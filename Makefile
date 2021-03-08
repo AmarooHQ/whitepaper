@@ -19,7 +19,7 @@ wc:
 	wc $(WPFILE)
 
 mk-latex-pdf:
-	pdflatex $(WPNOEXT).tex
+	pdflatex -output-directory=$(OUTDIR) $(WPNOEXT).tex
 
 %.md:
 	echo 'skipping task for .md files'
