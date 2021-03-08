@@ -171,6 +171,8 @@ It's worth noting that, at this point, there is no benefit to Ethereum's securit
 
 Naturally, the large difference in target block frequencies means that Ethereum has a good deal of latency before its chain gains the security benefit from reflected work. For this reason, PoW reflection makes the most sense when used with high frequency chains. The downside of this is the increased overhead of more block headers, however, this is minimal in the scheme of things.
 
+\todo[inline]{UT won't be done until we figure out how to tell what the right algorithm is to count/weigh reflected blocks.}
+
 #### Two *merge mined* blockchains
 
 The case of two merged mined chains (e.g. Bitcoin and Namecoin) is not as simple as the case of two chains using different hashing algorithms for their work. That is because the conclusion drawn about the difficult of attack does not hold. If we consider two chains that are both reflected in one another and able to be merged mined, then it is trivial to see that an attack is, at most, as difficult as attacking the strongest chain (presuming that 100% of miners are mining that chain). So there is an upper limit on the additional security provided via this technique.
