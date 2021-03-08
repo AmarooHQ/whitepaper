@@ -350,3 +350,34 @@ guess: extending the Bitcoin + Ethereum example to, say, Bitcoin + Ethereum + Li
 e.g. you lose your BTC reward if your MM NMC block isn't accepted? This could only be done with a DAG system b/c there's a chance of a stale NMC block penalizing an honest BTC+NMC miner
 
 this is the only thing i have thought of (so far?) that could make MM PoW reflection secure.
+
+#### ensuring availability of blocks corresponding to reflected headers
+
+\todo[inline]{can we do better than getting miners to download all the relevant blocks?} they don't have to verify them, just make sure the data is available. e.g. they could download and share for 24hrs and then drop the blocks for the chains they don't care about.
+
+#### methods of weighing blocks (for a standalone blockchain)
+
+* confirmations -- how much work is built on a block
+* work -- how much work went into finding the proof for a block
+* sigma-work -- how much cumulative work has been contributed up to and including that block (and only it's history)
+
+I think for Quanta / cryptonet I was using sigma-work; IDK if there was a good reason tho.
+
+\todo[inline]{Are these methods equivalent?}
+
+\todo[inline]{Can any of these methods be generalized elegantly for PoW reflection?}
+
+\todo[inline]{How to weigh the foreign work confirming local head-headers? (like, the tips of the chain; and everything down to the nearest fork, I guess)}
+
+\todo[inline]{Are there attacks that might be opened by using one of these weighing methods?}
+
+\todo[inline]{Can we like analogize to calculus somewhere here (or use calculus directly)?}
+
+mb think about it from the angles:
+
+* *what does it mean for a tx to be confirmed compared to a block header to be confirmed?*
+* *what does it mean for a chain to read an SPV proof from another chain? what about 2 layers of indirection? (so confirming that another chain knows about a local tx)*
+
+consider a high frequency simplex (e.g. a 60-chain-simplex with ~60s block times -> approx 1 block / section). there should be an advantage to publishing a block immediately (otherwise selfish mining attacks might come in to play). having lots of other reflecting chains means that there should always be a super low latency to reflection (seconds), ideally less than the propagation time for a block (including verification). \todo[inline]{check that having a DAG makes this overhead go away; overhead that might otherwise exist in a PoW satoshi-chain from stale blocks and the like}
+
+note: selfish mining proposed a fix for Bitcoin that involved miners choosing *randomly* which of 2 valid blocks to build on. this was an important part of their solution. that smells like it indicates that 2 reflected heads, regardless of order, should be weighted equally. remember: diff parts of the simplex might record 2 valid blocks for chain-A (one of the simplex chains) in different orders.
