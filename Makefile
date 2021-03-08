@@ -12,7 +12,6 @@ build-whitepaper: clean %.md
 	  cat $$mdfile >> $(WPFILE) && \
 	  echo -n "\n\n" >> $(WPFILE) ; \
 	done
-	pandoc -s -f markdown -t html -o $(WPHTML) $(WPFILE)
 	pandoc -s -f markdown -t latex -o $(WPNOEXT).tex $(WPFILE)
 
 wc:

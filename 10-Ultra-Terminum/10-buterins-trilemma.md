@@ -4,9 +4,9 @@ The trilemma is as follows:
 
 For some magnitude of computational resources (computation, bandwidth, storage, etc), *c*, and magnitude of the network (transaction throughput, state size, market cap, etc), *n*, it is claimed that blockchain systems have at most 2 of these 3 properties:
 
-* Decentralization - the system can operate with participants that have only O(c) resources (e.g. a laptop, a raspberry pi, a VPS, etc).
-* Security - the system is secure against attackers with up to O(n) resources.
-* Scalability - the system can process transactions with O(n) > O(c); this means that, as the network grows, the throughput of the system grows faster than the computational resources required per user.
+* Decentralization - the system can operate with participants that have only $O(c)$ resources (e.g. a laptop, a raspberry pi, a VPS, etc).
+* Security - the system is secure against attackers with up to $O(n)$ resources.
+* Scalability - the system can process transactions with $O(n) > O(c)$; this means that, as the network grows, the throughput of the system grows faster than the computational resources required per user.
 
 ### Core Conflict
 
@@ -26,7 +26,7 @@ To break this conflict we need to look at the underlying assumptions.
 
 An assumptions of the "shard + small blocks" answer is:
 
-> This greatly increases throughput, but at a cost of security: an N-factor increase in throughput using this method necessarily comes with an N-factor decrease in security, as a level of resources 1/N the size of the whole ecosystem will be sufficient to attack any individual chain.
+> This greatly increases throughput, but at a cost of security: an N-factor increase in throughput using this method necessarily comes with an N-factor decrease in security, as a level of resources $1/N$ the size of the whole ecosystem will be sufficient to attack any individual chain.
 
 An assumption of the "no shards + big blocks" answer is:
 

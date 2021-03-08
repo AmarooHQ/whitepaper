@@ -3,7 +3,7 @@
 ## dependencies
 
 - the Makefile presumes you're running this in a linux environment
-- you'll need: make, pandoc, pdflatex (usually provided via a latex distribution)
+- you'll need: make, pandoc, pdflatex (usually provided via a latex distribution), `texlive-science` package on ubuntu (for `siunitx`)
 
 ## build it
 
