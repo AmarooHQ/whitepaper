@@ -1,4 +1,4 @@
-## Why was progress not made sooner?
+## unused: Why was progress not made sooner?
 
 **NOTE: IDK if we should include this section; it's incomplete atm anyway. IMO it probs comes off as condescending or otherwise bad.**
 

@@ -1,8 +1,8 @@
-## Scaling Complexity Analysis of *Ultra Terminum*
+### Scaling Complexity Analysis of *Ultra Terminum*
 
 UT has two primary methods of scaling: reflection and dapp-chains. Reflection is novel. Dapp-chains are similar to many of the scaling ideas proposed for other networks (polkadot, eth2, etc), though there are fewer restrictions on dapp-chains in UT compared to other networks.
 
-### Complexity of Dapp-Chains
+#### Complexity of Dapp-Chains
 
 Dapp-chains look and act like typical shards; i.e. dapp-chains are 'child' chains of some 'parent' chain. If we presume that all chains have some constant maximum capacity (similar to the block-limit in Bitcoin and gas-limit in Ethereum) then calculating the scaling complexity is straight-forward and typical.
 
@@ -18,7 +18,7 @@ The parent chain can host multiple dapp-chains. If it is *only* hosting dapp-cha
 
 todo: is 'in' correct to use, as used in "has total capacity in `O(k^2) = O(c^2)`"?
 
-### Complexity of PoW Reflection
+#### Complexity of PoW Reflection
 
 - similar to above
 
@@ -30,7 +30,7 @@ we end up with `k[tx]*k[r]/bh` throughput --> roughly `space for txs * space for
 
 to maximize `k[tx]*k[r]` we set `k[tx] = k[r] = k/2` => so final calc is `k^2/4bh` => scales with `O(k^2) = O(c^2)`.
 
-### Complexity of UT
+#### Complexity of UT
 
 Basically, replace `k[tx]` with dapp-chain headers. so dapp-chain capacity decreases from `k^2/bh` to `k^2/2bh` (for dapp-chain values of `b` and `h`). but we get to multiply by `k[r]/bh = k/2bh` rchains (for reflected chain values of `b` and `h`).
 
@@ -44,7 +44,7 @@ the total (`t`) number of dapp-chains we can have is `t = r*d`. We know that `r*
 
 thus: the maximum number of dapp chains is given by `k^2/(4*h[r]*h[d])`.
 
-### Some numbers
+#### Some numbers
 
 at 3000 bytes/sec (Ethereum), 60s block times, geom avg 200 byte headers (`sqrt(h[r]*h[d])`), 500 byte avg tx size => UT can do 1,215,000 tps. With just dapp-chains (like polkadot, eth2, etc) those params would give 5,400 tps.
 

@@ -1,4 +1,4 @@
-## PoW reflection
+### PoW reflection
 
 **note: reminder about secrecy and patent-ability, this is part of it**
 
@@ -11,13 +11,13 @@ The idea of one blockchain 'tracking' another blockchain via chain-headers and S
 * 3: https://github.com/XertroV/coppr/blob/master/chainheaders.py
 * 4: https://github.com/ethereum/btcrelay
 
-### Two Blockchains
+#### Two Blockchains
 
 Let's build up the idea via a hypothetical situation with two distinct blockchains. For simplicity, let's use Bitcoin and Ethereum 1.
 
 Our starting case is that both chains use different Proof of Work algorithms and neither track one another.
 
-#### 1. Ethereum tracks Bitcoin
+##### 1. Ethereum tracks Bitcoin
 
 The idea that Ethereum SCs can track Bitcoin chain-headers is well understood. Bitcoin's proof of work algorithm is clean and simple so implementing the necessary logic in an Eth SC is not that difficult (3). In principle, any chain that supports some headers-only mode can be tracked in this way. In practice that can be difficult (e.g. Ethereum doesn't support memory hard hashes unless special cases are introduced), but we're not interested in practicality *at the moment*.
 
@@ -35,7 +35,7 @@ Let's add such a contract to Ethereum and describe the relevant data and events:
 
 After a Bitcoin block is produced, an Ethereum miner includes an Eth tx containing the BTC header, which updates the SC tracking the Bitcoin chain. In reality there are practical concerns about incentivizing someone to produce such a transaction (among other things); we're not concerned with those here. We're just concerned with the relationships that exist and what they can do.
 
-#### 2. Bitcoin tracks Ethereum
+##### 2. Bitcoin tracks Ethereum
 
 Let's consider a hypothetical change to Bitcoin. The protocol is extended to add support for tracking Ethereum's chainheaders. That is, a bespoke protocol extension is created that allows/requires miners to publish known Ethereum chainheaders along with their Bitcoin block. Similar to the way Ethereum tracks Bitcoin, now Bitcoin also tracks Ethereum.
 
@@ -51,7 +51,7 @@ Let's consider a hypothetical change to Bitcoin. The protocol is extended to add
 
 Why would a chain want to track another chain? The typical answer is to prove transactions or state occurred on the foreign chain. On Ethereum one could build a trustless BTC<->Ether market, for example.
 
-#### 3. Bitcoin tracks Ethereum tracking Bitcoin
+##### 3. Bitcoin tracks Ethereum tracking Bitcoin
 
 Can we use a tracked chain for a different purpose? What happens if the Bitcoin chain tracks whether Bitcoin history is confirmed within the Ethereum SC?
 
@@ -73,7 +73,7 @@ At this point, if an attacker was to publish a better Bitcoin chain, then Bitcoi
 
 Could we use Bitcoin's knowledge *that it's own history is reflected in the Ethereum SC* to *prevent* such an attack?
 
-#### 4. A modification to Bitcoin's *block-weight* calculation
+##### 4. A modification to Bitcoin's *block-weight* calculation
 
 NOTE: I think it might be good to reorg this section a bit so that the current-btc stuff comes first, then we go into the modifications. TODO
 
@@ -171,7 +171,7 @@ It's worth noting that, at this point, there is no benefit to Ethereum's securit
 
 Naturally, the large difference in target block frequencies means that Ethereum has a good deal of latency before its chain gains the security benefit from reflected work. For this reason, PoW reflection makes the most sense when used with high frequency chains. The downside of this is the increased overhead of more block headers, however, this is minimal in the scheme of things.
 
-### Two *merge mined* blockchains
+#### Two *merge mined* blockchains
 
 The case of two merged mined chains (e.g. Bitcoin and Namecoin) is not as simple as the case of two chains using different hashing algorithms for their work. That is because the conclusion drawn about the difficult of attack does not hold. If we consider two chains that are both reflected in one another and able to be merged mined, then it is trivial to see that an attack is, at most, as difficult as attacking the strongest chain (presuming that 100% of miners are mining that chain). So there is an upper limit on the additional security provided via this technique.
 
@@ -299,7 +299,7 @@ Directions for research/solutions:
 
 links to a lot of research, some might be relevant. is interesting in any case: https://medium.com/@adlerjohn/the-why-s-of-optimistic-rollup-7c6a22cbb61a
 
-### PoW reflection between chains using the same alg
+#### PoW reflection between chains using the same alg
 
 What about chains using the same alg? e.g. Bitcoin (B) and Bitcoin-copy (C)?
 
@@ -320,7 +320,7 @@ is this secure? if so, then mixing with reflection to other chains provides extr
 
 under that sort of thing the 'microchain' would become like an O(c) record of all headers from all chains. then all chains would sync their reflections up against the full headers-only-network (i.e. all chain headers of all chains). each dapp can then be O(c). so we get back to O(c^2) scaling.
 
-### Contexts where PoW can be directly compared
+#### Contexts where PoW can be directly compared
 
 - decentralized market
   - risk of manipulation
@@ -328,11 +328,11 @@ under that sort of thing the 'microchain' would become like an O(c) record of al
 - single token across multiple chains (like the ROO)
   - 'constant of conversion' = to ratio of ROO on each chain (at that time)
 
-### Reflection with more than two blockchains
+#### Reflection with more than two blockchains
 
 guess: extending the Bitcoin + Ethereum example to, say, Bitcoin + Ethereum + Litecoin will provide the security benefits of all 3. it should be additive. a doublespend would require a doublespend against all 3.
 
-### Reflection with PoS chains / otherwise unsafe consensus algs (like PoA)
+#### Reflection with PoS chains / otherwise unsafe consensus algs (like PoA)
 
 - helps solve *nothing at stake* problem b/c history is committed to thermodynamically (b/c of reflection in PoW chains), even with internal-based-stake (i.e. ROO); slashing can happen on like a 'watchdog' chain to ensure bad actors can't get away with it
 - provides easy way for corps to run darkchains for whatever they want (tho *how* exactly you do the dark bit is ??)
@@ -343,7 +343,7 @@ guess: extending the Bitcoin + Ethereum example to, say, Bitcoin + Ethereum + Li
 - could build of parity/ethereum/polkadot/etc clients. Cardano too if Ouroboros isn't garbage.
 - PoS implementations more complex but easier to think about. Their building blocks are simpler but there are more of them. PoW systems have fewer building blocks but harder to think/reason about.
 
-### can rewards be based on PoW being accepted into a foreign chain?
+#### can rewards be based on PoW being accepted into a foreign chain?
 
 e.g. you lose your BTC reward if your MM NMC block isn't accepted? This could only be done with a DAG system b/c there's a chance of a stale NMC block penalizing an honest BTC+NMC miner
 

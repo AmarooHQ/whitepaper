@@ -1,5 +1,5 @@
 OUTDIR=output
-WPNOEXT=whitepaper
+WPNOEXT=$(OUTDIR)/whitepaper
 WPFILE=$(WPNOEXT).markdown
 WPHTML=$(WPNOEXT).html
 
@@ -25,7 +25,6 @@ mk-latex-pdf:
 	echo 'skipping task for .md files'
 
 clean: init
-	-rm $(WPFILE)
 	-rm -r $(OUTDIR)/*
 
 init:

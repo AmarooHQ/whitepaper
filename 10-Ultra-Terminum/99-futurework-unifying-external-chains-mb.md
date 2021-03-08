@@ -1,5 +1,6 @@
-
 ## Unifying Chains
+
+**todo: should we include?**
 
 - how could amaroo do reflection with ethereum?
 - we don't have roo on both chains so we can't calculate the equiv work
