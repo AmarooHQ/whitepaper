@@ -2,3 +2,4 @@
 #whitepaper.markdown
 whitepaper.*
 *.log
+output/*
