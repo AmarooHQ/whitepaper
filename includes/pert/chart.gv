@@ -1,0 +1,53 @@
+digraph PertChart {
+    compound=true;
+
+    subgraph cluster_proofEngines {
+        label = "Proof Engines";
+        posEngine -> powEngine;
+    }
+
+    subgraph cluster_whitePaper {
+        // style=filled;
+        // color=lightgrey;
+        // node [style=filled];
+        label = "White Paper";
+        networkTopol -> utSpec;
+        tokenomics;
+        amarooVision;
+        validation -> utSpec;
+        dagDetails -> utSpec;
+        wpDraft1 -> dagDetails,amarooVision,validation,networkTopol,tokenomics;
+    }
+
+    powEngine [label = "PoW Engine"];
+
+    lightClient -> basicChain -> dagDetails;
+    TGE -> wpDraft1 [lhead=cluster_whitePaper];
+
+    TGE -> currencyMechanics;
+    currencyMechanics -> reflectionNChains;
+    reflectionNChains -> reflection2Chains;
+
+    reflection2Chains -> simpleDappForSPV;
+    simpleDappForSPV -> basicChain;
+    p2pLayer -> networkTopol;
+    reflection2Chains -> p2pLayer;
+    simpleDappForSPV -> lightClient;
+    lightClient -> powEngine;
+    dappChains -> posEngine;
+    dappChains -> currencyMechanics;
+    bitcoinSpvDapp -> dappChains;
+    fiatBridge -> dappChains;
+    exchange -> fiatBridge;
+    exchange -> cryptoExch;
+    TGE -> bitcoinSpvDapp;
+    cryptoExch -> TGE;
+    cryptoExch -> reflectionNChains;
+    TGE -> tgeLegalExploration;
+    currencyMechanics -> wpDraft1 [lhead=cluster_whitePaper];
+    reflection2Chains -> placeholderCurrencyMechanics;
+    placeholderCurrencyMechanics -> basicChain;
+    powEngine -> basicChain;
+    reflection2Chains -> utSpec;
+
+}

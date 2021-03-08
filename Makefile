@@ -23,6 +23,9 @@ mk-latex-pdf:
 %.md:
 	echo 'skipping task for .md files'
 
+pert:
+	dot -Gdpi=300 -Tpng includes/pert/chart.gv -o includes/pert/chart.png
+
 clean: init
 	-rm -r $(OUTDIR)/*
 
