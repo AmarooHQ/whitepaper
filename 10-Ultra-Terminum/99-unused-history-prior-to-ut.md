@@ -1,6 +1,6 @@
 ##
 
-To explain *Terminus Ultra*, we will need to go back.
+To explain *Ultra Terminum*, we will need to go back.
 
 2011 - merged mining and AuxPoW
 2013 - marketcoin, SPV proofs, and distributed exchange
@@ -14,7 +14,7 @@ To explain *Terminus Ultra*, we will need to go back.
 2018/9/20/21 - yes/no, Goldratt, and Critical Fallibilism
 2021 - mutual confirmation and PoW reflection
 2021 - heterogeneous PoW
-2021 - *Terminus Ultra*
+2021 - *Ultra Terminum*
 
 heterogeneous PoW means: multiple hash algorithms are involved; this implies that multiple types of ASICs and/or GPUs and/or whatever are necessary in some way for an attack to be successful.
 

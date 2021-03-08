@@ -84,7 +84,7 @@ type MicroBlockHeader =
 type MicroBlock = MerklePatriciaTree ChainID ShardUpdate
 ```
 
-The idea of microchains, within Ethereum, eventually grew into the more sophisticated *chain fibers* via the work of Gav Wood and other Ethereum devs in 2014/5. With chain fibers, the "blockchains", i.e. (transaction, state) schemes, are called *fibres*, *subspaces*, or *strata* (although their technical definitions and exact properties differ to what I've described above). Since then, many more descendant ideas have been created, like Eth2's *beacon chain and shards*, Polkadot's *relay chain and parachains*, and, as we'll soon see, *Terminus Ultra*.
+The idea of microchains, within Ethereum, eventually grew into the more sophisticated *chain fibers* via the work of Gav Wood and other Ethereum devs in 2014/5. With chain fibers, the "blockchains", i.e. (transaction, state) schemes, are called *fibres*, *subspaces*, or *strata* (although their technical definitions and exact properties differ to what I've described above). Since then, many more descendant ideas have been created, like Eth2's *beacon chain and shards*, Polkadot's *relay chain and parachains*, and, as we'll soon see, *Ultra Terminum*.
 
 https://blog.ethereum.org/2015/04/05/blockchain-scalability-chain-fibers-redux/
 https://ethereum.org/en/eth2/beacon-chain/
