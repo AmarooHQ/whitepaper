@@ -57,7 +57,7 @@ thus: the maximum number of dapp chains is given by $\frac{k^2}{4 \cdot h_r \cdo
 
 NB: Ethereum's throughput is about 3000 bytes/sec maximum.
 
-| throughput (bytes/sec) | $b_r$ ($s^{-1}$); set $b_r = b_d$ | $h_r$ (bytes) | $h_d$ (bytes) | avg tx size (bytes) | Eth2 tps estimate | UT tps |
+| $k$; throughput (bytes/sec) | $b_r; b_d$ ($s^{-1}$); set $b_r = b_d$ | $h_r$ (bytes) | $h_d$ (bytes) | avg tx size (bytes) | Eth2 tps estimate | UT tps |
 |---|---|---|---|---|---|---|
 | 3000 | $\frac{1}{60}$ | 500 | 500 | 200 | 5,400 | 486,000 |
 ||||||||
