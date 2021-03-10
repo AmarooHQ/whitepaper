@@ -14,3 +14,5 @@
   - todo: add your ideas here! or as an issue. or whatever.
 
 The directory names are capitalized atm b/c I think it might be good to keep the option open of using the directory names as section headings, but mb that could be difficult if we want punctuation and stuff. IDK.
+
+I use this to compile and view quickly: `make && code ./output/whitepaper.pdf`
