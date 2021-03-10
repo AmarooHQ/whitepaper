@@ -47,9 +47,11 @@ we simplify as before, and we have complexity $O(k^3) = O(c^3)$.
 
 the total ($t$) number of dapp-chains we can have is $t = r\cdot d$. We know that `r*h[r] + d*h[d] = k`; i.e. `reflection-chains * size of reflection header + dapp-chains * size of dapp-chain headers = k`. We can use these two to obtain: `t = r*(k - r*h[r])/h[d]` (eliminating the variable `d`). we then get `dt/dr = k/h[d] - 2*r*h[r]/h[d]`. find the maximum at `dt/dr = 0` to yield `r = k/(2*h[r])` at maximum throughput. since `t = r*(k - r*h[r])/h[d] = rk/h[d] - r^2*h[r]/h[d]` we get `t[max] = k^2/(2*h[r]*h[d]) - k^2/(4*h[r]^2) * h[r]/h[d] = 2*k^2/(4*h[r]*h[d]) - k^2/(4*h[r]*h[d]) = k^2/(4*h[r]*h[d])`
 
-$[t_{max} = \frac{k^2}{4 \cdot h_r \cdot h_d}]$
+$t_{max} = \frac{k^2}{4 \cdot h_r \cdot h_d}$
 
 thus: the maximum number of dapp chains is given by $\frac{k^2}{4 \cdot h_r \cdot h_d}$.
+
+\todo[inline]{This formula must be wrong, it doesn't sanity check. e.g. $k=3000; h_r=150; h_d=300$ yeilds $50$, which doesn't make sense. mb that's *per second* but even then that seems wrong. need to check units and derivation.}
 
 #### Some numbers
 
