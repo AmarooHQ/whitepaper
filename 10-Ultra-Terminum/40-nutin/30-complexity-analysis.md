@@ -53,6 +53,13 @@ thus: the maximum number of dapp chains is given by $\frac{k^2}{4 \cdot h_r \cdo
 
 #### Some numbers
 
+NB: Ethereum's throughput is about 3000 bytes/sec maximum.
+
+| throughput (bytes/sec) | $b_r$ ($\si{\per\sec}$); set $b_r = b_d$ | $h_r$ (bytes) | $h_d$ (bytes) | avg tx size (bytes) | tps |
+|---|---|---|---|---|---|
+
+\todo[inline]{put below data into table}
+
 at 3000 bytes/sec (Ethereum), 60s block times, geom avg 200 byte headers (`sqrt(h[r]*h[d])`), 500 byte avg tx size => UT can do 1,215,000 tps. With just dapp-chains (like polkadot, eth2, etc) those params would give 5,400 tps.
 
 3000 bytes/sec, 60s block times, avg 500 byte headers, 200 byte txs => UT: 486,000 tps; Eth2: 5,400 tps.
