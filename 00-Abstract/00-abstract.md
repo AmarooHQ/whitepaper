@@ -18,10 +18,16 @@ header-includes: |
         \fancyhead[CO,CE]{This is fancy}
         \fancyfoot[LE,RO]{}
     \end{comment}
-    \cfoot{\thepage\ of \zpageref{LastPage}}
+    \fancyfoot[C]{\thepage\ of \zpageref{LastPage}}
     \DeclareSIUnit{\block}{block}
     \setuptodonotes{inlinepar}
+    \fancypagestyle{firststyle}
+    {
+        \fancyhf{}
+        \fancyfoot[C]{\thepage\ of \zpageref{LastPage}}
+    }
 abstract: >
+    \thispagestyle{firststyle}
     I/we present *Amaroo* and *Ultra Terminum*. *Amaroo* is a machine for making blockchains.
     \todo[inline]{nb: these are "todo" comments}
     *Ultra Terminum* (UT) is a hybrid PoW/PoS method providing $O(c^2)$, $O(c^3)$, or $O(c^4)$ scaling.
