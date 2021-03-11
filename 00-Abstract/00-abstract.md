@@ -11,13 +11,14 @@ header-includes: |
     \usepackage{comment}
     \usepackage{siunitx}
     \usepackage{todonotes}
+    \usepackage[lastpage,user]{zref}
     \usepackage{fancyhdr}
     \pagestyle{fancy}
     \begin{comment}
         \fancyhead[CO,CE]{This is fancy}
-        \fancyfoot[CO,CE]{So is this}
+        \fancyfoot[LE,RO]{}
     \end{comment}
-    \fancyfoot[LE,RO]{\thepage}
+    \cfoot{\thepage\ of \zpageref{LastPage}}
     \DeclareSIUnit{\block}{block}
     \setuptodonotes{inlinepar}
 abstract: >
