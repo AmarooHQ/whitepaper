@@ -36,5 +36,18 @@ abstract: >
     This figure is highly sensitive to block production frequency and, for comparison's sake, 10 minute target times for blocks could provide up to 180m tps.
     \newline
     **NOTE: PRERELEASE -- DO NOT SHARE OR DISTRIBUTE!!!**
+include-before: >
+    \newpage
+    \todo[inline]{format this correctly. see BOTNS for correct formatting.\newline ... Hmm, actually mb I like this formatting.}
+    \vspace*{\fill}
+    \begin{center}
+    \textit{
+    A thousand ages in thy sight\newline
+    Are like an evening gone;\newline
+    Short as the watch that ends the night\newline
+    Before the rising sun.
+    }
+    \end{center}
+    \vspace*{\fill}
     \newpage
 ---
