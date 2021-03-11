@@ -1,5 +1,5 @@
 ---
-title: Amaroo Whitepaper
+title: The Amaroo Whitepaper
 author: Max Kaye
 output:
     html_document:
@@ -23,7 +23,11 @@ header-includes: |
 abstract: >
     I/we present *Amaroo* and *Ultra Terminum*. *Amaroo* is a machine for making blockchains.
     \todo[inline]{nb: these are "todo" comments}
-    *Ultra Terminum* (UT) is a hybrid PoW/PoS method providing $O(c^2)$, $O(c^3)$, or $O(c^4)$ scaling. \todo[inline]{check these numbers:} Additionally, a novel method of 'tiling' is proposed which provides $O(2^i \cdot c^j)$ scaling, for $i = \lceil \log_2 ((\frac{n}{c^j} + 2) / 3) \rceil, j \in \{2,3,4\}$ --- just in case. With reasonable parameters (i.e. a per-node load comparable to Bitcoin) and $O(c^3)$ scaling, UT can comfortably exceed 1m tps without additional scaling methods (e.g. payment channels). This figure is highly sensitive to block production frequency and, for comparison's sake, 10 minute target times for blocks could provide up to 180m tps.
+    *Ultra Terminum* (UT) is a hybrid PoW/PoS method providing $O(c^2)$, $O(c^3)$, or $O(c^4)$ scaling.
+    \todo[inline]{check the maths for tiling complexity:}
+    Additionally, a novel method of 'tiling' is proposed which provides $O(2^i \cdot c^j)$ scaling, for $i = \lceil \log_2 ((\frac{n}{c^j} + 2) / 3) \rceil, j \in \{2,3,4\}$ --- just in case.
+    With reasonable parameters (i.e. a per-node load comparable to Bitcoin) and $O(c^3)$ scaling, UT can comfortably exceed 1m tps without additional scaling methods (e.g. payment channels).
+    This figure is highly sensitive to block production frequency and, for comparison's sake, 10 minute target times for blocks could provide up to 180m tps.
     \newline
     **NOTE: PRERELEASE -- DO NOT SHARE OR DISTRIBUTE!!!**
 ---

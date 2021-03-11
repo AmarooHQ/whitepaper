@@ -29,7 +29,7 @@ If a proof-of-stake network had the same chain parameters as Bitcoin -- i.e. a m
 
 ### PoW is "wasteful"
 
-Another common misconception is that proof-of-work is "wasteful"[^pow-waste]. This ignores a qualatative difference between PoW and PoS: PoW has *thermodynamic* security. That is, an attempt to re-write a PoW chain's history requires the *destructive* use of energy. By comparison, PoS only consumes negligable energy.
+Another common misconception is that proof-of-work is "wasteful"[^pow-waste]. This ignores a qualitative difference between PoW and PoS: PoW has *thermodynamic* security. That is, an attempt to re-write a PoW chain's history requires the *destructive* use of energy. By comparison, PoS only consumes negligible energy.
 
 This means that there are no laws of physics which prevent re-writing the arbitrary history of a PoS chain[^phys-info]. There are thus many methods of re-writing PoS chains' histories, because "if something is permitted by the laws of physics, then the only thing that can prevent it from being technologically possible is not knowing how"[^boi-optimism].
 
@@ -40,3 +40,33 @@ It is within a person's *rights* to think and claim that PoW is wasteful. Howeve
 [^boi-optimism]: See the reasoning behind *The Principle of Optimism* in *The Beginning of Infinity*, chapter 9: *Optimism*.
 
 [^phys-info]: Granted, information theory is implied by the laws of physics, but this does not guard against $5 wrench attacks. PoW and thermodynamic security do, though. Wrenches do not reverse entropy.
+
+### The Nothing-at-Stake problem isn't an issue, or it's easy to solve in a pure PoS environment
+
+To my knowledge, there is no good solution to the nothing-at-stake problem for pure PoS blockchains.
+
+\todo[inline]{check if there have been any new ideas to solve NAS problem}
+
+Two of the most popular PoS chains -- Polkadot and Cardano -- barely attempt to deal with this problem. While it's likely true that these chains are secure *enough* for their current usage, we can't surely say the same if these chains gained massive popularity.
+
+From the Polkadot whitepaper:
+
+> To ensure newly-syncing clients are not able to be fooled onto the wrong chain, regular "hard forks" will occur (of at most the same period of the validators’ bond liquidation) that hard-code recent check-point block hashes into clients.
+
+From the Ouroboros (Cardano's consensus method) paper:
+
+> Provided that stakeholders are frequently online, nothing at stake is taken care of by our analysis of forkable strings (even if the adversary brute-forces all possible strategies to fork the evolving blockchain in the near future, there is none that is viable), and our chain selection rule that instructs players to ignore very deep forks that deviate from the block they received the last time they were online.
+
+In essence, the solutions proposed to address the nothing-at-stake problem are: do regular and frequent checkpoint hard forks, or keep your nodes online and reject deep forks. Neither of these solutions provide comparable security to the thermodynamic security of proof-of-work chains; which is why Bitcoin (et al.) nodes don't need to remain online, and why Bitcoin doesn't *need* checkpoints[^btc-checkpoint]. It is worth noting that both Polkadot and Cardano introduce *new* and *external* sources of security: hard-forks that depend on developers updating client codebases, and a requirement that nodes remain online and the relevant networks remain unsegregated (e.g. that governments do not segregate the internet across borders).
+
+Why does the nothing-at-stake problem exist? It is due to the conflict between these two necessary conditions: *miners must have some opportunity cost when producing blocks*, and *miners can soft-fork new rules in that prevent error correction methods like slashing from taking place*.
+
+A simple demonstration of the nothing-at-stake problem can be seen via the following attack. NB: both Polkadot's and Cardano's solutions do guard against this attack, so the following is purely demonstrative.
+
+A malicious user, perhaps a previously honest node, acquires (e.g. buys) private keys that do not *currently* hold stake, but did at some point in the past. That user can do this over a long period of time and can acquire private keys that correspond to stake at many different points in a chains history. Once they reach some critical threshold they can begin the attack. First, they liquidate any coins they hold (e.g. via a 3rd party exchange) so that their assets will not be affected by the immanent attack. They then proceed to find the best point in the past to begin creating a chain-fork. Either via brute force or a more efficient method, they engineer some context by which they control the consensus method *at that point in the past* (and possibly selectively include past, valid, transactions). They create an alternate history from this starting point up to a relevant breakpoint in the PoS method (e.g. when new validators are chosen) and repeat the previous process of brute forcing or otherwise engineering a context where they control the consensus protocol. They repeat this process, selectively including pre-existing or newly created transactions such that they can control the consensus method indefinitely. This allows them to create a competing chain-fork of comparable length, which is then published and undoes relevant history (such as their transactions which deposit coins in an exchange account). They also soft-fork the protocol to prevent the publication of proofs that would lead to affects like slashing.
+
+In this way, a malicious user can subvert one of the necessary conditions mentioned previously: that of opportunity cost. Fundamentally, since pure PoS methods do not have *thermodynamic* opportunity cost, there is no *physical* reason that this is impossible.
+
+There is a mostly-trivial solution to this problem: do not use PoS as the foundation of a network's security. The nothing-at-stake problem only exists because of the circularity required in pure PoS systems: the consensus method determines the validators who control the transaction set, but the transaction set determines which validators are empowered under the consensus method). If, however, a PoS method is implemented *within* a PoW foundation, then properties like the required opportunity cost can be guaranteed by *moving the error correction methods to a PoW-secured layer*. This means that techniques like *slashing* cannot occur in the PoS layer, they should take place in a more foundational layer. Provided that a network's security resolves to some PoW layer, then well-designed PoS protocols can ~inherit enough thermodynamic security to thwart the nothing-at-stake problem. This method is universal in the correct design-space.
+
+[^btc-checkpoint]: Bitcoin does include checkpoints, but checkpoints are only added when they are uncontroversial (e.g. *months* after the relevant blocks are produced) and these checkpoints aren't crucial for Bitcoin's integrity. These checkpoints do prevent certain types of non-critical ~griefing attacks -- a quality of life feature.
