@@ -23,6 +23,8 @@ header-includes: |
         \fancyfoot[C]{\thepage\ of \zpageref{LastPage}}
     }
     \usepackage[mark]{gitinfo2}
+    \renewcommand{\gitMark}{
+        \gitAbbrevHash{} (\gitAuthorDate)}
 abstract: >
     \thispagestyle{firststyle}
     I/we present *Amaroo* and *Ultra Terminum*. *Amaroo* is a machine for making blockchains.
