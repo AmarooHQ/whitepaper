@@ -12,7 +12,7 @@ build-whitepaper: clean %.md
 	  cat $$mdfile >> $(WPFILE) && \
 	  echo -n "\n\n" >> $(WPFILE) ; \
 	done
-	pandoc -s -f markdown -t latex -o $(WPNOEXT).tex $(WPFILE)
+	pandoc -s --toc -f markdown -t latex -o $(WPNOEXT).tex $(WPFILE)
 
 wc:
 	wc $(WPFILE)

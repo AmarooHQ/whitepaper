@@ -14,10 +14,6 @@ header-includes: |
     \usepackage[lastpage,user]{zref}
     \usepackage{fancyhdr}
     \pagestyle{fancy}
-    \begin{comment}
-        \fancyhead[CO,CE]{This is fancy}
-        \fancyfoot[LE,RO]{}
-    \end{comment}
     \fancyfoot[C]{\thepage\ of \zpageref{LastPage}}
     \DeclareSIUnit{\block}{block}
     \setuptodonotes{inlinepar}
@@ -26,6 +22,7 @@ header-includes: |
         \fancyhf{}
         \fancyfoot[C]{\thepage\ of \zpageref{LastPage}}
     }
+    \usepackage[mark]{gitinfo2}
 abstract: >
     \thispagestyle{firststyle}
     I/we present *Amaroo* and *Ultra Terminum*. *Amaroo* is a machine for making blockchains.
@@ -37,4 +34,5 @@ abstract: >
     This figure is highly sensitive to block production frequency and, for comparison's sake, 10 minute target times for blocks could provide up to 180m tps.
     \newline
     **NOTE: PRERELEASE -- DO NOT SHARE OR DISTRIBUTE!!!**
+    \newpage
 ---
