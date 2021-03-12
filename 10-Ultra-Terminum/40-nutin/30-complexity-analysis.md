@@ -45,15 +45,21 @@ Throughput_{Total} = \frac{k^2}{2\cdot b_d \cdot h_d} \cdot \frac{k}{2 \cdot b_r
 
 we simplify as before, and we have complexity $O(k^3) = O(c^3)$.
 
-the total ($t$) number of dapp-chains we can have is $t = r\cdot d$. We know that `r*h[r] + d*h[d] = k`; i.e. `reflection-chains * size of reflection header + dapp-chains * size of dapp-chain headers = k`. We can use these two to obtain: `t = r*(k - r*h[r])/h[d]` (eliminating the variable `d`). we then get `dt/dr = k/h[d] - 2*r*h[r]/h[d]`. find the maximum at `dt/dr = 0` to yield `r = k/(2*h[r])` at maximum throughput. since `t = r*(k - r*h[r])/h[d] = rk/h[d] - r^2*h[r]/h[d]` we get `t[max] = k^2/(2*h[r]*h[d]) - k^2/(4*h[r]^2) * h[r]/h[d] = 2*k^2/(4*h[r]*h[d]) - k^2/(4*h[r]*h[d]) = k^2/(4*h[r]*h[d])`
+##### Maximum number of dapp-chains
 
-$t_{max} = \frac{k^2}{4 \cdot h_r \cdot h_d}$
+the total ($t$) number of dapp-chains we can have is $t = r\cdot d$. We know that $r \cdot h_r \cdot b_r + d \cdot h_d \cdot b_d = k$; \todo[inline]{check remainder of paragraph} i.e. `reflection-chains * size of reflection header + dapp-chains * size of dapp-chain headers = k`. We can use these two to obtain: `t = r*(k - r*h[r])/h[d]` (eliminating the variable `d`). we then get `dt/dr = k/h[d] - 2*r*h[r]/h[d]`. find the maximum at `dt/dr = 0` to yield `r = k/(2*h[r])` at maximum throughput. since `t = r*(k - r*h[r])/h[d] = rk/h[d] - r^2*h[r]/h[d]` we get `t[max] = k^2/(2*h[r]*h[d]) - k^2/(4*h[r]^2) * h[r]/h[d] = 2*k^2/(4*h[r]*h[d]) - k^2/(4*h[r]*h[d]) = k^2/(4*h[r]*h[d])`
 
-thus: the maximum number of dapp chains is given by $\frac{k^2}{4 \cdot h_r \cdot h_d}$.
+Thus, the maximum number of dapp chains is given by:
 
-\todo[inline]{This formula must be wrong, it doesn't sanity check. e.g. $k=3000; h_r=150; h_d=300$ yeilds $50$, which doesn't make sense. mb that's *per second* but even then that seems wrong. need to check units and derivation.}
+$T_{max dapps} = \frac{k^2}{4 \cdot h_r \cdot b_r \cdot h_d \cdot b_d}$
 
-#### Some numbers
+\todo[inline]{need to check this properly with updated starting equations}
+
+##### Optimal number of simplex-chains and dapp-chains
+
+\todo[inline]{do algebra here}
+
+#### Complexity comparison
 
 NB: Ethereum's throughput is about 3000 bytes/sec maximum, and Bitcoin (with segwit) about 2000 bytes/sec.
 
@@ -76,3 +82,44 @@ at 3000 bytes/sec (Ethereum), 60s block times, geom avg 200 byte headers (`sqrt(
 3000 bytes/sec, 150s block times, 500 byte headers, 500 byte txs => UT: 1,215,000 tps; Eth2: 5,400 tps.
 
 3000 bytes/sec, 600s block times, 500 byte headers, 500 byte txs => UT: 19,440,000 tps; Eth2: 21,600 tps.
+
+| $k$, $b_r$, $b_d$, $h_r$, $h_d$, avg tx size | $O(c)$ tps | $O(c^2)$ tps | UT tps |
+|---|---|---|---|
+| 3000, 1/60, 1/60, 500, 500, 200 | 15 | 5,400 | 486,000 |
+| 3000, 1/600, 1/600, 112, 250, 250 | 12 | 86,400 | 347,142,857 |
+| 3333, 1/600, 1/600, 112, 112, 250 | 13.3 | 238,047 | 1,062,606,324 |
+
+\todo[inline]{move this code to an appendix eventually}
+
+```python
+from decimal import Decimal
+
+def calc_tps_throughput(k, br, bd, hr, hd, tx_size):
+    ut_tps = k**3 / (4 * br * bd * hr * hd) / tx_size
+    return {
+        'btc_tps': k / tx_size,
+        # c^2 estimate, remove constants to be optimistic
+        'eth2_tps': k**2 / (bd * hd) / tx_size,
+        # c^3 estimate
+        'ut_tps': ut_tps,
+        'ut_m_tps': '{:.2f} million'.format(ut_tps / 1000000),
+        'ut_chain_gb_per_year': k * 60 * 60 * 24 * 365.25 / (1024 ** 3),
+        'ut_max_dappchains': k**2 / (4 * br * bd * hr * hd),
+        'ut_optimal_rchains': k / (2 * hr * br),
+        'ut_optimal_dappchains': k / (2 * hd * bd),
+    }
+
+def table_row(params):
+    r = calc_tps_throughput(*params)
+    return ' | '.join(str(i) for i in ['', params, r['btc_tps'], r['eth2_tps'], r['ut_tps'], '']).strip()
+
+row_inputs = [
+    (3000, 1/60, 1/60, 500, 500, 200),
+    (3000, 1/600, 1/600, 112, 250, 250),
+]
+for r in row_inputs:
+    print table_row(r)
+# list((r, calc_tps_throughput(*r)) for r in row_inputs)
+```
+
+\todo[inline]{bandwidth requirement presuming all simplex blocks downloaded (to ensure availability)}
