@@ -1,5 +1,7 @@
 ## Amaroo, the System
 
+\todo[inline]{I want to re-draft this entire section.}
+
 Amaroo is a principled blockchain factory, and a place for blockchains to live freely where they can interact with each other.
 
 Amaroo blockchains (sometimes called *dapp chains*, or just *chains*) each run exactly one dapp. A dapp (in Amaroo) is a collection of modules. Those modules each provide some specific functionality. There are some core modules that each dapp chain needs for it to be part of Amaroo, but there are no restrictions beyond those few requirements: modules (or a combination of them) can do anything deterministic that *any* blockchain can do. Amaroo itself has some core modules, too. namely: modules for specifying chains, deploying new chains, and ensuring consistency and interoperability between chains.
