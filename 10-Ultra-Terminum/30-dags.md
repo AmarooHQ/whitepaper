@@ -1,16 +1,4 @@
-## PoW: Some Problems and Solutions
-
-I'll briefly talk about some problems and solutions with Satoshi's proof of work method. Descendants of these ideas have been used somewhat sporadically by newer blockchains (e.g. Ethereum 1 integrated GHOST).
-
-- selfish mining / block withholding
-- ghost
-- incompatible histories
-
-### Wasted Work
-
-**todo mb**
-
-## DAGs
+# DAGs
 
 Satoshi chains (like Bitcoin) are made of blocks with a single parent. Although the *canonical* history of the chain is the *heaviest* branch, other branches do exist. Though, those other branches are typically abandoned quickly (and are known as *stale*, though sometimes incorrectly referred to as *orphaned*). Thus, Satoshi chains are trees. They are also, technically, DAGs; though they don't include any DAG-specific features. *Generally* speaking, blockchains follow this method.
 
@@ -20,7 +8,7 @@ This section is concerned with more radical DAG based economic data structures.
 
 **todo - review**
 
-### The Quanta DAG (aka T.E.T.O.)
+## The Quanta DAG (aka T.E.T.O.)
 
 **With thanks and appreciation to Paul Firth, who wrote a draft paper about this under the title T.E.T.O. (Trustless Eventual Total Order) in 2016.**
 

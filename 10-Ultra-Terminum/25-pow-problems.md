@@ -1,0 +1,11 @@
+# PoW: Some Problems and Solutions
+
+I'll briefly talk about some problems and solutions with Satoshi's proof of work method. Descendants of these ideas have been used somewhat sporadically by newer blockchains (e.g. Ethereum 1 integrated GHOST).
+
+- selfish mining / block withholding
+- ghost
+- incompatible histories
+
+## Wasted Work
+
+**todo mb**

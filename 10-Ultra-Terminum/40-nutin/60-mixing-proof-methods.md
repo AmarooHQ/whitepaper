@@ -1,4 +1,4 @@
-### Mixing Proof Methods
+## Mixing Proof Methods
 
 \todo[inline]{Mixing PoW with PoS (etc) in the simplex itself}
 

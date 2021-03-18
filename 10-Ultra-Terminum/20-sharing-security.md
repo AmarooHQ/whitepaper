@@ -1,4 +1,4 @@
-## Methods of Sharing Security
+# Methods of Sharing Security
 
 The security of Proof of Work depends on solutions to a challenge problem being difficult to find (time consuming, expensive, etc). The problem can differ between PoW methods, but eventually a potential solution is verified via some function, and that function *must* be far more efficient than the method of generation. Proof of Stake, in principle, operates the same way. The reason that solutions in Proof of Stake systems are difficult to find is because rules are imposed that restrict the generation of solutions (and users are typically penalised if they break those rules).
 
@@ -17,7 +17,7 @@ NB: in reality, Bitcoin's target can be calculated directly from its header; I a
 
 Crucially, the interpretation of data 'rolled up' in a proof must be *unambiguous*.
 
-### AuxPoW (aka Merged Mining)
+## AuxPoW (aka Merged Mining)
 
 Miners commit to a specific *extension* (or *update*, *block*) to a blockchain's *history* (it's *blockchain*, or *ledger*) by generating proofs (*mining*) that include a *single and unambiguous* group of non-conflicting transactions. When generating the proofs for consensus mechanisms (PoW, PoS, PoA, etc), the miners (or auditors, or bakers, or w/e) have some control over the contents of the block they're generating. If they are able to include some arbitrary data in their draft block -- which ensures that it will be 'rolled up' into the proof -- then their generated solution(s) imply the knowledge of, and intent to include, said arbitrary data in the proof.
 
@@ -61,7 +61,7 @@ A requirement for this method (or any other) is that there is an *unambiguous* w
 
 In the case of Bitcoin/Namecoin merged mining, that is what I mean by "appropriate properties for its intended use" (though there are additional and different required properties in reality). However we choose to interpret the data behind a proof of work, we must be able to know it *exactly* and know that it was *intended*. Without that ability, we cannot meaningfully use the proof of work to secure a blockchain.
 
-### Microchains
+## Microchains
 
 A *microchain* (coined by Gav Wood in 2014) is the concept of a small and highly restrictive blockchain; the purpose of which is to create an *abstraction layer* separating the *consensus mechanism* from *transactions and state transitions*. A microchain can thus support *multiple different and independent* (transaction, state) schemes -- in effect this means supporting multiple "blockchains" via a single consensus mechanism. Seen in this way, microchains are a generalised form of merged mining where one proof can support multiple different blocks, each belonging to a different blockchain. In today's language this might be described as a single blockchain with multiple heterogeneous shards. End users could synchronise only those shards they cared about, but miners would need to fully validate *all* shards to ensure they didn't build on invalid histories. Miners could opt to extend only a subset of shards if the protocol supported it.
 

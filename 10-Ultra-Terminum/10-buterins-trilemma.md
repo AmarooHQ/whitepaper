@@ -1,4 +1,4 @@
-## Buterin's Trilemma
+# Buterin's Trilemma
 
 The trilemma is as follows:
 
@@ -8,7 +8,7 @@ For some magnitude of computational resources (computation, bandwidth, storage, 
 * Security - the system is secure against attackers with up to $O(n)$ resources.
 * Scalability - the system can process transactions with $O(n) > O(c)$; this means that, as the network grows, the throughput of the system grows faster than the computational resources required per user.
 
-### Core Conflict
+## Core Conflict
 
 Here is a cloud for the core conflict:
 
@@ -59,7 +59,7 @@ We have some hints to conditions that might belong to a *silver bullet* solution
 
 **This is the crux of the problem: how do you construct a sharded blockchain (scalable) such that attacking a shard is about as difficult as attacking the full network (secure), but helping to secure the blockchain does not require validating all shards (decentralized)?**
 
-### Assumptions
+## Assumptions
 
 Here are some additional underlying assumptions that are either common or which I expect to be common:
 
