@@ -33,11 +33,11 @@ Let's add such a contract to Ethereum and describe the relevant data and events:
 | 41 | | j + 40 | BTC [k+1] header | Tracks BTC chain up to BTC[k+1] |
 | ... |||||
 
-After a Bitcoin block is produced, an Ethereum miner includes an Eth tx containing the BTC header, which updates the SC tracking the Bitcoin chain. In reality there are practical concerns about incentivizing someone to produce such a transaction (among other things); we're not concerned with those here. We're just concerned with the relationships that exist and what they can do.
+After a Bitcoin block is produced, an Ethereum miner includes an Eth tx containing the BTC header, which updates the SC tracking the Bitcoin chain. In reality there are practical concerns about incenting someone to produce such a transaction (among other things); we're not concerned with those here. We're just concerned with the relationships that exist and what they can do.
 
 #### 2. Bitcoin tracks Ethereum
 
-Let's consider a hypothetical change to Bitcoin. The protocol is extended to add support for tracking Ethereum's chainheaders. That is, a bespoke protocol extension is created that allows/requires miners to publish known Ethereum chainheaders along with their Bitcoin block. Similar to the way Ethereum tracks Bitcoin, now Bitcoin also tracks Ethereum.
+Let's consider a hypothetical change to Bitcoin. The protocol is extended to add support for tracking Ethereum's chain-headers. That is, a bespoke protocol extension is created that allows/requires miners to publish known Ethereum chain-headers along with their Bitcoin block. Similar to the way Ethereum tracks Bitcoin, now Bitcoin also tracks Ethereum.
 
 | Time (~15s increments) | Bitcoin block made | BTC block contents | BTC state | Eth block made | Eth block contents | Eth state |
 |---|---|---|---|---|---|---|
@@ -69,7 +69,7 @@ Bitcoin now knows *which Bitcoin blocks are known about by some external source*
 
 Put another way: Bitcoin's history is confirmed *not only* by new Bitcoin blocks, *but also* by Ethereum blocks. Since Bitcoin nodes *know* they have the blocks that Ethereum knows about, there's no data-availability concern here.
 
-At this point, if an attacker was to publish a better Bitcoin chain, then Bitcoin nodes would reorganise around the *new* history published by the attacker, and the attacker's block headers would end up being recorded in the Ethereum SC (so the SC would reorganise just as Bitcoin nodes do).
+At this point, if an attacker was to publish a better Bitcoin chain, then Bitcoin nodes would reorganize around the *new* history published by the attacker, and the attacker's block headers would end up being recorded in the Ethereum SC (so the SC would reorganize just as Bitcoin nodes do).
 
 Could we use Bitcoin's knowledge *that it's own history is reflected in the Ethereum SC* to *prevent* such an attack?
 
@@ -252,7 +252,7 @@ btcOnlyWorkFor state block = sum $ (\b -> btcBlockWeight b - doubleCountedWeight
   where
     relevantBtcBlocks = filter currBlockIsHead (btcMainChainBlocks state)
     currBlockIsHead btcBlock = nmcHash block == getNmcHeadFromBtcBlock btcBlock
-    -- todo: is this correct? what about if an NMC block get's confirmed, then there
+    -- todo: is this correct? what about if an NMC block gets confirmed, then there
     -- are 3x BTC confirmations on top, but no NMC blocks in that time? (so 4 confs total)
     -- Should that count as `3.5 BtcBlocks` or `2 BtcBlocks`?
     -- Max's intuition: 2 (the latter). IDK tho, needs more thinking.
@@ -361,7 +361,7 @@ this is the only thing i have thought of (so far?) that could make MM PoW reflec
 * work -- how much work went into finding the proof for a block
 * sigma-work -- how much cumulative work has been contributed up to and including that block (and only it's history)
 
-I think for Quanta / cryptonet I was using sigma-work; IDK if there was a good reason tho.
+I think for Quanta / Cryptonet I was using sigma-work; IDK if there was a good reason tho.
 
 \todo[inline]{Are these methods equivalent?}
 
@@ -378,6 +378,7 @@ mb think about it from the angles:
 * *what does it mean for a tx to be confirmed compared to a block header to be confirmed?*
 * *what does it mean for a chain to read an SPV proof from another chain? what about 2 layers of indirection? (so confirming that another chain knows about a local tx)*
 
-consider a high frequency simplex (e.g. a 60-chain-simplex with ~60s block times -> approx 1 block / section). there should be an advantage to publishing a block immediately (otherwise selfish mining attacks might come in to play). having lots of other reflecting chains means that there should always be a super low latency to reflection (seconds), ideally less than the propagation time for a block (including verification). \todo[inline]{check that having a DAG makes this overhead go away; overhead that might otherwise exist in a PoW satoshi-chain from stale blocks and the like}
+consider a high frequency simplex (e.g. a 60-chain-simplex with ~60s block times -> approx 1 block / section). there should be an advantage to publishing a block immediately (otherwise selfish mining attacks might come in to play). having lots of other reflecting chains means that there should always be a super low latency to reflection (seconds), ideally less than the propagation time for a block (including verification).
+\todo[inline]{check that having a DAG makes this overhead go away; overhead that might otherwise exist in a PoW Satoshi-chain from stale blocks and the like}
 
 note: selfish mining proposed a fix for Bitcoin that involved miners choosing *randomly* which of 2 valid blocks to build on. this was an important part of their solution. that smells like it indicates that 2 reflected heads, regardless of order, should be weighted equally. remember: diff parts of the simplex might record 2 valid blocks for chain-A (one of the simplex chains) in different orders.

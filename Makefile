@@ -7,7 +7,7 @@ whitepaper: build-whitepaper mk-latex-pdf wc
 
 # atm restrict this to just the UT folder, can generalize again later
 # to do that: replace '10-Ultra-Terminum' with '*-*'
-build-whitepaper: clean %.md
+build-whitepaper: clean-wp-md %.md
 	touch $(WPFILE)
 	for mdfile in `find 10-Ultra-Terminum/ -iname \*.md`; do \
 	  echo "Processing: $$mdfile" && \
@@ -31,6 +31,9 @@ pert:
 
 clean: init
 	-rm -r $(OUTDIR)/*
+
+clean-wp-md:
+	-rm $(WPFILE)
 
 init:
 	@mkdir -p $(OUTDIR)
