@@ -1,8 +1,40 @@
 ## Scaling Complexity Analysis of *Ultra Terminum*
 
-UT has two primary methods of scaling: reflection and dapp-chains. Reflection is novel. Dapp-chains are similar to many of the scaling ideas proposed for other networks (polkadot, eth2, etc), though there are fewer restrictions on dapp-chains in UT compared to other networks.
+UT has two primary methods of scaling: reflection and dapp-chains. Reflection is novel. Dapp-chains are similar to many of the scaling ideas proposed for other networks (polkadot, eth2, etc), though there are fewer restrictions on dapp-chains in UT compared to other networks. Additionally, dapp-chains in UT are integrated into the simplex. This provides additional security compared to 'naked' PoS chains without sacrificing any of their other developments (e.g. finality).
+
+### Complexity of $O(c)$ chains
+
+e.g. Bitcoin
+
+\todo[inline]{do algebra}
+
+### Optimistic Complexity of $O(c^2)$ chains
+
+e.g. Eth2, Polkadot
+
+\todo[inline]{do algebra}
+
+### Complexity of $O(c^2)$ reflection
+
+\todo[inline]{do algebra}
+
+### Replacing Transactions with Dapp-Chains
+
+\todo[inline]{do algebra}
+
+\todo[inline]{this section covers both throughput and optimal numbers for dapp-chains and simplex-chains}
+
+### Complexity of $O(c^3)$ UT
+
+\todo[inline]{do algebra}
+
+### Complexity of $O(c^4)$ UT
+
+\todo[inline]{do algebra}
 
 ### Complexity of Dapp-Chains
+
+\todo[inline]{outdated, will be replaced by above sections}
 
 Dapp-chains look and act like typical shards; i.e. dapp-chains are 'child' chains of some 'parent' chain. If we presume that all chains have some constant maximum capacity (similar to the block-limit in Bitcoin and gas-limit in Ethereum) then calculating the scaling complexity is straight-forward and typical.
 
@@ -19,6 +51,8 @@ The parent chain can host multiple dapp-chains. If it is *only* hosting dapp-cha
 
 ### Complexity of PoW Reflection
 
+\todo[inline]{outdated, will be replaced by above sections}
+
 - similar to above
 
 $k$ space in each block split between headers of other chains + transactions; $k = k_{tx} + k_r$
@@ -31,18 +65,21 @@ to maximize $k_{tx} \cdot k_r$ we set $k_{tx} = k_r = \frac{k}{2}$ => so final c
 
 ### Complexity of UT
 
+\todo[inline]{outdated, will be replaced by above sections}
+
 Basically, replace $k_{tx}$ with dapp-chain headers. so dapp-chain capacity decreases from `k^2/bh` to `k^2/2bh` (for dapp-chain values of `b` and `h`). but we get to multiply by `k[r]/bh = k/2bh` rchains (for reflected chain values of `b` and `h`).
 
 it's unlikely that `b` and `h` will be the same for reflected parent PoW chains and dapp-chains, but presuming they are:
 
 \begin{equation}
-Throughput_{Total} = \frac{k^2}{2\cdot b_d \cdot h_d} \cdot \frac{k}{2 \cdot b_r \cdot h_r}
-= \frac{k^3}{4 \cdot b_d \cdot b_r \cdot h_d \cdot h_r}
+Throughput_{Total} = \frac{k^3}{4 \cdot B_f \cdot B_h \cdot D_f \cdot D_h}
 \end{equation}
 
 we simplify as before, and we have complexity $O(k^3) = O(c^3)$.
 
 #### Maximum number of dapp-chains
+
+\todo[inline]{outdated, will be replaced by above sections}
 
 the total ($t$) number of dapp-chains we can have is $t = r\cdot d$. We know that $r \cdot h_r \cdot b_r + d \cdot h_d \cdot b_d = k$; \todo[inline]{check remainder of paragraph} i.e. `reflection-chains * size of reflection header + dapp-chains * size of dapp-chain headers = k`. We can use these two to obtain: `t = r*(k - r*h[r])/h[d]` (eliminating the variable `d`). we then get `dt/dr = k/h[d] - 2*r*h[r]/h[d]`. find the maximum at `dt/dr = 0` to yield `r = k/(2*h[r])` at maximum throughput. since `t = r*(k - r*h[r])/h[d] = rk/h[d] - r^2*h[r]/h[d]` we get `t[max] = k^2/(2*h[r]*h[d]) - k^2/(4*h[r]^2) * h[r]/h[d] = 2*k^2/(4*h[r]*h[d]) - k^2/(4*h[r]*h[d]) = k^2/(4*h[r]*h[d])`
 
@@ -57,31 +94,6 @@ $T_{max dapps} = \frac{k^2}{4 \cdot h_r \cdot b_r \cdot h_d \cdot b_d}$
 \todo[inline]{do algebra here}
 
 ### Complexity comparison
-
-NB: Ethereum's throughput is about 3000 bytes/sec maximum, and Bitcoin (with segwit) about 2000 bytes/sec.
-
-| $k$; throughput (bytes/sec) | $b_r; b_d$ ($s^{-1}$); set $b_r = b_d$ | $h_r$ (bytes) | $h_d$ (bytes) | avg tx size (bytes) | Eth2 tps estimate | UT tps |
-|---|---|---|---|---|---|---|
-| 3000 | $\frac{1}{60}$ | 500 | 500 | 200 | 5,400 | 486,000 |
-||||||||
-| 3000 | $\frac{1}{600}$ | 150 | 300 | 300 | 60,000 | 180,000,000 |
-
-\todo[inline]{put below data into table}
-
-at 3000 bytes/sec (Ethereum), 60s block times, geom avg 200 byte headers (`sqrt(h[r]*h[d])`), 500 byte avg tx size => UT can do 1,215,000 tps. With just dapp-chains (like polkadot, eth2, etc) those params would give 5,400 tps.
-
-3000 bytes/sec, 60s block times, avg 500 byte headers, 200 byte txs => UT: 486,000 tps; Eth2: 5,400 tps.
-
-(note that UT is v sensitive to header sizes; better to have smaller headers and larger txs if we get a choice)
-
-3000 bytes/sec, 15s block times, avg 500 byte headers, 200 byte txs => UT: 30,375 tps; Eth2: 1,350 tps.
-
-3000 bytes/sec, 150s block times, 500 byte headers, 500 byte txs => UT: 1,215,000 tps; Eth2: 5,400 tps.
-
-3000 bytes/sec, 600s block times, 500 byte headers, 500 byte txs => UT: 19,440,000 tps; Eth2: 21,600 tps.
-
-\% | $k$, $B_f$, $D_f$, $B_h$, $D_h$, $Tx_{avg}$ | $O(c)$ tps | $O(c^2)$ tps | $O(c^3)$ UT tps | $O(c^3)$ UT dappchains | $O(c^4)$ UT tps | $O(c^4)$ UT dappchains |
-% |---|---|---|---|---|---|---|
 
 | $k$, $B_f$, $D_f$, $B_h$, $D_h$, $Tx_{avg}$ | $O(c)$ tps | $O(c^2)$ tps | $O(c^3)$ UT tps | $O(c^4)$ UT tps |
 |---|---|---|---|---|
@@ -130,7 +142,8 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
     }
 
 def fmt_rounded_commas(value):
-    return f"{round(value):,}" if value < 10**6 else f"\x24{value:.1e}}}\x24".replace("e+0", "e+").replace("e+", "\\times 10^{")
+    return f"{round(value):,}" if value < 10**6 else f"\x24{value:.1e}}}\x24" \
+        .replace("e+0", "e+").replace("e+", "\\times 10^{")
 
 def table_row(params, incl_dappchains=False):
     r = calc_tps_throughput(*params)
@@ -170,5 +183,7 @@ for r in row_inputs:
     print(table_row(r))
 # list((r, calc_tps_throughput(*r)) for r in row_inputs)
 ```
+
+### Bandwidth Complexity
 
 \todo[inline]{bandwidth requirement presuming all simplex blocks downloaded (to ensure availability)}
