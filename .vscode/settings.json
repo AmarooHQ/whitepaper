@@ -2,16 +2,19 @@
     "cSpell.words": [
         "Amaroo",
         "BFTs",
+        "Buterin's",
         "Cardano",
         "Cardano's",
         "Ethereum's",
         "Goldratt's",
         "Litecoin",
+        "Microchains",
         "Namecoin",
         "Namecoin's",
         "Polkadot",
         "Polkadot's",
         "ZKPs",
+        "blockchain's",
         "blockchains",
         "codebases",
         "confs",
@@ -21,6 +24,9 @@
         "doublespends",
         "hashrate",
         "incenting",
-        "unpaywalled"
+        "microchain",
+        "sharded",
+        "unpaywalled",
+        "unvalidated"
     ]
 }

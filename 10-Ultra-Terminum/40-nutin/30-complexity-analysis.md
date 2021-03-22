@@ -32,7 +32,9 @@ e.g. Eth2, Polkadot
 
 \todo[inline]{do algebra}
 
-### Complexity of Dapp-Chains
+### Outdated Sections
+
+#### Complexity of Dapp-Chains
 
 \todo[inline]{outdated, will be replaced by above sections}
 
@@ -49,7 +51,7 @@ The parent chain can host multiple dapp-chains. If it is *only* hosting dapp-cha
 
 *Total capacity* (or throughput) of a parent-child architecture, like this, is the sum of the capacity of all child-chains. Each child chain has `k` capacity. Since we have $\frac{k}{b*h} dchains$ total, we can say that the total throughput is approximately $\frac{k}{b*h} \si{dchains} * k bytes/sec/dchain = \frac{k^2}{b.h} bytes/sec$. Since $b$ and $h$ are constants, a parent-child architecture like this has total capacity in $O(k^2) = O(c^2)$. Given previous research, this is the expected result.
 
-### Complexity of PoW Reflection
+#### Complexity of PoW Reflection
 
 \todo[inline]{outdated, will be replaced by above sections}
 
@@ -63,7 +65,7 @@ we end up with $\frac{k_{tx} \cdot k_r}{b_r \cdot h_r}$ throughput --> roughly `
 
 to maximize $k_{tx} \cdot k_r$ we set $k_{tx} = k_r = \frac{k}{2}$ => so final calc is $\frac{k^2}{4 \cdot b_r \cdot h_r}$ => scales with $O(k^2) = O(c^2)$.
 
-### Complexity of UT
+#### Complexity of UT
 
 \todo[inline]{outdated, will be replaced by above sections}
 
@@ -77,7 +79,7 @@ Throughput_{Total} = \frac{k^3}{4 \cdot B_f \cdot B_h \cdot D_f \cdot D_h}
 
 we simplify as before, and we have complexity $O(k^3) = O(c^3)$.
 
-#### Maximum number of dapp-chains
+##### Maximum number of dapp-chains
 
 \todo[inline]{outdated, will be replaced by above sections}
 
@@ -89,7 +91,7 @@ $T_{max dapps} = \frac{k^2}{4 \cdot h_r \cdot b_r \cdot h_d \cdot b_d}$
 
 \todo[inline]{need to check this properly with updated starting equations}
 
-#### Optimal number of simplex-chains and dapp-chains
+##### Optimal number of simplex-chains and dapp-chains
 
 \todo[inline]{do algebra here}
 
