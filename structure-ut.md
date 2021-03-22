@@ -5,7 +5,7 @@ The structure itself will be captured in the TOC generated for the UT paper. Thi
 ## big / meta / theme stuff
 
 - what is the structure of other consensus papers?
-  - **TODO**
+  - **TODO** identify common structural elements of past papers and compare to what we have. is anything missing?
 
 ## sections and deets
 
@@ -32,6 +32,9 @@ The structure itself will be captured in the TOC generated for the UT paper. Thi
     - design requirements
       - good and bad qualities of simplex-chains
     - problems with naive architecture
+  - Dapp-chains
+    - flexibility & extending UT/Amaroo
+    - dapp-chain attacks
   - Complexity analysis
     - algebra and derivation
       - o(c)
@@ -44,11 +47,10 @@ The structure itself will be captured in the TOC generated for the UT paper. Thi
   - Fixing Problems
     - DAGs
     - block availability
-  - Dapp-chains
-    - flexibility & extending UT/Amaroo
-    - dapp-chain attacks
   - Tiling
     - method
+      - initial
+      - iteration step
     - complexity
       - derive formula from method rather than searching OEIS
     - tiling attacks?
@@ -56,16 +58,16 @@ The structure itself will be captured in the TOC generated for the UT paper. Thi
     - data struct requirements
     - bandwidth requirements
     - architecture limitations
-    - **todo** extra stuff from brainstorm
--
-- answered crit index
+    - **todo** brainstorm impracticality concerns
+  - Neat features
+    - lower variance of PoW blocks without changing target time
+- appendix: answered crit index
   - **todo** brainstorm predicted crits
   - **todo** answer those crits and/or link to parts of paper where they are answered
+  - **todo** brainstorm reasons ppl would have a negative reaction (e.g. PoW, patent)
+- appendix: code for generating comparison tables
 - glossary
 
 ## other structure stuff todo
-
-
-
 
 Set dates for WP review, probably more at end of month.
