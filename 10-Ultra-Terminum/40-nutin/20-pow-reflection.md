@@ -4,12 +4,11 @@
 
 Can blockchains work cooperatively to secure each other? It certainly seems that there is nothing *in principle* that prohibits this. Can we come up with a way to do this?
 
-The idea of one blockchain 'tracking' another blockchain via chain-headers and SPV proofs is not new: I (loosely) proposed a system which used this method to support rich cross-chain exchange in 2013 (1,2). I wrote a simplified implementation in the very early days of Ethereum (3), a precursor to the later-successful BTCRelay (4). The general idea of one blockchain tracking the headers of another will be our starting point.
+The idea of one blockchain 'tracking' another blockchain via chain-headers and SPV proofs is not new: I (loosely) proposed a system which used this method to support rich cross-chain exchange in 2013[^xc1]. I wrote a simplified implementation in the very early days of Ethereum[^xc3], a precursor to the later-successful BTCRelay[^xc4]. The general idea of one blockchain tracking the headers of another will be our starting point.
 
-* 1: https://bitcointalk.org/index.php?topic=198032.0
-* 2: https://bitcointalk.org/index.php?topic=598784.0
-* 3: https://github.com/XertroV/coppr/blob/master/chainheaders.py
-* 4: https://github.com/ethereum/btcrelay
+[^xc1]: <https://bitcointalk.org/index.php?topic=198032.0>, <https://bitcointalk.org/index.php?topic=598784.0>
+[^xc3]: <https://github.com/XertroV/coppr/blob/master/chainheaders.py>
+[^xc4]: <https://github.com/ethereum/btcrelay>
 
 ### Two Blockchains
 
@@ -19,7 +18,7 @@ Our starting case is that both chains use different Proof of Work algorithms and
 
 #### Step 1. Ethereum tracks Bitcoin
 
-The idea that Ethereum SCs can track Bitcoin chain-headers is well understood. Bitcoin's proof of work algorithm is clean and simple so implementing the necessary logic in an Eth SC is not that difficult (3). In principle, any chain that supports some headers-only mode can be tracked in this way. In practice that can be difficult (e.g. Ethereum doesn't support memory hard hashes unless special cases are introduced), but we're not interested in practicality *at the moment*.
+The idea that Ethereum SCs can track Bitcoin chain-headers is well understood. Bitcoin's proof of work algorithm is clean and simple so implementing the necessary logic in an Ethereum SC is not that difficult. In principle, any chain that supports some headers-only mode can be tracked in this way. In practice that can be difficult (e.g. Ethereum's EVM doesn't support memory hard hashes unless special cases are introduced), but we're not interested in practicality *at the moment*.
 
 Let's add such a contract to Ethereum and describe the relevant data and events:
 
@@ -27,10 +26,10 @@ Let's add such a contract to Ethereum and describe the relevant data and events:
 |---|---|---|---|---|
 | ... |||||
 | 0 | k ||||
-| 1 | | j | BTC[k] header | Tracks BTC chain up to BTC[k] |
+| 1 | | j | $BTC_k$ header | Tracks BTC chain up to $BTC_k$ |
 | ... |||||
 | 40 | k + 1 ||||
-| 41 | | j + 40 | BTC [k+1] header | Tracks BTC chain up to BTC[k+1] |
+| 41 | | j + 40 | $BTC_{k+1}$ header | Tracks BTC chain up to $BTC_{k+1}$ |
 | ... |||||
 
 After a Bitcoin block is produced, an Ethereum miner includes an Eth tx containing the BTC header, which updates the SC tracking the Bitcoin chain. In reality there are practical concerns about incenting someone to produce such a transaction (among other things); we're not concerned with those here. We're just concerned with the relationships that exist and what they can do.
@@ -38,6 +37,8 @@ After a Bitcoin block is produced, an Ethereum miner includes an Eth tx containi
 #### Step 2. Bitcoin tracks Ethereum
 
 Let's consider a hypothetical change to Bitcoin. The protocol is extended to add support for tracking Ethereum's chain-headers. That is, a bespoke protocol extension is created that allows/requires miners to publish known Ethereum chain-headers along with their Bitcoin block. Similar to the way Ethereum tracks Bitcoin, now Bitcoin also tracks Ethereum.
+
+\todo[inline]{[ANYONE] Update "Eth[j]" syntax to match $BTC_k$ syntax used in prev table.}
 
 | Time (~15s increments) | Bitcoin block made | BTC block contents | BTC state | Eth block made | Eth block contents | Eth state |
 |---|---|---|---|---|---|---|
