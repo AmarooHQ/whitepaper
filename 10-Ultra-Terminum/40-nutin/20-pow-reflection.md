@@ -176,6 +176,8 @@ Naturally, the large difference in target block frequencies means that Ethereum 
 
 ### PoW reflection between chains using the same alg
 
+\todo[inline]{build this section out -- seems like this can be done securely}
+
 What about chains using the same alg? e.g. Bitcoin (B) and Bitcoin-copy (C)?
 
 - opportunity cost exists for a miner choosing to mine B or C.
@@ -203,15 +205,27 @@ How can we design a system that allows for sensible comparisons between Proofs o
 
 #### A Single Root Token Across Multiple Chains
 
+The simplest method for comparing work done via different algorithms is to measure that work via a common unit. How can we do this? Whatever method we choose, it must *cancel out* market conditions like: silicon availability, the cost of power, the availability of mining rigs, and short-term effects like a drastic shift in token price.
 
+In blockchains like Bitcoin and Ethereum, block rewards are denominated in the *root token* of that chain. What if we had two chains with the same root token?
 
-#### A Trustless Decentralized Market
+If two PoW blockchains using different hashing algorithms use the same root token, then we can directly compare the rates of work done on each via the normalized block rewards of the root token on each (normalized against time). What do I mean by this? Let's look at an example.
 
-- decentralized market
-  - risk of manipulation
-  - does provide a way to convert between reward tokens => a way to get a 'constant of conversion'
-- single token across multiple chains (like the ROO)
-  - 'constant of conversion' = to ratio of ROO on each chain (at that time)
+Say we had Altcoin1 and Altcoin2: two near-identical PoW chains using different algorithms, but with the *same* root token (conserved via a 2-way peg or w/e). Firstly, we need a way to determine what their block rewards are, and the intuitive solution is to set each chain's block reward proportionally to the percentage of root tokens (i.e. *coins*) on that chain. If one of them has 100% of the root tokens, then 50 coins are generated as a reward per block. If one had 60% of the root tokens, then 30 coins are generated per block *on that chain*, and (since we only have 2 chains) 20 coins are generated per block *for the other chain*, corresponding to the remaining 40% of root tokens. One reason this method makes sense is that the ratio of coins on each chain is not affected by block rewards -- though this property only holds (as I've put it here) if both chains have the same rate of block production. We can generalize the method by normalizing against time so that we're comparing the rates of coin production rather than the block rewards themselves.
+
+Now that we know what the block rewards are and have defined them in terms of the percentage of total coins that are on that chain, we can work on comparing the chains' hash rates. What sort of foundation could we do this from? What about *equal work for equal reward*? Because we have defined block rewards in terms of *where* root tokens are held, we can measure things like *hashes per token* (when considering block rewards particularly). Crucially, we can measure this *for each chain*, which allows us to -- *contextually* -- make claims like 100 hashes of algorithm 1 are worth 25 hashes of algorithm 2.
+
+Since we know the percentage of root tokens on each chain for each moment in history, we can safely use that figure in chain-weight calculations. The reliability of that data will be the same as the reliability of the blockchains themselves, provided we enforce the 2-way peg that ensures no root tokens are created or destroyed outside protocol rules.
+
+\todo[inline]{should we bother deriving the maths for this here? IMO it's not that important to include in the paper provided the core idea is. Just some basic algebra and calculus.}
+
+#### Different Root Tokens with a DEX
+
+Instead of using the same token on multiple chains, you could use a similar method with different root tokens on different chains. Implicit in above single-token method was a 1:1 conversion ratio between root tokens held on each chain. Can we not replace that with an exchange rate? If that exchange rate was provided via a trustless and decentralized exchange, could that not also be a reasonable context to do this sort of conversion?
+
+In principle you can use the same principles to compare work between chains that have different root tokens. However, there is a major new caveat with this method: the DEX and price-finding methods now become *part* of the consensus methods of those chains. This caveat makes the different-tokens context much harder to reason about, and introduces questions like *What is the effect of front running?* and *Could an attacker exploit market conditions to perform a doublespend when they wouldn't normally be able to?*
+
+In the context of *Ultra Terminum* and *Amaroo*, these aren't questions that are important to answer. If PoW reflection is ever used to secure multiple chains with heterogenous tokens, it's likely that these questions will need answering, or that alternate methods be devised.
 
 ### Reflection with more than two blockchains
 
