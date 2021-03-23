@@ -11,12 +11,11 @@ The structure itself will be captured in the TOC generated for the UT paper. Thi
 
 - intro
 - background info & foundational concepts
-  - Meaning of O(C)
-  - SPV
+  - ?? Meaning of O(C)
+  - ?? SPV
   - *probs not* MM? IDK
   - *probs not* DAGS? Not required at this stage
-- problem that we're solving
-  - buterin's trilemma
+- problem that we're solving / buterin's trilemma
   - explanation and conflict
 - UT itself
   - PoW reflection
