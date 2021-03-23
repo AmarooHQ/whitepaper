@@ -78,7 +78,7 @@ Could we use Bitcoin's knowledge *that it's own history is reflected in the Ethe
 
 NOTE: I think it might be good to reorg this section a bit so that the current-btc stuff comes first, then we go into the modifications. TODO
 
-Before we discuss a change that Bitcoin could make, it is important to note that chain-work done with one hashing algorithm is *not generally convertible* to 'equivalent' work done via another hashing algorithm. There is no meaningful *generic* answer to the question "how many *double SHA256* hashes is one *Ethash* hash worth?". In fact there is no meaningful answer to similar questions that use any other other combination of hashing algorithms, either. It is not possible to *generically and universally* convert between different units. You can *only* do this within a *context*. We'll look at some such contexts later.
+Before we discuss a change that Bitcoin could make, it is important to note that chain-work done with one hashing algorithm is *not generally convertible* to 'equivalent' work done via another hashing algorithm. There is no meaningful *generic* answer to the question "how many *double SHA256* hashes is one *Ethash* hash worth?". In fact there is no meaningful answer to similar questions that use any other other combination of hashing algorithms, either. It is not possible to *generically and universally* convert between qualitatively different units. You can *only* do this within some *context* where you *define* a conversion method. We'll look at some such contexts later.
 
 NB: Bitcoin does two SHA256 hashes per block, which is why I refer to "double SHA256" above.
 
@@ -109,9 +109,9 @@ blockWeight block = 1
 -- we set the weight to 1 earlier; this is not representative of a production chain
 ```
 
-Could the Bitcoin chain incorporate the idea that Ethereum had confirmed part of it's history? (Ideally the Ethereum chain would know about all but the latest block, but there might be some latency in reality.) Could the Bitcoin chain use this to thwart some types of attack?
+Could the Bitcoin chain incorporate the idea that Ethereum had confirmed part of its history? (Ideally the Ethereum chain would know about all but the latest block, but, in reality, there might be some latency.) Could the Bitcoin chain use this to thwart some types of attack?
 
-Let's modify the Bitcoin weight-calculation functions to account for Bitcoin history that has been confirmed by the Ethereum chain:
+Let's modify the Bitcoin weight-calculation functions so that they account for Bitcoin history that has been confirmed by the Ethereum chain:
 
 ```haskell
 -- bitcoin-modified-weight-calc.hs
@@ -168,13 +168,15 @@ One particular *impact* of this change is that a doublespend attack (e.g. by wit
 
 Why? The privately mined blocks to perform the attack *are not known about* by Ethereum. Rather, Ethereum knows about the *public* Bitcoin history *against which the attack competes*. Thus, the private chain-segment must *either* contribute more total work to the Bitcoin blockchain than the public chain-segment does *including* the relevant Ethereum chain-segment, *or* the attacker must, in addition to their private Bitcoin chain-segment, *also* produce a private Ethereum chain-segment such that the *total* work of both private chain-segments is calculated to be greater than the total work of both public chain-segments, and then publish both segments simultaneously.
 
-It's worth noting that, at this point, there is no benefit to Ethereum's security as Ethereum isn't 'reading' the reflected work. Thus a doublespend attack against Ethereum has the expected, non-reflected parameters. The only thing required for Ethereum to take advantage of the reflected PoW is the inclusion of appropriate merkle proofs that show the Eth chain according to Bitcoin.
+It's worth noting that, at this point, there is no benefit to Ethereum's security as Ethereum isn't 'reading' the reflected work. Thus a doublespend attack against Ethereum has the expected, non-reflected profile. The only thing that is required for Ethereum to take advantage of the reflected PoW is the inclusion of appropriate merkle proofs which show the Ethereum chain according to Bitcoin.
 
-Naturally, the large difference in target block frequencies means that Ethereum has a good deal of latency before its chain gains the security benefit from reflected work. For this reason, PoW reflection makes the most sense when used with high frequency chains. The downside of this is the increased overhead of more block headers, however, this is minimal in the scheme of things.
+Naturally, the large difference in target block frequencies means that Ethereum has a good deal of latency before its chain gains the security benefit from reflected work. For this reason, PoW reflection makes the most sense when used with high frequency chains, or chains of similar frequencies. One downside of this is that shortening the block production frequency requires the inclusion of more block headers, however, this is minimal in the scheme of things.
 
 \todo[inline]{UT won't be done until we figure out how to tell what the right algorithm is to count/weigh reflected blocks.}
 
 ### Two *merge mined* blockchains
+
+\todo[inline]{This section can be cut down significantly -- MM chains have security issues in general, and PoW reflection between merged chains is insecure without additional constraints. Those constraints basically nullify the benefits of MM.}
 
 The case of two merged mined chains (e.g. Bitcoin and Namecoin) is not as simple as the case of two chains using different hashing algorithms for their work. That is because the conclusion drawn about the difficult of attack does not hold. If we consider two chains that are both reflected in one another and able to be merged mined, then it is trivial to see that an attack is, at most, as difficult as attacking the strongest chain (presuming that 100% of miners are mining that chain). So there is an upper limit on the additional security provided via this technique.
 
@@ -323,7 +325,17 @@ is this secure? if so, then mixing with reflection to other chains provides extr
 
 under that sort of thing the 'microchain' would become like an O(c) record of all headers from all chains. then all chains would sync their reflections up against the full headers-only-network (i.e. all chain headers of all chains). each dapp can then be O(c). so we get back to O(c^2) scaling.
 
-### Contexts where PoW can be directly compared
+### Comparing incomparable Proofs of Work
+
+For PoW reflection to work effectively, there must be some method of comparing the *work* done by reflecting chains. Earlier, we simply *set* a ratio between Bitcoin blocks and Ethereum blocks based on the arbitrary notion of *equal work in equal time*, but that isn't a context that's easy to create and maintain in reality.
+
+How can we design a system that allows for sensible comparisons between Proofs of Work that use different hashing algorithms?
+
+#### A Single Root Token Across Multiple Chains
+
+
+
+#### A Trustless Decentralized Market
 
 - decentralized market
   - risk of manipulation
