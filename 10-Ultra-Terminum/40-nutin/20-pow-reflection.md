@@ -233,6 +233,8 @@ In the context of *Ultra Terminum* and *Amaroo*, these aren't questions that are
 
 If we can do reflection between two chains, can we also do reflection between three chains?
 
+\todo[inline]{write this out}
+
 guess: extending the Bitcoin + Ethereum example to, say, Bitcoin + Ethereum + Litecoin will provide the security benefits of all 3. it should be additive. a doublespend would require a doublespend against all 3.
 
 ### Reflection with PoS chains / otherwise unsafe consensus algs (like PoA)

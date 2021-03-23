@@ -1,12 +1,16 @@
 ## Scaling Complexity Analysis of *Ultra Terminum*
 
-UT has two primary methods of scaling: reflection and dapp-chains. Reflection is novel. Dapp-chains are similar to many of the scaling ideas proposed for other networks (polkadot, eth2, etc), though there are fewer restrictions on dapp-chains in UT compared to other networks. Additionally, dapp-chains in UT are integrated into the simplex. This provides additional security compared to 'naked' PoS chains without sacrificing any of their other developments (e.g. finality).
+UT has two primary methods of scaling: reflection and dapp-chains. Reflection is novel. Dapp-chains are similar to many of the scaling ideas proposed for other networks (polkadot, eth2, etc), though there are fewer restrictions on dapp-chains in UT compared to other networks. Additionally, dapp-chains in UT are hosted by the simplex. This provides additional security compared to 'naked' PoS chains without sacrificing any of their other developments (e.g. finality).
 
 ### Complexity of $O(c)$ chains
 
 e.g. Bitcoin
 
-\todo[inline]{do algebra}
+\todo[inline]{do algebra; lol there's like no algebra for this one}
+
+\begin{equation}
+T_1 = k
+\end{equation}
 
 ### Optimistic Complexity of $O(c^2)$ chains
 
@@ -14,9 +18,51 @@ e.g. Eth2, Polkadot
 
 \todo[inline]{do algebra}
 
+\begin{equation}
+\begin{split}
+T_2 & = \frac{k_1 \cdot k_2}{D_f \cdot D_h}
+    & \approx \frac{k^2}{D_f \cdot D_h}
+\end{split}
+\end{equation}
+
 ### Complexity of $O(c^2)$ reflection
 
 \todo[inline]{do algebra}
+
+For simplexes, the optimal number of simplex-chains is:
+
+\begin{equation}
+N_1 = \frac{k_1}{2 \cdot B_f \cdot B_h}
+\end{equation}
+
+\begin{equation}
+\label{eq:simplex-T1}
+T_1 = \frac{k_1^2}{4 \cdot B_f \cdot B_h}
+\end{equation}
+
+($T_1$ in bytes/sec)
+
+what's the balance (in b/s) of transactions to reflections?
+
+Set:
+
+\begin{equation}
+\label{eq:k-optimal}
+k_1 = k_{1,tx} + k_{1,B}
+\end{equation}
+
+by the power of maths and sorta-documented algebra (equations 1,2,3,4 in scans on basecamp):
+
+\begin{equation}
+\label{eq:k-tx-optimal}
+k_{1,tx} = \frac{k_1}{2}
+\end{equation}
+
+thus, via \autoref{eq:k-optimal}
+
+\begin{equation}
+k_{1,B} = \frac{k_1}{2}
+\end{equation}
 
 ### Replacing Transactions with Dapp-Chains
 
@@ -24,13 +70,79 @@ e.g. Eth2, Polkadot
 
 \todo[inline]{this section covers both throughput and optimal numbers for dapp-chains and simplex-chains}
 
+
+also generally:
+
+\begin{equation}
+\label{eq:throughput-iter}
+T_{i+1} = \frac{T_i}{D_f \cdot D_h} \cdot k_{i+1}
+\end{equation}
+
+maybe this next one only works for simple scaling like eth2, not reflection (can't remember off the top of my head; it's eq 9 in the scans on BC)
+
+\begin{equation}
+N_{i} = \frac{T_i}{k_i}
+\end{equation}
+
+\todo[inline]{(insert maths)}
+
+Thus, the maximum number of dapp chains is given by:
+
+\begin{equation}
+N_2 = \frac{k_1^2}{4 \cdot B_f \cdot B_h \cdot D_f \cdot D_h}
+\end{equation}
+
 ### Complexity of $O(c^3)$ UT
 
 \todo[inline]{do algebra}
 
+\begin{equation}
+T_1 = \frac{k_1^2}{4 \cdot B_f \cdot B_h}
+\end{equation}
+
+\begin{equation}
+T_2 = \frac{k_1^2 \cdot k_2}{4 \cdot B_f \cdot B_h \cdot D_f \cdot D_h}
+\end{equation}
+
 ### Complexity of $O(c^4)$ UT
 
 \todo[inline]{do algebra}
+
+\begin{equation}
+T_3 = \frac{k_1^2 \cdot k_2 \cdot k_3}{4 \cdot B_f \cdot B_h \cdot D_f^2 \cdot D_h^2}
+\end{equation}
+
+(presuming that params $D_f$ and $D_h$ are used for dapp-chains and dapp-dapp-chains)
+
+### Complexity comparison
+
+| $k$, $B_f$, $D_f$, $B_h$, $D_h$, $Tx_{avg}$ | $O(c)$ tps | $O(c^2)$ tps | $O(c^3)$ UT tps | $O(c^4)$ UT tps |
+|---|---|---|---|---|
+| (1000, 1/15, 1/15, 112, 250, 250) | 4 | 240 | 8,036 | 482,143 |
+| (3000, 1/15, 1/15, 112, 250, 250) | 12 | 2,160 | 216,964 | $3.9\times 10^{7}$ |
+| (3000, 1/20, 1/40, 112, 250, 250) | 12 | 5,760 | 771,429 | $3.7\times 10^{8}$ |
+| (1000, 1/60, 1/60, 112, 250, 250) | 4 | 960 | 128,571 | $3.1\times 10^{7}$ |
+| (3000, 1/60, 1/60, 200, 500, 250) | 12 | 4,320 | 972,000 | $3.5\times 10^{8}$ |
+| (3000, 1/60, 1/60, 112, 500, 250) | 12 | 4,320 | $1.7\times 10^{6}$ | $6.2\times 10^{8}$ |
+| (3000, 1/60, 1/60, 200, 250, 250) | 12 | 8,640 | $1.9\times 10^{6}$ | $1.4\times 10^{9}$ |
+| (3000, 1/60, 1/60, 112, 250, 250) | 12 | 8,640 | $3.5\times 10^{6}$ | $2.5\times 10^{9}$ |
+| (26000, 1/60, 1/60, 200, 200, 250) | 104 | 811,200 | $1.6\times 10^{9}$ | $1.2\times 10^{13}$ |
+| (26000, 1/60, 1/60, 112, 200, 250) | 104 | 811,200 | $2.8\times 10^{9}$ | $2.2\times 10^{13}$ |
+| (1000, 1/600, 1/600, 112, 250, 250) | 4 | 9,600 | $1.3\times 10^{7}$ | $3.1\times 10^{10}$ |
+| (3000, 1/600, 1/600, 200, 250, 250) | 12 | 86,400 | $1.9\times 10^{8}$ | $1.4\times 10^{12}$ |
+| (3000, 1/600, 1/600, 112, 250, 250) | 12 | 86,400 | $3.5\times 10^{8}$ | $2.5\times 10^{12}$ |
+| (26000, 1/600, 1/600, 200, 200, 250) | 104 | $8.1\times 10^{6}$ | $1.6\times 10^{11}$ | $1.2\times 10^{16}$ |
+| (26000, 1/600, 1/600, 112, 200, 250) | 104 | $8.1\times 10^{6}$ | $2.8\times 10^{11}$ | $2.2\times 10^{16}$ |
+| (1000, 1/60, 1/600, 112, 250, 250) | 4 | 9,600 | $1.3\times 10^{6}$ | $3.1\times 10^{9}$ |
+| (3000, 1/60, 1/600, 112, 250, 250) | 12 | 86,400 | $3.5\times 10^{7}$ | $2.5\times 10^{11}$ |
+| (26000, 1/60, 1/600, 112, 250, 250) | 104 | $6.5\times 10^{6}$ | $2.3\times 10^{10}$ | $1.4\times 10^{15}$ |
+
+\todo[inline]{add figure of graphs of $B_f$ a/or $D_f$ vs tps, $B_h$ a/or $D_h$ vs tps, tx-size vs tps, k vs tps}
+
+### Bandwidth Complexity
+
+\todo[inline]{bandwidth requirement presuming all simplex blocks downloaded (to ensure availability)}
+
 
 ### Outdated Sections
 
@@ -85,40 +197,15 @@ we simplify as before, and we have complexity $O(k^3) = O(c^3)$.
 
 the total ($t$) number of dapp-chains we can have is $t = r\cdot d$. We know that $r \cdot h_r \cdot b_r + d \cdot h_d \cdot b_d = k$; \todo[inline]{check remainder of paragraph} i.e. `reflection-chains * size of reflection header + dapp-chains * size of dapp-chain headers = k`. We can use these two to obtain: `t = r*(k - r*h[r])/h[d]` (eliminating the variable `d`). we then get `dt/dr = k/h[d] - 2*r*h[r]/h[d]`. find the maximum at `dt/dr = 0` to yield `r = k/(2*h[r])` at maximum throughput. since `t = r*(k - r*h[r])/h[d] = rk/h[d] - r^2*h[r]/h[d]` we get `t[max] = k^2/(2*h[r]*h[d]) - k^2/(4*h[r]^2) * h[r]/h[d] = 2*k^2/(4*h[r]*h[d]) - k^2/(4*h[r]*h[d]) = k^2/(4*h[r]*h[d])`
 
+\todo[inline]{The below is right tho}
+
 Thus, the maximum number of dapp chains is given by:
 
-$T_{max dapps} = \frac{k^2}{4 \cdot h_r \cdot b_r \cdot h_d \cdot b_d}$
+\begin{equation}
+N_2 = \frac{k_1^2}{4 \cdot B_f \cdot B_h \cdot D_f \cdot D_h}
+\end{equation}
 
-\todo[inline]{need to check this properly with updated starting equations}
-
-##### Optimal number of simplex-chains and dapp-chains
-
-\todo[inline]{do algebra here}
-
-### Complexity comparison
-
-| $k$, $B_f$, $D_f$, $B_h$, $D_h$, $Tx_{avg}$ | $O(c)$ tps | $O(c^2)$ tps | $O(c^3)$ UT tps | $O(c^4)$ UT tps |
-|---|---|---|---|---|
-| (1000, 1/15, 1/15, 112, 250, 250) | 4 | 240 | 8,036 | 482,143 |
-| (3000, 1/15, 1/15, 112, 250, 250) | 12 | 2,160 | 216,964 | $3.9\times 10^{7}$ |
-| (3000, 1/20, 1/40, 112, 250, 250) | 12 | 5,760 | 771,429 | $3.7\times 10^{8}$ |
-| (1000, 1/60, 1/60, 112, 250, 250) | 4 | 960 | 128,571 | $3.1\times 10^{7}$ |
-| (3000, 1/60, 1/60, 200, 500, 250) | 12 | 4,320 | 972,000 | $3.5\times 10^{8}$ |
-| (3000, 1/60, 1/60, 112, 500, 250) | 12 | 4,320 | $1.7\times 10^{6}$ | $6.2\times 10^{8}$ |
-| (3000, 1/60, 1/60, 200, 250, 250) | 12 | 8,640 | $1.9\times 10^{6}$ | $1.4\times 10^{9}$ |
-| (3000, 1/60, 1/60, 112, 250, 250) | 12 | 8,640 | $3.5\times 10^{6}$ | $2.5\times 10^{9}$ |
-| (26000, 1/60, 1/60, 200, 200, 250) | 104 | 811,200 | $1.6\times 10^{9}$ | $1.2\times 10^{13}$ |
-| (26000, 1/60, 1/60, 112, 200, 250) | 104 | 811,200 | $2.8\times 10^{9}$ | $2.2\times 10^{13}$ |
-| (1000, 1/600, 1/600, 112, 250, 250) | 4 | 9,600 | $1.3\times 10^{7}$ | $3.1\times 10^{10}$ |
-| (3000, 1/600, 1/600, 200, 250, 250) | 12 | 86,400 | $1.9\times 10^{8}$ | $1.4\times 10^{12}$ |
-| (3000, 1/600, 1/600, 112, 250, 250) | 12 | 86,400 | $3.5\times 10^{8}$ | $2.5\times 10^{12}$ |
-| (26000, 1/600, 1/600, 200, 200, 250) | 104 | $8.1\times 10^{6}$ | $1.6\times 10^{11}$ | $1.2\times 10^{16}$ |
-| (26000, 1/600, 1/600, 112, 200, 250) | 104 | $8.1\times 10^{6}$ | $2.8\times 10^{11}$ | $2.2\times 10^{16}$ |
-| (1000, 1/60, 1/600, 112, 250, 250) | 4 | 9,600 | $1.3\times 10^{6}$ | $3.1\times 10^{9}$ |
-| (3000, 1/60, 1/600, 112, 250, 250) | 12 | 86,400 | $3.5\times 10^{7}$ | $2.5\times 10^{11}$ |
-| (26000, 1/60, 1/600, 112, 250, 250) | 104 | $6.5\times 10^{6}$ | $2.3\times 10^{10}$ | $1.4\times 10^{15}$ |
-
-\todo[inline]{add figure of graphs of $B_f$ a/or $D_f$ vs tps, $B_h$ a/or $D_h$ vs tps, tx-size vs tps, k vs tps}
+### code to generate complexity comparison table
 
 \todo[inline]{move this code to an appendix eventually}
 
@@ -185,7 +272,3 @@ for r in row_inputs:
     print(table_row(r))
 # list((r, calc_tps_throughput(*r)) for r in row_inputs)
 ```
-
-### Bandwidth Complexity
-
-\todo[inline]{bandwidth requirement presuming all simplex blocks downloaded (to ensure availability)}
