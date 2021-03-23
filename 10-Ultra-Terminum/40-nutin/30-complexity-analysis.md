@@ -20,8 +20,8 @@ e.g. Eth2, Polkadot
 
 \begin{equation}
 \begin{split}
-T_2 & = \frac{k_1 \cdot k_2}{D_f \cdot D_h}
-    & \approx \frac{k^2}{D_f \cdot D_h}
+T_2 & = \frac{k_1 \cdot k_2}{D_f \cdot D_h} \\
+& \approx \frac{k^2}{D_f \cdot D_h}
 \end{split}
 \end{equation}
 
