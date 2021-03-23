@@ -238,13 +238,14 @@ guess: extending the Bitcoin + Ethereum example to, say, Bitcoin + Ethereum + Li
 ### Reflection with PoS chains / otherwise unsafe consensus algs (like PoA)
 
 - helps solve *nothing at stake* problem b/c history is committed to thermodynamically (b/c of reflection in PoW chains), even with internal-based-stake (i.e. ROO); slashing can happen on like a 'watchdog' chain to ensure bad actors can't get away with it
-- provides easy way for corps to run darkchains for whatever they want (tho *how* exactly you do the dark bit is ??)
-- anyone can make a little PoS chain to add to security; has to fit within the O(c) 'microchain' but that should be fine-ish
+- provides easy way for corps to run darkchains for whatever they want (tho *how* exactly you do the dark bit is ??) -- nb: doesn't make sense to do them as simplex-chains, they can just be dapp chains.
+- "anyone" can make a little PoS chain to add to security
 - PoS chains could like safely provide mb up to 50% of security? this would mean a 50% reduction in energy usage (not that a reduction of that complexity matters -> energy usage still of same complexity, i.e. O(n))
-- how to balance PoW rewards with PoS? if staking is just 'free money' then why would ppl mine? mb staking involves some burning? i.e. you burn 100 coins and if you mine for 1yr you get 105 coins back or something. hmm. burn means slashing is hard, so mb not burn.
+  - mb just 33% security
+- how to balance PoW rewards with PoS? if staking is just 'free money' then why would ppl mine? possible options: lower reward, burning coins is required, other?
 - would deffo need a deposit for PoS chains, still. can't start a chain from nothing, need some cost (or opportunity cost at least)
 - could build on parity/ethereum/polkadot/etc clients. Cardano too if Ouroboros isn't garbage.
-- PoS implementations more complex but easier to think about. Their building blocks are simpler but there are more of them. PoW systems have fewer building blocks but harder to think/reason about.
+  - probs best to just use these as dappchains
 
 ### ensuring availability of blocks corresponding to reflected headers
 
