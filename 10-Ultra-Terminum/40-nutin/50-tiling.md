@@ -2,7 +2,7 @@
 
 * can tile simplexes by dividing initial simplex into 4 parts.
 * then creating new nodes as required
-* $3 \cdot 2^i - 2$
+* $3 \cdot 2^i - 2$ (nb: I think this was for a prev simplex tiling method; same complexity as the alt formula tho)
 
 ### initial state
 
@@ -29,6 +29,10 @@
 \todo[inline]{explain diags}
 
 NB for figs: Vertices are simplex-chains. Edges are the reflections between simplex-chains.
+
+\begin{comment}
+side by side figures: https://tex.stackexchange.com/questions/37581/latex-figures-side-by-side
+\end{comment}
 
 \begin{figure}
     \centering
