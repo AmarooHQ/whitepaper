@@ -3,3 +3,8 @@
 whitepaper.*
 *.log
 output/*
+.ipynb_checkpoints
+*.sage.py
+*.ipynb
+includes/ut/tiling/*.png
+*.7z
