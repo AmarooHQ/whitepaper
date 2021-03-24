@@ -15,7 +15,7 @@ build-whitepaper: clean-wp-md %.md
 	  cat $$mdfile >> $(WPFILE) && \
 	  echo -n "\n\n" >> $(WPFILE) ; \
 	done
-	pandoc -s --toc -f markdown -t latex -o $(WPTEX) $(WPFILE)
+	pandoc -s --number-sections --toc -f markdown -t latex -o $(WPTEX) $(WPFILE)
 	sed -i 's/\\%\\%/%/g' $(WPTEX)
 
 wc:
