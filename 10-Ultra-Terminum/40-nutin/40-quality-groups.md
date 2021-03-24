@@ -42,7 +42,7 @@ Set $t=0$ to be immediately after a block is published on a chain. then, as $t$ 
 
 The potential reward-over-time for a miner ($t$ vs $r + TxFees$) looks like a sawtooth function with a y-axis offset. It builds as more txs pile up, and drops back to the baseline reward after a block.
 
-\todo[inline]{figure of reward vs time mb, and one with lower variance? IDK, mb not necessary. Here's a paper about block production/arrival times https://arxiv.org/pdf/1801.07447.pdf also https://en.wikipedia.org/wiki/Negative_binomial_distribution}
+\todo[inline]{figure of reward vs time mb, and one with lower variance? IDK, mb not necessary. Here's a paper about block production/arrival times \url{https://arxiv.org/pdf/1801.07447.pdf} also \url{https://en.wikipedia.org/wiki/Negative_binomial_distribution}}
 
 If the miners $M_0, ..., M_9$ are capable of working on one of any $\{C_0, ..., C_9\}$ (and they have identical ROI profiles to the other miners), then they're incented to work on the chain with the most txs in the mempool. That means: miners should, roughly, work the chain that has gone the longest without a block. What should we expect based on those incentives? Miners should work on each chain only in the final moments of the block production cycle. If block times were set to 60s, then they'd start mining at like the 54s mark b/c that's how they maximize their ROI.
 
