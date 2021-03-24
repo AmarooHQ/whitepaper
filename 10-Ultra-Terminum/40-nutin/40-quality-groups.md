@@ -28,28 +28,30 @@ NB: The only way to directly compare security like this is to proxy the measurem
 
 ### Lowering the variance of block production in PoW blockchains
 
-op: https://3.basecamp.com/4985262/buckets/20820958/messages/3532467549
+\todo[inline]{figures showing block production to demonstrate variance}
 
-no direct modification of incentives required -- like that is an emergent phenomona via tx fees.
+Is it possible to *dramatically* lower the variance of block production in PoW blockchains without altering incentive structures, compromising security, or changing the probability of generating a valid block?
 
-the soln is in how the network is structured -- then miners follow easy+rational choices about what to mine on. it's important not to try and make it artificially (e.g. by increasing the block reward based on time-since-last-block) because you don't want ppl to game a system. better to have a simple system with emergent props than a system with those props designed in that's gameable.
+Yes. The method relies on the *structure* of the network, rather than the consensus protocol itself. Particularly, the network must be structured such that miners' choices result in decreased block production variance --- an emergent phenomenon. It's important not to try and make it artificially (e.g. by increasing the block reward with time-since-last-block) because you don't want ppl to game the system. It's better to have a simple system with emergent properties than a complex system with those properties "designed in".
 
-Say you have a network with 10 chains: C0, C1, C2, ..., C9. If the networks are separate then you have 10 groups of miners: M0, M1, M2, ..., M9. They have to choose one chain to mine on (basically), so you expect a distribution to be basically proportional to normalized (e.g. in USD) block rewards + tx fees. The proportions of block rewards between Ci & Cj don't really matter, we expect the mining groups Mi & Mj will just sort themselves out. For simplicity, tho, we can say that everything is an even 10% across the board (mining rewards, miners on each chain, etc).
+Say you have a network with 10 chains: $C_0$, $C_1$, $C_2$, ..., $C_9$. If the networks are separate then you have 10 groups of miners: $M_0$, $M_1$, $M_2$, ..., $M_9$. They have to choose one chain to mine on (basically), so you expect a distribution to be basically proportional to normalized (e.g. in USD) block rewards + tx fees. The proportions of block rewards between $C_i$ & $C_j$ don't really matter, we expect the mining groups $M_i$ & $M_j$ will just sort themselves out. For simplicity, tho, we can say that everything is an even 10% across the board (mining rewards, miners on each chain, etc).
 
 IF the network has spare capacity (i.e. txs are mostly cleared out with each block; the mempool for each chain is ~empty) then we have a situation like this:
 
-set t=0 to be immediately after a block is published on a chain. then, as t progresses, txs with fees should build up in the mempool, so `tx_fees ~ t`. the reward for mining a block is `r + tx_fees` for some block reward, r. if tx_fees ~ t then r+tx_fees ~ K+t for some constant K.
+set $t=0$ to be immediately after a block is published on a chain. then, as $t$ progresses, txs with fees should build up in the mempool, so $TxFees \approx t$. The reward for mining a block is $r + TxFees$ for some block reward, $r$. if $TxFees \approx t$ then $r + TxFees \approx K + t$ for some constant $K$.
 
-the reward-over-time looks like a saw function with a y-axis offset (e.g. first image on: https://www.thefouriertransform.com/series/sawExample.php). it slowly builds as more txs pile up, and drops back to the baseline reward after a block.
+The potential reward-over-time for a miner ($t$ vs $r + TxFees$) looks like a saw function with a y-axis offset. It builds as more txs pile up, and drops back to the baseline reward after a block.
 
-If the miners M0, ..., M9 are capable of working on one of any {C0, ..., C9} (they have identical ROI profiles to the other miners), then basically they're incentivised to work on each chain "late" in the cycle of tx-accumulation-then-new-block. What should we *roughly* expect based on those incentives? Miners should work on each chain only in the final moments of the cycle. If block times were set to 60s, then they'd start mining at like the 54s mark b/c that's how you maximise ROI.
+\todo[inline]{figure of a saw function}
+
+If the miners $M_0$, ..., $M_9$ are capable of working on one of any $\{C_0, ..., C_9\}$ (they have identical ROI profiles to the other miners), then basically they're incented to work on each chain "late" in the cycle of tx-accumulation-then-new-block. What should we *roughly* expect based on those incentives? Miners should work on each chain only in the final moments of the cycle. If block times were set to 60s, then they'd start mining at like the 54s mark b/c that's how you maximize ROI.
 
 why wouldn't they just keep mining on the same chain? b/c in the time that they focused on one chain, another one entered into that >54s threshold and thus has the best ROI potential per hash done.
 
-I wouldn't be surprised if chains basically end up synchronising so that there's a much more reliable 'tick-tick-tick' pattern of blocks.
+I wouldn't be surprised if chains basically end up synchronizing so that there's a much more reliable 'tick-tick-tick' pattern of blocks.
 
-One reason that we can predict txs will build up in this fashion (with those fees and in a predictable way) is that most of the txs that are included in simplex blocks will be dapp-chain-block-transactions. Because those are probs PoS, they should be predictable and regular.
+One reason that we can predict that txs will build up in this fashion (with those fees and in a predictable way) is that most of the txs that are included in simplex blocks will be dapp-chain-block-transactions. Because those are facilitating PoS dapp-chains, we should expect them to be predictable and regular.
 
 The average hash rate on each chain, as described above, is always the same regardless of which of the two miner strats are used (always averages to 10%). however, the variance of the blocks won't be that of a chain with 60s block times, it'll be one of a chain with 6s block times.
 
-I haven't thought enough about it yet, but I think this will help prevent attacks too; the attacker has the same 51% params to try and like DOS a chain or whatever (tho a block-dag helps here), however, the attacker is competing against 0% of his hashpower for 54s out of 60s, and competing against 2000% of his hashpower for 6s out of 60s. (if the chains average to 10% of all miners, then the attacker needs 5% of all miners to 51% attack the chain. relative to the attacker, he might have 51% of the avg mining power on that chain, but the aggregate of miners is 20x that; hence 2000% mentioned before).
+Is it possible that this will help prevent attacks too? An attacker has the same 51% parameters to DoS a chain (tho a block-dag can thwart naive DoS attacks), however, the attacker is competing against no other hashpower for 54s out of 60s, and competing against 20x his hashpower for the last 6s out of that 60s. Why 20x? If each chains' average hashrate is 10% of the total hashrate, then the attacker needs 5% of the total hashrate to 51% attack a single chain. Relative to the attacker, he might have 51% of the avg mining power for a given chain, but the aggregate hashrate is 20x that.

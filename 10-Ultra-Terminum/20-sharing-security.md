@@ -38,6 +38,7 @@ block:
 
 We could write a verification function for Namecoin that looked like:
 
+%%TC:ignore
 ```haskell
 -- note: `target` comes from the *Namecoin* header, not the Bitcoin header
 nmcVerify target btcBlockHeader btcBlock nmcBlockHeader
@@ -52,6 +53,7 @@ nmcVerify target btcBlockHeader btcBlock nmcBlockHeader
     nmcBlockImplicitInBtcBlock
       = btcHeaderOkay && coinbaseAuxData == hash nmcBlockHeader
 ```
+%%TC:endignore
 
 This is to say: the validity of a Namecoin block is based on it's singular and unambiguous inclusion in a Bitcoin block, and the *work* (in PoW) is calculated based on the hash of the Bitcoin block, not the Namecoin block. This indirection is why merged mining is referred to as *Auxiliary PoW* or AuxPoW; a Bitcoin miner can generate valid blocks for *both* Bitcoin and Namecoin *simultaneously*.
 

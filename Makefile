@@ -2,6 +2,7 @@ OUTDIR=output
 WPNOEXT=$(OUTDIR)/whitepaper
 WPFILE=$(WPNOEXT).markdown
 WPHTML=$(WPNOEXT).html
+WPTEX=$(WPNOEXT).tex
 
 whitepaper: build-whitepaper mk-latex-pdf wc
 
@@ -14,14 +15,15 @@ build-whitepaper: clean-wp-md %.md
 	  cat $$mdfile >> $(WPFILE) && \
 	  echo -n "\n\n" >> $(WPFILE) ; \
 	done
-	pandoc -s --toc -f markdown -t latex -o $(WPNOEXT).tex $(WPFILE)
+	pandoc -s --toc -f markdown -t latex -o $(WPTEX) $(WPFILE)
+	sed -i 's/\\%\\%/%/g' $(WPTEX)
 
 wc:
 	wc $(WPFILE)
 
 mk-latex-pdf:
 	# pdflatex -output-directory=$(OUTDIR) $(WPNOEXT).tex
-	latexmk -pdf -output-directory=$(OUTDIR) $(WPNOEXT).tex
+	latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
 
 %.md:
 	echo 'skipping task for .md files'
