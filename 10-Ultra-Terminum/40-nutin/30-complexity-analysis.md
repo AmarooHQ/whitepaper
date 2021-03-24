@@ -116,6 +116,13 @@ T_3 = \frac{k_1^2 \cdot k_2 \cdot k_3}{4 \cdot B_f \cdot B_h \cdot D_f^2 \cdot D
 
 ### Complexity comparison
 
+$k$: raw per-chain throughput (bytes/$s$) \newline
+$B_f$: simplex block frequency ($s^{-1}$) \newline
+$B_h$: simplex block header size (bytes) \newline
+$D_f$: dapp-chain block frequency ($s^{-1}$) \newline
+$D_h$: dapp-chain block header size (bytes) \newline
+$Tx_{avg}$: average tx size (bytes)
+
 | $k$, $B_f$, $D_f$, $B_h$, $D_h$, $Tx_{avg}$ | $O(c)$ tps | $O(c^2)$ tps | $O(c^3)$ UT tps | $O(c^4)$ UT tps |
 |---|---|---|---|---|
 | (1000, 1/15, 1/15, 112, 250, 250) | 4 | 240 | 8,036 | 482,143 |
@@ -144,7 +151,6 @@ T_3 = \frac{k_1^2 \cdot k_2 \cdot k_3}{4 \cdot B_f \cdot B_h \cdot D_f^2 \cdot D
 ### Bandwidth Complexity
 
 \todo[inline]{bandwidth requirement presuming all simplex blocks downloaded (to ensure availability)}
-
 
 ### code to generate complexity comparison table
 
