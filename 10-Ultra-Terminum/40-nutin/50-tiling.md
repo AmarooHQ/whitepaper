@@ -3,6 +3,7 @@
 * can tile simplexes by dividing initial simplex into 4 parts.
 * then creating new nodes as required
 * $3 \cdot 2^i - 2$ (nb: I think this was for a prev simplex tiling method; same complexity as the alt formula tho)
+* we will probably need to consider tiling at around 1000 simplex chains (from memory about 5k simplex chains was optimal with $O(c)$ throughput at 3000 b/s).
 
 ### initial state
 
