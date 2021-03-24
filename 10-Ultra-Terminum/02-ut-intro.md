@@ -17,8 +17,8 @@ You will need to understand the following concepts to understand the foundations
 * SPV proofs
 * SPV proofs via Smart Contracts (e.g. [BTC Relay](https://github.com/ethereum/btcrelay))
 
-And you'll need to understand the following to fully understand *Ultra Terminum* and it thwarts some attacks.
+And you'll need to understand the following to fully understand how *Ultra Terminum* thwarts some attacks:
 
-* Generalizations of Nakamoto Consensus to DAGs (particularly, read *Inclusive Block Chain Protocols*[^incl-proto])
+* Generalizations of Nakamoto Consensus to DAGs (particularly, read [*Inclusive Block Chain Protocols*](https://www.avivz.net/pubs/15/inclusive_btc_full.pdf)[^incl-proto])
 
 [^incl-proto]: *Inclusive Block Chain Protocols* by Yoad Lewenberg, Yonatan Sompolinsky, and Aviv Zohar. <https://www.avivz.net/pubs/15/inclusive_btc_full.pdf>, <https://fc15.ifca.ai/preproceedings/paper_101.pdf>, DOI: 10.1007/978-3-662-47854-7_33
