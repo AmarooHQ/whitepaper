@@ -176,7 +176,7 @@ One particular *impact* of this change is that a doublespend attack (e.g. by wit
 
 Why? The privately mined blocks to perform the attack *are not known about* by Ethereum. Rather, Ethereum knows about the *public* Bitcoin history *against which the attack competes*. Thus, the private chain-segment must *either* contribute more total work to the Bitcoin blockchain than the public chain-segment does *including* the relevant Ethereum chain-segment, *or* the attacker must, in addition to their private Bitcoin chain-segment, *also* produce a private Ethereum chain-segment such that the *total* work of both private chain-segments is calculated to be greater than the total work of both public chain-segments, and then publish both segments simultaneously.
 
-It's worth noting that, at this point, there is no benefit to Ethereum's security as Ethereum isn't 'reading' the reflected work. Thus a doublespend attack against Ethereum has the expected, non-reflected profile. The only thing that is required for Ethereum to take advantage of the reflected PoW is the inclusion of appropriate merkle proofs which show the Ethereum chain according to Bitcoin.
+It's worth noting that, at this point, there is no benefit to Ethereum's security. That's because Ethereum isn't 'reading' the reflected work back off the Bitcoin chain. Thus a doublespend attack against Ethereum has the expected, non-reflected profile -- it isn't more difficult to attack Ethereum yet. However, Ethereum can take advantage of the reflection, though. The main requirements are: the inclusion of appropriate merkle proofs that show known Ethereum blocks according to Bitcoin, and an update to Ethereum's block-weight calculations to account for the reflected work. PoW reflection doesn't automatically secure both chains; each chain can proactively and independently take advantage of PoW reflection.
 
 Naturally, the large difference in target block frequencies means that Ethereum has a good deal of latency before its chain gains the security benefit from reflected work. For this reason, PoW reflection makes the most sense when used with high frequency chains, or chains of similar frequencies. One downside of this is that shortening the block production frequency requires the inclusion of more block headers, however, this is minimal in the scheme of things.
 
@@ -260,3 +260,66 @@ guess: extending the Bitcoin + Ethereum example to, say, Bitcoin + Ethereum + Li
 ### ensuring availability of blocks corresponding to reflected headers
 
 \todo[inline]{can we do better than getting miners to download all the relevant blocks?} they don't have to verify them, just make sure the data is available. e.g. they could download and share for 24hrs and then drop the blocks for the chains they don't care about.
+
+### New block-weight algorithms
+
+\todo[inline]{brainstorm and progress this}
+
+From forum last night:
+
+> Here's the way we can think about the block weighting algorithm:
+>
+> Miners want to include reflection block headers b/c it helps them achieve the goal "be part of the longest chain" which is an intermediate goal to "get block rewards" -- b/c the protocol must demand it. So whatever block weighting algorithm we go with, a constraint (mb the starting point, mb not) needs to be something like:
+>
+>> contributing to reflections (including other chains' block headers in your blocks + proofs of state) is instrumental to producing blocks that become part of the main chain.
+>
+> This gives us a good yes/no quality that a block weighting algorithm *must* have. We can add some additional stuff that might help conjecture good weighting algorithms, too.
+>
+> meta comment: next step is to brainstorm algorithms (which is a step in the current WP plan I think)
+>
+> note: b/c block headers are like ~everywhere, and proving the most up-to-date reflection on a foreign chain is basically going to be a block header + merkle branch, there should be some significant engineering efficiencies we can make there -- so that, like, we don't need to send the proofs *and* the headers, we only need to send a small part, or maybe something in O(1) (like a bloom filter?).
+
+----
+
+> mb an insight: as a miner, contributing other block headers doesn't make *your* block "more confirmed" or something. But it does help confirm *prior* blocks, which means that *by adding foreign block headers your block is built on a "more worked" chain, b/c you're providing the evidence of that work!*
+>
+> Is that enough incentive? IDK, but one alternative is to like give them a boost to the "work" in that block (e.g. 10% of the work in the headers they include). that feels arbitrary and unprincipled, tho.
+
+----
+
+> note for scaling calcs/algebra: what happens if we include the overhead of merkle proofs along with the other headers? Does that like break everything? surely we can't calc all the permutations of likely header combos to find a matching merkle root... that sounds like a lot of work with e.g. 1000 reflected chains. easy with 2 or 3 chains tho.
+
+----
+
+>> what happens if we include the overhead of merkle proofs along with the other headers?
+>
+> that overhead is approx log(n_reflected_chains) for *each header* btw, that sort of thing might not be catastrophic, but it'd be a weird governor-esq anti-scaling overhead; like potentially `n*log(n)` for header sizes. i.e. something like:
+>
+> `constant + n_simplex_chains * log2(n_simplex_chains)`
+
+----
+
+>> that sort of thing might not be catastrophic, but it'd be a weird governor-esq anti-scaling overhead
+>
+> I added some worst case sorta numbers to the WP. the "500, 500" and "500, 700" below represent log2(4096)*32 byte increases to the header size (i.e. something like 384 bytes added to headers of a base size 112 bytes and 250 bytes)
+>
+> | (3000, 1/60, 1/60, 500, 500, 250) | 12 | 4,320 | 388,800 | $1.4\times 10^{8}$ |
+> | (3000, 1/60, 1/60, 500, 700, 250) | 12 | 3,086 | 277,714 | $7.1\times 10^{7}$ |
+>
+> So yeah, it's not catastrophic; our TPS would still be above 100k and with O(c^4) scaling it's still approx 10^8.
+>
+> One thing that might come in to play is the basic idea I have to ensure block availability: download and store every block for 24hrs. That's O(c^2) bandwidth but c is relative to like 3 kb/s, so O(c^2) bandwidth isn't a show-stopper here (at least atm, todo: calc limits)
+
+\todo[inline]{calc limits}
+
+> If all miners have all simplex blocks in the last 24hrs *anyway*, then they can construct the proofs themselves. That might mean there's a way to avoid transmitting the proof + still be able to verify it. sort of like segwit does: throw away the data that's useless after it's been verified b/c the miner already had that anyway. In Bitcoin's case, that's the tx signatures; in UT's case, it's the block header proof-of-inclusion merkle branches.
+>
+> aside: does segwit mean that like a persistent, long term 51% attack can steal funds? b/c witnesses aren't included anymore?
+
+----
+
+> another **todo**: how are confirmation times affected by the simplex? IMO other chains confirming a particular chain's block counts for something in terms of the idea of "confirmation".
+>
+> confirmation is typically calculated via the probability (or ability) that an attacker can reverse a transaction. it's a measure of *assurance*, as such.
+>
+> how does UT play in to this? well, more reflection => harder for an attacker to reverse. Consider the parameters of an attacker having specific resources (e.g. a bunch of sha256 ASICs -- which is of a contiguous and homogeneous quality that past analysis has alluded to, tho it's abstracted via maths that presumes that); we can thwart most of those. But if we take an "optimistic" (for the attacker) look at an attacker with O(n) resources, then we're in worst-case-ville and I think UT might degrade to, *at worst*, the best lower-bound (i.e. best of all the worst-case situations) of other blockchains. Note to self: Need to write more on this to figure it out.
