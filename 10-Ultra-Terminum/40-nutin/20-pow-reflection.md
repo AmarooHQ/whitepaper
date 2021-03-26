@@ -192,6 +192,10 @@ see \autoref{s:counting-reflected-work} for notes.
 
 tl;dr it can work fine I think. Like it's still secure; there's nothing about PoW reflection that *requires* more than one hashing alg, it's just the easier context to explain it in b/c miners of one chain can't attack the other.
 
+\todo[inline]{tidy this section, provide explanation.}
+
+\begin{comment}
+
 \todo[inline]{build this section out -- seems like this can be done securely. nb: the rest of this subsection are just notes; probs just skip over them}
 
 What about chains using the same alg? e.g. Bitcoin (B) and Bitcoin-copy (C)?
@@ -212,6 +216,8 @@ What about chains using the same alg? e.g. Bitcoin (B) and Bitcoin-copy (C)?
 is this secure? if so, then mixing with reflection to other chains provides extra security as expected?
 
 under that sort of thing the 'microchain' would become like an O(c) record of all headers from all chains. then all chains would sync their reflections up against the full headers-only-network (i.e. all chain headers of all chains). each dapp can then be O(c). so we get back to O(c^2) scaling.
+
+\end{comment}
 
 ### Comparing incomparable Proofs of Work
 
