@@ -122,9 +122,9 @@ Note that $O(\log_2 \frac{n}{c^{j-1}}) \approx O(\log_2 n)$ for a fast growing n
 
 Because $O(\log_2 n) < O(\sqrt{n})$.
 
-In a tessellating set of tiles, we can approximate the distance between tiles via a geometric interpretation: for a set of $n$ tessellating tiles, each tile having a constant area, then the full area is $\sim {n}$. Thus, the maximal distance between tiles is $\sim \sqrt{n}$.
+In a tessellating set of tiles, we can approximate the distance between tiles via a geometric interpretation: for a set of $n$ tessellating tiles, each tile having a constant area, then the full area is $\propto {n}$. Thus, the maximal distance between tiles is $\propto \sqrt{n}$.
 
-However, the distance between $n$ tiles, using the binary-tree method, is $\sim \log_2 n$. So it's (maybe counterintuitively) more efficient to use non-tessellating tiles.
+However, the distance between any 2 of $n$ tiles, using the binary-tree method, is $\sim \log_2 n$. So it's (maybe counterintuitively) more efficient to use non-tessellating tiles.
 
 #### Network Complexity
 
@@ -136,6 +136,8 @@ O(c^j \cdot N_{tiles}) & = O(c^j \cdot \frac{n}{c^j}) \\
 & = O(n) \label{eq:simplex-tiling-complexity}
 \end{split}
 \end{equation}
+
+#### Upper Bound
 
 Solving problems via the creation of new knowledge, i.e. *progress*, has no upper bound[^boi-progress]. Additionally: "If something is permitted by the laws of physics, then the only thing that can prevent it from being technologically possible is not knowing how."[^boi-optimism] Thus, there are no know near-term[^near-term-limit] limits to the expansion of human civilization, our population, or our economy[^boi-spaceship-earth]; and consequently, there is no near-term limit on $n$.
 
