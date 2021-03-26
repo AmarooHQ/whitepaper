@@ -122,7 +122,7 @@ Each chain -- at full capacity -- operates with order $O(c)$ by definition. Thus
 
 For a given $O(c^j); j \in \{2,3,4\}$ configuration of UT, a chain can process SPV proofs of state on another chain. For $j = 4$, the furthest that a transaction can occur from its host simplex-chain is in the 3rd level of nesting (i.e. a dapp-dapp-chain). It would require $j-1$ SPV proofs to "ascend" from the host simplex-chain to a dapp-dapp-chain. However, given that full nodes of a dapp-dapp-chain are required to be full nodes of both the host dapp-chain and the host simplex-chain, transactions in that dapp-dapp-chain do not need to provide SPV proofs of state in either of those host chains -- full nodes already have those details. That is: transactions which "descend" the layers of nesting can do so with $O(1)$ cost. SPV proofs are only required when transactions "ascend" the layers of nesting to other simplex-, dapp-, or dapp-dapp-chains.
 
-Thus, the maximum number of SPV proofs required to prove state anywhere in a UT network is $j$.
+Thus, the maximum number of SPV proofs required to prove state anywhere in a UT simplex is $j$.
 
 Since $j$ is constant, cross-chain SPV proofs therefore have order:
 
