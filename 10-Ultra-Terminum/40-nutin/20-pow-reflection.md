@@ -331,3 +331,5 @@ From forum last night:
 > confirmation is typically calculated via the probability (or ability) that an attacker can reverse a transaction. it's a measure of *assurance*, as such.
 >
 > how does UT play in to this? well, more reflection => harder for an attacker to reverse. Consider the parameters of an attacker having specific resources (e.g. a bunch of sha256 ASICs -- which is of a contiguous and homogeneous quality that past analysis has alluded to, tho it's abstracted via maths that presumes that); we can thwart most of those. But if we take an "optimistic" (for the attacker) look at an attacker with O(n) resources, then we're in worst-case-ville and I think UT might degrade to, *at worst*, the best lower-bound (i.e. best of all the worst-case situations) of other blockchains. Note to self: Need to write more on this to figure it out.
+
+\todo[inline]{how are confirmation times affected by the simplex?}
