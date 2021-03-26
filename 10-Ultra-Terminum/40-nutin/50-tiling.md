@@ -4,7 +4,7 @@ Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes
 
 Maximal Simplex: a simplex with the maximum number of simplex-chains under $O(c)$ constraints.
 
-A tile is a quadrifurcated maximal simplex. That is: it is a simplex that deliberately reserves only \frac{1}{4} of its otherwise maximum capacity for internal reflections. By definition, the maximum capacity of a tile is \frac{1}{4} the maximum capacity of an equivalent maximal simplex. Why quadrifurcate capacity like this? In a maximal simplex, all reflections are between simplex-chains within that simplex, i.e. all reflections are internal. However, by reserving \frac{3}{4} of a simplex's maximum capacity, that simplex (which thus becomes the root tile) can reflect all simplex-chains in 3 adjacent 'children' tiles. Those adjacent tiles do not reflect their siblings, though; initially, their only external reflections are to simplex-chains in the parent tile. Each child tile, at this stage, has only reserved 50% of the capacity of an equivalent maximal simplex -- 25% for externally reflecting its parent's simplex-chains, and 25% for internally reflecting its own simplex-chains. Thus, each tile is able to reflect all simplex-chains of the parent tile *and* two additional children tiles. Children tiles can be instantiated in an ad-hoc basis, i.e. as a simplex-tiling (or an individual tile) approaches maximum capacity.
+A tile is a quadrifurcated maximal simplex. That is: it is a simplex that deliberately reserves only $\frac{1}{4}$ of its otherwise maximum capacity for internal reflections. By definition, the maximum capacity of a tile is $\frac{1}{4}$ the maximum capacity of an equivalent maximal simplex. Why quadrifurcate capacity like this? In a maximal simplex, all reflections are between simplex-chains within that simplex, i.e. all reflections are internal. However, by reserving $\frac{3}{4}$ of a simplex's maximum capacity, that simplex (which thus becomes the root tile) can reflect all simplex-chains in 3 adjacent 'children' tiles. Those adjacent tiles do not reflect their siblings, though; initially, their only external reflections are to simplex-chains in the parent tile. Each child tile, at this stage, has only reserved 50% of the capacity of an equivalent maximal simplex -- 25% for externally reflecting its parent's simplex-chains, and 25% for internally reflecting its own simplex-chains. Thus, each tile is able to reflect all simplex-chains of the parent tile *and* two additional children tiles. Children tiles can be instantiated in an ad-hoc basis, i.e. as a simplex-tiling (or an individual tile) approaches maximum capacity.
 
 ### Tile Valence
 
@@ -105,13 +105,13 @@ N_{tiles} & = 3 \cdot 2^h - 2 \\
 
 Thus, the maximal distance between leaf tiles is $2 \cdot \log_{2}(\frac{N_{tiles} + 2}{3})$, and thus the number of SPV proofs required scales with $O(\log_2 N_{tiles})$.
 
-Since tiles can be added in an ad-hoc fashion depending on current capacity, and each tile scales with complexity $O(c^j); j \n \{2,3,4\}$: $N_{tiles} \propto \frac{n}{c^j}$. Thus $O(N_{tiles}) = O(\frac{n}{c^j})$.
+Since tiles can be added in an ad-hoc fashion depending on current capacity, and each tile scales with complexity $O(c^j); j \in \{2,3,4\}$: $N_{tiles} \propto \frac{n}{c^j}$. Thus $O(N_{tiles}) = O(\frac{n}{c^j})$.
 
 Given \autoref{eq:spv-complexity}, inter-tile SPV proofs have order:
 
 \begin{equation}
 \begin{split}
-O(\log_2 c + \log_2 N_{tiles}) & = O(\log_2 c + \log_2 \frac{n}{c^j})
+O(\log_2 c + \log_2 N_{tiles}) & = O(\log_2 c + \log_2 \frac{n}{c^j}) \\
 & = O(\log_2 \frac{n}{c^{j-1}}) \label{eq:tiled-spv-complexity}
 \end{split}
 \end{equation}
@@ -132,7 +132,7 @@ Since $O(N_{tiles}) = O(\frac{n}{c^j})$, and each tile has order $O(c^j)$, the c
 
 \begin{equation}
 \begin{split}
-O(c^j \cdot N_{tiles}) & = O(c^j \cdot \frac{n}{c^j})
+O(c^j \cdot N_{tiles}) & = O(c^j \cdot \frac{n}{c^j}) \\
 & = O(n) \label{eq:simplex-tiling-complexity}
 \end{split}
 \end{equation}
