@@ -178,9 +178,15 @@ Why? The privately mined blocks to perform the attack *are not known about* by E
 
 It's worth noting that, at this point, there is no benefit to Ethereum's security. That's because Ethereum isn't 'reading' the reflected work back off the Bitcoin chain. Thus a doublespend attack against Ethereum has the expected, non-reflected profile -- it isn't more difficult to attack Ethereum yet. However, Ethereum can take advantage of the reflection, though. The main requirements are: the inclusion of appropriate merkle proofs that show known Ethereum blocks according to Bitcoin, and an update to Ethereum's block-weight calculations to account for the reflected work. PoW reflection doesn't automatically secure both chains; each chain can proactively and independently take advantage of PoW reflection.
 
-Naturally, the large difference in target block frequencies means that Ethereum has a good deal of latency before its chain gains the security benefit from reflected work. For this reason, PoW reflection makes the most sense when used with high frequency chains, or chains of similar frequencies. One downside of this is that shortening the block production frequency requires the inclusion of more block headers, however, this is minimal in the scheme of things.
+Naturally, the large difference in target block frequencies means that Ethereum has a good deal of latency before its chain gains the security benefit from reflected work. For this reason, PoW reflection makes the most sense when used with high frequency chains, or chains of similar frequencies. One downside of this is that shortening the block production frequency requires the inclusion of more block headers. This, however, is minimal in the scheme of things.
 
 \todo[inline]{UT won't be done until we figure out how to tell what the right algorithm is to count/weigh reflected blocks.}
+
+### How should we count reflected work?
+
+see \autoref{s:counting-reflected-work} for notes.
+
+\todo[inline]{write out this section, and decide if this is a good spot in the paper for it. Should it be later on?}
 
 ### PoW reflection between chains using the same alg
 
@@ -262,6 +268,8 @@ guess: extending the Bitcoin + Ethereum example to, say, Bitcoin + Ethereum + Li
 \todo[inline]{can we do better than getting miners to download all the relevant blocks?} they don't have to verify them, just make sure the data is available. e.g. they could download and share for 24hrs and then drop the blocks for the chains they don't care about.
 
 ### New block-weight algorithms
+
+\label{s:counting-reflected-work}
 
 \todo[inline]{brainstorm and progress this}
 
