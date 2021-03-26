@@ -31,13 +31,6 @@ Increasing the valence beyond 3 does not make sense, though. There are two reaso
 \label{fig:tiled-simplex-5-d1}
 \end{figure}
 
-\begin{figure}
-\centering
-\includegraphics[width=50mm]{ut/tiling/d1-many-tiled-17-simplexes}
-\caption{The initial state of a 17-chain simplex before tiling. Vertices are simplex-chains. Edges are the reflections between simplex-chains.}
-\label{fig:tiled-simplex-17-d1}
-\end{figure}
-
 \autoref{fig:tiled-simplex-5-d1} assumes an $O(c)$ node has capacity for tracking $4 \cdot n$ simplex-chains, with $n = 5$. In reality, an $O(c)$ node has capacity to track $\sim 10^3$ or $10^4$ simplex-chains. Simplexes and simplex-tilings of that magnitude are impractical to illustrate.
 
 ### Adding Tiles
