@@ -5,6 +5,8 @@
 - the Makefile presumes you're running this in a linux environment
 - you'll need: make, pandoc, latexmk, pdflatex (usually provided via a latex distribution), `texlive-science` package on ubuntu (for `siunitx`), `texlive-extra-utils`
 
+if you run into compile errors, try installing `texlive-full` -- not a great workaround but does solve some issues (b/c apparently we have a missing dep)
+
 ## build it
 
 - `make`: markdown (.md) files in folders with a dash in their name will be "compiled" into `whitepaper.markdown`. the order of files will be via their natural sorting (run `find *-* -iname \*.md` to list them; that's the cmd used in the makefile).
