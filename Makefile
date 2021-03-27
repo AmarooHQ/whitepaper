@@ -10,7 +10,7 @@ whitepaper: build-whitepaper mk-latex-pdf wc
 # to do that: replace '10-Ultra-Terminum' with '*-*'
 build-whitepaper: clean-wp-md %.md
 	touch $(WPFILE)
-	for mdfile in `find 10-Ultra-Terminum/ -iname \*.md`; do \
+	for mdfile in `find 10-Ultra-Terminum/ -iname \*.md | sort`; do \
 	  echo "Processing: $$mdfile" && \
 	  cat $$mdfile >> $(WPFILE) && \
 	  echo -n "\n\n" >> $(WPFILE) ; \
