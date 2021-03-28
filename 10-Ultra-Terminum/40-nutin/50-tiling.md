@@ -130,18 +130,23 @@ O(c^j \cdot N_{tiles}) & = O(c^j \cdot \frac{n}{c^j}) \\
 \end{split}
 \end{equation}
 
+For all practical purposes, simplex-tiling provides unbounded capacity.
+
+#### Security Implications
+
+\todo[inline]{tiling security implications -- tiling weaker than maximal simplex}
+
+\begin{comment}
+
 #### Upper Bound
 
 Solving problems via the creation of new knowledge, i.e. *progress*, has no upper bound[^boi-progress]. Additionally: "If something is permitted by the laws of physics, then the only thing that can prevent it from being technologically possible is not knowing how."[^boi-optimism] Thus, there are no know near-term[^near-term-limit] limits to the expansion of human civilization, our population, or our economy[^boi-spaceship-earth]; and consequently, there is no near-term limit on $n$.
-
-For all practical purposes, simplex-tiling provides unbounded capacity.
 
 [^boi-progress]: The explanations by which we *know* that progress is unbounded are a primary focus of David Deutsch's *The Beginning of Infinity* (2011).
 [^boi-optimism]: *The Beginning of Infinity* p. 231.
 [^near-term-limit]: By *near-term*, I mean: within the next $10^7$ years or so.
 [^boi-spaceship-earth]: I guess a common response to this will be something like Spaceship Earth. The myth of Spaceship Earth is refuted in *The Beginning of Infinity*, Ch 3 (*The Spark*).
 
-\begin{comment}
 
 Dyson swarms can hold, say, $10^{15}$ people[^dyson-pop] on the low end. \todo[inline]{finish dyson pop stuff}
 
