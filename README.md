@@ -36,3 +36,7 @@ you need (ubuntu pkgs):
 
 - https://www.baeldung.com/cs/latex-drawing-graphs
 - using sagemath for simplex graphs, but the above could be good for blockchain graphs or other things
+
+## resource: scaffold for doing a thesis in markdown + pandoc
+
+<https://github.com/chiakaivalya/thesis-markdown-pandoc>
