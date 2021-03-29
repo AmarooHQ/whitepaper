@@ -3,9 +3,14 @@
 ## dependencies
 
 - the Makefile presumes you're running this in a linux environment
-- you'll need: make, pandoc, latexmk, pdflatex (usually provided via a latex distribution), `texlive-science` package on ubuntu (for `siunitx`), `texlive-extra-utils`
+- you'll need: make, pandoc, latexmk
+- ubuntu pkgs: `texlive-science`, `texlive-extra-utils`
 
 if you run into compile errors, try installing `texlive-full` -- not a great workaround but does solve some issues (b/c apparently we have a missing dep)
+
+### "supported" build env
+
+- Ubuntu 20.04 (WSL or whatever)
 
 ## build it
 

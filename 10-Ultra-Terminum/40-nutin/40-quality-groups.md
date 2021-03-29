@@ -1,5 +1,7 @@
 ## Qualities of different security methods
 
+\label{sec:quality-groups}
+
 A *quality-group* is a group of qualities that can exist simultaneously. For any indivisible (and applicable) problem, you can choose one of the quality groups; but you can't mix and match qualities from each group.
 
 This sort of thing happens (at least in this case) because there is a choice of method, and each method provides different emergent properties.
@@ -28,13 +30,13 @@ NB: The only way to directly compare security like this is to proxy the measurem
 
 ### Lowering the variance of block production in PoW blockchains
 
-\todo[inline]{figures showing block production to demonstrate variance}
+\todo[inline]{mb -- figures showing block production to demonstrate variance}
 
 Is it possible to *dramatically* lower the variance of block production in PoW blockchains without altering incentive structures, compromising security, or changing the probability of generating a valid block?
 
 Yes. The method relies on the *structure* of the network, rather than the consensus protocol itself. Particularly, the network must be structured such that miners' choices result in decreased block production variance --- an emergent phenomenon. It's important not to try and make it artificially (e.g. by increasing the block reward with time-since-last-block) because you don't want ppl to game the system. It's better to have a simple system with emergent properties than a complex system with those properties "designed in".
 
-Say you have a network with 10 chains: $C_0, C_1, C_2, ..., C_9$. If the networks are separate then you have 10 groups of miners: $M_0, M_1, M_2, ..., M_9$. They have to choose one chain to mine on (basically), so you expect a distribution to be basically proportional to normalized (e.g. in USD) block rewards + tx fees. The proportions of block rewards between $C_i$ & $C_j$ don't really matter, we expect the mining groups $M_i$ & $M_j$ will just sort themselves out. For simplicity, tho, we can say that everything is an even 10% across the board (mining rewards, miners on each chain, etc).
+Say you have a network with 10 chains: $C_0, C_1, C_2, ..., C_9$. If the networks are separate, then you have 10 groups of miners: $M_0, M_1, M_2, ..., M_9$. They have to choose one chain to mine on, so the distribution of miners is expected approximate the distribution of normalized block rewards + tx fees. The proportions of block rewards between $C_i$ & $C_j$ don't really matter, we expect the mining groups $M_i$ & $M_j$ will just sort themselves out due to market forces. For simplicity, though, this example assumes that mining rewards and the distribution of miners is an even 10% across the board.
 
 If the network has spare capacity (i.e. txs are mostly cleared out with each block; the mempool for each chain is ~empty) then we have a situation like this:
 
@@ -48,10 +50,12 @@ If the miners $M_0, ..., M_9$ are capable of working on one of any $\{C_0, ..., 
 
 Why wouldn't they just keep mining on the same chain? b/c in the time that they focused on one chain, another one passed that >54s high-ROI threshold and thus has the best ROI potential per hash done.
 
-We should thus expect that this configuration of chains actually *synchronizes* miners, resulting in regular block production and lower variance.
+We should thus expect that this configuration of chains actually *synchronizes* miners, resulting in block production that is somewhat regular and lower in variance.
 
-One reason that we can predict that txs will build up in this fashion (with those fees and in a predictable way) is that most of the txs that are included in simplex blocks will be dapp-chain-block-transactions. Because those are facilitating PoS dapp-chains, we should expect them to be predictable and regular.
+One reason that we can predict that txs will build up in this fashion (with those fees and in a predictable way) is that most of the txs that are included in simplex blocks will be dapp-chain-header-transactions. Since dapp-chains will use PoS, we should expect them to be predictable and regular.
 
-The average hash rate on each chain, as described above, is always the same regardless of which of the two miner strats are used (always averages to 10%). however, the variance of block production on one of these chains won't be that of a chain with 60s block times, it'll be that of a chain with 6s block times.
+The average hash rate on each simplex chain, as described above, is always the same regardless of which of the two miner strats are used. However, the variance of block production on each of these chains won't be that of a chain with 60s block times, it'll be that of a chain with 6s block times.
+
+\todo[inline]{paragraph below needs to be polished}
 
 Is it possible that this will help prevent attacks too? An attacker has the same 51% parameters to DoS a chain (tho a block-dag can thwart naive DoS attacks), however, the attacker is competing against no other hashpower for 54s out of 60s, and competing against 20x his hashpower for the last 6s out of that 60s. Why 20x? If each chains' average hashrate is 10% of the total hashrate, then the attacker needs 5% of the total hashrate to 51% attack a single chain. Relative to the attacker, he might have 51% of the avg mining power for a given chain, but the aggregate hashrate is 20x that.

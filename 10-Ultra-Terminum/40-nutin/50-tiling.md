@@ -4,7 +4,7 @@ Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes
 
 Maximal Simplex: a simplex with the maximum number of simplex-chains under $O(c)$ constraints.
 
-A tile is a quadrifurcated maximal simplex. That is: it is a simplex that deliberately reserves only $\frac{1}{4}$ of its otherwise maximum capacity for internal reflections. By definition, the maximum capacity of a tile is $\frac{1}{4}$ the maximum capacity of an equivalent maximal simplex. Why quadrifurcate capacity like this? In a maximal simplex, all reflections are between simplex-chains within that simplex, i.e. all reflections are internal. However, by reserving $\frac{3}{4}$ of a simplex's maximum capacity, that simplex (which thus becomes the root tile) can reflect all simplex-chains in 3 adjacent 'children' tiles. Those adjacent tiles do not reflect their siblings, though; initially, their only external reflections are to simplex-chains in the parent tile. Each child tile, at this stage, has only reserved 50% of the capacity of an equivalent maximal simplex -- 25% for externally reflecting its parent's simplex-chains, and 25% for internally reflecting its own simplex-chains. Thus, each tile is able to reflect all simplex-chains of the parent tile *and* two additional children tiles. Children tiles can be instantiated in an ad-hoc basis, i.e. as a simplex-tiling (or an individual tile) approaches maximum capacity.
+A tile is a quadrifurcated maximal simplex. That is: it is a simplex that deliberately reserves only $\frac{1}{4}$ of its otherwise maximum capacity for internal reflections. By definition, the maximum capacity of a tile is $\frac{1}{4}$ the maximum capacity of an equivalent maximal simplex. Why quadrifurcate capacity like this? In a maximal simplex, all reflections are between simplex-chains within that simplex, i.e. all reflections are internal. However, by reserving $\frac{3}{4}$ of a simplex's maximum capacity, that simplex (which thus becomes the root tile) can reflect all simplex-chains in 3 adjacent 'children' tiles. Those adjacent tiles do not reflect their siblings, though; initially, their only external reflections are with simplex-chains in the parent tile. Each child tile, at this stage, has only reserved 50% of the capacity of an equivalent maximal simplex -- 25% for externally reflecting its parent's simplex-chains, and 25% for internally reflecting its own simplex-chains. Thus, each tile is able to reflect all simplex-chains of the parent tile *and* two additional children tiles. Children tiles can be instantiated in an ad-hoc basis, i.e. as a simplex-tiling (or an individual tile) approaches maximum capacity.
 
 ### Tile Valence
 
@@ -12,11 +12,13 @@ A tile is a quadrifurcated maximal simplex. That is: it is a simplex that delibe
 
 Tiles *must* have a valance of $>= 3$ for $O(n)$ scaling. If tiles had a valence of 0, then no additional tiles can be added. If tiles had a valence of 1, then only a single additional tile could be added (for a total of 2) but no more. If tiles had a valance of 2, then the 'shape' that the tiles created would be a linear chain; a tile-chain. For a tile-chain of length $n$, proving state on the far end of the chain would take $n$ SPV proofs, which is untenable.
 
-However, if tiles have a valance of $3$, then each tile has up to 3 neighbors. For all tiles but the first, this is equivalent to being a node in a binary tree (where each non-root node has 1 parent and 2 children: 3 neighbors). In essence, this method of tiling simplexes results in 3 distinct binary trees as children of a single root tile -- this can be seen in \autoref{fig:tiled-simplex-5-d4}.
+However, if tiles have a valance of $3$, then each tile has up to 3 neighbors. For all tiles but the first, this is equivalent to being a node in a binary tree (where each non-root, non-leaf node has 1 parent and 2 children: 3 neighbors). In essence, this method of tiling simplexes results in 3 distinct binary trees as children of a single root tile -- this can be seen in \autoref{fig:tiled-simplex-5-d4}.
 
 Increasing the valence beyond 3 does not make sense, though. There are two reasons for this. The first reason is that, for complexity orders involving logarithms, higher valences change the *base* of the logarithms; and that has no effect on the order of complexity[^log-complexity]. The second reason is that an increase in valence requires a corresponding decrease in the capacity that is reserved for internal reflections -- this would negatively affect the security of that tile.
 
 \todo[inline]{Does increasing the valence negatively affect the security of a tile? My gut says 'yes', but IDK if I can back that up.}
+
+\todo[inline]{increasing valence will negatively affect the security of leaf-tiles b/c they have fewer reflections now.}
 
 [^log-complexity]: Complexity orders involving logarithms are sensitive to changes in the base *if* the logarithms are part of an exponent. e.g. $O(3^{\log_2 n}) > O(3^{\log_4 n})$. These considerations aren't relevant here, though.
 
@@ -27,7 +29,7 @@ Increasing the valence beyond 3 does not make sense, though. There are two reaso
 \begin{figure}
 \centering
 \includegraphics[width=50mm]{ut/tiling/d1-many-tiled-5-simplexes}
-\caption{The initial state of a 5-chain simplex before tiling. Vertices are simplex-chains. Edges are the reflections between simplex-chains.}
+\caption{The initial state of a 5-chain simplex-tile before tiling. Vertices are simplex-chains. Edges are the reflections between simplex-chains.}
 \label{fig:tiled-simplex-5-d1}
 \end{figure}
 
@@ -39,7 +41,7 @@ A tiling 'iteration' is the process by which new tiles are added. For the sake o
 
 We start from the foundation that each tile has a maximum of $\frac{N_1}{4}$ simplex-chains, where $N_1$ is the maximum capacity of a maximal simplex. That is: if one computer (based on $O(c)$ reasoning) could be a full-node[^simplex-full-validation] for a simplex-chain in a 4000-simplex, then each tile will have, at most, 1000 simplex-chains. Since a tile is adjacent to $<=3$ other tiles, a tiled simplex-chain will have, at most, $N_1$ reflections (since a tile and its neighbors have, at most, $\frac{N_1}{4}$ simplex-chains, and all of those simplex-chains are reflected).
 
-[^simplex-full-validation]: A full-node for a simplex-chain necessarily validates neither any other simplex-chains, nor dapp-chains on that simplex-chain. \todo[inline]{neither-nor feels awkward here, but the alternative is like 'does not necessarily validate either-or' which didn't feel great either.}
+[^simplex-full-validation]: A full-node for a simplex-chain does not need to fully validate any other simplex-chains, or dapp-chains on that simplex-chain. Header-only validation is fine.
 
 Our starting point, at $i=1$, is a $\frac{N_1}{4}$-simplex which constitutes a single tile.
 
@@ -75,6 +77,8 @@ side by side figures: https://tex.stackexchange.com/questions/37581/latex-figure
 ### Complexity Analysis
 
 Two elements of complexity will be analysed: the size of SPV proofs between simplex-chains, and the network overall.
+
+\todo[inline]{Need to check the Big O stuff in this section.}
 
 #### Tiling Complexity
 
@@ -134,7 +138,9 @@ For all practical purposes, simplex-tiling provides unbounded capacity.
 
 #### Security Implications
 
-\todo[inline]{tiling security implications -- tiling weaker than maximal simplex}
+\todo[inline]{tiling security implications -- tiling weaker than maximal simplex.}
+
+e.g. The leaf tiles in \autoref{fig:tiled-simplex-5-d2} have simplex-chains that are weaker than an equiv 20-chain simplex. The root tile has equiv security, tho. This is true even tho both systems have 20 simplex-chains total.
 
 \begin{comment}
 

@@ -1,5 +1,7 @@
 ## Scaling Complexity Analysis of *Ultra Terminum*
 
+\label{sec:ut-complexity}
+
 UT has two primary methods of scaling: reflection and dapp-chains. Reflection is novel. Dapp-chains are similar to many of the scaling ideas proposed for other networks (polkadot, eth2, etc), though there are fewer restrictions on dapp-chains in UT compared to other networks. Additionally, dapp-chains in UT are hosted by the simplex. This provides additional security compared to 'naked' PoS chains without sacrificing any of their other developments (e.g. finality).
 
 ### Complexity of $O(c)$ chains
@@ -130,6 +132,8 @@ Since $j$ is constant, cross-chain SPV proofs therefore have order:
 O(j \cdot \log_2 c) = O(\log_2 c) \label{eq:spv-complexity}
 \end{equation}
 
+\todo[inline]{}
+
 ### Complexity comparison
 
 $k$: raw per-chain throughput (bytes/$s$) \newline
@@ -170,72 +174,16 @@ NB: For the purposes of the following table, the average transaction size is tak
 
 \todo[inline]{bandwidth requirement presuming all simplex blocks downloaded (to ensure availability)}
 
-### code to generate complexity comparison table
+### The Impact of Header Size
 
-\todo[inline]{move this code to an appendix eventually}
+\todo[inline]{UT is sensitive to header-size}
 
-```python
-from decimal import Decimal
+\autoref{eq:throughput-iter} shows that UT's throughput is inversely proportional to the size of headers, $D_h$, for that given depth of nesting (this is true for $O(c^2)$ configurations, too). It also shows that throughput is inversely proportional to the block frequency, $D_f$, and proportional to chosen raw throughput, $k$.
 
-def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
-    ut_tps = k**3 / (4 * bf * bh * df * dh) / tx_size
-    ut_4_tps = k**4 / (4 * bf * bh * df**2 * dh**2) / tx_size
-    return {
-        'btc_tps': k / tx_size,
-        # c^2 estimate, remove constants to be optimistic
-        'eth2_tps': k**2 / (df * dh) / tx_size,
-        # c^3 estimate
-        'ut_tps': ut_tps,
-        'ut_4_tps': ut_4_tps,
-        'ut_m_tps': '{:.2f} million'.format(ut_tps / 1000000),
-        'ut_chain_gb_per_year': k * 60 * 60 * 24 * 365.25 / (1024 ** 3),
-        'ut_3_max_dappchains': k**2 / (4 * bh * bf * dh * df),
-        'ut_3_optimal_rchains': k / (2 * bh * bf),
-        'ut_3_optimal_dappchains': k / (2 * dh * df),
-        'ut_4_max_dappchains': k**3 / (4 * bh * bf * dh**2 * df**2),
-    }
+Of these three values, header size is the only value we *cannot* choose arbitrarily. To maintain overall throughput, doubling the header size requires one of: halving the block production frequency (i.e. doubling the block target time), or doubling the chain's raw throughput, or some combination of those two options. One such combination would be to decrease the block production frequency by a factor of $\frac{1}{\sqrt{2}}$ and increase the raw throughput by a factor of $\sqrt{2}$.
 
-def fmt_rounded_commas(value):
-    return f"{round(value):,}" if value < 10**6 else f"\x24{value:.1e}}}\x24" \
-        .replace("e+0", "e+").replace("e+", "\\times 10^{")
+Changing all header sizes by some factor has different effects for different UT configurations. For $O(c^2)$ configurations of UT, the effect on throughput is linearly proportional to the factor; doubling the header sizes reduces overall throughput by a factor of 2. However, for the $O(c^3) configuration of UT, the effect is quadratically proportional to the factor; doubling the header sizes will reduce overall throughput by a factor of 4! The relationship is even worse for the $O(c^4) configuration of UT, where the effect is cubicly proportional.
 
-def table_row(params, incl_dappchains=False):
-    r = calc_tps_throughput(*params)
-    cols = [r['btc_tps'], r['eth2_tps'], r['ut_tps']] \
-        + ([r['ut_3_max_dappchains']] if incl_dappchains else []) \
-        + [r['ut_4_tps']] \
-        + ([r['ut_4_max_dappchains']] if incl_dappchains else [])
-    return ' | '.join(str(i) for i in
-            (['', ', '.join(map(str, list(params)[:-1]))] + list(map(fmt_rounded_commas, cols)) + [''])
-        ).strip() \
-            .replace('0.0016666666666666668', '1/600') \
-            .replace('0.016666666666666666', '1/60') \
-            .replace('0.06666666666666667', '1/15') \
-            .replace('0.05', '1/20').replace('0.025', '1/40')
+This effect is not unique to UT, though. In general, any system of sharding is affected in this manner when the headers of a child-chain are recorded included in the parent-chain's blocks.
 
-row_inputs = [
-    (1000, 1/15, 1/15, 112, 250, 250),
-    (3000, 1/15, 1/15, 112, 250, 250),
-    (3000, 1/20, 1/40, 112, 250, 250),
-    (1000, 1/60, 1/60, 112, 250, 250),
-    (3000, 1/60, 1/60, 200, 500, 250),
-    (3000, 1/60, 1/60, 112, 500, 250),
-    (3000, 1/60, 1/60, 200, 250, 250),
-    (3000, 1/60, 1/60, 112, 250, 250),
-    (26000, 1/60, 1/60, 200, 200, 250),
-    (26000, 1/60, 1/60, 112, 200, 250),
-    (1000, 1/600, 1/600, 112, 250, 250),
-    (3000, 1/600, 1/600, 200, 250, 250),
-    (3000, 1/600, 1/600, 112, 250, 250),
-    (26000, 1/600, 1/600, 200, 200, 250),
-    (26000, 1/600, 1/600, 112, 200, 250),
-    (1000, 1/60, 1/600, 112, 250, 250),
-    (3000, 1/60, 1/600, 112, 250, 250),
-    (26000, 1/60, 1/600, 112, 250, 250),
-    (3000, 1/60, 1/60, 500, 500, 250),
-    (3000, 1/60, 1/60, 500, 700, 250),
-]
-for r in row_inputs:
-    print(table_row(r))
-# list((r, calc_tps_throughput(*r)) for r in row_inputs)
-```
+Practically, this effect means that a decrease to the size of headers has *increasing* marginal benefit. Compared to $O(c)$ blockchains (e.g. Bitcoin), efficient header schemes are far more important for sharded blockchain networks.

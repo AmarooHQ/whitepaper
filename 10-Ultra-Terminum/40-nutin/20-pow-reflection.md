@@ -174,19 +174,16 @@ When a chain does this we say *Bitcoin (or Bitcoin's work) is **reflected** in E
 
 One particular *impact* of this change is that a doublespend attack (e.g. by withholding a privately mined chain that reverts a transaction) must now be performed *not only* against Bitcoin, *but also and simultaneously* against Ethereum.
 
-Why? The privately mined blocks to perform the attack *are not known about* by Ethereum. Rather, Ethereum knows about the *public* Bitcoin history *against which the attack competes*. Thus, the private chain-segment must *either* contribute more total work to the Bitcoin blockchain than the public chain-segment does *including* the relevant Ethereum chain-segment, *or* the attacker must, in addition to their private Bitcoin chain-segment, *also* produce a private Ethereum chain-segment such that the *total* work of both private chain-segments is calculated to be greater than the total work of both public chain-segments, and then publish both segments simultaneously.
+Why? The privately mined blocks to perform the attack *are not known about* by Ethereum. Rather, Ethereum knows about the *public* Bitcoin history *against which the attack competes*. Thus, *either*:
+
+* the private chain-segment must contribute more total work to the Bitcoin blockchain than the public chain-segment does -- *including* the relevant Ethereum chain-segment; *or*
+* the attacker must *additionally* produce a private Ethereum chain-segment such that the *total* work of both private chain-segments is greater than the total work of both public chain-segments, and publish both chain-segments simultaneously.
 
 It's worth noting that, at this point, there is no benefit to Ethereum's security. That's because Ethereum isn't 'reading' the reflected work back off the Bitcoin chain. Thus a doublespend attack against Ethereum has the expected, non-reflected profile -- it isn't more difficult to attack Ethereum yet. However, Ethereum can take advantage of the reflection, though. The main requirements are: the inclusion of appropriate merkle proofs that show known Ethereum blocks according to Bitcoin, and an update to Ethereum's block-weight calculations to account for the reflected work. PoW reflection doesn't automatically secure both chains; each chain can proactively and independently take advantage of PoW reflection.
 
-Naturally, the large difference in target block frequencies means that Ethereum has a good deal of latency before its chain gains the security benefit from reflected work. For this reason, PoW reflection makes the most sense when used with high frequency chains, or chains of similar frequencies. One downside of this is that shortening the block production frequency requires the inclusion of more block headers. This, however, is minimal in the scheme of things.
+Naturally, the large difference in target block frequencies means that Ethereum has a good deal of latency before its chain gains the security benefit from reflected work. For this reason, PoW reflection makes the most sense when used with high frequency chains, or chains of similar frequencies. One downside of this is that shortening the block production frequency requires the inclusion of more block headers. In the scheme of things, this is somewhat significant but not a deal-breaker.
 
-\todo[inline]{UT won't be done until we figure out how to tell what the right algorithm is to count/weigh reflected blocks.}
-
-### How should we count reflected work?
-
-see \autoref{s:counting-reflected-work} for notes.
-
-\todo[inline]{write out this section, and decide if this is a good spot in the paper for it. Should it be later on?}
+Practical methods of comparing (and converting the weight of) different Proofs of Work are discussed in \autoref{sec:comparing-diff-pows}.
 
 ### PoW reflection between chains using the same alg
 
@@ -219,13 +216,17 @@ under that sort of thing the 'microchain' would become like an O(c) record of al
 
 \end{comment}
 
-### Comparing incomparable Proofs of Work
+### Comparing Incomparable Proofs of Work
 
-For PoW reflection to work effectively, there must be some method of comparing the *work* done by reflecting chains. Earlier, we simply *set* a ratio between Bitcoin blocks and Ethereum blocks based on the arbitrary notion of *equal work in equal time*, but that isn't a context that's easy to create and maintain in reality.
+\label{sec:comparing-diff-pows}
+
+For PoW reflection to work effectively, there must be some method of comparing and converting the *work* done by reflecting chains. Earlier, we simply *set* a ratio between Bitcoin blocks and Ethereum blocks based on the arbitrary notion of *equal work in equal time*, but that isn't a context that's easy to create and maintain in reality.
 
 How can we design a system that allows for sensible comparisons between Proofs of Work that use different hashing algorithms?
 
 #### A Single Root Token Across Multiple Chains
+
+*Root Token*: The sole network-level token required by typical blockchain protocols. e.g. Bitcoin has BTC, Ethereum has ETH, Polkadot has DOT, Cardano has ADA, etc.
 
 The simplest method for comparing work done via different algorithms is to measure that work via a common unit. How can we do this? Whatever method we choose, it must *cancel out* market conditions like: silicon availability, the cost of power, the availability of mining rigs, and short-term effects like a drastic shift in token price.
 

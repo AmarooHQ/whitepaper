@@ -36,6 +36,7 @@ clean: init
 
 clean-wp-md:
 	-rm $(WPFILE)
+	-rm $(WPNOEXT).pdf
 
 init:
 	@mkdir -p $(OUTDIR)
