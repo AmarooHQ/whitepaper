@@ -43,9 +43,9 @@ We start from the foundation that each tile has a maximum of $\frac{N_1}{4}$ sim
 
 [^simplex-full-validation]: A full-node for a simplex-chain does not need to fully validate any other simplex-chains, or dapp-chains on that simplex-chain. Header-only validation is fine.
 
-Our starting point, at $i=1$, is a $\frac{N_1}{4}$-simplex which constitutes a single tile.
+Our starting point is a $\frac{N_1}{4}$-simplex which constitutes a single tile. This is shown in \autoref{fig:tiled-simplex-5-d1}.
 
-The next iteration is to add $3$ adjacent tiles, since our initial tile has a valence of 3. Each of these new tiles has one pre-existing neighbor, so each tile has capacity for 2 more neighbors. Thus, the next iteration will add twice the number of tiles as the preceding iteration -- in this case, $6$ new tiles. This pattern -- adding twice the number of tiles as the previous iteration -- continues indefinitely.
+The next iteration is to add $3$ adjacent tiles, since our initial tile has a valence of 3. Each of these new tiles has one pre-existing neighbor (the root tile), so each new tile has capacity for 2 more neighbors. Thus, the next iteration will add twice the number of tiles as the preceding iteration -- in this case, $6$ new tiles. This pattern -- adding twice the number of tiles as the previous iteration -- continues indefinitely.
 
 \begin{comment}
 side by side figures: https://tex.stackexchange.com/questions/37581/latex-figures-side-by-side
@@ -100,20 +100,24 @@ N_{tiles} & = 3 \cdot 2^h - 2 \\
 \end{split}
 \end{equation}
 
-Thus, the maximal distance between leaf tiles is $2 \cdot \log_{2}(\frac{N_{tiles} + 2}{3})$, and thus the number of SPV proofs required scales with $O(\log_2 N_{tiles})$.
+Thus, the maximal distance between leaf tiles is $2 \cdot \log_{2}(\frac{N_{tiles} + 2}{3})$, and thus the number of SPV proofs required (across simplex-chains) scales with $O(\log_2 N_{tiles})$.
 
 Since tiles can be added in an ad-hoc fashion depending on current capacity, and each tile scales with complexity $O(c^j); j \in \{2,3,4\}$: $N_{tiles} \propto \frac{n}{c^j}$. Thus $O(N_{tiles}) = O(\frac{n}{c^j})$.
 
-Given \autoref{eq:spv-complexity}, inter-tile SPV proofs have order:
+Given \autoref{eq:spv-complexity}, dapp-chain inter-tile SPV proofs have order:
 
 \begin{equation}
 \begin{split}
 O(\log_2 c + \log_2 N_{tiles}) & = O(\log_2 c + \log_2 \frac{n}{c^j}) \\
-& = O(\log_2 \frac{n}{c^{j-1}}) \label{eq:tiled-spv-complexity}
+& = O(\log_2 \frac{n}{c^{j-1}}) \\
+& = O(\log_2 n - \log_2 c^{j-1}) \\
+& = O(\log_2 n - (j - 1) \cdot \log_2 c) \\
+& = O(\log_2 n - \log_2 c) \\
+& = O(\log_2 \frac{n}{c}) \label{eq:tiled-spv-complexity}
 \end{split}
 \end{equation}
 
-Note that $O(\log_2 \frac{n}{c^{j-1}}) \approx O(\log_2 n)$ for a fast growing network because $O(c^{j-1}) \ll O(n)$; i.e. $c^{j-1}$ can be treated as a constant.
+Note that $O(\log_2 \frac{n}{c}) \approx O(\log_2 n)$ for a fast growing network because $O(c) \ll O(n)$; i.e. $c$ can be treated as a constant.
 
 #### Tessellating tiles are less efficient
 
