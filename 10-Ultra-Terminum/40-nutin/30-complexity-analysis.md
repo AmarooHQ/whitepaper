@@ -132,8 +132,6 @@ Since $j$ is constant, cross-chain SPV proofs therefore have order:
 O(j \cdot \log_2 c) = O(\log_2 c) \label{eq:spv-complexity}
 \end{equation}
 
-\todo[inline]{}
-
 ### Complexity comparison
 
 $k$: raw per-chain throughput (bytes/$s$) \newline

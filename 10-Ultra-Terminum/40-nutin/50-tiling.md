@@ -106,30 +106,14 @@ Since tiles can be added in an ad-hoc fashion depending on current capacity, and
 
 Given \autoref{eq:spv-complexity}, dapp-chain inter-tile SPV proofs have order:
 
-\todo[inline]{decide on which of these to use}
-
-##### most simplified version
-
 \begin{equation}
 \begin{split}
 O(\log_2 c + \log_2 N_{tiles}) & = O(\log_2 c + \log_2 \frac{n}{c^j}) \\
-& = O(\log_2 c + \log_2 n - \log_2 c^j) \\
 & = O(\log_2 c + \log_2 n - j \cdot \log_2 c) \\
 & = O(\log_2 c + \log_2 n - \log_2 c) \\
 & = O(\log_2 n) \label{eq:tiled-spv-complexity}
 \end{split}
 \end{equation}
-
-##### alt
-
-\begin{equation}
-\begin{split}
-O(\log_2 c + \log_2 N_{tiles}) & = O(\log_2 c + \log_2 \frac{n}{c^j}) \\
-& = O(\log_2 \frac{n}{c^{j-1}}) \label{eq:tiled-spv-complexity-alt}
-\end{split}
-\end{equation}
-
-Note that $O(\log_2 \frac{n}{c^{j-1}}) \approx O(\log_2 n)$ for a fast growing network because $O(c^{j-1}) \ll O(n)$; i.e. $c^{j-1}$ can be treated as a constant.
 
 #### Tessellating tiles are less efficient
 
