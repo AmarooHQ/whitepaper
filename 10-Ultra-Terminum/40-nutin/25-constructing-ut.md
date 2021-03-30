@@ -14,28 +14,30 @@ If we can do reflection between two chains, can we also do reflection between th
 
 \label{sec:the-simplex}
 
-\todo[inline]{fix spacing of captions in \autoref{fig:simplexes}}
-
 \begin{figure}
     \centering
-    \begin{subfigure}{.33\textwidth}
+    \hfill
+    \begin{subfigure}{.28\textwidth}
         \centering
-        \includegraphics[width=.75\linewidth]{ut/tiling/d1-many-tiled-2-simplexes}
+        \includegraphics[width=.95\linewidth]{ut/tiling/d1-many-tiled-2-simplexes}
         \caption{PoW reflection between 2 blockchains. The most basic non-trivial simplex.}
         \label{fig:simplex-2-d1}
     \end{subfigure}%%
-    \begin{subfigure}{.33\textwidth}
+    \hfill
+    \begin{subfigure}{.28\textwidth}
         \centering
-        \includegraphics[width=.75\linewidth]{ut/tiling/d1-many-tiled-7-simplexes}
+        \includegraphics[width=.95\linewidth]{ut/tiling/d1-many-tiled-7-simplexes}
         \caption{PoW reflection between 7 blockchains; a 7-chain simplex.}
         \label{fig:simplex-7-d1}
     \end{subfigure}%%
-    \begin{subfigure}{.33\linewidth}
+    \hfill
+    \begin{subfigure}{.28\textwidth}
         \centering
-        \includegraphics[width=.75\linewidth]{ut/tiling/d1-many-tiled-29-simplexes}
+        \includegraphics[width=.95\linewidth]{ut/tiling/d1-many-tiled-29-simplexes}
         \caption{A 29-chain simplex.}
         \label{fig:simplex-29-d1}
     \end{subfigure}
+    \hfill
     \caption{Simplexes of increasing capacity. Vertices are simplex-chains. Edges are the reflections between simplex-chains.}
     \label{fig:simplexes}
 \end{figure}
@@ -65,3 +67,9 @@ The complexity and impact of this strategy is discussed in \autoref{sec:bandwidt
 \label{sec:proving-reflection}
 
 \todo[inline]{write this. come up with a method by which a miner having all blocks can construct the witnesses for proof-of-reflection. by doing this, miners don't need to include SPV proofs of reflection; the witnesses don't need to be included.}
+
+### Confirmation Times
+
+\label{sec:confirmation-times}
+
+\todo[inline]{write this.}

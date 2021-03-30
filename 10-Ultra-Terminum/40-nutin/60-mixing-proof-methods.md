@@ -8,6 +8,8 @@ One potential issue, with simplex-chains using something other than PoW, is the 
 
 However, there are some potential advantages to including PoS or PoA chains in the simplex.
 
+\todo[inline]{write this section out -- unfinished}
+
 ### Geo-beacons
 
 One use for simplex-level PoA chains is a geo-beacon.

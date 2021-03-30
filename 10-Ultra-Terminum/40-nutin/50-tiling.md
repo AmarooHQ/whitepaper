@@ -53,24 +53,28 @@ side by side figures: https://tex.stackexchange.com/questions/37581/latex-figure
 
 \begin{figure}
     \centering
-    \begin{subfigure}{.30\textwidth}
+    \hfill
+    \begin{subfigure}{.28\textwidth}
         \centering
-        \includegraphics[width=.75\linewidth]{ut/tiling/d2-many-tiled-5-simplexes}
+        \includegraphics[width=.95\linewidth]{ut/tiling/d2-many-tiled-5-simplexes}
         \caption{1st iteration. 4 tiles.}
         \label{fig:tiled-simplex-5-d2}
     \end{subfigure}%%
-    \begin{subfigure}{.30\textwidth}
+    \hfill
+    \begin{subfigure}{.28\textwidth}
         \centering
-        \includegraphics[width=.75\linewidth]{ut/tiling/d3-many-tiled-5-simplexes}
+        \includegraphics[width=.95\linewidth]{ut/tiling/d3-many-tiled-5-simplexes}
         \caption{2nd iteration. 10 tiles.}
         \label{fig:tiled-simplex-5-d3}
     \end{subfigure}%%
-    \begin{subfigure}{.30\linewidth}
+    \hfill
+    \begin{subfigure}{.28\textwidth}
         \centering
-        \includegraphics[width=.75\linewidth]{ut/tiling/d4-many-tiled-5-simplexes}
+        \includegraphics[width=.95\linewidth]{ut/tiling/d4-many-tiled-5-simplexes}
         \caption{3rd iteration. 22 tiles.}
         \label{fig:tiled-simplex-5-d4}
     \end{subfigure}
+    \hfill
     \caption{The state of tiled 5-chain simplexes after sequential iterations. Vertices are simplex-chains. Edges are the reflections between simplex-chains.}
 \end{figure}
 
