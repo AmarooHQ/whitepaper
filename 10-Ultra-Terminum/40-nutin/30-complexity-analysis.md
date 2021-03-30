@@ -186,7 +186,7 @@ S & = \frac{k_1}{2 \cdot B_f \cdot B_h} \cdot k_1 \cdot d \\
 \end{split}
 \end{equation}
 
-It is clear that $\Delta S$ has order $O(c^2)$, but how bad is this? For $k_1 = 3000$, $B_f = \frac{1}{60}$, and $B_h = 112$: $\Delta S \approx 4.8 \cdot 10^6$ bytes/s, or 4.8 MB/s. With those figures: $N_1 = 1600$ simplex-chains. Curiously, with 15s block times the bandwidth requirements decrease to 1.2 MB/s for a simplex of 400 chains.
+It is clear that $\Delta S$ has order $O(c^2)$, but how bad is this? For $k_1 = 3000$, $B_f = \frac{1}{60}$, and $B_h = 112$: $\Delta S \approx 4.8 \cdot 10^6$ bytes/s, or 4.8 MB/s. With those figures: $N_1 \approx 1600$ simplex-chains. Curiously, with 15s block times the bandwidth requirements decrease to 1.2 MB/s for a simplex of $\sim 400$ chains.
 
 While $O(c^2)$ bandwidth scaling is not ideal, it's clear that -- especially in the early days of a UT simplex when there are fewer simplex-chains -- there are tolerable configurations available.
 
