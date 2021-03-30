@@ -4,13 +4,15 @@
 
 ### Generalizing Reflection
 
-If we can do reflection between two chains, can we also do reflection between three chains?
+\label{sec:generalizing-reflection}
+
+If we can do reflection between two chains, can we also do reflection between three or more chains?
 
 \todo[inline]{write this out}
 
-guess: extending the Bitcoin + Ethereum example to, say, Bitcoin + Ethereum + Litecoin will provide the security benefits of all 3. it should be additive. a doublespend would require a doublespend against all 3.
-
 ### The Simplex
+
+\label{sec:the-simplex}
 
 \todo[inline]{fix spacing of captions in \autoref{fig:simplexes}}
 
@@ -38,9 +40,15 @@ guess: extending the Bitcoin + Ethereum example to, say, Bitcoin + Ethereum + Li
     \label{fig:simplexes}
 \end{figure}
 
-### Availability of Reflected Headers
+### Dapp-chains
 
-\todo[inline]{can we do better than getting miners to download all the relevant blocks?} they don't have to verify them, just make sure the data is available. e.g. they could download and share for 24hrs and then drop the blocks for the chains they don't care about.
+\label{sec:dapp-chains}
+
+#### Dapp-dapp-chains
+
+### Availability of Reflected Blocks
+
+\lable{sec:availability-of-blocks}
 
 What would happen if a header -- with valid PoW but *without* a valid block -- were to be reflected? That would mean that chain A contains a header, $H_{1a}$, for chain B for which no block is available. This is does not break chain B, but it could mean that other blocks on chain B temporarily have a harder time competing, or waste the resources of chain B nodes as they go looking for that block, $B_{1a}$. Furthermore, it risks chain B miners doing SPV mining, which is bad.
 
@@ -51,3 +59,9 @@ There is at least one way to ensure that reflected headers are available. That i
 For this to work, though, miners must verify that blocks *exist* for all reflected headers. Is this practical if there are $10^3$ or $10^4$ reflected chains in a simplex? The miners are only required to do very small amounts of computation on these other blocks, so their computational capacity won't be a bottleneck here. Furthermore, they don't need to keep these other blocks indefinitely, just long enough to be confident that they won't reflect headers that don't have blocks attached. So they won't need much extra disk space, either; after a few years, the history of a simplex chain will be larger than, say, the last 12 hours of all simplex-chains' histories. What they will need is *bandwidth*.
 
 The complexity and impact of this strategy is discussed in \autoref{sec:bandwidth-complexity}.
+
+### Proving Reflection
+
+\label{sec:proving-reflection}
+
+\todo[inline]{write this. come up with a method by which a miner having all blocks can construct the witnesses for proof-of-reflection. by doing this, miners don't need to include SPV proofs of reflection; the witnesses don't need to be included.}
