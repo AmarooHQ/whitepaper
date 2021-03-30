@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "textlint": "^11.9.0",
+    "textlint-rule-en-max-word-count": "XertroV/textlint-rule-en-max-word-count#better-errors-r1",
+    "textlint-rule-sentence-length": "^2.2.0"
+  },
+  "scripts": {
+    "lint": "textlint ./10-Ultra-Terminum"
+  }
+}

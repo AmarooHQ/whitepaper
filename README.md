@@ -40,3 +40,9 @@ you need (ubuntu pkgs):
 ## resource: scaffold for doing a thesis in markdown + pandoc
 
 <https://github.com/chiakaivalya/thesis-markdown-pandoc>
+
+## linting
+
+* install deps with `npm i`
+* lint with `npm run lint`
+* linter rules in `.textlintrc`

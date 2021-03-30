@@ -1,0 +1,10 @@
+{
+    "rules": {
+        "en-max-word-count": {
+            "max" : 40
+        },
+        "sentence-length": {
+            "max": 250
+        }
+    }
+}
