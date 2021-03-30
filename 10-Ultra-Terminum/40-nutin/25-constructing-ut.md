@@ -48,7 +48,7 @@ If we can do reflection between two chains, can we also do reflection between th
 
 ### Availability of Reflected Blocks
 
-\lable{sec:availability-of-blocks}
+\label{sec:availability-of-blocks}
 
 What would happen if a header -- with valid PoW but *without* a valid block -- were to be reflected? That would mean that chain A contains a header, $H_{1a}$, for chain B for which no block is available. This is does not break chain B, but it could mean that other blocks on chain B temporarily have a harder time competing, or waste the resources of chain B nodes as they go looking for that block, $B_{1a}$. Furthermore, it risks chain B miners doing SPV mining, which is bad.
 
