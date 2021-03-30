@@ -33,9 +33,9 @@ If we can do reflection between two chains, can we also do reflection between th
     \hfill
     \begin{subfigure}{.28\textwidth}
         \centering
-        \includegraphics[width=.95\linewidth]{ut/tiling/d1-many-tiled-29-simplexes}
-        \caption{A 29-chain simplex.}
-        \label{fig:simplex-29-d1}
+        \includegraphics[width=.95\linewidth]{ut/tiling/d1-many-tiled-17-simplexes}
+        \caption{A 17-chain simplex.}
+        \label{fig:simplex-17-d1}
     \end{subfigure}
     \hfill
     \caption{Simplexes of increasing capacity. Vertices are simplex-chains. Edges are the reflections between simplex-chains.}
