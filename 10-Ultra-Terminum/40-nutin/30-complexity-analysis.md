@@ -170,7 +170,25 @@ NB: For the purposes of the following table, the average transaction size is tak
 
 ### Bandwidth Complexity
 
-\todo[inline]{bandwidth requirement presuming all simplex blocks downloaded (to ensure availability)}
+\label{sec:bandwidth-complexity}
+
+If miners temporarily keep the blocks of every simplex-chain (so that they can verify reflected headers correspond to existent blocks) then what is the complexity and burden of this?
+
+\todo[inline]{Update below equation ref to eq:simplex-N1 after other algebra merged in}
+
+Each simplex-chain has a raw throughput of $k_1$ bytes/s. From \autoref{eq:simplex-T1} we know that $N_1 = \frac{k_1}{2 \cdot B_f \cdot B_h}$. The amount of storage, $S$, required to keep $d$ seconds worth of each simplex-chain's history is equal to the product of: the number of simplex-chains -- $N_1$, the raw throughput of each chain -- $k_1$, and the duration we want to store -- $d$. Let $\Delta S$ be the bandwidth requirements (in bytes/s) to facilitate this.
+
+\begin{equation}
+\begin{split}
+S & = \frac{k_1}{2 \cdot B_f \cdot B_h} \cdot k_1 \cdot d
+& = \frac{k_1^2 \cdot d}{2 \cdot B_f \cdot B_h}  \label{eq:bandwidth-req}
+\Delta S & = \frac{k_1^2}{2 \cdot B_f \cdot B_h}
+\end{split}
+\end{equation}
+
+It is clear that $\Delta S$ has order $O(c^2)$, but how bad is this? For $k_1 = 3000$, $B_f = \frac{1}{60}$, and $B_h = 112$: $\Delta S \approx 4.8 \cdot 10^6$ bytes/s, or 4.8 MB/s. With those figures: $N_1 = 1600$ simplex-chains. Curiously, with 15s block times the bandwidth requirements decrease to 1.2 MB/s for a simplex of 400 chains.
+
+While $O(c^2)$ bandwidth scaling is not ideal, it's clear that -- especially in the early days of a UT simplex when there are fewer simplex-chains -- there are tolerable configurations.
 
 ### The Impact of Header Size
 
