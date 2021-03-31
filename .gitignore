@@ -7,6 +7,7 @@ output/*
 *.sage.py
 *.ipynb
 includes/ut/tiling/*.png
+includes/ut/tiling/*.svg
 *.7z
 # copies of pdfs i'm moving to root folder, we can remove this next line later if desired
 /*.pdf
