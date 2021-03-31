@@ -1,8 +1,7 @@
-\appendix
 
-# Appendices
+# Code-gen
 
-## Code for generating figures in the UT complexity comparison table
+## UT Complexity Comparison
 
 The following code can be copy-pasted into a python3 interpreter.
 

@@ -132,6 +132,14 @@ Since $j$ is constant, cross-chain SPV proofs therefore have order:
 O(j \cdot \log_2 c) = O(\log_2 c) \label{eq:spv-complexity}
 \end{equation}
 
+### Complexity of Reflection Proofs
+
+\label{sec:complexity-reflection-proof}
+
+A simplex-chain reflects $N_1 - 1 \approx N_1$ other simplex-chains. A merkle tree of reflected headers has order $O(N_1) = O(k_1) = O(c)$ and a corresponding proof size of order $O(\log_2 N_1) = O(\log_2 k_1) = O(\log_2 c)$. Since those other simplex-chains also have $\sim N_1$ reflections, proving reflection in those other $\sim N_1$ simplex-chains requires $\sim N_1$ merkle branches. Thus, the full set of reflection proofs, per simplex-chain, is $O(c \cdot \log_2 c)$.
+
+\todo[inline]{can we exclude these proofs by treating them as droppable witnesses? see \autoref{sec:proving-reflection}}
+
 ### Complexity comparison
 
 $k$: raw per-chain throughput (bytes/$s$) \newline
@@ -139,7 +147,9 @@ $B_f$: simplex block frequency ($s^{-1}$) \newline
 $B_h$: simplex block header size (bytes) \newline
 $D_f$: dapp-chain block frequency ($s^{-1}$) \newline
 $D_h$: dapp-chain block header size (bytes) \newline
-%% $Tx_{avg}$: average tx size (bytes)
+\begin{comment}
+$Tx_{avg}$: average tx size (bytes)
+\end{comment}
 
 NB: For the purposes of the following table, the average transaction size is taken to be 250 bytes.
 
@@ -186,13 +196,11 @@ S & = \frac{k_1}{2 \cdot B_f \cdot B_h} \cdot k_1 \cdot d \\
 \end{split}
 \end{equation}
 
-It is clear that $\Delta S$ has order $O(c^2)$, but how bad is this? For $k_1 = 3000$, $B_f = \frac{1}{60}$, and $B_h = 112$: $\Delta S \approx 4.8 \cdot 10^6$ bytes/s, or 4.8 MB/s. With those figures: $N_1 \approx 1600$ simplex-chains. Curiously, with 15s block times the bandwidth requirements decrease to 1.2 MB/s for a simplex of $\sim 400$ chains.
+It is clear that $\Delta S$ has order $O(c^2)$, but how bad is this? For $k_1 = 3000$, $B_f = \frac{1}{60}$, and $B_h = 112$: $\Delta S \approx 4.8 \cdot 10^6$ bytes/s, or 4.8 MB/s. With those figures: $N_1 \approx 1600$ simplex-chains. Decreasing block times to 15s correspondingly decrease the bandwidth requirements to 1.2 MB/s for a simplex with $\sim 400$ chains.
 
 While $O(c^2)$ bandwidth scaling is not ideal, it's clear that -- especially in the early days of a UT simplex when there are fewer simplex-chains -- there are tolerable configurations available.
 
 ### The Impact of Header Size
-
-\todo[inline]{UT is sensitive to header-size}
 
 \autoref{eq:throughput-iter} shows that UT's throughput is inversely proportional to the size of headers, $D_h$, for that given depth of nesting (this is true for $O(c^2)$ configurations, too). It also shows that throughput is inversely proportional to the block frequency, $D_f$, and proportional to chosen raw throughput, $k$.
 
