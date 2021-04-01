@@ -8,13 +8,13 @@ A common method of sharding is to *nest* blockchains. For example, Ethereum 2 ha
 
 > The Beacon Chain will conduct or coordinate the expanded network of shards and stakers. But it won't be like the Ethereum mainnet of today. It can't handle accounts or smart contracts.
 
-This type of configuration, where a root-chain facilitates shards, is referred to as *nesting* in this section. The shards of Ethereum 2 are *a level of nesting* above the root-chain. Sometimes people use terms like *layer 2* to describe this sort of nesting, though such usage of *layer 2* is ambiguous and potentially misleading. It easily confuses nesting with off-chain scaling methods (such as payment channels or ephemeral 'child' blockchains, e.g., Plasma), and it potentially misleads readers about the security properties of nested blockchains. Nested blockchains *can* faithfully inherit the security properties of their parent-chains, which is not the case for layer 2 solutions.
+This type of configuration, where a root-chain facilitates shards, is referred to as *nesting* in this section. The shards of Ethereum 2 are *a level of nesting* above the root-chain. Sometimes people use terms like *layer 2* to describe this sort of nesting, though such usage of *layer 2* is ambiguous and potentially misleading. It easily confuses nesting with off-chain scaling methods (such as payment channels or ephemeral 'child' blockchains, e.g., Plasma), and it potentially misleads readers about the security properties of nested blockchains. Nested blockchains *can* faithfully inherit the security properties of their parent-chains, which is not the case for layer 2 solutions. Furthermore, terms like *layer x* cannot accurately describe UT's design. Would UT's dapp-chains (having equal or better security properties than comparable chains like Ethereum 2, Polkadot, or Cardano) be *layer 1* or *layer 2*? It would be misleading to call them *layer 2* because UT dapp-chains have all the security qualities of other PoS chains, *and more*. If they were called *layer 1* chains, then what is the simplex -- *layer 0*? It is clear that the common idea behind *layer 1/2* scaling does not have sufficient capacity to accurately describe UT's simplex- and dapp-chains; it is inadequate.
 
 \todo[inline]{look for references to 'layer2' and change to nesting as appropriate.}
 
 The following derivations focus on *throughput* of particular blockchain designs and scaling configurations. Raw throughput of a network, $T_i$, is measured in bytes/sec (B/s) for some level of nesting, $i$. Note that $T_i$ directly corresponds to a design's maximum transactions per second (tps) via ${tps}_i = \nicefrac{T_i}{Tx_{avg}}$, where $Tx_{avg}$ is the average size of a transaction. The raw B/s throughput of a chain at the $i^{th}$ level of nesting is denoted by $k_i$. Note that $T_i$ is a *calculated* value, but $k_i$ is a *parameter* that may be chosen. An increase to $k_i$ is equivalent or similar to an increase in maximum block size.
 
-Shown below are relationships between the number of chains at a level of nesting, $N_i$, and the network throughput at that level of nesting, $T_1$. For existing blockchain designs, note that $N_1 = 1$.
+Shown below are relationships between the number of chains at a level of nesting, $N_i$, and the network throughput at that level of nesting, $T_i$. For existing blockchain designs, note that $N_1 = 1$.
 
 Additionally, $O(k_i)$ is defined via $O(k_i) \equiv O(c)$.
 
@@ -38,7 +38,7 @@ T_1 = k_1
 
 The complexity order of the network is given by $O(T_1) = O(k_1) = O(c)$ as expected.
 
-For Bitcoin, given $k_1 \approx 2000 \: B/s$ (accounting for SegWit), and $Tx_{avg} = 500 \: B$, then
+For Bitcoin, given $k_1 \approx 2000$ B/s (accounting for SegWit), and $Tx_{avg} = 500$ B, then
 
 \begin{equation*}
 {tps}_{Bitcoin,max} \approx \frac{2000}{Tx_{avg}} \approx 4
@@ -50,13 +50,13 @@ This is what we expect based on the measured real-world performance of Bitcoin.
 
 Examples: Ethereum 2, Polkadot.
 
-Suppose the root-chain has a throughput of $k_1$ B/s and it can support up to $N_2$ nested chains. Those nested chains have headers of $D_h$ bytes that are produced at a frequency of $D_f$ ($s^{-1}$). Thus, each nested chain consumes $D_h \cdot D_f$ B/s of the root-chain's capacity.
+Suppose the root-chain has a throughput of $k_1$ B/s and it can support up to $N_2$ nested chains. Those nested chains have headers of $D_h$ bytes that are produced at a frequency of $D_f$ ($s^{-1}$). Thus, each nested chain consumes $D_f \cdot D_h$ B/s of the root-chain's capacity.
 
 $N_2$ is this given by:
 
 \begin{equation}
 \label{eq:n2-for-c2-traditional}
-N_2 = \frac{k_1}{D_h \cdot D_f}
+N_2 = \frac{k_1}{D_f \cdot D_h}
 \end{equation}
 
 NB: For blockchains of this design: $N_1 = 1$.
@@ -66,8 +66,8 @@ If each nested chain has a throughput capacity of $k_2$ B/s, then:
 \begin{equation}
 \label{eq:t2-for-c2-traditional}
 \begin{split}
-T_2 & = \frac{k_1 \cdot k_2}{D_h \cdot D_f} \\
-& \approx \frac{k^2}{D_h \cdot D_f}
+T_2 & = \frac{k_1 \cdot k_2}{D_f \cdot D_h} \\
+& \approx \frac{k^2}{D_f \cdot D_h}
 \end{split}
 \end{equation}
 
@@ -115,14 +115,14 @@ The optimal number of simplex-chains will maximize throughput. We can find that 
 At $\frac{dT_1}{dN_1} = 0$:
 
 \begin {equation}
-\label{eq:n-simplex}
+\label{eq:simplex-N1}
 \begin{split}
 k_1 & = 2 \cdot N_1 \cdot B_f \cdot B_h \\
 \therefore N_1 & = \frac{k_1}{2 \cdot B_f \cdot B_h}
 \end{split}
 \end {equation}
 
-From \autoref{eq:reflection-t1-in-terms-of-n1} and substituting $N_1$ from \autoref{eq:n-simplex}:
+From \autoref{eq:reflection-t1-in-terms-of-n1} and substituting $N_1$ from \autoref{eq:simplex-N1}:
 
 \begin{equation}
 \label{eq:simplex-T1}
@@ -141,7 +141,7 @@ N_1 \cdot k_{1,tx} & = \frac{k_1^2}{4 \cdot B_f \cdot B_h}
 \end{split}
 \end{equation*}
 
-Substituting $N_1$ from \autoref{eq:n-simplex} gives:
+Substituting $N_1$ from \autoref{eq:simplex-N1} gives:
 
 \begin{equation*}
 \begin{split}
@@ -151,7 +151,7 @@ k_{1,tx} & = \frac{k_1}{2}
 \end{split}
 \end{equation*}
 
-thus, by definition:
+thus, from the definition of $k_1$ in \autoref{eq:k1-reflection-defn}:
 
 \begin{equation*}
 k_{1,B} = \frac{k_1}{2}
@@ -161,74 +161,69 @@ k_{1,B} = \frac{k_1}{2}
 
 \todo[inline]{this section covers both throughput and optimal numbers for dapp-chains and simplex-chains}
 
-If a system has some throughput, $T$, then we can say that for some throughput at layer $i$, $T_i$, we can support
+If a system supports nested chains, then we can say that for some throughput, $T_i$, at nesting level $i$, that $(i+1)^{th}$ nesting level can support $N_{i+1}$ nested chains via:
 
-\begin{equation*}
-\frac{T_i}{D_h \cdot D_f}
-\end{equation*}
+\begin{equation}
+\label{eq:N-i-plus-1-in-terms-of-Ti}
+N_{i+1} = \frac{T_i}{D_f \cdot D_h}
+\end{equation}
 
-chains at layer $i + 1$. Therefore, via \autoref{eq:t2-for-c2-traditional}, we get
+Therefore, via the same logic used for \autoref{eq:t2-for-c2-traditional}:
 
 \begin{equation}
 \label{eq:throughput-iter}
-T_{i+1} = \frac{T_i}{D_h \cdot D_f} \cdot k_{i+1}
+T_{i+1} = T_i \cdot \frac{k_{i+1}}{D_f \cdot D_h}
 \end{equation}
 
-We can also say that, via \autoref{eq:n2-for-c2-traditional},
+Note that this relationship only holds for the traditional sharding model of securing sharded chains via their inclusion in a parent-chain, e.g., UT's dapp-chains and dapp-dapp-chains, or existing $O(c^2)$ designs.
+
+Combining these yields:
 
 \begin{equation}
 \label{eq:simple-scaling}
 N_{i+1} = \frac{T_{i+1}}{k_{i+1}}
 \end{equation}
 
-NB: This only works for simple scaling such as Eth2, not reflection.
+### Complexity of $O(c^3)$ UT
 
-\todo[inline]{insert maths}
-\todo[inline]{leesa: should this be in O($c^3$) section?}
+Starting with \autoref{eq:simplex-T1} and building on \autoref{eq:throughput-iter}:
 
-Thus, the maximum number of dapp chains is given by:
+\begin{equation}
+\begin{split}
+\label{eq:throughput-c-3}
+T_1 & = \frac{k_1^2}{4 \cdot B_f \cdot B_h} \\
+\therefore T_2 & = \frac{k_1^2 \cdot k_2}{4 \cdot B_f \cdot B_h \cdot D_f \cdot D_h}
+\end{split}
+\end{equation}
+
+Thus $O(T_2) = O(c^3)$.
+
+The maximum number of dapp chains is given by:
 
 \begin{equation*}
 \begin{split}
 N_2 & = \frac{T_2}{k_2} \\
-& = \frac{k_1^2}{4 \cdot B_f \cdot B_h \cdot D_h \cdot D_f}
+& = \frac{k_1^2}{4 \cdot B_f \cdot B_h \cdot D_f \cdot D_h}
 \end{split}
 \end{equation*}
 
-### Complexity of $O(c^3)$ UT
-
-\todo[inline]{do algebra}
-
-Building on \autoref{eq:throughput-iter} from $O(c^2)$ reflection, we have
-
-\begin{equation*}
-T_1 = \frac{k_1^2}{4 \cdot B_f \cdot B_h}
-\end{equation*}
-
-\begin{equation}
-\label{eq:throughput-c-3}
-T_2 = \frac{k_1^2 \cdot k_2}{4 \cdot B_f \cdot B_h \cdot D_h \cdot D_f}
-\end{equation}
-
-NB: $i=1$ here because reflection doesn't introduce a second layer.
-
 ### Complexity of $O(c^4)$ UT
-
-\todo[inline]{do algebra}
 
 If we say each dapp chain hosts more dapp chains (such as Eth2, Polkadot), then via \autoref{eq:throughput-iter} and \autoref{eq:throughput-c-3},
 
 \begin{equation}
 \label{eq:throughput-c-4}
 \begin{split}
-T_3 & = \frac{T_2}{D_h \cdot D_f} \cdot k_3 \\
+T_3 & = \frac{T_2}{D_f \cdot D_h} \cdot k_3 \\
 & = \frac{k_1^2 \cdot k_2 \cdot k_3}{4 \cdot B_f \cdot B_h \cdot D_h^2 \cdot D_f^2}
 \end{split}
 \end{equation}
 
-(presuming that params $D_f$ and $D_h$ are used for dapp-chains and dapp-dapp-chains)
+Thus $O(T_3) = O(c^4)$.
 
-Via \autoref{eq:simple-scaling} and \autoref{eq:throughput-c-4},
+Note that the derivation of $T_3$ presumes that the parameters $D_f$ and $D_h$ are the same for both dapp-chains and dapp-dapp-chains.
+
+Via \autoref{eq:simple-scaling} and \autoref{eq:throughput-c-4}:
 
 \begin{equation*}
 \begin{split}
@@ -257,7 +252,7 @@ O(j \cdot \log_2 c) = O(\log_2 c) \label{eq:spv-complexity}
 
 \label{sec:complexity-reflection-proof}
 
-A simplex-chain reflects $N_1 - 1 \approx N_1$ other simplex-chains. A merkle tree of reflected headers has order $O(N_1) = O(k_1) = O(c)$ and a corresponding proof size of order $O(\log_2 N_1) = O(\log_2 k_1) = O(\log_2 c)$. Since those other simplex-chains also have $\sim N_1$ reflections, proving reflection in those other $\sim N_1$ simplex-chains requires $\sim N_1$ merkle branches. Thus, the full set of reflection proofs, per simplex-chain, is $O(c \cdot \log_2 c)$.
+A simplex-chain reflects $N_1 - 1 \approx N_1$ other simplex-chains. A merkle tree of reflected headers has order $O(N_1) = O(k_1) = O(c)$ and a corresponding proof size of order $O(\log_2 N_1) = O(\log_2 k_1) = O(\log_2 c)$. Since those other simplex-chains also have $\sim N_1$ reflections, proving reflection in those other $\sim N_1$ simplex-chains requires $\sim N_1$ merkle branches. Thus, the full set of reflection proofs, per simplex-chain, is $O(N_1 \cdot \log_2 N_1) = O(c \cdot \log_2 c)$.
 
 \todo[inline]{can we exclude these proofs by treating them as droppable witnesses? see \autoref{sec:proving-reflection}}
 
@@ -305,9 +300,7 @@ NB: For the purposes of the following table, the average transaction size is tak
 
 If miners temporarily keep the blocks of every simplex-chain (so that they can verify reflected headers correspond to existent blocks) then what is the complexity and burden of this?
 
-\todo[inline]{Update below equation ref to eq:simplex-N1 after other algebra merged in}
-
-Each simplex-chain has a raw throughput of $k_1$ bytes/s. From \autoref{eq:simplex-T1} we know that $N_1 = \frac{k_1}{2 \cdot B_f \cdot B_h}$. The amount of storage, $S$, required to keep $d$ seconds worth of each simplex-chain's history is equal to the product of: the number of simplex-chains -- $N_1$, the raw throughput of each chain -- $k_1$, and the duration we want to store -- $d$. Let $\Delta S$ be the bandwidth requirements (in bytes/s) to facilitate this.
+Each simplex-chain has a raw throughput of $k_1$ bytes/s. From \autoref{eq:simplex-N1} we know that $N_1 = \frac{k_1}{2 \cdot B_f \cdot B_h}$. The amount of storage, $S$, required to keep $d$ seconds worth of each simplex-chain's history is equal to the product of: the number of simplex-chains -- $N_1$, the raw throughput of each chain -- $k_1$, and the duration we want to store -- $d$. Let $\Delta S$ be the bandwidth requirements (in bytes/s) to facilitate this.
 
 \begin{equation}
 \begin{split}
