@@ -6,6 +6,8 @@
 
 [^buterins-trilemma]: I think *Scalability Trilemma* is a bad name because *scalability* is one of the three conflicting qualities; you could just as well call it the *decentralization trilemma*, etc. Apparently the term was coined by Vitalik Buterin, so I prefer the name *Buterin's Trilemma*.
 
+\todo[inline]{something about methodology + generic modification to existing consensus methods}
+
 It may be more accurate to describe UT as a new *methodology* because
 
 UT has equal or better security properties than all individual/singular/atomic/foundational consensus methods (including Bitcoin's PoW method and all PoS variants). This is because UT is able to leverage many existing consensus methods in combination and, by way of construction, UT can only *add* security to these methods, or *do nothing*.

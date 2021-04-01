@@ -72,9 +72,7 @@ If simplex-chains' consensus protocol requires accounting for reflected work, th
 
 There is a trivial method: include merkle branch proofs along with reflected headers. Specifically: when a miner on chain A includes a header from chain B, they should also include a merkle branch that shows the most recent chain A header that has been reflected by chain B. Miners would need to do this for *all* simplex-chains that they reflect. Predictably, this has overhead with order $O(N_1 \cdot log_2 N_1)$, where $N_1$ is the number of chains in the simplex.
 
-NB:
-
-
+NB: **todo** something about $O(c)$ scaling still.
 
 This complexity is discussed in \autoref{sec:complexity-reflection-proof}.
 
