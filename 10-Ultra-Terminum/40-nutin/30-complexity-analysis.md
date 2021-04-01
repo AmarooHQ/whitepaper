@@ -8,8 +8,6 @@ UT has two primary methods of scaling: reflection and dapp-chains. Reflection is
 
 e.g. Bitcoin
 
-\todo[inline]{do algebra; lol there's like no algebra for this one}
-
 We define throughput to be measured in tps (transactions per second), where 
 
 \begin{equation*}
@@ -30,7 +28,7 @@ Therefore
 O(c) \: throughput = \frac{k_1}{tx_{avg}}
 \end{equation*}
 
-In BTC, if $k = 2000 \: b/s$ with SegWit, then 
+In BTC, given $k = 2000 \: b/s$ with SegWit, then 
 
 \begin{equation*}
 T \approx 4 \: tps \: at \: 500 \: byte \: transactions.
@@ -39,8 +37,6 @@ T \approx 4 \: tps \: at \: 500 \: byte \: transactions.
 ### Optimistic Complexity of $O(c^2)$ chains
 
 e.g. Eth2, Polkadot
-
-\todo[inline]{do algebra}
 
 Suppose the main chain has a throughput of $k_1$ b/s, headers are $D_h$ bytes and occur at $D_f$ frequency $(s^{-1})$. Thus each L2 chain consumes $D_h \cdot D_f$ b/s. Therefore the main chain supports a throughput of
 
@@ -54,20 +50,28 @@ layer 2 chains. If each L2 chain has a throughput of $k_2$ b/s capacity, then
 \begin{equation}
 \label{eq:throughput-chains}
 \begin{split}
-T_2 & = \frac{k_1 \cdot k_2}{D_f \cdot D_h} \\
-& \approx \frac{k^2}{D_f \cdot D_h} \; b/s
+T_2 & = \frac{k_1 \cdot k_2}{D_h \cdot D_f} \\
+& \approx \frac{k^2}{D_h \cdot D_f} \; b/s
 \end{split}
 \end{equation}
 
 ### Complexity of $O(c^2)$ reflection
 
-\todo[inline]{do algebra}
-
 Each chain has $k_1$ b/s capacity, but this is split between reflections and transactions. Headers are $B_h$ bytes with a frequency of $B_f$. We'll also refer to $N$ simplex chains as $N_1$.
 
-Each chain then must include $N_1 \cdot B_h \cdot B_f$ b/s to do reflection. So each chain has $k_{1,tx} = k_1 -  N_1 \cdot B_h \cdot B_f$ b/s for transactions.
+Each chain then must include 
 
-We set:
+\begin{equation*}
+N_1 \cdot B_h \cdot B_f \: b/s 
+\end{equation*}
+
+to do reflection. So each chain has 
+
+\begin{equation*}
+k_{1,tx} = k_1 -  N_1 \cdot B_h \cdot B_f \: b/s 
+\end{equation*}
+
+for transactions. We set:
 
 \begin{equation}
 \label{eq:k-optimal}
@@ -88,7 +92,7 @@ T & = N_1 \cdot k_{1,tx} \\
 \end{split}
 \end{equation}
 
-For simplexes, the optimal number of simplex-chains is:
+For simplexes, the optimal number of simplex-chains can be derived in the following:
 
 \begin{equation*}
 \begin{split}
@@ -102,7 +106,7 @@ At $\frac{\partial T}{\partial N_1} = 0$,
 \label{eq:n-simplex}
 \begin{split}
 k_1 & = 2 \cdot N_1 \cdot B_h \cdot B_f \\ 
-\therefore N_1 & = \frac{k_1}{2 \cdot B_f \cdot B_h}
+\therefore N_1 & = \frac{k_1}{2 \cdot B_h \cdot B_f}
 \end{split}
 \end {equation}
 
@@ -111,8 +115,8 @@ From \autoref{eq:throughput-reflection} and substituting $N_1$ for \autoref{eq:n
 \begin{equation}
 \label{eq:simplex-T1}
 \begin{split}
-T & = \frac{k_1^2}{4 \cdot B_f \cdot B_h} \: (k_1 - \frac{k_1}{2}) \\
-T_1 & = \frac{k_1^2}{4 \cdot B_f \cdot B_h} \; b/s
+T & = \frac{k_1^2}{4 \cdot B_h \cdot B_f} \: (k_1 - \frac{k_1}{2}) \\
+T_1 & = \frac{k_1^2}{4 \cdot B_h \cdot B_f} \: b/s
 \end{split}
 \end{equation}
 
@@ -127,13 +131,13 @@ N_1 \cdot k_{1,tx} & = \frac{k_1^2}{4 \cdot B_h \cdot B_f}
 
 Substituting $N_1$ for \autoref{eq:n-simplex} gives 
 
-\begin{equation}
+\begin{equation*}
 \begin{split}
 \label{eq:k-tx-optimal}
 \frac{k_1 \cdot k_{1,tx}}{2 \cdot B_h \cdot B_f} & = \frac{k_1^2}{4 \cdot B_h \cdot B_f} \\
 k_{1,tx} & = \frac{k_1}{2}
 \end{split}
-\end{equation}
+\end{equation*}
 
 <!-- by the power of maths and sorta-documented algebra (equations 1,2,3,4 in scans on basecamp):
 
@@ -144,13 +148,11 @@ k_{1,tx} = \frac{k_1}{2}
 
 thus, via \autoref{eq:k-optimal}
 
-\begin{equation}
+\begin{equation*}
 k_{1,B} = \frac{k_1}{2}
-\end{equation}
+\end{equation*}
 
 ### Replacing Transactions with Dapp-Chains
-
-\todo[inline]{do algebra}
 
 \todo[inline]{this section covers both throughput and optimal numbers for dapp-chains and simplex-chains}
 
@@ -164,7 +166,7 @@ chains at layer $i + 1$. Therefore, via \autoref{eq:throughput-chains}, we get
 
 \begin{equation}
 \label{eq:throughput-iter}
-T_{i+1} = \frac{T_i}{D_f \cdot D_h} \cdot k_{i+1}
+T_{i+1} = \frac{T_i}{D_h \cdot D_f} \cdot k_{i+1}
 \end{equation}
 
 We can also say that, via \autoref{eq:throughput-main-chain}, 
@@ -177,12 +179,16 @@ N_{i+1} = \frac{T_{i+1}}{k_{i+1}}
 NB: This only works for simple scaling such as Eth2, not reflection. 
 
 \todo[inline]{insert maths}
+\todo[inline]{leesa: should this be in O($c^3$) section?}
 
 Thus, the maximum number of dapp chains is given by:
 
-\begin{equation}
-N_2 = \frac{k_1^2}{4 \cdot B_f \cdot B_h \cdot D_f \cdot D_h}
-\end{equation}
+\begin{equation*}
+\begin{split}
+N_2 & = \frac{T_2}{k_2} \\ 
+& = \frac{k_1^2}{4 \cdot B_h \cdot B_f \cdot D_h \cdot D_f}
+\end{split}
+\end{equation*}
 
 ### Complexity of $O(c^3)$ UT
 
@@ -190,13 +196,13 @@ N_2 = \frac{k_1^2}{4 \cdot B_f \cdot B_h \cdot D_f \cdot D_h}
 
 Building on \autoref{eq:throughput-iter} from $O(c^2)$ reflection, we have
 
-\begin{equation}
-T_1 = \frac{k_1^2}{4 \cdot B_f \cdot B_h}
-\end{equation}
+\begin{equation*}
+T_1 = \frac{k_1^2}{4 \cdot B_h \cdot B_f}
+\end{equation*}
 
 \begin{equation}
 \label{eq:throughput-c-3}
-T_2 = \frac{k_1^2 \cdot k_2}{4 \cdot B_f \cdot B_h \cdot D_f \cdot D_h}
+T_2 = \frac{k_1^2 \cdot k_2}{4 \cdot B_h \cdot B_f \cdot D_h \cdot D_f}
 \end{equation}
 
 NB: $i=1$ here because reflection doesn't introduce a second layer. 
@@ -211,11 +217,20 @@ If we say each dapp chain hosts more dapp chains (such as Eth2, Polkadot), then 
 \label{eq:throughput-c-4}
 \begin{split}
 T_3 & = \frac{T_2}{D_h \cdot D_f} \cdot k_3 \\
-& = \frac{k_1^2 \cdot k_2 \cdot k_3}{4 \cdot B_f \cdot B_h \cdot D_f^2 \cdot D_h^2}
+& = \frac{k_1^2 \cdot k_2 \cdot k_3}{4 \cdot B_h \cdot B_f \cdot D_h^2 \cdot D_f^2}
 \end{split}
 \end{equation}
 
 (presuming that params $D_f$ and $D_h$ are used for dapp-chains and dapp-dapp-chains)
+
+Via \autoref{eq:simple-scaling} and \autoref{eq:throughput-c-4},
+
+\begin{equation*}
+\begin{split}
+N_3 & = \frac{T_3}{k_3} \\
+& = \frac{k_1^2 \cdot k_2}{4 \cdot B_h \cdot B_f \cdot D_h^2 \cdot D_f^2}
+\end{split}
+\end{equation*}
 
 ### Complexity of SPV proofs
 
