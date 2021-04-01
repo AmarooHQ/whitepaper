@@ -2,151 +2,156 @@
 
 \label{sec:ut-complexity}
 
-UT has two primary methods of scaling: reflection and dapp-chains. Reflection is novel. Dapp-chains are similar to many of the scaling ideas proposed for other networks (polkadot, eth2, etc), though there are fewer restrictions on dapp-chains in UT compared to other networks. Additionally, dapp-chains in UT are hosted by the simplex. This provides additional security compared to 'naked' PoS chains without sacrificing any of their other developments (e.g. finality).
+UT has two primary methods of scaling: reflection and dapp-chains. Reflection is novel. Dapp-chains are similar to many of the scaling ideas proposed for other networks (Polkadot, Eth2, etc), though there are fewer restrictions on dapp-chains in UT compared to other designs. Additionally, dapp-chains in UT are hosted by the simplex. This provides additional security compared to 'naked' PoS chains without sacrificing any of their other developments (e.g. finality), and provides greater capacity than a single host-chain.
+
+A common method of sharding is to *nest* blockchains. For example, Ethereum 2 has a root-chain called *The Beacon Chain*. From \url{https://ethereum.org/en/eth2/beacon-chain/}:
+
+> The Beacon Chain will conduct or coordinate the expanded network of shards and stakers. But it won't be like the Ethereum mainnet of today. It can't handle accounts or smart contracts.
+
+This type of configuration, where a root-chain facilitates shards, is referred to as *nesting* in this section. The shards of Ethereum 2 are *a level of nesting* above the root-chain. Sometimes people use terms like *layer 2* to describe this sort of nesting, though such usage of *layer 2* is ambiguous and potentially misleading. It easily confuses nesting with off-chain scaling methods (such as payment channels or ephemeral 'child' blockchains, e.g., Plasma), and it potentially misleads readers about the security properties of nested blockchains. Nested blockchains *can* faithfully inherit the security properties of their parent-chains, which is not the case for layer 2 solutions.
+
+\todo[inline]{look for references to 'layer2' and change to nesting as appropriate.}
+
+The following derivations focus on *throughput* of particular blockchain designs and scaling configurations. Raw throughput of a network, $T_i$, is measured in bytes/sec (B/s) for some level of nesting, $i$. Note that $T_i$ directly corresponds to a design's maximum transactions per second (tps) via ${tps}_i = \nicefrac{T_i}{Tx_{avg}}$, where $Tx_{avg}$ is the average size of a transaction. The raw B/s throughput of a chain at the $i^{th}$ level of nesting is denoted by $k_i$. Note that $T_i$ is a *calculated* value, but $k_i$ is a *parameter* that may be chosen. An increase to $k_i$ is equivalent or similar to an increase in maximum block size.
+
+Shown below are relationships between the number of chains at a level of nesting, $N_i$, and the network throughput at that level of nesting, $T_1$. For existing blockchain designs, note that $N_1 = 1$.
+
+Additionally, $O(k_i)$ is defined via $O(k_i) \equiv O(c)$.
 
 ### Complexity of $O(c)$ chains
 
-e.g. Bitcoin
+Example: Bitcoin.
 
-We define throughput to be measured in tps (transactions per second), where 
-
-\begin{equation*}
-tps = \frac{bytes/sec}{tx_{avg}}
-\end{equation*}
-
-In an $O(c)$ chain, the tps is $k_1 \: b/s$ where 
+The *raw throughput*, $k_1$, can be calculated for existing chains (e.g. Bitcoin) via the product of the maximum block size, $B_{max}$ (in bytes), and the block production frequency, $B_f$ (in hertz, or $s^{-1}$):
 
 \begin{equation*}
-k_1 = B \cdot b_r 
+k_1 = B_{max} \cdot B_f
 \end{equation*}
 
-where B is the block size and $b_r$ is the block rate $(s^{-1})$.
+Care should be taken to account for protocol extensions like *Segregated Witness* that effectively reduce the size of transactions (or, equivalently, increase the effective maximum block size).
 
-Therefore 
+The *throughput*, $T_1$, of an $O(c)$ chain is equivalent to its raw throughput:
 
 \begin{equation*}
-O(c) \: throughput = \frac{k_1}{tx_{avg}}
+T_1 = k_1
 \end{equation*}
 
-In BTC, given $k = 2000 \: b/s$ with SegWit, then 
+The complexity order of the network is given by $O(T_1) = O(k_1) = O(c)$ as expected.
+
+For Bitcoin, given $k_1 \approx 2000 \: B/s$ (accounting for SegWit), and $Tx_{avg} = 500 \: B$, then
 
 \begin{equation*}
-T \approx 4 \: tps \: at \: 500 \: byte \: transactions.
+{tps}_{Bitcoin,max} \approx \frac{2000}{Tx_{avg}} \approx 4
 \end{equation*}
+
+This is what we expect based on the measured real-world performance of Bitcoin.
 
 ### Optimistic Complexity of $O(c^2)$ chains
 
-e.g. Eth2, Polkadot
+Examples: Ethereum 2, Polkadot.
 
-Suppose the main chain has a throughput of $k_1$ b/s, headers are $D_h$ bytes and occur at $D_f$ frequency $(s^{-1})$. Thus each L2 chain consumes $D_h \cdot D_f$ b/s. Therefore the main chain supports a throughput of
+Suppose the root-chain has a throughput of $k_1$ B/s and it can support up to $N_2$ nested chains. Those nested chains have headers of $D_h$ bytes that are produced at a frequency of $D_f$ ($s^{-1}$). Thus, each nested chain consumes $D_h \cdot D_f$ B/s of the root-chain's capacity.
+
+$N_2$ is this given by:
 
 \begin{equation}
-\label{eq:throughput-main-chain}
-\frac{k_1}{D_h \cdot D_f} 
+\label{eq:n2-for-c2-traditional}
+N_2 = \frac{k_1}{D_h \cdot D_f}
 \end{equation}
 
-layer 2 chains. If each L2 chain has a throughput of $k_2$ b/s capacity, then
+NB: For blockchains of this design: $N_1 = 1$.
+
+If each nested chain has a throughput capacity of $k_2$ B/s, then:
 
 \begin{equation}
-\label{eq:throughput-chains}
+\label{eq:t2-for-c2-traditional}
 \begin{split}
 T_2 & = \frac{k_1 \cdot k_2}{D_h \cdot D_f} \\
-& \approx \frac{k^2}{D_h \cdot D_f} \; b/s
+& \approx \frac{k^2}{D_h \cdot D_f}
 \end{split}
 \end{equation}
+
+Thus $O(T_2) = O(c^2)$ as expected.
 
 ### Complexity of $O(c^2)$ reflection
 
-Each chain has $k_1$ b/s capacity, but this is split between reflections and transactions. Headers are $B_h$ bytes with a frequency of $B_f$. We'll also refer to $N$ simplex chains as $N_1$.
+There is no root-chain for a collection of mutually reflecting blockchains (i.e. a simplex), so $N_1 \neq 1$. In a simplex, each chain has $k_1$ B/s capacity, but this is split between reflections and transactions. At this foundational level (where there is no nesting yet), headers are $B_h$ bytes with a frequency of $B_f$ Hz. There are $N_1$ simplex chains.
 
-Each chain then must include 
+Reflecting a single simplex-chain requires $B_f \cdot B_h$ B/s of capacity, and each simplex-chain must reflect $N_1 - 1 \approx N_1$ other simplex-chains. This means that a simplex-chain must reserve $N_1 \cdot B_f \cdot B_h$ B/s of its capacity for reflections, denoted by $k_{1,B} = N_1 \cdot B_f \cdot B_h$. Additionally, simplex-chains must reserve some capacity for transactions, $k_{1,tx}$.
 
-\begin{equation*}
-N_1 \cdot B_h \cdot B_f \: b/s 
-\end{equation*}
+Since simplex-chains must split their capacity between reflections and transactions, set:
 
-to do reflection. So each chain has 
+\begin{equation}
+\begin{split}
+\label{eq:k1-reflection-defn}
+k_1 & = k_{1,tx} + k_{1,B} \\
+k_{1,tx} & = k_1 - k_{1,B}
+\end{split}
+\end{equation}
 
-\begin{equation*}
-k_{1,tx} = k_1 -  N_1 \cdot B_h \cdot B_f \: b/s 
-\end{equation*}
-
-for transactions. We set:
+Given $k_{1,B} = N_1 \cdot B_f \cdot B_h$:
 
 \begin{equation}
 \label{eq:k-optimal}
-\begin{split}
-k_1 = k_{1,tx} + k_{1,B} \\
-where \; k_{1,B}=N_1 \cdot B_h \cdot B_f
-\end{split}
+k_{1,tx} = k_1 - N_1 \cdot B_f \cdot B_h
 \end{equation}
 
-Then the total transactions will be $N_1 \cdot k_{1, tx}$. Expanding this, we get
+Since each simplex-chain reserves $k_{1,tx}$ B/s for transactions, the total throughput reserved for transactions will be $N_1 \cdot k_{1,tx}$. Thus:
 
-\begin{equation}
-\label{eq:throughput-reflection}
-\begin{split}
-T & = N_1 \cdot k_{1,tx} \\
-& = N_1(k_1-N_i \cdot B_h \cdot B_f) \\ 
-& = N_1 k_1 - N_i^2 \cdot B_h \cdot B_f \\
-\end{split}
-\end{equation}
+\begin{align}
+T_1 & = N_1 \cdot k_{1,tx} \label{eq:reflection-t1-start} \\
+& = N_1(k_1 - N_1 \cdot B_f \cdot B_h) \notag \\
+& = N_1 \cdot k_1 - N_1^2 \cdot B_f \cdot B_h \label{eq:reflection-t1-in-terms-of-n1}
+\end{align}
 
-For simplexes, the optimal number of simplex-chains can be derived in the following:
+The optimal number of simplex-chains will maximize throughput. We can find that optimum via:
 
 \begin{equation*}
 \begin{split}
-\frac{\partial T}{\partial N_1} & = k_1 - 2 \cdot N_1 \cdot B_h \cdot B_f
+\frac{dT_1}{dN_1} & = k_1 - 2 \cdot N_1 \cdot B_f \cdot B_h
 \end{split}
 \end{equation*}
 
-At $\frac{\partial T}{\partial N_1} = 0$, 
+At $\frac{dT_1}{dN_1} = 0$:
 
 \begin {equation}
 \label{eq:n-simplex}
 \begin{split}
-k_1 & = 2 \cdot N_1 \cdot B_h \cdot B_f \\ 
-\therefore N_1 & = \frac{k_1}{2 \cdot B_h \cdot B_f}
+k_1 & = 2 \cdot N_1 \cdot B_f \cdot B_h \\
+\therefore N_1 & = \frac{k_1}{2 \cdot B_f \cdot B_h}
 \end{split}
 \end {equation}
 
-From \autoref{eq:throughput-reflection} and substituting $N_1$ for \autoref{eq:n-simplex}, we get 
+From \autoref{eq:reflection-t1-in-terms-of-n1} and substituting $N_1$ from \autoref{eq:n-simplex}:
 
 \begin{equation}
 \label{eq:simplex-T1}
 \begin{split}
-T & = \frac{k_1^2}{4 \cdot B_h \cdot B_f} \: (k_1 - \frac{k_1}{2}) \\
-T_1 & = \frac{k_1^2}{4 \cdot B_h \cdot B_f} \: b/s
+T_1 & = k_1 \cdot \frac{k_1}{2 \cdot B_f \cdot B_h} - B_f \cdot B_h \cdot \frac{k_1^2}{4 \cdot B_f^2 \cdot B_h^2} \\
+& = \frac{2 k_1^2}{4 \cdot B_f \cdot B_h} - \frac{k_1^2}{4 \cdot B_f \cdot B_h} \\
+& = \frac{k_1^2}{4 \cdot B_f \cdot B_h}
 \end{split}
 \end{equation}
 
-What's the balance (in b/s) of transactions to reflections?
+What are $k_{1,B}$ and $k_{1,tx}$ in terms of $k_1$? From \autoref{eq:reflection-t1-start} and \autoref{eq:simplex-T1}:
 
-From \autoref{eq:throughput-reflection} and \autoref{eq:simplex-T1},
 \begin{equation*}
 \begin{split}
-N_1 \cdot k_{1,tx} & = \frac{k_1^2}{4 \cdot B_h \cdot B_f}
+N_1 \cdot k_{1,tx} & = \frac{k_1^2}{4 \cdot B_f \cdot B_h}
 \end{split}
 \end{equation*}
 
-Substituting $N_1$ for \autoref{eq:n-simplex} gives 
+Substituting $N_1$ from \autoref{eq:n-simplex} gives:
 
 \begin{equation*}
 \begin{split}
 \label{eq:k-tx-optimal}
-\frac{k_1 \cdot k_{1,tx}}{2 \cdot B_h \cdot B_f} & = \frac{k_1^2}{4 \cdot B_h \cdot B_f} \\
+\frac{k_1 \cdot k_{1,tx}}{2 \cdot B_f \cdot B_h} & = \frac{k_1^2}{4 \cdot B_f \cdot B_h} \\
 k_{1,tx} & = \frac{k_1}{2}
 \end{split}
 \end{equation*}
 
-<!-- by the power of maths and sorta-documented algebra (equations 1,2,3,4 in scans on basecamp):
-
-\begin{equation}
-\label{eq:k-tx-optimal}
-k_{1,tx} = \frac{k_1}{2}
-\end{equation} -->
-
-thus, via \autoref{eq:k-optimal}
+thus, by definition:
 
 \begin{equation*}
 k_{1,B} = \frac{k_1}{2}
@@ -156,27 +161,27 @@ k_{1,B} = \frac{k_1}{2}
 
 \todo[inline]{this section covers both throughput and optimal numbers for dapp-chains and simplex-chains}
 
-If a system has some throughput, $T$, then we can say that for some throughput at layer $i$, $T_i$, we can support 
+If a system has some throughput, $T$, then we can say that for some throughput at layer $i$, $T_i$, we can support
 
 \begin{equation*}
 \frac{T_i}{D_h \cdot D_f}
 \end{equation*}
 
-chains at layer $i + 1$. Therefore, via \autoref{eq:throughput-chains}, we get
+chains at layer $i + 1$. Therefore, via \autoref{eq:t2-for-c2-traditional}, we get
 
 \begin{equation}
 \label{eq:throughput-iter}
 T_{i+1} = \frac{T_i}{D_h \cdot D_f} \cdot k_{i+1}
 \end{equation}
 
-We can also say that, via \autoref{eq:throughput-main-chain}, 
+We can also say that, via \autoref{eq:n2-for-c2-traditional},
 
 \begin{equation}
 \label{eq:simple-scaling}
 N_{i+1} = \frac{T_{i+1}}{k_{i+1}}
 \end{equation}
 
-NB: This only works for simple scaling such as Eth2, not reflection. 
+NB: This only works for simple scaling such as Eth2, not reflection.
 
 \todo[inline]{insert maths}
 \todo[inline]{leesa: should this be in O($c^3$) section?}
@@ -185,8 +190,8 @@ Thus, the maximum number of dapp chains is given by:
 
 \begin{equation*}
 \begin{split}
-N_2 & = \frac{T_2}{k_2} \\ 
-& = \frac{k_1^2}{4 \cdot B_h \cdot B_f \cdot D_h \cdot D_f}
+N_2 & = \frac{T_2}{k_2} \\
+& = \frac{k_1^2}{4 \cdot B_f \cdot B_h \cdot D_h \cdot D_f}
 \end{split}
 \end{equation*}
 
@@ -197,15 +202,15 @@ N_2 & = \frac{T_2}{k_2} \\
 Building on \autoref{eq:throughput-iter} from $O(c^2)$ reflection, we have
 
 \begin{equation*}
-T_1 = \frac{k_1^2}{4 \cdot B_h \cdot B_f}
+T_1 = \frac{k_1^2}{4 \cdot B_f \cdot B_h}
 \end{equation*}
 
 \begin{equation}
 \label{eq:throughput-c-3}
-T_2 = \frac{k_1^2 \cdot k_2}{4 \cdot B_h \cdot B_f \cdot D_h \cdot D_f}
+T_2 = \frac{k_1^2 \cdot k_2}{4 \cdot B_f \cdot B_h \cdot D_h \cdot D_f}
 \end{equation}
 
-NB: $i=1$ here because reflection doesn't introduce a second layer. 
+NB: $i=1$ here because reflection doesn't introduce a second layer.
 
 ### Complexity of $O(c^4)$ UT
 
@@ -217,7 +222,7 @@ If we say each dapp chain hosts more dapp chains (such as Eth2, Polkadot), then 
 \label{eq:throughput-c-4}
 \begin{split}
 T_3 & = \frac{T_2}{D_h \cdot D_f} \cdot k_3 \\
-& = \frac{k_1^2 \cdot k_2 \cdot k_3}{4 \cdot B_h \cdot B_f \cdot D_h^2 \cdot D_f^2}
+& = \frac{k_1^2 \cdot k_2 \cdot k_3}{4 \cdot B_f \cdot B_h \cdot D_h^2 \cdot D_f^2}
 \end{split}
 \end{equation}
 
@@ -228,7 +233,7 @@ Via \autoref{eq:simple-scaling} and \autoref{eq:throughput-c-4},
 \begin{equation*}
 \begin{split}
 N_3 & = \frac{T_3}{k_3} \\
-& = \frac{k_1^2 \cdot k_2}{4 \cdot B_h \cdot B_f \cdot D_h^2 \cdot D_f^2}
+& = \frac{k_1^2 \cdot k_2}{4 \cdot B_f \cdot B_h \cdot D_h^2 \cdot D_f^2}
 \end{split}
 \end{equation*}
 
