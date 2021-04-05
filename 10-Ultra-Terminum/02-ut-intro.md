@@ -22,7 +22,7 @@ The essence of *Ultra Terminum* is a new method for sharing security: *PoW Refle
 
 ## Assumed Knowledge
 
-You will need to understand the following concepts to understand the foundations of *PoW Reflection* and *Ultra Terminum*:
+You will need to have mastered the following concepts to reliably understand the foundations of *PoW Reflection* and *Ultra Terminum*:
 
 * Nakamoto Consensus (i.e. how Bitcoin's blockchain works)
 * The idea of $O(c)$ and $O(c^2)$ scaling -- you can read the first few FAQs [here](https://eth.wiki/sharding/Sharding-FAQs) for a refresher
