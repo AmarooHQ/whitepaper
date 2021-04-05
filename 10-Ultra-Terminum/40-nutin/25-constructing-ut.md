@@ -72,11 +72,25 @@ If simplex-chains' consensus protocol requires accounting for reflected work, th
 
 There is a trivial method: include merkle branch proofs along with reflected headers. Specifically: when a miner on chain A includes a header from chain B, they should also include a merkle branch that shows the most recent chain A header that has been reflected by chain B. Miners would need to do this for *all* simplex-chains that they reflect. Predictably, this has overhead with order $O(N_1 \cdot log_2 N_1)$, where $N_1$ is the number of chains in the simplex.
 
-NB: **todo** something about $O(c)$ scaling still.
+NB: **todo** something about $O(c)$ scaling still rather than $O(c \log_2 c)$.
 
 This complexity is discussed in \autoref{sec:complexity-reflection-proof}.
 
+\todo[inline]{how do we solve?}
 
+#### Segmented State
+
+* process just block header txs
+* state is segmented from other chain-state, i.e. txs can read headers, but the segment of the chain that deals with headers can't read txs (b/c it doesn't depend on them, but txs can depend on headers).
+* process each chain's segmented (partial) state for header reflections only
+* miners download all blocks from all simplex-chains anyway given \autoref{sec:availability-of-blocks}
+* note here: don't need to store all the headers $N_1$ times, just their hashes. that could reduce storage of headers to like $\frac{32}{112}$ of what they were before.
+* b/c we store all block headers anyway, if reflection takes $t$ seconds to propagate through the simplex, then nodes need $t \cdot N_1 \cdot B_f \cdot B_h$ bytes to store all the headers.
+* then, each simplex-chain (per header) has $t \cdot B_f \cdot N_1$ pointers to the heads of the header-chains it reflects, and since we have $N_1$ simplex chains to track, that means $t \cdot B_f \cdot N_1^2$ many pointers are necessary to know the a complete description of all reflections
+* having that info means you can deterministically recreate SPV proofs of reflection
+* so we can treat these proofs as a witness and not include them in the blockchain
+
+\todo[inline]{write this section out and specify the algorithm -- or at least a draft}
 
 ### Confirmation Times
 

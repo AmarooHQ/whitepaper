@@ -1,4 +1,4 @@
-# Reflection with Merkle Branches
+# Reflection Including Merkle Branches
 
 What does a simplex look like if simplex-chains include proofs of reflection?
 

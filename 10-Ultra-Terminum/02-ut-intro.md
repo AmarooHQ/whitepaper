@@ -34,3 +34,9 @@ And you'll need to understand the following to understand how *Ultra Terminum* t
 * Generalizations of Nakamoto Consensus to DAGs (particularly, read [*Inclusive Block Chain Protocols*](https://www.avivz.net/pubs/15/inclusive_btc_full.pdf)[^incl-proto])
 
 [^incl-proto]: *Inclusive Block Chain Protocols* by Yoad Lewenberg, Yonatan Sompolinsky, and Aviv Zohar. <https://www.avivz.net/pubs/15/inclusive_btc_full.pdf>, <https://fc15.ifca.ai/preproceedings/paper_101.pdf>, DOI: 10.1007/978-3-662-47854-7_33
+
+## A Principle of Scaling
+
+When you have worse than $O(c)$ complexity, that thing cannot become a bottleneck. If it's not a bottleneck, then it doesn't matter that it's worse than $O(c)$.
+
+\todo[inline]{include this?}
