@@ -169,7 +169,7 @@ ethBlockWeight ethBlock = 1
 \todo[inline]{formalize the above mathematically so it can be more easily analyzed}
 
 \begin{equation}
-
+a = 1
 \end{equation}
 
 What is the meaning and impact of this change?
