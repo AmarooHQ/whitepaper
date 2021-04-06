@@ -159,8 +159,6 @@ k_{1,B} = \frac{k_1}{2}
 
 ### Replacing Transactions with Dapp-Chains
 
-\todo[inline]{this section covers both throughput and optimal numbers for dapp-chains and simplex-chains}
-
 If a system supports nested chains, then we can say that for some throughput, $T_i$, at nesting level $i$, that $(i+1)^{th}$ nesting level can support $N_{i+1}$ nested chains via:
 
 \begin{equation}
@@ -233,8 +231,6 @@ N_3 & = \frac{T_3}{k_3} \\
 \end{equation*}
 
 ### Complexity of SPV proofs
-
-\todo[inline]{I refactored the equations in this section to use $j$ instead of $i$ as the exponent of $c$. LMK if there are any $i$s left around.}
 
 Each chain -- at full capacity -- operates with order $O(c)$ by definition. Thus its state has order $O(c)$ also. The size of SPV proofs scale logarithmically with the set you're proving membership of, e.g. the number of transactions, or size of the chain's state, etc. Thus, SPV proofs scale with order $O(\log_2 c)$.
 
