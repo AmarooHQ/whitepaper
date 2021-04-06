@@ -348,3 +348,11 @@ I think this should pan out b/c miners build on the longest chain. So if, at som
 note: I think this *must* hold for double-spend mitigation stuff to work out.
 
 An alternative plan, if the above doesn't work out, is for the header to include its corresponding block-weighting that accounts for reflections. That would allow a full-node doing an initial sync to reproduce the block-ordering that accounts for reflections, even though it isn't verifying those reflections (similar to SegWit).
+
+### Effect on Confirmation Speed
+
+The idea of *confirmation* is a representation of the risk that a transaction will fail to become finalized within a blockchain network; as a transaction receives more *confirmations*, the probability that a doublespend attempt succeeds approaches 0. A transaction is said to have been *confirmed* once it has enough confirmations to pass a *breakpoint*, beyond which the probability of an attack succeeding is close (enough) to 0.
+
+
+
+\todo[inline]{finish}

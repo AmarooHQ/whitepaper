@@ -1,0 +1,16 @@
+from 2021-03-15 or thereabouts
+
+pos security
+- github wikis: eric voskuil
+-- theoretical analysis of ideas and platforms
+-- https://github.com/zack-bitcoin/amoveo-docs
+-- parasitic oracle
+- PoS - tragedy of the commons -- bribery attack on validators
+-- majority of rational validators willing to attack while paying a small amount
+-- with $666
+-- you don't have to pay them the opportunity cost, then it increases prob of attack succeeding
+-- the amount you have to pay a rational validator = capital at risk if it succeeds * increase in prob succeeding
+-- spend decreases as # of validators increases
+-- tragedy of the commons problem in PoS bribery -- zack has written some stuff, compiled some responses
+- zano - hybrid PoW/PoS
+-- prob of block is func of % of stake + % of total hashrate
