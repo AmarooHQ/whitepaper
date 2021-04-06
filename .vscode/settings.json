@@ -1,12 +1,5 @@
 {
     "cSpell.words": [
-        "Buterin",
-        "Ethash",
-        "Ouroboros",
-        "Terminum",
-        "forkable",
-        "merkle",
-        "simplex's",
         "Amaroo",
         "BFTs",
         "Buterin's",
@@ -45,6 +38,7 @@
         "sharded",
         "simplex's",
         "unpaywalled",
-        "unvalidated"
+        "unvalidated",
+        "varnothing"
     ]
 }

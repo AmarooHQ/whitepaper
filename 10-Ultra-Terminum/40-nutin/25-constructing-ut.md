@@ -105,10 +105,25 @@ However, it is not necessary for a protocol to permit *all* transactions to pote
 
 Simplex-chains can use this technique to their advantage by segregating both transactions and state which are specific to PoW reflections. That way, the state of a simplex-chain's reflections is calculable independently of anything else that simplex-chain is doing, i.e., dapp-chain extensions and other simplex-level transactions.
 
-* process just block header txs
-* state is segmented from other chain-state, i.e., txs can read headers, but the segment of the chain that deals with headers can't read txs (b/c it doesn't depend on them, but txs can depend on headers).
-* process each chain's segmented (partial) state for header reflections only
-* miners download all blocks from all simplex-chains anyway given \autoref{sec:availability-of-blocks}
+We could specify the state-transition of simplex-chains (using Ethereum's nomenclature) like this, for example:
+
+\begin{equation}
+\begin{split}
+\label{eq:segregated-state}
+\sigma_{R,t+1} & \equiv \Upsilon_R(\sigma_{R,t}, T) \\
+\sigma_{\star,t+1} & \equiv \Upsilon_{\star}(\sigma_{R,t} + \sigma_{\star,t}, T)
+\end{split}
+\end{equation}
+
+Where $\sigma_{R,t}$ is the segment of state tracking reflections and headers, $\sigma_{\star,t}$ is the global state excluding $\sigma_{R,t}$, $\Upsilon_R$ is the state-transition function for the reflections segment, and $\Upsilon_{\star}$ is the state transition function for all remaining segments. Note that if $T$ is a reflection-transaction (i.e., it contains headers to be reflected) then $\Upsilon_{\star}$ does nothing, and if $T$ is any other type of transaction then $\Upsilon_R$ does nothing.
+
+In essence \autoref{eq:segregated-state} shows that $\sigma_{R,t}$ depends *only* on the $\sigma_{R,t-1}$ state-segment and the current transaction, whereas $\sigma_{\star,t}$ depends on global state.
+
+If simplex-chains are segmented in this manner, then miners will be able to calculate the reflection-state of other simplex-chains without calculating their complete state. This would allow them to deterministically calculate proofs of reflection for all other simplex-chains.
+
+Given that the reflection-segments of simplex-chains will contain mostly repeated data (i.e., headers), and that these segments will have very similar resultant state, there should be numerous optimizations that are possible. For example, it's not necessary for a miner's node to re-download reflected headers since it already has most (or all) of them; that node just needs to know *which* headers are reflected. This reduces the effective size of simplex-blocks from $b$ to $b \cdot (\frac{g + B_h}{2B_h})$, where $g$ is the size of the relevant digest in bytes. For $g=32; B_h=112$, this reduces effective block size to $\sim 0.643 b$.
+
+\begin{comment}
 * note here: don't need to store all the headers $N_1$ times, just their hashes. that could reduce storage of headers to like $\frac{32}{112}$ of what they were before.
 * b/c we store all block headers anyway, if reflection takes $t$ seconds to propagate through the simplex, then nodes need $t \cdot N_1 \cdot B_f \cdot B_h$ bytes to store all the headers.
 * then, each simplex-chain (per header) has $t \cdot B_f \cdot N_1$ pointers to the heads of the header-chains it reflects, and since we have $N_1$ simplex chains to track, that means $t \cdot B_f \cdot N_1^2$ many pointers are necessary to know the a complete description of all reflections
@@ -116,6 +131,7 @@ Simplex-chains can use this technique to their advantage by segregating both tra
 * so we can treat these proofs as a witness and not include them in the blockchain
 
 \todo[inline]{write this section out and specify the algorithm -- or at least a draft}
+\end{comment}
 
 ### Confirmation Times
 

@@ -331,7 +331,7 @@ From forum last night:
 
 ### Recursive Reflection
 
-\todo[inline]{not sure if this should be included.}
+\todo[inline]{not sure if this should be included. if so then need to write out this section}
 
 Say chain B reflects both A and C. $A <-> B <-> C$. PoW reflection says A gets a benefit by proving that B reflects specific work from A. Does A get a security benefit by proving that C reflects B reflects A?
 
@@ -341,6 +341,10 @@ Say chain B reflects both A and C. $A <-> B <-> C$. PoW reflection says A gets a
 
 \todo[inline]{show that the result under PoW reflection is backwards compatible, i.e., existing consensus methods will settle on the same result. Needs to work for DAGs, too.}
 
+##### Notes:
+
 I think this should pan out b/c miners build on the longest chain. So if, at some time $t$, there's a disagreement between block-weighting methods, then miners will choose the reflection weighting. That should mean that a few blocks later (e.g., at $t+5$) the 'problematic' section of the chain is now re-orgd so that the methods agree again.
 
 note: I think this *must* hold for double-spend mitigation stuff to work out.
+
+An alternative plan, if the above doesn't work out, is for the header to include its corresponding block-weighting that accounts for reflections. That would allow a full-node doing an initial sync to reproduce the block-ordering that accounts for reflections, even though it isn't verifying those reflections (similar to SegWit).
