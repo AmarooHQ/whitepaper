@@ -97,7 +97,7 @@ For the purposes of our hypothetical construction, let's say that the Bitcoin ch
 
 NB: we're not that concerned with whether this is a reasonable assumption or not, we just need a way to convert the work done on each chain into the same units. (Some methods for doing this will be discussed later.)
 
-Currently, the Bitcoin network chooses the "heaviest" (most worked) chain as its common history. Bitcoin calculates the "weight" of blocks (i.e. how much work went in to them) via an estimation of how many hashes were required -- measured in `double SHA256 hashes`. Let's normalize this number so that we're working in terms of `BtcBlocks` instead of `double SHA256 hashes`; that's pretty easy, since each block is worth `1 BtcBlock` by definition. Now, we can also measure the work in `EthBlocks`, too (that being: `40 EthBlocks`).
+Currently, the Bitcoin network chooses the "heaviest" (most worked) chain as its common history. Bitcoin calculates the "weight" of blocks (i.e., how much work went in to them) via an estimation of how many hashes were required -- measured in `double SHA256 hashes`. Let's normalize this number so that we're working in terms of `BtcBlocks` instead of `double SHA256 hashes`; that's pretty easy, since each block is worth `1 BtcBlock` by definition. Now, we can also measure the work in `EthBlocks`, too (that being: `40 EthBlocks`).
 
 How can the network choose the heaviest chain? Well, here is a simple recursive function to do just that:
 
@@ -203,7 +203,7 @@ What about chains using the same alg? e.g. Bitcoin (B) and Bitcoin-copy (C)?
 - normal reflection works????? mb
 - if so, mb we don't merge mine at all.
 - requires *constant* mining tho (on all chains). like doesn't work if ppl only mine a chain sometimes (bc an attacker can come in with no competition)
-- chains mb can be DOSd? reflection can make this harder b/c honest blocks can build on DOS blocks -- if they're not private (i.e. they're available).
+- chains mb can be DOSd? reflection can make this harder b/c honest blocks can build on DOS blocks -- if they're not private (i.e., they're available).
 - but an attacker still need some profit driven reason, otherwise they're losing money by mining an attack; doublespends provide an out for that.
 - would a pseudo merge mining (PMM) scheme work if the diff of merged multi-blocks is the sum of the diffs? like mining for B and C is as difficult as mining a block on B then mining a block on C. Call these special combined blocks *dual-chain-blocks*.
 - that way there's opportunity cost but also there's a reason to do PMM: efficiency (don't need to swap between multiple chains, can reduce variance, etc)
@@ -212,7 +212,7 @@ What about chains using the same alg? e.g. Bitcoin (B) and Bitcoin-copy (C)?
 
 is this secure? if so, then mixing with reflection to other chains provides extra security as expected?
 
-under that sort of thing the 'microchain' would become like an O(c) record of all headers from all chains. then all chains would sync their reflections up against the full headers-only-network (i.e. all chain headers of all chains). each dapp can then be O(c). so we get back to O(c^2) scaling.
+under that sort of thing the 'microchain' would become like an O(c) record of all headers from all chains. then all chains would sync their reflections up against the full headers-only-network (i.e., all chain headers of all chains). each dapp can then be O(c). so we get back to O(c^2) scaling.
 
 \end{comment}
 
@@ -234,7 +234,7 @@ In blockchains like Bitcoin and Ethereum, block rewards are denominated in the *
 
 If two PoW blockchains using different hashing algorithms use the same root token, then we can directly compare the rates of work done on each via the normalized block rewards of the root token on each (normalized against time). What do I mean by this? Let's look at an example.
 
-Say we had Altcoin1 and Altcoin2: two near-identical PoW chains using different algorithms, but with the *same* root token (conserved via a 2-way peg or w/e). Firstly, we need a way to determine what their block rewards are, and the intuitive solution is to set each chain's block reward proportionally to the percentage of root tokens (i.e. *coins*) on that chain. If one of them has 100% of the root tokens, then 50 coins are generated as a reward per block. If one had 60% of the root tokens, then 30 coins are generated per block *on that chain*, and (since we only have 2 chains) 20 coins are generated per block *for the other chain*, corresponding to the remaining 40% of root tokens. One reason this method makes sense is that the ratio of coins on each chain is not affected by block rewards -- though this property only holds (as I've put it here) if both chains have the same rate of block production. We can generalize the method by normalizing against time so that we're comparing the rates of coin production rather than the block rewards themselves.
+Say we had Altcoin1 and Altcoin2: two near-identical PoW chains using different algorithms, but with the *same* root token (conserved via a 2-way peg or w/e). Firstly, we need a way to determine what their block rewards are, and the intuitive solution is to set each chain's block reward proportionally to the percentage of root tokens (i.e., *coins*) on that chain. If one of them has 100% of the root tokens, then 50 coins are generated as a reward per block. If one had 60% of the root tokens, then 30 coins are generated per block *on that chain*, and (since we only have 2 chains) 20 coins are generated per block *for the other chain*, corresponding to the remaining 40% of root tokens. One reason this method makes sense is that the ratio of coins on each chain is not affected by block rewards -- though this property only holds (as I've put it here) if both chains have the same rate of block production. We can generalize the method by normalizing against time so that we're comparing the rates of coin production rather than the block rewards themselves.
 
 Now that we know what the block rewards are and have defined them in terms of the percentage of total coins that are on that chain, we can work on comparing the chains' hash rates. What sort of foundation could we do this from? What about *equal work for equal reward*? Because we have defined block rewards in terms of *where* root tokens are held, we can measure things like *hashes per token* (when considering block rewards particularly). Crucially, we can measure this *for each chain*, which allows us to -- *contextually* -- make claims like 100 hashes of algorithm 1 are worth 25 hashes of algorithm 2.
 
@@ -252,10 +252,10 @@ In the context of *Ultra Terminum* and *Amaroo*, these aren't questions that are
 
 ### Reflection with PoS chains / otherwise unsafe consensus algs (like PoA)
 
-- helps solve *nothing at stake* problem b/c history is committed to thermodynamically (b/c of reflection in PoW chains), even with internal-based-stake (i.e. ROO); slashing can happen on like a 'watchdog' chain to ensure bad actors can't get away with it
+- helps solve *nothing at stake* problem b/c history is committed to thermodynamically (b/c of reflection in PoW chains), even with internal-based-stake (i.e., ROO); slashing can happen on like a 'watchdog' chain to ensure bad actors can't get away with it
 - provides easy way for corps to run darkchains for whatever they want (tho *how* exactly you do the dark bit is ??) -- nb: doesn't make sense to do them as simplex-chains, they can just be dapp chains.
 - "anyone" can make a little PoS chain to add to security
-- PoS chains could like safely provide mb up to 50% of security? this would mean a 50% reduction in energy usage (not that a reduction of that complexity matters -> energy usage still of same complexity, i.e. O(n))
+- PoS chains could like safely provide mb up to 50% of security? this would mean a 50% reduction in energy usage (not that a reduction of that complexity matters -> energy usage still of same complexity, i.e., O(n))
   - mb just 33% security
 - how to balance PoW rewards with PoS? if staking is just 'free money' then why would ppl mine? possible options: lower reward, burning coins is required, other?
 - would deffo need a deposit for PoS chains, still. can't start a chain from nothing, need some cost (or opportunity cost at least)
@@ -296,7 +296,7 @@ From forum last night:
 
 >> what happens if we include the overhead of merkle proofs along with the other headers?
 >
-> that overhead is approx log(n_reflected_chains) for *each header* btw, that sort of thing might not be catastrophic, but it'd be a weird governor-esq anti-scaling overhead; like potentially `n*log(n)` for header sizes. i.e. something like:
+> that overhead is approx log(n_reflected_chains) for *each header* btw, that sort of thing might not be catastrophic, but it'd be a weird governor-esq anti-scaling overhead; like potentially `n*log(n)` for header sizes, i.e., something like:
 >
 > `constant + n_simplex_chains * log2(n_simplex_chains)`
 
@@ -304,7 +304,7 @@ From forum last night:
 
 >> that sort of thing might not be catastrophic, but it'd be a weird governor-esq anti-scaling overhead
 >
-> I added some worst case sorta numbers to the WP. the "500, 500" and "500, 700" below represent log2(4096)*32 byte increases to the header size (i.e. something like 384 bytes added to headers of a base size 112 bytes and 250 bytes)
+> I added some worst case sorta numbers to the WP. the "500, 500" and "500, 700" below represent log2(4096)*32 byte increases to the header size (i.e., something like 384 bytes added to headers of a base size 112 bytes and 250 bytes)
 >
 > | (3000, 1/60, 1/60, 500, 500, 250) | 12 | 4,320 | 388,800 | $1.4\times 10^{8}$ |
 > | (3000, 1/60, 1/60, 500, 700, 250) | 12 | 3,086 | 277,714 | $7.1\times 10^{7}$ |
@@ -325,8 +325,22 @@ From forum last night:
 >
 > confirmation is typically calculated via the probability (or ability) that an attacker can reverse a transaction. it's a measure of *assurance*, as such.
 >
-> how does UT play in to this? well, more reflection => harder for an attacker to reverse. Consider the parameters of an attacker having specific resources (e.g. a bunch of sha256 ASICs -- which is of a contiguous and homogeneous quality that past analysis has alluded to, tho it's abstracted via maths that presumes that); we can thwart most of those. But if we take an "optimistic" (for the attacker) look at an attacker with O(n) resources, then we're in worst-case-ville and I think UT might degrade to, *at worst*, the best lower-bound (i.e. best of all the worst-case situations) of other blockchains. Note to self: Need to write more on this to figure it out.
+> how does UT play in to this? well, more reflection => harder for an attacker to reverse. Consider the parameters of an attacker having specific resources (e.g. a bunch of sha256 ASICs -- which is of a contiguous and homogeneous quality that past analysis has alluded to, tho it's abstracted via maths that presumes that); we can thwart most of those. But if we take an "optimistic" (for the attacker) look at an attacker with O(n) resources, then we're in worst-case-ville and I think UT might degrade to, *at worst*, the best lower-bound (i.e., best of all the worst-case situations) of other blockchains. Note to self: Need to write more on this to figure it out.
 
 \todo[inline]{how are confirmation times affected by the simplex?}
 
 ### Recursive Reflection
+
+\todo[inline]{not sure if this should be included.}
+
+Say chain B reflects both A and C. $A <-> B <-> C$. PoW reflection says A gets a benefit by proving that B reflects specific work from A. Does A get a security benefit by proving that C reflects B reflects A?
+
+### Equivalency of Reflecting and Non-Reflecting Block-Weightings
+
+\label{sec:equiv-state-block-weightings}
+
+\todo[inline]{show that the result under PoW reflection is backwards compatible, i.e., existing consensus methods will settle on the same result. Needs to work for DAGs, too.}
+
+I think this should pan out b/c miners build on the longest chain. So if, at some time $t$, there's a disagreement between block-weighting methods, then miners will choose the reflection weighting. That should mean that a few blocks later (e.g., at $t+5$) the 'problematic' section of the chain is now re-orgd so that the methods agree again.
+
+note: I think this *must* hold for double-spend mitigation stuff to work out.

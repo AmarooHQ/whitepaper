@@ -32,7 +32,7 @@ abstract: >
     *Ultra Terminum* (UT) is a hybrid PoW/PoS method providing $O(c^2)$, $O(c^3)$, or $O(c^4)$ scaling.
     \todo[inline]{check the maths for tiling complexity:}
     Additionally, a novel method of 'tiling' is proposed which provides $O(2^i \cdot c^j)$ scaling, for $i = \lceil \log_2 ((\frac{n}{c^j} + 2) / 3) \rceil, j \in \{2,3,4\}$ --- just in case.
-    With reasonable parameters (i.e. a per-node load comparable to Bitcoin) and $O(c^3)$ scaling, UT can comfortably exceed 1m tps without additional scaling methods (e.g. payment channels).
+    With reasonable parameters (i.e., a per-node load comparable to Bitcoin) and $O(c^3)$ scaling, UT can comfortably exceed 1m tps without additional scaling methods (e.g. payment channels).
     For comparison's sake, parameters that allow existing $O(c^2)$ blockchains to reach 1m tps can, under $O(c^3)$ UT, provide a raw maximum capacity of between 1 and 20 billion tps (give or take).
     \newline
     **NOTE: PRERELEASE -- DO NOT SHARE OR DISTRIBUTE!!!**

@@ -51,7 +51,6 @@ The structure itself will be captured in the TOC generated for the UT paper. Thi
       - initial
       - iteration step
     - complexity
-      - derive formula from method rather than searching OEIS
     - tiling attacks?
   - Practicality
     - data struct requirements

@@ -18,7 +18,7 @@ There is a myth that somehow proof-of-work is not capable of scaling to the exte
 
 While it's somewhat true that the *networks* which use PoW can become congested and have high confirmation latency, a cursory familiarity with the Bitcoin source code will reveal that this is due to limits which are controlled by chain parameters[^pow-chain-params]. This is why Litecoin can process more transactions than Bitcoin: the network parameters are different (in this case the target duration between blocks is 2.5 min instead of 10 min, but the block size limit is the same).
 
-If a proof-of-stake network had the same chain parameters as Bitcoin -- i.e. a maximum block size of 1,000,000 bytes + 10 minutes between blocks -- then it would have the same throughput (all else being equal). Badly chosen chain parameters *can* be problematic, but it's not directly related to proof-of-X in most cases.
+If a proof-of-stake network had the same chain parameters as Bitcoin -- i.e., a maximum block size of 1,000,000 bytes + 10 minutes between blocks -- then it would have the same throughput (all else being equal). Badly chosen chain parameters *can* be problematic, but it's not directly related to proof-of-X in most cases.
 
 [^pow-chain-params]: **todo** find proper reference to block size limit; [here's MAX_BLOCK_BASE_SIZE in a test](https://github.com/bitcoin/bitcoin/blob/384e090f9345c07fa81ccafa8cd36037f3cd0813/test/functional/test_framework/messages.py#L40)
 

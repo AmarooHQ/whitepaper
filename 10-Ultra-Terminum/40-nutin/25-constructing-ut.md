@@ -72,16 +72,41 @@ If simplex-chains' consensus protocol requires accounting for reflected work, th
 
 There is a trivial method: include merkle branch proofs along with reflected headers. Specifically: when a miner on chain A includes a header from chain B, they should also include a merkle branch that shows the most recent chain A header that has been reflected by chain B. Miners would need to do this for *all* simplex-chains that they reflect. Predictably, this has overhead with order $O(N_1 \cdot log_2 N_1)$, where $N_1$ is the number of chains in the simplex.
 
-NB: **todo** something about $O(c)$ scaling still rather than $O(c \log_2 c)$.
-
 This complexity is discussed in \autoref{sec:complexity-reflection-proof}.
 
+NB: **todo** something about $O(c)$ scaling still rather than $O(c \log_2 c)$.
 \todo[inline]{how do we solve?}
 
-#### Segmented State
+Do we *need* to include proofs of reflection, though? If miners of any simplex-chain download blocks of *all* simplex-chains -- as mentioned in \autoref{sec:availability-of-blocks} -- then including all necessary proofs of reflection *smells* redundant. Since miners have all the necessary data to construct the proofs, do they need to actually include those proofs? Could we treat them as witnesses similar to SegWit?
+
+There would be some downsides to excluding the proofs of reflection. For one, it would mean that simplex-chain nodes, during an initial sync, would not be able to verify PoW reflection without auxillary data -- potentially a lot. This may not be a problem, though, because we expect that a *non-miners'* evaluation of a simplex-chain's history will be identical regardless of whether they account for PoW reflection or not (discussed in \autoref{sec:equiv-state-block-weightings}). Secondly, it would mean that miners *must* track the state of *all* reflections in the simplex for some period of time so that they ensure the integrity of the reflection protocol. Given \autoref{sec:availability-of-blocks}, this might be possible without significant overhead.
+
+A practical method for treating proofs of reflection as witnesses that may be excluded is discussed in \autoref{sec:segmented-state}.
+
+### Segmented State
+
+\label{sec:segmented-state}
+
+Traditionally, blockchain protocols have some *global* state and a state-transition function. For example, the Ethereum Yellow Paper[^eth-yellow-paper-state-trans] says:
+
+> Ethereum, taken as a whole, can be viewed as a transaction-based state machine: we begin with a genesis state and incrementally execute transactions to morph it into some current state. It is this current state which we accept as the canonical “version” of the world of Ethereum. \newline
+> ... \newline
+> A valid state transition is one which comes about through a transaction. Formally:
+> \begin{equation*}
+>     \sigma_{t+1} \equiv \Upsilon(\sigma_t, T)
+> \end{equation*}
+> where $\Upsilon$ is the Ethereum state transition function.
+
+[^eth-yellow-paper-state-trans]: \url{https://ethereum.github.io/yellowpaper/paper.pdf} Petersburg Version 41c1837 – 2021-02-14; *Dr. Gavin Wood*, Section: 2. The Blockchain Paradigm. CID: `QmcdwaEqKjsASs1sZqxBNPw5vmypE5YL61zSvWdGoX7wtC`
+
+One of the reasons for this tradition is that transactions are permitted to depend on any parts of the global state. For example: a Bitcoin transaction is permitted to spend any UTXO, and Ethereum smart contracts can interact with any other smart contracts on the Ethereum blockchain.
+
+However, it is not necessary for a protocol to permit *all* transactions to potentially depend on global state. A protocol could specify that certain transactions may depend only on a strictly defined subset of global state, i.e., state is segmented and some of those segments is calculable independently of global state.
+
+Simplex-chains can use this technique to their advantage by segregating both transactions and state which are specific to PoW reflections. That way, the state of a simplex-chain's reflections is calculable independently of anything else that simplex-chain is doing, i.e., dapp-chain extensions and other simplex-level transactions.
 
 * process just block header txs
-* state is segmented from other chain-state, i.e. txs can read headers, but the segment of the chain that deals with headers can't read txs (b/c it doesn't depend on them, but txs can depend on headers).
+* state is segmented from other chain-state, i.e., txs can read headers, but the segment of the chain that deals with headers can't read txs (b/c it doesn't depend on them, but txs can depend on headers).
 * process each chain's segmented (partial) state for header reflections only
 * miners download all blocks from all simplex-chains anyway given \autoref{sec:availability-of-blocks}
 * note here: don't need to store all the headers $N_1$ times, just their hashes. that could reduce storage of headers to like $\frac{32}{112}$ of what they were before.
