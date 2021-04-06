@@ -4,7 +4,7 @@
 
 *Ultra Terminum* (UT) is a cross-chain consensus method that solves *Buterin's Trilemma*[^buterins-trilemma] (aka the *Scalability Trilemma*). That is: *Ultra Terminum* is a consensus method that is highly distributed, highly secure, and highly scalable. In essence, UT is a new way to organize blockchains.
 
-[^buterins-trilemma]: I think *Scalability Trilemma* is a bad name because *scalability* is one of the three conflicting qualities; you could just as well call it the *decentralization trilemma*, etc. Apparently the term was coined by Vitalik Buterin, so I prefer the name *Buterin's Trilemma*.
+[^buterins-trilemma]: I think *Scalability Trilemma* is a bad name because *scalability* is one of the three conflicting qualities; you could just as well call it the *Decentralization Trilemma*, etc. The term *Blockchain Trilemma* has been used recently, which I think is worse. Apparently the term was coined by Vitalik Buterin, so I prefer the name *Buterin's Trilemma*.
 
 \todo[inline]{something about methodology + generic modification to existing consensus methods}
 
