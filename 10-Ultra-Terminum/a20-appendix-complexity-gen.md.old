@@ -1,7 +1,10 @@
+\begin{comment}
 
 # Code-gen
 
 ## UT Complexity Comparison
+
+NOTE: see `/includes/ut/complexity/comparison-gen.py` for new versions.
 
 The following code can be copy-pasted into a python3 interpreter.
 
@@ -71,3 +74,5 @@ for r in row_inputs:
     print(table_row(r))
 # list((r, calc_tps_throughput(*r)) for r in row_inputs)
 ```
+
+\end{comment}
