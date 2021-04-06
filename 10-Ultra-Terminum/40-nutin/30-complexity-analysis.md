@@ -215,7 +215,7 @@ If we say each dapp chain hosts more dapp chains (such as Eth2, Polkadot), then 
 \label{eq:throughput-c-4}
 \begin{split}
 T_3 & = \frac{T_2}{D_f \cdot D_h} \cdot k_3 \\
-& = \frac{k_1^2 \cdot k_2 \cdot k_3}{4 \cdot B_f \cdot B_h \cdot D_h^2 \cdot D_f^2}
+& = \frac{k_1^2 \cdot k_2 \cdot k_3}{4 \cdot B_f \cdot B_h \cdot D_f^2 \cdot D_h^2}
 \end{split}
 \end{equation}
 
