@@ -391,6 +391,8 @@ Which becomes vanishingly small much faster than for a single chain. There's a b
 
 ### The Previous Block-Weighting Function
 
+\todo[inline]{exploratory notes}
+
 Let: $T$ be the target for the verification function; $T_{\text{max}}$ be the maximum meaningful target (e.g., $2^{256}$); $h$ be the hash digest as a number.
 
 If $T > h$ (the success criterion) then $T - h > 0$. $P(x); x \neq 0$ is a function which returns 1 if $x$ is positive, and 0 otherwise.
@@ -406,6 +408,33 @@ This function, $W_{\text{block},1}$ will return the weight of a block in terms o
 
 ### Block-Weighting w/ Conversion
 
+\todo[inline]{exploratory notes}
+
 In order to convert between different hashes (or even the same hash function on different blockchains) we need a method, and the best method discussed above is to normalize against the distribution of some common root-token (provided the inflation rate, mining rewards, etc are all of the same profile). The root-token's distribution will change over time, but is essentially constant over the period of a few blocks.
 
 Our goal is to convert some other block's work into something comparable to $W_{\text{block},1}$.
+
+ROO/s is generated on each chain ~proportionally to the ratio, $r_j$, of local-ROO to global-ROO. Each chain will (dependant on the hash function) have some attempts/s (hashrate) that is implicitly measured via the target value. Attempts/block is given by $\frac{T_{\text{max}}}{T_j}$, so attempts/s is given by $\frac{T_{\text{max}}}{T_j} \cdot B_{f,j}$, where $B_{f,j}$ is the block frequency measured in hertz ($s^{-1}$). The generated ROO/s is proportional to attempts/s over small time scales, i.e., there is some scaling constant. Over longer periods of time, the generated ROO/s is related to attempts/s, but not necessarily via a constant.
+
+A miner's attempts/s is proportional to their expected reward-rate over small time scales. For the chain as a whole, this is demonstrated by: expected attempts per block is proportional to the block reward, i.e., the product of expected attempts per block and some constant, $Z$, measured in ROO/attempt equals the block reward. For example: given some chain $j$ with $A_j$ expected attempts per block, and $B_{R,j}$ block reward; $A_j \cdot Z_j = B_{R,j}$. Since attempts per block is given by $\frac{T_{\text{max}}}{T_j}$, we can say $\frac{T_{\text{max}}}{T_j} \cdot Z = B_R$. Additionally, $B_R$ is proportional to $r$; i.e., $B_{R,j} = r_j \cdot B_{R,\text{global}}$. Thus $\frac{T_{\text{max}}}{T_j} \cdot Z_j = r_j \cdot B_{R,\text{global}}$.
+
+\begin{equation}
+\frac{T_{\text{max}}}{T_j} \cdot \frac{Z_j}{r_j} = B_{R,\text{global}}
+\end{equation}
+
+Thus, given two chains, $j$ and $k$:
+
+\begin{equation}
+\begin{split}
+\frac{T_{\text{max}} Z_j}{T_j r_j} & = \frac{T_{\text{max}} Z_k}{T_k r_k} \\
+\frac{T_k}{T_j} & = \frac{Z_k r_j}{Z_j r_k}
+\end{split}
+\end{equation}
+
+
+
+
+
+\begin{equation}
+r_1 = Z_1 \cdot \frac{T_{\text{max}}}{T_1} \cdot B_{f,1}
+\end{equation}
