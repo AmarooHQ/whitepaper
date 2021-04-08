@@ -388,3 +388,24 @@ NTS: for cases where multiple races need to be won, the probability of success w
 \end{equation}
 
 Which becomes vanishingly small much faster than for a single chain. There's a breakpoint around winning the race, sorta. The attacker does get some bonus from winning by a larger margin, but winning the race is still important.
+
+### The Previous Block-Weighting Function
+
+Let: $T$ be the target for the verification function; $T_{\text{max}}$ be the maximum meaningful target (e.g., $2^{256}$); $h$ be the hash digest as a number.
+
+If $T > h$ (the success criterion) then $T - h > 0$. $P(x); x \neq 0$ is a function which returns 1 if $x$ is positive, and 0 otherwise.
+
+\begin{equation}
+\begin{split}
+P(x) & = \frac{\sqrt{x^2}}{2x} + \frac{1}{2} \\
+W_{\text{block},1}(T, h) & = P(T - h) \cdot \frac{T_{\text{max}}}{T}
+\end{split}
+\end{equation}
+
+This function, $W_{\text{block},1}$ will return the weight of a block in terms of the expected number of hashes needed to generate the proof of work. This function is useful because it is able to compare blocks between chain forks, even if the difficulty is different on each fork. That is to say: this weighting-function is meaningful over long periods of time; it works both instantaneously and long-term.
+
+### Block-Weighting w/ Conversion
+
+In order to convert between different hashes (or even the same hash function on different blockchains) we need a method, and the best method discussed above is to normalize against the distribution of some common root-token (provided the inflation rate, mining rewards, etc are all of the same profile). The root-token's distribution will change over time, but is essentially constant over the period of a few blocks.
+
+Our goal is to convert some other block's work into something comparable to $W_{\text{block},1}$.

@@ -14,11 +14,7 @@ Tiles *must* have a valance of $>= 3$ for $O(n)$ scaling. If tiles had a valence
 
 However, if tiles have a valance of $3$, then each tile has up to 3 neighbors. For all tiles but the first, this is equivalent to being a node in a binary tree (where each non-root, non-leaf node has 1 parent and 2 children: 3 neighbors). In essence, this method of tiling simplexes results in 3 distinct binary trees as children of a single root tile -- this can be seen in \autoref{fig:tiled-simplex-5-d4}.
 
-Increasing the valence beyond 3 does not make sense, though. There are two reasons for this. The first reason is that, for complexity orders involving logarithms, higher valences change the *base* of the logarithms; and that has no effect on the order of complexity[^log-complexity]. The second reason is that an increase in valence requires a corresponding decrease in the capacity that is reserved for internal reflections -- this would negatively affect the security of that tile.
-
-\todo[inline]{Does increasing the valence negatively affect the security of a tile? My gut says 'yes', but IDK if I can back that up.}
-
-\todo[inline]{increasing valence will negatively affect the security of leaf-tiles b/c they have fewer reflections now.}
+Increasing the valence beyond 3 does not make sense, though. There are two reasons for this. The first reason is that, for complexity orders involving logarithms, higher valences change the *base* of the logarithms; and that has no effect on the order of complexity[^log-complexity]. The second reason is: an increase in valence means that the tile's capacity for reflections is divided into more pieces, only one of which is reserved for internal reflections; that means that the tile will have fewer internal reflections (and more external reflections) which decreases the security of leaf tiles.
 
 [^log-complexity]: Complexity orders involving logarithms are sensitive to changes in the base *if* the logarithms are part of an exponent. e.g. $O(3^{\log_2 n}) > O(3^{\log_4 n})$. These considerations aren't relevant here, though.
 
