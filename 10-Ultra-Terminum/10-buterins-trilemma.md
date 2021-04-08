@@ -27,7 +27,7 @@ we need scale                    (**conflict**)
 \label{fig:trilemma-core-conflict}
 \end{figure}
 
-To break the core conflict we need to look at the underlying assumptions.
+To understand the core conflict we need to look at the underlying assumptions.
 
 Buterin writes in the Ethereum sharding FAQ regarding the *shard + small blocks* strategy:
 
@@ -69,7 +69,7 @@ We have some hints to conditions that might belong to a *silver bullet* solution
 
 **This is the crux of the problem: how do you construct a sharded blockchain (scalable) such that attacking a shard is about as difficult as attacking the full network (secure), whilst ensuring that the security of the network does not require validating all shards (decentralized)?**
 
-## Assumptions
+### Assumptions
 
 Here are some additional underlying assumptions that are either common or which I expect to be common:
 
@@ -81,3 +81,9 @@ Here are some additional underlying assumptions that are either common or which 
 These assumptions *are* true in lots of cases (arguably in all cases up to now). Do they need to be?
 
 NB: I call them *assumptions*; some people will likely (and rightly) take issue with that and call them *conclusions* instead. For our purposes there isn't really a difference; I include them here so that I can later show you under which conditions they are all false.
+
+## Conjecture: A Principle of Scaling
+
+When you have worse than $O(c)$ complexity, that thing cannot become a bottleneck. If it's not a bottleneck, then it doesn't matter that it's worse than $O(c)$.
+
+\todo[inline]{include this?}
