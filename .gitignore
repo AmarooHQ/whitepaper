@@ -12,3 +12,4 @@ includes/ut/tiling/*.svg
 # copies of pdfs i'm moving to root folder, we can remove this next line later if desired
 /*.pdf
 node_modules
+/*.zip

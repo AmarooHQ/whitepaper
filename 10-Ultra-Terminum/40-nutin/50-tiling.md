@@ -1,10 +1,15 @@
 ## Tiling Simplexes
 
+\label{sec:tiling}
+
 Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes are tiled, we call the result a *simplex-tiling*.
 
 Maximal Simplex: a simplex with the maximum number of simplex-chains under $O(c)$ constraints.
 
 A tile is a quadrifurcated maximal simplex. That is: it is a simplex that deliberately reserves only $\frac{1}{4}$ of its otherwise maximum capacity for internal reflections. By definition, the maximum capacity of a tile is $\frac{1}{4}$ the maximum capacity of an equivalent maximal simplex. Why quadrifurcate capacity like this? In a maximal simplex, all reflections are between simplex-chains within that simplex, i.e., all reflections are internal. However, by reserving $\frac{3}{4}$ of a simplex's maximum capacity, that simplex (which thus becomes the root tile) can reflect all simplex-chains in 3 adjacent 'children' tiles. Those adjacent tiles do not reflect their siblings, though; initially, their only external reflections are with simplex-chains in the parent tile. Each child tile, at this stage, has only reserved 50% of the capacity of an equivalent maximal simplex -- 25% for externally reflecting its parent's simplex-chains, and 25% for internally reflecting its own simplex-chains. Thus, each tile is able to reflect all simplex-chains of the parent tile *and* two additional children tiles. Children tiles can be instantiated in an ad-hoc basis, i.e., as a simplex-tiling (or an individual tile) approaches maximum capacity.
+
+\todo[inline]{from forum: \\ Max: It's not that `k` decreases, but the proportion of `k` dedicated to internal reflections decreases. like it's optimal to have `k/2` dedicated to reflections, and `k/2` dedicated to transactions. when tiling with a valence of 3, the `k/2` for reflections is qudrifurcated, so there's `k/8` dedicated for each group of reflections (internal, parent, child1, child2). \\
+Leesa: oki yup this makes a lot of sense now. I felt like the `k` explanations were helpful in solidifying understanding. I think bc it helped to make the concept more concrete since it linked back to the proofs.}
 
 ### Tile Valence
 

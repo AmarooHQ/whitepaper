@@ -2,17 +2,44 @@
 
 \label{sec:constructing-ut}
 
+*PoW reflection* can be used as a foundational technique to build an $O(c^2)$ base-layer for a blockchain network (which I call *the simplex*). This section details the construction of such a foundation, and how it can be extended up to $O(c^4)$ complexity. The $O(n)$ scaling configuration is detailed in \autoref{sec:tiling}.
+
+Such a foundation (*the simplex*) is *not* a sharded blockchain -- there's no requirement that chains in this base-layer are either interchangeable or use the same primitives. This was demonstrated via the example in \autoref{sec:two-blockchains}. Rather, the simplex is an emergent construct that is created via the *relationships* between blockchains. Instead of one blockchain being split into many (as occurs with sharding), the simplex is many blockchains becoming one coherent network.
+
+\todo[inline]{Should I summarize the section here? e.g.: this section will cover generalizing to N reflections, the simplex, dapp chains, then analysis. IDK, seems superfluous}
+
 ### Generalizing Reflection
 
 \label{sec:generalizing-reflection}
 
-If we can do reflection between two chains, can we also do reflection between three or more chains?
+*PoW reflection* is, in essence, the idea that a chain can acknowledge that its history has been confirmed by a different chain[^reflection-prior]. That is a simplification, but it is the essence of it.
 
-\todo[inline]{write this out}
+[^reflection-prior]: I have not been able to find any existing discussion of this method. If you know of any existing discussion of this method, please post a link to the forum topic that is linked in the abstract.
+
+In principle, the necessary capabilities that some chain, $C_A$, must have in order for it to be reflected by another chain, $C_B$, are:
+
+1. The headers of $C_A$ can be freely recorded, unambiguously, in $C_B$;
+2. The headers of $C_B$ can be freely recorded, unambiguously, in $C_A$;
+3. $C_A$ is able to prove that its headers have been recorded in $C_B$, and has full knowledge of which headers have been recorded; and
+4. $C_A$ integrates this knowledge into its chain-weighting algorithm.
+
+If $C_A$ and $C_B$ are doing *mutual* PoW reflection, then the same conditions must be satisfied by $C_B$.
+
+Is $C_A$ able to *simultaneously* do reflection with more than one other chain, e.g., $C_C ... C_Z$? Yes. There is nothing that we have covered so far that would prevent this. If *PoW reflection* is viable with one other foreign chain, then it is viable with *many* other foreign chains. However, the dynamics do becoming increasingly complex, as we will now see.
 
 ### The Simplex
 
 \label{sec:the-simplex}
+
+When two or more blockchains *mutually reflect* each-other, they form a *simplex*[^simplex-maths]. For the sake of brevity: all *reflections* within a simplex are *mutual reflections*, and I will omit *mutual* from now on when discussing them.
+
+When a blockchain is part of a simplex, it is called a *simplex-chain* (as distinct from *dapp-chains*).
+
+To maintain consistency with the geometric usage of the term *simplex*: a simplex with $k+1$ chains is called a $k$-simplex or a $(k+1)$-chain simplex[^simplex-approx]. In a $k$-simplex, each simplex-chain has $k$ reflections (one reflection for each of the other simplex-chains). A $k$-simplex has, in total, ${k+1} \choose 2$ reflections.
+
+[^simplex-maths]: The name is taken from geometry (particularly the higher-dimensional kind). A simplex, for a given dimensionality, is the uniquely simplest polytope; e.g., a line in 1D space, a triangle in 2D space, a tetrahedron in 3D space, etc. A $k$-dimensional simplex is known as a $k$-simplex. As shown in \autoref{fig:simplexes}, the 2D projection of a $k$-simplex is identical to a diagram of all possible mutual reflections between $k+1$ blockchains, where each chain is represented by a vertex and each mutual reflection is represented by an edge.
+
+[^simplex-approx]: \textbf{NB:} I will ignore this distinction for $k \gg 1$.
 
 \begin{figure}
     \centering
@@ -20,21 +47,21 @@ If we can do reflection between two chains, can we also do reflection between th
     \begin{subfigure}{.28\textwidth}
         \centering
         \includegraphics[width=.95\linewidth]{ut/tiling/d1-many-tiled-2-simplexes}
-        \caption{PoW reflection between 2 blockchains. The most basic non-trivial simplex.}
+        \caption{PoW reflection between 2 blockchains. A 1-simplex. The most basic non-trivial simplex.}
         \label{fig:simplex-2-d1}
     \end{subfigure}%%
     \hfill
     \begin{subfigure}{.28\textwidth}
         \centering
         \includegraphics[width=.95\linewidth]{ut/tiling/d1-many-tiled-7-simplexes}
-        \caption{PoW reflection between 7 blockchains; a 7-chain simplex.}
+        \caption{PoW reflection between 7 blockchains; a 7-chain simplex; a 6-simplex.}
         \label{fig:simplex-7-d1}
     \end{subfigure}%%
     \hfill
     \begin{subfigure}{.28\textwidth}
         \centering
         \includegraphics[width=.95\linewidth]{ut/tiling/d1-many-tiled-17-simplexes}
-        \caption{A 17-chain simplex.}
+        \caption{A 17-chain simplex; a 16-simplex.}
         \label{fig:simplex-17-d1}
     \end{subfigure}
     \hfill
