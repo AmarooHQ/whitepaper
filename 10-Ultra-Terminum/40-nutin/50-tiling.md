@@ -128,6 +128,8 @@ In a tessellating set of tiles, we can approximate the distance between tiles vi
 
 However, the distance between any 2 of $n$ tiles, using the binary-tree method, is $\sim \log_2 n$. So it's (maybe counterintuitively) more efficient to use non-tessellating tiles.
 
+\todo[inline]{\href{https://mindyourdecisions.com/blog/2016/07/03/distance-between-two-random-points-in-a-square-sunday-puzzle/}{this maths problem} about the average distance between 2 points in a square (analogous to tessellating tiles) has an answer with a *log* in it. todo: mb tessellating tiles are actually more efficient?}
+
 #### Network Complexity
 
 Since $O(N_{tiles}) = O(\frac{n}{c^j})$, and each tile has order $O(c^j)$, the complexity of the network  overall is given by the product of a tile's order by the number of tiles:

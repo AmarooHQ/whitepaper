@@ -318,8 +318,10 @@ Of these three values, header size is the only value we *cannot* choose arbitrar
 
 Changing all header sizes by some factor has different effects for different UT configurations. For $O(c^2)$ configurations of UT, the effect on throughput is linearly proportional to the factor; doubling the header sizes reduces overall throughput by a factor of 2. However, for the $O(c^3)$ configuration of UT, the effect is quadratically proportional to the factor; doubling the header sizes will reduce overall throughput by a factor of 4! The relationship is even worse for the $O(c^4)$ configuration of UT, where the effect is cubicly proportional.
 
-It is worth noting, though, that different header schemes can be used in each level of nesting. This means that if, say, dapp-chains need larger headers than simplex-chains, then there isn't a negative effect on the capacity of the simplex (i.e., the layer(s) beneath).
+It is worth noting, though, that different header schemes can be used in each level of nesting. This means that if, say, dapp-chains need larger headers than simplex-chains, then there isn't a negative effect on the capacity of the simplex (i.e., the level(s) beneath).
 
-This effect is not unique to UT, though. In general, any system of sharding is affected in this manner when the headers of a child-chain are included in the parent-chain's blocks.
+This effect is not unique to UT, though. In general, any system of sharding is also affected in this manner: when the headers of a child-chain are included in the parent-chain's blocks.
 
-Practically, this effect means that a decrease to the size of headers has *increasing* marginal benefit. Compared to $O(c)$ blockchains (e.g. Bitcoin), efficient header schemes are far more important for sharded blockchain networks.
+Practically, this effect means that a decrease to the size of headers has *increasing* marginal benefit. Compared to $O(c)$ blockchains (e.g. Bitcoin), efficient header schemes are far more important for UT and sharded blockchain networks.
+
+\todo[inline]{(todo/polish) look for references to sharding and, if they are talking about UT, change to talk about UT and sharding or correct the wording.}
