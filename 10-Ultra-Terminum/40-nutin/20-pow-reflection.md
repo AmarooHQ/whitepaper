@@ -434,7 +434,7 @@ Thus, given two chains, $j$ and $k$:
 \end{equation}
 
 
-
+nb: I need to consider that the history that the miner builds on increases with time (b/c reflections start accumulating, and once that miner publishes a block, then that block will have sigma-weight more than just its own weight). so the place to look isn't what a block weighs, it's to look at what a block is building on -- how much does that weigh.
 
 
 \begin{equation}
