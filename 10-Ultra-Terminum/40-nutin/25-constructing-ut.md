@@ -73,7 +73,21 @@ To maintain consistency with the geometric usage of the term *simplex*: a simple
 
 \label{sec:dapp-chains}
 
-\todo[inline]{write it}
+\bquote{
+    Decoupling the underlying consensus from the state-transition has been informally proposed in private for at least two years---Max Kaye was a proponent of such a strategy during the very early days of Ethereum.
+}{
+    Dr. Gavin Wood; \href{https://cloudflare-ipfs.com/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Polkadot Whitepaper, s2.2}
+}
+
+*Dapp-chains* are the method by which *Ultra Terminum* exceeds $O(c^2)$ scaling without using the method described in \autoref{sec:tiling}. To be clear: the $O(c^2)$ configuration of UT is compatible with that other method (and it is thus sufficient to reach $O(n)$ scalability). However, there are *decisive* reasons to introduce and use *dapp-chains*. Dapp-chains provide features that the $O(n)$ scaling configuration alone cannot provide. Additionally, dapp-chains increase the simplex's scalability to $O(c^3)$ or $O(c^4)$.
+
+What are *dapp-chains*? Dapp-chains are *application-specific* PoS blockchains and their state- and transaction-schemes are architecturally distinct from those used in the simplex. The headers of dapp-chains are encoded as simplex-transactions, which means that techniques like *slashing* are first-class operations within the *PoW* context provided by the simplex. *This solves the nothing-at-stake problem for any PoS mechanism*, provided the necessary primitives can be encoded in a simplex-transaction. Practically speaking, an input-output transaction system with scripting capabilities (like that of Bitcoin) can be created to facilitate the necessary primitives. Additionally, different simplex-chains can implement different scripting systems, effectively facilitating any practical PoS-esq consensus mechanism.
+
+There are numerous practical benefits to using dapp-chains in this fashion. The abstraction interface that exists between simplex-chains and dapp-chains means that existing PoS blockchain schemes can be easily integrated. Existing PoW blockchain schemes can be integrated, too, though will likely require some additional work.
+
+The most likely method of integration has four components: modification of the headers, modification of existing slashing protocols, implementation of a two-way peg, and support for intra-simplex SPV proofs. For example: [Parity Technologies' OpenEthereum](https://github.com/openethereum/openethereum) could be integrated as a dapp-chain with the creation of a new [header format](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/ethcore/types/src/header.rs), the creation or modification of a suitable [engine](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/ethcore/src/engines/basic_authority.rs), and the implementation of suitable [builtins](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/vm/builtin/src/lib.rs) that facilitate both the two-way peg and intra-simplex SPV proofs[^builtins-or-sc].
+
+[^builtins-or-sc]: Note: instead of builtins, these requirements could be met via EVM/WASM smart contracts.
 
 #### Dapp-dapp-chains
 
