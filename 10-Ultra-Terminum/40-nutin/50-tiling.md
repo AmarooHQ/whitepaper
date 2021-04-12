@@ -168,3 +168,7 @@ Galaxies that are close enough to us, and that have a low enough relative veloci
 [^stars-1b-ly]: <http://www.icc.dur.ac.uk/~tt/Lectures/Galaxies/LocalGroup/Back/superc.html>, <https://archive.vn/wEu5E>, <http://web.archive.org/web/20201021141956/http://www.icc.dur.ac.uk/~tt/Lectures/Galaxies/LocalGroup/Back/superc.html>
 
 \end{comment}
+
+#### What About Tiled 3-Simplexes?
+
+NTS: 3-simplexes have 4 simplex-chains; the simplest simplex-tile for which O(n) tiling works. Security isn't as good as doing that, tho.

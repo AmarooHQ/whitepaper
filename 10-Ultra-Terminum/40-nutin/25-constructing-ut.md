@@ -81,13 +81,35 @@ To maintain consistency with the geometric usage of the term *simplex*: a simple
 
 *Dapp-chains* are the method by which *Ultra Terminum* exceeds $O(c^2)$ scaling without using the method described in \autoref{sec:tiling}. To be clear: the $O(c^2)$ configuration of UT is compatible with that other method (and it is thus sufficient to reach $O(n)$ scalability). However, there are *decisive* reasons to introduce and use *dapp-chains*. Dapp-chains provide features that the $O(n)$ scaling configuration alone cannot provide. Additionally, dapp-chains increase the simplex's scalability to $O(c^3)$ or $O(c^4)$.
 
-What are *dapp-chains*? Dapp-chains are *application-specific* PoS blockchains with architecturally distinct state- and transaction-schemes (distinct from those used in the simplex). The headers of dapp-chains are encoded as simplex-transactions, which means that techniques like *slashing* are first-class operations within the *PoW* context provided by the simplex. *This solves the nothing-at-stake problem for any PoS mechanism*, provided the necessary primitives can be encoded in a simplex-transaction. Practically speaking, an input-output transaction system with scripting capabilities (like that of Bitcoin) can be created to facilitate the necessary primitives. Additionally, different simplex-chains can implement different scripting systems, effectively facilitating any practical PoS-esq consensus mechanism.
+What are *dapp-chains*? Dapp-chains are *application-specific* PoS blockchains with architecturally distinct state- and transaction-schemes (distinct from those used in the simplex, and each other). The headers of dapp-chains are encoded as simplex-transactions, which means that techniques like *slashing* are first-class operations within the **PoW** context provided by the simplex. *This solves the nothing-at-stake problem for any PoS mechanism*, provided the necessary primitives can be encoded in a simplex-transaction. Practically speaking, a simple input-output transaction system with scripting capabilities (like that of Bitcoin) can be created to facilitate the necessary primitives. Additionally, different simplex-chains can implement different scripting systems, effectively facilitating any practical PoS-esq consensus mechanism.
 
-There are numerous practical benefits to using dapp-chains in this fashion. The abstraction interface that exists between simplex-chains and dapp-chains means that existing PoS blockchain schemes can be easily integrated. Existing PoW blockchain schemes can be integrated, too, though will likely require some additional work.
+There are numerous practical benefits to using dapp-chains in this fashion. One benefit is: the abstraction interface that exists between simplex-chains and dapp-chains means that existing PoS blockchain schemes can be easily integrated. Existing PoW blockchain schemes can be integrated, too, though will likely require some additional work.
 
 The most likely method of integration has four components: modification of the headers, modification of existing slashing protocols, implementation of a two-way peg, and support for intra-simplex SPV proofs. For example: [Parity Technologies' OpenEthereum](https://github.com/openethereum/openethereum) could be integrated as a dapp-chain with the creation of a new [header format](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/ethcore/types/src/header.rs), the creation or modification of a suitable [engine](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/ethcore/src/engines/basic_authority.rs), and the implementation of suitable [builtins](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/vm/builtin/src/lib.rs) that facilitate both the two-way peg and intra-simplex SPV proofs[^builtins-or-sc].
 
 [^builtins-or-sc]: Note: instead of builtins, these requirements could be met via EVM/WASM smart contracts.
+
+\todo[inline]{finish below}
+
+The abstraction layer between simplex-chains and dapp-chains has another advantage; one with great *reach*. Any PoS system with special features, say with [finality guarantees](https://github.com/w3f/consensus/blob/master/pdf/grandpa.pdf) or one that is [provably secure](https://iohk.io/en/research/library/papers/ouroborosa-provably-secure-proof-of-stake-blockchain-protocol/), then *something about how their security guarantees stick around*
+
+plan:
+
+- advantages
+  - abstraction -> universality
+  - reach -> use existing PoS tech without sacrifice/compromise
+  - cross-community benefits
+  - optimized/specialized dapps - e.g. dex (high freq too mb)
+  - inter-dapp-chain dependencies -> synergies
+    - e.g. two chains can both depend on the "bitcoin SPV proofs" chain. their full nodes need to run that other dapp-chain as a dependency
+  - use tech like mimblewimble without changing the entire system
+  - in general deploy new tech quickly, low risk, high cadence, isolated (sandboxed)
+    - tangent about sandbox: is there some good structural principles that prevent classes of attacks? I guess that requiring SPV cross-chain proofs and/or latency stops lots of that (e.g. no re-entrancy)
+  - low overhead for integrating wallets b/c mostly stuff is the same (e.g. interfaces, etc)
+    - nb: need a common format for addresses or some understanding of them at a data/type level
+  - *all* the layer-2 solns
+  - todo: more tomorrow
+
 
 #### Dapp-dapp-chains
 
