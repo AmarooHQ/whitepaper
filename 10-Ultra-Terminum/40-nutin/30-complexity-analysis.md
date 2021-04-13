@@ -4,9 +4,11 @@
 
 UT has two primary methods of scaling: reflection and dapp-chains. Reflection is novel. Dapp-chains are similar to many of the scaling ideas proposed for other networks (Polkadot, Eth2, etc), though there are fewer restrictions on dapp-chains in UT compared to other designs. Additionally, dapp-chains in UT are hosted by the simplex. This provides additional security compared to 'naked' PoS chains without sacrificing any of their other developments (e.g. finality), and provides greater capacity than a single host-chain.
 
-A common method of sharding is to *nest* blockchains. For example, Ethereum 2 has a root-chain called *The Beacon Chain*. From \url{https://ethereum.org/en/eth2/beacon-chain/}:
+A common method of sharding is to *nest* blockchains. For example, Ethereum 2 has a root-chain called *The Beacon Chain*.
 
-> The Beacon Chain will conduct or coordinate the expanded network of shards and stakers. But it won't be like the Ethereum mainnet of today. It can't handle accounts or smart contracts.
+\bquote{
+    The Beacon Chain will conduct or coordinate the expanded network of shards and stakers. But it won't be like the Ethereum mainnet of today. It can't handle accounts or smart contracts.
+}{\url{https://ethereum.org/en/eth2/beacon-chain/}}
 
 This type of configuration, where a root-chain facilitates shards, is referred to as *nesting* in this section. The shards of Ethereum 2 are *a level of nesting* above the root-chain. Sometimes people use terms like *layer 2* to describe this sort of nesting, though such usage of *layer 2* is ambiguous and potentially misleading. It easily confuses nesting with off-chain scaling methods (such as payment channels or ephemeral 'child' blockchains, e.g., Plasma), and it potentially misleads readers about the security properties of nested blockchains. Nested blockchains *can* faithfully inherit the security properties of their parent-chains, which is not the case for layer 2 solutions. Furthermore, terms like *layer x* cannot accurately describe UT's design. Would UT's dapp-chains (having equal or better security properties than comparable chains like Ethereum 2, Polkadot, or Cardano) be *layer 1* or *layer 2*? It would be misleading to call them *layer 2* because UT dapp-chains have all the security qualities of other PoS chains, *and more*. If they were called *layer 1* chains, then what is the simplex -- *layer 0*? It is clear that the common idea behind *layer 1/2* scaling does not have sufficient capacity to accurately describe UT's simplex- and dapp-chains; it is inadequate.
 

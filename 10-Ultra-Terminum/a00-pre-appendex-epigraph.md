@@ -1,4 +1,13 @@
 \newpage
+
+%% tell fancyhdr to not do a style on this page
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \fancyhead[RE,RO]{}
+    \fancyfoot[C]{\thepage\ of \zpageref{LastPage}}
+}
+\thispagestyle{plain}
+
 \vspace*{\fill}
 \setlength\epigraphwidth{.5\textwidth}
 \epigraph{
@@ -7,5 +16,6 @@
     \hspace{4pt} “No, no,” Apheta murmured. “Every hope.”
 }{}
 \vspace*{\fill}
+
 \newpage
 \appendix

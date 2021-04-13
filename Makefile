@@ -34,6 +34,7 @@ wc:
 mk-latex-pdf:
 	# pdflatex -output-directory=$(OUTDIR) $(WPNOEXT).tex
 	latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
+	cp $(WPNOEXT).pdf ./whitepaper-latest.pdf
 
 %.md:
 	echo 'skipping task for .md files'

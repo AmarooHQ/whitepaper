@@ -117,6 +117,25 @@ plan:
 
 \todo[inline]{write it}
 
+plan:
+
+- dapp-dapp-chains are the shards of dapp-chains
+  - These are based on whatever is implemented in the dapp-chain; so abstracted away from UT
+  - If Eth2 is $O(c^2)$ with shards, and we modify Eth2 to run as a dapp-chain, then Eth2 shards would be dapp-dapp-chains and UT's max complexity would be $O(c^4)$.
+  - Basically we can use other $O(c^2)$ chains as needed to create lots of capacity w/ no loss of security
+  - dapp-dapp-chains aren't a big deal really, just nice to have.
+
+## Practical Considerations for UT's Design
+
+plan:
+
+- there are some sticking points with a naive design
+  - don't want to reflect blocks that don't exist
+  - need to reflect headers, but including merkle proofs-of-reflection would be cumbersome
+- what about security implications and/or confirmation time?
+
+\todo[inline]{nb: mb security/conf bits go in PoW reflection, or stay here, IDK yet}
+
 ### Availability of Reflected Blocks
 
 \label{sec:availability-of-blocks}
@@ -156,17 +175,17 @@ A practical method for treating proofs of reflection as witnesses that may be ex
 
 \label{sec:segmented-state}
 
-Traditionally, blockchain protocols have some *global* state and a state-transition function. For example, the Ethereum Yellow Paper[^eth-yellow-paper-state-trans] says:
+Traditionally, blockchain protocols have some *global* state and a state-transition function. For example, the Ethereum Yellow Paper says:
 
-> Ethereum, taken as a whole, can be viewed as a transaction-based state machine: we begin with a genesis state and incrementally execute transactions to morph it into some current state. It is this current state which we accept as the canonical “version” of the world of Ethereum. \newline
-> ... \newline
-> A valid state transition is one which comes about through a transaction. Formally:
-> \begin{equation*}
->     \sigma_{t+1} \equiv \Upsilon(\sigma_t, T)
-> \end{equation*}
-> where $\Upsilon$ is the Ethereum state transition function.
-
-[^eth-yellow-paper-state-trans]: \url{https://ethereum.github.io/yellowpaper/paper.pdf} Petersburg Version 41c1837 – 2021-02-14; *Dr. Gavin Wood*, Section: 2. The Blockchain Paradigm. CID: `QmcdwaEqKjsASs1sZqxBNPw5vmypE5YL61zSvWdGoX7wtC`
+\bquote{
+    Ethereum, taken as a whole, can be viewed as a transaction-based state machine: we begin with a genesis state and incrementally execute transactions to morph it into some current state. It is this current state which we accept as the canonical “version” of the world of Ethereum. \\
+    \ldots \\
+    A valid state transition is one which comes about through a transaction. Formally:
+    \begin{equation*}
+        \sigma_{t+1} \equiv \Upsilon(\sigma_t, T)
+    \end{equation*}
+    where $\Upsilon$ is the Ethereum state transition function.
+}{Dr. Gavin Wood; \href{https://cloudflare-ipfs.com/ipfs/QmcdwaEqKjsASs1sZqxBNPw5vmypE5YL61zSvWdGoX7wtC}{Ethereum Yellow Paper / Petersburg Version 41c1837}, s2}
 
 One of the reasons for this tradition is that transactions are permitted to depend on any parts of the global state. For example: a Bitcoin transaction is permitted to spend any UTXO, and Ethereum smart contracts can interact with any other smart contracts on the Ethereum blockchain.
 
