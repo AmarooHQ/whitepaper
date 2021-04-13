@@ -2,7 +2,7 @@
 
 ### 51% and double-spends
 
-\todo[inline]{discuss 51 percent and how difficult it is in UT vs Bitcoin, et al.}
+\todo{discuss 51 percent and how difficult it is in UT vs Bitcoin, et al.}
 
 need to do 51% attacks on 51% of simplex chains
 
@@ -10,13 +10,13 @@ similar to how you can theoretically win govt in a democracy by winning 51% of v
 
 ### Poisoning the Well
 
-\todo[inline]{the deliberate and malicious production of malformed data}
+\todo{the deliberate and malicious production of malformed data}
 
 - e.g. making blocks with valid PoW but invalid contents so that they get reflected
 
 ### Selfish Mining
 
-\todo[inline]{discuss selfish mining, and how it doesn't work}
+\todo{discuss selfish mining, and how it doesn't work}
 
 - PoW reflection means that withholding blocks is a big disadvantage b/c you want the network (and other chains) to know about them ASAP.
 
@@ -27,4 +27,4 @@ similar to how you can theoretically win govt in a democracy by winning 51% of v
 
 ### other attacks?
 
-\todo[inline]{find some}
+\todo{find some}

@@ -2,7 +2,7 @@
 
 ## Answering *Buterin's Trilemma*
 
-\todo[inline]{write out some explanation of how B.T. is answered.}
+\todo{write out some explanation of how B.T. is answered.}
 
 \begin{figure}
 \centering

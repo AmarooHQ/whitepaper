@@ -6,7 +6,7 @@
 
 [^buterins-trilemma]: I think *Scalability Trilemma* is a bad name because *scalability* is one of the three conflicting qualities; you could just as well call it the *Decentralization Trilemma*, etc. The term *Blockchain Trilemma* has been used recently, which I think is worse. Apparently the term was coined by Vitalik Buterin, so I prefer the name *Buterin's Trilemma*.
 
-\todo[inline]{something about methodology + generic modification to existing consensus methods}
+\todo{something about methodology + generic modification to existing consensus methods}
 
 It may be more accurate to describe UT as a new *methodology* because
 
@@ -16,9 +16,9 @@ UT is capable of supporting millions of transactions per second in the security 
 
 The essence of *Ultra Terminum* is a new method for sharing security: *PoW Reflection*. This technique allows us to build complex blockchain networks with powerful scaling properties. This is how *Ultra Terminum* can scale with orders $O(c^2)$, $O(c^3)$, $O(c^4)$, and -- in the right contexts -- $O(n)$.
 
-\todo[inline]{UT isn't like a singular consensus method, more like a multi-method or methodology. todo: decide what to call this. a meta-consensus method? a multi-consensus method? a consensus multi-method? a consensus methodology?}
+\todo{UT isn't like a singular consensus method, more like a multi-method or methodology. todo: decide what to call this. a meta-consensus method? a multi-consensus method? a consensus multi-method? a consensus methodology?}
 
-\todo[inline]{What do we call other consensus methods? individual/singular/atomic/foundational mb}
+\todo{What do we call other consensus methods? individual/singular/atomic/foundational mb}
 
 ## Assumed Knowledge
 

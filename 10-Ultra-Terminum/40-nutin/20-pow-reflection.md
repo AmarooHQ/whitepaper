@@ -1,6 +1,6 @@
 ## PoW reflection
 
-\todo[inline]{note: reminder about secrecy and patent-ability, this is part of it}
+\todo{note: reminder about secrecy and patent-ability, this is part of it}
 
 Can blockchains work cooperatively to secure each other? It certainly seems that there is nothing *in principle* that prohibits this. Can we come up with a way to do this?
 
@@ -40,7 +40,7 @@ After a Bitcoin block is produced, an Ethereum miner includes an Eth tx containi
 
 Let's consider a hypothetical change to Bitcoin. The protocol is extended to add support for tracking Ethereum's chain-headers. That is, a bespoke protocol extension is created that allows/requires miners to publish known Ethereum chain-headers along with their Bitcoin block. Similar to the way Ethereum tracks Bitcoin, now Bitcoin also tracks Ethereum.
 
-\todo[inline]{[ANYONE] Update "Eth[j]" syntax to match $BTC_k$ syntax used in prev table.}
+\todo{[ANYONE] Update "Eth[j]" syntax to match $BTC_k$ syntax used in prev table.}
 
 | Time (~15s increments) | Bitcoin block made | BTC block contents | BTC state | Eth block made | Eth block contents | Eth state |
 |---|---|---|---|---|---|---|
@@ -168,7 +168,7 @@ ethBlockWeight ethBlock = 1
 ```
 %%TC:endignore
 
-\todo[inline]{formalize the above mathematically so it can be more easily analyzed}
+\todo{formalize the above mathematically so it can be more easily analyzed}
 
 \begin{equation}
 a = 1
@@ -197,11 +197,11 @@ Practical methods of comparing (and converting the weight of) different Proofs o
 
 tl;dr it can work fine I think. Like it's still secure; there's nothing about PoW reflection that *requires* more than one hashing alg, it's just the easier context to explain it in b/c miners of one chain can't attack the other.
 
-\todo[inline]{tidy this section, provide explanation.}
+\todo{tidy this section, provide explanation.}
 
 \begin{comment}
 
-\todo[inline]{build this section out -- seems like this can be done securely. nb: the rest of this subsection are just notes; probs just skip over them}
+\todo{build this section out -- seems like this can be done securely. nb: the rest of this subsection are just notes; probs just skip over them}
 
 What about chains using the same alg? e.g. Bitcoin (B) and Bitcoin-copy (C)?
 
@@ -248,7 +248,7 @@ Now that we know what the block rewards are and have defined them in terms of th
 
 Since we know the percentage of root tokens on each chain for each moment in history, we can safely use that figure in chain-weight calculations. The reliability of that data will be the same as the reliability of the blockchains themselves, provided we enforce the 2-way peg that ensures no root tokens are created or destroyed outside protocol rules.
 
-\todo[inline]{should we bother deriving the maths for this here? IMO it's not that important to include in the paper provided the core idea is. Just some basic algebra and calculus.}
+\todo{should we bother deriving the maths for this here? IMO it's not that important to include in the paper provided the core idea is. Just some basic algebra and calculus.}
 
 #### Different Root Tokens with a DEX
 
@@ -274,7 +274,7 @@ In the context of *Ultra Terminum* and *Amaroo*, these aren't questions that are
 
 \label{s:counting-reflected-work}
 
-\todo[inline]{brainstorm and progress this}
+\todo{brainstorm and progress this}
 
 From forum last night:
 
@@ -321,7 +321,7 @@ From forum last night:
 >
 > One thing that might come in to play is the basic idea I have to ensure block availability: download and store every block for 24hrs. That's O(c^2) bandwidth but c is relative to like 3 kb/s, so O(c^2) bandwidth isn't a show-stopper here (at least atm, todo: calc limits)
 
-\todo[inline]{calc limits}
+\todo{calc limits}
 
 > If all miners have all simplex blocks in the last 24hrs *anyway*, then they can construct the proofs themselves. That might mean there's a way to avoid transmitting the proof + still be able to verify it. sort of like segwit does: throw away the data that's useless after it's been verified b/c the miner already had that anyway. In Bitcoin's case, that's the tx signatures; in UT's case, it's the block header proof-of-inclusion merkle branches.
 >
@@ -335,11 +335,11 @@ From forum last night:
 >
 > how does UT play in to this? well, more reflection => harder for an attacker to reverse. Consider the parameters of an attacker having specific resources (e.g. a bunch of sha256 ASICs -- which is of a contiguous and homogeneous quality that past analysis has alluded to, tho it's abstracted via maths that presumes that); we can thwart most of those. But if we take an "optimistic" (for the attacker) look at an attacker with O(n) resources, then we're in worst-case-ville and I think UT might degrade to, *at worst*, the best lower-bound (i.e., best of all the worst-case situations) of other blockchains. Note to self: Need to write more on this to figure it out.
 
-\todo[inline]{how are confirmation times affected by the simplex?}
+\todo{how are confirmation times affected by the simplex?}
 
 ### Recursive Reflection
 
-\todo[inline]{not sure if this should be included. if so then need to write out this section}
+\todo{not sure if this should be included. if so then need to write out this section}
 
 Say chain B reflects both A and C. $A <-> B <-> C$. PoW reflection says A gets a benefit by proving that B reflects specific work from A. Does A get a security benefit by proving that C reflects B reflects A?
 
@@ -347,7 +347,7 @@ Say chain B reflects both A and C. $A <-> B <-> C$. PoW reflection says A gets a
 
 \label{sec:equiv-state-block-weightings}
 
-\todo[inline]{show that the result under PoW reflection is backwards compatible, i.e., existing consensus methods will settle on the same result. Needs to work for DAGs, too.}
+\todo{show that the result under PoW reflection is backwards compatible, i.e., existing consensus methods will settle on the same result. Needs to work for DAGs, too.}
 
 ##### Notes:
 
@@ -363,7 +363,7 @@ The idea of *confirmation* is a representation of the risk that a transaction wi
 
 Let us say that some chain, $C_1$, is reflected by another chain, $C_2$. Since we have two chains, we will also say that $N = 2$. For simplicity, let us assume that these two chains have equal hash power and use the same hash function for the PoW -- this means the attacker can mine either chain. Let us also denote the probability of an attack succeeding on some chain, $C_i$, via the function $P_{C_i}(q_i)$, where $q_i$ is the proportion of computational power that the attacker controls.
 
-\todo[inline]{write out these paragraphs properly and make maths more formal}
+\todo{write out these paragraphs properly and make maths more formal}
 
 NTS: For the case of ${C_1, C_2}$, it's clear that if $q_1 > 0.5$ and $q_2 > 0.5$ then the attacker should be able to perform arbitrary doublespends. This is equivalent to doing a 51% attack on both $C_1$ and $C_2$ simultaneously.
 
@@ -379,9 +379,9 @@ What if $q_1 < 0.5$ and $q_2 < 0.5$?
 
 NST: If the attacker is withholding then there are two races: one on $C_1$ and one on $C_2$. to secretly do a doublespend then the attacker must win both races and publish both chain-segments simultaneously, causing a simultaneous reorg on both chains.
 
-\todo[inline]{finish this section}
+\todo{finish this section}
 
-\todo[inline]{what are the dynamics of winning one race but not both? say they won $C_1$, they'd publish both but then someone else building on $C_1$ would add all the real headers from $C_2$ that don't include the reflections, which *after the fact* would diminish the chain-weight of $C_1$, but then with new $C_2$ blocks would reflect the new $C_1$ chain-segment. Todo: how does this interact with block-weighting calculation? need to do some simulations I think. Also todo: should miners like take into account new reflected work in their draft blocks? if so does that mean they'd still favor the old (honest) chain segment? probs need to formalize the chain-weighting alg so that it can be analyzed easily}
+\todo{what are the dynamics of winning one race but not both? say they won $C_1$, they'd publish both but then someone else building on $C_1$ would add all the real headers from $C_2$ that don't include the reflections, which *after the fact* would diminish the chain-weight of $C_1$, but then with new $C_2$ blocks would reflect the new $C_1$ chain-segment. Todo: how does this interact with block-weighting calculation? need to do some simulations I think. Also todo: should miners like take into account new reflected work in their draft blocks? if so does that mean they'd still favor the old (honest) chain segment? probs need to formalize the chain-weighting alg so that it can be analyzed easily}
 
 NTS: for cases where multiple races need to be won, the probability of success will be like
 
@@ -393,7 +393,7 @@ Which becomes vanishingly small much faster than for a single chain. There's a b
 
 ### The Previous Block-Weighting Function
 
-\todo[inline]{exploratory notes}
+\todo{exploratory notes}
 
 Let: $T$ be the target for the verification function; $T_{\text{max}}$ be the maximum meaningful target (e.g., $2^{256}$); $h$ be the hash digest as a number.
 
@@ -410,7 +410,7 @@ This function, $W_{\text{block},1}$ will return the weight of a block in terms o
 
 ### Block-Weighting w/ Conversion
 
-\todo[inline]{exploratory notes}
+\todo{exploratory notes}
 
 In order to convert between different hashes (or even the same hash function on different blockchains) we need a method, and the best method discussed above is to normalize against the distribution of some common root-token (provided the inflation rate, mining rewards, etc are all of the same profile). The root-token's distribution will change over time, but is essentially constant over the period of a few blocks.
 

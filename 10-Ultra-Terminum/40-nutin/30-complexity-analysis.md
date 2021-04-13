@@ -12,7 +12,7 @@ A common method of sharding is to *nest* blockchains. For example, Ethereum 2 ha
 
 This type of configuration, where a root-chain facilitates shards, is referred to as *nesting* in this section. The shards of Ethereum 2 are *a level of nesting* above the root-chain. Sometimes people use terms like *layer 2* to describe this sort of nesting, though such usage of *layer 2* is ambiguous and potentially misleading. It easily confuses nesting with off-chain scaling methods (such as payment channels or ephemeral 'child' blockchains, e.g., Plasma), and it potentially misleads readers about the security properties of nested blockchains. Nested blockchains *can* faithfully inherit the security properties of their parent-chains, which is not the case for layer 2 solutions. Furthermore, terms like *layer x* cannot accurately describe UT's design. Would UT's dapp-chains (having equal or better security properties than comparable chains like Ethereum 2, Polkadot, or Cardano) be *layer 1* or *layer 2*? It would be misleading to call them *layer 2* because UT dapp-chains have all the security qualities of other PoS chains, *and more*. If they were called *layer 1* chains, then what is the simplex -- *layer 0*? It is clear that the common idea behind *layer 1/2* scaling does not have sufficient capacity to accurately describe UT's simplex- and dapp-chains; it is inadequate.
 
-\todo[inline]{look for references to 'layer2' and change to nesting as appropriate.}
+\todo{look for references to 'layer2' and change to nesting as appropriate.}
 
 The following derivations focus on *throughput* of particular blockchain designs and scaling configurations. Raw throughput of a network, $T_i$, is measured in bytes/sec (B/s) for some level of nesting, $i$. Note that $T_i$ directly corresponds to a design's maximum transactions per second (tps) via ${tps}_i = \nicefrac{T_i}{Tx_{avg}}$, where $Tx_{avg}$ is the average size of a transaction. The raw B/s throughput of a chain at the $i^{th}$ level of nesting is denoted by $k_i$. Note that $T_i$ is a *calculated* value, but $k_i$ is a *parameter* that may be chosen. An increase to $k_i$ is equivalent or similar to an increase in maximum block size.
 
@@ -256,7 +256,7 @@ O(j \cdot \log_2 c) = O(\log_2 c) \label{eq:spv-complexity}
 
 A simplex-chain reflects $N_1 - 1 \approx N_1$ other simplex-chains. A merkle tree of reflected headers has order $O(N_1) = O(k_1) = O(c)$ and a corresponding proof size of order $O(\log_2 N_1) = O(\log_2 k_1) = O(\log_2 c)$. Since those other simplex-chains also have $\sim N_1$ reflections, proving reflection in those other $\sim N_1$ simplex-chains requires $\sim N_1$ merkle branches. Thus, the full set of reflection proofs, per simplex-chain, is $O(N_1 \cdot \log_2 N_1) = O(c \cdot \log_2 c)$.
 
-\todo[inline]{can we exclude these proofs by treating them as droppable witnesses? see \autoref{sec:proving-reflection}}
+\todo{can we exclude these proofs by treating them as droppable witnesses? see \autoref{sec:proving-reflection}}
 
 ### Complexity comparison
 
@@ -294,7 +294,7 @@ NB: For the purposes of the following table, the average transaction size is tak
 | 3000, 1/60, 1/60, 500, 500 | 12 | 4,320 | 388,800 | $1.4\times 10^{8}$ |
 | 3000, 1/60, 1/60, 500, 700 | 12 | 3,086 | 277,714 | $7.1\times 10^{7}$ |
 
-\todo[inline]{add figure of graphs of $B_f$ a/or $D_f$ vs tps, $B_h$ a/or $D_h$ vs tps, tx-size vs tps, k vs tps}
+\todo{add figure of graphs of $B_f$ a/or $D_f$ vs tps, $B_h$ a/or $D_h$ vs tps, tx-size vs tps, k vs tps}
 
 ### Bandwidth Complexity
 
@@ -330,4 +330,4 @@ This effect is not unique to UT, though. In general, any system of sharding is a
 
 Practically, this effect means that a decrease to the size of headers has *increasing* marginal benefit. Compared to $O(c)$ blockchains (e.g. Bitcoin), efficient header schemes are far more important for UT and sharded blockchain networks.
 
-\todo[inline]{(todo/polish) look for references to sharding and, if they are talking about UT, change to talk about UT and sharding or correct the wording.}
+\todo{(todo/polish) look for references to sharding and, if they are talking about UT, change to talk about UT and sharding or correct the wording.}

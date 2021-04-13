@@ -6,7 +6,7 @@
 
 Such a foundation (*the simplex*) is *not* a sharded blockchain -- there's no requirement that chains in this base-layer are either interchangeable or use the same primitives. This was demonstrated via the example in \autoref{sec:two-blockchains}. Rather, the simplex is an emergent construct that is created via the *relationships* between blockchains. Instead of one blockchain being split into many (as occurs with sharding), the simplex is many blockchains becoming one coherent network.
 
-\todo[inline]{Should I summarize the section here? e.g.: this section will cover generalizing to N reflections, the simplex, dapp chains, then analysis. IDK, seems superfluous}
+\todo{Should I summarize the section here? e.g.: this section will cover generalizing to N reflections, the simplex, dapp chains, then analysis. IDK, seems superfluous}
 
 ### Generalizing Reflection
 
@@ -89,7 +89,7 @@ The most likely method of integration has four components: modification of the h
 
 [^builtins-or-sc]: Note: instead of builtins, these requirements could be met via EVM/WASM smart contracts.
 
-\todo[inline]{finish below}
+\todo{finish below}
 
 The abstraction layer between simplex-chains and dapp-chains has another advantage; one with great *reach*. Any PoS system with special features, say with [finality guarantees](https://github.com/w3f/consensus/blob/master/pdf/grandpa.pdf) or one that is [provably secure](https://iohk.io/en/research/library/papers/ouroborosa-provably-secure-proof-of-stake-blockchain-protocol/), then *something about how their security guarantees stick around*
 
@@ -115,7 +115,7 @@ plan:
 
 #### Dapp-dapp-chains
 
-\todo[inline]{write it}
+\todo{write it}
 
 plan:
 
@@ -134,7 +134,7 @@ plan:
   - need to reflect headers, but including merkle proofs-of-reflection would be cumbersome
 - what about security implications and/or confirmation time?
 
-\todo[inline]{nb: mb security/conf bits go in PoW reflection, or stay here, IDK yet}
+\todo{nb: mb security/conf bits go in PoW reflection, or stay here, IDK yet}
 
 ### Availability of Reflected Blocks
 
@@ -154,7 +154,7 @@ The complexity and impact of this strategy is discussed in \autoref{sec:bandwidt
 
 \label{sec:proving-reflection}
 
-\todo[inline]{write this. come up with a method by which a miner having all blocks can construct the witnesses for proof-of-reflection. by doing this, miners don't need to include SPV proofs of reflection; the witnesses don't need to be included.}
+\todo{write this. come up with a method by which a miner having all blocks can construct the witnesses for proof-of-reflection. by doing this, miners don't need to include SPV proofs of reflection; the witnesses don't need to be included.}
 
 If simplex-chains' consensus protocol requires accounting for reflected work, then nodes must have some method whereby they know which work (in a particular chain's history) has been reflected. That is: a node for chain A must be able to answer the question *For each other simplex-chain, which blocks in chain A's history have been reflected?* This means that each node must have $N_1 - 1$ answers for a simplex of $N_1$ chains.
 
@@ -163,7 +163,7 @@ There is a trivial method: include merkle branch proofs along with reflected hea
 This complexity is discussed in \autoref{sec:complexity-reflection-proof}.
 
 NB: **todo** something about $O(c)$ scaling still rather than $O(c \log_2 c)$.
-\todo[inline]{how do we solve?}
+\todo{how do we solve?}
 
 Do we *need* to include proofs of reflection, though? If miners of any simplex-chain download blocks of *all* simplex-chains -- as mentioned in \autoref{sec:availability-of-blocks} -- then including all necessary proofs of reflection *smells* redundant. Since miners have all the necessary data to construct the proofs, do they need to actually include those proofs? Could we treat them as witnesses similar to SegWit?
 
@@ -218,11 +218,11 @@ Given that the reflection-segments of simplex-chains will contain mostly repeate
 * having that info means you can deterministically recreate SPV proofs of reflection
 * so we can treat these proofs as a witness and not include them in the blockchain
 
-\todo[inline]{write this section out and specify the algorithm -- or at least a draft}
+\todo{write this section out and specify the algorithm -- or at least a draft}
 \end{comment}
 
 ### Confirmation Times
 
 \label{sec:confirmation-times}
 
-\todo[inline]{write this.}
+\todo{write this.}

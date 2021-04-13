@@ -45,7 +45,7 @@ It is within a person's *rights* to think and claim that PoW is wasteful. Howeve
 
 To my knowledge, there is no good solution to the nothing-at-stake problem for pure PoS blockchains.
 
-\todo[inline]{check if there have been any new ideas to solve NAS problem}
+\todo{check if there have been any new ideas to solve NAS problem}
 
 Two of the most popular PoS chains -- Polkadot and Cardano -- barely attempt to deal with this problem. While it's likely true that these chains are secure *enough* for their current usage, we can't surely say the same if these chains gained massive popularity.
 

@@ -86,4 +86,4 @@ NB: I call them *assumptions*; some people will likely (and rightly) take issue 
 
 When you have worse than $O(c)$ complexity, that thing cannot become a bottleneck. If it's not a bottleneck, then it doesn't matter that it's worse than $O(c)$.
 
-\todo[inline]{include this?}
+\todo{include this?}
