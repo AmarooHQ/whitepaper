@@ -124,6 +124,8 @@ k_1 & = 2 \cdot N_1 \cdot B_f \cdot B_h \\
 \end{split}
 \end {equation}
 
+Thus $O(N_1) = O(k_1) = O(c)$.
+
 From \autoref{eq:reflection-t1-in-terms-of-n1} and substituting $N_1$ from \autoref{eq:simplex-N1}:
 
 \begin{equation}
@@ -134,6 +136,8 @@ T_1 & = k_1 \cdot \frac{k_1}{2 \cdot B_f \cdot B_h} - B_f \cdot B_h \cdot \frac{
 & = \frac{k_1^2}{4 \cdot B_f \cdot B_h}
 \end{split}
 \end{equation}
+
+Thus $O(T_1) = O(k_1^2) = O(c^2)$.
 
 What are $k_{1,B}$ and $k_{1,tx}$ in terms of $k_1$? From \autoref{eq:reflection-t1-start} and \autoref{eq:simplex-T1}:
 
@@ -153,7 +157,7 @@ k_{1,tx} & = \frac{k_1}{2}
 \end{split}
 \end{equation*}
 
-thus, from the definition of $k_1$ in \autoref{eq:k1-reflection-defn}:
+Thus, from the definition of $k_1$ in \autoref{eq:k1-reflection-defn}:
 
 \begin{equation*}
 k_{1,B} = \frac{k_1}{2}
