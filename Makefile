@@ -46,6 +46,7 @@ clean: init
 	-rm -r $(OUTDIR)/*
 
 clean-wp-md:
+	-rm .git/gitHeadInfo.gin
 	-rm $(WPFILE)
 	-rm $(WPNOEXT).pdf
 
