@@ -4,7 +4,7 @@
 
 - the Makefile presumes you're running this in a linux environment
 - you'll need: make, pandoc, latexmk
-- ubuntu pkgs: `texlive-science`, `texlive-extra-utils`
+- ubuntu pkgs: `texlive-science`, `texlive-extra-utils`, `gnuplot`
 
 if you run into compile errors, try installing `texlive-full` -- not a great workaround but does solve some issues (b/c apparently we have a missing dep)
 
