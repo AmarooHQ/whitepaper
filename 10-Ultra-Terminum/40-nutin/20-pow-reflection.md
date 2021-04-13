@@ -365,31 +365,35 @@ Let us say that some chain, $C_1$, is reflected by another chain, $C_2$. Since w
 
 \todo{write out these paragraphs properly and make maths more formal}
 
-NTS: For the case of ${C_1, C_2}$, it's clear that if $q_1 > 0.5$ and $q_2 > 0.5$ then the attacker should be able to perform arbitrary doublespends. This is equivalent to doing a 51% attack on both $C_1$ and $C_2$ simultaneously.
+\mk{NTS: For the case of ${C_1, C_2}$, it's clear that if $q_1 > 0.5$ and $q_2 > 0.5$ then the attacker should be able to perform arbitrary doublespends. This is equivalent to doing a 51% attack on both $C_1$ and $C_2$ simultaneously.}
 
 What if $q_1 > 0.5$ and $q_2 < 0.5$?
 
-NTS: attacker dominates if $q_1 + q_2 > 1$, or more generally:
+\mk{
+  NTS: attacker dominates if $q_1 + q_2 > 1$, or more generally:
 
-\begin{equation}
-\sum_{i = i}^{N} q_i > \frac{N}{2}
-\end{equation}
+  \begin{equation}
+  \sum_{i = i}^{N} q_i > \frac{N}{2}
+  \end{equation}
+}
 
 What if $q_1 < 0.5$ and $q_2 < 0.5$?
 
-NST: If the attacker is withholding then there are two races: one on $C_1$ and one on $C_2$. to secretly do a doublespend then the attacker must win both races and publish both chain-segments simultaneously, causing a simultaneous reorg on both chains.
+\mk{NST: If the attacker is withholding then there are two races: one on $C_1$ and one on $C_2$. to secretly do a doublespend then the attacker must win both races and publish both chain-segments simultaneously, causing a simultaneous reorg on both chains.}
 
 \todo{finish this section}
 
 \todo{what are the dynamics of winning one race but not both? say they won $C_1$, they'd publish both but then someone else building on $C_1$ would add all the real headers from $C_2$ that don't include the reflections, which *after the fact* would diminish the chain-weight of $C_1$, but then with new $C_2$ blocks would reflect the new $C_1$ chain-segment. Todo: how does this interact with block-weighting calculation? need to do some simulations I think. Also todo: should miners like take into account new reflected work in their draft blocks? if so does that mean they'd still favor the old (honest) chain segment? probs need to formalize the chain-weighting alg so that it can be analyzed easily}
 
-NTS: for cases where multiple races need to be won, the probability of success will be like
+\mk{
+  NTS: for cases where multiple races need to be won, the probability of success will be like
 
 \begin{equation}
 \prod_{i=1}^{N} P_{C_i}(q_i)
 \end{equation}
 
 Which becomes vanishingly small much faster than for a single chain. There's a breakpoint around winning the race, sorta. The attacker does get some bonus from winning by a larger margin, but winning the race is still important.
+}
 
 ### The Previous Block-Weighting Function
 
