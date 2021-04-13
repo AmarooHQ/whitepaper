@@ -9,9 +9,9 @@
 \begin{BVerbatim}
               stay
         /---> decentralized -\
-       /                      \     shard +
-we need scale                  |--> PoW reflection +
-       \                      /     small blocks
+       /                      \     PoW reflection
+we need scale                  |-->       +
+       \                      /      small blocks
         \---> stay ----------/
               secure
 \end{BVerbatim}

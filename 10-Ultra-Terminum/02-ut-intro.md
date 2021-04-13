@@ -8,7 +8,7 @@
 
 Compared with existing consensus methods, UT provides *equal or better* security properties than **all** existing consensus methods (including Bitcoin's PoW method and variants, and *all* PoS variants). This is because UT leverages existing consensus methods in combination and, by way of construction, UT can only *add* security to these methods.
 
-As a consensus method[^ut-consensus-method], UT differs from existing consensus methods in that it is a *generic modification* to particular components of consensus algorithms. These modifications allow existing consensus algorithms to synergistically cooperate. This results in *massive* improvements to the security of the network, whilst also providing a foundation for incredible scalability.
+As a consensus method[^ut-consensus-method], UT differs from existing consensus methods in that it is a *generic modification* to particular components of consensus algorithms. These modifications allow existing consensus algorithms to synergistically cooperate. This results in *massive* improvements to the security and decentralization of the network, whilst also providing a foundation for incredible scalability.
 
 [^ut-consensus-method]: Whether *Ultra Terminum* is a consensus method or not is somewhat unclear. On the one hand: a new combination of methods is still a method. On the other hand: UT provides a way to modify most/all other consensus methods, and UT doesn't provide a way to run a *single* blockchain. This is why I've described it as a cross-chain consensus *strategy*.
 
