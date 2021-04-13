@@ -2,30 +2,28 @@
 
 # Introduction
 
-*Ultra Terminum* (UT) is a cross-chain consensus method that solves *Buterin's Trilemma*[^buterins-trilemma] (aka the *Scalability Trilemma*). That is: *Ultra Terminum* is a consensus method that is highly distributed, highly secure, and highly scalable. In essence, UT is a new way to organize blockchains.
+*Ultra Terminum* (UT) is a cooperative cross-chain consensus strategy that solves *Buterin's Trilemma*[^buterins-trilemma] (aka the *Scalability Trilemma*). That is: *Ultra Terminum* builds on existing consensus methods to produce a blockchain network that is highly distributed, highly secure, and highly scalable. In essence, UT is a new way to organize blockchains.
 
 [^buterins-trilemma]: I think *Scalability Trilemma* is a bad name because *scalability* is one of the three conflicting qualities; you could just as well call it the *Decentralization Trilemma*, etc. The term *Blockchain Trilemma* has been used recently, which I think is worse. Apparently the term was coined by Vitalik Buterin, so I prefer the name *Buterin's Trilemma*.
 
-\todo{something about methodology + generic modification to existing consensus methods}
+Compared with existing consensus methods, UT provides *equal or better* security properties than **all** existing consensus methods (including Bitcoin's PoW method and variants, and *all* PoS variants). This is because UT leverages existing consensus methods in combination and, by way of construction, UT can only *add* security to these methods.
 
-It may be more accurate to describe UT as a new *methodology* because
+As a consensus method[^ut-consensus-method], UT differs from existing consensus methods in that it is a *generic modification* to particular components of consensus algorithms. These modifications allow existing consensus algorithms to synergistically cooperate. This results in *massive* improvements to the security of the network, whilst also providing a foundation for incredible scalability.
 
-UT has equal or better security properties than all individual/singular/atomic/foundational consensus methods (including Bitcoin's PoW method and all PoS variants). This is because UT is able to leverage many existing consensus methods in combination and, by way of construction, UT can only *add* security to these methods, or *do nothing*.
+[^ut-consensus-method]: Whether *Ultra Terminum* is a consensus method or not is somewhat unclear. On the one hand: a new combination of methods is still a method. On the other hand: UT provides a way to modify most/all other consensus methods, and UT doesn't provide a way to run a *single* blockchain. This is why I've described it as a cross-chain consensus *strategy*.
 
 UT is capable of supporting millions of transactions per second in the security environment afforded by a first class blockchain (e.g. Bitcoin, Eth1).
 
-The essence of *Ultra Terminum* is a new method for sharing security: *PoW Reflection*. This technique allows us to build complex blockchain networks with powerful scaling properties. This is how *Ultra Terminum* can scale with orders $O(c^2)$, $O(c^3)$, $O(c^4)$, and -- in the right contexts -- $O(n)$.
+At the core of *Ultra Terminum* is a new method for sharing security: *PoW Reflection*. This technique (which works with PoS, too) allows us to incrementally build complex blockchain networks with powerful scaling properties. *PoW Reflection* is how *Ultra Terminum* can scale with orders $O(c^2)$, $O(c^3)$, $O(c^4)$, and -- in the right contexts -- $O(n)$.
 
-\todo{UT isn't like a singular consensus method, more like a multi-method or methodology. todo: decide what to call this. a meta-consensus method? a multi-consensus method? a consensus multi-method? a consensus methodology?}
-
-\todo{What do we call other consensus methods? individual/singular/atomic/foundational mb}
+As UT is primarily a method of *structuring* a blockchain network, the scalability configurations mentioned herein *do not include **layer 2** methods*. That means that *layer 2* techniques (e.g., state/payment channels, ZK/optimistic rollups, and anchored/side chains) can be implemented *on top* of UT.
 
 ## Assumed Knowledge
 
 You will need to have mastered the following concepts to reliably understand the foundations of *PoW Reflection* and *Ultra Terminum*:
 
 * Nakamoto Consensus (i.e., how Bitcoin's blockchain works)
-* The idea of $O(c)$ and $O(c^2)$ scaling -- you can read the first few FAQs [here](https://eth.wiki/sharding/Sharding-FAQs) for a refresher
+* The idea of $O(c)$ and $O(c^2)$ scaling and existing strategies -- you can read the first few FAQs [here](https://eth.wiki/sharding/Sharding-FAQs) for a refresher
 * SPV proofs
 * SPV proofs via Smart Contracts (e.g. [BTC Relay](https://github.com/ethereum/btcrelay))
 

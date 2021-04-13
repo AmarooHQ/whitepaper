@@ -1,8 +1,10 @@
+\newpage
+
 # Buterin's Trilemma
 
 The trilemma is as follows:
 
-For some magnitude of computational resources (computation, bandwidth, storage, etc), *c*, and magnitude of the network (transaction throughput, state size, market cap, etc), *n*, it is claimed that blockchain systems have at most 2 of these 3 properties:
+For some magnitude of computational resources (computation, bandwidth, storage, etc), *c*, and magnitude of the network (transaction throughput, state size, market cap, etc), *n*, it is claimed that blockchain systems have, at most, 2 of these 3 properties:
 
 * Decentralization --- the system can operate with participants that have only $O(c)$ resources (e.g. a laptop, a raspberry pi, a VPS, etc).
 * Security --- the system is secure against attackers with up to $O(n)$ resources.
