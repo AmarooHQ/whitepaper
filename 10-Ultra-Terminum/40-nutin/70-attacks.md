@@ -28,3 +28,9 @@ similar to how you can theoretically win govt in a democracy by winning 51% of v
 ### other attacks?
 
 \todo{find some}
+
+### dialog between Max and Nef
+
+\mk{
+    idea is to have a dialog between me and a fictional attacker (Nef, for *nefarious*) where we talk through attacks and mitigation.
+}

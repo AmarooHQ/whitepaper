@@ -213,7 +213,7 @@ N_2 & = \frac{T_2}{k_2} \\
 
 ### Complexity of $O(c^4)$ UT
 
-If we say each dapp chain hosts more dapp chains (such as Eth2, Polkadot), then via \autoref{eq:throughput-iter} and \autoref{eq:throughput-c-3},
+If we say each dapp chain hosts shards or more dapp chains (such as Eth2 or Polkadot do), then via \autoref{eq:throughput-iter} and \autoref{eq:throughput-c-3},
 
 \begin{equation}
 \label{eq:throughput-c-4}
