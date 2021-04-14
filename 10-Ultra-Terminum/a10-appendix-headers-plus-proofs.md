@@ -25,11 +25,14 @@ From \autoref{eq:simplex-N1-with-PoR}, we have $N_1$ that is of the form $N_1 = 
 \begin{figure}
     \centering
     \begin{tikzpicture}
-        \begin{loglogaxis}[
+        % axis options: 'axis', 'loglogaxis'
+        \begin{axis}[
             axis lines = left,
             xlabel = $x$,
             ylabel = {$f(x)$},
+            legend pos=north west,
         ]
+            % x/W_0(x)
             \addplot[no marks, smooth] gnuplot [
                 domain=100:100000000,
                 samples=1000,
@@ -37,8 +40,18 @@ From \autoref{eq:simplex-N1-with-PoR}, we have $N_1$ that is of the form $N_1 = 
             ]
             {x/lambertw(x)};
             \addlegendentry{$\frac{x}{W_0(x)}$}
-        \end{loglogaxis}
+
+            % x
+            \addplot[no marks, smooth] gnuplot [
+                domain=100:100000000,
+                samples=1000,
+                color=blue,
+            ]
+            {0.0638 * x + 23.16};
+            \addlegendentry{$0.0638 \cdot x + 23.16$}
+
+        \end{axis}
     \end{tikzpicture}
-    \caption{A graph of $f(x) = \frac{x}{W_0(x)}$ for $x \in [10^2, 10^8]$}
+    \caption{A graph of $f(x) = \frac{x}{W_0(x)}$ for $x \in [10^2, 10^8]$.}
     \label{fig:x-over-lambert}
 \end{figure}

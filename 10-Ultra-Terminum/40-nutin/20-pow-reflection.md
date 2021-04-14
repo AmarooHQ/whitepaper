@@ -365,7 +365,9 @@ Let us say that some chain, $C_1$, is reflected by another chain, $C_2$. Since w
 
 \todo{write out these paragraphs properly and make maths more formal}
 
-\mk{NTS: For the case of ${C_1, C_2}$, it's clear that if $q_1 > 0.5$ and $q_2 > 0.5$ then the attacker should be able to perform arbitrary doublespends. This is equivalent to doing a 51% attack on both $C_1$ and $C_2$ simultaneously.}
+\mk{
+  NTS: For the case of ${C_1, C_2}$, it's clear that if $q_1 > 0.5$ and $q_2 > 0.5$ then the attacker should be able to perform arbitrary doublespends. This is equivalent to doing a 51% attack on both $C_1$ and $C_2$ simultaneously.
+}
 
 What if $q_1 > 0.5$ and $q_2 < 0.5$?
 

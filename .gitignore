@@ -13,3 +13,4 @@ includes/ut/tiling/*.svg
 /*.pdf
 node_modules
 /*.zip
+*.pgf-plot.table
