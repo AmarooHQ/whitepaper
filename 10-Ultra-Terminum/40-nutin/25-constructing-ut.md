@@ -6,13 +6,11 @@
 
 Such a foundation (*the simplex*) is *not* a sharded blockchain -- there's no requirement that chains in this base-layer are either interchangeable or use the same primitives. This was demonstrated via the example in \autoref{sec:two-blockchains}. Rather, the simplex is an emergent construct that is created via the *relationships* between blockchains. Instead of one blockchain being split into many (as occurs with sharding), the simplex is many blockchains becoming one coherent network.
 
-\mk{Should I summarize the section here? e.g.: this section will cover generalizing to N reflections, the simplex, dapp chains, then analysis. IDK, seems superfluous}
-
 ### Generalizing Reflection
 
 \label{sec:generalizing-reflection}
 
-*PoW reflection* is, in essence, the idea that a chain can acknowledge that its history has been confirmed by a different chain[^reflection-prior]. That is a simplification, but it is the essence of it.
+*PoW reflection* is, in essence, the idea that a chain can acknowledge that its history has been confirmed by a different chain[^reflection-prior]. That is a simplification, but it *is* the essence of it.
 
 [^reflection-prior]: I have not been able to find any existing discussion of this method. If you know of any existing discussion of this method, please post a link to the forum topic that is linked in the abstract.
 
