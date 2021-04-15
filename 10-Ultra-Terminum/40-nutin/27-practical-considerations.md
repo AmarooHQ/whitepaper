@@ -102,6 +102,10 @@ Given that the reflection-segments of simplex-chains will contain mostly repeate
 
 \todo{write this.}
 
+\begin{equation}
+\frac{1}{O(c)}
+\end{equation}
+
 ### DoS and DAGs
 
 \label{sec:dos-and-dags}
