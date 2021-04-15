@@ -6,13 +6,14 @@
 
 ### Dialog: Attacks and Mitigation
 
+\newcommand{\nefName}{ExMalo}
 \newcommand{\cMax}[1]{\ChatR{title={Max:},colback=Cerulean!20}{#1}}
-\newcommand{\cNef}[1]{\ChatL{title={Nef:},colback=BrickRed!20}{#1}}
-\newcommand{\cSu}[1]{\ChatL{title={Ex Su:},colback=ForestGreen!20}{#1}}
+\newcommand{\cNef}[1]{\ChatL{title={\nefName:},colback=BrickRed!20}{#1}}
+\newcommand{\cSe}[1]{\ChatL{title={ExSe:},colback=ForestGreen!20}{#1}}
 
 \begin{tcolorbox}[colback=black!70,coltext=white]
     \centering
-    This is the beginning of your direct message history with @Nef
+    This is the beginning of your direct message history with @\nefName
 \end{tcolorbox}
 
 \cNef{I have an offer for you. I'm planning on doing a doublespend. It'll destroy confidence in your system. If you pay me, then I won't do it.}
@@ -129,14 +130,14 @@ Your message could not be delivered. This is usually because you don't share a s
 }
 
 \cMax{
-  chatlog-nef.txt (6 KB)
+  chatlog-{\lowercase{\nefName}}.txt (6 KB)
 }
 
 \cMax{
   What do you think?
 }
 
-\cSu{
+\cSe{
   Seems okay as illustration, but it's not very detailed.
 }
 
@@ -144,7 +145,7 @@ Your message could not be delivered. This is usually because you don't share a s
   Any ideas on what I should do?
 }
 
-\cSu{
+\cSe{
   Convince \emph{me}.
 }
 
@@ -152,7 +153,7 @@ Your message could not be delivered. This is usually because you don't share a s
   Okay. Where do you want to start?
 }
 
-\cSu{
+\cSe{
   I've read the WP. Let's start from the top --- reflection. Start from first principles and build the idea up. I'll ask Qs as we go.
 }
 
