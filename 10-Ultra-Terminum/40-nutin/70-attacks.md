@@ -166,7 +166,7 @@ need to do 51% attacks on 51% of simplex chains - worst case, that mb isn't enou
 similar to how you can theoretically win govt in a democracy by winning 51% of votes in 51% of electorates => only 25% of total votes. it's still harder than winning 51% of votes in one seat, tho.
 
 \mk{
-  I think I was wrong here; you need more than 51% of 51% b/c of private mining. so you still need 51% overall, tho that can be more/less in diff simplex-chains.
+  I think I was wrong here; you need more than 51\% of 51\% b/c of private mining. so you still need 51\% overall, tho that can be more/less in diff simplex-chains.
 }
 
 ### Poisoning the Well
