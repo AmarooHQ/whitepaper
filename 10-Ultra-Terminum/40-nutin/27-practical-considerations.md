@@ -101,3 +101,11 @@ Given that the reflection-segments of simplex-chains will contain mostly repeate
 \label{sec:confirmation-times}
 
 \todo{write this.}
+
+### DoS and DAGs
+
+\label{sec:dos-and-dags}
+
+\mk{
+    use quanta / inclusive-protocol to allow: multiple parents; merging histories; including invalid or pseudo-invalid blocks in history; prevent DoS attacks; avoid stale blocks
+}
