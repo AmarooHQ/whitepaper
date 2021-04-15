@@ -1,5 +1,9 @@
 ## Attacks
 
+\mk{
+  the dialogs are a bit sparse on the page with the current formatting. mb they should be a bit more condensed. I like the colors tho -- let's you scan quickly. I guess that left/right alignment does that somewhat too, tho.
+}
+
 ### Dialog: Attacks and Mitigation
 
 \newcommand{\cMax}[1]{\ChatR{title={Max:},colback=Cerulean!20}{#1}}
@@ -119,6 +123,10 @@ Your message could not be delivered. This is usually because you don't share a s
 \end{tcolorbox}
 
 ### Dialog 2
+
+\mk{
+  should redo the intro -- too slow / wasted space on page.
+}
 
 \cMax{
   chatlog-nef.txt (6 KB)
