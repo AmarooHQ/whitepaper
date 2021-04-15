@@ -1,38 +1,10 @@
 ## Attacks
 
-### 51% and double-spends
-
-\todo{discuss 51 percent and how difficult it is in UT vs Bitcoin, et al.}
-
-need to do 51% attacks on 51% of simplex chains
-
-similar to how you can theoretically win govt in a democracy by winning 51% of votes in 51% of electorates => only 25% of total votes. it's still harder than winning 51% of votes in one seat, tho.
-
-### Poisoning the Well
-
-\todo{the deliberate and malicious production of malformed data}
-
-- e.g. making blocks with valid PoW but invalid contents so that they get reflected
-
-### Selfish Mining
-
-\todo{discuss selfish mining, and how it doesn't work}
-
-- PoW reflection means that withholding blocks is a big disadvantage b/c you want the network (and other chains) to know about them ASAP.
-
-### DAG based attacks
-
-- creating lots of DAG blocks to link back to with low PoW
-- more backlinks -> larger headers -> lower total throughput
-
-### other attacks?
-
-\todo{find some}
-
 ### Dialog: Attacks and Mitigation
 
 \newcommand{\cMax}[1]{\ChatR{title={Max:},colback=Cerulean!20}{#1}}
 \newcommand{\cNef}[1]{\ChatL{title={Nef:},colback=BrickRed!20}{#1}}
+\newcommand{\cSu}[1]{\ChatL{title={Ex Su:},colback=ForestGreen!20}{#1}}
 
 \begin{tcolorbox}[colback=black!70,coltext=white]
     \centering
@@ -145,3 +117,62 @@ similar to how you can theoretically win govt in a democracy by winning 51% of v
 \begin{tcolorbox}[title={\pill{\scriptsize{\checkmark \; BOT}} Clyde}]
 Your message could not be delivered. This is usually because you don't share a server with the recipient or the recipient is only accepting direct messages from friends.
 \end{tcolorbox}
+
+### Dialog 2
+
+\cMax{
+  chatlog-nef.txt (6 KB)
+}
+
+\cMax{
+  What do you think?
+}
+
+\cSu{
+  Seems okay as illustration, but it's not very detailed.
+}
+
+\cMax{
+  Any ideas on what I should do?
+}
+
+\cSu{
+  Convince \emph{me}.
+}
+
+\cMax{
+  Okay. Where do you want to start?
+}
+
+\cSu{
+  I've read the WP. Let's start from the top --- reflection. Start from first principles and build the idea up. I'll ask Qs as we go.
+}
+
+### 51% and double-spends
+
+\todo{discuss 51 percent and how difficult it is in UT vs Bitcoin, et al.}
+
+need to do 51% attacks on 51% of simplex chains
+
+similar to how you can theoretically win govt in a democracy by winning 51% of votes in 51% of electorates => only 25% of total votes. it's still harder than winning 51% of votes in one seat, tho.
+
+### Poisoning the Well
+
+\todo{the deliberate and malicious production of malformed data}
+
+- e.g. making blocks with valid PoW but invalid contents so that they get reflected
+
+### Selfish Mining
+
+\todo{discuss selfish mining, and how it doesn't work}
+
+- PoW reflection means that withholding blocks is a big disadvantage b/c you want the network (and other chains) to know about them ASAP.
+
+### DAG based attacks
+
+- creating lots of DAG blocks to link back to with low PoW
+- more backlinks -> larger headers -> lower total throughput
+
+### other attacks?
+
+\todo{find some}
