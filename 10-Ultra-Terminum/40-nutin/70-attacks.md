@@ -149,10 +149,6 @@ Your message could not be delivered. This is usually because you don't share a s
   Convince \emph{me}.
 }
 
-\cMax{
-  Okay. Where do you want to start?
-}
-
 \cSe{
   I've read the WP. Let's start from the top --- reflection. Start from first principles and build the idea up. I'll ask Qs as we go.
 }
@@ -165,26 +161,31 @@ Your message could not be delivered. This is usually because you don't share a s
 
 \todo{discuss 51 percent and how difficult it is in UT vs Bitcoin, et al.}
 
-need to do 51% attacks on 51% of simplex chains
+need to do 51% attacks on 51% of simplex chains - worst case, that mb isn't enough
 
 similar to how you can theoretically win govt in a democracy by winning 51% of votes in 51% of electorates => only 25% of total votes. it's still harder than winning 51% of votes in one seat, tho.
+
+\mk{
+  I think I was wrong here; you need more than 51% of 51% b/c of private mining. so you still need 51% overall, tho that can be more/less in diff simplex-chains.
+}
 
 ### Poisoning the Well
 
 \todo{the deliberate and malicious production of malformed data}
 
-- e.g. making blocks with valid PoW but invalid contents so that they get reflected
+- e.g. making blocks with valid PoW but invalid contents so that they get reflected (soln: miners can reject blocks or link to blocks as invalid; no block reward for producer)
 
 ### Selfish Mining
 
 \todo{discuss selfish mining, and how it doesn't work}
 
-- PoW reflection means that withholding blocks is a big disadvantage b/c you want the network (and other chains) to know about them ASAP.
+- PoW reflection means that withholding blocks is a big disadvantage b/c you want the network (and other chains) to know about them ASAP. Attack doesn't work.
 
 ### DAG based attacks
 
-- creating lots of DAG blocks to link back to with low PoW
-- more backlinks -> larger headers -> lower total throughput
+- creating lots of DAG blocks to link back to with low PoW (soln: no variable PoW targets or min limit)
+- more backlinks -> larger headers -> lower total throughput (soln: max numbers of backlinks + min PoW target)
+
 
 ### other attacks?
 
