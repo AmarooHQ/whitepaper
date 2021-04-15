@@ -148,6 +148,10 @@ Your message could not be delivered. This is usually because you don't share a s
   I've read the WP. Let's start from the top --- reflection. Start from first principles and build the idea up. I'll ask Qs as we go.
 }
 
+\todo{
+  Continue dialog.
+}
+
 ### 51% and double-spends
 
 \todo{discuss 51 percent and how difficult it is in UT vs Bitcoin, et al.}
