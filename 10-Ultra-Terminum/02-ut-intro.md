@@ -20,7 +20,7 @@ As UT is primarily a method of *structuring* a blockchain network, the scalabili
 
 ## Assumed Knowledge
 
-You will need to have mastered the following concepts to reliably understand the foundations of *PoW Reflection* and *Ultra Terminum*:
+You will need to understand (or, perhaps, have mastered) the following concepts to reliably understand the foundations of *PoW Reflection* and *Ultra Terminum*:
 
 * Nakamoto Consensus (i.e., how Bitcoin's blockchain works)
 * The idea of $O(c)$ and $O(c^2)$ scaling and existing strategies -- you can read the first few FAQs [here](https://eth.wiki/sharding/Sharding-FAQs) for a refresher

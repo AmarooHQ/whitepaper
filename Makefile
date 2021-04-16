@@ -42,6 +42,9 @@ mk-latex-pdf:
 pert:
 	dot -Gdpi=300 -Tpng includes/pert/chart.gv -o includes/pert/chart.png
 
+handout:
+	dot -Gdpi=300 -Tpng includes/handout/topic-tree.gv -o includes/handout/topic-tree.png
+
 clean: init
 	-rm -r $(OUTDIR)/*
 

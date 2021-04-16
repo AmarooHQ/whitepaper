@@ -1,0 +1,89 @@
+digraph TopicTree {
+    compound=true;
+    rankdir="LR";
+
+    /* subgraph cluster_proofEngines {
+        label = "Proof Engines";
+        posEngine -> powEngine;
+    } */
+
+    /* subgraph cluster_whitePaper {
+        // style=filled;
+        // color=lightgrey;
+        // node [style=filled];
+        label = "White Paper";
+        networkTopol -> utSpec;
+        tokenomics;
+        amarooVision;
+        validation -> utSpec;
+        dagDetails -> utSpec;
+        wpDraft1 -> dagDetails,amarooVision,validation,networkTopol,tokenomics;
+    } */
+
+    // why is it novel
+    // what are the new ideas
+    // why are they different
+    // why is it compelling
+    // why they haven't been done before
+    //
+    // ian - want a breakdown of the whitepaper
+
+    nosimus [label = "Nos Ultra\nTerminum\nUltimum\nImus, Nunc"];
+    consensus [label = "Consensus"];
+    pow [label = "Proof of Work (PoW)"];
+    essenceOfPoWDataInclusion [label = "PoW - What does it prove?"];
+    nakamotoConsensus [label = "Nakamoto Consensus"];
+    nakConsensusSafeUnsafe [label = "Safe Extensions"];
+    PoSConsensusGeneral [label = "Proof of Stake\n(Overview)"];
+    dosAttacks [label = "DoS Attacks"];
+    dataStructsGeneral [label = "Blockchain\nData Structs"];
+    merkleTrees [label = "Merkle Trees"];
+    spvProofs [label = "SPV Proofs"];
+    spvProofsViaSC [label = "SPV Proofs via\nSmart Contracts"];
+    scaling [label = "Scaling"];
+    scalingTrilemma [label = "Buterin's Trilemma"];
+    scalingOCSquared [label = "Scaling O(c^2)"];
+    scalingOCCubed [label = "Scaling O(c^3)\nAnd Beyond"];
+    scalingON [label = "Scaling O(n)"];
+    UT [label = "Ultra Terminum"];
+    powReflection [label = "PoW Reflection"];
+    powRefTwoChains [label = "PoW Reflection\nw/ 2 Chains"];
+    //UTCore [label = "Core of Ultra Terminum"];
+    powRefSimplex [label = "The Simplex\n(N Chains)"];
+    powRefConfirmationTimes [label = "Simplex\nConfirmation Times"];
+    powRefAttacks [label = "Simplex Attacks"];
+    simplexPoSVsPurePoS [label = "Simplex + PoS\nvs\nPure PoS"];
+    blockDag [label = "Block-DAGs\n(instead of blockchains)"];
+    dappChains [label = "Dapp-chains"];
+    devPotential [label = "Dev Potential"];
+    devPotentialUniversality [label = "Universality"];
+    devPotentialReach [label = "Reach"];
+    tiling [label = "Tiling"];
+    tilingSec [label = "Security"];
+
+    nosimus -> consensus -> pow;
+    consensus -> nakamotoConsensus -> nakConsensusSafeUnsafe;
+    pow -> nakamotoConsensus;
+    essenceOfPoWDataInclusion -> nakConsensusSafeUnsafe;
+    consensus -> PoSConsensusGeneral;
+    nakamotoConsensus -> blockDag -> dosAttacks;
+    //nakamotoConsensus -> essenceOfPoWDataInclusion;
+    pow -> essenceOfPoWDataInclusion;
+    nosimus -> dataStructsGeneral -> merkleTrees -> spvProofs -> spvProofsViaSC;
+    nosimus -> scaling -> scalingTrilemma;
+    scaling -> scalingOCSquared;
+    scaling -> dappChains -> scalingOCCubed;
+    //scaling -> scalingON;
+    nosimus -> UT -> powReflection -> powRefTwoChains;
+    powReflection -> powRefSimplex -> powRefConfirmationTimes;
+    powRefSimplex -> powRefAttacks;
+    powRefSimplex -> simplexPoSVsPurePoS;
+
+    dappChains -> devPotential -> devPotentialReach;
+    devPotential -> devPotentialUniversality;
+
+    powRefSimplex -> tiling;
+
+    tiling -> scalingON;
+    tiling -> tilingSec;
+}
