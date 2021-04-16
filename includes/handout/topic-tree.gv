@@ -20,29 +20,29 @@ digraph TopicTree {
         wpDraft1 -> dagDetails,amarooVision,validation,networkTopol,tokenomics;
     } */
 
-    // why is it novel
-    // what are the new ideas
-    // why are they different
-    // why is it compelling
-    // why they haven't been done before
-    //
-    // ian - want a breakdown of the whitepaper
+    nosimus [label = "Nos Ultra\nTerminum\nUltimum\nImus, Nunc", ordering=out];
 
-    nosimus [label = "Nos Ultra\nTerminum\nUltimum\nImus, Nunc"];
-    consensus [label = "Consensus"];
-    pow [label = "Proof of Work (PoW)"];
-    essenceOfPoWDataInclusion [label = "PoW - What does it prove?"];
-    nakamotoConsensus [label = "Nakamoto Consensus"];
+    subgraph cluster_Legend {
+        label = "Legend";
+        prior [label = "Prior Work", shape=rectangle];
+        original [label = "Original (full or in part)"];
+    }
+
+    consensus [label = "Consensus", ordering=out];
+    pow [label = "Proof of Work (PoW)", shape=rectangle];
+    essenceOfPoWDataInclusion [label = "PoW - What does it prove?", shape=rectangle];
+    nakamotoConsensus [label = "Nakamoto Consensus", shape=rectangle];
     nakConsensusSafeUnsafe [label = "Safe Extensions"];
-    PoSConsensusGeneral [label = "Proof of Stake\n(Overview)"];
+    PoSConsensusGeneral [label = "Proof of Stake\n(Overview)", shape=rectangle];
+    blockDag [label = "Block-DAGs\n(instead of blockchains)", shape=rectangle];
     dosAttacks [label = "DoS Attacks"];
-    dataStructsGeneral [label = "Blockchain\nData Structs"];
-    merkleTrees [label = "Merkle Trees"];
-    spvProofs [label = "SPV Proofs"];
-    spvProofsViaSC [label = "SPV Proofs via\nSmart Contracts"];
+    dataStructsGeneral [label = "Blockchain\nData Structs", shape=rectangle];
+    merkleTrees [label = "Merkle Trees", shape=rectangle];
+    spvProofs [label = "SPV Proofs", shape=rectangle];
+    spvProofsViaSC [label = "SPV Proofs via\nSmart Contracts", shape=rectangle];
     scaling [label = "Scaling"];
-    scalingTrilemma [label = "Buterin's Trilemma"];
-    scalingOCSquared [label = "Scaling O(c^2)"];
+    scalingTrilemma [label = "Buterin's Trilemma", shape=rectangle];
+    scalingOCSquared [label = "Scaling O(c^2)", shape=rectangle];
     scalingOCCubed [label = "Scaling O(c^3)\nAnd Beyond"];
     scalingON [label = "Scaling O(n)"];
     UT [label = "Ultra Terminum"];
@@ -50,10 +50,11 @@ digraph TopicTree {
     powRefTwoChains [label = "PoW Reflection\nw/ 2 Chains"];
     //UTCore [label = "Core of Ultra Terminum"];
     powRefSimplex [label = "The Simplex\n(N Chains)"];
+    simplexScale [label = "Simplex\nScalability"];
+    simplexDappChains [label = "Simplex\nDapp-chains"];
     powRefConfirmationTimes [label = "Simplex\nConfirmation Times"];
     powRefAttacks [label = "Simplex Attacks"];
     simplexPoSVsPurePoS [label = "Simplex + PoS\nvs\nPure PoS"];
-    blockDag [label = "Block-DAGs\n(instead of blockchains)"];
     dappChains [label = "Dapp-chains"];
     devPotential [label = "Dev Potential"];
     devPotentialUniversality [label = "Universality"];
@@ -61,12 +62,14 @@ digraph TopicTree {
     tiling [label = "Tiling"];
     tilingSec [label = "Security"];
 
-    nosimus -> consensus -> pow;
+    nosimus -> consensus;
+    consensus -> pow;
     consensus -> nakamotoConsensus -> nakConsensusSafeUnsafe;
     pow -> nakamotoConsensus;
     essenceOfPoWDataInclusion -> nakConsensusSafeUnsafe;
     consensus -> PoSConsensusGeneral;
-    nakamotoConsensus -> blockDag -> dosAttacks;
+    nakamotoConsensus -> blockDag;
+    blockDag -> dosAttacks;
     //nakamotoConsensus -> essenceOfPoWDataInclusion;
     pow -> essenceOfPoWDataInclusion;
     nosimus -> dataStructsGeneral -> merkleTrees -> spvProofs -> spvProofsViaSC;
@@ -75,7 +78,8 @@ digraph TopicTree {
     scaling -> dappChains -> scalingOCCubed;
     //scaling -> scalingON;
     nosimus -> UT -> powReflection -> powRefTwoChains;
-    powReflection -> powRefSimplex -> powRefConfirmationTimes;
+    powReflection -> powRefSimplex -> simplexScale -> simplexDappChains;
+    powRefSimplex -> powRefConfirmationTimes;
     powRefSimplex -> powRefAttacks;
     powRefSimplex -> simplexPoSVsPurePoS;
 

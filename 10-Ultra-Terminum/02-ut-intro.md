@@ -18,6 +18,8 @@ At the core of *Ultra Terminum* is a new method for sharing security: *PoW Refle
 
 As UT is primarily a method of *structuring* a blockchain network, the scalability configurations mentioned herein *do not include **layer 2** methods*. That means that *layer 2* techniques (e.g., state/payment channels, ZK/optimistic rollups, and anchored/side chains) can be implemented *on top* of UT.
 
+UT's unique structure means that confirmation times within UT are of order $\frac{1}{O(c)}$. This is a significant improvement over existing architectures, which are of order $O(1)$. This means that, as computers get more powerful, confirmation times in UT approach 0.
+
 ## Assumed Knowledge
 
 You will need to understand (or, perhaps, have mastered) the following concepts to reliably understand the foundations of *PoW Reflection* and *Ultra Terminum*:
