@@ -25,25 +25,26 @@ digraph TopicTree {
     subgraph cluster_Legend {
         label = "Legend";
         prior [label = "Prior Work", shape=rectangle];
-        original [label = "Original (full or in part)"];
+        partOriginal [label = "Original in part", shape=octagon];
+        original [label = "Original"];
     }
 
-    consensus [label = "Consensus", ordering=out];
+    consensus [label = "Consensus", ordering=out, shape=octagon];
     pow [label = "Proof of Work (PoW)", shape=rectangle];
     essenceOfPoWDataInclusion [label = "PoW - What does it prove?", shape=rectangle];
     nakamotoConsensus [label = "Nakamoto Consensus", shape=rectangle];
-    nakConsensusSafeUnsafe [label = "Safe Extensions"];
+    nakConsensusSafeUnsafe [label = "Extensions\n(safe and unsafe)", shape=octagon];
     PoSConsensusGeneral [label = "Proof of Stake\n(Overview)", shape=rectangle];
     blockDag [label = "Block-DAGs\n(instead of blockchains)", shape=rectangle];
-    dosAttacks [label = "DoS Attacks"];
+    dosAttacks [label = "DoS Attacks", shape=octagon];
     dataStructsGeneral [label = "Blockchain\nData Structs", shape=rectangle];
     merkleTrees [label = "Merkle Trees", shape=rectangle];
     spvProofs [label = "SPV Proofs", shape=rectangle];
     spvProofsViaSC [label = "SPV Proofs via\nSmart Contracts", shape=rectangle];
-    scaling [label = "Scaling"];
+    scaling [label = "Scaling", shape=octagon];
     scalingTrilemma [label = "Buterin's Trilemma", shape=rectangle];
     scalingOCSquared [label = "Scaling O(c^2)", shape=rectangle];
-    scalingOCCubed [label = "Scaling O(c^3)\nAnd Beyond"];
+    scalingOCCubed [label = "Scaling O(c^3)\nAnd Beyond", shape=octagon];
     scalingON [label = "Scaling O(n)"];
     UT [label = "Ultra Terminum"];
     powReflection [label = "PoW Reflection"];
@@ -55,10 +56,10 @@ digraph TopicTree {
     powRefConfirmationTimes [label = "Simplex\nConfirmation Times"];
     powRefAttacks [label = "Simplex Attacks"];
     simplexPoSVsPurePoS [label = "Simplex + PoS\nvs\nPure PoS"];
-    dappChains [label = "Dapp-chains"];
+    dappChains [label = "Dapp-chains", shape=octagon];
     devPotential [label = "Dev Potential"];
-    devPotentialUniversality [label = "Universality"];
-    devPotentialReach [label = "Reach"];
+    devPotentialUniversality [label = "Universality", shape=octagon];
+    devPotentialReach [label = "Reach", shape=octagon];
     tiling [label = "Tiling"];
     tilingSec [label = "Security"];
 

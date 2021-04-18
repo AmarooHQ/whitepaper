@@ -44,6 +44,7 @@ pert:
 
 handout:
 	dot -Gdpi=300 -Tpng includes/handout/topic-tree.gv -o includes/handout/topic-tree.png
+	pandoc --standalone --mathjax -f markdown --pdf-engine=context -V fontsize=11.5pt -o includes/handout/exec-summary.pdf includes/handout/exec-summary.md
 
 clean: init
 	-rm -r $(OUTDIR)/*

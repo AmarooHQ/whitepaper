@@ -80,7 +80,11 @@ Could we use Bitcoin's knowledge *that it's own history is reflected in the Ethe
 
 NOTE: I think it might be good to reorg this section a bit so that the current-btc stuff comes first, then we go into the modifications. TODO
 
-Before we discuss a change that Bitcoin could make, it is important to note that chain-work done with one hashing algorithm is *not generally convertible* to 'equivalent' work done via another hashing algorithm. There is no meaningful *generic* answer to the question "how many *double SHA256* hashes is one *Ethash* hash worth?". In fact there is no meaningful answer to similar questions that use any other other combination of hashing algorithms, either. It is not possible to *generically and universally* convert between qualitatively different units. You can *only* do this within some *context* where you *define* a conversion method. We'll look at some such contexts later.
+Before we discuss a change that Bitcoin could make, it is important to note that chain-work done with one hashing algorithm is *not generally convertible* to 'equivalent' work done via another hashing algorithm. There is no meaningful *generic* answer to the question "how many *double SHA256* hashes is one *Ethash* hash worth?". In fact there is no meaningful answer to similar questions that use any other other combination of hashing algorithms, either. It is not possible to *generically and universally* convert between qualitatively different units[^et-conversion]. You can *only* do this within some *context* where you *define* a conversion method. We'll look at some such contexts later.
+
+[^et-conversion]: The philosophical generalization of *qualitative conversion* and the *necessary* role that *goals* and *context* play is [Elliot Temple's](https://elliottemple.com) idea. It is covered in his [*Critical Fallibilism Course*](https://gumroad.com/l/mhtbA). It's also partially covered in (or related to) [Elliot's *Yes or No Philosophy* course](https://gumroad.com/l/hxqsh) and some of his articles, e.g., [*IGCs* ({Idea, Context, Goal} triples)](https://curi.us/2387-igcs) and [*Bottleneck Examples*](https://curi.us/2353-bottleneck-examples).
+
+\begin{comment} The idea is also closely related to his work integrating Goldratt's *Theory of Constraints* into *Critical Fallibilism*. \end{comment}
 
 NB: Bitcoin does two SHA256 hashes per block, which is why I refer to "double SHA256" above.
 

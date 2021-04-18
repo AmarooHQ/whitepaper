@@ -2,13 +2,15 @@
 
 # Buterin's Trilemma
 
-The trilemma is as follows:
+[The trilemma](https://eth.wiki/sharding/Sharding-FAQs) is as follows:
 
 For some magnitude of computational resources (computation, bandwidth, storage, etc), *c*, and magnitude of the network (transaction throughput, state size, market cap, etc), *n*, it is claimed that blockchain systems have, at most, 2 of these 3 properties:
 
 * Decentralization --- the system can operate with participants that have only $O(c)$ resources (e.g. a laptop, a raspberry pi, a VPS, etc).
 * Security --- the system is secure against attackers with up to $O(n)$ resources.
 * Scalability --- the system can process $O(n)$ transactions with $O(n) > O(c)$; this means that, as the network grows, the throughput of the system grows faster than the computational resources required per user.
+
+The definition of scalability is perhaps problematic. If the network growth, $O(n)$, becomes bottlenecked by an $O(c^2)$ scaling configuration, is the network really scalable? I prefer an alternative definition of scalability: the system can process $O(n)$ transactions in $O(1)$ time or less, i.e., confirmations neither take longer nor become more scarce as $n$ and/or $c$ increase.
 
 ## Core Conflict
 
@@ -66,16 +68,16 @@ An underlying assumption here is that maximally sharing security across the netw
 
 We have some hints to conditions that might belong to a *silver bullet* solution:
 
-* We can share security with shards and small blocks.
-* We can share security without miners keeping and validating all chains.
+* We can share security between chains/shards and can use small blocks.
+* We can share security without miners keeping and validating all chains/shards.
 
-**This is the crux of the problem: how do you construct a sharded blockchain (scalable) such that attacking a shard is about as difficult as attacking the full network (secure), whilst ensuring that the security of the network does not require validating all shards (decentralized)?**
+**This is the crux of the problem: how do you construct a network of blockchains (scalable) such that attacking an individual chain is about as difficult as attacking the full network (secure), whilst ensuring that the security of the network does not require validating all chains (decentralized)?**
 
 ### Assumptions
 
 Here are some additional underlying assumptions that are either common or which I expect to be common:
 
-* Sharing PoW requires merged mining.
+* Sharing PoW security requires merged mining.
 * Sharing PoW security requires that chains use the same hashing algorithm.
 * Simultaneously securing a network with PoW and PoS is not possible without compromises (like that PoW miners could DOS PoS miners or vice versa).
 * It is unsafe for PoW miners to build on unvalidated histories (as is done with SPV mining, which *is* unsafe).
@@ -86,6 +88,6 @@ NB: I call them *assumptions*; some people will likely (and rightly) take issue 
 
 ## Conjecture: A Principle of Scaling
 
-When you have worse than $O(c)$ complexity, that thing cannot become a bottleneck. If it's not a bottleneck, then it doesn't matter that it's worse than $O(c)$.
+A scalable system *can* have components with complexities worse than $O(c)$ *provided* that those components are not bottlenecks. As long as there is excess capacity in those components, the system can still scale.
 
 \todo{include this?}
