@@ -77,9 +77,10 @@ At this point, if an attacker was to publish a better Bitcoin chain, then Bitcoi
 Could we use Bitcoin's knowledge *that it's own history is reflected in the Ethereum SC* to *prevent* such an attack?
 
 \begin{figure}
+\centering
 \input{ut/diags/pow-chain1}
 \label{fig:pow-chain1}
-\caption{test caption pow chain 1}
+\caption{Hypothetical \textit{PoW Reflection} between Bitcoin and Ethereum}
 \end{figure}
 
 #### Step 4. A modification to Bitcoin's *block-weight* calculation

@@ -27,10 +27,10 @@
 % \tikzstyle{braceR} = [decorate, decoration={brace,amplitude=6pt,raise=2pt}]
 % \tikzstyle{ethBraceR} = [braceR, sloped]
 
-\begin{tikzpicture}[node distance=1cm]
+\begin{tikzpicture}[node distance=0.7cm]
 
     \node (btcChain) [chainName] {Bitcoin};
-    \node (ethChain) [chainName, right of=btcChain, xshift=4.5cm] {Ethereum};
+    \node (ethChain) [chainName, right of=btcChain, xshift=4cm] {Ethereum};
 
     \foreach \net/\oNet in {btc/eth,eth/btc} {
         \node (\net Dots) [below of=\net Chain, yshift=0cm] {$\vdots$};
@@ -60,9 +60,13 @@
         \draw [arrowParent] (btc\x) -- (\prevNode);
 
         % btc state
-        \draw [braceL] (btc\x.west |- btc\x.north) --
-            node (btcState\x) [anchor=east, xshift=-10pt, text width=130pt,align=right] {\footnotesize{
-                \textsc{STATE} \\ Known Headers: $ETH_{0 \cdots 40j+\ethLastEnd}$ \\ Proof of Reflection: $ETH_{40j+\ethLastEnd}$}}
+        \draw [braceLR] (btc\x.west |- btc\x.north) --
+            node (btcState\x) [anchor=east, xshift=-10pt, text width=110pt,align=right] {\footnotesize{
+                \textsc{STATE} \\
+                Headers: $ETH_{0 \cdots j+\ethLastEnd}$ \\
+                Latest PoR: $ETH_{j+\ethLastEnd}$ \\
+                %% $\Sigma$ Weight: $\Sigma^{j+\ethLastEnd}_{k=0} \text{W}(ETH_{k})$
+                }}
             (btc\x.west |- btc\x.south);
 
         % reflection arrow, only on nodes 2 and beyond
@@ -89,17 +93,22 @@
 
         \ifnum 3>\x
 
-        \node (ethS\x) [block, below = of \prevNode |- \oPrev, yshift=\ys] {$\MakeUppercase{eth}_{40j+\ethBStart}$};
+        \node (ethS\x) [block, below = of \prevNode |- \oPrev, yshift=\ys] {$\MakeUppercase{eth}_{j+\ethBStart}$};
         \draw [arrowParent] (ethS\x) -- (\prevNode);
 
         \node (ethDots\x) [dots, below = of ethS\x, yshift=0.5cm] {\vdots};
         \draw [arrowParent] (ethDots\x) -- (ethS\x);
 
-        \node (ethE\x) [block, below = of ethDots\x, yshift=0.5cm] {$\MakeUppercase{eth}_{40j+\ethBEnd}$};
+        \node (ethE\x) [block, below = of ethDots\x, yshift=0.5cm] {$\MakeUppercase{eth}_{j+\ethBEnd}$};
         \draw [arrowParent] (ethE\x) -- (ethDots\x);
 
-        \draw [braceR] (ethS\x.east |- ethS\x.north) --
-            node (ethStateCoord\x) [anchor=west, xshift=10pt, text width=120pt] {\footnotesize{\textsc{STATE} \\ Known Headers: $BTC_{0 \cdots i+\x}$ \\ Proof of Reflection: $BTC_{i+\x}$}}
+        \draw [braceRL] (ethS\x.east |- ethS\x.north) --
+            node (ethStateCoord\x) [anchor=west, xshift=10pt, text width=110pt] {\footnotesize{
+                \textsc{STATE} \\
+                Headers: $BTC_{0 \cdots i+\x}$ \\
+                Latest PoR: $BTC_{i+\x}$ \\
+                %% $\Sigma$ Weight: $\Sigma^{i+\x}_{k=0} \text{W}(BTC_{k})$
+                }}
             (ethS\x.east |- ethS\x.south);
         %\node (ethState\x) [block, right = of ethStateCoord\x, xshift=0cm] {State};
 
