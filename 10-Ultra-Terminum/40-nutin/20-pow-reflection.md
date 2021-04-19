@@ -84,20 +84,7 @@ Before we discuss a change that Bitcoin could make, it is important to note that
 
 [^et-conversion]: The philosophical generalization of *qualitative conversion* and the *necessary* role that *goals* and *context* play is [Elliot Temple's](https://elliottemple.com) idea. It is covered in his [*Critical Fallibilism Course*](https://gumroad.com/l/mhtbA). It's also partially covered in (or related to) [Elliot's *Yes or No Philosophy* course](https://gumroad.com/l/hxqsh) and some of his articles, e.g., [*IGCs* ({Idea, Context, Goal} triples)](https://curi.us/2387-igcs) and [*Bottleneck Examples*](https://curi.us/2353-bottleneck-examples).
 
-\begin{comment} The idea is also closely related to his work integrating Goldratt's *Theory of Constraints* into *Critical Fallibilism*. \end{comment}
-
 NB: Bitcoin does two SHA256 hashes per block, which is why I refer to "double SHA256" above.
-
-\begin{comment}
-
-some related stuff that mb is useful to revisit when writing this bit:
-
-* [The Order of Things](https://www.newyorker.com/magazine/2011/02/14/the-order-of-things) ([unpaywalled-mirror](https://outline.com/8gMRNR))
-* https://curi.us/2353-bottleneck-examples - explanation of above under "College Rankings"
-* yes/no and CF course (can't remember specifics)
-* Goldratt's *The Choice* (is a cucumber longer than it is green?)
-
-\end{comment}
 
 For the purposes of our hypothetical construction, let's say that the Bitcoin chain and Ethereum chain do *equal work over equal time*. That is: the work required to mine 1 Bitcoin block, which happens approx every 10 minutes, is equal to the work done on the Ethereum chain over the same time period (10 minutes), which is approximately 40 Ethereum blocks (with a target time of 15 seconds). So: 1 Bitcoin confirmation is worth approx 40 Ethereum confirmations. *For the sake of this construction, we'll also presume this relationship doesn't change over time*. Our constant of conversion is thus: `40` and the unit is `EthBlocks / BtcBlock`.
 
