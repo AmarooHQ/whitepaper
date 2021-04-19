@@ -30,6 +30,7 @@ I use this to compile and view quickly: `make && code ./output/whitepaper.pdf`
 you need (ubuntu pkgs):
 
 - `sagemath`
+- `sagetex`
 - `dot2tex` (mb, but i don't think so anymore)
 
 ## notes about latex graph stuff

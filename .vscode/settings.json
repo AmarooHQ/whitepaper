@@ -51,5 +51,6 @@
         "unpaywalled",
         "unvalidated",
         "varnothing"
-    ]
+    ],
+    "python.pythonPath": "/usr/bin/python3"
 }

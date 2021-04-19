@@ -15,3 +15,5 @@ node_modules
 /*.zip
 *.pgf-plot.table
 includes/**/*.pdf
+/includes/ut/diags
+includes/handout/exec-summary.md
