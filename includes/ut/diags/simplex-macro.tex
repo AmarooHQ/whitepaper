@@ -1,0 +1,38 @@
+\providecommand\SimplexChains{7}%
+\providecommand\SimplexNodeColor{red}%
+\providecommand\SimplexRadius{5}%
+\providecommand\SimplexNodeRadius{3pt}%
+% use this command to differentiate nodes from different simplexes
+\providecommand\SimplexNodeName{chain}%
+\providecommand\SimplexOffsetAngle{0}%
+\providecommand\SimplexOffsetR{0}%
+
+\tikzstyle{refl} = [line width=2pt, shorten >= 3pt, shorten <= 3pt]%
+\tikzstyle{splxNode} = [draw=black,shape=circle]%
+%
+\newcommand\TikzSimplex{
+    \pgfmathsetmacro\rOffset{(360/\SimplexChains)+90}
+    \node (\SimplexNodeName-origin) at (\SimplexOffsetAngle: \SimplexOffsetR) {};
+    % \node (\SimplexNodeName-origin-label) [yshift=\SimplexRadius*1.2cm] at (\SimplexNodeName-origin) {O \SimplexOffsetAngle: \SimplexOffsetR -- \SimplexNodeRadius};
+    \foreach \i in {1,...,\SimplexChains} {
+            \pgfmathsetmacro\r{\i*(360/\SimplexChains)+\rOffset}
+            \xdef\sxRadius{\SimplexRadius}
+            \ifnum 1=\SimplexChains
+                \xdef\sxRadius{0}
+            \fi
+            \node (\SimplexNodeName//\i)
+                [splxNode, fill=\SimplexNodeColor, inner sep=\SimplexNodeRadius]
+                at ([shift=({\r: \sxRadius*0.8cm})]\SimplexNodeName-origin)
+                {};
+        }
+    \foreach \i in {1,...,\SimplexChains} {
+            \foreach \j in {1,...,\SimplexChains} {
+                    \ifnum \i>\j
+                        \draw [refl] (\SimplexNodeName//\i) -- (\SimplexNodeName//\j);
+                        % \node (n-\i-\j) at (\i, \j) {\i, \j};
+                    \else
+                        \breakforeach
+                    \fi
+                }
+        }
+}%

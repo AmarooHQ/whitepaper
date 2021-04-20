@@ -55,8 +55,8 @@
     \node (ethChain) [chainName, right of=btcChain, xshift=4cm] {\NameChainB};
 
     \foreach \net/\oNet in {btc/eth,eth/btc} {
-        \node (\net Dots) [below of=\net Chain, yshift=0cm] {$\vdots$};
-    }
+            \node (\net Dots) [below of=\net Chain, yshift=0cm] {$\vdots$};
+        }
 
     \foreach \x in {1,...,6} {
             \pgfmathtruncatemacro\r{round(\x-1)}

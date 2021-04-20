@@ -1,0 +1,14 @@
+\documentclass[]{standalone}
+\usepackage[T1]{fontenc}\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usepackage{pgfbaselayers}
+\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
+
+% overwrite (either \providecommand or \renewcommand) to control the parts of the diagram which are drawn or not.
+
+\begin{document}
+\input{ut/diags/tiling-macro}%
+\begin{tikzpicture}
+    \TikzSimplexTiling
+\end{tikzpicture}
+\end{document}

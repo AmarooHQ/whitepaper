@@ -1,0 +1,115 @@
+\documentclass[]{standalone}
+\usepackage[T1]{fontenc}\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
+
+\begin{document}
+\input{tikz-styles}%
+\begin{tikzpicture}[node distance=0.8cm]
+
+    \node (btcChain) [chainName] {Bitcoin};
+    \node (ethChain) [chainName, right of=btcChain, xshift=4cm] {Ethereum};
+
+    \foreach \net/\oNet in {btc/eth,eth/btc} {
+        \node (\net Dots) [below of=\net Chain, yshift=0cm] {$\vdots$};
+    }
+
+    \foreach \x in {1,...,3} {
+        \pgfmathtruncatemacro\r{round(\x-1)}
+        \pgfmathtruncatemacro\ethLastEnd{round((\x-1)*40)}
+        \pgfmathtruncatemacro\ethBStart{round((\x-1)*40+1)}
+        \pgfmathtruncatemacro\ethBEnd{round((\x-1)*40+40)}
+        \xdef\stateXS{5pt}
+
+        %%%%%%%%%
+        % bitcoin
+        %%%%%%%%%
+
+        \ifnum 1=\x
+        \xdef\ys{0}
+        \xdef\prevNode{btcDots}
+        \xdef\oPrev{ethDots}
+        \else
+        % \xdef\ys{-1cm}
+        \xdef\prevNode{btc\r}
+        \xdef\oPrev{ethE\r}
+        \fi
+
+        \node (btc\x) [block, below = of \prevNode |- \oPrev, yshift=\ys] {$\MakeUppercase{btc}_{i+\x}$};
+        \draw [arrowParent] (btc\x) -- (\prevNode);
+
+        % btc state
+        \draw [braceLR] (btc\x.west |- btc\x.north) --
+            node (btcState\x) [state, anchor=east, xshift=-\stateXS, align=right] {\footnotesize{
+                \textsc{STATE} \\
+                Headers: $ETH_{0 \cdots j+\ethLastEnd}$ \\
+                Latest PoR: $BTC_{i+\r}$ \\
+                %% $\Sigma$ Weight: $\Sigma^{j+\ethLastEnd}_{k=0} \text{W}(ETH_{k})$
+                }}
+            (btc\x.west |- btc\x.south);
+
+        % reflection arrow, only on nodes 2 and beyond
+        \ifnum 1<\x
+        \draw [arrowRefl] (btc\x) --
+            node [anchor=center, above, sloped] {\scriptsize{include 40 headers}}
+            node [anchor=center, below, sloped] {\scriptsize{and 40 PoRs}}
+            (ethAll\r);
+        \fi
+
+        %%%%%%%%%%
+        % ethereum
+        %%%%%%%%%%
+
+        \xdef\ys{0}
+
+        \ifnum 1=\x
+        \xdef\prevNode{ethDots}
+        \xdef\oPrev{btc1}
+        \else
+        \xdef\prevNode{ethE\r}
+        \xdef\oPrev{btc\x}
+        \fi
+
+        % exclude last Eth chunk
+        \ifnum 3>\x
+
+        \node (ethS\x) [block, below = of \prevNode |- \oPrev, yshift=\ys] {$\MakeUppercase{eth}_{j+\ethBStart}$};
+        \draw [arrowParent] (ethS\x) -- (\prevNode);
+
+        \node (ethDots\x) [dots, below = of ethS\x, yshift=0.5cm] {\vdots};
+        \draw [arrowParent] (ethDots\x) -- (ethS\x);
+
+        \node (ethE\x) [block, below = of ethDots\x, yshift=0.5cm] {$\MakeUppercase{eth}_{j+\ethBEnd}$};
+        \draw [arrowParent] (ethE\x) -- (ethDots\x);
+
+        \draw [braceRL] (ethS\x.east |- ethS\x.north) --
+            node (ethStateCoord\x) [state, anchor=west, xshift=\stateXS] {\footnotesize{
+                \textsc{STATE} \\
+                Headers: $BTC_{0 \cdots i+\x}$ \\
+                Latest PoR: $ETH_{j+\ethLastEnd}$ \\
+                %% $\Sigma$ Weight: $\Sigma^{i+\x}_{k=0} \text{W}(BTC_{k})$
+                }}
+            (ethS\x.east |- ethS\x.south);
+        %\node (ethState\x) [block, right = of ethStateCoord\x, xshift=0cm] {State};
+
+        % curly brace for lots of eth blocks
+        \draw [ethBraceL] (ethS\x.west -| ethE\x.west) -- node (ethAll\x) [black, midway, yshift=14pt] {
+            %\scriptsize{$ETH_{40(j+\x) \cdots 40(j+\x)+39}$}
+            \scriptsize{40 Eth Blocks}
+        } (ethE\x.west);
+
+        % eth refl
+        \draw [arrowRefl] (ethS\x) --
+            node [anchor=center, above, sloped] {\scriptsize{include header}}
+            node [anchor=center, below, sloped] {\scriptsize{and PoR}}
+            (\oPrev);
+
+        \fi
+    }%
+
+    \xdef\xs{0.8cm}
+    \node (topLeft) [left = of btcState1.west |- btcChain.north, minimum width=0, xshift=\xs] {};
+    \node (botLeft) [left = of btcState3.west |- btc3.south, minimum width=0, xshift=\xs] {};
+    \draw [arrowTime] (topLeft) node () [anchor=west, yshift=-10pt] {\textit{Time}} -- (botLeft);
+\end{tikzpicture}
+\end{document}

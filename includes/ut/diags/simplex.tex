@@ -1,0 +1,18 @@
+\documentclass[]{standalone}
+\usepackage[T1]{fontenc}\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
+
+% overwrite (either \providecommand or \renewcommand) to control the parts of the diagram which are drawn or not.
+
+\begin{document}
+\providecommand\SimplexNodeColor{red}%
+\providecommand\SimplexRadius{5cm}%
+% use this command to differentiate nodes from different simplexes
+\providecommand\SimplexNodeName{chain}%
+\input{ut/diags/simplex-macro}
+%
+\begin{tikzpicture}
+    \TikzSimplex
+\end{tikzpicture}
+\end{document}
