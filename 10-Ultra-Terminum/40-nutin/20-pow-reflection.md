@@ -68,6 +68,14 @@ Can we use a tracked chain for a different purpose? What happens if the Bitcoin 
 | 41 | ||| j + 40 | BTC[k+1] header | Tracks BTC chain up to BTC[k+1] |
 | ... |||||||
 
+\begin{figure}
+\todo{This figure currently shows mutual reflection, which isn't the case for "step 3"}
+\centering
+\input{ut/diags/pow-chain1}
+\label{fig:pow-chain1}
+\caption{Hypothetical \textit{PoW Reflection} between Bitcoin and Ethereum}
+\end{figure}
+
 Bitcoin now knows *which Bitcoin blocks are known about by some external source* (Ethereum in this case).
 
 Put another way: Bitcoin's history is confirmed *not only* by new Bitcoin blocks, *but also* by Ethereum blocks. Since Bitcoin nodes *know* they have the blocks that Ethereum knows about, there's no data-availability concern here.
@@ -76,16 +84,9 @@ At this point, if an attacker was to publish a better Bitcoin chain, then Bitcoi
 
 Could we use Bitcoin's knowledge *that it's own history is reflected in the Ethereum SC* to *prevent* such an attack?
 
-\begin{figure}
-\centering
-\input{ut/diags/pow-chain1}
-\label{fig:pow-chain1}
-\caption{Hypothetical \textit{PoW Reflection} between Bitcoin and Ethereum}
-\end{figure}
-
 #### Step 4. A modification to Bitcoin's *block-weight* calculation
 
-NOTE: I think it might be good to reorg this section a bit so that the current-btc stuff comes first, then we go into the modifications. TODO
+\todo{NOTE: I think it might be good to reorg this section a bit so that the current-btc stuff comes first, then we go into the modifications.}
 
 Before we discuss a change that Bitcoin could make, it is important to note that chain-work done with one hashing algorithm is *not generally convertible* to 'equivalent' work done via another hashing algorithm. There is no meaningful *generic* answer to the question "how many *double SHA256* hashes is one *Ethash* hash worth?". In fact there is no meaningful answer to similar questions that use any other other combination of hashing algorithms, either. It is not possible to *generically and universally* convert between qualitatively different units[^et-conversion]. You can *only* do this within some *context* where you *define* a conversion method. We'll look at some such contexts later.
 
@@ -95,7 +96,7 @@ NB: Bitcoin does two SHA256 hashes per block, which is why I refer to "double SH
 
 For the purposes of our hypothetical construction, let's say that the Bitcoin chain and Ethereum chain do *equal work over equal time*. That is: the work required to mine 1 Bitcoin block, which happens approx every 10 minutes, is equal to the work done on the Ethereum chain over the same time period (10 minutes), which is approximately 40 Ethereum blocks (with a target time of 15 seconds). So: 1 Bitcoin confirmation is worth approx 40 Ethereum confirmations. *For the sake of this construction, we'll also presume this relationship doesn't change over time*. Our constant of conversion is thus: `40` and the unit is `EthBlocks / BtcBlock`.
 
-NB: we're not that concerned with whether this is a reasonable assumption or not, we just need a way to convert the work done on each chain into the same units. (Some methods for doing this will be discussed later.)
+NB: we're not that concerned with whether this is a reasonable assumption or not; right now, we just need a way to convert the work done on each chain into the same units. (Some methods for doing this will be discussed later.)
 
 Currently, the Bitcoin network chooses the "heaviest" (most worked) chain as its common history. Bitcoin calculates the "weight" of blocks (i.e., how much work went in to them) via an estimation of how many hashes were required -- measured in `double SHA256 hashes`. Let's normalize this number so that we're working in terms of `BtcBlocks` instead of `double SHA256 hashes`; that's pretty easy, since each block is worth `1 BtcBlock` by definition. Now, we can also measure the work in `EthBlocks`, too (that being: `40 EthBlocks`).
 

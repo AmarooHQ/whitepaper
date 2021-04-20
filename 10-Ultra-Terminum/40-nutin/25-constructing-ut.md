@@ -110,6 +110,9 @@ plan:
   - *all* the layer-2 solns
   - todo: more tomorrow
 
+\todo{
+  dev potential;
+}
 
 #### Dapp-dapp-chains
 
