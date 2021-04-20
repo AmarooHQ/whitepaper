@@ -36,6 +36,17 @@ Let's add such a contract to Ethereum and describe the relevant data and events:
 
 After a Bitcoin block is produced, an Ethereum miner includes an Eth tx containing the BTC header, which updates the SC tracking the Bitcoin chain. In reality there are practical concerns about incenting someone to produce such a transaction (among other things); we're not concerned with those here. We're just concerned with the relationships that exist and what they can do.
 
+\providecommand\DrawEthRefl{1}
+\providecommand\DrawEthState{1}
+\providecommand\DrawBtcLT{3}
+
+\begin{figure}
+\centering
+\input{ut/diags/pr-btc-eth-complete}
+\label{fig:pr-btc-eth-step1}
+\caption{Bitcoin headers are included in Ethereum's state (via user made transactions) as they are produced. This is roughly how \textit{BTC Relay} works.}
+\end{figure}
+
 #### Step 2. Bitcoin tracks Ethereum
 
 Let's consider a hypothetical change to Bitcoin. The protocol is extended to add support for tracking Ethereum's chain-headers. That is, a bespoke protocol extension is created that allows/requires miners to publish known Ethereum chain-headers along with their Bitcoin block. Similar to the way Ethereum tracks Bitcoin, now Bitcoin also tracks Ethereum.
@@ -68,12 +79,24 @@ Can we use a tracked chain for a different purpose? What happens if the Bitcoin 
 | 41 | ||| j + 40 | BTC[k+1] header | Tracks BTC chain up to BTC[k+1] |
 | ... |||||||
 
+\providecommand\DrawBtcState{1}
+\providecommand\DrawBtcRefl{1}
+\renewcommand\DrawBtcLT{4}
+\providecommand\DrawEthLT{4}
+\providecommand\DrawPoRLabel{1}
+\providecommand\DrawPoRInState{1}
+\providecommand\NameChainA{Chain A}
+\providecommand\AbbrChainA{A}
+\providecommand\NameChainB{Chain B}
+\providecommand\AbbrChainB{B}
+\providecommand\ChainBBlocksN{1}
+
 \begin{figure}
 \todo{This figure currently shows mutual reflection, which isn't the case for "step 3"}
 \centering
-\input{ut/diags/pow-chain1}
-\label{fig:pow-chain1}
-\caption{Hypothetical \textit{PoW Reflection} between Bitcoin and Ethereum}
+\input{ut/diags/pr-btc-eth-complete}
+\label{fig:pr-btc-eth-complete}
+\caption{\textit{PoW Reflection} between two UT Chains}
 \end{figure}
 
 Bitcoin now knows *which Bitcoin blocks are known about by some external source* (Ethereum in this case).

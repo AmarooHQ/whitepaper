@@ -15,5 +15,13 @@ node_modules
 /*.zip
 *.pgf-plot.table
 includes/**/*.pdf
-/includes/ut/diags
 includes/handout/exec-summary.md
+*.dvi
+*.pdf
+*.synctex.gz
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+
+includes/**/*.old

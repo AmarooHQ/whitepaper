@@ -3,113 +3,219 @@
 \usepackage{amsmath, amsfonts}
 \usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
 
+% overwrite (either \providecommand or \renewcommand) to control the parts of the diagram which are drawn or not.
+\providecommand\DrawBtcState{1}
+\providecommand\DrawEthState{1}
+\providecommand\DrawBtcRefl{1}
+\providecommand\DrawEthRefl{1}
+\providecommand\DrawPoRLabel{1}
+\providecommand\DrawPoRInState{1}
+\providecommand\DrawEthLT{3}
+\providecommand\DrawBtcLT{4}
+
 \begin{document}
+% default params for image
+\providecommand\DrawBtcState{0}%
+\providecommand\DrawEthState{0}%
+\providecommand\DrawBtcRefl{0}%
+\providecommand\DrawEthRefl{0}%
+\providecommand\DrawPoRLabel{0}%
+\providecommand\DrawPoRInState{0}%
+\providecommand\DrawEthLT{3}%
+\providecommand\DrawBtcLT{4}%
+\providecommand\NameChainA{Bitcoin}
+\providecommand\AbbrChainA{BTC}
+\providecommand\NameChainB{Ethereum}
+\providecommand\AbbrChainB{ETH}
+\providecommand\ChainBBlocksN{40}
+%
+% define \ifnodedefined
+\makeatletter % https://tex.stackexchange.com/questions/37709/how-can-i-know-if-a-node-is-already-defined
+\long\def\ifnodedefined#1#2#3{%
+    \@ifundefined{pgf@sh@ns@#1}{#3}{#2}%
+}%
+\makeatother%
 \input{tikz-styles}%
 \begin{tikzpicture}[node distance=0.8cm]
+    \pgfmathtruncatemacro\lastBtc{round(\DrawBtcLT-1)}
+    \pgfmathtruncatemacro\lastEth{round(\DrawEthLT-1)}
 
-    \node (btcChain) [chainName] {Bitcoin};
-    \node (ethChain) [chainName, right of=btcChain, xshift=4cm] {Ethereum};
+    \def\ethE{ethS}
+    \def\ethAll{ethS}
+    \def\ethPorHeaders{header}
+    \def\ethPorIncl{PoR}
+    \ifnum 1<\ChainBBlocksN
+        \def\ethE{ethE}
+        \def\ethAll{ethAll}
+        \def\ethPorHeaders{\ChainBBlocksN\:headers}
+        \def\ethPorIncl{\ChainBBlocksN\:PoRs}
+    \fi
+
+    \node (btcChain) [chainName] {\NameChainA};
+    \node (ethChain) [chainName, right of=btcChain, xshift=4cm] {\NameChainB};
 
     \foreach \net/\oNet in {btc/eth,eth/btc} {
         \node (\net Dots) [below of=\net Chain, yshift=0cm] {$\vdots$};
     }
 
-    \foreach \x in {1,...,3} {
-        \pgfmathtruncatemacro\r{round(\x-1)}
-        \pgfmathtruncatemacro\ethLastEnd{round((\x-1)*40)}
-        \pgfmathtruncatemacro\ethBStart{round((\x-1)*40+1)}
-        \pgfmathtruncatemacro\ethBEnd{round((\x-1)*40+40)}
-        \xdef\stateXS{5pt}
+    \foreach \x in {1,...,6} {
+            \pgfmathtruncatemacro\r{round(\x-1)}
+            \pgfmathtruncatemacro\ethLastEnd{round((\x-1)*\ChainBBlocksN)}
+            \pgfmathtruncatemacro\ethBStart{round((\x-1)*\ChainBBlocksN+1)}
+            \pgfmathtruncatemacro\ethBEnd{round((\x-1)*\ChainBBlocksN+\ChainBBlocksN)}
+            \xdef\stateXS{5pt}
 
-        %%%%%%%%%
-        % bitcoin
-        %%%%%%%%%
+            %%%%%%%%%
+            % bitcoin (well, chain A. the diagram grew out of an example of BTC/ETH, you see)
+            %%%%%%%%%
 
-        \ifnum 1=\x
-        \xdef\ys{0}
-        \xdef\prevNode{btcDots}
-        \xdef\oPrev{ethDots}
-        \else
-        % \xdef\ys{-1cm}
-        \xdef\prevNode{btc\r}
-        \xdef\oPrev{ethE\r}
-        \fi
+            \ifnum 1=\x
+                \xdef\ys{0}
+                \xdef\prevNode{btcDots}
+                \xdef\oPrev{ethDots}
+            \else
+                % \xdef\ys{-1cm}
+                \xdef\prevNode{btc\r}
+                \xdef\oPrev{\ethE\r}
+            \fi
 
-        \node (btc\x) [block, below = of \prevNode |- \oPrev, yshift=\ys] {$\MakeUppercase{btc}_{i+\x}$};
-        \draw [arrowParent] (btc\x) -- (\prevNode);
+            \ifnum \DrawBtcLT>\x
+                \node (btc\x) [block, below = of \prevNode |- \oPrev, yshift=\ys] {$\AbbrChainA_{i+\x}$};
+                \draw [arrowParent] (btc\x) -- (\prevNode);
 
-        % btc state
-        \draw [braceLR] (btc\x.west |- btc\x.north) --
-            node (btcState\x) [state, anchor=east, xshift=-\stateXS, align=right] {\footnotesize{
-                \textsc{STATE} \\
-                Headers: $ETH_{0 \cdots j+\ethLastEnd}$ \\
-                Latest PoR: $BTC_{i+\r}$ \\
-                %% $\Sigma$ Weight: $\Sigma^{j+\ethLastEnd}_{k=0} \text{W}(ETH_{k})$
-                }}
-            (btc\x.west |- btc\x.south);
+                % btc state
+                \def\InitStateContents{
+                    \textsc{STATE} \\
+                    Headers: $\AbbrChainB_{0 \cdots j+\ethLastEnd}$
+                }
+                \ifnum 1=\DrawPoRInState
+                    \def\StateContents{\InitStateContents \\
+                        Latest PoR: $\AbbrChainA_{i+\r}$ \\
+                        %% $\Sigma$ Weight: $\Sigma^{j+\ethLastEnd}_{k=0} \text{W}(\AbbrChainB_{k})$
+                    }
+                \else
+                    \def\StateContents{\InitStateContents}
+                \fi
 
-        % reflection arrow, only on nodes 2 and beyond
-        \ifnum 1<\x
-        \draw [arrowRefl] (btc\x) --
-            node [anchor=center, above, sloped] {\scriptsize{include 40 headers}}
-            node [anchor=center, below, sloped] {\scriptsize{and 40 PoRs}}
-            (ethAll\r);
-        \fi
+                \ifnum 1=\DrawBtcState
+                    \draw [braceLR] (btc\x.west |- btc\x.north) --
+                    node (btcState\x) [state, anchor=east, xshift=-\stateXS, align=right] {\footnotesize{\StateContents}}
+                    (btc\x.west |- btc\x.south);
+                \fi
+                % end btc state
 
-        %%%%%%%%%%
-        % ethereum
-        %%%%%%%%%%
+                \def\porLabel{}
+                \ifnum 1=\DrawPoRLabel
+                    \def\porLabel{\scriptsize{and \ethPorIncl}}
+                \fi
 
-        \xdef\ys{0}
+                % reflection arrow, only on nodes 2 and beyond
+                \ifnum 1=\DrawBtcRefl
+                    \ifnum 1<\x
+                        \draw [arrowRefl] (btc\x) --
+                        node [anchor=center, above, sloped] {\scriptsize{include \ethPorHeaders}}
+                        node [anchor=center, below, sloped] {\porLabel}
+                        (\ethAll\r);
+                    \fi
+                \fi
+            \fi
 
-        \ifnum 1=\x
-        \xdef\prevNode{ethDots}
-        \xdef\oPrev{btc1}
-        \else
-        \xdef\prevNode{ethE\r}
-        \xdef\oPrev{btc\x}
-        \fi
+            %%%%%%%%%%
+            % ethereum
+            %%%%%%%%%%
 
-        % exclude last Eth chunk
-        \ifnum 3>\x
+            \xdef\ys{0}
 
-        \node (ethS\x) [block, below = of \prevNode |- \oPrev, yshift=\ys] {$\MakeUppercase{eth}_{j+\ethBStart}$};
-        \draw [arrowParent] (ethS\x) -- (\prevNode);
+            \ifnum 1=\x
+                \xdef\prevNode{ethDots}
+                \xdef\oPrev{btc1}
+            \else
+                \xdef\prevNode{\ethE\r}
+                \xdef\oPrev{btc\x}
+            \fi
 
-        \node (ethDots\x) [dots, below = of ethS\x, yshift=0.5cm] {\vdots};
-        \draw [arrowParent] (ethDots\x) -- (ethS\x);
+            % exclude last Eth chunk
+            \ifnum \DrawEthLT>\x
+                \node (ethS\x) [block, below = of \prevNode |- \oPrev, yshift=\ys] {$\AbbrChainB_{j+\ethBStart}$};
+                \draw [arrowParent] (ethS\x) -- (\prevNode);
 
-        \node (ethE\x) [block, below = of ethDots\x, yshift=0.5cm] {$\MakeUppercase{eth}_{j+\ethBEnd}$};
-        \draw [arrowParent] (ethE\x) -- (ethDots\x);
+                \ifnum 1<\ChainBBlocksN
+                    \node (ethDots\x) [dots, below = of ethS\x, yshift=0.5cm] {\vdots};
+                    \draw [arrowParent] (ethDots\x) -- (ethS\x);
 
-        \draw [braceRL] (ethS\x.east |- ethS\x.north) --
-            node (ethStateCoord\x) [state, anchor=west, xshift=\stateXS] {\footnotesize{
-                \textsc{STATE} \\
-                Headers: $BTC_{0 \cdots i+\x}$ \\
-                Latest PoR: $ETH_{j+\ethLastEnd}$ \\
-                %% $\Sigma$ Weight: $\Sigma^{i+\x}_{k=0} \text{W}(BTC_{k})$
-                }}
-            (ethS\x.east |- ethS\x.south);
-        %\node (ethState\x) [block, right = of ethStateCoord\x, xshift=0cm] {State};
+                    \node (ethE\x) [block, below = of ethDots\x, yshift=0.5cm] {$\AbbrChainB_{j+\ethBEnd}$};
+                    \draw [arrowParent] (ethE\x) -- (ethDots\x);
+                \fi
 
-        % curly brace for lots of eth blocks
-        \draw [ethBraceL] (ethS\x.west -| ethE\x.west) -- node (ethAll\x) [black, midway, yshift=14pt] {
-            %\scriptsize{$ETH_{40(j+\x) \cdots 40(j+\x)+39}$}
-            \scriptsize{40 Eth Blocks}
-        } (ethE\x.west);
+                % Ethereum State
+                \def\InitStateContents{
+                    \textsc{STATE} \\
+                    Headers: $\AbbrChainA_{0 \cdots i+\x}$
+                }
+                \ifnum 1=\DrawPoRInState
+                    \def\StateContents{\InitStateContents \\
+                        Latest PoR: $\AbbrChainB_{j+\ethLastEnd}$\\
+                        %% $\Sigma$ Weight: $\Sigma^{j+\ethLastEnd}_{k=0} \text{W}(\AbbrChainB_{k})$
+                    }
+                \else
+                    \def\StateContents{\InitStateContents}
+                \fi
+                \ifnum 1=\DrawEthState
+                    \draw [braceRL] (ethS\x.east |- ethS\x.north) --
+                    node (ethStateCoord\x) [state, anchor=west, xshift=\stateXS] {\footnotesize{\StateContents}}
+                    (ethS\x.east |- ethS\x.south);
+                    %\node (ethState\x) [block, right = of ethStateCoord\x, xshift=0cm] {State};
+                \fi
+                % end Ethereum State
 
-        % eth refl
-        \draw [arrowRefl] (ethS\x) --
-            node [anchor=center, above, sloped] {\scriptsize{include header}}
-            node [anchor=center, below, sloped] {\scriptsize{and PoR}}
-            (\oPrev);
 
-        \fi
-    }%
+                \ifnum 1<\ChainBBlocksN
+                    % curly brace for lots of eth blocks
+                    \draw [ethBraceL] (ethS\x.west -| \ethE\x.west) -- node (ethAll\x) [black, midway, yshift=14pt] {
+                        %\scriptsize{$\AbbrChainB_{40(j+\x) \cdots 40(j+\x)+39}$}
+                        \scriptsize{\ChainBBlocksN\:Blocks}
+                    } (\ethE\x.west);
+                \fi
 
-    \xdef\xs{0.8cm}
-    \node (topLeft) [left = of btcState1.west |- btcChain.north, minimum width=0, xshift=\xs] {};
-    \node (botLeft) [left = of btcState3.west |- btc3.south, minimum width=0, xshift=\xs] {};
+                \def\porLabel{}
+                \ifnum 1=\DrawPoRLabel
+                    \def\porLabel{\scriptsize{and PoR}}
+                \fi
+
+                % eth refl
+                \ifnum 1=\DrawEthRefl
+                    \draw [arrowRefl] (ethS\x) --
+                    node [anchor=center, above, sloped] {\scriptsize{include header}}
+                    node [anchor=center, below, sloped] {\porLabel}
+                    (\oPrev);
+                \fi
+            \fi
+        }%
+
+    \ifnum \DrawBtcLT>\DrawEthLT
+        \def\lowNode{btc\lastBtc}
+    \else
+        \def\lowNode{\ethE\lastEth}
+    \fi
+
+    \xdef\xs{-0.2cm}
+    \def\leftNode{btcChain}
+    \ifnum 1=\DrawBtcState
+        \xdef\xs{0.8cm}
+        \def\leftNode{btcState1}
+    \fi
+
+    % \ifnum 1=\DrawBtcState
+    %     \node (topLeft) [left = of btcState1.west |- btcChain.north, minimum width=0, xshift=\xs] {};
+    %     \node (botLeft) [left = of btcState1.west |- \lowNode.south, minimum width=0, xshift=\xs] {};
+    % \else
+    %     \node (topLeft) [left = of btcChain.west |- btcChain.north, minimum width=0, xshift=\xs] {};
+    %     \node (botLeft) [left = of btcChain.west |- \lowNode.south, minimum width=0, xshift=\xs] {};
+    % \fi
+
+    \node (topLeft) [left = of \leftNode.west |- btcChain.north, minimum width=0, xshift=\xs] {};
+    \node (botLeft) [left = of \leftNode.west |- \lowNode.south, minimum width=0, xshift=\xs] {};
+
     \draw [arrowTime] (topLeft) node () [anchor=west, yshift=-10pt] {\textit{Time}} -- (botLeft);
 \end{tikzpicture}
 \end{document}
