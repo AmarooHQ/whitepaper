@@ -1,32 +1,10 @@
-\documentclass{standalone}
+\documentclass[]{standalone}
 \usepackage[T1]{fontenc}\usepackage{tikz}
 \usepackage{amsmath, amsfonts}
 \usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
 
-% \tikzstyle{chainName} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm, text centered, draw=black]
-% \tikzstyle{block} = [rectangle, rounded corners, minimum width=1cm, minimum height=1cm, draw=black]
-% \tikzstyle{dots} = [inner sep=0pt, text height=10pt]
-% \tikzstyle{arrowParent} = [thick, ->, -to, shorten >= 2pt, shorten <= 2pt]
-% \tikzstyle{arrowRefl} = [dashed, ->, -to, shorten >= 2pt, shorten <= 2pt]
-% \tikzstyle{braceL} = [decorate, decoration={brace,amplitude=6pt,mirror,raise=2pt}]
-% \tikzstyle{ethBraceL} = [braceL, sloped, rotate=180]
-% \tikzstyle{braceR} = [decorate, decoration={brace,amplitude=6pt,raise=2pt}]
-% \tikzstyle{ethBraceR} = [braceR, sloped]
-
 \begin{document}
-
-\input{tikz-styles}
-
-% \tikzstyle{chainName} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm, text centered, draw=black]
-% \tikzstyle{block} = [rectangle, rounded corners, minimum width=1cm, minimum height=1cm, draw=black]
-% \tikzstyle{dots} = [inner sep=0pt, text height=10pt]
-% \tikzstyle{arrowParent} = [thick, ->, -to, shorten >= 2pt, shorten <= 2pt]
-% \tikzstyle{arrowRefl} = [dashed, ->, -to, shorten >= 2pt, shorten <= 2pt]
-% \tikzstyle{braceL} = [decorate, decoration={brace,amplitude=6pt,mirror,raise=2pt}]
-% \tikzstyle{ethBraceL} = [braceL, sloped, rotate=180]
-% \tikzstyle{braceR} = [decorate, decoration={brace,amplitude=6pt,raise=2pt}]
-% \tikzstyle{ethBraceR} = [braceR, sloped]
-
+\input{tikz-styles}%
 \begin{tikzpicture}[node distance=0.8cm]
 
     \node (btcChain) [chainName] {Bitcoin};
@@ -41,6 +19,7 @@
         \pgfmathtruncatemacro\ethLastEnd{round((\x-1)*40)}
         \pgfmathtruncatemacro\ethBStart{round((\x-1)*40+1)}
         \pgfmathtruncatemacro\ethBEnd{round((\x-1)*40+40)}
+        \xdef\stateXS{5pt}
 
         %%%%%%%%%
         % bitcoin
@@ -61,7 +40,7 @@
 
         % btc state
         \draw [braceLR] (btc\x.west |- btc\x.north) --
-            node (btcState\x) [anchor=east, xshift=-10pt, text width=110pt,align=right] {\footnotesize{
+            node (btcState\x) [state, anchor=east, xshift=-\stateXS, align=right] {\footnotesize{
                 \textsc{STATE} \\
                 Headers: $ETH_{0 \cdots j+\ethLastEnd}$ \\
                 Latest PoR: $BTC_{i+\r}$ \\
@@ -91,6 +70,7 @@
         \xdef\oPrev{btc\x}
         \fi
 
+        % exclude last Eth chunk
         \ifnum 3>\x
 
         \node (ethS\x) [block, below = of \prevNode |- \oPrev, yshift=\ys] {$\MakeUppercase{eth}_{j+\ethBStart}$};
@@ -103,7 +83,7 @@
         \draw [arrowParent] (ethE\x) -- (ethDots\x);
 
         \draw [braceRL] (ethS\x.east |- ethS\x.north) --
-            node (ethStateCoord\x) [anchor=west, xshift=10pt, text width=110pt] {\footnotesize{
+            node (ethStateCoord\x) [state, anchor=west, xshift=\stateXS] {\footnotesize{
                 \textsc{STATE} \\
                 Headers: $BTC_{0 \cdots i+\x}$ \\
                 Latest PoR: $ETH_{j+\ethLastEnd}$ \\
@@ -125,7 +105,11 @@
             (\oPrev);
 
         \fi
-    }
+    }%
 
+    \xdef\xs{0.8cm}
+    \node (topLeft) [left = of btcState1.west |- btcChain.north, minimum width=0, xshift=\xs] {};
+    \node (botLeft) [left = of btcState3.west |- btc3.south, minimum width=0, xshift=\xs] {};
+    \draw [arrowTime] (topLeft) node () [anchor=west, yshift=-10pt] {\textit{Time}} -- (botLeft);
 \end{tikzpicture}
 \end{document}
