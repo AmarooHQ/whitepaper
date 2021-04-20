@@ -83,6 +83,13 @@ Could we use Bitcoin's knowledge *that it's own history is reflected in the Ethe
 \caption{Hypothetical \textit{PoW Reflection} between Bitcoin and Ethereum}
 \end{figure}
 
+\begin{figure}
+\centering
+\input{ut/diags/pow-refl-horiz}
+\label{fig:pow-chain-horiz}
+\caption{Hypothetical \textit{PoW Reflection} between Bitcoin and Ethereum}
+\end{figure}
+
 #### Step 4. A modification to Bitcoin's *block-weight* calculation
 
 NOTE: I think it might be good to reorg this section a bit so that the current-btc stuff comes first, then we go into the modifications. TODO
