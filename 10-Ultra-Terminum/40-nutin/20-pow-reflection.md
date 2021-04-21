@@ -102,7 +102,9 @@ Chain B now knows *which B blocks are known about by some external source* (Chai
 
 Put another way: Chain B's history is confirmed *not only* by new Chain B blocks, *but also* by Chain E blocks. Since Chain B nodes *know* they have the blocks that Chain E knows about, there's no data-availability concern here.
 
-At this point, if an attacker was to publish an alternate, better Chain B history, then Chain B nodes would reorganize around the *new* history published by the attacker, and the attacker's block headers would end up being recorded in Chain E (so Chain E would reorganize just as Chain B nodes do).
+**Important:** Soon, these confirmations will have real and useful meaning. Under the right conditions, an appropriate configuration of *PoW reflection* results in an increase in the *rate* that confirmations are acquired. This is the first hint of $\frac{1}{O(c)}$ confirmation time.
+
+At this point, if an attacker was to publish an alternate, better Chain B history, then Chain B nodes would reorganize around the *new* history published by the attacker, and the attacker's block headers would end up being recorded in Chain E and causing a reorganization there, too. Currently, this configuration does not add any security to Chain B.
 
 Could we use Chain B's knowledge *that it's own history is reflected in Chain E* to *prevent* such an attack?
 
@@ -112,82 +114,84 @@ Could we use Chain B's knowledge *that it's own history is reflected in Chain E*
 
 \todo{NOTE: I think it might be good to reorg this section a bit so that the current-btc stuff comes first, then we go into the modifications.}
 
-Before we discuss a change that Chain B could make, it is important to note that chain-work done with one hashing algorithm is *not generally convertible* to 'equivalent' work done via another hashing algorithm. There is no meaningful *generic* answer to the question "how many *double SHA256* hashes is one *Ethash* hash worth?". In fact there is no meaningful answer to similar questions that use any other other combination of hashing algorithms, either. It is not possible to *generically and universally* convert between qualitatively different units[^et-conversion]. You can *only* do this within some *context* where you *define* a conversion method. We'll look at some such contexts later.
+Before we discuss a change that Chain B could make, it is important to note that chain-work done with one hashing algorithm is *not generally convertible* to 'equivalent' work done via another hashing algorithm. For example, there is no meaningful *generic* answer to the question "how many *double SHA256* hashes is one *Ethash* hash worth?". In fact, there is no meaningful answer to similar questions that use any other other combination of hashing algorithms, either. It is not possible to *generically and universally* convert between qualitatively different units[^et-conversion]. It is *only* to do this within some *context* where with a *defined* conversion method. We'll look at some such contexts later.
 
 [^et-conversion]: The philosophical generalization of *qualitative conversion* and the *necessary* role that *goals* and *context* play is [Elliot Temple's](https://elliottemple.com) idea. It is covered in his [*Critical Fallibilism Course*](https://gumroad.com/l/mhtbA). It's also partially covered in (or related to) [Elliot's *Yes or No Philosophy* course](https://gumroad.com/l/hxqsh) and some of his articles, e.g., [*IGCs* ({Idea, Context, Goal} triples)](https://curi.us/2387-igcs) and [*Bottleneck Examples*](https://curi.us/2353-bottleneck-examples).
 
 NB: Bitcoin does two SHA256 hashes per block, which is why I refer to "double SHA256" above.
 
-For the purposes of our hypothetical construction, let's say that the Bitcoin chain and Ethereum chain do *equal work over equal time*. That is: the work required to mine 1 Bitcoin block, which happens approx every 10 minutes, is equal to the work done on the Ethereum chain over the same time period (10 minutes), which is approximately 40 Ethereum blocks (with a target time of 15 seconds). So: 1 Bitcoin confirmation is worth approx 40 Ethereum confirmations. *For the sake of this construction, we'll also presume this relationship doesn't change over time*. Our constant of conversion is thus: `40` and the unit is `EthBlocks / BtcBlock`.
+For the purposes of our hypothetical construction, let's say that B and E do *equal work over equal time*. In the current example, that means that the work required to produce either $B_i$ or $E_j$ is the same. *For the sake of this construction, we'll also presume this relationship doesn't change over time*. Our constant of conversion is thus: 1 *E Blocks per B Block*.
 
 NB: we're not that concerned with whether this is a reasonable assumption or not; right now, we just need a way to convert the work done on each chain into the same units. (Some methods for doing this will be discussed later.)
 
-Currently, the Bitcoin network chooses the "heaviest" (most worked) chain as its common history. Bitcoin calculates the "weight" of blocks (i.e., how much work went in to them) via an estimation of how many hashes were required -- measured in `double SHA256 hashes`. Let's normalize this number so that we're working in terms of `BtcBlocks` instead of `double SHA256 hashes`; that's pretty easy, since each block is worth `1 BtcBlock` by definition. Now, we can also measure the work in `EthBlocks`, too (that being: `40 EthBlocks`).
+Currently, the Chain B network chooses the "heaviest" (most worked) chain as its common history. Chain B calculates the "weight" of blocks (i.e., how much work went in to them) via an estimation of how many hashes were required -- say these are measured in *double SHA256 hashes*. For the purposes of illustration, let's normalize this number to be in terms of *B Blocks* -- instead of *double SHA256 hashes*; that's easy, since each block is worth 1 *B Block* by definition. Now, we can also measure the work in *E Blocks*, too (that being: 1 *E Block*).
 
-How can the network choose the heaviest chain? Well, here is a simple recursive function to do just that:
+How can the network choose the heaviest chain? Well, a traditional blockchain might use a simple recursive function like this:
 
 ```haskell
--- bitcoin-vanilla-weight-calc.hs
-type BtcWeight = Number
+-- chain-b-vanilla-weight-calc.hs
+type BWeight = Number
 
-chainWeight :: List Block -> BtcWeight
+chainWeight :: List Block -> BWeight
 chainWeight [] = 0
 chainWeight b:bs = blockWeight b + chainWeight bs
--- pattern match against a block (b) and the rest of the chain (bs), or return 0.
+-- pattern match a list of blocks. The head is `b` and the rest
+-- of the chain is `bs`. If the list is empty then return 0.
 
-blockWeight :: Block -> BtcWeight
+blockWeight :: Block -> BWeight
 blockWeight block = 1
--- we set the weight to 1 earlier; this is not representative of a production chain
+-- by definition; this is not representative of a production chain
 ```
 
-Could the Bitcoin chain incorporate the idea that Ethereum had confirmed part of its history? (Ideally the Ethereum chain would know about all but the latest block, but, in reality, there might be some latency.) Could the Bitcoin chain use this to thwart some types of attack?
+Could Chain B incorporate the idea that Chain E had confirmed part of its history? Could Chain B use this to thwart some types of attack?
 
-Let's modify the Bitcoin weight-calculation functions so that they account for Bitcoin history that has been confirmed by the Ethereum chain:
+Let's modify the Chain B block-weight calculation functions so that they account for the Chain B history that has been confirmed by Chain E:
 
 %%TC:ignore
 ```haskell
--- bitcoin-modified-weight-calc.hs
-type BtcWeight = Number
-type EthWeight = Number
+-- chain-b-modified-weight-calc.hs
+type BWeight = Number
+type EWeight = Number
 
-btcWToEthW btcW = btcW * 40
-ethWToBtcW ethW = ethW / 40
+weightConvConst = 1
+bWToEWeight bW = bW * weightConvConst
+eWToBWeight eW = eW / weightConvConst
 
-chainWeight :: BtcState -> List Block -> BtcWeight
+chainWeight :: BState -> List Block -> BWeight
 chainWeight _ [] = 0
 chainWeight state b:bs = totalBlockWeight state b + chainWeight state bs
 
-totalBlockWeight :: BtcState -> Block -> BtcWeight
+totalBlockWeight :: BState -> Block -> BWeight
 totalBlockWeight state block = blockWeight block +
-    if ethHasConfirmed state block
-        then ethWToBtcW (ethWorkFor state block)
+    if chainEHasConfirmed state block
+        then eWToBWeight (eWorkFor state block)
         else 0
 
-ethHasConfirmed :: BtcState -> Block -> Boolean
-ethHasConfirmed state block =
-    doesEthHaveBlock state block &&
-    isBlockInMainChainAccordingToEth state block
+chainEHasConfirmed :: BState -> Block -> Boolean
+chainEHasConfirmed state block =
+    doesEHaveBlock state block &&
+    isBlockInMainChainAccordingToE state block
 
 -- we won't define these functions as their names are illustrative enough
-doesEthHaveBlock _ _ = undefined
-isBlockInMainChainAccordingToEth _ _ = undefined
+doesEHaveBlock _ _ = undefined
+isBlockInMainChainAccordingToE _ _ = undefined
 
-ethWorkFor :: BtcState -> Block -> EthWeight
-ethWorkFor state block = sum $ ethBlockWeight <$> relevantEthBlocks
+eWorkFor :: BState -> Block -> EWeight
+eWorkFor state block = sum (map eBlockWeight relevantEBlocks)
   where
     -- a `filter` like this is inefficient but illustrative enough
-    relevantEthBlocks = filter currBlockIsHead (ethMainChainBlocks state)
-    currBlockIsHead ethBlock = btcHash block == getBtcHeadFromEthBlock ethBlock
+    relevantEBlocks = filter currBlockIsHead (eMainChainBlocks state)
+    currBlockIsHead eBlock = hash block == getBHeadFromEBlock eBlock
 
-blockWeight :: Block -> BtcWeight
+blockWeight :: Block -> BWeight
 blockWeight block = 1
 
-ethBlockWeight :: EthBlock -> EthWeight
-ethBlockWeight ethBlock = 1
+eBlockWeight :: EBlock -> EWeight
+eBlockWeight eBlock = 1
 -- -- alternatively:
--- ethBlockWeight ethBlock = 1 / (countBtcChainHeads ethBlock)
--- -- this would go some way for accounting for multiple Bitcoin heads
--- -- without giving either Bitcoin head an advantage.
+-- eBlockWeight eBlock = 1 / (countBChainHeads eBlock)
+-- -- this would go some way for accounting for multiple Chain B heads
+-- -- without giving either Chain B head an advantage.
 ```
 %%TC:endignore
 
@@ -199,22 +203,24 @@ a = 1
 
 What is the meaning and impact of this change?
 
-The *meaning* of this change is that Bitcoin now incorporates work done on the Ethereum chain *into Bitcoin's own calculation of the heaviest worked chain*.
+The *meaning* of this change is that Chain B now incorporates work done on Chain E *into Chain B's own calculation of the heaviest worked chain*.
 
-When a chain does this we say *Bitcoin (or Bitcoin's work) is **reflected** in Ethereum (or in the Ethereum chain)*. This technique is what is meant by the term *PoW reflection*.
+When a chain does this we say *Chain B (or Chain B's work) is **reflected** in Chain E*. This technique is what is meant by the term *PoW reflection*.
 
-One particular *impact* of this change is that a doublespend attack (e.g. by withholding a privately mined chain that reverts a transaction) must now be performed *not only* against Bitcoin, *but also and simultaneously* against Ethereum.
+One particular *impact* of this change is that a doublespend attack (e.g. by withholding a privately mined chain that reverts a transaction) must now be performed *not only* against Chain B, *but also and simultaneously* against Chain E.
 
-Why? The privately mined blocks to perform the attack *are not known about* by Ethereum. Rather, Ethereum knows about the *public* Bitcoin history *against which the attack competes*. Thus, *either*:
+Why? The privately mined blocks to perform the attack *are not known about* by Chain E. Rather, Chain E knows about the *public* Chain B history *against which the attack competes*. Thus, *either*:
 
-* the private chain-segment must contribute more total work to the Bitcoin blockchain than the public chain-segment does -- *including* the relevant Ethereum chain-segment; *or*
-* the attacker must *additionally* produce a private Ethereum chain-segment such that the *total* work of both private chain-segments is greater than the total work of both public chain-segments, and publish both chain-segments simultaneously.
+* the private chain-segment must contribute more total work to the Chain B blockchain than the public chain-segment does -- *including* the relevant Chain E chain-segment; *or*
+* the attacker must *additionally* produce a private Chain E chain-segment such that the *total* work of both private chain-segments is greater than the total work of both public chain-segments, and publish both chain-segments simultaneously.
 
 It's worth noting that, at this point, there is no benefit to Chain E's security. That's because Chain E isn't 'reading' the reflected work back from Chain B. Thus a doublespend attack against Chain E has the expected, non-reflected profile -- it isn't more difficult to attack Chain E yet. However, Chain E can take advantage of the reflection, though. The main requirements are: the inclusion of appropriate merkle proofs that show known Chain E blocks according to Chain B, and an update to Chain E's block-weight calculations to account for the reflected work. PoW reflection doesn't automatically secure both chains; each chain can proactively and independently take advantage of PoW reflection.
 
 Naturally, if there were a large difference in target block frequencies (e.g., 10 minutes vs 15 seconds) then there would also be a good deal of latency before a chain gains the security benefit from reflected work. For this reason, PoW reflection makes the most sense when used with high frequency chains, or chains of similar frequencies. One downside of this is that shortening the block production frequency requires the inclusion of more block headers. In the scheme of things, this can be somewhat significant but is not a deal-breaker.
 
 Practical methods of comparing (and converting the weight of) different Proofs of Work are discussed in \autoref{sec:comparing-diff-pows}.
+
+\todo{What if you mine a longer B-chain and then publish it to Chain E? Well you have to do that later, and you need to publish the blocks, too. If Chain E just checks the work on that local chain, then it looks like the attacker's chain is longer. But the chain, as calculated by full nodes is, not worth as much as the original chain, so they will keep mining on the orig chain. However, if the attacker has $q>p$ then they'll always outperform the honest chain and the reflections will eventually favour the attackers chain. so the reflecting chains (Chain E) need to incorporate calculations of the *total* block weight of Chain B. That means they need to be half-nodes for Chain B so that they can track Chain B's known reflections.}
 
 #### Step 5. Mutual Reflection
 
