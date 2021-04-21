@@ -1,21 +1,19 @@
-\providecommand\TilingDepth{5}
-\providecommand\TilingInitSize{5}
-\providecommand\TilingScaleConst{1.3}
-\providecommand\TilingValence{3}
-\providecommand\SimplexChains{7}
-\input{ut/diags/simplex-macro}
-
-% \makeatletter
-% \def\fillRGB#1#2#3{\pgfsys@color@rgb@fill{#1}{#2}{#3}}
-% \makeatother
-
-\pgfdeclarelayer{reflections}
-\pgfdeclarelayer{tiles}
-\pgfsetlayers{reflections,main,tiles}
-
+\providecommand\TilingDepth{5}%
+\providecommand\TilingInitSize{5}%
+\providecommand\TilingScaleConst{1.5}%
+\providecommand\TilingValence{3}%
+\providecommand\SimplexChains{5}%
+\providecommand\RainbowColors{1}%
+\input{simplex-macro}%
+% \makeatletter%
+% \def\fillRGB#1#2#3{\pgfsys@color@rgb@fill{#1}{#2}{#3}}%
+% \makeatother%
+\pgfdeclarelayer{reflections}%
+\pgfdeclarelayer{tiles}%
+\pgfsetlayers{reflections,main,tiles}%
 \newcommand\TikzSimplexTiling{
     \pgfmathsetmacro\nNodesTotal{3*(2^(\TilingDepth)-1)+1}
-    \xdef\initNodeR{\TilingInitSize*2}
+    \xdef\initNodeR{\TilingInitSize*3}
     \xdef\nodeR{\initNodeR}
     \pgfmathsetmacro\newChildren{\TilingValence-1}
     \xdef\createChildren{\TilingValence}
@@ -27,6 +25,7 @@
     \xdef\lastD{0}
     \xdef\timesRun{0}
     \foreach \d in {0,...,\TilingDepth} {
+            \ifnum 0<\createCurrent
             \renewcommand\SimplexRadius{\tilingCurrSize}
             \renewcommand\SimplexOffsetR{\createDistance}
             \pgfmathsetmacro\sxAngleOffset{360/\createCurrent/2+(180/\TilingValence)*(\TilingValence-2)/2}
@@ -43,10 +42,16 @@
                     \pgfmathsetmacro\sxAngle{360/\createCurrent*\s-\sxAngleOffset}
                     \renewcommand\SimplexOffsetAngle{\sxAngle}
 
+                    \ifnum 1=\RainbowColors
                     \pgfmathsetmacro\cr{cos(mod(\timesRun*23, 360))*0.5 + 0.5}
-                    % \pgfmathsetmacro\cr{1}
                     \pgfmathsetmacro\cg{cos(mod(\timesRun*23 + 240, 360))*0.5 + 0.5}
                     \pgfmathsetmacro\cb{cos(mod(\timesRun*23 + 120, 360))*0.5 + 0.5}
+                    \else
+                    \pgfmathsetmacro\cr{cos(mod(\timesRun/2.57, 360))*0.4 + 0.6}
+                    \pgfmathsetmacro\cg{cos(mod(\timesRun/1.91 - 90, 360))*0.4 + 0.6}
+                    % \pgfmathsetmacro\cb{cos(mod(\timesRun/2.0 + 180, 360))*0.2 + 0.4}
+                    \pgfmathsetmacro\cb{-1}
+                    \fi
                     \definecolor{tilingColor}{rgb}{\cr,\cg,\cb}
                     \renewcommand\SimplexNodeColor{tilingColor}
 
@@ -77,5 +82,6 @@
             \pgfmathsetmacro\newCreateChildren{\createChildren*\newChildren}
             \xdef\createChildren{\newCreateChildren}
             \xdef\lastD{\d}
-        }
-}
+            \fi
+        }%
+}%

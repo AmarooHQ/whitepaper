@@ -4,7 +4,24 @@ WPFILE=$(WPNOEXT).markdown
 WPHTML=$(WPNOEXT).html
 WPTEX=$(WPNOEXT).tex
 
-whitepaper: build-whitepaper wp-pandoc mk-latex-pdf wc
+default : whitepaper
+
+# https://tex.stackexchange.com/questions/45/how-to-speed-up-latex-compilation-with-several-tikz-pictures
+TIME     = /usr/bin/time -p
+LATEXMK  = latexmk -silent -f -g --pdf
+PDFLATEX = pdflatex -interaction=batchmode
+PDFCROP  = pdfcrop
+RM       = /bin/rm
+StandAloneGraphicsTeXFiles = $(wildcard *_sag.tex)
+PDFGraphics = $(patsubst %_sag.tex,%_sag.pdf,$(StandAloneGraphicsTeXFiles))
+InputTeXFiles = $(wildcard *_input.tex)
+
+%_sag.pdf : %_sag.tex
+        $(PDFLATEX) $<
+        $(PDFCROP) $@ $@
+
+
+whitepaper: $(PDFGraphics) $(InputTeXFiles) build-whitepaper wp-pandoc mk-latex-pdf wc
 
 # atm restrict this to just the UT folder, can generalize again later
 # to do that: replace '10-Ultra-Terminum' with '*-*'
@@ -47,6 +64,12 @@ handout:
 	pandoc --standalone --mathjax -f markdown --pdf-engine=context -V fontsize=11.5pt -o includes/handout/exec-summary.pdf includes/handout/exec-summary.md
 
 clean: init
+	$(RM) -f -- *.aux *.bak *.bbl *.blg *.log *.out *.toc *.tdo _region.*
+
+depclean: clean
+	$(RM) -f -- *_sag.pdf
+
+distclean: depclean
 	-rm -r $(OUTDIR)/*
 
 clean-wp-md:

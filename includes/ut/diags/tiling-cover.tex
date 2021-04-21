@@ -6,10 +6,15 @@
 
 % overwrite (either \providecommand or \renewcommand) to control the parts of the diagram which are drawn or not.
 
-\begin{document}
+\begin{document}%
+\providecommand\TilingDepth{5}%
+\providecommand\TilingInitSize{5}%
+\providecommand\TilingScaleConst{1.5}%
 \providecommand\TilingValence{3}%
+\providecommand\SimplexChains{5}%
+\providecommand\RainbowColors{1}%
 \input{tiling-macro}%
 \begin{tikzpicture}%
-    \TikzSimplexTiling
+    \TikzSimplexTiling%
 \end{tikzpicture}%
 \end{document}
