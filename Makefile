@@ -4,7 +4,7 @@ WPFILE=$(WPNOEXT).markdown
 WPHTML=$(WPNOEXT).html
 WPTEX=$(WPNOEXT).tex
 
-default : whitepaper
+default: whitepaper
 
 # https://tex.stackexchange.com/questions/45/how-to-speed-up-latex-compilation-with-several-tikz-pictures
 TIME     = /usr/bin/time -p
@@ -12,14 +12,14 @@ LATEXMK  = latexmk -silent -f -g --pdf
 PDFLATEX = pdflatex -interaction=batchmode
 PDFCROP  = pdfcrop
 RM       = /bin/rm
-StandAloneGraphicsTeXFiles = $(wildcard *_sag.tex)
+#StandAloneGraphicsTeXFiles = $(wildcard includes/ut/diags/*_sag.tex)
+StandAloneGraphicsTeXFiles = $(shell find includes -iname \*_sag.tex)
 PDFGraphics = $(patsubst %_sag.tex,%_sag.pdf,$(StandAloneGraphicsTeXFiles))
 InputTeXFiles = $(wildcard *_input.tex)
 
 %_sag.pdf : %_sag.tex
-        $(PDFLATEX) $<
-        $(PDFCROP) $@ $@
-
+	$(PDFLATEX) $<
+	#$(PDFCROP) $@ $@
 
 whitepaper: $(PDFGraphics) $(InputTeXFiles) build-whitepaper wp-pandoc mk-latex-pdf wc
 
@@ -64,10 +64,12 @@ handout:
 	pandoc --standalone --mathjax -f markdown --pdf-engine=context -V fontsize=11.5pt -o includes/handout/exec-summary.pdf includes/handout/exec-summary.md
 
 clean: init
-	$(RM) -f -- *.aux *.bak *.bbl *.blg *.log *.out *.toc *.tdo _region.*
+	$(RM) -fv -- **/*.aux **/*.bak **/*.bbl **/*.blg **/*.log **/*.out **/*.toc **/*.tdo _region.*
 
 depclean: clean
-	$(RM) -f -- *_sag.pdf
+	$(RM) -fv -- **/*_sag.pdf
+
+gfx: $(PDFGraphics)
 
 distclean: depclean
 	-rm -r $(OUTDIR)/*

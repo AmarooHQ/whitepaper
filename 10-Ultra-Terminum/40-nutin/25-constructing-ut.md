@@ -49,12 +49,12 @@ To maintain consistency with the geometric usage of the term *simplex*: a simple
     \begin{subfigure}{.28\linewidth}
         \centering
         %%\includegraphics[width=.95\linewidth]{ut/tiling/d1-many-tiled-2-simplexes}
-        \resizebox{!}{\linewidth}{%
-        \begin{tikzpicture}
-          \renewcommand\SimplexChains{2}
-          \TikzSimplex
-        \end{tikzpicture}
-        }
+        %% \resizebox{!}{\linewidth}{%
+        %% \begin{tikzpicture}
+          %% \renewcommand\SimplexChains{2}
+          %% \TikzSimplex
+        %% \end{tikzpicture}
+        \includepdf{simplex_2_sag}
         %%\caption{PoW reflection between 2 blockchains. A 1-simplex. The most basic non-trivial simplex.}
         \label{fig:simplex-2-d1}
     \end{subfigure}%%
