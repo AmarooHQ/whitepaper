@@ -4,25 +4,17 @@
 
 Can blockchains work cooperatively to secure each other? It certainly seems that there is nothing *in principle* that prohibits this. Can we come up with a way to do this?
 
-The idea of one blockchain 'tracking' another blockchain via chain-headers and SPV proofs is not new: in 2013[^xc1], I (loosely) proposed a system which used this method to support rich cross-chain exchange. I wrote a simplified implementation in the very early days of Ethereum[^xc3], a precursor to the later-successful BTCRelay[^xc4]. The general idea of one blockchain tracking the headers of another will be our starting point.
+The idea of one blockchain 'tracking' another blockchain via chain-headers and its state via SPV proofs is not new. In 2013[^xc1], I (loosely) proposed a system which used this method to support rich cross-chain exchange. I wrote a simplified implementation of this method in the very early days of Ethereum[^xc3], a precursor to the later-successful BTC Relay[^xc4]. The general idea of one blockchain tracking the headers of another will be our starting point.
 
 [^xc1]: <https://bitcointalk.org/index.php?topic=198032.0>, <https://bitcointalk.org/index.php?topic=598784.0>
 [^xc3]: <https://github.com/XertroV/coppr/blob/master/chainheaders.py>
 [^xc4]: <https://github.com/ethereum/btcrelay>
 
-### Two Blockchains
+### Tracking Bitcoin Headers and Txs from Ethereum
 
-\label{sec:two-blockchains}
+The idea that Ethereum SCs can track Bitcoin chain-headers is well understood. Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is not that difficult. In principle, any chain that supports some headers-only mode can be tracked in this way. In practice that can be difficult (e.g., Ethereum's EVM doesn't support memory hard hashes unless special cases are introduced). But we're not interested in practicality *at the moment*.
 
-Let's build up the idea via a hypothetical situation with two distinct blockchains. For simplicity, let's use Bitcoin and Ethereum 1.
-
-Our starting case is that both chains use different Proof of Work algorithms and neither tracks the other.
-
-#### Step 1. Ethereum tracks Bitcoin
-
-The idea that Ethereum SCs can track Bitcoin chain-headers is well understood. Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is not that difficult. In principle, any chain that supports some headers-only mode can be tracked in this way. In practice that can be difficult (e.g. Ethereum's EVM doesn't support memory hard hashes unless special cases are introduced), but we're not interested in practicality *at the moment*.
-
-Let's add such a contract to Ethereum and describe the relevant data and events:
+Let's add such a contract to Ethereum and describe the relevant data and events in the following table. \autoref{fig:pr-btc-eth-step1} illustrates this.
 
 | Time (~15s increments) | Bitcoin block made | Eth block made | Eth block contents | Eth state |
 |---|---|---|---|---|
@@ -34,74 +26,93 @@ Let's add such a contract to Ethereum and describe the relevant data and events:
 | 41 | | j + 40 | $BTC_{k+1}$ header | Tracks BTC chain up to $BTC_{k+1}$ |
 | ... |||||
 
-After a Bitcoin block is produced, an Ethereum miner includes an Eth tx containing the BTC header, which updates the SC tracking the Bitcoin chain. In reality there are practical concerns about incenting someone to produce such a transaction (among other things); we're not concerned with those here. We're just concerned with the relationships that exist and what they can do.
-
-\begin{figure}
+\begin{figure}[H]
 \centering
-\includegraphics{pow_refl_btc_eth_step1_sag}
-\label{fig:pr-btc-eth-step1}
+\includegraphics[height=0.3\textheight]{pow_refl_btc_eth_step1_sag}
 \caption{Bitcoin headers are included in Ethereum's state (via user made transactions) as they are produced. This is roughly how \textit{BTC Relay} works.}
+\label{fig:pr-btc-eth-step1}
 \end{figure}
 
-#### Step 2. Bitcoin tracks Ethereum
+After a Bitcoin block is produced, an Ethereum miner includes a transaction containing the Bitcoin header, which updates the SC tracking the Bitcoin chain. In reality there are practical concerns about incenting someone to produce such a transaction (among other things); we're not concerned with those here. We're just concerned with the relationships that exist and what they can do.
 
-Let's consider a hypothetical change to Bitcoin. The protocol is extended to add support for tracking Ethereum's chain-headers. That is, a bespoke protocol extension is created that allows/requires miners to publish known Ethereum chain-headers along with their Bitcoin block. Similar to the way Ethereum tracks Bitcoin, now Bitcoin also tracks Ethereum.
+Why would a chain want to track another chain? The typical answer is to prove transactions or state occurred on the foreign chain. On Ethereum one could build a trustless $\text{BTC}\leftrightarrow\text{ETH}$ market, for example.
 
-\todo{[ANYONE] Update "Eth[j]" syntax to match $BTC_k$ syntax used in prev table.}
+### Two Blockchains
 
-| Time (~15s increments) | Bitcoin block made | BTC block contents | BTC state | Eth block made | Eth block contents | Eth state |
-|---|---|---|---|---|---|---|
-| ... |||||||
-| 0 | k | Eth[j-40:j-1] headers | Tracks Eth chain up to Eth[j-1] ||||
-| 1 | ||| j | BTC[k] header | Tracks BTC chain up to BTC[k] |
-| ... |||||||
-| 40 | k + 1 | Eth[j:j+39] headers | Tracks Eth chain up to Eth[j+39] ||||
-| 41 | ||| j + 40 | BTC[k+1] header | Tracks BTC chain up to BTC[k+1] |
-| ... |||||||
+\label{sec:two-blockchains}
 
-Why would a chain want to track another chain? The typical answer is to prove transactions or state occurred on the foreign chain. On Ethereum one could build a trustless BTC<->Ether market, for example.
+Let's build up the idea via a hypothetical situation with two distinct blockchains. For simplicity, you can imagine these as Bitcoin and Ethereum 1 -- at least to start with. However, keep in mind that the changes required to support *PoW reflection* are unlikely to ever be integrated with either Bitcoin or Ethereum (and reaching social agreement about the details would be difficult, to say the least).
+
+Our starting case is that both chains use different Proof of Work algorithms and neither tracks the other. For simplicity, the following progression will use two blockchains with identical block times, and will not account for variance in block production.
+
+#### Step 1. Chain E tracks Chain B
+
+This is conceptually similar to Ethereum tracking Bitcoin, and shown in \autoref{fig:pow_refl_step1}.
 
 \begin{figure}
 \centering
-\includegraphics{pow_refl_step2_sag}
-\label{fig:pow_refl_step2}
+\includegraphics[height=0.28\textheight]{pow_refl_step1_sag}
+\caption{Step 1: Chain B's headers are tracked by Chain E.}
+\label{fig:pow_refl_step1}
+\end{figure}
+
+Similar to before, Chain E will include Chain B's headers as they are produced. Note that this can be a protocol-level implementation; it does not have to be at the smart contract level as it would be with Ethereum.
+
+#### Step 2. Chain B tracks Chain E
+
+Say that the protocol of Chain B is extended to add support for tracking Chain E's headers. That is, a bespoke protocol extension is created that allows/requires miners to publish known Chain E headers along with their Chain B block. Similar to the way Chain E tracks Chain B, now Chain B also tracks Chain E. This is shown in \autoref{fig:pow_refl_step2} and the following table.
+
+| Time | B block made | B block contents | B state | E block made | E block contents | E state |
+|---|---|---|---|---|---|---|
+| ... |||||||
+| 0 | k | $E_{j-1}$ header | Tracks E up to $E_{j-1}$ ||||
+| 1 | ||| j | $B_{k}$ header | Tracks B chain up to $B_{k}$ |
+| 2 | k + 1 | $E_{j}$ headers | Tracks E up to $E_{j}$ ||||
+| 3 | ||| j + 1 | $B_{k+1}$ header | Tracks B up to $B_{k+1}$ |
+| ... |||||||
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=0.3\textheight]{pow_refl_step2_sag}
 \caption{Step 2: Chain B and Chain E track each other's header-only chain. In this example Chain E produces blocks 3 times faster than Chain B.}
+\label{fig:pow_refl_step2}
 \end{figure}
 
 #### Step 3. B tracks E's tracking of B
 
 Can we use a tracked chain for a different purpose? What happens if Chain B tracks whether Chain B's history is confirmed within Chain E?
 
-| Time | B block made | B block contents | B state | E block made | E block contents | Eth state |
+| Time | B block made | B block contents | B state | E block made | E block contents | E state |
 |---|---|---|---|---|---|---|
 | ... |||||||
-| 0 | k | Eth[j-40:j-1] headers + Merkle proof of BTC[k-1] | Tracks Eth chain up to Eth[j-1] *and* knows that Eth knows of BTC[k-1] ||||
-| 1 | ||| j | BTC[k] header | Tracks BTC chain up to BTC[k] |
-| ... |||||||
-| 40 | k + 1 | Eth[j:j+39] headers + Merkle proof of BTC[k] | Tracks Eth chain up to Eth[j+39] *and* knows that Eth knows of BTC[k] ||||
-| 41 | ||| j + 40 | BTC[k+1] header | Tracks BTC chain up to BTC[k+1] |
+| 0 | k | $E_{j-1}$ header + Merkle proof of $B_{k-1}$ | Tracks Chain E up to $E_{j-1}$ *and* knows that Chain E knows of $B_{k-1}$ ||||
+| 1 | ||| j | $B_{k}$ header | Tracks Chain B up to $B_{k}$ |
+| 2 | k + 1 | $E_{j}$ header + Merkle proof of $B_{k}$ | Tracks Chain E up to $E_{j}$ *and* knows that E knows of $B_{k}$ ||||
+| 3 | ||| j + 1 | $B_{k+1}$ header | Tracks B up to $B_{k+1}$ |
 | ... |||||||
 
-\begin{figure}
+Chain B now knows *which B blocks are known about by some external source* (Chain E in this case).
+
+\begin{figure}[H]
 \centering
-\includegraphics{pow_refl_step3_sag}
-\label{fig:pow-refl-step3}
+\includegraphics[height=0.3\textheight]{pow_refl_step3_sag}
 \caption{Step 3: Chain B includes Proofs of Reflection (PoRs) along with headers. Proofs of Reflection allow Chain B to know which of its own blocks are known to Chain E.}
+\label{fig:pow-refl-step3}
 \end{figure}
 
-Bitcoin now knows *which Bitcoin blocks are known about by some external source* (Ethereum in this case).
+Put another way: Chain B's history is confirmed *not only* by new Chain B blocks, *but also* by Chain E blocks. Since Chain B nodes *know* they have the blocks that Chain E knows about, there's no data-availability concern here.
 
-Put another way: Bitcoin's history is confirmed *not only* by new Bitcoin blocks, *but also* by Ethereum blocks. Since Bitcoin nodes *know* they have the blocks that Ethereum knows about, there's no data-availability concern here.
+At this point, if an attacker was to publish an alternate, better B chain, then Chain B nodes would reorganize around the *new* history published by the attacker, and the attacker's block headers would end up being recorded in Chain E (so Chain E would reorganize its header-only version of Chain B just as Chain B nodes do).
 
-At this point, if an attacker was to publish a better Bitcoin chain, then Bitcoin nodes would reorganize around the *new* history published by the attacker, and the attacker's block headers would end up being recorded in the Ethereum SC (so the SC would reorganize just as Bitcoin nodes do).
+Could we use Chain B's knowledge *that it's own history is reflected in Chain E* to *prevent* such an attack?
 
-Could we use Bitcoin's knowledge *that it's own history is reflected in the Ethereum SC* to *prevent* such an attack?
+#### Step 4. A modification to Chain B's *block-weight* calculation
 
-#### Step 4. A modification to Bitcoin's *block-weight* calculation
+\todo{Replace refs to Bitcoin with Chain B and Ethereum with Chain E}
 
 \todo{NOTE: I think it might be good to reorg this section a bit so that the current-btc stuff comes first, then we go into the modifications.}
 
-Before we discuss a change that Bitcoin could make, it is important to note that chain-work done with one hashing algorithm is *not generally convertible* to 'equivalent' work done via another hashing algorithm. There is no meaningful *generic* answer to the question "how many *double SHA256* hashes is one *Ethash* hash worth?". In fact there is no meaningful answer to similar questions that use any other other combination of hashing algorithms, either. It is not possible to *generically and universally* convert between qualitatively different units[^et-conversion]. You can *only* do this within some *context* where you *define* a conversion method. We'll look at some such contexts later.
+Before we discuss a change that Chain B could make, it is important to note that chain-work done with one hashing algorithm is *not generally convertible* to 'equivalent' work done via another hashing algorithm. There is no meaningful *generic* answer to the question "how many *double SHA256* hashes is one *Ethash* hash worth?". In fact there is no meaningful answer to similar questions that use any other other combination of hashing algorithms, either. It is not possible to *generically and universally* convert between qualitatively different units[^et-conversion]. You can *only* do this within some *context* where you *define* a conversion method. We'll look at some such contexts later.
 
 [^et-conversion]: The philosophical generalization of *qualitative conversion* and the *necessary* role that *goals* and *context* play is [Elliot Temple's](https://elliottemple.com) idea. It is covered in his [*Critical Fallibilism Course*](https://gumroad.com/l/mhtbA). It's also partially covered in (or related to) [Elliot's *Yes or No Philosophy* course](https://gumroad.com/l/hxqsh) and some of his articles, e.g., [*IGCs* ({Idea, Context, Goal} triples)](https://curi.us/2387-igcs) and [*Bottleneck Examples*](https://curi.us/2353-bottleneck-examples).
 
@@ -205,11 +216,11 @@ Naturally, the large difference in target block frequencies means that Ethereum 
 
 Practical methods of comparing (and converting the weight of) different Proofs of Work are discussed in \autoref{sec:comparing-diff-pows}.
 
-\begin{figure}
+\begin{figure}[H]
 \centering
-\includegraphics{pow_refl_step4_sag}
-\label{fig:pow-refl-step4}
+\includegraphics[height=0.35\textheight]{pow_refl_step4_sag}
 \caption{\textit{PoW Reflection} between two UT Chains}
+\label{fig:pow-refl-step4}
 \end{figure}
 
 ### PoW reflection between chains using the same alg

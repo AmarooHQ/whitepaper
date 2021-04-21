@@ -177,4 +177,15 @@ Galaxies that are close enough to us, and that have a low enough relative veloci
 
 #### What About Tiled 3-Simplexes?
 
-\mk{NTS: 3-simplexes have 4 simplex-chains; the simplest simplex-tile for which O(n) tiling works. Security isn't as good as doing that, tho.}
+A 3-simplex (which has 4 chains) is the least populous simplex that may be tiled with a valence of 3. The result of this is shown in \autoref{fig:tiled-3-simplexes} and is equivalent to a tiling of individual blockchains. This configuration still has $O(n)$ scalability.
+
+- practicality of security: inter-tile confirmations take longer b/c there are fewer blockchains in each tile.
+- potentially more brittle b/c confirmations take longer to propagate --- easier doublespend mb?
+- much lower capacity *in terms of blockchains*, i.e., to reach equivalent capacity to a simplex-tiling (where each tile has hundreds of chains) the furthest distance between chains increases. This has negative feedback loops WRT security/confirmation speed/brittleness.
+
+\begin{figure}
+\centering
+\includegraphics[height=.4\linewidth]{tiling_s1_d6_sag}
+\caption{Tiling where each tile has only external reflections, i.e., there is only 1 single blockchain per tile.}
+\label{fig:tiled-3-simplexes}
+\end{figure}

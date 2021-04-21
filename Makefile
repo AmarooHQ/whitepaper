@@ -4,7 +4,7 @@ WPFILE=$(WPNOEXT).markdown
 WPHTML=$(WPNOEXT).html
 WPTEX=$(WPNOEXT).tex
 
-default: whitepaper
+default: deponly-clean whitepaper
 
 # https://tex.stackexchange.com/questions/45/how-to-speed-up-latex-compilation-with-several-tikz-pictures
 TIME     = /usr/bin/time -p
@@ -21,7 +21,7 @@ InputTeXFiles = $(wildcard *_input.tex)
 	$(PDFLATEX) -output-directory=`dirname $<` $<
 	$(PDFCROP) $@ $@
 
-whitepaper: deponly-clean $(PDFGraphics) $(InputTeXFiles) build-whitepaper wp-pandoc mk-latex-pdf wc
+whitepaper: $(PDFGraphics) $(InputTeXFiles) build-whitepaper wp-pandoc mk-latex-pdf wc
 
 # atm restrict this to just the UT folder, can generalize again later
 # to do that: replace '10-Ultra-Terminum' with '*-*'

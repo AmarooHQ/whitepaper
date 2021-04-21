@@ -35,7 +35,7 @@ When a blockchain is part of a simplex, it is called a *simplex-chain* (as disti
 
 To maintain consistency with the geometric usage of the term *simplex*: a simplex with $k+1$ chains is called a $k$-simplex or a $(k+1)$-chain simplex[^simplex-approx]. In a $k$-simplex, each simplex-chain has $k$ reflections (one reflection for each of the other simplex-chains). A $k$-simplex has, in total, ${k+1} \choose 2$ reflections.
 
-[^simplex-maths]: The name is taken from geometry (particularly: the higher-dimensional kind). A simplex, for a given dimensionality, is the uniquely simplest polytope; e.g., a line in 1D space, a triangle in 2D space, a tetrahedron in 3D space, etc. A $k$-dimensional simplex is known as a $k$-simplex. As shown in \autoref{fig:simplexes}, the 2D projection of a $k$-simplex is identical to a diagram of all possible mutual reflections between $k+1$ blockchains, where each chain is represented by a vertex and each mutual reflection is represented by an edge.
+[^simplex-maths]: The name is taken from geometry (particularly: the higher-dimensional kind). A simplex, for a given dimensionality, is the uniquely simplest polytope; e.g., a line in 1D space, a triangle in 2D space, a tetrahedron in 3D space, etc. A $k$-dimensional simplex is known as a $k$-simplex. As shown in \autoref{fig:simplexes}, the 2D skew orthogonal projection of a $k$-simplex is identical to a diagram of all possible mutual reflections between $k+1$ blockchains, where each chain is represented by a vertex and each mutual reflection is represented by an edge.
 
 [^simplex-approx]: \textbf{NB:} I will ignore this distinction for $k \gg 1$.
 
@@ -60,7 +60,7 @@ To maintain consistency with the geometric usage of the term *simplex*: a simple
         \vskip 0pt
         \centering
         \includegraphics[height=.95\linewidth]{simplex_17_sag}
-        \caption{A 17-chain simplex; a 16-simplex.}
+        \caption{A 17-chain simplex; a 16-simplex. It has 136 unique mutual reflections in total.}
         \label{fig:simplex-17-d1}
     \end{subfigure}
     \caption{Simplexes of increasing capacity. Vertices are simplex-chains. Edges are the reflections between simplex-chains.}

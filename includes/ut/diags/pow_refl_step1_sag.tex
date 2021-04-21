@@ -10,22 +10,20 @@
 
 \begin{document}
 % default params for image
-\providecommand\DrawBtcState{1}%
+\providecommand\DrawBtcState{0}%
 \providecommand\DrawEthState{1}%
-\providecommand\DrawBtcRefl{1}%
+\providecommand\DrawBtcRefl{0}%
 \providecommand\DrawEthRefl{1}%
-\providecommand\DrawPoRLabel{1}%
-\providecommand\DrawPoRInState{1}%
-\providecommand\DrawPoRForChainB{0}%
+\providecommand\DrawPoRLabel{0}%
+\providecommand\DrawPoRInState{0}%
 \providecommand\DrawEthLT{3}%
-\providecommand\DrawBtcLT{4}%
+\providecommand\DrawBtcLT{3}%
 \providecommand\NameChainA{Chain B}%
 \providecommand\AbbrChainA{B}%
 \providecommand\NameChainB{Chain E}%
 \providecommand\AbbrChainB{E}%
 \providecommand\ChainBBlocksN{1}%
 \input{pow_refl_chains_macro}%
-\input{tikz-styles}%
 \begin{tikzpicture}[node distance=0.8cm]
     \TikzBlockchainPowReflection
 \end{tikzpicture}
