@@ -21,7 +21,7 @@ InputTeXFiles = $(wildcard *_input.tex)
 	$(PDFLATEX) -output-directory=`dirname $<` $<
 	$(PDFCROP) $@ $@
 
-whitepaper: $(PDFGraphics) $(InputTeXFiles) build-whitepaper wp-pandoc mk-latex-pdf wc
+whitepaper: deponly-clean $(PDFGraphics) $(InputTeXFiles) build-whitepaper wp-pandoc mk-latex-pdf wc
 
 # atm restrict this to just the UT folder, can generalize again later
 # to do that: replace '10-Ultra-Terminum' with '*-*'
@@ -66,8 +66,10 @@ handout:
 clean: init
 	$(RM) -fv -- `find . -iname \*.aux -or -iname \*.bak -or -iname \*.bbl -or -iname \*.blg -or -iname \*.log -or -iname \*.out -or -iname \*.toc -or -iname \*.tdo -or -iname _region.*`
 
-depclean: clean
+deponly-clean:
 	$(RM) -fv -- `find ./ -iname \*_sag.pdf`
+
+depclean: clean deponly-clean
 
 distclean: depclean
 	-rm -r $(OUTDIR)/*
