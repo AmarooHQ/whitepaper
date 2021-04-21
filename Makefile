@@ -17,7 +17,8 @@ StandAloneGraphicsTeXFiles = $(shell find includes -iname \*_sag.tex)
 PDFGraphics = $(patsubst %_sag.tex,%_sag.pdf,$(StandAloneGraphicsTeXFiles))
 InputTeXFiles = $(wildcard *_input.tex)
 
-%_sag.pdf : %_sag.tex
+%_sag.pdf: %_sag.tex
+    echo "Processing: $<"
 	$(PDFLATEX) $<
 	#$(PDFCROP) $@ $@
 
@@ -67,7 +68,7 @@ clean: init
 	$(RM) -fv -- **/*.aux **/*.bak **/*.bbl **/*.blg **/*.log **/*.out **/*.toc **/*.tdo _region.*
 
 depclean: clean
-	$(RM) -fv -- **/*_sag.pdf
+	$(RM) -fv -- `find includes -iname \*_sag.pdf`
 
 gfx: $(PDFGraphics)
 

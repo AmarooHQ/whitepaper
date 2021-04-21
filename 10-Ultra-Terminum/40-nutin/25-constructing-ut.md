@@ -39,40 +39,31 @@ To maintain consistency with the geometric usage of the term *simplex*: a simple
 
 [^simplex-approx]: \textbf{NB:} I will ignore this distinction for $k \gg 1$.
 
-\providecommand\SimplexChains{2}
-\providecommand\SimplexRadius{20mm}
-\renewcommand\SimplexChains{2}
-
-\begin{figure}[H]
-    \centering
-    \hfill
-    \begin{subfigure}{.28\linewidth}
+\begin{figure}
+    \begin{subfigure}[t]{.31\linewidth}
+        \vskip 0pt
         \centering
         %%\includegraphics[width=.95\linewidth]{ut/tiling/d1-many-tiled-2-simplexes}
-        %% \resizebox{!}{\linewidth}{%
-        %% \begin{tikzpicture}
-          %% \renewcommand\SimplexChains{2}
-          %% \TikzSimplex
-        %% \end{tikzpicture}
-        \includepdf{simplex_2_sag}
-        %%\caption{PoW reflection between 2 blockchains. A 1-simplex. The most basic non-trivial simplex.}
+        \includegraphics[height=.95\linewidth]{simplex_2_sag}
+        \caption{PoW reflection between 2 blockchains. A 1-simplex. The most basic non-trivial simplex.}
         \label{fig:simplex-2-d1}
     \end{subfigure}%%
     \hfill
-    \begin{subfigure}{40mm}
+    \begin{subfigure}[t]{.31\linewidth}
+        \vskip 0pt
         \centering
-        \includegraphics[width=.95\linewidth]{ut/tiling/d1-many-tiled-7-simplexes}
-        %%\caption{PoW reflection between 7 blockchains; a 7-chain simplex; a 6-simplex.}
+        \includegraphics[height=.95\linewidth]{simplex_7_sag}
+        \caption{PoW reflection between 7 blockchains; a 7-chain simplex; a 6-simplex.}
         \label{fig:simplex-7-d1}
     \end{subfigure}%%
     \hfill
-    \begin{subfigure}{40mm}
+    \begin{subfigure}[t]{.31\linewidth}
+        \vskip 0pt
         \centering
-        \includegraphics[width=.95\linewidth]{ut/tiling/d1-many-tiled-17-simplexes}
-        %%\caption{A 17-chain simplex; a 16-simplex.}
+        \includegraphics[height=.95\linewidth]{simplex_17_sag}
+        \caption{A 17-chain simplex; a 16-simplex.}
         \label{fig:simplex-17-d1}
     \end{subfigure}
-    \hfill
     \caption{Simplexes of increasing capacity. Vertices are simplex-chains. Edges are the reflections between simplex-chains.}
     \label{fig:simplexes}
 \end{figure}

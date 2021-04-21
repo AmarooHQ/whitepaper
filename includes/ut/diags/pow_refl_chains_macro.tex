@@ -1,19 +1,17 @@
-\documentclass[]{standalone}
-\usepackage[T1]{fontenc}\usepackage{tikz}
-\usepackage{amsmath, amsfonts}
-\usepackage{xintexpr}
-\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
-
-% overwrite (either \providecommand or \renewcommand) to control the parts of the diagram which are drawn or not.
-\providecommand\DrawBtcState{1}
-\providecommand\DrawEthState{1}
-\providecommand\DrawBtcRefl{1}
-\providecommand\DrawEthRefl{1}
-\providecommand\DrawPoRLabel{1}
-\providecommand\DrawPoRInState{1}
-\providecommand\DrawEthLT{3}
-\providecommand\DrawBtcLT{4}
-
+\providecommand\DrawBtcState{0}%
+\providecommand\DrawEthState{0}%
+\providecommand\DrawBtcRefl{0}%
+\providecommand\DrawEthRefl{0}%
+\providecommand\DrawPoRLabel{0}%
+\providecommand\DrawPoRInState{0}%
+\providecommand\DrawPoRForChainB{1}%
+\providecommand\DrawEthLT{3}%
+\providecommand\DrawBtcLT{4}%
+\providecommand\NameChainA{Bitcoin}%
+\providecommand\AbbrChainA{BTC}%
+\providecommand\NameChainB{Ethereum}%
+\providecommand\AbbrChainB{ETH}%
+\providecommand\ChainBBlocksN{40}%
 \newcommand\TikzBlockchainPowReflection{
     \pgfmathtruncatemacro\lastBtc{round(\DrawBtcLT-1)}
     \pgfmathtruncatemacro\lastEth{round(\DrawEthLT-1)}
@@ -130,7 +128,7 @@
                     \textsc{STATE} \\
                     Headers: $\AbbrChainA_{0 \cdots i+\x}$
                 }
-                \ifnum 1=\DrawPoRInState
+                \ifnum 1=\xintifboolexpr{\DrawPoRInState = 1 && \DrawPoRForChainB = 1}{1}{0}
                     \def\StateContents{\InitStateContents \\
                         Latest PoR: $\AbbrChainB_{j+\ethLastEnd}$\\
                         %% $\Sigma$ Weight: $\Sigma^{j+\ethLastEnd}_{k=0} \text{W}(\AbbrChainB_{k})$
@@ -156,7 +154,7 @@
                 \fi
 
                 \def\porLabel{}
-                \ifnum 1=\DrawPoRLabel
+                \ifnum 1=\xintifboolexpr{\DrawPoRInState = 1 && \DrawPoRForChainB = 1}{1}{0}
                     \def\porLabel{\scriptsize{and PoR}}
                 \fi
 
@@ -196,27 +194,3 @@
 
     \draw [arrowTime] (topLeft) node () [anchor=west, yshift=-10pt] {\textit{Time}} -- (botLeft);
 }%
-
-\begin{document}
-% default params for image
-\providecommand\DrawBtcState{0}%
-\providecommand\DrawEthState{0}%
-\providecommand\DrawBtcRefl{0}%
-\providecommand\DrawEthRefl{0}%
-\providecommand\DrawPoRLabel{0}%
-\providecommand\DrawPoRInState{0}%
-\providecommand\DrawEthLT{3}%
-\providecommand\DrawBtcLT{4}%
-\providecommand\NameChainA{Bitcoin}%
-\providecommand\AbbrChainA{BTC}%
-\providecommand\NameChainB{Ethereum}%
-\providecommand\AbbrChainB{ETH}%
-\providecommand\ChainBBlocksN{40}%
-\makeatother%
-\input{tikz-styles}%
-\fbox{%
-\begin{tikzpicture}[node distance=0.8cm]
-    \TikzBlockchainPowReflection
-\end{tikzpicture}
-}%
-\end{document}

@@ -36,13 +36,9 @@ Let's add such a contract to Ethereum and describe the relevant data and events:
 
 After a Bitcoin block is produced, an Ethereum miner includes an Eth tx containing the BTC header, which updates the SC tracking the Bitcoin chain. In reality there are practical concerns about incenting someone to produce such a transaction (among other things); we're not concerned with those here. We're just concerned with the relationships that exist and what they can do.
 
-\providecommand\DrawEthRefl{1}
-\providecommand\DrawEthState{1}
-\providecommand\DrawBtcLT{3}
-
 \begin{figure}
 \centering
-\input{ut/diags/pr-btc-eth-complete}
+\includegraphics{pow_refl_btc_eth_step1_sag}
 \label{fig:pr-btc-eth-step1}
 \caption{Bitcoin headers are included in Ethereum's state (via user made transactions) as they are produced. This is roughly how \textit{BTC Relay} works.}
 \end{figure}
@@ -65,11 +61,18 @@ Let's consider a hypothetical change to Bitcoin. The protocol is extended to add
 
 Why would a chain want to track another chain? The typical answer is to prove transactions or state occurred on the foreign chain. On Ethereum one could build a trustless BTC<->Ether market, for example.
 
-#### Step 3. Bitcoin tracks Ethereum tracking Bitcoin
+\begin{figure}
+\centering
+\includegraphics{pow_refl_step2_sag}
+\label{fig:pow_refl_step2}
+\caption{Step 2: Chain B and Chain E track each other's header-only chain. In this example Chain E produces blocks 3 times faster than Chain B.}
+\end{figure}
 
-Can we use a tracked chain for a different purpose? What happens if the Bitcoin chain tracks whether Bitcoin history is confirmed within the Ethereum SC?
+#### Step 3. B tracks E's tracking of B
 
-| Time (~15s increments) | Bitcoin block made | BTC block contents | BTC state | Eth block made | Eth block contents | Eth state |
+Can we use a tracked chain for a different purpose? What happens if Chain B tracks whether Chain B's history is confirmed within Chain E?
+
+| Time | B block made | B block contents | B state | E block made | E block contents | Eth state |
 |---|---|---|---|---|---|---|
 | ... |||||||
 | 0 | k | Eth[j-40:j-1] headers + Merkle proof of BTC[k-1] | Tracks Eth chain up to Eth[j-1] *and* knows that Eth knows of BTC[k-1] ||||
@@ -79,24 +82,11 @@ Can we use a tracked chain for a different purpose? What happens if the Bitcoin 
 | 41 | ||| j + 40 | BTC[k+1] header | Tracks BTC chain up to BTC[k+1] |
 | ... |||||||
 
-\providecommand\DrawBtcState{1}
-\providecommand\DrawBtcRefl{1}
-\renewcommand\DrawBtcLT{4}
-\providecommand\DrawEthLT{4}
-\providecommand\DrawPoRLabel{1}
-\providecommand\DrawPoRInState{1}
-\providecommand\NameChainA{Chain A}
-\providecommand\AbbrChainA{A}
-\providecommand\NameChainB{Chain B}
-\providecommand\AbbrChainB{B}
-\providecommand\ChainBBlocksN{1}
-
 \begin{figure}
-\todo{This figure currently shows mutual reflection, which isn't the case for "step 3"}
 \centering
-\input{ut/diags/pr-btc-eth-complete}
-\label{fig:pr-btc-eth-complete}
-\caption{\textit{PoW Reflection} between two UT Chains}
+\includegraphics{pow_refl_step3_sag}
+\label{fig:pow-refl-step3}
+\caption{Step 3: Chain B includes Proofs of Reflection (PoRs) along with headers. Proofs of Reflection allow Chain B to know which of its own blocks are known to Chain E.}
 \end{figure}
 
 Bitcoin now knows *which Bitcoin blocks are known about by some external source* (Ethereum in this case).
@@ -214,6 +204,13 @@ It's worth noting that, at this point, there is no benefit to Ethereum's securit
 Naturally, the large difference in target block frequencies means that Ethereum has a good deal of latency before its chain gains the security benefit from reflected work. For this reason, PoW reflection makes the most sense when used with high frequency chains, or chains of similar frequencies. One downside of this is that shortening the block production frequency requires the inclusion of more block headers. In the scheme of things, this is somewhat significant but not a deal-breaker.
 
 Practical methods of comparing (and converting the weight of) different Proofs of Work are discussed in \autoref{sec:comparing-diff-pows}.
+
+\begin{figure}
+\centering
+\includegraphics{pow_refl_step4_sag}
+\label{fig:pow-refl-step4}
+\caption{\textit{PoW Reflection} between two UT Chains}
+\end{figure}
 
 ### PoW reflection between chains using the same alg
 
