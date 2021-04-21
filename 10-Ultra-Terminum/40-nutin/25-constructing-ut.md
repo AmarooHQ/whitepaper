@@ -43,7 +43,6 @@ To maintain consistency with the geometric usage of the term *simplex*: a simple
     \begin{subfigure}[t]{.31\linewidth}
         \vskip 0pt
         \centering
-        %%\includegraphics[width=.95\linewidth]{ut/tiling/d1-many-tiled-2-simplexes}
         \includegraphics[height=.95\linewidth]{simplex_2_sag}
         \caption{PoW reflection between 2 blockchains. A 1-simplex. The most basic non-trivial simplex.}
         \label{fig:simplex-2-d1}

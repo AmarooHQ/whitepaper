@@ -33,7 +33,7 @@ Increasing the valence beyond 3 does not make sense, though. There are two reaso
 
 \begin{figure}
 \centering
-\includegraphics[width=50mm]{ut/tiling/d1-many-tiled-5-simplexes}
+\includegraphics[width=50mm]{simplex_5_sag}
 \caption{The initial state of a 5-chain simplex-tile before tiling. Vertices are simplex-chains. Edges are the reflections between simplex-chains.}
 \label{fig:tiled-simplex-5-d1}
 \end{figure}
@@ -57,29 +57,29 @@ side by side figures: https://tex.stackexchange.com/questions/37581/latex-figure
 \end{comment}
 
 \begin{figure}
-    \centering
-    \hfill
-    \begin{subfigure}{.28\textwidth}
+    \begin{subfigure}[t]{.31\textwidth}
+        \vskip 0pt
         \centering
-        \includegraphics[width=.95\linewidth]{ut/tiling/d2-many-tiled-5-simplexes}
+        \includegraphics[height=.95\linewidth]{tiling_s5_d2_sag}
         \caption{1st iteration. 4 tiles.}
         \label{fig:tiled-simplex-5-d2}
     \end{subfigure}%%
     \hfill
-    \begin{subfigure}{.28\textwidth}
+    \begin{subfigure}[t]{.31\textwidth}
+        \vskip 0pt
         \centering
-        \includegraphics[width=.95\linewidth]{ut/tiling/d3-many-tiled-5-simplexes}
+        \includegraphics[height=.95\linewidth]{tiling_s5_d3_sag}
         \caption{2nd iteration. 10 tiles.}
         \label{fig:tiled-simplex-5-d3}
     \end{subfigure}%%
     \hfill
-    \begin{subfigure}{.28\textwidth}
+    \begin{subfigure}[t]{.31\textwidth}
+        \vskip 0pt
         \centering
-        \includegraphics[width=.95\linewidth]{ut/tiling/d4-many-tiled-5-simplexes}
+        \includegraphics[height=.95\linewidth]{tiling_s5_d4_sag}
         \caption{3rd iteration. 22 tiles.}
         \label{fig:tiled-simplex-5-d4}
     \end{subfigure}
-    \hfill
     \caption{The state of tiled 5-chain simplexes after sequential iterations. Vertices are simplex-chains. Edges are the reflections between simplex-chains.}
 \end{figure}
 

@@ -4,6 +4,7 @@
 \providecommand\TilingValence{3}%
 \providecommand\SimplexChains{5}%
 \providecommand\RainbowColors{1}%
+\providecommand\TilingSizeToNodeRRatio{3}%
 \input{simplex-macro}%
 % \makeatletter%
 % \def\fillRGB#1#2#3{\pgfsys@color@rgb@fill{#1}{#2}{#3}}%
@@ -13,7 +14,7 @@
 \pgfsetlayers{reflections,main,tiles}%
 \newcommand\TikzSimplexTiling{
     \pgfmathsetmacro\nNodesTotal{3*(2^(\TilingDepth)-1)+1}
-    \xdef\initNodeR{\TilingInitSize*3}
+    \xdef\initNodeR{\TilingInitSize*\TilingSizeToNodeRRatio}
     \xdef\nodeR{\initNodeR}
     \pgfmathsetmacro\newChildren{\TilingValence-1}
     \xdef\createChildren{\TilingValence}
@@ -26,62 +27,62 @@
     \xdef\timesRun{0}
     \foreach \d in {0,...,\TilingDepth} {
             \ifnum 0<\createCurrent
-            \renewcommand\SimplexRadius{\tilingCurrSize}
-            \renewcommand\SimplexOffsetR{\createDistance}
-            \pgfmathsetmacro\sxAngleOffset{360/\createCurrent/2+(180/\TilingValence)*(\TilingValence-2)/2}
-            \pgfmathsetmacro\newSxNodeR{\nodeR/sqrt(\TilingScaleConst)}
-            \xdef\nodeR{\newSxNodeR}
-            \renewcommand\SimplexNodeRadius{\nodeR}
-            \foreach \s in {1,...,\createCurrent} {
-                    \def\parentSimplex{\nodeNameRoot/0/1}
-                    \ifnum 1<\d
-                        \pgfmathsetmacro\parentId{int(\s/\newChildren + (1-1/\newChildren))}
-                        \def\parentSimplex{\nodeNameRoot/\lastD/\parentId}
-                    \fi
-                    \renewcommand\SimplexNodeName{\nodeNameRoot/\d/\s}
-                    \pgfmathsetmacro\sxAngle{360/\createCurrent*\s-\sxAngleOffset}
-                    \renewcommand\SimplexOffsetAngle{\sxAngle}
+                \renewcommand\SimplexRadius{\tilingCurrSize}
+                \renewcommand\SimplexOffsetR{\createDistance}
+                \pgfmathsetmacro\sxAngleOffset{360/\createCurrent/2+(180/\TilingValence)*(\TilingValence-2)/2}
+                \pgfmathsetmacro\newSxNodeR{\nodeR/sqrt(\TilingScaleConst)}
+                \xdef\nodeR{\newSxNodeR}
+                \renewcommand\SimplexNodeRadius{\nodeR}
+                \foreach \s in {1,...,\createCurrent} {
+                        \def\parentSimplex{\nodeNameRoot/0/1}
+                        \ifnum 1<\d
+                            \pgfmathsetmacro\parentId{int(\s/\newChildren + (1-1/\newChildren))}
+                            \def\parentSimplex{\nodeNameRoot/\lastD/\parentId}
+                        \fi
+                        \renewcommand\SimplexNodeName{\nodeNameRoot/\d/\s}
+                        \pgfmathsetmacro\sxAngle{360/\createCurrent*\s-\sxAngleOffset}
+                        \renewcommand\SimplexOffsetAngle{\sxAngle}
 
-                    \ifnum 1=\RainbowColors
-                    \pgfmathsetmacro\cr{cos(mod(\timesRun*23, 360))*0.5 + 0.5}
-                    \pgfmathsetmacro\cg{cos(mod(\timesRun*23 + 240, 360))*0.5 + 0.5}
-                    \pgfmathsetmacro\cb{cos(mod(\timesRun*23 + 120, 360))*0.5 + 0.5}
-                    \else
-                    \pgfmathsetmacro\cr{cos(mod(\timesRun/2.57, 360))*0.4 + 0.6}
-                    \pgfmathsetmacro\cg{cos(mod(\timesRun/1.91 - 90, 360))*0.4 + 0.6}
-                    % \pgfmathsetmacro\cb{cos(mod(\timesRun/2.0 + 180, 360))*0.2 + 0.4}
-                    \pgfmathsetmacro\cb{-1}
-                    \fi
-                    \definecolor{tilingColor}{rgb}{\cr,\cg,\cb}
-                    \renewcommand\SimplexNodeColor{tilingColor}
+                        \ifnum 1=\RainbowColors
+                            \pgfmathsetmacro\cr{cos(mod(\timesRun*23, 360))*0.5 + 0.5}
+                            \pgfmathsetmacro\cg{cos(mod(\timesRun*23 + 240, 360))*0.5 + 0.5}
+                            \pgfmathsetmacro\cb{cos(mod(\timesRun*23 + 120, 360))*0.5 + 0.5}
+                        \else
+                            \pgfmathsetmacro\cr{cos(mod(\timesRun/2.57, 360))*0.4 + 0.6}
+                            \pgfmathsetmacro\cg{cos(mod(\timesRun/1.91 - 90, 360))*0.4 + 0.6}
+                            % \pgfmathsetmacro\cb{cos(mod(\timesRun/2.0 + 180, 360))*0.2 + 0.4}
+                            \pgfmathsetmacro\cb{-1}
+                        \fi
+                        \definecolor{tilingColor}{rgb}{\cr,\cg,\cb}
+                        \renewcommand\SimplexNodeColor{tilingColor}
 
-                    \TikzSimplex
-                    % \node () [yshift=30pt] at (\SimplexNodeName//1) {$\nNodesTotal$};
-                    % \node () [yshift=20pt] at (\SimplexNodeName//1) {\parentSimplex};
+                        \TikzSimplex
+                        % \node () [yshift=30pt] at (\SimplexNodeName//1) {$\nNodesTotal$};
+                        % \node () [yshift=20pt] at (\SimplexNodeName//1) {\parentSimplex};
 
-                    \pgfmathparse{\timesRun+1}
-                    \xdef\timesRun{\pgfmathresult}
-                    \ifnum 0=\d
-                    \else
-                    \begin{pgfonlayer}{reflections}
-                        % draw refl lines to parent
-                        \foreach \sn in {1,...,\SimplexChains} {
-                                \foreach \pn in {1,...,\SimplexChains} {
-                                        \draw [dashed] (\parentSimplex//\pn) -- (\SimplexNodeName//\sn);
+                        \pgfmathparse{\timesRun+1}
+                        \xdef\timesRun{\pgfmathresult}
+                        \ifnum 0=\d
+                        \else
+                            \begin{pgfonlayer}{reflections}
+                                % draw refl lines to parent
+                                \foreach \sn in {1,...,\SimplexChains} {
+                                        \foreach \pn in {1,...,\SimplexChains} {
+                                                \draw [dashed] (\parentSimplex//\pn) -- (\SimplexNodeName//\sn);
+                                            }
                                     }
-                            }
-                    \end{pgfonlayer}
-                    \fi
-                }
+                            \end{pgfonlayer}
+                        \fi
+                    }
 
-            \def\tmpAngleOffset{\sxAngleOffset}
-            \pgfmathsetmacro\newCreateDist{\createDistance + \tilingCurrSize * 2}
-            \xdef\tilingCurrSize{\tilingCurrSize/\TilingScaleConst}
-            \xdef\createDistance{\newCreateDist}
-            \xdef\createCurrent{\createChildren}
-            \pgfmathsetmacro\newCreateChildren{\createChildren*\newChildren}
-            \xdef\createChildren{\newCreateChildren}
-            \xdef\lastD{\d}
+                \def\tmpAngleOffset{\sxAngleOffset}
+                \pgfmathsetmacro\newCreateDist{\createDistance + \tilingCurrSize * 2}
+                \xdef\tilingCurrSize{\tilingCurrSize/\TilingScaleConst}
+                \xdef\createDistance{\newCreateDist}
+                \xdef\createCurrent{\createChildren}
+                \pgfmathsetmacro\newCreateChildren{\createChildren*\newChildren}
+                \xdef\createChildren{\newCreateChildren}
+                \xdef\lastD{\d}
             \fi
         }%
 }%

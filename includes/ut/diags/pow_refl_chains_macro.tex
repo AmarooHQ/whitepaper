@@ -12,6 +12,7 @@
 \providecommand\NameChainB{Ethereum}%
 \providecommand\AbbrChainB{ETH}%
 \providecommand\ChainBBlocksN{40}%
+\input{tikz-styles}%
 \newcommand\TikzBlockchainPowReflection{
     \pgfmathtruncatemacro\lastBtc{round(\DrawBtcLT-1)}
     \pgfmathtruncatemacro\lastEth{round(\DrawEthLT-1)}
@@ -39,7 +40,7 @@
             \pgfmathtruncatemacro\ethLastEnd{round((\x-1)*\ChainBBlocksN)}
             \pgfmathtruncatemacro\ethBStart{round((\x-1)*\ChainBBlocksN+1)}
             \pgfmathtruncatemacro\ethBEnd{round((\x-1)*\ChainBBlocksN+\ChainBBlocksN)}
-            \xdef\stateXS{5pt}
+            \xdef\stateXS{-17pt}
 
             %%%%%%%%%
             % bitcoin (well, chain A. the diagram grew out of an example of BTC/ETH, you see)
@@ -74,9 +75,8 @@
                 \fi
 
                 \ifnum 1=\DrawBtcState
-                    \draw [braceLR] (btc\x.west |- btc\x.north) --
-                    node (btcState\x) [state, anchor=east, xshift=-\stateXS, align=right] {\footnotesize{\StateContents}}
-                    (btc\x.west |- btc\x.south);
+                    \node (btcState\x) [state, left = of btc\x, xshift=-\stateXS, align=right] {\footnotesize{\StateContents}};
+                    \draw [braceLR] (btc\x.west |- btcState\x.north) -- (btc\x.west |- btcState\x.south);
                 \fi
                 % end btc state
 
@@ -137,10 +137,8 @@
                     \def\StateContents{\InitStateContents}
                 \fi
                 \ifnum 1=\DrawEthState
-                    \draw [braceRL] (ethS\x.east |- ethS\x.north) --
-                    node (ethStateCoord\x) [state, anchor=west, xshift=\stateXS] {\footnotesize{\StateContents}}
-                    (ethS\x.east |- ethS\x.south);
-                    %\node (ethState\x) [block, right = of ethStateCoord\x, xshift=0cm] {State};
+                    \node (ethState\x) [state, right = of ethS\x, xshift=\stateXS, align=left] {\footnotesize{\StateContents}};
+                    \draw [braceRL] (ethS\x.east |- ethState\x.north) -- (ethS\x.east |- ethState\x.south);
                 \fi
                 % end Ethereum State
 
@@ -148,7 +146,6 @@
                 \ifnum 1<\ChainBBlocksN
                     % curly brace for lots of eth blocks
                     \draw [ethBraceL] (ethS\x.west -| \ethE\x.west) -- node (ethAll\x) [black, midway, yshift=14pt] {
-                        %\scriptsize{$\AbbrChainB_{40(j+\x) \cdots 40(j+\x)+39}$}
                         \scriptsize{\ChainBBlocksN\:Blocks}
                     } (\ethE\x.west);
                 \fi

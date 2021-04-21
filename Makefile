@@ -13,14 +13,13 @@ PDFLATEX = pdflatex -interaction=batchmode
 PDFCROP  = pdfcrop
 RM       = /bin/rm
 #StandAloneGraphicsTeXFiles = $(wildcard includes/ut/diags/*_sag.tex)
-StandAloneGraphicsTeXFiles = $(shell find includes -iname \*_sag.tex)
+StandAloneGraphicsTeXFiles = $(shell find ./ -iname \*_sag.tex)
 PDFGraphics = $(patsubst %_sag.tex,%_sag.pdf,$(StandAloneGraphicsTeXFiles))
 InputTeXFiles = $(wildcard *_input.tex)
 
 %_sag.pdf: %_sag.tex
-    echo "Processing: $<"
-	$(PDFLATEX) $<
-	#$(PDFCROP) $@ $@
+	$(PDFLATEX) -output-directory=`dirname $<` $<
+	$(PDFCROP) $@ $@
 
 whitepaper: $(PDFGraphics) $(InputTeXFiles) build-whitepaper wp-pandoc mk-latex-pdf wc
 
@@ -65,12 +64,10 @@ handout:
 	pandoc --standalone --mathjax -f markdown --pdf-engine=context -V fontsize=11.5pt -o includes/handout/exec-summary.pdf includes/handout/exec-summary.md
 
 clean: init
-	$(RM) -fv -- **/*.aux **/*.bak **/*.bbl **/*.blg **/*.log **/*.out **/*.toc **/*.tdo _region.*
+	$(RM) -fv -- `find . -iname \*.aux -or -iname \*.bak -or -iname \*.bbl -or -iname \*.blg -or -iname \*.log -or -iname \*.out -or -iname \*.toc -or -iname \*.tdo -or -iname _region.*`
 
 depclean: clean
-	$(RM) -fv -- `find includes -iname \*_sag.pdf`
-
-gfx: $(PDFGraphics)
+	$(RM) -fv -- `find ./ -iname \*_sag.pdf`
 
 distclean: depclean
 	-rm -r $(OUTDIR)/*
