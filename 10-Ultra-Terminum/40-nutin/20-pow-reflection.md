@@ -74,7 +74,7 @@ Say that the protocol of Chain B is extended to add support for tracking Chain E
 \begin{figure}[H]
 \centering
 \includegraphics[height=0.3\textheight]{pow_refl_step2_sag}
-\caption{Step 2: Chain B and Chain E track each other's header-only chain. In this example Chain E produces blocks 3 times faster than Chain B.}
+\caption{Step 2: Chain B and Chain E track each other's header-only chain.}
 \label{fig:pow_refl_step2}
 \end{figure}
 
@@ -102,11 +102,11 @@ Chain B now knows *which B blocks are known about by some external source* (Chai
 
 Put another way: Chain B's history is confirmed *not only* by new Chain B blocks, *but also* by Chain E blocks. Since Chain B nodes *know* they have the blocks that Chain E knows about, there's no data-availability concern here.
 
-At this point, if an attacker was to publish an alternate, better B chain, then Chain B nodes would reorganize around the *new* history published by the attacker, and the attacker's block headers would end up being recorded in Chain E (so Chain E would reorganize its header-only version of Chain B just as Chain B nodes do).
+At this point, if an attacker was to publish an alternate, better Chain B history, then Chain B nodes would reorganize around the *new* history published by the attacker, and the attacker's block headers would end up being recorded in Chain E (so Chain E would reorganize just as Chain B nodes do).
 
 Could we use Chain B's knowledge *that it's own history is reflected in Chain E* to *prevent* such an attack?
 
-#### Step 4. A modification to Chain B's *block-weight* calculation
+#### Step 4. One Way Reflection
 
 \todo{Replace refs to Bitcoin with Chain B and Ethereum with Chain E}
 
@@ -210,11 +210,15 @@ Why? The privately mined blocks to perform the attack *are not known about* by E
 * the private chain-segment must contribute more total work to the Bitcoin blockchain than the public chain-segment does -- *including* the relevant Ethereum chain-segment; *or*
 * the attacker must *additionally* produce a private Ethereum chain-segment such that the *total* work of both private chain-segments is greater than the total work of both public chain-segments, and publish both chain-segments simultaneously.
 
-It's worth noting that, at this point, there is no benefit to Ethereum's security. That's because Ethereum isn't 'reading' the reflected work back off the Bitcoin chain. Thus a doublespend attack against Ethereum has the expected, non-reflected profile -- it isn't more difficult to attack Ethereum yet. However, Ethereum can take advantage of the reflection, though. The main requirements are: the inclusion of appropriate merkle proofs that show known Ethereum blocks according to Bitcoin, and an update to Ethereum's block-weight calculations to account for the reflected work. PoW reflection doesn't automatically secure both chains; each chain can proactively and independently take advantage of PoW reflection.
+It's worth noting that, at this point, there is no benefit to Chain E's security. That's because Chain E isn't 'reading' the reflected work back from Chain B. Thus a doublespend attack against Chain E has the expected, non-reflected profile -- it isn't more difficult to attack Chain E yet. However, Chain E can take advantage of the reflection, though. The main requirements are: the inclusion of appropriate merkle proofs that show known Chain E blocks according to Chain B, and an update to Chain E's block-weight calculations to account for the reflected work. PoW reflection doesn't automatically secure both chains; each chain can proactively and independently take advantage of PoW reflection.
 
-Naturally, the large difference in target block frequencies means that Ethereum has a good deal of latency before its chain gains the security benefit from reflected work. For this reason, PoW reflection makes the most sense when used with high frequency chains, or chains of similar frequencies. One downside of this is that shortening the block production frequency requires the inclusion of more block headers. In the scheme of things, this is somewhat significant but not a deal-breaker.
+Naturally, if there were a large difference in target block frequencies (e.g., 10 minutes vs 15 seconds) then there would also be a good deal of latency before a chain gains the security benefit from reflected work. For this reason, PoW reflection makes the most sense when used with high frequency chains, or chains of similar frequencies. One downside of this is that shortening the block production frequency requires the inclusion of more block headers. In the scheme of things, this can be somewhat significant but is not a deal-breaker.
 
 Practical methods of comparing (and converting the weight of) different Proofs of Work are discussed in \autoref{sec:comparing-diff-pows}.
+
+#### Step 5. Mutual Reflection
+
+\todo{Write out a bit about mutual reflection or move from elsewhere.}
 
 \begin{figure}[H]
 \centering
