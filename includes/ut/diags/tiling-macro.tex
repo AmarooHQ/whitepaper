@@ -5,7 +5,8 @@
 \providecommand\SimplexChains{5}%
 \providecommand\RainbowColors{1}%
 \providecommand\TilingSizeToNodeRRatio{3}%
-\providecommand\TilingAutoRotate{1}
+\providecommand\TilingAutoRotate{1}%
+\providecommand\TilingRotateDebug{0}%
 \input{simplex-macro}%
 % \makeatletter%
 % \def\fillRGB#1#2#3{\pgfsys@color@rgb@fill{#1}{#2}{#3}}%
@@ -72,15 +73,17 @@
                         % \renewcommand\SimplexRotationMod{180/\createCurrent*(\s-ceil(\createCurrent/2))}
                         % \fi
                         \ifnum 0<\d
-                            \pgfmathsetmacro\angleDiff{mod(\parentSxAngle - \sxAngle, 360)}
+                            \pgfmathsetmacro\angleDiff{mod(\sxAngle - \parentSxAngle, 360)}
                             \ifnum 1=\d
                                 \pgfmathsetmacro\distToParent{\createDistance}
                                 \pgfmathsetmacro\angleToParent{\sxAngle}
+                                \pgfmathsetmacro\finalRotation{90-\sxAngle}
                             \else
-                                \pgfmathsetmacro\distToParent{sqrt(\createDistance^2 + \prevCreateDist^2 + 2*\createDistance*\prevCreateDist*cos(\angleDiff))}
+                                \pgfmathsetmacro\distToParent{sqrt(\createDistance^2 + \prevCreateDist^2 - 2*\createDistance*\prevCreateDist*cos(\angleDiff))}
                                 \pgfmathsetmacro\angleToParent{asin(\prevCreateDist * sin(\angleDiff) / \distToParent)}
+                                \pgfmathsetmacro\finalRotation{\sxAngle+90-\angleToParent}
                             \fi
-                            \pgfmathsetmacro\finalRotation{\parentSxAngle - 2^(\d)*\angleToParent}
+                            % \pgfmathsetmacro\finalRotation{\parentSxAngle + (90 - abs(\angleToParent)) * (abs(\angleToParent)/\angleToParent)}
                             \renewcommand\SimplexRotationMod{\finalRotation}
                         \fi
 
@@ -92,14 +95,16 @@
                         \xdef\timesRun{\pgfmathresult}
                         \ifnum 0=\d
                         \else
+                            \ifnum 1=\TilingRotateDebug
                             \node () [above of=\SimplexNodeName//1] {\SimplexNodeName//1};
-                            \node () [above of=\SimplexNodeName//2] {\createDistance};
+                            \node () [above of=\SimplexNodeName//2] {parentDist: \distToParent, dist: \createDistance};
                             \node () [yshift=10pt, above of=\SimplexNodeName//2] {self: \s, parent: \parentId};
                             \node () [yshift=20pt, above of=\SimplexNodeName//2] {sxAngle: \sxAngle};
                             \node () [yshift=30pt, above of=\SimplexNodeName//2] {parentSx: \parentSxAngle};
                             \node () [yshift=40pt, above of=\SimplexNodeName//2] {theta: \angleDiff};
                             \node () [yshift=50pt, above of=\SimplexNodeName//2] {alpha: \angleToParent};
                             \node () [yshift=60pt, above of=\SimplexNodeName//2] {final: \finalRotation};
+                            \fi
                             \begin{pgfonlayer}{reflections}
                                 % draw refl lines to parent
                                 \foreach \sn in {1,...,\SimplexChains} {
