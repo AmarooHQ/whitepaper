@@ -126,27 +126,52 @@ NB: we're not that concerned with whether this is a reasonable assumption or not
 
 Currently, the Chain B network chooses the "heaviest" (most worked) chain as its common history. Chain B calculates the "weight" of blocks (i.e., how much work went in to them) via an estimation of how many hashes were required -- say these are measured in *double SHA256 hashes*. For the purposes of illustration, let's normalize this number to be in terms of *B Blocks* -- instead of *double SHA256 hashes*; that's easy, since each block is worth 1 *B Block* by definition. Now, we can also measure the work in *E Blocks*, too (that being: 1 *E Block*).
 
-How can the network choose the heaviest chain? Well, a traditional blockchain might use a simple recursive function like this:
+How can the network choose the heaviest chain? Well, a traditional blockchain might use a simple recursive function like \autoref{alg:vanilla-bw}.
 
-```haskell
--- chain-b-vanilla-weight-calc.hs
-type BWeight = Number
-
-chainWeight :: List Block -> BWeight
-chainWeight [] = 0
-chainWeight b:bs = blockWeight b + chainWeight bs
--- pattern match a list of blocks. The head is `b` and the rest
--- of the chain is `bs`. If the list is empty then return 0.
-
-blockWeight :: Block -> BWeight
-blockWeight block = 1
--- by definition; this is not representative of a production chain
-```
+\begin{algorithm}
+\caption{Vanilla Chain Weight Algorithm}\label{alg:vanilla-bw}
+\begin{algorithmic}
+\Procedure{WeighChain}{$blocks$}\Comment{The weight of a chain}
+  \If {length($blocks$) == 0}
+    \State \Return{0}
+  \EndIf
+  \State \Return{WeighBlock(head($blocks$)) + WeighChain(tail($blocks$))}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
 Could Chain B incorporate the idea that Chain E had confirmed part of its history? Could Chain B use this to thwart some types of attack?
 
-Let's modify the Chain B block-weight calculation functions so that they account for the Chain B history that has been confirmed by Chain E:
+Yes, and we must modify the block-weight calculation so that it accounts for work contributed by Chain E. Such an algorithm is described in \autoref{alg:refl-1-bw}. Essentially, additional weight is added to a block when it is *the best block* known to Chain E, i.e., according to Chain E it is at the tip of Chain B. Note that this weight is still added if Chain E knows of multiple competing chain-tips.
 
+\begin{algorithm}
+\caption{Modified Chain Weight Algorithm}\label{alg:refl-1-bw}
+\begin{algorithmic}
+\Procedure{WeighChain}{$blocks, state$}\Comment{The weight of a chain}
+  \If {length($blocks$) == 0}
+    \State \Return{0}
+  \EndIf
+  \State \Return{WeighBlock(head($blocks$), $state$) + WeighChain(tail($blocks$), $state$)}
+\EndProcedure
+\\
+\Procedure{WeighBlock}{$block, state$}
+  \State \Return{LocalBlockWeight($block$) + ReflectedEBlockWeight($block, state$)}
+\EndProcedure
+\\
+\Procedure{ReflectedEBlockWeight}{$block, state$}
+  \State $Blocks_{E} \gets$ ReflectingEBlocks(state)
+  \State $s\gets 0$
+  \For{$B_e$ in $Blocks_{E}$}
+    \If {$block$ in ReflectedChainHeads($B_e$)}
+      \State $s\gets s+$ WeightOf($B_e$)
+    \EndIf
+  \EndFor
+  \State \Return{s}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{comment}
 %%TC:ignore
 ```haskell
 -- chain-b-modified-weight-calc.hs
@@ -196,10 +221,11 @@ eBlockWeight eBlock = 1
 %%TC:endignore
 
 \todo{formalize the above mathematically so it can be more easily analyzed}
-
 \begin{equation}
 a = 1
 \end{equation}
+
+\end{comment}
 
 What is the meaning and impact of this change?
 
@@ -221,6 +247,8 @@ Naturally, if there were a large difference in target block frequencies (e.g., 1
 Practical methods of comparing (and converting the weight of) different Proofs of Work are discussed in \autoref{sec:comparing-diff-pows}.
 
 \todo{What if you mine a longer B-chain and then publish it to Chain E? Well you have to do that later, and you need to publish the blocks, too. If Chain E just checks the work on that local chain, then it looks like the attacker's chain is longer. But the chain, as calculated by full nodes is, not worth as much as the original chain, so they will keep mining on the orig chain. However, if the attacker has $q>p$ then they'll always outperform the honest chain and the reflections will eventually favour the attackers chain. so the reflecting chains (Chain E) need to incorporate calculations of the *total* block weight of Chain B. That means they need to be half-nodes for Chain B so that they can track Chain B's known reflections.}
+
+- savvy readers might note that as the Chain B tip is gaining reflections from Chain E, miners on Chain B are incented to include as many Chain E headers (and PoRs) as possible. That's because each new header will add weight to the *parent* of the block which the Chain B miner is attempting to produce, increasing overall chain-weight.
 
 #### Step 5. Mutual Reflection
 

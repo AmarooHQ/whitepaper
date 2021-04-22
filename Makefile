@@ -4,7 +4,7 @@ WPFILE=$(WPNOEXT).markdown
 WPHTML=$(WPNOEXT).html
 WPTEX=$(WPNOEXT).tex
 
-default: deponly-clean whitepaper
+default: whitepaper
 
 # https://tex.stackexchange.com/questions/45/how-to-speed-up-latex-compilation-with-several-tikz-pictures
 TIME     = /usr/bin/time -p
