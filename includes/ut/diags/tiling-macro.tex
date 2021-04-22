@@ -5,6 +5,7 @@
 \providecommand\SimplexChains{5}%
 \providecommand\RainbowColors{1}%
 \providecommand\TilingSizeToNodeRRatio{3}%
+\providecommand\TilingAutoRotate{1}
 \input{simplex-macro}%
 % \makeatletter%
 % \def\fillRGB#1#2#3{\pgfsys@color@rgb@fill{#1}{#2}{#3}}%
@@ -23,24 +24,36 @@
     \def\nodeNameRoot{r}
     \xdef\tilingCurrSize{\TilingInitSize}
     \xdef\createDistance{0}
+    \xdef\prevCreateDist{0}
     \xdef\lastD{0}
     \xdef\timesRun{0}
+    \xdef\lastAngleOffset{0}
     \foreach \d in {0,...,\TilingDepth} {
             \ifnum 0<\createCurrent
                 \renewcommand\SimplexRadius{\tilingCurrSize}
                 \renewcommand\SimplexOffsetR{\createDistance}
-                \pgfmathsetmacro\sxAngleOffset{360/\createCurrent/2+(180/\TilingValence)*(\TilingValence-2)/2}
+                \ifnum 1=\TilingAutoRotate
+                    \pgfmathsetmacro\sxAngleOffset{mod(360/\createCurrent/2+(180/\TilingValence)*(\TilingValence-2)/2, 360)}
+                \else
+                    \pgfmathsetmacro\sxAngleOffset{mod(360/\createCurrent/2, 360)}
+                \fi
                 \pgfmathsetmacro\newSxNodeR{\nodeR/sqrt(\TilingScaleConst)}
                 \xdef\nodeR{\newSxNodeR}
                 \renewcommand\SimplexNodeRadius{\nodeR}
                 \foreach \s in {1,...,\createCurrent} {
                         \def\parentSimplex{\nodeNameRoot/0/1}
+                        \pgfmathsetmacro\parentId{0}
                         \ifnum 1<\d
                             \pgfmathsetmacro\parentId{int(\s/\newChildren + (1-1/\newChildren))}
                             \def\parentSimplex{\nodeNameRoot/\lastD/\parentId}
                         \fi
                         \renewcommand\SimplexNodeName{\nodeNameRoot/\d/\s}
-                        \pgfmathsetmacro\sxAngle{360/\createCurrent*\s-\sxAngleOffset}
+                        \pgfmathsetmacro\sxAngle{mod(360/\createCurrent*\s-\sxAngleOffset, 360)}
+                        \ifnum 1=\d
+                        \pgfmathsetmacro\parentSxAngle{0}
+                        \else
+                        \pgfmathsetmacro\parentSxAngle{mod(360/(\createCurrent/2)*\parentId-\lastAngleOffset, 360)}
+                        \fi
                         \renewcommand\SimplexOffsetAngle{\sxAngle}
 
                         \ifnum 1=\RainbowColors
@@ -55,6 +68,21 @@
                         \fi
                         \definecolor{tilingColor}{rgb}{\cr,\cg,\cb}
                         \renewcommand\SimplexNodeColor{tilingColor}
+                        % \ifnum 1=\d
+                        % \renewcommand\SimplexRotationMod{180/\createCurrent*(\s-ceil(\createCurrent/2))}
+                        % \fi
+                        \ifnum 0<\d
+                            \pgfmathsetmacro\angleDiff{mod(\parentSxAngle - \sxAngle, 360)}
+                            \ifnum 1=\d
+                                \pgfmathsetmacro\distToParent{\createDistance}
+                                \pgfmathsetmacro\angleToParent{\sxAngle}
+                            \else
+                                \pgfmathsetmacro\distToParent{sqrt(\createDistance^2 + \prevCreateDist^2 + 2*\createDistance*\prevCreateDist*cos(\angleDiff))}
+                                \pgfmathsetmacro\angleToParent{asin(\prevCreateDist * sin(\angleDiff) / \distToParent)}
+                            \fi
+                            \pgfmathsetmacro\finalRotation{\parentSxAngle - 2^(\d)*\angleToParent}
+                            \renewcommand\SimplexRotationMod{\finalRotation}
+                        \fi
 
                         \TikzSimplex
                         % \node () [yshift=30pt] at (\SimplexNodeName//1) {$\nNodesTotal$};
@@ -64,6 +92,14 @@
                         \xdef\timesRun{\pgfmathresult}
                         \ifnum 0=\d
                         \else
+                            \node () [above of=\SimplexNodeName//1] {\SimplexNodeName//1};
+                            \node () [above of=\SimplexNodeName//2] {\createDistance};
+                            \node () [yshift=10pt, above of=\SimplexNodeName//2] {self: \s, parent: \parentId};
+                            \node () [yshift=20pt, above of=\SimplexNodeName//2] {sxAngle: \sxAngle};
+                            \node () [yshift=30pt, above of=\SimplexNodeName//2] {parentSx: \parentSxAngle};
+                            \node () [yshift=40pt, above of=\SimplexNodeName//2] {theta: \angleDiff};
+                            \node () [yshift=50pt, above of=\SimplexNodeName//2] {alpha: \angleToParent};
+                            \node () [yshift=60pt, above of=\SimplexNodeName//2] {final: \finalRotation};
                             \begin{pgfonlayer}{reflections}
                                 % draw refl lines to parent
                                 \foreach \sn in {1,...,\SimplexChains} {
@@ -75,7 +111,9 @@
                         \fi
                     }
 
+                \xdef\lastAngleOffset{\sxAngleOffset}
                 \def\tmpAngleOffset{\sxAngleOffset}
+                \xdef\prevCreateDist{\createDistance}
                 \pgfmathsetmacro\newCreateDist{\createDistance + \tilingCurrSize * 2}
                 \xdef\tilingCurrSize{\tilingCurrSize/\TilingScaleConst}
                 \xdef\createDistance{\newCreateDist}

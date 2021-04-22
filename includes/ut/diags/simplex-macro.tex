@@ -6,12 +6,13 @@
 \providecommand\SimplexNodeName{chain}%
 \providecommand\SimplexOffsetAngle{0}%
 \providecommand\SimplexOffsetR{0}%
-
+\providecommand\SimplexRotationMod{0}%
+%
 \tikzstyle{refl} = [line width=2pt, shorten >= 0pt, shorten <= 0pt]%
-\tikzstyle{splxNode} = [draw=black,shape=circle]%
+\tikzstyle{splxNode} = [draw=black!50,shape=circle]%
 %
 \newcommand\TikzSimplex{
-    \pgfmathsetmacro\rOffset{(360/\SimplexChains)+90}
+    \pgfmathsetmacro\rOffset{(360/\SimplexChains)+90+\SimplexRotationMod}
     \node (\SimplexNodeName-origin) at (\SimplexOffsetAngle: \SimplexOffsetR) {};
     % \node (\SimplexNodeName-origin-label) [yshift=\SimplexRadius*1.2cm] at (\SimplexNodeName-origin) {O \SimplexOffsetAngle: \SimplexOffsetR -- \SimplexNodeRadius};
     \foreach \i in {1,...,\SimplexChains} {
