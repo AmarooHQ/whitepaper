@@ -7,13 +7,16 @@
 \providecommand\TilingSizeToNodeRRatio{3}%
 \providecommand\TilingAutoRotate{1}%
 \providecommand\TilingRotateDebug{0}%
+\providecommand\TilingDrawAllReflections{1}%
+\providecommand\TilingDrawGroups{0}%
 \input{simplex-macro}%
 % \makeatletter%
 % \def\fillRGB#1#2#3{\pgfsys@color@rgb@fill{#1}{#2}{#3}}%
 % \makeatother%
 \pgfdeclarelayer{reflections}%
+\pgfdeclarelayer{groups}%
 \pgfdeclarelayer{tiles}%
-\pgfsetlayers{reflections,main,tiles}%
+\pgfsetlayers{reflections,groups,main,tiles}%
 \newcommand\TikzSimplexTiling{
     \pgfmathsetmacro\nNodesTotal{3*(2^(\TilingDepth)-1)+1}
     \xdef\initNodeR{\TilingInitSize*\TilingSizeToNodeRRatio}
@@ -29,6 +32,7 @@
     \xdef\lastD{0}
     \xdef\timesRun{0}
     \xdef\lastAngleOffset{0}
+    \xdef\tileName{init-unset-name}
     \foreach \d in {0,...,\TilingDepth} {
             \ifnum 0<\createCurrent
                 \renewcommand\SimplexRadius{\tilingCurrSize}
@@ -48,7 +52,8 @@
                             \pgfmathsetmacro\parentId{int(\s/\newChildren + (1-1/\newChildren))}
                             \def\parentSimplex{\nodeNameRoot/\lastD/\parentId}
                         \fi
-                        \renewcommand\SimplexNodeName{\nodeNameRoot/\d/\s}
+                        \xdef\tileName{\nodeNameRoot/\d/\s}
+                        \renewcommand\SimplexNodeName{\tileName}
                         \pgfmathsetmacro\sxAngle{mod(360/\createCurrent*\s-\sxAngleOffset, 360)}
                         \ifnum 1=\d
                         \pgfmathsetmacro\parentSxAngle{0}
@@ -88,6 +93,16 @@
                         \fi
 
                         \TikzSimplex
+                        \ifnum 1=\TilingDrawGroups
+                            \begin{pgfonlayer}{groups}
+                                \node (\tileName-group)
+                                    [inner sep=\tilingCurrSize*0.75cm,
+                                        shape=circle, fill=tilingColor!30,
+                                        fill opacity=0.75
+                                        ]
+                                    at (\sxAngle: \createDistance);
+                            \end{pgfonlayer}
+                        \fi
                         % \node () [yshift=30pt] at (\SimplexNodeName//1) {$\nNodesTotal$};
                         % \node () [yshift=20pt] at (\SimplexNodeName//1) {\parentSimplex};
 
@@ -96,22 +111,26 @@
                         \ifnum 0=\d
                         \else
                             \ifnum 1=\TilingRotateDebug
-                            \node () [above of=\SimplexNodeName//1] {\SimplexNodeName//1};
-                            \node () [above of=\SimplexNodeName//2] {parentDist: \distToParent, dist: \createDistance};
-                            \node () [yshift=10pt, above of=\SimplexNodeName//2] {self: \s, parent: \parentId};
-                            \node () [yshift=20pt, above of=\SimplexNodeName//2] {sxAngle: \sxAngle};
-                            \node () [yshift=30pt, above of=\SimplexNodeName//2] {parentSx: \parentSxAngle};
-                            \node () [yshift=40pt, above of=\SimplexNodeName//2] {theta: \angleDiff};
-                            \node () [yshift=50pt, above of=\SimplexNodeName//2] {alpha: \angleToParent};
-                            \node () [yshift=60pt, above of=\SimplexNodeName//2] {final: \finalRotation};
+                            \node (\tileName-d1) [above of=\SimplexNodeName//1] {\SimplexNodeName//1};
+                            \node (\tileName-d2) [above of=\SimplexNodeName//2] {parentDist: \distToParent, dist: \createDistance};
+                            \node (\tileName-d3) [yshift=10pt, above of=\SimplexNodeName//2] {self: \s, parent: \parentId};
+                            \node (\tileName-d4) [yshift=20pt, above of=\SimplexNodeName//2] {sxAngle: \sxAngle};
+                            \node (\tileName-d5) [yshift=30pt, above of=\SimplexNodeName//2] {parentSx: \parentSxAngle};
+                            \node (\tileName-d6) [yshift=40pt, above of=\SimplexNodeName//2] {theta: \angleDiff};
+                            \node (\tileName-d7) [yshift=50pt, above of=\SimplexNodeName//2] {alpha: \angleToParent};
+                            \node (\tileName-d8) [yshift=60pt, above of=\SimplexNodeName//2] {final: \finalRotation};
                             \fi
                             \begin{pgfonlayer}{reflections}
                                 % draw refl lines to parent
+                                \ifnum 1=\TilingDrawAllReflections
                                 \foreach \sn in {1,...,\SimplexChains} {
                                         \foreach \pn in {1,...,\SimplexChains} {
                                                 \draw [thin] (\parentSimplex//\pn) -- (\SimplexNodeName//\sn);
                                             }
                                     }
+                                \else
+                                    \draw [ultra thick, style=double, double distance=2pt, line width=2pt] (\parentSimplex-group) -- (\tileName-group);
+                                \fi
                             \end{pgfonlayer}
                         \fi
                     }

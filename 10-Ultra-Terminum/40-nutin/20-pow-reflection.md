@@ -147,7 +147,7 @@ Yes, and we must modify the block-weight calculation so that it accounts for wor
 \begin{algorithm}
 \caption{Modified Chain Weight Algorithm}\label{alg:refl-1-bw}
 \begin{algorithmic}
-\Procedure{WeighChain}{$blocks, state$}\Comment{The weight of a chain}
+\Procedure{WeighChain}{$blocks, state$} \Comment{The weight of a blockchain}
   \If {length($blocks$) == 0}
     \State \Return{0}
   \EndIf
@@ -155,14 +155,17 @@ Yes, and we must modify the block-weight calculation so that it accounts for wor
 \EndProcedure
 \\
 \Procedure{WeighBlock}{$block, state$}
-  \State \Return{LocalBlockWeight($block$) + ReflectedEBlockWeight($block, state$)}
+  \State $W_l \gets$ LocalBlockWeight($block$) \Comment{Weight based on work done to produce $block$}
+  \State $W_r \gets$ ReflectedBlockWeight($block, state$) \Comment{Weight added via reflection}
+  \State \Return{$W_l + W_r$}
 \EndProcedure
 \\
-\Procedure{ReflectedEBlockWeight}{$block, state$}
-  \State $Blocks_{E} \gets$ ReflectingEBlocks(state)
+\Procedure{ReflectedBlockWeight}{$block, state$}
+  \State $Blocks_{E} \gets$ ReflectingEBlocks(state) \Comment{Blocks from Chain E that reflect the local chain}
   \State $s\gets 0$
   \For{$B_e$ in $Blocks_{E}$}
-    \If {$block$ in ReflectedChainHeads($B_e$)}
+    \State RCHs $\gets$ ReflectedChainHeads($B_e$) \Comment{Local blocks that have been reflected by $B_e$}
+    \If {$block$ in RCHs}
       \State $s\gets s+$ WeightOf($B_e$)
     \EndIf
   \EndFor
@@ -248,7 +251,7 @@ Practical methods of comparing (and converting the weight of) different Proofs o
 
 \todo{What if you mine a longer B-chain and then publish it to Chain E? Well you have to do that later, and you need to publish the blocks, too. If Chain E just checks the work on that local chain, then it looks like the attacker's chain is longer. But the chain, as calculated by full nodes is, not worth as much as the original chain, so they will keep mining on the orig chain. However, if the attacker has $q>p$ then they'll always outperform the honest chain and the reflections will eventually favour the attackers chain. so the reflecting chains (Chain E) need to incorporate calculations of the *total* block weight of Chain B. That means they need to be half-nodes for Chain B so that they can track Chain B's known reflections.}
 
-- savvy readers might note that as the Chain B tip is gaining reflections from Chain E, miners on Chain B are incented to include as many Chain E headers (and PoRs) as possible. That's because each new header will add weight to the *parent* of the block which the Chain B miner is attempting to produce, increasing overall chain-weight.
+- savvy readers might note that as the Chain B tip is gaining reflections from Chain E, miners on Chain B are incented to include as many Chain E headers (and PoRs) as possible. That's because each new header will add weight to the *parent* of the block which the Chain B miner is attempting to produce, increasing overall chain-weight that the miner is building on.
 
 #### Step 5. Mutual Reflection
 

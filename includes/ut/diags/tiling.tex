@@ -2,12 +2,14 @@
 \usepackage[T1]{fontenc}\usepackage{tikz}
 \usepackage{amsmath, amsfonts}
 \usepackage{pgfbaselayers}
-\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
+\usetikzlibrary{arrows, arrows.meta, shapes.geometric, calc, positioning, decorations.pathreplacing}
 
 % overwrite (either \providecommand or \renewcommand) to control the parts of the diagram which are drawn or not.
 
 \begin{document}
+\providecommand\TilingDepth{5}%
 \providecommand\TilingValence{3}%
+\providecommand\TilingDrawGroups{0}%
 \input{tiling-macro}%
 \begin{tikzpicture}%
     \TikzSimplexTiling
