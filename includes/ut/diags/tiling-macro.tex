@@ -95,12 +95,12 @@
                         \TikzSimplex
                         \ifnum 1=\TilingDrawGroups
                             \begin{pgfonlayer}{groups}
-                                \node (\tileName-group)
+                                \node (\tileName/group)
                                     [inner sep=\tilingCurrSize*0.75cm,
                                         shape=circle, fill=tilingColor!30,
                                         fill opacity=0.75
                                         ]
-                                    at (\sxAngle: \createDistance);
+                                    at (\sxAngle: \createDistance) {};
                             \end{pgfonlayer}
                         \fi
                         % \node () [yshift=30pt] at (\SimplexNodeName//1) {$\nNodesTotal$};
@@ -129,7 +129,7 @@
                                             }
                                     }
                                 \else
-                                    \draw [ultra thick, style=double, double distance=2pt, line width=2pt] (\parentSimplex-group) -- (\tileName-group);
+                                    \draw [ultra thick, style=double, double distance=2pt, line width=2pt] (\parentSimplex/group) -- (\tileName/group);
                                 \fi
                             \end{pgfonlayer}
                         \fi

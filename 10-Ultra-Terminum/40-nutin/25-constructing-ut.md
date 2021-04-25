@@ -23,21 +23,34 @@ In principle, the necessary capabilities that some chain, $C_A$, must have in or
 
 If $C_A$ and $C_B$ are doing *mutual* PoW reflection, then the same conditions must be satisfied by $C_B$.
 
-Is $C_A$ able to *simultaneously* do reflection with more than one other chain, e.g., $C_C ... C_Z$? Yes. There is nothing that we have covered so far that would prevent this. If *PoW reflection* is viable with one other foreign chain, then it is viable with *many* other foreign chains. However, the dynamics do becoming increasingly complex, as we will now see.
+Is $C_A$ able to *simultaneously* do reflection with more than one other chain, e.g., $C_C ... C_Z$? Yes. There is nothing that we have covered so far that would prevent this. If *PoW reflection* is viable with a single other chain, then it is viable with *many* other chains. However, the dynamics do becoming increasingly complex, as we will soon see.
+
+In order to support arbitrarily many reflections, we need to modify \textsc{ReflectedBlockWeight} from \autoref{alg:refl-1-bw} as done in \autoref{alg:refl-many-chains}.
+
+\begin{algorithm}
+\caption{Many-chain ReflectedBlockWeight}\label{alg:refl-many-chains}
+\begin{algorithmic}
+\Procedure{ReflectedBlockWeight}{$block, state$}
+  \State $s\gets 0$
+  \For{$C_i$ in \Call{AllReflectingChains}{$state$}}
+    \State $Blocks_{i} \gets$ \Call{ReflectingBlocks}{$C_i$, $state$} \Comment{Reflecting blocks from $C_i$}
+    \For{$B_{i,j}$ in $Blocks_{i}$}
+      \State RCHs $\gets$ \Call{ReflectedChainHeads}{$B_{i,j}$, $state$} \Comment{Local blocks reflected by $B_{i,j}$}
+      \If {$block$ in RCHs}
+        \State $s\gets s+$ \Call{WeightOf}{$B_{i,j}$, $state$}
+      \EndIf
+    \EndFor
+  \EndFor
+  \State \Return{s}
+\EndProcedure \Comment{This is an inefficient method and would not be used in production.}
+\end{algorithmic}
+\end{algorithm}
 
 ### The Simplex
 
 \label{sec:the-simplex}
 
-When two or more blockchains *mutually reflect* each-other, they form a *simplex*[^simplex-maths]. For the sake of brevity: all *reflections* within a simplex are *mutual reflections*, and I will omit *mutual* from now on when discussing them.
-
-When a blockchain is part of a simplex, it is called a *simplex-chain* (as distinct from *dapp-chains*).
-
-To maintain consistency with the geometric usage of the term *simplex*: a simplex with $k+1$ chains is called a $k$-simplex or a $(k+1)$-chain simplex[^simplex-approx]. In a $k$-simplex, each simplex-chain has $k$ reflections (one reflection for each of the other simplex-chains). A $k$-simplex has, in total, ${k+1} \choose 2$ reflections.
-
-[^simplex-maths]: The name is taken from geometry (particularly: the higher-dimensional kind). A simplex, for a given dimensionality, is the uniquely simplest polytope; e.g., a line in 1D space, a triangle in 2D space, a tetrahedron in 3D space, etc. A $k$-dimensional simplex is known as a $k$-simplex. As shown in \autoref{fig:simplexes}, the 2D skew orthogonal projection of a $k$-simplex is identical to a diagram of all possible mutual reflections between $k+1$ blockchains, where each chain is represented by a vertex and each mutual reflection is represented by an edge.
-
-[^simplex-approx]: \textbf{NB:} I will ignore this distinction for $k \gg 1$.
+When two or more blockchains *mutually reflect* each-other, they form a *simplex*[^simplex-maths]. For the sake of brevity: all *reflections* within a simplex are *mutual reflections*, and I will omit *mutual* from now on when discussing them. Examples of simplexes are shown in \autoref{fig:simplexes}.
 
 \begin{figure}
     \begin{subfigure}[t]{.31\linewidth}
@@ -66,6 +79,14 @@ To maintain consistency with the geometric usage of the term *simplex*: a simple
     \caption{Simplexes of increasing capacity. Vertices are simplex-chains. Edges are the reflections between simplex-chains.}
     \label{fig:simplexes}
 \end{figure}
+
+When a blockchain is part of a simplex, it is called a *simplex-chain* (as distinct from *dapp-chains*).
+
+To maintain consistency with the geometric usage of the term *simplex*: a simplex with $k+1$ chains is called a $k$-simplex or a $(k+1)$-chain simplex[^simplex-approx]. In a $k$-simplex, each simplex-chain has $k$ reflections (one reflection for each of the other simplex-chains). A $k$-simplex has, in total, ${k+1} \choose 2$ reflections.
+
+[^simplex-maths]: The name is taken from geometry (particularly: the higher-dimensional kind). A simplex, for a given dimensionality, is the uniquely simplest polytope; e.g., a line in 1D space, a triangle in 2D space, a tetrahedron in 3D space, etc. A $k$-dimensional simplex is known as a $k$-simplex. As shown in \autoref{fig:simplexes}, the 2D skew orthogonal projection of a $k$-simplex is identical to a diagram of all possible mutual reflections between $k+1$ blockchains, where each chain is represented by a vertex and each mutual reflection is represented by an edge.
+
+[^simplex-approx]: \textbf{NB:} I will ignore this distinction for $k \gg 1$.
 
 ### Dapp-chains
 

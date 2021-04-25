@@ -113,3 +113,29 @@ Given that the reflection-segments of simplex-chains will contain mostly repeate
 \mk{
     use quanta / inclusive-protocol to allow: multiple parents; merging histories; including invalid or pseudo-invalid blocks in history; prevent DoS attacks; avoid stale blocks
 }
+
+\begin{figure}
+    \begin{subfigure}[t]{.31\linewidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{dag_simple_sag}
+        \caption{A simple 2-parent example of a block-dag segment.}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.31\linewidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{dag_simple2_sag}
+        \caption{A slightly more complex example of a block-dag segment.}
+        \label{fig:dag-simple2}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.31\linewidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{dag_simple2_linearization_sag}
+        \caption{One possible linearization of \autoref{fig:dag-simple2}}
+    \end{subfigure}%%
+    \caption{Some examples of simple block-dag segments and linearization.}
+    \label{fig:dag-simple-segments}
+\end{figure}

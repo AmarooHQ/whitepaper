@@ -78,7 +78,7 @@ Say that the protocol of Chain B is extended to add support for tracking Chain E
 \label{fig:pow_refl_step2}
 \end{figure}
 
-#### Step 3. B tracks E's tracking of B
+#### Step 3. Chain B tracks Chain E's tracking of Chain B
 
 Can we use a tracked chain for a different purpose? What happens if Chain B tracks whether Chain B's history is confirmed within Chain E?
 
@@ -93,14 +93,14 @@ Can we use a tracked chain for a different purpose? What happens if Chain B trac
 
 Chain B now knows *which B blocks are known about by some external source* (Chain E in this case).
 
+Put another way: Chain B's history is confirmed *not only* by new Chain B blocks, *but also* by Chain E blocks. Since Chain B nodes *know* they have the blocks that Chain E knows about, there's no data-availability concern here.
+
 \begin{figure}[H]
 \centering
 \includegraphics[height=0.3\textheight]{pow_refl_step3_sag}
 \caption{Step 3: Chain B includes Proofs of Reflection (PoRs) along with headers. Proofs of Reflection allow Chain B to know which of its own blocks are known to Chain E.}
 \label{fig:pow-refl-step3}
 \end{figure}
-
-Put another way: Chain B's history is confirmed *not only* by new Chain B blocks, *but also* by Chain E blocks. Since Chain B nodes *know* they have the blocks that Chain E knows about, there's no data-availability concern here.
 
 **Important:** Soon, these confirmations will have real and useful meaning. Under the right conditions, an appropriate configuration of *PoW reflection* results in an increase in the *rate* that confirmations are acquired. This is the first hint of $\frac{1}{O(c)}$ confirmation time.
 
@@ -135,7 +135,7 @@ How can the network choose the heaviest chain? Well, a traditional blockchain mi
   \If {length($blocks$) == 0}
     \State \Return{0}
   \EndIf
-  \State \Return{WeighBlock(head($blocks$)) + WeighChain(tail($blocks$))}
+  \State \Return{\Call{WeighBlock}{head($blocks$)} + \Call{WeighChain}{tail($blocks$)}}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
@@ -151,22 +151,22 @@ Yes, and we must modify the block-weight calculation so that it accounts for wor
   \If {length($blocks$) == 0}
     \State \Return{0}
   \EndIf
-  \State \Return{WeighBlock(head($blocks$), $state$) + WeighChain(tail($blocks$), $state$)}
+  \State \Return{\Call{WeighBlock}{head($blocks$), $state$} + \Call{WeighChain}{tail($blocks$), $state$}}
 \EndProcedure
 \\
 \Procedure{WeighBlock}{$block, state$}
-  \State $W_l \gets$ LocalBlockWeight($block$) \Comment{Weight based on work done to produce $block$}
-  \State $W_r \gets$ ReflectedBlockWeight($block, state$) \Comment{Weight added via reflection}
+  \State $W_l \gets$ \Call{LocalBlockWeight}{$block$} \Comment{Weight due to work done producing $block$}
+  \State $W_r \gets$ \Call{ReflectedBlockWeight}{$block, state$} \Comment{Weight added via reflection}
   \State \Return{$W_l + W_r$}
 \EndProcedure
 \\
 \Procedure{ReflectedBlockWeight}{$block, state$}
-  \State $Blocks_{E} \gets$ ReflectingEBlocks(state) \Comment{Blocks from Chain E that reflect the local chain}
   \State $s\gets 0$
+  \State $Blocks_{E} \gets$ \Call{ReflectingEBlocks}{$state$} \Comment{Chain E blocks that reflect the local chain}
   \For{$B_e$ in $Blocks_{E}$}
-    \State RCHs $\gets$ ReflectedChainHeads($B_e$) \Comment{Local blocks that have been reflected by $B_e$}
+    \State RCHs $\gets$ \Call{ReflectedChainHeads}{$B_e$, $state$} \Comment{Local blocks reflected by $B_e$}
     \If {$block$ in RCHs}
-      \State $s\gets s+$ WeightOf($B_e$)
+      \State $s\gets s+$ \Call{WeightOf}{$B_e$, $state$}
     \EndIf
   \EndFor
   \State \Return{s}
@@ -175,7 +175,6 @@ Yes, and we must modify the block-weight calculation so that it accounts for wor
 \end{algorithm}
 
 \begin{comment}
-%%TC:ignore
 ```haskell
 -- chain-b-modified-weight-calc.hs
 type BWeight = Number
@@ -221,7 +220,6 @@ eBlockWeight eBlock = 1
 -- -- this would go some way for accounting for multiple Chain B heads
 -- -- without giving either Chain B head an advantage.
 ```
-%%TC:endignore
 
 \todo{formalize the above mathematically so it can be more easily analyzed}
 \begin{equation}
@@ -234,7 +232,7 @@ What is the meaning and impact of this change?
 
 The *meaning* of this change is that Chain B now incorporates work done on Chain E *into Chain B's own calculation of the heaviest worked chain*.
 
-When a chain does this we say *Chain B (or Chain B's work) is **reflected** in Chain E*. This technique is what is meant by the term *PoW reflection*.
+When a chain does this we say *Chain B (or Chain B's work) is **reflected** in Chain E*. This technique is what is meant by the term *Proof of Reflection*.
 
 One particular *impact* of this change is that a doublespend attack (e.g. by withholding a privately mined chain that reverts a transaction) must now be performed *not only* against Chain B, *but also and simultaneously* against Chain E.
 
@@ -249,7 +247,9 @@ Naturally, if there were a large difference in target block frequencies (e.g., 1
 
 Practical methods of comparing (and converting the weight of) different Proofs of Work are discussed in \autoref{sec:comparing-diff-pows}.
 
-\todo{What if you mine a longer B-chain and then publish it to Chain E? Well you have to do that later, and you need to publish the blocks, too. If Chain E just checks the work on that local chain, then it looks like the attacker's chain is longer. But the chain, as calculated by full nodes is, not worth as much as the original chain, so they will keep mining on the orig chain. However, if the attacker has $q>p$ then they'll always outperform the honest chain and the reflections will eventually favour the attackers chain. so the reflecting chains (Chain E) need to incorporate calculations of the *total* block weight of Chain B. That means they need to be half-nodes for Chain B so that they can track Chain B's known reflections.}
+\todo{Answer the following:}
+
+- What if you mine a longer B-chain and then publish it to Chain E? Well you have to do that later, and you need to publish the blocks, too. If Chain E just checks the work on that local chain, then it looks like the attacker's chain is longer. But the chain, as calculated by full nodes is, not worth as much as the original chain, so they will keep mining on the orig chain. However, if the attacker has $q>p$ then they'll always outperform the honest chain and the reflections will eventually favour the attackers chain. so the reflecting chains (Chain E) need to incorporate calculations of the *total* block weight of Chain B. That means they need to be half-nodes for Chain B so that they can track Chain B's known reflections.
 
 - savvy readers might note that as the Chain B tip is gaining reflections from Chain E, miners on Chain B are incented to include as many Chain E headers (and PoRs) as possible. That's because each new header will add weight to the *parent* of the block which the Chain B miner is attempting to produce, increasing overall chain-weight that the miner is building on.
 
