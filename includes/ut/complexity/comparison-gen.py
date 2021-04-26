@@ -30,13 +30,13 @@ def table_row(params, incl_dappchains=False):
         + [r['ut_4_tps']] \
         + ([r['ut_4_max_dappchains']] if incl_dappchains else [])
     return ' | '.join(str(i) for i in
-            (['', ', '.join(map(str, list(params)[:-1]))] \
+            (['', '$' + ', '.join(map(str, list(params)[:-1])) + '$'] \
                 + list(map(fmt_rounded_commas, cols)) + [''])
         ).strip() \
-            .replace('0.0016666666666666668', '1/600') \
-            .replace('0.016666666666666666', '1/60') \
-            .replace('0.06666666666666667', '1/15') \
-            .replace('0.05', '1/20').replace('0.025', '1/40')
+            .replace('0.0016666666666666668', '\\nicefrac{1}{600}') \
+            .replace('0.016666666666666666', '\\nicefrac{1}{60}') \
+            .replace('0.06666666666666667', '\\nicefrac{1}{15}') \
+            .replace('0.05', '\\nicefrac{1}{20}').replace('0.025', '\\nicefrac{1}{40}')
 
 ## NOTE: too many table entries to be useful. it'd be nice to generate the data
 ## with a more ordered format, though.
