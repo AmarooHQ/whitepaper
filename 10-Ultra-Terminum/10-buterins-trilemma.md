@@ -10,7 +10,7 @@ For some magnitude of computational resources (computation, bandwidth, storage, 
 * Security --- the system is secure against attackers with up to $O(n)$ resources.
 * Scalability --- the system can process $O(n)$ transactions with $O(n) > O(c)$; this means that, as the network grows, the throughput of the system grows faster than the computational resources required per user.
 
-The definition of scalability is perhaps problematic. If the network growth, $O(n)$, becomes bottlenecked by an $O(c^2)$ scaling configuration, is the network really scalable? I prefer an alternative definition of scalability: the system can process $O(n)$ transactions in $O(1)$ time or less, i.e., confirmations neither take longer nor become more scarce as $n$ and/or $c$ increase.
+The definition of scalability is perhaps problematic. If the network growth, $O(n)$, becomes bottlenecked by an $O(c^2)$ scaling configuration, is the network really scalable? I prefer an alternative definition of scalability: the system can process $O(n)$ transactions in $O(1)$ time, i.e., confirmations neither take longer nor become more scarce as $n$ and/or $c$ change.
 
 ## Core Conflict
 
