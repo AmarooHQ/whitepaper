@@ -272,7 +272,7 @@ $Tx_{avg}$: average tx size (bytes)
 NB: For the purposes of the following table, the average transaction size is taken to be 250 bytes.
 
 | $k$, $B_f$, $D_f$, $B_h$, $D_h$ | $O(c)$ tps | $O(c^2)$ tps | $O(c^3)$ UT tps | $O(c^4)$ UT tps |
-|---|---|---|---|---|
+|--------|---|---|----|----|
 | 1000, 1/15, 1/15, 112, 250 | 4 | 240 | 8,036 | 482,143 |
 | 3000, 1/15, 1/15, 112, 250 | 12 | 2,160 | 216,964 | $3.9\times 10^{7}$ |
 | 30000, 1/15, 1/15, 112, 250 | 120 | 216,000 | $2.2\times 10^{8}$ | $3.9\times 10^{11}$ |
