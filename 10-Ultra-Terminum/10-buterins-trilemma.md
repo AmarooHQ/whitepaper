@@ -14,10 +14,9 @@ The definition of scalability is perhaps problematic. If the network growth, $O(
 
 ## Core Conflict
 
-\autoref{fig:trilemma-core-conflict} shows a cloud for the core conflict.
-
 \begin{figure}
 \centering
+\begin{comment}
 \begin{BVerbatim}
               stay               shard +
         /---> decentralized ---> small blocks
@@ -27,21 +26,25 @@ we need scale                    (**conflict**)
         \---> stay ------------> no shards +
               secure             big blocks
 \end{BVerbatim}
+\end{comment}
+\includegraphics{trilemma/core_conflict_sag}
 \caption{A cloud of the core conflict of \textit{Buterin's Trilemma}.}
 \label{fig:trilemma-core-conflict}
 \end{figure}
 
+\autoref{fig:trilemma-core-conflict} shows a cloud for the core conflict. Safely increasing capacity requires that we stay decentralized. Staying decentralized requires that we use sharding and small blocks. Safely increasing capacity requires that the network stays secure. Staying secure requires we use big blocks. Big blocks are the opposite of small blocks, so we have a *conflict*. Sharding compromises security, and big blocks compromise decentralization.
+
 To understand the core conflict we need to look at the underlying assumptions.
 
-Buterin writes in the Ethereum sharding FAQ regarding the *shard + small blocks* strategy:
+Buterin writes in the Ethereum sharding FAQ regarding the *sharding with small blocks* strategy:
 
 > This greatly increases throughput, but at a cost of security: an N-factor increase in throughput using this method necessarily comes with an N-factor decrease in security, as a level of resources $1/N$ the size of the whole ecosystem will be sufficient to attack any individual chain.
 
-He writes, regarding the *no shards + big blocks* strategy:
+He writes, regarding the *big blocks without sharding* strategy:
 
 > ... such an approach inevitably has its limits: if one goes too far, then nodes running on consumer hardware will drop out, the network will start to rely exclusively on a very small number of supercomputers running the blockchain, which can lead to great centralization risk.
 
-A mistaken way to break the conflict is *merged mining* (aka AuxPoW). This method attempts to share security between chains, so that one might be able to have security + merged shards (aka side-chains) + small blocks. Buterin writes:
+A mistaken way to break the conflict is *merged mining* (aka AuxPoW). This method attempts to share security between chains, so that one might be able to have decentralization and security via small blocks and merged mined chains/shards (sometimes called side-chains). Buterin writes:
 
 > If all miners participate, this theoretically can increase throughput by a factor of N without compromising security. However, this also has the problem that it increases the computational and storage load on each miner by a factor of N, and so in fact this solution is simply a stealthy form of block size increase.
 
@@ -49,6 +52,7 @@ A mistaken way to break the conflict is *merged mining* (aka AuxPoW). This metho
 
 \begin{figure}
 \centering
+\begin{comment}
 \begin{BVerbatim}
                users have       users don't need
          /---> less burden ---> super computers
@@ -60,11 +64,13 @@ add MM blockchains               decentralization implies
          \---> miners keep ---> miners need
                all chains       super computers
 \end{BVerbatim}
+\end{comment}
+\includegraphics{trilemma/mm_conflict_sag}
 \caption{A cloud showing the scaling conflict of \textit{merged mining}.}
 \label{fig:trilemma-mm-conflict}
 \end{figure}
 
-An underlying assumption here is that maximally sharing security across the network requires miners to maintain a record of all chains and do validation on all those chains. The naive solution (sharding, mentioned above) gets us back to the start. It seems like progress is impossible.
+An underlying assumption here is that maximally sharing security across the network requires miners to maintain a record of all chains and do validation on all those chains. The naive solution (sharding, mentioned above) conflicts with secure methods of merged mining. It seems like progress is impossible.
 
 We have some hints to conditions that might belong to a *silver bullet* solution:
 
@@ -84,10 +90,8 @@ Here are some additional underlying assumptions that are either common or which 
 
 These assumptions *are* true in lots of cases (arguably in all cases up to now). Do they need to be?
 
-NB: I call them *assumptions*; some people will likely (and rightly) take issue with that and call them *conclusions* instead. For our purposes there isn't really a difference; I include them here so that I can later show you under which conditions they are all false.
+NB: I call them *assumptions*; some people will likely (and rightly) take issue with that and call them *conclusions* instead. For our purposes there isn't really a difference; I include them here so that I can later show you conditions under which they are all false.
 
 ## Conjecture: A Principle of Scaling
 
-A scalable system *can* have components with complexities worse than $O(c)$ *provided* that those components are not bottlenecks. As long as there is excess capacity in those components, the system can still scale.
-
-\todo{include this?}
+A scalable system *can* have components with complexities worse than $O(c)$ *if and only if* those components are not *bottlenecks*. As long as there is *excess capacity* in those components, the system can still scale.
