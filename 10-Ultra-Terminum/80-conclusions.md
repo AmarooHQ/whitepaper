@@ -9,7 +9,7 @@
 \begin{BVerbatim}
               stay
         /---> decentralized -\
-       /                      \     PoW reflection
+       /                      \     Proof of Reflection
 we need scale                  |-->       +
        \                      /      small blocks
         \---> stay ----------/

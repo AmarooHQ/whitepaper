@@ -47,8 +47,8 @@ digraph TopicTree {
     scalingOCCubed [label = "Scaling O(c^3)\nAnd Beyond", shape=octagon];
     scalingON [label = "Scaling O(n)"];
     UT [label = "Ultra Terminum"];
-    powReflection [label = "PoW Reflection"];
-    powRefTwoChains [label = "PoW Reflection\nw/ 2 Chains"];
+    powReflection [label = "Proof of Reflection"];
+    powRefTwoChains [label = "Proof of Reflection\nw/ 2 Chains"];
     //UTCore [label = "Core of Ultra Terminum"];
     powRefSimplex [label = "The Simplex\n(N Chains)"];
     simplexScale [label = "Simplex\nScalability"];

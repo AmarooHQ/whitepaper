@@ -14,7 +14,7 @@ As a consensus method[^ut-consensus-method], UT differs from existing consensus 
 
 UT is capable of supporting millions of transactions per second in the security environment afforded by a first class blockchain (e.g. Bitcoin, Eth1).
 
-At the core of *Ultra Terminum* is a new method for sharing security: *PoW Reflection*. This technique (which works with PoS, too) allows us to incrementally build complex blockchain networks with powerful scaling properties. *PoW Reflection* is how *Ultra Terminum* can scale with orders $O(c^2)$, $O(c^3)$, $O(c^4)$, and -- in the right contexts -- $O(n)$.
+At the core of *Ultra Terminum* is a new method for sharing security: *Proof of Reflection*. This technique (which works in conjunction with PoW, PoS, etc) allows us to incrementally build complex blockchain networks with powerful scaling properties. *Proof of Reflection* is how *Ultra Terminum* natively scales with order $O(c^2)$, and is the basis for $O(n)$ scaling. UT goes beyond $O(c^2)$ scaling (to $O(c^3)$ and $O(c^4)$) via dapp-chains: chains that are application-specific and which inherit security properties from the foundational structures.
 
 As UT is primarily a method of *structuring* a blockchain network, the scalability configurations mentioned herein *do not include **layer 2** methods*. That means that *layer 2* techniques (e.g., state/payment channels, ZK/optimistic rollups, and anchored/side chains) can be implemented *on top* of UT.
 
@@ -22,7 +22,7 @@ UT's unique structure means that confirmation times within UT are of order $\fra
 
 ## Assumed Knowledge
 
-You will need to understand (or, perhaps, have mastered) the following concepts to reliably understand the foundations of *PoW Reflection* and *Ultra Terminum*:
+You will need to understand (or, perhaps, have mastered) the following concepts to reliably understand the foundations of *Proof of Reflection* and *Ultra Terminum*:
 
 * Nakamoto Consensus (i.e., how Bitcoin's blockchain works)
 * The idea of $O(c)$ and $O(c^2)$ scaling and existing strategies -- you can read the first few FAQs [here](https://eth.wiki/sharding/Sharding-FAQs) for a refresher

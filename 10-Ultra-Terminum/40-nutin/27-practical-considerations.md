@@ -8,7 +8,7 @@ plan:
   - need to reflect headers, but including merkle proofs-of-reflection would be cumbersome
 - what about security implications and/or confirmation time?
 
-\todo{nb: mb security/conf bits go in PoW reflection, or stay here, IDK yet}
+\todo{nb: mb security/conf bits go in Proof of Reflection, or stay here, IDK yet}
 
 ### Availability of Reflected Blocks
 
@@ -42,9 +42,11 @@ This complexity is discussed in \autoref{sec:complexity-reflection-proof}.
 
 Do we *need* to include proofs of reflection, though? If miners of any simplex-chain download blocks of *all* simplex-chains -- as mentioned in \autoref{sec:availability-of-blocks} -- then including all necessary proofs of reflection *smells* redundant. Since miners have all the necessary data to construct the proofs, do they need to actually include those proofs? Could we treat them as witnesses similar to SegWit?
 
-There would be some downsides to excluding the proofs of reflection. For one, it would mean that simplex-chain nodes, during an initial sync, would not be able to verify PoW reflection without auxillary data -- potentially a lot. This may not be a problem, though, because we expect that a *non-miners'* evaluation of a simplex-chain's history will be identical regardless of whether they account for PoW reflection or not (discussed in \autoref{sec:equiv-state-block-weightings}). Secondly, it would mean that miners *must* track the state of *all* reflections in the simplex for some period of time so that they ensure the integrity of the reflection protocol. Given \autoref{sec:availability-of-blocks}, this might be possible without significant overhead.
+There would be some downsides to excluding the proofs of reflection. For one, it would mean that simplex-chain nodes, during an initial sync, would not be able to verify Proof of Reflection without auxillary data -- potentially a lot. This may not be a problem, though, because we expect that a *non-miners'* evaluation of a simplex-chain's history will be identical regardless of whether they account for Proof of Reflection or not (discussed in \autoref{sec:equiv-state-block-weightings}). Secondly, it would mean that miners *must* track the state of *all* reflections in the simplex for some period of time so that they ensure the integrity of the reflection protocol. Given \autoref{sec:availability-of-blocks}, this is possible without significant overhead.
 
-A practical method for treating proofs of reflection as witnesses that may be excluded is discussed in \autoref{sec:segmented-state}.
+\todo{Make sure "we expect that a *non-miners'* evaluation of a simplex-chain's history will be identical regardless of whether they account for Proof of Reflection or not" is explained / answered}
+
+A practical method for treating proofs of reflection as witnesses that may be excluded/pruned is discussed in \autoref{sec:segmented-state}.
 
 ### Segmented State
 
@@ -66,7 +68,7 @@ One of the reasons for this tradition is that transactions are permitted to depe
 
 However, it is not necessary for a protocol to permit *all* transactions to potentially depend on global state. A protocol could specify that certain transactions may depend only on a strictly defined subset of global state, i.e., state is segmented and some of those segments is calculable independently of global state.
 
-Simplex-chains can use this technique to their advantage by segregating both transactions and state which are specific to PoW reflections. That way, the state of a simplex-chain's reflections is calculable independently of anything else that simplex-chain is doing, i.e., dapp-chain extensions and other simplex-level transactions.
+Simplex-chains can use this technique to their advantage by segregating both transactions and state which are specific to Proof of Reflections. That way, the state of a simplex-chain's reflections is calculable independently of anything else that simplex-chain is doing, i.e., dapp-chain extensions and other simplex-level transactions.
 
 We could specify the state-transition of simplex-chains (using Ethereum's nomenclature) like this, for example:
 

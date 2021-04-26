@@ -18,7 +18,7 @@ The parent chain can host multiple dapp-chains. If it is *only* hosting dapp-cha
 
 *Total capacity* (or throughput) of a parent-child architecture, like this, is the sum of the capacity of all child-chains. Each child chain has `k` capacity. Since we have $\frac{k}{b \cdot h} dchains$ total, we can say that the total throughput is approximately $\frac{k}{b*h} \si{dchains} * k bytes/sec/dchain = \frac{k^2}{b.h} bytes/sec$. Since $b$ and $h$ are constants, a parent-child architecture like this has total capacity in $O(k^2) = O(c^2)$. Given previous research, this is the expected result.
 
-#### Complexity of PoW Reflection
+#### Complexity of Proof of Reflection
 
 \todo[inline]{outdated, will be replaced by above sections}
 

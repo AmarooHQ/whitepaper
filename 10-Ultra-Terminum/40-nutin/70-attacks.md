@@ -179,7 +179,7 @@ similar to how you can theoretically win govt in a democracy by winning 51% of v
 
 \todo{discuss selfish mining, and how it doesn't work}
 
-- PoW reflection means that withholding blocks is a big disadvantage b/c you want the network (and other chains) to know about them ASAP. Attack doesn't work.
+- Proof of Reflection means that withholding blocks is a big disadvantage b/c you want the network (and other chains) to know about them ASAP. Attack doesn't work.
 
 ### DAG based attacks
 

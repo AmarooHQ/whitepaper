@@ -18,7 +18,7 @@ The structure itself will be captured in the TOC generated for the UT paper. Thi
 - problem that we're solving / buterin's trilemma
   - explanation and conflict
 - UT itself
-  - PoW reflection
+  - Proof of Reflection
     - comparing hashrate
       - foreshadow incentive structure stuff
     - redux of block-weight calculations

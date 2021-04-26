@@ -1,13 +1,13 @@
 
 ### Two *merge mined* blockchains
 
-\todo[inline]{This section can be cut down significantly -- MM chains have security issues in general, and PoW reflection between merged chains is insecure without additional constraints. Those constraints basically nullify the benefits of MM.}
+\todo[inline]{This section can be cut down significantly -- MM chains have security issues in general, and Proof of Reflection between merged chains is insecure without additional constraints. Those constraints basically nullify the benefits of MM.}
 
 The case of two merged mined chains (e.g. Bitcoin and Namecoin) is not as simple as the case of two chains using different hashing algorithms for their work. That is because the conclusion drawn about the difficult of attack does not hold. If we consider two chains that are both reflected in one another and able to be merged mined, then it is trivial to see that an attack is, at most, as difficult as attacking the strongest chain (presuming that 100% of miners are mining that chain). So there is an upper limit on the additional security provided via this technique.
 
 NB: It is possible that, given two merge mined chains, the sum of all work is greater than the work done on either chain; that is easier to see with a general method of merge mining as opposed to the method used for Namecoin. While it doesn't make much sense for a miner to *only* mine Namecoin and never attempt to produce Bitcoin blocks, it is possible that a miner could choose to do that. We won't spend much time focusing on this situation. In reality it's reasonable to expect that (or design a system such that) miners will always mine the heaviest chain. Miners will then selectively merge mine other chains, though they might not mine all possible chains.
 
-However, that doesn't mean that PoW reflection isn't merited in these cases. For this next example, let us consider Bitcoin and Namecoin.
+However, that doesn't mean that Proof of Reflection isn't merited in these cases. For this next example, let us consider Bitcoin and Namecoin.
 
 There is something that we should note before proceeding. Valid Namecoin proofs include the Bitcoin header, the merkle proof of the coinbase transaction, and the coinbase transaction itself. Although that Bitcoin header *might* have corresponded to a valid Bitcoin block, had the proof met Bitcoin's standards, we should expect that most of the time this is not the case. Namecoin does not automatically get access to a valid Bitcoin header-chain just because it is merged mined with Bitcoin. The current merge mining scheme requires that, for PoW to be reflected, Namecoin must explicitly include known Bitcoin headers as they are produced. Because of this, Namecoin blocks cannot implicitly contain the Bitcoin headers associated with that Namecoin block's proof since, much of the time, that Bitcoin header *will not* correspond to a valid Bitcoin block. We still have latency between these chains with Namecoin's current merge mining scheme.
 

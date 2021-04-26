@@ -1,4 +1,4 @@
-## PoW reflection
+## Proof of Reflection
 
 \mk{note: reminder about secrecy and patent-ability, this is part of it}
 
@@ -41,7 +41,7 @@ Why would a chain want to track another chain? The typical answer is to prove tr
 
 \label{sec:two-blockchains}
 
-Let's build up the idea via a hypothetical situation with two distinct blockchains. For simplicity, you can imagine these as Bitcoin and Ethereum 1 -- at least to start with. However, keep in mind that the changes required to support *PoW reflection* are unlikely to ever be integrated with either Bitcoin or Ethereum (and reaching social agreement about the details would be difficult, to say the least).
+Let's build up the idea via a hypothetical situation with two distinct blockchains. For simplicity, you can imagine these as Bitcoin and Ethereum 1 -- at least to start with. However, keep in mind that the changes required to support *Proof of Reflection* are unlikely to ever be integrated with either Bitcoin or Ethereum (and reaching social agreement about the details would be difficult, to say the least).
 
 Our starting case is that both chains use different Proof of Work algorithms and neither tracks the other. For simplicity, the following progression will use two blockchains with identical block times, and will not account for variance in block production.
 
@@ -102,7 +102,7 @@ Put another way: Chain B's history is confirmed *not only* by new Chain B blocks
 \label{fig:pow-refl-step3}
 \end{figure}
 
-**Important:** Soon, these confirmations will have real and useful meaning. Under the right conditions, an appropriate configuration of *PoW reflection* results in an increase in the *rate* that confirmations are acquired. This is the first hint of $\frac{1}{O(c)}$ confirmation time.
+**Important:** Soon, these confirmations will have real and useful meaning. Under the right conditions, an appropriate configuration of *Proof of Reflection* results in an increase in the *rate* that confirmations are acquired. This is the first hint of $\frac{1}{O(c)}$ confirmation time.
 
 At this point, if an attacker was to publish an alternate, better Chain B history, then Chain B nodes would reorganize around the *new* history published by the attacker, and the attacker's block headers would end up being recorded in Chain E and causing a reorganization there, too. Currently, this configuration does not add any security to Chain B.
 
@@ -241,9 +241,9 @@ Why? The privately mined blocks to perform the attack *are not known about* by C
 * the private chain-segment must contribute more total work to the Chain B blockchain than the public chain-segment does -- *including* the relevant Chain E chain-segment; *or*
 * the attacker must *additionally* produce a private Chain E chain-segment such that the *total* work of both private chain-segments is greater than the total work of both public chain-segments, and publish both chain-segments simultaneously.
 
-It's worth noting that, at this point, there is no benefit to Chain E's security. That's because Chain E isn't 'reading' the reflected work back from Chain B. Thus a doublespend attack against Chain E has the expected, non-reflected profile -- it isn't more difficult to attack Chain E yet. However, Chain E can take advantage of the reflection, though. The main requirements are: the inclusion of appropriate merkle proofs that show known Chain E blocks according to Chain B, and an update to Chain E's block-weight calculations to account for the reflected work. PoW reflection doesn't automatically secure both chains; each chain can proactively and independently take advantage of PoW reflection.
+It's worth noting that, at this point, there is no benefit to Chain E's security. That's because Chain E isn't 'reading' the reflected work back from Chain B. Thus a doublespend attack against Chain E has the expected, non-reflected profile -- it isn't more difficult to attack Chain E yet. However, Chain E can take advantage of the reflection, though. The main requirements are: the inclusion of appropriate merkle proofs that show known Chain E blocks according to Chain B, and an update to Chain E's block-weight calculations to account for the reflected work. Proof of Reflection doesn't automatically secure both chains; each chain can proactively and independently take advantage of Proof of Reflection.
 
-Naturally, if there were a large difference in target block frequencies (e.g., 10 minutes vs 15 seconds) then there would also be a good deal of latency before a chain gains the security benefit from reflected work. For this reason, PoW reflection makes the most sense when used with high frequency chains, or chains of similar frequencies. One downside of this is that shortening the block production frequency requires the inclusion of more block headers. In the scheme of things, this can be somewhat significant but is not a deal-breaker.
+Naturally, if there were a large difference in target block frequencies (e.g., 10 minutes vs 15 seconds) then there would also be a good deal of latency before a chain gains the security benefit from reflected work. For this reason, Proof of Reflection makes the most sense when used with high frequency chains, or chains of similar frequencies. One downside of this is that shortening the block production frequency requires the inclusion of more block headers. In the scheme of things, this can be somewhat significant but is not a deal-breaker.
 
 Practical methods of comparing (and converting the weight of) different Proofs of Work are discussed in \autoref{sec:comparing-diff-pows}.
 
@@ -260,13 +260,13 @@ Practical methods of comparing (and converting the weight of) different Proofs o
 \begin{figure}[H]
 \centering
 \includegraphics[height=0.35\textheight]{pow_refl_step4_sag}
-\caption{\textit{PoW Reflection} between two UT Chains}
+\caption{\textit{Proof of Reflection} between two UT Chains}
 \label{fig:pow-refl-step4}
 \end{figure}
 
-### PoW reflection between chains using the same alg
+### Proof of Reflection between chains using the same alg
 
-tl;dr it can work fine I think. Like it's still secure; there's nothing about PoW reflection that *requires* more than one hashing alg, it's just the easier context to explain it in b/c miners of one chain can't attack the other.
+tl;dr it can work fine I think. Like it's still secure; there's nothing about Proof of Reflection that *requires* more than one hashing alg, it's just the easier context to explain it in b/c miners of one chain can't attack the other.
 
 \todo{tidy this section, provide explanation.}
 
@@ -299,7 +299,7 @@ under that sort of thing the 'microchain' would become like an O(c) record of al
 
 \label{sec:comparing-diff-pows}
 
-For PoW reflection to work effectively, there must be some method of comparing and converting the *work* done by reflecting chains. Earlier, we simply *set* a ratio between Bitcoin blocks and Ethereum blocks based on the arbitrary notion of *equal work in equal time*, but that isn't a context that's easy to create and maintain in reality.
+For Proof of Reflection to work effectively, there must be some method of comparing and converting the *work* done by reflecting chains. Earlier, we simply *set* a ratio between Bitcoin blocks and Ethereum blocks based on the arbitrary notion of *equal work in equal time*, but that isn't a context that's easy to create and maintain in reality.
 
 How can we design a system that allows for sensible comparisons between Proofs of Work that use different hashing algorithms?
 
@@ -327,7 +327,7 @@ Instead of using the same token on multiple chains, you could use a similar meth
 
 In principle you can use the same principles to compare work between chains that have different root tokens. However, there is a major new caveat with this method: the DEX and price-finding methods now become *part* of the consensus methods of those chains. This caveat makes the different-tokens context much harder to reason about, and introduces questions like *What is the effect of front running?* and *Could an attacker exploit market conditions to perform a doublespend when they wouldn't normally be able to?*
 
-In the context of *Ultra Terminum* and *Amaroo*, these aren't questions that are important to answer. If PoW reflection is ever used to secure multiple chains with heterogenous tokens, it's likely that these questions will need answering, or that alternate methods be devised.
+In the context of *Ultra Terminum* and *Amaroo*, these aren't questions that are important to answer. If Proof of Reflection is ever used to secure multiple chains with heterogenous tokens, it's likely that these questions will need answering, or that alternate methods be devised.
 
 ### Reflection with PoS chains / otherwise unsafe consensus algs (like PoA)
 
@@ -412,13 +412,13 @@ From forum last night:
 
 \todo{not sure if this should be included. if so then need to write out this section}
 
-Say chain B reflects both A and C. $A <-> B <-> C$. PoW reflection says A gets a benefit by proving that B reflects specific work from A. Does A get a security benefit by proving that C reflects B reflects A?
+Say chain B reflects both A and C. $A <-> B <-> C$. Proof of Reflection says A gets a benefit by proving that B reflects specific work from A. Does A get a security benefit by proving that C reflects B reflects A?
 
 ### Equivalency of Reflecting and Non-Reflecting Block-Weightings
 
 \label{sec:equiv-state-block-weightings}
 
-\todo{show that the result under PoW reflection is backwards compatible, i.e., existing consensus methods will settle on the same result. Needs to work for DAGs, too.}
+\todo{show that the result under Proof of Reflection is backwards compatible, i.e., existing consensus methods will settle on the same result. Needs to work for DAGs, too.}
 
 ##### Notes:
 

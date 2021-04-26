@@ -2,7 +2,7 @@
 
 \label{sec:constructing-ut}
 
-*PoW reflection* can be used as a foundational technique to build an $O(c^2)$ base-layer for a blockchain network (which I call *the simplex*). This section details the construction of such a foundation, and how it can be extended up to $O(c^4)$ complexity. The $O(n)$ scaling configuration is detailed in \autoref{sec:tiling}.
+*Proof of Reflection* can be used as a foundational technique to build an $O(c^2)$ base-layer for a blockchain network (which I call *the simplex*). This section details the construction of such a foundation, and how it can be extended up to $O(c^4)$ complexity. The $O(n)$ scaling configuration is detailed in \autoref{sec:tiling}.
 
 Such a foundation (*the simplex*) is *not* a sharded blockchain -- there's no requirement that chains in this base-layer are either interchangeable or use the same primitives. This was demonstrated via the example in \autoref{sec:two-blockchains}. Rather, the simplex is an emergent construct that is created via the *relationships* between blockchains. Instead of one blockchain being split into many (as occurs with sharding), the simplex is many blockchains becoming one coherent network.
 
@@ -10,7 +10,7 @@ Such a foundation (*the simplex*) is *not* a sharded blockchain -- there's no re
 
 \label{sec:generalizing-reflection}
 
-*PoW reflection* is, in essence, the idea that a chain can acknowledge that its history has been confirmed by a different chain[^reflection-prior]. That is a simplification, but it *is* the essence of it.
+*Proof of Reflection* is, in essence, the idea that a chain can acknowledge that its history has been confirmed by a different chain[^reflection-prior]. That is a simplification, but it *is* the essence of it.
 
 [^reflection-prior]: I have not been able to find any existing discussion of this method. If you know of any existing discussion of this method, please post a link to the forum topic that is linked in the abstract.
 
@@ -21,9 +21,9 @@ In principle, the necessary capabilities that some chain, $C_A$, must have in or
 3. $C_A$ is able to prove that its headers have been recorded in $C_B$, and has full knowledge of which headers have been recorded; and
 4. $C_A$ integrates this knowledge into its chain-weighting algorithm.
 
-If $C_A$ and $C_B$ are doing *mutual* PoW reflection, then the same conditions must be satisfied by $C_B$.
+If $C_A$ and $C_B$ are doing *mutual* Proof of Reflection, then the same conditions must be satisfied by $C_B$.
 
-Is $C_A$ able to *simultaneously* do reflection with more than one other chain, e.g., $C_C ... C_Z$? Yes. There is nothing that we have covered so far that would prevent this. If *PoW reflection* is viable with a single other chain, then it is viable with *many* other chains. However, the dynamics do becoming increasingly complex, as we will soon see.
+Is $C_A$ able to *simultaneously* do reflection with more than one other chain, e.g., $C_C ... C_Z$? Yes. There is nothing that we have covered so far that would prevent this. If *Proof of Reflection* is viable with a single other chain, then it is viable with *many* other chains. However, the dynamics do becoming increasingly complex, as we will soon see.
 
 In order to support arbitrarily many reflections, we need to modify \textsc{ReflectedBlockWeight} from \autoref{alg:refl-1-bw} as done in \autoref{alg:refl-many-chains}.
 
@@ -57,7 +57,7 @@ When two or more blockchains *mutually reflect* each-other, they form a *simplex
         \vskip 0pt
         \centering
         \includegraphics[height=.95\linewidth]{simplex_2_sag}
-        \caption{PoW reflection between 2 blockchains. A 1-simplex. The most basic non-trivial simplex.}
+        \caption{Proof of Reflection between 2 blockchains. A 1-simplex. The most basic non-trivial simplex.}
         \label{fig:simplex-2-d1}
     \end{subfigure}%%
     \hfill
@@ -65,7 +65,7 @@ When two or more blockchains *mutually reflect* each-other, they form a *simplex
         \vskip 0pt
         \centering
         \includegraphics[height=.95\linewidth]{simplex_7_sag}
-        \caption{PoW reflection between 7 blockchains; a 7-chain simplex; a 6-simplex.}
+        \caption{Proof of Reflection between 7 blockchains; a 7-chain simplex; a 6-simplex.}
         \label{fig:simplex-7-d1}
     \end{subfigure}%%
     \hfill
