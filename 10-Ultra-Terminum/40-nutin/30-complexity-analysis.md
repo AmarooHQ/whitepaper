@@ -250,13 +250,13 @@ Since $j$ is constant, cross-chain SPV proofs therefore have order:
 O(j \cdot \log_2 c) = O(\log_2 c) \label{eq:spv-complexity}
 \end{equation}
 
-### Complexity of Reflection Proofs
+### Complexity of Proofs of Reflection
 
 \label{sec:complexity-reflection-proof}
 
 A simplex-chain reflects $N_1 - 1 \approx N_1$ other simplex-chains. A merkle tree of reflected headers has order $O(N_1) = O(k_1) = O(c)$ and a corresponding proof size of order $O(\log_2 N_1) = O(\log_2 k_1) = O(\log_2 c)$. Since those other simplex-chains also have $\sim N_1$ reflections, proving reflection in those other $\sim N_1$ simplex-chains requires $\sim N_1$ merkle branches. Thus, the full set of reflection proofs, per simplex-chain, is $O(N_1 \cdot \log_2 N_1) = O(c \cdot \log_2 c)$.
 
-\todo{can we exclude these proofs by treating them as droppable witnesses? see \autoref{sec:proving-reflection}}
+Note: In a production system, these proofs can be excluded from blocks by treating them as droppable witnesses; see \autoref{sec:proving-reflection}.
 
 ### Complexity comparison
 

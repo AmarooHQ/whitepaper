@@ -6,15 +6,7 @@
 
 \begin{figure}
 \centering
-\begin{BVerbatim}
-              stay
-        /---> decentralized -\
-       /                      \     Proof of Reflection
-we need scale                  |-->       +
-       \                      /      small blocks
-        \---> stay ----------/
-              secure
-\end{BVerbatim}
+\includegraphics{trilemma/conflict_resolution_sag}
 \caption{A solution to the core conflict of \textit{Buterin's Trilemma}.}
 \label{fig:trilemma-core-conflict-solved}
 \end{figure}

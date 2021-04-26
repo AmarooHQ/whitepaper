@@ -1,6 +1,8 @@
 
 ## Practical Considerations for UT's Design
 
+\label{sec:practical-considerations}
+
 plan:
 
 - there are some sticking points with a naive design
@@ -34,15 +36,13 @@ The complexity and impact of this strategy is discussed in \autoref{sec:bandwidt
 
 If simplex-chains' consensus protocol requires accounting for reflected work, then nodes must have some method whereby they know which work (in a particular chain's history) has been reflected. That is: a node for chain A must be able to answer the question *For each other simplex-chain, which blocks in chain A's history have been reflected?* This means that each node must have $N_1 - 1$ answers for a simplex of $N_1$ chains.
 
-There is a trivial method: include merkle branch proofs along with reflected headers. Specifically: when a miner on chain A includes a header from chain B, they should also include a merkle branch that shows the most recent chain A header that has been reflected by chain B. Miners would need to do this for *all* simplex-chains that they reflect. Predictably, this has overhead with order $O(N_1 \cdot log_2 N_1)$, where $N_1$ is the number of chains in the simplex.
+There is a trivial method: include merkle branch proofs along with reflected headers. Specifically: when a miner on chain A includes a header from chain B, they should also include a merkle branch that shows the most recent chain A header that has been reflected by chain B. Miners would need to do this for *all* simplex-chains that they reflect. Predictably, this has overhead with order $O(N_1 \cdot log_2 N_1)$, where $N_1$ is the number of chains in the simplex. This method has complexity $O(c \log_2 c)$ which is discussed in \autoref{sec:complexity-reflection-proof}.
 
-This complexity is discussed in \autoref{sec:complexity-reflection-proof}.
+Do we *need* to include proofs of reflection, though? Is it possible to avoid the explicit inclusion of those proofs, potentially allowing for $O(c)$ complexity instead?
 
-\mk{NB: **todo** something about $O(c)$ scaling still rather than $O(c \log_2 c)$.}
+If miners of any simplex-chain download the blocks of *all* simplex-chains -- as mentioned in \autoref{sec:availability-of-blocks} -- then including all necessary proofs of reflection can be made redundant. Since miners, theoretically, have all the necessary data to construct the proofs, do those miners need to actually include those proofs? Could we treat those proofs as witnesses and prune them -- similar to SegWit?
 
-Do we *need* to include proofs of reflection, though? If miners of any simplex-chain download blocks of *all* simplex-chains -- as mentioned in \autoref{sec:availability-of-blocks} -- then including all necessary proofs of reflection *smells* redundant. Since miners have all the necessary data to construct the proofs, do they need to actually include those proofs? Could we treat them as witnesses similar to SegWit?
-
-There would be some downsides to excluding the proofs of reflection. For one, it would mean that simplex-chain nodes, during an initial sync, would not be able to verify Proof of Reflection without auxillary data -- potentially a lot. This may not be a problem, though, because we expect that a *non-miners'* evaluation of a simplex-chain's history will be identical regardless of whether they account for Proof of Reflection or not (discussed in \autoref{sec:equiv-state-block-weightings}). Secondly, it would mean that miners *must* track the state of *all* reflections in the simplex for some period of time so that they ensure the integrity of the reflection protocol. Given \autoref{sec:availability-of-blocks}, this is possible without significant overhead.
+There would be some downsides to excluding the proofs of reflection. For one, it would mean that simplex-chain nodes, during an initial sync, would not be able to verify Proofs of Reflection without auxillary data -- potentially a lot. This may not be a problem, though, because we expect that a *non-miners'* evaluation of a simplex-chain's history will be identical regardless of whether they account for Proof of Reflection or not (discussed in \autoref{sec:equiv-state-block-weightings}). Secondly, it would mean that miners *must* track the state of *all* reflections in the simplex for some period of time so that they ensure the integrity of the reflection protocol. Given \autoref{sec:availability-of-blocks}, this is possible without significant overhead.
 
 \todo{Make sure "we expect that a *non-miners'* evaluation of a simplex-chain's history will be identical regardless of whether they account for Proof of Reflection or not" is explained / answered}
 
@@ -64,13 +64,13 @@ Traditionally, blockchain protocols have some *global* state and a state-transit
     where $\Upsilon$ is the Ethereum state transition function.
 }{Dr. Gavin Wood; \href{https://cloudflare-ipfs.com/ipfs/QmcdwaEqKjsASs1sZqxBNPw5vmypE5YL61zSvWdGoX7wtC}{Ethereum Yellow Paper / Petersburg Version 41c1837}, s2}
 
-One of the reasons for this tradition is that transactions are permitted to depend on any parts of the global state. For example: a Bitcoin transaction is permitted to spend any UTXO, and Ethereum smart contracts can interact with any other smart contracts on the Ethereum blockchain.
+One of the reasons for this tradition is that transactions are (typically) permitted to depend on any part of the global state. For example: a Bitcoin transaction is permitted to spend any UTXO, and an Ethereum smart contract may interact with any other smart contract on the Ethereum blockchain.
 
-However, it is not necessary for a protocol to permit *all* transactions to potentially depend on global state. A protocol could specify that certain transactions may depend only on a strictly defined subset of global state, i.e., state is segmented and some of those segments is calculable independently of global state.
+However, it is not necessary for a protocol to allow *any and all* transactions to depend on global state. A protocol could specify that certain transactions may depend only on a strictly defined subset of global state, i.e., a well defined *segment* of global state that is independently calculable.
 
-Simplex-chains can use this technique to their advantage by segregating both transactions and state which are specific to Proof of Reflections. That way, the state of a simplex-chain's reflections is calculable independently of anything else that simplex-chain is doing, i.e., dapp-chain extensions and other simplex-level transactions.
+Simplex-chains can use this technique to their advantage by segmenting both transactions and state which are specific to Proofs of Reflection. That way, the state of a simplex-chain's reflections can be calculated without needing to calculate the remaining state for that simplex-chain.
 
-We could specify the state-transition of simplex-chains (using Ethereum's nomenclature) like this, for example:
+We could specify the state-transition of simplex-chains (using Ethereum's nomenclature) like this:
 
 \begin{equation}
 \begin{split}
@@ -80,7 +80,7 @@ We could specify the state-transition of simplex-chains (using Ethereum's nomenc
 \end{split}
 \end{equation}
 
-Where $\sigma_{R,t}$ is the segment of state tracking reflections and headers, $\sigma_{\star,t}$ is the global state excluding $\sigma_{R,t}$, $\Upsilon_R$ is the state-transition function for the reflections segment, and $\Upsilon_{\star}$ is the state transition function for all remaining segments. Note that if $T$ is a reflection-transaction (i.e., it contains headers to be reflected) then $\Upsilon_{\star}$ does nothing, and if $T$ is any other type of transaction then $\Upsilon_R$ does nothing.
+Where, at some time $t$: $\sigma_{R,t}$ is the segment of state that is tracking reflections and headers; $\sigma_{\star,t}$ is the global state excluding $\sigma_{R,t}$: $\Upsilon_R$ is the state-transition function for the reflections segment; and $\Upsilon_{\star}$ is the state transition function for all remaining segments. Note that if $T$ is a reflection-transaction (i.e., it contains headers to be reflected) then $\Upsilon_{\star}$ does nothing, and if $T$ is any other type of transaction then $\Upsilon_R$ does nothing.
 
 In essence \autoref{eq:segregated-state} shows that $\sigma_{R,t}$ depends *only* on the $\sigma_{R,t-1}$ state-segment and the current transaction, whereas $\sigma_{\star,t}$ depends on global state.
 

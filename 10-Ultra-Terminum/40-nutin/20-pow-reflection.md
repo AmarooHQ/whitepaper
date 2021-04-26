@@ -17,16 +17,18 @@ The idea that Ethereum SCs can track Bitcoin chain-headers is well understood. B
 Let's add such a contract to Ethereum and describe the relevant data and events in the following table. \autoref{fig:pr-btc-eth-step1} illustrates this.
 
 | Time (~15s increments) | Bitcoin block made | Eth block made | Eth block contents | Eth state |
-|---|---|---|---|---|
-| ... |||||
+|---|---|---|-----|------|
+| $\vdots$ |||||
 | 0 | k ||||
-| 1 | | j | $BTC_k$ header | Tracks BTC chain up to $BTC_k$ |
-| ... |||||
+| 1 | | j | $BTC_k$ header | Tracks $BTC_{0 \cdots k}$ |
+| $\vdots$ |||||
 | 40 | k + 1 ||||
-| 41 | | j + 40 | $BTC_{k+1}$ header | Tracks BTC chain up to $BTC_{k+1}$ |
-| ... |||||
+| 41 | | j + 40 | $BTC_{k+1}$ header | Tracks $BTC_{0 \cdots k+1}$ |
+| $\vdots$ |||||
 
-\begin{figure}[H]
+: Data and events for both Bitcoin and Ethereum as blocks are produced and Bitcoin headers are tracked via an Ethereum SC.
+
+\begin{figure}[]
 \centering
 \includegraphics[height=0.3\textheight]{pow_refl_btc_eth_step1_sag}
 \caption{Bitcoin headers are included in Ethereum's state (via user made transactions) as they are produced. This is roughly how \textit{BTC Relay} works.}
@@ -56,51 +58,53 @@ This is conceptually similar to Ethereum tracking Bitcoin, and shown in \autoref
 \label{fig:pow_refl_step1}
 \end{figure}
 
-Similar to before, Chain E will include Chain B's headers as they are produced. Note that this can be a protocol-level implementation; it does not have to be at the smart contract level as it would be with Ethereum.
+Similar to before, Chain E will include Chain B's headers as they are produced. Note that this can be a protocol-level implementation; it does not have to be at the smart contract level -- as it would be with Ethereum.
 
 #### Step 2. Chain B tracks Chain E
 
 Say that the protocol of Chain B is extended to add support for tracking Chain E's headers. That is, a bespoke protocol extension is created that allows/requires miners to publish known Chain E headers along with their Chain B block. Similar to the way Chain E tracks Chain B, now Chain B also tracks Chain E. This is shown in \autoref{fig:pow_refl_step2} and the following table.
 
 | Time | B block made | B block contents | B state | E block made | E block contents | E state |
-|---|---|---|---|---|---|---|
-| ... |||||||
-| 0 | k | $E_{j-1}$ header | Tracks E up to $E_{j-1}$ ||||
-| 1 | ||| j | $B_{k}$ header | Tracks B chain up to $B_{k}$ |
-| 2 | k + 1 | $E_{j}$ headers | Tracks E up to $E_{j}$ ||||
-| 3 | ||| j + 1 | $B_{k+1}$ header | Tracks B up to $B_{k+1}$ |
-| ... |||||||
+|--|---|-----|------|---|-----|------|
+| $\vdots$ |||||||
+| 0 | k | $E_{j-1}$ header | Tracks $E_{0 \cdots j-1}$ ||||
+| 1 | ||| j | $B_{k}$ header | Tracks $B_{0 \cdots k}$ |
+| 2 | k + 1 | $E_{j}$ header | Tracks $E_{0 \cdots j}$ ||||
+| 3 | ||| j + 1 | $B_{k+1}$ header | Tracks $B_{0 \cdots k+1}$ |
+| $\vdots$ |||||||
 
-\begin{figure}[H]
+: Both Chain B and Chain E track each-other's headers.
+
+\begin{figure}[p]
 \centering
-\includegraphics[height=0.3\textheight]{pow_refl_step2_sag}
+\includegraphics[height=0.4\textheight]{pow_refl_step2_sag}
 \caption{Step 2: Chain B and Chain E track each other's header-only chain.}
 \label{fig:pow_refl_step2}
 \end{figure}
 
 #### Step 3. Chain B tracks Chain E's tracking of Chain B
 
-Can we use a tracked chain for a different purpose? What happens if Chain B tracks whether Chain B's history is confirmed within Chain E?
+Can we use a tracked chain for a different purpose? What happens if Chain B tracks whether Chain B's history is confirmed within Chain E? This can be done via the inclusion of merkle branches that prove the particular state of Chain E that contains this information. These merkle branches are known as *Proofs of Reflection* (PoRs). Events and data are shown in the following table and \autoref{fig:pow-refl-step3}.
 
 | Time | B block made | B block contents | B state | E block made | E block contents | E state |
-|---|---|---|---|---|---|---|
-| ... |||||||
-| 0 | k | $E_{j-1}$ header + Merkle proof of $B_{k-1}$ | Tracks Chain E up to $E_{j-1}$ *and* knows that Chain E knows of $B_{k-1}$ ||||
-| 1 | ||| j | $B_{k}$ header | Tracks Chain B up to $B_{k}$ |
-| 2 | k + 1 | $E_{j}$ header + Merkle proof of $B_{k}$ | Tracks Chain E up to $E_{j}$ *and* knows that E knows of $B_{k}$ ||||
-| 3 | ||| j + 1 | $B_{k+1}$ header | Tracks B up to $B_{k+1}$ |
-| ... |||||||
+|--|---|------|------|---|-----|------|
+| $\vdots$ |||||||
+| 0 | k | $E_{j-1}$ header + Merkle proof of $B_{k-1}$ | Tracks $E_{0 \cdots j-1}$ *and* knows that Chain E tracks $B_{0 \cdots k-1}$ ||||
+| 1 | ||| j | $B_{k}$ header | Tracks $B_{0 \cdots k}$ |
+| 2 | k + 1 | $E_{j}$ header + Merkle proof of $B_{k}$ | Tracks $E_{0 \cdots j}$ *and* knows that E tracks $B_{0 \cdots k}$ ||||
+| 3 | ||| j + 1 | $B_{k+1}$ header | Tracks $B_{0 \cdots k+1}$ |
+| $\vdots$ |||||||
 
-Chain B now knows *which B blocks are known about by some external source* (Chain E in this case).
+: Chain B tracks which headers are known about by Chain E. That is: Chain B includes *proofs of reflection*.
 
-Put another way: Chain B's history is confirmed *not only* by new Chain B blocks, *but also* by Chain E blocks. Since Chain B nodes *know* they have the blocks that Chain E knows about, there's no data-availability concern here.
-
-\begin{figure}[H]
+\begin{figure}[p]
 \centering
-\includegraphics[height=0.3\textheight]{pow_refl_step3_sag}
-\caption{Step 3: Chain B includes Proofs of Reflection (PoRs) along with headers. Proofs of Reflection allow Chain B to know which of its own blocks are known to Chain E.}
+\includegraphics[height=0.4\textheight]{pow_refl_step3_sag}
+\caption{Step 3: Chain B includes \textit{proofs of reflection} (PoRs) along with headers. Proofs of Reflection allow Chain B to know which of its own blocks are known to Chain E.}
 \label{fig:pow-refl-step3}
 \end{figure}
+
+Chain B now knows *which B blocks are tracked by Chain E*, i.e., which local blocks are known about by some external source. Put another way: Chain B's history is confirmed *not only* by new Chain B blocks, *but also* by Chain E blocks. There's no data-availability concern here since Chain B nodes *know* that they have the blocks that Chain E knows about.
 
 **Important:** Soon, these confirmations will have real and useful meaning. Under the right conditions, an appropriate configuration of *Proof of Reflection* results in an increase in the *rate* that confirmations are acquired. This is the first hint of $\frac{1}{O(c)}$ confirmation time.
 
@@ -110,19 +114,15 @@ Could we use Chain B's knowledge *that it's own history is reflected in Chain E*
 
 #### Step 4. One Way Reflection
 
-\todo{Replace refs to Bitcoin with Chain B and Ethereum with Chain E}
-
-\todo{NOTE: I think it might be good to reorg this section a bit so that the current-btc stuff comes first, then we go into the modifications.}
-
 Before we discuss a change that Chain B could make, it is important to note that chain-work done with one hashing algorithm is *not generally convertible* to 'equivalent' work done via another hashing algorithm. For example, there is no meaningful *generic* answer to the question "how many *double SHA256* hashes is one *Ethash* hash worth?". In fact, there is no meaningful answer to similar questions that use any other other combination of hashing algorithms, either. It is not possible to *generically and universally* convert between qualitatively different units[^et-conversion]. It is *only* to do this within some *context* where with a *defined* conversion method. We'll look at some such contexts later.
 
-[^et-conversion]: The philosophical generalization of *qualitative conversion* and the *necessary* role that *goals* and *context* play is [Elliot Temple's](https://elliottemple.com) idea. It is covered in his [*Critical Fallibilism Course*](https://gumroad.com/l/mhtbA). It's also partially covered in (or related to) [Elliot's *Yes or No Philosophy* course](https://gumroad.com/l/hxqsh) and some of his articles, e.g., [*IGCs* ({Idea, Context, Goal} triples)](https://curi.us/2387-igcs) and [*Bottleneck Examples*](https://curi.us/2353-bottleneck-examples).
+[^et-conversion]: The philosophical generalization of *qualitative conversion* and the *necessary* role that *goals* and *context* play is [Elliot Temple's](https://elliottemple.com) idea. It is covered in his [*Critical Fallibilism Course*](https://gumroad.com/l/mhtbA). It's also partially covered in (or related to) [Elliot's *Yes or No Philosophy* course](https://gumroad.com/l/hxqsh) and some of his articles, e.g., [*IGCs* ({Idea, Goal, Context} triples)](https://curi.us/2387-igcs) and [*Bottleneck Examples*](https://curi.us/2353-bottleneck-examples).
 
 NB: Bitcoin does two SHA256 hashes per block, which is why I refer to "double SHA256" above.
 
 For the purposes of our hypothetical construction, let's say that B and E do *equal work over equal time*. In the current example, that means that the work required to produce either $B_i$ or $E_j$ is the same. *For the sake of this construction, we'll also presume this relationship doesn't change over time*. Our constant of conversion is thus: 1 *E Blocks per B Block*.
 
-NB: we're not that concerned with whether this is a reasonable assumption or not; right now, we just need a way to convert the work done on each chain into the same units. (Some methods for doing this will be discussed later.)
+NB: we're not that concerned with whether this is a reasonable assumption or not; right now, we just need a way to convert the work done on each chain into the same units. (Some methods for doing this will be discussed in \autoref{sec:comparing-diff-pows}.)
 
 Currently, the Chain B network chooses the "heaviest" (most worked) chain as its common history. Chain B calculates the "weight" of blocks (i.e., how much work went in to them) via an estimation of how many hashes were required -- say these are measured in *double SHA256 hashes*. For the purposes of illustration, let's normalize this number to be in terms of *B Blocks* -- instead of *double SHA256 hashes*; that's easy, since each block is worth 1 *B Block* by definition. Now, we can also measure the work in *E Blocks*, too (that being: 1 *E Block*).
 
@@ -174,60 +174,6 @@ Yes, and we must modify the block-weight calculation so that it accounts for wor
 \end{algorithmic}
 \end{algorithm}
 
-\begin{comment}
-```haskell
--- chain-b-modified-weight-calc.hs
-type BWeight = Number
-type EWeight = Number
-
-weightConvConst = 1
-bWToEWeight bW = bW * weightConvConst
-eWToBWeight eW = eW / weightConvConst
-
-chainWeight :: BState -> List Block -> BWeight
-chainWeight _ [] = 0
-chainWeight state b:bs = totalBlockWeight state b + chainWeight state bs
-
-totalBlockWeight :: BState -> Block -> BWeight
-totalBlockWeight state block = blockWeight block +
-    if chainEHasConfirmed state block
-        then eWToBWeight (eWorkFor state block)
-        else 0
-
-chainEHasConfirmed :: BState -> Block -> Boolean
-chainEHasConfirmed state block =
-    doesEHaveBlock state block &&
-    isBlockInMainChainAccordingToE state block
-
--- we won't define these functions as their names are illustrative enough
-doesEHaveBlock _ _ = undefined
-isBlockInMainChainAccordingToE _ _ = undefined
-
-eWorkFor :: BState -> Block -> EWeight
-eWorkFor state block = sum (map eBlockWeight relevantEBlocks)
-  where
-    -- a `filter` like this is inefficient but illustrative enough
-    relevantEBlocks = filter currBlockIsHead (eMainChainBlocks state)
-    currBlockIsHead eBlock = hash block == getBHeadFromEBlock eBlock
-
-blockWeight :: Block -> BWeight
-blockWeight block = 1
-
-eBlockWeight :: EBlock -> EWeight
-eBlockWeight eBlock = 1
--- -- alternatively:
--- eBlockWeight eBlock = 1 / (countBChainHeads eBlock)
--- -- this would go some way for accounting for multiple Chain B heads
--- -- without giving either Chain B head an advantage.
-```
-
-\todo{formalize the above mathematically so it can be more easily analyzed}
-\begin{equation}
-a = 1
-\end{equation}
-
-\end{comment}
-
 What is the meaning and impact of this change?
 
 The *meaning* of this change is that Chain B now incorporates work done on Chain E *into Chain B's own calculation of the heaviest worked chain*.
@@ -241,36 +187,42 @@ Why? The privately mined blocks to perform the attack *are not known about* by C
 * the private chain-segment must contribute more total work to the Chain B blockchain than the public chain-segment does -- *including* the relevant Chain E chain-segment; *or*
 * the attacker must *additionally* produce a private Chain E chain-segment such that the *total* work of both private chain-segments is greater than the total work of both public chain-segments, and publish both chain-segments simultaneously.
 
-It's worth noting that, at this point, there is no benefit to Chain E's security. That's because Chain E isn't 'reading' the reflected work back from Chain B. Thus a doublespend attack against Chain E has the expected, non-reflected profile -- it isn't more difficult to attack Chain E yet. However, Chain E can take advantage of the reflection, though. The main requirements are: the inclusion of appropriate merkle proofs that show known Chain E blocks according to Chain B, and an update to Chain E's block-weight calculations to account for the reflected work. Proof of Reflection doesn't automatically secure both chains; each chain can proactively and independently take advantage of Proof of Reflection.
+It's worth noting that, at this point, there is no benefit to Chain E's security. That's because Chain E isn't 'reading' the reflected work back from Chain B. Thus a doublespend attack against Chain E has the expected, non-reflected profile -- it isn't more difficult to attack Chain E yet. However, Chain E can take advantage of the reflection. The main requirements are: the inclusion of appropriate proofs of reflection that show known Chain E blocks according to Chain B, and an update to Chain E's block-weight calculations to account for the reflected work. *Proof of Reflection* doesn't automatically secure both chains; each chain can proactively and independently take advantage of *Proof of Reflection*.
 
-Naturally, if there were a large difference in target block frequencies (e.g., 10 minutes vs 15 seconds) then there would also be a good deal of latency before a chain gains the security benefit from reflected work. For this reason, Proof of Reflection makes the most sense when used with high frequency chains, or chains of similar frequencies. One downside of this is that shortening the block production frequency requires the inclusion of more block headers. In the scheme of things, this can be somewhat significant but is not a deal-breaker.
+Naturally, if there were a large difference in target block frequencies (e.g., 10 minutes vs 15 seconds) then there would also be a good deal of latency before a chain gains the security benefit from reflected work. For this reason, *Proof of Reflection* makes the most sense when used with high frequency chains, or chains of similar frequencies. One downside of this is that shortening the block production frequency requires the inclusion of more block headers. In the scheme of things, this can be somewhat significant but is not a deal-breaker.
 
 Practical methods of comparing (and converting the weight of) different Proofs of Work are discussed in \autoref{sec:comparing-diff-pows}.
+
+Note that, as the Chain B tip is gaining reflections from Chain E, miners on Chain B are incented to include as many Chain E headers (and PoRs) as possible. That's because each new header will add weight to the *parent* of the block which the Chain B miner is attempting to produce. This increases the overall chain-weight that the miner is building on, and thus contributes to their block becoming part of the most-worked chain.
 
 \todo{Answer the following:}
 
 - What if you mine a longer B-chain and then publish it to Chain E? Well you have to do that later, and you need to publish the blocks, too. If Chain E just checks the work on that local chain, then it looks like the attacker's chain is longer. But the chain, as calculated by full nodes is, not worth as much as the original chain, so they will keep mining on the orig chain. However, if the attacker has $q>p$ then they'll always outperform the honest chain and the reflections will eventually favour the attackers chain. so the reflecting chains (Chain E) need to incorporate calculations of the *total* block weight of Chain B. That means they need to be half-nodes for Chain B so that they can track Chain B's known reflections.
 
-- savvy readers might note that as the Chain B tip is gaining reflections from Chain E, miners on Chain B are incented to include as many Chain E headers (and PoRs) as possible. That's because each new header will add weight to the *parent* of the block which the Chain B miner is attempting to produce, increasing overall chain-weight that the miner is building on.
+How is it that Chain B miners can know the partial state of Chain E that is required to produce the necessary PoRs? Typically a blockchain network will support some light-client protocol that allows nodes to ask for such proofs, and that is one method. However, it is possible to design a blockchain system so that this is not required, and one such method is discussed in \autoref{sec:segmented-state}.
 
 #### Step 5. Mutual Reflection
 
-\todo{Write out a bit about mutual reflection or move from elsewhere.}
+The final step in this progression is *mutual reflection* -- where both chains track one-another and include the necessary PoRs and modifications to their chain-weight algorithms. This is shown in \autoref{fig:pow-refl-step5}.
 
-\begin{figure}[H]
+\begin{figure}[]
 \centering
-\includegraphics[height=0.35\textheight]{pow_refl_step4_sag}
+\includegraphics[height=0.35\textheight]{pow_refl_step5_sag}
 \caption{\textit{Proof of Reflection} between two UT Chains}
-\label{fig:pow-refl-step4}
+\label{fig:pow-refl-step5}
 \end{figure}
+
+There are several details that still require discussion, though, such as: *how exactly is weight contributed by a reflecting chain converted to weight in the local chain?* (discussed in \autoref{sec:comparing-diff-pows}); and *how can proofs of reflection be calculated without the requirement that miners are full nodes of both chains?* (discussed in \autoref{sec:practical-considerations}).
+
+Despite these omissions, the *essence* of *Proof of Reflection* should now be apparent. That is: the idea that blockchains can track the history of other blockchains, and thus confirm that history in the same way they confirm transactions, can *in principle* be used to increase the difficulty of attacking those blockchains. *In principle* it is possible to increase the security of a blockchain via *reflection*.
+
+\begin{comment}
 
 ### Proof of Reflection between chains using the same alg
 
-tl;dr it can work fine I think. Like it's still secure; there's nothing about Proof of Reflection that *requires* more than one hashing alg, it's just the easier context to explain it in b/c miners of one chain can't attack the other.
+tl;dr it can work fine I think. Like it's still secure; there's nothing about *Proof of Reflection* that *requires* more than one hashing alg, it's just the easier context to explain it in b/c miners of one chain can't attack the other.
 
 \todo{tidy this section, provide explanation.}
-
-\begin{comment}
 
 \todo{build this section out -- seems like this can be done securely. nb: the rest of this subsection are just notes; probs just skip over them}
 
@@ -313,13 +265,15 @@ In blockchains like Bitcoin and Ethereum, block rewards are denominated in the *
 
 If two PoW blockchains using different hashing algorithms use the same root token, then we can directly compare the rates of work done on each via the normalized block rewards of the root token on each (normalized against time). What do I mean by this? Let's look at an example.
 
-Say we had Altcoin1 and Altcoin2: two near-identical PoW chains using different algorithms, but with the *same* root token (conserved via a 2-way peg or w/e). Firstly, we need a way to determine what their block rewards are, and the intuitive solution is to set each chain's block reward proportionally to the percentage of root tokens (i.e., *coins*) on that chain. If one of them has 100% of the root tokens, then 50 coins are generated as a reward per block. If one had 60% of the root tokens, then 30 coins are generated per block *on that chain*, and (since we only have 2 chains) 20 coins are generated per block *for the other chain*, corresponding to the remaining 40% of root tokens. One reason this method makes sense is that the ratio of coins on each chain is not affected by block rewards -- though this property only holds (as I've put it here) if both chains have the same rate of block production. We can generalize the method by normalizing against time so that we're comparing the rates of coin production rather than the block rewards themselves.
+Say we had Altcoin1 and Altcoin2: two near-identical PoW chains using different algorithms, but with the *same* root token. Firstly, we need a way to determine what their block rewards are, and the intuitive solution is to set each chain's block reward proportionally to the percentage of root tokens (i.e., *coins*) on that chain. If one of them has 100% of the root tokens, then 50 coins are generated as a reward per block. If one had 60% of the root tokens, then 30 coins are generated per block *on that chain*, and (since we only have 2 chains) 20 coins are generated per block *for the other chain*, corresponding to the remaining 40% of root tokens. One reason this method makes sense is that the ratio of coins on each chain is not affected by block rewards -- though this property only holds (as I've put it here) if both chains have the same rate of block production. We can generalize the method by normalizing against time so that we're comparing the rates of coin production rather than the block rewards themselves.
 
 Now that we know what the block rewards are and have defined them in terms of the percentage of total coins that are on that chain, we can work on comparing the chains' hash rates. What sort of foundation could we do this from? What about *equal work for equal reward*? Because we have defined block rewards in terms of *where* root tokens are held, we can measure things like *hashes per token* (when considering block rewards particularly). Crucially, we can measure this *for each chain*, which allows us to -- *contextually* -- make claims like 100 hashes of algorithm 1 are worth 25 hashes of algorithm 2.
 
 Since we know the percentage of root tokens on each chain for each moment in history, we can safely use that figure in chain-weight calculations. The reliability of that data will be the same as the reliability of the blockchains themselves, provided we enforce the 2-way peg that ensures no root tokens are created or destroyed outside protocol rules.
 
-\todo{should we bother deriving the maths for this here? IMO it's not that important to include in the paper provided the core idea is. Just some basic algebra and calculus.}
+\todo{should we bother deriving the maths for this here? IMO it's not that important to include in the paper provided the core idea is.}
+
+\todo{add an algorithm for this conversion.}
 
 #### Different Root Tokens with a DEX
 
@@ -515,7 +469,14 @@ Thus, given two chains, $j$ and $k$:
   nb: I need to consider that the history that the miner builds on increases with time (b/c reflections start accumulating, and once that miner publishes a block, then that block will have sigma-weight more than just its own weight). so the place to look isn't what a block weighs, it's to look at what a block is building on -- how much does that weigh.
 }
 
-
 \begin{equation}
 r_1 = Z_1 \cdot \frac{T_{\text{max}}}{T_1} \cdot B_{f,1}
 \end{equation}
+
+### The Insecurity of Merged Mining
+
+\todo{write}
+
+- Merged Mining allows attacking merged chains at 0 cost.
+- that means that if a parent chain and a merged mined child chain where to reflect one another, then the weight contributed via merged mining must be 0 -- no additional work was actually done beyond that of the parent-chain.
+- Also, if some other chain reflects both a parent chain *and* a merged mined child chain, then the net benefit is equal to *only* the work contributed by the reflecting parent chain.
