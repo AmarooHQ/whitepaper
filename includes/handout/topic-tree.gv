@@ -57,7 +57,7 @@ digraph TopicTree {
     powRefAttacks [label = "Simplex Attacks"];
     simplexPoSVsPurePoS [label = "Simplex + PoS\nvs\nPure PoS"];
     dappChains [label = "Dapp-chains", shape=octagon];
-    devPotential [label = "Dev Potential"];
+    devPotential [label = "Leveraging\nExisting Projects"];
     devPotentialUniversality [label = "Universality", shape=octagon];
     devPotentialReach [label = "Reach", shape=octagon];
     tiling [label = "Tiling"];
@@ -65,14 +65,14 @@ digraph TopicTree {
 
     nosimus -> consensus;
     consensus -> pow;
-    consensus -> nakamotoConsensus -> nakConsensusSafeUnsafe;
     pow -> nakamotoConsensus;
-    essenceOfPoWDataInclusion -> nakConsensusSafeUnsafe;
+    pow -> essenceOfPoWDataInclusion;
+    // essenceOfPoWDataInclusion -> nakConsensusSafeUnsafe;
+    nakamotoConsensus -> nakConsensusSafeUnsafe;
     consensus -> PoSConsensusGeneral;
     nakamotoConsensus -> blockDag;
     blockDag -> dosAttacks;
     //nakamotoConsensus -> essenceOfPoWDataInclusion;
-    pow -> essenceOfPoWDataInclusion;
     nosimus -> dataStructsGeneral -> merkleTrees -> spvProofs -> spvProofsViaSC;
     nosimus -> scaling -> scalingTrilemma;
     scaling -> scalingOCSquared;

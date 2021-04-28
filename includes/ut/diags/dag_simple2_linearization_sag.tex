@@ -14,9 +14,10 @@
 \tikzstyle{arrowLin} = [thick, ->, -to, shorten >= 2pt, shorten <= 2pt]%
 \newcommand\TikzDagSimple{
     \providecommand\AbbrChain{B}
-    \node (prevDots) [yshift=0cm] {$\vdots$};
+    % \node (prevDots) [yshift=0cm] {$\vdots$};
 
-    \node (block1) [block, below = of prevDots] {$\AbbrChain_{i}$};
+    \node (block1) [block] {$\AbbrChain_{i}$};
+    % \node (block1) [block, below = of prevDots] {$\AbbrChain_{i}$};
     %\draw [arrowParent] (block1) -- (prevDots);
 
     \node (block2mid) [below = of block1] {};
@@ -43,7 +44,7 @@
     \draw [arrowLin] (block2/2) -- (block1);
 
     \xdef\xs{0cm}
-    \xdef\topNode{prevDots}
+    \xdef\topNode{block1}
     \xdef\botNode{block4}
     \xdef\leftMostNode{block2/1}
 

@@ -214,7 +214,7 @@ The final step in this progression is *mutual reflection* -- where both chains t
 
 There are several details that still require discussion, though, such as: *how exactly is weight contributed by a reflecting chain converted to weight in the local chain?* (discussed in \autoref{sec:comparing-diff-pows}); and *how can proofs of reflection be calculated without the requirement that miners are full nodes of both chains?* (discussed in \autoref{sec:practical-considerations}).
 
-Despite these omissions, the *essence* of *Proof of Reflection* should now be apparent. That is: the idea that blockchains can track the history of other blockchains, and thus confirm that history in the same way they confirm transactions, can *in principle* be used to increase the difficulty of attacking those blockchains. *In principle* it is possible to increase the security of a blockchain via *reflection*.
+Despite these omissions, the *essence* of *Proof of Reflection* should now be apparent. *In principle*, we can make blockchains more difficult to attack based on the idea that *blockchains can track the history of other blockchains (and confirm that chain's history like they do transactions)*. *In principle*, it is possible to increase the security of a blockchain via *reflection*.
 
 \begin{comment}
 
