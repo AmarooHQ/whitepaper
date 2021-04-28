@@ -21,7 +21,7 @@ The definition of scalability is perhaps problematic. If the network growth, $O(
 \label{fig:trilemma-core-conflict}
 \end{figure}
 
-\autoref{fig:trilemma-core-conflict} shows a cloud for the core conflict. Safely increasing capacity requires that we stay decentralized. Staying decentralized requires that we use sharding and small blocks. Safely increasing capacity requires that the network stays secure. Staying secure requires we use big blocks. Big blocks are the opposite of small blocks, so we have a *conflict*. Sharding compromises security, and big blocks compromise decentralization.
+\autoref{fig:trilemma-core-conflict} shows a cloud for the core conflict. It reads: *safely increasing capacity* requires that we *stay decentralized*. *Staying decentralized* requires that we *use sharding and small blocks*. *Safely increasing capacity* requires that the network *stays secure*. *Staying secure* requires we *use big blocks*. Big blocks are the opposite of small blocks, so we have a *conflict*. Additionally: sharding compromises security, and big blocks compromise decentralization.
 
 To understand the core conflict we need to look at the underlying assumptions.
 
