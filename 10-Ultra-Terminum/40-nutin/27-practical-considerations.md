@@ -30,11 +30,6 @@ The complexity and impact of this strategy is discussed in \autoref{sec:bandwidt
 
 \label{sec:proving-reflection}
 
-\bigtodo{
-    write this. come up with a method by which a miner having all blocks can construct the witnesses for proof-of-reflection. by doing this, miners don't need to include SPV proofs of reflection; the witnesses don't need to be included. \\
-    NB: I think this todo has been done.
-    }
-
 If simplex-chains' consensus protocol requires accounting for reflected work, then nodes must have some method whereby they know which work (in a particular chain's history) has been reflected. That is: a node for chain A must be able to answer the question *For each other simplex-chain, which blocks in chain A's history have been reflected?* This means that each node must have $N_1 - 1$ answers for a simplex of $N_1$ chains.
 
 There is a trivial method: include merkle branch proofs along with reflected headers. Specifically: when a miner on chain A includes a header from chain B, they should also include a merkle branch that shows the most recent chain A header that has been reflected by chain B. Miners would need to do this for *all* simplex-chains that they reflect. Predictably, this has overhead with order $O(N_1 \cdot log_2 N_1)$, where $N_1$ is the number of chains in the simplex. This method has complexity $O(c \log_2 c)$ which is discussed in \autoref{sec:complexity-reflection-proof}.

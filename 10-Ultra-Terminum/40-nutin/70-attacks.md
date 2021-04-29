@@ -157,6 +157,15 @@ Your message could not be delivered. This is usually because you don't share a s
   Continue dialog.
 }
 
+### Analysis of Existing Attacks
+
+\todo{Link to response locations for: 51\%, publishing bad data, selfish mining, dag-based, reflection stuff}
+
+
+
+
+\begin{comment}
+
 ### 51% and double-spends
 
 \bigtodo{discuss 51 percent and how difficult it is in UT vs Bitcoin, et al.}
@@ -186,6 +195,4 @@ similar to how you can theoretically win govt in a democracy by winning 51% of v
 - creating lots of DAG blocks to link back to with low PoW (soln: no variable PoW targets or min limit)
 - more backlinks -> larger headers -> lower total throughput (soln: max numbers of backlinks + min PoW target)
 
-### other attacks?
-
-\bigtodo{find some}
+\end{comment}

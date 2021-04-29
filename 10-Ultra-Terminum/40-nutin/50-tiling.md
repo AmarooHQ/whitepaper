@@ -28,8 +28,6 @@ Increasing the valence beyond 3 does not make sense, though. There are two reaso
 
 ### The First Tile
 
-\bigtodo{mb a diagram of simplex in quadrants -- this would show like a 20-chain simplex in partitions of 5, but mb with 15/20 chains being like 'empty'. IDK, TBD}
-
 \begin{figure}
 \centering
 \includegraphics[width=50mm]{simplex_5_sag}
@@ -175,6 +173,8 @@ Galaxies that are close enough to us, and that have a low enough relative veloci
 \end{comment}
 
 #### What About Tiled 3-Simplexes?
+
+\todo{write out - Tiled 3-Simplexes}
 
 A 3-simplex (which has 4 chains) is the least populous simplex that may be tiled with a valence of 3. The result of this is shown in \autoref{fig:tiled-3-simplexes} and is equivalent to a tiling of individual blockchains. This configuration still has $O(n)$ scalability.
 

@@ -30,8 +30,6 @@ NB: The only way to directly compare security like this is to proxy the measurem
 
 ### Lowering the variance of block production in PoW blockchains
 
-\bigtodo{mb -- figures showing block production to demonstrate variance}
-
 Is it possible to *dramatically* lower the variance of block production in PoW blockchains without altering incentive structures, compromising security, or changing the probability of generating a valid block?
 
 Yes. The method relies on the *structure* of the network, rather than the consensus protocol itself. Particularly, the network must be structured such that miners' choices result in decreased block production variance --- an emergent phenomenon. It's important not to try and make it artificially (e.g. by increasing the block reward with time-since-last-block) because you don't want ppl to game the system. It's better to have a simple system with emergent properties than a complex system with those properties "designed in".
@@ -43,8 +41,6 @@ If the network has spare capacity (i.e., txs are mostly cleared out with each bl
 Set $t=0$ to be immediately after a block is published on a chain. then, as $t$ progresses, txs with fees should build up in the mempool, so $TxFees \propto t$. The reward for mining a block is $r + TxFees$ for some block reward, $r$. if $TxFees \propto t$ then $r + TxFees \propto K + t$ for some constant $K$.
 
 The potential reward-over-time for a miner ($t$ vs $r + TxFees$) looks like a sawtooth function with a y-axis offset. It builds as more txs pile up, and drops back to the baseline reward after a block.
-
-\bigtodo{figure of reward vs time mb, and one with lower variance? IDK, mb not necessary. Here's a paper about block production/arrival times \url{https://arxiv.org/pdf/1801.07447.pdf} also \url{https://en.wikipedia.org/wiki/Negative_binomial_distribution}}
 
 If the miners $M_0, ..., M_9$ are capable of working on one of any $\{C_0, ..., C_9\}$ (and they have identical ROI profiles to the other miners), then they're incented to work on the chain with the most txs in the mempool. That means: miners should, roughly, work the chain that has gone the longest without a block. What should we expect based on those incentives? Miners should work on each chain only in the final moments of the block production cycle. If block times were set to 60s, then they'd start mining at like the 54s mark b/c that's how they maximize their ROI.
 

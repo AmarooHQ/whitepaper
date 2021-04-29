@@ -321,6 +321,64 @@ In the context of *Ultra Terminum* and *Amaroo*, these aren't questions that are
 - could build on parity/ethereum/polkadot/etc clients. Cardano too if Ouroboros isn't garbage.
   - probs best to just use these as dappchains
 
+### Recursive Reflection
+
+\bigtodo{not sure if this should be included. if so then need to write out this section}
+
+Say chain B reflects both A and C. $A <-> B <-> C$. Proof of Reflection says A gets a benefit by proving that B reflects specific work from A. Does A get a security benefit by proving that C reflects B reflects A?
+
+### Equivalency of Reflecting and Non-Reflecting Block-Weightings
+
+\label{sec:equiv-state-block-weightings}
+
+\bigtodo{show that the result under Proof of Reflection is backwards compatible, i.e., existing consensus methods will settle on the same result. Needs to work for DAGs, too.}
+
+##### Notes:
+
+I think this should pan out b/c miners build on the longest chain. So if, at some time $t$, there's a disagreement between block-weighting methods, then miners will choose the reflection weighting. That should mean that a few blocks later (e.g., at $t+5$) the 'problematic' section of the chain is now re-orgd so that the methods agree again.
+
+note: I think this *must* hold for double-spend mitigation stuff to work out.
+
+An alternative plan, if the above doesn't work out, is for the header to include its corresponding block-weighting that accounts for reflections. That would allow a full-node doing an initial sync to reproduce the block-ordering that accounts for reflections, even though it isn't verifying those reflections (similar to SegWit).
+
+### Effect on Confirmation Speed
+
+The idea of *confirmation* is a representation of the risk that a transaction will fail to become finalized within a blockchain network; as a transaction receives more *confirmations*, the probability that a doublespend attempt succeeds approaches 0. A transaction is said to have been *confirmed* once it has enough confirmations to pass a *breakpoint*, beyond which the probability of an attack succeeding is close (enough) to 0.
+
+Let us say that some chain, $C_1$, is reflected by another chain, $C_2$. Since we have two chains, we will also say that $N = 2$. For simplicity, let us assume that these two chains have equal hash power and use the same hash function for the PoW -- this means the attacker can mine either chain. Let us also denote the probability of an attack succeeding on some chain, $C_i$, via the function $P_{C_i}(q_i)$, where $q_i$ is the proportion of computational power that the attacker controls.
+
+\bigtodo{write out these paragraphs properly and make maths more formal}
+
+\mk{
+  NTS: For the case of ${C_1, C_2}$, it's clear that if $q_1 > 0.5$ and $q_2 > 0.5$ then the attacker should be able to perform arbitrary doublespends. This is equivalent to doing a 51% attack on both $C_1$ and $C_2$ simultaneously.
+}
+
+What if $q_1 > 0.5$ and $q_2 < 0.5$?
+
+\mk{
+  NTS: attacker dominates if $q_1 + q_2 > 1$, or more generally: $\sum_{i = i}^{N} q_i > \frac{N}{2}$
+}
+
+What if $q_1 < 0.5$ and $q_2 < 0.5$?
+
+\mk{NST: If the attacker is withholding then there are two races: one on $C_1$ and one on $C_2$. to secretly do a doublespend then the attacker must win both races and publish both chain-segments simultaneously, causing a simultaneous reorg on both chains.}
+
+\bigtodo{finish this section}
+
+\bigtodo{what are the dynamics of winning one race but not both? say they won $C_1$, they'd publish both but then someone else building on $C_1$ would add all the real headers from $C_2$ that don't include the reflections, which *after the fact* would diminish the chain-weight of $C_1$, but then with new $C_2$ blocks would reflect the new $C_1$ chain-segment. Todo: how does this interact with block-weighting calculation? need to do some simulations I think. Also todo: should miners like take into account new reflected work in their draft blocks? if so does that mean they'd still favor the old (honest) chain segment? probs need to formalize the chain-weighting alg so that it can be analyzed easily}
+
+\mk{
+  NTS: for cases where multiple races need to be won, the probability of success will be like: \\
+$\prod_{i=1}^{N} P_{C_i}(q_i)$ \\
+Which becomes vanishingly small much faster than for a single chain. There's a breakpoint around winning the race, sorta. The attacker does get some bonus from winning by a larger margin, but winning the race is still important.
+}
+
+### block weight stuff
+
+\todo{review commented blockweight stuff and figure out what needs to be included still and where}
+
+\begin{comment}
+
 ### New block-weight algorithms
 
 \label{s:counting-reflected-work}
@@ -388,58 +446,6 @@ From forum last night:
 
 \bigtodo{how are confirmation times affected by the simplex?}
 
-### Recursive Reflection
-
-\bigtodo{not sure if this should be included. if so then need to write out this section}
-
-Say chain B reflects both A and C. $A <-> B <-> C$. Proof of Reflection says A gets a benefit by proving that B reflects specific work from A. Does A get a security benefit by proving that C reflects B reflects A?
-
-### Equivalency of Reflecting and Non-Reflecting Block-Weightings
-
-\label{sec:equiv-state-block-weightings}
-
-\bigtodo{show that the result under Proof of Reflection is backwards compatible, i.e., existing consensus methods will settle on the same result. Needs to work for DAGs, too.}
-
-##### Notes:
-
-I think this should pan out b/c miners build on the longest chain. So if, at some time $t$, there's a disagreement between block-weighting methods, then miners will choose the reflection weighting. That should mean that a few blocks later (e.g., at $t+5$) the 'problematic' section of the chain is now re-orgd so that the methods agree again.
-
-note: I think this *must* hold for double-spend mitigation stuff to work out.
-
-An alternative plan, if the above doesn't work out, is for the header to include its corresponding block-weighting that accounts for reflections. That would allow a full-node doing an initial sync to reproduce the block-ordering that accounts for reflections, even though it isn't verifying those reflections (similar to SegWit).
-
-### Effect on Confirmation Speed
-
-The idea of *confirmation* is a representation of the risk that a transaction will fail to become finalized within a blockchain network; as a transaction receives more *confirmations*, the probability that a doublespend attempt succeeds approaches 0. A transaction is said to have been *confirmed* once it has enough confirmations to pass a *breakpoint*, beyond which the probability of an attack succeeding is close (enough) to 0.
-
-Let us say that some chain, $C_1$, is reflected by another chain, $C_2$. Since we have two chains, we will also say that $N = 2$. For simplicity, let us assume that these two chains have equal hash power and use the same hash function for the PoW -- this means the attacker can mine either chain. Let us also denote the probability of an attack succeeding on some chain, $C_i$, via the function $P_{C_i}(q_i)$, where $q_i$ is the proportion of computational power that the attacker controls.
-
-\bigtodo{write out these paragraphs properly and make maths more formal}
-
-\mk{
-  NTS: For the case of ${C_1, C_2}$, it's clear that if $q_1 > 0.5$ and $q_2 > 0.5$ then the attacker should be able to perform arbitrary doublespends. This is equivalent to doing a 51% attack on both $C_1$ and $C_2$ simultaneously.
-}
-
-What if $q_1 > 0.5$ and $q_2 < 0.5$?
-
-\mk{
-  NTS: attacker dominates if $q_1 + q_2 > 1$, or more generally: $\sum_{i = i}^{N} q_i > \frac{N}{2}$
-}
-
-What if $q_1 < 0.5$ and $q_2 < 0.5$?
-
-\mk{NST: If the attacker is withholding then there are two races: one on $C_1$ and one on $C_2$. to secretly do a doublespend then the attacker must win both races and publish both chain-segments simultaneously, causing a simultaneous reorg on both chains.}
-
-\bigtodo{finish this section}
-
-\bigtodo{what are the dynamics of winning one race but not both? say they won $C_1$, they'd publish both but then someone else building on $C_1$ would add all the real headers from $C_2$ that don't include the reflections, which *after the fact* would diminish the chain-weight of $C_1$, but then with new $C_2$ blocks would reflect the new $C_1$ chain-segment. Todo: how does this interact with block-weighting calculation? need to do some simulations I think. Also todo: should miners like take into account new reflected work in their draft blocks? if so does that mean they'd still favor the old (honest) chain segment? probs need to formalize the chain-weighting alg so that it can be analyzed easily}
-
-\mk{
-  NTS: for cases where multiple races need to be won, the probability of success will be like: \\
-$\prod_{i=1}^{N} P_{C_i}(q_i)$ \\
-Which becomes vanishingly small much faster than for a single chain. There's a breakpoint around winning the race, sorta. The attacker does get some bonus from winning by a larger margin, but winning the race is still important.
-}
-
 ### The Previous Block-Weighting Function
 
 \bigtodo{exploratory notes}
@@ -490,6 +496,8 @@ Thus, given two chains, $j$ and $k$:
 \begin{equation}
 r_1 = Z_1 \cdot \frac{T_{\text{max}}}{T_1} \cdot B_{f,1}
 \end{equation}
+
+\end{comment}
 
 ### The Insecurity of Merged Mining
 
