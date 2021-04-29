@@ -1,5 +1,6 @@
 OUTDIR=output
-WPNOEXT=$(OUTDIR)/whitepaper
+WPRAW=whitepaper
+WPNOEXT=$(OUTDIR)/$(WPRAW)
 WPFILE=$(WPNOEXT).markdown
 WPHTML=$(WPNOEXT).html
 WPTEX=$(WPNOEXT).tex
@@ -50,8 +51,11 @@ wc:
 
 mk-latex-pdf:
 	# pdflatex -output-directory=$(OUTDIR) $(WPNOEXT).tex
+	-rm $(WPNOEXT).glsdefs
 	latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
-	cp $(WPNOEXT).pdf ./whitepaper-latest.pdf
+	makeglossaries -d $(OUTDIR) $(WPRAW)
+	latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
+	cp $(WPNOEXT).pdf ./$(WPRAW)-latest.pdf
 
 %.md:
 	echo 'skipping task for .md files'
@@ -64,7 +68,7 @@ handout:
 	pandoc --standalone --mathjax -f markdown --pdf-engine=context -V fontsize=11.5pt -o includes/handout/exec-summary.pdf includes/handout/exec-summary.md
 
 clean: init
-	$(RM) -fv -- `find . -iname \*.aux -or -iname \*.bak -or -iname \*.bbl -or -iname \*.blg -or -iname \*.log -or -iname \*.out -or -iname \*.toc -or -iname \*.tdo -or -iname _region.*`
+	$(RM) -fv -- `find . -iname \*.aux -or -iname \*.gls* -or -iname \*.bak -or -iname \*.bbl -or -iname \*.blg -or -iname \*.log -or -iname \*.out -or -iname \*.toc -or -iname \*.tdo -or -iname _region.*`
 
 deponly-clean:
 	$(RM) -fv -- `find ./ -iname \*_sag.pdf`

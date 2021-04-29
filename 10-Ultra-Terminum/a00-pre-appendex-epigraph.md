@@ -12,4 +12,6 @@
 \vspace*{\fill}
 
 \newpage
+\printglossaries
+\newpage
 \appendix

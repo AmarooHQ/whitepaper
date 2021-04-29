@@ -37,7 +37,7 @@ Let's add such a contract to Ethereum and describe the relevant data and events 
 
 After a Bitcoin block is produced, an Ethereum miner includes a transaction containing the Bitcoin header, which updates the SC tracking the Bitcoin chain. In reality there are practical concerns about incenting someone to produce such a transaction (among other things); we're not concerned with those here. We're just concerned with the relationships that exist and what they can do.
 
-Why would a chain want to track another chain? The typical answer is to prove transactions or state occurred on the foreign chain. On Ethereum one could build a trustless $\text{BTC}\leftrightarrow\text{ETH}$ market, for example.
+Why would a chain want to track another chain? The typical answer is to prove transactions or state occurred on the foreign chain. On Ethereum, one could build a trustless $\text{BTC}\leftrightarrow\text{ETH}$ market, for example.
 
 ### Two Blockchains
 
@@ -180,6 +180,8 @@ The *meaning* of this change is that Chain B now incorporates work done on Chain
 
 When a chain does this we say *Chain B (or Chain B's work) is **reflected** in Chain E*. This technique is what is meant by the term *Proof of Reflection*.
 
+\defineTerm{Proof of Reflection}{The consensus technique whereby a blockchain becomes more difficult to attack via the inclusion of proofs that its history is tracked and confirmed by another blockchain}
+
 One particular *impact* of this change is that a doublespend attack (e.g. by withholding a privately mined chain that reverts a transaction) must now be performed *not only* against Chain B, *but also and simultaneously* against Chain E.
 
 Why? The privately mined blocks to perform the attack *are not known about* by Chain E. Rather, Chain E knows about the *public* Chain B history *against which the attack competes*. Thus, *either*:
@@ -251,13 +253,21 @@ under that sort of thing the 'microchain' would become like an O(c) record of al
 
 \label{sec:comparing-diff-pows}
 
-For Proof of Reflection to work effectively, there must be some method of comparing and converting the *work* done by reflecting chains. Earlier, we simply *set* a ratio between Bitcoin blocks and Ethereum blocks based on the arbitrary notion of *equal work in equal time*, but that isn't a context that's easy to create and maintain in reality.
+For Proof of Reflection to work effectively, there must be some method of comparing and converting the *work* done by reflecting chains. Earlier, we simply *set* a ratio between Chain B blocks and Chain E blocks, but that isn't suitable for a production network.
 
 How can we design a system that allows for sensible comparisons between Proofs of Work that use different hashing algorithms?
 
+The core problem is that the work done on different chains is measured using different units -- and those units aren't convertible. This applies to blockchains that use the same hashing algorithm, too, since there may be different costs and factors that are implicit in the mining of each of those chains. One hash is not necessarily worth exactly one hash in different contexts.
+
+Returning to Elliot Temple's idea: in order to convert otherwise unconvertible units, one must define a suitable goal and context for that conversion to make sense. For example: *is a cucumber longer than it is green?*[^cucumber-goldratt] That doesn't make sense because we can't convert between length and color. However, consider the situation where you want to win a cucumber competition where points are awarded both for the consistency of the color and for length (and nothing else). Based on those rules you could figure out a way to convert both color and length into points. This would help you pick the best of your cucumbers to enter into the competition, and developing that method means that you also now have a way to convert color to length via whatever relationship you come up with. Depending on the specific rules, you could now say things like *1cm of length is worth 3 blemishes*. In order to make sense of *converting between a cucumber's color and length*, you need both the context of the competition's rules and also the goal of maximizing the number of points.
+
+[^cucumber-goldratt]: This example is from Eli Goldratt's *The Choice* (2008).
+
+In the case of *Proof of Reflection*, we need to define a suitable goal and context to enable this conversion. Our goal is straight forward, and the same as other consensus mechanisms: we want a blockchain system that is as difficult as possible to attack. The difficulty of such an attack is typically analysed from the context of an attacker's *risk vs reward* where the attacker has a goal of *profit*. This hints at the essence of suitable contexts.
+
 #### A Single Root Token Across Multiple Chains
 
-*Root Token*: The sole network-level token required by typical blockchain protocols. e.g. Bitcoin has BTC, Ethereum has ETH, Polkadot has DOT, Cardano has ADA, etc.
+\defineTerm{Root Token}{The sole network-level token required by typical blockchain protocols. e.g. Bitcoin has BTC, Ethereum has ETH, Polkadot has DOT, Cardano has ADA, etc}
 
 The simplest method for comparing work done via different algorithms is to measure that work via a common unit. How can we do this? Whatever method we choose, it must *cancel out* market conditions like: silicon availability, the cost of power, the availability of mining rigs, and short-term effects like a drastic shift in token price.
 
