@@ -26,8 +26,9 @@ whitepaper: $(PDFGraphics) $(InputTeXFiles) build-whitepaper wp-pandoc mk-latex-
 
 # atm restrict this to just the UT folder, can generalize again later
 # to do that: replace '10-Ultra-Terminum' with '*-*'
-build-whitepaper: clean-wp-md %.md
-	touch $(WPFILE)
+# nb: add `clean-wp-md` as a dependency if there are issues building.
+build-whitepaper: %.md
+	echo '' > $(WPFILE)
 	for mdfile in `find 10-Ultra-Terminum/ -iname \*.md | sort`; do \
 	  echo "Processing: $$mdfile" && \
 	  cat $$mdfile >> $(WPFILE) && \
@@ -39,7 +40,7 @@ wp-pandoc:
 	sed -i 's/\\%\\%/%/g' $(WPTEX)
 
 wp-just-quotes: clean-wp-md
-	touch $(WPFILE)
+	echo '' > $(WPFILE)
 	cat 10-Ultra-Terminum/00.md >> $(WPFILE)
 	cat 10-Ultra-Terminum/10-buterins-trilemma.md >> $(WPFILE)
 	cat 10-Ultra-Terminum/40-nutin/25-constructing-ut.md >> $(WPFILE)

@@ -3,7 +3,7 @@
 
 #### Complexity of Dapp-Chains
 
-\todo[inline]{outdated, will be replaced by above sections}
+\bigtodo[inline]{outdated, will be replaced by above sections}
 
 Dapp-chains look and act like typical shards; i.e. dapp-chains are 'child' chains of some 'parent' chain. If we presume that all chains have some constant maximum capacity (similar to the block-limit in Bitcoin and gas-limit in Ethereum) then calculating the scaling complexity is straight-forward and typical.
 
@@ -11,7 +11,7 @@ NB: capacity is often discussed in *transactions per second* (tps) or in terms o
 
 [^1]: Ethereum's capacity is slightly harder to calculate in $\si{bytes\per\sec}$ since we need to convert from $\si{gas\per\sec}$ to $\si{bytes\per\sec}$. Averaging the size of blocks 11949129 to 11949134 (which were all above 98% gas utilization) gives $\SI{46896}{bytes/block}$, or $\SI{3126.4}{bytes\per\sec}$.
 
-\todo[inline]{fix up units and maths to work with latex, mathjax, etc.}
+\bigtodo[inline]{fix up units and maths to work with latex, mathjax, etc.}
 Each dapp-chain has some maximum capacity, $k \si{bytes/sec/dchain}$, and some header-size $h \si{bytes/header}$. Additionally, there is some average block production rate per dapp-chain: `b blocks/sec/dchain`. The parent chain also has some maximum capacity, which we set equal to the dapp-chains' capacity, `k bytes/sec/pchain` (nb: since there is only one parent-chain we can omit the `pchain` component from these units). We can choose `k` to fit with reasonable expectations about each nodes' computational capacity, `c`. Note that $O(k) = O(c)$; throughput grows with computational capacity (naturally).
 
 The parent chain can host multiple dapp-chains. If it is *only* hosting dapp-chains, then, at maximum capacity, each parent-block will be full of headers for dapp-chains. That is, a parent chain can handle up to `k/h headers/sec/pchain = k/h headers/sec`. We've said that there is, on average, `b blocks/sec/dchain`, and headers have a 1:1 relationship to blocks. Thus we can say that we can support up to `k/bh dchains`.
@@ -20,7 +20,7 @@ The parent chain can host multiple dapp-chains. If it is *only* hosting dapp-cha
 
 #### Complexity of Proof of Reflection
 
-\todo[inline]{outdated, will be replaced by above sections}
+\bigtodo[inline]{outdated, will be replaced by above sections}
 
 - similar to above
 
@@ -34,7 +34,7 @@ to maximize $k_{tx} \cdot k_r$ we set $k_{tx} = k_r = \frac{k}{2}$ => so final c
 
 #### Complexity of UT
 
-\todo[inline]{outdated, will be replaced by above sections}
+\bigtodo[inline]{outdated, will be replaced by above sections}
 
 Basically, replace $k_{tx}$ with dapp-chain headers. so dapp-chain capacity decreases from `k^2/bh` to `k^2/2bh` (for dapp-chain values of `b` and `h`). but we get to multiply by `k[r]/bh = k/2bh` rchains (for reflected chain values of `b` and `h`).
 
@@ -48,11 +48,11 @@ we simplify as before, and we have complexity $O(k^3) = O(c^3)$.
 
 ##### Maximum number of dapp-chains
 
-\todo[inline]{outdated, will be replaced by above sections}
+\bigtodo[inline]{outdated, will be replaced by above sections}
 
-the total ($t$) number of dapp-chains we can have is $t = r\cdot d$. We know that $r \cdot h_r \cdot b_r + d \cdot h_d \cdot b_d = k$; \todo[inline]{check remainder of paragraph} i.e. `reflection-chains * size of reflection header + dapp-chains * size of dapp-chain headers = k`. We can use these two to obtain: `t = r*(k - r*h[r])/h[d]` (eliminating the variable `d`). we then get `dt/dr = k/h[d] - 2*r*h[r]/h[d]`. find the maximum at `dt/dr = 0` to yield `r = k/(2*h[r])` at maximum throughput. since `t = r*(k - r*h[r])/h[d] = rk/h[d] - r^2*h[r]/h[d]` we get `t[max] = k^2/(2*h[r]*h[d]) - k^2/(4*h[r]^2) * h[r]/h[d] = 2*k^2/(4*h[r]*h[d]) - k^2/(4*h[r]*h[d]) = k^2/(4*h[r]*h[d])`
+the total ($t$) number of dapp-chains we can have is $t = r\cdot d$. We know that $r \cdot h_r \cdot b_r + d \cdot h_d \cdot b_d = k$; \bigtodo[inline]{check remainder of paragraph} i.e. `reflection-chains * size of reflection header + dapp-chains * size of dapp-chain headers = k`. We can use these two to obtain: `t = r*(k - r*h[r])/h[d]` (eliminating the variable `d`). we then get `dt/dr = k/h[d] - 2*r*h[r]/h[d]`. find the maximum at `dt/dr = 0` to yield `r = k/(2*h[r])` at maximum throughput. since `t = r*(k - r*h[r])/h[d] = rk/h[d] - r^2*h[r]/h[d]` we get `t[max] = k^2/(2*h[r]*h[d]) - k^2/(4*h[r]^2) * h[r]/h[d] = 2*k^2/(4*h[r]*h[d]) - k^2/(4*h[r]*h[d]) = k^2/(4*h[r]*h[d])`
 
-\todo[inline]{The below is right tho}
+\bigtodo[inline]{The below is right tho}
 
 Thus, the maximum number of dapp chains is given by:
 

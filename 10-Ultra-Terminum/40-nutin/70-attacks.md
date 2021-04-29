@@ -89,7 +89,7 @@
   I can still attack some dapp-chains.
 }
 
-\todo{look into PoS bribe attacks}
+\bigtodo{look into PoS bribe attacks}
 
 \cMax{
   How? Dapp-chain history is secured by the PoW done in the simplex. If you try, then your stake will get slashed and things will go back to normal. It's more like a donation than an attack.
@@ -153,13 +153,13 @@ Your message could not be delivered. This is usually because you don't share a s
   I've read the WP. Let's start from the top --- reflection. Start from first principles and build the idea up. I'll ask Qs as we go.
 }
 
-\todo{
+\bigtodo{
   Continue dialog.
 }
 
 ### 51% and double-spends
 
-\todo{discuss 51 percent and how difficult it is in UT vs Bitcoin, et al.}
+\bigtodo{discuss 51 percent and how difficult it is in UT vs Bitcoin, et al.}
 
 need to do 51% attacks on 51% of simplex chains - worst case, that mb isn't enough
 
@@ -171,13 +171,13 @@ similar to how you can theoretically win govt in a democracy by winning 51% of v
 
 ### Poisoning the Well
 
-\todo{the deliberate and malicious production of malformed data}
+\bigtodo{the deliberate and malicious production of malformed data}
 
 - e.g. making blocks with valid PoW but invalid contents so that they get reflected (soln: miners can reject blocks or link to blocks as invalid; no block reward for producer)
 
 ### Selfish Mining
 
-\todo{discuss selfish mining, and how it doesn't work}
+\bigtodo{discuss selfish mining, and how it doesn't work}
 
 - Proof of Reflection means that withholding blocks is a big disadvantage b/c you want the network (and other chains) to know about them ASAP. Attack doesn't work.
 
@@ -188,4 +188,4 @@ similar to how you can theoretically win govt in a democracy by winning 51% of v
 
 ### other attacks?
 
-\todo{find some}
+\bigtodo{find some}

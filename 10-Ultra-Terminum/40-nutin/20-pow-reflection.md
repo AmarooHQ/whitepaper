@@ -114,6 +114,8 @@ Could we use Chain B's knowledge *that it's own history is reflected in Chain E*
 
 #### Step 4. One Way Reflection
 
+\label{sec:por-step4}
+
 Before we discuss a change that Chain B could make, it is important to note that chain-work done with one hashing algorithm is *not generally convertible* to 'equivalent' work done via another hashing algorithm. For example, there is no meaningful *generic* answer to the question "how many *double SHA256* hashes is one *Ethash* hash worth?". In fact, there is no meaningful answer to similar questions that use any other other combination of hashing algorithms, either. It is not possible to *generically and universally* convert between qualitatively different units[^et-conversion]. It is *only* to do this within some *context* where with a *defined* conversion method. We'll look at some such contexts later.
 
 [^et-conversion]: The philosophical generalization of *qualitative conversion* and the *necessary* role that *goals* and *context* play is [Elliot Temple's](https://elliottemple.com) idea. It is covered in his [*Critical Fallibilism Course*](https://gumroad.com/l/mhtbA). It's also partially covered in (or related to) [Elliot's *Yes or No Philosophy* course](https://gumroad.com/l/hxqsh) and some of his articles, e.g., [*IGCs* ({Idea, Goal, Context} triples)](https://curi.us/2387-igcs) and [*Bottleneck Examples*](https://curi.us/2353-bottleneck-examples).
@@ -197,7 +199,7 @@ Practical methods of comparing (and converting the weight of) different Proofs o
 
 Note that, as the Chain B tip is gaining reflections from Chain E, miners on Chain B are incented to include as many Chain E headers (and PoRs) as possible. That's because each new header will add weight to the *parent* of the block which the Chain B miner is attempting to produce. This increases the overall chain-weight that the miner is building on, and thus contributes to their block becoming part of the most-worked chain.
 
-\todo{Answer the following:}
+\bigtodo{Answer the following:}
 
 - What if you mine a longer B-chain and then publish it to Chain E? Well you have to do that later, and you need to publish the blocks, too. If Chain E just checks the work on that local chain, then it looks like the attacker's chain is longer. But the chain, as calculated by full nodes is, not worth as much as the original chain, so they will keep mining on the orig chain. However, if the attacker has $q>p$ then they'll always outperform the honest chain and the reflections will eventually favour the attackers chain. so the reflecting chains (Chain E) need to incorporate calculations of the *total* block weight of Chain B. That means they need to be half-nodes for Chain B so that they can track Chain B's known reflections.
 
@@ -224,9 +226,9 @@ Despite these omissions, the *essence* of *Proof of Reflection* should now be ap
 
 tl;dr it can work fine I think. Like it's still secure; there's nothing about *Proof of Reflection* that *requires* more than one hashing alg, it's just the easier context to explain it in b/c miners of one chain can't attack the other.
 
-\todo{tidy this section, provide explanation.}
+\bigtodo{tidy this section, provide explanation.}
 
-\todo{build this section out -- seems like this can be done securely. nb: the rest of this subsection are just notes; probs just skip over them}
+\bigtodo{build this section out -- seems like this can be done securely. nb: the rest of this subsection are just notes; probs just skip over them}
 
 What about chains using the same alg? e.g. Bitcoin (B) and Bitcoin-copy (C)?
 
@@ -259,11 +261,12 @@ How can we design a system that allows for sensible comparisons between Proofs o
 
 The core problem is that the work done on different chains is measured using different units -- and those units aren't convertible. This applies to blockchains that use the same hashing algorithm, too, since there may be different costs and factors that are implicit in the mining of each of those chains. One hash is not necessarily worth exactly one hash in different contexts.
 
-Returning to Elliot Temple's idea: in order to convert otherwise unconvertible units, one must define a suitable goal and context for that conversion to make sense. For example: *is a cucumber longer than it is green?*[^cucumber-goldratt] That doesn't make sense because we can't convert between length and color. However, consider the situation where you want to win a cucumber competition where points are awarded both for the consistency of the color and for length (and nothing else). Based on those rules you could figure out a way to convert both color and length into points. This would help you pick the best of your cucumbers to enter into the competition, and developing that method means that you also now have a way to convert color to length via whatever relationship you come up with. Depending on the specific rules, you could now say things like *1cm of length is worth 3 blemishes*. In order to make sense of *converting between a cucumber's color and length*, you need both the context of the competition's rules and also the goal of maximizing the number of points.
+Revisiting *qualitative conversion* from \autoref{sec:por-step4}: in order to convert otherwise unconvertible units, one must define a suitable goal and context for that conversion to make sense. For example: *is a cucumber longer than it is green?*[^cucumber-goldratt] That question doesn't make sense because we can't convert between length and color. However, consider the situation where you want to win a cucumber competition where points are awarded for a cucumber based on both its consistency of color and its length (and nothing else). Based on the sepcific rules, you could figure out a way to convert both color and length into points. This would help you pick the best of your cucumbers to enter into the competition, and developing that method means that you also now have a way to convert color to length via whatever relationship you come up with. Depending on the specific rules, you could now say things like *1cm of length is worth 3 blemishes*. In order to make sense of *converting between a cucumber's color and length*, you need both the context of the competition's rules and also the goal of maximizing the number of points[^conv-other-gc-pairs].
 
 [^cucumber-goldratt]: This example is from Eli Goldratt's *The Choice* (2008).
+[^conv-other-gc-pairs]: NB: Other {goal, context} pairs could work, too.
 
-In the case of *Proof of Reflection*, we need to define a suitable goal and context to enable this conversion. Our goal is straight forward, and the same as other consensus mechanisms: we want a blockchain system that is as difficult as possible to attack. The difficulty of such an attack is typically analysed from the context of an attacker's *risk vs reward* where the attacker has a goal of *profit*. This hints at the essence of suitable contexts.
+In the case of *Proof of Reflection*, we need to define a suitable goal and context to enable this conversion. Our goal is straight forward, and the same as other consensus mechanisms: we want a blockchain system that is as difficult as possible to attack. The difficulty of such an attack is typically analysed from the context of an attacker's *risk vs reward* where the attacker has a goal of *profit*. This hints at a possible essence of suitable contexts.
 
 #### A Single Root Token Across Multiple Chains
 
@@ -281,17 +284,30 @@ Now that we know what the block rewards are and have defined them in terms of th
 
 Since we know the percentage of root tokens on each chain for each moment in history, we can safely use that figure in chain-weight calculations. The reliability of that data will be the same as the reliability of the blockchains themselves, provided we enforce the 2-way peg that ensures no root tokens are created or destroyed outside protocol rules.
 
-\todo{should we bother deriving the maths for this here? IMO it's not that important to include in the paper provided the core idea is.}
+\autoref{alg:weightof-1} details a simplistic \textsc{WeightOf} function which returns a weight normalized in coins/s.
 
-\todo{add an algorithm for this conversion.}
+\begin{algorithm}
+\caption{A simplistic \textsc{WeightOf} for networks of a single root token}\label{alg:weightof-1}
+\begin{algorithmic}
+\Procedure{WeightOf}{$B_i, state$} \Comment{The weight of a reflecting block normalized to coins/s}
+  \State $t \gets$ \Call{BlockTimestamp}{$B_i$}
+  \State $C \gets$ \Call{ChainOf}{$B_i$, $state$}
+  \State $r \gets$ \Call{RootTokensOnChainAt}{$C$, $t$}
+  \State $f \gets$ \Call{BlockFrequencyOfChain}{$C$}
+  \State \Return{$r \cdot f$}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\bigtodo{revisit \autoref{alg:weightof-1} and check it makes sense + add necessary explanations.}
 
 #### Different Root Tokens with a DEX
 
 Instead of using the same token on multiple chains, you could use a similar method with different root tokens on different chains. Implicit in above single-token method was a 1:1 conversion ratio between root tokens held on each chain. Can we not replace that with an exchange rate? If that exchange rate was provided via a trustless and decentralized exchange, could that not also be a reasonable context to do this sort of conversion?
 
-In principle you can use the same principles to compare work between chains that have different root tokens. However, there is a major new caveat with this method: the DEX and price-finding methods now become *part* of the consensus methods of those chains. This caveat makes the different-tokens context much harder to reason about, and introduces questions like *What is the effect of front running?* and *Could an attacker exploit market conditions to perform a doublespend when they wouldn't normally be able to?*
+One can use the same principles to compare work between chains that have different root tokens. However, there is a major new caveat with this method: the DEX and price-finding methods now become *part* of the consensus methods of those chains. This caveat makes this context (with differing root tokens) much harder to reason about, and introduces questions like *What is the effect of front running?* and *Could an attacker exploit market conditions to perform a doublespend when they wouldn't normally be able to?*
 
-In the context of *Ultra Terminum* and *Amaroo*, these aren't questions that are important to answer. If Proof of Reflection is ever used to secure multiple chains with heterogenous tokens, it's likely that these questions will need answering, or that alternate methods be devised.
+In the context of *Ultra Terminum* and *Amaroo*, these aren't questions that are important to answer. If *Proof of Reflection* is ever used to secure multiple chains with heterogenous tokens, it's likely that either these questions will need to be answered or alternate methods will need to be devised.
 
 ### Reflection with PoS chains / otherwise unsafe consensus algs (like PoA)
 
@@ -309,7 +325,7 @@ In the context of *Ultra Terminum* and *Amaroo*, these aren't questions that are
 
 \label{s:counting-reflected-work}
 
-\todo{brainstorm and progress this}
+\bigtodo{brainstorm and progress this}
 
 From forum last night:
 
@@ -356,7 +372,7 @@ From forum last night:
 >
 > One thing that might come in to play is the basic idea I have to ensure block availability: download and store every block for 24hrs. That's O(c^2) bandwidth but c is relative to like 3 kb/s, so O(c^2) bandwidth isn't a show-stopper here (at least atm, todo: calc limits)
 
-\todo{calc limits}
+\bigtodo{calc limits}
 
 > If all miners have all simplex blocks in the last 24hrs *anyway*, then they can construct the proofs themselves. That might mean there's a way to avoid transmitting the proof + still be able to verify it. sort of like segwit does: throw away the data that's useless after it's been verified b/c the miner already had that anyway. In Bitcoin's case, that's the tx signatures; in UT's case, it's the block header proof-of-inclusion merkle branches.
 >
@@ -370,11 +386,11 @@ From forum last night:
 >
 > how does UT play in to this? well, more reflection => harder for an attacker to reverse. Consider the parameters of an attacker having specific resources (e.g. a bunch of sha256 ASICs -- which is of a contiguous and homogeneous quality that past analysis has alluded to, tho it's abstracted via maths that presumes that); we can thwart most of those. But if we take an "optimistic" (for the attacker) look at an attacker with O(n) resources, then we're in worst-case-ville and I think UT might degrade to, *at worst*, the best lower-bound (i.e., best of all the worst-case situations) of other blockchains. Note to self: Need to write more on this to figure it out.
 
-\todo{how are confirmation times affected by the simplex?}
+\bigtodo{how are confirmation times affected by the simplex?}
 
 ### Recursive Reflection
 
-\todo{not sure if this should be included. if so then need to write out this section}
+\bigtodo{not sure if this should be included. if so then need to write out this section}
 
 Say chain B reflects both A and C. $A <-> B <-> C$. Proof of Reflection says A gets a benefit by proving that B reflects specific work from A. Does A get a security benefit by proving that C reflects B reflects A?
 
@@ -382,7 +398,7 @@ Say chain B reflects both A and C. $A <-> B <-> C$. Proof of Reflection says A g
 
 \label{sec:equiv-state-block-weightings}
 
-\todo{show that the result under Proof of Reflection is backwards compatible, i.e., existing consensus methods will settle on the same result. Needs to work for DAGs, too.}
+\bigtodo{show that the result under Proof of Reflection is backwards compatible, i.e., existing consensus methods will settle on the same result. Needs to work for DAGs, too.}
 
 ##### Notes:
 
@@ -398,7 +414,7 @@ The idea of *confirmation* is a representation of the risk that a transaction wi
 
 Let us say that some chain, $C_1$, is reflected by another chain, $C_2$. Since we have two chains, we will also say that $N = 2$. For simplicity, let us assume that these two chains have equal hash power and use the same hash function for the PoW -- this means the attacker can mine either chain. Let us also denote the probability of an attack succeeding on some chain, $C_i$, via the function $P_{C_i}(q_i)$, where $q_i$ is the proportion of computational power that the attacker controls.
 
-\todo{write out these paragraphs properly and make maths more formal}
+\bigtodo{write out these paragraphs properly and make maths more formal}
 
 \mk{
   NTS: For the case of ${C_1, C_2}$, it's clear that if $q_1 > 0.5$ and $q_2 > 0.5$ then the attacker should be able to perform arbitrary doublespends. This is equivalent to doing a 51% attack on both $C_1$ and $C_2$ simultaneously.
@@ -407,34 +423,26 @@ Let us say that some chain, $C_1$, is reflected by another chain, $C_2$. Since w
 What if $q_1 > 0.5$ and $q_2 < 0.5$?
 
 \mk{
-  NTS: attacker dominates if $q_1 + q_2 > 1$, or more generally:
-
-  \begin{equation}
-  \sum_{i = i}^{N} q_i > \frac{N}{2}
-  \end{equation}
+  NTS: attacker dominates if $q_1 + q_2 > 1$, or more generally: $\sum_{i = i}^{N} q_i > \frac{N}{2}$
 }
 
 What if $q_1 < 0.5$ and $q_2 < 0.5$?
 
 \mk{NST: If the attacker is withholding then there are two races: one on $C_1$ and one on $C_2$. to secretly do a doublespend then the attacker must win both races and publish both chain-segments simultaneously, causing a simultaneous reorg on both chains.}
 
-\todo{finish this section}
+\bigtodo{finish this section}
 
-\todo{what are the dynamics of winning one race but not both? say they won $C_1$, they'd publish both but then someone else building on $C_1$ would add all the real headers from $C_2$ that don't include the reflections, which *after the fact* would diminish the chain-weight of $C_1$, but then with new $C_2$ blocks would reflect the new $C_1$ chain-segment. Todo: how does this interact with block-weighting calculation? need to do some simulations I think. Also todo: should miners like take into account new reflected work in their draft blocks? if so does that mean they'd still favor the old (honest) chain segment? probs need to formalize the chain-weighting alg so that it can be analyzed easily}
+\bigtodo{what are the dynamics of winning one race but not both? say they won $C_1$, they'd publish both but then someone else building on $C_1$ would add all the real headers from $C_2$ that don't include the reflections, which *after the fact* would diminish the chain-weight of $C_1$, but then with new $C_2$ blocks would reflect the new $C_1$ chain-segment. Todo: how does this interact with block-weighting calculation? need to do some simulations I think. Also todo: should miners like take into account new reflected work in their draft blocks? if so does that mean they'd still favor the old (honest) chain segment? probs need to formalize the chain-weighting alg so that it can be analyzed easily}
 
 \mk{
-  NTS: for cases where multiple races need to be won, the probability of success will be like
-
-\begin{equation}
-\prod_{i=1}^{N} P_{C_i}(q_i)
-\end{equation}
-
+  NTS: for cases where multiple races need to be won, the probability of success will be like: \\
+$\prod_{i=1}^{N} P_{C_i}(q_i)$ \\
 Which becomes vanishingly small much faster than for a single chain. There's a breakpoint around winning the race, sorta. The attacker does get some bonus from winning by a larger margin, but winning the race is still important.
 }
 
 ### The Previous Block-Weighting Function
 
-\todo{exploratory notes}
+\bigtodo{exploratory notes}
 
 Let: $T$ be the target for the verification function; $T_{\text{max}}$ be the maximum meaningful target (e.g., $2^{256}$); $h$ be the hash digest as a number.
 
@@ -451,7 +459,7 @@ This function, $W_{\text{block},1}$ will return the weight of a block in terms o
 
 ### Block-Weighting w/ Conversion
 
-\todo{exploratory notes}
+\bigtodo{exploratory notes}
 
 In order to convert between different hashes (or even the same hash function on different blockchains) we need a method, and the best method discussed above is to normalize against the distribution of some common root-token (provided the inflation rate, mining rewards, etc are all of the same profile). The root-token's distribution will change over time, but is essentially constant over the period of a few blocks.
 
@@ -485,7 +493,7 @@ r_1 = Z_1 \cdot \frac{T_{\text{max}}}{T_1} \cdot B_{f,1}
 
 ### The Insecurity of Merged Mining
 
-\todo{write}
+\bigtodo{write}
 
 - Merged Mining allows attacking merged chains at 0 cost.
 - that means that if a parent chain and a merged mined child chain where to reflect one another, then the weight contributed via merged mining must be 0 -- no additional work was actually done beyond that of the parent-chain.

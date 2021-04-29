@@ -1,7 +1,7 @@
 
 ## Microchains
 
-\todo[inline]{Do we need to discuss microchains?}
+\bigtodo[inline]{Do we need to discuss microchains?}
 
 A *microchain* (coined by Gav Wood in 2014) is the concept of a small and highly restrictive blockchain; the purpose of which is to create an *abstraction layer* separating the *consensus mechanism* from *transactions and state transitions*. A microchain can thus support *multiple different and independent* (transaction, state) schemes -- in effect this means supporting multiple blockchains via a single consensus mechanism.
 

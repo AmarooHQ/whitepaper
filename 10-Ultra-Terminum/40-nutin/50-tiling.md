@@ -8,11 +8,10 @@ Maximal Simplex: a simplex with the maximum number of simplex-chains under $O(c)
 
 A tile is a quadrifurcated maximal simplex. That is: it is a simplex that deliberately reserves only $\nicefrac{1}{4}$ of its otherwise maximum capacity for internal reflections. By definition, the maximum capacity of a tile is $\nicefrac{1}{4}$ the maximum capacity of an equivalent maximal simplex. Why quadrifurcate capacity like this? In a maximal simplex, all reflections are between simplex-chains within that simplex, i.e., all reflections are internal. However, by reserving $\nicefrac{3}{4}$ of a simplex's maximum capacity, that simplex (which thus becomes the root tile) can reflect all simplex-chains in 3 adjacent 'children' tiles. Those adjacent tiles do not reflect their siblings, though; initially, their only external reflections are with simplex-chains in the parent tile. Each child tile, at this stage, has only reserved 50% of the capacity of an equivalent maximal simplex -- 25% for externally reflecting its parent's simplex-chains, and 25% for internally reflecting its own simplex-chains. Thus, each tile is able to reflect all simplex-chains of the parent tile *and* two additional children tiles. Children tiles can be instantiated in an ad-hoc basis, i.e., as a simplex-tiling (or an individual tile) approaches maximum capacity.
 
-\todo{
+\bigtodo{
     from forum: \\
-    \bquote{
-        \bquote{It's not that `k` decreases, but the proportion of `k` dedicated to internal reflections decreases. like it's optimal to have `k/2` dedicated to reflections, and `k/2` dedicated to transactions. when tiling with a valence of 3, the `k/2` for reflections is qudrifurcated, so there's `k/8` dedicated for each group of reflections (internal, parent, child1, child2).}{Max}
-        oki yup this makes a lot of sense now. I felt like the `k` explanations were helpful in solidifying understanding. I think bc it helped to make the concept more concrete since it linked back to the proofs.}{Leesa}
+    max: It's not that `k` decreases, but the proportion of `k` dedicated to internal reflections decreases. like it's optimal to have `k/2` dedicated to reflections, and `k/2` dedicated to transactions. when tiling with a valence of 3, the `k/2` for reflections is qudrifurcated, so there's `k/8` dedicated for each group of reflections (internal, parent, child1, child2). \\
+    leesa: oki yup this makes a lot of sense now. I felt like the `k` explanations were helpful in solidifying understanding. I think bc it helped to make the concept more concrete since it linked back to the proofs.
 }
 
 ### Tile Valence
@@ -29,7 +28,7 @@ Increasing the valence beyond 3 does not make sense, though. There are two reaso
 
 ### The First Tile
 
-\todo{mb a diagram of simplex in quadrants -- this would show like a 20-chain simplex in partitions of 5, but mb with 15/20 chains being like 'empty'. IDK, TBD}
+\bigtodo{mb a diagram of simplex in quadrants -- this would show like a 20-chain simplex in partitions of 5, but mb with 15/20 chains being like 'empty'. IDK, TBD}
 
 \begin{figure}
 \centering
@@ -87,7 +86,7 @@ side by side figures: https://tex.stackexchange.com/questions/37581/latex-figure
 
 Two elements of complexity will be analysed: the size of SPV proofs between simplex-chains, and the network overall.
 
-\todo{Need to check the Big O stuff in this section.}
+\bigtodo{Need to check the Big O stuff in this section.}
 
 #### Tiling Complexity
 
@@ -132,7 +131,7 @@ In a tessellating set of tiles, we can approximate the distance between tiles vi
 
 However, the distance between any 2 of $n$ tiles, using the binary-tree method, is $\sim \log_2 n$. So it's (maybe counterintuitively) more efficient to use non-tessellating tiles.
 
-\todo{\href{https://mindyourdecisions.com/blog/2016/07/03/distance-between-two-random-points-in-a-square-sunday-puzzle/}{this maths problem} about the average distance between 2 points in a square (analogous to tessellating tiles) has an answer with a *log* in it. todo: mb tessellating tiles are actually more efficient?}
+\bigtodo{\href{https://mindyourdecisions.com/blog/2016/07/03/distance-between-two-random-points-in-a-square-sunday-puzzle/}{this maths problem} about the average distance between 2 points in a square (analogous to tessellating tiles) has an answer with a *log* in it. todo: mb tessellating tiles are actually more efficient?}
 
 #### Network Complexity
 
@@ -149,7 +148,7 @@ For all practical purposes, simplex-tiling provides unbounded capacity.
 
 #### Security Implications
 
-\todo{tiling security implications -- tiling weaker than maximal simplex.}
+\bigtodo{tiling security implications -- tiling weaker than maximal simplex.}
 
 e.g. The leaf tiles in \autoref{fig:tiled-simplex-5-d2} have simplex-chains that are weaker than an equiv 20-chain simplex. The root tile has equiv security, tho. This is true even tho both systems have 20 simplex-chains total.
 
@@ -165,11 +164,11 @@ Solving problems via the creation of new knowledge, i.e., *progress*, has no upp
 [^boi-spaceship-earth]: I guess a common response to this will be something like Spaceship Earth. The myth of Spaceship Earth is refuted in *The Beginning of Infinity*, Ch 3 (*The Spark*).
 
 
-Dyson swarms can hold, say, $10^{15}$ people[^dyson-pop] on the low end. \todo{finish dyson pop stuff}
+Dyson swarms can hold, say, $10^{15}$ people[^dyson-pop] on the low end. \bigtodo{finish dyson pop stuff}
 
 Galaxies that are close enough to us, and that have a low enough relative velocity, can remain within a relevant (to us) inter-galactic civilization. Some of these galaxies are gravitationally bound to our own, so -- if humanity is successful -- will be part of our inter-galactic civilization 'for free'. Galaxies within, give or take, $10^21 km$ ($\sim$1 billion light-years) have a low enough relative velocity. We can colonize these galaxies and use devices such as Shkadov thrusters to move them close enough to Milkdromeda so that they remain part of an inter-galactic civilization[^move-galaxies] (i.e., 2-way communication is possible). Within those galaxies, there are approximately $10^17$ stars[^stars-1b-ly].
 
-[^dyson-pop]: \todo{\url{https://www.youtube.com/watch?v=Ef-mxjYkllw&t=1089s}}
+[^dyson-pop]: \bigtodo{\url{https://www.youtube.com/watch?v=Ef-mxjYkllw&t=1089s}}
 [^move-galaxies]: *Intergalactic Colonization* by Isaac Arthur, <https://youtu.be/xRB7a89Jh7w?t=1618>, 26:58
 [^stars-1b-ly]: <http://www.icc.dur.ac.uk/~tt/Lectures/Galaxies/LocalGroup/Back/superc.html>, <https://archive.vn/wEu5E>, <http://web.archive.org/web/20201021141956/http://www.icc.dur.ac.uk/~tt/Lectures/Galaxies/LocalGroup/Back/superc.html>
 

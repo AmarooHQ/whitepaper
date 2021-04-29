@@ -1,7 +1,7 @@
 
 ### Two *merge mined* blockchains
 
-\todo[inline]{This section can be cut down significantly -- MM chains have security issues in general, and Proof of Reflection between merged chains is insecure without additional constraints. Those constraints basically nullify the benefits of MM.}
+\bigtodo[inline]{This section can be cut down significantly -- MM chains have security issues in general, and Proof of Reflection between merged chains is insecure without additional constraints. Those constraints basically nullify the benefits of MM.}
 
 The case of two merged mined chains (e.g. Bitcoin and Namecoin) is not as simple as the case of two chains using different hashing algorithms for their work. That is because the conclusion drawn about the difficult of attack does not hold. If we consider two chains that are both reflected in one another and able to be merged mined, then it is trivial to see that an attack is, at most, as difficult as attacking the strongest chain (presuming that 100% of miners are mining that chain). So there is an upper limit on the additional security provided via this technique.
 

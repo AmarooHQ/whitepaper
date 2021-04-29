@@ -10,7 +10,7 @@ plan:
   - need to reflect headers, but including merkle proofs-of-reflection would be cumbersome
 - what about security implications and/or confirmation time?
 
-\todo{nb: mb security/conf bits go in Proof of Reflection, or stay here, IDK yet}
+\bigtodo{nb: mb security/conf bits go in Proof of Reflection, or stay here, IDK yet}
 
 ### Availability of Reflected Blocks
 
@@ -30,9 +30,10 @@ The complexity and impact of this strategy is discussed in \autoref{sec:bandwidt
 
 \label{sec:proving-reflection}
 
-\todo{
-    \mk{I think this bit is done.}
-    write this. come up with a method by which a miner having all blocks can construct the witnesses for proof-of-reflection. by doing this, miners don't need to include SPV proofs of reflection; the witnesses don't need to be included.}
+\bigtodo{
+    write this. come up with a method by which a miner having all blocks can construct the witnesses for proof-of-reflection. by doing this, miners don't need to include SPV proofs of reflection; the witnesses don't need to be included. \\
+    NB: I think this todo has been done.
+    }
 
 If simplex-chains' consensus protocol requires accounting for reflected work, then nodes must have some method whereby they know which work (in a particular chain's history) has been reflected. That is: a node for chain A must be able to answer the question *For each other simplex-chain, which blocks in chain A's history have been reflected?* This means that each node must have $N_1 - 1$ answers for a simplex of $N_1$ chains.
 
@@ -44,7 +45,7 @@ If miners of any simplex-chain download the blocks of *all* simplex-chains -- as
 
 There would be some downsides to excluding the proofs of reflection. For one, it would mean that simplex-chain nodes, during an initial sync, would not be able to verify Proofs of Reflection without auxillary data -- potentially a lot. This may not be a problem, though, because we expect that a *non-miners'* evaluation of a simplex-chain's history will be identical regardless of whether they account for Proof of Reflection or not (discussed in \autoref{sec:equiv-state-block-weightings}). Secondly, it would mean that miners *must* track the state of *all* reflections in the simplex for some period of time so that they ensure the integrity of the reflection protocol. Given \autoref{sec:availability-of-blocks}, this is possible without significant overhead.
 
-\todo{Make sure "we expect that a *non-miners'* evaluation of a simplex-chain's history will be identical regardless of whether they account for Proof of Reflection or not" is explained / answered}
+\bigtodo{Make sure "we expect that a *non-miners'* evaluation of a simplex-chain's history will be identical regardless of whether they account for Proof of Reflection or not" is explained / answered}
 
 A practical method for treating proofs of reflection as witnesses that may be excluded/pruned is discussed in \autoref{sec:segmented-state}.
 
@@ -95,14 +96,14 @@ Given that the reflection-segments of simplex-chains will contain mostly repeate
 * having that info means you can deterministically recreate SPV proofs of reflection
 * so we can treat these proofs as a witness and not include them in the blockchain
 
-\todo{write this section out and specify the algorithm -- or at least a draft}
+\bigtodo{write this section out and specify the algorithm -- or at least a draft}
 \end{comment}
 
 ### Confirmation Times
 
 \label{sec:confirmation-times}
 
-\todo{write this.}
+\bigtodo{write this.}
 
 \begin{equation}
 \frac{1}{O(c)}

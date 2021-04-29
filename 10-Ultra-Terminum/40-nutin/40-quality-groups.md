@@ -30,7 +30,7 @@ NB: The only way to directly compare security like this is to proxy the measurem
 
 ### Lowering the variance of block production in PoW blockchains
 
-\todo{mb -- figures showing block production to demonstrate variance}
+\bigtodo{mb -- figures showing block production to demonstrate variance}
 
 Is it possible to *dramatically* lower the variance of block production in PoW blockchains without altering incentive structures, compromising security, or changing the probability of generating a valid block?
 
@@ -44,7 +44,7 @@ Set $t=0$ to be immediately after a block is published on a chain. then, as $t$ 
 
 The potential reward-over-time for a miner ($t$ vs $r + TxFees$) looks like a sawtooth function with a y-axis offset. It builds as more txs pile up, and drops back to the baseline reward after a block.
 
-\todo{figure of reward vs time mb, and one with lower variance? IDK, mb not necessary. Here's a paper about block production/arrival times \url{https://arxiv.org/pdf/1801.07447.pdf} also \url{https://en.wikipedia.org/wiki/Negative_binomial_distribution}}
+\bigtodo{figure of reward vs time mb, and one with lower variance? IDK, mb not necessary. Here's a paper about block production/arrival times \url{https://arxiv.org/pdf/1801.07447.pdf} also \url{https://en.wikipedia.org/wiki/Negative_binomial_distribution}}
 
 If the miners $M_0, ..., M_9$ are capable of working on one of any $\{C_0, ..., C_9\}$ (and they have identical ROI profiles to the other miners), then they're incented to work on the chain with the most txs in the mempool. That means: miners should, roughly, work the chain that has gone the longest without a block. What should we expect based on those incentives? Miners should work on each chain only in the final moments of the block production cycle. If block times were set to 60s, then they'd start mining at like the 54s mark b/c that's how they maximize their ROI.
 
@@ -56,6 +56,6 @@ One reason that we can predict that txs will build up in this fashion (with thos
 
 The average hash rate on each simplex chain, as described above, is always the same regardless of which of the two miner strats are used. However, the variance of block production on each of these chains won't be that of a chain with 60s block times, it'll be that of a chain with 6s block times.
 
-\todo{paragraph below needs to be polished}
+\bigtodo{paragraph below needs to be polished}
 
 Is it possible that this will help prevent attacks too? An attacker has the same 51% parameters to DoS a chain (tho a block-dag can thwart naive DoS attacks), however, the attacker is competing against no other hashpower for 54s out of 60s, and competing against 20x his hashpower for the last 6s out of that 60s. Why 20x? If each chains' average hashrate is 10% of the total hashrate, then the attacker needs 5% of the total hashrate to 51% attack a single chain. Relative to the attacker, he might have 51% of the avg mining power for a given chain, but the aggregate hashrate is 20x that.

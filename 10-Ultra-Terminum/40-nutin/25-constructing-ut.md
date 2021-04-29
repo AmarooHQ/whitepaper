@@ -110,7 +110,7 @@ The most likely method of integration has four components: modification of the h
 
 [^builtins-or-sc]: Note: instead of builtins, these requirements could be met via EVM/WASM smart contracts.
 
-\todo{finish below}
+\bigtodo{finish below}
 
 The abstraction layer between simplex-chains and dapp-chains has another advantage; one with great *reach*. Any PoS system with special features, say with [finality guarantees](https://github.com/w3f/consensus/blob/master/pdf/grandpa.pdf) or one that is [provably secure](https://iohk.io/en/research/library/papers/ouroborosa-provably-secure-proof-of-stake-blockchain-protocol/), then *something about how their security guarantees stick around*
 
@@ -133,13 +133,13 @@ plan:
   - *all* the layer-2 solns
   - todo: more tomorrow
 
-\todo{
+\bigtodo{
   dev potential;
 }
 
 #### Dapp-dapp-chains
 
-\todo{write it}
+\bigtodo{write it}
 
 plan:
 
