@@ -10,7 +10,7 @@ plan:
   - need to reflect headers, but including merkle proofs-of-reflection would be cumbersome
 - what about security implications and/or confirmation time?
 
-\bigtodo{nb: mb security/conf bits go in Proof of Reflection, or stay here, IDK yet}
+\todo{nb: mb security/conf bits go in Proof of Reflection, or stay here, IDK yet}
 
 ### Availability of Reflected Blocks
 
@@ -40,7 +40,7 @@ If miners of any simplex-chain download the blocks of *all* simplex-chains -- as
 
 There would be some downsides to excluding the proofs of reflection. For one, it would mean that simplex-chain nodes, during an initial sync, would not be able to verify Proofs of Reflection without auxillary data -- potentially a lot. This may not be a problem, though, because we expect that a *non-miners'* evaluation of a simplex-chain's history will be identical regardless of whether they account for Proof of Reflection or not (discussed in \autoref{sec:equiv-state-block-weightings}). Secondly, it would mean that miners *must* track the state of *all* reflections in the simplex for some period of time so that they ensure the integrity of the reflection protocol. Given \autoref{sec:availability-of-blocks}, this is possible without significant overhead.
 
-\bigtodo{Make sure "we expect that a *non-miners'* evaluation of a simplex-chain's history will be identical regardless of whether they account for Proof of Reflection or not" is explained / answered}
+\todo{Make sure "we expect that a *non-miners'* evaluation of a simplex-chain's history will be identical regardless of whether they account for Proof of Reflection or not" is explained / answered}
 
 A practical method for treating proofs of reflection as witnesses that may be excluded/pruned is discussed in \autoref{sec:segmented-state}.
 
@@ -91,14 +91,14 @@ Given that the reflection-segments of simplex-chains will contain mostly repeate
 * having that info means you can deterministically recreate SPV proofs of reflection
 * so we can treat these proofs as a witness and not include them in the blockchain
 
-\bigtodo{write this section out and specify the algorithm -- or at least a draft}
+\todo{write this section out and specify the algorithm -- or at least a draft}
 \end{comment}
 
 ### Confirmation Times
 
 \label{sec:confirmation-times}
 
-\bigtodo{write this.}
+\todo{write this.}
 
 \begin{equation}
 \frac{1}{O(c)}

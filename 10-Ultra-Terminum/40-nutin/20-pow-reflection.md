@@ -199,11 +199,17 @@ Practical methods of comparing (and converting the weight of) different Proofs o
 
 Note that, as the Chain B tip is gaining reflections from Chain E, miners on Chain B are incented to include as many Chain E headers (and PoRs) as possible. That's because each new header will add weight to the *parent* of the block which the Chain B miner is attempting to produce. This increases the overall chain-weight that the miner is building on, and thus contributes to their block becoming part of the most-worked chain.
 
-\bigtodo{Answer the following:}
+\todo{Answer the following:}
 
 - What if you mine a longer B-chain and then publish it to Chain E? Well you have to do that later, and you need to publish the blocks, too. If Chain E just checks the work on that local chain, then it looks like the attacker's chain is longer. But the chain, as calculated by full nodes is, not worth as much as the original chain, so they will keep mining on the orig chain. However, if the attacker has $q>p$ then they'll always outperform the honest chain and the reflections will eventually favour the attackers chain. so the reflecting chains (Chain E) need to incorporate calculations of the *total* block weight of Chain B. That means they need to be half-nodes for Chain B so that they can track Chain B's known reflections.
 
 How is it that Chain B miners can know the partial state of Chain E that is required to produce the necessary PoRs? Typically a blockchain network will support some light-client protocol that allows nodes to ask for such proofs, and that is one method. However, it is possible to design a blockchain system so that this is not required, and one such method is discussed in \autoref{sec:segmented-state}.
+
+It's worth noting that there are still potential attacks on Chain B at this point. For example: what if an attacker mines a doublespend in private and produces a longer chain-segment than the honest chain? At this point the attacker can publish their blocks even though the honest chain-segment still weighs more due to reflections. Why would they do this? Well, if Chain E is tracking Chain B's headers-only chain without accounting for reflections, then the attackers chain-segment appears to have more work than the honest chain-segment. Thus Chain E's reflection of Chain B will reorganize to favor the attacker's chain-segment. If the attacker has more hash power than the honest miners (i.e., $q > p$[^hr-footnote]) then they can use this reorganization as a foothold to launch a normal 51% attack.
+
+[^hr-footnote]: In \href{https://bitcoin.org/bitcoin.pdf}{Satoshi's original paper} the parameters $p$ and $q$ represent the probability that the next block will be found by an honest node or the attacker, respectively. This convention has been continued in subsequent analysis, e.g., Rosenfeld's \href{https://cloudflare-ipfs.com/ipfs/QmT6GWJ2M9d7MqyyBdMzV6bUvGW5GANWrP5C2at2j7zFHi}{\emph{Analysis of hashrate-based double-spending}}, and is continued here, also.
+
+How can we prevent this sort of attack? The attack is predicated on Chain E *not* accounting for the added weight from reflections. Chain E can easily account for that weight, though, with some protocol changes. First: the total chain-weight (or, equivalently, the change in total chain-weight), *including reflections*, can be committed to via a field in the header. Based on this field, a headers-only version of the chain can be constructed correctly. Full nodes of Chain B can now also validate the claimed weight against the verifiable weight, and a mismatch invalidates the block. Second: When such a block is found (where the claimed chain-weight violates the protocol), full nodes can construct a fraud proof. Chain E should then confirm the fraud proof (i.e., record it on-chain) and thus prevent the attackers blocks from taking priority and/or gaining reflections. Third: Chain E already knows its own headers, and so can acknowledge the reflections between Chain B and Chain E with only the necessary merkle branches, and thus verify the reflections between Chain B and Chain E. This third method provides an additional means of detecting blocks that are invalid due to fraudulent chain-weight claims in the header.
 
 #### Step 5. Mutual Reflection
 
@@ -216,40 +222,11 @@ The final step in this progression is *mutual reflection* -- where both chains t
 \label{fig:pow-refl-step5}
 \end{figure}
 
-There are several details that still require discussion, though, such as: *how exactly is weight contributed by a reflecting chain converted to weight in the local chain?* (discussed in \autoref{sec:comparing-diff-pows}); and *how can proofs of reflection be calculated without the requirement that miners are full nodes of both chains?* (discussed in \autoref{sec:practical-considerations}).
+When chains mutually reflect each-other, detecting attacks becomes easier. After Chain E integrates *Proof of Reflection*, the security of Chain E is somewhat entangled with the history of Chain B. If a Chain B attacker publishes some chain-segment, then Chain E nodes will know that those blocks have not been reflected by Chain E. This make detecting such an attack much easier (provided the attacker is only attacking that chain).
+
+There are several details that still require discussion, though, such as: *how exactly is weight contributed by a reflecting chain converted to weight in the local chain?* (discussed in \autoref{sec:comparing-diff-pows}); and *how can proofs of reflection be calculated without the requirement that miners are full nodes of both chains?* (discussed in \autoref{sec:practical-considerations}). This last question is particularly important for moving beyond mutual reflection between only two chains.
 
 Despite these omissions, the *essence* of *Proof of Reflection* should now be apparent. *In principle*, we can make blockchains more difficult to attack based on the idea that *blockchains can track the history of other blockchains (and confirm that chain's history like they do transactions)*. *In principle*, it is possible to increase the security of a blockchain via *reflection*.
-
-\begin{comment}
-
-### Proof of Reflection between chains using the same alg
-
-tl;dr it can work fine I think. Like it's still secure; there's nothing about *Proof of Reflection* that *requires* more than one hashing alg, it's just the easier context to explain it in b/c miners of one chain can't attack the other.
-
-\bigtodo{tidy this section, provide explanation.}
-
-\bigtodo{build this section out -- seems like this can be done securely. nb: the rest of this subsection are just notes; probs just skip over them}
-
-What about chains using the same alg? e.g. Bitcoin (B) and Bitcoin-copy (C)?
-
-- opportunity cost exists for a miner choosing to mine B or C.
-- they can switch, tho.
-- can we get a situation where attacking one is as difficult as attacking both?
-- normal reflection works????? mb
-- if so, mb we don't merge mine at all.
-- requires *constant* mining tho (on all chains). like doesn't work if ppl only mine a chain sometimes (bc an attacker can come in with no competition)
-- chains mb can be DOSd? reflection can make this harder b/c honest blocks can build on DOS blocks -- if they're not private (i.e., they're available).
-- but an attacker still need some profit driven reason, otherwise they're losing money by mining an attack; doublespends provide an out for that.
-- would a pseudo merge mining (PMM) scheme work if the diff of merged multi-blocks is the sum of the diffs? like mining for B and C is as difficult as mining a block on B then mining a block on C. Call these special combined blocks *dual-chain-blocks*.
-- that way there's opportunity cost but also there's a reason to do PMM: efficiency (don't need to swap between multiple chains, can reduce variance, etc)
-- plus you could auto-reflect I think b/c the blocks will always be valid on both (and if not it's as difficult as as mining one valid block and one invalid one)
-- for such dual-chain-blocks, could the proof attached be worth more than ratio of difficulty of mining on the two chains. IDK, i think each chain can probs still count only their difficulty, not diff for both chains. otherwise might open door to censorship/DOS attacks.
-
-is this secure? if so, then mixing with reflection to other chains provides extra security as expected?
-
-under that sort of thing the 'microchain' would become like an O(c) record of all headers from all chains. then all chains would sync their reflections up against the full headers-only-network (i.e., all chain headers of all chains). each dapp can then be O(c). so we get back to O(c^2) scaling.
-
-\end{comment}
 
 ### Comparing Incomparable Proofs of Work
 
@@ -299,7 +276,7 @@ Since we know the percentage of root tokens on each chain for each moment in his
 \end{algorithmic}
 \end{algorithm}
 
-\bigtodo{revisit \autoref{alg:weightof-1} and check it makes sense + add necessary explanations.}
+\todo{revisit \autoref{alg:weightof-1} and check it makes sense + add necessary explanations.}
 
 #### Different Root Tokens with a DEX
 
@@ -323,7 +300,7 @@ In the context of *Ultra Terminum* and *Amaroo*, these aren't questions that are
 
 ### Recursive Reflection
 
-\bigtodo{not sure if this should be included. if so then need to write out this section}
+\todo{not sure if this should be included. if so then need to write out this section}
 
 Say chain B reflects both A and C. $A <-> B <-> C$. Proof of Reflection says A gets a benefit by proving that B reflects specific work from A. Does A get a security benefit by proving that C reflects B reflects A?
 
@@ -331,7 +308,7 @@ Say chain B reflects both A and C. $A <-> B <-> C$. Proof of Reflection says A g
 
 \label{sec:equiv-state-block-weightings}
 
-\bigtodo{show that the result under Proof of Reflection is backwards compatible, i.e., existing consensus methods will settle on the same result. Needs to work for DAGs, too.}
+\todo{show that the result under Proof of Reflection is backwards compatible, i.e., existing consensus methods will settle on the same result. Needs to work for DAGs, too.}
 
 ##### Notes:
 
@@ -347,7 +324,7 @@ The idea of *confirmation* is a representation of the risk that a transaction wi
 
 Let us say that some chain, $C_1$, is reflected by another chain, $C_2$. Since we have two chains, we will also say that $N = 2$. For simplicity, let us assume that these two chains have equal hash power and use the same hash function for the PoW -- this means the attacker can mine either chain. Let us also denote the probability of an attack succeeding on some chain, $C_i$, via the function $P_{C_i}(q_i)$, where $q_i$ is the proportion of computational power that the attacker controls.
 
-\bigtodo{write out these paragraphs properly and make maths more formal}
+\todo{write out these paragraphs properly and make maths more formal}
 
 \mk{
   NTS: For the case of ${C_1, C_2}$, it's clear that if $q_1 > 0.5$ and $q_2 > 0.5$ then the attacker should be able to perform arbitrary doublespends. This is equivalent to doing a 51% attack on both $C_1$ and $C_2$ simultaneously.
@@ -363,9 +340,9 @@ What if $q_1 < 0.5$ and $q_2 < 0.5$?
 
 \mk{NST: If the attacker is withholding then there are two races: one on $C_1$ and one on $C_2$. to secretly do a doublespend then the attacker must win both races and publish both chain-segments simultaneously, causing a simultaneous reorg on both chains.}
 
-\bigtodo{finish this section}
+\todo{finish this section}
 
-\bigtodo{what are the dynamics of winning one race but not both? say they won $C_1$, they'd publish both but then someone else building on $C_1$ would add all the real headers from $C_2$ that don't include the reflections, which *after the fact* would diminish the chain-weight of $C_1$, but then with new $C_2$ blocks would reflect the new $C_1$ chain-segment. Todo: how does this interact with block-weighting calculation? need to do some simulations I think. Also todo: should miners like take into account new reflected work in their draft blocks? if so does that mean they'd still favor the old (honest) chain segment? probs need to formalize the chain-weighting alg so that it can be analyzed easily}
+\todo{what are the dynamics of winning one race but not both? say they won $C_1$, they'd publish both but then someone else building on $C_1$ would add all the real headers from $C_2$ that don't include the reflections, which *after the fact* would diminish the chain-weight of $C_1$, but then with new $C_2$ blocks would reflect the new $C_1$ chain-segment. Todo: how does this interact with block-weighting calculation? need to do some simulations I think. Also todo: should miners like take into account new reflected work in their draft blocks? if so does that mean they'd still favor the old (honest) chain segment? probs need to formalize the chain-weighting alg so that it can be analyzed easily}
 
 \mk{
   NTS: for cases where multiple races need to be won, the probability of success will be like: \\
@@ -383,7 +360,7 @@ Which becomes vanishingly small much faster than for a single chain. There's a b
 
 \label{s:counting-reflected-work}
 
-\bigtodo{brainstorm and progress this}
+\todo{brainstorm and progress this}
 
 From forum last night:
 
@@ -430,7 +407,7 @@ From forum last night:
 >
 > One thing that might come in to play is the basic idea I have to ensure block availability: download and store every block for 24hrs. That's O(c^2) bandwidth but c is relative to like 3 kb/s, so O(c^2) bandwidth isn't a show-stopper here (at least atm, todo: calc limits)
 
-\bigtodo{calc limits}
+\todo{calc limits}
 
 > If all miners have all simplex blocks in the last 24hrs *anyway*, then they can construct the proofs themselves. That might mean there's a way to avoid transmitting the proof + still be able to verify it. sort of like segwit does: throw away the data that's useless after it's been verified b/c the miner already had that anyway. In Bitcoin's case, that's the tx signatures; in UT's case, it's the block header proof-of-inclusion merkle branches.
 >
@@ -444,11 +421,11 @@ From forum last night:
 >
 > how does UT play in to this? well, more reflection => harder for an attacker to reverse. Consider the parameters of an attacker having specific resources (e.g. a bunch of sha256 ASICs -- which is of a contiguous and homogeneous quality that past analysis has alluded to, tho it's abstracted via maths that presumes that); we can thwart most of those. But if we take an "optimistic" (for the attacker) look at an attacker with O(n) resources, then we're in worst-case-ville and I think UT might degrade to, *at worst*, the best lower-bound (i.e., best of all the worst-case situations) of other blockchains. Note to self: Need to write more on this to figure it out.
 
-\bigtodo{how are confirmation times affected by the simplex?}
+\todo{how are confirmation times affected by the simplex?}
 
 ### The Previous Block-Weighting Function
 
-\bigtodo{exploratory notes}
+\todo{exploratory notes}
 
 Let: $T$ be the target for the verification function; $T_{\text{max}}$ be the maximum meaningful target (e.g., $2^{256}$); $h$ be the hash digest as a number.
 
@@ -465,7 +442,7 @@ This function, $W_{\text{block},1}$ will return the weight of a block in terms o
 
 ### Block-Weighting w/ Conversion
 
-\bigtodo{exploratory notes}
+\todo{exploratory notes}
 
 In order to convert between different hashes (or even the same hash function on different blockchains) we need a method, and the best method discussed above is to normalize against the distribution of some common root-token (provided the inflation rate, mining rewards, etc are all of the same profile). The root-token's distribution will change over time, but is essentially constant over the period of a few blocks.
 
@@ -501,7 +478,7 @@ r_1 = Z_1 \cdot \frac{T_{\text{max}}}{T_1} \cdot B_{f,1}
 
 ### The Insecurity of Merged Mining
 
-\bigtodo{write}
+\todo{write}
 
 - Merged Mining allows attacking merged chains at 0 cost.
 - that means that if a parent chain and a merged mined child chain where to reflect one another, then the weight contributed via merged mining must be 0 -- no additional work was actually done beyond that of the parent-chain.

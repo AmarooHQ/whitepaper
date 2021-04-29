@@ -1,6 +1,6 @@
 ## Amaroo, the System
 
-\bigtodo{I want to re-draft this entire section.}
+\todo{I want to re-draft this entire section.}
 
 Amaroo is a *method and environment* for the creation, maintenance, and sustenance of blockchains. It is a principled blockchain factory, and a place for blockchains to live in a free, open, and thriving super-network.
 

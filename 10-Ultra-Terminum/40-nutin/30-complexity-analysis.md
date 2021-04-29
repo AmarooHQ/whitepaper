@@ -328,4 +328,4 @@ This effect is not unique to UT, though. In general, any system of sharding is a
 
 Practically, this effect means that a decrease to the size of headers has *increasing* marginal benefit. Compared to $O(c)$ blockchains (e.g. Bitcoin), efficient header schemes are far more important for UT and sharded blockchain networks.
 
-\bigtodo{(todo/polish) look for references to sharding and, if they are talking about UT, change to talk about UT and sharding or correct the wording.}
+\todo{(todo/polish) look for references to sharding and, if they are talking about UT, change to talk about UT and sharding or correct the wording.}
