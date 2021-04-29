@@ -135,9 +135,9 @@ Given that the reflection-segments of simplex-chains will contain mostly repeate
     \begin{subfigure}[t]{.31\linewidth}
         \vskip 0pt
         \centering
-        \includegraphics[height=.95\linewidth]{dag_simple2_linearization_sag}
-        \caption{One possible linearization of \autoref{fig:dag-simple2}}
+        \includegraphics[height=.95\linewidth]{dag_simple3_sag}
+        \caption{A 3-parent example of a block-dag segment.}
     \end{subfigure}%%
-    \caption{Some examples of simple block-dag segments and linearization.}
+    \caption{Some examples of simple block-dag segments.}
     \label{fig:dag-simple-segments}
 \end{figure}

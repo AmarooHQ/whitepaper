@@ -1,0 +1,45 @@
+\documentclass[]{standalone}
+\usepackage[T1]{fontenc}\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usepackage{xintexpr}
+\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
+
+\makeatletter
+\def\input@path{{./includes/}{./includes/ut/diags/}}
+\makeatother
+
+\begin{document}
+\input{dag-styles}%
+\newcommand\TikzDagSimple{
+    \providecommand\AbbrChain{B}
+    \node (prevDots) [yshift=0cm] {$\vdots$};
+
+    \node (block1) [block, below = of prevDots] {$\AbbrChain_{i}$};
+    \draw [arrowParent] (block1) -- (prevDots);
+
+    \node (block2mid) [below = of block1] {};
+    \node (block2/2) [block, below = of block1] {$\AbbrChain_{i+1,2}$};
+    \node (block2/1) [block, left = of block2/2] {$\AbbrChain_{i+1,1}$};
+    \node (block2/3) [block, right = of block2/2] {$\AbbrChain_{i+1,3}$};
+    \draw [arrowParent] (block2/1) -- (block1);
+    \draw [arrowParent] (block2/2) -- (block1);
+    \draw [arrowParent] (block2/3) -- (block1);
+
+    \node (block3) [block, below = of block2/2] {$\AbbrChain_{i+2}$};
+    \draw [arrowParent] (block3) -- (block2/1);
+    \draw [arrowParent] (block3) -- (block2/2);
+    \draw [arrowParent] (block3) -- (block2/3);
+
+    \xdef\xs{0cm}
+    \xdef\topNode{prevDots}
+    \xdef\botNode{block3}
+    \xdef\leftMostNode{block2/1}
+
+    \node (topLeft) [left = of \topNode -| \leftMostNode, minimum width=0, xshift=\xs] {};
+    \node (botLeft) [left = of \botNode.south -| \leftMostNode, minimum width=0, xshift=\xs] {};
+    \draw [arrowTime] (topLeft) node () [anchor=west, yshift=-10pt] {\textit{Time}} -- (botLeft);
+}%
+\begin{tikzpicture}[node distance=0.8cm]
+    \TikzDagSimple
+\end{tikzpicture}
+\end{document}

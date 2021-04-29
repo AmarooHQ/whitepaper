@@ -40,10 +40,34 @@ you need (ubuntu pkgs):
 
 ## resource: scaffold for doing a thesis in markdown + pandoc
 
+mb useful
+
 <https://github.com/chiakaivalya/thesis-markdown-pandoc>
 
 ## linting
 
+NB: These aren't enforced atm
+
 * install deps with `npm i`
 * lint with `npm run lint`
 * linter rules in `.textlintrc`
+
+## latex workshop (vscode addon) and write18 / escape-shell
+
+Add this to vscode settings (JSON), or modify accordingly.
+
+```
+    "latex-workshop.latex.tools": [{
+        "name": "latexmk",
+        "command": "latexmk",
+        "args": [
+            "-shell-escape",
+            "-synctex=1",
+            "-interaction=nonstopmode",
+            "-file-line-error",
+            "-pdf",
+            "-outdir=%OUTDIR%",
+            "%DOC%"
+        ]
+    }]
+```
