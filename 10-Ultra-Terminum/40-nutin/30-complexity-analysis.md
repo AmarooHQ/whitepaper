@@ -18,7 +18,7 @@ Shown below are relationships between the number of chains at a level of nesting
 
 Additionally, $O(k_i)$ is defined via $O(k_i) \equiv O(c)$.
 
-### Complexity of $O(c)$ chains
+### Complexity of $O(c)$ Chains
 
 Example: Bitcoin.
 
@@ -46,7 +46,7 @@ For Bitcoin, given $k_1 \approx 2000$ B/s (accounting for SegWit), and $Tx_{avg}
 
 This is what we expect based on the measured real-world performance of Bitcoin.
 
-### Optimistic Complexity of $O(c^2)$ chains
+### Optimistic Complexity of $O(c^2)$ Chains
 
 Examples: Ethereum 2, Polkadot.
 
@@ -73,7 +73,7 @@ T_2 & = \frac{k_1 \cdot k_2}{D_f \cdot D_h} \\
 
 Thus $O(T_2) = O(c^2)$ as expected.
 
-### Complexity of $O(c^2)$ reflection
+### Complexity of $O(c^2)$ Reflection
 
 There is no root-chain for a collection of mutually reflecting blockchains (i.e., a simplex), so $N_1 \neq 1$. In a simplex, each chain has $k_1$ B/s capacity, but this is split between reflections and transactions. At this foundational level (where there is no nesting yet), headers are $B_h$ bytes with a frequency of $B_f$ Hz. There are $N_1$ simplex chains.
 
@@ -234,7 +234,7 @@ N_3 & = \frac{T_3}{k_3} \\
 \end{split}
 \end{equation*}
 
-### Complexity of Cross-chain SPV proofs
+### Complexity of Cross-chain SPV Proofs
 
 Each chain -- at full capacity -- operates with order $O(c)$ by definition. Thus its state has order $O(c)$ also. The size of SPV proofs scale logarithmically with the set you're proving membership of, e.g. the number of transactions, or size of the chain's state, etc. Thus, SPV proofs scale with order $O(\log_2 c)$.
 
@@ -316,9 +316,9 @@ While $O(c^2)$ bandwidth scaling is not ideal, it's clear that -- especially in 
 
 ### The Impact of Header Size
 
-\autoref{eq:throughput-iter} shows that UT's throughput is inversely proportional to the size of headers, $D_h$, for that given depth of nesting (this is true for $O(c^2)$ configurations, too). It also shows that throughput is inversely proportional to the block frequency, $D_f$, and proportional to chosen raw throughput, $k$.
+\autoref{eq:throughput-iter} shows that UT's throughput is inversely proportional to the size of headers, $D_h$, for that given depth of nesting (this is true for $O(c^2)$ UT configurations, too). It also shows that throughput is inversely proportional to the block frequency, $D_f$, and proportional to chosen raw throughput, $k$.
 
-Of these three values, header size is the only value we *cannot* choose arbitrarily. To maintain overall throughput, doubling the header size requires one of: halving the block production frequency (i.e., doubling the block target time), or doubling the chain's raw throughput, or some combination of those two options. One such combination would be to decrease the block production frequency by a factor of $\frac{1}{\sqrt{2}}$ and increase the raw throughput by a factor of $\sqrt{2}$.
+Of these three values (header size, block frequency, and raw throughput), header size is the only value we *cannot* choose arbitrarily. To maintain overall throughput, doubling the header size requires one of: halving the block production frequency (i.e., doubling the block target time), or doubling the chain's raw throughput, or some combination of those two options. One such combination would be to decrease the block production frequency by a factor of $\frac{1}{\sqrt{2}}$ and increase the raw throughput by a factor of $\sqrt{2}$.
 
 Changing all header sizes by some factor has different effects for different UT configurations. For $O(c^2)$ configurations of UT, the effect on throughput is linearly proportional to the factor; doubling the header sizes reduces overall throughput by a factor of 2. However, for the $O(c^3)$ configuration of UT, the effect is quadratically proportional to the factor; doubling the header sizes will reduce overall throughput by a factor of 4! The relationship is even worse for the $O(c^4)$ configuration of UT, where the effect is cubicly proportional.
 
@@ -327,5 +327,3 @@ It is worth noting, though, that different header schemes can be used in each le
 This effect is not unique to UT, though. In general, any system of sharding is also affected in this manner: when the headers of a child-chain are included in the parent-chain's blocks.
 
 Practically, this effect means that a decrease to the size of headers has *increasing* marginal benefit. Compared to $O(c)$ blockchains (e.g. Bitcoin), efficient header schemes are far more important for UT and sharded blockchain networks.
-
-\todo{(todo/polish) look for references to sharding and, if they are talking about UT, change to talk about UT and sharding or correct the wording.}

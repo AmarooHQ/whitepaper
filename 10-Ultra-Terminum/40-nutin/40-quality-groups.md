@@ -2,6 +2,8 @@
 
 \label{sec:quality-groups}
 
+\todo{review this section -- rewrite intro at least}
+
 A *quality-group* is a group of qualities that can exist simultaneously. For any indivisible (and applicable) problem, you can choose one of the quality groups; but you can't mix and match qualities from each group.
 
 This sort of thing happens (at least in this case) because there is a choice of method, and each method provides different emergent properties.

@@ -21,7 +21,7 @@
         axis lines = left,
         xlabel = $x$,
         ylabel = {$f(x)$},
-        legend pos=north west,
+        legend pos=south east,
     ]
         % x/W_0(x)
         \addplot[no marks, smooth] gnuplot [
@@ -30,7 +30,7 @@
             color=red,
         ]
         {x/lambertw(x)};
-        \addlegendentry{$\frac{x}{W_0(x)}$}
+        \addlegendentry{$x(W_0(x))^{-1}$}
 
         % x
         \addplot[no marks, smooth] gnuplot [
@@ -38,8 +38,17 @@
             samples=1000,
             color=blue,
         ]
-        {0.0638 * x + 23.16};
-        \addlegendentry{$0.0638 \cdot x + 23.16$}
-    \end{axis}
+        {0.0638 * x};
+        \addlegendentry{$0.0638 \cdot x$}
+
+        % % x
+        % \addplot[no marks, smooth] gnuplot [
+        %     domain=100:100000000,
+        %     samples=1000,
+        %     color=green,
+        % ]
+        % {(x/lambertw(x) - 0.0638 * x)};
+        % \addlegendentry{$\frac{x}{W_0(x)} - 0.0638 \cdot x$}
+    \end{loglogaxis}
 \end{tikzpicture}
 \end{document}

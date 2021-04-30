@@ -30,7 +30,7 @@
             color=red,
         ]
         {x/lambertw(x)};
-        \addlegendentry{$\frac{x}{W_0(x)}$}
+        \addlegendentry{$x(W_0(x))^{-1}$}
 
         % x
         \addplot[no marks, smooth] gnuplot [
@@ -38,8 +38,8 @@
             samples=1000,
             color=blue,
         ]
-        {0.0638 * x + 23.16};
-        \addlegendentry{$0.0638 \cdot x + 23.16$}
+        {0.0638 * x};
+        \addlegendentry{$0.0638 \cdot x$}
     \end{axis}
 \end{tikzpicture}
 \end{document}
