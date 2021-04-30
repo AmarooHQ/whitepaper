@@ -234,7 +234,7 @@ N_3 & = \frac{T_3}{k_3} \\
 \end{split}
 \end{equation*}
 
-### Complexity of SPV proofs
+### Complexity of Cross-chain SPV proofs
 
 Each chain -- at full capacity -- operates with order $O(c)$ by definition. Thus its state has order $O(c)$ also. The size of SPV proofs scale logarithmically with the set you're proving membership of, e.g. the number of transactions, or size of the chain's state, etc. Thus, SPV proofs scale with order $O(\log_2 c)$.
 
@@ -256,7 +256,7 @@ A simplex-chain reflects $N_1 - 1 \approx N_1$ other simplex-chains. A merkle tr
 
 Note: In a production system, these proofs can be excluded from blocks by treating them as droppable witnesses; see \autoref{sec:proving-reflection}.
 
-### Complexity comparison
+### Complexity Comparison
 
 $k$: raw per-chain throughput (bytes/$s$) \newline
 $B_f$: simplex block frequency ($s^{-1}$) \newline
