@@ -328,44 +328,6 @@ There are some other conjectured solutions to the *Nothing at Stake* problem. Th
 
 There are some (as yet) unsolved problems that arise through this design, such as the *economic* details of managing block rewards across the PoW and PoS chains. Given that solutions to this problem likely depend on the specific details of the relevant PoS systems, this problem is not addressed in this paper.
 
-
-### Effect on Confirmation Speed
-
-The idea of *confirmation* is a representation of the risk that a transaction will fail to become finalized within a blockchain network; as a transaction receives more *confirmations*, the probability that a doublespend attempt succeeds approaches 0. A transaction is said to have been *confirmed* once it has enough confirmations to pass a *breakpoint*, beyond which the probability of an attack succeeding is close (enough) to 0.
-
-Let us say that some chain, $C_1$, mutually reflects another chain, $C_2$. For simplicity, let us assume that these two chains have equal hash power, host equal amounts of the root token, and use the same hash function for their PoW (meaning an attacker can mine either chain). Let $q_i > 0$ denote the attacker's *proportional hash-rate*[^prop-hash-rate] on $C_i$, and let $p_i > 0$ denote the honest proportional hash-rate on $C_i$. Similar to \autoref{sec:reflection-pow-and-pos}, assume that the maximum security contribution of each chain is capped at 50%. Thus, the following equalities hold: $p_1 + q_1 = 0.5$, $p_2 + q_2 = 0.5$; these imply $p_1 + p_2 + q_1 + q_2 = 1$. Additionally: $q_1 + q_2 = q$ and $p_1 + p_2 = p$.
-
-[^prop-hash-rate]: A proportional hash-rate is defined to be the proportion of that hash-rate to \emph{the hash-rate of the total network}, including reflected chains. These values are equivalent to the probability that the actor(s) responsible for that hash-rate will generate the next block.
-
-
-
-
-\todo{write out these paragraphs properly and make maths more formal}
-
-\mk{
-  NTS: For the case of ${C_1, C_2}$, it's clear that if $q_1 > 0.5$ and $q_2 > 0.5$ then the attacker should be able to perform arbitrary doublespends. This is equivalent to doing a 51% attack on both $C_1$ and $C_2$ simultaneously.
-}
-
-What if $q_1 > 0.5$ and $q_2 < 0.5$?
-
-\mk{
-  NTS: attacker dominates if $q_1 + q_2 > 1$, or more generally: $\sum_{i = i}^{N} q_i > \frac{N}{2}$
-}
-
-What if $q_1 < 0.5$ and $q_2 < 0.5$?
-
-\mk{NST: If the attacker is withholding then there are two races: one on $C_1$ and one on $C_2$. to secretly do a doublespend then the attacker must win both races and publish both chain-segments simultaneously, causing a simultaneous reorg on both chains.}
-
-\todo{finish this section}
-
-\todo{what are the dynamics of winning one race but not both? say they won $C_1$, they'd publish both but then someone else building on $C_1$ would add all the real headers from $C_2$ that don't include the reflections, which *after the fact* would diminish the chain-weight of $C_1$, but then with new $C_2$ blocks would reflect the new $C_1$ chain-segment. Todo: how does this interact with block-weighting calculation? need to do some simulations I think. Also todo: should miners like take into account new reflected work in their draft blocks? if so does that mean they'd still favor the old (honest) chain segment? probs need to formalize the chain-weighting alg so that it can be analyzed easily}
-
-\mk{
-  NTS: for cases where multiple races need to be won, the probability of success will be like: \\
-$\prod_{i=1}^{N} P_{C_i}(q_i)$ \\
-Which becomes vanishingly small much faster than for a single chain. There's a breakpoint around winning the race, sorta. The attacker does get some bonus from winning by a larger margin, but winning the race is still important.
-}
-
 ### Recursive Reflection
 
 \todo{not sure if this should be included. if so then need to write out this section}
@@ -388,7 +350,7 @@ An alternative plan, if the above doesn't work out, is for the header to include
 
 ### The Insecurity of Merged Mining
 
-\todo{write}
+\todo{write -- The Insecurity of Merged Mining}
 
 - Merged Mining allows attacking merged chains at 0 cost.
 - that means that if a parent chain and a merged mined child chain where to reflect one another, then the weight contributed via merged mining must be 0 -- no additional work was actually done beyond that of the parent-chain.

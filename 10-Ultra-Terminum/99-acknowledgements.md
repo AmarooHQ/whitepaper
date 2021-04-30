@@ -1,5 +1,5 @@
 # Acknowledgements
 
-Leesa Dang, for her help editing, improving the readability of the paper, and transcribing derivations and equations regarding UT's complexity.
+Leesa Dang, for her help editing, transcribing, and improving the readability of the paper.
 
-Elliot Temple
+Especially Elliot Temple, for helping me to find the beginning of my infinity.

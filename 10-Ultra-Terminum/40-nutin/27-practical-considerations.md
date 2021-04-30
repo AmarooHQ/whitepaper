@@ -3,14 +3,12 @@
 
 \label{sec:practical-considerations}
 
-plan:
+\todo{practical considerations - plan:}
 
 - there are some sticking points with a naive design
   - don't want to reflect blocks that don't exist
   - need to reflect headers, but including merkle proofs-of-reflection would be cumbersome
 - what about security implications and/or confirmation time?
-
-\todo{nb: mb security/conf bits go in Proof of Reflection, or stay here, IDK yet}
 
 ### Availability of Reflected Blocks
 
@@ -84,32 +82,33 @@ If simplex-chains are segmented in this manner, then miners will be able to calc
 
 Given that the reflection-segments of simplex-chains will contain mostly repeated data (i.e., headers), and that these segments will have very similar resultant state, there should be numerous optimizations that are possible. For example, it's not necessary for a miner's node to re-download reflected headers since it already has most (or all) of them; that node just needs to know *which* headers are reflected. This reduces the effective size of simplex-blocks from $b$ to $b \cdot (\frac{g + B_h}{2B_h})$, where $g$ is the size of the relevant digest in bytes. For $g=32; B_h=112$, this reduces effective block size to $\sim 0.643 b$ --- an improvement of $\sim 35\%$.
 
-\begin{comment}
-* note here: don't need to store all the headers $N_1$ times, just their hashes. that could reduce storage of headers to like $\frac{32}{112}$ of what they were before.
-* b/c we store all block headers anyway, if reflection takes $t$ seconds to propagate through the simplex, then nodes need $t \cdot N_1 \cdot B_f \cdot B_h$ bytes to store all the headers.
-* then, each simplex-chain (per header) has $t \cdot B_f \cdot N_1$ pointers to the heads of the header-chains it reflects, and since we have $N_1$ simplex chains to track, that means $t \cdot B_f \cdot N_1^2$ many pointers are necessary to know the a complete description of all reflections
-* having that info means you can deterministically recreate SPV proofs of reflection
-* so we can treat these proofs as a witness and not include them in the blockchain
-
-\todo{write this section out and specify the algorithm -- or at least a draft}
-\end{comment}
+\todo{check that the argument for droppable witnesses is good enough. nb: check this line in git history at f4f2ff7 for prev notes}
 
 ### Confirmation Times
 
 \label{sec:confirmation-times}
 
-\todo{write this.}
+\todo{write -- confirmation times}
 
 \begin{equation}
 \frac{1}{O(c)}
 \end{equation}
 
+\begin{comment}
+The idea of *confirmation* is a representation of the risk that a transaction will fail to become finalized within a blockchain network; as a transaction receives more *confirmations*, the probability that a doublespend attempt succeeds approaches 0. A transaction is said to have been *confirmed* once it has enough confirmations to pass a *breakpoint*, beyond which the probability of an attack succeeding is close (enough) to 0.
+
+Let us say that some chain, $C_1$, mutually reflects another chain, $C_2$. For simplicity, let us assume that these two chains have equal hash power, host equal amounts of the root token, and use the same hash function for their PoW (meaning an attacker can mine either chain). Let $q_i > 0$ denote the attacker's *proportional hash-rate*[^prop-hash-rate] on $C_i$, and let $p_i > 0$ denote the honest proportional hash-rate on $C_i$. Similar to \autoref{sec:reflection-pow-and-pos}, assume that the maximum security contribution of each chain is capped at 50%. Thus, the following equalities hold: $p_1 + q_1 = 0.5$, $p_2 + q_2 = 0.5$; these imply $p_1 + p_2 + q_1 + q_2 = 1$. Additionally: $q_1 + q_2 = q$ and $p_1 + p_2 = p$.
+
+[^prop-hash-rate]: A proportional hash-rate is defined to be the proportion of that hash-rate to \emph{the hash-rate of the total network}, including reflected chains. These values are equivalent to the probability that the actor(s) responsible for that hash-rate will generate the next block.
+\end{comment}
+
+
 ### DoS and DAGs
 
 \label{sec:dos-and-dags}
 
-\mk{
-    use quanta / inclusive-protocol to allow: multiple parents; merging histories; including invalid or pseudo-invalid blocks in history; prevent DoS attacks; avoid stale blocks
+\todo{
+    write \emph{DoS and DAGs}. use quanta / inclusive-protocol to allow: multiple parents; merging histories; including invalid or pseudo-invalid blocks in history; prevent DoS attacks; avoid stale blocks
 }
 
 \begin{figure}
