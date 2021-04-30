@@ -37,7 +37,7 @@ In order to support arbitrarily many reflections, we need to modify \textsc{Refl
     \For{$B_{i,j}$ in $Blocks_{i}$}
       \State RCHs $\gets$ \Call{ReflectedChainHeads}{$B_{i,j}$, $state$} \Comment{Local blocks reflected by $B_{i,j}$}
       \If {$block$ in RCHs}
-        \State $s\gets s+$ \Call{WeightOf}{$B_{i,j}$, $state$}
+        \State $s\gets s \; +$ \Call{WeightOf}{$B_{i,j}$, $state$}
       \EndIf
     \EndFor
   \EndFor

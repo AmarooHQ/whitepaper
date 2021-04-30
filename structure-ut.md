@@ -19,7 +19,7 @@ The structure itself will be captured in the TOC generated for the UT paper. Thi
   - explanation and conflict
 - UT itself
   - Proof of Reflection
-    - comparing hashrate
+    - comparing hash-rate
       - foreshadow incentive structure stuff
     - redux of block-weight calculations
       - **todo** brainstorm block-weight methods and crits/qualities/etc

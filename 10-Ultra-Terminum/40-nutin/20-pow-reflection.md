@@ -203,7 +203,7 @@ How is it that Chain B miners can know the partial state of Chain E that is requ
 
 It's worth noting that there are still potential attacks on Chain B at this point. For example: what if an attacker mines a doublespend in private and produces a longer chain-segment than the honest chain? At this point the attacker can publish their blocks even though the honest chain-segment still weighs more due to reflections. Why would they do this? Well, if Chain E is tracking Chain B's headers-only chain without accounting for reflections, then the attackers chain-segment appears to have more work than the honest chain-segment. Thus Chain E's reflection of Chain B will reorganize to favor the attacker's chain-segment. If the attacker has more hash power than the honest miners (i.e., $q > p$[^hr-footnote]) then they can use this reorganization as a foothold to launch a normal 51% attack.
 
-[^hr-footnote]: In \href{https://bitcoin.org/bitcoin.pdf}{Satoshi's original paper} the parameters $p$ and $q$ represent the probability that the next block will be found by an honest node or the attacker, respectively. This convention has been continued in subsequent analysis, e.g., Rosenfeld's \href{https://cloudflare-ipfs.com/ipfs/QmT6GWJ2M9d7MqyyBdMzV6bUvGW5GANWrP5C2at2j7zFHi}{\emph{Analysis of hashrate-based double-spending}}, and is continued here, also.
+[^hr-footnote]: In \href{https://bitcoin.org/bitcoin.pdf}{Satoshi's original paper} the parameters $p$ and $q$ represent the probability that the next block will be found by an honest node or the attacker, respectively. This convention has been continued in subsequent analysis, e.g., Rosenfeld's \href{https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{\emph{Analysis of hash-rate-based double-spending}}, and is continued here, also.
 
 How can we prevent this sort of attack? The attack is predicated on Chain E *not* accounting for the added weight from reflections. Chain E can easily account for that weight, though, with some protocol changes. First: the total chain-weight (or, equivalently, the change in total chain-weight), *including reflections*, can be committed to via a field in the header. Based on this field, a headers-only version of the chain can be constructed correctly. Full nodes of Chain B can now also validate the claimed weight against the verifiable weight, and a mismatch invalidates the block. Second: When such a block is found (where the claimed chain-weight violates the protocol), full nodes can construct a fraud proof. Chain E should then confirm the fraud proof (i.e., record it on-chain) and thus prevent the attackers blocks from taking priority and/or gaining reflections. Third: Chain E already knows its own headers, and so can acknowledge the reflections between Chain B and Chain E with only the necessary merkle branches, and thus verify the reflections between Chain B and Chain E. This third method provides an additional means of detecting blocks that are invalid due to fraudulent chain-weight claims in the header.
 
@@ -263,9 +263,9 @@ Say we had Altcoin1 and Altcoin2: two near-identical PoW chains using different 
 
 Now that we know what the block rewards are and have defined them in terms of the percentage of total coins that are on that chain, we can work on comparing the chains' hash rates. What sort of foundation could we do this from? What about *equal work for equal reward*? Because we have defined block rewards in terms of *where* root tokens are held, we can measure things like *hashes per token* (when considering block rewards particularly). Crucially, we can measure this *for each chain*, which allows us to -- *contextually* -- make claims like 100 hashes of algorithm 1 are worth 25 hashes of algorithm 2.
 
-Since we know the percentage of root tokens on each chain for each moment in history, we can safely use that figure in chain-weight calculations. The reliability of that data will be the same as the reliability of the blockchains themselves, provided we enforce the 2-way peg that ensures no root tokens are created or destroyed outside protocol rules.
+Since we know the percentage of root tokens on each chain for each moment in history, we can safely use that figure in chain-weight calculations. The reliability of that data will be the same as the reliability of the blockchains themselves, provided we enforce the 2-way peg that ensures no root tokens are created or destroyed in violation of protocol rules.
 
-\autoref{alg:weightof-1} details a simplistic \textsc{WeightOf} function which returns a weight normalized in coins (i.e., root tokens). It does not account for some things, e.g., changes to the difficulty of $C$ over time.
+\autoref{alg:weightof-1} details a simplistic \textsc{WeightOf} function that returns a weight normalized in coins (i.e., root tokens). It does not account for some things, e.g., changes to the difficulty of $C$ over time.
 
 \begin{algorithm}
 \caption{A simplistic \textsc{WeightOf} for networks of a single root token}\label{alg:weightof-1}
@@ -306,7 +306,7 @@ If a PoW chain is reflected in a PoS chain, then an attacker will likely need mo
 
 Consider an attack on the PoW chain and presume that the difficulty on the PoW chain is constant over the attack, i.e., the PoW chain's difficulty doesn't adjust quickly enough to react to the attack. Additionally, assume the attacker has *not* been contributing to the network before the attack, i.e., their hash-rate is not accounted for in the PoW chain's difficulty. Given the two chains are mutually reflecting, half of the network's security is provided by the PoS chain (and thus immune to the attacker in this case). Therefore, a successful attacker -- *using the traditional method of mining a competing chain-segment in private* -- must generate more blocks than both chains combined. That means the attacker needs *twice* the honest hash-rate for a guaranteed successful attack.
 
-However, consider the case that *the security contribution of the PoW chain is \textbf{capped} at 50%*. This situation is approximately equivalent to that where the PoW chain has a *perfect* difficulty adjustment algorithm, i.e., the network instantly adapts to keep the block production frequency constant. Let $p > 0$ be the honest miners' contribution to *overall* network security, and $q > 0$ be the attacker's contribution. As the PoW contribution to overall security is capped at 50%, the equality $p + q = 0.5$ is enforced. In this case, the attacker will have a maximum chain-weight contribution rate of $\frac{1}{2} \cdot \frac{q}{q + p}$ and the honest chain-segments will have a maximum contribution rate of $\frac{1}{2} \cdot \frac{p}{q + p} + \frac{1}{2}$. The condition for a successful attack is shown in \autoref{eq:refl-pow-pos-1}, and the inequality has no solutions.
+However, consider the case that *the security contribution of the PoW chain is \textbf{capped} at 50%* -- i.e., capped at the proportion of root tokens hosted on that chain. For our purposes, this situation is approximately equivalent to that where the PoW chain has a *perfect* difficulty adjustment algorithm, i.e., the network instantly adapts to keep the block production frequency constant. Let $p > 0$ be the honest miners' contribution to *overall* network security, and $q > 0$ be the attacker's contribution. As the PoW contribution to overall security is capped at 50%, the equality $p + q = 0.5$ is enforced. In this case, the attacker will have a maximum chain-weight contribution rate of $\frac{1}{2} \cdot \frac{q}{q + p}$ and the honest chain-segments will have a maximum contribution rate of $\frac{1}{2} \cdot \frac{p}{q + p} + \frac{1}{2}$. The condition for a successful attack is shown in \autoref{eq:refl-pow-pos-1}, and the inequality has no solutions.
 
 \begin{align}
 && \frac{1}{2} \cdot \frac{q}{q + p} & > \frac{1}{2} \cdot \frac{p}{q + p} + \frac{1}{2} \notag \\
@@ -333,10 +333,10 @@ There are some (as yet) unsolved problems that arise through this design, such a
 
 The idea of *confirmation* is a representation of the risk that a transaction will fail to become finalized within a blockchain network; as a transaction receives more *confirmations*, the probability that a doublespend attempt succeeds approaches 0. A transaction is said to have been *confirmed* once it has enough confirmations to pass a *breakpoint*, beyond which the probability of an attack succeeding is close (enough) to 0.
 
-Let us say that some chain, $C_1$, is reflected by another chain, $C_2$. For simplicity, let us assume that these two chains have equal hash power and use the same hash function for their PoW -- this means the attacker can mine either chain.
+Let us say that some chain, $C_1$, mutually reflects another chain, $C_2$. For simplicity, let us assume that these two chains have equal hash power, host equal amounts of the root token, and use the same hash function for their PoW (meaning an attacker can mine either chain). Let $q_i > 0$ denote the attacker's *proportional hash-rate*[^prop-hash-rate] on $C_i$, and let $p_i > 0$ denote the honest proportional hash-rate on $C_i$. Similar to \autoref{sec:reflection-pow-and-pos}, assume that the maximum security contribution of each chain is capped at 50%. Thus, the following equalities hold: $p_1 + q_1 = 0.5$, $p_2 + q_2 = 0.5$; these imply $p_1 + p_2 + q_1 + q_2 = 1$. Additionally: $q_1 + q_2 = q$ and $p_1 + p_2 = p$.
 
+[^prop-hash-rate]: A proportional hash-rate is defined to be the proportion of that hash-rate to \emph{the hash-rate of the total network}, including reflected chains. These values are equivalent to the probability that the actor(s) responsible for that hash-rate will generate the next block.
 
-Let us also denote the probability of an attack succeeding on some chain, $C_i$, via the function $P_{C_i}(q_i)$, where $q_i$ is both the proportion of computational power that the attacker controls and the probability that the attacker will create the next block (these values are equal).
 
 
 
@@ -366,7 +366,6 @@ $\prod_{i=1}^{N} P_{C_i}(q_i)$ \\
 Which becomes vanishingly small much faster than for a single chain. There's a breakpoint around winning the race, sorta. The attacker does get some bonus from winning by a larger margin, but winning the race is still important.
 }
 
-
 ### Recursive Reflection
 
 \todo{not sure if this should be included. if so then need to write out this section}
@@ -386,133 +385,6 @@ I think this should pan out b/c miners build on the longest chain. So if, at som
 note: I think this *must* hold for double-spend mitigation stuff to work out.
 
 An alternative plan, if the above doesn't work out, is for the header to include its corresponding block-weighting that accounts for reflections. That would allow a full-node doing an initial sync to reproduce the block-ordering that accounts for reflections, even though it isn't verifying those reflections (similar to SegWit).
-
-
-### block weight stuff
-
-\todo{review commented blockweight stuff and figure out what needs to be included still and where}
-
-\begin{comment}
-
-### New block-weight algorithms
-
-\label{s:counting-reflected-work}
-
-\todo{brainstorm and progress this}
-
-From forum last night:
-
-> Here's the way we can think about the block weighting algorithm:
->
-> Miners want to include reflection block headers b/c it helps them achieve the goal "be part of the longest chain" which is an intermediate goal to "get block rewards" -- b/c the protocol must demand it. So whatever block weighting algorithm we go with, a constraint (mb the starting point, mb not) needs to be something like:
->
->> contributing to reflections (including other chains' block headers in your blocks + proofs of state) is instrumental to producing blocks that become part of the main chain.
->
-> This gives us a good yes/no quality that a block weighting algorithm *must* have. We can add some additional stuff that might help conjecture good weighting algorithms, too.
->
-> meta comment: next step is to brainstorm algorithms (which is a step in the current WP plan I think)
->
-> note: b/c block headers are like ~everywhere, and proving the most up-to-date reflection on a foreign chain is basically going to be a block header + merkle branch, there should be some significant engineering efficiencies we can make there -- so that, like, we don't need to send the proofs *and* the headers, we only need to send a small part, or maybe something in O(1) (like a bloom filter?).
-
-----
-
-> mb an insight: as a miner, contributing other block headers doesn't make *your* block "more confirmed" or something. But it does help confirm *prior* blocks, which means that *by adding foreign block headers your block is built on a "more worked" chain, b/c you're providing the evidence of that work!*
->
-> Is that enough incentive? IDK, but one alternative is to like give them a boost to the "work" in that block (e.g. 10% of the work in the headers they include). that feels arbitrary and unprincipled, tho.
-
-----
-
-> note for scaling calcs/algebra: what happens if we include the overhead of merkle proofs along with the other headers? Does that like break everything? surely we can't calc all the permutations of likely header combos to find a matching merkle root... that sounds like a lot of work with e.g. 1000 reflected chains. easy with 2 or 3 chains tho.
-
-----
-
->> what happens if we include the overhead of merkle proofs along with the other headers?
->
-> that overhead is approx log(n_reflected_chains) for *each header* btw, that sort of thing might not be catastrophic, but it'd be a weird governor-esq anti-scaling overhead; like potentially `n*log(n)` for header sizes, i.e., something like:
->
-> `constant + n_simplex_chains * log2(n_simplex_chains)`
-
-----
-
->> that sort of thing might not be catastrophic, but it'd be a weird governor-esq anti-scaling overhead
->
-> I added some worst case sorta numbers to the WP. the "500, 500" and "500, 700" below represent log2(4096)*32 byte increases to the header size (i.e., something like 384 bytes added to headers of a base size 112 bytes and 250 bytes)
->
-> | (3000, 1/60, 1/60, 500, 500, 250) | 12 | 4,320 | 388,800 | $1.4\times 10^{8}$ |
-> | (3000, 1/60, 1/60, 500, 700, 250) | 12 | 3,086 | 277,714 | $7.1\times 10^{7}$ |
->
-> So yeah, it's not catastrophic; our TPS would still be above 100k and with O(c^4) scaling it's still approx 10^8.
->
-> One thing that might come in to play is the basic idea I have to ensure block availability: download and store every block for 24hrs. That's O(c^2) bandwidth but c is relative to like 3 kb/s, so O(c^2) bandwidth isn't a show-stopper here (at least atm, todo: calc limits)
-
-\todo{calc limits}
-
-> If all miners have all simplex blocks in the last 24hrs *anyway*, then they can construct the proofs themselves. That might mean there's a way to avoid transmitting the proof + still be able to verify it. sort of like segwit does: throw away the data that's useless after it's been verified b/c the miner already had that anyway. In Bitcoin's case, that's the tx signatures; in UT's case, it's the block header proof-of-inclusion merkle branches.
->
-> aside: does segwit mean that like a persistent, long term 51% attack can steal funds? b/c witnesses aren't included anymore?
-
-----
-
-> another **todo**: how are confirmation times affected by the simplex? IMO other chains confirming a particular chain's block counts for something in terms of the idea of "confirmation".
->
-> confirmation is typically calculated via the probability (or ability) that an attacker can reverse a transaction. it's a measure of *assurance*, as such.
->
-> how does UT play in to this? well, more reflection => harder for an attacker to reverse. Consider the parameters of an attacker having specific resources (e.g. a bunch of sha256 ASICs -- which is of a contiguous and homogeneous quality that past analysis has alluded to, tho it's abstracted via maths that presumes that); we can thwart most of those. But if we take an "optimistic" (for the attacker) look at an attacker with O(n) resources, then we're in worst-case-ville and I think UT might degrade to, *at worst*, the best lower-bound (i.e., best of all the worst-case situations) of other blockchains. Note to self: Need to write more on this to figure it out.
-
-\todo{how are confirmation times affected by the simplex?}
-
-### The Previous Block-Weighting Function
-
-\todo{exploratory notes}
-
-Let: $T$ be the target for the verification function; $T_{\text{max}}$ be the maximum meaningful target (e.g., $2^{256}$); $h$ be the hash digest as a number.
-
-If $T > h$ (the success criterion) then $T - h > 0$. $P(x); x \neq 0$ is a function which returns 1 if $x$ is positive, and 0 otherwise.
-
-\begin{equation}
-\begin{split}
-P(x) & = \frac{\sqrt{x^2}}{2x} + \frac{1}{2} \\
-W_{\text{block},1}(T, h) & = P(T - h) \cdot \frac{T_{\text{max}}}{T}
-\end{split}
-\end{equation}
-
-This function, $W_{\text{block},1}$ will return the weight of a block in terms of the expected number of hashes needed to generate the proof of work. This function is useful because it is able to compare blocks between chain forks, even if the difficulty is different on each fork. That is to say: this weighting-function is meaningful over long periods of time; it works both instantaneously and long-term.
-
-### Block-Weighting w/ Conversion
-
-\todo{exploratory notes}
-
-In order to convert between different hashes (or even the same hash function on different blockchains) we need a method, and the best method discussed above is to normalize against the distribution of some common root-token (provided the inflation rate, mining rewards, etc are all of the same profile). The root-token's distribution will change over time, but is essentially constant over the period of a few blocks.
-
-Our goal is to convert some other block's work into something comparable to $W_{\text{block},1}$.
-
-ROO/s is generated on each chain ~proportionally to the ratio, $r_j$, of local-ROO to global-ROO. Each chain will (dependant on the hash function) have some attempts/s (hashrate) that is implicitly measured via the target value. Attempts/block is given by $\frac{T_{\text{max}}}{T_j}$, so attempts/s is given by $\frac{T_{\text{max}}}{T_j} \cdot B_{f,j}$, where $B_{f,j}$ is the block frequency measured in hertz ($s^{-1}$). The generated ROO/s is proportional to attempts/s over small time scales, i.e., there is some scaling constant. Over longer periods of time, the generated ROO/s is related to attempts/s, but not necessarily via a constant.
-
-A miner's attempts/s is proportional to their expected reward-rate over small time scales. For the chain as a whole, this is demonstrated by: expected attempts per block is proportional to the block reward, i.e., the product of expected attempts per block and some constant, $Z$, measured in ROO/attempt equals the block reward. For example: given some chain $j$ with $A_j$ expected attempts per block, and $B_{R,j}$ block reward; $A_j \cdot Z_j = B_{R,j}$. Since attempts per block is given by $\frac{T_{\text{max}}}{T_j}$, we can say $\frac{T_{\text{max}}}{T_j} \cdot Z = B_R$. Additionally, $B_R$ is proportional to $r$; i.e., $B_{R,j} = r_j \cdot B_{R,\text{global}}$. Thus $\frac{T_{\text{max}}}{T_j} \cdot Z_j = r_j \cdot B_{R,\text{global}}$.
-
-\begin{equation}
-\frac{T_{\text{max}}}{T_j} \cdot \frac{Z_j}{r_j} = B_{R,\text{global}}
-\end{equation}
-
-Thus, given two chains, $j$ and $k$:
-
-\begin{equation}
-\begin{split}
-\frac{T_{\text{max}} Z_j}{T_j r_j} & = \frac{T_{\text{max}} Z_k}{T_k r_k} \\
-\frac{T_k}{T_j} & = \frac{Z_k r_j}{Z_j r_k}
-\end{split}
-\end{equation}
-
-
-\mk{
-  nb: I need to consider that the history that the miner builds on increases with time (b/c reflections start accumulating, and once that miner publishes a block, then that block will have sigma-weight more than just its own weight). so the place to look isn't what a block weighs, it's to look at what a block is building on -- how much does that weigh.
-}
-
-\begin{equation}
-r_1 = Z_1 \cdot \frac{T_{\text{max}}}{T_1} \cdot B_{f,1}
-\end{equation}
-
-\end{comment}
 
 ### The Insecurity of Merged Mining
 

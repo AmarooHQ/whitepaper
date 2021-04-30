@@ -31,7 +31,7 @@
 \cNef{Wait, what do you mean "reflections", and why does 6\% of the supply matter?}
 
 \cMax{
-  Once a block for one chain is published, its existence gets confirmed by the other chains. That's a reflection. There are 15 other simplex-chains, so every sha256 block gets roughly 15 \emph{other} confirmations before the next sha256 block gets produced. The number of confs is a bit random, so mb it's a few less or a few more. The point is that the honest chain will weigh like 15x more than your privately-mined chain, even if your hashrate is 20x the honest hashrate.
+  Once a block for one chain is published, its existence gets confirmed by the other chains. That's a reflection. There are 15 other simplex-chains, so every sha256 block gets roughly 15 \emph{other} confirmations before the next sha256 block gets produced. The number of confs is a bit random, so mb it's a few less or a few more. The point is that the honest chain will weigh like 15x more than your privately-mined chain, even if your hash-rate is 20x the honest hash-rate.
 }
 
 \cMax{

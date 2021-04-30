@@ -13,7 +13,7 @@ includes/ut/tiling/*.svg
 /*.pdf
 node_modules
 /*.zip
-*.pgf-plot.table
+*.pgf-plot.*
 *.pgf-plot.gnuplot
 includes/**/*.pdf
 includes/handout/exec-summary.md

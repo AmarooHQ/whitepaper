@@ -8,7 +8,7 @@
 
 \pgfplotsset{scaled y ticks=false}
 \pgfplotsset{scaled x ticks=false}
-
+\pgfplotsset{compat=1.16}
 
 \makeatletter
 \def\input@path{{./includes/}{./includes/ut/diags/}}
@@ -17,7 +17,7 @@
 \begin{document}
 \begin{tikzpicture}
     % axis options: 'axis', 'loglogaxis'
-    \begin{axis}[
+    \begin{loglogaxis}[
         axis lines = left,
         xlabel = $x$,
         ylabel = {$f(x)$},

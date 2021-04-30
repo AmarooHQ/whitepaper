@@ -23,8 +23,19 @@ Given that we can avoid including proofs of reflection (see \autoref{sec:proving
 From \autoref{eq:simplex-N1-with-PoR}, we have $N_1$ that is of the form $N_1 = O(1) \cdot \frac{k_1}{W_0(O(1) \cdot k_1)}$. \autoref{fig:x-over-lambert} shows that $f(x) = \frac{x}{W_0(x)}$ looks similar to a straight line for values of $x$ that we care about. So lets approximate: $O(\frac{k}{W_0(k)}) = O(k)$. Thus I guess that, even if simplex-chains include proofs of reflection along with reflected headers, the result is still $O(N_1) = O(c)$ and $O(T_1) = O(c^2)$.
 
 \begin{figure}
-    \centering
-    \includegraphics{graph_prodlog_sag}
-    \caption{A graph of $f(x) = \frac{x}{W_0(x)}$ for $x \in [10^2, 10^8]$.}
+    \begin{subfigure}[t]{.48\linewidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.75\linewidth]{graph_prodlog_sag}
+        \caption{Using linear axes}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.48\linewidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.75\linewidth]{graph_prodlog_loglog_sag}
+        \caption{Using log axes}
+    \end{subfigure}%%
+    \caption{Graphs of $f(x) = \frac{x}{W_0(x)}$ for $x \in [10^2, 10^8]$.}
     \label{fig:x-over-lambert}
 \end{figure}
