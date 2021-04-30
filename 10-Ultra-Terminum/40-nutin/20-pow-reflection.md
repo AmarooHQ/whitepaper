@@ -182,7 +182,7 @@ The *meaning* of this change is that Chain B now incorporates work done on Chain
 
 When a chain does this we say *Chain B (or Chain B's work) is **reflected** in Chain E*. This technique is what is meant by the term *Proof of Reflection*.
 
-\defineTerm{Proof of Reflection}{The consensus technique whereby a blockchain becomes more difficult to attack via the inclusion of proofs that its history is tracked and confirmed by another blockchain}
+\defineTerm{Proof of Reflection (PoR)}{The consensus technique whereby a blockchain becomes more difficult to attack via the inclusion of proofs that its history is tracked and confirmed by another blockchain}
 
 One particular *impact* of this change is that a doublespend attack (e.g. by withholding a privately mined chain that reverts a transaction) must now be performed *not only* against Chain B, *but also and simultaneously* against Chain E.
 
@@ -291,31 +291,52 @@ One can use the same principles to compare work between chains that have differe
 
 In the context of *Ultra Terminum* and *Amaroo*, these aren't questions that are important to answer. If *Proof of Reflection* is ever used to secure multiple chains with heterogenous tokens, it's likely that either these questions will need to be answered or alternate methods will need to be devised.
 
-### Recursive Reflection
 
-\todo{not sure if this should be included. if so then need to write out this section}
+### Reflection Between PoW and PoS Chains
 
-Say chain B reflects both A and C. $A <-> B <-> C$. Proof of Reflection says A gets a benefit by proving that B reflects specific work from A. Does A get a security benefit by proving that C reflects B reflects A?
+\label{sec:reflection-pow-and-pos}
 
-### Equivalency of Reflecting and Non-Reflecting Block-Weightings
+Perhaps one of the most interesting features of *Proof of Reflection* is that PoW chains and PoS chains can reflect one another. Up till now, we've contextualized the weight of a reflection via the *work* required to produce a block. But the concept of *work* does not neatly apply to foundational consensus mechanisms that do not have some physical resource utilization requirement -- such as PoS.
 
-\label{sec:equiv-state-block-weightings}
+\defineTerm{Foundational Consensus Mechanisms}{Those mechanisms, like PoW and PoS, which can work in some \emph{standalone} fashion; PoR is a cross-chain \emph{extension} to such mechanisms}
 
-\todo{show that the result under Proof of Reflection is backwards compatible, i.e., existing consensus methods will settle on the same result. Needs to work for DAGs, too.}
+Putting the issue of *conversion* aside for a moment, is it possible *in principle* for PoW and PoS chains to reflect one another? Yes. Additionally, PoR provides decisive advantages *both* for PoW chains *and* PoS chains, though there are some additional problems that must be solved, too.
 
-##### Notes:
+If a PoW chain is reflected in a PoS chain, then an attacker will likely need more than just computational resources to attack the PoW chain. Consider a PoW chain and a PoS chain that share a root token, and each chain hosts approximately 50% of the total supply. If the two chains have equal block production frequencies, then 50% of the network's security comes from each chain.
 
-I think this should pan out b/c miners build on the longest chain. So if, at some time $t$, there's a disagreement between block-weighting methods, then miners will choose the reflection weighting. That should mean that a few blocks later (e.g., at $t+5$) the 'problematic' section of the chain is now re-orgd so that the methods agree again.
+Consider an attack on the PoW chain and presume that the difficulty on the PoW chain is constant over the attack, i.e., the PoW chain's difficulty doesn't adjust quickly enough to react to the attack. Additionally, assume the attacker has *not* been contributing to the network before the attack, i.e., their hash-rate is not accounted for in the PoW chain's difficulty. Given the two chains are mutually reflecting, half of the network's security is provided by the PoS chain (and thus immune to the attacker in this case). Therefore, a successful attacker -- *using the traditional method of mining a competing chain-segment in private* -- must generate more blocks than both chains combined. That means the attacker needs *twice* the honest hash-rate for a guaranteed successful attack.
 
-note: I think this *must* hold for double-spend mitigation stuff to work out.
+However, consider the case that *the security contribution of the PoW chain is \textbf{capped} at 50%*. This situation is approximately equivalent to that where the PoW chain has a *perfect* difficulty adjustment algorithm, i.e., the network instantly adapts to keep the block production frequency constant. Let $p > 0$ be the honest miners' contribution to *overall* network security, and $q > 0$ be the attacker's contribution. As the PoW contribution to overall security is capped at 50%, the equality $p + q = 0.5$ is enforced. In this case, the attacker will have a maximum chain-weight contribution rate of $\frac{1}{2} \cdot \frac{q}{q + p}$ and the honest chain-segments will have a maximum contribution rate of $\frac{1}{2} \cdot \frac{p}{q + p} + \frac{1}{2}$. The condition for a successful attack is shown in \autoref{eq:refl-pow-pos-1}, and the inequality has no solutions.
 
-An alternative plan, if the above doesn't work out, is for the header to include its corresponding block-weighting that accounts for reflections. That would allow a full-node doing an initial sync to reproduce the block-ordering that accounts for reflections, even though it isn't verifying those reflections (similar to SegWit).
+\begin{align}
+&& \frac{1}{2} \cdot \frac{q}{q + p} & > \frac{1}{2} \cdot \frac{p}{q + p} + \frac{1}{2} \notag \\
+&& \frac{q}{q + p} & > \frac{p}{q + p} + 1 \notag \\
+&& q & > p + (q + p) \notag \\
+&& 0 & > 2p && \text{which is a contradiction since\;} p > 0
+\label{eq:refl-pow-pos-1}
+\end{align}
+
+Given the right set up, a PoW chain gains an *incredible* security advantage from mutual reflection with a PoS chain.
+
+What about the PoS chain, though; what benefits does it gain from this relationship? The answer here is simple: by reflecting with a PoW chain, the PoS chain gains *thermodynamic security*; the PoS chain's history is *thermodynamically secured* by the PoW chain. \textbf{This solves the \emph{Nothing at Stake} problem for any well constructed PoS scheme.} Furthermore, it is possible for error-correction methods like \emph{slashing} to be implemented *on the PoW chain*, not the PoS chain. Granted, such a change being done well requires subtle and precise protocol design, but it is *in principle* possible with tolerable overhead.
+
+There are some other conjectured solutions to the *Nothing at Stake* problem. The two examples that follow solve the problem via mechanisms that are *external* to the protocol itself, i.e., hard-coded checkpoints and the requirement that nodes are online ``frequently''. The solution provided by mutual reflection with a PoW blockchain -- i.e., thermodynamic security -- is provided *by the protocol itself* and can only *increase* the security of PoS mechanisms. Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
+
+\bquote{Long-range ``nothing-at-stake'' attacks are circumvented through a simple ``checkpoint'' latch which prevents a dangerous chain-reorganisation of more than a particular chain-depth. To ensure newly-syncing clients are not able to be fooled onto the wrong chain, regular ``hard forks'' will occur (of at most the same period of the validators' bond liquidation) that hard-code recent checkpoint block hashes into clients.}{Dr. Gavin Wood; \href{https://cloudflare-ipfs.com/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Polkadot Whitepaper, s5.2}}
+
+\bquote{Provided that stakeholders are frequently online, nothing at stake is taken care of by our analysis of forkable strings (even if the adversary brute-forces all possible strategies to fork the evolving blockchain in the near future, there is none that is viable), and our chain selection rule that instructs players to ignore very deep forks that deviate from the block they received the last time they were online.}{\href{http://cloudflare-ipfs.com/ipfs/QmWCAHyi35SeXH2E4e8jRVk7yNse2x6D14uPfABnhagbvN}{Ouroboros: A Provably Secure Proof-of-Stake Blockchain Protocol, s10}}
+
+There are some (as yet) unsolved problems that arise through this design, such as the *economic* details of managing block rewards across the PoW and PoS chains. Given that solutions to this problem likely depend on the specific details of the relevant PoS systems, this problem is not addressed in this paper.
+
 
 ### Effect on Confirmation Speed
 
 The idea of *confirmation* is a representation of the risk that a transaction will fail to become finalized within a blockchain network; as a transaction receives more *confirmations*, the probability that a doublespend attempt succeeds approaches 0. A transaction is said to have been *confirmed* once it has enough confirmations to pass a *breakpoint*, beyond which the probability of an attack succeeding is close (enough) to 0.
 
-Let us say that some chain, $C_1$, is reflected by another chain, $C_2$. Since we have two chains, we will also say that $N = 2$. For simplicity, let us assume that these two chains have equal hash power and use the same hash function for the PoW -- this means the attacker can mine either chain. Let us also denote the probability of an attack succeeding on some chain, $C_i$, via the function $P_{C_i}(q_i)$, where $q_i$ is both the proportion of computational power that the attacker controls and the probability that the attacker will create the next block (these values are equal).
+Let us say that some chain, $C_1$, is reflected by another chain, $C_2$. For simplicity, let us assume that these two chains have equal hash power and use the same hash function for their PoW -- this means the attacker can mine either chain.
+
+
+Let us also denote the probability of an attack succeeding on some chain, $C_i$, via the function $P_{C_i}(q_i)$, where $q_i$ is both the proportion of computational power that the attacker controls and the probability that the attacker will create the next block (these values are equal).
 
 
 
@@ -344,6 +365,28 @@ What if $q_1 < 0.5$ and $q_2 < 0.5$?
 $\prod_{i=1}^{N} P_{C_i}(q_i)$ \\
 Which becomes vanishingly small much faster than for a single chain. There's a breakpoint around winning the race, sorta. The attacker does get some bonus from winning by a larger margin, but winning the race is still important.
 }
+
+
+### Recursive Reflection
+
+\todo{not sure if this should be included. if so then need to write out this section}
+
+Say chain B reflects both A and C. $A <-> B <-> C$. Proof of Reflection says A gets a benefit by proving that B reflects specific work from A. Does A get a security benefit by proving that C reflects B reflects A?
+
+### Equivalency of Reflecting and Non-Reflecting Block-Weightings
+
+\label{sec:equiv-state-block-weightings}
+
+\todo{show that the result under Proof of Reflection is backwards compatible, i.e., existing consensus methods will settle on the same result. Needs to work for DAGs, too.}
+
+##### Notes:
+
+I think this should pan out b/c miners build on the longest chain. So if, at some time $t$, there's a disagreement between block-weighting methods, then miners will choose the reflection weighting. That should mean that a few blocks later (e.g., at $t+5$) the 'problematic' section of the chain is now re-orgd so that the methods agree again.
+
+note: I think this *must* hold for double-spend mitigation stuff to work out.
+
+An alternative plan, if the above doesn't work out, is for the header to include its corresponding block-weighting that accounts for reflections. That would allow a full-node doing an initial sync to reproduce the block-ordering that accounts for reflections, even though it isn't verifying those reflections (similar to SegWit).
+
 
 ### block weight stuff
 
