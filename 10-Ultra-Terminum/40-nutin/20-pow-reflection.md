@@ -234,18 +234,26 @@ How can we design a system that allows for sensible comparisons between Proofs o
 
 The core problem is that the work done on different chains is measured using different units -- and those units aren't convertible. This applies to blockchains that use the same hashing algorithm, too, since there may be different costs and factors that are implicit in the mining of each of those chains. One hash is not necessarily worth exactly one hash in different contexts.
 
-Revisiting *qualitative conversion* from \autoref{sec:por-step4}: in order to convert otherwise unconvertible units, one must define a suitable goal and context for that conversion to make sense. For example: *is a cucumber longer than it is green?*[^cucumber-goldratt] That question doesn't make sense because we can't convert between length and color. However, consider the situation where you want to win a cucumber competition where points are awarded for a cucumber based on both its consistency of color and its length (and nothing else). Based on the sepcific rules, you could figure out a way to convert both color and length into points. This would help you pick the best of your cucumbers to enter into the competition, and developing that method means that you also now have a way to convert color to length via whatever relationship you come up with. Depending on the specific rules, you could now say things like *1cm of length is worth 3 blemishes*. In order to make sense of *converting between a cucumber's color and length*, you need both the context of the competition's rules and also the goal of maximizing the number of points[^conv-other-gc-pairs].
+Revisiting *qualitative conversion* from \autoref{sec:por-step4}: the way to analyse (and criticize) potential solutions is via the concept of IGCs -- {Idea, Goal, Context} triples[^igcs]. The *idea* component contains *the method* of conversion such that the the goal is satisfied in the given context. The three elements of an IGC are all of the components that are required to evaluate criticisms and thus determine whether the IGC succeeds or fails.
+
+[^igcs]: IGCs are a method of structuring ideas (solutions to problems) so that they can be effectively analysed and criticized. They're also an introduction to the thinking methods and techniques of *Critical Fallibilism*. See \url{https://curi.us/2387-igcs}.
+
+In order to convert otherwise unconvertible units, one must define a suitable goal and context for that conversion to make sense. For example: *is a cucumber longer than it is green?*[^cucumber-goldratt] That question doesn't make sense because we can't convert between length and color. However, consider the situation where you want to win a cucumber competition where points are awarded for a cucumber based on both its consistency of color and its length (and nothing else). Based on the specific rules, you could figure out a way to convert both color and length into points. This would help you pick the best of your cucumbers to enter into the competition, and your developing of that method means that you also now have a way to convert color to length via whatever relationship you came up with. Depending on the specific rules, you could now say things like *1cm of length is worth 3 blemishes*. In order to make sense of *converting between a cucumber's color and length*, you need both the context of the competition's rules and also the goal of maximizing the number of points[^conv-other-gc-pairs].
 
 [^cucumber-goldratt]: This example is from Eli Goldratt's *The Choice* (2008).
-[^conv-other-gc-pairs]: NB: Other {goal, context} pairs could work, too.
+[^conv-other-gc-pairs]: NB: Other {goal, context} pairs could work, too, and would have different methods of conversion.
 
-In the case of *Proof of Reflection*, we need to define a suitable goal and context to enable this conversion. Our goal is straight forward, and the same as other consensus mechanisms: we want a blockchain system that is as difficult as possible to attack. The difficulty of such an attack is typically analysed from the context of an attacker's *risk vs reward* where the attacker has a goal of *profit*. This hints at a possible essence of suitable contexts.
+In the case of *Proof of Reflection*, we need to define a suitable goal and context to enable this conversion, and come up with ideas for how to do that conversion. Our goal is straight forward, and the same as other consensus mechanisms: we want a blockchain system that is as difficult as possible to attack. The context is the architectures of both the PoR implementation and the blockchains in question, plus the rest of the world (including attackers). More specifically: the difficulty of an attack against a blockchain network is typically analysed from the context of an attacker's *risk vs reward* where the attacker has a goal of *profit*.
+
+Two ideas follow that create two distinct IGCs.
 
 #### A Single Root Token Across Multiple Chains
 
-\defineTerm{Root Token}{The sole network-level token required by typical blockchain protocols. e.g. Bitcoin has BTC, Ethereum has ETH, Polkadot has DOT, Cardano has ADA, etc}
+\defineTerm{Root Token (RT)}{The sole network-level token required by typical blockchain protocols. e.g. Bitcoin has BTC, Ethereum has ETH, Polkadot has DOT, Cardano has ADA, etc}
 
-The simplest method for comparing work done via different algorithms is to measure that work via a common unit. How can we do this? Whatever method we choose, it must *cancel out* market conditions like: silicon availability, the cost of power, the availability of mining rigs, and short-term effects like a drastic shift in token price.
+\begin{comment}
+The simplest method for comparing work done via different algorithms is for all reflecting chains to measure that work via a common unit. How can we do this? We could try to measure it in some external unit like USD. However, that would require accounting for external factors like the availability of silicon and mining rigs, the cost of electricity, and various exchange rates. Accounting for those external factors impractical, so whatever method we choose, those factors must *cancel out*.
+\end{comment}
 
 In blockchains like Bitcoin and Ethereum, block rewards are denominated in the *root token* of that chain. What if we had two chains with the same root token?
 
@@ -257,42 +265,31 @@ Now that we know what the block rewards are and have defined them in terms of th
 
 Since we know the percentage of root tokens on each chain for each moment in history, we can safely use that figure in chain-weight calculations. The reliability of that data will be the same as the reliability of the blockchains themselves, provided we enforce the 2-way peg that ensures no root tokens are created or destroyed outside protocol rules.
 
-\autoref{alg:weightof-1} details a simplistic \textsc{WeightOf} function which returns a weight normalized in coins/s.
+\autoref{alg:weightof-1} details a simplistic \textsc{WeightOf} function which returns a weight normalized in coins (i.e., root tokens). It does not account for some things, e.g., changes to the difficulty of $C$ over time.
 
 \begin{algorithm}
 \caption{A simplistic \textsc{WeightOf} for networks of a single root token}\label{alg:weightof-1}
 \begin{algorithmic}
-\Procedure{WeightOf}{$B_i, state$} \Comment{The weight of a reflecting block normalized to coins/s}
+\Procedure{WeightOf}{$B_i, state$} \Comment{The weight of a reflecting block normalized to coins}
   \State $t \gets$ \Call{BlockTimestamp}{$B_i$}
   \State $C \gets$ \Call{ChainOf}{$B_i$, $state$}
-  \State $r \gets$ \Call{RootTokensOnChainAt}{$C$, $t$}
-  \State $f \gets$ \Call{BlockFrequencyOfChain}{$C$}
-  \State \Return{$r \cdot f$}
+  \State $r \gets$ \Call{RootTokenRatioOnChainAt}{$C$, $t$} \Comment{Proportion of all RTs on $C$ at $t$}
+  \State $f \gets$ \Call{BlockFrequencyOfChain}{$C$} \Comment{Block production Hz of $C$}
+  \State $I \gets$ \Call{NetworkInflation}{$state$} \Comment{coins/s created over the entire network}
+  \State \Return{$r \cdot I \cdot f^{-1}$}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
-\todo{revisit \autoref{alg:weightof-1} and check it makes sense + add necessary explanations.}
+\todo{add fwd link to better \textsc{WeightOf} function}
 
 #### Different Root Tokens with a DEX
 
-Instead of using the same token on multiple chains, you could use a similar method with different root tokens on different chains. Implicit in above single-token method was a 1:1 conversion ratio between root tokens held on each chain. Can we not replace that with an exchange rate? If that exchange rate was provided via a trustless and decentralized exchange, could that not also be a reasonable context to do this sort of conversion?
+Instead of using the same token on multiple chains, a similar method could work between chains with different root tokens. Implicit in above single-token method was a 1:1 conversion ratio between root tokens held on each chain. Can we not replace that with an exchange rate? If that exchange rate was provided via a trustless and decentralized exchange, could that not also be a reasonable context to do this sort of conversion?
 
 One can use the same principles to compare work between chains that have different root tokens. However, there is a major new caveat with this method: the DEX and price-finding methods now become *part* of the consensus methods of those chains. This caveat makes this context (with differing root tokens) much harder to reason about, and introduces questions like *What is the effect of front running?* and *Could an attacker exploit market conditions to perform a doublespend when they wouldn't normally be able to?*
 
 In the context of *Ultra Terminum* and *Amaroo*, these aren't questions that are important to answer. If *Proof of Reflection* is ever used to secure multiple chains with heterogenous tokens, it's likely that either these questions will need to be answered or alternate methods will need to be devised.
-
-### Reflection with PoS chains / otherwise unsafe consensus algs (like PoA)
-
-- helps solve *nothing at stake* problem b/c history is committed to thermodynamically (b/c of reflection in PoW chains), even with internal-based-stake (i.e., ROO); slashing can happen on like a 'watchdog' chain to ensure bad actors can't get away with it
-- provides easy way for corps to run darkchains for whatever they want (tho *how* exactly you do the dark bit is ??) -- nb: doesn't make sense to do them as simplex-chains, they can just be dapp chains.
-- "anyone" can make a little PoS chain to add to security
-- PoS chains could like safely provide mb up to 50% of security? this would mean a 50% reduction in energy usage (not that a reduction of that complexity matters -> energy usage still of same complexity, i.e., O(n))
-  - mb just 33% security
-- how to balance PoW rewards with PoS? if staking is just 'free money' then why would ppl mine? possible options: lower reward, burning coins is required, other?
-- would deffo need a deposit for PoS chains, still. can't start a chain from nothing, need some cost (or opportunity cost at least)
-- could build on parity/ethereum/polkadot/etc clients. Cardano too if Ouroboros isn't garbage.
-  - probs best to just use these as dappchains
 
 ### Recursive Reflection
 
@@ -318,7 +315,9 @@ An alternative plan, if the above doesn't work out, is for the header to include
 
 The idea of *confirmation* is a representation of the risk that a transaction will fail to become finalized within a blockchain network; as a transaction receives more *confirmations*, the probability that a doublespend attempt succeeds approaches 0. A transaction is said to have been *confirmed* once it has enough confirmations to pass a *breakpoint*, beyond which the probability of an attack succeeding is close (enough) to 0.
 
-Let us say that some chain, $C_1$, is reflected by another chain, $C_2$. Since we have two chains, we will also say that $N = 2$. For simplicity, let us assume that these two chains have equal hash power and use the same hash function for the PoW -- this means the attacker can mine either chain. Let us also denote the probability of an attack succeeding on some chain, $C_i$, via the function $P_{C_i}(q_i)$, where $q_i$ is the proportion of computational power that the attacker controls.
+Let us say that some chain, $C_1$, is reflected by another chain, $C_2$. Since we have two chains, we will also say that $N = 2$. For simplicity, let us assume that these two chains have equal hash power and use the same hash function for the PoW -- this means the attacker can mine either chain. Let us also denote the probability of an attack succeeding on some chain, $C_i$, via the function $P_{C_i}(q_i)$, where $q_i$ is both the proportion of computational power that the attacker controls and the probability that the attacker will create the next block (these values are equal).
+
+
 
 \todo{write out these paragraphs properly and make maths more formal}
 

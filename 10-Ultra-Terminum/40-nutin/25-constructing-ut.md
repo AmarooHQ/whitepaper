@@ -1,4 +1,4 @@
-## Escape Velocity (Constructing UT)
+## Constructing *Ultra Terminum*
 
 \label{sec:constructing-ut}
 
@@ -89,6 +89,30 @@ To maintain consistency with the geometric usage of the term *simplex*: a simple
 [^simplex-maths]: The name is taken from geometry (particularly: the higher-dimensional kind). A simplex, for a given dimensionality, is the uniquely simplest polytope; e.g., a line in 1D space, a triangle in 2D space, a tetrahedron in 3D space, etc. A $k$-dimensional simplex is known as a $k$-simplex. As shown in \autoref{fig:simplexes}, the 2D skew orthogonal projection of a $k$-simplex is identical to a diagram of all possible mutual reflections between $k+1$ blockchains, where each chain is represented by a vertex and each mutual reflection is represented by an edge.
 
 [^simplex-approx]: \textbf{NB:} I will ignore this distinction for $k \gg 1$.
+
+### Reflection Between PoW and PoS
+
+\label{sec:reflection-pow-and-pos}
+
+Perhaps one of the most interesting features of *Proof of Reflection* is that PoW chains and PoS chains can reflect one another. Up till now, we've contextualized the weight of a reflection via the *work* required to produce a block. But the concept of *work* does not neatly apply to foundational consensus mechanisms that do not have some physical resource utilization requirement -- such as PoS.
+
+\defineTerm{Foundational Consensus Mechanisms}{Those mechanisms, like PoW and PoS, which can work in some *standalone* fashion; PoR is a cross-chain *extension* to such mechanisms}
+
+Putting the issue of *conversion* aside for a moment, is it possible *in principle* for PoW and PoS chains to reflect one another? Yes. Additionally, PoR provides decisive advantages *both* for PoW chains *and* PoS chains, though there are some additional problems that must be solved, too.
+
+If a PoW chain is reflected in a PoS chain, then an attacker will likely need more than just computational resources to attack the PoW chain. Consider a PoW chain and a PoS chain that share a root token, and each chain hosts approximately 50% of the total supply.
+
+ they will need to attack the PoS chain simultaneously
+
+- helps solve *nothing at stake* problem b/c history is committed to thermodynamically (b/c of reflection in PoW chains), even with internal-based-stake (i.e., ROO); slashing can happen on like a 'watchdog' chain to ensure bad actors can't get away with it
+- provides easy way for corps to run darkchains for whatever they want (tho *how* exactly you do the dark bit is ??) -- nb: doesn't make sense to do them as simplex-chains, they can just be dapp chains.
+- "anyone" can make a little PoS chain to add to security
+- PoS chains could like safely provide mb up to 50% of security? this would mean a 50% reduction in energy usage (not that a reduction of that complexity matters -> energy usage still of same complexity, i.e., O(n))
+  - mb just 33% security
+- how to balance PoW rewards with PoS? if staking is just 'free money' then why would ppl mine? possible options: lower reward, burning coins is required, other?
+- would deffo need a deposit for PoS chains, still. can't start a chain from nothing, need some cost (or opportunity cost at least)
+- could build on parity/ethereum/polkadot/etc clients. Cardano too if Ouroboros isn't garbage.
+  - probs best to just use these as dappchains
 
 ### Dapp-chains
 
