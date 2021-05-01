@@ -312,7 +312,6 @@ However, consider the case that *the security contribution of the PoW chain is \
 
 \begin{align}
 && \frac{1}{2} \cdot \frac{q}{q + p} & > \frac{1}{2} \cdot \frac{p}{q + p} + \frac{1}{2} \notag \\
-&& \frac{q}{q + p} & > \frac{p}{q + p} + 1 \notag \\
 && q & > p + (q + p) \notag \\
 && 0 & > 2p && \text{which is a contradiction since\;} p > 0
 \label{eq:refl-pow-pos-1}
