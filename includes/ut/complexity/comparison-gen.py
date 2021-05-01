@@ -17,7 +17,7 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
         'ut_n_1': k / (2 * bh * bf),
         'ut_3_optimal_dappchains': k / (2 * dh * df),
         'ut_n_3': k**3 / (4 * bh * bf * dh**2 * df**2),
-        'delta_s_KBps': k**2 / (2 * bh * bf) / 1000,
+        'delta_s_Bps': k**2 / (2 * bh * bf),
     }
 
 def fmt_rounded_commas(value):
@@ -25,18 +25,17 @@ def fmt_rounded_commas(value):
         .replace("e+0", "e+").replace("e+", "\\times 10^{")
 
 def table_header(incl_dappchains=False):
+    headings = ['$O(c)$ tps', '$O(c^2)$ tps', '$O(c^3)$ UT tps', '$O(c^4)$ UT tps'] \
+        if not incl_dappchains else ['$N_1$ (UT)', '$N_2$ (UT)', '$N_3$ (UT)', '$\Delta S$']
     return '\n'.join([
-        '| ' + ' | '.join(['$k$, $B_f$, $D_f$, $B_h$, $D_h$', '$O(c)$ tps', '$O(c^2)$ tps', '$O(c^3)$ UT tps', '$O(c^4)$ UT tps'] \
-        + (['$N_1$', '$N_2$', '$N_3$', '$\Delta S$'] if incl_dappchains else [])) + ' |',
-        '|'.join([''] + ['--------','---','----','----','----'] \
-        + (['----', '----', '----', '----'] if incl_dappchains else []) + [''])
+        '| ' + ' | '.join(['$k$, $B_f$, $D_f$, $B_h$, $D_h$'] + headings) + ' |',
+        '|'.join(['', '--------'] \
+        + (['---','----','----','----'] if not incl_dappchains else ['---', '----', '----', '----']) + [''])
     ])
 
 def table_row(params, incl_dappchains=False):
     r = calc_tps_throughput(*params)
-    cols = [r['btc_tps'], r['eth2_tps'], r['ut_3_tps']] \
-        + [r['ut_4_tps']] \
-        + ([r['ut_n_1'], r['ut_n_2'], r['ut_n_3'], r['delta_s_KBps']] if incl_dappchains else [])
+    cols = [r['btc_tps'], r['eth2_tps'], r['ut_3_tps'], r['ut_4_tps']] if not incl_dappchains else [r['ut_n_1'], r['ut_n_2'], r['ut_n_3'], r['delta_s_Bps']]
     return ' | '.join(str(i) for i in
             (['', '$' + ', '.join(map(str, list(params)[:-1])) + '$'] \
                 + list(map(fmt_rounded_commas, cols)) + [''])
@@ -85,10 +84,10 @@ row_inputs = [
     (3000, 1/60, 1/60, 500, 700, 250),
 ]
 
-extra_columns = True
+do_dappchains = True
 
-print(table_header(incl_dappchains=extra_columns))
+print(table_header(incl_dappchains=do_dappchains))
 for r in row_inputs:
-    print(table_row(r, incl_dappchains=extra_columns))
+    print(table_row(r, incl_dappchains=do_dappchains))
 
 # list((r, calc_tps_throughput(*r)) for r in row_inputs)

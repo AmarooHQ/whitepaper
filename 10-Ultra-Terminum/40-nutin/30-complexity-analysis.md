@@ -310,9 +310,34 @@ S & = \frac{k_1}{2 \cdot B_f \cdot B_h} \cdot k_1 \cdot d \\
 \end{split}
 \end{equation}
 
-It is clear that $\Delta S$ has order $O(c^2)$, but how bad is this? For $k_1 = 3000$, $B_f = \frac{1}{60}$, and $B_h = 112$: $\Delta S \approx 2.4 MB/s. With those figures: $N_1 \approx 800$ simplex-chains, and $N_2 \approx 290,000$ dapp-chains. Decreasing block times to 15s correspondingly decrease the bandwidth requirements to 0.6 MB/s for a simplex with $\sim 200$ chains and $\sim 18,000$ dapp-chains.
+It is clear that $\Delta S$ has order $O(c^2)$, but how bad is this? For $k_1 = 3000$, $B_f = \frac{1}{60}$, and $B_h = 112$: $\Delta S \approx 2.4$ MB/s. With those figures: $N_1 \approx 800$ simplex-chains, $N_2 \approx 290,000$ dapp-chains, and maximum tps of $\sim 3.5\times 10^6$. Decreasing block times to 15s correspondingly decrease the bandwidth requirements to 0.6 MB/s for a simplex with $\sim 200$ chains, $\sim 18,000$ dapp-chains, and $\sim 210,000$ max tps.
 
 While $O(c^2)$ bandwidth scaling is not ideal, it's clear that -- especially in the early days of a UT simplex when there are fewer simplex-chains -- there are tolerable configurations available.
+
+| $k$, $B_f$, $D_f$, $B_h$, $D_h$ | $N_1$ (UT) | $N_2$ (UT) | $N_3$ (UT) | $\Delta S$ |
+|--------|---|----|----|----|
+| $1000, \nicefrac{1}{15}, \nicefrac{1}{15}, 112, 250$ | 67 | 2,009 | 120,536 | 66,964 |
+| $3000, \nicefrac{1}{15}, \nicefrac{1}{15}, 112, 250$ | 201 | 18,080 | $3.3\times 10^{6}$ | 602,679 |
+| $30000, \nicefrac{1}{15}, \nicefrac{1}{15}, 112, 250$ | 2,009 | $1.8\times 10^{6}$ | $3.3\times 10^{9}$ | $6.0\times 10^{7}$ |
+| $1000, \nicefrac{1}{60}, \nicefrac{1}{60}, 112, 250$ | 268 | 32,143 | $7.7\times 10^{6}$ | 267,857 |
+| $3000, \nicefrac{1}{60}, \nicefrac{1}{60}, 112, 250$ | 804 | 289,286 | $2.1\times 10^{8}$ | $2.4\times 10^{6}$ |
+| $3000, \nicefrac{1}{60}, \nicefrac{1}{60}, 112, 500$ | 804 | 144,643 | $5.2\times 10^{7}$ | $2.4\times 10^{6}$ |
+| $3000, \nicefrac{1}{60}, \nicefrac{1}{60}, 200, 250$ | 450 | 162,000 | $1.2\times 10^{8}$ | $1.4\times 10^{6}$ |
+| $3000, \nicefrac{1}{60}, \nicefrac{1}{60}, 200, 500$ | 450 | 81,000 | $2.9\times 10^{7}$ | $1.4\times 10^{6}$ |
+| $30000, \nicefrac{1}{60}, \nicefrac{1}{60}, 200, 200$ | 4,500 | $2.0\times 10^{7}$ | $1.8\times 10^{11}$ | $1.4\times 10^{8}$ |
+| $30000, \nicefrac{1}{60}, \nicefrac{1}{60}, 112, 200$ | 8,036 | $3.6\times 10^{7}$ | $3.3\times 10^{11}$ | $2.4\times 10^{8}$ |
+| $1000, \nicefrac{1}{600}, \nicefrac{1}{600}, 112, 250$ | 2,679 | $3.2\times 10^{6}$ | $7.7\times 10^{9}$ | $2.7\times 10^{6}$ |
+| $3000, \nicefrac{1}{600}, \nicefrac{1}{600}, 200, 250$ | 4,500 | $1.6\times 10^{7}$ | $1.2\times 10^{11}$ | $1.3\times 10^{7}$ |
+| $3000, \nicefrac{1}{600}, \nicefrac{1}{600}, 112, 250$ | 8,036 | $2.9\times 10^{7}$ | $2.1\times 10^{11}$ | $2.4\times 10^{7}$ |
+| $30000, \nicefrac{1}{600}, \nicefrac{1}{600}, 200, 200$ | 45,000 | $2.0\times 10^{9}$ | $1.8\times 10^{14}$ | $1.3\times 10^{9}$ |
+| $30000, \nicefrac{1}{600}, \nicefrac{1}{600}, 112, 200$ | 80,357 | $3.6\times 10^{9}$ | $3.3\times 10^{14}$ | $2.4\times 10^{9}$ |
+| $1000, \nicefrac{1}{60}, \nicefrac{1}{600}, 112, 250$ | 268 | 321,429 | $7.7\times 10^{8}$ | 267,857 |
+| $3000, \nicefrac{1}{60}, \nicefrac{1}{600}, 112, 250$ | 804 | $2.9\times 10^{6}$ | $2.1\times 10^{10}$ | $2.4\times 10^{6}$ |
+| $30000, \nicefrac{1}{60}, \nicefrac{1}{600}, 112, 250$ | 8,036 | $2.9\times 10^{8}$ | $2.1\times 10^{13}$ | $2.4\times 10^{8}$ |
+| $3000, \nicefrac{1}{60}, \nicefrac{1}{60}, 500, 500$ | 180 | 32,400 | $1.2\times 10^{7}$ | 540,000 |
+| $3000, \nicefrac{1}{60}, \nicefrac{1}{60}, 500, 700$ | 180 | 23,143 | $6.0\times 10^{6}$ | 540,000 |
+
+: UT's capacity and bandwidth requirements: $N_1, N_2, N_3, \text{and} \Delta S$ for various parameters.
 
 ### The Impact of Header Size
 
