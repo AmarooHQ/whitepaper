@@ -1,4 +1,4 @@
-## Qualities of different security methods
+## Qualities of Different Security Methods
 
 \label{sec:quality-groups}
 
@@ -30,7 +30,7 @@ My intuition is that each of these three quality-groups should be responsible fo
 
 NB: The only way to directly compare security like this is to proxy the measurement via the distribution of ROO per group. i.e., for the 45/40/15 example, we might have 45% of ROO in (or on dapp-chains via) ASIC-chains, 40% in GPU-chains, and 15% in PoS-chains. For this calculation I count any ROO in a dapp-chain as also being in the parent simplex-chain.
 
-### Lowering the variance of block production in PoW blockchains
+### Lowering Block Production Variance
 
 Is it possible to *dramatically* lower the variance of block production in PoW blockchains without altering incentive structures, compromising security, or changing the probability of generating a valid block?
 
