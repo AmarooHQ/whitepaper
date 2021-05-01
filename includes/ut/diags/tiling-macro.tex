@@ -4,6 +4,8 @@
 \providecommand\TilingValence{3}%
 \providecommand\SimplexChains{5}%
 \providecommand\RainbowColors{1}%
+\providecommand\TilingMonoColor{0}%
+\providecommand\TilingNodeColor{pink}%
 \providecommand\TilingSizeToNodeRRatio{3}%
 \providecommand\TilingAutoRotate{1}%
 \providecommand\TilingRotateDebug{0}%
@@ -31,7 +33,7 @@
     \xdef\createChildren{\TilingValence}
     \ifnum 1=\TilingAltPattern
         \xdef\createCurrent{2}
-        \pgfmathsetmacro\newCreateDistance{\tilingCurrSize*1.5}
+        \pgfmathsetmacro\newCreateDistance{\tilingCurrSize*2}
         \xdef\createDistance{\newCreateDistance}
         \pgfmathsetmacro\newCreateChildren{(\TilingValence-1)*2}
         \xdef\createChildren{\newCreateChildren}
@@ -74,18 +76,22 @@
                         \fi
                         \renewcommand\SimplexOffsetAngle{\sxAngle}
 
-                        \ifnum 1=\RainbowColors
-                            \pgfmathsetmacro\cr{cos(mod(\timesRun*23, 360))*0.5 + 0.5}
-                            \pgfmathsetmacro\cg{cos(mod(\timesRun*23 + 240, 360))*0.5 + 0.5}
-                            \pgfmathsetmacro\cb{cos(mod(\timesRun*23 + 120, 360))*0.5 + 0.5}
+                        \ifnum 0=\TilingMonoColor
+                            \ifnum 1=\RainbowColors
+                                \pgfmathsetmacro\cr{cos(mod(\timesRun*23, 360))*0.5 + 0.5}
+                                \pgfmathsetmacro\cg{cos(mod(\timesRun*23 + 240, 360))*0.5 + 0.5}
+                                \pgfmathsetmacro\cb{cos(mod(\timesRun*23 + 120, 360))*0.5 + 0.5}
+                            \else
+                                \pgfmathsetmacro\cr{cos(mod(\timesRun/2.57, 360))*0.4 + 0.6}
+                                \pgfmathsetmacro\cg{cos(mod(\timesRun/1.91 - 90, 360))*0.4 + 0.6}
+                                % \pgfmathsetmacro\cb{cos(mod(\timesRun/2.0 + 180, 360))*0.2 + 0.4}
+                                \pgfmathsetmacro\cb{-1}
+                            \fi
+                            \definecolor{tilingColor}{rgb}{\cr,\cg,\cb}
+                            \renewcommand\SimplexNodeColor{tilingColor}
                         \else
-                            \pgfmathsetmacro\cr{cos(mod(\timesRun/2.57, 360))*0.4 + 0.6}
-                            \pgfmathsetmacro\cg{cos(mod(\timesRun/1.91 - 90, 360))*0.4 + 0.6}
-                            % \pgfmathsetmacro\cb{cos(mod(\timesRun/2.0 + 180, 360))*0.2 + 0.4}
-                            \pgfmathsetmacro\cb{-1}
+                            \renewcommand\SimplexNodeColor{\TilingNodeColor}
                         \fi
-                        \definecolor{tilingColor}{rgb}{\cr,\cg,\cb}
-                        \renewcommand\SimplexNodeColor{tilingColor}
                         % \ifnum 1=\d
                         % \renewcommand\SimplexRotationMod{180/\createCurrent*(\s-ceil(\createCurrent/2))}
                         % \fi
