@@ -205,7 +205,9 @@ It's worth noting that there are still potential attacks on Chain B at this poin
 
 [^hr-footnote]: In \href{https://bitcoin.org/bitcoin.pdf}{Satoshi's original paper} the parameters $p$ and $q$ represent the probability that the next block will be found by an honest node or the attacker, respectively. This convention has been continued in subsequent analysis, e.g., Rosenfeld's \href{https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{\emph{Analysis of hash-rate-based double-spending}}, and is continued here, also.
 
-How can we prevent this sort of attack? The attack is predicated on Chain E *not* accounting for the added weight from reflections. Chain E can easily account for that weight, though, with some protocol changes. First: the total chain-weight (or, equivalently, the change in total chain-weight), *including reflections*, can be committed to via a field in the header. Based on this field, a headers-only version of the chain can be constructed correctly. Full nodes of Chain B can now also validate the claimed weight against the verifiable weight, and a mismatch invalidates the block. Second: When such a block is found (where the claimed chain-weight violates the protocol), full nodes can construct a fraud proof. Chain E should then confirm the fraud proof (i.e., record it on-chain) and thus prevent the attackers blocks from taking priority and/or gaining reflections. Third: Chain E already knows its own headers, and so can acknowledge the reflections between Chain B and Chain E with only the necessary merkle branches, and thus verify the reflections between Chain B and Chain E. This third method provides an additional means of detecting blocks that are invalid due to fraudulent chain-weight claims in the header.
+How can we prevent this sort of attack? The attack is predicated on Chain E *not* accounting for the added weight from reflections. Chain E can easily account for that weight, though, with some protocol changes. First: the total chain-weight[^total-vs-rel-chain-weight], *including reflections*, can be committed to via a field in the header. Based on this field, a headers-only version of the chain can be constructed correctly. Full nodes of Chain B can now also validate the claimed weight against the verifiable weight, and a mismatch invalidates the block. Second: When such a block is found (where the claimed chain-weight violates the protocol), full nodes can construct a fraud proof. Chain E should then confirm the fraud proof (i.e., record it on-chain) and thus prevent the attackers blocks from taking priority and/or gaining reflections. Third: Chain E already knows its own headers, and so it only requires the necessary merkle branches to verify the reflections between Chain B and Chain E. This third method provides an additional means of detecting blocks that are invalid due to fraudulent chain-weight claims in the header.
+
+[^total-vs-rel-chain-weight]: Instead of the total chain-weight, the change in total chain-weight can be committed to instead. These are essentially equivalent.
 
 #### Step 5. Mutual Reflection
 
@@ -328,12 +330,6 @@ There are some other conjectured solutions to the *Nothing at Stake* problem. Th
 \bquote{Provided that stakeholders are frequently online, nothing at stake is taken care of by our analysis of forkable strings (even if the adversary brute-forces all possible strategies to fork the evolving blockchain in the near future, there is none that is viable), and our chain selection rule that instructs players to ignore very deep forks that deviate from the block they received the last time they were online.}{\href{http://cloudflare-ipfs.com/ipfs/QmWCAHyi35SeXH2E4e8jRVk7yNse2x6D14uPfABnhagbvN}{Ouroboros: A Provably Secure Proof-of-Stake Blockchain Protocol, s10}}
 
 There are some (as yet) unsolved problems that arise through this design, such as the *economic* details of managing block rewards across the PoW and PoS chains. Given that solutions to this problem likely depend on the specific details of the relevant PoS systems, this problem is not addressed in this paper.
-
-### Recursive Reflection
-
-\todo{not sure if this should be included. if so then need to write out this section}
-
-Say chain B reflects both A and C. $A <-> B <-> C$. Proof of Reflection says A gets a benefit by proving that B reflects specific work from A. Does A get a security benefit by proving that C reflects B reflects A?
 
 ### Equivalency of Reflecting and Non-Reflecting Block-Weightings
 
