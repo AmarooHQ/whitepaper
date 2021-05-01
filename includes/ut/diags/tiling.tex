@@ -2,14 +2,19 @@
 \usepackage[T1]{fontenc}\usepackage{tikz}
 \usepackage{amsmath, amsfonts}
 \usepackage{pgfbaselayers}
+\usepackage{xintexpr}
 \usetikzlibrary{arrows, arrows.meta, shapes.geometric, calc, positioning, decorations.pathreplacing}
 
 % overwrite (either \providecommand or \renewcommand) to control the parts of the diagram which are drawn or not.
 
 \begin{document}
-\providecommand\TilingDepth{5}%
+\providecommand\TilingDepth{4}%
 \providecommand\TilingValence{3}%
 \providecommand\TilingDrawGroups{0}%
+\providecommand\TilingAltPattern{1}%
+\providecommand\TilingRotateDebug{0}%
+\providecommand\TilingAutoRotate{1}%
+\providecommand\SimplexChains{5}%
 \input{tiling-macro}%
 \begin{tikzpicture}%
     \TikzSimplexTiling

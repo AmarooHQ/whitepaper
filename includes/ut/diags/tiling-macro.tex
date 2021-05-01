@@ -9,6 +9,7 @@
 \providecommand\TilingRotateDebug{0}%
 \providecommand\TilingDrawAllReflections{1}%
 \providecommand\TilingDrawGroups{0}%
+\providecommand\TilingAltPattern{0}%
 \input{simplex-macro}%
 % \makeatletter%
 % \def\fillRGB#1#2#3{\pgfsys@color@rgb@fill{#1}{#2}{#3}}%
@@ -22,12 +23,19 @@
     \xdef\initNodeR{\TilingInitSize*\TilingSizeToNodeRRatio}
     \xdef\nodeR{\initNodeR}
     \pgfmathsetmacro\newChildren{\TilingValence-1}
-    \xdef\createChildren{\TilingValence}
-    \xdef\createCurrent{1}
     \xdef\lastTilesTotal{0}
     \def\nodeNameRoot{r}
     \xdef\tilingCurrSize{\TilingInitSize}
+    \xdef\createCurrent{1}
     \xdef\createDistance{0}
+    \xdef\createChildren{\TilingValence}
+    \ifnum 1=\TilingAltPattern
+        \xdef\createCurrent{2}
+        \pgfmathsetmacro\newCreateDistance{\tilingCurrSize*1.5}
+        \xdef\createDistance{\newCreateDistance}
+        \pgfmathsetmacro\newCreateChildren{(\TilingValence-1)*2}
+        \xdef\createChildren{\newCreateChildren}
+    \fi
     \xdef\prevCreateDist{0}
     \xdef\lastD{0}
     \xdef\timesRun{0}
@@ -38,7 +46,11 @@
                 \renewcommand\SimplexRadius{\tilingCurrSize}
                 \renewcommand\SimplexOffsetR{\createDistance}
                 \ifnum 1=\TilingAutoRotate
-                    \pgfmathsetmacro\sxAngleOffset{mod(360/\createCurrent/2+(180/\TilingValence)*(\TilingValence-2)/2, 360)}
+                    \ifnum 0=\TilingAltPattern
+                        \pgfmathsetmacro\sxAngleOffset{mod(360/\createCurrent/2+(180/\TilingValence)*(\TilingValence-2)/2, 360)}
+                    \else
+                        \pgfmathsetmacro\sxAngleOffset{mod(360/\createCurrent/2+(540/\TilingValence)*(\TilingValence-2)/2, 360)}
+                    \fi
                 \else
                     \pgfmathsetmacro\sxAngleOffset{mod(360/\createCurrent/2, 360)}
                 \fi
@@ -48,17 +60,17 @@
                 \foreach \s in {1,...,\createCurrent} {
                         \def\parentSimplex{\nodeNameRoot/0/1}
                         \pgfmathsetmacro\parentId{0}
-                        \ifnum 1<\d
+                        \ifnum 1=\xintifboolexpr{1 < \d || \TilingAltPattern = 1}{1}{0}
                             \pgfmathsetmacro\parentId{int(\s/\newChildren + (1-1/\newChildren))}
                             \def\parentSimplex{\nodeNameRoot/\lastD/\parentId}
                         \fi
                         \xdef\tileName{\nodeNameRoot/\d/\s}
                         \renewcommand\SimplexNodeName{\tileName}
                         \pgfmathsetmacro\sxAngle{mod(360/\createCurrent*\s-\sxAngleOffset, 360)}
-                        \ifnum 1=\d
-                        \pgfmathsetmacro\parentSxAngle{0}
+                        \ifnum 1=\xintifboolexpr{1 = \d && \TilingAltPattern = 0}{1}{0}
+                            \pgfmathsetmacro\parentSxAngle{0}
                         \else
-                        \pgfmathsetmacro\parentSxAngle{mod(360/(\createCurrent/2)*\parentId-\lastAngleOffset, 360)}
+                            \pgfmathsetmacro\parentSxAngle{mod(360/(\createCurrent/2)*\parentId-\lastAngleOffset, 360)}
                         \fi
                         \renewcommand\SimplexOffsetAngle{\sxAngle}
 
@@ -77,9 +89,10 @@
                         % \ifnum 1=\d
                         % \renewcommand\SimplexRotationMod{180/\createCurrent*(\s-ceil(\createCurrent/2))}
                         % \fi
-                        \ifnum 0<\d
+                        \ifnum 1=\xintifboolexpr{0 < \d || \TilingAltPattern = 1}{1}{0}
                             \pgfmathsetmacro\angleDiff{mod(\sxAngle - \parentSxAngle, 360)}
-                            \ifnum 1=\d
+                            \ifnum 1=\xintifboolexpr{(1 = \d && \TilingAltPattern = 0) || (0 = \d && \TilingAltPattern = 1)}{1}{0}
+                                % defaults for 1=\d
                                 \pgfmathsetmacro\distToParent{\createDistance}
                                 \pgfmathsetmacro\angleToParent{\sxAngle}
                                 \pgfmathsetmacro\finalRotation{90-\sxAngle}
@@ -108,7 +121,8 @@
 
                         \pgfmathparse{\timesRun+1}
                         \xdef\timesRun{\pgfmathresult}
-                        \ifnum 0=\d
+                        \ifnum 0>\d
+                            % don't draw debug info for these depths
                         \else
                             \ifnum 1=\TilingRotateDebug
                             \node (\tileName-d1) [above of=\SimplexNodeName//1] {\SimplexNodeName//1};
