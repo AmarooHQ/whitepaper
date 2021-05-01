@@ -196,3 +196,11 @@ The average hash rate on each simplex chain, as described above, is always the s
 \todo{paragraph below needs to be polished}
 
 Is it possible that this will help prevent attacks too? An attacker has the same 51% parameters to DoS a chain (tho a block-dag can thwart naive DoS attacks), however, the attacker is competing against no other hash-power for 54s out of 60s, and competing against 20x his hash-power for the last 6s out of that 60s. Why 20x? If each chains' average hash-rate is 10% of the total hash-rate, then the attacker needs 5% of the total hash-rate to 51% attack a single chain. Relative to the attacker, he might have 51% of the avg mining power for a given chain, but the aggregate hash-rate is 20x that.
+
+### Mixing Proof Methods
+
+\todo{maybe - add geo-beacons}
+
+\todo{
+    maybe - pure PoS = zero-conf dapp-chain block in UT. \\
+    A PoS blockchain, is **in essence**, equivalent in security to *zero-confirmation* transactions via UT. That's because, if they're not confirmed, then they form a *transaction-chain* that has all the same properties as the PoS methods used by said blockchains!}

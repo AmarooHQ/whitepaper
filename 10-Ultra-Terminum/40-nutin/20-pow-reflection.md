@@ -39,7 +39,7 @@ After a Bitcoin block is produced, an Ethereum miner includes a transaction cont
 
 Why would a chain want to track another chain? The typical answer is to prove transactions or state occurred on the foreign chain. On Ethereum, one could build a trustless $\text{BTC}\leftrightarrow\text{ETH}$ market, for example.
 
-### Iterative Implementation of Proof of Reflection
+### Incremental Implementation of Proof of Reflection
 
 \label{sec:two-blockchains}
 

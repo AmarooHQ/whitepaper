@@ -50,7 +50,7 @@ In order to support arbitrarily many reflections, we need to modify \textsc{Refl
 
 \label{sec:the-simplex}
 
-\defineTerm{The Simplex}{The single coherent structure that emerges from a collection of blockchains that mutually reflect each-other}
+\defineTerm{Simplex}{The single coherent structure that emerges from a collection of blockchains that mutually reflect each-other}
 
 When two or more blockchains *mutually reflect* each-other, they form a *simplex*[^simplex-maths]. For the sake of brevity: all *reflections* within a simplex are *mutual reflections*, and I will omit *mutual* from now on when discussing them. Examples of simplexes are shown in \autoref{fig:simplexes}.
 
@@ -84,7 +84,7 @@ When two or more blockchains *mutually reflect* each-other, they form a *simplex
 
 When a blockchain is part of a simplex, it is called a *simplex-chain* (as distinct from *dapp-chains*).
 
-\defineTerm{Simplex-chain}{A blockchain that is part of *a simplex*; it mutually reflects all other simplex-chains in that simplex}
+\defineTerm{Simplex-chain}{A blockchain that is part of a \emph{simplex}; it mutually reflects all other simplex-chains in that simplex}
 
 To maintain consistency with the geometric usage of the term *simplex*: a simplex with $k+1$ chains is called a $k$-simplex or a $(k+1)$-chain simplex[^simplex-approx]. In a $k$-simplex, each simplex-chain has $k$ reflections (one reflection for each of the other simplex-chains). A $k$-simplex has, in total, ${k+1} \choose 2$ reflections.
 
