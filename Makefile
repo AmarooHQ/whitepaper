@@ -90,10 +90,10 @@ init:
 	@mkdir -p $(OUTDIR)
 
 docker-build:
-	docker build -f Dockerfile.texlive -t whitepaper-build2:latest .
+	docker build -f Dockerfile -t whitepaper-build:latest .
 
 docker:
-	docker run --rm -it -u `id -u ${USER}`:`id -g ${USER}` -v `pwd`:/work whitepaper-build2:latest
+	docker run --rm -it -u `id -u ${USER}`:`id -g ${USER}` -v `pwd`:/work whitepaper-build:latest
 
 docker-bash:
-	docker run --rm -it -u `id -u ${USER}`:`id -g ${USER}` -v `pwd`:/work whitepaper-build2:latest /bin/bash
+	docker run --rm -it -u `id -u ${USER}`:`id -g ${USER}` -v `pwd`:/work whitepaper-build:latest /bin/bash
