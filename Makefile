@@ -32,6 +32,7 @@ whitepaper-skip-pandoc: $(PDFGraphics) $(InputTeXFiles) mk-latex-pdf wc
 # to do that: replace '10-Ultra-Terminum' with '*-*'
 # nb: add `clean-wp-md` as a dependency if there are issues building.
 build-whitepaper: %.md
+	mkdir -p $(OUTDIR)
 	echo '' > $(WPFILE)
 	for mdfile in `find 10-Ultra-Terminum/ -iname \*.md | sort`; do \
 	  echo "Processing: $$mdfile" && \
