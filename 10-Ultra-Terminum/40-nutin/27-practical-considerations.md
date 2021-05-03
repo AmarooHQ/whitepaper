@@ -1,14 +1,6 @@
-
 ## Practical Considerations for UT's Design
 
 \label{sec:practical-considerations}
-
-\todo{practical considerations - plan:}
-
-- there are some sticking points with a naive design
-  - don't want to reflect blocks that don't exist
-  - need to reflect headers, but including merkle proofs-of-reflection would be cumbersome
-- what about security implications and/or confirmation time?
 
 ### Availability of Reflected Blocks
 

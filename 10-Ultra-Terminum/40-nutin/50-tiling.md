@@ -178,9 +178,9 @@ Galaxies that are close enough to us, and that have a low enough relative veloci
 
 \end{comment}
 
-#### Variants
+### Variants
 
-##### Alternate and Equivalent Tiling
+#### Alternate and Equivalent Tiling
 
 There exists an alternate tiling that begins with two tiles instead of one, though the iteration algorithm is the same. It is shown in \autoref{fig:alt-tiling}. It has $N_{tiles} = 2^{h+2} - 2$.
 
@@ -205,7 +205,7 @@ There exists an alternate tiling that begins with two tiles instead of one, thou
     \label{fig:alt-tiling}
 \end{figure}
 
-##### Tiling With Individual Blockchains
+#### Tiling With Individual Blockchains
 
 A 3-simplex (which has 4 chains) is the least populous simplex that may be tiled with a valence of 3. The result of this is shown in \autoref{fig:tiled-3-simplexes} and is equivalent to a tiling of individual blockchains (a single-chain tiling). This configuration still has $O(n)$ scalability.
 
