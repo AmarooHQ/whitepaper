@@ -207,13 +207,7 @@ There exists an alternate tiling that begins with two tiles instead of one, thou
 
 ##### Tiling With Individual Blockchains
 
-\todo{write out - Tiled 3-Simplexes}
-
-A 3-simplex (which has 4 chains) is the least populous simplex that may be tiled with a valence of 3. The result of this is shown in \autoref{fig:tiled-3-simplexes} and is equivalent to a tiling of individual blockchains. This configuration still has $O(n)$ scalability.
-
-- practicality of security: inter-tile confirmations take longer b/c there are fewer blockchains in each tile.
-- potentially more brittle b/c confirmations take longer to propagate --- easier doublespend mb?
-- much lower capacity *in terms of blockchains*, i.e., to reach equivalent capacity to a simplex-tiling (where each tile has hundreds of chains) the furthest distance between chains increases. This has negative feedback loops WRT security/confirmation speed/brittleness.
+A 3-simplex (which has 4 chains) is the least populous simplex that may be tiled with a valence of 3. The result of this is shown in \autoref{fig:tiled-3-simplexes} and is equivalent to a tiling of individual blockchains (a single-chain tiling). This configuration still has $O(n)$ scalability.
 
 \begin{figure}
 \centering
@@ -233,3 +227,9 @@ A 3-simplex (which has 4 chains) is the least populous simplex that may be tiled
     \caption{Both tilings where each tile has only external reflections, i.e., there is only 1 single blockchain per tile.}
     \label{fig:tiled-3-simplexes}
 \end{figure}
+
+This method has some decisive criticisms.
+
+First, the confirmation rate is much slower -- both intra-tile and inter-tile. Inter-tile confirmations (which are important for e.g., cross-tile SPV transactions) occur with frequency $B_f \cdot N_1$, i.e., the frequency is proportional to the number of simplex-chains in each tile. This means that single-chain tilings have the theoretically *worst case* confirmation rate compared to tilings of larger simplexes.
+
+Second, because the inter-tile confirmation rate is *worst case*, the window for attack (via the private creation of chain-segments) is correspondingly longer. That is, the window for attack is also *worst case* for a chosen block frequency.
