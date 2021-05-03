@@ -178,7 +178,34 @@ Galaxies that are close enough to us, and that have a low enough relative veloci
 
 \end{comment}
 
-#### What About Tiled 3-Simplexes?
+#### Variants
+
+##### Alternate and Equivalent Tiling
+
+There exists an alternate tiling that begins with two tiles instead of one, though the iteration algorithm is the same. It is shown in \autoref{fig:alt-tiling}. It has $N_{tiles} = 2^{h+2} - 2$.
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.33\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_alt_s5_d2_sag}
+        \caption{1st iteration. 6 tiles.}
+        \label{fig:tiled-simplex-alt-d2}
+    \end{subfigure}%%
+    \hspace{0.1\textwidth}
+    \begin{subfigure}[t]{.33\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_alt_s5_d3_sag}
+        \caption{2nd iteration. 14 tiles.}
+        \label{fig:tiled-simplex-alt-d3}
+    \end{subfigure}%%
+    \caption{An alternate tiling that is equivalent in terms of complexity, security, etc.}
+    \label{fig:alt-tiling}
+\end{figure}
+
+##### Tiling With Individual Blockchains
 
 \todo{write out - Tiled 3-Simplexes}
 
@@ -190,7 +217,19 @@ A 3-simplex (which has 4 chains) is the least populous simplex that may be tiled
 
 \begin{figure}
 \centering
-\includegraphics[height=.4\linewidth]{tiling_s1_d6_sag}
-\caption{Tiling where each tile has only external reflections, i.e., there is only 1 single blockchain per tile.}
-\label{fig:tiled-3-simplexes}
+    \begin{subfigure}[t]{.33\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_s1_d6_sag}
+        \label{fig:tiled-3-simplexes-main}
+    \end{subfigure}%%
+    \hspace{0.1\textwidth}
+    \begin{subfigure}[t]{.33\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_alt_s1_d6_sag}
+        \label{fig:tiled-3-simplexes-alt}
+    \end{subfigure}%%
+    \caption{Both tilings where each tile has only external reflections, i.e., there is only 1 single blockchain per tile.}
+    \label{fig:tiled-3-simplexes}
 \end{figure}
