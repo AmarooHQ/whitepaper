@@ -74,6 +74,7 @@ Add this to vscode settings (JSON), or modify accordingly.
 
 ## experimental docker build environment
 
-* `docker build -t whitepaper-build:latest .` in project root directory, once to initialise docker container
-* `docker run --rm -it -v $(pwd):/work whitepaper-build:latest /bin/bash` in project root directory
+* `docker build -t whitepaper-build:latest .` in project root directory, once to initialize docker container (or `make docker-build`)
+* `make docker` to build once
+* `docker run --rm -it -u $(id -u ${USER}):$(id -g ${USER}) -v $(pwd):/work whitepaper-build:latest /bin/bash` in project root directory (or `make docker-bash`)
 * in resulting shell, run `make` to build whitepaper as normal.

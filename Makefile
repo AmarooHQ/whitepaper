@@ -24,6 +24,8 @@ InputTeXFiles = $(wildcard *_input.tex)
 
 whitepaper: $(PDFGraphics) $(InputTeXFiles) build-whitepaper wp-pandoc mk-latex-pdf wc
 
+whitepaper-skip-pandoc: $(PDFGraphics) $(InputTeXFiles) mk-latex-pdf wc
+
 # atm restrict this to just the UT folder, can generalize again later
 # to do that: replace '10-Ultra-Terminum' with '*-*'
 # nb: add `clean-wp-md` as a dependency if there are issues building.
@@ -86,3 +88,12 @@ clean-wp-md:
 
 init:
 	@mkdir -p $(OUTDIR)
+
+docker-build:
+	docker build -f Dockerfile.texlive -t whitepaper-build2:latest .
+
+docker:
+	docker run --rm -it -u `id -u ${USER}`:`id -g ${USER}` -v `pwd`:/work whitepaper-build2:latest
+
+docker-bash:
+	docker run --rm -it -u `id -u ${USER}`:`id -g ${USER}` -v `pwd`:/work whitepaper-build2:latest /bin/bash
