@@ -7,9 +7,10 @@
 \providecommand\SimplexOffsetAngle{0}%
 \providecommand\SimplexOffsetR{0}%
 \providecommand\SimplexRotationMod{0}%
+\providecommand\SimplexOutlineColor{black}%
 %
-\tikzstyle{refl} = [line width=2pt, shorten >= 0pt, shorten <= 0pt]%
-\tikzstyle{splxNode} = [draw=black!80, ultra thick, shape=circle]%
+\tikzstyle{refl} = [line width=2pt, draw=\SimplexOutlineColor, shorten >= 0pt, shorten <= 0pt]%
+\tikzstyle{splxNode} = [draw=\SimplexOutlineColor, ultra thick, shape=circle]%
 %
 \newcommand\TikzSimplex{
     \pgfmathsetmacro\rOffset{(360/\SimplexChains)+90+\SimplexRotationMod}
@@ -22,14 +23,14 @@
                 \xdef\sxRadius{0}
             \fi
             \node (\SimplexNodeName//\i)
-                [splxNode, fill=\SimplexNodeColor, inner sep=\SimplexNodeRadius]
+                [splxNode, fill=\SimplexNodeColor, draw=\SimplexOutlineColor, inner sep=\SimplexNodeRadius]
                 at ([shift=({\r: \sxRadius*0.8cm})]\SimplexNodeName-origin)
                 {};
         }
     \foreach \i in {1,...,\SimplexChains} {
             \foreach \j in {1,...,\SimplexChains} {
                     \ifnum \i>\j
-                        \draw [refl] (\SimplexNodeName//\i) -- (\SimplexNodeName//\j);
+                        \draw [refl, draw=\SimplexOutlineColor] (\SimplexNodeName//\i) -- (\SimplexNodeName//\j);
                         % \node (n-\i-\j) at (\i, \j) {\i, \j};
                     \else
                         \breakforeach

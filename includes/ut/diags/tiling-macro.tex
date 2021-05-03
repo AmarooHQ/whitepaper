@@ -12,6 +12,7 @@
 \providecommand\TilingDrawAllReflections{1}%
 \providecommand\TilingDrawGroups{0}%
 \providecommand\TilingAltPattern{0}%
+\providecommand\TilingLineColor{black}%
 \input{simplex-macro}%
 % \makeatletter%
 % \def\fillRGB#1#2#3{\pgfsys@color@rgb@fill{#1}{#2}{#3}}%
@@ -21,6 +22,7 @@
 \pgfdeclarelayer{tiles}%
 \pgfsetlayers{reflections,groups,main,tiles}%
 \newcommand\TikzSimplexTiling{
+    \renewcommand\SimplexOutlineColor{\TilingLineColor}
     \pgfmathsetmacro\nNodesTotal{3*(2^(\TilingDepth)-1)+1}
     \xdef\initNodeR{\TilingInitSize*\TilingSizeToNodeRRatio}
     \xdef\nodeR{\initNodeR}
@@ -33,7 +35,7 @@
     \xdef\createChildren{\TilingValence}
     \ifnum 1=\TilingAltPattern
         \xdef\createCurrent{2}
-        \pgfmathsetmacro\newCreateDistance{\tilingCurrSize*2}
+        \pgfmathsetmacro\newCreateDistance{\tilingCurrSize*1.5}
         \xdef\createDistance{\newCreateDistance}
         \pgfmathsetmacro\newCreateChildren{(\TilingValence-1)*2}
         \xdef\createChildren{\newCreateChildren}
@@ -145,11 +147,11 @@
                                 \ifnum 1=\TilingDrawAllReflections
                                 \foreach \sn in {1,...,\SimplexChains} {
                                         \foreach \pn in {1,...,\SimplexChains} {
-                                                \draw [thin] (\parentSimplex//\pn) -- (\SimplexNodeName//\sn);
+                                                \draw [thin, draw=\TilingLineColor] (\parentSimplex//\pn) -- (\SimplexNodeName//\sn);
                                             }
                                     }
                                 \else
-                                    \draw [ultra thick, style=double, double distance=2pt, line width=2pt] (\parentSimplex/group) -- (\tileName/group);
+                                    \draw [ultra thick, draw=\TilingLineColor, style=double, double distance=2pt, line width=2pt] (\parentSimplex/group) -- (\tileName/group);
                                 \fi
                             \end{pgfonlayer}
                         \fi
