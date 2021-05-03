@@ -10,24 +10,29 @@ default: whitepaper
 # https://tex.stackexchange.com/questions/45/how-to-speed-up-latex-compilation-with-several-tikz-pictures
 TIME     = /usr/bin/time -p
 LATEXMK  = latexmk -silent -f -g --pdf
-PDFLATEX = pdflatex -interaction=batchmode
+PDFLATEX = latexmk -pdf -shell-escape -interaction=batchmode
 PDFCROP  = pdfcrop
 RM       = /bin/rm
 #StandAloneGraphicsTeXFiles = $(wildcard includes/ut/diags/*_sag.tex)
 StandAloneGraphicsTeXFiles = $(shell find ./ -iname \*_sag.tex)
 PDFGraphics = $(patsubst %_sag.tex,%_sag.pdf,$(StandAloneGraphicsTeXFiles))
 InputTeXFiles = $(wildcard *_input.tex)
+PWD = $(pwd)
 
 %_sag.pdf: %_sag.tex
-	$(PDFLATEX) -output-directory=`dirname $<` $<
+	cd `dirname $<` && \
+	$(PDFLATEX) `basename $<`
 	$(PDFCROP) $@ $@
 
 whitepaper: $(PDFGraphics) $(InputTeXFiles) build-whitepaper wp-pandoc mk-latex-pdf wc
+
+whitepaper-skip-pandoc: $(PDFGraphics) $(InputTeXFiles) mk-latex-pdf wc
 
 # atm restrict this to just the UT folder, can generalize again later
 # to do that: replace '10-Ultra-Terminum' with '*-*'
 # nb: add `clean-wp-md` as a dependency if there are issues building.
 build-whitepaper: %.md
+	mkdir -p $(OUTDIR)
 	echo '' > $(WPFILE)
 	for mdfile in `find 10-Ultra-Terminum/ -iname \*.md | sort`; do \
 	  echo "Processing: $$mdfile" && \
@@ -86,3 +91,12 @@ clean-wp-md:
 
 init:
 	@mkdir -p $(OUTDIR)
+
+docker-build:
+	docker build -f Dockerfile -t whitepaper-build:latest .
+
+docker:
+	docker run --rm -it -u `id -u ${USER}`:`id -g ${USER}` -v `pwd`:/work whitepaper-build:latest
+
+docker-bash:
+	docker run --rm -it -u `id -u ${USER}`:`id -g ${USER}` -v `pwd`:/work whitepaper-build:latest /bin/bash

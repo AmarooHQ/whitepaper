@@ -3,10 +3,10 @@
 ## dependencies
 
 - the Makefile presumes you're running this in a linux environment
-- you'll need: make, pandoc, latexmk
+- you'll need: make, pandoc v2.5, latexmk
 - ubuntu pkgs: `texlive-science`, `texlive-extra-utils`, `gnuplot`
 
-if you run into compile errors, try installing `texlive-full` -- not a great workaround but does solve some issues (b/c apparently we have a missing dep)
+if you run into compile errors, you could try installing `texlive-full` -- not a great workaround but does solve some issues (b/c apparently we have a missing dep) -- or just use the docker build via `make docker-build && make docker`
 
 ### "supported" build env
 
@@ -24,14 +24,6 @@ if you run into compile errors, try installing `texlive-full` -- not a great wor
 The directory names are capitalized atm b/c I think it might be good to keep the option open of using the directory names as section headings, but mb that could be difficult if we want punctuation and stuff. IDK.
 
 I use this to compile and view quickly: `make && code ./output/whitepaper.pdf`
-
-## sagemath to generate some figures
-
-you need (ubuntu pkgs):
-
-- `sagemath`
-- `sagetex`
-- `dot2tex` (mb, but i don't think so anymore)
 
 ## notes about latex graph stuff
 
@@ -71,3 +63,11 @@ Add this to vscode settings (JSON), or modify accordingly.
         ]
     }]
 ```
+
+## experimental docker build environment
+
+* TL;DR -- `make docker-build && make docker`
+  * `docker build -t whitepaper-build:latest .` in project root directory, once to initialize docker container (or `make docker-build`)
+  * `make docker` to build once
+  * `docker run --rm -it -u $(id -u ${USER}):$(id -g ${USER}) -v $(pwd):/work whitepaper-build:latest /bin/bash` in project root directory (or `make docker-bash`)
+  * in resulting shell, run `make` to build whitepaper as normal.
