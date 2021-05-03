@@ -56,11 +56,10 @@ wc:
 	wc $(WPFILE)
 
 mk-latex-pdf:
-	# pdflatex -output-directory=$(OUTDIR) $(WPNOEXT).tex
 	-rm $(WPNOEXT).glsdefs
-	latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
+	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
 	makeglossaries -d $(OUTDIR) $(WPRAW)
-	latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
+	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
 	cp $(WPNOEXT).pdf ./$(WPRAW)-latest.pdf
 
 %.md:
