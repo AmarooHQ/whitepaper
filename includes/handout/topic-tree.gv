@@ -43,7 +43,7 @@ digraph TopicTree {
     spvProofsViaSC [label = "SPV Proofs via\nSmart Contracts", shape=rectangle];
     scaling [label = "Scaling", shape=octagon];
     scalingTrilemma [label = "Buterin's Trilemma", shape=rectangle];
-    scalingOCSquared [label = "Scaling O(c^2)", shape=rectangle];
+    scalingOCSquared [label = "Scaling O(c^2)\n and maybe O(c^3)", shape=rectangle];
     scalingOCCubed [label = "Scaling O(c^3)\nAnd Beyond", shape=octagon];
     scalingON [label = "Scaling O(n)"];
     UT [label = "Ultra Terminum"];
@@ -52,14 +52,14 @@ digraph TopicTree {
     //UTCore [label = "Core of Ultra Terminum"];
     powRefSimplex [label = "The Simplex\n(N Chains)"];
     simplexScale [label = "Simplex\nScalability"];
-    simplexDappChains [label = "Simplex\nDapp-chains"];
+    // simplexDappChains [label = "Simplex\nDapp-chains"];
     powRefConfirmationTimes [label = "Simplex\nConfirmation Times"];
     powRefAttacks [label = "Simplex Attacks"];
     simplexPoSVsPurePoS [label = "Simplex + PoS\nvs\nPure PoS"];
     dappChains [label = "Dapp-chains", shape=octagon];
     devPotential [label = "Leveraging\nExisting Projects"];
-    devPotentialUniversality [label = "Universality", shape=octagon];
-    devPotentialReach [label = "Reach", shape=octagon];
+    // devPotentialUniversality [label = "Universality", shape=octagon];
+    // devPotentialReach [label = "Reach", shape=octagon];
     tiling [label = "Tiling"];
     tilingSec [label = "Security"];
 
@@ -76,16 +76,15 @@ digraph TopicTree {
     nosimus -> dataStructsGeneral -> merkleTrees -> spvProofs -> spvProofsViaSC;
     nosimus -> scaling -> scalingTrilemma;
     scaling -> scalingOCSquared;
-    scaling -> dappChains -> scalingOCCubed;
     //scaling -> scalingON;
     nosimus -> UT -> powReflection -> powRefTwoChains;
-    powReflection -> powRefSimplex -> simplexScale -> simplexDappChains;
+    powReflection -> powRefSimplex -> simplexScale;
+    powRefSimplex -> dappChains -> scalingOCCubed;
     powRefSimplex -> powRefConfirmationTimes;
     powRefSimplex -> powRefAttacks;
     powRefSimplex -> simplexPoSVsPurePoS;
 
-    dappChains -> devPotential -> devPotentialReach;
-    devPotential -> devPotentialUniversality;
+    dappChains -> devPotential;
 
     powRefSimplex -> tiling;
 
