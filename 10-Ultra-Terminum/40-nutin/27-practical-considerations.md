@@ -78,11 +78,21 @@ Given that the reflection-segments of simplex-chains will contain mostly repeate
 
 \label{sec:confirmation-times}
 
-\todo{write -- confirmation times}
+A confirmation is a *discreet* event that occurs when a block is produced. When an attacker is performing a hash-rate based doublespend attack they are, effectively, racing the honest network; that race is measured in confirmations[^confirmation-race], not *time*.
 
-\begin{equation}
-\frac{1}{O(c)}
-\end{equation}
+\bquote{
+    The probability of success [of a double-spend attempt] depends on the number of blocks [by which the honest network has an advantage], and not on the time constant $T_0$.
+}{Meni Rosenfeld; \href{https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{Analysis of hashrate-based double-spending}}
+
+In a traditional blockchain (e.g., Bitcoin, Ethereum) confirmations occur at a predictable rate (that of the target block production frequency). Thus, for any *particular* traditional blockchain a convenient time-based \emph{rule of thumb} can be devised, e.g., a Bitcoin transaction is safe to accept after 1 hour. However, this approximation only works because blocks are only produced locally and at a constant rate. Put another way, the frequency of confirmations is identical to the frequency of blocks, $B_f$ Hz. Since $O(B_f) = O(1)$, the time-complexity of confirmation in these networks is also $O(1)$.
+
+When using PoR, though, the assumptions behind that \emph{rule of thumb} do not hold -- while blocks on a single chain may be produced at a constant rate, that chain also gains a security benefit from other chains. For the case of a 2-chain simplex (where those chains have the same block production frequency), the rate of confirmations will be twice the rate of block production. This is easily generalized: for an $N_1$-simplex with simplex-chains that share some block frequency $B_f$, the rate of confirmation will be $N_1 \cdot B_f$ Hz. Thus, the rate of confirmations has complexity $O(N_1 \cdot B_f) = O(N_1) = O(c)$.
+
+Let *confirmation time* be the duration breakpoint, above which a large enough number of confirmations have occurred to consider a transaction *safe*. This is equivalent to the *rule of thumb* we mentioned earlier. For a traditional blockchain, as we mentioned, this is the product of some constant and the expected duration between blocks: $B_f^{-1}$. For a simplex, though, the expected *duration* is $(N_1 \cdot B_f)^{-1}$. Thus, as the simplex grows -- as $N_1$ *increases* -- the entire network's rate of confirmations also increases, and thus *confirmation time* approaches 0[^approach-zero].
+
+A 200-simplex with $B_f = \nicefrac{1}{15}$ has a confirmation rate of $\nicefrac{40}{3} \approx 13.3$ Hz. An 800-simplex with $B_f = \nicefrac{1}{60}$ has the same confirmation rate. This is $\sim 6.5\times$ faster than EOS, $\sim 200\times$ faster than Ethereum, and $\sim 8,000\times$ faster than Bitcoin.
+
+[^approach-zero]: To say that confirmation time approaches 0 only tells the latter half of the process by which a transaction becomes confirmed. The first half of that process is *getting an initial confirmation*, which is effectively a constant overhead.
 
 \begin{comment}
 The idea of *confirmation* is a representation of the risk that a transaction will fail to become finalized within a blockchain network; as a transaction receives more *confirmations*, the probability that a doublespend attempt succeeds approaches 0. A transaction is said to have been *confirmed* once it has enough confirmations to pass a *breakpoint*, beyond which the probability of an attack succeeding is close (enough) to 0.
