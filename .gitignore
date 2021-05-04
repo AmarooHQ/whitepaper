@@ -16,7 +16,7 @@ node_modules
 *.pgf-plot.*
 *.pgf-plot.gnuplot
 includes/**/*.pdf
-includes/handout/exec-summary.md
+includes/handout/*.md
 *.dvi
 *.pdf
 *.synctex.gz
