@@ -90,8 +90,6 @@ side by side figures: https://tex.stackexchange.com/questions/37581/latex-figure
 
 Two elements of complexity will be analysed: the size of SPV proofs between simplex-chains, and the network overall.
 
-\todo{Need to check the Big O stuff in this section.}
-
 #### Tiling Complexity
 
 If our tiling is balanced (in the sense that a binary tree can be balanced) then the root tile has 3 children, each of which is the root node of a balanced binary tree. If those trees have a height of $h-1$, then each have $2^{h} - 1$ total nodes. The height of the trees is set to $h-1$ so that the full tiling has a height of $h$. The number of tiles in the full tiling is thus:
@@ -126,16 +124,6 @@ O(\log_2 c + \log_2 N_{tiles}) & = O(\log_2 c + \log_2 \frac{n}{c^j}) \\
 & = O(\log_2 n) \label{eq:tiled-spv-complexity}
 \end{split}
 \end{equation}
-
-#### Tessellating tiles are less efficient
-
-Because $O(\log_2 n) < O(\sqrt{n})$.
-
-In a tessellating set of tiles, we can approximate the distance between tiles via a geometric interpretation: for a set of $n$ tessellating tiles, each tile having a constant area, then the full area is $\propto {n}$. Thus, the maximal distance between tiles is $\propto \sqrt{n}$.
-
-However, the distance between any 2 of $n$ tiles, using the binary-tree method, is $\sim \log_2 n$. So it's (maybe counterintuitively) more efficient to use non-tessellating tiles.
-
-\todo{\href{https://mindyourdecisions.com/blog/2016/07/03/distance-between-two-random-points-in-a-square-sunday-puzzle/}{this maths problem} about the average distance between 2 points in a square (analogous to tessellating tiles) has an answer with a *log* in it. todo: mb tessellating tiles are actually more efficient?}
 
 #### Network Complexity
 
@@ -186,20 +174,28 @@ There exists an alternate tiling that begins with two tiles instead of one, thou
 
 \begin{figure}
     \centering
-    \begin{subfigure}[t]{.33\textwidth}
+    \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
         \centering
         \includegraphics[height=.95\linewidth]{tiling_alt_s5_d2_sag}
         \caption{1st iteration. 6 tiles.}
         \label{fig:tiled-simplex-alt-d2}
     \end{subfigure}%%
-    \hspace{0.1\textwidth}
-    \begin{subfigure}[t]{.33\textwidth}
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
         \centering
         \includegraphics[height=.95\linewidth]{tiling_alt_s5_d3_sag}
         \caption{2nd iteration. 14 tiles.}
         \label{fig:tiled-simplex-alt-d3}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_alt_s5_d4_sag}
+        \caption{3rd iteration. 30 tiles.}
+        \label{fig:tiled-simplex-alt-d4}
     \end{subfigure}%%
     \caption{An alternate tiling that is equivalent in terms of complexity, security, etc.}
     \label{fig:alt-tiling}
@@ -233,3 +229,13 @@ This method has some decisive criticisms.
 First, the confirmation rate is much slower -- both intra-tile and inter-tile. Inter-tile confirmations (which are important for e.g., cross-tile SPV transactions) occur with frequency $B_f \cdot N_1$, i.e., the frequency is proportional to the number of simplex-chains in each tile. This means that single-chain tilings have the theoretically *worst case* confirmation rate compared to tilings of larger simplexes.
 
 Second, because the inter-tile confirmation rate is *worst case*, the window for attack (via the private creation of chain-segments) is correspondingly longer. That is, the window for attack is also *worst case* for a chosen block frequency.
+
+#### Tessellating tiles are less efficient
+
+Because $O(\log_2 n) < O(\sqrt{n})$.
+
+In a tessellating set of tiles, we can approximate the distance between tiles via a geometric interpretation: for a set of $n$ tessellating tiles, each tile having a constant area, then the full area is $\propto {n}$. Thus, the maximal distance between tiles is $\propto \sqrt{n}$.
+
+However, the distance between any 2 of $n$ tiles, using the binary-tree method, is $\sim \log_2 n$. So it's (maybe counterintuitively) more efficient to use non-tessellating tiles.
+
+\todo{\href{https://mindyourdecisions.com/blog/2016/07/03/distance-between-two-random-points-in-a-square-sunday-puzzle/}{this maths problem} about the average distance between 2 points in a square (analogous to tessellating tiles) has an answer with a *log* in it. todo: mb tessellating tiles are actually more efficient?}

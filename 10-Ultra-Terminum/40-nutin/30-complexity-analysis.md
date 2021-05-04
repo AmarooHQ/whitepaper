@@ -161,7 +161,9 @@ Thus, from the definition of $k_1$ in \autoref{eq:k1-reflection-defn}:
 k_{1,B} = \frac{k_1}{2}
 \end{equation*}
 
-### Replacing Transactions with Dapp-Chains
+### Dapp-Chains and the Complexity of $O(c^3)$ and $O(c^4)$ UT
+
+#### Dapp-Chains
 
 If a system supports nested chains, then we can say that for some throughput, $T_i$, at nesting level $i$, that $(i+1)^{th}$ nesting level can support $N_{i+1}$ nested chains via:
 
@@ -186,7 +188,7 @@ Combining these yields:
 N_{i+1} = \frac{T_{i+1}}{k_{i+1}}
 \end{equation}
 
-### Complexity of $O(c^3)$ UT
+#### UT with Dapp-Chains
 
 Starting with \autoref{eq:simplex-T1} and building on \autoref{eq:throughput-iter}:
 
@@ -209,7 +211,7 @@ N_2 & = \frac{T_2}{k_2} \\
 \end{split}
 \end{equation*}
 
-### Complexity of $O(c^4)$ UT
+#### UT with Dapp-Dapp-Chains
 
 If we say each dapp chain hosts shards or more dapp chains (such as Eth2 or Polkadot do), then via \autoref{eq:throughput-iter} and \autoref{eq:throughput-c-3},
 
@@ -234,7 +236,9 @@ N_3 & = \frac{T_3}{k_3} \\
 \end{split}
 \end{equation*}
 
-### Complexity of Cross-chain SPV Proofs
+### Complexity of Cross-Chain SPV Proofs & Proofs of Reflection
+
+#### Cross-Chain SPV Proofs
 
 Each chain -- at full capacity -- operates with order $O(c)$ by definition. Thus its state has order $O(c)$ also. The size of SPV proofs scale logarithmically with the set you're proving membership of, e.g. the number of transactions, or size of the chain's state, etc. Thus, SPV proofs scale with order $O(\log_2 c)$.
 
@@ -248,7 +252,7 @@ Since $j$ is constant, cross-chain SPV proofs therefore have order:
 O(j \cdot \log_2 c) = O(\log_2 c) \label{eq:spv-complexity}
 \end{equation}
 
-### Complexity of Proofs of Reflection
+#### Proofs of Reflection
 
 \label{sec:complexity-reflection-proof}
 
@@ -337,7 +341,7 @@ While $O(c^2)$ bandwidth scaling is not ideal, it's clear that -- especially in 
 | $3000, \nicefrac{1}{60}, \nicefrac{1}{60}, 500, 500$ | 180 | 32,400 | $1.2\times 10^{7}$ | 540,000 |
 | $3000, \nicefrac{1}{60}, \nicefrac{1}{60}, 500, 700$ | 180 | 23,143 | $6.0\times 10^{6}$ | 540,000 |
 
-: UT's capacity and bandwidth requirements: $N_1, N_2, N_3, \text{and} \Delta S$ for various parameters.
+: UT's capacity and bandwidth requirements: $N_1, N_2, N_3, \text{and}\;\Delta S$ for various parameters.
 
 ### The Impact of Header Size
 

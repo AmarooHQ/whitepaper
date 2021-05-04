@@ -1,3 +1,5 @@
+\begin{comment}
+
 # Sharing Security with AuxPow
 
 \todo{reread and edit - merged mining}
@@ -64,3 +66,5 @@ Is this example verification function one that could work? In principle, *yes* (
 A requirement for this method (or any other) is that there is an *unambiguous* way to determine the precise intended addition to Namecoin's blockchain. In the example above, it is required that the Namecoin block hash is the exact data in the *first* OP_RETURN output. If the Namecoin block hash could be in *any* OP_RETURN output, then we would not be able to tell, *unambiguously*, if it was the *precise and only* intended update to the Namecoin ledger. Perhaps the miner included *multiple* Namecoin block hashes; if they did (and if they could be in any OP_RETURN output) then they might be able to publish *multiple, different* updates, which would violate the earlier conditions we've specified for valid updates.
 
 In the case of Bitcoin/Namecoin merged mining, that is what I mean by "appropriate properties for its intended use" (though there are additional and different required properties in reality). However we choose to interpret the data behind a proof of work, we must be able to know it *exactly* and know that it was *intended*. Without that, we cannot meaningfully use the proof of work to secure a 'child' blockchain.
+
+\end{comment}
