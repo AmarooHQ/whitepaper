@@ -142,7 +142,7 @@ For all practical purposes, simplex-tiling provides unbounded capacity.
 
 \todo{tiling security implications -- tiling weaker than maximal simplex.}
 
-e.g. The leaf tiles in \autoref{fig:tiled-simplex-5-d2} have simplex-chains that are weaker than an equiv 20-chain simplex. The root tile has equiv security, tho. This is true even tho both systems have 20 simplex-chains total.
+e.g. The leaf tiles in \autoref{fig:tiled-simplex-5-d2} have simplex-chains that are weaker than an equiv 20-chain simplex. The root tile has equiv security, though. This is true even though both systems have 20 simplex-chains total.
 
 \begin{comment}
 

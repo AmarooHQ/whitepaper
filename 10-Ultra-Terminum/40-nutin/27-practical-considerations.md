@@ -149,9 +149,9 @@ Consider these 3 categories of methods of securing a blockchain:
 * PoW without ASICs (e.g. GPUs/CPUs; aka "ASIC resistant")
 * PoS
 
-PoW+ASICs means the miner-base is inflexible; they don't have many choices for where to point their ASICs. It's super high hash-rate, tho, and has near-optimal thermodynamic security given the state of ASIC manufacturing (e.g. 5nm chips).
+PoW+ASICs means the miner-base is inflexible; they don't have many choices for where to point their ASICs. It's super high hash-rate, though, and has near-optimal thermodynamic security given the state of ASIC manufacturing (e.g. 5nm chips).
 
-PoW+GPUs means the miner-base is super flexible; there are lots of choices for profitable chains to mine. They can pick and choose and have low overhead to doing so. They aren't near the limit for thermodynamic security, tho. If relevant ASICs come along they'll always out-compete GPUs.
+PoW+GPUs means the miner-base is super flexible; there are lots of choices for profitable chains to mine. They can pick and choose and have low overhead to doing so. They aren't near the limit for thermodynamic security, though. If relevant ASICs come along they'll always out-compete GPUs.
 
 PoS has an inflexible miner base too -- most PoS schemes (e.g. PBFT, DPoS, etc) require the miners to stake coins and that happens over a period of time. However, there is a sense where the thermodynamic security of PoS is high (provided ECDSAs and EC crypto keep working). There's another sense where the thermodynamic security of PoS is low: miners control their private keys and have near zero energy cost per signature. That's the reason that PoS systems include mechanics like *slashing*.
 
