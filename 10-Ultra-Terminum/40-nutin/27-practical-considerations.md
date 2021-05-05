@@ -94,14 +94,6 @@ A 200-simplex with $B_f = \nicefrac{1}{15}$ has a confirmation rate of $\nicefra
 
 [^approach-zero]: To say that confirmation time approaches 0 only tells the latter half of the process by which a transaction becomes confirmed. The first half of that process is *getting an initial confirmation*, which is effectively a constant overhead.
 
-\begin{comment}
-The idea of *confirmation* is a representation of the risk that a transaction will fail to become finalized within a blockchain network; as a transaction receives more *confirmations*, the probability that a doublespend attempt succeeds approaches 0. A transaction is said to have been *confirmed* once it has enough confirmations to pass a *breakpoint*, beyond which the probability of an attack succeeding is close (enough) to 0.
-
-Let us say that some chain, $C_1$, mutually reflects another chain, $C_2$. For simplicity, let us assume that these two chains have equal hash power, host equal amounts of the root token, and use the same hash function for their PoW (meaning an attacker can mine either chain). Let $q_i > 0$ denote the attacker's *proportional hash-rate*[^prop-hash-rate] on $C_i$, and let $p_i > 0$ denote the honest proportional hash-rate on $C_i$. Similar to \autoref{sec:reflection-pow-and-pos}, assume that the maximum security contribution of each chain is capped at 50%. Thus, the following equalities hold: $p_1 + q_1 = 0.5$, $p_2 + q_2 = 0.5$; these imply $p_1 + p_2 + q_1 + q_2 = 1$. Additionally: $q_1 + q_2 = q$ and $p_1 + p_2 = p$.
-
-[^prop-hash-rate]: A proportional hash-rate is defined to be the proportion of that hash-rate to \emph{the hash-rate of the total network}, including reflected chains. These values are equivalent to the probability that the actor(s) responsible for that hash-rate will generate the next block.
-\end{comment}
-
 
 ### DoS and DAGs
 

@@ -1,5 +1,3 @@
-\begin{comment}
-
 # Reflection Including Merkle Branches
 
 What does a simplex look like if simplex-chains include proofs of reflection?
@@ -41,5 +39,3 @@ From \autoref{eq:simplex-N1-with-PoR}, we have $N_1$ that is of the form $N_1 = 
     \caption{Graphs of $f(x) = \frac{x}{W_0(x)}$ for $x \in [10^2, 10^8]$.}
     \label{fig:x-over-lambert}
 \end{figure}
-
-\end{comment}

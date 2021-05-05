@@ -4,6 +4,8 @@
   the dialogs are a bit sparse on the page with the current formatting. mb they should be a bit more condensed. I like the colors tho -- let's you scan quickly. I guess that left/right alignment does that somewhat too, tho.
 }
 
+\todo{Link to response locations for: 51\%, publishing bad data, selfish mining, dag-based, reflection stuff}
+
 ### Dialog: Attacks and Mitigation
 
 \newcommand{\nefName}{ExMalo}
@@ -123,6 +125,9 @@
 Your message could not be delivered. This is usually because you don't share a server with the recipient or the recipient is only accepting direct messages from friends.
 \end{tcolorbox}
 
+
+\begin{comment}
+
 ### Dialog 2
 
 \mk{
@@ -157,13 +162,7 @@ Your message could not be delivered. This is usually because you don't share a s
   Continue dialog.
 }
 
-### Analysis of Existing Attacks
-
-\todo{Link to response locations for: 51\%, publishing bad data, selfish mining, dag-based, reflection stuff}
-
-
-
-
+\end{comment}
 \begin{comment}
 
 ### 51% and double-spends
