@@ -118,7 +118,9 @@ The most likely method of integration has four components: modification of the h
 
 \todo{finish below}
 
-The abstraction layer between simplex-chains and dapp-chains has another advantage; one with great *reach*. Any PoS system with special features, say with [finality guarantees](https://github.com/w3f/consensus/blob/master/pdf/grandpa.pdf) or one that is [provably secure](https://iohk.io/en/research/library/papers/ouroborosa-provably-secure-proof-of-stake-blockchain-protocol/), then (*something about how their security guarantees stick around*)
+If the headers of dapp-chains are simplex-level transactions, what can we say about the security of dapp-chains? Since dapp-chains will use some sort of PoS scheme, and there is no substantive difference between standalone headers and transaction-headers. That means that *zero-confirmation* transaction-headers are *precisely* as secure as their standalone counterparts -- by definition. This means that other features -- e.g., [finality guarantees](https://github.com/w3f/consensus/blob/master/pdf/grandpa.pdf) -- are *free*.
+
+\defineTerm{Transaction-headers}{Dapp-chain headers that are encoded as simplex-level transactions; i.e., they are processed by a simplex-chain as a transaction, but they also function as the header for a dapp-chain block}
 
 plan:
 
