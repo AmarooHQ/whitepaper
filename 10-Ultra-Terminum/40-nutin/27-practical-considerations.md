@@ -155,9 +155,11 @@ UT's consensus is emergent from an *additive and collaborative* process. Adding 
 
 Do they want a highly secure base-chain, but variance in block times isn't a problem? Then they should go with an ASIC-chain. Do they want a moderately secure base-chain, but with *low* variance in block times? Then go with a GPU-chain. Do they want a moderate-to-low security base-chain, but with regular (near-zero-variance) block times? Then go with a PoS/PoA-chain (at the simplex level).
 
+\begin{comment}
 My intuition is that each of these three quality-groups should be responsible for <50% of UT's overall security. If they were balanced, then they'd be at one-third each; however, something like 45%/40%/15% would work too.
 
 NB: The only way to directly compare security like this is to proxy the measurement via the distribution of ROO per group. i.e., for the 45/40/15 example, we might have 45% of ROO in (or on dapp-chains via) ASIC-chains, 40% in GPU-chains, and 15% in PoS-chains. For this calculation I count any ROO in a dapp-chain as also being in the parent simplex-chain.
+\end{comment}
 
 ### Lowering Block Production Variance
 
