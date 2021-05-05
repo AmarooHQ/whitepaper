@@ -1,10 +1,12 @@
 ## Attacks
 
-\mk{
-  the dialogs are a bit sparse on the page with the current formatting. mb they should be a bit more condensed. I like the colors tho -- let's you scan quickly. I guess that left/right alignment does that somewhat too, tho.
-}
+*Ultra Terminum* -- with appropriate configuration -- is resistant to the following attacks; see the linked section for discussion:
 
-\todo{Link to response locations for: 51\%, publishing bad data, selfish mining, dag-based, reflection stuff}
+- 51% Attack, see \autoref{sec:reflection-pow-and-pos}
+- Selfish mining, see \autoref{sec:confirmation-times}
+- Reflection without publication, see \autoref{sec:availability-of-blocks}
+- Empty block DoS, see \autoref{sec:dos-and-dags}
+- Nothing at stake, see \autoref{sec:reflection-pow-and-pos} and \autoref{sec:dapp-chains}
 
 ### Dialog: Attacks and Mitigation
 
@@ -168,14 +170,6 @@ Your message could not be delivered. This is usually because you don't share a s
 ### 51% and double-spends
 
 \todo{discuss 51 percent and how difficult it is in UT vs Bitcoin, et al.}
-
-need to do 51% attacks on 51% of simplex chains - worst case, that mb isn't enough
-
-similar to how you can theoretically win govt in a democracy by winning 51% of votes in 51% of electorates => only 25% of total votes. it's still harder than winning 51% of votes in one seat, tho.
-
-\mk{
-  I think I was wrong here; you need more than 51\% of 51\% b/c of private mining. so you still need 51\% overall, tho that can be more/less in diff simplex-chains.
-}
 
 ### Poisoning the Well
 

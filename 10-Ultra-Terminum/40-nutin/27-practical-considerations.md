@@ -94,6 +94,10 @@ A 200-simplex with $B_f = \nicefrac{1}{15}$ has a confirmation rate of $\nicefra
 
 [^approach-zero]: To say that confirmation time approaches 0 only tells the latter half of the process by which a transaction becomes confirmed. The first half of that process is *getting an initial confirmation*, which is effectively a constant overhead.
 
+Note that PoR incents miners to publish blocks as soon as possible so that those blocks begin gaining reflections. If a miner does not publish a block immediately, then any competing block will start acquiring reflections first and thus hold an advantage over the withheld block. This mitigates the selfish mining[^selfish-mining] attack.
+
+[^selfish-mining]: See \href{https://cloudflare-ipfs.com/ipfs/QmNukb1L8BhEsiCbrmnkEJWAvUjhBHidinKMZKfCaLG6ep}{Majority is not Enough: Bitcoin Mining is Vulnerable} by Ittay Eyal and Emin Gün Sirer.
+
 
 ### DoS and DAGs
 

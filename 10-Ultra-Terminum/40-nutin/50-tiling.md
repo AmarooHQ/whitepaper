@@ -234,8 +234,15 @@ Second, because the inter-tile confirmation rate is *worst case*, the window for
 
 Because $O(\log_2 n) < O(\sqrt{n})$.
 
-In a tessellating set of tiles, we can approximate the distance between tiles via a geometric interpretation: for a set of $n$ tessellating tiles, each tile having a constant area, then the full area is $\propto {n}$. Thus, the maximal distance between tiles is $\propto \sqrt{n}$.
+In a tessellating set of tiles, we can approximate the maximum distance between tiles via a geometric interpretation: for a set of $n$ tessellating tiles, each tile having a constant area, then the full area is $\propto {n}$. Thus, the maximal distance between tiles is $\propto \sqrt{n}$.
 
-However, the distance between any 2 of $n$ tiles, using the binary-tree method, is $\sim \log_2 n$. So it's (maybe counterintuitively) more efficient to use non-tessellating tiles.
+However, the maximum distance between any 2 of $n$ tiles, using the binary-tree method, is $\sim \log_2 n$. So it's (maybe counterintuitively) more efficient to use non-tessellating tiles.
 
-\todo{\href{https://mindyourdecisions.com/blog/2016/07/03/distance-between-two-random-points-in-a-square-sunday-puzzle/}{this maths problem} about the average distance between 2 points in a square (analogous to tessellating tiles) has an answer with a *log* in it. todo: mb tessellating tiles are actually more efficient?}
+Additionally, a model of tilings of similar capacity -- i.e., similar $N_{tiles}$ -- shows that the average distance between tiles is lower for tree-based tilings.
+
+\begin{figure}
+\centering
+\includegraphics[height=.5\linewidth]{avg-dist.pdf}
+\caption{Shown are the distances between randomly selected tilings for two tiling methods -- the tree method (which this section primarily concerns) and a simple tessellating method.}
+\label{fig:tiling-avg-dist-comparison}
+\end{figure}
