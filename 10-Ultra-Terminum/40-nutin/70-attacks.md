@@ -2,7 +2,7 @@
 
 *Ultra Terminum* -- with appropriate configuration -- is resistant to the following attacks; see the linked section for discussion:
 
-- 51% Attack, see \autoref{sec:proof-of-reflection} -- particularly \autoref{sec:reflection-pow-and-pos} -- and \autoref{sec:preventing-dos-attacks}.
+- 51% Attack, see \autoref{sec:reflection-pow-and-pos}, \label{sec:reflection-pow-and-pos}, and \autoref{sec:preventing-dos-attacks}.
 - Selfish mining, see \autoref{sec:confirmation-times}
 - Reflection without publication, see \autoref{sec:availability-of-blocks}
 - Empty block DoS and censorship, see \autoref{sec:dos-and-dags}
@@ -66,7 +66,7 @@
 }
 
 \cMax{
-  Say you attacked \emph{all} the PoW simplex-chains, what about the PoS ones? You can't mine those, too.
+  Say that you did try to attack \emph{all} the PoW simplex-chains, what about the PoS ones? You need to pwn those first if you want to 51% the PoW chains.
 }
 
 \cMax{
@@ -82,11 +82,21 @@
 
 \cMax{
   \q{I have lots of ROO for PoS chains.}
-  GL with that. Since the PoS chains are reflected in the PoW chains, you can't screw with their history to brute-force a favorable quorum --- you'd have to re-write way too much PoW history for that. If you're already PoS mining, then your stake will get slashed the second you publish, so the rest of the network will calc those PoS blocks to have a negative weight.
+  GL with that. Since the PoS chains are reflected in the PoW chains, you can't screw with their history to brute-force a favorable quorum --- you'd have to re-write way too much PoW history for that. If you're already PoS mining, then your stake will get slashed the second you publish, so the rest of the network will calc those PoS blocks to have a negative weight. Bribes don't work either b/c the PoS set-up is done on a different chain and reflections from the simplex stop long-range attacks.
 }
 
 \cMax{
   Not to mention that you can't attack the PoA simplex-chains, anyway. The honest network's always going to have an extra 20\% on you.
+}
+
+\cNef{
+  \q{Since the PoS chains are reflected in the PoW chains, you can't screw with their history to brute-force a favorable quorum --- you'd have to re-write way too much PoW history for that.}
+  Like I said, it'll cost you more than it costs me. Have you forgotten that I can launch these attacks simultaneously?
+}
+
+\cMax{
+  \q{simultaneously}
+  That's just it. You can't. Attacking the PoS chains requires set-up, which means that you need to attack the PoW chains *at an earlier point in time* than the moment of launch. But attacking the PoW chains won't succeed without the reflections from PoS chains. And if you want to provide lots of PoS reflections, well you need to attack the PoW chains *even further* back to do *that* set-up. Do you see the problem here? Your only option is to *start from the genesis blocks*.
 }
 
 \cNef{

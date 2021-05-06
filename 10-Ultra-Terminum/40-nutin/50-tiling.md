@@ -234,11 +234,11 @@ Second, because the inter-tile confirmation rate is *worst case*, the window for
 
 Because $O(\log_2 n) < O(\sqrt{n})$.
 
-In a tessellating set of tiles, we can approximate the maximum distance between tiles via a geometric interpretation: for a set of $n$ tessellating tiles, each tile having a constant area, then the full area is $\propto {n}$. Thus, the maximal distance between tiles is $\propto \sqrt{n}$.
+In a tessellating set of tiles, we can approximate the *maximum* distance between tiles via a geometric interpretation: for a set of $n$ tessellating tiles, each tile having a constant area, then the full area is $\propto {n}$. Thus, the maximal distance between tiles is $\propto \sqrt{n}$.
 
-However, the maximum distance between any 2 of $n$ tiles, using the binary-tree method, is $\sim \log_2 n$. So it's (maybe counterintuitively) more efficient to use non-tessellating tiles.
+However, the *maximum* distance between any 2 of $n$ tiles, using the binary-tree method, is $\sim \log_2 n$. So it's (maybe counterintuitively) more efficient to use non-tessellating tiles.
 
-Additionally, a model of tilings of similar capacity -- i.e., similar $N_{tiles}$ -- shows that the average distance between tiles is lower for tree-based tilings.
+Additionally, a model of tilings of similar capacity -- i.e., similar $N_{tiles}$ -- shows that the *average* distance between tiles is lower for tree-based tilings.
 
 \begin{figure}
 \centering

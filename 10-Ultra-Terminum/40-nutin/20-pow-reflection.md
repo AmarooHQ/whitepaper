@@ -331,6 +331,25 @@ There are some other conjectured solutions to the *Nothing at Stake* problem. Th
 
 There are some (as yet) unsolved problems that arise through this design, such as the *economic* details of managing block rewards across the PoW and PoS chains. Given that solutions to this problem likely depend on the specific details of the relevant PoS systems, this problem is not addressed in this paper.
 
+#### PoS Bribe Attacks
+
+\todo{write -- PoS Bribe Attacks}
+
+NOTES:
+
+I've been reading this: https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/the_defence_of_pos.md
+
+I think that PoS might require something like UT/the simplex to work. Particularly, Zack says:
+
+> PoS must fail in one of these ways, A or B:
+>
+> A) Once attackers have >51% of validator stake they can maintain the attack perpetually. They control who is added to the validator set. They can censor anything. They can use censorship to push through arbitrary soft-fork updates, including updates to change the consensus mechanism to PoW. Users who don't like the new rules are incentivized to sell to users who do like the new rules.
+> ...
+
+How UT solves these problems:
+
+PoS simplex-chains don't need to have the decision of validator sets within their own chain; it can be external in a reflected PoW chain. Thus having >51% of the validator stake doesn't break the protocol. In a normal blockchain it would b/c a DoS would be possible, but that doesn't work in UT b/c simplex-chains are DAGs. (Though an attacker can potentially delay transactions for a few minutes, repeatedly, and thus reduce overall capacity by some factor.)
+
 ### The Insecurity of Merged Mining
 
 \todo{write -- The Insecurity of Merged Mining}
