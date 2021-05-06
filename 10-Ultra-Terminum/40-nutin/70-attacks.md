@@ -2,11 +2,11 @@
 
 *Ultra Terminum* -- with appropriate configuration -- is resistant to the following attacks; see the linked section for discussion:
 
-- 51% Attack, see \autoref{sec:reflection-pow-and-pos}
+- 51% Attack, see \autoref{sec:proof-of-reflection} -- particularly \autoref{sec:reflection-pow-and-pos} -- and \autoref{sec:preventing-dos-attacks}.
 - Selfish mining, see \autoref{sec:confirmation-times}
 - Reflection without publication, see \autoref{sec:availability-of-blocks}
-- Empty block DoS, see \autoref{sec:dos-and-dags}
-- Nothing at stake, see \autoref{sec:reflection-pow-and-pos} and \autoref{sec:dapp-chains}
+- Empty block DoS and censorship, see \autoref{sec:dos-and-dags}
+- Nothing at stake / long-range, see \autoref{sec:reflection-pow-and-pos} and \autoref{sec:dapp-chains}
 
 ### Dialog: Attacks and Mitigation
 
@@ -92,8 +92,6 @@
 \cNef{
   I can still attack some dapp-chains.
 }
-
-\todo{look into PoS bribe attacks}
 
 \cMax{
   How? Dapp-chain history is secured by the PoW done in the simplex. If you try, then your stake will get slashed and things will go back to normal. It's more like a donation than an attack.

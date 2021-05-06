@@ -72,8 +72,6 @@ If simplex-chains are segmented in this manner, then miners will be able to calc
 
 Given that the reflection-segments of simplex-chains will contain mostly repeated data (i.e., headers), and that these segments will have very similar resultant state, there should be numerous optimizations that are possible. For example, it's not necessary for a miner's node to re-download reflected headers since it already has most (or all) of them; that node just needs to know *which* headers are reflected. This reduces the effective size of simplex-blocks from $b$ to $b \cdot (\frac{g + B_h}{2B_h})$, where $g$ is the size of the relevant digest in bytes. For $g=32; B_h=112$, this reduces effective block size to $\sim 0.643 b$ --- an improvement of $\sim 35\%$.
 
-\todo{check that the argument for droppable witnesses is good enough. nb: check this line in git history at f4f2ff7 for prev notes}
-
 ### Confirmation Times
 
 \label{sec:confirmation-times}
@@ -103,9 +101,39 @@ Note that PoR incents miners to publish blocks as soon as possible so that those
 
 \label{sec:dos-and-dags}
 
-\todo{
-    write \emph{DoS and DAGs}. use quanta / inclusive-protocol to allow: multiple parents; merging histories; including invalid or pseudo-invalid blocks in history; prevent DoS attacks; avoid stale blocks
-}
+There are decisive advantages to using DAGs (instead of trees) as the fundamental structure of a chain. Namely, multiple histories (both compatible and incompatible) can be merged into a single, consistent history -- a feature which eliminates stale blocks and thwarts attacks like an empty-block Denial of Service[^empty-dos]. Although it's rare that I explicitly mention this, UT's simplex-chains must be block-DAGs to remain functional and avoid such DoS attacks.
+
+[^empty-dos]: For an example of this attack, see \href{https://bitcointalk.org/index.php?topic=56675.msg678006\#msg678006}{Luke Jr's attack on Coiledcoin}.
+
+#### Block-DAG Lineage
+
+The idea that blocks in a chain can have multiple parents -- i.e., the chain forms a Directed Acyclic Graph (DAG) that is not also a tree -- dates back to (at least) late 2013[^ghost-dec-2013] with the publication of GHOST by Sompolinsky and Zohar. However, GHOST disallows multiple *canonical* parents, and a chain using GHOST defines its *canonical history* -- the *main chain* -- via the chain formed exclusively from the first parent of each block. A block's other, non-canonical parents are linked to *only* for the purpose of contributing to the total chain-weight.
+
+In the two years after GHOST was published, a number of DAG-based blockchain designs were developed that facilitated merging histories from multiple parent blocks.
+
+In mid-2014 I created a prototyped DAG-based blockchain called Quanta[^quanta-2014] with a novel method of linearization that converged to a complete and stable ordering of blocks. This method was independently rediscovered[^redisc] in mid-2015 by Lewenberg, Sompolinsky, and Zohar[^inclusive-july-2015] -- who also further developed and analysed the method, which they named *the inclusive protocol*. Additionally, in 2016 Paul Firth further developed Quanta in his *Trustless Eventual Total Order* draft[^teto-2016].
+
+In late-2015 several new, alternative methods were also published, however these are not generalizations of Nakamoto consensus. Namely: Lerner's DagCoin[^dagcoin-sept-2015], and IOTA's Tangle[^iota-oct-2015].
+
+For the purposes of this paper, we are concerned with the method detailed in *Inclusive Block Chain Protocols*.
+
+[^ghost-dec-2013]: \href{https://cloudflare-ipfs.com/ipfs/QmTDz4WuAXi2rV7Ei3pHHKTFCYGPeDbDoAkmypkHdJnnKe}{Secure High-Rate Transaction Processing in Bitcoin} by Yonatan Sompolinsky and Aviv Zohar.
+
+[^quanta-2014]: \href{https://github.com/XertroV/quanta-test/blob/ba598d5fe89d3b16db07533957a2080edb19a9cd/quanta.py\#L157}{Quanta source code}, \href{https://bitcointalk.org/index.php?topic=1057342}{Quanta bitcointalk thread}.
+
+[^dagcoin-sept-2015]: \href{https://cloudflare-ipfs.com/ipfs/QmbXhgQzN8FPFLiJoVApHvT1vf3xZUGefvD5GdfYPHuBpe}{DagCoin Draft} by Sergio Demian Lerner.
+
+[^iota-oct-2015]: \href{https://bitcointalk.org/index.php?topic=1216479.0}{IOTA bitcointalk thread}.
+
+[^inclusive-july-2015]: \href{https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy}{Inclusive Block Chain Protocols}.
+
+[^redisc]: As far as I can tell, the linearization methods produce identical results.
+
+[^teto-2016]: \href{https://github.com/wildbunny/docs/blob/master/T.E.T.O-draft.pdf}{T.E.T.O Draft} by Paul Firth.
+
+#### Basic Structure
+
+\todo{mb -- DAG \emph{basic structure} section.}
 
 \begin{figure}
     \begin{subfigure}[t]{.31\linewidth}
@@ -132,6 +160,25 @@ Note that PoR incents miners to publish blocks as soon as possible so that those
     \caption{Some examples of simple block-dag segments.}
     \label{fig:dag-simple-segments}
 \end{figure}
+
+#### Preventing DoS Attacks
+
+\label{sec:preventing-dos-attacks}
+
+Consider the situation where an attacker is attempting to deny service via the production of empty blocks, and that the attacker can create blocks faster than the honest network. Such a situation is illustrated in \autoref{fig:dag-dos-1}. Since the goal of the attack is to prevent transactions from occurring, the attacker must produce empty blocks[^empty-nb]. Furthermore, if the attacker links back to any honest blocks then the honest blocks' histories will be merged with the canonical history; thus the attack would fail. The attacker's only available strategy is to produce a single chain of empty blocks.
+
+[^empty-nb]: Note that the attacker should still be reflecting other simplex-chains so as to maximize the total weight of the attacker's chain-segment. Given this, the attacker's blocks will contain reflected headers but no transactions.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{dag_dos1_sag}
+    \caption{An attempted DoS attack on a block-DAG. The attacker's blocks, $A_j$, contain no transactions. Each block is annotated with its \emph{chain-weight} ($\Sigma_w$). Even though the attacker produces $2\times$ as many blocks as the honest network, the attack inevitably fails after a short while. NB: $H_i$ is defined to have $\Sigma_w = 0$ for illustrative convenience.}
+    \label{fig:dag-dos-1}
+\end{figure}
+
+How does such an attack fair? The challenge of such a DoS attack is to prevent honest miners from extending the attacker's chain-segment. For traditional (non-DAG) chains -- where each non-genesis block has exactly one parent -- this is accomplished as soon as the attacker is able to produce a heavier chain-segment than the honest network for a given period. (Typically, this means the attacker produces blocks more frequently.) However, if blocks are allowed to have *more* than one parent then there *is no point* where an attacker can *maintain* a DoS attack indefinitely. Instead, they can only *delay the execution* of some transactions for a short period of time. Particularly, if an attacker can produce $A_{blocks} = \nicefrac{q}{p} > 1$ for every 1 block produced by the honest network, then the attack can delay transactions for up to $A_{blocks} \cdot B_f^{-1}$ seconds, where $B_f$ is the regulated frequency of block production (in Hz). After this point, the weight of the honest chain-segment (which includes the attacker's chain-segment) is always greatest.
+
+However, if an attacker performs a *repeating cycle* of these attacks, then they may be able to decrease the effective capacity of the chain by a factor of $A_{blocks} = \nicefrac{q}{p}$.
 
 ### Qualities of Different Security Methods
 

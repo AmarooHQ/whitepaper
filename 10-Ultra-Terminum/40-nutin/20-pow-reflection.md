@@ -1,5 +1,7 @@
 ## Proof of Reflection
 
+\label{sec:proof-of-reflection}
+
 \mk{note: reminder about secrecy and patent-ability, this is part of it}
 
 Can blockchains work cooperatively to secure each other? It certainly seems that there is nothing *in principle* that prohibits this. Can we come up with a way to do this?
