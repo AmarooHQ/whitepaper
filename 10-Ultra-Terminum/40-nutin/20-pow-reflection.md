@@ -325,9 +325,13 @@ What about the PoS chain, though; what benefits does it gain from this relations
 
 There are some other conjectured solutions to the *Nothing at Stake* problem. The two examples that follow solve the problem via mechanisms that are *external* to the protocol itself, i.e., hard-coded checkpoints and the requirement that nodes are online ``frequently''. The solution provided by mutual reflection with a PoW blockchain -- i.e., thermodynamic security -- is provided *by the protocol itself* and can only *increase* the security of PoS mechanisms. Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
 
-\bquote{Long-range ``nothing-at-stake'' attacks are circumvented through a simple ``checkpoint'' latch which prevents a dangerous chain-reorganisation of more than a particular chain-depth. To ensure newly-syncing clients are not able to be fooled onto the wrong chain, regular ``hard forks'' will occur (of at most the same period of the validators' bond liquidation) that hard-code recent checkpoint block hashes into clients.}{Dr. Gavin Wood; \href{https://cloudflare-ipfs.com/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Polkadot Whitepaper, s5.2}}
+\bquote{
+  Long-range ``nothing-at-stake'' attacks are circumvented through a simple ``checkpoint'' latch which prevents a dangerous chain-reorganisation of more than a particular chain-depth. To ensure newly-syncing clients are not able to be fooled onto the wrong chain, regular ``hard forks'' will occur (of at most the same period of the validators' bond liquidation) that hard-code recent checkpoint block hashes into clients.
+}{Dr. Gavin Wood; \href{https://cloudflare-ipfs.com/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Polkadot Whitepaper, s5.2}}
 
-\bquote{Provided that stakeholders are frequently online, nothing at stake is taken care of by our analysis of forkable strings (even if the adversary brute-forces all possible strategies to fork the evolving blockchain in the near future, there is none that is viable), and our chain selection rule that instructs players to ignore very deep forks that deviate from the block they received the last time they were online.}{\href{http://cloudflare-ipfs.com/ipfs/QmWCAHyi35SeXH2E4e8jRVk7yNse2x6D14uPfABnhagbvN}{Ouroboros: A Provably Secure Proof-of-Stake Blockchain Protocol, s10}}
+\bquote{
+  Provided that stakeholders are frequently online, nothing at stake is taken care of by our analysis of forkable strings (even if the adversary brute-forces all possible strategies to fork the evolving blockchain in the near future, there is none that is viable), and our chain selection rule that instructs players to ignore very deep forks that deviate from the block they received the last time they were online.
+}{\href{http://cloudflare-ipfs.com/ipfs/QmWCAHyi35SeXH2E4e8jRVk7yNse2x6D14uPfABnhagbvN}{Ouroboros: A Provably Secure Proof-of-Stake Blockchain Protocol, s10}}
 
 There are some (as yet) unsolved problems that arise through this design, such as the *economic* details of managing block rewards across the PoW and PoS chains. Given that solutions to this problem likely depend on the specific details of the relevant PoS systems, this problem is not addressed in this paper.
 
@@ -335,20 +339,19 @@ There are some (as yet) unsolved problems that arise through this design, such a
 
 \todo{write -- PoS Bribe Attacks}
 
+Pure PoS blockchains are inherently insecure. This is the underlying reason why modern protocols still resort to external methods of security. One particular weakness is to that of *bribes*.
+
+\bquote{PoS must fail in one of these ways, A or B: \newline
+A) Once attackers have $>51\%$ of validator stake they can maintain the attack perpetually. They control who is added to the validator set. They can censor anything. They can use censorship to push through arbitrary soft-fork updates, including updates to change the consensus mechanism to PoW. Users who don't like the new rules are incentivized to sell to users who do like the new rules.}{Zack Hess; \href{https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/the_defence_of_pos.md}{The Defense of PoS}}
+
+
 NOTES:
 
-I've been reading this: https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/the_defence_of_pos.md
+I've been reading this: \href{https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/the_defence_of_pos.md}{The Defense of PoS}
 
-I think that PoS might require something like UT/the simplex to work. Particularly, Zack says:
+I think that PoS might require something like UT/the simplex to work. Particularly, wrt the above quote from Zack Hess:
 
-> PoS must fail in one of these ways, A or B:
->
-> A) Once attackers have >51% of validator stake they can maintain the attack perpetually. They control who is added to the validator set. They can censor anything. They can use censorship to push through arbitrary soft-fork updates, including updates to change the consensus mechanism to PoW. Users who don't like the new rules are incentivized to sell to users who do like the new rules.
-> ...
-
-How UT solves these problems:
-
-PoS simplex-chains don't need to have the decision of validator sets within their own chain; it can be external in a reflected PoW chain. Thus having >51% of the validator stake doesn't break the protocol. In a normal blockchain it would b/c a DoS would be possible, but that doesn't work in UT b/c simplex-chains are DAGs. (Though an attacker can potentially delay transactions for a few minutes, repeatedly, and thus reduce overall capacity by some factor.)
+How UT solves these problems: PoS simplex-chains don't need to have the decision of validator sets within their own chain; it can be external in a reflected PoW chain. Thus having >51% of the validator stake doesn't break the protocol. In a normal blockchain it would b/c a DoS would be possible, but that doesn't work in UT b/c simplex-chains are DAGs. (Though an attacker can potentially delay transactions for a few minutes, repeatedly, and thus reduce overall capacity by some factor.)
 
 ### The Insecurity of Merged Mining
 

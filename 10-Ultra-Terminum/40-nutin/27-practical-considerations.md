@@ -107,6 +107,8 @@ There are decisive advantages to using DAGs (instead of trees) as the fundamenta
 
 #### Block-DAG Lineage
 
+\label{sec:block-dag-lineage}
+
 The idea that blocks in a chain can have multiple parents -- i.e., the chain forms a Directed Acyclic Graph (DAG) that is not also a tree -- dates back to (at least) late 2013[^ghost-dec-2013] with the publication of GHOST by Sompolinsky and Zohar. However, GHOST disallows multiple *canonical* parents, and a chain using GHOST defines its *canonical history* -- the *main chain* -- via the chain formed exclusively from the first parent of each block. A block's other, non-canonical parents are linked to *only* for the purpose of contributing to the total chain-weight.
 
 In the two years after GHOST was published, a number of DAG-based blockchain designs were developed that facilitated merging histories from multiple parent blocks.
@@ -133,9 +135,7 @@ For the purposes of this paper, we are concerned with the method detailed in *In
 
 #### Basic Structure
 
-\todo{mb -- DAG \emph{basic structure} section.}
-
-\begin{figure}
+\begin{figure}[H]
     \begin{subfigure}[t]{.31\linewidth}
         \vskip 0pt
         \centering
@@ -160,6 +160,8 @@ For the purposes of this paper, we are concerned with the method detailed in *In
     \caption{Some examples of simple block-dag segments.}
     \label{fig:dag-simple-segments}
 \end{figure}
+
+Some basic block-dag segments are shown in \autoref{fig:dag-simple-segments}. If the figures do not speak for themselves, then I suggest you revisit some of the material linked in \autoref{sec:block-dag-lineage}.
 
 #### Preventing DoS Attacks
 
