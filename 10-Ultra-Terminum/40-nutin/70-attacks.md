@@ -2,7 +2,7 @@
 
 *Ultra Terminum* -- with appropriate configuration -- is resistant to the following attacks; see the linked section for discussion:
 
-- 51% Attack, see \autoref{sec:reflection-pow-and-pos}, \label{sec:reflection-pow-and-pos}, and \autoref{sec:preventing-dos-attacks}.
+- 51% Attack, see \autoref{sec:proof-of-reflection} and \autoref{sec:preventing-dos-attacks}.
 - Selfish mining, see \autoref{sec:confirmation-times}
 - Reflection without publication, see \autoref{sec:availability-of-blocks}
 - Empty block DoS and censorship, see \autoref{sec:dos-and-dags}
@@ -183,7 +183,7 @@ Your message could not be delivered. This is usually because you don't share a s
 
 \todo{the deliberate and malicious production of malformed data}
 
-- e.g. making blocks with valid PoW but invalid contents so that they get reflected (soln: miners can reject blocks or link to blocks as invalid; no block reward for producer)
+- e.g., making blocks with valid PoW but invalid contents so that they get reflected (soln: miners can reject blocks or link to blocks as invalid; no block reward for producer)
 
 ### Selfish Mining
 

@@ -12,7 +12,7 @@ As a consensus method[^ut-consensus-method], UT differs from existing consensus 
 
 [^ut-consensus-method]: Whether *Ultra Terminum* is a consensus method or not is somewhat unclear. On the one hand: a new combination of methods is still a method. On the other hand: UT provides a way to modify most/all other consensus methods, and UT doesn't provide a way to run a *single* blockchain. This is why I've described it as a cross-chain consensus *strategy*.
 
-UT is capable of supporting millions of transactions per second in the security environment afforded by a first class blockchain (e.g. Bitcoin, Eth1).
+UT is capable of supporting millions of transactions per second in the security environment afforded by a first class blockchain (, Bitcoin, Eth1).
 
 At the core of *Ultra Terminum* is a new method for sharing security: *Proof of Reflection*. This technique (which works in conjunction with PoW, PoS, etc) allows the incremental construction of complex blockchain networks with powerful scaling properties. *Proof of Reflection* is how *Ultra Terminum* natively scales with order $O(c^2)$, and is the basis for $O(n)$ scaling. UT's higher-order scaling configurations, $O(c^3)$ and $O(c^4)$, requires dapp-chains: chains that are application-specific and which inherit security properties from the foundational structures.
 
@@ -27,7 +27,7 @@ You will need to understand (or, perhaps, have mastered) the following concepts 
 * Nakamoto Consensus (i.e., how Bitcoin's blockchain works)
 * The idea of $O(c)$ and $O(c^2)$ scaling and existing strategies -- you can read the first few FAQs [here](https://eth.wiki/sharding/Sharding-FAQs) for a refresher
 * SPV proofs
-* Cross-chain SPV proofs via Smart Contracts (e.g. [BTC Relay](https://github.com/ethereum/btcrelay))
+* Cross-chain SPV proofs via Smart Contracts (e.g., [BTC Relay](https://github.com/ethereum/btcrelay))
 
 And you'll need to understand the following to understand how *Ultra Terminum* thwarts some attacks:
 

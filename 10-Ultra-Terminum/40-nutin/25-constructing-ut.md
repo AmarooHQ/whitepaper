@@ -131,15 +131,15 @@ plan:
   - abstraction -> universality
   - reach -> use existing PoS tech without sacrifice/compromise
   - cross-community benefits
-  - optimized/specialized dapps - e.g. dex (high freq too mb)
+  - optimized/specialized dapps - e.g., dex (high freq too mb)
     - DB specialization (or lack of)
   - inter-dapp-chain dependencies -> synergies
-    - e.g. two chains can both depend on the "bitcoin SPV proofs" chain. their full nodes need to run that other dapp-chain as a dependency
+    - e.g., two chains can both depend on the "bitcoin SPV proofs" chain. their full nodes need to run that other dapp-chain as a dependency
   - use tech like mimblewimble without changing the entire system
   - in general deploy new tech quickly, low risk, high cadence, isolated (sandboxed)
-    - tangent about sandbox: is there some good structural principles that prevent classes of attacks? I guess that requiring SPV cross-chain proofs and/or latency stops lots of that (e.g. no re-entrancy). **nb:** i'm wrong about no re-entrancy here; that sorta attack can still be done step-by-step manually sending SPV proofs back and forth or w/e.
+    - tangent about sandbox: is there some good structural principles that prevent classes of attacks? I guess that requiring SPV cross-chain proofs and/or latency stops lots of that (e.g., no re-entrancy). **nb:** i'm wrong about no re-entrancy here; that sorta attack can still be done step-by-step manually sending SPV proofs back and forth or w/e.
     - it does mean that we can maintain guarantees about the ROO and it's distribution and things, tho. like we know how much is where, and it shouldn't leave without being accounted for.
-  - low overhead for integrating wallets b/c mostly stuff is the same (e.g. interfaces, etc)
+  - low overhead for integrating wallets b/c mostly stuff is the same (e.g., interfaces, etc)
     - nb: need a common format for addresses or some understanding of them at a data/type level
   - *all* the layer-2 solns
   - todo: more tomorrow

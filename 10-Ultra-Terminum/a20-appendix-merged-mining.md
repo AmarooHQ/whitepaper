@@ -4,7 +4,7 @@
 
 \todo{reread and edit - merged mining}
 
-The security of Proof of Work depends on solutions to a challenge problem being *difficult to find* (e.g. time consuming, expensive, etc). The problem itself can differ between PoW methods, but, in each method, eventually a potential solution is verified via some function, and that verification method *must* be far more efficient than the generation method. Proof of Stake, in principle, operates the same way. The reason that solutions in Proof of Stake systems are difficult to find is because the rules that are imposed restrict the generation of solutions. Typically users are typically penalized if they break those rules.
+The security of Proof of Work depends on solutions to a challenge problem being *difficult to find* (e.g., time consuming, expensive, etc). The problem itself can differ between PoW methods, but, in each method, eventually a potential solution is verified via some function, and that verification method *must* be far more efficient than the generation method. Proof of Stake, in principle, operates the same way. The reason that solutions in Proof of Stake systems are difficult to find is because the rules that are imposed restrict the generation of solutions. Typically users are typically penalized if they break those rules.
 
 *Verification Function*: the function that miners must satisfy for their proof to be valid.
 

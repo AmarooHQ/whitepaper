@@ -2,7 +2,7 @@
 
 \label{sec:ut-complexity}
 
-UT has two primary methods of scaling: reflection and dapp-chains. Reflection is novel. Dapp-chains are similar to many of the scaling ideas proposed for other networks (Polkadot, Eth2, etc), though there are fewer restrictions on dapp-chains in UT compared to other designs. Additionally, dapp-chains in UT are hosted by the simplex. This provides additional security compared to 'naked' PoS chains without sacrificing any of their other developments (e.g. finality), and provides greater capacity than a single host-chain.
+UT has two primary methods of scaling: reflection and dapp-chains. Reflection is novel. Dapp-chains are similar to many of the scaling ideas proposed for other networks (Polkadot, Eth2, etc), though there are fewer restrictions on dapp-chains in UT compared to other designs. Additionally, dapp-chains in UT are hosted by the simplex. This provides additional security compared to 'naked' PoS chains without sacrificing any of their other developments (e.g., finality), and provides greater capacity than a single host-chain.
 
 A common method of sharding is to *nest* blockchains. For example, Ethereum 2 has a root-chain called *The Beacon Chain*.
 
@@ -22,7 +22,7 @@ Additionally, $O(k_i)$ is defined via $O(k_i) \equiv O(c)$.
 
 Example: Bitcoin.
 
-The *raw throughput*, $k_1$, can be calculated for existing chains (e.g. Bitcoin) via the product of the maximum block size, $B_{max}$ (in bytes), and the block production frequency, $B_f$ (in hertz, or $s^{-1}$):
+The *raw throughput*, $k_1$, can be calculated for existing chains (e.g., Bitcoin) via the product of the maximum block size, $B_{max}$ (in bytes), and the block production frequency, $B_f$ (in hertz, or $s^{-1}$):
 
 \begin{equation*}
 k_1 = B_{max} \cdot B_f
@@ -240,7 +240,7 @@ N_3 & = \frac{T_3}{k_3} \\
 
 #### Cross-Chain SPV Proofs
 
-Each chain -- at full capacity -- operates with order $O(c)$ by definition. Thus its state has order $O(c)$ also. The size of SPV proofs scale logarithmically with the set you're proving membership of, e.g. the number of transactions, or size of the chain's state, etc. Thus, SPV proofs scale with order $O(\log_2 c)$.
+Each chain -- at full capacity -- operates with order $O(c)$ by definition. Thus its state has order $O(c)$ also. The size of SPV proofs scale logarithmically with the set you're proving membership of, e.g., the number of transactions, or size of the chain's state, etc. Thus, SPV proofs scale with order $O(\log_2 c)$.
 
 For a given $O(c^j); j \in \{2,3,4\}$ configuration of UT, a chain can process SPV proofs of state on another chain. For $j = 4$, the furthest that a transaction can occur from its host simplex-chain is in the 3rd level of nesting (i.e., a dapp-dapp-chain). It would require $j-1$ SPV proofs to "ascend" from the host simplex-chain to a dapp-dapp-chain. However, given that full nodes of a dapp-dapp-chain are required to be full nodes of both the host dapp-chain and the host simplex-chain, transactions in that dapp-dapp-chain do not need to provide SPV proofs of state in either of those host chains -- full nodes already have those details. That is: transactions which "descend" the levels of nesting can do so with $O(1)$ cost. SPV proofs are only required when transactions "ascend" the levels of nesting to other simplex-, dapp-, or dapp-dapp-chains.
 
@@ -355,4 +355,4 @@ It is worth noting, though, that different header schemes can be used in each le
 
 This effect is not unique to UT, though. In general, any system of sharding is also affected in this manner: when the headers of a child-chain are included in the parent-chain's blocks.
 
-Practically, this effect means that a decrease to the size of headers has *increasing* marginal benefit. Compared to $O(c)$ blockchains (e.g. Bitcoin), efficient header schemes are far more important for UT and sharded blockchain networks.
+Practically, this effect means that a decrease to the size of headers has *increasing* marginal benefit. Compared to $O(c)$ blockchains (e.g., Bitcoin), efficient header schemes are far more important for UT and sharded blockchain networks.

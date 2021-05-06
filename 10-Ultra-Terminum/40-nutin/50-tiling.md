@@ -30,7 +30,7 @@ However, if tiles have a valance of $3$, then each tile has up to 3 neighbors. F
 
 Increasing the valence beyond 3 does not make sense, though. There are two reasons for this. The first reason is that, for complexity orders involving logarithms, higher valences change the *base* of the logarithms; and that has no effect on the order of complexity[^log-complexity]. The second reason is: an increase in valence means that the tile's capacity for reflections is divided into more pieces, only one of which is reserved for internal reflections; that means that the tile will have fewer internal reflections (and more external reflections) which decreases the security of leaf tiles.
 
-[^log-complexity]: Complexity orders involving logarithms are sensitive to changes in the base *if* the logarithms are part of an exponent. e.g. $O(3^{\log_2 n}) > O(3^{\log_4 n})$. These considerations aren't relevant here, though.
+[^log-complexity]: Complexity orders involving logarithms are sensitive to changes in the base *if* the logarithms are part of an exponent. e.g., $O(3^{\log_2 n}) > O(3^{\log_4 n})$. These considerations aren't relevant here, though.
 
 ### The First Tile
 
@@ -142,7 +142,7 @@ For all practical purposes, simplex-tiling provides unbounded capacity.
 
 \todo{tiling security implications -- tiling weaker than maximal simplex.}
 
-e.g. The leaf tiles in \autoref{fig:tiled-simplex-5-d2} have simplex-chains that are weaker than an equiv 20-chain simplex. The root tile has equiv security, though. This is true even though both systems have 20 simplex-chains total.
+e.g., The leaf tiles in \autoref{fig:tiled-simplex-5-d2} have simplex-chains that are weaker than an equiv 20-chain simplex. The root tile has equiv security, though. This is true even though both systems have 20 simplex-chains total.
 
 \begin{comment}
 
