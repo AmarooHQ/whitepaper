@@ -1,3 +1,5 @@
+\newpage
+
 # Invention Details
 
 \let\origSec\section
@@ -11,6 +13,10 @@
 
 \input{includes/inventiveness/abstract.tex}
 \input{includes/inventiveness/body.tex}
+
+\origSec{Additional Figures}{
+\input{includes/inventiveness/figs-orig.tex}
+}
 
 \let\section\origSec
 \let\subsection\origSubSec

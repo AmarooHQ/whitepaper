@@ -85,6 +85,12 @@
 \usepackage[section]{placeins}
 \usepackage[nomarkers,tablesonly]{endfloat}
 
+\makeatletter
+\def\input@path{{./}{../}{../../}}
+\makeatother
+
+\graphicspath{ {./}{../ut/diags/} }
+
 \hypersetup{
     colorlinks=true,
     linkcolor=cyan!60!black,
@@ -117,7 +123,8 @@
 \newpage
 
 \begin{section}{Figures and Algorithms}
-    \input{figs.tex}
+    \input{figs-in-wp.tex}
+    \input{figs-orig.tex}
 \end{section}
 
 \end{document}

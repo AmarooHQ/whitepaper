@@ -86,7 +86,7 @@ Say that the protocol of Chain B is extended to add support for tracking Chain E
 
 #### Step 3. Chain B tracks Chain E's tracking of Chain B
 
-Can we use a tracked chain for a different purpose? What happens if Chain B tracks whether Chain B's history is confirmed within Chain E? This can be done via the inclusion of merkle branches that prove the particular state of Chain E that contains this information. These merkle branches are known as *Proofs of Reflection* (PoRs). Events and data are shown in the following table and \autoref{fig:pow-refl-step3}.
+Can we use a tracked chain for a different purpose? What happens if Chain B tracks whether Chain B's history is confirmed within Chain E? This can be done via the inclusion of merkle branches that prove the particular state of Chain E that contains this information. These merkle branches are known as *Proofs of Reflection* (PoRs). Events and data are shown in the following table and \autoref{fig:por-step3}.
 
 | Time | B block made | B block contents | B state | E block made | E block contents | E state |
 |--|---|------|------|---|-----|------|
@@ -103,7 +103,7 @@ Can we use a tracked chain for a different purpose? What happens if Chain B trac
 \centering
 \includegraphics[height=0.4\textheight]{pow_refl_step3_sag}
 \caption{Step 3: Chain B includes \textit{proofs of reflection} (PoRs) along with headers. Proofs of Reflection allow Chain B to know which of its own blocks are known to Chain E.}
-\label{fig:pow-refl-step3}
+\label{fig:por-step3}
 \end{figure}
 
 Chain B now knows *which B blocks are tracked by Chain E*, i.e., which local blocks are known about by some external source. Put another way: Chain B's history is confirmed *not only* by new Chain B blocks, *but also* by Chain E blocks. There's no data-availability concern here since Chain B nodes *know* that they have the blocks that Chain E knows about.
@@ -175,13 +175,13 @@ How can we prevent this sort of attack? The attack is predicated on Chain E *not
 
 #### Step 5. Mutual Reflection
 
-The final step in this progression is *mutual reflection* -- where both chains track one-another and include the necessary PoRs and modifications to their chain-weight algorithms. This is shown in \autoref{fig:pow-refl-step5}.
+The final step in this progression is *mutual reflection* -- where both chains track one-another and include the necessary PoRs and modifications to their chain-weight algorithms. This is shown in \autoref{fig:por-step5}.
 
 \begin{figure}[]
 \centering
 \includegraphics[height=0.35\textheight]{pow_refl_step5_sag}
 \caption{\textit{Proof of Reflection} between two UT Chains}
-\label{fig:pow-refl-step5}
+\label{fig:por-step5}
 \end{figure}
 
 When chains mutually reflect each-other, detecting attacks becomes easier. After Chain E integrates *Proof of Reflection*, the security of Chain E is somewhat entangled with the history of Chain B. If a Chain B attacker publishes some chain-segment, then Chain E nodes will know that those blocks have not been reflected by Chain E. This make detecting such an attack much easier (provided the attacker is only attacking that chain).
