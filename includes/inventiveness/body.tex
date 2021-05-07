@@ -38,10 +38,10 @@
      Implementations of consensus methods use a concept known as \emph{chain-weight} to determine the "heaviest" (or "longest") collection of linked blocks, which is then taken to be the canonical history of the relevant blockchain.
      Methods of consensus will either already have some functions\footnote{Or some collection of code that fulfills an equivalent purpose.} implemented in source code to calculate chain-weight, or be easily modifiable to integrate such functions.
      A generalization of the primary function is shown in \autoref{alg:vanilla-bw}.
-     One reason that a blockchain may not explicitly define such a function is because that function would always return 1 (or some other constant) and has thus been omitted.
+     One reason that a blockchain may not explicitly define such a function is because that function would always return 1 (or some trivial result) and has thus been omitted.
      \autoref{alg:refl-1-bw} shows the necessary changes to the calculation of each block's weight.
      Note that \autoref{alg:refl-1-bw} omits a definition of \textsc{WeightOf}.
-     Depending on the \emph{reflecting} chain's native currency (or \emph{coin}), one of two definitions should be used. If the blockchains use \emph{the same} coin\footnote{Typically this means that they share the same main/root currency.} then \autoref{alg:weightof-1} should be used.
+     Depending on the \emph{reflecting} chain's native currency (or \emph{coin}), one of two definitions should be used. If the blockchains use \emph{the same} coin\footnote{Typically this means that they share the same main/root currency.} then \autoref{alg:weightof-1} or \autoref{alg:weightof-ratio} (or an appropriate variant) should be used.
      However, if the blockchains have \emph{different} coins, then \autoref{alg:weightof-dex} should be used.
      Note that, if \autoref{alg:weightof-dex} is used, then some definition of \textsc{ExchangeRateOfCoinToLocalAt} must be provided (that definition will differ based on consensus algorithm and the available data sources).
      The obvious place to source exchange rate data is via an on-chain decentralized exchange operating between the two blockchains.
