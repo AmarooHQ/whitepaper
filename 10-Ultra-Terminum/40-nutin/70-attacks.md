@@ -66,7 +66,7 @@
 }
 
 \cMax{
-  Say that you did try to attack \emph{all} the PoW simplex-chains, what about the PoS ones? You need to pwn those first if you want to 51% the PoW chains.
+  Say that you did try to attack \emph{all} the PoW simplex-chains, what about the PoS ones? You need to pwn those first if you want to 51\% the PoW chains.
 }
 
 \cMax{
