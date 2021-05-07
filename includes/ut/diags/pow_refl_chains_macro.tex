@@ -13,6 +13,7 @@
 \providecommand\AbbrChainB{ETH}%
 \providecommand\ChainBBlocksN{40}%
 \providecommand\ChainBBlocksNHasVariance{0}%
+\providecommand\ChainVarianceMathSeed{9001}%
 \input{tikz-styles}%
 \newcommand\TikzBlockchainPowReflection{
     \pgfmathtruncatemacro\lastBtc{round(\DrawBtcLT-1)}
@@ -28,7 +29,7 @@
         % to facilitate variance in bblocks
         \xdef\tmpBBlocksN{\ChainBBlocksN}
         \xdef\bBlocksCount{0}
-        \pgfmathsetseed{9001}
+        \pgfmathsetseed{\ChainVarianceMathSeed}
         \pgfmathtruncatemacro{\blocksNVarOffset}{int(0.3 * \ChainBBlocksN)}
 
         % labels and things that need to come after variance variables

@@ -28,7 +28,7 @@ Is $C_A$ able to *simultaneously* do reflection with more than one other chain, 
 
 In order to support arbitrarily many reflections, we need to modify \textsc{ReflectedBlockWeight} from \autoref{alg:refl-1-bw} as shown in \autoref{alg:refl-many-chains}.
 
-\input{algorithms/refl-many-chains.tex}
+\input{includes/ut/algorithms/refl-many-chains.tex}
 
 ### The Simplex
 

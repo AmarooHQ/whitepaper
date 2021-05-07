@@ -16,7 +16,7 @@ The idea of one blockchain 'tracking' another blockchain via chain-headers and i
 
 The idea that Ethereum smart contracts (SCs) can track Bitcoin chain-headers is well understood. Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is not that difficult. In principle, any chain that supports some headers-only mode can be tracked in this way. In practice that can be difficult (e.g., Ethereum's EVM doesn't support memory hard hashes unless special cases are introduced). But we're not interested in practicality *at the moment*.
 
-Let's add such a contract to Ethereum and describe the relevant data and events in the following table. \autoref{fig:pr-btc-eth-step1} illustrates this.
+Let's add such a contract to Ethereum and describe the relevant data and events in the following table. \autoref{fig:pr-btc-eth-step1} illustrates this. Note: \autoref{fig:pr-btc-eth-step1} includes some variance in Ethereum's block production rate, similar to what might be observed in a real-world environment.
 
 | Time (~15s increments) | Bitcoin block made | Eth block made | Eth block contents | Eth state |
 |---|---|---|-----|------|
@@ -33,7 +33,7 @@ Let's add such a contract to Ethereum and describe the relevant data and events 
 \begin{figure}[]
 \centering
 \includegraphics[height=0.3\textheight]{pow_refl_btc_eth_step1_sag}
-\caption{Bitcoin headers are included in Ethereum's state (via user made transactions) as they are produced. This is roughly how \textit{BTC Relay} works.}
+\caption{Bitcoin headers, as they are produced, are included in Ethereum's state (via user made transactions). This is roughly how \textit{BTC Relay} works.}
 \label{fig:pr-btc-eth-step1}
 \end{figure}
 
@@ -132,13 +132,13 @@ Currently, the Chain B network chooses the "heaviest" (most worked) chain as its
 
 How can the network choose the heaviest chain? Well, a traditional blockchain might use a simple recursive function like \autoref{alg:vanilla-bw}.
 
-\input{algorithms/vanilla-chainweight.tex}
+\input{includes/ut/algorithms/vanilla-chainweight.tex}
 
 Could Chain B incorporate the idea that Chain E had confirmed part of its history? Could Chain B use this to thwart some types of attack?
 
 Yes, and we must modify the block-weight calculation so that it accounts for work contributed by Chain E. Such an algorithm is described in \autoref{alg:refl-1-bw}. Essentially, additional weight is added to a block when it is *the best block* known to Chain E, i.e., according to Chain E it is at the tip of Chain B. Note that this weight is still added if Chain E knows of multiple competing chain-tips.
 
-\input{algorithms/por-chainweight-1.tex}
+\input{includes/ut/algorithms/por-chainweight-1.tex}
 
 What is the meaning and impact of this change?
 
@@ -233,7 +233,7 @@ Since we know the percentage of root tokens on each chain for each moment in his
 
 \autoref{alg:weightof-1} details a simplistic \textsc{WeightOf} function that returns a weight normalized in coins (i.e., root tokens). It does not account for some things, e.g., changes to the difficulty of $C$ over time.
 
-\input{algorithms/weightof-simple.tex}
+\input{includes/ut/algorithms/weightof-simple.tex}
 
 \todo{add fwd link to better \textsc{WeightOf} function}
 
@@ -241,10 +241,11 @@ Since we know the percentage of root tokens on each chain for each moment in his
 
 Instead of using the same token on multiple chains, a similar method could work between chains with different root tokens. Implicit in above single-token method was a 1:1 conversion ratio between root tokens held on each chain. Can we not replace that with an exchange rate? If that exchange rate was provided via a trustless and decentralized exchange, could that not also be a reasonable context to do this sort of conversion?
 
-One can use the same principles to compare work between chains that have different root tokens. However, there is a major new caveat with this method: the DEX and price-finding methods now become *part* of the consensus methods of those chains. This caveat makes this context (with differing root tokens) much harder to reason about, and introduces questions like *What is the effect of front running?* and *Could an attacker exploit market conditions to perform a doublespend when they wouldn't normally be able to?*
+One can use the same principles to compare work between chains that have different root tokens. Such a method is detailed in \autoref{alg:weightof-dex}. However, there is a major new caveat with this method: the DEX and price-finding methods now become *part* of the consensus methods of those chains. This caveat makes this context (with differing root tokens) much harder to reason about, and introduces questions like *What is the effect of front running?* and *Could an attacker exploit market conditions to perform a doublespend when they wouldn't normally be able to?*
 
 In the context of *Ultra Terminum* and *Amaroo*, these aren't questions that are important to answer. If *Proof of Reflection* is ever used to secure multiple chains with heterogenous tokens, it's likely that either these questions will need to be answered or alternate methods will need to be devised.
 
+\input{includes/ut/algorithms/weightof-dex.tex}
 
 ### Reflection Between PoW and PoS Chains
 
