@@ -1,0 +1,32 @@
+\documentclass[]{standalone}
+\usepackage[T1]{fontenc}\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usepackage{xintexpr}
+\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
+
+\makeatletter
+\def\input@path{{./includes/}{./includes/ut/diags/}}
+\makeatother
+
+\begin{document}
+% default params for image
+\providecommand\DrawBtcState{1}%
+\providecommand\DrawEthState{1}%
+\providecommand\DrawBtcRefl{1}%
+\providecommand\DrawEthRefl{1}%
+\providecommand\DrawPoRLabel{1}%
+\providecommand\DrawPoRInState{1}%
+\providecommand\DrawPoRForChainB{0}%
+\providecommand\DrawEthLT{3}%
+\providecommand\DrawBtcLT{4}%
+\providecommand\NameChainA{Chain A}%
+\providecommand\AbbrChainA{A}%
+\providecommand\NameChainB{Chain B}%
+\providecommand\AbbrChainB{B}%
+\providecommand\ChainBBlocksN{1}%
+\input{pow_refl_chains_macro}%
+\input{tikz-styles}%
+\begin{tikzpicture}[node distance=0.8cm]
+    \TikzBlockchainPowReflection
+\end{tikzpicture}
+\end{document}

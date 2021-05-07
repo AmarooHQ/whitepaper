@@ -12,6 +12,7 @@
 \providecommand\NameChainB{Ethereum}%
 \providecommand\AbbrChainB{ETH}%
 \providecommand\ChainBBlocksN{40}%
+\providecommand\ChainBBlocksNHasVariance{0}%
 \input{tikz-styles}%
 \newcommand\TikzBlockchainPowReflection{
     \pgfmathtruncatemacro\lastBtc{round(\DrawBtcLT-1)}
@@ -24,8 +25,15 @@
     \ifnum 1<\ChainBBlocksN
         \def\ethE{ethE}
         \def\ethAll{ethAll}
-        \def\ethPorHeaders{\ChainBBlocksN\:headers}
-        \def\ethPorIncl{\ChainBBlocksN\:PoRs}
+        % to facilitate variance in bblocks
+        \xdef\tmpBBlocksN{\ChainBBlocksN}
+        \xdef\bBlocksCount{0}
+        \pgfmathsetseed{9001}
+        \pgfmathtruncatemacro{\blocksNVarOffset}{int(0.3 * \ChainBBlocksN)}
+
+        % labels and things that need to come after variance variables
+        \def\ethPorHeaders{\lastEthChainSegmentLen\:headers}
+        \def\ethPorIncl{\lastEthChainSegmentLen\:PoRs}
     \fi
 
     \node (btcChain) [chainName] {\NameChainA};
@@ -41,6 +49,19 @@
             \pgfmathtruncatemacro\ethBStart{round((\x-1)*\ChainBBlocksN+1)}
             \pgfmathtruncatemacro\ethBEnd{round((\x-1)*\ChainBBlocksN+\ChainBBlocksN)}
             \xdef\stateXS{-17pt}
+
+            \ifnum 1<\ChainBBlocksN
+                \ifnum 1=\ChainBBlocksNHasVariance
+                    \pgfmathtruncatemacro{\calcdBBlocks}{round(\ChainBBlocksN - random(0, 2*\blocksNVarOffset) + \blocksNVarOffset)}
+                    \xdef\lastEthChainSegmentLen{\tmpBBlocksN}
+                    \xdef\tmpBBlocksN{\calcdBBlocks}
+                    \pgfmathtruncatemacro{\ethLastEnd}{\bBlocksCount}
+                    \pgfmathtruncatemacro{\ethBStart}{\bBlocksCount + 1}
+                    \pgfmathtruncatemacro{\newBBlocksCount}{\bBlocksCount + \tmpBBlocksN}
+                    \xdef\bBlocksCount{\newBBlocksCount}
+                    \pgfmathtruncatemacro{\ethBEnd}{\bBlocksCount}
+                \fi
+            \fi
 
             %%%%%%%%%
             % bitcoin (well, chain A. the diagram grew out of an example of BTC/ETH, you see)
@@ -116,6 +137,17 @@
                 \draw [arrowParent] (ethS\x) -- (\prevNode);
 
                 \ifnum 1<\ChainBBlocksN
+                    % \ifnum 1=\ChainBBlocksNHasVariance
+                    %     \pgfmathtruncatemacro{\blocksNVarOffset}{int(0.3 * \ChainBBlocksN)}
+                    %     \pgfmathtruncatemacro{\calcdBBlocks}{round(\ChainBBlocksN - random(0, 2*\blocksNVarOffset) + \blocksNVarOffset)}
+                    %     \xdef\tmpBBlocksN{\calcdBBlocks}
+                    %     \pgfmathtruncatemacro{\ethLastEnd}{\bBlocksCount}
+                    %     \pgfmathtruncatemacro{\ethBStart}{\bBlocksCount + 1}
+                    %     \pgfmathtruncatemacro{\newBBlocksCount}{\bBlocksCount + \tmpBBlocksN}
+                    %     \xdef\bBlocksCount{\newBBlocksCount}
+                    %     \pgfmathtruncatemacro{\ethBEnd}{\bBlocksCount}
+                    % \fi
+
                     \node (ethDots\x) [dots, below = of ethS\x, yshift=0.5cm] {\vdots};
                     \draw [arrowParent] (ethDots\x) -- (ethS\x);
 
@@ -146,7 +178,7 @@
                 \ifnum 1<\ChainBBlocksN
                     % curly brace for lots of eth blocks
                     \draw [ethBraceL] (ethS\x.west -| \ethE\x.west) -- node (ethAll\x) [black, midway, yshift=14pt] {
-                        \scriptsize{\ChainBBlocksN\:Blocks}
+                        \scriptsize{\tmpBBlocksN\:Blocks}
                     } (\ethE\x.west);
                 \fi
 
@@ -164,6 +196,8 @@
                 \fi
             \fi
         }%
+
+    % set up positions for time axis + label
 
     \ifnum \DrawBtcLT>\DrawEthLT
         \def\lowNode{btc\lastBtc}

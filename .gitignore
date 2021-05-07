@@ -27,3 +27,4 @@ includes/handout/*.md
 
 includes/**/*.old
 *.synctex*
+*.out
