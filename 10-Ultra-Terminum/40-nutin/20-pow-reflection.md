@@ -132,51 +132,13 @@ Currently, the Chain B network chooses the "heaviest" (most worked) chain as its
 
 How can the network choose the heaviest chain? Well, a traditional blockchain might use a simple recursive function like \autoref{alg:vanilla-bw}.
 
-\begin{algorithm}
-\caption{Vanilla Chain Weight Algorithm}\label{alg:vanilla-bw}
-\begin{algorithmic}
-\Procedure{WeighChain}{$blocks$}\Comment{The weight of a chain}
-  \If {length($blocks$) == 0}
-    \State \Return{0}
-  \EndIf
-  \State \Return{\Call{WeighBlock}{head($blocks$)} + \Call{WeighChain}{tail($blocks$)}}
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+\input{algorithms/vanilla-chainweight.tex}
 
 Could Chain B incorporate the idea that Chain E had confirmed part of its history? Could Chain B use this to thwart some types of attack?
 
 Yes, and we must modify the block-weight calculation so that it accounts for work contributed by Chain E. Such an algorithm is described in \autoref{alg:refl-1-bw}. Essentially, additional weight is added to a block when it is *the best block* known to Chain E, i.e., according to Chain E it is at the tip of Chain B. Note that this weight is still added if Chain E knows of multiple competing chain-tips.
 
-\begin{algorithm}
-\caption{Modified Chain Weight Algorithm}\label{alg:refl-1-bw}
-\begin{algorithmic}
-\Procedure{WeighChain}{$blocks, state$} \Comment{The weight of a blockchain}
-  \If {length($blocks$) == 0}
-    \State \Return{0}
-  \EndIf
-  \State \Return{\Call{WeighBlock}{head($blocks$), $state$} + \Call{WeighChain}{tail($blocks$), $state$}}
-\EndProcedure
-\\
-\Procedure{WeighBlock}{$block, state$}
-  \State $W_l \gets$ \Call{LocalBlockWeight}{$block$} \Comment{Weight due to work done producing $block$}
-  \State $W_r \gets$ \Call{ReflectedBlockWeight}{$block, state$} \Comment{Weight added via reflection}
-  \State \Return{$W_l + W_r$}
-\EndProcedure
-\\
-\Procedure{ReflectedBlockWeight}{$block, state$}
-  \State $s\gets 0$
-  \State $Blocks_{E} \gets$ \Call{ReflectingEBlocks}{$state$} \Comment{Chain E blocks that reflect the local chain}
-  \For{$B_e$ in $Blocks_{E}$}
-    \State RCHs $\gets$ \Call{ReflectedChainHeads}{$B_e$, $state$} \Comment{Local blocks reflected by $B_e$}
-    \If {$block$ in RCHs}
-      \State $s\gets s+$ \Call{WeightOf}{$B_e$, $state$}
-    \EndIf
-  \EndFor
-  \State \Return{s}
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+\input{algorithms/por-chainweight-1.tex}
 
 What is the meaning and impact of this change?
 
@@ -271,19 +233,7 @@ Since we know the percentage of root tokens on each chain for each moment in his
 
 \autoref{alg:weightof-1} details a simplistic \textsc{WeightOf} function that returns a weight normalized in coins (i.e., root tokens). It does not account for some things, e.g., changes to the difficulty of $C$ over time.
 
-\begin{algorithm}
-\caption{A simplistic \textsc{WeightOf} for networks of a single root token}\label{alg:weightof-1}
-\begin{algorithmic}
-\Procedure{WeightOf}{$B_i, state$} \Comment{The weight of a reflecting block normalized to coins}
-  \State $t \gets$ \Call{BlockTimestamp}{$B_i$}
-  \State $C \gets$ \Call{ChainOf}{$B_i$, $state$}
-  \State $r \gets$ \Call{RootTokenRatioOnChainAt}{$C$, $t$} \Comment{Proportion of all RTs on $C$ at $t$}
-  \State $f \gets$ \Call{BlockFrequencyOfChain}{$C$} \Comment{Block production Hz of $C$}
-  \State $I \gets$ \Call{NetworkInflation}{$state$} \Comment{coins/s created over the entire network}
-  \State \Return{$r \cdot I \cdot f^{-1}$}
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+\input{algorithms/weightof-simple.tex}
 
 \todo{add fwd link to better \textsc{WeightOf} function}
 

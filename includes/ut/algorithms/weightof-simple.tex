@@ -1,0 +1,20 @@
+\begin{algorithm}
+\caption{A simplistic \textsc{WeightOf} for networks of a single root token}\label{alg:weightof-1}
+\begin{algorithmic}
+\Procedure{WeightOf}{$B_i, state$} \Comment{The weight of a reflecting block normalized to coins}
+    \State $t \gets$ \Call{BlockTimestamp}{$B_i$}
+    \State $C \gets$ \Call{ChainOf}{$B_i$, $state$}
+    \State $r \gets$ \Call{RootTokenRatioOnChainAt}{$C$, $t$} \Comment{Proportion of all RTs on $C$ at $t$}
+    \State $f \gets$ \Call{BlockFrequencyOfChain}{$C$} \Comment{Block production Hz of $C$}
+    \State $I \gets$ \Call{NetworkInflation}{$state$} \Comment{coins/s created over the entire network}
+    \State \Return{$r \cdot I \cdot f^{-1}$}
+\EndProcedure
+\\
+\Procedure{WeightOf}{$B_i, state$} \Comment{The weight of a reflecting block normalized to coins}
+    \State $t \gets$ \Call{BlockTimestamp}{$B_i$}
+    \State $C \gets$ \Call{ChainOf}{$B_i$, $state$}
+    \State $r \gets$ \Call{BlockRewardOfChainAt}{$C$, $t$} \Comment{Block reward of $C$ at $t$}
+    \State \Return{$r$}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

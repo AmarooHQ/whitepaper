@@ -83,6 +83,18 @@
 \usepackage[fit]{truncate}
 \usepackage{wallpaper}
 \usepackage[section]{placeins}
+\usepackage[nomarkers,tablesonly]{endfloat}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=cyan!60!black,
+    urlcolor=cyan!60!black
+}
+
+\def\algorithmautorefname{Algorithm}
+\def\subsectionautorefname{Section}
+\def\subsubsectionautorefname{Section}
+\def\paragraphautorefname{Section}
 
 \title{Ultra Terminum - Invention Details}
 \author{Max Kaye}
@@ -92,102 +104,206 @@
 \maketitle
 
 \begin{abstract}
-Details of the methods used in Ultra Terminum (UT).
-Additionally: details and arguments for UT's novelty, inventiveness, and utility.
+    Details of the methods used in Ultra Terminum (UT).
+    Additionally: details and arguments for UT's novelty, inventiveness, and utility.
 
-UT is a combination of multiple, incremental methods.
+    UT is a combination of multiple, incremental methods.
 
-The first is \emph{Proof of Reflection}: a method and protocol whereby
-a blockchain may utilize an otherwise separate blockchain to
-increase its own security and inherit particular security \emph{qualities} of that other blockchain
-(which the first blockchain would otherwise never have).
-In effect, this is a method for sharing security between blockchains.
-If a blockchain uses this method, it does not preclude that blockchain from using it again with another, third blockchain.
-Furthermore, this method is universal over all classes of consensus mechanisms that
-blockchains may use (e.g., Proof of Work, Proof of Stake, Proof of Authority, etc).
+    The first is \emph{Proof of Reflection}: a method and protocol whereby
+    a blockchain may utilize an otherwise separate blockchain to
+    increase its own security and inherit particular security \emph{qualities} of that other blockchain
+    (which the first blockchain would otherwise never have).
+    In effect, this is a method for sharing security between blockchains.
+    If a blockchain uses this method, it does not preclude that blockchain from using it again with another, third blockchain.
+    Furthermore, this method is universal over all classes of consensus mechanisms that
+    blockchains may use (e.g., Proof of Work, Proof of Stake, Proof of Authority, etc).
 
-The second is a method for arranging and efficiently operating a set of blockchains using Proof of Reflection to maximize throughput (measured in, e.g., transactions per second), security, and speed.
-The result of this method is a construct called \emph{the simplex}.
+    The second is a method for arranging and efficiently operating a set of blockchains using Proof of Reflection to maximize throughput (measured in, e.g., transactions per second), security, and speed.
+    The result of this method is a construct called \emph{the simplex}.
 
-The third is a method for constructing an unbounded tiling
-of simplexes which preserves the security benefits from the second method,
-thus providing practically infinite throughput and capacity in a secure environment.
+    The third is a method for constructing an unbounded tiling
+    of simplexes which preserves the security benefits from the second method,
+    thus providing practically infinite capacity and throughput in a secure environment.
 
-UT claims to solve a well-known problem in the blockchain space, usually called the \emph{scalability trilemma}.
-In light of this: the novelty, inventiveness, and utility of UT is somewhat self-evident, as a solution to this problem is highly sought-after.
-There is additional reasoning and documentation herein.
+    UT claims to solve a well-known problem in the blockchain space, usually called the \emph{scalability trilemma}.
+    In light of this: the novelty, inventiveness, and utility of UT is somewhat self-evident, as a solution to this problem is highly sought-after.
+    There is additional reasoning and documentation herein.
 \end{abstract}
 
+{
+\setcounter{tocdepth}{1}
+\tableofcontents
+}
+
 \begin{section}{Proof of Reflection (PoR)}
-    \begin{subsection}{Prerequisites for PoR}
-    \end{subsection}
-    \begin{subsection}{Required Actions to Facilitate PoR}
-    \end{subsection}
-    \begin{subsection}{Modification to Existing Consensus Method}
-    \end{subsection}
-    \begin{subsection}{Method of Operation}
-        \autoref{fig:por-step3} illustrates the relationship between blockchains where one of those chains (Chain A) is using the other (Chain B) for reflection.
-        Note that these diagrams often simplify the depicted blockchains, in that they produce blocks at a consistent and equal rate.
-        In reality, there is no requirement that this holds, and PoR works between any two blockchains regardless of their block production rates and is tolerant of production rates that are inconsistent and/or high variance.
-        A demonstration of this tolerance is shown in \autoref{fig:por-with-eth}.
 
-        \begin{figure}[]
-            \centering
-            \includegraphics[width=.9\linewidth]{../ut/diags/pow_refl_step3_ab_sag}
-            \caption{The time-evolution of, and relationship between, two separate blockchains, A and B, where Chain A is using Chain B for PoR.}
-            \label{fig:por-step3}
-        \end{figure}
+    PoR is a modification (and associated supporting methods) to existing consensus methods that allows a blockchain to take full advantage of another blockchain's network security (even if consensus methods differ), provided that other blockchain has particular capabilities\footnote{It's very common that a blockchain will have the necessary capabilities, but not all blockchains do.}. A blockchain can use PoR with as many other blockchains as it wishes. Given some blockchain that implements this modification, the difficulty of performing a 51\% attack against it becomes approximately as difficult as performing a 51\% attack against the original blockchain plus \emph{all} the other blockchains that, via PoR, reflect it.
 
-        \begin{figure}[]
-            \centering
-            \includegraphics[width=.9\linewidth]{../ut/diags/por_with_ethereum_sag}
-            \caption{The time-evolution of, and relationship between, a blockchain and Ethereum where that first blockchain is using Ethereum as a source of PoR.}
-            \label{fig:por-with-eth}
-        \end{figure}
+ \begin{subsection}{Prerequisites for PoR}
+     In principle, the necessary capabilities (and actions) that some chains,
+     \(C_A\) and \(C_B\), must have (and do) in order for \(C_A\) to be
+     reflected by \(C_B\) are:
 
-    \end{subsection}
-    \begin{subsection}{Novelty and Inventiveness}
-    \end{subsection}
-    \begin{subsection}{Utility}
-    \end{subsection}
+     \begin{enumerate}
+         \def\labelenumi{\arabic{enumi}.}
+         \tightlist
+         \item \label{item:headers-a-in-b}
+               The headers of \(C_A\) can be (and are) freely recorded -- promptly and unambiguously -- in \(C_B\);
+         \item \label{item:headers-b-in-a}
+               The headers of \(C_B\) can be (and are) freely recorded -- promptly and unambiguously -- in \(C_A\); and
+         \item \label{item:prove-headers}
+               \(C_A\) nodes are able to (and do) promptly prove which of its headers have been recorded in \(C_B\), and have full knowledge of that set of headers.
+     \end{enumerate}
+
+     There are multiple well-known methods to achieve \autoref{item:headers-a-in-b} and \autoref{item:headers-b-in-a}, including via specially designed smart contracts or via bespoke protocol enhancements.\footnote{I can provide citations if necessary.}
+
+     A well-known method to facilitate \autoref{item:prove-headers} is via merkle proofs (i.e., one or more branches of a merkle tree) that prove the contents of some relevant state of $C_B$ given a merkle root that is included in $C_B$'s headers. This is often referred to as an \emph{SPV proof}. However, this is not the only method to achieve \autoref{item:prove-headers}. A second method is for every block producer in $C_A$ be capable of verifying the relevant state by following $C_B$'s network rules, e.g., by running a local instance of $C_B$'s client-server software (or equivalent). A third method is for every block producer in $C_A$ to be capable of *guessing* (e.g., by trial and error) the relevant state (given their knowledge of possible options) and subsequently to be capable of efficiently verifying whether the guess was correct or not with certainty (e.g., by cryptographically recreating some known value that is generated from the relevant state). Note, this third method would (probably) not be possible unless $C_B$ had implemented specific features to facilitate it.
+
+     Although the methods to facilitate \autoref{item:prove-headers} may incidentally generate proofs of the relevant state, those proofs \emph{never need to be transmitted between nodes} if certain conditions are met\footnote{See droppable witnesses in whitepaper}.
+
+     Incentivization of block produces to perform the necessary prerequisites are implicit in the construction of PoR (performing these actions is inexpensive and provides their blocks with additional weight, positively impacting their return on investment).
+
+ \end{subsection}
+ \begin{subsection}{Required Actions to Facilitate PoR}
+
+    The benefits from \emph{Proof of Reflection} begin as soon as $C_A$ integrates this knowledge into its chain-weighting algorithm, by a method suitably similar to those mentioned in the next section.
+
+ \end{subsection}
+ \begin{subsection}{Modification to Existing Consensus Method}
+
+     Implementations of consensus methods use a concept known as \emph{chain-weight} to determine the "heaviest" (or "longest") collection of linked blocks, which is then taken to be the canonical history of the relevant blockchain.
+     Methods of consensus will either already have some functions\footnote{Or some collection of code that fulfills an equivalent purpose.} implemented in source code to calculate chain-weight, or be easily modifiable to integrate such functions.
+     A generalization of the primary function is shown in \autoref{alg:vanilla-bw}.
+     One reason that a blockchain may not explicitly define such a function is because that function would always return 1 (or some other constant) and has thus been omitted.
+     \autoref{alg:refl-1-bw} shows the necessary changes to the calculation of each block's weight.
+     Note that \autoref{alg:refl-1-bw} omits a definition of \textsc{WeightOf}.
+     Depending on the \emph{reflecting} chain's native currency (or \emph{coin}), one of two definitions should be used. If the blockchains use \emph{the same} coin\footnote{Typically this means that they share the same main/root currency.} then \autoref{alg:weightof-1} should be used.
+     However, if the blockchains have \emph{different} coins, then \autoref{alg:weightof-dex} should be used.
+     Note that, if \autoref{alg:weightof-dex} is used, then some definition of \textsc{ExchangeRateOfCoinToLocalAt} must be provided (that definition will differ based on consensus algorithm and the available data sources).
+     The obvious place to source exchange rate data is via an on-chain decentralized exchange operating between the two blockchains.
+     Alternatively, values for given time periods could be hardcoded into the blockchain client-server's source code with new values (for new time periods) added regularly.
+
+    Note that this modification does not depend on participating blockchains using any particular class of consensus methods (e.g., proof of work, proof of stake, etc). Thus PoR can be used to \emph{combine} existing consensus methods. Doing so means that reflected chains gain some of the security qualities of the reflecting chain. For example: reflected proof of stake chains gain the thermodynamic security of reflecting proof of work chains; and reflected proof of work chains gain faster confirmations and possibly low block production variance\footnote{See WP section of similar name}.
+
+ \end{subsection}
+ \begin{subsection}{Method of Operation}
+     \autoref{fig:por-step3} illustrates the relationship between blockchains where one of those chains (Chain A) is using the other (Chain B) for reflection.
+     Note that these diagrams often simplify the depicted blockchains, in that they produce blocks at a consistent and equal rate.
+     In reality, there is no requirement that this holds, and PoR works between any two blockchains regardless of their block production rates and is tolerant of production rates that are inconsistent and/or high variance.
+     A demonstration of this tolerance is shown in \autoref{fig:por-with-eth}, where a fictional blockchain, Chain A, uses Ethereum for PoR.
+     Note that this does not require modification to Ethereum (as it existed in April 2021), so it is currently possible for almost ant existing blockchain to implement the necessary changes that initiate and maintain the illustrated relationship.
+ \end{subsection}
+ \begin{subsection}{Novelty and Inventiveness}
+    The following (possibly inexhaustive) list of ideas in PoR are novel:
+
+    \begin{enumerate}
+        \def\labelenumi{\arabic{enumi}.}
+        \tightlist
+        \item
+            That the block weights of two different blockchains (whether they share a root token or not) are convertible via normalization against the blockchains' respective block rewards\footnote{This avoids involving external market forces, such as hardware availability or the price of electricity.}, using an exchange rate to convert denominations if necessary such as that which is provided via an on-chain decentralized exchange.
+        \item
+            That a blockchain can use the network security of a different (possibly pre-existing and otherwise unassociated) blockchain to enhance its own security via \emph{Proof of Reflection}, provided that a method of converting block-weights exists.
+        \item
+            That otherwise incompatible consensus methods (such as various proof of work and proof of stake schemes) are able to cooperatively secure each other via PoR.
+        \item
+            That those otherwise incompatible consensus methods, in doing PoR, inherit some traits of the other consensus method(s); i.e., that PoR is capable of working with all prior consensus methods and enhances their security.
+    \end{enumerate}
+
+ \end{subsection}
+ \begin{subsection}{Utility}
+
+    The benefits of PoR (depending on which chains do the reflecting) include: quantitative increase to security, increased confirmation rate (and thus a faster network), the gaining of additional (otherwise unobtainable) security qualities, and more efficient cross-chain transactions with the reflecting chain.
+
+ \end{subsection}
 \end{section}
 
 \begin{section}{Construction of The Simplex}
-    \begin{subsection}{Requirements for Participating Blockchains}
-        \begin{subsubsection}{Mutual PoR}
-            \begin{figure}[H]
-                \centering
-                \includegraphics[width=.9\linewidth]{../ut/diags/pow_refl_step5_sag}
-                \caption{Relationships between and time-evolution of two blockchains that are mutually reflecting one another.}
-                \label{fig:por-step5}
-            \end{figure}
-        \end{subsubsection}
-    \end{subsection}
-    \begin{subsection}{Modification to Existing PoR Method}
-    \end{subsection}
-    \begin{subsection}{Method of Construction}
-    \end{subsection}
-    \begin{subsection}{Method of Operation}
-    \end{subsection}
-    \begin{subsection}{Novelty and Inventiveness}
-    \end{subsection}
-    \begin{subsection}{Utility}
-    \end{subsection}
+
+ \begin{subsection}{Requirements for Participating Blockchains}
+
+     \begin{subsubsection}{Mutual PoR}
+
+        \autoref{fig:por-step5}
+
+     \end{subsubsection}
+
+ \end{subsection}
+ \begin{subsection}{Modification to Existing PoR Method}
+
+ \end{subsection}
+ \begin{subsection}{Method of Construction}
+
+ \end{subsection}
+ \begin{subsection}{Method of Operation}
+
+ \end{subsection}
+ \begin{subsection}{Novelty and Inventiveness}
+
+ \end{subsection}
+ \begin{subsection}{Utility}
+
+ \end{subsection}
 \end{section}
 
 \begin{section}{Simplex Tilings}
-    \begin{subsection}{Requirements for Participating Simplexes}
-    \end{subsection}
-    \begin{subsection}{Modification to Existing Simplex Parameters}
-    \end{subsection}
-    \begin{subsection}{Method of Construction}
-    \end{subsection}
-    \begin{subsection}{Method of Operation}
-    \end{subsection}
-    \begin{subsection}{Novelty and Inventiveness}
-    \end{subsection}
-    \begin{subsection}{Utility}
-    \end{subsection}
+
+ \begin{subsection}{Requirements for Participating Simplexes}
+
+ \end{subsection}
+ \begin{subsection}{Modification to Existing Simplex Parameters}
+
+ \end{subsection}
+ \begin{subsection}{Method of Construction}
+
+ \end{subsection}
+ \begin{subsection}{Method of Operation}
+
+ \end{subsection}
+ \begin{subsection}{Novelty and Inventiveness}
+
+ \end{subsection}
+ \begin{subsection}{Utility}
+
+ \end{subsection}
+\end{section}
+
+\newpage
+
+\begin{section}{Figures and Algorithms}
+
+ % PoR algorithms
+
+ \input{../ut/algorithms/vanilla-chainweight.tex}
+ \input{../ut/algorithms/por-chainweight-1.tex}
+ \input{../ut/algorithms/weightof-simple.tex}
+ \input{../ut/algorithms/weightof-dex.tex}
+
+ % one way PoR
+
+ \begin{figure}
+     \centering
+     \includegraphics[width=.8\linewidth]{../ut/diags/pow_refl_step3_ab_sag}
+     \caption{The time-evolution of, and relationship between, two separate blockchains, A and B, where Chain A is using Chain B for PoR.}
+     \label{fig:por-step3}
+ \end{figure}
+
+ \begin{figure}
+     \centering
+     \includegraphics[width=.8\linewidth]{../ut/diags/por_with_ethereum_sag}
+     \caption{The time-evolution of, and relationship between, some blockchain (Chain A) and Ethereum, where Chain A is using Ethereum as a source of PoR.}
+     \label{fig:por-with-eth}
+ \end{figure}
+
+ % mutual reflection
+
+ \begin{figure}
+     \centering
+     \includegraphics[width=.8\linewidth]{../ut/diags/pow_refl_step5_sag}
+     \caption{Relationships between and time-evolution of two blockchains that are mutually reflecting one another.}
+     \label{fig:por-step5}
+ \end{figure}
+
+
 \end{section}
 
 \end{document}

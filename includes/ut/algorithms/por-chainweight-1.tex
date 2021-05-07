@@ -1,0 +1,31 @@
+
+\begin{algorithm}
+\caption{Modified Chain Weight Algorithm}
+\label{alg:refl-1-bw}
+\begin{algorithmic}
+\Procedure{WeighChain}{$blocks, state$} \Comment{The weight of a blockchain}
+  \If {length($blocks$) == 0}
+    \State \Return{0}
+  \EndIf
+  \State \Return{\Call{WeighBlock}{head($blocks$), $state$} + \Call{WeighChain}{tail($blocks$), $state$}}
+\EndProcedure
+\\
+\Procedure{WeighBlock}{$block, state$}
+  \State $W_l \gets$ \Call{LocalBlockWeight}{$block$} \Comment{Weight due to work done producing $block$}
+  \State $W_r \gets$ \Call{ReflectedBlockWeight}{$block, state$} \Comment{Weight added via reflection}
+  \State \Return{$W_l + W_r$}
+\EndProcedure
+\\
+\Procedure{ReflectedBlockWeight}{$block, state$}
+  \State $s\gets 0$
+  \State $Blocks_{E} \gets$ \Call{ReflectingEBlocks}{$state$} \Comment{Chain E blocks that reflect the local chain}
+  \For{$B_e$ in $Blocks_{E}$}
+    \State RCHs $\gets$ \Call{ReflectedChainHeads}{$B_e$, $state$} \Comment{Local blocks reflected by $B_e$}
+    \If {$block$ in RCHs}
+      \State $s\gets s+$ \Call{WeightOf}{$B_e$, $state$}
+    \EndIf
+  \EndFor
+  \State \Return{s}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

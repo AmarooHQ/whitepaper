@@ -14,37 +14,21 @@ Such a foundation (*the simplex*) is *not* a sharded blockchain -- there's no re
 
 [^reflection-prior]: I have not been able to find any existing discussion of this method. If you know of any existing discussion of this method, please post a link to the forum topic that is linked in the abstract.
 
-In principle, the necessary capabilities that some chain, $C_A$, must have in order for it to be reflected by another chain, $C_B$, are:
+In principle, the necessary capabilities (and actions) that some chains, $C_A$ and $C_B$, must have (and do) in order for $C_A$ to be reflected by $C_B$ are:
 
-1. The headers of $C_A$ can be freely recorded, unambiguously, in $C_B$;
-2. The headers of $C_B$ can be freely recorded, unambiguously, in $C_A$;
-3. $C_A$ is able to prove that its headers have been recorded in $C_B$, and has full knowledge of which headers have been recorded; and
-4. $C_A$ integrates this knowledge into its chain-weighting algorithm.
+1. The headers of $C_A$ can be (and are) freely recorded -- promptly and unambiguously -- in $C_B$;
+2. The headers of $C_B$ can be (and are) freely recorded -- promptly and unambiguously -- in $C_A$; and
+3. $C_A$ is able to (and does) promptly prove that its headers have been recorded in $C_B$, and has full knowledge of which headers have been recorded.
 
-If $C_A$ and $C_B$ are doing *mutual* Proof of Reflection, then the same conditions must be satisfied by $C_B$.
+The benefits from *Proof of Reflection* begin as soon as $C_A$ integrates this knowledge into its chain-weighting algorithm, by a method suitably similar to \autoref{alg:refl-1-bw} and \autoref{alg:weightof-1}.
+
+If $C_A$ and $C_B$ are doing *mutual* Proof of Reflection, then both chains must satisfy all requirements.
 
 Is $C_A$ able to *simultaneously* do reflection with more than one other chain, e.g., $C_C ... C_Z$? Yes. There is nothing that we have covered so far that would prevent this. If *Proof of Reflection* is viable with a single other chain, then it is viable with *many* other chains. However, the dynamics do becoming increasingly complex, as we will soon see.
 
-In order to support arbitrarily many reflections, we need to modify \textsc{ReflectedBlockWeight} from \autoref{alg:refl-1-bw} as done in \autoref{alg:refl-many-chains}.
+In order to support arbitrarily many reflections, we need to modify \textsc{ReflectedBlockWeight} from \autoref{alg:refl-1-bw} as shown in \autoref{alg:refl-many-chains}.
 
-\begin{algorithm}
-\caption{Many-chain ReflectedBlockWeight}\label{alg:refl-many-chains}
-\begin{algorithmic}
-\Procedure{ReflectedBlockWeight}{$block, state$}
-  \State $s\gets 0$
-  \For{$C_i$ in \Call{AllReflectingChains}{$state$}}
-    \State $Blocks_{i} \gets$ \Call{ReflectingBlocks}{$C_i$, $state$} \Comment{Reflecting blocks from $C_i$}
-    \For{$B_{i,j}$ in $Blocks_{i}$}
-      \State RCHs $\gets$ \Call{ReflectedChainHeads}{$B_{i,j}$, $state$} \Comment{Local blocks reflected by $B_{i,j}$}
-      \If {$block$ in RCHs}
-        \State $s\gets s \; +$ \Call{WeightOf}{$B_{i,j}$, $state$}
-      \EndIf
-    \EndFor
-  \EndFor
-  \State \Return{s}
-\EndProcedure \Comment{This is an inefficient method and would not be used in production.}
-\end{algorithmic}
-\end{algorithm}
+\input{algorithms/refl-many-chains.tex}
 
 ### The Simplex
 

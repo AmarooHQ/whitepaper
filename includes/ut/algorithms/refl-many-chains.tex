@@ -1,0 +1,18 @@
+\begin{algorithm}
+\caption{Many-chain ReflectedBlockWeight}\label{alg:refl-many-chains}
+\begin{algorithmic}
+\Procedure{ReflectedBlockWeight}{$block, state$}
+  \State $s\gets 0$
+  \For{$C_i$ in \Call{AllReflectingChains}{$state$}}
+    \State $Blocks_{i} \gets$ \Call{ReflectingBlocks}{$C_i$, $state$} \Comment{Reflecting blocks from $C_i$}
+    \For{$B_{i,j}$ in $Blocks_{i}$}
+      \State RCHs $\gets$ \Call{ReflectedChainHeads}{$B_{i,j}$, $state$} \Comment{Local blocks reflected by $B_{i,j}$}
+      \If {$block$ in RCHs}
+        \State $s\gets s \; +$ \Call{WeightOf}{$B_{i,j}$, $state$}
+      \EndIf
+    \EndFor
+  \EndFor
+  \State \Return{s}
+\EndProcedure \Comment{This is an inefficient method and would not be used in production.}
+\end{algorithmic}
+\end{algorithm}
