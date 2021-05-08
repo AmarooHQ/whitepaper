@@ -1,7 +1,7 @@
 
 \begin{section}{Proof of Reflection (PoR)}
 
-    PoR is a modification (and associated supporting methods) to existing consensus methods that allows a blockchain to take full advantage of another blockchain's network security (even if consensus methods differ), provided that other blockchain has particular capabilities\footnote{It's very common that a blockchain will have the necessary capabilities, but not all blockchains do.}. A blockchain can use PoR with as many other blockchains as it wishes. Given some blockchain that implements this modification, the difficulty of performing a 51\% attack against it becomes approximately as difficult as performing a 51\% attack against the original blockchain plus \emph{all} the other blockchains that, via PoR, reflect it.
+ PoR is a modification (and associated supporting methods) to existing consensus methods that allows a blockchain to take full advantage of another blockchain's network security (even if consensus methods differ), provided that other blockchain has particular capabilities\footnote{It's very common that a blockchain will have the necessary capabilities, but not all blockchains do.}. A blockchain can use PoR with as many other blockchains as it wishes. Given some blockchain that implements this modification, the difficulty of performing a 51\% attack against it becomes approximately as difficult as performing a 51\% attack against the original blockchain plus \emph{all} the other blockchains that, via PoR, reflect it.
 
  \begin{subsection}{Prerequisites for PoR}
      In principle, the necessary capabilities (and actions) that some chains,
@@ -30,7 +30,7 @@
  \end{subsection}
  \begin{subsection}{Required Actions to Facilitate PoR}
 
-    The benefits from \emph{Proof of Reflection} begin as soon as $C_A$ integrates this knowledge into its chain-weighting algorithm, by a method suitably similar to those mentioned in the next section.
+     The benefits from \emph{Proof of Reflection} begin as soon as $C_A$ integrates this knowledge into its chain-weighting algorithm, by a method suitably similar to those mentioned in the next section.
 
  \end{subsection}
  \begin{subsection}{Modification to Existing Consensus Method}
@@ -47,9 +47,11 @@
      The obvious place to source exchange rate data is via an on-chain decentralized exchange operating between the two blockchains.
      Alternatively, values for given time periods could be hardcoded into the blockchain client-server's source code with new values (for new time periods) added regularly.
 
-    Note that this modification does not depend on participating blockchains using any particular class of consensus methods (e.g., proof of work, proof of stake, etc). Thus PoR can be used to \emph{combine} existing consensus methods. Doing so means that reflected chains gain some of the security qualities of the reflecting chain. For example: reflected proof of stake chains gain the thermodynamic security of reflecting proof of work chains; and reflected proof of work chains gain faster confirmations and possibly low block production variance\footnote{See WP section of similar name}.
+     Note that this modification does not depend on participating blockchains using any particular class of consensus methods (e.g., proof of work, proof of stake, etc). Thus PoR can be used to \emph{combine} existing consensus methods. Doing so means that reflected chains gain some of the security qualities of the reflecting chain. For example: reflected proof of stake chains gain the thermodynamic security of reflecting proof of work chains; and reflected proof of work chains gain faster confirmations and possibly low block production variance\footnote{See WP section of similar name}.
 
-    Also note that if a proof stake chain is reflected by a proof of work chain, then the PoW chain provides thermodynamic security to the PoS chain. A class of attacks (for which there were previously no known uncriticized solutions) can be made impossible via hosting the proof of stake set-up and staking procedures on the reflecting PoW chain. This is possible to do with low overhead, since the PoS chain is already tracking parts of the PoW chain's state (so tracking certain other parts is reasonably easy and efficient). By moving these procedures to the PoW chain, it means that an attack on the PoS chain \emph{must} also attack the PoW chain (since the attacks we are guarding against rely on manipulating these procedures); thus the PoS chain is at least as difficult to attack as the PoW chain.
+     Also note that if a proof stake chain is reflected by a proof of work chain, then the PoW chain provides thermodynamic security to the PoS chain. A class of attacks (for which there were previously no known uncriticized solutions) can be made impossible via hosting the proof of stake set-up and staking procedures on the reflecting PoW chain. This is possible to do with low overhead, since the PoS chain is already tracking parts of the PoW chain's state (so tracking certain other parts is reasonably easy and efficient). By moving these procedures to the PoW chain, it means that an attack on the PoS chain \emph{must} also attack the PoW chain (since the attacks we are guarding against rely on manipulating these procedures); thus the PoS chain is at least as difficult to attack as the PoW chain.
+
+     Also note that PoR can be done *in both directions* between two blockchains (i.e., *mutual* reflection). This increases the security qualities of both chains. When PoR is done in one direction, i.e., Chain A is reflected by Chain B, then an attack on Chain A may require an attack on Chain B *first* -- once Chain B is being successfully attacked, then an attacker can attack Chain A. However, when PoR is *mutual*, attacking Chain B requires first attacking Chain A, which first requires attacking Chain B, etc. Thus attacks are more difficult against chains that are mutually reflecting (than configurations where the PoR is one-way).
 
  \end{subsection}
  \begin{subsection}{Method of Operation}
@@ -60,27 +62,27 @@
      Note that this does not require modification to Ethereum (as it existed in April 2021), so it is currently possible for almost any existing blockchain to implement the necessary changes that initiate and maintain the illustrated relationship.
  \end{subsection}
  \begin{subsection}{Novelty and Inventiveness}
-    The following (possibly inexhaustive) list of ideas -- that used in (or based on) PoR -- are novel:
+     The following (possibly inexhaustive) list of ideas -- that used in (or based on) PoR -- are novel:
 
-    \begin{enumerate}
-        \def\labelenumi{\arabic{enumi}.}
-        \tightlist
-        \item
-            That the block weights of two different blockchains (whether they share a root token or not) are convertible via normalization against the blockchains' respective block rewards\footnote{This avoids involving external market forces, such as hardware availability or the price of electricity.}, and, if necessary, using an exchange rate (such as that which is provided via an on-chain decentralized exchange) to convert denominations.
-        \item
-            That a blockchain can use the network security of a different (possibly pre-existing and otherwise unassociated) blockchain to enhance its own security via \emph{Proof of Reflection}, provided that a method of converting block-weights exists.
-        \item
-            That otherwise incompatible consensus methods (such as various proof of work and proof of stake schemes) are able to cooperatively secure each other via PoR.
-        \item
-            That those otherwise incompatible consensus methods, in doing PoR, inherit some traits of the other consensus method(s); i.e., that PoR is capable of working with all prior consensus methods and enhances their security.
-        \item
-            That proof of stake chains which are reflected by suitable proof of work chains can move their staking and set-up phases to the reflecting proof of work chain, and in doing so thwart a class of attacks that was previously impossible\footnote{i.e., no previous method was known.}. This is a unique feature among blockchain designs, since both the reflecting PoW chain and reflected PoS chain are still individual, stand-alone blockchains. Note that: in no sense does the PoW chain host the PoS chain, as this configuration does not preclude the PoW chain, \emph{simultaneously}, using PoR via reflection in the PoS chain (i.e., the vice-versa configuration).
-    \end{enumerate}
+     \begin{enumerate}
+         \def\labelenumi{\arabic{enumi}.}
+         \tightlist
+         \item
+               That the block weights of two different blockchains (whether they share a root token or not) are convertible via normalization against the blockchains' respective block rewards\footnote{This avoids involving external market forces, such as hardware availability or the price of electricity.}, and, if necessary, using an exchange rate (such as that which is provided via an on-chain decentralized exchange) to convert denominations.
+         \item
+               That a blockchain can use the network security of a different (possibly pre-existing and otherwise unassociated) blockchain to enhance its own security via \emph{Proof of Reflection}, provided that a method of converting block-weights exists.
+         \item
+               That otherwise incompatible consensus methods (such as various proof of work and proof of stake schemes) are able to cooperatively secure each other via PoR.
+         \item
+               That those otherwise incompatible consensus methods, in doing PoR, inherit some traits of the other consensus method(s); i.e., that PoR is capable of working with all prior consensus methods and enhances their security.
+         \item
+               That proof of stake chains which are reflected by suitable proof of work chains can move their staking and set-up phases to the reflecting proof of work chain, and, in doing so, thwart a class of attacks for which no previous solution was known. This is a unique feature among blockchain designs, since both the reflecting PoW chain and reflected PoS chain are still individual, stand-alone blockchains. Note that: in no sense does the PoW chain host the PoS chain, as this configuration does not preclude the PoW chain, \emph{simultaneously}, using PoR via reflection in the PoS chain (i.e., the vice-versa configuration).
+     \end{enumerate}
 
  \end{subsection}
  \begin{subsection}{Utility}
 
-    The benefits of PoR (depending on which chains do the reflecting) include: quantitative increase to security, increased confirmation rate (and thus a faster network), the gaining of additional (otherwise unobtainable) security qualities, and more efficient cross-chain transactions with the reflecting chain.
+     The benefits of PoR (depending on which chains do the reflecting) include: quantitative increase to security, increased confirmation rate (and thus a faster network), the gaining of additional (otherwise unobtainable) security qualities, and more efficient cross-chain transactions with the reflecting chain.
 
  \end{subsection}
 \end{section}
@@ -91,7 +93,7 @@
 
      \begin{subsubsection}{Mutual PoR}
 
-        \autoref{fig:por-step5}
+         \autoref{fig:por-step5}
 
      \end{subsubsection}
 
