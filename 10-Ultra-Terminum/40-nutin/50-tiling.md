@@ -16,7 +16,7 @@ A quadrifurcated maximal simplex. That is: it is a simplex that deliberately res
 
 \todo{
     from forum: \\
-    max: It's not that `k` decreases, but the proportion of `k` dedicated to internal reflections decreases. like it's optimal to have `k/2` dedicated to reflections, and `k/2` dedicated to transactions. when tiling with a valence of 3, the `k/2` for reflections is qudrifurcated, so there's `k/8` dedicated for each group of reflections (internal, parent, child1, child2). \\
+    max: It's not that `k` decreases, but the proportion of `k` dedicated to internal reflections decreases. like it's optimal to have `k/2` dedicated to reflections, and `k/2` dedicated to transactions. when tiling with a valence of 3, the `k/2` for reflections is quadrifurcated, so there's `k/8` dedicated for each group of reflections (internal, parent, child1, child2). \\
     leesa: oki yup this makes a lot of sense now. I felt like the `k` explanations were helpful in solidifying understanding. I think bc it helped to make the concept more concrete since it linked back to the proofs.
 }
 

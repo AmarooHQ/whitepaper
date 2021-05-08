@@ -94,6 +94,7 @@ A 200-simplex with $B_f = \nicefrac{1}{15}$ has a confirmation rate of $\nicefra
 
 Note that PoR incents miners to publish blocks as soon as possible so that those blocks begin gaining reflections. If a miner does not publish a block immediately, then any competing block will start acquiring reflections first and thus hold an advantage over the withheld block. This mitigates the selfish mining[^selfish-mining] attack.
 
+%% cspell: disable-next-line
 [^selfish-mining]: See \href{https://cloudflare-ipfs.com/ipfs/QmNukb1L8BhEsiCbrmnkEJWAvUjhBHidinKMZKfCaLG6ep}{Majority is not Enough: Bitcoin Mining is Vulnerable} by Ittay Eyal and Emin Gün Sirer.
 
 
@@ -121,11 +122,11 @@ For the purposes of this paper, we are concerned with the method detailed in *In
 
 [^ghost-dec-2013]: \href{https://cloudflare-ipfs.com/ipfs/QmTDz4WuAXi2rV7Ei3pHHKTFCYGPeDbDoAkmypkHdJnnKe}{Secure High-Rate Transaction Processing in Bitcoin} by Yonatan Sompolinsky and Aviv Zohar.
 
-[^quanta-2014]: \href{https://github.com/XertroV/quanta-test/blob/ba598d5fe89d3b16db07533957a2080edb19a9cd/quanta.py\#L157}{Quanta source code}, \href{https://bitcointalk.org/index.php?topic=1057342}{Quanta bitcointalk thread}.
+[^quanta-2014]: \href{https://github.com/XertroV/quanta-test/blob/ba598d5fe89d3b16db07533957a2080edb19a9cd/quanta.py\#L157}{Quanta source code}, \href{https://bitcointalk.org/index.php?topic=1057342}{Quanta BitcoinTalk thread}.
 
 [^dagcoin-sept-2015]: \href{https://cloudflare-ipfs.com/ipfs/QmbXhgQzN8FPFLiJoVApHvT1vf3xZUGefvD5GdfYPHuBpe}{DagCoin Draft} by Sergio Demian Lerner.
 
-[^iota-oct-2015]: \href{https://bitcointalk.org/index.php?topic=1216479.0}{IOTA bitcointalk thread}.
+[^iota-oct-2015]: \href{https://bitcointalk.org/index.php?topic=1216479.0}{IOTA BitcoinTalk thread}.
 
 [^inclusive-july-2015]: \href{https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy}{Inclusive Block Chain Protocols}.
 

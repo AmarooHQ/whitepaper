@@ -89,16 +89,22 @@
 
 \begin{section}{Construction of The Simplex}
 
+    The Simplex is an emergent construct that forms when a set of blockchains mutually reflect all other blockchains in that set. See \autoref{fig:simplexes}. When in this configuration, for consensus attacks to succeed (e.g., a 51\% attack), an attacker must attack \emph{the simplex as a whole}. A blockchain that is part of a simplex is called a simplex-chain.
+
+    To maximize total throughput, the constituent blockchains should devote \nicefrac{1}{2} of their overall capacity\footnote{measured in bytes/s} to reflections (via each miner eagerly including of all new-found headers of other simplex-chains in their blocks).
+
  \begin{subsection}{Requirements for Participating Blockchains}
 
      \begin{subsubsection}{Mutual PoR}
 
-         \autoref{fig:por-step5}
+        Simplex-chains must \emph{mutually} reflect all other simplex-chains. Mutual reflection between two blockchains (which forms a 2-chain simplex) is shown in \autoref{fig:por-step5}.
 
      \end{subsubsection}
 
  \end{subsection}
  \begin{subsection}{Modification to Existing PoR Method}
+
+
 
  \end{subsection}
  \begin{subsection}{Method of Construction}
