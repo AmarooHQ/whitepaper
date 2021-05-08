@@ -26,9 +26,13 @@ If $C_A$ and $C_B$ are doing *mutual* Proof of Reflection, then both chains must
 
 Is $C_A$ able to *simultaneously* do reflection with more than one other chain, e.g., $C_C ... C_Z$? Yes. There is nothing that we have covered so far that would prevent this. If *Proof of Reflection* is viable with a single other chain, then it is viable with *many* other chains. However, the dynamics do becoming increasingly complex, as we will soon see.
 
-In order to support arbitrarily many reflections, we need to modify \textsc{ReflectedBlockWeight} from \autoref{alg:refl-1-bw} as shown in \autoref{alg:refl-many-chains}.
+In order to support arbitrarily many reflections, we need to modify \textsc{ReflectedBlockWeight} from \autoref{alg:refl-1-bw} as shown in \autoref{alg:por-reflected-block-weight}.
 
-\input{includes/ut/algorithms/refl-many-chains.tex}
+\input{includes/ut/algorithms/por-reflected-block-weight.tex}
+
+Additionally, we should modify the \textsc{WeightOf} function as detailed in \autoref{alg:por-simplex} -- this integrates the cap on weight contributed by each reflecting chain, as suggested in \autoref{sec:reflection-pow-and-pos}.
+
+\input{includes/ut/algorithms/por-simplex.tex}
 
 ### The Simplex
 

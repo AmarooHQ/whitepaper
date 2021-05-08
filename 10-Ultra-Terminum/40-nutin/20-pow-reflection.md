@@ -227,15 +227,13 @@ Consider two PoW blockchains that share a root token, but use different hashing 
 
 Say we had Altcoin1 and Altcoin2: two PoW chains using different algorithms, but with the *same* root token and the same block production rate. Firstly, we need a way to determine what their block rewards are, and the intuitive solution is to set each chain's block reward proportionally to the percentage of root tokens (i.e., *coins*) on that chain. Say that 100% of the root tokens should correspond to 50 coins generated per block. So, if one chain had 60% of the root tokens, then 30 coins are generated per block *on that chain*, and (since we only have 2 chains) *the other chain* has 20 coins generated per block -- corresponding to the remaining 40% of root tokens. One reason this method makes sense is that the *ratio* of coins on each chain is not affected by block rewards. We can generalize the method by normalizing against time so that we're comparing the rates of coin production rather than the block rewards themselves.
 
-Now that we know what the block rewards are and have defined them in terms of the percentage of total coins that are on that chain, we can work on comparing the chains' hash rates. What sort of foundation could we do this from? What about *equal work for equal reward*? Because we have defined block rewards in terms of *where* root tokens are held, we can measure things like *hashes per token* (when considering block rewards particularly). Crucially, we can measure this *for each chain*, which allows us to -- *contextually* -- make claims like 100 hashes of algorithm 1 are worth 25 hashes of algorithm 2.
+Now that we know what the block rewards are and have defined them in terms of the percentage of total coins that are on that chain, we can work on comparing the chains' hash rates. What sort of foundation could we do this from? What about *equal work for equal reward*? Because we have defined block rewards in terms of *where* root tokens are held, we can measure things like *hashes per token* (when considering block rewards particularly). Crucially, we can measure this *for each chain*, which allows us to -- *contextually* -- make claims like 100 hashes on Chain A are worth 25 hashes on Chain B.
 
 Since we know the percentage of root tokens on each chain for each moment in history, we can safely use that figure in chain-weight calculations. The reliability of that data will be the same as the reliability of the blockchains themselves, provided we enforce the 2-way peg that ensures no root tokens are created or destroyed in violation of protocol rules.
 
 \autoref{alg:weightof-1} details a simplistic \textsc{WeightOf} function that returns a weight normalized in coins (i.e., root tokens). It does not account for some things, e.g., changes to the difficulty of $C$ over time.
 
-\input{includes/ut/algorithms/weightof-simple.tex}
-
-\todo{add fwd link to better \textsc{WeightOf} function}
+\input{includes/ut/algorithms/weightof-basic.tex}
 
 #### Different Root Tokens with a DEX
 
@@ -286,6 +284,8 @@ There are some other conjectured solutions to the *Nothing at Stake* problem. Th
 }{\href{http://cloudflare-ipfs.com/ipfs/QmWCAHyi35SeXH2E4e8jRVk7yNse2x6D14uPfABnhagbvN}{Ouroboros: A Provably Secure Proof-of-Stake Blockchain Protocol, s10}}
 
 There are some (as yet) unsolved problems that arise through this design, such as the *economic* details of managing block rewards across the PoW and PoS chains. Given that solutions to this problem likely depend on the specific details of the relevant PoS systems, this problem is not addressed in this paper.
+
+\todo{refelct only chains that reflect your history; if they favor a different history, then you should be building on that history instead, so don't reflect those blocks -- i.e. ppl should calculate weight to be 0.}
 
 #### PoS Bribe Attacks
 

@@ -21,7 +21,7 @@
 
      There are multiple well-known methods to achieve \autoref{item:headers-a-in-b} and \autoref{item:headers-b-in-a}, including via specially designed smart contracts or via bespoke protocol enhancements.\footnote{I can provide citations if necessary.}
 
-     A well-known method to facilitate \autoref{item:prove-headers} is via merkle proofs (i.e., one or more branches of a merkle tree) that prove the contents of some relevant state of $C_B$ given a merkle root that is included in $C_B$'s headers. This is often referred to as an \emph{SPV proof}. However, this is not the only method to achieve \autoref{item:prove-headers}. A second method is for every block producer in $C_A$ be capable of verifying the relevant state by following $C_B$'s network rules, e.g., by running a local instance of $C_B$'s client-server software (or equivalent). A third method is for every block producer in $C_A$ to be capable of *guessing* (e.g., by trial and error) the relevant state (given their knowledge of possible options) and subsequently to be capable of efficiently verifying whether the guess was correct or not with certainty (e.g., by cryptographically recreating some known value that is generated from the relevant state). Note, this third method would (probably) not be possible unless $C_B$ had implemented specific features to facilitate it.
+     A well-known method to facilitate \autoref{item:prove-headers} is via merkle proofs (i.e., one or more branches of a merkle tree) that prove the contents of some relevant state of $C_B$ given a merkle root that is included in $C_B$'s headers. This is often referred to as an \emph{SPV proof}. However, this is not the only method to achieve \autoref{item:prove-headers}. A second method is for every block producer in $C_A$ be capable of verifying the relevant state by following $C_B$'s network rules, e.g., by running a local instance of $C_B$'s client-server software (or equivalent). A third method is for every block producer in $C_A$ to be capable of \emph{guessing} (e.g., by trial and error) the relevant state (given their knowledge of possible options) and subsequently to be capable of efficiently verifying whether the guess was correct or not with certainty (e.g., by cryptographically recreating some known value that is generated from the relevant state). Note, this third method would (probably) not be possible unless $C_B$ had implemented specific features to facilitate it.
 
      Although the methods to facilitate \autoref{item:prove-headers} may incidentally generate proofs of the relevant state, those proofs \emph{never need to be transmitted between nodes} if certain conditions are met\footnote{See droppable witnesses in whitepaper}.
 
@@ -51,7 +51,7 @@
 
      Also note that if a proof stake chain is reflected by a proof of work chain, then the PoW chain provides thermodynamic security to the PoS chain. A class of attacks (for which there were previously no known uncriticized solutions) can be made impossible via hosting the proof of stake set-up and staking procedures on the reflecting PoW chain. This is possible to do with low overhead, since the PoS chain is already tracking parts of the PoW chain's state (so tracking certain other parts is reasonably easy and efficient). By moving these procedures to the PoW chain, it means that an attack on the PoS chain \emph{must} also attack the PoW chain (since the attacks we are guarding against rely on manipulating these procedures); thus the PoS chain is at least as difficult to attack as the PoW chain.
 
-     Also note that PoR can be done *in both directions* between two blockchains (i.e., *mutual* reflection). This increases the security qualities of both chains. When PoR is done in one direction, i.e., Chain A is reflected by Chain B, then an attack on Chain A may require an attack on Chain B *first* -- once Chain B is being successfully attacked, then an attacker can attack Chain A. However, when PoR is *mutual*, attacking Chain B requires first attacking Chain A, which first requires attacking Chain B, etc. Thus attacks are more difficult against chains that are mutually reflecting (than configurations where the PoR is one-way).
+     Also note that PoR can be done \emph{in both directions} between two blockchains (i.e., \emph{mutual} reflection). This increases the security qualities of both chains. When PoR is done in one direction, i.e., Chain A is reflected by Chain B, then an attack on Chain A may require an attack on Chain B \emph{first} -- once Chain B is being successfully attacked, then an attacker can attack Chain A. In the one-way PoR configuration, an attacker can "checkpoint" their progress via sequential attacks. However, when PoR is \emph{mutual}, attacking Chain B requires first attacking Chain A, which first requires attacking Chain B, etc. Thus attacks are more difficult against chains that are mutually reflecting (than configurations where the PoR is one-way). Instead of being able to "checkpoint" their progress, an attacker must attack both chains simultaneously.
 
  \end{subsection}
  \begin{subsection}{Method of Operation}
@@ -91,7 +91,9 @@
 
     The Simplex is an emergent construct that forms when a set of blockchains mutually reflect all other blockchains in that set. See \autoref{fig:simplexes}. When in this configuration, for consensus attacks to succeed (e.g., a 51\% attack), an attacker must attack \emph{the simplex as a whole}. A blockchain that is part of a simplex is called a simplex-chain.
 
-    To maximize total throughput, the constituent blockchains should devote \nicefrac{1}{2} of their overall capacity\footnote{measured in bytes/s} to reflections (via each miner eagerly including of all new-found headers of other simplex-chains in their blocks).
+    To maximize \emph{both} total throughput of all simplex-chains and the number of simplex-chains in total, the constituent blockchains should devote \nicefrac{1}{2} of their overall capacity\footnote{measured in bytes/s} to reflections (via each miner eagerly including of all new-found headers of other simplex-chains in their blocks).
+
+    Simplexes range in size from 2 chains to tens of thousands of chains (and larger in the future when computational resources are cheaper).
 
  \begin{subsection}{Requirements for Participating Blockchains}
 
@@ -104,7 +106,13 @@
  \end{subsection}
  \begin{subsection}{Modification to Existing PoR Method}
 
+    Each chain should generalize their reflection capabilities as detailed in \autoref{alg:por-reflected-block-weight}.
 
+    For maximum security: each simplex-chain should adjust their weighting function to cap the security contribution of other simplex chains.
+    This ensures that real-world variance in block production frequency (of other simplex-chains) does not adversely affect the security of the simplex-chain in question.
+    If this is not done, then an attack on one simplex-chain may have amplified effects on the other simplex-chains.
+    The foundation for this algorithm is detailed in \autoref{alg:por-simplex}.
+    Note: this change is optional, but beneficial.
 
  \end{subsection}
  \begin{subsection}{Method of Construction}
