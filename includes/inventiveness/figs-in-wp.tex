@@ -1,33 +1,33 @@
- % PoR algorithms
+% PoR algorithms
 
- \input{../ut/algorithms/vanilla-chainweight.tex}
- \input{../ut/algorithms/por-chainweight-1.tex}
- \input{../ut/algorithms/weightof-basic.tex}
- \input{../ut/algorithms/weightof-ratio.tex}
- \input{../ut/algorithms/weightof-dex.tex}
- \input{../ut/algorithms/por-reflected-block-weight.tex}
+\input{../ut/algorithms/vanilla-chainweight.tex}
+\input{../ut/algorithms/por-chainweight-1.tex}
+\input{../ut/algorithms/weightof-basic.tex}
+\input{../ut/algorithms/weightof-ratio.tex}
+\input{../ut/algorithms/weightof-dex.tex}
+\input{../ut/algorithms/por-reflected-block-weight.tex}
 
- % one way PoR
+% one way PoR
 
- \begin{figure}
-     \centering
-     \includegraphics[width=.8\linewidth]{../ut/diags/pow_refl_step3_ab_sag}
-     \caption{The time-evolution of, and relationship between, two separate blockchains, A and B, where Chain A is using Chain B for PoR.}
-     \label{fig:por-step3}
- \end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=.8\linewidth]{../ut/diags/pow_refl_step3_ab_sag}
+    \caption{The time-evolution of, and relationship between, two separate blockchains, A and B, where Chain A is using Chain B for PoR.}
+    \label{fig:por-step3}
+\end{figure}
 
- % mutual reflection
+% mutual reflection
 
- \begin{figure}
-     \centering
-     \includegraphics[width=.8\linewidth]{../ut/diags/pow_refl_step5_sag}
-     \caption{Relationships between and time-evolution of two blockchains that are mutually reflecting one another.}
-     \label{fig:por-step5}
- \end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=.8\linewidth]{../ut/diags/pow_refl_step5_sag}
+    \caption{Relationships between and time-evolution of two blockchains that are mutually reflecting one another.}
+    \label{fig:por-step5}
+\end{figure}
 
- % simplexes
+% simplexes
 
- \begin{figure}
+\begin{figure}
     \begin{subfigure}[t]{.31\linewidth}
         \vskip 0pt
         \centering
@@ -53,10 +53,9 @@
     \end{subfigure}
     \caption{Simplexes of increasing capacity. Vertices are simplex-chains. Edges are the reflections between simplex-chains.}
     \label{fig:simplexes}
- \end{figure}
+\end{figure}
 
- % tiling
-
+% tiling
 
 \begin{figure}
     \begin{subfigure}[t]{.31\textwidth}
@@ -84,4 +83,35 @@
     \end{subfigure}
     \caption{The state of tiled 5-chain simplexes after sequential iterations. Vertices are simplex-chains. Edges are the reflections between simplex-chains.}
     \label{fig:simplex-tiling}
+\end{figure}
+
+%alt tiling
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_alt_s5_d2_sag}
+        \caption{1st iteration. 6 tiles.}
+        \label{fig:tiled-simplex-alt-d2}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_alt_s5_d3_sag}
+        \caption{2nd iteration. 14 tiles.}
+        \label{fig:tiled-simplex-alt-d3}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_alt_s5_d4_sag}
+        \caption{3rd iteration. 30 tiles.}
+        \label{fig:tiled-simplex-alt-d4}
+    \end{subfigure}%%
+    \caption{An alternate tiling that is equivalent in terms of complexity, security, etc.}
+    \label{fig:alt-tiling}
 \end{figure}

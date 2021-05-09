@@ -89,7 +89,7 @@
  \end{subsection}
 \end{section}
 
-\begin{section}{Construction of The Simplex}
+\begin{section}{The Simplex}
 
  The Simplex is an emergent construct that forms when a set of blockchains mutually reflect all other blockchains in that set. See \autoref{fig:simplexes}. When in this configuration, for consensus attacks to succeed (e.g., a 51\% attack), an attacker must attack \emph{the simplex as a whole}. A blockchain that is part of a simplex is called a simplex-chain.
 
@@ -116,10 +116,14 @@
  \end{subsection}
  \begin{subsection}{Method of Construction}
 
-
+    A blockchain is started from a genesis block. The simplex can be started from one or more genesis blocks (in the case of 1 genesis block, the simplex-chain spawns a new simplex-chain to create an, initially, 2-chain simplex). As simplex-chains approach maximum capacity, new simplex-chains are instantiated. There are many different approaches one could take to design methods of instantiation based on particular requirements and/or features that are desired.
 
  \end{subsection}
  \begin{subsection}{Method of Operation}
+
+    Miners that are producing blocks for simplex-chains behave slightly differently to normal. They are required to reflect the headers of other simplex-chains, and thus must include them in their blocks. However, for the smoothest operation of the simplex, each miner should download *all* other blocks of other simplex chains; this ensures that only existent blocks get reflected.
+
+    Futhermore, miners should partially validate blocks from other simplex-chains, but only those segments of the block that deal with reflections. This additional processing (which is not overly burdensome on the miner) ensures that proofs of reflection (e.g., merkle branches) do not need to be created or transmitted (this was hinted at previously). This improves overall throughput and reliability. It is technically optional, though other methods for ensuring the integrity are then required.
 
  \end{subsection}
  \begin{subsection}{Novelty and Inventiveness}
@@ -143,7 +147,7 @@
  \end{subsection}
 \end{section}
 
-\begin{section}{Simplex-Tilings}
+\begin{section}{Simplex-Tiling}
 
  A simplex-tiling is a tiling of simplex-tiles. Simplex-tiles are similar to simplexes. All reflections within a simplex are mutual and \emph{internal}, i.e., with simplex-chains in that simplex. A simplex-\emph{tile} is similar but \emph{not} all reflections are internal.
 
@@ -153,7 +157,7 @@
 
  \begin{subsection}{Requirements for Participating Simplex-tiles}
 
-     Simplex-tiles should reserve \nicefrac{1}{8} of their capacity for internal reflections, and \nicefrac{3}{8}\footnote{Simplex-tiles have a property called \emph{valence} which determines how many other simplex-tiles they can do external reflections with. A valence of 3 is the minimum required for a scalable tiling, but smaller and larger valences are possible. The ratios of capacity that a simplex-tile should reserve for internal and external reflections is based on its valence.} of their capacity for \emph{external} reflections, i.e., mutual reflections with \emph{other} tiles. See \autoref{fig:simplex-tiling}.
+     Simplex-tiles should reserve \nicefrac{1}{8} of their capacity for internal reflections, and \nicefrac{3}{8}\footnote{Simplex-tiles have a property called \emph{valence} which determines how many other simplex-tiles they can do external reflections with. A valence of 3 is the minimum required for a scalable tiling, but smaller and larger valences are possible. The ratios of capacity that a simplex-tile should reserve for internal and external reflections is based on its valence.} of their capacity for \emph{external} reflections, i.e., mutual reflections with \emph{other} tiles. See \autoref{fig:simplex-tiling}. Note: there are additional patterns of tiling. An example is shown in \autoref{fig:alt-tiling}.
 
  \end{subsection}
  \begin{subsection}{Modification to Existing Simplex Parameters}
@@ -185,9 +189,9 @@
  \end{subsection}
  \begin{subsection}{Utility}
 
-     $O(n)$ scalability
+     $O(n)$ scalability, i.e., \emph{unbounded capacity}.
 
-     Improved security
+     Further improved security such that attacking one chain in the tiling is as difficult as attacking the complete tiling (i.e., all participating simplex-chains).
 
  \end{subsection}
 \end{section}
