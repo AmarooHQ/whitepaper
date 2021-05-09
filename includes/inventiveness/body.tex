@@ -106,12 +106,11 @@
  \end{subsection}
  \begin{subsection}{Modification to Existing PoR Method}
 
-    Each chain should generalize their reflection capabilities as detailed in \autoref{alg:por-reflected-block-weight}.
+    Each chain should generalize their reflection capabilities as detailed in \autoref{alg:por-reflected-block-weight}. Note that this includes a cap on each simplex-chain's contribution, which is optional.
 
-    For maximum security: each simplex-chain should adjust their weighting function to cap the security contribution of other simplex chains.
+    For maximum security, each simplex-chain should adjust their weighting function to cap the security contribution of other simplex chains.
     This ensures that real-world variance in block production frequency (of other simplex-chains) does not adversely affect the security of the simplex-chain in question.
     If this is not done, then an attack on one simplex-chain may have amplified effects on the other simplex-chains.
-    The foundation for this algorithm is detailed in \autoref{alg:por-simplex}.
     Note: this change is optional, but beneficial.
 
  \end{subsection}

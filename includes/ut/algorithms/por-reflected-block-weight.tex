@@ -4,15 +4,25 @@
 \Procedure{ReflectedBlockWeight}{$block, state$}
   \State $s\gets 0$
   \For{$C_i$ in \Call{AllReflectingChains}{$state$}}
+    \State $s_C \gets 0$
+    \State $n \gets 0$
     \State $Blocks_{i} \gets$ \Call{ReflectingBlocks}{$C_i$, $state$} \Comment{Reflecting blocks from $C_i$}
     \For{$B_{i,j}$ in $Blocks_{i}$}
       \State RCHs $\gets$ \Call{ReflectedChainHeads}{$B_{i,j}$, $state$} \Comment{Local blocks reflected by $B_{i,j}$}
       \If {$block$ in RCHs}
-        \State $s\gets s \; +$ \Call{WeightOf}{$B_{i,j}$, $state$}
+        \State $n \gets n + 1$
+        \State $s_C\gets s_C \; +$ \Call{WeightOf}{$B_{i,j}$, $state$}
       \EndIf
     \EndFor
+    \State $B_f \gets $ \Call{BlockFrequencySelf}{$state$}
+    \State $C_f \gets $ \Call{BlockFrequencyOfChain}{$C$, $state$}
+    \State $e \gets C_f \div B_f$ \Comment{Expected blocks from $C$}
+    \If {$n > 0$}
+      \State weightMod $\gets$ min(1, $e \div n$) \Comment{This caps the contribution of $C$ per block}
+      \State $s \gets s_C\;\cdot$ weightMod $+\; s$
+    \EndIf
   \EndFor
-  \State \Return{s}
+  \State \Return{$s$}
 \EndProcedure \Comment{This is an inefficient method and would not be used in production.}
 \end{algorithmic}
 \end{algorithm}

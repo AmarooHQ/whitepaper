@@ -30,9 +30,7 @@ In order to support arbitrarily many reflections, we need to modify \textsc{Refl
 
 \input{includes/ut/algorithms/por-reflected-block-weight.tex}
 
-Additionally, we should modify the \textsc{WeightOf} function as detailed in \autoref{alg:por-simplex} -- this integrates the cap on weight contributed by each reflecting chain, as suggested in \autoref{sec:reflection-pow-and-pos}.
-
-\input{includes/ut/algorithms/por-simplex.tex}
+Note that \autoref{alg:por-reflected-block-weight} integrates the cap on weight contributed by each reflecting chain, as suggested in \autoref{sec:reflection-pow-and-pos}.
 
 ### The Simplex
 

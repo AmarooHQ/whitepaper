@@ -231,9 +231,11 @@ Now that we know what the block rewards are and have defined them in terms of th
 
 Since we know the percentage of root tokens on each chain for each moment in history, we can safely use that figure in chain-weight calculations. The reliability of that data will be the same as the reliability of the blockchains themselves, provided we enforce the 2-way peg that ensures no root tokens are created or destroyed in violation of protocol rules.
 
-\autoref{alg:weightof-1} details a simplistic \textsc{WeightOf} function that returns a weight normalized in coins (i.e., root tokens). It does not account for some things, e.g., changes to the difficulty of $C$ over time.
+\autoref{alg:weightof-1} and \autoref{alg:weightof-ratio} detail simplistic \textsc{WeightOf} functions that return a weight normalized in coins (i.e., root tokens). It does not account for some things, e.g., changes to the difficulty of $C$ over time.
 
 \input{includes/ut/algorithms/weightof-basic.tex}
+
+\input{includes/ut/algorithms/weightof-ratio.tex}
 
 #### Different Root Tokens with a DEX
 
