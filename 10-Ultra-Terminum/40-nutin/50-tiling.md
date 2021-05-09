@@ -84,6 +84,7 @@ side by side figures: https://tex.stackexchange.com/questions/37581/latex-figure
         \label{fig:tiled-simplex-5-d4}
     \end{subfigure}
     \caption{The state of tiled 5-chain simplexes after sequential iterations. Vertices are simplex-chains. Edges are the reflections between simplex-chains.}
+    \label{fig:simplex-tiling}
 \end{figure}
 
 ### Complexity Analysis
