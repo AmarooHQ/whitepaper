@@ -22,7 +22,7 @@
 
 \cNef{I have an offer for you. I'm planning on doing a doublespend. It'll destroy confidence in your system. If you pay me, then I won't do it.}
 
-\cMax{Uhh, okay... IDK if you're credible tho. Convince me of that and I'll consider your "offer".}
+\cMax{Uhh, okay... IDK if you're credible tho. Convince me of that and I'll consider your ``offer''.}
 
 \cNef{I have a bunch of sha256 ASICs. I know that one of the simplex-chains uses that, and it doesn't have that much hashing power behind it, so I'm going to attack it. Std stuff.}
 
@@ -32,7 +32,7 @@
 
 \cMax{The sha256 simplex-chain only has 6\% of the ROO supply on it. Plus, there'll be way too many reflections by the time you try to publish.}
 
-\cNef{Wait, what do you mean "reflections", and why does 6\% of the supply matter?}
+\cNef{Wait, what do you mean ``reflections'', and why does 6\% of the supply matter?}
 
 \cMax{
   Once a block for one chain is published, its existence gets confirmed by the other chains. That's a reflection. There are 15 other simplex-chains, so every sha256 block gets roughly 15 \emph{other} confirmations before the next sha256 block gets produced. The number of confs is a bit random, so mb it's a few less or a few more. The point is that the honest chain will weigh like 15x more than your privately-mined chain, even if your hash-rate is 20x the honest hash-rate.
@@ -90,7 +90,12 @@
 }
 
 \cNef{
-  \q{Since the PoS chains are reflected in the PoW chains, you can't screw with their history to brute-force a favorable quorum --- you'd have to re-write way too much PoW history for that.}
+  %% this box grew too much
+  \q{
+    \begin{varwidth}{0.91\linewidth}
+    Since the PoS chains are reflected in the PoW chains, you can't screw with their history to brute-force a favorable quorum --- you'd have to re-write way too much PoW history for that.
+    \end{varwidth}
+  }
   Like I said, it'll cost you more than it costs me. Have you forgotten that I can launch these attacks simultaneously?
 }
 

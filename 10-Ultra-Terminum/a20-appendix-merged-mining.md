@@ -25,7 +25,7 @@ Miners commit to a specific *extension* (or *update*, *block*) to a network's *h
 
 If miners are able to commit some *additional* data, which is also singular and unambiguous, could that data be used in a way that takes advantage of the work associated with the proof? Yes. In principle there is no significant difference between each data that can be shown to be included in a proof; the only significant factor is whether such data can be proven to have been included with appropriate properties for its intended use.
 
-What do I mean by "appropriate properties for its intended use"?
+What do I mean by ``appropriate properties for its intended use''?
 
 Let's look at a simple (fictional) method of merged mining in the context of Bitcoin. Take this partial pseudo-description of a bitcoin block:
 
@@ -65,6 +65,6 @@ Is this example verification function one that could work? In principle, *yes* (
 
 A requirement for this method (or any other) is that there is an *unambiguous* way to determine the precise intended addition to Namecoin's blockchain. In the example above, it is required that the Namecoin block hash is the exact data in the *first* OP_RETURN output. If the Namecoin block hash could be in *any* OP_RETURN output, then we would not be able to tell, *unambiguously*, if it was the *precise and only* intended update to the Namecoin ledger. Perhaps the miner included *multiple* Namecoin block hashes; if they did (and if they could be in any OP_RETURN output) then they might be able to publish *multiple, different* updates, which would violate the earlier conditions we've specified for valid updates.
 
-In the case of Bitcoin/Namecoin merged mining, that is what I mean by "appropriate properties for its intended use" (though there are additional and different required properties in reality). However we choose to interpret the data behind a proof of work, we must be able to know it *exactly* and know that it was *intended*. Without that, we cannot meaningfully use the proof of work to secure a 'child' blockchain.
+In the case of Bitcoin/Namecoin merged mining, that is what I mean by ``appropriate properties for its intended use'' (though there are additional and different required properties in reality). However we choose to interpret the data behind a proof of work, we must be able to know it *exactly* and know that it was *intended*. Without that, we cannot meaningfully use the proof of work to secure a 'child' blockchain.
 
 \end{comment}

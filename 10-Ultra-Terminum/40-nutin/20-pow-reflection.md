@@ -118,17 +118,17 @@ Could we use Chain B's knowledge *that it's own history is reflected in Chain E*
 
 \label{sec:por-step4}
 
-Before we discuss a change that Chain B could make, it is important to note that chain-work done with one hashing algorithm is *not generally convertible* to 'equivalent' work done via another hashing algorithm. For example, there is no meaningful *generic* answer to the question "how many *double SHA256* hashes is one *Ethash* hash worth?". In fact, there is no meaningful answer to similar questions that use any other other combination of hashing algorithms, either. It is not possible to *generically and universally* convert between qualitatively different units[^et-conversion]. It is *only* to do this within some *context* where with a *defined* conversion method. We'll look at some such contexts later.
+Before we discuss a change that Chain B could make, it is important to note that chain-work done with one hashing algorithm is *not generally convertible* to 'equivalent' work done via another hashing algorithm. For example, there is no meaningful *generic* answer to the question \emph{how many double SHA256 hashes is one Ethash hash worth?} In fact, there is no meaningful answer to similar questions that use any other other combination of hashing algorithms, either. It is not possible to *generically and universally* convert between qualitatively different units[^et-conversion]. It is *only* to do this within some *context* where with a *defined* conversion method. We'll look at some such contexts later.
 
 [^et-conversion]: The philosophical generalization of *qualitative conversion* and the *necessary* role that *goals* and *context* play is [Elliot Temple's](https://elliottemple.com) idea. It is covered in his [*Critical Fallibilism Course*](https://gumroad.com/l/mhtbA). It's also partially covered in (or related to) [Elliot's *Yes or No Philosophy* course](https://gumroad.com/l/hxqsh) and some of his articles, e.g., [*IGCs* ({Idea, Goal, Context} triples)](https://curi.us/2387-igcs) and [*Bottleneck Examples*](https://curi.us/2353-bottleneck-examples).
 
-NB: Bitcoin does two SHA256 hashes per block, which is why I refer to "double SHA256" above.
+NB: Bitcoin does two SHA256 hashes per block, which is why I refer to ``double SHA256'' above.
 
 For the purposes of our hypothetical construction, let's say that B and E do *equal work over equal time*. In the current example, that means that the work required to produce either $B_i$ or $E_j$ is the same. *For the sake of this construction, we'll also presume this relationship doesn't change over time*. Our constant of conversion is thus: 1 *E Blocks per B Block*.
 
 NB: we're not that concerned with whether this is a reasonable assumption or not; right now, we just need a way to convert the work done on each chain into the same units. (Some methods for doing this will be discussed in \autoref{sec:comparing-diff-pows}.)
 
-Currently, the Chain B network chooses the "heaviest" (most worked) chain as its common history. Chain B calculates the "weight" of blocks (i.e., how much work went in to them) via an estimation of how many hashes were required -- say these are measured in *double SHA256 hashes*. For the purposes of illustration, let's normalize this number to be in terms of *B Blocks* -- instead of *double SHA256 hashes*; that's easy, since each block is worth 1 *B Block* by definition. Now, we can also measure the work in *E Blocks*, too (that being: 1 *E Block*).
+Currently, the Chain B network chooses the \`\`heaviest'' (most worked) chain as its common history. Chain B calculates the \`\`weight'' of blocks (i.e., how much work went in to them) via an estimation of how many hashes were required -- say these are measured in *double SHA256 hashes*. For the purposes of illustration, let's normalize this number to be in terms of *B Blocks* -- instead of *double SHA256 hashes*; that's easy, since each block is worth 1 *B Block* by definition. Now, we can also measure the work in *E Blocks*, too (that being: 1 *E Block*).
 
 How can the network choose the heaviest chain? Well, a traditional blockchain might use a simple recursive function like \autoref{alg:vanilla-bw}.
 
@@ -251,6 +251,8 @@ In the context of *Ultra Terminum* and *Amaroo*, these aren't questions that are
 
 \label{sec:reflection-pow-and-pos}
 
+\todo{Consider moving this section to somewhere else after the simplex is discussed.}
+
 Perhaps one of the most interesting features of *Proof of Reflection* is that PoW chains and PoS chains can reflect one another. Up till now, we've contextualized the weight of a reflection via the *work* required to produce a block. But the concept of *work* does not neatly apply to foundational consensus mechanisms that do not have some physical resource utilization requirement -- such as PoS.
 
 \defineTerm{Foundational Consensus Mechanisms}{Those mechanisms, like PoW and PoS, which can work in some \emph{standalone} fashion; PoR is a cross-chain \emph{extension} to such mechanisms}
@@ -272,7 +274,9 @@ However, consider the case that *the security contribution of the PoW chain is \
 
 Given the right set up, a PoW chain gains an *incredible* security advantage from mutual reflection with a PoS chain.
 
-What about the PoS chain, though; what benefits does it gain from this relationship? The answer here is simple: by reflecting with a PoW chain, the PoS chain gains *thermodynamic security*; the PoS chain's history is *thermodynamically secured* by the PoW chain. \textbf{This solves the \emph{Nothing at Stake} problem for any well constructed PoS scheme.} Furthermore, it is possible for error-correction methods like \emph{slashing} to be implemented *on the PoW chain*, not the PoS chain. Granted, such a change being done well requires subtle and precise protocol design, but it is *in principle* possible with tolerable overhead.
+What about the PoS chain, though; what benefits does it gain from this relationship? The answer here is simple: by reflecting with a PoW chain, the PoS chain gains *thermodynamic security*; the PoS chain's history is *thermodynamically secured* by the PoW chain. \textbf{This solves the \emph{Nothing at Stake} problem for any well constructed PoS scheme.} Furthermore, it is possible for error-correction methods like \emph{slashing} to be implemented *on the PoW chain*, not the PoS chain. Granted, such a change being done well requires subtle and precise protocol design, but these changes are *in principle* possible with tolerable overhead.
+
+There are some (as yet) unsolved problems that arise through this design, such as the *economic* details of managing block rewards across the PoW and PoS chains. Given that solutions to this problem likely depend on the specific details of the relevant PoS systems, this problem is not addressed here.
 
 There are some other conjectured solutions to the *Nothing at Stake* problem. The two examples that follow solve the problem via mechanisms that are *external* to the protocol itself, i.e., hard-coded checkpoints and the requirement that nodes are online ``frequently''. The solution provided by mutual reflection with a PoW blockchain -- i.e., thermodynamic security -- is provided *by the protocol itself* and can only *increase* the security of PoS mechanisms. Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
 
@@ -285,15 +289,13 @@ There are some other conjectured solutions to the *Nothing at Stake* problem. Th
   Provided that stakeholders are frequently online, nothing at stake is taken care of by our analysis of forkable strings (even if the adversary brute-forces all possible strategies to fork the evolving blockchain in the near future, there is none that is viable), and our chain selection rule that instructs players to ignore very deep forks that deviate from the block they received the last time they were online.
 }{\href{http://cloudflare-ipfs.com/ipfs/QmWCAHyi35SeXH2E4e8jRVk7yNse2x6D14uPfABnhagbvN}{Ouroboros: A Provably Secure Proof-of-Stake Blockchain Protocol, s10}}
 
-There are some (as yet) unsolved problems that arise through this design, such as the *economic* details of managing block rewards across the PoW and PoS chains. Given that solutions to this problem likely depend on the specific details of the relevant PoS systems, this problem is not addressed in this paper.
-
 \todo{refelct only chains that reflect your history; if they favor a different history, then you should be building on that history instead, so don't reflect those blocks -- i.e. ppl should calculate weight to be 0.}
 
 #### PoS Bribe Attacks
 
 \todo{write -- PoS Bribe Attacks}
 
-*Pure* PoS blockchains are inherently insecure. This is the underlying reason why modern protocols still resort to external methods of security (as mentioned above). One particular weakness is to that of *bribes*.
+*Pure* PoS blockchains are inherently insecure. This is the underlying reason why modern protocols still resort to external methods of security (as mentioned above). Even with those external security measures, PoS chains are generally weak to bribe attacks.
 
 \bquote{PoS must fail in one of these ways, A or B: \newline
 \newline
@@ -310,7 +312,35 @@ I think that PoS might require something like UT/the simplex to work. Particular
 
 How UT solves these problems: PoS simplex-chains don't need to have the decision of validator sets within their own chain; it can be external in a reflected PoW chain. Thus having >51% of the validator stake doesn't break the protocol. In a normal blockchain it would b/c a DoS would be possible, but that doesn't work in UT b/c simplex-chains are DAGs. (Though an attacker can potentially delay transactions for a few minutes, repeatedly, and thus reduce overall capacity by some factor.)
 
-### The Insecurity of Merged Mining
+\todo{soundness of PoS -- or remove from abstract}
+
+#### Answers to Zack Hess's Criticism of Hybrid PoW/PoS
+
+The hybrid \emph{context} that UT provides[^hybrid-context] is different to the context provided by a single blockchain that uses a hybrid PoW/PoS consensus mechanism. In UT, each chain is either PoW or PoS (or something else).
+
+[^hybrid-context]: Note that UT can work exclusively with PoW chains, so in the case that PoS cannot be done securely (even with UT's improvements) then this does not break UT fundamentally. Particularly: at the very least the $O(c^2)$ and $O(n)$ configurations still work.
+
+\bquote{
+  If it is the kind of PoS mechanism that is based on something like coin-age, so even if most PoS validators stop participating, PoS blocks can still be found, then we need to consider a some cases based on the fork-choice rule. In a hybrid design, the fork-choice rule depends on some combination of P = portion of PoS validators participating, and H = the amount of hashpower. \\
+  \\
+  We have a fork choice rule weight(H, P). \\
+  \\
+  Increasing PoS participation, or increasing hashpower, can only have a positive influence on the weight of that subchain. (We will use proof by contradiction to show that this supposition is false.) \\
+  \\
+  S1: H1 > H0. \\
+  \\
+  \dots
+}{Zack Hess; \href{https://github.com/zack-bitcoin/amoveo-docs/blob/9a4ffa2e800c24772fd68e1f745b6a14967e59c2/other_blockchains/pow_pos_hybrid.md}{PoW/PoS Hybrid Consensus Mechanisms}}
+
+In UT, the weight contributed by a PoW or PoS reflection depends on the conversion method (part of UT's fork-choice rule), which depends on the value on each of those chains. Thus, it's not the case that ``increasing PoS participation, or increasing hashpower, can only have a positive influence on the weight of that subchain''[^subchain].
+
+Particularly, Hess starts his proof with S1:
+
+\todo{finish hybrid pow/pos stuff or clean up}
+
+[^subchain]: The idea of \emph{subchains} is specific to individual blockchains that use a hybrid PoW/PoS consensus mechanism. I think the correct conversion of the idea of a \emph{subchain} to a UT context is to view the simplex (see \autoref{sec:the-simplex}) as a single chain, and simplex-chains as subchains.
+
+### The Insecurity of Merged Mining in UT
 
 \todo{write -- The Insecurity of Merged Mining}
 

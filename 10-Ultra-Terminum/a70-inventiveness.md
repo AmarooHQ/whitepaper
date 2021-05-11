@@ -1,3 +1,5 @@
+\begin{comment}
+
 \newpage
 
 # Invention Details
@@ -21,3 +23,5 @@
 \let\section\origSec
 \let\subsection\origSubSec
 \let\subsubsection\origSubSubSec
+
+\end{comment}

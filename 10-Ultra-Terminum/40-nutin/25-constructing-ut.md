@@ -41,7 +41,7 @@ Note that \autoref{alg:por-reflected-block-weight} integrates the cap on weight 
 When two or more blockchains *mutually reflect* each-other, they form a *simplex*[^simplex-maths]. For the sake of brevity: all *reflections* within a simplex are *mutual reflections*, and I will omit *mutual* from now on when discussing them. Examples of simplexes are shown in \autoref{fig:simplexes}.
 
 \begin{figure}
-    \begin{subfigure}[t]{.31\linewidth}
+    \begin{subfigure}{.31\linewidth}
         \vskip 0pt
         \centering
         \includegraphics[height=.95\linewidth]{simplex_2_sag}
@@ -49,7 +49,7 @@ When two or more blockchains *mutually reflect* each-other, they form a *simplex
         \label{fig:simplex-2-d1}
     \end{subfigure}%%
     \hfill
-    \begin{subfigure}[t]{.31\linewidth}
+    \begin{subfigure}{.31\linewidth}
         \vskip 0pt
         \centering
         \includegraphics[height=.95\linewidth]{simplex_7_sag}
@@ -57,7 +57,7 @@ When two or more blockchains *mutually reflect* each-other, they form a *simplex
         \label{fig:simplex-7-d1}
     \end{subfigure}%%
     \hfill
-    \begin{subfigure}[t]{.31\linewidth}
+    \begin{subfigure}{.31\linewidth}
         \vskip 0pt
         \centering
         \includegraphics[height=.95\linewidth]{simplex_17_sag}
