@@ -274,6 +274,8 @@ However, consider the case that *the security contribution of the PoW chain is \
 
 Given the right set up, a PoW chain gains an *incredible* security advantage from mutual reflection with a PoS chain.
 
+\textbf{Note:} The attack scenario above assumes two important things: the attacker is only attacking the PoW chain via a \emph{mining in private} strategy, and that the attacker is not attacking the PoS chain that is reflecting the PoW chain. These are not safe assumptions in general.
+
 What about the PoS chain, though; what benefits does it gain from this relationship? The answer here is simple: by reflecting with a PoW chain, the PoS chain gains *thermodynamic security*; the PoS chain's history is *thermodynamically secured* by the PoW chain. \textbf{This solves the \emph{Nothing at Stake} problem for any well constructed PoS scheme.} Furthermore, it is possible for error-correction methods like \emph{slashing} to be implemented *on the PoW chain*, not the PoS chain. Granted, such a change being done well requires subtle and precise protocol design, but these changes are *in principle* possible with tolerable overhead.
 
 There are some (as yet) unsolved problems that arise through this design, such as the *economic* details of managing block rewards across the PoW and PoS chains. Given that solutions to this problem likely depend on the specific details of the relevant PoS systems, this problem is not addressed here.

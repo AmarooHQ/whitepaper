@@ -107,8 +107,6 @@ The most likely method of integration has four components: modification of the h
 If the headers of dapp-chains are simplex-level transactions, what can we say about the security of dapp-chains? Since dapp-chains will use some sort of PoS scheme, and there is no substantive difference between standalone headers and header-transactions. That means that *zero-confirmation* header-transactions are *precisely* as secure as their standalone counterparts -- by definition. This means that other features -- e.g., [finality guarantees](https://github.com/w3f/consensus/blob/master/pdf/grandpa.pdf) -- are *free*. As these header-transactions are subsequently confirmed by the simplex, they inherit the typical security benefits that transactions gain from confirmation. Similar to reflection between PoW and PoS chains, dapp-chains also gain additional security benefits that would not normally be possible without the simplex.
 
 
-
-
 \todo{finish below}
 
 plan:

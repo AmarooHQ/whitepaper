@@ -183,7 +183,8 @@ Consider the situation where an attacker is attempting to deny service via the p
 
 How does such an attack fair? The challenge of such a DoS attack is to prevent honest miners from extending the attacker's chain-segment. For traditional (non-DAG) chains -- where each non-genesis block has exactly one parent -- this is accomplished as soon as the attacker is able to reliably produce a heavier chain-segment than the honest network for a given period. (Typically, this means the attacker produces blocks more frequently.) However, if blocks are allowed to have *more* than one parent then there *is no point* where an attacker can *maintain* a DoS attack indefinitely. Instead, they can only *delay the execution* of some transactions for a short period of time. Particularly, if an attacker can produce $A_{blocks} = \nicefrac{q}{p} > 1$ for every 1 block produced by the honest network, then the attack can delay transactions for up to $A_{blocks} \cdot B_f^{-1}$ seconds, where $B_f$ is the regulated frequency of block production (in Hz). After this point, the weight of the honest chain-segment (which includes the attacker's chain-segment) is always greatest.
 
-However, if an attacker performs a *repeating cycle* of these attacks, then they may be able to decrease the effective capacity of the chain by a factor of $A_{blocks} = \nicefrac{q}{p}$.
+However, if an attacker performs a *repeating cycle* of these attacks, then they may be able to decrease the effective capacity of the chain by a factor of $A_{blocks} = \nicefrac{q}{p}$. The opportunity cost of this attack (for the attacker) is the lost transaction fees.
+
 
 ### Qualities of Different Security Methods
 
