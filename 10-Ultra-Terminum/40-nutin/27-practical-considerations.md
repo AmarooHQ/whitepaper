@@ -94,7 +94,6 @@ A 200-simplex with $B_f = \nicefrac{1}{15}$ has a confirmation rate of $\nicefra
 
 Note that PoR incents miners to publish blocks as soon as possible so that those blocks begin gaining reflections. If a miner does not publish a block immediately, then any competing block will start acquiring reflections first and thus hold an advantage over the withheld block. This mitigates the selfish mining[^selfish-mining] attack.
 
-%% cspell: disable-next-line
 [^selfish-mining]: See \href{https://cloudflare-ipfs.com/ipfs/QmNukb1L8BhEsiCbrmnkEJWAvUjhBHidinKMZKfCaLG6ep}{Majority is not Enough: Bitcoin Mining is Vulnerable} by Ittay Eyal and Emin Gün Sirer.
 
 
