@@ -22,7 +22,7 @@
   \For{$B_e$ in $Blocks_{E}$}
     \State RCHs $\gets$ \Call{ReflectedChainHeads}{$B_e$, $state$} \Comment{Local blocks reflected by $B_e$}
     \If {$block$ in RCHs}
-      \State $s\gets s+$ \Call{WeightOf}{$B_e$, $state$}
+      \State $s\gets s\;+$ \Call{WeightOf}{$B_e$, $state$}
     \EndIf
   \EndFor
   \State \Return{s}

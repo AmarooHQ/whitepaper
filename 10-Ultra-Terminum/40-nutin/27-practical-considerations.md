@@ -201,6 +201,8 @@ PoW+GPUs means the miner-base is super flexible; there are lots of choices for p
 
 PoS has an inflexible miner base too -- most PoS schemes (e.g., DPoS, etc) require the miners to stake coins and that happens over a period of time. However, there is a sense where the thermodynamic security of PoS is high (provided ECDSAs and EC crypto keep working). There's another sense where the thermodynamic security of PoS is low: miners control their private keys and have near zero energy cost per signature. The former is irrelevant while the latter sense is true. That's the reason that PoS systems include mechanics like *slashing*.
 
+\todo{Polish different qualities section + check questions are answered.}
+
 So these methods of doing blockchain security all have different qualities. What does it mean for Amaroo, and how should the UT simplex be divided between these groups? Note: this assumes that there is a secure way to do PoS consensus.
 
 UT's consensus is emergent from an *additive and collaborative* process. Adding more simplex-chains increases security incrementally, but if one simplex-chain fails (or is attacked) then it doesn't have magnified negative effects for the rest of the network (e.g., by causing a network-wide DoS). This means we can potentially add lots of different types of blockchain security, with different qualities, to create a platform where dapp-authors can *choose the desired qualities*.
