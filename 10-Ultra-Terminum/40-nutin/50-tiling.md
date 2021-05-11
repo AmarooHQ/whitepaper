@@ -102,6 +102,12 @@ N_{tiles} & = 3 \cdot (2^{h} - 1) + 1 \\
 \end{split}
 \end{equation}
 
+and in general, for some valence, $v \ge 3$:
+
+\begin{equation}
+N_{tiles} = v \cdot \frac{(v-1)^h - 1}{v - 2} + 1
+\end{equation}
+
 Thus, the maximal distance between leaf tiles is $2h$, which is also the maximal number of SPV proofs required to prove state between any two simplex-chains. Given \autoref{eq:n-tiles}:
 
 \begin{equation}
@@ -113,7 +119,7 @@ N_{tiles} & = 3 \cdot 2^h - 2 \\
 
 Thus, the maximal distance between leaf tiles is $2 \cdot \log_{2}(\frac{N_{tiles} + 2}{3})$, and thus the number of SPV proofs required (across simplex-chains) scales with $O(\log_2 N_{tiles})$.
 
-Since tiles can be added in an ad-hoc fashion depending on current capacity, and each tile has capacity in $O(c^j); j \in \{2,3,4\}$, it must be that $N_{tiles} \propto \frac{n}{c^j}$. Thus $O(N_{tiles}) = O(\frac{n}{c^j})$.
+Since tiles can be added in an ad-hoc fashion depending on current capacity, and each tile has capacity in $O(c^j); j \in \{2,3,4\}$, it must be that $N_{tiles} \approx \frac{n}{c^j}$. Thus $O(N_{tiles}) = O(\frac{n}{c^j})$.
 
 Given \autoref{eq:spv-complexity}, dapp-chain inter-tile SPV proofs have order:
 
