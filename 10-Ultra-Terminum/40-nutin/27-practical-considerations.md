@@ -105,6 +105,8 @@ There are decisive advantages to using DAGs (instead of trees) as the fundamenta
 
 [^empty-dos]: For an example of this attack, see \href{https://bitcointalk.org/index.php?topic=56675.msg678006\#msg678006}{Luke Jr's attack on Coiledcoin}.
 
+\textbf{Note:} often the motivation for using a block-DAG instead of a block-tree is to increase the block frequency. Since block-DAGs can reference multiple previous blocks, the stale-rate can approach (or reach) 0. Increasing the block frequency is counter-productive in UT, though, since UT is sensitive to the size and number of headers that are produced (see \autoref{sec:impact-of-header-size}). In UT, the purpose of using block-DAGs is to thwart certain attacks, not to increase the block frequency. The intention is for UT simplex-chains to use fairly typical block frequencies -- possibly decreasing those frequencies over time to increase capacity.
+
 #### Block-DAG Lineage
 
 \label{sec:block-dag-lineage}

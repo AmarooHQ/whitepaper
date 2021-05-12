@@ -253,6 +253,10 @@ In the context of *Ultra Terminum* and *Amaroo*, these aren't questions that are
 
 \todo{Consider moving this section to somewhere else after the simplex is discussed.}
 
+\textbf{Important:} It is not clear whether PoS schemes can \emph{ever} be secure. However, there are decisive criticisms[^dec-crits-pos] of \emph{pure} PoS systems.
+
+[^dec-crits-pos]: See \todo{refs}
+
 Perhaps one of the most interesting features of *Proof of Reflection* is that PoW chains and PoS chains can reflect one another. Up till now, we've contextualized the weight of a reflection via the *work* required to produce a block. But the concept of *work* does not neatly apply to foundational consensus mechanisms that do not have some physical resource utilization requirement -- such as PoS.
 
 \defineTerm{Foundational Consensus Mechanisms}{Those mechanisms, like PoW and PoS, which can work in some \emph{standalone} fashion; PoR is a cross-chain \emph{extension} to such mechanisms}
@@ -272,7 +276,7 @@ However, consider the case that *the security contribution of the PoW chain is \
 \label{eq:refl-pow-pos-1}
 \end{align}
 
-Given the right set up, a PoW chain gains an *incredible* security advantage from mutual reflection with a PoS chain.
+Given the right set-up, a PoW chain gains an *incredible* security advantage from mutual reflection with a PoS chain.
 
 \textbf{Note:} The attack scenario above assumes two important things: the attacker is only attacking the PoW chain via a \emph{mining in private} strategy, and that the attacker is not attacking the PoS chain that is reflecting the PoW chain. These are not safe assumptions in general.
 
