@@ -243,27 +243,29 @@ Because $O(\log_2 n) < O(\sqrt{n})$.
 
 In a tessellating set of tiles, we can approximate the *maximum* distance between tiles via a geometric interpretation: for a set of $n$ tessellating tiles, each tile having a constant area, then the full area is $\propto {n}$. Thus, the maximal distance between tiles is $\propto \sqrt{n}$.
 
-However, the *maximum* distance between any 2 of $n$ tiles, using the binary-tree method, is $\sim \log_2 n$. So it's (maybe counterintuitively) more efficient to use non-tessellating tiles.
+However, using the tree method, the *maximal* distance between any 2 of $n$ tiles, is $\sim \log_2 n$. So it's (maybe counterintuitively) more efficient to use non-tessellating tiles.
 
 Additionally, a model of tilings of similar capacity -- i.e., similar $N_{tiles}$ -- shows that the *average* distance between tiles is lower for tree-based tilings.
 
 \begin{figure}
 \centering
-    \begin{subfigure}[t]{.45\textwidth}
+    \hspace{0.03\textwidth}
+    \begin{subfigure}[t]{.40\textwidth}
         \vskip 0pt
         \centering
         \includegraphics[height=.95\linewidth]{avg-dist-v3}
         \caption{Tree of valence 3.}
     \end{subfigure}%%
     \hfill
-    \begin{subfigure}[t]{.45\textwidth}
+    \begin{subfigure}[t]{.40\textwidth}
         \vskip 0pt
         \centering
         \includegraphics[height=.95\linewidth]{avg-dist-v4}
         \caption{Tree of valence 4.}
     \end{subfigure}%%
-\caption{Shown are the distances between randomly selected tiles for two tiling methods -- the tree method (which this section primarily concerns) and a simple square tessellating method.}
-\label{fig:tiling-avg-dist-comparison}
+    \hspace{0.03\textwidth}
+    \caption{Shown are the distances between randomly selected tiles for two tiling methods -- the tree method (which this section primarily concerns) and a simple square tessellating method.}
+    \label{fig:tiling-avg-dist-comparison}
 \end{figure}
 
 \begin{figure}
