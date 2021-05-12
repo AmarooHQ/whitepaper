@@ -4,10 +4,27 @@ from typing import Dict, Set, List
 from collections import namedtuple
 import matplotlib.pyplot as plt
 
+
+"""
+generate a comparison histogram of the average distances between tiles given different tiling methods.
+
+hypothesis: tree-tiling is more efficient than tesselating tilings.
+for a tesselating tiling, I devised a simple square based tiling that has v=4
+
+output graphs seem to agree with hypothesis. for the square tiling at least
+
+NB: if you're running this to test stuff, change n_trials to 10**5 or less so
+that this script runs in <2s. With n_trials=10**7 it takes 15-20 min to run on
+my machine. -MK
+"""
+
+
 rng = r.default_rng()
 n_trials = 10**7
-# valence of tree
+# valence of tree -- change this to produce graphs with different
 valence = 3
+# this breakpoint is nice b/c v={3,4} tree tilings
+# have n_tiles very close to some depth of square tiles -- so those comparisons are good
 stop_after_nodes_gt = 400
 
 """
@@ -20,38 +37,46 @@ p(outer layer) = (3*2**(h-1)) / (3*2**h - 2)
 """
 
 
-vm1 = valence - 1
-vm2 = valence - 2
+def find_tree_depth_for_valence(v=valence):
+    vm1 = v - 1
+    vm2 = v - 2
 
-total_nodes = valence + 1
-nodes_added_last = valence
-max_tree_depth = 1
-while total_nodes < stop_after_nodes_gt:
-    add_nodes = nodes_added_last * (valence - 1)
-    total_nodes += add_nodes
-    nodes_added_last = add_nodes
-    max_tree_depth += 1
-    print(f"T:{total_nodes}, A:{add_nodes}, D:{max_tree_depth}")
+    total_nodes = v + 1
+    nodes_added_last = v
+    depth_tmp = 1
+    while total_nodes < stop_after_nodes_gt:
+        add_nodes = nodes_added_last * (v - 1)
+        total_nodes += add_nodes
+        nodes_added_last = add_nodes
+        depth_tmp += 1
+        print(f"T:{total_nodes}, A:{add_nodes}, D:{depth_tmp}")
+    return depth_tmp
 
 
+max_tree_depth = find_tree_depth_for_valence()
 print(f"Tree depth: {max_tree_depth}")
 
 
-def gen_random_tree_path_length(h):
+def gen_random_tree_path_length(h, v=valence):
     # nodes in outer layer / total nodes
-    p = (3*2**(h-1)) / (3*2**h - 2)
-    p = (valence * vm1 ** (h-1)) / (valence * (vm1 ** h - 1)/vm2 + 1)
+    # example with v=3 hardcoded: p = (3*2**(h-1)) / (3*2**h - 2)
+    p = (v * (v-1) ** (h-1)) / (v * ((v-1) ** h - 1)/(v-2) + 1)
+    # if we are in the outer layer, return this depth
     if rng.random() < p:
         return h
+    # otherwise test 1 layer down
     return gen_random_tree_path_length(h - 1)
 
 
-def gen_tree_path_of_len(l):
+def gen_tree_path_of_len(l, v=valence):
+    '''generate a random tree path of a given length'''
     if l == 0: return []
     p = np.zeros(l)
-    p[0] = rng.choice(list(range(valence)))
+    # first choice has v options
+    p[0] = rng.choice(list(range(v)))
+    # other choices have v-1 options
     for i in range(1, l):
-        p[i] = rng.choice(list(range(valence-1)))
+        p[i] = rng.choice(list(range(v-1)))
     return p
 
 
@@ -200,3 +225,4 @@ plt.title(f'Distance between tiles for random samplings (n={n_trials})')
 plt.xlabel('distance')
 plt.ylabel('frequency')
 plt.savefig(f"avg-dist-tmp.pdf", dpi=300)
+print("Generated avg-dist-tmp.pdf. Copy this to another file if you want to keep it.")

@@ -85,10 +85,8 @@ row_inputs = [
     (3000, 1/60, 1/60, 500, 700, 250),
 ]
 
-do_dappchains = False
-
-print(table_header(incl_dappchains=do_dappchains))
-for r in row_inputs:
-    print(table_row(r, incl_dappchains=do_dappchains))
-
-# list((r, calc_tps_throughput(*r)) for r in row_inputs)
+for do_dappchains in [False, True]:
+    print(f"\n#### do_dappchains: {do_dappchains}\n")
+    print(table_header(incl_dappchains=do_dappchains))
+    for r in row_inputs:
+        print(table_row(r, incl_dappchains=do_dappchains))
