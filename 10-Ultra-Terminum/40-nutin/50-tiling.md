@@ -249,7 +249,48 @@ Additionally, a model of tilings of similar capacity -- i.e., similar $N_{tiles}
 
 \begin{figure}
 \centering
-\includegraphics[height=.5\linewidth]{avg-dist.pdf}
-\caption{Shown are the distances between randomly selected tilings for two tiling methods -- the tree method (which this section primarily concerns) and a simple tessellating method.}
+    \begin{subfigure}[t]{.45\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{avg-dist-v3}
+        \caption{Tree of valence 3.}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.45\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{avg-dist-v4}
+        \caption{Tree of valence 4.}
+    \end{subfigure}%%
+\caption{Shown are the distances between randomly selected tiles for two tiling methods -- the tree method (which this section primarily concerns) and a simple square tessellating method.}
 \label{fig:tiling-avg-dist-comparison}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_square_s5_d1_sag}
+        \caption{1st iteration. 5 tiles.}
+        \label{fig:tiling_square_s5_d1_sag}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_square_s5_d2_sag}
+        \caption{2nd iteration. 13 tiles.}
+        \label{fig:tiling_square_s5_d2_sag}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_square_s5_d3_sag}
+        \caption{3rd iteration. 25 tiles.}
+        \label{fig:tiling_square_s5_d3_sag}
+    \end{subfigure}%%
+    \caption{An example of a square tiling used in \autoref{fig:tiling-avg-dist-comparison}.}
+    \label{fig:tiling-square}
 \end{figure}
