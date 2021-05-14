@@ -14,7 +14,7 @@ This type of configuration, where a root-chain facilitates shards, is referred t
 
 The following derivations focus on *throughput* of particular blockchain designs and scaling configurations. Raw throughput of a network, $T_i$, is measured in bytes/sec (B/s) for some level of nesting, $i$. Note that $T_i$ directly corresponds to a design's maximum transactions per second (tps) via ${tps}_i = \nicefrac{T_i}{Tx_{avg}}$, where $Tx_{avg}$ is the average size of a transaction. The raw B/s throughput of a chain at the $i^{th}$ level of nesting is denoted by $k_i$. Note that $T_i$ is a *calculated* value, but $k_i$ is a *parameter* that may be chosen. An increase to $k_i$ is equivalent or similar to an increase in maximum block size.
 
-Shown below are relationships between the number of chains at a level of nesting, $N_i$, and the network throughput at that level of nesting, $T_i$. For existing blockchain designs, note that $N_1 = 1$.
+Shown below are relationships between the number of chains at a level of nesting, $N_i$, and the network throughput at that level of nesting, $T_i$. For most existing blockchain designs, note that $N_1 = 1$.
 
 Additionally, $O(k_i)$ is defined via $O(k_i) \equiv O(c)$.
 
@@ -50,7 +50,7 @@ This is what we expect based on the measured real-world performance of Bitcoin.
 
 Examples: Ethereum 2, Polkadot.
 
-Suppose the root-chain has a throughput of $k_1$ B/s and it can support up to $N_2$ nested chains. Those nested chains have headers of $D_h$ bytes that are produced at a frequency of $D_f$ ($s^{-1}$). Thus, each nested chain consumes $D_f \cdot D_h$ B/s of the root-chain's capacity.
+Suppose the root-chain has a throughput of $k_1$ B/s and it can support up to $N_2$ nested chains. Those nested chains have headers of $D_h$ bytes that are produced at a frequency of $D_f$ ($s^{-1}$). Thus, each nested chain consumes \emph{at least} $D_f \cdot D_h$ B/s of the root-chain's capacity.
 
 $N_2$ is thus given by:
 

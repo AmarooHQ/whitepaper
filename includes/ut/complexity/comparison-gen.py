@@ -1,9 +1,26 @@
 from decimal import Decimal
+from numpy.lib.scimath import sqrt
+from scipy.special import lambertw
+from numpy import log, log2, real
+import math
+
+
+def por_with_merkle_branches_n1_root(k, bf, bh, g):
+    ln2 = log(2)
+    inner_w = (2 ** (bh / g - 1) * sqrt(math.e) * k * ln2)/(bf * g)
+    d = 2 * bf * g * real(lambertw(inner_w))
+    return math.floor(k * ln2 / d)
+
 
 def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
     ut_2_tps = k**2 / (4 * bf * bh) / tx_size
     ut_3_tps = k**3 / (4 * bf * bh * df * dh) / tx_size
     ut_4_tps = k**4 / (4 * bf * bh * df**2 * dh**2) / tx_size
+    ut_n_1_with_por = por_with_merkle_branches_n1_root(k, bf, bh, 32)
+    ut_with_por_effective_bh = k / (2 * bf * ut_n_1_with_por)
+    ut_n1_per_k = ut_n_1_with_por / k
+    ut_2_tps_with_por = k * ut_n_1_with_por / 2 / tx_size
+
     return {
         'btc_tps': k / tx_size,
         # c^2 estimate, remove constants to be optimistic
@@ -14,29 +31,50 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
         'ut_4_tps': ut_4_tps,
         'ut_m_tps': '{:.2f} million'.format(ut_3_tps / 1000000),
         'ut_chain_gb_per_year': k * 60 * 60 * 24 * 365.25 / (1024 ** 3),
-        'ut_n_2': k**2 / (4 * bh * bf * dh * df),
         'ut_n_1': k / (2 * bh * bf),
+        'ut_n_2': k**2 / (4 * bh * bf * dh * df),
+        'ut_n_1_with_por': ut_n_1_with_por,
+        'ut_2_tps_with_por': ut_2_tps_with_por,
+        'ut_3_tps_with_por': k * ut_2_tps_with_por / (df * dh) / tx_size,
+        'ut_with_por_bh': ut_with_por_effective_bh,
+        'ut_n1_per_k': ut_n1_per_k,
         'ut_3_optimal_dappchains': k / (2 * dh * df),
         'ut_n_3': k**3 / (4 * bh * bf * dh**2 * df**2),
         'delta_s_Bps': k**2 / (2 * bh * bf),
     }
 
 def fmt_rounded_commas(value):
-    return f"{round(value):,}" if value < 10**6 else f"\x24{value:.1e}}}\x24" \
-        .replace("e+0", "e+").replace("e+", "\\times 10^{")
+    return f"{round(value):,}" if 1 < value < 10**6 else f"\x24{value:.1e}}}\x24" \
+        .replace("e+0", "e+").replace("e+", "\\times 10^{") \
+        .replace("e-0", "e-").replace("e-", "\\times 10^{-")
 
-def table_header(incl_dappchains=False):
-    headings = ['$O(c)$', '$O(c^2)$', '$O(c^2)$ UT', '$O(c^3)$ UT', '$O(c^4)$ UT'] \
-        if not incl_dappchains else ['$N_1$ (UT)', '$N_2$ (UT)', '$N_3$ (UT)', '$\Delta S$']
+def table_header(table_name):
+    headings = ({
+        'tps': ['$O(c)$', '$O(c^2)$', '$O(c^2)$ UT', '$O(c^3)$ UT', '$O(c^4)$ UT'],
+        'dappchains': ['$N_1$ (UT)', '$N_2$ (UT)', '$N_3$ (UT)', '$\Delta S$'],
+        'tps_por': ['$N_1$', '$O(c^2)$ tps', '$O(c^3)$ tps', '$B_h$ + PoRs', '$\\nicefrac{N_1}{k}$'],
+    })[table_name]
+
+    col_sizes = ({
+        'tps': ['---','----','----','----','----'],
+        'dappchains': ['---', '----', '----', '----'],
+        'tps_por': ['---', '----', '----', '----', '----'],
+    })[table_name]
+
     return '\n'.join([
         '| ' + ' | '.join(['$k$, $B_f$, $D_f$, $B_h$, $D_h$'] + headings) + ' |',
         '|'.join(['', '--------'] \
-        + (['---','----','----','----','----'] if not incl_dappchains else ['---', '----', '----', '----']) + [''])
+        + col_sizes + [''])
     ])
 
-def table_row(params, incl_dappchains=False):
+def table_row(params, table_name):
     r = calc_tps_throughput(*params)
-    cols = [r['btc_tps'], r['eth2_tps'], r['ut_2_tps'], r['ut_3_tps'], r['ut_4_tps']] if not incl_dappchains else [r['ut_n_1'], r['ut_n_2'], r['ut_n_3'], r['delta_s_Bps']]
+    cols = ({
+        'tps': [r['btc_tps'], r['eth2_tps'], r['ut_2_tps'], r['ut_3_tps'], r['ut_4_tps']],
+        'dappchains': [r['ut_n_1'], r['ut_n_2'], r['ut_n_3'], r['delta_s_Bps']],
+        'tps_por': [r['ut_n_1_with_por'], r['ut_2_tps_with_por'], r['ut_3_tps_with_por'], r['ut_with_por_bh'], r['ut_n1_per_k']],
+    })[table_name]
+
     return ' | '.join(str(i) for i in
             (['', '$' + ', '.join(map(str, list(params)[:-1])) + '$'] \
                 + list(map(fmt_rounded_commas, cols)) + [''])
@@ -85,8 +123,8 @@ row_inputs = [
     (3000, 1/60, 1/60, 500, 700, 250),
 ]
 
-for do_dappchains in [False, True]:
-    print(f"\n#### do_dappchains: {do_dappchains}\n")
-    print(table_header(incl_dappchains=do_dappchains))
+for table_name in ['tps', 'dappchains', 'tps_por']:
+    print(f"\n#### TABLE: {table_name}\n")
+    print(table_header(table_name))
     for r in row_inputs:
-        print(table_row(r, incl_dappchains=do_dappchains))
+        print(table_row(r, table_name))
