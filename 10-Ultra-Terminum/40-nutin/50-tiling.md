@@ -108,7 +108,7 @@ and in general, for some valence, $v \ge 3$:
 N_{tiles} = v \cdot \frac{(v-1)^h - 1}{v - 2} + 1
 \end{equation}
 
-Thus, the maximal distance between leaf tiles is $2h$, which is also the maximal number of SPV proofs required to prove state between any two simplex-chains. Given \autoref{eq:n-tiles}:
+Since we defined the height of each tree as $h-1$, the maximal distance between leaf tiles is $2h$, which is also the maximal number of SPV proofs required to prove state between any two simplex-chains. Given \autoref{eq:n-tiles}:
 
 \begin{equation}
 \begin{split}

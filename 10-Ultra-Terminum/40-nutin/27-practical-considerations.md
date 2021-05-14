@@ -76,7 +76,7 @@ Given that the reflection-segments of simplex-chains will contain mostly repeate
 
 \label{sec:confirmation-times}
 
-A confirmation is a *discreet* event that occurs when a block is produced. When an attacker is performing a hash-rate based doublespend attack they are, effectively, racing the honest network; that race is measured in confirmations[^confirmation-race], not *time*.
+A confirmation is a *discreet* event that occurs when a block is produced. When an attacker is performing a hash-rate based doublespend attack they are, effectively, racing the honest network; that race is measured in confirmations, not *time*.
 
 \bquote{
     The probability of success [of a double-spend attempt] depends on the number of blocks [by which the honest network has an advantage], and not on the time constant $T_0$.
