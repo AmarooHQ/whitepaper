@@ -8,6 +8,8 @@ use std::fmt;
 use std::fmt::Debug;
 use std::sync::Mutex;
 
+mod inclusive;
+
 #[derive(Debug)]
 pub enum ChainErr {
     BadPoW(u128, u128),
@@ -34,14 +36,45 @@ pub struct Heights {
 }
 
 pub trait ChainT<'a, B: BlockT> {
-    // fn new() -> impl ChainT<'a, B>;
-    fn add_block(&mut self, b: B, is_private: bool) -> Result<(), ChainErr>;
-    fn draft_block(&self, ts: u32, is_private: bool) -> B;
-    // fn draft_attack_block(&self, ts: u32) -> B;
+    fn save_block(&mut self, b_id: u128, b: B);
+    fn save_block_meta(&mut self, b_id: u128, b: BlockMD<B>);
+    fn get_block(&self, b: u128) -> Option<&B>;
+    fn get_block_meta(&self, b: u128) -> Option<&BlockMD<B>>;
+
     fn select_best_block(&self, is_private: bool) -> u128;
+    fn get_best_blocks(&self, is_private: bool) -> &BTreeSet<u128>;
+    fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut BTreeSet<u128>;
     fn validate_block(&self, b: &B) -> Result<(BlockMD<B>, &B, &BlockMD<B>), ChainErr>;
     fn next_difficulty(&self, b: &B, b_meta: &BlockMD<B>) -> u128;
     fn get_heights_pub_priv(&self) -> Heights;
+
+    fn add_block(&mut self, b: B, is_private: bool) -> Result<(), ChainErr> {
+        let (b_meta, _p, _p_meta) = self.validate_block(&b)?;
+        self.update_best_block(&b, &b_meta, is_private);
+        self.save_block(b.hash(), b.clone());
+        self.save_block_meta(b.hash(), b_meta);
+        Ok(())
+    }
+
+    fn update_best_block(&mut self, b: &B, b_meta: &BlockMD<B>, is_private: bool);
+
+    // fn update_best_block(&mut self, b: &B, b_meta: &BlockMD<B>, is_private: bool) {
+    //     let best_height = self
+    //         .get_block_meta(self.select_best_block(is_private))
+    //         .unwrap()
+    //         .height;
+    //     let best_blocks = self.get_best_blocks_mut(is_private);
+    //     if b_meta.height > best_height {
+    //         best_blocks.clear();
+    //     }
+    //     if b_meta.height >= best_height {
+    //         best_blocks.insert(b.hash());
+    //     }
+    // }
+
+    fn draft_block(&self, ts: u32, is_private: bool) -> B {
+        B::new(ts, self.select_best_block(is_private))
+    }
 }
 
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -124,17 +157,28 @@ impl<'a, B: BlockT + Clone> Chain<B> {
     fn target_from_difficulty(&self, d: u128) -> u128 {
         (1 << 127) / d
     }
+}
+
+impl<'a, B: BlockT + Clone + Debug> ChainT<'a, B> for Chain<B> {
+    fn save_block(&mut self, id: u128, b: B) {
+        self.blocks.insert(id, b);
+    }
+
+    fn save_block_meta(&mut self, id: u128, b_meta: BlockMD<B>) {
+        self.blocks_meta.insert(id, b_meta);
+    }
+
+    fn get_block(&self, b: u128) -> Option<&B> {
+        self.blocks.get(&b)
+    }
+
+    fn get_block_meta(&self, b: u128) -> Option<&BlockMD<B>> {
+        self.blocks_meta.get(&b)
+    }
 
     fn update_best_block(&mut self, b: &B, b_meta: &BlockMD<B>, is_private: bool) {
         let best_height = self.blocks_meta[&self.select_best_block(is_private)].height;
-
-        let best_blocks;
-        if is_private {
-            best_blocks = &mut self.best_priv_blocks;
-        } else {
-            best_blocks = &mut self.best_blocks;
-        }
-
+        let best_blocks = self.get_best_blocks_mut(is_private);
         if b_meta.height > best_height {
             best_blocks.clear();
         }
@@ -142,30 +186,25 @@ impl<'a, B: BlockT + Clone> Chain<B> {
             best_blocks.insert(b.hash());
         }
     }
-}
 
-impl<'a, B: BlockT + Clone + Debug> ChainT<'a, B> for Chain<B> {
-    fn add_block(&mut self, b: B, is_private: bool) -> Result<(), ChainErr> {
-        let (b_meta, _p, _p_meta) = self.validate_block(&b)?;
-
-        self.update_best_block(&b, &b_meta, is_private);
-        self.blocks.insert(b.hash(), b.clone());
-        self.blocks_meta.insert(b.hash(), b_meta);
-
-        Ok(())
+    fn get_best_blocks(&self, is_private: bool) -> &BTreeSet<u128> {
+        if is_private {
+            &self.best_priv_blocks
+        } else {
+            &self.best_blocks
+        }
     }
 
-    fn draft_block(&self, ts: u32, is_private: bool) -> B {
-        B::new(ts, self.select_best_block(is_private))
+    fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut BTreeSet<u128> {
+        if is_private {
+            &mut self.best_priv_blocks
+        } else {
+            &mut self.best_blocks
+        }
     }
 
     fn select_best_block(&self, is_private: bool) -> u128 {
-        let blocks;
-        if is_private {
-            blocks = &self.best_priv_blocks;
-        } else {
-            blocks = &self.best_blocks;
-        }
+        let blocks = self.get_best_blocks(is_private);
         *blocks.iter().choose(&mut rand::thread_rng()).unwrap()
     }
 
@@ -237,7 +276,7 @@ mod tests {
         );
     }
 
-    fn _mk_test_block(chain: &Chain<Block>, ts: u32) -> Block {
+    fn _mk_test_block(chain: &mut Chain<Block>, ts: u32) -> Block {
         let mut b = chain.draft_block(ts, false);
         b.id >>= 16;
         b
@@ -246,7 +285,7 @@ mod tests {
     #[test]
     fn update_best_block() -> Result<(), String> {
         let (genesis, _g_md, mut chain) = _setup_chain();
-        let b = _mk_test_block(&chain, 10);
+        let b = _mk_test_block(&mut chain, 10);
 
         assert_eq!(chain.select_best_block(false), genesis.hash());
         assert_eq!(chain.select_best_block(true), genesis.hash());

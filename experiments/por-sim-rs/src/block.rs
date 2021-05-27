@@ -1,8 +1,10 @@
 use getrandom::getrandom;
+use rand::seq::IteratorRandom;
 use sha3::{Digest, Sha3_256};
 use std::convert::TryFrom;
 use std::fmt::Debug;
 use std::hash::Hash;
+use std::slice::Iter;
 
 pub trait BlockT: Clone + Debug + PartialEq + Eq {
     fn new(ts: u32, parent: u128) -> Self;
@@ -18,6 +20,14 @@ pub trait BlockT: Clone + Debug + PartialEq + Eq {
         getrandom(&mut e).unwrap();
         u128::from_be_bytes(e)
     }
+
+    // fn select_parent_from(ps: &[u128]) -> u128 {
+    //     *ps.iter().choose(&mut rand::thread_rng()).unwrap()
+    // }
+}
+
+pub trait ManyParentsBlockT: BlockT {
+    fn new_multi_parent(timestamp: u32, parents: Vec<u128>) -> Self;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -26,8 +36,6 @@ pub struct Block {
     pub parent: u128,
     pub timestamp: u32,
 }
-
-impl Block {}
 
 impl BlockT for Block {
     fn new(ts: u32, parent: u128) -> Self {
@@ -77,7 +85,7 @@ pub struct DagBlock {
     pub timestamp: u32,
 }
 
-impl DagBlock {
+impl ManyParentsBlockT for DagBlock {
     fn new_multi_parent(timestamp: u32, parents: Vec<u128>) -> Self {
         DagBlock {
             timestamp,
