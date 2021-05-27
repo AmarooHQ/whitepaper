@@ -4,8 +4,6 @@ use crate::chain::ChainT;
 use crate::msg::Msg;
 use crate::msg::Msg::*;
 use log::*;
-use std::collections::HashSet;
-// use std::fmt;
 use std::marker::PhantomData;
 
 #[derive(Debug)]
@@ -51,8 +49,7 @@ impl<'a, B: 'a + BlockT + Clone, C: ChainT<'a, B>> Node<B, C> {
                     if self.is_attacker {
                         self.got_block(&b, true)?;
                     }
-                }
-                MsgEcho(m) => (),
+                } // MsgEcho(_m) => (),
             }
         }
 
@@ -75,16 +72,13 @@ impl<'a, B: 'a + BlockT + Clone, C: ChainT<'a, B>> Node<B, C> {
     }
 
     fn attempt_mining(&self, ts: u32, max_attempts: u32) -> Result<B, ()> {
-        let mut b = if self.is_attacker && ts > self.attack_threshold {
-            self.chain.draft_attack_block(ts)
-        } else {
-            self.chain.draft_block(ts)
-        };
+        let mine_in_private = self.is_attacker && ts > self.attack_threshold;
         for _ in 0..max_attempts {
+            let b = self.chain.draft_block(ts, mine_in_private);
             match self.chain.validate_block(&b) {
                 Ok((b_md, _, _)) => {
                     info!(
-                        "\nN={:4} NEW_BLOCK H={:6}, D={:6}, T={:5}, {:#x} ⭢  {:#x}",
+                        "\nN={:3} NEW_BLOCK H={:4}, D={:4}, T={:4}, {:#x} ⭢  {:#x}",
                         self.id,
                         b_md.height,
                         b_md.difficulty,
@@ -115,13 +109,17 @@ mod tests {
         let mut n = Node::<Block, Chain<Block>>::new(
             1337,
             Chain::new(
-                genesis,
+                genesis.clone(),
                 BlockMD::mk_genesis_md(&genesis, Chain::<Block>::DAA2_N_BLOCKS),
             ),
             None,
         );
-        // let b = n.attempt_mining(10, 1000000).unwrap();
-        let mut b = n.chain.draft_block(10);
+
+        // just so we make sure we can get a valid block via mining
+        let _b = n.attempt_mining(10, 10000).unwrap();
+
+        // create a valid block manually
+        let mut b = n.chain.draft_block(10, false);
         b.id >>= 12;
 
         assert_eq!(b.prev(), genesis.hash());
@@ -130,7 +128,7 @@ mod tests {
         // let _new_msgs = n.step(11, vec![MsgBlock(b)]).unwrap();
         n.got_block(&b, false)?;
 
-        assert_ne!(n.chain.get_heights_pub_priv().public, prev_height);
+        assert_eq!(n.chain.get_heights_pub_priv().public, prev_height + 1);
 
         Ok(())
     }

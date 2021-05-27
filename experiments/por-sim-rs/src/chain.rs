@@ -4,8 +4,6 @@ use rand::seq::IteratorRandom;
 use std::cmp::max;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
-use std::collections::HashMap;
-use std::convert::TryFrom;
 use std::fmt;
 use std::fmt::Debug;
 use std::sync::Mutex;
@@ -38,8 +36,8 @@ pub struct Heights {
 pub trait ChainT<'a, B: BlockT> {
     // fn new() -> impl ChainT<'a, B>;
     fn add_block(&mut self, b: B, is_private: bool) -> Result<(), ChainErr>;
-    fn draft_block(&self, ts: u32) -> B;
-    fn draft_attack_block(&self, ts: u32) -> B;
+    fn draft_block(&self, ts: u32, is_private: bool) -> B;
+    // fn draft_attack_block(&self, ts: u32) -> B;
     fn select_best_block(&self, is_private: bool) -> u128;
     fn validate_block(&self, b: &B) -> Result<(BlockMD<B>, &B, &BlockMD<B>), ChainErr>;
     fn next_difficulty(&self, b: &B, b_meta: &BlockMD<B>) -> u128;
@@ -157,12 +155,8 @@ impl<'a, B: BlockT + Clone + Debug> ChainT<'a, B> for Chain<B> {
         Ok(())
     }
 
-    fn draft_block(&self, ts: u32) -> B {
-        B::new(ts, self.select_best_block(false))
-    }
-
-    fn draft_attack_block(&self, ts: u32) -> B {
-        B::new(ts, self.select_best_block(true))
+    fn draft_block(&self, ts: u32, is_private: bool) -> B {
+        B::new(ts, self.select_best_block(is_private))
     }
 
     fn select_best_block(&self, is_private: bool) -> u128 {
@@ -223,17 +217,16 @@ impl<'a, B: BlockT + Clone + Debug> ChainT<'a, B> for Chain<B> {
 mod tests {
     use super::*;
 
-    fn setup_chain() -> (Block, BlockMD<Block>, Chain<Block>) {
+    fn _setup_chain() -> (Block, BlockMD<Block>, Chain<Block>) {
         let genesis = Block::genesis(0);
         let g_md = BlockMD::mk_genesis_md(&genesis, Chain::<Block>::DAA2_N_BLOCKS);
-        // let chain = Chain::new(genesis, g_md.clone(), Mutex::new(HashMap::new()));
-        let chain = Chain::new(genesis, g_md.clone());
+        let chain = Chain::new(genesis.clone(), g_md.clone());
         (genesis, g_md, chain)
     }
 
     #[test]
     fn target_from_d() {
-        let (_, _, chain) = setup_chain();
+        let (_, _, chain) = _setup_chain();
         assert_eq!(chain.target_from_difficulty(1), 1 << 127);
         assert_eq!(chain.target_from_difficulty(2), 1 << 126);
         assert_eq!(chain.target_from_difficulty(8), 1 << 124);
@@ -244,15 +237,42 @@ mod tests {
         );
     }
 
+    fn _mk_test_block(chain: &Chain<Block>, ts: u32) -> Block {
+        let mut b = chain.draft_block(ts, false);
+        b.id >>= 16;
+        b
+    }
+
+    #[test]
+    fn update_best_block() -> Result<(), String> {
+        let (genesis, _g_md, mut chain) = _setup_chain();
+        let b = _mk_test_block(&chain, 10);
+
+        assert_eq!(chain.select_best_block(false), genesis.hash());
+        assert_eq!(chain.select_best_block(true), genesis.hash());
+
+        chain.add_block(b.clone(), false)?;
+
+        assert_eq!(chain.select_best_block(false), b.hash());
+        assert_eq!(chain.select_best_block(true), genesis.hash());
+
+        chain.add_block(b.clone(), true)?;
+
+        assert_eq!(chain.select_best_block(false), b.hash());
+        assert_eq!(chain.select_best_block(true), b.hash());
+
+        Ok(())
+    }
+
     #[test]
     fn block_md() -> Result<(), String> {
-        let (genesis, g_md, mut chain) = setup_chain();
+        let (genesis, g_md, mut chain) = _setup_chain();
         assert_eq!(g_md.daa2_blocks.len(), Chain::<Block>::DAA2_N_BLOCKS);
 
         let next_d = chain.next_difficulty(&genesis, &g_md);
         assert_eq!(next_d, 1000);
 
-        let mut b = chain.draft_block(10);
+        let mut b = chain.draft_block(10, false);
         // make the id (PoW proxy) smaller than starting difficulty (1000).
         b.id >>= 11;
 
@@ -266,7 +286,7 @@ mod tests {
             0
         );
         assert_eq!(chain.blocks.get(&b.hash()).is_none(), true);
-        chain.add_block(b, is_priv)?;
+        chain.add_block(b.clone(), is_priv)?;
         assert_eq!(chain.blocks.get(&b.hash()).is_some(), true);
 
         assert_ne!(chain.select_best_block(is_priv), pre_bb);

@@ -1,6 +1,6 @@
 use crate::block::Block;
 use crate::chain::Chain;
-use log::{info, Level, LevelFilter, Metadata, Record};
+use log::LevelFilter;
 use simple_logger::SimpleLogger;
 
 mod block;
@@ -19,7 +19,7 @@ pub fn main() -> Result<(), String> {
     let attack_starts_at = 1000;
     let mut mm =
         message_manager::MM::<Block, Chain<Block>>::new(n_honest, n_attackers, attack_starts_at);
-    mm.run_attack(attack_starts_at * 2, 20).unwrap();
+    mm.run_attack(attack_starts_at * 3, 20).unwrap();
 
     Ok(())
 }

@@ -1,11 +1,10 @@
 use super::node::*;
 use crate::block::BlockT;
 use crate::chain::*;
-use crate::msg::{Msg, Msg::*};
+use crate::msg::Msg;
 use core::hash::Hash;
 use itertools::Itertools;
 use log::*;
-use std::collections::{HashMap, HashSet};
 use std::fmt::Debug;
 
 pub struct MM<B, C> {
@@ -22,11 +21,8 @@ impl<'a, B: BlockT + Clone + Eq + Hash + Debug> MM<B, Chain<B>> {
             "Creating new simulation with {} honest nodes and {} attacking nodes. Attack starts at H={}.",
             nodes_honest, nodes_attacking, attack_starts_at
         );
-        // let diff_cache = Mutex::new(HashMap::new());
         let mut mm = MM {
-            // tick: 0,
             nodes: Vec::new(),
-            // difficulty_cache: Mutex::new(HashMap::new()),
             attack_starts_at,
         };
         let genesis = B::genesis(0);
@@ -68,7 +64,7 @@ impl<'a, B: BlockT + Clone + Eq + Hash + Debug> MM<B, Chain<B>> {
     pub fn tick_many(&mut self, n_ticks: u32) -> Result<Vec<Msg<B>>, String> {
         let mut msgs = Vec::new();
         let mut all_msgs = Vec::new();
-        msgs.push(MsgEcho(String::from("test msg")));
+        // msgs.push(Msg::MsgEcho(String::from("test msg")));
 
         for ts in 1..(n_ticks + 1) {
             if ts % 100 == 0 {
@@ -138,16 +134,17 @@ mod tests {
 
     #[test]
     fn blocks_propagate() {
-        let mut mm = MM::<Block, Chain<Block>>::new(100, 100, 10);
-        let all_msgs = mm.tick_many(100).unwrap();
+        let mut mm = MM::<Block, Chain<Block>>::new(10, 0, 0);
+        let all_msgs = mm.tick_many(10).unwrap();
 
         assert_eq!(all_msgs.len() > 0, true);
         println!("All Msgs: {:?}", all_msgs);
 
         let hs = mm.nodes.first().unwrap().chain.get_heights_pub_priv();
         assert_ne!(hs.public, 0);
+        assert_eq!(hs.private, 0);
 
-        for node in &mm.nodes[1..] {
+        for node in &mm.nodes[..] {
             assert_eq!(node.chain.get_heights_pub_priv().public, hs.public);
         }
     }

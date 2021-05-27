@@ -4,5 +4,5 @@ use crate::block::{Block, BlockT};
 pub enum Msg<B: Clone + BlockT = Block> {
     MsgBlock(B),
     MsgPrivBlock(B),
-    MsgEcho(String),
+    // MsgEcho(String),
 }
