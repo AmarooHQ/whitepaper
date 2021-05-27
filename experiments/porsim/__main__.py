@@ -97,7 +97,7 @@ nexus = BroadcastNexus()
 
 
 def simple_chain_factory() -> SimpleChain:
-    return SimpleChain(genesis=TBlock(0, 0, 1, 1, 0), genesis_meta=BlockMetaData(0, 2**10))
+    return SimpleChain(genesis=TBlock(0, 0, 1, 1, 0), genesis_meta=BlockMetaData(0, 2**20, SimpleChain.FREQUENCY_GOAL_nHz, SimpleChain.BLOCK_TIME_GOAL))
 
 
 def mk_node(network: str, chain_f: Callable[[], TChain[B, BlockMD]] = simple_chain_factory) -> Node[TChain[B, BlockMD]]:

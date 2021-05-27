@@ -1,0 +1,19 @@
+[package]
+name = "por-sim-rs"
+version = "0.1.0"
+authors = ["Max Kaye <m@xk.io>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+futures = "0.3"
+getrandom = "0.2.3"
+log = "0.4.14"
+rand = "0.8.3"
+sha3 = "0.9.1"
+simple_logger = "1.11.0"
+tokio = { version = "1.6.0", features = ["full"] }
+
+[profile.release]
+debug = true

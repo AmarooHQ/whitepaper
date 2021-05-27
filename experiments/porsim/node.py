@@ -101,7 +101,7 @@ class Node(Generic[C]):
                 break
 
     def _run_tick_mine(self, ts: int):
-        for _ in range(10000):
+        for _ in range(10):
             new_b = self.chain.draft_block(ts)
             match self.chain.block_validation_test(new_b):
                 case OK(b_meta):

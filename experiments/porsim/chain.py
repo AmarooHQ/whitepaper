@@ -15,6 +15,8 @@ from .block import SimpleBlock, TBlock
 class BlockMetaData:
     height: int
     difficulty: int
+    measured_f_nHz: int
+    block_time: int
 
     def __str__(self) -> str:
         return f"{asdict(self)}"
@@ -137,6 +139,8 @@ class SimpleChain(Generic[B], TChain[B, BlockMetaData]):
 
     TARGET_BYTES = 8
     MAX_TARGET = 256**TARGET_BYTES
+    BLOCK_TIME_GOAL = 10
+    FREQUENCY_GOAL_nHz = 10**9 // BLOCK_TIME_GOAL
 
     def add_block(self, b: B) -> BlockResult:
         invalid_res = self.block_validation_test(b)
@@ -147,13 +151,19 @@ class SimpleChain(Generic[B], TChain[B, BlockMetaData]):
         p_meta = self.blocks_meta[p.id]
         self.blocks[b.id] = b
         self.best.put(b)
-        self.blocks_meta[b.id] = BlockMetaData(p_meta.height + 1, self.next_difficulty(p))
+        self.blocks_meta[b.id] = BlockMetaData(
+            p_meta.height + 1,
+            self.next_difficulty(p),
+            self.measure_nHz(p),
+            b.timestamp - p.timestamp
+            )
         return OK(b)
 
     def draft_block(self, ts: int):
         p = self.best.get_one()
         d = self.calc_next_difficulty(p)
-        new_id = int.from_bytes(os.urandom(self.TARGET_BYTES), byteorder='big')
+        # take 2 fewer bytes than target to simulate luckiest/best attempt
+        new_id = int.from_bytes(os.urandom(self.TARGET_BYTES - 2), byteorder='big')
         return p.__class__(new_id, p.id, 1, p.sigma_weight + 1, ts)
 
     def chain_heads(self):
@@ -173,7 +183,7 @@ class SimpleChain(Generic[B], TChain[B, BlockMetaData]):
         if b.sigma_weight != b.weight + p.sigma_weight:
             return Err(f"Incorrect Sigma Weight {b.sigma_weight}")
 
-        return OK(BlockMetaData(p_meta.height + 1, next_diff))
+        return OK(BlockMetaData(p_meta.height + 1, next_diff, self.measure_nHz(p), b.timestamp - p.timestamp))
 
     def calc_next_difficulty(self, p: B):
         # last_ten = reduce()
@@ -192,16 +202,50 @@ class SimpleChain(Generic[B], TChain[B, BlockMetaData]):
     def height_of(self, b: B) -> int:
         return self.blocks_meta[b.id].height
 
-    def next_difficulty(self, p: B) -> int:
+    def next_difficulty_ethlike(self, p: B) -> int:
         if p.id == 0:
-            return 2**20
+            return 2**17
         old_p = self.blocks[p.parent]
-        delta_ts = p.timestamp - old_p.timestamp
+        delta_ts = (p.timestamp - old_p.timestamp)
         assert delta_ts > 0
-        modifier = max(1 - delta_ts, -99)
+        modifier = max(1 - delta_ts // self.BLOCK_TIME_GOAL, -99)
         old_diff = self.blocks_meta[old_p.id].difficulty
-        new_diff = old_diff + old_diff // 2048 * modifier
-        return max(new_diff, 2048)
+        new_diff = old_diff + old_diff * modifier // 1024
+        return max(new_diff, 1024)
+
+    def next_difficulty_pde(self, b: B) -> int:
+        p = self.blocks[b.parent]
+        p_meta = self.blocks_meta[p.id]
+        p_diff = p_meta.difficulty
+        prev_nHz = self.measure_nHz(p)
+        a = 100
+        f_prime = (prev_nHz - self.FREQUENCY_GOAL_nHz) // a
+        return p_diff + p_diff * f_prime // prev_nHz
+
+    def next_difficulty_daa2(self, b: B) -> int:
+        sum_last = 100
+        # sum_last = 2048
+        b_with_ancestors = self.get_with_n_ancestors(b, sum_last - 1)
+        block_time_sum = sum(self.blocks_meta[_b.id].block_time for _b in b_with_ancestors)
+        win_rate_sum = sum(self.blocks_meta[_b.id].difficulty for _b in b_with_ancestors)
+        return self.BLOCK_TIME_GOAL * win_rate_sum // block_time_sum
+
+    def get_with_n_ancestors(self, b: B, n: int) -> list[B]:
+        ancestors = [b]
+        c = b
+        for _ in range(n):
+            c = self.blocks[c.parent]
+            ancestors.append(c)
+        return ancestors
+
+    def next_difficulty(self, b: B) -> int:
+        return self.next_difficulty_daa2(b)
+
+    def measure_nHz(self, b: B) -> int:
+        if b.id == 0:
+            return self.FREQUENCY_GOAL_nHz
+        p = self.blocks[b.parent]
+        return self.blocks_meta[b.id].measured_f_nHz * 90 // 100 + 10**9 // (b.timestamp - p.timestamp) * 10 // 100
 
     def target_from_difficulty(self, d: int) -> int:
         return self.MAX_TARGET // d
