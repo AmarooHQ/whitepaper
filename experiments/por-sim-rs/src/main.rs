@@ -14,9 +14,12 @@ pub fn main() -> Result<(), String> {
         .with_level(LevelFilter::Info)
         .init()
         .unwrap();
-
-    let mut mm = message_manager::MM::<Block, Chain<Block>>::new(1000);
-    mm.tick_many(1000).unwrap();
+    let n_honest = 40;
+    let n_attackers = 35;
+    let attack_starts_at = 1000;
+    let mut mm =
+        message_manager::MM::<Block, Chain<Block>>::new(n_honest, n_attackers, attack_starts_at);
+    mm.run_attack(attack_starts_at * 2, 20).unwrap();
 
     Ok(())
 }

@@ -30,14 +30,20 @@ impl From<ChainErr> for String {
 
 use ChainErr::*;
 
+pub struct Heights {
+    pub public: u32,
+    pub private: u32,
+}
+
 pub trait ChainT<'a, B: BlockT> {
     // fn new() -> impl ChainT<'a, B>;
-    fn add_block(&mut self, b: B) -> Result<(), ChainErr>;
+    fn add_block(&mut self, b: B, is_private: bool) -> Result<(), ChainErr>;
     fn draft_block(&self, ts: u32) -> B;
-    fn select_best_block(&self) -> u128;
+    fn draft_attack_block(&self, ts: u32) -> B;
+    fn select_best_block(&self, is_private: bool) -> u128;
     fn validate_block(&self, b: &B) -> Result<(BlockMD<B>, &B, &BlockMD<B>), ChainErr>;
-    fn next_difficulty(&self, b: &B) -> u128;
-    // fn fork_rule
+    fn next_difficulty(&self, b: &B, b_meta: &BlockMD<B>) -> u128;
+    fn get_heights_pub_priv(&self) -> Heights;
 }
 
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -60,7 +66,8 @@ impl<B: BlockT> BlockMD<B> {
 
 pub struct Chain<B: BlockT> {
     blocks: BTreeMap<u128, B>,
-    best_blocks: BTreeSet<u128>,
+    pub best_blocks: BTreeSet<u128>,
+    best_priv_blocks: BTreeSet<u128>,
     blocks_meta: BTreeMap<u128, BlockMD<B>>,
     goal_block_time: u32,
     difficulty_cache: Mutex<BTreeMap<u128, u128>>,
@@ -69,16 +76,13 @@ pub struct Chain<B: BlockT> {
 impl<'a, B: BlockT + Clone> Chain<B> {
     pub const DAA2_N_BLOCKS: usize = 100;
 
-    pub fn new(
-        genesis: B,
-        genesis_meta: BlockMD<B>,
-        // difficulty_cache: Mutex<HashMap<u128, u128>>,
-    ) -> Chain<B> {
+    pub fn new(genesis: B, genesis_meta: BlockMD<B>) -> Chain<B> {
         let g_hash = genesis.hash();
         trace!("genesis.hash:{}", g_hash);
         Chain {
             blocks: [(g_hash, genesis.clone())].iter().cloned().collect(),
             best_blocks: [g_hash].iter().cloned().collect(),
+            best_priv_blocks: [g_hash].iter().cloned().collect(),
             blocks_meta: [(g_hash, genesis_meta)].iter().cloned().collect(),
             goal_block_time: 10,
             difficulty_cache: Mutex::new([].iter().cloned().collect()),
@@ -95,9 +99,8 @@ impl<'a, B: BlockT + Clone> Chain<B> {
     //     bs
     // }
 
-    fn next_difficulty_daa2_raw(&self, b_hash: u128) -> u128 {
-        let b_meta = &self.blocks_meta[&b_hash];
-        if b_meta.height < u32::try_from(Self::DAA2_N_BLOCKS >> 4).unwrap() {
+    fn next_difficulty_daa2_raw(&self, b_hash: u128, b_meta: &BlockMD<B>) -> u128 {
+        if b_meta.height < (Self::DAA2_N_BLOCKS >> 4) as u32 {
             return 1000;
         }
         let blocks = &b_meta.daa2_blocks;
@@ -107,13 +110,13 @@ impl<'a, B: BlockT + Clone> Chain<B> {
         u128::from(self.goal_block_time) * win_rate_sum / max(u128::from(block_time_sum), 1)
     }
 
-    fn next_difficulty_daa2(&self, b_hash: u128) -> u128 {
+    fn next_difficulty_daa2(&self, b_hash: u128, b_meta: &BlockMD<B>) -> u128 {
         let mut c = self.difficulty_cache.lock().unwrap();
         let cached_d = c.get(&b_hash).clone();
         match cached_d {
             Some(d) => *d,
             None => {
-                let d = self.next_difficulty_daa2_raw(b_hash);
+                let d = self.next_difficulty_daa2_raw(b_hash, b_meta);
                 c.insert(b_hash, d);
                 d
             }
@@ -123,21 +126,31 @@ impl<'a, B: BlockT + Clone> Chain<B> {
     fn target_from_difficulty(&self, d: u128) -> u128 {
         (1 << 127) / d
     }
+
+    fn update_best_block(&mut self, b: &B, b_meta: &BlockMD<B>, is_private: bool) {
+        let best_height = self.blocks_meta[&self.select_best_block(is_private)].height;
+
+        let best_blocks;
+        if is_private {
+            best_blocks = &mut self.best_priv_blocks;
+        } else {
+            best_blocks = &mut self.best_blocks;
+        }
+
+        if b_meta.height > best_height {
+            best_blocks.clear();
+        }
+        if b_meta.height >= best_height {
+            best_blocks.insert(b.hash());
+        }
+    }
 }
 
 impl<'a, B: BlockT + Clone + Debug> ChainT<'a, B> for Chain<B> {
-    fn add_block(&mut self, b: B) -> Result<(), ChainErr> {
+    fn add_block(&mut self, b: B, is_private: bool) -> Result<(), ChainErr> {
         let (b_meta, _p, _p_meta) = self.validate_block(&b)?;
 
-        let best_height = self.blocks_meta[&self.select_best_block()].height;
-        if b_meta.height > best_height {
-            self.best_blocks.clear();
-            // self.best_blocks = [b.hash()].iter().cloned().collect();
-        }
-        if b_meta.height >= best_height {
-            self.best_blocks.insert(b.hash());
-        }
-
+        self.update_best_block(&b, &b_meta, is_private);
         self.blocks.insert(b.hash(), b.clone());
         self.blocks_meta.insert(b.hash(), b_meta);
 
@@ -145,25 +158,39 @@ impl<'a, B: BlockT + Clone + Debug> ChainT<'a, B> for Chain<B> {
     }
 
     fn draft_block(&self, ts: u32) -> B {
-        B::new(ts, self.select_best_block())
+        B::new(ts, self.select_best_block(false))
     }
 
-    fn select_best_block(&self) -> u128 {
-        *self
-            .best_blocks
-            .iter()
-            .choose(&mut rand::thread_rng())
-            .unwrap()
+    fn draft_attack_block(&self, ts: u32) -> B {
+        B::new(ts, self.select_best_block(true))
+    }
+
+    fn select_best_block(&self, is_private: bool) -> u128 {
+        let blocks;
+        if is_private {
+            blocks = &self.best_priv_blocks;
+        } else {
+            blocks = &self.best_blocks;
+        }
+        *blocks.iter().choose(&mut rand::thread_rng()).unwrap()
+    }
+
+    fn get_heights_pub_priv(&self) -> Heights {
+        Heights {
+            public: self.blocks_meta[&self.select_best_block(false)].height,
+            private: self.blocks_meta[&self.select_best_block(true)].height,
+        }
     }
 
     fn validate_block(&self, b: &B) -> Result<(BlockMD<B>, &B, &BlockMD<B>), ChainErr> {
-        if !self.blocks.contains_key(&b.prev()) {
+        let pm = self.blocks.get(&b.prev());
+        if pm.is_none() {
             return Err(UnkParent);
         }
 
-        let p = self.blocks.get(&b.prev()).unwrap();
+        let p = pm.unwrap();
         let p_meta = self.blocks_meta.get(&b.prev()).unwrap();
-        let d = self.next_difficulty(&p);
+        let d = self.next_difficulty(&p, &p_meta);
         let target = self.target_from_difficulty(d);
 
         if b.hash() > target {
@@ -187,8 +214,8 @@ impl<'a, B: BlockT + Clone + Debug> ChainT<'a, B> for Chain<B> {
         ))
     }
 
-    fn next_difficulty(&self, b: &B) -> u128 {
-        self.next_difficulty_daa2(b.hash())
+    fn next_difficulty(&self, b: &B, b_meta: &BlockMD<B>) -> u128 {
+        self.next_difficulty_daa2(b.hash(), b_meta)
     }
 }
 
@@ -219,17 +246,35 @@ mod tests {
 
     #[test]
     fn block_md() -> Result<(), String> {
-        let (_genesis, g_md, chain) = setup_chain();
+        let (genesis, g_md, mut chain) = setup_chain();
         assert_eq!(g_md.daa2_blocks.len(), Chain::<Block>::DAA2_N_BLOCKS);
 
-        let next_d = chain.next_difficulty(&_genesis);
+        let next_d = chain.next_difficulty(&genesis, &g_md);
         assert_eq!(next_d, 1000);
 
         let mut b = chain.draft_block(10);
+        // make the id (PoW proxy) smaller than starting difficulty (1000).
         b.id >>= 11;
 
         let (b_md, _, _) = chain.validate_block(&b)?;
         assert_eq!(b_md.daa2_blocks.len(), Chain::<Block>::DAA2_N_BLOCKS);
+
+        let is_priv = false;
+        let pre_bb = chain.select_best_block(is_priv);
+        assert_eq!(
+            chain.blocks_meta[&chain.select_best_block(is_priv)].height,
+            0
+        );
+        assert_eq!(chain.blocks.get(&b.hash()).is_none(), true);
+        chain.add_block(b, is_priv)?;
+        assert_eq!(chain.blocks.get(&b.hash()).is_some(), true);
+
+        assert_ne!(chain.select_best_block(is_priv), pre_bb);
+        assert_ne!(
+            chain.blocks_meta[&chain.select_best_block(is_priv)].height,
+            0
+        );
+
         Ok(())
     }
 }
