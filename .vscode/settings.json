@@ -55,6 +55,7 @@
         "discipulus",
         "doublespend",
         "doublespends",
+        "getrandom",
         "incented",
         "incenting",
         "incentivized",
@@ -113,5 +114,8 @@
         "\\[\\^([a-z0-9\\-]*)\\]",
         "\\\\bquote{([a-zA-Z0-9`'\\- \\.;\\(\\)\\n]*)}"
     ],
-    "python.pythonPath": "/usr/bin/python3"
+    "python.pythonPath": "/home/xertrov/.pyenv/versions/3.10.0b1/bin/python",
+    "[rust]": {
+        "editor.formatOnSave": true
+    },
 }

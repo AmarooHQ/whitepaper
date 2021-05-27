@@ -1,6 +1,5 @@
 use crate::block::Block;
 use crate::chain::Chain;
-use futures::prelude::*;
 use log::{info, Level, LevelFilter, Metadata, Record};
 use simple_logger::SimpleLogger;
 
@@ -16,7 +15,7 @@ pub fn main() -> Result<(), String> {
         .init()
         .unwrap();
 
-    let mut mm = message_manager::MM::<Block, Chain<Block>>::new(100);
+    let mut mm = message_manager::MM::<Block, Chain<Block>>::new(1000);
     mm.tick_many(1000).unwrap();
 
     Ok(())

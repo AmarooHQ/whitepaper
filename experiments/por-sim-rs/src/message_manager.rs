@@ -4,20 +4,24 @@ use crate::chain::*;
 use crate::msg::{Msg, Msg::*};
 use core::hash::Hash;
 use log::*;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fmt::Debug;
+use std::sync::Mutex;
 
 pub struct MM<B, C> {
     // tick: u32,
     nodes: Vec<Node<B, C>>,
+    // difficulty_cache: Mutex<HashMap<u128, u128>>,
 }
 
 impl<'a, B: BlockT + Clone + Eq + Hash + Debug> MM<B, Chain<B>> {
     pub fn new(nodes: u16) -> MM<B, Chain<B>> {
         info!("Creating new simulation with {} nodes", nodes);
+        // let diff_cache = Mutex::new(HashMap::new());
         let mut mm = MM {
             // tick: 0,
             nodes: Vec::new(),
+            // difficulty_cache: Mutex::new(HashMap::new()),
         };
         let genesis = B::genesis(0);
         for i in 0..nodes {
@@ -32,6 +36,7 @@ impl<'a, B: BlockT + Clone + Eq + Hash + Debug> MM<B, Chain<B>> {
                 Chain::<B>::new(
                     g.clone(),
                     BlockMD::mk_genesis_md(&genesis, Chain::<B>::DAA2_N_BLOCKS),
+                    // Mutex::new(HashMap::new()),
                 ),
             ));
         }
