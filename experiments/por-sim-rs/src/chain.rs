@@ -1,6 +1,6 @@
 use crate::block::*;
-use crate::chain::fork_rules::ForkRules;
-use crate::chain::fork_rules::LongestChain;
+use crate::chain::fork_rules::*;
+use crate::ForkResult::BestBlock;
 use log::*;
 use std::cmp::max;
 use std::collections::BTreeMap;
@@ -9,7 +9,7 @@ use std::fmt;
 use std::fmt::Debug;
 use std::sync::Mutex;
 
-mod fork_rules;
+pub mod fork_rules;
 mod inclusive;
 
 #[derive(Debug)]
@@ -38,14 +38,14 @@ pub struct Heights {
 }
 
 /// Used for LCA calculations
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct BInfo<B> {
     id: u128,
     b: B,
     b_md: BlockMD<B>,
 }
 
-pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain> {
+pub trait ChainT<'a, B: BlockT> {
     fn save_block(&mut self, b_id: u128, b: B);
     fn save_block_meta(&mut self, b_id: u128, b: BlockMD<B>);
     fn get_block(&self, b: u128) -> Option<&B>;
@@ -68,15 +68,26 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain> {
     // fn update_best_block(&mut self, b: &B, b_meta: &BlockMD<B>, is_private: bool);
 
     fn update_best_block(&mut self, b: &B, b_meta: &BlockMD<B>, is_private: bool) {
-        let best_height = self
-            .get_block_meta(self.select_best_block(is_private))
-            .unwrap()
-            .height;
+        let bb_id = self.select_best_block(is_private);
+        let bb_md = self.get_block_meta(bb_id).unwrap().clone();
+        // let bb = self.get_block(bb_id).unwrap();
         let best_blocks = self.get_best_blocks_mut(is_private);
-        if b_meta.height > best_height {
+        /*let best_of = F::best_of((b, b_meta), (bb, bb_md));
+        match best_of {
+            BestBlock(_b) => {
+                if _b == b {
+                    best_blocks.clear();
+                    best_blocks.insert(b.get_hash());
+                }
+            }
+            BlocksEq => {
+                best_blocks.insert(b.get_hash());
+            }
+        };*/
+        if b_meta.height > bb_md.height {
             best_blocks.clear();
         }
-        if b_meta.height >= best_height {
+        if b_meta.height >= bb_md.height {
             best_blocks.insert(b.get_hash());
         }
     }
@@ -187,9 +198,10 @@ pub struct Chain<B: BlockT> {
     blocks_meta: BTreeMap<u128, BlockMD<B>>,
     goal_block_time: u32,
     difficulty_cache: Mutex<BTreeMap<u128, u128>>,
+    // fork_rules: F,
 }
 
-impl<'a, B: BlockT + Clone> Chain<B> {
+impl<'a, B: BlockT> Chain<B> {
     pub const DAA2_N_BLOCKS: usize = 100;
 
     pub fn new(genesis: B, genesis_meta: BlockMD<B>) -> Chain<B> {
@@ -202,6 +214,7 @@ impl<'a, B: BlockT + Clone> Chain<B> {
             blocks_meta: [(g_hash, genesis_meta)].iter().cloned().collect(),
             goal_block_time: 10,
             difficulty_cache: Mutex::new([].iter().cloned().collect()),
+            // fork_rules,
         }
     }
 
@@ -240,7 +253,7 @@ impl<'a, B: BlockT + Clone> Chain<B> {
     }
 }
 
-impl<'a, B: BlockT + Clone + Debug> ChainT<'a, B> for Chain<B> {
+impl<'a, B: BlockT> ChainT<'a, B> for Chain<B> {
     fn save_block(&mut self, id: u128, b: B) {
         self.blocks.insert(id, b);
     }
@@ -362,7 +375,7 @@ mod tests {
 
     #[test]
     fn update_best_block() -> Result<(), String> {
-        let (genesis, _g_md, mut chain) = _setup_chain();
+        let (genesis, _g_md, mut chain) = _setup_chain::<Block>();
         let b = _mk_test_block(&mut chain, 10);
 
         assert_eq!(chain.select_best_block(false), genesis.get_hash());

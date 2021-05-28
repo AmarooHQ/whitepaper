@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 clap = "2.33.3"
+derive-new = "0.5.9"
 getrandom = "0.2.3"
 itertools = "0.10.0"
 log = "0.4.14"

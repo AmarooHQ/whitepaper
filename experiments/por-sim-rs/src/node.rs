@@ -1,4 +1,5 @@
 use crate::block::BlockT;
+use crate::chain::fork_rules::*;
 use crate::chain::ChainErr;
 use crate::chain::ChainT;
 use crate::msg::Msg;
@@ -16,7 +17,7 @@ pub struct Node<B, C> {
     mining_attempts_per_tick: u32,
 }
 
-impl<'a, B: 'a + BlockT + Clone, C: ChainT<'a, B>> Node<B, C> {
+impl<'a, B: 'a + BlockT, C: ChainT<'a, B>> Node<B, C> {
     pub fn new(
         id: u16,
         chain: C,
@@ -108,6 +109,7 @@ impl<'a, B: 'a + BlockT + Clone, C: ChainT<'a, B>> Node<B, C> {
 mod tests {
     use super::*;
     use crate::block::Block;
+    use crate::chain::fork_rules::LongestChain;
     use crate::chain::*;
 
     #[test]

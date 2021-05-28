@@ -1,5 +1,6 @@
 use super::node::*;
 use crate::block::BlockT;
+use crate::chain::fork_rules::*;
 use crate::chain::*;
 use crate::msg::Msg;
 use core::hash::Hash;
@@ -14,7 +15,7 @@ pub struct MM<B, C> {
     attack_starts_at: u32,
 }
 
-impl<'a, B: BlockT + Clone + Eq + Hash + Debug> MM<B, Chain<B>> {
+impl<'a, B: BlockT + Debug> MM<B, Chain<B>> {
     pub fn new(
         nodes_honest: u16,
         nodes_attacking: u16,
@@ -155,7 +156,7 @@ mod tests {
 
     #[test]
     fn blocks_propagate() {
-        let mut mm = create_mm_no_priv::<Block>();
+        let mut mm: MM<Block, Chain<Block>> = create_mm_no_priv();
         let all_msgs = mm.tick_many(10).unwrap();
 
         assert_eq!(all_msgs.len() > 0, true);

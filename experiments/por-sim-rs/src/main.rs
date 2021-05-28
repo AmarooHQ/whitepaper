@@ -1,4 +1,5 @@
 use crate::block::Block;
+use crate::chain::fork_rules::*;
 use crate::chain::Chain;
 use clap::{value_t_or_exit, App, Arg, ArgMatches, SubCommand};
 use log::LevelFilter;
@@ -6,6 +7,8 @@ use simple_logger::SimpleLogger;
 
 #[macro_use]
 extern crate clap;
+#[macro_use]
+extern crate derive_new;
 
 mod block;
 mod chain;
