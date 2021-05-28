@@ -7,6 +7,7 @@ use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::fmt;
 use std::fmt::Debug;
+use std::marker::PhantomData;
 use std::sync::Mutex;
 
 pub mod fork_rules;
@@ -45,7 +46,7 @@ pub struct BInfo<B> {
     b_md: BlockMD<B>,
 }
 
-pub trait ChainT<'a, B: BlockT> {
+pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     fn save_block(&mut self, b_id: u128, b: B);
     fn save_block_meta(&mut self, b_id: u128, b: BlockMD<B>);
     fn get_block(&self, b: u128) -> Option<&B>;
@@ -70,9 +71,9 @@ pub trait ChainT<'a, B: BlockT> {
     fn update_best_block(&mut self, b: &B, b_meta: &BlockMD<B>, is_private: bool) {
         let bb_id = self.select_best_block(is_private);
         let bb_md = self.get_block_meta(bb_id).unwrap().clone();
-        // let bb = self.get_block(bb_id).unwrap();
+        let bb = self.get_block(bb_id).unwrap().clone();
         let best_blocks = self.get_best_blocks_mut(is_private);
-        /*let best_of = F::best_of((b, b_meta), (bb, bb_md));
+        let best_of: ForkResult<B> = F::best_of((b, b_meta), (&bb, &bb_md));
         match best_of {
             BestBlock(_b) => {
                 if _b == b {
@@ -80,16 +81,16 @@ pub trait ChainT<'a, B: BlockT> {
                     best_blocks.insert(b.get_hash());
                 }
             }
-            BlocksEq => {
+            ForkResult::BlocksEq => {
                 best_blocks.insert(b.get_hash());
             }
-        };*/
-        if b_meta.height > bb_md.height {
-            best_blocks.clear();
-        }
-        if b_meta.height >= bb_md.height {
-            best_blocks.insert(b.get_hash());
-        }
+        };
+        // if b_meta.height > bb_md.height {
+        //     best_blocks.clear();
+        // }
+        // if b_meta.height >= bb_md.height {
+        //     best_blocks.insert(b.get_hash());
+        // }
     }
 
     fn draft_block(&self, ts: u32, is_private: bool) -> B {
@@ -191,20 +192,21 @@ impl<B: BlockT> BlockMD<B> {
     }
 }
 
-pub struct Chain<B: BlockT> {
+pub struct Chain<B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     blocks: BTreeMap<u128, B>,
     pub best_blocks: BTreeSet<u128>,
     best_priv_blocks: BTreeSet<u128>,
     blocks_meta: BTreeMap<u128, BlockMD<B>>,
     goal_block_time: u32,
     difficulty_cache: Mutex<BTreeMap<u128, u128>>,
-    // fork_rules: F,
+    // fork_rules: LongestChain<B>,
+    _phantom: PhantomData<F>,
 }
 
-impl<'a, B: BlockT> Chain<B> {
+impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
     pub const DAA2_N_BLOCKS: usize = 100;
 
-    pub fn new(genesis: B, genesis_meta: BlockMD<B>) -> Chain<B> {
+    pub fn new(genesis: B, genesis_meta: BlockMD<B>) -> Chain<B, F> {
         let g_hash = genesis.get_hash();
         trace!("genesis.hash:{}", g_hash);
         Chain {
@@ -214,7 +216,8 @@ impl<'a, B: BlockT> Chain<B> {
             blocks_meta: [(g_hash, genesis_meta)].iter().cloned().collect(),
             goal_block_time: 10,
             difficulty_cache: Mutex::new([].iter().cloned().collect()),
-            // fork_rules,
+            // fork_rules: LongestChain::<B>::new(),
+            _phantom: PhantomData,
         }
     }
 
@@ -253,7 +256,7 @@ impl<'a, B: BlockT> Chain<B> {
     }
 }
 
-impl<'a, B: BlockT> ChainT<'a, B> for Chain<B> {
+impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
     fn save_block(&mut self, id: u128, b: B) {
         self.blocks.insert(id, b);
     }
@@ -347,16 +350,16 @@ impl<'a, B: BlockT> ChainT<'a, B> for Chain<B> {
 mod tests {
     use super::*;
 
-    fn _setup_chain<B: BlockT>() -> (B, BlockMD<B>, Chain<B>) {
+    fn _setup_chain<B: BlockT, F: ForkRules<B>>() -> (B, BlockMD<B>, Chain<B, F>) {
         let genesis = B::genesis(0);
-        let g_md = BlockMD::mk_genesis_md(&genesis, Chain::<B>::DAA2_N_BLOCKS);
+        let g_md = BlockMD::mk_genesis_md(&genesis, Chain::<B, F>::DAA2_N_BLOCKS);
         let chain = Chain::new(genesis.clone(), g_md.clone());
         (genesis, g_md, chain)
     }
 
     #[test]
     fn target_from_d() {
-        let (_, _, chain) = _setup_chain::<Block>();
+        let (_, _, chain) = _setup_chain::<Block, LongestChain<Block>>();
         assert_eq!(chain.target_from_difficulty(1), 1 << 127);
         assert_eq!(chain.target_from_difficulty(2), 1 << 126);
         assert_eq!(chain.target_from_difficulty(8), 1 << 124);
@@ -375,7 +378,7 @@ mod tests {
 
     #[test]
     fn update_best_block() -> Result<(), String> {
-        let (genesis, _g_md, mut chain) = _setup_chain::<Block>();
+        let (genesis, _g_md, mut chain) = _setup_chain::<Block, LongestChain<Block>>();
         let b = _mk_test_block(&mut chain, 10);
 
         assert_eq!(chain.select_best_block(false), genesis.get_hash());
@@ -396,8 +399,11 @@ mod tests {
 
     #[test]
     fn block_md() -> Result<(), String> {
-        let (genesis, g_md, mut chain) = _setup_chain::<Block>();
-        assert_eq!(g_md.daa2_blocks.len(), Chain::<Block>::DAA2_N_BLOCKS);
+        let (genesis, g_md, mut chain) = _setup_chain::<Block, LongestChain<Block>>();
+        assert_eq!(
+            g_md.daa2_blocks.len(),
+            Chain::<Block, LongestChain<Block>>::DAA2_N_BLOCKS
+        );
 
         let next_d = chain.next_difficulty(&genesis, &g_md);
         // assert_eq!(next_d, 1000);
@@ -406,7 +412,10 @@ mod tests {
         let b = _mk_draft_block(&chain, 10, false);
 
         let (b_md, _, _) = chain.validate_block(&b)?;
-        assert_eq!(b_md.daa2_blocks.len(), Chain::<Block>::DAA2_N_BLOCKS);
+        assert_eq!(
+            b_md.daa2_blocks.len(),
+            Chain::<Block, LongestChain<Block>>::DAA2_N_BLOCKS
+        );
 
         let is_priv = false;
         let pre_bb = chain.select_best_block(is_priv);
@@ -437,7 +446,7 @@ mod tests {
     #[test]
     fn find_lca_simple() -> Result<(), String> {
         // creates a single-parent chain
-        let (g, _g_md, mut chain) = _setup_chain::<Block>();
+        let (g, _g_md, mut chain) = _setup_chain::<Block, LongestChain<Block>>();
 
         let b1 = _mk_draft_block(&chain, 10, false);
         let b2 = _mk_draft_block(&chain, 10, false);
@@ -475,8 +484,9 @@ mod tests {
 
     #[test]
     fn find_lca_dag_simple() -> Result<(), String> {
-        // creates a single-parent chain
-        let (g, _g_md, mut chain) = _setup_chain::<DagBlock>();
+        todo!();
+        // creates a multi-parent chain
+        let (g, _g_md, mut chain) = _setup_chain::<DagBlock, LongestChain<DagBlock>>();
 
         let b1 = _mk_draft_block(&chain, 10, false);
         let b2 = _mk_draft_block(&chain, 10, false);
