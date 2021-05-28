@@ -1,6 +1,7 @@
 use crate::block::*;
+use crate::chain::fork_rules::ForkRules;
+use crate::chain::fork_rules::LongestChain;
 use log::*;
-use rand::seq::IteratorRandom;
 use std::cmp::max;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
@@ -8,6 +9,7 @@ use std::fmt;
 use std::fmt::Debug;
 use std::sync::Mutex;
 
+mod fork_rules;
 mod inclusive;
 
 #[derive(Debug)]
@@ -35,13 +37,20 @@ pub struct Heights {
     pub private: u32,
 }
 
-pub trait ChainT<'a, B: BlockT> {
+/// Used for LCA calculations
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
+pub struct BInfo<B> {
+    id: u128,
+    b: B,
+    b_md: BlockMD<B>,
+}
+
+pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain> {
     fn save_block(&mut self, b_id: u128, b: B);
     fn save_block_meta(&mut self, b_id: u128, b: BlockMD<B>);
     fn get_block(&self, b: u128) -> Option<&B>;
     fn get_block_meta(&self, b: u128) -> Option<&BlockMD<B>>;
 
-    fn select_best_block(&self, is_private: bool) -> u128;
     fn get_best_blocks(&self, is_private: bool) -> &BTreeSet<u128>;
     fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut BTreeSet<u128>;
     fn validate_block(&self, b: &B) -> Result<(BlockMD<B>, &B, &BlockMD<B>), ChainErr>;
@@ -51,36 +60,110 @@ pub trait ChainT<'a, B: BlockT> {
     fn add_block(&mut self, b: B, is_private: bool) -> Result<(), ChainErr> {
         let (b_meta, _p, _p_meta) = self.validate_block(&b)?;
         self.update_best_block(&b, &b_meta, is_private);
-        self.save_block(b.hash(), b.clone());
-        self.save_block_meta(b.hash(), b_meta);
+        self.save_block(b.get_hash(), b.clone());
+        self.save_block_meta(b.get_hash(), b_meta);
         Ok(())
     }
 
-    fn update_best_block(&mut self, b: &B, b_meta: &BlockMD<B>, is_private: bool);
+    // fn update_best_block(&mut self, b: &B, b_meta: &BlockMD<B>, is_private: bool);
 
-    // fn update_best_block(&mut self, b: &B, b_meta: &BlockMD<B>, is_private: bool) {
-    //     let best_height = self
-    //         .get_block_meta(self.select_best_block(is_private))
-    //         .unwrap()
-    //         .height;
-    //     let best_blocks = self.get_best_blocks_mut(is_private);
-    //     if b_meta.height > best_height {
-    //         best_blocks.clear();
-    //     }
-    //     if b_meta.height >= best_height {
-    //         best_blocks.insert(b.hash());
-    //     }
-    // }
+    fn update_best_block(&mut self, b: &B, b_meta: &BlockMD<B>, is_private: bool) {
+        let best_height = self
+            .get_block_meta(self.select_best_block(is_private))
+            .unwrap()
+            .height;
+        let best_blocks = self.get_best_blocks_mut(is_private);
+        if b_meta.height > best_height {
+            best_blocks.clear();
+        }
+        if b_meta.height >= best_height {
+            best_blocks.insert(b.get_hash());
+        }
+    }
 
     fn draft_block(&self, ts: u32, is_private: bool) -> B {
-        B::new(ts, self.select_best_block(is_private))
+        B::new_from(
+            ts,
+            self.get_best_blocks(is_private).iter().cloned().collect(),
+        )
+    }
+
+    // fn select_best_block(&self, is_private: bool) -> u128;
+    fn select_best_block(&self, is_private: bool) -> u128 {
+        let blocks: Vec<u128> = self.get_best_blocks(is_private).iter().cloned().collect();
+        B::select_parent_from(blocks)
+    }
+
+    fn target_from_difficulty(&self, d: u128) -> u128 {
+        (1 << 127) / d
+    }
+
+    fn find_lca_and_intermediates(
+        &self,
+        bs: &Vec<u128>,
+    ) -> Option<(u128, BTreeMap<u32, BTreeSet<BInfo<B>>>)> {
+        let mut intermediates = BTreeMap::<u32, BTreeSet<BInfo<B>>>::new();
+        let mut intermediate_q = BTreeMap::<u32, Vec<u128>>::new();
+        let mut heights = Vec::new();
+
+        for &id in bs {
+            let b_md = self.get_block_meta(id).unwrap();
+
+            heights.push(b_md.height);
+
+            let iq_e = intermediate_q.entry(b_md.height);
+            let iq_v = iq_e.or_insert(Default::default());
+            iq_v.push(id);
+
+            // v.insert(BInfo { id, b, b_md });
+        }
+
+        let mut min_h = *heights.iter().min().unwrap();
+        let max_h = *heights.iter().max().unwrap();
+
+        for h in (0..=max_h).rev() {
+            trace!("LCA at H={}", h);
+            let at_h = intermediate_q.get(&h).unwrap().clone();
+            trace!("LCA at H={}, at_h.len={}, at_h={:?}", h, at_h.len(), at_h);
+
+            for &id in at_h.iter() {
+                let b = self.get_block(id).unwrap().clone();
+                let b_md = self.get_block_meta(id).unwrap().clone();
+
+                let e = intermediates.entry(b_md.height);
+                let v = e.or_insert(Default::default());
+
+                for p in b.all_prev() {
+                    let p_md = self.get_block_meta(p).unwrap();
+                    let iq_e = intermediate_q.entry(p_md.height);
+                    let iq_v = iq_e.or_insert(Default::default());
+                    if !iq_v.contains(&p) {
+                        iq_v.push(p);
+                    }
+                    if p_md.height < min_h {
+                        min_h = p_md.height;
+                    }
+                }
+
+                v.insert(BInfo { id, b, b_md });
+            }
+
+            // we should only hit this condition when we've found the LCA
+            if h <= min_h && at_h.len() == 1 {
+                return Some((at_h[0], intermediates));
+            }
+        }
+
+        None
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct BlockMD<B> {
     pub difficulty: u128,
     pub height: u32,
+    pub weight: u128,
+    pub chain_weight: u128,
     pub daa2_blocks: Vec<(B, u128)>,
 }
 
@@ -90,6 +173,8 @@ impl<B: BlockT> BlockMD<B> {
         BlockMD {
             difficulty,
             height: 0,
+            weight: 1,
+            chain_weight: 1,
             daa2_blocks: vec![(genesis.clone(), difficulty); daa2_n_blocks],
         }
     }
@@ -108,7 +193,7 @@ impl<'a, B: BlockT + Clone> Chain<B> {
     pub const DAA2_N_BLOCKS: usize = 100;
 
     pub fn new(genesis: B, genesis_meta: BlockMD<B>) -> Chain<B> {
-        let g_hash = genesis.hash();
+        let g_hash = genesis.get_hash();
         trace!("genesis.hash:{}", g_hash);
         Chain {
             blocks: [(g_hash, genesis.clone())].iter().cloned().collect(),
@@ -131,9 +216,9 @@ impl<'a, B: BlockT + Clone> Chain<B> {
     // }
 
     fn next_difficulty_daa2_raw(&self, b_hash: u128, b_meta: &BlockMD<B>) -> u128 {
-        // if b_meta.height < (Self::DAA2_N_BLOCKS >> 4) as u32 {
-        //     return 1000;
-        // }
+        if b_meta.height < (Self::DAA2_N_BLOCKS >> 4) as u32 {
+            return 10;
+        }
         let blocks = &b_meta.daa2_blocks;
         let block_time_sum: u32 =
             self.blocks[&b_hash].get_ts() - b_meta.daa2_blocks.last().unwrap().0.get_ts();
@@ -152,10 +237,6 @@ impl<'a, B: BlockT + Clone> Chain<B> {
                 d
             }
         }
-    }
-
-    fn target_from_difficulty(&self, d: u128) -> u128 {
-        (1 << 127) / d
     }
 }
 
@@ -176,16 +257,16 @@ impl<'a, B: BlockT + Clone + Debug> ChainT<'a, B> for Chain<B> {
         self.blocks_meta.get(&b)
     }
 
-    fn update_best_block(&mut self, b: &B, b_meta: &BlockMD<B>, is_private: bool) {
-        let best_height = self.blocks_meta[&self.select_best_block(is_private)].height;
-        let best_blocks = self.get_best_blocks_mut(is_private);
-        if b_meta.height > best_height {
-            best_blocks.clear();
-        }
-        if b_meta.height >= best_height {
-            best_blocks.insert(b.hash());
-        }
-    }
+    // fn update_best_block(&mut self, b: &B, b_meta: &BlockMD<B>, is_private: bool) {
+    //     let best_height = self.blocks_meta[&self.select_best_block(is_private)].height;
+    //     let best_blocks = self.get_best_blocks_mut(is_private);
+    //     if b_meta.height > best_height {
+    //         best_blocks.clear();
+    //     }
+    //     if b_meta.height >= best_height {
+    //         best_blocks.insert(b.hash());
+    //     }
+    // }
 
     fn get_best_blocks(&self, is_private: bool) -> &BTreeSet<u128> {
         if is_private {
@@ -203,11 +284,6 @@ impl<'a, B: BlockT + Clone + Debug> ChainT<'a, B> for Chain<B> {
         }
     }
 
-    fn select_best_block(&self, is_private: bool) -> u128 {
-        let blocks = self.get_best_blocks(is_private);
-        *blocks.iter().choose(&mut rand::thread_rng()).unwrap()
-    }
-
     fn get_heights_pub_priv(&self) -> Heights {
         Heights {
             public: self.blocks_meta[&self.select_best_block(false)].height,
@@ -222,18 +298,20 @@ impl<'a, B: BlockT + Clone + Debug> ChainT<'a, B> for Chain<B> {
         }
 
         let p = pm.unwrap();
-        let p_meta = self.blocks_meta.get(&b.prev()).unwrap();
+        let p_meta = self.get_block_meta(b.prev()).unwrap();
         let d = self.next_difficulty(&p, &p_meta);
         let target = self.target_from_difficulty(d);
 
-        if b.hash() > target {
-            return Err(BadPoW(b.hash(), target));
+        if b.get_hash() > target {
+            return Err(BadPoW(b.get_hash(), target));
         }
 
         Ok((
             BlockMD {
                 difficulty: d,
                 height: p_meta.height + 1,
+                weight: d,
+                chain_weight: d,
                 daa2_blocks: Vec::from(
                     [
                         &[(b.clone(), d)],
@@ -248,7 +326,7 @@ impl<'a, B: BlockT + Clone + Debug> ChainT<'a, B> for Chain<B> {
     }
 
     fn next_difficulty(&self, b: &B, b_meta: &BlockMD<B>) -> u128 {
-        self.next_difficulty_daa2(b.hash(), b_meta)
+        self.next_difficulty_daa2(b.get_hash(), b_meta)
     }
 }
 
@@ -256,16 +334,16 @@ impl<'a, B: BlockT + Clone + Debug> ChainT<'a, B> for Chain<B> {
 mod tests {
     use super::*;
 
-    fn _setup_chain() -> (Block, BlockMD<Block>, Chain<Block>) {
-        let genesis = Block::genesis(0);
-        let g_md = BlockMD::mk_genesis_md(&genesis, Chain::<Block>::DAA2_N_BLOCKS);
+    fn _setup_chain<B: BlockT>() -> (B, BlockMD<B>, Chain<B>) {
+        let genesis = B::genesis(0);
+        let g_md = BlockMD::mk_genesis_md(&genesis, Chain::<B>::DAA2_N_BLOCKS);
         let chain = Chain::new(genesis.clone(), g_md.clone());
         (genesis, g_md, chain)
     }
 
     #[test]
     fn target_from_d() {
-        let (_, _, chain) = _setup_chain();
+        let (_, _, chain) = _setup_chain::<Block>();
         assert_eq!(chain.target_from_difficulty(1), 1 << 127);
         assert_eq!(chain.target_from_difficulty(2), 1 << 126);
         assert_eq!(chain.target_from_difficulty(8), 1 << 124);
@@ -287,33 +365,32 @@ mod tests {
         let (genesis, _g_md, mut chain) = _setup_chain();
         let b = _mk_test_block(&mut chain, 10);
 
-        assert_eq!(chain.select_best_block(false), genesis.hash());
-        assert_eq!(chain.select_best_block(true), genesis.hash());
+        assert_eq!(chain.select_best_block(false), genesis.get_hash());
+        assert_eq!(chain.select_best_block(true), genesis.get_hash());
 
         chain.add_block(b.clone(), false)?;
 
-        assert_eq!(chain.select_best_block(false), b.hash());
-        assert_eq!(chain.select_best_block(true), genesis.hash());
+        assert_eq!(chain.select_best_block(false), b.get_hash());
+        assert_eq!(chain.select_best_block(true), genesis.get_hash());
 
         chain.add_block(b.clone(), true)?;
 
-        assert_eq!(chain.select_best_block(false), b.hash());
-        assert_eq!(chain.select_best_block(true), b.hash());
+        assert_eq!(chain.select_best_block(false), b.get_hash());
+        assert_eq!(chain.select_best_block(true), b.get_hash());
 
         Ok(())
     }
 
     #[test]
     fn block_md() -> Result<(), String> {
-        let (genesis, g_md, mut chain) = _setup_chain();
+        let (genesis, g_md, mut chain) = _setup_chain::<Block>();
         assert_eq!(g_md.daa2_blocks.len(), Chain::<Block>::DAA2_N_BLOCKS);
 
         let next_d = chain.next_difficulty(&genesis, &g_md);
-        assert_eq!(next_d, 1000);
+        // assert_eq!(next_d, 1000);
+        assert_eq!(next_d, 10);
 
-        let mut b = chain.draft_block(10, false);
-        // make the id (PoW proxy) smaller than starting difficulty (1000).
-        b.id >>= 11;
+        let b = _mk_draft_block(&chain, 10, false);
 
         let (b_md, _, _) = chain.validate_block(&b)?;
         assert_eq!(b_md.daa2_blocks.len(), Chain::<Block>::DAA2_N_BLOCKS);
@@ -324,15 +401,100 @@ mod tests {
             chain.blocks_meta[&chain.select_best_block(is_priv)].height,
             0
         );
-        assert_eq!(chain.blocks.get(&b.hash()).is_none(), true);
+        assert_eq!(chain.blocks.get(&b.get_hash()).is_none(), true);
         chain.add_block(b.clone(), is_priv)?;
-        assert_eq!(chain.blocks.get(&b.hash()).is_some(), true);
+        assert_eq!(chain.blocks.get(&b.get_hash()).is_some(), true);
 
         assert_ne!(chain.select_best_block(is_priv), pre_bb);
         assert_ne!(
             chain.blocks_meta[&chain.select_best_block(is_priv)].height,
             0
         );
+
+        Ok(())
+    }
+
+    /// make the id (PoW proxy) smaller than starting difficulty.
+    fn _mk_draft_block<'a, B: BlockT, C: ChainT<'a, B>>(chain: &C, ts: u32, is_private: bool) -> B {
+        let mut b = chain.draft_block(ts, is_private);
+        b.test_set_work_bits(24);
+        b
+    }
+
+    #[test]
+    fn find_lca_simple() -> Result<(), String> {
+        // creates a single-parent chain
+        let (g, _g_md, mut chain) = _setup_chain::<Block>();
+
+        let b1 = _mk_draft_block(&chain, 10, false);
+        let b2 = _mk_draft_block(&chain, 10, false);
+
+        chain.add_block(b1.clone(), false)?;
+        chain.add_block(b2.clone(), false)?;
+
+        let (lca_id, inter) = chain
+            .find_lca_and_intermediates(&vec![b1.get_hash(), b2.get_hash()])
+            .unwrap();
+
+        assert_eq!(lca_id, g.get_hash());
+
+        assert_eq!(inter[&1].len(), 2);
+        assert_eq!(inter[&0].len(), 1);
+
+        // add a 3rd block
+        let b3 = _mk_draft_block(&chain, 20, false);
+        chain.add_block(b3.clone(), false)?;
+
+        // find chain-segment from b3 (at h=2) and genesis
+        let (lca_id, inter) = chain
+            .find_lca_and_intermediates(&vec![b3.get_hash(), g.get_hash()])
+            .unwrap();
+
+        assert_eq!(lca_id, g.get_hash());
+
+        assert_eq!(inter[&2].len(), 1);
+        // only expect one block at h=1 to be included.
+        assert_eq!(inter[&1].len(), 1);
+        assert_eq!(inter[&0].len(), 1);
+
+        Ok(())
+    }
+
+    #[test]
+    fn find_lca_dag_simple() -> Result<(), String> {
+        // creates a single-parent chain
+        let (g, _g_md, mut chain) = _setup_chain::<DagBlock>();
+
+        let b1 = _mk_draft_block(&chain, 10, false);
+        let b2 = _mk_draft_block(&chain, 10, false);
+
+        chain.add_block(b1.clone(), false)?;
+        chain.add_block(b2.clone(), false)?;
+
+        let (lca_id, inter) = chain
+            .find_lca_and_intermediates(&vec![b1.get_hash(), b2.get_hash()])
+            .unwrap();
+
+        assert_eq!(lca_id, g.get_hash());
+
+        assert_eq!(inter[&1].len(), 2);
+        assert_eq!(inter[&0].len(), 1);
+
+        // add a 3rd block; should build of both h=1 blocks.
+        let b3 = _mk_draft_block(&chain, 20, false);
+        chain.add_block(b3.clone(), false)?;
+
+        // find chain-segment from b3 (at h=2) and genesis
+        let (lca_id, inter) = chain
+            .find_lca_and_intermediates(&vec![b3.get_hash(), g.get_hash()])
+            .unwrap();
+
+        assert_eq!(lca_id, g.get_hash());
+
+        assert_eq!(inter[&2].len(), 1);
+        // expect 2 blocks at h=1 to be included b/c it's a dag!.
+        assert_eq!(inter[&1].len(), 2);
+        assert_eq!(inter[&0].len(), 1);
 
         Ok(())
     }

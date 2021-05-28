@@ -90,7 +90,7 @@ impl<'a, B: 'a + BlockT + Clone, C: ChainT<'a, B>> Node<B, C> {
                         b_md.height,
                         b_md.difficulty,
                         b.get_ts(),
-                        b.hash(),
+                        b.get_hash(),
                         b.prev()
                     );
                     return Ok(b);
@@ -130,7 +130,7 @@ mod tests {
         let mut b = n.chain.draft_block(10, false);
         b.id >>= 12;
 
-        assert_eq!(b.prev(), genesis.hash());
+        assert_eq!(b.prev(), genesis.get_hash());
 
         let prev_height = n.chain.get_heights_pub_priv().public;
         // let _new_msgs = n.step(11, vec![MsgBlock(b)]).unwrap();

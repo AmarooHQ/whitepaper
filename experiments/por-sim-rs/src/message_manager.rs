@@ -137,16 +137,13 @@ impl<'a, B: BlockT + Clone + Eq + Hash + Debug> MM<B, Chain<B>> {
 
 mod tests {
     use super::*;
-    use crate::block::Block;
+    use crate::block::*;
 
-    #[test]
-    fn blocks_propagate() {
-        let mut mm = MM::<Block, Chain<Block>>::new(10, 0, 0, 100);
-        let all_msgs = mm.tick_many(10).unwrap();
+    fn create_mm_no_priv<B: BlockT>() -> MM<B, Chain<B>> {
+        MM::<B, Chain<B>>::new(20, 0, 0, 100)
+    }
 
-        assert_eq!(all_msgs.len() > 0, true);
-        println!("All Msgs: {:?}", all_msgs);
-
+    fn ensure_chain_progress<B: BlockT>(mm: &MM<B, Chain<B>>) {
         let hs = mm.nodes.first().unwrap().chain.get_heights_pub_priv();
         assert_ne!(hs.public, 0);
         assert_eq!(hs.private, 0);
@@ -154,5 +151,69 @@ mod tests {
         for node in &mm.nodes[..] {
             assert_eq!(node.chain.get_heights_pub_priv().public, hs.public);
         }
+    }
+
+    #[test]
+    fn blocks_propagate() {
+        let mut mm = create_mm_no_priv::<Block>();
+        let all_msgs = mm.tick_many(10).unwrap();
+
+        assert_eq!(all_msgs.len() > 0, true);
+        // println!("All Msgs: {:?}", all_msgs);
+
+        ensure_chain_progress(&mm);
+    }
+
+    #[test]
+    fn mm_with_vanilla_block() {
+        let mut mm = create_mm_no_priv::<Block>();
+        mm.tick_many(20).unwrap();
+        ensure_chain_progress(&mm);
+    }
+
+    #[test]
+    fn mm_with_dag_block() {
+        let mut mm = create_mm_no_priv::<DagBlock>();
+        mm.tick_many(20).unwrap();
+        ensure_chain_progress(&mm);
+    }
+
+    #[test]
+    fn mm_with_dag_block_has_many_parents() {
+        let mut mm = MM::<DagBlock, Chain<DagBlock>>::new(3, 0, 0, 100);
+
+        // set ts far in future to avoid issues with difficulty alg
+        let msgs = mm.tick(1000, vec![]).unwrap();
+
+        let chain = &mm.nodes.first().unwrap().chain;
+        let bb = chain.get_block(chain.select_best_block(false)).unwrap();
+        assert_ne!(bb.parents.len(), 0);
+        assert_eq!(bb.parents.len(), 1);
+        // we made at least 2 blocks
+        assert_eq!(
+            msgs.len() > 1,
+            true,
+            "we made at least two blocks on the first tick: {:?}",
+            msgs
+        );
+
+        // this is the tick where blocks from tick 1 are added, and new blocks produced (but not yet added)
+        let msgs = mm.tick(1200, msgs).unwrap();
+        assert_eq!(
+            msgs.len() > 0,
+            true,
+            "We should produce block msgs here: {:?}",
+            msgs
+        );
+
+        // lets add blocks from the last tick.
+        let msgs = mm.tick(1300, msgs).unwrap();
+
+        let chain = &mm.nodes.first().unwrap().chain;
+        let bb = chain.get_block(chain.select_best_block(false)).unwrap();
+        let bb_meta = chain.get_block_meta(bb.get_hash()).unwrap();
+        assert_eq!(bb_meta.height, 2);
+        assert_ne!(bb.parents.len(), 0);
+        assert_ne!(bb.parents.len(), 1);
     }
 }
