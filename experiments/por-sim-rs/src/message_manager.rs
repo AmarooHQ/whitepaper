@@ -15,7 +15,12 @@ pub struct MM<B, C> {
 }
 
 impl<'a, B: BlockT + Clone + Eq + Hash + Debug> MM<B, Chain<B>> {
-    pub fn new(nodes_honest: u16, nodes_attacking: u16, attack_starts_at: u32) -> MM<B, Chain<B>> {
+    pub fn new(
+        nodes_honest: u16,
+        nodes_attacking: u16,
+        attack_starts_at: u32,
+        mining_attempts_per_tick: u32,
+    ) -> MM<B, Chain<B>> {
         let n_nodes = nodes_honest + nodes_attacking;
         info!(
             "Creating new simulation with {} honest nodes and {} attacking nodes. Attack starts at H={}.",
@@ -40,8 +45,10 @@ impl<'a, B: BlockT + Clone + Eq + Hash + Debug> MM<B, Chain<B>> {
                     BlockMD::mk_genesis_md(&genesis, Chain::<B>::DAA2_N_BLOCKS),
                 ),
                 atk_start_conds,
+                mining_attempts_per_tick,
             ));
         }
+        info!("Created {} nodes.", mm.nodes.len());
         mm
     }
 
@@ -134,7 +141,7 @@ mod tests {
 
     #[test]
     fn blocks_propagate() {
-        let mut mm = MM::<Block, Chain<Block>>::new(10, 0, 0);
+        let mut mm = MM::<Block, Chain<Block>>::new(10, 0, 0, 100);
         let all_msgs = mm.tick_many(10).unwrap();
 
         assert_eq!(all_msgs.len() > 0, true);

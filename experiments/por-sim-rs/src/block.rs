@@ -1,10 +1,11 @@
+use crate::hash::hash_u128;
 use getrandom::getrandom;
 use rand::seq::IteratorRandom;
 use sha3::{Digest, Sha3_256};
 use std::convert::TryFrom;
+use std::convert::TryInto;
 use std::fmt::Debug;
 use std::hash::Hash;
-use std::slice::Iter;
 
 pub trait BlockT: Clone + Debug + PartialEq + Eq {
     fn new(ts: u32, parent: u128) -> Self;
@@ -39,8 +40,11 @@ pub struct Block {
 
 impl BlockT for Block {
     fn new(ts: u32, parent: u128) -> Self {
+        let mut e: [u8; 16] = [0; 16];
+        getrandom(&mut e).unwrap();
+        let id = u128::from_be_bytes(e);
         Self {
-            id: Self::get_rand_id(),
+            id,
             timestamp: ts,
             parent,
         }
@@ -74,7 +78,7 @@ impl BlockT for Block {
     }
 
     fn increment_nonce(&mut self) {
-        self.id += 1;
+        self.id = hash_u128(self.id);
     }
 }
 
@@ -121,7 +125,10 @@ impl BlockT for DagBlock {
         self.timestamp
     }
     fn increment_nonce(&mut self) {
-        self.id += 1
+        self.id = hash_u128(self.id);
+        // let bs = &self.id.to_be_bytes()[..];
+        // let h = &Sha3_256::digest(bs)[..16];
+        // self.id = u128::from_be_bytes(h.try_into().unwrap());
     }
 }
 

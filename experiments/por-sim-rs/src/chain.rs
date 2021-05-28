@@ -131,9 +131,9 @@ impl<'a, B: BlockT + Clone> Chain<B> {
     // }
 
     fn next_difficulty_daa2_raw(&self, b_hash: u128, b_meta: &BlockMD<B>) -> u128 {
-        if b_meta.height < (Self::DAA2_N_BLOCKS >> 4) as u32 {
-            return 1000;
-        }
+        // if b_meta.height < (Self::DAA2_N_BLOCKS >> 4) as u32 {
+        //     return 1000;
+        // }
         let blocks = &b_meta.daa2_blocks;
         let block_time_sum: u32 =
             self.blocks[&b_hash].get_ts() - b_meta.daa2_blocks.last().unwrap().0.get_ts();

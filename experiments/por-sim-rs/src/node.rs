@@ -13,16 +13,23 @@ pub struct Node<B, C> {
     _phantom: PhantomData<B>,
     is_attacker: bool,
     attack_threshold: u32,
+    mining_attempts_per_tick: u32,
 }
 
 impl<'a, B: 'a + BlockT + Clone, C: ChainT<'a, B>> Node<B, C> {
-    pub fn new(id: u16, chain: C, attack_threshold: Option<u32>) -> Node<B, C> {
+    pub fn new(
+        id: u16,
+        chain: C,
+        attack_threshold: Option<u32>,
+        mining_attempts_per_tick: u32,
+    ) -> Node<B, C> {
         Node {
             id,
             chain,
             _phantom: PhantomData,
             is_attacker: attack_threshold.is_some(),
             attack_threshold: attack_threshold.unwrap_or(0),
+            mining_attempts_per_tick,
         }
     }
 
@@ -54,7 +61,7 @@ impl<'a, B: 'a + BlockT + Clone, C: ChainT<'a, B>> Node<B, C> {
         }
 
         // try to mine
-        match self.attempt_mining(ts, 100) {
+        match self.attempt_mining(ts, self.mining_attempts_per_tick) {
             Ok(b) => out_msgs.push(
                 // if we're an attacker and past when the attack starts,
                 // then relay private blocks. otherwise it's a normal block.
@@ -73,8 +80,8 @@ impl<'a, B: 'a + BlockT + Clone, C: ChainT<'a, B>> Node<B, C> {
 
     fn attempt_mining(&self, ts: u32, max_attempts: u32) -> Result<B, ()> {
         let mine_in_private = self.is_attacker && ts > self.attack_threshold;
+        let mut b = self.chain.draft_block(ts, mine_in_private);
         for _ in 0..max_attempts {
-            let b = self.chain.draft_block(ts, mine_in_private);
             match self.chain.validate_block(&b) {
                 Ok((b_md, _, _)) => {
                     info!(
@@ -90,7 +97,7 @@ impl<'a, B: 'a + BlockT + Clone, C: ChainT<'a, B>> Node<B, C> {
                 }
                 Err(_e) => {
                     // warn!("Block with hash {:?} is not valid: {:?}", b.hash(), e);
-                    // b.increment_nonce();
+                    b.increment_nonce();
                 }
             }
         }
@@ -113,6 +120,7 @@ mod tests {
                 BlockMD::mk_genesis_md(&genesis, Chain::<Block>::DAA2_N_BLOCKS),
             ),
             None,
+            100,
         );
 
         // just so we make sure we can get a valid block via mining
