@@ -8,20 +8,20 @@ use itertools::Itertools;
 use log::*;
 use std::fmt::Debug;
 
-pub struct MM<B, C> {
+pub struct MM<B: BlockT, F: ForkRules<B>, C> {
     // tick: u32,
-    nodes: Vec<Node<B, C>>,
+    nodes: Vec<Node<B, F, C>>,
     // difficulty_cache: Mutex<HashMap<u128, u128>>,
-    attack_starts_at: u32,
+    attack_starts_at: u128,
 }
 
-impl<'a, B: BlockT + Debug> MM<B, Chain<B>> {
+impl<'a, B: BlockT, F: ForkRules<B>> MM<B, F, Chain<B, F>> {
     pub fn new(
         nodes_honest: u16,
         nodes_attacking: u16,
-        attack_starts_at: u32,
+        attack_starts_at: u128,
         mining_attempts_per_tick: u32,
-    ) -> MM<B, Chain<B>> {
+    ) -> MM<B, F, Chain<B, F>> {
         let n_nodes = nodes_honest + nodes_attacking;
         info!(
             "Creating new simulation with {} honest nodes and {} attacking nodes. Attack starts at H={}.",
@@ -41,9 +41,9 @@ impl<'a, B: BlockT + Debug> MM<B, Chain<B>> {
             };
             mm.add_node(Node::new(
                 i,
-                Chain::<B>::new(
+                Chain::<B, F>::new(
                     g.clone(),
-                    BlockMD::mk_genesis_md(&genesis, Chain::<B>::DAA2_N_BLOCKS),
+                    BlockMD::mk_genesis_md(&genesis, Chain::<B, F>::DAA2_N_BLOCKS),
                 ),
                 atk_start_conds,
                 mining_attempts_per_tick,
@@ -53,7 +53,7 @@ impl<'a, B: BlockT + Debug> MM<B, Chain<B>> {
         mm
     }
 
-    pub fn add_node(&mut self, node: Node<B, Chain<B>>) {
+    pub fn add_node(&mut self, node: Node<B, F, Chain<B, F>>) {
         self.nodes.push(node);
     }
 
@@ -85,7 +85,7 @@ impl<'a, B: BlockT + Debug> MM<B, Chain<B>> {
         Ok(all_msgs)
     }
 
-    pub fn run_attack(&mut self, ts_limit: u32, win_thresh: u32) -> Result<bool, String> {
+    pub fn run_attack(&mut self, ts_limit: u32, win_thresh: u128) -> Result<bool, String> {
         let mut msgs = Vec::new();
 
         let mut atk_height_start = self.attack_starts_at;
@@ -94,13 +94,13 @@ impl<'a, B: BlockT + Debug> MM<B, Chain<B>> {
                 info!("tick: {}", ts);
             }
 
-            if ts == self.attack_starts_at {
+            if ts as u128 == self.attack_starts_at {
                 atk_height_start = self
                     .nodes
                     .first()
                     .unwrap()
                     .chain
-                    .get_heights_pub_priv()
+                    .get_fork_measure_pub_priv()
                     .public;
             }
 
@@ -114,7 +114,7 @@ impl<'a, B: BlockT + Debug> MM<B, Chain<B>> {
             }
         }
 
-        let hs = self.nodes.last().unwrap().chain.get_heights_pub_priv();
+        let hs = self.nodes.last().unwrap().chain.get_fork_measure_pub_priv();
         info!(
             "Attack Failed, T={}, StartH={}, Pub={}, Priv={}",
             ts_limit, atk_height_start, hs.public, hs.private
@@ -122,11 +122,16 @@ impl<'a, B: BlockT + Debug> MM<B, Chain<B>> {
         Ok(false)
     }
 
-    fn attack_is_success(&self, ts: u32, atk_height_start: u32, win_thres: u32) -> Option<Heights> {
-        if ts < self.attack_starts_at {
+    fn attack_is_success(
+        &self,
+        ts: u32,
+        atk_height_start: u128,
+        win_thres: u128,
+    ) -> Option<Heights> {
+        if (ts as u128) < self.attack_starts_at {
             None
         } else {
-            let hs = self.nodes.last().unwrap().chain.get_heights_pub_priv();
+            let hs = self.nodes.last().unwrap().chain.get_fork_measure_pub_priv();
             if hs.public < hs.private && hs.public >= atk_height_start + win_thres {
                 Some(hs)
             } else {
@@ -140,23 +145,31 @@ mod tests {
     use super::*;
     use crate::block::*;
 
-    fn create_mm_no_priv<B: BlockT>() -> MM<B, Chain<B>> {
-        MM::<B, Chain<B>>::new(20, 0, 0, 100)
+    fn create_mm_no_priv<B: BlockT, F: ForkRules<B>>() -> MM<B, F, Chain<B, F>> {
+        MM::<B, F, Chain<B, F>>::new(20, 0, 0, 100)
     }
 
-    fn ensure_chain_progress<B: BlockT>(mm: &MM<B, Chain<B>>) {
-        let hs = mm.nodes.first().unwrap().chain.get_heights_pub_priv();
+    fn ensure_chain_progress<B: BlockT, F: ForkRules<B>>(mm: &MM<B, F, Chain<B, F>>) {
+        let hs = mm.nodes.first().unwrap().chain.get_fork_measure_pub_priv();
+
         assert_ne!(hs.public, 0);
         assert_eq!(hs.private, 0);
 
         for node in &mm.nodes[..] {
-            assert_eq!(node.chain.get_heights_pub_priv().public, hs.public);
+            println!(
+                "baseline: {:?}, this node: {:?}, {:?}, {:?}",
+                hs,
+                node.chain.get_fork_measure_pub_priv(),
+                node.chain.get_fork_measure_pub_priv(),
+                node.chain.get_fork_measure_pub_priv(),
+            );
+            assert_eq!(node.chain.get_fork_measure_pub_priv().public, hs.public);
         }
     }
 
     #[test]
     fn blocks_propagate() {
-        let mut mm: MM<Block, Chain<Block>> = create_mm_no_priv();
+        let mut mm: MM<Block, _, Chain<_>> = create_mm_no_priv();
         let all_msgs = mm.tick_many(10).unwrap();
 
         assert_eq!(all_msgs.len() > 0, true);
@@ -167,21 +180,22 @@ mod tests {
 
     #[test]
     fn mm_with_vanilla_block() {
-        let mut mm = create_mm_no_priv::<Block>();
+        let mut mm = create_mm_no_priv::<Block, LongestChain<_>>();
         mm.tick_many(20).unwrap();
         ensure_chain_progress(&mm);
     }
 
     #[test]
     fn mm_with_dag_block() {
-        let mut mm = create_mm_no_priv::<DagBlock>();
+        let mut mm = create_mm_no_priv::<DagBlock, HeaviestChain<_>>();
         mm.tick_many(20).unwrap();
         ensure_chain_progress(&mm);
     }
 
     #[test]
     fn mm_with_dag_block_has_many_parents() {
-        let mut mm = MM::<DagBlock, Chain<DagBlock>>::new(3, 0, 0, 100);
+        let mut mm =
+            MM::<DagBlock, HeaviestChain<_>, Chain<DagBlock, HeaviestChain<_>>>::new(5, 0, 0, 200);
 
         // set ts far in future to avoid issues with difficulty alg
         let msgs = mm.tick(1000, vec![]).unwrap();
@@ -213,6 +227,15 @@ mod tests {
         let chain = &mm.nodes.first().unwrap().chain;
         let bb = chain.get_block(chain.select_best_block(false)).unwrap();
         let bb_meta = chain.get_block_meta(bb.get_hash()).unwrap();
+        println!("best blocks: {:?}", chain.get_best_blocks(false));
+        println!(
+            "best blocks: {:?}",
+            chain
+                .get_best_blocks(false)
+                .iter()
+                .map(|&id| { chain.get_block(id).unwrap() })
+                .collect::<Vec<_>>()
+        );
         assert_eq!(bb_meta.height, 2);
         assert_ne!(bb.parents.len(), 0);
         assert_ne!(bb.parents.len(), 1);

@@ -8,29 +8,31 @@ use log::*;
 use std::marker::PhantomData;
 
 #[derive(Debug)]
-pub struct Node<B, C> {
+pub struct Node<B, F, C> {
     id: u16,
     pub chain: C,
     _phantom: PhantomData<B>,
+    _phantom2: PhantomData<F>,
     is_attacker: bool,
-    attack_threshold: u32,
+    attack_threshold: u128,
     mining_attempts_per_tick: u32,
 }
 
-impl<'a, B: 'a + BlockT, C: ChainT<'a, B>> Node<B, C> {
+impl<'a, B: 'a + BlockT, F: ForkRules<B>, C: ChainT<'a, B, F>> Node<B, F, C> {
     pub fn new(
         id: u16,
         chain: C,
-        attack_threshold: Option<u32>,
+        attack_threshold: Option<u128>,
         mining_attempts_per_tick: u32,
-    ) -> Node<B, C> {
+    ) -> Node<B, F, C> {
         Node {
             id,
             chain,
-            _phantom: PhantomData,
             is_attacker: attack_threshold.is_some(),
             attack_threshold: attack_threshold.unwrap_or(0),
             mining_attempts_per_tick,
+            _phantom: PhantomData,
+            _phantom2: PhantomData,
         }
     }
 
@@ -48,7 +50,7 @@ impl<'a, B: 'a + BlockT, C: ChainT<'a, B>> Node<B, C> {
                     self.got_block(&b, false)?;
                     // before the attack has started, treat all blocks
                     // like they were also private blocks
-                    if self.is_attacker && self.attack_threshold > ts {
+                    if self.is_attacker && self.attack_threshold > ts as u128 {
                         self.got_block(&b, true)?;
                     }
                 }
@@ -66,7 +68,7 @@ impl<'a, B: 'a + BlockT, C: ChainT<'a, B>> Node<B, C> {
             Ok(b) => out_msgs.push(
                 // if we're an attacker and past when the attack starts,
                 // then relay private blocks. otherwise it's a normal block.
-                if self.is_attacker && self.attack_threshold <= ts {
+                if self.is_attacker && self.attack_threshold <= ts as u128 {
                     MsgPrivBlock(b)
                 } else {
                     MsgBlock(b)
@@ -80,7 +82,7 @@ impl<'a, B: 'a + BlockT, C: ChainT<'a, B>> Node<B, C> {
     }
 
     fn attempt_mining(&self, ts: u32, max_attempts: u32) -> Result<B, ()> {
-        let mine_in_private = self.is_attacker && ts > self.attack_threshold;
+        let mine_in_private = self.is_attacker && ts as u128 > self.attack_threshold;
         let mut b = self.chain.draft_block(ts, mine_in_private);
         for _ in 0..max_attempts {
             match self.chain.validate_block(&b) {
@@ -115,14 +117,12 @@ mod tests {
     #[test]
     fn block_is_added_to_chain() -> Result<(), String> {
         let genesis = Block::genesis(0);
-        let mut n = Node::<Block, Chain<Block>>::new(
-            1337,
-            Chain::new(
-                genesis.clone(),
-                BlockMD::mk_genesis_md(&genesis, Chain::<Block>::DAA2_N_BLOCKS),
-            ),
-            None,
-            100,
+        let c = Chain::new(
+            genesis.clone(),
+            BlockMD::mk_genesis_md(&genesis, Chain::<Block, LongestChain<Block>>::DAA2_N_BLOCKS),
+        );
+        let mut n = Node::<Block, LongestChain<Block>, Chain<Block, LongestChain<Block>>>::new(
+            1337, c, None, 100,
         );
 
         // just so we make sure we can get a valid block via mining
@@ -134,11 +134,11 @@ mod tests {
 
         assert_eq!(b.prev(), genesis.get_hash());
 
-        let prev_height = n.chain.get_heights_pub_priv().public;
+        let prev_height = n.chain.get_fork_measure_pub_priv().public;
         // let _new_msgs = n.step(11, vec![MsgBlock(b)]).unwrap();
         n.got_block(&b, false)?;
 
-        assert_eq!(n.chain.get_heights_pub_priv().public, prev_height + 1);
+        assert_eq!(n.chain.get_fork_measure_pub_priv().public, prev_height + 1);
 
         Ok(())
     }

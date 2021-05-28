@@ -49,13 +49,13 @@ pub fn main() -> Result<(), String> {
     let n_attackers = n_total - n_honest;
     let attack_starts_at = 1000;
     let mining_attempts_per_tick = 100;
-    let mut mm = message_manager::MM::<Block, Chain<Block>>::new(
+    let mut mm = message_manager::MM::<Block, _, Chain<Block>>::new(
         n_honest,
         n_attackers,
         attack_starts_at,
         mining_attempts_per_tick,
     );
-    mm.run_attack(attack_starts_at * 3, 20).unwrap();
+    mm.run_attack((attack_starts_at * 3) as u32, 20).unwrap();
 
     Ok(())
 }

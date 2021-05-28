@@ -33,13 +33,14 @@ impl From<ChainErr> for String {
 
 use ChainErr::*;
 
+#[derive(Debug)]
 pub struct Heights {
-    pub public: u32,
-    pub private: u32,
+    pub public: u128,
+    pub private: u128,
 }
 
 /// Used for LCA calculations
-#[derive(PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Debug)]
 pub struct BInfo<B> {
     id: u128,
     b: B,
@@ -56,7 +57,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut BTreeSet<u128>;
     fn validate_block(&self, b: &B) -> Result<(BlockMD<B>, &B, &BlockMD<B>), ChainErr>;
     fn next_difficulty(&self, b: &B, b_meta: &BlockMD<B>) -> u128;
-    fn get_heights_pub_priv(&self) -> Heights;
+    fn get_fork_measure_pub_priv(&self) -> Heights;
 
     fn add_block(&mut self, b: B, is_private: bool) -> Result<(), ChainErr> {
         let (b_meta, _p, _p_meta) = self.validate_block(&b)?;
@@ -76,7 +77,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
         let best_of: ForkResult<B> = F::best_of((b, b_meta), (&bb, &bb_md));
         match best_of {
             BestBlock(_b) => {
-                if _b == b {
+                if _b.get_hash() == b.get_hash() {
                     best_blocks.clear();
                     best_blocks.insert(b.get_hash());
                 }
@@ -170,7 +171,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct BlockMD<B> {
     pub difficulty: u128,
     pub height: u32,
@@ -185,8 +186,8 @@ impl<B: BlockT> BlockMD<B> {
         BlockMD {
             difficulty,
             height: 0,
-            weight: 1,
-            chain_weight: 1,
+            weight: 0,
+            chain_weight: 0,
             daa2_blocks: vec![(genesis.clone(), difficulty); daa2_n_blocks],
         }
     }
@@ -300,10 +301,10 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         }
     }
 
-    fn get_heights_pub_priv(&self) -> Heights {
+    fn get_fork_measure_pub_priv(&self) -> Heights {
         Heights {
-            public: self.blocks_meta[&self.select_best_block(false)].height,
-            private: self.blocks_meta[&self.select_best_block(true)].height,
+            public: F::fork_measure(&self.blocks_meta[&self.select_best_block(false)]),
+            private: F::fork_measure(&self.blocks_meta[&self.select_best_block(true)]),
         }
     }
 
@@ -350,7 +351,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
 mod tests {
     use super::*;
 
-    fn _setup_chain<B: BlockT, F: ForkRules<B>>() -> (B, BlockMD<B>, Chain<B, F>) {
+    fn _setup_chain<'a, B: BlockT, F: ForkRules<B>>() -> (B, BlockMD<B>, Chain<B, F>) {
         let genesis = B::genesis(0);
         let g_md = BlockMD::mk_genesis_md(&genesis, Chain::<B, F>::DAA2_N_BLOCKS);
         let chain = Chain::new(genesis.clone(), g_md.clone());
@@ -437,7 +438,11 @@ mod tests {
     }
 
     /// make the id (PoW proxy) smaller than starting difficulty.
-    fn _mk_draft_block<'a, B: BlockT, C: ChainT<'a, B>>(chain: &C, ts: u32, is_private: bool) -> B {
+    fn _mk_draft_block<'a, B: BlockT, F: ForkRules<B>, C: ChainT<'a, B, F>>(
+        chain: &C,
+        ts: u32,
+        is_private: bool,
+    ) -> B {
         let mut b = chain.draft_block(ts, is_private);
         b.test_set_work_bits(24);
         b
@@ -484,9 +489,8 @@ mod tests {
 
     #[test]
     fn find_lca_dag_simple() -> Result<(), String> {
-        todo!();
         // creates a multi-parent chain
-        let (g, _g_md, mut chain) = _setup_chain::<DagBlock, LongestChain<DagBlock>>();
+        let (g, _g_md, mut chain) = _setup_chain::<DagBlock, HeaviestChain<DagBlock>>();
 
         let b1 = _mk_draft_block(&chain, 10, false);
         let b2 = _mk_draft_block(&chain, 10, false);

@@ -38,7 +38,7 @@ impl<'a, B: ManyParentsBlockT> ChainT<'a, B> for InclusiveChain<B> {
     fn next_difficulty(&self, _: &B, _: &BlockMD<B>) -> u128 {
         todo!()
     }
-    fn get_heights_pub_priv(&self) -> Heights {
+    fn get_fork_measure_pub_priv(&self) -> Heights {
         todo!()
     }
     fn save_block(&mut self, _: u128, _: B) {
