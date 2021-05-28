@@ -56,4 +56,7 @@ impl<'a, B: ManyParentsBlockT> ChainT<'a, B> for InclusiveChain<B> {
     fn get_best_blocks_mut(&mut self, _: bool) -> &mut std::collections::BTreeSet<u128> {
         todo!()
     }
+    fn get_heights_pub_priv(&self) -> Heights {
+        todo!()
+    }
 }

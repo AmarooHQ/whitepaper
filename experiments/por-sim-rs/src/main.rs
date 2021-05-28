@@ -42,14 +42,16 @@ pub fn main() -> Result<(), String> {
         .with_level(LevelFilter::Info)
         .init()
         .unwrap();
-    let args = get_arg_matches();
+    // let args = get_arg_matches();
 
-    let n_total = value_t_or_exit!(args.value_of("nodes"), u16);
-    let n_honest = value_t_or_exit!(args.value_of("honest-nodes"), u16);
+    // let n_total = value_t_or_exit!(args.value_of("nodes"), u16);
+    // let n_honest = value_t_or_exit!(args.value_of("honest-nodes"), u16);
+    let n_total = 75;
+    let n_honest = 40;
     let n_attackers = n_total - n_honest;
     let attack_starts_at = 1000;
     let mining_attempts_per_tick = 100;
-    let mut mm = message_manager::MM::<Block, _, Chain<Block>>::new(
+    let mut mm = message_manager::MM::<Block, HeaviestChain<Block>, Chain<Block, _>>::new(
         n_honest,
         n_attackers,
         attack_starts_at,

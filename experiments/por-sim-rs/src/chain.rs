@@ -58,6 +58,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     fn validate_block(&self, b: &B) -> Result<(BlockMD<B>, &B, &BlockMD<B>), ChainErr>;
     fn next_difficulty(&self, b: &B, b_meta: &BlockMD<B>) -> u128;
     fn get_fork_measure_pub_priv(&self) -> Heights;
+    fn get_heights_pub_priv(&self) -> Heights;
 
     fn add_block(&mut self, b: B, is_private: bool) -> Result<(), ChainErr> {
         let (b_meta, _p, _p_meta) = self.validate_block(&b)?;
@@ -234,7 +235,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
 
     fn next_difficulty_daa2_raw(&self, b_hash: u128, b_meta: &BlockMD<B>) -> u128 {
         if b_meta.height < (Self::DAA2_N_BLOCKS >> 4) as u32 {
-            return 10;
+            return 1000;
         }
         let blocks = &b_meta.daa2_blocks;
         let block_time_sum: u32 =
@@ -305,6 +306,13 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         Heights {
             public: F::fork_measure(&self.blocks_meta[&self.select_best_block(false)]),
             private: F::fork_measure(&self.blocks_meta[&self.select_best_block(true)]),
+        }
+    }
+
+    fn get_heights_pub_priv(&self) -> Heights {
+        Heights {
+            public: self.blocks_meta[&self.select_best_block(false)].height as u128,
+            private: self.blocks_meta[&self.select_best_block(true)].height as u128,
         }
     }
 

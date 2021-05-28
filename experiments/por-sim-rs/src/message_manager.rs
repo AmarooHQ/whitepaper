@@ -100,7 +100,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> MM<B, F, Chain<B, F>> {
                     .first()
                     .unwrap()
                     .chain
-                    .get_fork_measure_pub_priv()
+                    .get_heights_pub_priv()
                     .public;
             }
 
@@ -114,7 +114,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> MM<B, F, Chain<B, F>> {
             }
         }
 
-        let hs = self.nodes.last().unwrap().chain.get_fork_measure_pub_priv();
+        let hs = self.nodes.last().unwrap().chain.get_heights_pub_priv();
         info!(
             "Attack Failed, T={}, StartH={}, Pub={}, Priv={}",
             ts_limit, atk_height_start, hs.public, hs.private
@@ -131,7 +131,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> MM<B, F, Chain<B, F>> {
         if (ts as u128) < self.attack_starts_at {
             None
         } else {
-            let hs = self.nodes.last().unwrap().chain.get_fork_measure_pub_priv();
+            let hs = self.nodes.last().unwrap().chain.get_heights_pub_priv();
             if hs.public < hs.private && hs.public >= atk_height_start + win_thres {
                 Some(hs)
             } else {
