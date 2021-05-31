@@ -66,6 +66,17 @@ pub struct BlockMD<B> {
     _phantom_b: PhantomData<B>,
 }
 
+pub struct Chain<B: BlockT, F: ForkRules<B> = LongestChain<B>> {
+    blocks: BTreeMap<u128, B>,
+    pub best_blocks: BTreeSet<u128>,
+    best_priv_blocks: BTreeSet<u128>,
+    blocks_meta: BTreeMap<u128, BlockMD<B>>,
+    goal_block_time: u32,
+    difficulty_cache: Mutex<BTreeMap<u64, u64>>,
+    // fork_rules: LongestChain<B>,
+    _phantom: PhantomData<F>,
+}
+
 pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     fn new(genesis: B, genesis_meta: BlockMD<B>) -> Self;
 
@@ -265,17 +276,6 @@ impl<B: BlockT> BlockMD<B> {
     }
 }
 
-pub struct Chain<B: BlockT, F: ForkRules<B> = LongestChain<B>> {
-    blocks: BTreeMap<u128, B>,
-    pub best_blocks: BTreeSet<u128>,
-    best_priv_blocks: BTreeSet<u128>,
-    blocks_meta: BTreeMap<u128, BlockMD<B>>,
-    goal_block_time: u32,
-    difficulty_cache: Mutex<BTreeMap<u128, u128>>,
-    // fork_rules: LongestChain<B>,
-    _phantom: PhantomData<F>,
-}
-
 impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
     pub const DAA2_N_BLOCKS: usize = 100;
 
@@ -289,29 +289,33 @@ impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
     //     bs
     // }
 
-    fn next_difficulty_daa2_raw(&self, b_hash: u128, b_meta: &BlockMD<B>) -> u64 {
+    fn next_difficulty_daa2_raw(&self, b: &B, b_meta: &BlockMD<B>) -> u64 {
         if b_meta.height < (Self::DAA2_N_BLOCKS >> 4) as u32 {
             return 1000;
         }
         let blocks = &b_meta.daa2_blocks;
-        let block_time_sum: u32 =
-            self.blocks[&b_hash].get_ts() - b_meta.daa2_blocks.last().unwrap().ts;
+        let block_time_sum: u32 = b.get_ts() - b_meta.daa2_blocks.last().unwrap().ts;
         let win_rate_sum: u64 = blocks.iter().map(|t| t.d).sum();
         u64::from(self.goal_block_time) * win_rate_sum / max(u64::from(block_time_sum), 1)
     }
 
-    fn next_difficulty_daa2(&self, b_hash: u128, b_meta: &BlockMD<B>) -> u64 {
-        return self.next_difficulty_daa2_raw(b_hash, b_meta);
-        // let mut c = self.difficulty_cache.lock().unwrap();
-        // let cached_d = c.get(&b_hash).clone();
-        // match cached_d {
-        //     Some(d) => *d,
-        //     None => {
-        //         let d = self.next_difficulty_daa2_raw(b_hash, b_meta);
-        //         c.insert(b_hash, d);
-        //         d
-        //     }
-        // }
+    fn next_difficulty_daa2(&self, b: &B, b_meta: &BlockMD<B>) -> u64 {
+        // my guess as to a good place to swap to cached difficulty
+        if Self::DAA2_N_BLOCKS < 150 {
+            return self.next_difficulty_daa2_raw(b, b_meta);
+        } else {
+            let b_hash = b.get_hash();
+            let mut c = self.difficulty_cache.lock().unwrap();
+            let cached_d = c.get(&(b_hash as u64));
+            match cached_d {
+                Some(d) => *d,
+                None => {
+                    let d = self.next_difficulty_daa2_raw(b, b_meta);
+                    c.insert(b_hash as u64, d);
+                    d
+                }
+            }
+        }
     }
 }
 
@@ -449,7 +453,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
     }
 
     fn next_difficulty(&self, b: &B, b_meta: &BlockMD<B>) -> u64 {
-        self.next_difficulty_daa2(b.get_hash(), b_meta)
+        self.next_difficulty_daa2(b, b_meta)
     }
 }
 
