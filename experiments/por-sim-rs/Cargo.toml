@@ -19,3 +19,4 @@ twox-hash = "1.6.0"
 
 [profile.release]
 debug = true
+# opt-level = 'z'  # Optimize for size.

@@ -1,20 +1,15 @@
 use crate::block::BlockT;
-use crate::chain::fork_rules::*;
-use crate::chain::Chain;
 use crate::chain::ChainErr;
 use crate::chain::ChainT;
 use crate::cryptosystem::CSystemT;
 use crate::msg::Msg;
 use crate::msg::Msg::*;
 use log::*;
-use std::marker::PhantomData;
 
 #[derive(Debug)]
 pub struct Node<'a, S: CSystemT<'a>> {
     id: u16,
     pub chain: S::C,
-    // _phantom: PhantomData<S::B>,
-    // _phantom2: PhantomData<S::FR>,
     is_attacker: bool,
     attack_threshold: u128,
     mining_attempts_per_tick: u32,
@@ -33,8 +28,6 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
             is_attacker: attack_threshold.is_some(),
             attack_threshold: attack_threshold.unwrap_or(0),
             mining_attempts_per_tick,
-            // _phantom: PhantomData,
-            // _phantom2: PhantomData,
         }
     }
 

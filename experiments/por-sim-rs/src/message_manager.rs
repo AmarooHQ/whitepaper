@@ -122,7 +122,7 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
                     .public;
             }
 
-            msgs = self.tick(ts, msgs.clone())?;
+            msgs = self.tick(ts, msgs)?;
             if let Some((hs, fms)) = self.attack_is_success(ts, atk_height_start, win_thresh) {
                 info!(
                     "ATTACK SUCCESS! T={}, StartH={}, PubH={}, PrivH={}, PubFM={}, PrivFM={}",

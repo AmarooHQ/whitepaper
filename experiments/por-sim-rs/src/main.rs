@@ -41,7 +41,7 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
         (@arg attacker_ratio: -r --ratio +takes_value default_value("0.45") #{0, 1} "Proportion of nodes which are attackers.")
         (@arg start_attack_at_h: -s --start_attack_height +takes_value default_value("1000") "Height at which to start the attack.")
         (@arg hash_rate: -H --hash_rate +takes_value default_value("10") "Maximum hashes each node will perform each tick attempting to produce a block.")
-        (@arg crypto_system: -S --crypto_system +takes_value  "Name of the cryptosystem template to use.")
+        (@arg crypto_system: -S --crypto_system +takes_value possible_values(&CryptoSystemArg::variants())  "Name of the cryptosystem template to use.")
     )
     .get_matches()
 }

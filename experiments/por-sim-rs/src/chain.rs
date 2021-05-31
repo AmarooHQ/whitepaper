@@ -385,6 +385,8 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
 
         let lca_md = self.get_block_meta(lca_id).unwrap();
 
+        // TODO: Add all parents recursively for daa2_blocks
+
         Ok((
             BlockMD {
                 difficulty: d,
