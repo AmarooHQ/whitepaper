@@ -23,6 +23,7 @@ mod hash;
 mod message_manager;
 mod msg;
 mod node;
+mod strategies;
 
 arg_enum! {
     #[derive(Debug)]
