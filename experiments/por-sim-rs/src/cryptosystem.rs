@@ -24,6 +24,14 @@ impl<'a> CSystemT<'a> for SimpleCS {
     type C = Chain<Self::B, Self::FR>;
 }
 
+pub struct WeightedChainCS {}
+
+impl<'a> CSystemT<'a> for WeightedChainCS {
+    type B = Block;
+    type FR = HeaviestChain<Self::B>;
+    type C = Chain<Self::B, Self::FR>;
+}
+
 pub struct DagCS {}
 
 impl<'a> CSystemT<'a> for DagCS {

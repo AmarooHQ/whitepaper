@@ -1,4 +1,3 @@
-use crate::block::Block;
 use crate::block::BlockT;
 use crate::chain::fork_rules::*;
 use crate::chain::Chain;

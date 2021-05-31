@@ -13,13 +13,30 @@ pub struct MM<'a, S: CSystemT<'a>> {
     attack_starts_at: u128,
 }
 
+pub struct AttackArgs {
+    pub n_honest: u16,
+    pub n_attackers: u16,
+    pub attack_starts_at: u128,
+    pub hash_rate: u32,
+}
+
+impl AttackArgs {
+    fn new(n_honest: u16, n_attackers: u16, attack_starts_at: u128, hash_rate: u32) -> Self {
+        AttackArgs {
+            n_honest,
+            n_attackers,
+            attack_starts_at,
+            hash_rate,
+        }
+    }
+}
+
 impl<'a, S: CSystemT<'a>> MM<'a, S> {
-    pub fn new(
-        nodes_honest: u16,
-        nodes_attacking: u16,
-        attack_starts_at: u128,
-        mining_attempts_per_tick: u32,
-    ) -> MM<'a, S> {
+    pub fn new(args: AttackArgs) -> MM<'a, S> {
+        let nodes_honest: u16 = args.n_honest;
+        let nodes_attacking: u16 = args.n_attackers;
+        let attack_starts_at: u128 = args.attack_starts_at;
+        let mining_attempts_per_tick: u32 = args.hash_rate;
         let n_nodes = nodes_honest + nodes_attacking;
         info!(
             "Creating new simulation with {} honest nodes and {} attacking nodes. Attack starts at H={}.",
@@ -152,7 +169,7 @@ mod tests {
     use crate::cryptosystem::SimpleCS;
 
     fn create_mm_no_priv<'a, S: CSystemT<'a>>() -> MM<'a, S> {
-        MM::<'a, S>::new(20, 0, 0, 100)
+        MM::<'a, S>::new(AttackArgs::new(20, 0, 0, 100))
     }
 
     fn ensure_chain_progress<'a, S: CSystemT<'a>>(mm: &MM<'a, S>) {
@@ -200,7 +217,7 @@ mod tests {
 
     #[test]
     fn mm_with_dag_block_has_many_parents() {
-        let mut mm = MM::<'_, DagCS>::new(10, 0, 0, 100);
+        let mut mm = MM::<'_, DagCS>::new(AttackArgs::new(10, 0, 0, 100));
 
         // set ts far in future to avoid issues with difficulty alg
         let t1_ts = 1000;
