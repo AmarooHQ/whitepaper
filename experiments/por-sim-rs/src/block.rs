@@ -30,7 +30,7 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
         u128::from_be_bytes(e)
     }
 
-    fn select_parent_from<C: IntoIterator<Item = u128>>(ps: C) -> u128 {
+    fn select_parent_from<B, C: IntoIterator<Item = B>>(ps: C) -> B {
         ps.into_iter().choose(&mut rand::thread_rng()).unwrap()
     }
 
