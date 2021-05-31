@@ -180,15 +180,15 @@ The final step in this progression is *mutual reflection* -- where both chains t
 \begin{figure}[]
 \centering
 \includegraphics[height=0.35\textheight]{pow_refl_step5_sag}
-\caption{\textit{Proof of Reflection} between two UT Chains}
+\caption{\textit{Proof of Reflection} between two UT Chains, Chain A and Chain B}
 \label{fig:por-step5}
 \end{figure}
 
-When chains mutually reflect each-other, detecting attacks becomes easier. After Chain E integrates *Proof of Reflection*, the security of Chain E is somewhat entangled with the history of Chain B. If a Chain B attacker publishes some chain-segment, then Chain E nodes will know that those blocks have not been reflected by Chain E. This make detecting such an attack much easier (provided the attacker is only attacking that chain).
+When two chains (Chain A and Chain B) mutually reflect each-other, detecting attacks becomes easier. The security of both Chain A and B are partially dependant on each others' histories (along with their own, of course). If one chain is attacked, where some alternate chain-segment is published, then that chain's nodes will know that those blocks have not been reflected - potentially indicating that the recently-published chain-segment was constructed in private or constructed after the fact.
 
 There are several details that still require discussion, though, such as: *how exactly is weight contributed by a reflecting chain converted to weight in the local chain?* (discussed in \autoref{sec:comparing-diff-pows}); and *how can proofs of reflection be calculated without the requirement that miners are full nodes of both chains?* (discussed in \autoref{sec:practical-considerations}). This last question is particularly important for moving beyond mutual reflection between only two chains.
 
-Despite these omissions, the *essence* of *Proof of Reflection* should now be apparent. *In principle*, we can make blockchains more difficult to attack based on the idea that *blockchains can track the history of other blockchains (and confirm that chain's history like they do transactions)*. *In principle*, it is possible to increase the security of a blockchain via *reflection*.
+The *essence* of *Proof of Reflection* should now be apparent. *In principle*, we can make blockchains more difficult to attack based on the idea that *blockchains can track the history of other blockchains (and confirm a chain's history like they do transactions)*. *In principle*, it is possible to increase the security of a blockchain via *reflection* and to increase the security of multiple blockchains via *mutual reflection*.
 
 ### Comparing Incomparable Proofs of Work
 

@@ -107,13 +107,13 @@ def mk_node(network: str, chain_f: Callable[[], TChain[B, BlockMD]] = simple_cha
     return node
 
 
-def main(n_nodes=5):
+def main(n_nodes=50):
     nodes = list(mk_node('net_1') for _ in range(n_nodes))
     logger.debug(f"Nodes: {nodes}")
     logger.debug(f"Clocks: {nexus.clock_qs}")
     ps = list(mp.Process(target=n.run) for n in nodes)
     list(p.start() for p in ps)
-    nexus.run_clock(tick_limit=100000)
+    nexus.run_clock(tick_limit=1000)
     logger.info("Main: run_clock finished.")
     list(p.join() for p in ps)
     # except KeyboardInterrupt as e:

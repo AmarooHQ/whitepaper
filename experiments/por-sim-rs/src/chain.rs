@@ -416,7 +416,7 @@ mod tests {
 
         let next_d = chain.next_difficulty(&genesis, &g_md);
         // assert_eq!(next_d, 1000);
-        assert_eq!(next_d, 10);
+        assert_eq!(next_d, 1000);
 
         let b = _mk_draft_block(&chain, 10, false);
 
