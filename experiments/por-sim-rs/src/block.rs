@@ -1,12 +1,9 @@
 use crate::hash::hash_u128;
 use getrandom::getrandom;
 use rand::seq::IteratorRandom;
-use std::{fmt, fmt::Display};
-// use sha3::{Digest, Sha3_256};
-// use std::convert::TryFrom;
-// use std::convert::TryInto;
 use std::fmt::Debug;
 use std::hash::Hash;
+use std::{fmt, fmt::Display};
 
 pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + Hash {
     fn new(ts: u32, parent: u128) -> Self;

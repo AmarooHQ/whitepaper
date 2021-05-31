@@ -116,15 +116,8 @@ mod tests {
     use crate::block::Block;
     use crate::chain::fork_rules::LongestChain;
     use crate::chain::*;
+    use crate::cryptosystem::SimpleCS;
     use crate::node;
-
-    struct SimpleCS {}
-
-    impl<'a> CSystemT<'a> for SimpleCS {
-        type B = Block;
-        type FR = LongestChain<Block>;
-        type C = Chain<Self::B, Self::FR>;
-    }
 
     #[test]
     fn block_is_added_to_chain() -> Result<(), String> {

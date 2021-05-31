@@ -1,20 +1,16 @@
 use super::node::*;
 use crate::block::BlockT;
-use crate::chain::fork_rules::*;
 use crate::chain::*;
 use crate::cryptosystem::CSystemT;
 use crate::msg::Msg;
-use core::hash::Hash;
 use itertools::Itertools;
 use log::*;
-use std::fmt::Debug;
 
 pub struct MM<'a, S: CSystemT<'a>> {
     // tick: u32,
     nodes: Vec<Node<'a, S>>,
     // difficulty_cache: Mutex<HashMap<u128, u128>>,
     attack_starts_at: u128,
-    genesis: S::B,
 }
 
 impl<'a, S: CSystemT<'a>> MM<'a, S> {
@@ -33,7 +29,6 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
         let mut mm = MM {
             nodes: Vec::new(),
             attack_starts_at,
-            genesis: genesis.clone(),
         };
         for i in 0..n_nodes {
             let atk_start_conds = if i >= nodes_honest {
@@ -120,10 +115,12 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
             }
         }
 
-        let hs = self.nodes.last().unwrap().chain.get_heights_pub_priv();
+        let chain = &self.nodes.last().unwrap().chain;
+        let hs = chain.get_heights_pub_priv();
+        let fms = chain.get_fork_measure_pub_priv();
         info!(
-            "Attack Failed, T={}, StartH={}, Pub={}, Priv={}",
-            ts_limit, atk_height_start, hs.public, hs.private
+            "Attack Failed. T={}, StartH={}, PubH={}, PrivH={}, PubFM={}, PrivFM={}",
+            ts_limit, atk_height_start, hs.public, hs.private, fms.public, fms.private
         );
         Ok(false)
     }
@@ -137,8 +134,9 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
         if (ts as u128) < self.attack_starts_at {
             None
         } else {
-            let hs = self.nodes.last().unwrap().chain.get_heights_pub_priv();
-            let fms = self.nodes.last().unwrap().chain.get_fork_measure_pub_priv();
+            let chain = &self.nodes.last().unwrap().chain;
+            let hs = chain.get_heights_pub_priv();
+            let fms = chain.get_fork_measure_pub_priv();
             if fms.public < fms.private && hs.public >= atk_height_start + win_thres {
                 Some((hs, fms))
             } else {
@@ -150,7 +148,6 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
 
 mod tests {
     use super::*;
-    use crate::block::*;
     use crate::cryptosystem::DagCS;
     use crate::cryptosystem::SimpleCS;
 
@@ -159,7 +156,7 @@ mod tests {
     }
 
     fn ensure_chain_progress<'a, S: CSystemT<'a>>(mm: &MM<'a, S>) {
-        let hs = mm.nodes.first().unwrap().chain.get_fork_measure_pub_priv();
+        let hs = mm.chain().get_fork_measure_pub_priv();
 
         assert_ne!(hs.public, 0);
         assert_eq!(hs.private, 0);
