@@ -418,6 +418,7 @@ mod tests {
         (genesis, g_md, chain)
     }
 
+    #[cfg(debug_assertions)]
     /// make the id (PoW proxy) small so that it passes all difficulty checks.
     fn _mk_draft_block<'a, B: BlockT, F: ForkRules<B>, C: ChainT<'a, B, F>>(
         chain: &C,

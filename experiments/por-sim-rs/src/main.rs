@@ -1,4 +1,4 @@
-use crate::block::Block;
+use crate::block::*;
 use crate::chain::fork_rules::*;
 use crate::chain::Chain;
 use clap::{value_t_or_exit, App, Arg, ArgMatches, SubCommand};
@@ -37,6 +37,8 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
     .get_matches()
 }
 
+type B = DagBlock;
+
 pub fn main() -> Result<(), String> {
     SimpleLogger::new()
         .with_level(LevelFilter::Info)
@@ -51,7 +53,7 @@ pub fn main() -> Result<(), String> {
     let n_attackers = n_total - n_honest;
     let attack_starts_at = 1000;
     let mining_attempts_per_tick = 100;
-    let mut mm = message_manager::MM::<Block, HeaviestChain<Block>, Chain<Block, _>>::new(
+    let mut mm = message_manager::MM::<B, HeaviestChain<_>, Chain<_, _>>::new(
         n_honest,
         n_attackers,
         attack_starts_at,
