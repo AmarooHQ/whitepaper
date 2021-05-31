@@ -60,6 +60,10 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     fn get_fork_measure_pub_priv(&self) -> Heights;
     fn get_heights_pub_priv(&self) -> Heights;
 
+    fn get_chain_weight_at(&self, b: u128) -> u128 {
+        self.get_block_meta(b).unwrap().chain_weight
+    }
+
     fn add_block(&mut self, b: B, is_private: bool) -> Result<(), ChainErr> {
         let (b_meta, _p, _p_meta) = self.validate_block(&b)?;
         self.update_best_block(&b, &b_meta, is_private);
@@ -68,7 +72,18 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
         Ok(())
     }
 
-    // fn update_best_block(&mut self, b: &B, b_meta: &BlockMD<B>, is_private: bool);
+    fn get_best_blocks_md(&self, is_private: bool) -> Vec<(u128, B, BlockMD<B>)> {
+        self.get_best_blocks(is_private)
+            .iter()
+            .map(|&b| {
+                (
+                    b,
+                    self.get_block(b).unwrap().clone(),
+                    self.get_block_meta(b).unwrap().clone(),
+                )
+            })
+            .collect()
+    }
 
     fn update_best_block(&mut self, b: &B, b_meta: &BlockMD<B>, is_private: bool) {
         let bb_id = self.select_best_block(is_private);
@@ -87,12 +102,6 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
                 best_blocks.insert(b.get_hash());
             }
         };
-        // if b_meta.height > bb_md.height {
-        //     best_blocks.clear();
-        // }
-        // if b_meta.height >= bb_md.height {
-        //     best_blocks.insert(b.get_hash());
-        // }
     }
 
     fn draft_block(&self, ts: u32, is_private: bool) -> B {
@@ -117,8 +126,25 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
         bs: &Vec<u128>,
     ) -> Option<(u128, BTreeMap<u32, BTreeSet<BInfo<B>>>)> {
         let mut intermediates = BTreeMap::<u32, BTreeSet<BInfo<B>>>::new();
-        let mut intermediate_q = BTreeMap::<u32, Vec<u128>>::new();
+        let mut intermediate_q = BTreeMap::<u32, BTreeSet<u128>>::new();
         let mut heights = Vec::new();
+
+        if bs.len() == 0 {
+            return None;
+        }
+
+        /* // Don't need this code -- works out via below anyway.
+        if bs.len() == 1 {
+            let id = bs[0];
+            let b = self.get_block(id).unwrap().clone();
+            let b_md = self.get_block_meta(id).unwrap().clone();
+            let h = b_md.height;
+            let mut infos = BTreeSet::new();
+            infos.insert(BInfo { id, b, b_md });
+            intermediates.insert(h, infos);
+            return Some((id, intermediates));
+        }
+        */
 
         for &id in bs {
             let b_md = self.get_block_meta(id).unwrap();
@@ -127,8 +153,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
 
             let iq_e = intermediate_q.entry(b_md.height);
             let iq_v = iq_e.or_insert(Default::default());
-            iq_v.push(id);
-
+            iq_v.insert(id);
             // v.insert(BInfo { id, b, b_md });
         }
 
@@ -140,6 +165,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
             let at_h = intermediate_q.get(&h).unwrap().clone();
             trace!("LCA at H={}, at_h.len={}, at_h={:?}", h, at_h.len(), at_h);
 
+            // iterate through block hashes at this height
             for &id in at_h.iter() {
                 let b = self.get_block(id).unwrap().clone();
                 let b_md = self.get_block_meta(id).unwrap().clone();
@@ -147,15 +173,20 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
                 let e = intermediates.entry(b_md.height);
                 let v = e.or_insert(Default::default());
 
-                for p in b.all_prev() {
-                    let p_md = self.get_block_meta(p).unwrap();
-                    let iq_e = intermediate_q.entry(p_md.height);
-                    let iq_v = iq_e.or_insert(Default::default());
-                    if !iq_v.contains(&p) {
-                        iq_v.push(p);
-                    }
-                    if p_md.height < min_h {
-                        min_h = p_md.height;
+                // this part adds all_prev() of the current block to the intermediate_q.
+                // we only want to do this if we haven't yet reached the min_h OR we have
+                // multiple blocks at this height (and thus haven't found the LCA yet).
+                if h > min_h || at_h.len() > 1 {
+                    for p in b.all_prev() {
+                        let p_md = self.get_block_meta(p).unwrap();
+                        let iq_e = intermediate_q.entry(p_md.height);
+                        let iq_v = iq_e.or_insert(Default::default());
+                        if !iq_v.contains(&p) {
+                            iq_v.insert(p);
+                        }
+                        if p_md.height < min_h {
+                            min_h = p_md.height;
+                        }
                     }
                 }
 
@@ -164,7 +195,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
 
             // we should only hit this condition when we've found the LCA
             if h <= min_h && at_h.len() == 1 {
-                return Some((at_h[0], intermediates));
+                return Some((*at_h.iter().collect::<Vec<_>>()[0], intermediates));
             }
         }
 
@@ -179,6 +210,19 @@ pub struct BlockMD<B> {
     pub weight: u128,
     pub chain_weight: u128,
     pub daa2_blocks: Vec<(B, u128)>,
+}
+
+impl<B: BlockT> fmt::Display for BlockMD<B> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // let mut md2 = self.clone();
+        // md2.daa2_blocks = vec![];
+        // fmt::Debug::fmt(&md2, f)
+        write!(
+            f,
+            "BlockMD D={} | H={} | W={} | ΣW={}",
+            self.difficulty, self.height, self.weight, self.chain_weight
+        )
+    }
 }
 
 impl<B: BlockT> BlockMD<B> {
@@ -331,12 +375,20 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             return Err(BadPoW(b.get_hash(), target));
         }
 
+        let (lca_id, intermediates_map) = self.find_lca_and_intermediates(&b.all_prev()).unwrap();
+        let delta_chain_weight: u128 = intermediates_map
+            .iter()
+            .map::<u128, _>(|(_k, v)| v.iter().map(|info| info.b_md.weight).sum())
+            .sum();
+
+        let lca_md = self.get_block_meta(lca_id).unwrap();
+
         Ok((
             BlockMD {
                 difficulty: d,
                 height: p_meta.height + 1,
                 weight: d,
-                chain_weight: d,
+                chain_weight: lca_md.chain_weight + delta_chain_weight + d,
                 daa2_blocks: Vec::from(
                     [
                         &[(b.clone(), d)],
@@ -366,6 +418,15 @@ mod tests {
         (genesis, g_md, chain)
     }
 
+    /// make the id (PoW proxy) small so that it passes all difficulty checks.
+    fn _mk_draft_block<'a, B: BlockT, F: ForkRules<B>, C: ChainT<'a, B, F>>(
+        chain: &C,
+        ts: u32,
+        is_private: bool,
+    ) -> B {
+        chain.draft_block(ts, is_private).test_set_work_bits(24)
+    }
+
     #[test]
     fn target_from_d() {
         let (_, _, chain) = _setup_chain::<Block, LongestChain<Block>>();
@@ -379,16 +440,10 @@ mod tests {
         );
     }
 
-    fn _mk_test_block(chain: &mut Chain<Block>, ts: u32) -> Block {
-        let mut b = chain.draft_block(ts, false);
-        b.id >>= 16;
-        b
-    }
-
     #[test]
     fn update_best_block() -> Result<(), String> {
         let (genesis, _g_md, mut chain) = _setup_chain::<Block, LongestChain<Block>>();
-        let b = _mk_test_block(&mut chain, 10);
+        let b = _mk_draft_block(&mut chain, 10, false);
 
         assert_eq!(chain.select_best_block(false), genesis.get_hash());
         assert_eq!(chain.select_best_block(true), genesis.get_hash());
@@ -402,6 +457,69 @@ mod tests {
 
         assert_eq!(chain.select_best_block(false), b.get_hash());
         assert_eq!(chain.select_best_block(true), b.get_hash());
+
+        Ok(())
+    }
+
+    #[test]
+    fn update_best_heaviest_block() -> Result<(), String> {
+        let (genesis, _g_md, mut chain) = _setup_chain::<Block, HeaviestChain<Block>>();
+        let b = _mk_draft_block(&mut chain, 10, false);
+
+        assert_eq!(chain.select_best_block(false), genesis.get_hash());
+        assert_eq!(chain.select_best_block(true), genesis.get_hash());
+
+        chain.add_block(b.clone(), false)?;
+
+        assert_eq!(chain.select_best_block(false), b.get_hash());
+        assert_eq!(chain.select_best_block(true), genesis.get_hash());
+
+        chain.add_block(b.clone(), true)?;
+
+        assert_eq!(chain.select_best_block(false), b.get_hash());
+        assert_eq!(chain.select_best_block(true), b.get_hash());
+
+        Ok(())
+    }
+
+    #[test]
+    fn update_best_heaviest_dagblock() -> Result<(), String> {
+        let (genesis, _g_md, mut chain) = _setup_chain::<DagBlock, HeaviestChain<DagBlock>>();
+        let b = _mk_draft_block(&mut chain, 10, false);
+        let b2 = _mk_draft_block(&mut chain, 10, false);
+        let b3 = _mk_draft_block(&mut chain, 10, false);
+
+        assert_eq!(chain.select_best_block(false), genesis.get_hash());
+        assert_eq!(chain.select_best_block(true), genesis.get_hash());
+
+        chain.add_block(b.clone(), false)?;
+
+        assert_eq!(chain.select_best_block(false), b.get_hash());
+        assert_eq!(chain.select_best_block(true), genesis.get_hash());
+        assert_eq!(chain.get_chain_weight_at(b.get_hash()), 1000);
+
+        chain.add_block(b.clone(), true)?;
+
+        assert_eq!(chain.select_best_block(false), b.get_hash());
+        assert_eq!(chain.select_best_block(true), b.get_hash());
+
+        chain.add_block(b2.clone(), false)?;
+        chain.add_block(b3.clone(), false)?;
+
+        assert_eq!(chain.get_chain_weight_at(b2.get_hash()), 1000);
+        assert_eq!(chain.get_chain_weight_at(b3.get_hash()), 1000);
+
+        let b4 = _mk_draft_block(&chain, 20, false);
+        chain.add_block(b4.clone(), false)?;
+        let b4_md = chain.get_block_meta(b4.get_hash()).unwrap();
+
+        assert_eq!(b4_md.height, 2, "b4_md has correct height");
+        assert_eq!(b4_md.weight, 1000, "b4_md has correct weight");
+        assert_eq!(b4_md.chain_weight, 4000, "b4_md has correct Σ weight");
+
+        for &b in chain.get_best_blocks(false) {
+            assert_eq!(chain.get_block_meta(b).unwrap().height, 2);
+        }
 
         Ok(())
     }
@@ -445,17 +563,6 @@ mod tests {
         Ok(())
     }
 
-    /// make the id (PoW proxy) smaller than starting difficulty.
-    fn _mk_draft_block<'a, B: BlockT, F: ForkRules<B>, C: ChainT<'a, B, F>>(
-        chain: &C,
-        ts: u32,
-        is_private: bool,
-    ) -> B {
-        let mut b = chain.draft_block(ts, is_private);
-        b.test_set_work_bits(24);
-        b
-    }
-
     #[test]
     fn find_lca_simple() -> Result<(), String> {
         // creates a single-parent chain
@@ -476,8 +583,9 @@ mod tests {
         assert_eq!(inter[&1].len(), 2);
         assert_eq!(inter[&0].len(), 1);
 
-        // add a 3rd block
-        let b3 = _mk_draft_block(&chain, 20, false);
+        // add a 3rd block, make sure it builds off b2
+        let mut b3 = _mk_draft_block(&chain, 20, false);
+        b3.parent = b2.get_hash();
         chain.add_block(b3.clone(), false)?;
 
         // find chain-segment from b3 (at h=2) and genesis
@@ -491,6 +599,22 @@ mod tests {
         // only expect one block at h=1 to be included.
         assert_eq!(inter[&1].len(), 1);
         assert_eq!(inter[&0].len(), 1);
+
+        let (lca_id, inter) = chain
+            .find_lca_and_intermediates(&vec![b3.get_hash()])
+            .unwrap();
+        assert_eq!(lca_id, b3.get_hash());
+        assert_eq!(inter.len(), 1);
+        assert_eq!(inter[&2].len(), 1);
+
+        // b3 builds off b2, so this should return b2 as the LCA
+        let (lca_id, inter) = chain
+            .find_lca_and_intermediates(&vec![b3.get_hash(), b2.get_hash()])
+            .unwrap();
+        assert_eq!(lca_id, b2.get_hash());
+        assert_eq!(inter.len(), 2);
+        assert_eq!(inter[&2].len(), 1);
+        assert_eq!(inter[&1].len(), 1);
 
         Ok(())
     }

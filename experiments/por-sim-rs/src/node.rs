@@ -126,7 +126,7 @@ mod tests {
         );
 
         // just so we make sure we can get a valid block via mining
-        let _b = n.attempt_mining(10, 10000).unwrap();
+        let _b = n.attempt_mining(10, 100000).unwrap();
 
         // create a valid block manually
         let mut b = n.chain.draft_block(10, false);

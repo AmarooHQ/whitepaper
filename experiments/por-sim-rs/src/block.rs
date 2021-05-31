@@ -1,13 +1,14 @@
 use crate::hash::hash_u128;
 use getrandom::getrandom;
 use rand::seq::IteratorRandom;
+use std::{fmt, fmt::Display};
 // use sha3::{Digest, Sha3_256};
 // use std::convert::TryFrom;
 // use std::convert::TryInto;
 use std::fmt::Debug;
 use std::hash::Hash;
 
-pub trait BlockT: Clone + Debug + PartialEq + Eq + PartialOrd + Ord + Hash {
+pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + Hash {
     fn new(ts: u32, parent: u128) -> Self;
     fn new_from(ts: u32, parent_opts: Vec<u128>) -> Self;
     fn genesis(ts: u32) -> Self;
@@ -28,7 +29,8 @@ pub trait BlockT: Clone + Debug + PartialEq + Eq + PartialOrd + Ord + Hash {
         ps.into_iter().choose(&mut rand::thread_rng()).unwrap()
     }
 
-    fn test_set_work_bits(&mut self, n_bits: u8);
+    #[cfg(debug_assertions)]
+    fn test_set_work_bits(&mut self, n_bits: u8) -> Self;
 }
 
 pub trait SingleParentBlockT: BlockT {}
@@ -42,6 +44,16 @@ pub struct Block {
     pub id: u128,
     pub parent: u128,
     pub timestamp: u32,
+}
+
+impl Display for Block {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "Block@{:4} | {:#16x} -> {:#16x}",
+            self.timestamp, self.id, self.parent
+        )
+    }
 }
 
 impl SingleParentBlockT for Block {}
@@ -98,8 +110,10 @@ impl BlockT for Block {
         self.id = hash_u128(self.id);
     }
 
-    fn test_set_work_bits(&mut self, n_bits: u8) {
+    #[cfg(debug_assertions)]
+    fn test_set_work_bits(&mut self, n_bits: u8) -> Self {
         self.id &= u128::MAX >> n_bits;
+        self.clone()
     }
 }
 
@@ -108,6 +122,16 @@ pub struct DagBlock {
     pub id: u128,
     pub parents: Vec<u128>,
     pub timestamp: u32,
+}
+
+impl Display for DagBlock {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "DagBlock@{:4} | {:#16x} -> {:?}",
+            self.timestamp, self.id, self.parents
+        )
+    }
 }
 
 impl ManyParentsBlockT for DagBlock {
@@ -157,8 +181,10 @@ impl BlockT for DagBlock {
         // let h = &Sha3_256::digest(bs)[..16];
         // self.id = u128::from_be_bytes(h.try_into().unwrap());
     }
-    fn test_set_work_bits(&mut self, n_bits: u8) {
+    #[cfg(debug_assertions)]
+    fn test_set_work_bits(&mut self, n_bits: u8) -> Self {
         self.id &= u128::MAX >> n_bits;
+        self.clone()
     }
 }
 

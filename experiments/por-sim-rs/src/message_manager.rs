@@ -13,6 +13,7 @@ pub struct MM<B: BlockT, F: ForkRules<B>, C> {
     nodes: Vec<Node<B, F, C>>,
     // difficulty_cache: Mutex<HashMap<u128, u128>>,
     attack_starts_at: u128,
+    genesis: B,
 }
 
 impl<'a, B: BlockT, F: ForkRules<B>> MM<B, F, Chain<B, F>> {
@@ -30,10 +31,9 @@ impl<'a, B: BlockT, F: ForkRules<B>> MM<B, F, Chain<B, F>> {
         let mut mm = MM {
             nodes: Vec::new(),
             attack_starts_at,
+            genesis: B::genesis(0),
         };
-        let genesis = B::genesis(0);
         for i in 0..n_nodes {
-            let g = genesis.clone();
             let atk_start_conds = if i >= nodes_honest {
                 Some(attack_starts_at)
             } else {
@@ -42,8 +42,8 @@ impl<'a, B: BlockT, F: ForkRules<B>> MM<B, F, Chain<B, F>> {
             mm.add_node(Node::new(
                 i,
                 Chain::<B, F>::new(
-                    g.clone(),
-                    BlockMD::mk_genesis_md(&genesis, Chain::<B, F>::DAA2_N_BLOCKS),
+                    mm.genesis.clone(),
+                    BlockMD::mk_genesis_md(&mm.genesis.clone(), Chain::<B, F>::DAA2_N_BLOCKS),
                 ),
                 atk_start_conds,
                 mining_attempts_per_tick,
@@ -55,6 +55,10 @@ impl<'a, B: BlockT, F: ForkRules<B>> MM<B, F, Chain<B, F>> {
 
     pub fn add_node(&mut self, node: Node<B, F, Chain<B, F>>) {
         self.nodes.push(node);
+    }
+
+    pub fn chain(&self) -> &Chain<B, F> {
+        return &self.nodes.first().unwrap().chain;
     }
 
     pub fn tick(&mut self, ts: u32, msgs: Vec<Msg<B>>) -> Result<Vec<Msg<B>>, String> {
@@ -194,16 +198,17 @@ mod tests {
 
     #[test]
     fn mm_with_dag_block_has_many_parents() {
-        let mut mm =
-            MM::<DagBlock, HeaviestChain<_>, Chain<DagBlock, HeaviestChain<_>>>::new(5, 0, 0, 200);
+        let mut mm = MM::<DagBlock, HeaviestChain<_>, Chain<_, _>>::new(10, 0, 0, 100);
 
         // set ts far in future to avoid issues with difficulty alg
-        let msgs = mm.tick(1000, vec![]).unwrap();
+        let t1_ts = 1000;
+        let mut msgs = mm.tick(t1_ts, vec![]).unwrap();
 
-        let chain = &mm.nodes.first().unwrap().chain;
-        let bb = chain.get_block(chain.select_best_block(false)).unwrap();
-        assert_ne!(bb.parents.len(), 0);
-        assert_eq!(bb.parents.len(), 1);
+        // create 2 dagblocks
+        let b_h1_1 = mm.chain().draft_block(t1_ts, false).test_set_work_bits(24);
+        let b_h1_2 = mm.chain().draft_block(t1_ts, false).test_set_work_bits(24);
+        msgs.extend(vec![Msg::MsgBlock(b_h1_1), Msg::MsgBlock(b_h1_2)]);
+
         // we made at least 2 blocks
         assert_eq!(
             msgs.len() > 1,
@@ -212,28 +217,33 @@ mod tests {
             msgs
         );
 
+        // check that the best block has exactly 1 parent (the genesis block)
+        let chain = mm.chain();
+        let bb = chain.get_block(chain.select_best_block(false)).unwrap();
+        assert_ne!(bb.parents.len(), 0);
+        assert_eq!(bb.parents.len(), 1);
+
         // this is the tick where blocks from tick 1 are added, and new blocks produced (but not yet added)
-        let msgs = mm.tick(1200, msgs).unwrap();
-        assert_eq!(
-            msgs.len() > 0,
-            true,
-            "We should produce block msgs here: {:?}",
-            msgs
-        );
+        let t2_ts = 1200;
+        let mut msgs = mm.tick(t2_ts, msgs).unwrap();
+        if msgs.len() == 0 {
+            let mut b = mm.chain().draft_block(t2_ts, false);
+            b.id >>= 30;
+            msgs.push(Msg::MsgBlock(b));
+        }
 
         // lets add blocks from the last tick.
-        let msgs = mm.tick(1300, msgs).unwrap();
+        let _msgs = mm.tick(1300, msgs).unwrap();
 
-        let chain = &mm.nodes.first().unwrap().chain;
+        let chain = &mm.chain();
         let bb = chain.get_block(chain.select_best_block(false)).unwrap();
         let bb_meta = chain.get_block_meta(bb.get_hash()).unwrap();
-        println!("best blocks: {:?}", chain.get_best_blocks(false));
         println!(
-            "best blocks: {:?}",
+            "best blocks: {:#?}",
             chain
-                .get_best_blocks(false)
+                .get_best_blocks_md(false)
                 .iter()
-                .map(|&id| { chain.get_block(id).unwrap() })
+                .map(|(i, b, md)| (i, b.to_string(), md.to_string()))
                 .collect::<Vec<_>>()
         );
         assert_eq!(bb_meta.height, 2);
