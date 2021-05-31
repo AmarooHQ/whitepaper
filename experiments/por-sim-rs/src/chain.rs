@@ -35,8 +35,8 @@ use ChainErr::*;
 
 #[derive(Debug)]
 pub struct Heights {
-    pub public: u128,
-    pub private: u128,
+    pub public: u64,
+    pub private: u64,
 }
 
 /// Used for LCA calculations
@@ -45,6 +45,25 @@ pub struct BInfo<B> {
     id: u128,
     b: B,
     b_md: BlockMD<B>,
+}
+
+/// Used for tracking Daa2 metadata
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Debug, Hash)]
+pub struct Daa2Info {
+    id: u128,
+    ts: u32,
+    d: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct BlockMD<B> {
+    pub difficulty: u64,
+    pub height: u32,
+    pub weight: u64,
+    pub chain_weight: u64,
+    // pub daa2_blocks: Vec<(B, u128)>,
+    pub daa2_blocks: Vec<Daa2Info>,
+    _phantom_b: PhantomData<B>,
 }
 
 pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
@@ -58,11 +77,11 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     fn get_best_blocks(&self, is_private: bool) -> &BTreeSet<u128>;
     fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut BTreeSet<u128>;
     fn validate_block(&self, b: &B) -> Result<(BlockMD<B>, &B, &BlockMD<B>), ChainErr>;
-    fn next_difficulty(&self, b: &B, b_meta: &BlockMD<B>) -> u128;
+    fn next_difficulty(&self, b: &B, b_meta: &BlockMD<B>) -> u64;
     fn get_fork_measure_pub_priv(&self) -> Heights;
     fn get_heights_pub_priv(&self) -> Heights;
 
-    fn get_chain_weight_at(&self, b: u128) -> u128 {
+    fn get_chain_weight_at(&self, b: u128) -> u64 {
         self.get_block_meta(b).unwrap().chain_weight
     }
 
@@ -107,10 +126,16 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     }
 
     fn draft_block(&self, ts: u32, is_private: bool) -> B {
-        B::new_from(
+        let mut b = B::new_from(
             ts,
             self.get_best_blocks(is_private).iter().cloned().collect(),
-        )
+            0,
+        );
+        b.set_difficulty(self.next_difficulty(
+            self.get_block(b.prev()).unwrap(),
+            self.get_block_meta(b.prev()).unwrap(),
+        ));
+        b
     }
 
     // fn select_best_block(&self, is_private: bool) -> u128;
@@ -119,8 +144,8 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
         B::select_parent_from(blocks)
     }
 
-    fn target_from_difficulty(&self, d: u128) -> u128 {
-        (1 << 127) / d
+    fn target_from_difficulty(&self, d: u64) -> u128 {
+        (1 << 127) / (d as u128)
     }
 
     fn find_lca_and_intermediates(
@@ -205,15 +230,6 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct BlockMD<B> {
-    pub difficulty: u128,
-    pub height: u32,
-    pub weight: u128,
-    pub chain_weight: u128,
-    pub daa2_blocks: Vec<(B, u128)>,
-}
-
 impl<B: BlockT> fmt::Display for BlockMD<B> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // let mut md2 = self.clone();
@@ -235,7 +251,16 @@ impl<B: BlockT> BlockMD<B> {
             height: 0,
             weight: 0,
             chain_weight: 0,
-            daa2_blocks: vec![(genesis.clone(), difficulty); daa2_n_blocks],
+            // daa2_blocks: vec![(genesis.clone(), difficulty); daa2_n_blocks],
+            daa2_blocks: vec![
+                Daa2Info {
+                    id: genesis.get_hash(),
+                    ts: genesis.get_ts(),
+                    d: difficulty
+                };
+                daa2_n_blocks
+            ],
+            _phantom_b: PhantomData,
         }
     }
 }
@@ -264,28 +289,29 @@ impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
     //     bs
     // }
 
-    fn next_difficulty_daa2_raw(&self, b_hash: u128, b_meta: &BlockMD<B>) -> u128 {
+    fn next_difficulty_daa2_raw(&self, b_hash: u128, b_meta: &BlockMD<B>) -> u64 {
         if b_meta.height < (Self::DAA2_N_BLOCKS >> 4) as u32 {
             return 1000;
         }
         let blocks = &b_meta.daa2_blocks;
         let block_time_sum: u32 =
-            self.blocks[&b_hash].get_ts() - b_meta.daa2_blocks.last().unwrap().0.get_ts();
-        let win_rate_sum: u128 = blocks.iter().map(|t| t.1).sum();
-        u128::from(self.goal_block_time) * win_rate_sum / max(u128::from(block_time_sum), 1)
+            self.blocks[&b_hash].get_ts() - b_meta.daa2_blocks.last().unwrap().ts;
+        let win_rate_sum: u64 = blocks.iter().map(|t| t.d).sum();
+        u64::from(self.goal_block_time) * win_rate_sum / max(u64::from(block_time_sum), 1)
     }
 
-    fn next_difficulty_daa2(&self, b_hash: u128, b_meta: &BlockMD<B>) -> u128 {
-        let mut c = self.difficulty_cache.lock().unwrap();
-        let cached_d = c.get(&b_hash).clone();
-        match cached_d {
-            Some(d) => *d,
-            None => {
-                let d = self.next_difficulty_daa2_raw(b_hash, b_meta);
-                c.insert(b_hash, d);
-                d
-            }
-        }
+    fn next_difficulty_daa2(&self, b_hash: u128, b_meta: &BlockMD<B>) -> u64 {
+        return self.next_difficulty_daa2_raw(b_hash, b_meta);
+        // let mut c = self.difficulty_cache.lock().unwrap();
+        // let cached_d = c.get(&b_hash).clone();
+        // match cached_d {
+        //     Some(d) => *d,
+        //     None => {
+        //         let d = self.next_difficulty_daa2_raw(b_hash, b_meta);
+        //         c.insert(b_hash, d);
+        //         d
+        //     }
+        // }
     }
 }
 
@@ -357,12 +383,18 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
 
     fn get_heights_pub_priv(&self) -> Heights {
         Heights {
-            public: self.blocks_meta[&self.select_best_block(false)].height as u128,
-            private: self.blocks_meta[&self.select_best_block(true)].height as u128,
+            public: self.blocks_meta[&self.select_best_block(false)].height as u64,
+            private: self.blocks_meta[&self.select_best_block(true)].height as u64,
         }
     }
 
     fn validate_block(&self, b: &B) -> Result<(BlockMD<B>, &B, &BlockMD<B>), ChainErr> {
+        if b.get_hash() > self.target_from_difficulty(b.get_difficulty()) {
+            return Err(BadPoW(
+                b.get_hash(),
+                self.target_from_difficulty(b.get_difficulty()),
+            ));
+        }
         let pm = self.blocks.get(&b.prev());
         if pm.is_none() {
             return Err(UnkParent);
@@ -371,21 +403,26 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         let p = pm.unwrap();
         let p_meta = self.get_block_meta(b.prev()).unwrap();
         let d = self.next_difficulty(&p, &p_meta);
-        let target = self.target_from_difficulty(d);
 
+        let target = self.target_from_difficulty(d);
         if b.get_hash() > target {
             return Err(BadPoW(b.get_hash(), target));
         }
 
         let (lca_id, intermediates_map) = self.find_lca_and_intermediates(&b.all_prev()).unwrap();
-        let delta_chain_weight: u128 = intermediates_map
+        let delta_chain_weight: u64 = intermediates_map
             .iter()
-            .map::<u128, _>(|(_k, v)| v.iter().map(|info| info.b_md.weight).sum())
+            .map::<u64, _>(|(_k, v)| v.iter().map(|info| info.b_md.weight).sum())
             .sum();
 
         let lca_md = self.get_block_meta(lca_id).unwrap();
 
         // TODO: Add all parents recursively for daa2_blocks
+        let to_add = vec![Daa2Info {
+            id: b.get_hash(),
+            ts: b.get_ts(),
+            d,
+        }];
 
         Ok((
             BlockMD {
@@ -395,18 +432,23 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
                 chain_weight: lca_md.chain_weight + delta_chain_weight + d,
                 daa2_blocks: Vec::from(
                     [
-                        &[(b.clone(), d)],
+                        &[Daa2Info {
+                            id: b.get_hash(),
+                            ts: b.get_ts(),
+                            d,
+                        }],
                         &p_meta.daa2_blocks[..(Self::DAA2_N_BLOCKS - 1)],
                     ]
                     .concat(),
                 ),
+                _phantom_b: PhantomData,
             },
             p,
             p_meta,
         ))
     }
 
-    fn next_difficulty(&self, b: &B, b_meta: &BlockMD<B>) -> u128 {
+    fn next_difficulty(&self, b: &B, b_meta: &BlockMD<B>) -> u64 {
         self.next_difficulty_daa2(b.get_hash(), b_meta)
     }
 }

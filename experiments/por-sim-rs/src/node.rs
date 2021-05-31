@@ -82,14 +82,15 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         for _ in 0..max_attempts {
             match self.chain.validate_block(&b) {
                 Ok((b_md, _, _)) => {
-                    info!(
+                    debug!(
                         "\nN={:3} NEW_BLOCK H={:4}, D={:4}, T={:4}, {:#x} ⭢  {:#x}",
+                        // "\nN={:} NEW_BLOCK H={:}, D={:}, T={:}, {:} ⭢  {:}",
                         self.id,
                         b_md.height,
                         b_md.difficulty,
                         b.get_ts(),
                         b.get_hash(),
-                        b.prev()
+                        b.prev(),
                     );
                     return Ok(b);
                 }

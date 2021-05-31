@@ -8,13 +8,14 @@ use crate::cryptosystem::WeightedChainCS;
 use crate::message_manager::AttackArgs;
 use clap::{value_t_or_exit, App, Arg, ArgMatches, SubCommand};
 use log::LevelFilter;
-use simple_logger::SimpleLogger;
-use std::marker::PhantomData;
 
 #[macro_use]
 extern crate clap;
 #[macro_use]
 extern crate derive_new;
+#[macro_use]
+extern crate log;
+extern crate env_logger;
 
 mod block;
 mod chain;
@@ -48,10 +49,12 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
 }
 
 pub fn main() -> Result<(), String> {
-    SimpleLogger::new()
-        .with_level(LevelFilter::Info)
-        .init()
-        .unwrap();
+    log::set_max_level(LevelFilter::Info);
+    env_logger::init();
+    // SimpleLogger::new()
+    //     .with_level(LevelFilter::Info)
+    //     .init()
+    //     .unwrap();
     let args = get_arg_matches();
 
     let n_total = value_t_or_exit!(args.value_of("nodes"), u16);
@@ -66,7 +69,7 @@ pub fn main() -> Result<(), String> {
     let n_attackers = n_total - n_honest;
     // let attack_starts_at = 1000;
     // let hash_rate = 100;
-    let attack_starts_at = attack_at_h as u128;
+    let attack_starts_at = attack_at_h as u64;
     let atk_args = AttackArgs {
         n_honest,
         n_attackers,

@@ -10,18 +10,18 @@ pub struct MM<'a, S: CSystemT<'a>> {
     // tick: u32,
     nodes: Vec<Node<'a, S>>,
     // difficulty_cache: Mutex<HashMap<u128, u128>>,
-    attack_starts_at: u128,
+    attack_starts_at: u64,
 }
 
 pub struct AttackArgs {
     pub n_honest: u16,
     pub n_attackers: u16,
-    pub attack_starts_at: u128,
+    pub attack_starts_at: u64,
     pub hash_rate: u32,
 }
 
 impl AttackArgs {
-    fn new(n_honest: u16, n_attackers: u16, attack_starts_at: u128, hash_rate: u32) -> Self {
+    fn new(n_honest: u16, n_attackers: u16, attack_starts_at: u64, hash_rate: u32) -> Self {
         AttackArgs {
             n_honest,
             n_attackers,
@@ -35,10 +35,10 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
     pub fn new(args: AttackArgs) -> MM<'a, S> {
         let nodes_honest: u16 = args.n_honest;
         let nodes_attacking: u16 = args.n_attackers;
-        let attack_starts_at: u128 = args.attack_starts_at;
+        let attack_starts_at: u64 = args.attack_starts_at;
         let mining_attempts_per_tick: u32 = args.hash_rate;
         let n_nodes = nodes_honest + nodes_attacking;
-        info!(
+        warn!(
             "Creating new simulation with {} honest nodes and {} attacking nodes. Attack starts at H={}.",
             nodes_honest, nodes_attacking, attack_starts_at
         );
@@ -49,7 +49,7 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
         };
         for i in 0..n_nodes {
             let atk_start_conds = if i >= nodes_honest {
-                Some(attack_starts_at)
+                Some(attack_starts_at as u128)
             } else {
                 None
             };
@@ -103,7 +103,7 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
         Ok(all_msgs)
     }
 
-    pub fn run_attack(&mut self, ts_limit: u32, win_thresh: u128) -> Result<bool, String> {
+    pub fn run_attack(&mut self, ts_limit: u32, win_thresh: u32) -> Result<bool, String> {
         let mut msgs = Vec::new();
 
         let mut atk_height_start = self.attack_starts_at;
@@ -112,7 +112,7 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
                 info!("tick: {}", ts);
             }
 
-            if ts as u128 == self.attack_starts_at {
+            if ts as u64 == self.attack_starts_at {
                 atk_height_start = self
                     .nodes
                     .first()
@@ -124,7 +124,7 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
 
             msgs = self.tick(ts, msgs)?;
             if let Some((hs, fms)) = self.attack_is_success(ts, atk_height_start, win_thresh) {
-                info!(
+                warn!(
                     "ATTACK SUCCESS! T={}, StartH={}, PubH={}, PrivH={}, PubFM={}, PrivFM={}",
                     ts, atk_height_start, hs.public, hs.private, fms.public, fms.private
                 );
@@ -135,7 +135,7 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
         let chain = &self.nodes.last().unwrap().chain;
         let hs = chain.get_heights_pub_priv();
         let fms = chain.get_fork_measure_pub_priv();
-        info!(
+        warn!(
             "Attack Failed. T={}, StartH={}, PubH={}, PrivH={}, PubFM={}, PrivFM={}",
             ts_limit, atk_height_start, hs.public, hs.private, fms.public, fms.private
         );
@@ -145,16 +145,16 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
     fn attack_is_success(
         &self,
         ts: u32,
-        atk_height_start: u128,
-        win_thres: u128,
+        atk_height_start: u64,
+        win_thres: u32,
     ) -> Option<(Heights, Heights)> {
-        if (ts as u128) < self.attack_starts_at {
+        if (ts as u64) < self.attack_starts_at {
             None
         } else {
             let chain = &self.nodes.last().unwrap().chain;
             let hs = chain.get_heights_pub_priv();
             let fms = chain.get_fork_measure_pub_priv();
-            if fms.public < fms.private && hs.public >= atk_height_start + win_thres {
+            if fms.public < fms.private && hs.public >= atk_height_start + win_thres as u64 {
                 Some((hs, fms))
             } else {
                 None

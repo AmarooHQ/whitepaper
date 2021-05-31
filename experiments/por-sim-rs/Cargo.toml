@@ -9,12 +9,12 @@ edition = "2018"
 [dependencies]
 clap = "2.33.3"
 derive-new = "0.5.9"
+env_logger = "0.8.3"
 getrandom = "0.2.3"
 itertools = "0.10.0"
 log = "0.4.14"
 rand = "0.8.3"
 sha3 = "0.9.1"
-simple_logger = "1.11.0"
 twox-hash = "1.6.0"
 
 [profile.release]

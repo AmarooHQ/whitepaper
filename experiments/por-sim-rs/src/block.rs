@@ -1,13 +1,14 @@
 use crate::hash::hash_u128;
 use getrandom::getrandom;
+use rand::prelude::*;
 use rand::seq::IteratorRandom;
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::{fmt, fmt::Display};
 
 pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + Hash {
-    fn new(ts: u32, parent: u128) -> Self;
-    fn new_from(ts: u32, parent_opts: Vec<u128>) -> Self;
+    fn new(ts: u32, parent: u128, d: u64) -> Self;
+    fn new_from(ts: u32, parent_opts: Vec<u128>, d: u64) -> Self;
     fn genesis(ts: u32) -> Self;
     fn get_hash(&self) -> u128;
     // fn hash_sha3(&self) -> u128;
@@ -15,8 +16,15 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
     fn all_prev(&self) -> Vec<u128>;
     fn get_ts(&self) -> u32;
     fn increment_nonce(&mut self);
+    fn get_difficulty(&self) -> u64;
+    fn set_difficulty(&mut self, d: u64);
 
     fn get_rand_id() -> u128 {
+        // Self::get_urand_id()
+        thread_rng().gen()
+    }
+
+    fn get_urand_id() -> u128 {
         let mut e: [u8; 16] = [0; 16];
         getrandom(&mut e).unwrap();
         u128::from_be_bytes(e)
@@ -33,7 +41,7 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
 pub trait SingleParentBlockT: BlockT {}
 
 pub trait ManyParentsBlockT: BlockT {
-    fn new_multi_parent(timestamp: u32, parents: Vec<u128>) -> Self;
+    fn new_multi_parent(timestamp: u32, parents: Vec<u128>, d: u64) -> Self;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -41,6 +49,7 @@ pub struct Block {
     pub id: u128,
     pub parent: u128,
     pub timestamp: u32,
+    pub d: u64,
 }
 
 impl Display for Block {
@@ -56,7 +65,7 @@ impl Display for Block {
 impl SingleParentBlockT for Block {}
 
 impl BlockT for Block {
-    fn new(ts: u32, parent: u128) -> Self {
+    fn new(ts: u32, parent: u128, d: u64) -> Self {
         let mut e: [u8; 16] = [0; 16];
         getrandom(&mut e).unwrap();
         let id = u128::from_be_bytes(e);
@@ -64,15 +73,16 @@ impl BlockT for Block {
             id,
             timestamp: ts,
             parent,
+            d,
         }
     }
 
-    fn new_from(ts: u32, parent_opts: Vec<u128>) -> Self {
-        Self::new(ts, Self::select_parent_from(parent_opts))
+    fn new_from(ts: u32, parent_opts: Vec<u128>, d: u64) -> Self {
+        Self::new(ts, Self::select_parent_from(parent_opts), d)
     }
 
     fn genesis(ts: u32) -> Self {
-        let mut g = Self::new(ts, 0);
+        let mut g = Self::new(ts, 0, 0);
         g.id >>= 10;
         g.parent = g.id;
         g
@@ -107,6 +117,13 @@ impl BlockT for Block {
         self.id = hash_u128(self.id);
     }
 
+    fn get_difficulty(&self) -> u64 {
+        self.d
+    }
+    fn set_difficulty(&mut self, d: u64) {
+        self.d = d;
+    }
+
     #[cfg(debug_assertions)]
     fn test_set_work_bits(&mut self, n_bits: u8) -> Self {
         self.id &= u128::MAX >> n_bits;
@@ -119,6 +136,7 @@ pub struct DagBlock {
     pub id: u128,
     pub parents: Vec<u128>,
     pub timestamp: u32,
+    d: u64,
 }
 
 impl Display for DagBlock {
@@ -132,24 +150,25 @@ impl Display for DagBlock {
 }
 
 impl ManyParentsBlockT for DagBlock {
-    fn new_multi_parent(timestamp: u32, parents: Vec<u128>) -> Self {
+    fn new_multi_parent(timestamp: u32, parents: Vec<u128>, d: u64) -> Self {
         DagBlock {
             timestamp,
             id: Self::get_rand_id(),
             parents,
+            d,
         }
     }
 }
 
 impl BlockT for DagBlock {
-    fn new(timestamp: u32, parent: u128) -> Self {
-        Self::new_multi_parent(timestamp, vec![parent])
+    fn new(timestamp: u32, parent: u128, d: u64) -> Self {
+        Self::new_multi_parent(timestamp, vec![parent], d)
     }
-    fn new_from(ts: u32, parent_opts: Vec<u128>) -> Self {
-        Self::new_multi_parent(ts, parent_opts)
+    fn new_from(ts: u32, parent_opts: Vec<u128>, d: u64) -> Self {
+        Self::new_multi_parent(ts, parent_opts, d)
     }
     fn genesis(ts: u32) -> Self {
-        let mut g = Self::new(ts, 0);
+        let mut g = Self::new(ts, 0, 0);
         g.parents = vec![g.id];
         g
     }
@@ -177,6 +196,12 @@ impl BlockT for DagBlock {
         // let bs = &self.id.to_be_bytes()[..];
         // let h = &Sha3_256::digest(bs)[..16];
         // self.id = u128::from_be_bytes(h.try_into().unwrap());
+    }
+    fn get_difficulty(&self) -> u64 {
+        self.d
+    }
+    fn set_difficulty(&mut self, d: u64) {
+        self.d = d;
     }
     #[cfg(debug_assertions)]
     fn test_set_work_bits(&mut self, n_bits: u8) -> Self {

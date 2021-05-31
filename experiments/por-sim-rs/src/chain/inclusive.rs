@@ -38,7 +38,7 @@ impl<'a, B: ManyParentsBlockT> ChainT<'a, B> for InclusiveChain<B> {
     ) -> std::result::Result<(BlockMD<B>, &B, &BlockMD<B>), ChainErr> {
         todo!()
     }
-    fn next_difficulty(&self, _: &B, _: &BlockMD<B>) -> u128 {
+    fn next_difficulty(&self, _: &B, _: &BlockMD<B>) -> u64 {
         todo!()
     }
     fn get_fork_measure_pub_priv(&self) -> Heights {
