@@ -641,8 +641,9 @@ mod tests {
 
         // add a 3rd block; should build of both h=1 blocks.
         let b3 = _mk_draft_block(&chain, 20, false);
-        chain.add_block(b3.clone(), false)?;
+        let b4 = _mk_draft_block(&chain, 20, false); // add this later
 
+        chain.add_block(b3.clone(), false)?;
         // find chain-segment from b3 (at h=2) and genesis
         let (lca_id, inter) = chain
             .find_lca_and_intermediates(&vec![b3.get_hash(), g.get_hash()])
@@ -654,6 +655,31 @@ mod tests {
         // expect 2 blocks at h=1 to be included b/c it's a dag!.
         assert_eq!(inter[&1].len(), 2);
         assert_eq!(inter[&0].len(), 1);
+
+        // 5 blocks including genesis, and genesis is LCA of most recent 2 blocks
+        chain.add_block(b4.clone(), false)?;
+        let (lca_id, inter) = chain
+            .find_lca_and_intermediates(&vec![b3.get_hash(), b4.get_hash()])
+            .unwrap();
+        assert_eq!(lca_id, g.get_hash());
+        assert_eq!(inter[&2].len(), 2);
+        assert_eq!(inter[&1].len(), 2);
+        assert_eq!(inter[&0].len(), 1);
+
+        let b5 = _mk_draft_block(&chain, 30, false);
+        chain.add_block(b5.clone(), false)?;
+        let (lca_id, inter) = chain.find_lca_and_intermediates(&b5.parents).unwrap();
+        assert_eq!(lca_id, g.get_hash());
+        assert_eq!(inter[&2].len(), 2);
+        assert_eq!(inter[&1].len(), 2);
+        assert_eq!(inter[&0].len(), 1);
+
+        let (lca_id, inter) = chain
+            .find_lca_and_intermediates(&vec![b5.get_hash()])
+            .unwrap();
+        assert_eq!(lca_id, b5.get_hash());
+        assert_eq!(inter[&3].len(), 1);
+        assert_eq!(inter.len(), 1);
 
         Ok(())
     }
