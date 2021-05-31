@@ -1,46 +1,49 @@
+use crate::block::Block;
 use crate::block::BlockT;
 use crate::chain::fork_rules::*;
+use crate::chain::Chain;
 use crate::chain::ChainErr;
 use crate::chain::ChainT;
+use crate::cryptosystem::CSystemT;
 use crate::msg::Msg;
 use crate::msg::Msg::*;
 use log::*;
 use std::marker::PhantomData;
 
 #[derive(Debug)]
-pub struct Node<B, F, C> {
+pub struct Node<'a, S: CSystemT<'a>> {
     id: u16,
-    pub chain: C,
-    _phantom: PhantomData<B>,
-    _phantom2: PhantomData<F>,
+    pub chain: S::C,
+    // _phantom: PhantomData<S::B>,
+    // _phantom2: PhantomData<S::FR>,
     is_attacker: bool,
     attack_threshold: u128,
     mining_attempts_per_tick: u32,
 }
 
-impl<'a, B: 'a + BlockT, F: ForkRules<B>, C: ChainT<'a, B, F>> Node<B, F, C> {
+impl<'a, S: CSystemT<'a>> Node<'a, S> {
     pub fn new(
         id: u16,
-        chain: C,
+        chain: S::C,
         attack_threshold: Option<u128>,
         mining_attempts_per_tick: u32,
-    ) -> Node<B, F, C> {
+    ) -> Node<'a, S> {
         Node {
             id,
             chain,
             is_attacker: attack_threshold.is_some(),
             attack_threshold: attack_threshold.unwrap_or(0),
             mining_attempts_per_tick,
-            _phantom: PhantomData,
-            _phantom2: PhantomData,
+            // _phantom: PhantomData,
+            // _phantom2: PhantomData,
         }
     }
 
-    fn got_block(&mut self, b: &B, is_private: bool) -> Result<(), ChainErr> {
+    fn got_block(&mut self, b: &S::B, is_private: bool) -> Result<(), ChainErr> {
         self.chain.add_block(b.clone(), is_private)
     }
 
-    pub fn step(&mut self, ts: u32, msgs: Vec<Msg<B>>) -> Result<Vec<Msg<B>>, String> {
+    pub fn step(&mut self, ts: u32, msgs: Vec<Msg<S::B>>) -> Result<Vec<Msg<S::B>>, String> {
         let mut out_msgs = vec![];
 
         // process incoming messages
@@ -81,7 +84,7 @@ impl<'a, B: 'a + BlockT, F: ForkRules<B>, C: ChainT<'a, B, F>> Node<B, F, C> {
         Ok(out_msgs)
     }
 
-    fn attempt_mining(&self, ts: u32, max_attempts: u32) -> Result<B, ()> {
+    fn attempt_mining(&self, ts: u32, max_attempts: u32) -> Result<S::B, ()> {
         let mine_in_private = self.is_attacker && ts as u128 > self.attack_threshold;
         let mut b = self.chain.draft_block(ts, mine_in_private);
         for _ in 0..max_attempts {
@@ -113,17 +116,24 @@ mod tests {
     use crate::block::Block;
     use crate::chain::fork_rules::LongestChain;
     use crate::chain::*;
+    use crate::node;
+
+    struct SimpleCS {}
+
+    impl<'a> CSystemT<'a> for SimpleCS {
+        type B = Block;
+        type FR = LongestChain<Block>;
+        type C = Chain<Self::B, Self::FR>;
+    }
 
     #[test]
     fn block_is_added_to_chain() -> Result<(), String> {
         let genesis = Block::genesis(0);
         let c = Chain::new(
             genesis.clone(),
-            BlockMD::mk_genesis_md(&genesis, Chain::<Block, LongestChain<Block>>::DAA2_N_BLOCKS),
+            BlockMD::mk_genesis_md(&genesis, <SimpleCS as CSystemT>::C::DAA2_N_BLOCKS),
         );
-        let mut n = Node::<Block, LongestChain<Block>, Chain<Block, LongestChain<Block>>>::new(
-            1337, c, None, 100,
-        );
+        let mut n: Node<SimpleCS> = Node::new(1337, c, None, 100);
 
         // just so we make sure we can get a valid block via mining
         let _b = n.attempt_mining(10, 100000).unwrap();

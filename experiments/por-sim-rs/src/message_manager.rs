@@ -2,36 +2,38 @@ use super::node::*;
 use crate::block::BlockT;
 use crate::chain::fork_rules::*;
 use crate::chain::*;
+use crate::cryptosystem::CSystemT;
 use crate::msg::Msg;
 use core::hash::Hash;
 use itertools::Itertools;
 use log::*;
 use std::fmt::Debug;
 
-pub struct MM<B: BlockT, F: ForkRules<B>, C> {
+pub struct MM<'a, S: CSystemT<'a>> {
     // tick: u32,
-    nodes: Vec<Node<B, F, C>>,
+    nodes: Vec<Node<'a, S>>,
     // difficulty_cache: Mutex<HashMap<u128, u128>>,
     attack_starts_at: u128,
-    genesis: B,
+    genesis: S::B,
 }
 
-impl<'a, B: BlockT, F: ForkRules<B>> MM<B, F, Chain<B, F>> {
+impl<'a, S: CSystemT<'a>> MM<'a, S> {
     pub fn new(
         nodes_honest: u16,
         nodes_attacking: u16,
         attack_starts_at: u128,
         mining_attempts_per_tick: u32,
-    ) -> MM<B, F, Chain<B, F>> {
+    ) -> MM<'a, S> {
         let n_nodes = nodes_honest + nodes_attacking;
         info!(
             "Creating new simulation with {} honest nodes and {} attacking nodes. Attack starts at H={}.",
             nodes_honest, nodes_attacking, attack_starts_at
         );
+        let genesis = S::B::genesis(0);
         let mut mm = MM {
             nodes: Vec::new(),
             attack_starts_at,
-            genesis: B::genesis(0),
+            genesis: genesis.clone(),
         };
         for i in 0..n_nodes {
             let atk_start_conds = if i >= nodes_honest {
@@ -41,9 +43,9 @@ impl<'a, B: BlockT, F: ForkRules<B>> MM<B, F, Chain<B, F>> {
             };
             mm.add_node(Node::new(
                 i,
-                Chain::<B, F>::new(
-                    mm.genesis.clone(),
-                    BlockMD::mk_genesis_md(&mm.genesis.clone(), Chain::<B, F>::DAA2_N_BLOCKS),
+                S::C::new(
+                    genesis.clone(),
+                    BlockMD::mk_genesis_md(&genesis.clone(), Chain::<S::B, S::FR>::DAA2_N_BLOCKS),
                 ),
                 atk_start_conds,
                 mining_attempts_per_tick,
@@ -53,15 +55,15 @@ impl<'a, B: BlockT, F: ForkRules<B>> MM<B, F, Chain<B, F>> {
         mm
     }
 
-    pub fn add_node(&mut self, node: Node<B, F, Chain<B, F>>) {
+    pub fn add_node(&mut self, node: Node<'a, S>) {
         self.nodes.push(node);
     }
 
-    pub fn chain(&self) -> &Chain<B, F> {
+    pub fn chain(&self) -> &S::C {
         return &self.nodes.first().unwrap().chain;
     }
 
-    pub fn tick(&mut self, ts: u32, msgs: Vec<Msg<B>>) -> Result<Vec<Msg<B>>, String> {
+    pub fn tick(&mut self, ts: u32, msgs: Vec<Msg<S::B>>) -> Result<Vec<Msg<S::B>>, String> {
         let mut new_msgs = Vec::new();
         for node in self.nodes.iter_mut() {
             let in_msgs = node.step(ts, msgs.clone()).unwrap();
@@ -73,7 +75,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> MM<B, F, Chain<B, F>> {
         Ok(new_msgs.into_iter().unique().collect())
     }
 
-    pub fn tick_many(&mut self, n_ticks: u32) -> Result<Vec<Msg<B>>, String> {
+    pub fn tick_many(&mut self, n_ticks: u32) -> Result<Vec<Msg<S::B>>, String> {
         let mut msgs = Vec::new();
         let mut all_msgs = Vec::new();
         // msgs.push(Msg::MsgEcho(String::from("test msg")));
@@ -109,10 +111,10 @@ impl<'a, B: BlockT, F: ForkRules<B>> MM<B, F, Chain<B, F>> {
             }
 
             msgs = self.tick(ts, msgs.clone())?;
-            if let Some(hs) = self.attack_is_success(ts, atk_height_start, win_thresh) {
+            if let Some((hs, fms)) = self.attack_is_success(ts, atk_height_start, win_thresh) {
                 info!(
-                    "ATTACK SUCCESS! T={}, StartH={}, Pub={}, Priv={}",
-                    ts, atk_height_start, hs.public, hs.private
+                    "ATTACK SUCCESS! T={}, StartH={}, PubH={}, PrivH={}, PubFM={}, PrivFM={}",
+                    ts, atk_height_start, hs.public, hs.private, fms.public, fms.private
                 );
                 return Ok(true);
             }
@@ -131,13 +133,14 @@ impl<'a, B: BlockT, F: ForkRules<B>> MM<B, F, Chain<B, F>> {
         ts: u32,
         atk_height_start: u128,
         win_thres: u128,
-    ) -> Option<Heights> {
+    ) -> Option<(Heights, Heights)> {
         if (ts as u128) < self.attack_starts_at {
             None
         } else {
             let hs = self.nodes.last().unwrap().chain.get_heights_pub_priv();
-            if hs.public < hs.private && hs.public >= atk_height_start + win_thres {
-                Some(hs)
+            let fms = self.nodes.last().unwrap().chain.get_fork_measure_pub_priv();
+            if fms.public < fms.private && hs.public >= atk_height_start + win_thres {
+                Some((hs, fms))
             } else {
                 None
             }
@@ -148,12 +151,14 @@ impl<'a, B: BlockT, F: ForkRules<B>> MM<B, F, Chain<B, F>> {
 mod tests {
     use super::*;
     use crate::block::*;
+    use crate::cryptosystem::DagCS;
+    use crate::cryptosystem::SimpleCS;
 
-    fn create_mm_no_priv<B: BlockT, F: ForkRules<B>>() -> MM<B, F, Chain<B, F>> {
-        MM::<B, F, Chain<B, F>>::new(20, 0, 0, 100)
+    fn create_mm_no_priv<'a, S: CSystemT<'a>>() -> MM<'a, S> {
+        MM::<'a, S>::new(20, 0, 0, 100)
     }
 
-    fn ensure_chain_progress<B: BlockT, F: ForkRules<B>>(mm: &MM<B, F, Chain<B, F>>) {
+    fn ensure_chain_progress<'a, S: CSystemT<'a>>(mm: &MM<'a, S>) {
         let hs = mm.nodes.first().unwrap().chain.get_fork_measure_pub_priv();
 
         assert_ne!(hs.public, 0);
@@ -173,7 +178,7 @@ mod tests {
 
     #[test]
     fn blocks_propagate() {
-        let mut mm: MM<Block, _, Chain<_>> = create_mm_no_priv();
+        let mut mm = create_mm_no_priv::<'_, SimpleCS>();
         let all_msgs = mm.tick_many(10).unwrap();
 
         assert_eq!(all_msgs.len() > 0, true);
@@ -184,21 +189,21 @@ mod tests {
 
     #[test]
     fn mm_with_vanilla_block() {
-        let mut mm = create_mm_no_priv::<Block, LongestChain<_>>();
+        let mut mm = create_mm_no_priv::<'_, SimpleCS>();
         mm.tick_many(20).unwrap();
         ensure_chain_progress(&mm);
     }
 
     #[test]
     fn mm_with_dag_block() {
-        let mut mm = create_mm_no_priv::<DagBlock, HeaviestChain<_>>();
+        let mut mm = create_mm_no_priv::<'_, DagCS>();
         mm.tick_many(20).unwrap();
         ensure_chain_progress(&mm);
     }
 
     #[test]
     fn mm_with_dag_block_has_many_parents() {
-        let mut mm = MM::<DagBlock, HeaviestChain<_>, Chain<_, _>>::new(10, 0, 0, 100);
+        let mut mm = MM::<'_, DagCS>::new(10, 0, 0, 100);
 
         // set ts far in future to avoid issues with difficulty alg
         let t1_ts = 1000;

@@ -14,6 +14,9 @@ struct InclusiveChain<B> {
 }
 
 impl<'a, B: ManyParentsBlockT> ChainT<'a, B> for InclusiveChain<B> {
+    fn new(_genesis: B, _genesis_meta: BlockMD<B>) -> Self {
+        todo!()
+    }
     fn add_block(&mut self, _: B, _: bool) -> std::result::Result<(), ChainErr> {
         todo!()
     }

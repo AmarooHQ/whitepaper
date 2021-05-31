@@ -48,6 +48,8 @@ pub struct BInfo<B> {
 }
 
 pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
+    fn new(genesis: B, genesis_meta: BlockMD<B>) -> Self;
+
     fn save_block(&mut self, b_id: u128, b: B);
     fn save_block_meta(&mut self, b_id: u128, b: BlockMD<B>);
     fn get_block(&self, b: u128) -> Option<&B>;
@@ -252,21 +254,6 @@ pub struct Chain<B: BlockT, F: ForkRules<B> = LongestChain<B>> {
 impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
     pub const DAA2_N_BLOCKS: usize = 100;
 
-    pub fn new(genesis: B, genesis_meta: BlockMD<B>) -> Chain<B, F> {
-        let g_hash = genesis.get_hash();
-        trace!("genesis.hash:{}", g_hash);
-        Chain {
-            blocks: [(g_hash, genesis.clone())].iter().cloned().collect(),
-            best_blocks: [g_hash].iter().cloned().collect(),
-            best_priv_blocks: [g_hash].iter().cloned().collect(),
-            blocks_meta: [(g_hash, genesis_meta)].iter().cloned().collect(),
-            goal_block_time: 10,
-            difficulty_cache: Mutex::new([].iter().cloned().collect()),
-            // fork_rules: LongestChain::<B>::new(),
-            _phantom: PhantomData,
-        }
-    }
-
     // fn get_with_n_ancestors<'b>(&'b self, b: &'b B, n: u32) -> Vec<&'b B> {
     //     let mut bs = vec![b];
     //     let mut c = b;
@@ -303,6 +290,21 @@ impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
 }
 
 impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
+    fn new(genesis: B, genesis_meta: BlockMD<B>) -> Chain<B, F> {
+        let g_hash = genesis.get_hash();
+        trace!("genesis.hash:{}", g_hash);
+        Chain {
+            blocks: [(g_hash, genesis.clone())].iter().cloned().collect(),
+            best_blocks: [g_hash].iter().cloned().collect(),
+            best_priv_blocks: [g_hash].iter().cloned().collect(),
+            blocks_meta: [(g_hash, genesis_meta)].iter().cloned().collect(),
+            goal_block_time: 10,
+            difficulty_cache: Mutex::new([].iter().cloned().collect()),
+            // fork_rules: LongestChain::<B>::new(),
+            _phantom: PhantomData,
+        }
+    }
+
     fn save_block(&mut self, id: u128, b: B) {
         self.blocks.insert(id, b);
     }

@@ -1,6 +1,8 @@
 use crate::block::*;
 use crate::chain::fork_rules::*;
 use crate::chain::Chain;
+use crate::cryptosystem::CSystemT;
+use crate::cryptosystem::DagCS;
 use clap::{value_t_or_exit, App, Arg, ArgMatches, SubCommand};
 use log::LevelFilter;
 use simple_logger::SimpleLogger;
@@ -12,6 +14,7 @@ extern crate derive_new;
 
 mod block;
 mod chain;
+mod cryptosystem;
 mod hash;
 mod message_manager;
 mod msg;
@@ -53,7 +56,7 @@ pub fn main() -> Result<(), String> {
     let n_attackers = n_total - n_honest;
     let attack_starts_at = 1000;
     let mining_attempts_per_tick = 100;
-    let mut mm = message_manager::MM::<B, HeaviestChain<_>, Chain<_, _>>::new(
+    let mut mm = message_manager::MM::<'_, DagCS>::new(
         n_honest,
         n_attackers,
         attack_starts_at,
