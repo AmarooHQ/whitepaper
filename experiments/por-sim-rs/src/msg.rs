@@ -1,21 +1,21 @@
 use crate::block::{Block, BlockT};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum Msg<B: Clone + BlockT = Block> {
+pub enum Msg<B: Clone + BlockT> {
     MsgBlock(B),
     MsgPrivBlock(B),
     // MsgEcho(String),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum MsgToNode<'a, B: Clone + BlockT = Block> {
-    MsgBlock(&'a B),
-    MsgPrivBlock(&'a B),
+pub enum MsgToNode<B: Clone + BlockT> {
+    MsgBlock(B),
+    MsgPrivBlock(B),
     // MsgEcho(String),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum MsgFromNode<B: Clone + BlockT = Block> {
+pub enum MsgFromNode<B: Clone + BlockT> {
     MsgBlock(B),
     MsgPrivBlock(B),
     // MsgEcho(String),

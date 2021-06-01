@@ -4,6 +4,7 @@ use crate::chain::ChainT;
 use crate::cryptosystem::CSystemT;
 use crate::msg::Msg;
 use crate::msg::Msg::*;
+use crate::msg::MsgToNode;
 use log::*;
 
 #[derive(Debug)]
@@ -37,13 +38,13 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         self.chain.add_block(b.clone(), is_private)
     }
 
-    pub fn step(&mut self, ts: u32, msgs: Vec<Msg<S::B>>) -> Result<Vec<Msg<S::B>>, String> {
+    pub fn step(&mut self, ts: u32, msgs: &Vec<MsgToNode<S::B>>) -> Result<Vec<Msg<S::B>>, String> {
         let mut out_msgs = vec![];
 
         // process incoming messages
         for in_msg in msgs {
             match in_msg {
-                MsgBlock(b) => {
+                MsgToNode::MsgBlock(b) => {
                     self.curr_draft_block = None;
                     self.got_block(&b, false)?;
                     // before the attack has started, treat all blocks
@@ -52,7 +53,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
                         self.got_block(&b, true)?;
                     }
                 }
-                MsgPrivBlock(b) => {
+                MsgToNode::MsgPrivBlock(b) => {
                     self.curr_draft_block = None;
                     // only attacking nodes should process these msgs
                     if self.is_attacker {

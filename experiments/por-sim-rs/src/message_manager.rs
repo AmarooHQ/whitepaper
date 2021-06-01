@@ -78,31 +78,39 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
         return &self.nodes.first().unwrap().chain;
     }
 
-    fn msgs_from_into_to(&mut self, msgs_from: Vec<Msg<S::B>>) -> Vec<Msg<S::B>> {
-        let msgs_to = Default::default();
+    fn msgs_from_into_to(&mut self, msgs_from: Vec<Msg<S::B>>) -> Vec<MsgToNode<S::B>> {
+        let mut msgs_to: Vec<_> = Default::default();
         for msg in msgs_from {
             match msg {
-                Msg::MsgBlock(b) => {}
-                Msg::MsgPrivBlock(b) => {}
+                Msg::MsgBlock(b) => {
+                    msgs_to.push(MsgToNode::MsgBlock(b));
+                }
+                Msg::MsgPrivBlock(b) => {
+                    msgs_to.push(MsgToNode::MsgPrivBlock(b));
+                }
             }
         }
         msgs_to
     }
 
     pub fn tick(&mut self, ts: u32, msgs: Vec<Msg<S::B>>) -> Result<Vec<Msg<S::B>>, String> {
-        let mut new_msgs = Vec::new();
-        for node in self.nodes.iter_mut() {
-            let in_msgs = node.step(ts, msgs.clone()).unwrap();
-            if in_msgs.len() > 0 {
-                debug!("\nGot messages: {:?}", in_msgs);
-            }
-            new_msgs.extend(in_msgs.into_iter());
-        }
-        Ok(new_msgs.into_iter().unique().collect())
+        let msgs_to = self.msgs_from_into_to(msgs);
+        let output_msgs = self
+            .nodes
+            .iter_mut()
+            .map(|node| {
+                let in_msgs = node.step(ts, &msgs_to).unwrap();
+                if in_msgs.len() > 0 {
+                    debug!("\nGot messages: {:?}", in_msgs);
+                }
+                in_msgs
+            })
+            .concat();
+        Ok(Vec::from(output_msgs))
     }
 
     pub fn tick_many(&mut self, n_ticks: u32) -> Result<Vec<Msg<S::B>>, String> {
-        let mut msgs = Vec::new();
+        let mut msgs_from = Vec::new();
         let mut all_msgs = Vec::new();
         // msgs.push(Msg::MsgEcho(String::from("test msg")));
 
@@ -110,15 +118,15 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
             if ts % 100 == 0 {
                 info!("tick: {}", ts);
             }
-            msgs = self.tick(ts, msgs.clone())?;
-            all_msgs.extend(msgs.iter().cloned());
+            msgs_from = { self.tick(ts, msgs_from)? };
+            all_msgs.extend(msgs_from.clone().into_iter());
         }
 
         Ok(all_msgs)
     }
 
     pub fn run_attack(&mut self, ts_limit: u32, win_thresh: u32) -> Result<bool, String> {
-        let mut msgs = Vec::new();
+        let mut msgs_from = Vec::new();
 
         let mut atk_height_start = self.attack_starts_at;
         for ts in 1..(ts_limit + 1) {
@@ -136,10 +144,7 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
                         .public,
                 );
             }
-
-            // msgs = self.msgs_from_into_to(msgs);
-
-            msgs = self.tick(ts, msgs)?;
+            msgs_from = self.tick(ts, msgs_from)?;
             if let Some((hs, fms)) = self.attack_is_success(ts, atk_height_start, win_thresh) {
                 warn!(
                     "ATTACK SUCCESS! T={}, StartH={}, PubH={}, PrivH={}, PubFM={}, PrivFM={}",
