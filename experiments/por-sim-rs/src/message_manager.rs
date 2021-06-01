@@ -39,7 +39,7 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
         let mining_attempts_per_tick: u32 = args.hash_rate;
         let n_nodes = nodes_honest + nodes_attacking;
         warn!(
-            "Creating new simulation with {} honest nodes and {} attacking nodes. Attack starts at H={}.",
+            "Creating new simulation with {} honest nodes and {} attacking nodes. Attack starts at T={}.",
             nodes_honest, nodes_attacking, attack_starts_at
         );
         let genesis = S::B::genesis(0);
@@ -80,7 +80,7 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
         for node in self.nodes.iter_mut() {
             let in_msgs = node.step(ts, msgs.clone()).unwrap();
             if in_msgs.len() > 0 {
-                info!("\nGot messages: {:?}", in_msgs);
+                debug!("\nGot messages: {:?}", in_msgs);
             }
             new_msgs.extend(in_msgs.into_iter());
         }
@@ -238,7 +238,7 @@ mod tests {
 
         // check that the best block has exactly 1 parent (the genesis block)
         let chain = mm.chain();
-        let bb = chain.get_block(chain.select_best_block(false)).unwrap();
+        let bb = &chain.get_block(chain.select_best_block(false)).unwrap().0;
         assert_ne!(bb.parents.len(), 0);
         assert_eq!(bb.parents.len(), 1);
 
@@ -255,14 +255,13 @@ mod tests {
         let _msgs = mm.tick(1300, msgs).unwrap();
 
         let chain = &mm.chain();
-        let bb = chain.get_block(chain.select_best_block(false)).unwrap();
-        let bb_meta = chain.get_block_meta(bb.get_hash()).unwrap();
+        let (bb, bb_meta) = chain.get_block(chain.select_best_block(false)).unwrap();
         println!(
             "best blocks: {:#?}",
             chain
                 .get_best_blocks_md(false)
                 .iter()
-                .map(|(i, b, md)| (i, b.to_string(), md.to_string()))
+                .map(|(i, (b, md))| (i, b.to_string(), md.to_string()))
                 .collect::<Vec<_>>()
         );
         assert_eq!(bb_meta.height, 2);

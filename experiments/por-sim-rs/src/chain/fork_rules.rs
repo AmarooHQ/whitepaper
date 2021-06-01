@@ -56,7 +56,7 @@ impl<B: BlockT> ForkRules<B> for LongestChain<B> {
     // }
 
     fn weight_of<'a, F: ForkRules<B>>(b: &B, chain: &impl ChainT<'a, B, F>) -> u64 {
-        (chain.get_block_meta(b.prev()).unwrap().height + 1) as u64
+        (chain.get_block(b.prev()).unwrap().1.height + 1) as u64
     }
 
     // fn weight_of<'a>(b: &B, f: Box<impl Fn(u128) -> Option<BlockMD<B>>>) -> u128 {
@@ -71,8 +71,7 @@ impl ForkRules<Block> for HeaviestChain<Block> {
 
     fn weight_of<'a, F: ForkRules<Block>>(b: &Block, chain: &impl ChainT<'a, Block, F>) -> u64 {
         let p_id = b.prev();
-        let p = chain.get_block(p_id).unwrap();
-        let p_md = chain.get_block_meta(p_id).unwrap();
+        let (p, p_md) = chain.get_block(p_id).unwrap();
         p_md.chain_weight + chain.next_difficulty(p, p_md)
     }
 }

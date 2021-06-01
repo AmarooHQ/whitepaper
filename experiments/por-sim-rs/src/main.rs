@@ -63,12 +63,8 @@ pub fn main() -> Result<(), String> {
     let hash_rate = value_t_or_exit!(args.value_of("hash_rate"), u32);
     let crypto_system =
         value_t!(args, "crypto_system", CryptoSystemArg).unwrap_or_else(|e| e.exit());
-    // let n_honest = value_t_or_exit!(args.value_of("honest-nodes"), u16);
-    // let n_total = 75;
     let n_honest = ((n_total as f64) * (1. - attacker_ratio)) as u16;
     let n_attackers = n_total - n_honest;
-    // let attack_starts_at = 1000;
-    // let hash_rate = 100;
     let attack_starts_at = attack_at_h as u64;
     let atk_args = AttackArgs {
         n_honest,

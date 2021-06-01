@@ -79,25 +79,25 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
     fn attempt_mining(&self, ts: u32, max_attempts: u32) -> Result<S::B, ()> {
         let mine_in_private = self.is_attacker && ts as u128 > self.attack_threshold;
         let mut b = self.chain.draft_block(ts, mine_in_private);
+        let target = self.chain.target_from_difficulty(b.get_difficulty());
         for _ in 0..max_attempts {
-            match self.chain.validate_block(&b) {
-                Ok((b_md, _, _)) => {
-                    debug!(
-                        "\nN={:3} NEW_BLOCK H={:4}, D={:4}, T={:4}, {:#x} ⭢  {:#x}",
-                        // "\nN={:} NEW_BLOCK H={:}, D={:}, T={:}, {:} ⭢  {:}",
-                        self.id,
-                        b_md.height,
-                        b_md.difficulty,
-                        b.get_ts(),
-                        b.get_hash(),
-                        b.prev(),
-                    );
-                    return Ok(b);
-                }
-                Err(_e) => {
-                    // warn!("Block with hash {:?} is not valid: {:?}", b.hash(), e);
-                    b.increment_nonce();
-                }
+            if b.get_hash() < target {
+                let (b_md, _, _) = self.chain.validate_block(&b).unwrap();
+                debug!(
+                    "\nN={:3} NEW_BLOCK H={:4}, D={:4}, ΣW={:8}, T={:4}, {:#x} ⭢  {:#x}",
+                    // "\nN={:} NEW_BLOCK H={:}, D={:}, T={:}, {:} ⭢  {:}",
+                    self.id,
+                    b_md.height,
+                    b_md.difficulty,
+                    b_md.chain_weight,
+                    b.get_ts(),
+                    b.get_hash(),
+                    b.prev(),
+                );
+                return Ok(b);
+            } else {
+                // warn!("Block with hash {:?} is not valid: {:?}", b.hash(), e);
+                b.increment_nonce();
             }
         }
         Err(())
