@@ -9,6 +9,7 @@ use std::collections::BTreeSet;
 use std::fmt;
 use std::fmt::Debug;
 use std::marker::PhantomData;
+use std::rc::Rc;
 use std::sync::Mutex;
 
 pub mod fork_rules;
@@ -64,7 +65,7 @@ pub struct BlockMD<B> {
     pub weight: u64,
     pub chain_weight: u64,
     // pub daa2_blocks: Vec<(B, u128)>,
-    pub daa2_blocks: Vec<Daa2Info>,
+    pub daa2_blocks: Vec<Rc<Daa2Info>>,
     _phantom_b: PhantomData<B>,
 }
 
@@ -251,11 +252,11 @@ impl<B: BlockT> BlockMD<B> {
             chain_weight: 0,
             // daa2_blocks: vec![(genesis.clone(), difficulty); daa2_n_blocks],
             daa2_blocks: vec![
-                Daa2Info {
+                Rc::new(Daa2Info {
                     id: genesis.get_hash(),
                     ts: genesis.get_ts(),
                     d: difficulty
-                };
+                });
                 daa2_n_blocks
             ],
             _phantom_b: PhantomData,
@@ -414,11 +415,11 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
                 chain_weight: lca_md.chain_weight + delta_chain_weight + d,
                 daa2_blocks: Vec::from(
                     [
-                        &[Daa2Info {
+                        &[Rc::new(Daa2Info {
                             id: b.get_hash(),
                             ts: b.get_ts(),
                             d,
-                        }],
+                        })],
                         &p_meta.daa2_blocks[..(Self::DAA2_N_BLOCKS - 1)],
                     ]
                     .concat(),
@@ -459,13 +460,22 @@ mod tests {
     #[test]
     fn target_from_d() {
         let (_, _, chain) = _setup_chain::<Block, LongestChain<Block>>();
-        assert_eq!(chain.target_from_difficulty(1), 1 << 127);
-        assert_eq!(chain.target_from_difficulty(2), 1 << 126);
-        assert_eq!(chain.target_from_difficulty(8), 1 << 124);
-        assert_eq!(chain.target_from_difficulty(1024), 1 << 117);
+        assert_eq!(chain.target_from_difficulty(1), u128::from(u64::MAX) << 64);
+        assert_eq!(
+            chain.target_from_difficulty(2),
+            u128::from(u64::MAX / 2) << 64
+        );
+        assert_eq!(
+            chain.target_from_difficulty(8),
+            u128::from(u64::MAX / 8) << 64
+        );
+        assert_eq!(
+            chain.target_from_difficulty(1024),
+            u128::from(u64::MAX / 1024) << 64
+        );
         assert_eq!(
             chain.target_from_difficulty(1000),
-            170141183460469231731687303715884105
+            0x004189374bc6a7ef0000000000000000
         );
     }
 

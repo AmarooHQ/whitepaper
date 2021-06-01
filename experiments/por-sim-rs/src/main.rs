@@ -8,6 +8,7 @@ use crate::cryptosystem::WeightedChainCS;
 use crate::message_manager::AttackArgs;
 use clap::{value_t_or_exit, App, Arg, ArgMatches, SubCommand};
 use log::LevelFilter;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 #[macro_use]
 extern crate clap;
@@ -49,6 +50,7 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
 }
 
 pub fn main() -> Result<(), String> {
+    let start_main = SystemTime::now();
     log::set_max_level(LevelFilter::Info);
     env_logger::init();
     // SimpleLogger::new()
@@ -72,12 +74,24 @@ pub fn main() -> Result<(), String> {
         attack_starts_at,
         hash_rate,
     };
-    match crypto_system {
+
+    let start_atk = SystemTime::now();
+
+    let r = match crypto_system {
         CryptoSystemArg::WeightedDag => mk_run_atk(DagCS {}, atk_args),
         CryptoSystemArg::WeightedChain => mk_run_atk(WeightedChainCS {}, atk_args),
         CryptoSystemArg::SimpleChain => mk_run_atk(SimpleCS {}, atk_args),
     }
-    .map(|_s| ())
+    .map(|_s| ());
+
+    let end_main = SystemTime::now();
+
+    warn!(
+        "Simulation took {} ms, total execution time {} ms",
+        end_main.duration_since(start_atk).unwrap().as_millis(),
+        end_main.duration_since(start_main).unwrap().as_millis(),
+    );
+    r
 }
 
 // fn(n1: u16, n2: u16, at: u128, hr: u32)

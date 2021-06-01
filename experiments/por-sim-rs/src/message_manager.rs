@@ -2,15 +2,17 @@ use super::node::*;
 use crate::block::BlockT;
 use crate::chain::*;
 use crate::cryptosystem::CSystemT;
-use crate::msg::Msg;
+use crate::msg::*;
 use itertools::Itertools;
 use log::*;
+// use std::rc::Rc;
 
 pub struct MM<'a, S: CSystemT<'a>> {
     // tick: u32,
     nodes: Vec<Node<'a, S>>,
     // difficulty_cache: Mutex<HashMap<u128, u128>>,
     attack_starts_at: u64,
+    // block_store:
 }
 
 pub struct AttackArgs {
@@ -75,6 +77,17 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
         return &self.nodes.first().unwrap().chain;
     }
 
+    fn msgs_from_into_to(&mut self, msgs_from: Vec<Msg<S::B>>) -> Vec<Msg<S::B>> {
+        let msgs_to = Default::default();
+        for msg in msgs_from {
+            match msg {
+                Msg::MsgBlock(b) => {}
+                Msg::MsgPrivBlock(b) => {}
+            }
+        }
+        msgs_to
+    }
+
     pub fn tick(&mut self, ts: u32, msgs: Vec<Msg<S::B>>) -> Result<Vec<Msg<S::B>>, String> {
         let mut new_msgs = Vec::new();
         for node in self.nodes.iter_mut() {
@@ -121,6 +134,8 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
                     .get_heights_pub_priv()
                     .public;
             }
+
+            msgs = self.msgs_from_into_to(msgs);
 
             msgs = self.tick(ts, msgs)?;
             if let Some((hs, fms)) = self.attack_is_success(ts, atk_height_start, win_thresh) {
