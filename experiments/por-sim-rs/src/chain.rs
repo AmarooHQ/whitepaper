@@ -395,12 +395,12 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         }
 
         let (lca_id, intermediates_map) = self.find_lca_and_intermediates(&b.all_prev()).unwrap();
+        let (_, lca_md) = self.get_block(lca_id).unwrap();
         let delta_chain_weight: u64 = intermediates_map
             .iter()
+            .filter(|(&k, _v)| k != lca_md.height) // make sure we don't count the LCA in delta CW
             .map::<u64, _>(|(_k, v)| v.iter().map(|info| info.weight).sum())
             .sum();
-
-        let (_, lca_md) = self.get_block(lca_id).unwrap();
 
         // // TODO: Add all parents recursively for daa2_blocks
         // let to_add = vec![Daa2Info {
