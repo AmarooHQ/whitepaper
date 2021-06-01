@@ -110,10 +110,9 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
                     b.prev(),
                 );
                 return Ok(b);
-            } else {
-                // warn!("Block with hash {:?} is not valid: {:?}", b.hash(), e);
-                b.increment_nonce();
             }
+            // warn!("Block with hash {:?} is not valid: {:?}", b.hash(), e);
+            b.increment_nonce();
         }
         self.curr_draft_block.replace(b);
         Err(())
