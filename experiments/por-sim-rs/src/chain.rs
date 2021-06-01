@@ -65,7 +65,8 @@ pub struct BlockMD<B> {
     pub weight: u64,
     pub chain_weight: u64,
     // pub daa2_blocks: Vec<(B, u128)>,
-    pub daa2_blocks: Vec<Rc<Daa2Info>>,
+    pub daa2_blocks: Vec<Daa2Info>,
+    // pub daa2_blocks: Vec<Rc<Daa2Info>>,
     _phantom_b: PhantomData<B>,
 }
 
@@ -252,11 +253,14 @@ impl<B: BlockT> BlockMD<B> {
             chain_weight: 0,
             // daa2_blocks: vec![(genesis.clone(), difficulty); daa2_n_blocks],
             daa2_blocks: vec![
-                Rc::new(Daa2Info {
+                // Rc::new(
+                Daa2Info {
                     id: genesis.get_hash(),
                     ts: genesis.get_ts(),
                     d: difficulty
-                });
+                }
+                //)
+                ;
                 daa2_n_blocks
             ],
             _phantom_b: PhantomData,
@@ -415,11 +419,14 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
                 chain_weight: lca_md.chain_weight + delta_chain_weight + d,
                 daa2_blocks: Vec::from(
                     [
-                        &[Rc::new(Daa2Info {
-                            id: b.get_hash(),
-                            ts: b.get_ts(),
-                            d,
-                        })],
+                        &[
+                            // Rc::new(
+                            Daa2Info {
+                                id: b.get_hash(),
+                                ts: b.get_ts(),
+                                d,
+                            }, // )
+                        ],
                         &p_meta.daa2_blocks[..(Self::DAA2_N_BLOCKS - 1)],
                     ]
                     .concat(),

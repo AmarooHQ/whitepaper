@@ -93,7 +93,7 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
         for node in self.nodes.iter_mut() {
             let in_msgs = node.step(ts, msgs.clone()).unwrap();
             if in_msgs.len() > 0 {
-                debug!("\nGot messages: {:?}", in_msgs);
+                info!("\nGot messages: {:?}", in_msgs);
             }
             new_msgs.extend(in_msgs.into_iter());
         }
@@ -135,7 +135,7 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
                     .public;
             }
 
-            msgs = self.msgs_from_into_to(msgs);
+            // msgs = self.msgs_from_into_to(msgs);
 
             msgs = self.tick(ts, msgs)?;
             if let Some((hs, fms)) = self.attack_is_success(ts, atk_height_start, win_thresh) {
@@ -227,6 +227,13 @@ mod tests {
     fn mm_with_dag_block() {
         let mut mm = create_mm_no_priv::<'_, DagCS>();
         mm.tick_many(20).unwrap();
+        ensure_chain_progress(&mm);
+    }
+
+    #[test]
+    fn run_attack_test() {
+        let mut mm = create_mm_no_priv::<'_, DagCS>();
+        mm.run_attack(100, 100).unwrap();
         ensure_chain_progress(&mm);
     }
 
