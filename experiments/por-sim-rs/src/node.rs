@@ -89,7 +89,6 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         // };
         let mut b = if let Some(mut b) = self.curr_draft_block.take() {
             b.set_ts(ts);
-            b.increment_nonce();
             b
         } else {
             self.chain.draft_block(ts, mine_in_private)
@@ -114,6 +113,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
             // warn!("Block with hash {:?} is not valid: {:?}", b.hash(), e);
             b.increment_nonce();
         }
+        // put b back if we didn't find a block
         self.curr_draft_block.replace(b);
         Err(())
     }

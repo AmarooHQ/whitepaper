@@ -6,6 +6,7 @@ use fnv::FnvHashMap;
 use hashbrown;
 use hashers::null::PassThroughHasher;
 use intmap::IntMap;
+use lazy_static::lazy_static;
 use log::*;
 use std::cmp::max;
 use std::collections::BTreeMap;
@@ -323,20 +324,18 @@ impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
     }
 
     fn next_difficulty_daa2(&self, b: &B, b_meta: &BlockMD<B>) -> Difficulty {
-        // my guess as to a good place to swap to cached difficulty
-        if Self::DAA2_N_BLOCKS < 150 {
-            return self.next_difficulty_daa2_raw(b, b_meta);
-        } else {
-            let b_hash = b.get_hash();
-            let mut c = self.difficulty_cache.lock().unwrap();
-            let cached_d = c.get(&(b_hash as u64));
-            match cached_d {
-                Some(d) => *d,
-                None => {
-                    let d = self.next_difficulty_daa2_raw(b, b_meta);
-                    c.insert(b_hash as u64, d);
-                    d
-                }
+        lazy_static! {
+            static ref CACHE: Mutex<HashMap<u64, Difficulty>> = Mutex::new(Default::default());
+        }
+        let b_hash = b.get_hash();
+        let mut c = CACHE.lock().unwrap();
+        let cached_d = c.get(&(b_hash as u64));
+        match cached_d {
+            Some(d) => *d,
+            None => {
+                let d = self.next_difficulty_daa2_raw(b, b_meta);
+                c.insert(b_hash as u64, d);
+                d
             }
         }
     }
@@ -354,7 +353,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             best_blocks: [g_hash].iter().cloned().collect(),
             best_priv_blocks: [g_hash].iter().cloned().collect(),
             goal_block_time: 10,
-            difficulty_cache: Mutex::new([].iter().cloned().collect()),
+            difficulty_cache: Mutex::new(Default::default()),
             // fork_rules: LongestChain::<B>::new(),
             _phantom: PhantomData,
         }
