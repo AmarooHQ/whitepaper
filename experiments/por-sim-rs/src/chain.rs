@@ -1,6 +1,6 @@
 use crate::block::*;
 use crate::chain::fork_rules::*;
-use crate::types::Difficulty;
+use crate::types::*;
 use crate::ForkResult::BestBlock;
 use fnv::FnvHashMap;
 use hashbrown;
@@ -27,7 +27,7 @@ type PassThruHashMap<K, V> = HashMap<K, V, BuildHasherDefault<PassThroughHasher>
 
 #[derive(Debug)]
 pub enum ChainErr {
-    BadPoW(u128, u128),
+    BadPoW(HashID, HashID),
     UnkParent,
     BadDifficulty,
     TsBeforeParent,
@@ -57,7 +57,7 @@ pub struct Heights {
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Debug)]
 pub struct BInfo<'a, B> {
     _p: PhantomData<B>,
-    id: u128,
+    id: HashID,
     weight: Difficulty,
     chain_weight: Difficulty,
     b: &'a B,
@@ -67,7 +67,7 @@ pub struct BInfo<'a, B> {
 /// Used for tracking Daa2 metadata
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Debug, Hash)]
 pub struct Daa2Info {
-    // id: u128,
+    // id: HashID,
     ts: u32,
     d: Difficulty,
 }
@@ -78,7 +78,7 @@ pub struct BlockMD<B> {
     pub height: u32,
     pub weight: Difficulty,
     pub chain_weight: Difficulty,
-    pub daa2_blocks: Vec<u128>,
+    pub daa2_blocks: Vec<HashID>,
     // pub daa2_blocks: Vec<Daa2Info>,
     _phantom_b: PhantomData<B>,
 }
@@ -88,8 +88,8 @@ pub struct Chain<B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     // blocks: hashbrown::HashMap<u64, (B, BlockMD<B>)>, // 622ms
     // blocks: FnvHashMap<u64, (B, BlockMD<B>)>, // 639ms
     // blocks: IntMap<(B, BlockMD<B>)>, // 692ms
-    pub best_blocks: HashSet<u128>,
-    best_priv_blocks: HashSet<u128>,
+    pub best_blocks: HashSet<HashID>,
+    best_priv_blocks: HashSet<HashID>,
     goal_block_time: u32,
     difficulty_cache: Mutex<BTreeMap<u64, Difficulty>>,
     // fork_rules: LongestChain<B>,
@@ -104,17 +104,17 @@ fn conv_u128_id_to_u64(u: u128) -> u64 {
 pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     fn new(genesis: B, genesis_meta: BlockMD<B>) -> Self;
 
-    fn save_block(&mut self, b_id: u128, b: (B, BlockMD<B>));
-    fn get_block(&self, b: u128) -> Option<&(B, BlockMD<B>)>;
+    fn save_block(&mut self, b_id: HashID, b: (B, BlockMD<B>));
+    fn get_block(&self, b: HashID) -> Option<&(B, BlockMD<B>)>;
 
-    fn get_best_blocks(&self, is_private: bool) -> &HashSet<u128>;
-    fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut HashSet<u128>;
+    fn get_best_blocks(&self, is_private: bool) -> &HashSet<HashID>;
+    fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut HashSet<HashID>;
     fn validate_block(&self, b: &B) -> Result<(BlockMD<B>, &B, &BlockMD<B>), ChainErr>;
     fn next_difficulty(&self, b: &B, b_meta: &BlockMD<B>) -> Difficulty;
     fn get_fork_measure_pub_priv(&self) -> Heights;
     fn get_heights_pub_priv(&self) -> Heights;
 
-    fn get_chain_weight_at(&self, b: u128) -> Difficulty {
+    fn get_chain_weight_at(&self, b: HashID) -> Difficulty {
         self.get_block(b).unwrap().1.chain_weight
     }
 
@@ -125,7 +125,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
         Ok(())
     }
 
-    fn get_best_blocks_md(&self, is_private: bool) -> Vec<(u128, (B, BlockMD<B>))> {
+    fn get_best_blocks_md(&self, is_private: bool) -> Vec<(HashID, (B, BlockMD<B>))> {
         self.get_best_blocks(is_private)
             .iter()
             .map(|&b| (b, self.get_block(b).unwrap().clone()))
@@ -159,21 +159,26 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     }
 
     #[inline]
-    fn select_best_block(&self, is_private: bool) -> u128 {
-        // let blocks: Vec<u128> = Vec::from_iter(self.get_best_blocks(is_private).iter().cloned());
+    fn select_best_block(&self, is_private: bool) -> HashID {
+        // let blocks: Vec<HashID> = Vec::from_iter(self.get_best_blocks(is_private).iter().cloned());
         B::select_parent_from(self.get_best_blocks(is_private).iter().cloned())
     }
 
     #[inline]
-    fn target_from_difficulty(&self, d: Difficulty) -> u128 {
+    fn target_from_difficulty(&self, d: Difficulty) -> HashID {
         // division is *expensive*, this saves some cycles
-        u128::from(u64::MAX / u64::from(d)) << 64
+
+        // for u128
+        // HashID::from(u64::MAX / u64::from(d)) << 64
+
+        // for u64
+        u64::MAX / u64::from(d)
     }
 
     fn find_lca_and_intermediates(
         &self,
-        bs: &Vec<u128>,
-    ) -> Option<(u128, BTreeMap<u32, BTreeSet<BInfo<B>>>)> {
+        bs: &Vec<HashID>,
+    ) -> Option<(HashID, BTreeMap<u32, BTreeSet<BInfo<B>>>)> {
         match bs.len() {
             0 => {
                 return None;
@@ -195,7 +200,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
         }
 
         let mut intermediates = BTreeMap::<u32, BTreeSet<BInfo<B>>>::new();
-        let mut intermediate_q = BTreeMap::<u32, HashSet<u128>>::new();
+        let mut intermediate_q = BTreeMap::<u32, HashSet<HashID>>::new();
         let mut heights = Vec::new();
 
         for &id in bs {
@@ -342,7 +347,8 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         let g_hash = genesis.get_hash();
         trace!("genesis.hash:{}", g_hash);
         let mut blocks = HashMap::with_hasher(BuildHasherDefault::<PassThroughHasher>::default());
-        blocks.insert(conv_u128_id_to_u64(g_hash), (genesis, genesis_meta));
+        // blocks.insert(conv_u128_id_to_u64(g_hash), (genesis, genesis_meta));
+        blocks.insert(g_hash, (genesis, genesis_meta));
         Chain {
             blocks,
             best_blocks: [g_hash].iter().cloned().collect(),
@@ -354,12 +360,14 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         }
     }
 
-    fn save_block(&mut self, id: u128, b: (B, BlockMD<B>)) {
-        self.blocks.insert(conv_u128_id_to_u64(id), b);
+    fn save_block(&mut self, id: HashID, b: (B, BlockMD<B>)) {
+        // self.blocks.insert(conv_u128_id_to_u64(id), b);
+        self.blocks.insert(id, b);
     }
 
-    fn get_block(&self, b: u128) -> Option<&(B, BlockMD<B>)> {
-        self.blocks.get(&conv_u128_id_to_u64(b))
+    fn get_block(&self, b: HashID) -> Option<&(B, BlockMD<B>)> {
+        // self.blocks.get(&conv_u128_id_to_u64(b))
+        self.blocks.get(&b)
     }
 
     // fn update_best_block(&mut self, b: &B, b_meta: &BlockMD<B>, is_private: bool) {
@@ -373,7 +381,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
     //     }
     // }
 
-    fn get_best_blocks(&self, is_private: bool) -> &HashSet<u128> {
+    fn get_best_blocks(&self, is_private: bool) -> &HashSet<HashID> {
         if is_private {
             &self.best_priv_blocks
         } else {
@@ -381,7 +389,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         }
     }
 
-    fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut HashSet<u128> {
+    fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut HashSet<HashID> {
         if is_private {
             &mut self.best_priv_blocks
         } else {
@@ -502,22 +510,30 @@ mod tests {
     #[test]
     fn target_from_d() {
         let (_, _, chain) = _setup_chain::<Block, LongestChain<Block>>();
-        assert_eq!(chain.target_from_difficulty(1), u128::from(u64::MAX) << 64);
+        assert_eq!(
+            chain.target_from_difficulty(1),
+            // HashID::from(u64::MAX) << 64
+            HashID::from(u64::MAX)
+        );
         assert_eq!(
             chain.target_from_difficulty(2),
-            u128::from(u64::MAX / 2) << 64
+            // HashID::from(u64::MAX / 2) << 64
+            HashID::from(u64::MAX / 2)
         );
         assert_eq!(
             chain.target_from_difficulty(8),
-            u128::from(u64::MAX / 8) << 64
+            // HashID::from(u64::MAX / 8) << 64
+            HashID::from(u64::MAX / 8)
         );
         assert_eq!(
             chain.target_from_difficulty(1024),
-            u128::from(u64::MAX / 1024) << 64
+            // HashID::from(u64::MAX / 1024) << 64
+            HashID::from(u64::MAX / 1024)
         );
         assert_eq!(
             chain.target_from_difficulty(1000),
-            0x004189374bc6a7ef0000000000000000
+            // 0x004189374bc6a7ef0000000000000000
+            0x004189374bc6a7ef
         );
     }
 

@@ -1,5 +1,6 @@
-use crate::hash::hash_u128;
+use crate::hash::*;
 use crate::types::Difficulty;
+use crate::types::HashID;
 use getrandom::getrandom;
 use rand::prelude::*;
 use rand::seq::IteratorRandom;
@@ -10,29 +11,28 @@ use std::iter::IntoIterator;
 use std::{fmt, fmt::Display};
 
 pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + Hash {
-    fn new(ts: u32, parent: u128, d: Difficulty) -> Self;
-    fn new_from(ts: u32, parent_opts: impl IntoIterator<Item = u128>, d: Difficulty) -> Self;
+    fn new(ts: u32, parent: HashID, d: Difficulty) -> Self;
+    fn new_from(ts: u32, parent_opts: impl IntoIterator<Item = HashID>, d: Difficulty) -> Self;
     fn genesis(ts: u32) -> Self;
-    fn get_hash(&self) -> u128;
-    // fn hash_sha3(&self) -> u128;
-    fn prev(&self) -> u128;
-    fn all_prev(&self) -> Vec<u128>;
+    fn get_hash(&self) -> HashID;
+    // fn hash_sha3(&self) -> HashID;
+    fn prev(&self) -> HashID;
+    fn all_prev(&self) -> Vec<HashID>;
     fn get_ts(&self) -> u32;
     fn set_ts(&mut self, ts: u32);
-    #[inline]
     fn increment_nonce(&mut self);
     fn get_difficulty(&self) -> Difficulty;
     fn set_difficulty(&mut self, d: Difficulty);
 
-    fn get_rand_id() -> u128 {
+    fn get_rand_id() -> HashID {
         // Self::get_urand_id()
         thread_rng().gen()
     }
 
-    fn get_urand_id() -> u128 {
+    fn get_urand_id() -> HashID {
         let mut e: [u8; 16] = [0; 16];
         getrandom(&mut e).unwrap();
-        u128::from_be_bytes(e)
+        u128::from_be_bytes(e) as HashID
     }
 
     fn select_parent_from<B, C: IntoIterator<Item = B>>(ps: C) -> B {
@@ -48,15 +48,15 @@ pub trait SingleParentBlockT: BlockT {}
 pub trait ManyParentsBlockT: BlockT {
     fn new_multi_parent(
         timestamp: u32,
-        parents: impl IntoIterator<Item = u128>,
+        parents: impl IntoIterator<Item = HashID>,
         d: Difficulty,
     ) -> Self;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Block {
-    pub id: u128,
-    pub parent: u128,
+    pub id: HashID,
+    pub parent: HashID,
     pub timestamp: u32,
     pub d: Difficulty,
 }
@@ -74,10 +74,10 @@ impl Display for Block {
 impl SingleParentBlockT for Block {}
 
 impl BlockT for Block {
-    fn new(ts: u32, parent: u128, d: Difficulty) -> Self {
+    fn new(ts: u32, parent: HashID, d: Difficulty) -> Self {
         let mut e: [u8; 16] = [0; 16];
         getrandom(&mut e).unwrap();
-        let id = u128::from_be_bytes(e);
+        let id = u128::from_be_bytes(e) as HashID;
         Self {
             id,
             timestamp: ts,
@@ -86,7 +86,7 @@ impl BlockT for Block {
         }
     }
 
-    fn new_from(ts: u32, parent_opts: impl IntoIterator<Item = u128>, d: Difficulty) -> Self {
+    fn new_from(ts: u32, parent_opts: impl IntoIterator<Item = HashID>, d: Difficulty) -> Self {
         Self::new(ts, Self::select_parent_from(parent_opts), d)
     }
 
@@ -97,24 +97,24 @@ impl BlockT for Block {
         g
     }
 
-    /* fn hash_sha3(&self) -> u128 {
+    /* fn hash_sha3(&self) -> HashID {
         let id_bs = &self.id.to_be_bytes()[..];
         let parent_bs = &self.parent.to_be_bytes()[..];
         let ts_bs = &self.timestamp.to_be_bytes()[..];
         let r = Sha3_256::digest(&[id_bs, parent_bs, ts_bs].concat());
-        u128::from_be_bytes(r[..16].try_into().unwrap())
-        // u128::from_be_bytes(<[u8; 16]>::try_from(&r[..16]).unwrap())
+        HashID::from_be_bytes(r[..16].try_into().unwrap())
+        // HashID::from_be_bytes(<[u8; 16]>::try_from(&r[..16]).unwrap())
     } */
 
-    fn get_hash(&self) -> u128 {
+    fn get_hash(&self) -> HashID {
         self.id
     }
 
-    fn prev(&self) -> u128 {
+    fn prev(&self) -> HashID {
         self.parent
     }
 
-    fn all_prev(&self) -> Vec<u128> {
+    fn all_prev(&self) -> Vec<HashID> {
         vec![self.parent]
     }
 
@@ -128,7 +128,8 @@ impl BlockT for Block {
 
     #[inline]
     fn increment_nonce(&mut self) {
-        self.id = hash_u128(self.id);
+        // self.id = hash_u128(self.id);
+        self.id = hash_u64(self.id);
     }
 
     fn get_difficulty(&self) -> Difficulty {
@@ -140,15 +141,15 @@ impl BlockT for Block {
 
     #[cfg(debug_assertions)]
     fn test_set_work_bits(&mut self, n_bits: u8) -> Self {
-        self.id &= u128::MAX >> n_bits;
+        self.id &= HashID::MAX >> n_bits;
         self.clone()
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DagBlock {
-    pub id: u128,
-    pub parents: Vec<u128>,
+    pub id: HashID,
+    pub parents: Vec<HashID>,
     pub timestamp: u32,
     d: Difficulty,
 }
@@ -166,7 +167,7 @@ impl Display for DagBlock {
 impl ManyParentsBlockT for DagBlock {
     fn new_multi_parent(
         timestamp: u32,
-        parents: impl IntoIterator<Item = u128>,
+        parents: impl IntoIterator<Item = HashID>,
         d: Difficulty,
     ) -> Self {
         DagBlock {
@@ -179,10 +180,10 @@ impl ManyParentsBlockT for DagBlock {
 }
 
 impl BlockT for DagBlock {
-    fn new(timestamp: u32, parent: u128, d: Difficulty) -> Self {
+    fn new(timestamp: u32, parent: HashID, d: Difficulty) -> Self {
         Self::new_multi_parent(timestamp, vec![parent], d)
     }
-    fn new_from(ts: u32, parent_opts: impl IntoIterator<Item = u128>, d: Difficulty) -> Self {
+    fn new_from(ts: u32, parent_opts: impl IntoIterator<Item = HashID>, d: Difficulty) -> Self {
         Self::new_multi_parent(ts, parent_opts, d)
     }
     fn genesis(ts: u32) -> Self {
@@ -190,20 +191,20 @@ impl BlockT for DagBlock {
         g.parents = vec![g.id];
         g
     }
-    fn get_hash(&self) -> u128 {
+    fn get_hash(&self) -> HashID {
         self.id
     }
-    /* fn hash_sha3(&self) -> u128 {
+    /* fn hash_sha3(&self) -> HashID {
         let id_bs = &self.id.to_be_bytes()[..];
         let parent_bs: Vec<[u8; 16]> = self.parents.iter().map(|p| p.to_be_bytes()).collect();
         let ts_bs = &self.timestamp.to_be_bytes()[..];
         let r = Sha3_256::digest(&[id_bs, &parent_bs[..].concat(), ts_bs].concat());
-        u128::from_be_bytes(<[u8; 16]>::try_from(&r[..16]).unwrap())
+        HashID::from_be_bytes(<[u8; 16]>::try_from(&r[..16]).unwrap())
     } */
-    fn prev(&self) -> u128 {
+    fn prev(&self) -> HashID {
         self.parents[0]
     }
-    fn all_prev(&self) -> Vec<u128> {
+    fn all_prev(&self) -> Vec<HashID> {
         self.parents.clone()
     }
     fn get_ts(&self) -> u32 {
@@ -214,10 +215,11 @@ impl BlockT for DagBlock {
     }
     #[inline]
     fn increment_nonce(&mut self) {
-        self.id = hash_u128(self.id);
+        // self.id = hash_u128(self.id);
+        self.id = hash_u64(self.id);
         // let bs = &self.id.to_be_bytes()[..];
         // let h = &Sha3_256::digest(bs)[..16];
-        // self.id = u128::from_be_bytes(h.try_into().unwrap());
+        // self.id = HashID::from_be_bytes(h.try_into().unwrap());
     }
     fn get_difficulty(&self) -> Difficulty {
         self.d
@@ -227,7 +229,7 @@ impl BlockT for DagBlock {
     }
     #[cfg(debug_assertions)]
     fn test_set_work_bits(&mut self, n_bits: u8) -> Self {
-        self.id &= u128::MAX >> n_bits;
+        self.id &= HashID::MAX >> n_bits;
         self.clone()
     }
 }

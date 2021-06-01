@@ -1,6 +1,20 @@
+use crate::types::HashID;
+use fnv;
+use std::hash::Hasher;
+
 #[inline]
 pub fn hash_u128(data: u128) -> u128 {
-    twox_hash::xxh3::hash128(&data.to_be_bytes()[..])
+    // for u128, v fast
+    // twox_hash::xxh3::hash128(&data.to_be_bytes()[..])
+
+    // for u128, a little faster than v fast
+    u128::from(twox_hash::xxh3::hash64(&data.to_be_bytes()[..])) << 64
+}
+
+#[inline]
+pub fn hash_u64(data: u64) -> u64 {
+    // for u64
+    twox_hash::xxh3::hash64(&data.to_be_bytes()[..])
 }
 
 // md5: 6.82s user 0.36s system 99% cpu 7.179 total
