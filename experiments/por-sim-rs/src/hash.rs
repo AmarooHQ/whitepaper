@@ -1,3 +1,4 @@
+#[inline]
 pub fn hash_u128(data: u128) -> u128 {
     twox_hash::xxh3::hash128(&data.to_be_bytes()[..])
 }

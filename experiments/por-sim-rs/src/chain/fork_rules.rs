@@ -1,6 +1,7 @@
 use crate::block::{Block, BlockT, DagBlock};
 use crate::chain::BlockMD;
 use crate::chain::ChainT;
+use crate::types::Difficulty;
 use rand::seq::IteratorRandom;
 use std::marker::PhantomData;
 
@@ -13,9 +14,9 @@ use ForkResult::*;
 
 pub trait ForkRules<B: BlockT> {
     // fn new() -> Self;
-    fn fork_measure(b_md: &BlockMD<B>) -> u64;
+    fn fork_measure(b_md: &BlockMD<B>) -> Difficulty;
     // fn best_of<'a>(b1: (&'a B, &BlockMD<B>), b2: (&'a B, &BlockMD<B>)) -> ForkResult<'a, B>;
-    fn weight_of<'a, F: ForkRules<B>>(b: &B, chain: &impl ChainT<'a, B, F>) -> u64;
+    fn weight_of<'a, F: ForkRules<B>>(b: &B, chain: &impl ChainT<'a, B, F>) -> Difficulty;
     // fn weight_of<'a>(b: &B, f: Box<impl Fn(u128) -> Option<BlockMD<B>>>) -> u128;
 
     fn best_of<'a>(b1: (&'a B, &BlockMD<B>), b2: (&'a B, &BlockMD<B>)) -> ForkResult<'a, B> {
@@ -40,8 +41,8 @@ pub struct HeaviestChain<B: BlockT> {
 }
 
 impl<B: BlockT> ForkRules<B> for LongestChain<B> {
-    fn fork_measure(b_md: &BlockMD<B>) -> u64 {
-        b_md.height as u64
+    fn fork_measure(b_md: &BlockMD<B>) -> Difficulty {
+        Difficulty::from(b_md.height)
     }
 
     // fn best_of<'a>(b1: (&'a B, &BlockMD<B>), b2: (&'a B, &BlockMD<B>)) -> ForkResult<'a, B> {
@@ -55,8 +56,8 @@ impl<B: BlockT> ForkRules<B> for LongestChain<B> {
     //     }
     // }
 
-    fn weight_of<'a, F: ForkRules<B>>(b: &B, chain: &impl ChainT<'a, B, F>) -> u64 {
-        (chain.get_block(b.prev()).unwrap().1.height + 1) as u64
+    fn weight_of<'a, F: ForkRules<B>>(b: &B, chain: &impl ChainT<'a, B, F>) -> Difficulty {
+        Difficulty::from(chain.get_block(b.prev()).unwrap().1.height + 1)
     }
 
     // fn weight_of<'a>(b: &B, f: Box<impl Fn(u128) -> Option<BlockMD<B>>>) -> u128 {
@@ -65,11 +66,14 @@ impl<B: BlockT> ForkRules<B> for LongestChain<B> {
 }
 
 impl ForkRules<Block> for HeaviestChain<Block> {
-    fn fork_measure(b_md: &BlockMD<Block>) -> u64 {
+    fn fork_measure(b_md: &BlockMD<Block>) -> Difficulty {
         b_md.chain_weight
     }
 
-    fn weight_of<'a, F: ForkRules<Block>>(b: &Block, chain: &impl ChainT<'a, Block, F>) -> u64 {
+    fn weight_of<'a, F: ForkRules<Block>>(
+        b: &Block,
+        chain: &impl ChainT<'a, Block, F>,
+    ) -> Difficulty {
         let p_id = b.prev();
         let (p, p_md) = chain.get_block(p_id).unwrap();
         p_md.chain_weight + chain.next_difficulty(p, p_md)
@@ -77,7 +81,7 @@ impl ForkRules<Block> for HeaviestChain<Block> {
 }
 
 impl ForkRules<DagBlock> for HeaviestChain<DagBlock> {
-    fn fork_measure(b_md: &BlockMD<DagBlock>) -> u64 {
+    fn fork_measure(b_md: &BlockMD<DagBlock>) -> Difficulty {
         b_md.chain_weight
     }
 
@@ -98,17 +102,17 @@ impl ForkRules<DagBlock> for HeaviestChain<DagBlock> {
     fn weight_of<'a, F: ForkRules<DagBlock>>(
         b: &DagBlock,
         chain: &impl ChainT<'a, DagBlock, F>,
-    ) -> u64 {
+    ) -> Difficulty {
         let (_lca, lca_intermediates) = chain.find_lca_and_intermediates(&b.parents).unwrap();
         let min_h = lca_intermediates.keys().min().unwrap();
         let max_h = lca_intermediates.keys().max().unwrap();
 
         let lca_info = &lca_intermediates[min_h].iter().cloned().collect::<Vec<_>>()[0];
         let base_chain_weight = lca_info.b_md.chain_weight;
-        let intermediate_weights: u64 = lca_intermediates
+        let intermediate_weights: Difficulty = lca_intermediates
             .iter()
             .filter(|(h, _)| *h != min_h)
-            .map::<u64, _>(|(_, infos)| infos.iter().map(|i| i.weight).sum())
+            .map::<Difficulty, _>(|(_, infos)| infos.iter().map(|i| i.weight).sum())
             .sum();
 
         let some_p_info = lca_intermediates[max_h]

@@ -13,6 +13,7 @@ pub struct Node<'a, S: CSystemT<'a>> {
     is_attacker: bool,
     attack_threshold: u128,
     mining_attempts_per_tick: u32,
+    curr_draft_block: Option<S::B>,
 }
 
 impl<'a, S: CSystemT<'a>> Node<'a, S> {
@@ -28,6 +29,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
             is_attacker: attack_threshold.is_some(),
             attack_threshold: attack_threshold.unwrap_or(0),
             mining_attempts_per_tick,
+            curr_draft_block: None,
         }
     }
 
@@ -42,6 +44,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         for in_msg in msgs {
             match in_msg {
                 MsgBlock(b) => {
+                    self.curr_draft_block = None;
                     self.got_block(&b, false)?;
                     // before the attack has started, treat all blocks
                     // like they were also private blocks
@@ -50,6 +53,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
                     }
                 }
                 MsgPrivBlock(b) => {
+                    self.curr_draft_block = None;
                     // only attacking nodes should process these msgs
                     if self.is_attacker {
                         self.got_block(&b, true)?;
@@ -76,9 +80,19 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         Ok(out_msgs)
     }
 
-    fn attempt_mining(&self, ts: u32, max_attempts: u32) -> Result<S::B, ()> {
+    fn attempt_mining(&mut self, ts: u32, max_attempts: u32) -> Result<S::B, ()> {
         let mine_in_private = self.is_attacker && ts as u128 > self.attack_threshold;
-        let mut b = self.chain.draft_block(ts, mine_in_private);
+        // let mut b = match self.curr_draft_block {
+        //     Some(_b) => _b,
+        //     None => ,
+        // };
+        let mut b = if let Some(mut b) = self.curr_draft_block.take() {
+            b.set_ts(ts);
+            b.increment_nonce();
+            b
+        } else {
+            self.chain.draft_block(ts, mine_in_private)
+        };
         let target = self.chain.target_from_difficulty(b.get_difficulty());
         for _ in 0..max_attempts {
             if b.get_hash() < target {
@@ -100,6 +114,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
                 b.increment_nonce();
             }
         }
+        self.curr_draft_block.replace(b);
         Err(())
     }
 }

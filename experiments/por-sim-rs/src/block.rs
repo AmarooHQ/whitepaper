@@ -1,23 +1,28 @@
 use crate::hash::hash_u128;
+use crate::types::Difficulty;
 use getrandom::getrandom;
 use rand::prelude::*;
 use rand::seq::IteratorRandom;
 use std::fmt::Debug;
 use std::hash::Hash;
+use std::iter::FromIterator;
+use std::iter::IntoIterator;
 use std::{fmt, fmt::Display};
 
 pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + Hash {
-    fn new(ts: u32, parent: u128, d: u64) -> Self;
-    fn new_from(ts: u32, parent_opts: Vec<u128>, d: u64) -> Self;
+    fn new(ts: u32, parent: u128, d: Difficulty) -> Self;
+    fn new_from(ts: u32, parent_opts: impl IntoIterator<Item = u128>, d: Difficulty) -> Self;
     fn genesis(ts: u32) -> Self;
     fn get_hash(&self) -> u128;
     // fn hash_sha3(&self) -> u128;
     fn prev(&self) -> u128;
     fn all_prev(&self) -> Vec<u128>;
     fn get_ts(&self) -> u32;
+    fn set_ts(&mut self, ts: u32);
+    #[inline]
     fn increment_nonce(&mut self);
-    fn get_difficulty(&self) -> u64;
-    fn set_difficulty(&mut self, d: u64);
+    fn get_difficulty(&self) -> Difficulty;
+    fn set_difficulty(&mut self, d: Difficulty);
 
     fn get_rand_id() -> u128 {
         // Self::get_urand_id()
@@ -41,7 +46,11 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
 pub trait SingleParentBlockT: BlockT {}
 
 pub trait ManyParentsBlockT: BlockT {
-    fn new_multi_parent(timestamp: u32, parents: Vec<u128>, d: u64) -> Self;
+    fn new_multi_parent(
+        timestamp: u32,
+        parents: impl IntoIterator<Item = u128>,
+        d: Difficulty,
+    ) -> Self;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -49,7 +58,7 @@ pub struct Block {
     pub id: u128,
     pub parent: u128,
     pub timestamp: u32,
-    pub d: u64,
+    pub d: Difficulty,
 }
 
 impl Display for Block {
@@ -65,7 +74,7 @@ impl Display for Block {
 impl SingleParentBlockT for Block {}
 
 impl BlockT for Block {
-    fn new(ts: u32, parent: u128, d: u64) -> Self {
+    fn new(ts: u32, parent: u128, d: Difficulty) -> Self {
         let mut e: [u8; 16] = [0; 16];
         getrandom(&mut e).unwrap();
         let id = u128::from_be_bytes(e);
@@ -77,7 +86,7 @@ impl BlockT for Block {
         }
     }
 
-    fn new_from(ts: u32, parent_opts: Vec<u128>, d: u64) -> Self {
+    fn new_from(ts: u32, parent_opts: impl IntoIterator<Item = u128>, d: Difficulty) -> Self {
         Self::new(ts, Self::select_parent_from(parent_opts), d)
     }
 
@@ -113,14 +122,19 @@ impl BlockT for Block {
         self.timestamp
     }
 
+    fn set_ts(&mut self, ts: u32) {
+        self.timestamp = ts
+    }
+
+    #[inline]
     fn increment_nonce(&mut self) {
         self.id = hash_u128(self.id);
     }
 
-    fn get_difficulty(&self) -> u64 {
+    fn get_difficulty(&self) -> Difficulty {
         self.d
     }
-    fn set_difficulty(&mut self, d: u64) {
+    fn set_difficulty(&mut self, d: Difficulty) {
         self.d = d;
     }
 
@@ -136,7 +150,7 @@ pub struct DagBlock {
     pub id: u128,
     pub parents: Vec<u128>,
     pub timestamp: u32,
-    d: u64,
+    d: Difficulty,
 }
 
 impl Display for DagBlock {
@@ -150,21 +164,25 @@ impl Display for DagBlock {
 }
 
 impl ManyParentsBlockT for DagBlock {
-    fn new_multi_parent(timestamp: u32, parents: Vec<u128>, d: u64) -> Self {
+    fn new_multi_parent(
+        timestamp: u32,
+        parents: impl IntoIterator<Item = u128>,
+        d: Difficulty,
+    ) -> Self {
         DagBlock {
             timestamp,
             id: Self::get_rand_id(),
-            parents,
+            parents: Vec::from_iter(parents),
             d,
         }
     }
 }
 
 impl BlockT for DagBlock {
-    fn new(timestamp: u32, parent: u128, d: u64) -> Self {
+    fn new(timestamp: u32, parent: u128, d: Difficulty) -> Self {
         Self::new_multi_parent(timestamp, vec![parent], d)
     }
-    fn new_from(ts: u32, parent_opts: Vec<u128>, d: u64) -> Self {
+    fn new_from(ts: u32, parent_opts: impl IntoIterator<Item = u128>, d: Difficulty) -> Self {
         Self::new_multi_parent(ts, parent_opts, d)
     }
     fn genesis(ts: u32) -> Self {
@@ -191,16 +209,20 @@ impl BlockT for DagBlock {
     fn get_ts(&self) -> u32 {
         self.timestamp
     }
+    fn set_ts(&mut self, ts: u32) {
+        self.timestamp = ts
+    }
+    #[inline]
     fn increment_nonce(&mut self) {
         self.id = hash_u128(self.id);
         // let bs = &self.id.to_be_bytes()[..];
         // let h = &Sha3_256::digest(bs)[..16];
         // self.id = u128::from_be_bytes(h.try_into().unwrap());
     }
-    fn get_difficulty(&self) -> u64 {
+    fn get_difficulty(&self) -> Difficulty {
         self.d
     }
-    fn set_difficulty(&mut self, d: u64) {
+    fn set_difficulty(&mut self, d: Difficulty) {
         self.d = d;
     }
     #[cfg(debug_assertions)]

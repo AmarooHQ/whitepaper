@@ -3,6 +3,7 @@ use crate::block::BlockT;
 use crate::chain::*;
 use crate::cryptosystem::CSystemT;
 use crate::msg::*;
+use crate::types::Difficulty;
 use itertools::Itertools;
 use log::*;
 // use std::rc::Rc;
@@ -11,19 +12,19 @@ pub struct MM<'a, S: CSystemT<'a>> {
     // tick: u32,
     nodes: Vec<Node<'a, S>>,
     // difficulty_cache: Mutex<HashMap<u128, u128>>,
-    attack_starts_at: u64,
+    attack_starts_at: Difficulty,
     // block_store:
 }
 
 pub struct AttackArgs {
     pub n_honest: u16,
     pub n_attackers: u16,
-    pub attack_starts_at: u64,
+    pub attack_starts_at: Difficulty,
     pub hash_rate: u32,
 }
 
 impl AttackArgs {
-    fn new(n_honest: u16, n_attackers: u16, attack_starts_at: u64, hash_rate: u32) -> Self {
+    fn new(n_honest: u16, n_attackers: u16, attack_starts_at: Difficulty, hash_rate: u32) -> Self {
         AttackArgs {
             n_honest,
             n_attackers,
@@ -37,7 +38,7 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
     pub fn new(args: AttackArgs) -> MM<'a, S> {
         let nodes_honest: u16 = args.n_honest;
         let nodes_attacking: u16 = args.n_attackers;
-        let attack_starts_at: u64 = args.attack_starts_at;
+        let attack_starts_at: Difficulty = args.attack_starts_at;
         let mining_attempts_per_tick: u32 = args.hash_rate;
         let n_nodes = nodes_honest + nodes_attacking;
         warn!(
@@ -125,14 +126,15 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
                 info!("tick: {}", ts);
             }
 
-            if ts as u64 == self.attack_starts_at {
-                atk_height_start = self
-                    .nodes
-                    .first()
-                    .unwrap()
-                    .chain
-                    .get_heights_pub_priv()
-                    .public;
+            if Difficulty::from(ts) == self.attack_starts_at as Difficulty {
+                atk_height_start = Difficulty::from(
+                    self.nodes
+                        .first()
+                        .unwrap()
+                        .chain
+                        .get_heights_pub_priv()
+                        .public,
+                );
             }
 
             // msgs = self.msgs_from_into_to(msgs);
@@ -160,16 +162,16 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
     fn attack_is_success(
         &self,
         ts: u32,
-        atk_height_start: u64,
+        atk_height_start: Difficulty,
         win_thres: u32,
     ) -> Option<(Heights, Heights)> {
-        if (ts as u64) < self.attack_starts_at {
+        if (ts as Difficulty) < self.attack_starts_at {
             None
         } else {
             let chain = &self.nodes.last().unwrap().chain;
             let hs = chain.get_heights_pub_priv();
             let fms = chain.get_fork_measure_pub_priv();
-            if fms.public < fms.private && hs.public >= atk_height_start + win_thres as u64 {
+            if fms.public < fms.private && hs.public >= atk_height_start + win_thres as Difficulty {
                 Some((hs, fms))
             } else {
                 None

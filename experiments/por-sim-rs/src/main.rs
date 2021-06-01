@@ -6,6 +6,7 @@ use crate::cryptosystem::DagCS;
 use crate::cryptosystem::SimpleCS;
 use crate::cryptosystem::WeightedChainCS;
 use crate::message_manager::AttackArgs;
+use crate::types::Difficulty;
 use clap::{value_t_or_exit, App, Arg, ArgMatches, SubCommand};
 use log::LevelFilter;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -17,6 +18,7 @@ extern crate derive_new;
 #[macro_use]
 extern crate log;
 extern crate env_logger;
+extern crate intmap;
 
 mod block;
 mod chain;
@@ -26,6 +28,7 @@ mod message_manager;
 mod msg;
 mod node;
 mod strategies;
+mod types;
 
 arg_enum! {
     #[derive(Debug)]
@@ -67,7 +70,7 @@ pub fn main() -> Result<(), String> {
         value_t!(args, "crypto_system", CryptoSystemArg).unwrap_or_else(|e| e.exit());
     let n_honest = ((n_total as f64) * (1. - attacker_ratio)) as u16;
     let n_attackers = n_total - n_honest;
-    let attack_starts_at = attack_at_h as u64;
+    let attack_starts_at = attack_at_h as Difficulty;
     let atk_args = AttackArgs {
         n_honest,
         n_attackers,
