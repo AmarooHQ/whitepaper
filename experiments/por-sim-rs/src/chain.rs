@@ -19,6 +19,7 @@ pub enum ChainErr {
     BadPoW(u128, u128),
     UnkParent,
     BadDifficulty,
+    TsBeforeParent,
 }
 
 impl fmt::Display for ChainErr {
@@ -66,8 +67,8 @@ pub struct BlockMD<B> {
     pub height: u32,
     pub weight: u64,
     pub chain_weight: u64,
-    // pub daa2_blocks: Vec<(B, u128)>,
-    pub daa2_blocks: Vec<Daa2Info>,
+    pub daa2_blocks: Vec<u128>,
+    // pub daa2_blocks: Vec<Daa2Info>,
     _phantom_b: PhantomData<B>,
 }
 
@@ -247,11 +248,12 @@ impl<B: BlockT> BlockMD<B> {
             chain_weight: 0,
             // daa2_blocks: vec![(genesis.clone(), difficulty); daa2_n_blocks],
             daa2_blocks: vec![
-                Daa2Info {
-                    // id: genesis.get_hash(),
-                    ts: genesis.get_ts(),
-                    d: difficulty
-                };
+                // Daa2Info {
+                //     // id: genesis.get_hash(),
+                //     ts: genesis.get_ts(),
+                //     d: difficulty
+                // };
+                genesis.get_hash();
                 daa2_n_blocks
             ],
             _phantom_b: PhantomData,
@@ -273,12 +275,13 @@ impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
     // }
 
     fn next_difficulty_daa2_raw(&self, b: &B, b_meta: &BlockMD<B>) -> u64 {
-        if b_meta.height < (Self::DAA2_N_BLOCKS >> 4) as u32 {
+        if b_meta.height < 5 as u32 {
             return 1000;
         }
         let blocks = &b_meta.daa2_blocks;
-        let block_time_sum: u32 = b.get_ts() - b_meta.daa2_blocks.last().unwrap().ts;
-        let win_rate_sum: u64 = blocks.iter().map(|t| t.d).sum();
+        let (p, p_md) = self.get_block(*b_meta.daa2_blocks.last().unwrap()).unwrap();
+        let block_time_sum: u32 = b.get_ts() - p.get_ts();
+        let win_rate_sum: u64 = b_meta.chain_weight - p_md.chain_weight;
         u64::from(self.goal_block_time) * win_rate_sum / max(u64::from(block_time_sum), 1)
     }
 
@@ -387,6 +390,10 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             return Err(BadDifficulty);
         }
 
+        if b.get_ts() <= p.get_ts() {
+            return Err(TsBeforeParent);
+        }
+
         let (lca_id, intermediates_map) = self.find_lca_and_intermediates(&b.all_prev()).unwrap();
         let delta_chain_weight: u64 = intermediates_map
             .iter()
@@ -403,11 +410,12 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         // }];
 
         let mut daa2_blocks = Vec::with_capacity(Self::DAA2_N_BLOCKS);
-        daa2_blocks.push(Daa2Info {
-            // id: b.get_hash(),
-            ts: b.get_ts(),
-            d,
-        });
+        // daa2_blocks.push(Daa2Info {
+        //     // id: b.get_hash(),
+        //     ts: b.get_ts(),
+        //     d,
+        // });
+        daa2_blocks.push(b.get_hash());
         daa2_blocks.extend_from_slice(&p_meta.daa2_blocks[..(Self::DAA2_N_BLOCKS - 1)]);
 
         Ok((
@@ -552,6 +560,25 @@ mod tests {
         for &b in chain.get_best_blocks(false) {
             assert_eq!(chain.get_block(b).unwrap().1.height, 2);
         }
+
+        for i in 0..10 {
+            let tmp_b = _mk_draft_block(&chain, 30 + i * 10, false);
+            chain.add_block(tmp_b, false)?;
+        }
+
+        let b130 = _mk_draft_block(&chain, 130, false);
+        chain.add_block(b130.clone(), false)?;
+        let b140 = _mk_draft_block(&chain, 140, false);
+        chain.add_block(b140.clone(), false)?;
+
+        let b130_md = &chain.get_block(b130.get_hash()).unwrap().1;
+        let b140_md = &chain.get_block(b140.get_hash()).unwrap().1;
+
+        assert_eq!(b130.all_prev().len(), 1);
+        assert_eq!(
+            b140_md.chain_weight,
+            b140.get_difficulty() + b130_md.chain_weight
+        );
 
         Ok(())
     }
@@ -708,5 +735,10 @@ mod tests {
         assert_eq!(inter.len(), 1);
 
         Ok(())
+    }
+
+    #[test]
+    fn reject_child_older_than_parent() {
+        unimplemented!();
     }
 }
