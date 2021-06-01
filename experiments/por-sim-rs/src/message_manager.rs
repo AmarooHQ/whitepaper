@@ -93,7 +93,7 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
         for node in self.nodes.iter_mut() {
             let in_msgs = node.step(ts, msgs.clone()).unwrap();
             if in_msgs.len() > 0 {
-                info!("\nGot messages: {:?}", in_msgs);
+                debug!("\nGot messages: {:?}", in_msgs);
             }
             new_msgs.extend(in_msgs.into_iter());
         }

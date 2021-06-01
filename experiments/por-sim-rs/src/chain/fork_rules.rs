@@ -108,7 +108,7 @@ impl ForkRules<DagBlock> for HeaviestChain<DagBlock> {
         let intermediate_weights: u64 = lca_intermediates
             .iter()
             .filter(|(h, _)| *h != min_h)
-            .map::<u64, _>(|(_, infos)| infos.iter().map(|i| i.b_md.weight).sum())
+            .map::<u64, _>(|(_, infos)| infos.iter().map(|i| i.weight).sum())
             .sum();
 
         let some_p_info = lca_intermediates[max_h]

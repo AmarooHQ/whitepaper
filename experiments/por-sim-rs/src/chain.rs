@@ -2,7 +2,6 @@ use crate::block::*;
 use crate::chain::fork_rules::*;
 use crate::ForkResult::BestBlock;
 use log::*;
-use num::integer::div_floor;
 use std::cmp::max;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
@@ -44,10 +43,13 @@ pub struct Heights {
 
 /// Used for LCA calculations
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Debug)]
-pub struct BInfo<B> {
+pub struct BInfo<'a, B> {
+    _p: PhantomData<B>,
     id: u128,
-    b: B,
-    b_md: BlockMD<B>,
+    weight: u64,
+    chain_weight: u64,
+    b: &'a B,
+    b_md: &'a BlockMD<B>,
 }
 
 /// Used for tracking Daa2 metadata
@@ -66,7 +68,6 @@ pub struct BlockMD<B> {
     pub chain_weight: u64,
     // pub daa2_blocks: Vec<(B, u128)>,
     pub daa2_blocks: Vec<Daa2Info>,
-    // pub daa2_blocks: Vec<Rc<Daa2Info>>,
     _phantom_b: PhantomData<B>,
 }
 
@@ -198,7 +199,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
 
             // iterate through block hashes at this height
             for &id in at_h.iter() {
-                let (b, b_md) = self.get_block(id).cloned().unwrap();
+                let (b, b_md) = self.get_block(id).unwrap();
 
                 let e = intermediates.entry(b_md.height);
                 let v = e.or_insert(Default::default());
@@ -217,7 +218,14 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
                     }
                 }
 
-                v.insert(BInfo { id, b, b_md });
+                v.insert(BInfo {
+                    _p: PhantomData,
+                    id,
+                    weight: b_md.weight,
+                    chain_weight: b_md.chain_weight,
+                    b,
+                    b_md,
+                });
             }
 
             // we should only hit this condition when we've found the LCA
@@ -253,14 +261,11 @@ impl<B: BlockT> BlockMD<B> {
             chain_weight: 0,
             // daa2_blocks: vec![(genesis.clone(), difficulty); daa2_n_blocks],
             daa2_blocks: vec![
-                // Rc::new(
                 Daa2Info {
                     id: genesis.get_hash(),
                     ts: genesis.get_ts(),
                     d: difficulty
-                }
-                //)
-                ;
+                };
                 daa2_n_blocks
             ],
             _phantom_b: PhantomData,
@@ -399,17 +404,25 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         let (lca_id, intermediates_map) = self.find_lca_and_intermediates(&b.all_prev()).unwrap();
         let delta_chain_weight: u64 = intermediates_map
             .iter()
-            .map::<u64, _>(|(_k, v)| v.iter().map(|info| info.b_md.weight).sum())
+            .map::<u64, _>(|(_k, v)| v.iter().map(|info| info.weight).sum())
             .sum();
 
         let (_, lca_md) = self.get_block(lca_id).unwrap();
 
-        // TODO: Add all parents recursively for daa2_blocks
-        let to_add = vec![Daa2Info {
+        // // TODO: Add all parents recursively for daa2_blocks
+        // let to_add = vec![Daa2Info {
+        //     id: b.get_hash(),
+        //     ts: b.get_ts(),
+        //     d,
+        // }];
+
+        let mut daa2_blocks = Vec::with_capacity(Self::DAA2_N_BLOCKS);
+        daa2_blocks.push(Daa2Info {
             id: b.get_hash(),
             ts: b.get_ts(),
             d,
-        }];
+        });
+        daa2_blocks.extend_from_slice(&p_meta.daa2_blocks[..(Self::DAA2_N_BLOCKS - 1)]);
 
         Ok((
             BlockMD {
@@ -417,20 +430,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
                 height: p_meta.height + 1,
                 weight: d,
                 chain_weight: lca_md.chain_weight + delta_chain_weight + d,
-                daa2_blocks: Vec::from(
-                    [
-                        &[
-                            // Rc::new(
-                            Daa2Info {
-                                id: b.get_hash(),
-                                ts: b.get_ts(),
-                                d,
-                            }, // )
-                        ],
-                        &p_meta.daa2_blocks[..(Self::DAA2_N_BLOCKS - 1)],
-                    ]
-                    .concat(),
-                ),
+                daa2_blocks,
                 _phantom_b: PhantomData,
             },
             p,
