@@ -55,7 +55,7 @@ pub struct BInfo<'a, B> {
 /// Used for tracking Daa2 metadata
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Debug, Hash)]
 pub struct Daa2Info {
-    id: u128,
+    // id: u128,
     ts: u32,
     d: u64,
 }
@@ -165,19 +165,6 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
             return None;
         }
 
-        /* // Don't need this code -- works out via below anyway.
-        if bs.len() == 1 {
-            let id = bs[0];
-            let b = self.get_block(id).unwrap().clone();
-            let b_md = self.get_block_meta(id).unwrap().clone();
-            let h = b_md.height;
-            let mut infos = BTreeSet::new();
-            infos.insert(BInfo { id, b, b_md });
-            intermediates.insert(h, infos);
-            return Some((id, intermediates));
-        }
-        */
-
         for &id in bs {
             let b_md = &self.get_block(id).unwrap().1;
 
@@ -186,7 +173,6 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
             let iq_e = intermediate_q.entry(b_md.height);
             let iq_v = iq_e.or_insert(Default::default());
             iq_v.insert(id);
-            // v.insert(BInfo { id, b, b_md });
         }
 
         let mut min_h = *heights.iter().min().unwrap();
@@ -262,7 +248,7 @@ impl<B: BlockT> BlockMD<B> {
             // daa2_blocks: vec![(genesis.clone(), difficulty); daa2_n_blocks],
             daa2_blocks: vec![
                 Daa2Info {
-                    id: genesis.get_hash(),
+                    // id: genesis.get_hash(),
                     ts: genesis.get_ts(),
                     d: difficulty
                 };
@@ -418,7 +404,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
 
         let mut daa2_blocks = Vec::with_capacity(Self::DAA2_N_BLOCKS);
         daa2_blocks.push(Daa2Info {
-            id: b.get_hash(),
+            // id: b.get_hash(),
             ts: b.get_ts(),
             d,
         });
