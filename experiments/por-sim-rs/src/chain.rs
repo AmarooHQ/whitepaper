@@ -8,6 +8,7 @@ use hashers::null::PassThroughHasher;
 use intmap::IntMap;
 use lazy_static::lazy_static;
 use log::*;
+use std::cell::UnsafeCell;
 use std::cmp::max;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
@@ -19,6 +20,7 @@ use std::hash::BuildHasherDefault;
 use std::iter::FromIterator;
 use std::marker::PhantomData;
 use std::rc::Rc;
+use std::sync::Arc;
 use std::sync::Mutex;
 
 pub mod fork_rules;
@@ -79,7 +81,7 @@ pub struct BlockMD<B> {
     pub height: u32,
     pub weight: Difficulty,
     pub chain_weight: Difficulty,
-    pub daa2_blocks: Vec<HashID>,
+    // pub daa2_blocks: Vec<HashID>,
     // pub daa2_blocks: Vec<Daa2Info>,
     _phantom_b: PhantomData<B>,
 }
@@ -100,6 +102,11 @@ pub struct Chain<B: BlockT, F: ForkRules<B> = LongestChain<B>> {
 #[inline]
 fn conv_u128_id_to_u64(u: u128) -> u64 {
     (u as u64) ^ ((u >> 64) as u64)
+}
+
+lazy_static! {
+    static ref DIFFICULTY_CACHE: Mutex<HashMap<u64, Difficulty>> = Mutex::new(Default::default());
+    static ref DAA2_CACHE: Mutex<HashMap<u64, Arc<Vec<HashID>>>> = Mutex::new(Default::default());
 }
 
 pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
@@ -279,23 +286,27 @@ impl<B: BlockT> fmt::Display for BlockMD<B> {
 impl<B: BlockT> BlockMD<B> {
     pub fn mk_genesis_md(genesis: &B, daa2_n_blocks: usize) -> Self {
         let difficulty = 1;
+        BlockMD::<B>::set_daa2_blocks(genesis.get_hash(), vec![genesis.get_hash(); daa2_n_blocks]);
         BlockMD {
             difficulty,
             height: 0,
             weight: 0,
             chain_weight: 0,
             // daa2_blocks: vec![(genesis.clone(), difficulty); daa2_n_blocks],
-            daa2_blocks: vec![
-                // Daa2Info {
-                //     // id: genesis.get_hash(),
-                //     ts: genesis.get_ts(),
-                //     d: difficulty
-                // };
-                genesis.get_hash();
-                daa2_n_blocks
-            ],
+            // daa2_blocks: vec![genesis.get_hash(); daa2_n_blocks],
             _phantom_b: PhantomData,
         }
+    }
+
+    pub fn get_daa2_blocks(id: HashID) -> Option<Arc<Vec<HashID>>> {
+        DAA2_CACHE
+            .lock()
+            .ok()
+            .and_then(|c| c.get(&id).map(|v| v.clone()))
+    }
+
+    pub fn set_daa2_blocks(id: HashID, v: Vec<HashID>) {
+        DAA2_CACHE.lock().unwrap().insert(id, Arc::new(v));
     }
 }
 
@@ -316,7 +327,14 @@ impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
         if b_meta.height < 5 as u32 {
             return 1000;
         }
-        let (p, p_md) = self.get_block(*b_meta.daa2_blocks.last().unwrap()).unwrap();
+        let daa2_bs = BlockMD::<B>::get_daa2_blocks(b.get_hash());
+        let daa2_bs = match daa2_bs {
+            Some(bs) => bs,
+            None => {
+                todo!();
+            }
+        };
+        let (p, p_md) = self.get_block(*daa2_bs.last().unwrap()).unwrap();
         let block_time_sum: u32 = b.get_ts() - p.get_ts();
         let win_rate_sum: Difficulty = b_meta.chain_weight - p_md.chain_weight;
         Difficulty::from(self.goal_block_time) * win_rate_sum
@@ -324,11 +342,8 @@ impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
     }
 
     fn next_difficulty_daa2(&self, b: &B, b_meta: &BlockMD<B>) -> Difficulty {
-        lazy_static! {
-            static ref CACHE: Mutex<HashMap<u64, Difficulty>> = Mutex::new(Default::default());
-        }
         let b_hash = b.get_hash();
-        let mut c = CACHE.lock().unwrap();
+        let mut c = DIFFICULTY_CACHE.lock().unwrap();
         let cached_d = c.get(&(b_hash as u64));
         match cached_d {
             Some(d) => *d,
@@ -457,14 +472,16 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         //     d,
         // }];
 
-        let mut daa2_blocks = Vec::with_capacity(Self::DAA2_N_BLOCKS);
-        // daa2_blocks.push(Daa2Info {
-        //     // id: b.get_hash(),
-        //     ts: b.get_ts(),
-        //     d,
-        // });
-        daa2_blocks.push(b.get_hash());
-        daa2_blocks.extend_from_slice(&p_meta.daa2_blocks[..(Self::DAA2_N_BLOCKS - 1)]);
+        match BlockMD::<B>::get_daa2_blocks(b.get_hash()) {
+            Some(_) => (),
+            None => {
+                let mut daa2_blocks = Vec::with_capacity(Self::DAA2_N_BLOCKS);
+                daa2_blocks.push(b.get_hash());
+                let p_daa2_bs = BlockMD::<B>::get_daa2_blocks(p.get_hash()).unwrap();
+                daa2_blocks.extend_from_slice(&p_daa2_bs[..(Self::DAA2_N_BLOCKS - 1)]);
+                BlockMD::<B>::set_daa2_blocks(b.get_hash(), daa2_blocks);
+            }
+        }
 
         Ok((
             BlockMD {
@@ -472,7 +489,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
                 height: p_meta.height + 1,
                 weight: d,
                 chain_weight: lca_md.chain_weight + delta_chain_weight + d,
-                daa2_blocks,
+                // daa2_blocks,
                 _phantom_b: PhantomData,
             },
             p,
@@ -643,7 +660,9 @@ mod tests {
     fn block_md() -> Result<(), String> {
         let (genesis, g_md, mut chain) = _setup_chain::<Block, LongestChain<Block>>();
         assert_eq!(
-            g_md.daa2_blocks.len(),
+            BlockMD::<Block>::get_daa2_blocks(genesis.get_hash())
+                .unwrap()
+                .len(),
             Chain::<Block, LongestChain<Block>>::DAA2_N_BLOCKS
         );
 
@@ -653,9 +672,11 @@ mod tests {
 
         let b = _mk_draft_block(&chain, 10, false);
 
-        let (b_md, _, _) = chain.validate_block(&b)?;
+        let (_b_md, _, _) = chain.validate_block(&b)?;
         assert_eq!(
-            b_md.daa2_blocks.len(),
+            BlockMD::<Block>::get_daa2_blocks(genesis.get_hash())
+                .unwrap()
+                .len(),
             Chain::<Block, LongestChain<Block>>::DAA2_N_BLOCKS
         );
 
