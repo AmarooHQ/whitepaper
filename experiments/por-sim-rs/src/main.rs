@@ -1,15 +1,13 @@
-use crate::block::*;
 use crate::chain::fork_rules::*;
-use crate::chain::Chain;
 use crate::cryptosystem::CSystemT;
 use crate::cryptosystem::DagCS;
 use crate::cryptosystem::SimpleCS;
 use crate::cryptosystem::WeightedChainCS;
 use crate::message_manager::AttackArgs;
 use crate::types::Difficulty;
-use clap::{value_t_or_exit, App, Arg, ArgMatches, SubCommand};
+use clap::{value_t_or_exit, App, Arg, ArgMatches};
 use log::LevelFilter;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::SystemTime;
 
 #[macro_use]
 extern crate clap;
@@ -47,7 +45,7 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
         (@arg attacker_ratio: -r --ratio +takes_value default_value("0.45") #{0, 1} "Proportion of nodes which are attackers.")
         (@arg start_attack_at_h: -s --start_attack_height +takes_value default_value("1000") "Height at which to start the attack.")
         (@arg hash_rate: -H --hash_rate +takes_value default_value("10") "Maximum hashes each node will perform each tick attempting to produce a block.")
-        (@arg crypto_system: -S --crypto_system +takes_value possible_values(&CryptoSystemArg::variants())  "Name of the cryptosystem template to use.")
+        (@arg crypto_system: -S --crypto_system +takes_value default_value("WeightedDag") possible_values(&CryptoSystemArg::variants())  "Name of the cryptosystem template to use.")
     )
     .get_matches()
 }

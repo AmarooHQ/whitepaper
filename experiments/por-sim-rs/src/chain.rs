@@ -2,13 +2,12 @@ use crate::block::*;
 use crate::chain::fork_rules::*;
 use crate::types::*;
 use crate::ForkResult::BestBlock;
-use fnv::FnvHashMap;
-use hashbrown;
+// use fnv::FnvHashMap;
+// use hashbrown;
 use hashers::null::PassThroughHasher;
-use intmap::IntMap;
+// use intmap::IntMap;
 use lazy_static::lazy_static;
 use log::*;
-use std::cell::UnsafeCell;
 use std::cmp::max;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
@@ -19,7 +18,6 @@ use std::fmt::Debug;
 use std::hash::BuildHasherDefault;
 use std::iter::FromIterator;
 use std::marker::PhantomData;
-use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::Mutex;
 
@@ -204,7 +202,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
             }
             1 => {
                 let h = bs[0];
-                let (b, b_md) = self.get_block(h).unwrap();
+                let (_b, b_md) = self.get_block(h).unwrap();
                 let info_set: BTreeSet<_> = BTreeSet::from_iter(vec![BInfo {
                     // _p: PhantomData,
                     id: h,

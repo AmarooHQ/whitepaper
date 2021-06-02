@@ -1,6 +1,5 @@
-use crate::types::HashID;
-use fnv;
-use std::hash::Hasher;
+// use fnv;
+// use std::hash::Hasher;
 
 #[inline]
 pub fn hash_u128(data: u128) -> u128 {

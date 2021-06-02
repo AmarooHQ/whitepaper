@@ -239,7 +239,7 @@ mod tests {
 
     #[test]
     fn hash_sha3() -> Result<(), String> {
-        let b = Block::genesis(0);
+        let _b = Block::genesis(0);
         // let _h = b.hash_sha3();
         // DagBlock::genesis(0).hash_sha3();
         Ok(())
