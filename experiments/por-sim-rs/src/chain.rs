@@ -4,6 +4,7 @@ use crate::chain::fork_rules::*;
 use crate::types::PassThruHashMap;
 use crate::types::*;
 use crate::ForkResult::BestBlock;
+use lru::LruCache;
 // use fnv::FnvHashMap;
 // use hashbrown;
 // use intmap::IntMap;
@@ -92,6 +93,7 @@ fn conv_u128_id_to_u64(u: u128) -> u64 {
 lazy_static! {
     static ref DIFFICULTY_CACHE: Mutex<PassThruHashMap<u64, Difficulty>> =
         Mutex::new(Default::default());
+    static ref DIFFICULTY_LRU: Mutex<LruCache<u64, Difficulty>> = Mutex::new(LruCache::new(1024));
     static ref LCAS_CACHE: Mutex<HashMap<Vec<HashID>, Arc<(HashID, BTreeMap<u32, BTreeSet<BInfo>>)>>> =
         Mutex::new(Default::default());
 }
@@ -319,16 +321,22 @@ impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
 
     fn next_difficulty_daa2(&self, b: &B, b_meta: &BlockMD<B>) -> Difficulty {
         let b_hash = b.get_hash();
-        let mut c = DIFFICULTY_CACHE.lock().unwrap();
-        let cached_d = c.get(&(b_hash as u64));
-        match cached_d {
-            Some(d) => *d,
-            None => {
-                let d = self.next_difficulty_daa2_raw(b, b_meta);
-                c.insert(b_hash as u64, d);
-                d
-            }
-        }
+        return DIFFICULTY_LRU
+            .lock()
+            .ok()
+            .and_then(|mut lru| {
+                lru.get(&b_hash).map(|d| d.clone()).or_else(|| {
+                    DIFFICULTY_CACHE.lock().ok().and_then(|mut c| {
+                        c.get(&(b_hash as u64)).map(|d| d.clone()).or_else(|| {
+                            let d = self.next_difficulty_daa2_raw(b, b_meta);
+                            lru.put(b_hash, d);
+                            c.insert(b_hash as u64, d);
+                            Some(d)
+                        })
+                    })
+                })
+            })
+            .unwrap();
     }
 }
 
