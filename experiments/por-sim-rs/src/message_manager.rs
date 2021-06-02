@@ -82,13 +82,35 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
     fn msgs_from_into_to(&mut self, msgs_from: Vec<Msg<S::B>>) -> Vec<MsgToNode<S::B>> {
         let mut msgs_to: Vec<_> = Default::default();
         for msg in msgs_from {
+            let b_from_msg;
+            let p;
             match msg {
                 Msg::MsgBlock(b) => {
-                    msgs_to.push(MsgToNode::MsgBlock(b));
+                    b_from_msg = b;
+                    p = false;
+                    // msgs_to.push(MsgToNode::MsgBlock(b));
                 }
                 Msg::MsgPrivBlock(b) => {
-                    msgs_to.push(MsgToNode::MsgPrivBlock(b));
+                    b_from_msg = b;
+                    p = true;
+                    // msgs_to.push(MsgToNode::MsgPrivBlock(b));
                 }
+            }
+            let n = {
+                // public nodes first, private last - technically the attacking node knows
+                // all the blocks, so we don't *need* to ever use the first one.
+                if p {
+                    self.nodes.last()
+                } else {
+                    self.nodes.first()
+                }
+            };
+            match n.unwrap().chain.validate_block(&b_from_msg) {
+                Ok(b_md) => {
+                    msgs_to.push(MsgToNode::MsgCachedBlock(b_from_msg.get_hash(), p));
+                    S::B::set_cached_block((b_from_msg, b_md));
+                }
+                Err(_) => {}
             }
         }
         msgs_to

@@ -5,6 +5,7 @@ use crate::cryptosystem::CSystemT;
 use crate::msg::Msg;
 use crate::msg::Msg::*;
 use crate::msg::MsgToNode;
+use crate::types::HashID;
 use log::*;
 
 #[derive(Debug)]
@@ -38,6 +39,10 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         self.chain.add_block(b.clone(), is_private)
     }
 
+    fn notify_of_block(&mut self, id: HashID, p: bool) -> Result<(), ChainErr> {
+        self.chain.notify_block(id, p)
+    }
+
     pub fn step(&mut self, ts: u32, msgs: &Vec<MsgToNode<S::B>>) -> Result<Vec<Msg<S::B>>, String> {
         let mut out_msgs = vec![];
 
@@ -46,20 +51,26 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
             match in_msg {
                 MsgToNode::MsgBlock(b) => {
                     self.curr_draft_block = None;
-                    self.got_block(&b, false)?;
+                    self.got_block(b, false)?;
                     // before the attack has started, treat all blocks
                     // like they were also private blocks
                     if self.is_attacker && self.attack_threshold > ts as u128 {
-                        self.got_block(&b, true)?;
+                        self.got_block(b, true)?;
                     }
                 }
                 MsgToNode::MsgPrivBlock(b) => {
                     self.curr_draft_block = None;
                     // only attacking nodes should process these msgs
                     if self.is_attacker {
-                        self.got_block(&b, true)?;
+                        self.got_block(b, true)?;
                     }
-                } // MsgEcho(_m) => (),
+                }
+                MsgToNode::MsgCachedBlock(id, p) => {
+                    self.curr_draft_block = None;
+                    if !*p || (*p && self.is_attacker) {
+                        self.notify_of_block(*id, *p)?;
+                    }
+                }
             }
         }
 

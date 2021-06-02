@@ -115,6 +115,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
 
     fn get_best_blocks(&self, is_private: bool) -> &HashSet<HashID>;
     fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut HashSet<HashID>;
+    fn validate_block_pure(&self, b: &B) -> Result<Arc<(B, BlockMD<B>)>, ChainErr>;
     fn validate_block(&self, b: &B) -> Result<BlockMD<B>, ChainErr>;
     fn next_difficulty(&self, b: &B, b_meta: &BlockMD<B>) -> Difficulty;
     fn get_fork_measure_pub_priv(&self) -> Heights;
@@ -124,16 +125,27 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
         Self::get_cached_block(b).unwrap().1.chain_weight
     }
 
+    fn notify_block(&mut self, id: HashID, is_private: bool) -> Result<(), ChainErr> {
+        let b_c = Self::get_cached_block(id).unwrap();
+        self.update_best_block(&b_c.0, &b_c.1, is_private);
+        Ok(())
+    }
+
     fn add_block(&mut self, b: B, is_private: bool) -> Result<(), ChainErr> {
-        let b_meta = self.validate_block(&b)?;
-        self.update_best_block(&b, &b_meta, is_private);
+        let b_id = b.get_hash();
+        let b_c;
         // note, it *is* faster to check than just insert
-        match Self::get_cached_block(b.get_hash()) {
-            Some(_) => (),
+        match Self::get_cached_block(b_id) {
+            Some(b_cached) => {
+                b_c = b_cached;
+            }
             None => {
+                let b_meta = self.validate_block(&b)?;
                 Self::set_cached_block((b, b_meta));
+                b_c = Self::get_cached_block(b_id).unwrap();
             }
         };
+        self.update_best_block(&b_c.0, &b_c.1, is_private);
         // self.save_block(b.get_hash(), (b, b_meta));
         Ok(())
     }
@@ -282,7 +294,6 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
                 return Some(r);
             }
         }
-
         None
     }
 }
@@ -411,6 +422,11 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         }
     }
 
+    fn validate_block_pure(&self, b: &B) -> Result<Arc<(B, BlockMD<B>)>, ChainErr> {
+        todo!()
+        // Ok(pm)
+    }
+
     fn validate_block(&self, b: &B) -> Result<BlockMD<B>, ChainErr> {
         if b.get_hash() > self.target_from_difficulty(b.get_difficulty()) {
             return Err(BadPoW(
@@ -418,22 +434,51 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
                 self.target_from_difficulty(b.get_difficulty()),
             ));
         }
+
+        // TODO: will honest nodes ever know about attacking blocks and accidentally find a parent they shouldn't? those blocks are the in cache. I don't *think* so.
         let pm = Self::get_cached_block(b.prev());
         if pm.is_none() {
             return Err(UnkParent);
         }
 
         let pm = pm.unwrap();
-        let d = self.next_difficulty(&pm.0, &pm.1);
-        if d != b.get_difficulty() {
-            return Err(BadDifficulty);
-        }
 
         if b.get_ts() <= pm.0.get_ts() {
             return Err(TsBeforeParent);
         }
 
+        // let pm = self.validate_block_pure(b)?;
+
+        let d = self.next_difficulty(&pm.0, &pm.1);
+        if d != b.get_difficulty() {
+            return Err(BadDifficulty);
+        }
+
         let lca_r = self.find_lca_and_intermediates(&b.all_prev()).unwrap();
+
+        /* FIRST VERSION OF THE CODE
+         * SOMEHOW the difference in speed between this version of the code, and
+         * the version below is like 10x (worse for this one). Wtf?!
+         */
+        // let delta_chain_weight;
+        // let lca_chain_weight;
+        // if lca_r.0 == pm.0.get_hash() {
+        //     delta_chain_weight = 0;
+        //     lca_chain_weight = pm.1.chain_weight;
+        // } else {
+        //     let lca_md = &Self::get_cached_block(lca_r.0).unwrap().clone().1;
+        //     lca_chain_weight = lca_md.chain_weight;
+        //     let lca_height = lca_md.height;
+        //     delta_chain_weight = lca_r
+        //         .1
+        //         .iter()
+        //         .filter(|(&k, _v)| k != lca_height) // make sure we don't count the LCA in delta CW
+        //         .map::<Difficulty, _>(|(_k, v)| v.iter().map(|info| info.weight).sum())
+        //         .sum();
+        // }
+
+        /* SECOND VERSION OF THE CODE
+         */
         let lca_md = Self::get_cached_block(lca_r.0).unwrap().1.clone();
         let delta_chain_weight: Difficulty = lca_r
             .1
@@ -441,6 +486,9 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             .filter(|(&k, _v)| k != lca_md.height) // make sure we don't count the LCA in delta CW
             .map::<Difficulty, _>(|(_k, v)| v.iter().map(|info| info.weight).sum())
             .sum();
+        let lca_chain_weight = lca_md.chain_weight;
+
+        /* END DIFF VERSIONS */
 
         // // TODO: Add all parents recursively for daa2_blocks
         // let to_add = vec![Daa2Info {
@@ -465,7 +513,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             difficulty: d,
             height: pm.1.height + 1,
             weight: d,
-            chain_weight: lca_md.chain_weight + delta_chain_weight + d,
+            chain_weight: lca_chain_weight + delta_chain_weight + d,
             // daa2_blocks,
             _phantom_b: PhantomData,
         })
