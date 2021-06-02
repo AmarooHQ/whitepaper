@@ -103,25 +103,25 @@ impl ForkRules<DagBlock> for HeaviestChain<DagBlock> {
         b: &DagBlock,
         chain: &impl ChainT<'a, DagBlock, F>,
     ) -> Difficulty {
-        let (_lca, lca_intermediates) = chain.find_lca_and_intermediates(&b.parents).unwrap();
-        let min_h = lca_intermediates.keys().min().unwrap();
-        let max_h = lca_intermediates.keys().max().unwrap();
+        let lca_r = chain.find_lca_and_intermediates(&b.parents).unwrap();
+        let min_h = lca_r.1.keys().min().unwrap();
+        let max_h = lca_r.1.keys().max().unwrap();
 
-        let lca_info = &lca_intermediates[min_h].iter().cloned().collect::<Vec<_>>()[0];
-        let base_chain_weight = lca_info.b_md.chain_weight;
-        let intermediate_weights: Difficulty = lca_intermediates
+        let lca_info = &lca_r.1[min_h].iter().cloned().collect::<Vec<_>>()[0];
+        let base_chain_weight = lca_info.chain_weight;
+        let intermediate_weights: Difficulty = lca_r
+            .1
             .iter()
             .filter(|(h, _)| *h != min_h)
             .map::<Difficulty, _>(|(_, infos)| infos.iter().map(|i| i.weight).sum())
             .sum();
 
-        let some_p_info = lca_intermediates[max_h]
+        let some_p_info = lca_r.1[max_h]
             .iter()
             .choose(&mut rand::thread_rng())
             .unwrap();
 
-        base_chain_weight
-            + intermediate_weights
-            + chain.next_difficulty(&some_p_info.b, &some_p_info.b_md)
+        let (b, b_md) = chain.get_block(some_p_info.id).unwrap();
+        base_chain_weight + intermediate_weights + chain.next_difficulty(b, b_md)
     }
 }

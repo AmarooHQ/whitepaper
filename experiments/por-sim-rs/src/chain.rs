@@ -58,13 +58,13 @@ pub struct Heights {
 
 /// Used for LCA calculations
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Debug)]
-pub struct BInfo<'a, B> {
-    _p: PhantomData<B>,
+pub struct BInfo {
+    // _p: PhantomData<B>,
     id: HashID,
     weight: Difficulty,
     chain_weight: Difficulty,
-    b: &'a B,
-    b_md: &'a BlockMD<B>,
+    // b: &'a B,
+    // b_md: &'a BlockMD<B>,
 }
 
 /// Used for tracking Daa2 metadata
@@ -94,7 +94,6 @@ pub struct Chain<B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     pub best_blocks: HashSet<HashID>,
     best_priv_blocks: HashSet<HashID>,
     goal_block_time: u32,
-    difficulty_cache: Mutex<BTreeMap<u64, Difficulty>>,
     // fork_rules: LongestChain<B>,
     _phantom: PhantomData<F>,
 }
@@ -105,8 +104,12 @@ fn conv_u128_id_to_u64(u: u128) -> u64 {
 }
 
 lazy_static! {
-    static ref DIFFICULTY_CACHE: Mutex<HashMap<u64, Difficulty>> = Mutex::new(Default::default());
-    static ref DAA2_CACHE: Mutex<HashMap<u64, Arc<Vec<HashID>>>> = Mutex::new(Default::default());
+    static ref DIFFICULTY_CACHE: Mutex<PassThruHashMap<u64, Difficulty>> =
+        Mutex::new(Default::default());
+    static ref DAA2_CACHE: Mutex<PassThruHashMap<u64, Arc<Vec<HashID>>>> =
+        Mutex::new(Default::default());
+    static ref LCAS_CACHE: Mutex<HashMap<Vec<HashID>, Arc<(HashID, BTreeMap<u32, BTreeSet<BInfo>>)>>> =
+        Mutex::new(Default::default());
 }
 
 pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
@@ -186,7 +189,15 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     fn find_lca_and_intermediates(
         &self,
         bs: &Vec<HashID>,
-    ) -> Option<(HashID, BTreeMap<u32, BTreeSet<BInfo<B>>>)> {
+    ) -> Option<Arc<(HashID, BTreeMap<u32, BTreeSet<BInfo>>)>> {
+        if let Some(r) = LCAS_CACHE
+            .lock()
+            .ok()
+            .and_then(|c| c.get(bs).map(|v| v.clone()))
+        {
+            return Some(r.clone());
+        };
+
         match bs.len() {
             0 => {
                 return None;
@@ -195,19 +206,21 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
                 let h = bs[0];
                 let (b, b_md) = self.get_block(h).unwrap();
                 let info_set: BTreeSet<_> = BTreeSet::from_iter(vec![BInfo {
-                    _p: PhantomData,
+                    // _p: PhantomData,
                     id: h,
                     weight: b_md.weight,
                     chain_weight: b_md.chain_weight,
-                    b,
-                    b_md,
+                    // b,
+                    // b_md,
                 }]);
-                return Some((h, BTreeMap::from_iter(vec![(b_md.height, info_set)])));
+                let r = Arc::new((h, BTreeMap::from_iter(vec![(b_md.height, info_set)])));
+                LCAS_CACHE.lock().unwrap().insert(bs.clone(), r.clone());
+                return Some(r);
             }
             _ => {}
         }
 
-        let mut intermediates = BTreeMap::<u32, BTreeSet<BInfo<B>>>::new();
+        let mut intermediates = BTreeMap::<u32, BTreeSet<BInfo>>::new();
         let mut intermediate_q = BTreeMap::<u32, HashSet<HashID>>::new();
         let mut heights = Vec::new();
 
@@ -251,18 +264,20 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
                 }
 
                 v.insert(BInfo {
-                    _p: PhantomData,
+                    // _p: PhantomData,
                     id,
                     weight: b_md.weight,
                     chain_weight: b_md.chain_weight,
-                    b,
-                    b_md,
+                    // b,
+                    // b_md,
                 });
             }
 
             // we should only hit this condition when we've found the LCA
             if h <= min_h && at_h.len() == 1 {
-                return Some((*at_h.iter().collect::<Vec<_>>()[0], intermediates));
+                let r = Arc::new((*at_h.iter().collect::<Vec<_>>()[0], intermediates));
+                LCAS_CACHE.lock().unwrap().insert(bs.clone(), r.clone());
+                return Some(r);
             }
         }
 
@@ -368,7 +383,6 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             best_blocks: [g_hash].iter().cloned().collect(),
             best_priv_blocks: [g_hash].iter().cloned().collect(),
             goal_block_time: 10,
-            difficulty_cache: Mutex::new(Default::default()),
             // fork_rules: LongestChain::<B>::new(),
             _phantom: PhantomData,
         }
@@ -457,9 +471,10 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             return Err(TsBeforeParent);
         }
 
-        let (lca_id, intermediates_map) = self.find_lca_and_intermediates(&b.all_prev()).unwrap();
-        let (_, lca_md) = self.get_block(lca_id).unwrap();
-        let delta_chain_weight: Difficulty = intermediates_map
+        let lca_r = self.find_lca_and_intermediates(&b.all_prev()).unwrap();
+        let (_, lca_md) = self.get_block(lca_r.0).unwrap();
+        let delta_chain_weight: Difficulty = lca_r
+            .1
             .iter()
             .filter(|(&k, _v)| k != lca_md.height) // make sure we don't count the LCA in delta CW
             .map::<Difficulty, _>(|(_k, v)| v.iter().map(|info| info.weight).sum())
@@ -718,14 +733,14 @@ mod tests {
         chain.add_block(b1.clone(), false)?;
         chain.add_block(b2.clone(), false)?;
 
-        let (lca_id, inter) = chain
+        let lca_r = chain
             .find_lca_and_intermediates(&vec![b1.get_hash(), b2.get_hash()])
             .unwrap();
 
-        assert_eq!(lca_id, g.get_hash());
+        assert_eq!(lca_r.0, g.get_hash());
 
-        assert_eq!(inter[&1].len(), 2);
-        assert_eq!(inter[&0].len(), 1);
+        assert_eq!(lca_r.1[&1].len(), 2);
+        assert_eq!(lca_r.1[&0].len(), 1);
 
         // add a 3rd block, make sure it builds off b2
         let mut b3 = _mk_draft_block(&chain, 20, false);
@@ -733,32 +748,32 @@ mod tests {
         chain.add_block(b3.clone(), false)?;
 
         // find chain-segment from b3 (at h=2) and genesis
-        let (lca_id, inter) = chain
+        let lca_r = chain
             .find_lca_and_intermediates(&vec![b3.get_hash(), g.get_hash()])
             .unwrap();
 
-        assert_eq!(lca_id, g.get_hash());
+        assert_eq!(lca_r.0, g.get_hash());
 
-        assert_eq!(inter[&2].len(), 1);
+        assert_eq!(lca_r.1[&2].len(), 1);
         // only expect one block at h=1 to be included.
-        assert_eq!(inter[&1].len(), 1);
-        assert_eq!(inter[&0].len(), 1);
+        assert_eq!(lca_r.1[&1].len(), 1);
+        assert_eq!(lca_r.1[&0].len(), 1);
 
-        let (lca_id, inter) = chain
+        let lca_r = chain
             .find_lca_and_intermediates(&vec![b3.get_hash()])
             .unwrap();
-        assert_eq!(lca_id, b3.get_hash());
-        assert_eq!(inter.len(), 1);
-        assert_eq!(inter[&2].len(), 1);
+        assert_eq!(lca_r.0, b3.get_hash());
+        assert_eq!(lca_r.1.len(), 1);
+        assert_eq!(lca_r.1[&2].len(), 1);
 
         // b3 builds off b2, so this should return b2 as the LCA
-        let (lca_id, inter) = chain
+        let lca_r = chain
             .find_lca_and_intermediates(&vec![b3.get_hash(), b2.get_hash()])
             .unwrap();
-        assert_eq!(lca_id, b2.get_hash());
-        assert_eq!(inter.len(), 2);
-        assert_eq!(inter[&2].len(), 1);
-        assert_eq!(inter[&1].len(), 1);
+        assert_eq!(lca_r.0, b2.get_hash());
+        assert_eq!(lca_r.1.len(), 2);
+        assert_eq!(lca_r.1[&2].len(), 1);
+        assert_eq!(lca_r.1[&1].len(), 1);
 
         Ok(())
     }
@@ -774,14 +789,14 @@ mod tests {
         chain.add_block(b1.clone(), false)?;
         chain.add_block(b2.clone(), false)?;
 
-        let (lca_id, inter) = chain
+        let lca_r = chain
             .find_lca_and_intermediates(&vec![b1.get_hash(), b2.get_hash()])
             .unwrap();
 
-        assert_eq!(lca_id, g.get_hash());
+        assert_eq!(lca_r.0, g.get_hash());
 
-        assert_eq!(inter[&1].len(), 2);
-        assert_eq!(inter[&0].len(), 1);
+        assert_eq!(lca_r.1[&1].len(), 2);
+        assert_eq!(lca_r.1[&0].len(), 1);
 
         // add a 3rd block; should build of both h=1 blocks.
         let b3 = _mk_draft_block(&chain, 20, false);
@@ -789,41 +804,41 @@ mod tests {
 
         chain.add_block(b3.clone(), false)?;
         // find chain-segment from b3 (at h=2) and genesis
-        let (lca_id, inter) = chain
+        let lca_r = chain
             .find_lca_and_intermediates(&vec![b3.get_hash(), g.get_hash()])
             .unwrap();
 
-        assert_eq!(lca_id, g.get_hash());
+        assert_eq!(lca_r.0, g.get_hash());
 
-        assert_eq!(inter[&2].len(), 1);
+        assert_eq!(lca_r.1[&2].len(), 1);
         // expect 2 blocks at h=1 to be included b/c it's a dag!.
-        assert_eq!(inter[&1].len(), 2);
-        assert_eq!(inter[&0].len(), 1);
+        assert_eq!(lca_r.1[&1].len(), 2);
+        assert_eq!(lca_r.1[&0].len(), 1);
 
         // 5 blocks including genesis, and genesis is LCA of most recent 2 blocks
         chain.add_block(b4.clone(), false)?;
-        let (lca_id, inter) = chain
+        let lca_r = chain
             .find_lca_and_intermediates(&vec![b3.get_hash(), b4.get_hash()])
             .unwrap();
-        assert_eq!(lca_id, g.get_hash());
-        assert_eq!(inter[&2].len(), 2);
-        assert_eq!(inter[&1].len(), 2);
-        assert_eq!(inter[&0].len(), 1);
+        assert_eq!(lca_r.0, g.get_hash());
+        assert_eq!(lca_r.1[&2].len(), 2);
+        assert_eq!(lca_r.1[&1].len(), 2);
+        assert_eq!(lca_r.1[&0].len(), 1);
 
         let b5 = _mk_draft_block(&chain, 30, false);
         chain.add_block(b5.clone(), false)?;
-        let (lca_id, inter) = chain.find_lca_and_intermediates(&b5.parents).unwrap();
-        assert_eq!(lca_id, g.get_hash());
-        assert_eq!(inter[&2].len(), 2);
-        assert_eq!(inter[&1].len(), 2);
-        assert_eq!(inter[&0].len(), 1);
+        let lca_r = chain.find_lca_and_intermediates(&b5.parents).unwrap();
+        assert_eq!(lca_r.0, g.get_hash());
+        assert_eq!(lca_r.1[&2].len(), 2);
+        assert_eq!(lca_r.1[&1].len(), 2);
+        assert_eq!(lca_r.1[&0].len(), 1);
 
-        let (lca_id, inter) = chain
+        let lca_r = chain
             .find_lca_and_intermediates(&vec![b5.get_hash()])
             .unwrap();
-        assert_eq!(lca_id, b5.get_hash());
-        assert_eq!(inter[&3].len(), 1);
-        assert_eq!(inter.len(), 1);
+        assert_eq!(lca_r.0, b5.get_hash());
+        assert_eq!(lca_r.1[&3].len(), 1);
+        assert_eq!(lca_r.1.len(), 1);
 
         Ok(())
     }
