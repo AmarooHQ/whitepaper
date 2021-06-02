@@ -5,11 +5,13 @@
 
 Currently this paper sits at the ``Draft 1'' stage; some sections are incomplete (where the ``todos'' are).
 
-I have left those sections incomplete because they will require some moderate reworking to bring them to a point I am happy with. Particularly, it's not clear that Proof of Stake can be done securely \emph{at all} -- insofar as a \emph{blockchain} is concerned (DLTs are different and have weaker security requirements). This conflicts with some things I'd written as I believed (and still do believe) that some Proof of Stake configurations may be \emph{possible} to do securely \emph{within} the hybrid security context that \emph{Ultra Terminum} provides.
+I have left those sections currently incomplete because they require parallel and ongoing revision and validation.
 
-\emph{However}, \textbf{actually determining} whether PoS can \emph{ever} be done securely (including via UT's context) is significant work.
+In particular, further validation that Proof of Stake can be done securely \emph{at all} -- at least insofar as a \emph{blockchain} is concerned; DLTs are different and have weaker security requirements. This may not entirely align with some things I have written because I believed (and still do believe) that some Proof of Stake configurations may be \emph{possible} to do securely \emph{within} the hybrid security context that \emph{Ultra Terminum} provides.
 
-My plan is to refactor the incomplete sections to be as factually accurate as possible, which includes the following:
+\emph{However}, \textbf{actually determining} whether PoS can \emph{ever} be done securely (including via UT's context) is significant work. It is a milestone that we are pursuing.
+
+My plan is to incrementally refactor the incomplete sections, which includes the following:
 
 \begin{itemize}
     \item Include methods by which dapp-chains are possible to do securely within a \emph{purely Proof of Work} UT context. I have devised a method for this.
@@ -17,9 +19,9 @@ My plan is to refactor the incomplete sections to be as factually accurate as po
     \item Provide quantitative analysis of UT's security -- essentially this means: backing up the claim that attacking 1 of UT's chains is as difficult as attacking \emph{all} of UT's chains.
 \end{itemize}
 
-With regards to the last item in that list: although I am confident that UT does have the security properties I have claimed, my methods of explanation are likely to be taken as ``non-rigorous'' without quantitative analysis. I think this will happen because academics (and people who value an ``academic'' style of work) are often biased against arguments that are based on \emph{explanations} as opposed to numbers. I think this is a real bias (and not a product of my own biases, at least not wholly) because the standard of refutation is the same: provide a decisive criticism. That said, providing quantitative analysis will tease out any crucial design choices I have not yet made (or documented) and will make it harder for people to dismiss my work out of hand.
+With regards to the last item in that list: although I am confident that UT does have these security properties, confidence can be misleading. Rigorous quantitative analysis is not so fallible, and producing it will tease out any crucial design choices.
 
-For those reasons I have paused direct work on this paper's contents in favor of developing a near-comprehensive simulation of UT (and alternate PoW systems) to serve as the basis for the quantitative analysis. Work on this aspect is progressing smoothly.
+Thus our focus is currently a near-comprehensive simulation of UT (and pre-existing PoW systems) to serve as the basis for the quantitative analysis. Work on this aspect is progressing smoothly.
 
 --- \emph{Max}, June 2\textsuperscript{nd}
 
