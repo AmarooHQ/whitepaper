@@ -59,6 +59,7 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
     fn test_set_work_bits(&mut self, n_bits: u8) -> Self;
 
     fn get_cached_block(id: HashID) -> Option<Arc<(Self, BlockMD<Self>)>>;
+    // fn get_cached_blocks(ids: &[HashID]) -> Option<Box<[Arc<(Self, BlockMD<Self>)>]>>;
     fn set_cached_block(b: (Self, BlockMD<Self>));
 }
 
@@ -175,6 +176,10 @@ impl BlockT for Block {
         })
     }
 
+    // fn get_cached_blocks(ids: &[HashID]) -> Option<Box<[Arc<(Self, BlockMD<Self>)>]>> {
+
+    // }
+
     fn set_cached_block(b: (Self, BlockMD<Self>)) {
         let b_id = b.0.get_hash();
         let b_arc = Arc::new(b);
@@ -189,6 +194,7 @@ pub struct DagBlock {
     pub parents: Vec<HashID>,
     pub timestamp: u32,
     d: Difficulty,
+    // h: Height,
 }
 
 impl Display for DagBlock {

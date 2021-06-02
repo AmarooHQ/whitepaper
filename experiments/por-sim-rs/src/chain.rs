@@ -108,7 +108,10 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
         B::get_cached_block(b).map(|b| b.clone())
     }
 
-    // #[inline]
+    // fn get_cached_blocks(ids: &[HashID]) -> Option<Box<[Arc<(B, BlockMD<B>)>]>> {
+    //     B::get_cached_blocks(ids)
+    // }
+
     fn set_cached_block(b: (B, BlockMD<B>)) {
         B::set_cached_block(b)
     }
@@ -187,6 +190,11 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     fn select_best_block(&self, is_private: bool) -> HashID {
         // let blocks: Vec<HashID> = Vec::from_iter(self.get_best_blocks(is_private).iter().cloned());
         B::select_parent_from(self.get_best_blocks(is_private).iter().cloned())
+    }
+
+    #[inline]
+    fn get_any_best_block(&self, is_private: bool) -> Arc<(B, BlockMD<B>)> {
+        Self::get_cached_block(self.select_best_block(is_private)).unwrap()
     }
 
     #[inline]
@@ -337,18 +345,6 @@ impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
                 })
             })
             .unwrap();
-        // DIFFICULTY_CACHE
-        //     .lock()
-        //     .ok()
-        //     .and_then(|mut c| {
-        //         c.get(&(b_hash as u64)).map(|d| d.clone()).or_else(|| {
-        //             let d = self.next_difficulty_daa2_raw(b, b_meta);
-        //             // lru.put(b_hash, d);
-        //             c.insert(b_hash as u64, d);
-        //             Some(d)
-        //         })
-        //     })
-        //     .unwrap()
     }
 }
 

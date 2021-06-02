@@ -5,11 +5,12 @@ use crate::cryptosystem::CSystemT;
 use crate::msg::Msg;
 use crate::msg::Msg::*;
 use crate::msg::MsgToNode;
+#[cfg(test)]
 use crate::types::HashID;
 use log::*;
 
 #[derive(Debug)]
-pub struct Node<'a, S: CSystemT<'a>> {
+pub struct Node<'a, /*R: RelayStrategyT,*/ S: CSystemT<'a>> {
     id: u16,
     pub chain: S::C,
     is_attacker: bool,
@@ -39,6 +40,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         self.chain.add_block(b.clone(), is_private)
     }
 
+    #[cfg(test)]
     fn notify_of_block(&mut self, id: HashID, p: bool) -> Result<(), ChainErr> {
         self.chain.notify_block(id, p)
     }
