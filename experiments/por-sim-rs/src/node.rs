@@ -65,6 +65,8 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
                         self.got_block(b, true)?;
                     }
                 }
+
+                #[cfg(test)]
                 MsgToNode::MsgCachedBlock(id, p) => {
                     self.curr_draft_block = None;
                     if !*p || (*p && self.is_attacker) {
