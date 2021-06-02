@@ -35,7 +35,6 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         }
     }
 
-    #[cfg(test)]
     fn got_block(&mut self, b: &S::B, is_private: bool) -> Result<(), ChainErr> {
         self.chain.add_block(b.clone(), is_private)
     }
@@ -44,28 +43,28 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         self.chain.notify_block(id, p)
     }
 
-    pub fn step(&mut self, ts: u32, msgs: &Vec<MsgToNode>) -> Result<Vec<Msg<S::B>>, String> {
+    pub fn step(&mut self, ts: u32, msgs: &Vec<MsgToNode<S::B>>) -> Result<Vec<Msg<S::B>>, String> {
         let mut out_msgs = vec![];
 
         // process incoming messages
         for in_msg in msgs {
             match in_msg {
-                // MsgToNode::MsgBlock(b) => {
-                //     self.curr_draft_block = None;
-                //     self.got_block(b, false)?;
-                //     // before the attack has started, treat all blocks
-                //     // like they were also private blocks
-                //     if self.is_attacker && self.attack_threshold > ts as u128 {
-                //         self.got_block(b, true)?;
-                //     }
-                // }
-                // MsgToNode::MsgPrivBlock(b) => {
-                //     self.curr_draft_block = None;
-                //     // only attacking nodes should process these msgs
-                //     if self.is_attacker {
-                //         self.got_block(b, true)?;
-                //     }
-                // }
+                MsgToNode::MsgBlock(b) => {
+                    self.curr_draft_block = None;
+                    self.got_block(b, false)?;
+                    // before the attack has started, treat all blocks
+                    // like they were also private blocks
+                    if self.is_attacker && self.attack_threshold > ts as u128 {
+                        self.got_block(b, true)?;
+                    }
+                }
+                MsgToNode::MsgPrivBlock(b) => {
+                    self.curr_draft_block = None;
+                    // only attacking nodes should process these msgs
+                    if self.is_attacker {
+                        self.got_block(b, true)?;
+                    }
+                }
                 MsgToNode::MsgCachedBlock(id, p) => {
                     self.curr_draft_block = None;
                     if !*p || (*p && self.is_attacker) {

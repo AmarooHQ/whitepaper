@@ -10,9 +10,9 @@ pub enum Msg<B: Clone + BlockT> {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 // pub enum MsgToNode<B: Clone + BlockT> {
-pub enum MsgToNode {
-    // MsgBlock(B),
-    // MsgPrivBlock(B),
+pub enum MsgToNode<B: BlockT> {
+    MsgBlock(B),
+    MsgPrivBlock(B),
     MsgCachedBlock(HashID, bool),
     // MsgEcho(String),
 }

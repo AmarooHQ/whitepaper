@@ -337,6 +337,18 @@ impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
                 })
             })
             .unwrap();
+        // DIFFICULTY_CACHE
+        //     .lock()
+        //     .ok()
+        //     .and_then(|mut c| {
+        //         c.get(&(b_hash as u64)).map(|d| d.clone()).or_else(|| {
+        //             let d = self.next_difficulty_daa2_raw(b, b_meta);
+        //             // lru.put(b_hash, d);
+        //             c.insert(b_hash as u64, d);
+        //             Some(d)
+        //         })
+        //     })
+        //     .unwrap()
     }
 }
 
