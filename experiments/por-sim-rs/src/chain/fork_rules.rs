@@ -57,7 +57,7 @@ impl<B: BlockT> ForkRules<B> for LongestChain<B> {
     // }
 
     fn weight_of<'a, F: ForkRules<B>>(b: &B, chain: &impl ChainT<'a, B, F>) -> Difficulty {
-        Difficulty::from(chain.get_block(b.prev()).unwrap().1.height + 1)
+        Difficulty::from(B::get_cached_block(b.prev()).unwrap().1.height + 1)
     }
 
     // fn weight_of<'a>(b: &B, f: Box<impl Fn(u128) -> Option<BlockMD<B>>>) -> u128 {
@@ -75,8 +75,8 @@ impl ForkRules<Block> for HeaviestChain<Block> {
         chain: &impl ChainT<'a, Block, F>,
     ) -> Difficulty {
         let p_id = b.prev();
-        let (p, p_md) = chain.get_block(p_id).unwrap();
-        p_md.chain_weight + chain.next_difficulty(p, p_md)
+        let p = Block::get_cached_block(p_id).unwrap();
+        p.1.chain_weight + chain.next_difficulty(&p.0, &p.1)
     }
 }
 
@@ -121,7 +121,7 @@ impl ForkRules<DagBlock> for HeaviestChain<DagBlock> {
             .choose(&mut rand::thread_rng())
             .unwrap();
 
-        let (b, b_md) = chain.get_block(some_p_info.id).unwrap();
-        base_chain_weight + intermediate_weights + chain.next_difficulty(b, b_md)
+        let b = DagBlock::get_cached_block(some_p_info.id).unwrap();
+        base_chain_weight + intermediate_weights + chain.next_difficulty(&b.0, &b.1)
     }
 }

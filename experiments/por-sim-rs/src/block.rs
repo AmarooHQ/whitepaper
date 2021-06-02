@@ -3,6 +3,7 @@ use crate::hash::*;
 use crate::types::*;
 use getrandom::getrandom;
 use lazy_static::lazy_static;
+use lru::LruCache;
 use rand::prelude::*;
 use rand::seq::IteratorRandom;
 use std::fmt::Debug;
@@ -16,9 +17,14 @@ lazy_static! {
         Mutex::new(Default::default());
     static ref DAGBLOCK_CACHE: Mutex<PassThruHashMap<u64, Arc<(DagBlock, BlockMD<DagBlock>)>>> =
         Mutex::new(Default::default());
+    static ref DAGBLOCK_LRU: Mutex<LruCache<u64, Arc<(DagBlock, BlockMD<DagBlock>)>>> =
+        Mutex::new(LruCache::new(1024));
 }
 
 pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + Hash {
+    // note: this doesn't work b/c lazy_static inits those things as a Struct apparently.
+    // const MY_CACHE: Mutex<PassThruHashMap<u64, Arc<(Self, BlockMD<Self>)>>>;
+
     fn new(ts: u32, parent: HashID, d: Difficulty) -> Self;
     fn new_from(ts: u32, parent_opts: impl IntoIterator<Item = HashID>, d: Difficulty) -> Self;
     fn genesis(ts: u32) -> Self;
@@ -49,6 +55,9 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
 
     #[cfg(debug_assertions)]
     fn test_set_work_bits(&mut self, n_bits: u8) -> Self;
+
+    fn get_cached_block(id: HashID) -> Option<Arc<(Self, BlockMD<Self>)>>;
+    fn set_cached_block(b: (Self, BlockMD<Self>));
 }
 
 pub trait SingleParentBlockT: BlockT {}
@@ -152,6 +161,20 @@ impl BlockT for Block {
         self.id &= HashID::MAX >> n_bits;
         self.clone()
     }
+
+    fn get_cached_block(id: HashID) -> Option<Arc<(Self, BlockMD<Self>)>> {
+        BLOCK_CACHE
+            .lock()
+            .ok()
+            .and_then(|c| c.get(&id).map(|b| b.clone()))
+    }
+
+    fn set_cached_block(b: (Self, BlockMD<Self>)) {
+        BLOCK_CACHE
+            .lock()
+            .unwrap()
+            .insert(b.0.get_hash(), Arc::new(b));
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -239,6 +262,24 @@ impl BlockT for DagBlock {
     fn test_set_work_bits(&mut self, n_bits: u8) -> Self {
         self.id &= HashID::MAX >> n_bits;
         self.clone()
+    }
+
+    fn get_cached_block(id: HashID) -> Option<Arc<(Self, BlockMD<Self>)>> {
+        DAGBLOCK_LRU.lock().ok().and_then(|mut c| {
+            c.get(&id).map(|b| b.clone()).or_else(|| {
+                DAGBLOCK_CACHE
+                    .lock()
+                    .ok()
+                    .and_then(|c| c.get(&id).map(|b| b.clone()))
+            })
+        })
+    }
+
+    fn set_cached_block(b: (Self, BlockMD<Self>)) {
+        let b_id = b.0.get_hash();
+        let b_arc = Arc::new(b);
+        DAGBLOCK_LRU.lock().unwrap().put(b_id, b_arc.clone());
+        DAGBLOCK_CACHE.lock().unwrap().insert(b_id, b_arc.clone());
     }
 }
 

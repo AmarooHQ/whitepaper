@@ -188,8 +188,8 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
 
 mod tests {
     use super::*;
-    use crate::cryptosystem::DagCS;
-    use crate::cryptosystem::SimpleCS;
+    use crate::block::*;
+    use crate::cryptosystem::*;
 
     fn create_mm_no_priv<'a, S: CSystemT<'a>>() -> MM<'a, S> {
         MM::<'a, S>::new(AttackArgs::new(20, 0, 0, 100))
@@ -268,7 +268,9 @@ mod tests {
 
         // check that the best block has exactly 1 parent (the genesis block)
         let chain = mm.chain();
-        let bb = &chain.get_block(chain.select_best_block(false)).unwrap().0;
+        let bb = &DagBlock::get_cached_block(chain.select_best_block(false))
+            .unwrap()
+            .0;
         assert_ne!(bb.parents.len(), 0);
         assert_eq!(bb.parents.len(), 1);
 
@@ -285,17 +287,17 @@ mod tests {
         let _msgs = mm.tick(1300, msgs).unwrap();
 
         let chain = &mm.chain();
-        let (bb, bb_meta) = chain.get_block(chain.select_best_block(false)).unwrap();
+        let bb = DagBlock::get_cached_block(chain.select_best_block(false)).unwrap();
         println!(
             "best blocks: {:#?}",
             chain
                 .get_best_blocks_md(false)
                 .iter()
-                .map(|(i, (b, md))| (i, b.to_string(), md.to_string()))
+                .map(|(i, b)| (i, b.0.to_string(), b.1.to_string()))
                 .collect::<Vec<_>>()
         );
-        assert_eq!(bb_meta.height, 2);
-        assert_ne!(bb.parents.len(), 0);
-        assert_ne!(bb.parents.len(), 1);
+        assert_eq!(bb.1.height, 2);
+        assert_ne!(bb.0.parents.len(), 0);
+        assert_ne!(bb.0.parents.len(), 1);
     }
 }
