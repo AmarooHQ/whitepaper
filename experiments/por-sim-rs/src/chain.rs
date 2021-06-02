@@ -26,7 +26,7 @@ mod inclusive;
 
 type PassThruHashMap<K, V> = HashMap<K, V, BuildHasherDefault<PassThroughHasher>>;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ChainErr {
     BadPoW(HashID, HashID),
     UnkParent,
@@ -519,8 +519,10 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
 mod tests {
     use super::*;
 
-    fn _setup_chain<'a, B: BlockT, F: ForkRules<B>>() -> (B, BlockMD<B>, Chain<B, F>) {
-        let genesis = B::genesis(0);
+    fn _setup_chain<'a, B: BlockT, F: ForkRules<B>>(
+        ts: Option<u32>,
+    ) -> (B, BlockMD<B>, Chain<B, F>) {
+        let genesis = B::genesis(ts.unwrap_or(0));
         let g_md = BlockMD::mk_genesis_md(&genesis, Chain::<B, F>::DAA2_N_BLOCKS);
         let chain = Chain::new(genesis.clone(), g_md.clone());
         (genesis, g_md, chain)
@@ -538,7 +540,7 @@ mod tests {
 
     #[test]
     fn target_from_d() {
-        let (_, _, chain) = _setup_chain::<Block, LongestChain<Block>>();
+        let (_, _, chain) = _setup_chain::<Block, LongestChain<Block>>(None);
         assert_eq!(
             chain.target_from_difficulty(1),
             // HashID::from(u64::MAX) << 64
@@ -568,7 +570,7 @@ mod tests {
 
     #[test]
     fn update_best_block() -> Result<(), String> {
-        let (genesis, _g_md, mut chain) = _setup_chain::<Block, LongestChain<Block>>();
+        let (genesis, _g_md, mut chain) = _setup_chain::<Block, LongestChain<Block>>(None);
         let b = _mk_draft_block(&mut chain, 10, false);
 
         assert_eq!(chain.select_best_block(false), genesis.get_hash());
@@ -589,7 +591,7 @@ mod tests {
 
     #[test]
     fn update_best_heaviest_block() -> Result<(), String> {
-        let (genesis, _g_md, mut chain) = _setup_chain::<Block, HeaviestChain<Block>>();
+        let (genesis, _g_md, mut chain) = _setup_chain::<Block, HeaviestChain<Block>>(None);
         let b = _mk_draft_block(&mut chain, 10, false);
 
         assert_eq!(chain.select_best_block(false), genesis.get_hash());
@@ -610,7 +612,7 @@ mod tests {
 
     #[test]
     fn update_best_heaviest_dagblock() -> Result<(), String> {
-        let (genesis, _g_md, mut chain) = _setup_chain::<DagBlock, HeaviestChain<DagBlock>>();
+        let (genesis, _g_md, mut chain) = _setup_chain::<DagBlock, HeaviestChain<DagBlock>>(None);
         let b = _mk_draft_block(&mut chain, 10, false);
         let b2 = _mk_draft_block(&mut chain, 10, false);
         let b3 = _mk_draft_block(&mut chain, 10, false);
@@ -671,7 +673,7 @@ mod tests {
 
     #[test]
     fn block_md() -> Result<(), String> {
-        let (genesis, g_md, mut chain) = _setup_chain::<Block, LongestChain<Block>>();
+        let (genesis, g_md, mut chain) = _setup_chain::<Block, LongestChain<Block>>(None);
         assert_eq!(
             BlockMD::<Block>::get_daa2_blocks(genesis.get_hash())
                 .unwrap()
@@ -723,7 +725,7 @@ mod tests {
     #[test]
     fn find_lca_simple() -> Result<(), String> {
         // creates a single-parent chain
-        let (g, _g_md, mut chain) = _setup_chain::<Block, LongestChain<Block>>();
+        let (g, _g_md, mut chain) = _setup_chain::<Block, LongestChain<Block>>(None);
 
         let b1 = _mk_draft_block(&chain, 10, false);
         let b2 = _mk_draft_block(&chain, 10, false);
@@ -779,7 +781,7 @@ mod tests {
     #[test]
     fn find_lca_dag_simple() -> Result<(), String> {
         // creates a multi-parent chain
-        let (g, _g_md, mut chain) = _setup_chain::<DagBlock, HeaviestChain<DagBlock>>();
+        let (g, _g_md, mut chain) = _setup_chain::<DagBlock, HeaviestChain<DagBlock>>(None);
 
         let b1 = _mk_draft_block(&chain, 10, false);
         let b2 = _mk_draft_block(&chain, 10, false);
@@ -843,7 +845,10 @@ mod tests {
 
     #[test]
     fn reject_child_older_than_parent() {
-        unimplemented!();
+        let (_g, _g_md, mut chain) = _setup_chain::<DagBlock, HeaviestChain<DagBlock>>(Some(10));
+        let b = _mk_draft_block(&chain, 5, false);
+        assert_eq!(_g.get_ts() > b.get_ts(), true, "timestamps: b < g");
+        assert_eq!(chain.add_block(b, false), Err(ChainErr::TsBeforeParent));
     }
 
     #[test]
