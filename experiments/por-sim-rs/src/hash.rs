@@ -1,6 +1,7 @@
 // use fnv;
 // use std::hash::Hasher;
 
+#[cfg(test)] // remove later if need be
 #[inline]
 pub fn hash_u128(data: u128) -> u128 {
     // for u128, v fast
@@ -35,3 +36,13 @@ pub fn hash_u64(data: u64) -> u64 {
 // let r = blake2s(32, &[], bs);
 // let r2 = &r.as_bytes()[..16];
 // u128::from_be_bytes(r2.try_into().unwrap())
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_hash_u128() {
+        hash_u128(0x0);
+    }
+}

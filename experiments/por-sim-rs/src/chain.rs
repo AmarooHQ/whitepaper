@@ -6,7 +6,6 @@ use crate::types::*;
 use crate::ForkResult::BestBlock;
 // use fnv::FnvHashMap;
 // use hashbrown;
-use hashers::null::PassThroughHasher;
 // use intmap::IntMap;
 use lazy_static::lazy_static;
 use log::*;
@@ -17,14 +16,12 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fmt;
 use std::fmt::Debug;
-use std::hash::BuildHasherDefault;
 use std::iter::FromIterator;
 use std::marker::PhantomData;
 use std::sync::Arc;
 use std::sync::Mutex;
 
 pub mod fork_rules;
-mod inclusive;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ChainErr {
@@ -86,6 +83,7 @@ pub struct Chain<B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     _phantom_b: PhantomData<B>,
 }
 
+#[cfg(test)] // remove later if we use it again
 #[inline]
 fn conv_u128_id_to_u64(u: u128) -> u64 {
     (u as u64) ^ ((u >> 64) as u64)
@@ -422,7 +420,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         }
     }
 
-    fn validate_block_pure(&self, b: &B) -> Result<Arc<(B, BlockMD<B>)>, ChainErr> {
+    fn validate_block_pure(&self, _b: &B) -> Result<Arc<(B, BlockMD<B>)>, ChainErr> {
         todo!()
         // Ok(pm)
     }
@@ -524,7 +522,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
     }
 }
 
-// #[cfg(tests)]
+#[cfg(test)]
 mod tests {
     use super::*;
 
@@ -874,4 +872,7 @@ mod tests {
         );
         assert_eq!(conv_u128_id_to_u64(0x55555555555555555555555555555555), 0x0);
     }
+
+    #[test]
+    fn test_equivalence_of_notify_block_vs_add_block() {}
 }

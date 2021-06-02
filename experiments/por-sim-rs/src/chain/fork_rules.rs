@@ -56,7 +56,7 @@ impl<B: BlockT> ForkRules<B> for LongestChain<B> {
     //     }
     // }
 
-    fn weight_of<'a, F: ForkRules<B>>(b: &B, chain: &impl ChainT<'a, B, F>) -> Difficulty {
+    fn weight_of<'a, F: ForkRules<B>>(b: &B, _chain: &impl ChainT<'a, B, F>) -> Difficulty {
         Difficulty::from(B::get_cached_block(b.prev()).unwrap().1.height + 1)
     }
 

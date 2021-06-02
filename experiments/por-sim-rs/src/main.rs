@@ -5,7 +5,7 @@ use crate::cryptosystem::SimpleCS;
 use crate::cryptosystem::WeightedChainCS;
 use crate::message_manager::AttackArgs;
 use crate::types::Difficulty;
-use clap::{value_t_or_exit, App, Arg, ArgMatches};
+use clap::{value_t_or_exit, ArgMatches};
 use log::LevelFilter;
 use std::time::SystemTime;
 

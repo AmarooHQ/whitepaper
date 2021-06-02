@@ -25,6 +25,7 @@ pub struct AttackArgs {
 }
 
 impl AttackArgs {
+    #[cfg(test)]
     fn new(n_honest: u16, n_attackers: u16, attack_starts_at: Difficulty, hash_rate: u32) -> Self {
         AttackArgs {
             n_honest,
@@ -75,11 +76,12 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
         self.nodes.push(node);
     }
 
+    #[cfg(test)]
     pub fn chain(&self) -> &S::C {
         return &self.nodes.first().unwrap().chain;
     }
 
-    fn msgs_from_into_to(&mut self, msgs_from: Vec<Msg<S::B>>) -> Vec<MsgToNode<S::B>> {
+    fn msgs_from_into_to(&mut self, msgs_from: Vec<Msg<S::B>>) -> Vec<MsgToNode> {
         let mut msgs_to: Vec<_> = Default::default();
         for msg in msgs_from {
             let b_from_msg;
@@ -132,6 +134,8 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
         Ok(Vec::from(output_msgs))
     }
 
+    // can remove #[cfg(test)] later
+    #[cfg(test)]
     pub fn tick_many(&mut self, n_ticks: u32) -> Result<Vec<Msg<S::B>>, String> {
         let mut msgs_from = Vec::new();
         let mut all_msgs = Vec::new();
@@ -141,7 +145,7 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
             if ts % 100 == 0 {
                 info!("tick: {}", ts);
             }
-            msgs_from = { self.tick(ts, msgs_from)? };
+            msgs_from = self.tick(ts, msgs_from)?;
             all_msgs.extend(msgs_from.clone().into_iter());
         }
 
@@ -208,6 +212,7 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::block::*;

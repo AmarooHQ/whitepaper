@@ -289,6 +289,7 @@ impl BlockT for DagBlock {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 
