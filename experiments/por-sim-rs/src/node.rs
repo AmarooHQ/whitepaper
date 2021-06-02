@@ -121,7 +121,8 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
 
 mod tests {
     use super::*;
-    use crate::block::Block;
+    use crate::block::*;
+    use crate::block_metadata::*;
     use crate::chain::fork_rules::LongestChain;
     use crate::chain::*;
     use crate::cryptosystem::SimpleCS;

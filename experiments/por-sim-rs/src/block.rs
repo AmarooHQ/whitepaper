@@ -1,14 +1,22 @@
+use crate::block_metadata::BlockMD;
 use crate::hash::*;
-use crate::types::Difficulty;
-use crate::types::HashID;
+use crate::types::*;
 use getrandom::getrandom;
+use lazy_static::lazy_static;
 use rand::prelude::*;
 use rand::seq::IteratorRandom;
 use std::fmt::Debug;
 use std::hash::Hash;
-use std::iter::FromIterator;
-use std::iter::IntoIterator;
+use std::iter::{FromIterator, IntoIterator};
+use std::sync::{Arc, Mutex};
 use std::{fmt, fmt::Display};
+
+lazy_static! {
+    static ref BLOCK_CACHE: Mutex<PassThruHashMap<u64, Arc<(Block, BlockMD<Block>)>>> =
+        Mutex::new(Default::default());
+    static ref DAGBLOCK_CACHE: Mutex<PassThruHashMap<u64, Arc<(DagBlock, BlockMD<DagBlock>)>>> =
+        Mutex::new(Default::default());
+}
 
 pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + Hash {
     fn new(ts: u32, parent: HashID, d: Difficulty) -> Self;

@@ -1,5 +1,7 @@
 use crate::block::*;
+use crate::block_metadata::BlockMD;
 use crate::chain::fork_rules::*;
+use crate::types::PassThruHashMap;
 use crate::types::*;
 use crate::ForkResult::BestBlock;
 // use fnv::FnvHashMap;
@@ -23,8 +25,6 @@ use std::sync::Mutex;
 
 pub mod fork_rules;
 mod inclusive;
-
-type PassThruHashMap<K, V> = HashMap<K, V, BuildHasherDefault<PassThroughHasher>>;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ChainErr {
@@ -73,17 +73,6 @@ pub struct Daa2Info {
     d: Difficulty,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct BlockMD<B> {
-    pub difficulty: Difficulty,
-    pub height: u32,
-    pub weight: Difficulty,
-    pub chain_weight: Difficulty,
-    // pub daa2_blocks: Vec<HashID>,
-    // pub daa2_blocks: Vec<Daa2Info>,
-    _phantom_b: PhantomData<B>,
-}
-
 pub struct Chain<B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     blocks: PassThruHashMap<u64, (B, BlockMD<B>)>, // 593ms
     // blocks: hashbrown::HashMap<u64, (B, BlockMD<B>)>, // 622ms
@@ -103,8 +92,6 @@ fn conv_u128_id_to_u64(u: u128) -> u64 {
 
 lazy_static! {
     static ref DIFFICULTY_CACHE: Mutex<PassThruHashMap<u64, Difficulty>> =
-        Mutex::new(Default::default());
-    static ref DAA2_CACHE: Mutex<PassThruHashMap<u64, Arc<Vec<HashID>>>> =
         Mutex::new(Default::default());
     static ref LCAS_CACHE: Mutex<HashMap<Vec<HashID>, Arc<(HashID, BTreeMap<u32, BTreeSet<BInfo>>)>>> =
         Mutex::new(Default::default());
@@ -283,58 +270,8 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     }
 }
 
-impl<B: BlockT> fmt::Display for BlockMD<B> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // let mut md2 = self.clone();
-        // md2.daa2_blocks = vec![];
-        // fmt::Debug::fmt(&md2, f)
-        write!(
-            f,
-            "BlockMD D={} | H={} | W={} | ΣW={}",
-            self.difficulty, self.height, self.weight, self.chain_weight
-        )
-    }
-}
-
-impl<B: BlockT> BlockMD<B> {
-    pub fn mk_genesis_md(genesis: &B, daa2_n_blocks: usize) -> Self {
-        let difficulty = 1;
-        BlockMD::<B>::set_daa2_blocks(genesis.get_hash(), vec![genesis.get_hash(); daa2_n_blocks]);
-        BlockMD {
-            difficulty,
-            height: 0,
-            weight: 0,
-            chain_weight: 0,
-            // daa2_blocks: vec![(genesis.clone(), difficulty); daa2_n_blocks],
-            // daa2_blocks: vec![genesis.get_hash(); daa2_n_blocks],
-            _phantom_b: PhantomData,
-        }
-    }
-
-    pub fn get_daa2_blocks(id: HashID) -> Option<Arc<Vec<HashID>>> {
-        DAA2_CACHE
-            .lock()
-            .ok()
-            .and_then(|c| c.get(&id).map(|v| v.clone()))
-    }
-
-    pub fn set_daa2_blocks(id: HashID, v: Vec<HashID>) {
-        DAA2_CACHE.lock().unwrap().insert(id, Arc::new(v));
-    }
-}
-
 impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
     pub const DAA2_N_BLOCKS: usize = 100;
-
-    // fn get_with_n_ancestors<'b>(&'b self, b: &'b B, n: u32) -> Vec<&'b B> {
-    //     let mut bs = vec![b];
-    //     let mut c = b;
-    //     for _ in 0..n {
-    //         c = &self.blocks[&c.hash()];
-    //         bs.push(c);
-    //     }
-    //     bs
-    // }
 
     fn next_difficulty_daa2_raw(&self, b: &B, b_meta: &BlockMD<B>) -> Difficulty {
         if b_meta.height < 5 as u32 {
@@ -485,6 +422,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         //     d,
         // }];
 
+        // ensure that the daa2 vector is in the cache
         match BlockMD::<B>::get_daa2_blocks(b.get_hash()) {
             Some(_) => (),
             None => {

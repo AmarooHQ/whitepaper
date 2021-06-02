@@ -19,6 +19,7 @@ extern crate env_logger;
 extern crate intmap;
 
 mod block;
+mod block_metadata;
 mod chain;
 mod cryptosystem;
 mod hash;

@@ -1,5 +1,6 @@
 use super::node::*;
 use crate::block::BlockT;
+use crate::block_metadata::BlockMD;
 use crate::chain::*;
 use crate::cryptosystem::CSystemT;
 use crate::msg::*;
