@@ -15,6 +15,8 @@ use std::{fmt, fmt::Display};
 lazy_static! {
     static ref BLOCK_CACHE: Mutex<PassThruHashMap<u64, Arc<(Block, BlockMD<Block>)>>> =
         Mutex::new(Default::default());
+    static ref BLOCK_LRU: Mutex<LruCache<u64, Arc<(Block, BlockMD<Block>)>>> =
+        Mutex::new(LruCache::new(1024));
     static ref DAGBLOCK_CACHE: Mutex<PassThruHashMap<u64, Arc<(DagBlock, BlockMD<DagBlock>)>>> =
         Mutex::new(Default::default());
     static ref DAGBLOCK_LRU: Mutex<LruCache<u64, Arc<(DagBlock, BlockMD<DagBlock>)>>> =
@@ -163,17 +165,21 @@ impl BlockT for Block {
     }
 
     fn get_cached_block(id: HashID) -> Option<Arc<(Self, BlockMD<Self>)>> {
-        BLOCK_CACHE
-            .lock()
-            .ok()
-            .and_then(|c| c.get(&id).map(|b| b.clone()))
+        BLOCK_LRU.lock().ok().and_then(|mut c| {
+            c.get(&id).map(|b| b.clone()).or_else(|| {
+                BLOCK_CACHE
+                    .lock()
+                    .ok()
+                    .and_then(|c| c.get(&id).map(|b| b.clone()))
+            })
+        })
     }
 
     fn set_cached_block(b: (Self, BlockMD<Self>)) {
-        BLOCK_CACHE
-            .lock()
-            .unwrap()
-            .insert(b.0.get_hash(), Arc::new(b));
+        let b_id = b.0.get_hash();
+        let b_arc = Arc::new(b);
+        BLOCK_LRU.lock().unwrap().put(b_id, b_arc.clone());
+        BLOCK_CACHE.lock().unwrap().insert(b_id, b_arc.clone());
     }
 }
 
