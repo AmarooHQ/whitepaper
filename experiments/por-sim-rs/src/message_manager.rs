@@ -4,17 +4,21 @@ use crate::block_metadata::BlockMD;
 use crate::chain::*;
 use crate::cryptosystem::CSystemT;
 use crate::msg::*;
+use crate::strategies::relay::*;
+// use crate::strategies::relay::SelfishMining;
 use crate::types::Difficulty;
 use itertools::Itertools;
 use log::*;
 // use std::rc::Rc;
 
-pub struct MM<'a, S: CSystemT<'a>> {
+pub struct MM<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> {
     // tick: u32,
     nodes: Vec<Node<'a, S>>,
     // difficulty_cache: Mutex<HashMap<u128, u128>>,
     attack_starts_at: Difficulty,
+    args: AttackArgs,
     // block_store:
+    strategy: Option<R>,
 }
 
 pub struct AttackArgs {
@@ -22,6 +26,7 @@ pub struct AttackArgs {
     pub n_attackers: u16,
     pub attack_starts_at: Difficulty,
     pub hash_rate: u32,
+    pub end_simulation_at_t: u32,
 }
 
 impl AttackArgs {
@@ -32,12 +37,13 @@ impl AttackArgs {
             n_attackers,
             attack_starts_at,
             hash_rate,
+            end_simulation_at_t: 3 * attack_starts_at,
         }
     }
 }
 
-impl<'a, S: CSystemT<'a>> MM<'a, S> {
-    pub fn new(args: AttackArgs) -> MM<'a, S> {
+impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
+    pub fn new(args: AttackArgs) -> MM<'a, S, R> {
         let nodes_honest: u16 = args.n_honest;
         let nodes_attacking: u16 = args.n_attackers;
         let attack_starts_at: Difficulty = args.attack_starts_at;
@@ -51,6 +57,8 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
         let mut mm = MM {
             nodes: Vec::new(),
             attack_starts_at,
+            strategy: None,
+            args,
         };
         for i in 0..n_nodes {
             let atk_start_conds = if i >= nodes_honest {
@@ -97,7 +105,15 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
     }
 
     pub fn tick(&mut self, ts: u32, msgs: Vec<Msg<S::B>>) -> Result<Vec<Msg<S::B>>, String> {
-        let msgs_to = self.msgs_from_into_to(msgs);
+        let mut msgs_to = self.msgs_from_into_to(msgs);
+        if self.strategy.is_some() {
+            let attacker_msgs_to = msgs_to
+                .iter()
+                .map(|m| self.strategy.as_mut().unwrap().on_msg(m))
+                .collect::<Vec<_>>()
+                .concat();
+            msgs_to = [attacker_msgs_to, msgs_to].concat();
+        }
         let output_msgs = self
             .nodes
             .iter_mut()
@@ -130,8 +146,9 @@ impl<'a, S: CSystemT<'a>> MM<'a, S> {
         Ok(all_msgs)
     }
 
-    pub fn run_attack(&mut self, ts_limit: u32, win_thresh: u32) -> Result<bool, String> {
+    pub fn run_attack(&mut self, win_thresh: u32) -> Result<bool, String> {
         let mut msgs_from = Vec::new();
+        let ts_limit = self.args.end_simulation_at_t;
 
         let mut atk_height_start = self.attack_starts_at;
         for ts in 1..(ts_limit + 1) {
@@ -196,11 +213,11 @@ mod tests {
     use crate::block::*;
     use crate::cryptosystem::*;
 
-    fn create_mm_no_priv<'a, S: CSystemT<'a>>() -> MM<'a, S> {
-        MM::<'a, S>::new(AttackArgs::new(20, 0, 0, 100))
+    fn create_mm_no_priv<'a, S: CSystemT<'a>>() -> MM<'a, S, NullRelayStrat> {
+        MM::<'a, S, NullRelayStrat>::new(AttackArgs::new(20, 0, 33, 100))
     }
 
-    fn ensure_chain_progress<'a, S: CSystemT<'a>>(mm: &MM<'a, S>) {
+    fn ensure_chain_progress<'a, S: CSystemT<'a>>(mm: &MM<'a, S, NullRelayStrat>) {
         let hs = mm.chain().get_fork_measure_pub_priv();
 
         assert_ne!(hs.public, 0);
@@ -246,13 +263,13 @@ mod tests {
     #[test]
     fn run_attack_test() {
         let mut mm = create_mm_no_priv::<'_, DagCS>();
-        mm.run_attack(100, 100).unwrap();
+        mm.run_attack(100).unwrap();
         ensure_chain_progress(&mm);
     }
 
     #[test]
     fn mm_with_dag_block_has_many_parents() {
-        let mut mm = MM::<'_, DagCS>::new(AttackArgs::new(10, 0, 0, 100));
+        let mut mm = MM::<'_, DagCS, NullRelayStrat>::new(AttackArgs::new(10, 0, 0, 100));
 
         // set ts far in future to avoid issues with difficulty alg
         let t1_ts = 1000;

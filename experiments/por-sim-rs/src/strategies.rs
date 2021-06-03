@@ -1,2 +1,1 @@
-mod selfish;
-mod relay;
+pub mod relay;

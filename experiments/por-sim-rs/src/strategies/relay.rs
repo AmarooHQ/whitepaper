@@ -8,10 +8,24 @@ use crate::CSystemT;
 /// a strategy that runs at a network level based on incoming msgs
 pub trait RelayStrategyT<'a, S: CSystemT<'a>> {
     fn init(c: &S::C) -> Self;
-    fn on_msg(&mut self, m: &MsgToNode<S::B>) -> Vec<Msg<S::B>>;
+    fn on_msg(&mut self, m: &MsgToNode<S::B>) -> Vec<MsgToNode<S::B>>;
 }
 
-struct SelfishMining {
+pub struct NullRelayStrat();
+
+impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for NullRelayStrat {
+    fn init(_: &<S as CSystemT<'a>>::C) -> Self {
+        NullRelayStrat()
+    }
+    fn on_msg(
+        &mut self,
+        _: &MsgToNode<<S as CSystemT<'a>>::B>,
+    ) -> Vec<MsgToNode<<S as CSystemT<'a>>::B>> {
+        vec![]
+    }
+}
+
+pub struct SelfishMining {
     pub_height: Height,
     priv_height: Height,
     priv_branch_len: u32,
@@ -25,21 +39,25 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining {
             priv_branch_len: 0,
         }
     }
-    fn on_msg(&mut self, msg_from: &MsgToNode<S::B>) -> Vec<Msg<S::B>> {
+    fn on_msg(&mut self, msg_from: &MsgToNode<S::B>) -> Vec<MsgToNode<S::B>> {
         let delta_prev = self.priv_height - self.pub_height;
         match msg_from {
-            MsgToNode::MsgBlock(_, is_private) => {
+            MsgToNode::MsgBlock(b, is_private) => {
                 match is_private {
                     false => {
-                        // recalc pub length -- append block to pub chain
+                        // [SM] append block to pub chain -- recalc pub length.
+                        // NB: -- this will happen when nodes process msgs (after this step),
+                        // but worth noting in case we need to do calculations before then.
                         match delta_prev {
                             0 => {
-                                // sync public and private chains
+                                // [SM] sync public and private chains
                                 self.priv_branch_len = 0;
-                                todo!()
+                                // return a msg that adds this block to the priv chain too so the chains stay in sync.
+                                vec![MsgToNode::MsgBlock(b.clone(), true)]
                             }
                             1 => {
-                                // publish last block of priv chain
+                                // [SM] publish last block of priv chain (there's only one)
+                                // vec![MsgToNode::MsgBlock()]
                                 todo!()
                             }
                             2 => {
