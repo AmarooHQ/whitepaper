@@ -103,5 +103,5 @@ pub fn main() -> Result<(), String> {
 // fn(n1: u16, n2: u16, at: u128, hr: u32)
 
 fn mk_run_atk<'a, CS: CSystemT<'a>>(_cs: CS, args: AttackArgs) -> Result<bool, String> {
-    message_manager::MM::<'_, CS, NullRelayStrat>::new(args).run_attack(20)
+    message_manager::MM::<'_, CS, _, NullRelayStrat>::new(args).run_attack(20)
 }

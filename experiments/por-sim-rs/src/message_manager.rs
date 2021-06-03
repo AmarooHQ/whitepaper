@@ -5,13 +5,14 @@ use crate::chain::*;
 use crate::cryptosystem::CSystemT;
 use crate::msg::*;
 use crate::strategies::relay::*;
+use std::marker::PhantomData;
 // use crate::strategies::relay::SelfishMining;
 use crate::types::Difficulty;
 use itertools::Itertools;
 use log::*;
 // use std::rc::Rc;
 
-pub struct MM<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> {
+pub struct MM<'a, S: CSystemT<'a>, W, R: RelayStrategyT<'a, S, W>> {
     // tick: u32,
     nodes: Vec<Node<'a, S>>,
     // difficulty_cache: Mutex<HashMap<u128, u128>>,
@@ -19,6 +20,7 @@ pub struct MM<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> {
     args: AttackArgs,
     // block_store:
     strategy: Option<R>,
+    _w: PhantomData<W>,
 }
 
 pub struct AttackArgs {
@@ -42,8 +44,8 @@ impl AttackArgs {
     }
 }
 
-impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
-    pub fn new(args: AttackArgs) -> MM<'a, S, R> {
+impl<'a, S: CSystemT<'a>, W, R: RelayStrategyT<'a, S, W>> MM<'a, S, W, R> {
+    pub fn new(args: AttackArgs) -> MM<'a, S, W, R> {
         let nodes_honest: u16 = args.n_honest;
         let nodes_attacking: u16 = args.n_attackers;
         let attack_starts_at: Difficulty = args.attack_starts_at;
@@ -59,6 +61,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             attack_starts_at,
             strategy: None,
             args,
+            _w: PhantomData,
         };
         for i in 0..n_nodes {
             let atk_start_conds = if i >= nodes_honest {
@@ -215,11 +218,11 @@ mod tests {
     use crate::block::*;
     use crate::cryptosystem::*;
 
-    fn create_mm_no_priv<'a, S: CSystemT<'a>>() -> MM<'a, S, NullRelayStrat> {
-        MM::<'a, S, NullRelayStrat>::new(AttackArgs::new(20, 0, 33, 100))
+    fn create_mm_no_priv<'a, S: CSystemT<'a>>() -> MM<'a, S, bool, NullRelayStrat> {
+        MM::<'a, S, bool, NullRelayStrat>::new(AttackArgs::new(20, 0, 33, 100))
     }
 
-    fn ensure_chain_progress<'a, S: CSystemT<'a>>(mm: &MM<'a, S, NullRelayStrat>) {
+    fn ensure_chain_progress<'a, S: CSystemT<'a>>(mm: &MM<'a, S, bool, NullRelayStrat>) {
         let hs = mm.chain().get_fork_measure_pub_priv();
 
         assert_ne!(hs.public, 0);
@@ -271,7 +274,7 @@ mod tests {
 
     #[test]
     fn mm_with_dag_block_has_many_parents() {
-        let mut mm = MM::<'_, DagCS, NullRelayStrat>::new(AttackArgs::new(10, 0, 0, 100));
+        let mut mm = MM::<'_, DagCS, bool, NullRelayStrat>::new(AttackArgs::new(10, 0, 0, 100));
 
         // set ts far in future to avoid issues with difficulty alg
         let t1_ts = 1000;
