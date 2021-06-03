@@ -28,42 +28,41 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining {
     fn on_msg(&mut self, msg_from: &MsgToNode<S::B>) -> Vec<Msg<S::B>> {
         let delta_prev = self.priv_height - self.pub_height;
         match msg_from {
-            MsgToNode::MsgBlock(_) => {
-                // recalc pub length
-                match delta_prev {
-                    0 => {
-                        // sync public and private chains
-                        self.priv_branch_len = 0;
-                        todo!()
+            MsgToNode::MsgBlock(_, is_private) => {
+                match is_private {
+                    false => {
+                        // recalc pub length -- append block to pub chain
+                        match delta_prev {
+                            0 => {
+                                // sync public and private chains
+                                self.priv_branch_len = 0;
+                                todo!()
+                            }
+                            1 => {
+                                // publish last block of priv chain
+                                todo!()
+                            }
+                            2 => {
+                                // publish all of private chain
+                                self.priv_branch_len = 0;
+                                todo!()
+                            }
+                            _ => {
+                                // publish first unpublished block from private chain
+                                todo!()
+                            }
+                        }
                     }
-                    1 => {
-                        // publish last block of priv chain
-                        todo!()
-                    }
-                    2 => {
-                        // publish all of private chain
-                        self.priv_branch_len = 0;
-                        todo!()
-                    }
-                    _ => {
-                        // publish first unpublished block from private chain
+                    true => {
+                        // recalc priv length -- append block to priv chain
+                        self.priv_branch_len += 1;
+                        if delta_prev == 0 && self.priv_branch_len == 2 {
+                            // publish all priv chain
+                            self.priv_branch_len = 0;
+                        }
                         todo!()
                     }
                 }
-                todo!()
-            }
-            MsgToNode::MsgPrivBlock(_) => {
-                // recalc priv length
-                self.priv_branch_len += 1;
-                if delta_prev == 0 && self.priv_branch_len == 2 {
-                    // publish all priv chain
-                    self.priv_branch_len = 0;
-                }
-                todo!()
-            }
-            #[cfg(test)]
-            MsgToNode::MsgCachedBlock(_, _) => {
-                panic!("not implemented")
             }
         }
     }

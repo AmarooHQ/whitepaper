@@ -51,28 +51,19 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         // process incoming messages
         for in_msg in msgs {
             match in_msg {
-                MsgToNode::MsgBlock(b) => {
+                MsgToNode::MsgBlock(b, is_private) => {
                     self.curr_draft_block = None;
-                    self.got_block(b, false)?;
-                    // before the attack has started, treat all blocks
-                    // like they were also private blocks
-                    if self.is_attacker && self.attack_threshold > ts as u128 {
-                        self.got_block(b, true)?;
-                    }
-                }
-                MsgToNode::MsgPrivBlock(b) => {
-                    self.curr_draft_block = None;
-                    // only attacking nodes should process these msgs
-                    if self.is_attacker {
-                        self.got_block(b, true)?;
-                    }
-                }
-
-                #[cfg(test)]
-                MsgToNode::MsgCachedBlock(id, p) => {
-                    self.curr_draft_block = None;
-                    if !*p || (*p && self.is_attacker) {
-                        self.notify_of_block(*id, *p)?;
+                    match (is_private, self.is_attacker) {
+                        (false, _) => {
+                            self.got_block(b, false)?;
+                            // before the attack has started, treat all blocks
+                            // like they were also private blocks
+                            if self.is_attacker && self.attack_threshold > ts as u128 {
+                                self.got_block(b, true)?;
+                            }
+                        }
+                        (true, true) => self.got_block(b, true)?,
+                        (true, false) => {}
                     }
                 }
             }
@@ -163,6 +154,29 @@ mod tests {
         let prev_height = n.chain.get_fork_measure_pub_priv().public;
         // let _new_msgs = n.step(11, vec![MsgBlock(b)]).unwrap();
         n.got_block(&b, false)?;
+
+        assert_eq!(n.chain.get_fork_measure_pub_priv().public, prev_height + 1);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_block_added_via_notify() -> Result<(), ChainErr> {
+        let genesis = Block::genesis(0);
+        let c = Chain::new(
+            genesis.clone(),
+            BlockMD::mk_genesis_md(&genesis, <SimpleCS as CSystemT>::C::DAA2_N_BLOCKS),
+        );
+        let mut n: Node<SimpleCS> = Node::new(1337, c, None, 100);
+
+        let prev_height = n.chain.get_fork_measure_pub_priv().public;
+
+        // create a valid block manually
+        let b = n.chain.draft_block(10, false).test_set_work_bits(16);
+        let id = b.get_hash();
+        let b_md = n.chain.validate_block(&b)?;
+        <SimpleCS as CSystemT>::B::set_cached_block((b, b_md));
+        n.notify_of_block(id, false)?;
 
         assert_eq!(n.chain.get_fork_measure_pub_priv().public, prev_height + 1);
 
