@@ -57,6 +57,7 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
         (@arg relay_strategy: -R --relay_strategy +takes_value default_value("DoubleSpend") possible_values(&RelayStrategyArg::variants()) "Name of the relay strategy to use")
         // doublspend params
         (@arg win_threshold: --ds_win_threshold +takes_value default_value("20") "[DoubleSpend] Minimum number of confirmations before the double-spending private chain is published.")
+        // selfish mining params
     )
     .get_matches()
 }
@@ -92,9 +93,18 @@ pub fn main() -> Result<(), String> {
     let start_atk = SystemTime::now();
 
     let r = match crypto_system {
-        CryptoSystemArg::WeightedDag => mk_run_atk(DagCS {}, atk_args, args),
-        CryptoSystemArg::WeightedChain => mk_run_atk(WeightedChainCS {}, atk_args, args),
-        CryptoSystemArg::SimpleChain => mk_run_atk(SimpleCS {}, atk_args, args),
+        CryptoSystemArg::WeightedDag => {
+            mk_run_atk(CryptoSystemArg::WeightedDag, DagCS {}, atk_args, args)
+        }
+        CryptoSystemArg::WeightedChain => mk_run_atk(
+            CryptoSystemArg::WeightedChain,
+            WeightedChainCS {},
+            atk_args,
+            args,
+        ),
+        CryptoSystemArg::SimpleChain => {
+            mk_run_atk(CryptoSystemArg::SimpleChain, SimpleCS {}, atk_args, args)
+        }
     }
     .map(|_s| ());
 
@@ -111,6 +121,7 @@ pub fn main() -> Result<(), String> {
 // fn(n1: u16, n2: u16, at: u128, hr: u32)
 // R: RelayStrategyT<'a, S>
 fn mk_run_atk<'a, S: CSystemT<'a>>(
+    cs_arg: CryptoSystemArg,
     _cs: S,
     args: AttackArgs,
     cli_args: ArgMatches,
@@ -124,7 +135,13 @@ fn mk_run_atk<'a, S: CSystemT<'a>>(
             MM::<'_, S, DoubleSpendStrat>::new(args.clone(), params).run_attack()
         }
         RelayStrategyArg::SelfishMining => {
-            MM::<'_, S, SelfishMining<S>>::new(args.clone(), SelfishMiningParams()).run_attack()
+            let chain_type = match cs_arg {
+                CryptoSystemArg::WeightedDag => SmChainType::WeightedDag,
+                CryptoSystemArg::WeightedChain => SmChainType::WeightedChain,
+                CryptoSystemArg::SimpleChain => SmChainType::LongestChain,
+            };
+            MM::<'_, S, SelfishMining<S>>::new(args.clone(), SelfishMiningParams { chain_type })
+                .run_attack()
         }
     }
 }

@@ -73,6 +73,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
 
 #[derive(Debug)]
 pub struct SelfishMining<S> {
+    params: SelfishMiningParams,
     // pub_height: Height,
     // priv_height: Height,
     priv_branch_len: u32,
@@ -95,13 +96,23 @@ pub struct SelfishMiningResult {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct SelfishMiningParams();
+pub enum SmChainType {
+    LongestChain,
+    WeightedChain,
+    WeightedDag,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct SelfishMiningParams {
+    pub chain_type: SmChainType,
+}
 
 impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
     type ResultsTy = SelfishMiningResult;
     type Params = SelfishMiningParams;
-    fn init(_chain: &S::C, atk_start_h: Height, _p: Self::Params) -> Self {
+    fn init(_chain: &S::C, atk_start_h: Height, params: Self::Params) -> Self {
         SelfishMining {
+            params,
             // pub_height: chain.get_any_best_block(false).1.height,
             // priv_height: chain.get_any_best_block(false).1.height,
             priv_branch_len: 0,
@@ -112,9 +123,18 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
         }
     }
     fn on_msg(&mut self, msg_from: &MsgToNode<S::B>, atk_chain: &S::C) -> Vec<MsgToNode<S::B>> {
+        let fm = atk_chain.get_fork_measure_pub_priv();
         let h = atk_chain.get_heights_pub_priv();
         // delta_prev is always calculated before appending blocks to chains (i.e., before msgs are processed)
-        let delta_prev = h.private - h.public;
+        let delta_prev = match self.params.chain_type {
+            // these will be heights
+            SmChainType::LongestChain => h.private - h.public,
+            SmChainType::WeightedChain => h.private - h.public,
+            _ => 2,
+        };
+
+        let mut l_s = 0;
+        let mut l_h = 0;
 
         match msg_from {
             MsgToNode::MsgBlock(b, is_private) => {
@@ -288,7 +308,16 @@ mod tests {
             genesis.clone(),
             BlockMD::mk_genesis_md(&genesis, <SimpleCS as CSystemT>::C::DAA2_N_BLOCKS),
         );
-        (SelfishMining::init(&c, 0, SelfishMiningParams()), c)
+        (
+            SelfishMining::init(
+                &c,
+                0,
+                SelfishMiningParams {
+                    chain_type: SmChainType::LongestChain,
+                },
+            ),
+            c,
+        )
     }
 
     #[test]

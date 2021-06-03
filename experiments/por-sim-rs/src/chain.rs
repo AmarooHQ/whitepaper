@@ -118,6 +118,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
 
     fn get_best_blocks(&self, is_private: bool) -> &HashSet<HashID>;
     fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut HashSet<HashID>;
+    // fn get_chain_heads(&self, is_private: bool) -> &HashSet<HashID>;
     fn validate_block_pure(&self, b: &B) -> Result<Arc<(B, BlockMD<B>)>, ChainErr>;
     fn validate_block(&self, b: &B) -> Result<BlockMD<B>, ChainErr>;
     fn next_difficulty(&self, b: &B, b_meta: &BlockMD<B>) -> Difficulty;

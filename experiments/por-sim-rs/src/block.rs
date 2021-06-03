@@ -95,9 +95,10 @@ impl SingleParentBlockT for Block {}
 
 impl BlockT for Block {
     fn new(ts: u32, parent: HashID, d: Difficulty) -> Self {
-        let mut e: [u8; 16] = [0; 16];
-        getrandom(&mut e).unwrap();
-        let id = u128::from_be_bytes(e) as HashID;
+        // let mut e: [u8; 16] = [0; 16];
+        // getrandom(&mut e).unwrap();
+        // let id = u128::from_be_bytes(e) as HashID;
+        let id = Self::get_rand_id();
         Self {
             id,
             timestamp: ts,
