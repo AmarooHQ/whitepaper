@@ -8,7 +8,7 @@ use crate::CSystemT;
 /// a strategy that runs at a network level based on incoming msgs
 pub trait RelayStrategyT<'a, S: CSystemT<'a>> {
     fn init(c: &S::C) -> Self;
-    fn on_msg(&mut self, m: &MsgToNode<S::B>) -> Vec<MsgToNode<S::B>>;
+    fn on_msg(&mut self, m: &MsgToNode<S::B>, chain: &S::C) -> Vec<MsgToNode<S::B>>;
 }
 
 pub struct NullRelayStrat();
@@ -17,10 +17,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for NullRelayStrat {
     fn init(_: &<S as CSystemT<'a>>::C) -> Self {
         NullRelayStrat()
     }
-    fn on_msg(
-        &mut self,
-        _: &MsgToNode<<S as CSystemT<'a>>::B>,
-    ) -> Vec<MsgToNode<<S as CSystemT<'a>>::B>> {
+    fn on_msg(&mut self, _msg_from: &MsgToNode<S::B>, _chain: &S::C) -> Vec<MsgToNode<S::B>> {
         vec![]
     }
 }
@@ -39,7 +36,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining {
             priv_branch_len: 0,
         }
     }
-    fn on_msg(&mut self, msg_from: &MsgToNode<S::B>) -> Vec<MsgToNode<S::B>> {
+    fn on_msg(&mut self, msg_from: &MsgToNode<S::B>, atk_chain: &S::C) -> Vec<MsgToNode<S::B>> {
         let delta_prev = self.priv_height - self.pub_height;
         match msg_from {
             MsgToNode::MsgBlock(b, is_private) => {
@@ -52,21 +49,57 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining {
                             0 => {
                                 // [SM] sync public and private chains
                                 self.priv_branch_len = 0;
-                                // return a msg that adds this block to the priv chain too so the chains stay in sync.
+                                // return a msg that adds this block to the priv chain, too,
+                                // so the chains stay in sync.
                                 vec![MsgToNode::MsgBlock(b.clone(), true)]
                             }
                             1 => {
                                 // [SM] publish last block of priv chain (there's only one)
-                                // vec![MsgToNode::MsgBlock()]
-                                todo!()
+                                /* Note: SM algorithm doesn't include privateBranchLen<-0 for this case.
+                                 * IDK if that's correct or not.
+                                 * self.priv_branch_len = 0;
+                                 * */
+                                // NB: we might have got multiple private heads, so iter over them and b'cast all
+                                atk_chain
+                                    .get_best_blocks(true)
+                                    .iter()
+                                    .map(|id| {
+                                        MsgToNode::MsgBlock(
+                                            S::C::get_cached_block(*id).unwrap().0.clone(),
+                                            false,
+                                        )
+                                    })
+                                    .collect()
                             }
                             2 => {
-                                // publish all of private chain
+                                // [SM] publish all of private chain (should be 2 blocks)
                                 self.priv_branch_len = 0;
-                                todo!()
+                                /* NB: this is the same code as above. As long as chain's don't track
+                                 * state, then we can just broadcast the latest best block (since the
+                                 * parent block already exists in the block cache.)
+                                 * */
+                                atk_chain
+                                    .get_best_blocks(true)
+                                    .iter()
+                                    .map(|id| {
+                                        MsgToNode::MsgBlock(
+                                            S::C::get_cached_block(*id).unwrap().0.clone(),
+                                            false,
+                                        )
+                                    })
+                                    .collect()
                             }
                             _ => {
-                                // publish first unpublished block from private chain
+                                // [SM] publish first unpublished block from private chain\
+                                let best_atk_blocks = atk_chain.get_best_blocks(true);
+                                let best_pub_blocks = atk_chain.get_best_blocks(false);
+                                atk_chain.find_lca_and_intermediates(
+                                    &best_atk_blocks
+                                        .iter()
+                                        .chain(best_pub_blocks)
+                                        .cloned()
+                                        .collect(),
+                                );
                                 todo!()
                             }
                         }

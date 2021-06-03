@@ -208,6 +208,57 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
         u64::MAX / u64::from(d)
     }
 
+    /// Return priv blocks that are one better than known public blocks
+    fn find_first_priv_blocks_better_than_public(&self) -> Vec<Arc<(B, BlockMD<B>)>> {
+        let fm = self.get_fork_measure_pub_priv();
+        if fm.private <= fm.public {
+            return vec![];
+        }
+        let priv_blocks_tmp = self.get_best_blocks(true);
+        let best_pub_blocks = self.get_best_blocks(false);
+
+        let mut next_edge = priv_blocks_tmp.clone();
+        let mut blocks_to_ret = HashSet::<HashID>::new();
+        while next_edge.len() > 0 {
+            let curr_edge = next_edge.clone();
+            next_edge = Default::default();
+            for id in curr_edge {
+                if best_pub_blocks.contains(&id) {
+                    continue;
+                }
+                let b = Self::get_cached_block(id).unwrap();
+                if b.1.chain_weight <= fm.public {
+                    continue;
+                }
+                let mut add_to_edge: HashSet<HashID> = Default::default();
+                for p_id in b.0.all_prev() {
+                    // if b has a parent in best_pub_blocks then b satisfies the condition
+                    if best_pub_blocks.contains(&p_id) {
+                        blocks_to_ret.insert(b.0.get_hash());
+                        continue;
+                    }
+                    let p = Self::get_cached_block(p_id).unwrap();
+                    // if a parent p is worse than fm.public then it's not heavy enough
+                    if p.1.chain_weight <= fm.public {
+                        continue;
+                    }
+                    // otherwise the parent is better than pub blocks but we need to check its parents
+                    add_to_edge.insert(p_id);
+                }
+                if add_to_edge.len() == 0 {
+                    // if this block didn't produce anthing to add to the edge, then it must satisfy the condition
+                    blocks_to_ret.insert(id);
+                    continue;
+                }
+                next_edge = next_edge.union(&add_to_edge).cloned().collect();
+            }
+        }
+        blocks_to_ret
+            .into_iter()
+            .map(|id| Self::get_cached_block(id).unwrap())
+            .collect()
+    }
+
     fn find_lca_and_intermediates(
         &self,
         bs: &Vec<HashID>,
@@ -875,6 +926,46 @@ mod tests {
         let b = _mk_draft_block(&chain, 5, false);
         assert_eq!(_g.get_ts() > b.get_ts(), true, "timestamps: b < g");
         assert_eq!(chain.add_block(b, false), Err(ChainErr::TsBeforeParent));
+    }
+
+    #[test]
+    fn test_find_first_priv_blocks_better_than_public_longest() -> Result<(), ChainErr> {
+        let (_g, _g_md, mut chain) = _setup_chain::<Block, LongestChain<Block>>(None);
+        let b = _mk_draft_block(&chain, 10, false);
+        chain.add_block(b.clone(), false)?;
+        assert_eq!(chain.find_first_priv_blocks_better_than_public().len(), 0);
+        chain.add_block(b, true)?;
+        assert_eq!(chain.find_first_priv_blocks_better_than_public().len(), 0);
+
+        let b1 = _mk_draft_block(&chain, 20, true);
+        let b1_id = b1.get_hash();
+        chain.add_block(b1.clone(), true)?;
+        let ps: Vec<_> = chain
+            .find_first_priv_blocks_better_than_public()
+            .iter()
+            .map(|p| p.0.get_hash())
+            .collect();
+        assert_eq!(ps, vec![b1_id]);
+
+        let b2 = _mk_draft_block(&chain, 30, true);
+        let b2_id = b2.get_hash();
+        chain.add_block(b2, true)?;
+        let ps: Vec<_> = chain
+            .find_first_priv_blocks_better_than_public()
+            .iter()
+            .map(|p| p.0.get_hash())
+            .collect();
+        assert_eq!(ps, vec![b1_id]);
+
+        chain.add_block(b1.clone(), false)?;
+        let ps: Vec<_> = chain
+            .find_first_priv_blocks_better_than_public()
+            .iter()
+            .map(|p| p.0.get_hash())
+            .collect();
+        assert_eq!(ps, vec![b2_id]);
+
+        Ok(())
     }
 
     #[test]

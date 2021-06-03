@@ -106,10 +106,12 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
 
     pub fn tick(&mut self, ts: u32, msgs: Vec<Msg<S::B>>) -> Result<Vec<Msg<S::B>>, String> {
         let mut msgs_to = self.msgs_from_into_to(msgs);
+        let atk_node = self.nodes.last().unwrap();
         if self.strategy.is_some() {
+            let s = self.strategy.as_mut().unwrap();
             let attacker_msgs_to = msgs_to
                 .iter()
-                .map(|m| self.strategy.as_mut().unwrap().on_msg(m))
+                .map(|m| s.on_msg(m, &atk_node.chain))
                 .collect::<Vec<_>>()
                 .concat();
             msgs_to = [attacker_msgs_to, msgs_to].concat();
