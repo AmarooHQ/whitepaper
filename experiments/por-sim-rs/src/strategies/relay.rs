@@ -5,92 +5,110 @@ use crate::types::*;
 use crate::CSystemT;
 use conv::prelude::*;
 use std::collections::HashSet;
+use std::fmt::Debug;
 use std::marker::PhantomData;
 
 /// a strategy that runs at a network level based on incoming msgs
-pub trait RelayStrategyT<'a, S: CSystemT<'a>, W> {
-    fn init(c: &S::C) -> Self;
+pub trait RelayStrategyT<'a, S: CSystemT<'a>> {
+    type ResultsTy: Debug;
+    type Params: Clone + Copy;
+    fn init(c: &S::C, atk_start_h: Height, p: Self::Params) -> Self;
     fn on_msg(&mut self, m: &MsgToNode<S::B>, chain: &S::C) -> Vec<MsgToNode<S::B>>;
-    fn is_winning(&self, c: &S::C) -> W;
+    fn get_results(&self, c: &S::C) -> Option<Self::ResultsTy>;
+    fn should_stop_simulation(&self, ts: Timestamp, c: &S::C) -> bool;
 }
 
-pub struct NullRelayStrat();
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct DoubleSpendParams {
+    attack_starts_at: Height,
+    win_thres: Height,
+}
 
-impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S, bool> for NullRelayStrat {
-    fn init(_: &<S as CSystemT<'a>>::C) -> Self {
-        NullRelayStrat()
+impl DoubleSpendParams {
+    pub fn new(attack_starts_at: Height, win_thres: Height) -> Self {
+        DoubleSpendParams {
+            attack_starts_at,
+            win_thres,
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub struct DoubleSpendStrat {
+    params: DoubleSpendParams,
+    atk_start_h: Height,
+}
+
+impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
+    type ResultsTy = bool;
+    type Params = DoubleSpendParams;
+    fn init(_: &S::C, atk_start_h: Height, params: Self::Params) -> Self {
+        DoubleSpendStrat {
+            params,
+            atk_start_h,
+        }
     }
     fn on_msg(&mut self, _msg_from: &MsgToNode<S::B>, _chain: &S::C) -> Vec<MsgToNode<S::B>> {
         vec![]
     }
-    fn is_winning(&self, _: &S::C) -> bool {
-        false
+    fn get_results(&self, c: &S::C) -> Option<Self::ResultsTy> {
+        let hs = c.get_heights_pub_priv();
+        let fms = c.get_fork_measure_pub_priv();
+        if fms.public < fms.private && hs.public >= self.atk_start_h + self.params.win_thres {
+            Some(true)
+        } else {
+            None
+        }
+    }
+    fn should_stop_simulation(&self, ts: Timestamp, c: &S::C) -> bool {
+        if ts < self.params.attack_starts_at {
+            false
+        } else {
+            let hs = c.get_heights_pub_priv();
+            let fms = c.get_fork_measure_pub_priv();
+            fms.public < fms.private && hs.public > self.atk_start_h + self.params.win_thres
+        }
     }
 }
 
+#[derive(Debug)]
 pub struct SelfishMining<S> {
     // pub_height: Height,
     // priv_height: Height,
     priv_branch_len: u32,
     blocks_from_private: HashSet<HashID>,
     blocks_from_public: HashSet<HashID>,
+    atk_start_h: Height,
     _s: PhantomData<S>,
     // _r: PhantomData<W>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, Copy)]
 pub struct SelfishMiningResult {
     ratio_priv_blocks_in_chain: f64,
     ratio_priv_blocks_mined: f64,
+    chain_priv_count: f64,
+    chain_pub_count: f64,
+    chain_other_count: f64,
+    n_priv_blocks: f64,
+    n_pub_blocks: f64,
 }
 
-impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S, SelfishMiningResult> for SelfishMining<S> {
-    fn init(_chain: &S::C) -> Self {
+#[derive(Debug, Clone, Copy)]
+pub struct SelfishMiningParams();
+
+impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
+    type ResultsTy = SelfishMiningResult;
+    type Params = SelfishMiningParams;
+    fn init(_chain: &S::C, atk_start_h: Height, _p: Self::Params) -> Self {
         SelfishMining {
             // pub_height: chain.get_any_best_block(false).1.height,
             // priv_height: chain.get_any_best_block(false).1.height,
             priv_branch_len: 0,
             blocks_from_private: Default::default(),
             blocks_from_public: Default::default(),
+            atk_start_h,
             _s: PhantomData,
-        }
-    }
-    fn is_winning(&self, c: &S::C) -> SelfishMiningResult {
-        /* win conditions for selfish mining:
-         * - of blocks in the chain, blocks that were mined privately should
-         * */
-        let mut priv_count = 0.;
-        let mut pub_count = 0.;
-        let mut heads: HashSet<HashID> = c.get_best_blocks(false).clone();
-        let mut seen: HashSet<HashID> = Default::default();
-        loop {
-            let h_vec: Vec<_> = heads.iter().filter(|h| !seen.contains(&h)).collect();
-            if h_vec.len() == 0 {
-                break;
-            }
-            let mut new_heads = HashSet::<HashID>::new();
-            for id in h_vec {
-                seen.insert(*id);
-                if self.blocks_from_private.contains(id) {
-                    priv_count += 1.;
-                } else if self.blocks_from_public.contains(id) {
-                    pub_count += 1.;
-                }
-                let b = S::C::get_cached_block(*id).unwrap();
-                new_heads = new_heads
-                    .union(&b.0.all_prev().into_iter().collect())
-                    .cloned()
-                    .collect();
-            }
-            heads = new_heads;
-        }
-        let ratio_priv_blocks_in_chain = priv_count / (priv_count + pub_count);
-        let n_priv_blocks = self.blocks_from_private.len().value_as::<f64>().unwrap();
-        let n_pub_blocks = self.blocks_from_public.len().value_as::<f64>().unwrap();
-        let ratio_priv_blocks_mined = n_priv_blocks / (n_priv_blocks + n_pub_blocks);
-        SelfishMiningResult {
-            ratio_priv_blocks_in_chain,
-            ratio_priv_blocks_mined,
         }
     }
     fn on_msg(&mut self, msg_from: &MsgToNode<S::B>, atk_chain: &S::C) -> Vec<MsgToNode<S::B>> {
@@ -205,6 +223,56 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S, SelfishMiningResult> for Selfish
             }
         }
     }
+    fn get_results(&self, c: &S::C) -> Option<Self::ResultsTy> {
+        /* win conditions for selfish mining:
+         * - of blocks in the chain, blocks that were mined privately should
+         * */
+        let mut chain_priv_count = 0.;
+        let mut chain_pub_count = 0.;
+        let mut chain_other_count = 0.;
+        let mut heads: HashSet<HashID> = c.get_best_blocks(false).clone();
+        let mut seen: HashSet<HashID> = Default::default();
+        loop {
+            let h_vec: Vec<_> = heads.iter().filter(|h| !seen.contains(&h)).collect();
+            if h_vec.len() == 0 {
+                break;
+            }
+            let mut new_heads = HashSet::<HashID>::new();
+            for id in h_vec {
+                seen.insert(*id);
+                if self.blocks_from_private.contains(id) {
+                    chain_priv_count += 1.;
+                } else if self.blocks_from_public.contains(id) {
+                    chain_pub_count += 1.;
+                } else {
+                    chain_other_count += 1.;
+                }
+                let b = S::C::get_cached_block(*id).unwrap();
+                new_heads = new_heads
+                    .union(&b.0.all_prev().into_iter().collect())
+                    .cloned()
+                    .collect();
+            }
+            heads = new_heads;
+        }
+        let ratio_priv_blocks_in_chain = chain_priv_count / (chain_priv_count + chain_pub_count);
+        let n_priv_blocks = self.blocks_from_private.len().value_as::<f64>().unwrap();
+        let n_pub_blocks = self.blocks_from_public.len().value_as::<f64>().unwrap();
+        let ratio_priv_blocks_mined = n_priv_blocks / (n_priv_blocks + n_pub_blocks);
+        Some(SelfishMiningResult {
+            ratio_priv_blocks_in_chain,
+            ratio_priv_blocks_mined,
+            chain_priv_count,
+            chain_pub_count,
+            chain_other_count,
+            n_priv_blocks,
+            n_pub_blocks,
+        })
+    }
+    fn should_stop_simulation(&self, _ts: Timestamp, _c: &S::C) -> bool {
+        // never stop selfish mining
+        false
+    }
 }
 
 #[cfg(test)]
@@ -220,7 +288,7 @@ mod tests {
             genesis.clone(),
             BlockMD::mk_genesis_md(&genesis, <SimpleCS as CSystemT>::C::DAA2_N_BLOCKS),
         );
-        (SelfishMining::init(&c), c)
+        (SelfishMining::init(&c, 0, SelfishMiningParams()), c)
     }
 
     #[test]
@@ -296,7 +364,7 @@ mod tests {
             "previously private block is exclusively winning on public chain"
         );
 
-        let w = sm.is_winning(&c);
+        let w = sm.get_results(&c).unwrap();
         println!("W: {:?}", w);
         assert_eq!(
             w.ratio_priv_blocks_mined, 0.5,
@@ -362,7 +430,7 @@ mod tests {
             "previously private block is exclusively winning on public chain"
         );
 
-        let w = sm.is_winning(&c);
+        let w = sm.get_results(&c).unwrap();
         println!("W: {:?}", w);
         assert_eq!(
             w.ratio_priv_blocks_mined, 0.5,

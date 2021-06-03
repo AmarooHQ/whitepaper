@@ -5,8 +5,7 @@ use crate::cryptosystem::CSystemT;
 use crate::msg::Msg;
 use crate::msg::Msg::*;
 use crate::msg::MsgToNode;
-#[cfg(test)]
-use crate::types::HashID;
+use crate::types::*;
 use log::*;
 
 #[derive(Debug)]
@@ -14,7 +13,6 @@ pub struct Node<'a, /*R: RelayStrategyT,*/ S: CSystemT<'a>> {
     id: u16,
     pub chain: S::C,
     is_attacker: bool,
-    attack_threshold: u128,
     mining_attempts_per_tick: u32,
     curr_draft_block: Option<S::B>,
 }
@@ -23,14 +21,14 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
     pub fn new(
         id: u16,
         chain: S::C,
-        attack_threshold: Option<u128>,
+        is_attacker: bool,
         mining_attempts_per_tick: u32,
     ) -> Node<'a, S> {
         Node {
             id,
             chain,
-            is_attacker: attack_threshold.is_some(),
-            attack_threshold: attack_threshold.unwrap_or(0),
+            is_attacker,
+            // attack_threshold: attack_threshold.unwrap_or(0),
             mining_attempts_per_tick,
             curr_draft_block: None,
         }
@@ -45,7 +43,12 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         self.chain.notify_block(id, p)
     }
 
-    pub fn step(&mut self, ts: u32, msgs: &Vec<MsgToNode<S::B>>) -> Result<Vec<Msg<S::B>>, String> {
+    pub fn step(
+        &mut self,
+        ts: Timestamp,
+        msgs: &Vec<MsgToNode<S::B>>,
+        attack_started: bool,
+    ) -> Result<Vec<Msg<S::B>>, String> {
         let mut out_msgs = vec![];
 
         // process incoming messages
@@ -58,7 +61,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
                             self.got_block(b, false)?;
                             // before the attack has started, treat all blocks
                             // like they were also private blocks
-                            if self.is_attacker && self.attack_threshold > ts as u128 {
+                            if self.is_attacker && !attack_started {
                                 self.got_block(b, true)?;
                             }
                         }
@@ -70,11 +73,11 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         }
 
         // try to mine
-        match self.attempt_mining(ts, self.mining_attempts_per_tick) {
+        match self.attempt_mining(ts, self.mining_attempts_per_tick, attack_started) {
             Ok(b) => out_msgs.push(
                 // if we're an attacker and past when the attack starts,
                 // then relay private blocks. otherwise it's a normal block.
-                if self.is_attacker && self.attack_threshold <= ts as u128 {
+                if self.is_attacker && attack_started {
                     MsgPrivBlock(b)
                 } else {
                     MsgBlock(b)
@@ -87,8 +90,13 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         Ok(out_msgs)
     }
 
-    fn attempt_mining(&mut self, ts: u32, max_attempts: u32) -> Result<S::B, ()> {
-        let mine_in_private = self.is_attacker && ts as u128 > self.attack_threshold;
+    fn attempt_mining(
+        &mut self,
+        ts: u32,
+        max_attempts: u32,
+        attack_started: bool,
+    ) -> Result<S::B, ()> {
+        let mine_in_private = self.is_attacker && attack_started;
         // let mut b = match self.curr_draft_block {
         //     Some(_b) => _b,
         //     None => ,
@@ -140,10 +148,10 @@ mod tests {
             genesis.clone(),
             BlockMD::mk_genesis_md(&genesis, <SimpleCS as CSystemT>::C::DAA2_N_BLOCKS),
         );
-        let mut n: Node<SimpleCS> = Node::new(1337, c, None, 100);
+        let mut n: Node<SimpleCS> = Node::new(1337, c, false, 100);
 
         // just so we make sure we can get a valid block via mining
-        let _b = n.attempt_mining(10, 100000).unwrap();
+        let _b = n.attempt_mining(10, 100000, false).unwrap();
 
         // create a valid block manually
         let mut b = n.chain.draft_block(10, false);
@@ -157,6 +165,21 @@ mod tests {
 
         assert_eq!(n.chain.get_fork_measure_pub_priv().public, prev_height + 1);
 
+        // public block
+        let b2 = n.chain.draft_block(19, false).test_set_work_bits(16);
+        // process it after the attack has started
+        n.step(20, &vec![MsgToNode::MsgBlock(b2.clone(), false)], true)?;
+        assert_eq!(
+            n.chain.get_best_blocks(false).contains(&b2.get_hash()),
+            true,
+            "b2 in pub blocks"
+        );
+        assert_eq!(
+            n.chain.get_best_blocks(true).contains(&b2.get_hash()),
+            false,
+            "b2 not in priv blocks"
+        );
+
         Ok(())
     }
 
@@ -167,7 +190,7 @@ mod tests {
             genesis.clone(),
             BlockMD::mk_genesis_md(&genesis, <SimpleCS as CSystemT>::C::DAA2_N_BLOCKS),
         );
-        let mut n: Node<SimpleCS> = Node::new(1337, c, None, 100);
+        let mut n: Node<SimpleCS> = Node::new(1337, c, false, 100);
 
         let prev_height = n.chain.get_fork_measure_pub_priv().public;
 

@@ -1,11 +1,9 @@
 use crate::chain::fork_rules::*;
-use crate::cryptosystem::CSystemT;
-use crate::cryptosystem::DagCS;
-use crate::cryptosystem::SimpleCS;
-use crate::cryptosystem::WeightedChainCS;
+use crate::cryptosystem::*;
 use crate::message_manager::AttackArgs;
-use crate::strategies::relay::NullRelayStrat;
-use crate::types::Difficulty;
+use crate::message_manager::MM;
+use crate::strategies::relay::*;
+use crate::types::*;
 use clap::{value_t_or_exit, ArgMatches};
 use log::LevelFilter;
 use std::time::SystemTime;
@@ -38,6 +36,13 @@ arg_enum! {
         WeightedDag,
     }
 }
+arg_enum! {
+    #[derive(Debug)]
+    pub enum RelayStrategyArg {
+        DoubleSpend,
+        SelfishMining
+    }
+}
 
 fn get_arg_matches<'a>() -> ArgMatches<'a> {
     clap_app!(sim =>
@@ -48,7 +53,10 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
         (@arg start_attack_at_t: -s --start_attack_tick +takes_value default_value("1000") "Tick at which to start the attack.")
         (@arg end_simulation_at_t: -e --end_tick +takes_value "Maximum number of ticks for the simulation. Defaults to 3*start_attack_at_t")
         (@arg hash_rate: -H --hash_rate +takes_value default_value("10") "Maximum hashes each node will perform each tick attempting to produce a block.")
-        (@arg crypto_system: -S --crypto_system +takes_value default_value("WeightedDag") possible_values(&CryptoSystemArg::variants())  "Name of the cryptosystem template to use.")
+        (@arg crypto_system: -S --crypto_system +takes_value default_value("WeightedDag") possible_values(&CryptoSystemArg::variants()) "Name of the cryptosystem template to use.")
+        (@arg relay_strategy: -R --relay_strategy +takes_value default_value("DoubleSpend") possible_values(&RelayStrategyArg::variants()) "Name of the relay strategy to use")
+        // doublspend params
+        (@arg win_threshold: --ds_win_threshold +takes_value default_value("20") "[DoubleSpend] Minimum number of confirmations before the double-spending private chain is published.")
     )
     .get_matches()
 }
@@ -84,9 +92,9 @@ pub fn main() -> Result<(), String> {
     let start_atk = SystemTime::now();
 
     let r = match crypto_system {
-        CryptoSystemArg::WeightedDag => mk_run_atk(DagCS {}, atk_args),
-        CryptoSystemArg::WeightedChain => mk_run_atk(WeightedChainCS {}, atk_args),
-        CryptoSystemArg::SimpleChain => mk_run_atk(SimpleCS {}, atk_args),
+        CryptoSystemArg::WeightedDag => mk_run_atk(DagCS {}, atk_args, args),
+        CryptoSystemArg::WeightedChain => mk_run_atk(WeightedChainCS {}, atk_args, args),
+        CryptoSystemArg::SimpleChain => mk_run_atk(SimpleCS {}, atk_args, args),
     }
     .map(|_s| ());
 
@@ -101,7 +109,22 @@ pub fn main() -> Result<(), String> {
 }
 
 // fn(n1: u16, n2: u16, at: u128, hr: u32)
+// R: RelayStrategyT<'a, S>
+fn mk_run_atk<'a, S: CSystemT<'a>>(
+    _cs: S,
+    args: AttackArgs,
+    cli_args: ArgMatches,
+) -> Result<bool, String> {
+    let relay_strat = value_t_or_exit!(cli_args, "relay_strategy", RelayStrategyArg);
 
-fn mk_run_atk<'a, CS: CSystemT<'a>>(_cs: CS, args: AttackArgs) -> Result<bool, String> {
-    message_manager::MM::<'_, CS, _, NullRelayStrat>::new(args).run_attack(20)
+    match relay_strat {
+        RelayStrategyArg::DoubleSpend => {
+            let win_thresh = value_t_or_exit!(cli_args, "win_threshold", Height);
+            let params = DoubleSpendParams::new(args.attack_starts_at, win_thresh);
+            MM::<'_, S, DoubleSpendStrat>::new(args.clone(), params).run_attack()
+        }
+        RelayStrategyArg::SelfishMining => {
+            MM::<'_, S, SelfishMining<S>>::new(args.clone(), SelfishMiningParams()).run_attack()
+        }
+    }
 }
