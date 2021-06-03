@@ -9,20 +9,12 @@ use crate::CSystemT;
 pub trait RelayStrategyT<'a, S: CSystemT<'a>> {
     fn init(c: &S::C) -> Self;
     fn on_msg(&mut self, m: &MsgToNode<S::B>) -> Vec<Msg<S::B>>;
-    fn get_mine_on(&self) -> MiningChoice;
-}
-
-#[derive(Clone)]
-enum MiningChoice {
-    Public,
-    Private,
 }
 
 struct SelfishMining {
     pub_height: Height,
     priv_height: Height,
     priv_branch_len: u32,
-    latest_mining_choice: MiningChoice,
 }
 
 impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining {
@@ -31,7 +23,6 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining {
             pub_height: chain.get_any_best_block(false).1.height,
             priv_height: chain.get_any_best_block(false).1.height,
             priv_branch_len: 0,
-            latest_mining_choice: MiningChoice::Private,
         }
     }
     fn on_msg(&mut self, msg_from: &MsgToNode<S::B>) -> Vec<Msg<S::B>> {
@@ -43,23 +34,22 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining {
                     0 => {
                         // sync public and private chains
                         self.priv_branch_len = 0;
-                        todo!();
+                        todo!()
                     }
                     1 => {
                         // publish last block of priv chain
-                        todo!();
+                        todo!()
                     }
                     2 => {
                         // publish all of private chain
                         self.priv_branch_len = 0;
-                        todo!();
+                        todo!()
                     }
                     _ => {
                         // publish first unpublished block from private chain
-                        todo!();
+                        todo!()
                     }
                 }
-                self.latest_mining_choice = MiningChoice::Private;
                 todo!()
             }
             MsgToNode::MsgPrivBlock(_) => {
@@ -69,16 +59,12 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining {
                     // publish all priv chain
                     self.priv_branch_len = 0;
                 }
-                self.latest_mining_choice = MiningChoice::Private;
-                todo!();
+                todo!()
             }
             #[cfg(test)]
             MsgToNode::MsgCachedBlock(_, _) => {
                 panic!("not implemented")
             }
         }
-    }
-    fn get_mine_on(&self) -> MiningChoice {
-        self.latest_mining_choice.clone()
     }
 }

@@ -44,7 +44,8 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
         (version: "0.1.0")
         (@arg nodes: -n --nodes +takes_value default_value("75") "Number of nodes in total.")
         (@arg attacker_ratio: -r --ratio +takes_value default_value("0.45") #{0, 1} "Proportion of nodes which are attackers.")
-        (@arg start_attack_at_h: -s --start_attack_height +takes_value default_value("1000") "Height at which to start the attack.")
+        (@arg start_attack_at_t: -s --start_attack_height +takes_value default_value("1000") "Height at which to start the attack.")
+        // (@arg end_simulation_at_t: -e todo!())
         (@arg hash_rate: -H --hash_rate +takes_value default_value("10") "Maximum hashes each node will perform each tick attempting to produce a block.")
         (@arg crypto_system: -S --crypto_system +takes_value default_value("WeightedDag") possible_values(&CryptoSystemArg::variants())  "Name of the cryptosystem template to use.")
     )
@@ -63,7 +64,7 @@ pub fn main() -> Result<(), String> {
 
     let n_total = value_t_or_exit!(args.value_of("nodes"), u16);
     let attacker_ratio = value_t_or_exit!(args.value_of("attacker_ratio"), f64);
-    let attack_at_h = value_t_or_exit!(args.value_of("start_attack_at_h"), u32);
+    let attack_at_h = value_t_or_exit!(args.value_of("start_attack_at_t"), u32);
     let hash_rate = value_t_or_exit!(args.value_of("hash_rate"), u32);
     let crypto_system =
         value_t!(args, "crypto_system", CryptoSystemArg).unwrap_or_else(|e| e.exit());

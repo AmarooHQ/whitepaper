@@ -471,8 +471,9 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         let lca_r = self.find_lca_and_intermediates(&b.all_prev()).unwrap();
 
         /* FIRST VERSION OF THE CODE
-         * SOMEHOW the difference in speed between this version of the code, and
-         * the version below is like 10x (worse for this one). Wtf?!
+         * ~~SOMEHOW the difference in speed between this version of the code, and
+         * the version below is like 10x (worse for this one). Wtf?!~~
+         *
          */
         // let delta_chain_weight;
         // let lca_chain_weight;
