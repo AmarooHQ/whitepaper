@@ -28,6 +28,7 @@ pub mod fork_rules;
 pub enum ChainErr {
     BadPoW(HashID, HashID),
     UnkParent,
+    BadParentOrder((HashID, ChainWeight), (HashID, ChainWeight)),
     BadDifficulty,
     TsBeforeParent,
 }
@@ -545,14 +546,30 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         let pm = Self::get_cached_block(&b.prev());
         let pm = pm.unwrap();
         let all_parents = b.all_prev();
-        let pms = all_parents.iter().map(Self::get_cached_block);
-        for pm in pms {
+        let pms: Vec<_> = all_parents.iter().map(Self::get_cached_block).collect();
+        for pm in pms.clone() {
             if pm.is_none() {
                 return Err(UnkParent);
             }
-
             if b.get_ts() <= pm.unwrap().0.get_ts() {
                 return Err(TsBeforeParent);
+            }
+        }
+        if pms.len() > 1 {
+            let n_ps = pms.len();
+            let zipped = pms[..(n_ps - 1)].iter().zip(pms[1..].iter());
+            for (p1, p2) in zipped {
+                match (p1, p2) {
+                    (Some(p1), Some(p2)) => {
+                        if p1.1.chain_weight < p2.1.chain_weight {
+                            return Err(BadParentOrder(
+                                (p1.0.get_hash(), p1.1.chain_weight),
+                                (p2.0.get_hash(), p2.1.chain_weight),
+                            ));
+                        }
+                    }
+                    _ => return Err(UnkParent),
+                }
             }
         }
 

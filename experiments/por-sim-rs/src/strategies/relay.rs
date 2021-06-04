@@ -156,18 +156,18 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
                 // }
             }
             SmChainType::WeightedDag => {
-                panic!("need to properly implement WeightedDag selfish mining")
-                // if h.public >= h.private {
-                //     0
-                // } else {
-                //     div_ceil(
-                //         h.private - h.public,
-                //         S::B::get_cached_block(&atk_chain.select_best_block(false))
-                //             .unwrap()
-                //             .0
-                //             .get_difficulty(),
-                //     )
-                // }
+                // panic!("need to properly implement WeightedDag selfish mining")
+                if h.public >= h.private {
+                    0
+                } else {
+                    div_ceil(
+                        h.private - h.public,
+                        S::B::get_cached_block(&atk_chain.select_best_block(false))
+                            .unwrap()
+                            .0
+                            .get_difficulty(),
+                    )
+                }
             }
         };
 
@@ -553,5 +553,15 @@ mod tests {
         );
 
         Ok(())
+    }
+
+    #[test]
+    fn sm_weighted_chain() {
+        unimplemented!("Need to implement sm_weighted_chain.");
+    }
+
+    #[test]
+    fn sm_weighted_dag() {
+        unimplemented!("Need to implement sm_weighted_dag.");
     }
 }
