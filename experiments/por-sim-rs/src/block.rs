@@ -2,6 +2,7 @@ use crate::block_metadata::BlockMD;
 use crate::hash::*;
 use crate::types::*;
 use getrandom::getrandom;
+use itertools::{sorted, Itertools};
 use lazy_static::lazy_static;
 use lru::LruCache;
 use rand::prelude::*;
@@ -28,7 +29,12 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
     // const MY_CACHE: Mutex<PassThruHashMap<u64, Arc<(Self, BlockMD<Self>)>>>;
 
     fn new(ts: u32, parent: HashID, d: Difficulty) -> Self;
-    fn new_from(ts: u32, parent_opts: impl IntoIterator<Item = HashID>, d: Difficulty) -> Self;
+    fn new_from(
+        ts: u32,
+        parent_opts: impl IntoIterator<Item = HashID>,
+        chain_heads: &ChainHeads,
+        d: Difficulty,
+    ) -> Self;
     fn genesis(ts: u32) -> Self;
     fn get_hash(&self) -> HashID;
     // fn hash_sha3(&self) -> HashID;
@@ -58,7 +64,7 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
     #[cfg(debug_assertions)]
     fn test_set_work_bits(&mut self, n_bits: u8) -> Self;
 
-    fn get_cached_block(id: HashID) -> Option<Arc<(Self, BlockMD<Self>)>>;
+    fn get_cached_block(id: &HashID) -> Option<Arc<(Self, BlockMD<Self>)>>;
     // fn get_cached_blocks(ids: &[HashID]) -> Option<Box<[Arc<(Self, BlockMD<Self>)>]>>;
     fn set_cached_block(b: (Self, BlockMD<Self>));
 }
@@ -107,7 +113,12 @@ impl BlockT for Block {
         }
     }
 
-    fn new_from(ts: u32, parent_opts: impl IntoIterator<Item = HashID>, d: Difficulty) -> Self {
+    fn new_from(
+        ts: u32,
+        parent_opts: impl IntoIterator<Item = HashID>,
+        _chain_heads: &ChainHeads,
+        d: Difficulty,
+    ) -> Self {
         Self::new(ts, Self::select_parent_from(parent_opts), d)
     }
 
@@ -166,9 +177,9 @@ impl BlockT for Block {
         self.clone()
     }
 
-    fn get_cached_block(id: HashID) -> Option<Arc<(Self, BlockMD<Self>)>> {
+    fn get_cached_block(id: &HashID) -> Option<Arc<(Self, BlockMD<Self>)>> {
         BLOCK_LRU.lock().ok().and_then(|mut c| {
-            c.get(&id).map(|b| b.clone()).or_else(|| {
+            c.get(id).map(|b| b.clone()).or_else(|| {
                 BLOCK_CACHE
                     .lock()
                     .ok()
@@ -227,8 +238,25 @@ impl BlockT for DagBlock {
     fn new(timestamp: u32, parent: HashID, d: Difficulty) -> Self {
         Self::new_multi_parent(timestamp, vec![parent], d)
     }
-    fn new_from(ts: u32, parent_opts: impl IntoIterator<Item = HashID>, d: Difficulty) -> Self {
-        Self::new_multi_parent(ts, parent_opts, d)
+    fn new_from(
+        ts: u32,
+        parent_opts: impl IntoIterator<Item = HashID>,
+        chain_heads: &ChainHeads,
+        d: Difficulty,
+    ) -> Self {
+        Self::new_multi_parent(
+            ts,
+            parent_opts
+                .into_iter()
+                .chain(
+                    sorted(chain_heads.iter().map(|(id, cw)| (cw, id)))
+                        .rev()
+                        .map(|(_cw, id)| id)
+                        .cloned(),
+                )
+                .unique(),
+            d,
+        )
     }
     fn genesis(ts: u32) -> Self {
         let mut g = Self::new(ts, 0, 0);
@@ -277,9 +305,9 @@ impl BlockT for DagBlock {
         self.clone()
     }
 
-    fn get_cached_block(id: HashID) -> Option<Arc<(Self, BlockMD<Self>)>> {
+    fn get_cached_block(id: &HashID) -> Option<Arc<(Self, BlockMD<Self>)>> {
         DAGBLOCK_LRU.lock().ok().and_then(|mut c| {
-            c.get(&id).map(|b| b.clone()).or_else(|| {
+            c.get(id).map(|b| b.clone()).or_else(|| {
                 DAGBLOCK_CACHE
                     .lock()
                     .ok()

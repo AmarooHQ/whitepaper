@@ -318,7 +318,7 @@ mod tests {
 
         // check that the best block has exactly 1 parent (the genesis block)
         let chain = mm.chain();
-        let bb = &DagBlock::get_cached_block(chain.select_best_block(false))
+        let bb = &DagBlock::get_cached_block(&chain.select_best_block(false))
             .unwrap()
             .0;
         assert_ne!(bb.parents.len(), 0);
@@ -338,7 +338,7 @@ mod tests {
         let _msgs = mm.tick(1300, msgs).unwrap();
 
         let chain = &mm.chain();
-        let bb = DagBlock::get_cached_block(chain.select_best_block(false)).unwrap();
+        let bb = DagBlock::get_cached_block(&chain.select_best_block(false)).unwrap();
         println!(
             "best blocks: {:#?}",
             chain
