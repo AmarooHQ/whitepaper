@@ -77,7 +77,9 @@ pub struct Chain<B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     // blocks: FnvHashMap<u64, (B, BlockMD<B>)>, // 639ms
     // blocks: IntMap<(B, BlockMD<B>)>, // 692ms
     pub best_blocks: HashSet<HashID>,
+    pub_chain_heads: ChainHeads,
     best_priv_blocks: HashSet<HashID>,
+    priv_chain_heads: ChainHeads,
     goal_block_time: u32,
     // fork_rules: LongestChain<B>,
     _phantom_f: PhantomData<F>,
@@ -118,7 +120,8 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
 
     fn get_best_blocks(&self, is_private: bool) -> &HashSet<HashID>;
     fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut HashSet<HashID>;
-    // fn get_chain_heads(&self, is_private: bool) -> &HashSet<HashID>;
+    fn get_chain_heads(&self, is_private: bool) -> &ChainHeads;
+    fn get_chain_heads_mut(&mut self, is_private: bool) -> &mut ChainHeads;
     fn validate_block_pure(&self, b: &B) -> Result<Arc<(B, BlockMD<B>)>, ChainErr>;
     fn validate_block(&self, b: &B) -> Result<BlockMD<B>, ChainErr>;
     fn next_difficulty(&self, b: &B, b_meta: &BlockMD<B>) -> Difficulty;
@@ -150,6 +153,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
             }
         };
         self.update_best_block(&b_c.0, &b_c.1, is_private);
+        self.update_chain_heads(&b_c.0, &b_c.1, is_private);
         // self.save_block(b.get_hash(), (b, b_meta));
         Ok(())
     }
@@ -178,6 +182,20 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
                 best_blocks.insert(b.get_hash());
             }
         };
+    }
+
+    fn update_chain_heads(&mut self, _b: &B, _b_meta: &BlockMD<B>, _is_private: bool) {
+        let chs = self.get_chain_heads_mut(_is_private);
+        let mut to_rem: Vec<_> = Default::default();
+        for p_id in _b.all_prev() {
+            if chs.contains_key(&p_id) {
+                to_rem.push(p_id);
+            }
+        }
+        for p_id in to_rem {
+            chs.remove(&p_id);
+        }
+        chs.insert(_b.get_hash(), _b_meta.chain_weight);
     }
 
     fn draft_block(&self, ts: u32, is_private: bool) -> B {
@@ -403,6 +421,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
 impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
     fn new(genesis: B, genesis_meta: BlockMD<B>) -> Chain<B, F> {
         let g_hash = genesis.get_hash();
+        let g_diff = genesis.get_difficulty();
         trace!("genesis.hash:{}", g_hash);
         // let mut blocks = HashMap::with_hasher(BuildHasherDefault::<PassThroughHasher>::default());
         // blocks.insert(conv_u128_id_to_u64(g_hash), (genesis, genesis_meta));
@@ -413,6 +432,8 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             best_blocks: [g_hash].iter().cloned().collect(),
             best_priv_blocks: [g_hash].iter().cloned().collect(),
             goal_block_time: 10,
+            priv_chain_heads: [(g_hash, g_diff)].iter().cloned().collect(),
+            pub_chain_heads: [(g_hash, g_diff)].iter().cloned().collect(),
             // fork_rules: LongestChain::<B>::new(),
             _phantom_b: PhantomData,
             _phantom_f: PhantomData,
@@ -453,6 +474,20 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             &mut self.best_priv_blocks
         } else {
             &mut self.best_blocks
+        }
+    }
+
+    fn get_chain_heads(&self, is_private: bool) -> &ChainHeads {
+        match is_private {
+            true => &self.priv_chain_heads,
+            false => &self.pub_chain_heads,
+        }
+    }
+
+    fn get_chain_heads_mut(&mut self, is_private: bool) -> &mut ChainHeads {
+        match is_private {
+            true => &mut self.priv_chain_heads,
+            false => &mut self.pub_chain_heads,
         }
     }
 
@@ -703,11 +738,23 @@ mod tests {
         assert_eq!(chain.select_best_block(false), b.get_hash());
         assert_eq!(chain.select_best_block(true), genesis.get_hash());
         assert_eq!(chain.get_chain_weight_at(b.get_hash()), 1000);
+        assert_eq!(
+            chain.get_chain_heads(false)[&b.get_hash()],
+            chain.get_chain_weight_at(b.get_hash())
+        );
+        assert_eq!(
+            chain.get_chain_heads(true)[&genesis.get_hash()],
+            chain.get_chain_weight_at(genesis.get_hash())
+        );
 
         chain.add_block(b.clone(), true)?;
 
         assert_eq!(chain.select_best_block(false), b.get_hash());
         assert_eq!(chain.select_best_block(true), b.get_hash());
+        assert_eq!(
+            chain.get_chain_heads(true)[&b.get_hash()],
+            chain.get_chain_weight_at(b.get_hash())
+        );
 
         chain.add_block(b2.clone(), false)?;
         chain.add_block(b3.clone(), false)?;
@@ -744,6 +791,10 @@ mod tests {
         assert_eq!(
             b140_md.chain_weight,
             b140.get_difficulty() + b130_md.chain_weight
+        );
+        assert_eq!(
+            chain.get_chain_heads(false)[&b140.get_hash()],
+            chain.get_chain_weight_at(b140.get_hash())
         );
 
         Ok(())

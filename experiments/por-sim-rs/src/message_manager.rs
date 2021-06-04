@@ -101,7 +101,20 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
     }
 
     pub fn attack_started(&self, ts: Timestamp) -> bool {
-        self.args.attack_starts_at <= ts
+        ts >= self.args.attack_starts_at
+    }
+
+    pub fn check_and_set_atk_start_h(&mut self, ts: Timestamp) {
+        if self.attack_started(ts) && self.atk_start_h.is_none() {
+            self.atk_start_h = Some(Height::from(
+                self.nodes
+                    .first()
+                    .unwrap()
+                    .chain
+                    .get_heights_pub_priv()
+                    .public,
+            ));
+        }
     }
 
     pub fn tick(&mut self, ts: u32, msgs: Vec<Msg<S::B>>) -> Result<Vec<Msg<S::B>>, String> {
@@ -168,16 +181,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
                 info!("tick: {}", ts);
             }
 
-            if self.attack_started(ts) && self.atk_start_h.is_none() {
-                self.atk_start_h = Some(Height::from(
-                    self.nodes
-                        .first()
-                        .unwrap()
-                        .chain
-                        .get_heights_pub_priv()
-                        .public,
-                ));
-            }
+            self.check_and_set_atk_start_h(ts);
             msgs_from = self.tick(ts, msgs_from)?;
 
             // condition for stopping based on RelayStrategy
@@ -296,6 +300,7 @@ mod tests {
 
         // set ts far in future to avoid issues with difficulty alg
         let t1_ts = 1000;
+        mm.check_and_set_atk_start_h(t1_ts);
         let mut msgs = mm.tick(t1_ts, vec![]).unwrap();
 
         // create 2 dagblocks
@@ -321,6 +326,7 @@ mod tests {
 
         // this is the tick where blocks from tick 1 are added, and new blocks produced (but not yet added)
         let t2_ts = 1200;
+        mm.check_and_set_atk_start_h(t2_ts);
         let mut msgs = mm.tick(t2_ts, msgs).unwrap();
         if msgs.len() == 0 {
             let mut b = mm.chain().draft_block(t2_ts, false);

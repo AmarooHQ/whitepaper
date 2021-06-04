@@ -128,6 +128,8 @@ fn mk_run_atk<'a, S: CSystemT<'a>>(
 ) -> Result<bool, String> {
     let relay_strat = value_t_or_exit!(cli_args, "relay_strategy", RelayStrategyArg);
 
+    todo!("refactor chain to include chain_heads");
+
     match relay_strat {
         RelayStrategyArg::DoubleSpend => {
             let win_thresh = value_t_or_exit!(cli_args, "win_threshold", Height);
