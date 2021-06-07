@@ -27,7 +27,7 @@ pub mod fork_rules;
 #[derive(Debug, PartialEq, Eq)]
 pub enum ChainErr {
     BadPoW(HashID, HashID),
-    UnkParent,
+    BlockRefsUnkParent(HashID, HashID),
     BadParentOrder((HashID, ChainWeight), (HashID, ChainWeight)),
     BadDifficulty,
     TsBeforeParent,
@@ -73,16 +73,13 @@ pub struct Daa2Info {
 }
 
 pub struct Chain<B: BlockT, F: ForkRules<B> = LongestChain<B>> {
-    // blocks: PassThruHashMap<u64, (B, BlockMD<B>)>, // 593ms
-    // blocks: hashbrown::HashMap<u64, (B, BlockMD<B>)>, // 622ms
-    // blocks: FnvHashMap<u64, (B, BlockMD<B>)>, // 639ms
-    // blocks: IntMap<(B, BlockMD<B>)>, // 692ms
     pub best_blocks: HashSet<HashID>,
     pub_chain_heads: ChainHeads,
     best_priv_blocks: HashSet<HashID>,
     priv_chain_heads: ChainHeads,
+    seen_pub_blocks: HashSet<HashID>,
+    seen_priv_blocks: HashSet<HashID>,
     goal_block_time: u32,
-    // fork_rules: LongestChain<B>,
     _phantom_f: PhantomData<F>,
     _phantom_b: PhantomData<B>,
 }
@@ -121,10 +118,13 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
 
     fn get_best_blocks(&self, is_private: bool) -> &HashSet<HashID>;
     fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut HashSet<HashID>;
+    fn get_seen_blocks(&self, is_private: bool) -> &HashSet<HashID>;
+    fn get_seen_blocks_mut(&mut self, is_private: bool) -> &mut HashSet<HashID>;
     fn get_chain_heads(&self, is_private: bool) -> &ChainHeads;
     fn get_chain_heads_mut(&mut self, is_private: bool) -> &mut ChainHeads;
     // fn validate_block_pure(&self, b: &B) -> Result<Arc<(B, BlockMD<B>)>, ChainErr>;
     fn validate_block(&self, b: &B) -> Result<BlockMD<B>, ChainErr>;
+    fn validate_block_local(&self, b: &B, is_private: bool) -> Result<(), ChainErr>;
     fn next_difficulty(&self, b: &B, b_meta: &BlockMD<B>) -> Difficulty;
     fn get_fork_measure_pub_priv(&self) -> Heights;
     fn get_heights_pub_priv(&self) -> Heights;
@@ -142,6 +142,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     fn add_block(&mut self, b: B, is_private: bool) -> Result<(), ChainErr> {
         let b_id = b.get_hash();
         let b_c;
+        self.validate_block_local(&b, is_private)?;
         // note, it *is* faster to check than just insert
         match Self::get_cached_block(&b_id) {
             Some(b_cached) => {
@@ -155,6 +156,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
         };
         self.update_best_block(&b_c.0, &b_c.1, is_private);
         self.update_chain_heads(&b_c.0, &b_c.1, is_private);
+        self.update_seen_blocks(b_id, is_private);
         // self.save_block(b.get_hash(), (b, b_meta));
         Ok(())
     }
@@ -185,8 +187,8 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
         };
     }
 
-    fn update_chain_heads(&mut self, _b: &B, _b_meta: &BlockMD<B>, _is_private: bool) {
-        let chs = self.get_chain_heads_mut(_is_private);
+    fn update_chain_heads(&mut self, _b: &B, _b_meta: &BlockMD<B>, is_private: bool) {
+        let chs = self.get_chain_heads_mut(is_private);
         let mut to_rem: Vec<_> = Default::default();
         for p_id in _b.all_prev() {
             if chs.contains_key(&p_id) {
@@ -197,6 +199,10 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
             chs.remove(&p_id);
         }
         chs.insert(_b.get_hash(), _b_meta.chain_weight);
+    }
+
+    fn update_seen_blocks(&mut self, b_id: HashID, is_private: bool) {
+        self.get_seen_blocks_mut(is_private).insert(b_id);
     }
 
     fn draft_block(&self, ts: u32, is_private: bool) -> B {
@@ -437,6 +443,8 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             // blocks,
             best_blocks: [g_hash].iter().cloned().collect(),
             best_priv_blocks: [g_hash].iter().cloned().collect(),
+            seen_pub_blocks: [g_hash].iter().cloned().collect(),
+            seen_priv_blocks: [g_hash].iter().cloned().collect(),
             goal_block_time: 10,
             priv_chain_heads: [(g_hash, g_diff)].iter().cloned().collect(),
             pub_chain_heads: [(g_hash, g_diff)].iter().cloned().collect(),
@@ -445,27 +453,6 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             _phantom_f: PhantomData,
         }
     }
-
-    // fn save_block(&mut self, id: HashID, b: (B, BlockMD<B>)) {
-    //     // self.blocks.insert(conv_u128_id_to_u64(id), b);
-    //     self.blocks.insert(id, b);
-    // }
-
-    // fn get_block(&self, b: HashID) -> Option<&(B, BlockMD<B>)> {
-    //     // self.blocks.get(&conv_u128_id_to_u64(b))
-    //     self.blocks.get(&b)
-    // }
-
-    // fn update_best_block(&mut self, b: &B, b_meta: &BlockMD<B>, is_private: bool) {
-    //     let best_height = self.blocks_meta[&self.select_best_block(is_private)].height;
-    //     let best_blocks = self.get_best_blocks_mut(is_private);
-    //     if b_meta.height > best_height {
-    //         best_blocks.clear();
-    //     }
-    //     if b_meta.height >= best_height {
-    //         best_blocks.insert(b.hash());
-    //     }
-    // }
 
     fn get_best_blocks(&self, is_private: bool) -> &HashSet<HashID> {
         if is_private {
@@ -480,6 +467,22 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             &mut self.best_priv_blocks
         } else {
             &mut self.best_blocks
+        }
+    }
+
+    fn get_seen_blocks(&self, is_private: bool) -> &HashSet<HashID> {
+        if is_private {
+            &self.seen_priv_blocks
+        } else {
+            &self.seen_pub_blocks
+        }
+    }
+
+    fn get_seen_blocks_mut(&mut self, is_private: bool) -> &mut HashSet<HashID> {
+        if is_private {
+            &mut self.seen_priv_blocks
+        } else {
+            &mut self.seen_pub_blocks
         }
     }
 
@@ -534,6 +537,16 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
     //     // Ok(pm)
     // }
 
+    fn validate_block_local(&self, b: &B, is_private: bool) -> Result<(), ChainErr> {
+        for p_id in b.all_prev() {
+            if !self.get_seen_blocks(is_private).contains(&p_id) {
+                return Err(BlockRefsUnkParent(b.get_hash(), p_id));
+            }
+        }
+
+        Ok(())
+    }
+
     fn validate_block(&self, b: &B) -> Result<BlockMD<B>, ChainErr> {
         if b.get_hash() > self.target_from_difficulty(b.get_difficulty()) {
             return Err(BadPoW(
@@ -546,10 +559,13 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         let pm = Self::get_cached_block(&b.prev());
         let pm = pm.unwrap();
         let all_parents = b.all_prev();
-        let pms: Vec<_> = all_parents.iter().map(Self::get_cached_block).collect();
-        for pm in pms.clone() {
+        let pms: Vec<_> = all_parents
+            .iter()
+            .map(|id| (id, Self::get_cached_block(id)))
+            .collect();
+        for (p_id, pm) in pms.clone() {
             if pm.is_none() {
-                return Err(UnkParent);
+                return Err(BlockRefsUnkParent(b.get_hash(), p_id.clone()));
             }
             if b.get_ts() <= pm.unwrap().0.get_ts() {
                 return Err(TsBeforeParent);
@@ -558,7 +574,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         if pms.len() > 1 {
             let n_ps = pms.len();
             let zipped = pms[..(n_ps - 1)].iter().zip(pms[1..].iter());
-            for (p1, p2) in zipped {
+            for ((&p1_id, p1), (&p2_id, p2)) in zipped {
                 match (p1, p2) {
                     (Some(p1), Some(p2)) => {
                         if p1.1.chain_weight < p2.1.chain_weight {
@@ -568,7 +584,8 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
                             ));
                         }
                     }
-                    _ => return Err(UnkParent),
+                    (_, Some(_)) => return Err(BlockRefsUnkParent(b.get_hash(), p1_id.clone())),
+                    (_, _) => return Err(BlockRefsUnkParent(b.get_hash(), p2_id.clone())),
                 }
             }
         }
@@ -1059,5 +1076,6 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn test_equivalence_of_notify_block_vs_add_block() {}
 }

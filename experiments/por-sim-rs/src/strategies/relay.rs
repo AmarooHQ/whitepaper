@@ -4,10 +4,6 @@ use crate::msg::*;
 use crate::types::*;
 use crate::CSystemT;
 use conv::prelude::*;
-use num::integer::div_ceil;
-use num::integer::div_floor;
-use std::cmp::max;
-use std::cmp::min;
 use std::collections::HashSet;
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -132,7 +128,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
         }
     }
     fn on_msg(&mut self, msg_from: &MsgToNode<S::B>, atk_chain: &S::C) -> Vec<MsgToNode<S::B>> {
-        let fm = atk_chain.get_fork_measure_pub_priv();
+        // let fm = atk_chain.get_fork_measure_pub_priv();
         let h = atk_chain.get_heights_pub_priv();
         // delta_prev is always calculated before appending blocks to chains (i.e., before msgs are processed)
         let delta_prev = match self.params.chain_type {
@@ -140,39 +136,11 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
             SmChainType::LongestChain => h.private - h.public,
             SmChainType::WeightedChain => {
                 panic!("need to properly implement WeightedChain selfish mining")
-                // if h.public >= h.private {
-                //     0
-                // } else {
-                //     min(
-                //         div_floor(
-                //             h.private - h.public,
-                //             S::B::get_cached_block(&atk_chain.select_best_block(false))
-                //                 .unwrap()
-                //                 .0
-                //                 .get_difficulty(),
-                //         ),
-                //         2,
-                //     )
-                // }
             }
             SmChainType::WeightedDag => {
-                // panic!("need to properly implement WeightedDag selfish mining")
-                if h.public >= h.private {
-                    0
-                } else {
-                    div_ceil(
-                        h.private - h.public,
-                        S::B::get_cached_block(&atk_chain.select_best_block(false))
-                            .unwrap()
-                            .0
-                            .get_difficulty(),
-                    )
-                }
+                panic!("need to properly implement WeightedDag selfish mining")
             }
         };
-
-        let mut l_s = 0;
-        let mut l_h = 0;
 
         match msg_from {
             MsgToNode::MsgBlock(b, is_private) => {
@@ -189,26 +157,6 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
                                 // return a msg that adds this block to the priv chain, too,
                                 // so the chains stay in sync.
                                 vec![MsgToNode::MsgBlock(b.clone(), true)]
-                                /* Note: the below was an attempt to improve the naive performance of WeightedChain. It helps some but it's not really methodical. need to go back to some papers on eth selfish mining and go from there.
-                                [
-                                    vec![MsgToNode::MsgBlock(b.clone(), true)],
-                                    if self.params.chain_type == SmChainType::WeightedChain {
-                                        atk_chain
-                                            .get_best_blocks(true)
-                                            .iter()
-                                            .map(|id| {
-                                                MsgToNode::MsgBlock(
-                                                    S::C::get_cached_block(&*id).unwrap().0.clone(),
-                                                    false,
-                                                )
-                                            })
-                                            .collect()
-                                    } else {
-                                        vec![]
-                                    },
-                                ]
-                                .concat()
-                                */
                             }
                             1 => {
                                 // [SM] publish last block of priv chain (there's only one)
@@ -284,16 +232,16 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
                             // publishing this current block.
 
                             vec![
-                                // atk_chain
-                                //     .get_best_blocks(true)
-                                //     .iter()
-                                //     .map(|id| {
-                                //         MsgToNode::MsgBlock(
-                                //             S::C::get_cached_block(&*id).unwrap().0.clone(),
-                                //             false,
-                                //         )
-                                //     })
-                                //     .collect(),
+                                atk_chain
+                                    .get_best_blocks(true)
+                                    .iter()
+                                    .map(|id| {
+                                        MsgToNode::MsgBlock(
+                                            S::C::get_cached_block(&*id).unwrap().0.clone(),
+                                            false,
+                                        )
+                                    })
+                                    .collect(),
                                 vec![MsgToNode::MsgBlock(b.clone(), false)],
                             ]
                             .concat()
@@ -314,7 +262,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
         let mut chain_other_count = 0.;
         let mut chain_pub_weight = 0.;
         let mut chain_priv_weight = 0.;
-        let mut chain_other_weight = 0.;
+        let mut _chain_other_weight = 0.;
         let mut heads: HashSet<HashID> = c.get_best_blocks(false).clone();
         let mut seen: HashSet<HashID> = Default::default();
         loop {
@@ -334,7 +282,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
                     chain_pub_weight += b.1.weight.value_as::<f64>().unwrap();
                 } else {
                     chain_other_count += 1.;
-                    chain_other_weight += b.1.weight.value_as::<f64>().unwrap();
+                    _chain_other_weight += b.1.weight.value_as::<f64>().unwrap();
                 }
                 new_heads = new_heads
                     .union(&b.0.all_prev().into_iter().collect())
@@ -496,16 +444,22 @@ mod tests {
         // create a public block
         let b1 = c.draft_block(10, false).test_set_work_bits(16);
         let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b1.clone(), false), &c);
-        assert_eq!(sm_msgs, vec![MsgToNode::MsgBlock(b1.clone(), true)]);
+        assert_eq!(
+            sm_msgs,
+            vec![MsgToNode::MsgBlock(b1.clone(), true)],
+            "public block relayed to private chain"
+        );
         // simulate the actions from msgs
         c.add_block(b1.clone(), false)?;
         c.add_block(b1.clone(), true)?;
+        println!("Added b1 to both chains");
 
         // create a private block (lead=1)
         let b2 = c.draft_block(20, true).test_set_work_bits(16);
         let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b2.clone(), true), &c);
-        assert_eq!(sm_msgs, vec![]);
+        assert_eq!(sm_msgs, vec![], "no new msgs on this priv block");
         c.add_block(b2.clone(), true)?;
+        println!("Added b2 to priv chain");
 
         // create a public block (lead=0, but fork)
         let b2a = c.draft_block(20, false).test_set_work_bits(16);
@@ -516,6 +470,13 @@ mod tests {
             "publish priv block so that we have 2 competing heads"
         );
         c.add_block(b2a.clone(), false)?;
+        println!("Added b2a to pub chain");
+
+        assert_eq!(
+            c.get_chain_heads(false).contains_key(&b2.get_hash()),
+            false,
+            "public chain should not know about b2 yet"
+        );
 
         // another priv block (lead=0->1, resolves fork)
         let b3 = c.draft_block(30, true).test_set_work_bits(16);
@@ -528,11 +489,16 @@ mod tests {
         // -- NOTE, we should only see a msg on a private block when there are 2 valid heads (1 pub, 1 'priv')
         assert_eq!(
             sm_msgs,
-            vec![MsgToNode::MsgBlock(b3.clone(), false)],
+            vec![
+                MsgToNode::MsgBlock(b2.clone(), false),
+                MsgToNode::MsgBlock(b3.clone(), false)
+            ],
             "publish better priv block immediately to resolve fork"
         );
+        c.add_block(b2.clone(), false)?;
         c.add_block(b3.clone(), true)?;
         c.add_block(b3.clone(), false)?;
+        println!("Added b2 to pub chain + b3 to both chains");
 
         assert_eq!(
             c.get_best_blocks(false),
@@ -556,11 +522,13 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn sm_weighted_chain() {
         unimplemented!("Need to implement sm_weighted_chain.");
     }
 
     #[test]
+    #[ignore]
     fn sm_weighted_dag() {
         unimplemented!("Need to implement sm_weighted_dag.");
     }
