@@ -75,7 +75,7 @@ pub struct Chain<B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     priv_chain_heads: ChainHeads,
     seen_pub_blocks: SeenBlocks,
     seen_priv_blocks: SeenBlocks,
-    goal_block_time: u32,
+    net_args: NetworkArgs,
     _phantom_f: PhantomData<F>,
     _phantom_b: PhantomData<B>,
 }
@@ -95,7 +95,7 @@ lazy_static! {
 }
 
 pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
-    fn new(genesis: B, genesis_meta: BlockMD<B>) -> Self;
+    fn new(genesis: B, genesis_meta: BlockMD<B>, net_args: NetworkArgs) -> Self;
 
     // fn save_block(&mut self, b_id: HashID, b: (B, BlockMD<B>));
     // fn get_block(&self, b: HashID) -> Option<&(B, BlockMD<B>)>;
@@ -406,8 +406,6 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
 }
 
 impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
-    pub const DAA2_N_BLOCKS: usize = 100;
-
     fn next_difficulty_daa2_raw(&self, b: &B, b_meta: &BlockMD<B>) -> Difficulty {
         if b_meta.height < 5 as u32 {
             return 1000;
@@ -422,7 +420,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
         let p = Self::get_cached_block(&*daa2_bs.last().unwrap()).unwrap();
         let block_time_sum: u32 = b.get_ts() - p.0.get_ts();
         let win_rate_sum: Difficulty = b_meta.chain_weight - p.1.chain_weight;
-        Difficulty::from(self.goal_block_time) * win_rate_sum
+        Difficulty::from(self.net_args.block_target) * win_rate_sum
             / max(Difficulty::from(block_time_sum), 1)
     }
 
@@ -448,7 +446,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
 }
 
 impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
-    fn new(genesis: B, genesis_meta: BlockMD<B>) -> Chain<B, F> {
+    fn new(genesis: B, genesis_meta: BlockMD<B>, net_args: NetworkArgs) -> Chain<B, F> {
         let g_hash = genesis.get_hash();
         let g_diff = genesis.get_difficulty();
         trace!("genesis.hash:{}", g_hash);
@@ -462,9 +460,9 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             best_priv_blocks: [g_hash].iter().cloned().collect(),
             seen_pub_blocks: [g_hash].iter().cloned().collect(),
             seen_priv_blocks: [g_hash].iter().cloned().collect(),
-            goal_block_time: 10,
             priv_chain_heads: [(g_hash, g_diff)].iter().cloned().collect(),
             pub_chain_heads: [(g_hash, g_diff)].iter().cloned().collect(),
+            net_args,
             // fork_rules: LongestChain::<B>::new(),
             _phantom_b: PhantomData,
             _phantom_f: PhantomData,
@@ -565,11 +563,9 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
     }
 
     fn validate_block(&self, b: &B, is_private: bool) -> Result<BlockMD<B>, ChainErr> {
-        if b.get_hash() > self.target_from_difficulty(b.get_difficulty()) {
-            return Err(BadPoW(
-                b.get_hash(),
-                self.target_from_difficulty(b.get_difficulty()),
-            ));
+        let target = self.target_from_difficulty(b.get_difficulty());
+        if b.get_hash() > target {
+            return Err(BadPoW(b.get_hash(), target));
         }
 
         // TODO: will honest nodes ever know about attacking blocks and accidentally find a parent they shouldn't? those blocks are the in cache. I don't *think* so.
@@ -666,10 +662,10 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         match BlockMD::<B>::get_daa2_blocks(b.get_hash()) {
             Some(_) => (),
             None => {
-                let mut daa2_blocks = Vec::with_capacity(Self::DAA2_N_BLOCKS);
+                let mut daa2_blocks = Vec::with_capacity(self.net_args.daa2_n_blocks);
                 daa2_blocks.push(b.get_hash());
                 let p_daa2_bs = BlockMD::<B>::get_daa2_blocks(pm.0.get_hash()).unwrap();
-                daa2_blocks.extend_from_slice(&p_daa2_bs[..(Self::DAA2_N_BLOCKS - 1)]);
+                daa2_blocks.extend_from_slice(&p_daa2_bs[..(self.net_args.daa2_n_blocks - 1)]);
                 BlockMD::<B>::set_daa2_blocks(b.get_hash(), daa2_blocks);
             }
         }
@@ -697,8 +693,9 @@ mod tests {
         ts: Option<u32>,
     ) -> (B, BlockMD<B>, Chain<B, F>) {
         let genesis = B::genesis(ts.unwrap_or(0));
-        let g_md = BlockMD::mk_genesis_md(&genesis, Chain::<B, F>::DAA2_N_BLOCKS);
-        let chain = Chain::new(genesis.clone(), g_md.clone());
+        let net_args = NetworkArgs::new(10);
+        let g_md = BlockMD::mk_genesis_md(&genesis, net_args.daa2_n_blocks);
+        let chain = Chain::new(genesis.clone(), g_md.clone(), net_args);
         (genesis, g_md, chain)
     }
 
@@ -872,7 +869,7 @@ mod tests {
             BlockMD::<B>::get_daa2_blocks(genesis.get_hash())
                 .unwrap()
                 .len(),
-            Chain::<B, LongestChain<B>>::DAA2_N_BLOCKS
+            chain.net_args.daa2_n_blocks,
         );
 
         let next_d = chain.next_difficulty(&genesis, &g_md);
@@ -886,7 +883,7 @@ mod tests {
             BlockMD::<B>::get_daa2_blocks(genesis.get_hash())
                 .unwrap()
                 .len(),
-            Chain::<B, LongestChain<B>>::DAA2_N_BLOCKS
+            chain.net_args.daa2_n_blocks,
         );
 
         let is_priv = false;

@@ -18,3 +18,18 @@ pub type ChainHeads = PassThruHashMap<HashID, ChainWeight>;
 
 // pub type SeenBlocks = BTreeSet<HashID>;  // WAY slower
 pub type SeenBlocks = FxHashSet<HashID>;
+
+#[derive(Debug, Clone)]
+pub struct NetworkArgs {
+    pub block_target: u16,
+    pub daa2_n_blocks: usize,
+}
+
+impl NetworkArgs {
+    pub fn new(block_target: u16) -> Self {
+        NetworkArgs {
+            block_target,
+            daa2_n_blocks: 100,
+        }
+    }
+}

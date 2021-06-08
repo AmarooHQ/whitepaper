@@ -101,25 +101,32 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
 
         let mut bs_out = vec![];
 
-        let target = self.chain.target_from_difficulty(b.get_difficulty());
+        let mut target = self.chain.target_from_difficulty(b.get_difficulty());
         for _ in 0..max_attempts {
             if b.get_hash() < target {
-                let b_md = self.chain.validate_block(&b, mine_in_private).unwrap();
-                debug!(
-                    // "\nN={:3} NEW_BLOCK (priv={:}) H={:4}, D={:4}, ΣW={:8}, T={:4}, {:#x} ⭢  {:#x}",
-                    "\nN={:3} NEW_BLOCK (priv={:}) H={:4}, D={:4}, ΣW={:8}, T={:4}, {:#} ⭢  {:#}",
-                    // "\nN={:} NEW_BLOCK H={:}, D={:}, T={:}, {:} ⭢  {:}",
-                    self.id,
-                    mine_in_private,
-                    b_md.height,
-                    b_md.difficulty,
-                    b_md.chain_weight,
-                    b.get_ts(),
-                    b.get_hash(),
-                    b.prev(),
-                );
-                bs_out.push(b);
-                b = self.chain.draft_block(ts, mine_in_private);
+                match self.chain.validate_block(&b, mine_in_private) {
+                    Ok(b_md) => {
+                        debug!(
+                            // "\nN={:3} NEW_BLOCK (priv={:}) H={:4}, D={:4}, ΣW={:8}, T={:4}, {:#x} ⭢  {:#x}",
+                            "\nN={:3} NEW_BLOCK (priv={:}) H={:4}, D={:4}, ΣW={:8}, T={:4}, {:#} ⭢  {:#}",
+                            // "\nN={:} NEW_BLOCK H={:}, D={:}, T={:}, {:} ⭢  {:}",
+                            self.id,
+                            mine_in_private,
+                            b_md.height,
+                            b_md.difficulty,
+                            b_md.chain_weight,
+                            b.get_ts(),
+                            b.get_hash(),
+                            b.prev(),
+                        );
+                        bs_out.push(b);
+                        b = self.chain.draft_block(ts, mine_in_private);
+                        target = self.chain.target_from_difficulty(b.get_difficulty());
+                    }
+                    Err(e) => {
+                        warn!("Node got error while mining: {:?}", e);
+                    }
+                }
             }
             // warn!("Block with hash {:?} is not valid: {:?}", b.hash(), e);
             b.increment_nonce();
@@ -141,9 +148,11 @@ mod tests {
     #[test]
     fn block_is_added_to_chain() -> Result<(), String> {
         let genesis = Block::genesis(0);
+        let net_args = NetworkArgs::new(10);
         let c = Chain::new(
             genesis.clone(),
-            BlockMD::mk_genesis_md(&genesis, <SimpleCS as CSystemT>::C::DAA2_N_BLOCKS),
+            BlockMD::mk_genesis_md(&genesis, net_args.daa2_n_blocks),
+            net_args,
         );
         let mut n: Node<SimpleCS> = Node::new(1337, c, false, 100);
 
@@ -184,9 +193,11 @@ mod tests {
     #[test]
     fn test_block_added_via_notify() -> Result<(), ChainErr> {
         let genesis = Block::genesis(0);
+        let net_args = NetworkArgs::new(10);
         let c = Chain::new(
             genesis.clone(),
-            BlockMD::mk_genesis_md(&genesis, <SimpleCS as CSystemT>::C::DAA2_N_BLOCKS),
+            BlockMD::mk_genesis_md(&genesis, net_args.daa2_n_blocks),
+            net_args,
         );
         let mut n: Node<SimpleCS> = Node::new(1337, c, false, 100);
 

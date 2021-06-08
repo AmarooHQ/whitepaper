@@ -7,6 +7,7 @@ use crate::msg::*;
 use crate::strategies::relay::*;
 use crate::types::*;
 use log::*;
+use num::ToPrimitive;
 
 pub struct MM<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> {
     honest_node: Node<'a, S>,
@@ -38,7 +39,7 @@ impl AttackArgs {
 }
 
 impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
-    pub fn new(args: AttackArgs, atk_params: R::Params) -> MM<'a, S, R> {
+    pub fn new(args: AttackArgs, atk_params: R::Params, net_args: NetworkArgs) -> MM<'a, S, R> {
         warn!(
             "Creating new simulation with {} honest HR and {} attacking HR. Attack starts at T={}",
             args.honest_hr, args.attacker_hr, args.attack_starts_at,
@@ -46,7 +47,8 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
         let genesis = S::B::genesis(0);
         let chain = S::C::new(
             genesis.clone(),
-            BlockMD::mk_genesis_md(&genesis.clone(), Chain::<S::B, S::FR>::DAA2_N_BLOCKS),
+            BlockMD::mk_genesis_md(&genesis.clone(), net_args.daa2_n_blocks.to_usize().unwrap()),
+            net_args,
         );
         MM {
             honest_node: Node::new(0, chain.clone(), false, args.honest_hr),
@@ -207,6 +209,7 @@ mod tests {
         MM::<'a, S, DoubleSpendStrat>::new(
             AttackArgs::new(1000, 0, 100),
             DoubleSpendParams::new(100, 20),
+            NetworkArgs::new(10),
         )
     }
 
@@ -265,6 +268,7 @@ mod tests {
         let mut mm = MM::<'_, DagCS, DoubleSpendStrat>::new(
             AttackArgs::new(1000, 0, 100),
             DoubleSpendParams::new(100, 20),
+            NetworkArgs::new(10),
         );
 
         // set ts far in future to avoid issues with difficulty alg
