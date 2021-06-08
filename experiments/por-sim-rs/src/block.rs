@@ -7,7 +7,6 @@ use lazy_static::lazy_static;
 use lru::LruCache;
 use rand::prelude::*;
 use rand::seq::IteratorRandom;
-use std::collections::HashSet;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::hash::Hash;
@@ -53,12 +52,12 @@ impl<B: BlockT> Iterator for PrevBlockIter<B> {
 pub struct FilteredAllPrevBlockIter<'a, B: BlockT> {
     last_block: Option<B>,
     edge_blocks: VecDeque<HashID>,
-    exclude_blocks: &'a HashSet<HashID>,
-    seen_blocks: HashSet<HashID>,
+    exclude_blocks: &'a PassThruHashSet<HashID>,
+    seen_blocks: PassThruHashSet<HashID>,
 }
 
 impl<'a, B: BlockT> FilteredAllPrevBlockIter<'a, B> {
-    fn new(start_block: &B, exclude_blocks: &'a HashSet<HashID>) -> Self {
+    fn new(start_block: &B, exclude_blocks: &'a PassThruHashSet<HashID>) -> Self {
         // start our edge blocks with the provided start_block
         let edge_blocks = VecDeque::from(vec![start_block.get_hash()]);
         FilteredAllPrevBlockIter {
@@ -121,7 +120,7 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
 
     fn all_prev_iter_excluding<'a>(
         &self,
-        exclude_blocks: &'a HashSet<HashID>,
+        exclude_blocks: &'a PassThruHashSet<HashID>,
     ) -> FilteredAllPrevBlockIter<'a, Self> {
         FilteredAllPrevBlockIter::new(self, exclude_blocks)
     }

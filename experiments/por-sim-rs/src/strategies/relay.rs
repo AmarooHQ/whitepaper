@@ -4,7 +4,6 @@ use crate::msg::*;
 use crate::types::*;
 use crate::CSystemT;
 use conv::prelude::*;
-use std::collections::HashSet;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 
@@ -77,8 +76,8 @@ pub struct SelfishMining<S> {
     // pub_height: Height,
     // priv_height: Height,
     priv_branch_len: u32,
-    blocks_from_private: HashSet<HashID>,
-    blocks_from_public: HashSet<HashID>,
+    blocks_from_private: PassThruHashSet<HashID>,
+    blocks_from_public: PassThruHashSet<HashID>,
     atk_start_h: Height,
     _s: PhantomData<S>,
     // _r: PhantomData<W>,
@@ -261,14 +260,14 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
         let mut chain_pub_weight = 0.;
         let mut chain_priv_weight = 0.;
         let mut _chain_other_weight = 0.;
-        let mut heads: HashSet<HashID> = c.get_best_blocks(false).clone();
-        let mut seen: HashSet<HashID> = Default::default();
+        let mut heads: PassThruHashSet<HashID> = c.get_best_blocks(false).clone();
+        let mut seen: PassThruHashSet<HashID> = Default::default();
         loop {
             let h_vec: Vec<_> = heads.iter().filter(|h| !seen.contains(&h)).collect();
             if h_vec.len() == 0 {
                 break;
             }
-            let mut new_heads = HashSet::<HashID>::new();
+            let mut new_heads: PassThruHashSet<HashID> = Default::default();
             for id in h_vec {
                 seen.insert(*id);
                 let b = S::C::get_cached_block(&*id).unwrap();
@@ -436,7 +435,7 @@ mod tests {
 
         assert_eq!(
             c.get_best_blocks(false),
-            &HashSet::from_iter([b5a.get_hash()].iter().cloned()),
+            &PassThruHashSet::from_iter([b5a.get_hash()].iter().cloned()),
             "previously private block is exclusively winning on public chain"
         );
 
@@ -520,7 +519,7 @@ mod tests {
 
         assert_eq!(
             c.get_best_blocks(false),
-            &HashSet::from_iter([b3.get_hash()].iter().cloned()),
+            &PassThruHashSet::from_iter([b3.get_hash()].iter().cloned()),
             "previously private block is exclusively winning on public chain"
         );
 
@@ -594,7 +593,7 @@ mod tests {
 
         assert_eq!(
             c.get_best_blocks(true),
-            &HashSet::from_iter([b3a.get_hash()].iter().cloned()),
+            &PassThruHashSet::from_iter([b3a.get_hash()].iter().cloned()),
             "pub block is exclusively"
         );
 
