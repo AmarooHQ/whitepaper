@@ -14,7 +14,7 @@ pub trait RelayStrategyT<'a, S: CSystemT<'a>> {
     type Params: Clone + Copy;
     fn init(c: &S::C, atk_start_h: Height, p: Self::Params) -> Self;
     fn on_msg(&mut self, m: &MsgToNode<S::B>, chain: &S::C) -> Vec<MsgToNode<S::B>>;
-    fn get_results(&self, c: &S::C) -> Option<Self::ResultsTy>;
+    fn get_results(&self, c: &S::C) -> Option<(Self::ResultsTy, bool)>;
     fn should_stop_simulation(&self, ts: Timestamp, c: &S::C) -> bool;
 }
 
@@ -51,11 +51,11 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
     fn on_msg(&mut self, _msg_from: &MsgToNode<S::B>, _chain: &S::C) -> Vec<MsgToNode<S::B>> {
         vec![]
     }
-    fn get_results(&self, c: &S::C) -> Option<Self::ResultsTy> {
+    fn get_results(&self, c: &S::C) -> Option<(Self::ResultsTy, bool)> {
         let hs = c.get_heights_pub_priv();
         let fms = c.get_fork_measure_pub_priv();
         if fms.public < fms.private && hs.public >= self.atk_start_h + self.params.win_thres {
-            Some(true)
+            Some((true, true))
         } else {
             None
         }
@@ -237,6 +237,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
             _s: PhantomData,
         }
     }
+
     fn on_msg(&mut self, msg_from: &MsgToNode<S::B>, atk_chain: &S::C) -> Vec<MsgToNode<S::B>> {
         match self.params.chain_type {
             // these will be heights
@@ -249,7 +250,8 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
             }
         }
     }
-    fn get_results(&self, c: &S::C) -> Option<Self::ResultsTy> {
+
+    fn get_results(&self, c: &S::C) -> Option<(Self::ResultsTy, bool)> {
         /* win conditions for selfish mining:
          * - of blocks in the chain, blocks that were mined privately should
          * */
@@ -299,20 +301,27 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
         let ratio_priv_blocks_mined = n_priv_blocks / n_total_blocks;
         let stale_priv_blocks = n_priv_blocks - chain_priv_count;
         let stale_pub_blocks = n_pub_blocks - chain_pub_count;
-        Some(SelfishMiningResult {
-            ratio_priv_blocks_in_chain,
-            ratio_priv_weight_in_chain,
-            avg_priv_weight_in_chain,
-            avg_pub_weight_in_chain,
-            ratio_priv_blocks_mined,
-            chain_priv_count,
-            chain_pub_count,
-            chain_other_count,
-            n_priv_blocks,
-            n_pub_blocks,
-            stale_priv_blocks,
-            stale_pub_blocks,
-        })
+
+        // add a little error margin to claiming success
+        let success = ratio_priv_blocks_in_chain > (ratio_priv_blocks_mined + 0.005);
+
+        Some((
+            SelfishMiningResult {
+                ratio_priv_blocks_in_chain,
+                ratio_priv_weight_in_chain,
+                avg_priv_weight_in_chain,
+                avg_pub_weight_in_chain,
+                ratio_priv_blocks_mined,
+                chain_priv_count,
+                chain_pub_count,
+                chain_other_count,
+                n_priv_blocks,
+                n_pub_blocks,
+                stale_priv_blocks,
+                stale_pub_blocks,
+            },
+            success,
+        ))
     }
     fn should_stop_simulation(&self, _ts: Timestamp, _c: &S::C) -> bool {
         // never stop selfish mining
@@ -434,11 +443,11 @@ mod tests {
         let w = sm.get_results(&c).unwrap();
         println!("W: {:?}", w);
         assert_eq!(
-            w.ratio_priv_blocks_mined, 0.5,
+            w.0.ratio_priv_blocks_mined, 0.5,
             "50% of blocks mined were priv"
         );
         assert_eq!(
-            w.ratio_priv_blocks_in_chain,
+            w.0.ratio_priv_blocks_in_chain,
             4. / 5.,
             "80% of blocks in chain were priv"
         );
@@ -518,11 +527,11 @@ mod tests {
         let w = sm.get_results(&c).unwrap();
         println!("W: {:?}", w);
         assert_eq!(
-            w.ratio_priv_blocks_mined, 0.5,
+            w.0.ratio_priv_blocks_mined, 0.5,
             "50% of blocks mined were priv"
         );
         assert_eq!(
-            w.ratio_priv_blocks_in_chain,
+            w.0.ratio_priv_blocks_in_chain,
             2. / 3.,
             "66% of blocks in chain were priv"
         );

@@ -196,35 +196,37 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
         }
 
         let chain = &self.nodes.last().unwrap().chain;
-        let hs = chain.get_heights_pub_priv();
-        let fms = chain.get_fork_measure_pub_priv();
         match self.strategy.as_ref().and_then(|s| s.get_results(chain)) {
             None => {
-                warn!(
-                    "Attack Failed. T={}, StartH={}, PubH={}, PrivH={}, PubFM={}, PrivFM={}",
-                    last_ts,
-                    self.atk_start_h.unwrap_or(0),
-                    hs.public,
-                    hs.private,
-                    fms.public,
-                    fms.private
-                );
+                self.print_atk_summary(false, last_ts, chain);
                 Ok(false)
             }
-            Some(r) => {
-                warn!(
-                    "ATTACK SUCCESS! T={}, StartH={}, PubH={}, PrivH={}, PubFM={}, PrivFM={}",
-                    last_ts,
-                    self.atk_start_h.unwrap_or(0),
-                    hs.public,
-                    hs.private,
-                    fms.public,
-                    fms.private
-                );
+            Some((r, success)) => {
+                self.print_atk_summary(success, last_ts, chain);
                 warn!("Attack Results: {:?}", r);
                 Ok(true)
             }
         }
+    }
+
+    fn print_atk_summary(&self, success: bool, last_ts: Timestamp, chain: &S::C) {
+        let hs = chain.get_heights_pub_priv();
+        let fms = chain.get_fork_measure_pub_priv();
+        let atk_success_fail = if success {
+            "ATTACK SUCCESS!"
+        } else {
+            "Attack Failed."
+        };
+        warn!(
+            "{} T={}, StartH={}, PubH={}, PrivH={}, PubFM={}, PrivFM={}",
+            atk_success_fail,
+            last_ts,
+            self.atk_start_h.unwrap_or(0),
+            hs.public,
+            hs.private,
+            fms.public,
+            fms.private
+        );
     }
 }
 
