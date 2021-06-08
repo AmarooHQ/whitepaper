@@ -152,17 +152,27 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
                         // but worth noting in case we need to do calculations before then.
                         let mut msgs_out = match delta_prev {
                             0 => {
+                                debug!("[SM] pub / Δprev=0");
                                 // [SM] sync public and private chains
                                 self.priv_branch_len = 0;
                                 // return a msg that adds this block to the priv chain, too,
                                 // so the chains stay in sync.
-                                vec![MsgToNode::MsgBlock(b.clone(), true)]
+                                let mut pub_bs_to_add = vec![MsgToNode::MsgBlock(b.clone(), true)];
+                                let seen_priv_blocks = atk_chain.get_seen_blocks(true);
+                                for p in b.prev_iter() {
+                                    if seen_priv_blocks.contains(&p.get_hash()) {
+                                        break;
+                                    }
+                                    pub_bs_to_add.push(MsgToNode::MsgBlock(p.clone(), true));
+                                }
+                                pub_bs_to_add.reverse();
+                                pub_bs_to_add
                             }
                             1 => {
+                                debug!("[SM] pub / Δprev=1");
                                 // [SM] publish last block of priv chain (there's only one)
                                 /* Note: SM algorithm doesn't include privateBranchLen<-0 for this case.
-                                 * IDK if that's correct or not.
-                                 * self.priv_branch_len = 0;
+                                 * That's correct because the 'private' fork still exists
                                  * */
                                 // NB: we might have got multiple private heads, so iter over them and b'cast all
                                 atk_chain
@@ -177,6 +187,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
                                     .collect()
                             }
                             2 => {
+                                debug!("[SM] pub / Δprev=2");
                                 // [SM] publish all of private chain (should be 2 blocks)
                                 self.priv_branch_len = 0;
                                 /* NB: this is the same code as above. As long as chain's don't track
@@ -184,6 +195,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
                                  * parent block already exists in the block cache); i.e., we don't need
                                  * to broadcast the parents of our best priv block.
                                  * */
+
                                 atk_chain
                                     .get_best_blocks(true)
                                     .iter()
@@ -202,6 +214,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
                                     .concat()
                             }
                             _ => {
+                                debug!("[SM] pub / Δprev>2");
                                 // [SM] publish first unpublished block from private chain
                                 /* NB: We only publish 1 priv block so that there are 2 heads of the
                                  * public chain: 1 honest, 1 selfish. Since we have >= 2 priv blocks
@@ -220,10 +233,12 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
                         msgs_out
                     }
                     true => {
+                        debug!("[SM] priv");
                         self.blocks_from_private.insert(b.get_hash());
                         // [SM] append block to priv chain -- recalc priv length
                         self.priv_branch_len += 1;
                         if delta_prev == 0 && self.priv_branch_len == 2 {
+                            debug!("[SM] priv / Δprev=0");
                             // [SM] publish all priv chain
                             self.priv_branch_len = 0;
                             // NOTE: we just received a new private block, and the SM alg says (line 8)
@@ -400,25 +415,38 @@ mod tests {
         c.add_block(b5.clone(), false)?;
         c.add_block(b2.clone(), false)?;
 
+        // add another priv block then pub block
+        let b5a = c.draft_block(45, true).test_set_work_bits(16);
+        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b5a.clone(), true), &c);
+        assert_eq!(sm_msgs, vec![]);
+        c.add_block(b5a.clone(), true)?;
+
+        let b5b = c.draft_block(45, false).test_set_work_bits(16);
+        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b5b.clone(), false), &c);
+        assert_eq!(sm_msgs, vec![MsgToNode::MsgBlock(b3.clone(), false)]);
+        c.add_block(b3.clone(), false)?;
+        c.add_block(b5b.clone(), false)?;
+
         // add a public block (lead=1)
         let b6 = c.draft_block(51, false).test_set_work_bits(16);
         let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b6.clone(), false), &c);
         // since a public block was published we want to publish a competing priv block
+        // todo!("see todo in pub/2 branch");
         assert_eq!(
             sm_msgs,
             vec![
-                MsgToNode::MsgBlock(b3.clone(), false),
-                MsgToNode::MsgBlock(b4.clone(), false)
+                MsgToNode::MsgBlock(b4.clone(), false),
+                MsgToNode::MsgBlock(b5a.clone(), false)
             ],
             "publish ALL priv on new pub block with lead=1"
         );
         c.add_block(b6.clone(), false)?;
-        c.add_block(b3.clone(), false)?;
         c.add_block(b4.clone(), false)?;
+        c.add_block(b5a.clone(), false)?;
 
         assert_eq!(
             c.get_best_blocks(false),
-            &HashSet::from_iter([b4.get_hash()].iter().cloned()),
+            &HashSet::from_iter([b5a.get_hash()].iter().cloned()),
             "previously private block is exclusively winning on public chain"
         );
 
@@ -430,8 +458,8 @@ mod tests {
         );
         assert_eq!(
             w.ratio_priv_blocks_in_chain,
-            3. / 4.,
-            "75% of blocks in chain were priv"
+            4. / 5.,
+            "80% of blocks in chain were priv"
         );
 
         Ok(())
@@ -516,6 +544,68 @@ mod tests {
             w.ratio_priv_blocks_in_chain,
             2. / 3.,
             "66% of blocks in chain were priv"
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_selfish_mining_priv_pub_pub() -> Result<(), ChainErr> {
+        let (mut sm, mut c) = create_sm::<SimpleCS>();
+
+        // create a private block
+        let b2 = c.draft_block(20, true).test_set_work_bits(16);
+        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b2.clone(), true), &c);
+        assert_eq!(sm_msgs, vec![], "no new msgs on this priv block");
+        c.add_block(b2.clone(), true)?;
+        println!("Added b2 to priv chain");
+
+        // create a public block (lead=0, but fork)
+        let b2a = c.draft_block(20, false).test_set_work_bits(16);
+        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b2a.clone(), false), &c);
+        assert_eq!(
+            sm_msgs,
+            vec![MsgToNode::MsgBlock(b2.clone(), false)],
+            "publish priv block so that we have 2 competing heads"
+        );
+        c.add_block(b2a.clone(), false)?;
+        println!("Added b2a to pub chain");
+
+        assert_eq!(
+            c.get_chain_heads(false).contains_key(&b2.get_hash()),
+            false,
+            "public chain should not know about b2 yet"
+        );
+        assert_eq!(
+            c.get_chain_heads(true).contains_key(&b2a.get_hash()),
+            false,
+            "priv chain should not know about b2a yet"
+        );
+
+        // another pub block (wins fork)
+        let b3a = c.draft_block(30, false).test_set_work_bits(16);
+        assert_eq!(
+            b3a.prev(),
+            b2a.get_hash(),
+            "this pub block should build on the pub chain only."
+        );
+        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b3a.clone(), false), &c);
+        assert_eq!(
+            sm_msgs,
+            vec![
+                MsgToNode::MsgBlock(b2a.clone(), true),
+                MsgToNode::MsgBlock(b3a.clone(), true)
+            ],
+            "publish pub blocks to priv chain b/c pub won"
+        );
+        c.add_block(b2a.clone(), true)?;
+        c.add_block(b3a.clone(), true)?;
+        println!("Added b2a,b3a to priv chains");
+
+        assert_eq!(
+            c.get_best_blocks(true),
+            &HashSet::from_iter([b3a.get_hash()].iter().cloned()),
+            "pub block is exclusively"
         );
 
         Ok(())

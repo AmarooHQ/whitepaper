@@ -3,6 +3,7 @@ use crate::chain::BlockMD;
 use crate::chain::ChainT;
 use crate::types::Difficulty;
 use rand::seq::IteratorRandom;
+use std::convert::TryFrom;
 use std::marker::PhantomData;
 
 pub enum ForkResult<'a, B: BlockT> {
@@ -20,7 +21,8 @@ pub trait ForkRules<B: BlockT> {
     // fn weight_of<'a>(b: &B, f: Box<impl Fn(u128) -> Option<BlockMD<B>>>) -> u128;
 
     fn best_of<'a>(b1: (&'a B, &BlockMD<B>), b2: (&'a B, &BlockMD<B>)) -> ForkResult<'a, B> {
-        let d = Self::fork_measure(b1.1) - Self::fork_measure(b2.1);
+        let d = i32::try_from(Self::fork_measure(b1.1)).unwrap()
+            - i32::try_from(Self::fork_measure(b2.1)).unwrap();
         if d > 0 {
             BestBlock(b1.0)
         } else if d == 0 {

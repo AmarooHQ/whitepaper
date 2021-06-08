@@ -24,6 +24,30 @@ lazy_static! {
         Mutex::new(LruCache::new(1024));
 }
 
+pub struct PrevBlockIter<B: BlockT> {
+    curr_block: B,
+}
+
+impl<B: BlockT> Iterator for PrevBlockIter<B> {
+    type Item = B;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let p_id = self.curr_block.prev();
+        let p = B::get_cached_block(&p_id);
+        if p_id == self.curr_block.get_hash() {
+            None
+        } else {
+            match p {
+                None => None,
+                Some(p) => {
+                    self.curr_block = p.0.clone();
+                    Some(p.0.clone())
+                }
+            }
+        }
+    }
+}
+
 pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + Hash {
     // note: this doesn't work b/c lazy_static inits those things as a Struct apparently.
     // const MY_CACHE: Mutex<PassThruHashMap<u64, Arc<(Self, BlockMD<Self>)>>>;
@@ -40,6 +64,13 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
     // fn hash_sha3(&self) -> HashID;
     fn prev(&self) -> HashID;
     fn all_prev(&self) -> Vec<HashID>;
+
+    fn prev_iter(&self) -> PrevBlockIter<Self> {
+        PrevBlockIter {
+            curr_block: self.clone(),
+        }
+    }
+
     fn get_ts(&self) -> u32;
     fn set_ts(&mut self, ts: u32);
     fn increment_nonce(&mut self);
@@ -61,7 +92,7 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
         ps.into_iter().choose(&mut rand::thread_rng()).unwrap()
     }
 
-    #[cfg(debug_assertions)]
+    #[cfg(test)]
     fn test_set_work_bits(&mut self, n_bits: u8) -> Self;
 
     fn get_cached_block(id: &HashID) -> Option<Arc<(Self, BlockMD<Self>)>>;
@@ -171,7 +202,7 @@ impl BlockT for Block {
         self.d = d;
     }
 
-    #[cfg(debug_assertions)]
+    #[cfg(test)]
     fn test_set_work_bits(&mut self, n_bits: u8) -> Self {
         self.id &= HashID::MAX >> n_bits;
         self.clone()
@@ -299,7 +330,7 @@ impl BlockT for DagBlock {
     fn set_difficulty(&mut self, d: Difficulty) {
         self.d = d;
     }
-    #[cfg(debug_assertions)]
+    #[cfg(test)]
     fn test_set_work_bits(&mut self, n_bits: u8) -> Self {
         self.id &= HashID::MAX >> n_bits;
         self.clone()
