@@ -67,8 +67,6 @@ pub struct Daa2Info {
     d: Difficulty,
 }
 
-pub type SeenBlocks = FxHashSet<HashID>;
-
 pub struct Chain<B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     pub best_blocks: FxHashSet<HashID>,
     pub_chain_heads: ChainHeads,
@@ -116,8 +114,8 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
 
     fn get_best_blocks(&self, is_private: bool) -> &FxHashSet<HashID>;
     fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut FxHashSet<HashID>;
-    fn get_seen_blocks(&self, is_private: bool) -> &FxHashSet<HashID>;
-    fn get_seen_blocks_mut(&mut self, is_private: bool) -> &mut FxHashSet<HashID>;
+    fn get_seen_blocks(&self, is_private: bool) -> &SeenBlocks;
+    fn get_seen_blocks_mut(&mut self, is_private: bool) -> &mut SeenBlocks;
     fn get_chain_heads(&self, is_private: bool) -> &ChainHeads;
     fn get_chain_heads_mut(&mut self, is_private: bool) -> &mut ChainHeads;
     // fn validate_block_pure(&self, b: &B) -> Result<Arc<(B, BlockMD<B>)>, ChainErr>;
@@ -244,7 +242,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     fn find_missing_blocks_in(&self, is_private: bool) -> Vec<B> {
         // if is_private==true then we are looking for private blocks that aren't in pub
         let sync_from_best = self.get_best_blocks(is_private);
-        let mut exclude_blocks: FxHashSet<_> = self.get_seen_blocks(!is_private).clone();
+        let mut exclude_blocks: SeenBlocks = self.get_seen_blocks(!is_private).clone();
         let mut missing_blocks = Vec::new();
         for id in sync_from_best {
             let b = Self::get_cached_block(id).unwrap().0.clone();

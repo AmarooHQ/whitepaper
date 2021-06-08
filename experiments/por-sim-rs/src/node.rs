@@ -73,8 +73,8 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         }
 
         // try to mine
-        match self.attempt_mining(ts, self.mining_attempts_per_tick, attack_started) {
-            Ok(b) => out_msgs.push(
+        for b in self.attempt_mining(ts, self.mining_attempts_per_tick, attack_started) {
+            out_msgs.push(
                 // if we're an attacker and past when the attack starts,
                 // then relay private blocks. otherwise it's a normal block.
                 if self.is_attacker && attack_started {
@@ -82,31 +82,25 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
                 } else {
                     MsgBlock(b)
                 },
-            ),
-            _ => (),
-        };
+            );
+        }
 
         // return outgoing msgs
         Ok(out_msgs)
     }
 
-    fn attempt_mining(
-        &mut self,
-        ts: u32,
-        max_attempts: u32,
-        attack_started: bool,
-    ) -> Result<S::B, ()> {
+    fn attempt_mining(&mut self, ts: u32, max_attempts: u32, attack_started: bool) -> Vec<S::B> {
         let mine_in_private = self.is_attacker && attack_started;
-        // let mut b = match self.curr_draft_block {
-        //     Some(_b) => _b,
-        //     None => ,
-        // };
+
         let mut b = if let Some(mut b) = self.curr_draft_block.take() {
             b.set_ts(ts);
             b
         } else {
             self.chain.draft_block(ts, mine_in_private)
         };
+
+        let mut bs_out = vec![];
+
         let target = self.chain.target_from_difficulty(b.get_difficulty());
         for _ in 0..max_attempts {
             if b.get_hash() < target {
@@ -124,14 +118,15 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
                     b.get_hash(),
                     b.prev(),
                 );
-                return Ok(b);
+                bs_out.push(b);
+                b = self.chain.draft_block(ts, mine_in_private);
             }
             // warn!("Block with hash {:?} is not valid: {:?}", b.hash(), e);
             b.increment_nonce();
         }
         // put b back if we didn't find a block
         self.curr_draft_block.replace(b);
-        Err(())
+        bs_out
     }
 }
 
@@ -153,7 +148,8 @@ mod tests {
         let mut n: Node<SimpleCS> = Node::new(1337, c, false, 100);
 
         // just so we make sure we can get a valid block via mining
-        let _b = n.attempt_mining(10, 100000, false).unwrap();
+        let _bs = n.attempt_mining(10, 30000, false);
+        assert_eq!(_bs.len() > 0, true, "mined >=1 block");
 
         // create a valid block manually
         let mut b = n.chain.draft_block(10, false);

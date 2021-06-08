@@ -15,3 +15,6 @@ pub type PassThruHashMap<K, V> = HashMap<K, V, BuildHasherDefault<PassThroughHas
 pub type FxHashSet<K> = HashSet<K, BuildHasherDefault<FxHasher>>;
 
 pub type ChainHeads = PassThruHashMap<HashID, ChainWeight>;
+
+// pub type SeenBlocks = BTreeSet<HashID>;  // WAY slower
+pub type SeenBlocks = FxHashSet<HashID>;
