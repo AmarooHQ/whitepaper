@@ -4,7 +4,7 @@ use crate::msg::*;
 use crate::types::*;
 use crate::CSystemT;
 use conv::prelude::*;
-use num::{abs, pow};
+use num::pow;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 
@@ -86,7 +86,8 @@ pub struct SelfishMining<S> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct SelfishMiningResult {
-    predicted_win_ratio: f64,
+    predicted_win_ratio_gamma_half: f64,
+    predicted_win_ratio_gamma_near_one: f64,
     ratio_priv_blocks_in_chain: f64,
     ratio_priv_weight_in_chain: f64,
     avg_priv_weight_in_chain: f64,
@@ -305,20 +306,25 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
 
         let alpha = ratio_priv_blocks_mined;
         let gamma = 0.5;
-        let predicted_win_ratio =
+        let predicted_win_ratio_gamma_half =
+            (alpha * pow(1. - alpha, 2) * (4. * alpha + gamma * (1. - 2. * alpha)) - pow(alpha, 3))
+                / (1. - alpha * (1. + (2. - alpha) * alpha));
+        let gamma = 0.99;
+        let predicted_win_ratio_gamma_near_one =
             (alpha * pow(1. - alpha, 2) * (4. * alpha + gamma * (1. - 2. * alpha)) - pow(alpha, 3))
                 / (1. - alpha * (1. + (2. - alpha) * alpha));
 
         // add a little error margin to claiming success
         let success = ratio_priv_blocks_in_chain > (ratio_priv_blocks_mined + 0.005)
-            && abs(predicted_win_ratio - ratio_priv_blocks_in_chain) < 0.03;
+            && predicted_win_ratio_gamma_half - ratio_priv_blocks_in_chain < 0.03;
 
         // todo: predicted_win_ratio seems to be about 0.01 to 0.015 higher than the observed ratio.
         // Not sure if this is because of an implementation error (mb) or if it's tolerable error.
 
         Some((
             SelfishMiningResult {
-                predicted_win_ratio,
+                predicted_win_ratio_gamma_half,
+                predicted_win_ratio_gamma_near_one,
                 ratio_priv_blocks_in_chain,
                 ratio_priv_weight_in_chain,
                 avg_priv_weight_in_chain,

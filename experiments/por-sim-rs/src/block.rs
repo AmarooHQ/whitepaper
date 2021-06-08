@@ -130,6 +130,7 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
     fn increment_nonce(&mut self);
     fn get_difficulty(&self) -> Difficulty;
     fn set_difficulty(&mut self, d: Difficulty);
+    fn get_height(&self) -> Height;
 
     fn get_rand_id() -> HashID {
         // Self::get_urand_id()
@@ -170,6 +171,7 @@ pub struct Block {
     pub parent: HashID,
     pub timestamp: u32,
     pub d: Difficulty,
+    pub h: Height,
 }
 
 impl Display for Block {
@@ -190,11 +192,15 @@ impl BlockT for Block {
         // getrandom(&mut e).unwrap();
         // let id = u128::from_be_bytes(e) as HashID;
         let id = Self::get_rand_id();
+        let h = Self::get_cached_block(&parent)
+            .map(|b| b.0.h + 1)
+            .unwrap_or(0);
         Self {
             id,
             timestamp: ts,
             parent,
             d,
+            h,
         }
     }
 
@@ -241,6 +247,9 @@ impl BlockT for Block {
 
     fn set_ts(&mut self, ts: u32) {
         self.timestamp = ts
+    }
+    fn get_height(&self) -> Height {
+        self.h
     }
 
     #[inline(always)]
@@ -291,7 +300,7 @@ pub struct DagBlock {
     pub parents: Vec<HashID>,
     pub timestamp: u32,
     d: Difficulty,
-    // h: Height,
+    h: Height,
 }
 
 impl Display for DagBlock {
@@ -310,11 +319,16 @@ impl ManyParentsBlockT for DagBlock {
         parents: impl IntoIterator<Item = HashID>,
         d: Difficulty,
     ) -> Self {
+        let parents = Vec::from_iter(parents);
+        let h = Self::get_cached_block(&parents[0])
+            .map(|b| b.0.h + 1)
+            .unwrap_or(0);
         DagBlock {
             timestamp,
             id: Self::get_rand_id(),
-            parents: Vec::from_iter(parents),
+            parents,
             d,
+            h,
         }
     }
 }
@@ -329,19 +343,16 @@ impl BlockT for DagBlock {
         chain_heads: &ChainHeads,
         d: Difficulty,
     ) -> Self {
-        Self::new_multi_parent(
-            ts,
-            parent_opts
-                .into_iter()
-                .chain(
-                    sorted(chain_heads.iter().map(|(id, cw)| (cw, id)))
-                        .rev()
-                        .map(|(_cw, id)| id)
-                        .cloned(),
-                )
-                .unique(),
-            d,
-        )
+        let parents = parent_opts
+            .into_iter()
+            .chain(
+                sorted(chain_heads.iter().map(|(id, cw)| (cw, id)))
+                    .rev()
+                    .map(|(_cw, id)| id)
+                    .cloned(),
+            )
+            .unique();
+        Self::new_multi_parent(ts, parents, d)
     }
     fn genesis(ts: u32) -> Self {
         let mut g = Self::new(ts, 0, 0);
@@ -369,6 +380,9 @@ impl BlockT for DagBlock {
     }
     fn set_ts(&mut self, ts: u32) {
         self.timestamp = ts
+    }
+    fn get_height(&self) -> Height {
+        self.h
     }
     #[inline(always)]
     fn increment_nonce(&mut self) {

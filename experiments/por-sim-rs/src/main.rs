@@ -37,7 +37,7 @@ arg_enum! {
     }
 }
 arg_enum! {
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     pub enum RelayStrategyArg {
         DoubleSpend,
         SelfishMining
@@ -55,6 +55,7 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
         (@arg block_target: -b --block_target_time +takes_value default_value("10") "Target time (in ticks) between blocks.")
         (@arg crypto_system: -S --crypto_system +takes_value default_value("WeightedDag") possible_values(&CryptoSystemArg::variants()) "Name of the cryptosystem template to use.")
         (@arg relay_strategy: -R --relay_strategy +takes_value default_value("DoubleSpend") possible_values(&RelayStrategyArg::variants()) "Name of the relay strategy to use")
+        (@arg attacker_instant_propagation: --attacker_instant_prop !takes_value "Attacker's blocks instantly propagate to attackers (no wasted mining)")
         // doublspend params
         (@arg win_threshold: --ds_win_threshold +takes_value default_value("20") "[DoubleSpend] Minimum number of confirmations before the double-spending private chain is published.")
         // selfish mining params
@@ -76,17 +77,20 @@ pub fn main() -> Result<(), String> {
     let attack_at_h = value_t_or_exit!(args.value_of("start_attack_at_t"), u32);
     let end_simulation_at_t = value_t!(args, "end_simulation_at_t", u32).unwrap_or(3 * attack_at_h);
     let hash_rate = value_t_or_exit!(args.value_of("hash_rate"), f64);
+    let attacker_instant_propagation = args.is_present("attacker_instant_propagation");
     let block_target = value_t_or_exit!(args.value_of("block_target"), u16);
     let crypto_system =
         value_t!(args, "crypto_system", CryptoSystemArg).unwrap_or_else(|e| e.exit());
     let honest_hr = (hash_rate * (1. - attacker_ratio)).to_u16().unwrap();
     let attacker_hr = (hash_rate * attacker_ratio).to_u16().unwrap();
     let attack_starts_at = attack_at_h as Difficulty;
+
     let atk_args = AttackArgs {
         honest_hr,
         attacker_hr,
         attack_starts_at,
         end_simulation_at_t,
+        attacker_instant_propagation,
     };
     let network_args = NetworkArgs::new(block_target);
 
@@ -137,6 +141,10 @@ fn mk_run_atk<'a, S: CSystemT<'a>>(
     cli_args: ArgMatches,
 ) -> Result<bool, String> {
     let relay_strat = value_t_or_exit!(cli_args, "relay_strategy", RelayStrategyArg);
+
+    if args.attacker_instant_propagation && relay_strat == RelayStrategyArg::SelfishMining {
+        warn!("PLEASE NOTE: --attacker_instant_prop sometimes causes SelfishMining to fail for an unknown reason");
+    }
 
     match relay_strat {
         RelayStrategyArg::DoubleSpend => {

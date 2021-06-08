@@ -26,6 +26,7 @@ pub enum ChainErr {
     BadParentOrder((HashID, ChainWeight), (HashID, ChainWeight)),
     BadDifficulty,
     TsBeforeParent,
+    BlockHeightInvalid,
 }
 
 impl fmt::Display for ChainErr {
@@ -252,7 +253,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
             missing_blocks.extend(bs);
         }
         // make sure that the blocks we return are from lease recent to most recent.
-        missing_blocks.sort_by_key(|b| b.get_ts());
+        missing_blocks.sort_by_key(|b| (b.get_ts(), b.get_height()));
         missing_blocks
     }
 
@@ -568,9 +569,12 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             return Err(BadPoW(b.get_hash(), target));
         }
 
-        // TODO: will honest nodes ever know about attacking blocks and accidentally find a parent they shouldn't? those blocks are the in cache. I don't *think* so.
         let pm = Self::get_cached_block(&b.prev());
         let pm = pm.unwrap();
+        if b.get_height() != pm.0.get_height() + 1 {
+            return Err(BlockHeightInvalid);
+        }
+
         let all_parents = b.all_prev();
         let pms: Vec<_> = all_parents
             .iter()
@@ -580,7 +584,8 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             if pm.is_none() {
                 return Err(BlockRefsUnkParent(b.get_hash(), p_id.clone(), is_private));
             }
-            if b.get_ts() <= pm.unwrap().0.get_ts() {
+            let pm_b = &pm.unwrap().0;
+            if b.get_ts() < pm_b.get_ts() {
                 return Err(TsBeforeParent);
             }
         }
@@ -742,6 +747,7 @@ mod tests {
     #[test]
     fn update_best_block() -> Result<(), String> {
         let (genesis, _g_md, mut chain) = _setup_chain::<Block, LongestChain<Block>>(None);
+        assert_eq!(genesis.get_height(), 0, "genesis height should be 0");
         let b = _mk_draft_block(&mut chain, 10, false);
 
         assert_eq!(chain.select_best_block(false), genesis.get_hash());

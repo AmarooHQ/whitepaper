@@ -24,6 +24,7 @@ pub struct AttackArgs {
     pub attacker_hr: u16,
     pub attack_starts_at: Timestamp,
     pub end_simulation_at_t: Timestamp,
+    pub attacker_instant_propagation: bool,
 }
 
 impl AttackArgs {
@@ -34,6 +35,7 @@ impl AttackArgs {
             attacker_hr,
             attack_starts_at,
             end_simulation_at_t: attack_starts_at * 3,
+            attacker_instant_propagation: false,
         }
     }
 }
@@ -41,8 +43,8 @@ impl AttackArgs {
 impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
     pub fn new(args: AttackArgs, atk_params: R::Params, net_args: NetworkArgs) -> MM<'a, S, R> {
         warn!(
-            "Creating new simulation with {} honest HR and {} attacking HR. Attack starts at T={}",
-            args.honest_hr, args.attacker_hr, args.attack_starts_at,
+            "Creating new simulation with {} honest HR and {} attacking HR. Attack starts at T={}. InstantProp={}",
+            args.honest_hr, args.attacker_hr, args.attack_starts_at, args.attacker_instant_propagation
         );
         let genesis = S::B::genesis(0);
         let chain = S::C::new(
@@ -51,8 +53,14 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             net_args,
         );
         MM {
-            honest_node: Node::new(0, chain.clone(), false, args.honest_hr),
-            attacker_node: Node::new(1, chain.clone(), true, args.attacker_hr),
+            honest_node: Node::new(0, chain.clone(), false, args.honest_hr, false),
+            attacker_node: Node::new(
+                1,
+                chain.clone(),
+                true,
+                args.attacker_hr,
+                args.attacker_instant_propagation,
+            ),
             strategy: None,
             args: args.clone(),
             atk_params,
@@ -111,7 +119,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
                 .map(|m| s.on_msg(m, atk_chain))
                 .collect::<Vec<_>>()
                 .concat();
-            msgs_to = [attacker_msgs_to, msgs_to].concat();
+            msgs_to = [msgs_to, attacker_msgs_to].concat();
         }
         let output_msgs = vec![
             self.honest_node.step(ts, &msgs_to, atk_started).unwrap(),

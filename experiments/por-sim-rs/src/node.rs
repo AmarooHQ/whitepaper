@@ -15,6 +15,7 @@ pub struct Node<'a, /*R: RelayStrategyT,*/ S: CSystemT<'a>> {
     is_attacker: bool,
     mining_attempts_per_tick: u16,
     curr_draft_block: Option<S::B>,
+    add_mined_block_instant: bool,
 }
 
 impl<'a, S: CSystemT<'a>> Node<'a, S> {
@@ -23,6 +24,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         chain: S::C,
         is_attacker: bool,
         mining_attempts_per_tick: u16,
+        add_mined_block_instant: bool,
     ) -> Node<'a, S> {
         Node {
             id,
@@ -31,6 +33,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
             // attack_threshold: attack_threshold.unwrap_or(0),
             mining_attempts_per_tick,
             curr_draft_block: None,
+            add_mined_block_instant,
         }
     }
 
@@ -119,6 +122,9 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
                             b.get_hash(),
                             b.prev(),
                         );
+                        if self.add_mined_block_instant {
+                            self.chain.add_block(b.clone(), mine_in_private).unwrap();
+                        }
                         bs_out.push(b);
                         b = self.chain.draft_block(ts, mine_in_private);
                         target = self.chain.target_from_difficulty(b.get_difficulty());
@@ -154,7 +160,7 @@ mod tests {
             BlockMD::mk_genesis_md(&genesis, net_args.daa2_n_blocks),
             net_args,
         );
-        let mut n: Node<SimpleCS> = Node::new(1337, c, false, 100);
+        let mut n: Node<SimpleCS> = Node::new(1337, c, false, 100, false);
 
         // just so we make sure we can get a valid block via mining
         let _bs = n.attempt_mining(10, 30000, false);
@@ -199,7 +205,7 @@ mod tests {
             BlockMD::mk_genesis_md(&genesis, net_args.daa2_n_blocks),
             net_args,
         );
-        let mut n: Node<SimpleCS> = Node::new(1337, c, false, 100);
+        let mut n: Node<SimpleCS> = Node::new(1337, c, false, 100, false);
 
         let prev_height = n.chain.get_fork_measure_pub_priv().public;
 
