@@ -100,7 +100,8 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     // fn get_block(&self, b: HashID) -> Option<&(B, BlockMD<B>)>;
 
     fn get_cached_block(b: &HashID) -> Option<Arc<(B, BlockMD<B>)>> {
-        B::get_cached_block(&b).map(|b| b.clone())
+        // B::get_cached_block(&b).map(|b| b.clone())
+        B::get_cached_block(&b)
     }
 
     // fn get_cached_blocks(ids: &[HashID]) -> Option<Box<[Arc<(B, BlockMD<B>)>]>> {
@@ -184,13 +185,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
 
     fn update_chain_heads(&mut self, _b: &B, _b_meta: &BlockMD<B>, is_private: bool) {
         let chs = self.get_chain_heads_mut(is_private);
-        let mut to_rem: Vec<_> = Default::default();
         for p_id in _b.all_prev() {
-            if chs.contains_key(&p_id) {
-                to_rem.push(p_id);
-            }
-        }
-        for p_id in to_rem {
             chs.remove(&p_id);
         }
         chs.insert(_b.get_hash(), _b_meta.chain_weight);
