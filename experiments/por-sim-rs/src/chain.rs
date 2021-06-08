@@ -67,13 +67,15 @@ pub struct Daa2Info {
     d: Difficulty,
 }
 
+pub type SeenBlocks = FxHashSet<HashID>;
+
 pub struct Chain<B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     pub best_blocks: FxHashSet<HashID>,
     pub_chain_heads: ChainHeads,
     best_priv_blocks: FxHashSet<HashID>,
     priv_chain_heads: ChainHeads,
-    seen_pub_blocks: FxHashSet<HashID>,
-    seen_priv_blocks: FxHashSet<HashID>,
+    seen_pub_blocks: SeenBlocks,
+    seen_priv_blocks: SeenBlocks,
     goal_block_time: u32,
     _phantom_f: PhantomData<F>,
     _phantom_b: PhantomData<B>,
@@ -486,7 +488,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         }
     }
 
-    fn get_seen_blocks(&self, is_private: bool) -> &FxHashSet<HashID> {
+    fn get_seen_blocks(&self, is_private: bool) -> &SeenBlocks {
         if is_private {
             &self.seen_priv_blocks
         } else {
@@ -494,7 +496,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         }
     }
 
-    fn get_seen_blocks_mut(&mut self, is_private: bool) -> &mut FxHashSet<HashID> {
+    fn get_seen_blocks_mut(&mut self, is_private: bool) -> &mut SeenBlocks {
         if is_private {
             &mut self.seen_priv_blocks
         } else {
