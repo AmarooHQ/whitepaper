@@ -67,6 +67,7 @@ pub struct Daa2Info {
     d: Difficulty,
 }
 
+#[derive(Clone)]
 pub struct Chain<B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     pub best_blocks: FxHashSet<HashID>,
     pub_chain_heads: ChainHeads,
@@ -93,7 +94,7 @@ lazy_static! {
         Mutex::new(Default::default());
 }
 
-pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
+pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
     fn new(genesis: B, genesis_meta: BlockMD<B>) -> Self;
 
     // fn save_block(&mut self, b_id: HashID, b: (B, BlockMD<B>));

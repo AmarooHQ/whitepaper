@@ -13,7 +13,7 @@ pub enum ForkResult<'a, B: BlockT> {
 
 use ForkResult::*;
 
-pub trait ForkRules<B: BlockT> {
+pub trait ForkRules<B: BlockT>: Clone {
     // fn new() -> Self;
     fn fork_measure(b_md: &BlockMD<B>) -> Difficulty;
     // fn best_of<'a>(b1: (&'a B, &BlockMD<B>), b2: (&'a B, &BlockMD<B>)) -> ForkResult<'a, B>;
@@ -33,11 +33,11 @@ pub trait ForkRules<B: BlockT> {
     }
 }
 
-#[derive(new)]
+#[derive(new, Clone)]
 pub struct LongestChain<B: BlockT> {
     _phantom: PhantomData<B>,
 }
-#[derive(new)]
+#[derive(new, Clone)]
 pub struct HeaviestChain<B: BlockT> {
     _phantom: PhantomData<B>,
 }

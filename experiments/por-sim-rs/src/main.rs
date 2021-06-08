@@ -6,6 +6,7 @@ use crate::strategies::relay::*;
 use crate::types::*;
 use clap::{value_t_or_exit, ArgMatches};
 use log::LevelFilter;
+use num::ToPrimitive;
 use std::time::SystemTime;
 
 #[macro_use]
@@ -48,11 +49,10 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
     clap_app!(sim =>
         (about: "Blockchain PoW + PoR simulator")
         (version: "0.1.0")
-        (@arg nodes: -n --nodes +takes_value default_value("75") "Number of nodes in total.")
-        (@arg attacker_ratio: -r --ratio +takes_value default_value("0.45") #{0, 1} "Proportion of nodes which are attackers.")
+        (@arg attacker_ratio: -r --ratio +takes_value default_value("0.45") #{0, 1} "Proportion of hash rate belonging to attackers.")
         (@arg start_attack_at_t: -s --start_attack_tick +takes_value default_value("1000") "Tick at which to start the attack.")
-        (@arg end_simulation_at_t: -e --end_tick +takes_value "Maximum number of ticks for the simulation. Defaults to 3*start_attack_at_t")
-        (@arg hash_rate: -H --hash_rate +takes_value default_value("10") "Maximum hashes each node will perform each tick attempting to produce a block.")
+        (@arg end_simulation_at_t: -e --end_tick +takes_value "Maximum number of ticks for the simulation. Defaults to 3*start_attack_tick")
+        (@arg hash_rate: -H --hash_rate +takes_value default_value("1000") "Network hash rate per tick.")
         (@arg crypto_system: -S --crypto_system +takes_value default_value("WeightedDag") possible_values(&CryptoSystemArg::variants()) "Name of the cryptosystem template to use.")
         (@arg relay_strategy: -R --relay_strategy +takes_value default_value("DoubleSpend") possible_values(&RelayStrategyArg::variants()) "Name of the relay strategy to use")
         // doublspend params
@@ -72,21 +72,19 @@ pub fn main() -> Result<(), String> {
     //     .unwrap();
     let args = get_arg_matches();
 
-    let n_total = value_t_or_exit!(args.value_of("nodes"), u16);
     let attacker_ratio = value_t_or_exit!(args.value_of("attacker_ratio"), f64);
     let attack_at_h = value_t_or_exit!(args.value_of("start_attack_at_t"), u32);
     let end_simulation_at_t = value_t!(args, "end_simulation_at_t", u32).unwrap_or(3 * attack_at_h);
-    let hash_rate = value_t_or_exit!(args.value_of("hash_rate"), u32);
+    let hash_rate = value_t_or_exit!(args.value_of("hash_rate"), f64);
     let crypto_system =
         value_t!(args, "crypto_system", CryptoSystemArg).unwrap_or_else(|e| e.exit());
-    let n_honest = ((n_total as f64) * (1. - attacker_ratio)) as u16;
-    let n_attackers = n_total - n_honest;
+    let honest_hr = (hash_rate * (1. - attacker_ratio)).to_u16().unwrap();
+    let attacker_hr = (hash_rate * attacker_ratio).to_u16().unwrap();
     let attack_starts_at = attack_at_h as Difficulty;
     let atk_args = AttackArgs {
-        n_honest,
-        n_attackers,
+        honest_hr,
+        attacker_hr,
         attack_starts_at,
-        hash_rate,
         end_simulation_at_t,
     };
 

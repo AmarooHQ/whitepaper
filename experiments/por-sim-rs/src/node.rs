@@ -13,7 +13,7 @@ pub struct Node<'a, /*R: RelayStrategyT,*/ S: CSystemT<'a>> {
     id: u16,
     pub chain: S::C,
     is_attacker: bool,
-    mining_attempts_per_tick: u32,
+    mining_attempts_per_tick: u16,
     curr_draft_block: Option<S::B>,
 }
 
@@ -22,7 +22,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         id: u16,
         chain: S::C,
         is_attacker: bool,
-        mining_attempts_per_tick: u32,
+        mining_attempts_per_tick: u16,
     ) -> Node<'a, S> {
         Node {
             id,
@@ -89,7 +89,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         Ok(out_msgs)
     }
 
-    fn attempt_mining(&mut self, ts: u32, max_attempts: u32, attack_started: bool) -> Vec<S::B> {
+    fn attempt_mining(&mut self, ts: u32, max_attempts: u16, attack_started: bool) -> Vec<S::B> {
         let mine_in_private = self.is_attacker && attack_started;
 
         let mut b = if let Some(mut b) = self.curr_draft_block.take() {

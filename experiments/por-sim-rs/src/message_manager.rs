@@ -6,16 +6,12 @@ use crate::cryptosystem::CSystemT;
 use crate::msg::*;
 use crate::strategies::relay::*;
 use crate::types::*;
-use itertools::Itertools;
 use log::*;
 
 pub struct MM<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> {
-    // tick: u32,
-    nodes: Vec<Node<'a, S>>,
-    // difficulty_cache: Mutex<HashMap<u128, u128>>,
-    // attack_starts_at: Difficulty,
+    honest_node: Node<'a, S>,
+    attacker_node: Node<'a, S>,
     args: AttackArgs,
-    // block_store:
     strategy: Option<R>,
     atk_params: R::Params,
     atk_start_h: Option<Height>,
@@ -23,20 +19,18 @@ pub struct MM<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> {
 
 #[derive(Debug, Clone)]
 pub struct AttackArgs {
-    pub n_honest: u16,
-    pub n_attackers: u16,
-    pub hash_rate: u32,
+    pub honest_hr: u16,
+    pub attacker_hr: u16,
     pub attack_starts_at: Timestamp,
     pub end_simulation_at_t: Timestamp,
 }
 
 impl AttackArgs {
     #[cfg(test)]
-    fn new(n_honest: u16, n_attackers: u16, hash_rate: u32, attack_starts_at: Timestamp) -> Self {
+    fn new(honest_hr: u16, attacker_hr: u16, attack_starts_at: Timestamp) -> Self {
         AttackArgs {
-            n_honest,
-            n_attackers,
-            hash_rate,
+            honest_hr,
+            attacker_hr,
             attack_starts_at,
             end_simulation_at_t: attack_starts_at * 3,
         }
@@ -45,44 +39,28 @@ impl AttackArgs {
 
 impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
     pub fn new(args: AttackArgs, atk_params: R::Params) -> MM<'a, S, R> {
-        let nodes_honest: u16 = args.n_honest;
-        let nodes_attacking: u16 = args.n_attackers;
-        let mining_attempts_per_tick: u32 = args.hash_rate;
-        let n_nodes = nodes_honest + nodes_attacking;
         warn!(
-            "Creating new simulation with {} honest nodes and {} attacking nodes. Attack starts at T={}",
-            nodes_honest, nodes_attacking, args.attack_starts_at,
+            "Creating new simulation with {} honest HR and {} attacking HR. Attack starts at T={}",
+            args.honest_hr, args.attacker_hr, args.attack_starts_at,
         );
         let genesis = S::B::genesis(0);
-        let mut mm = MM {
-            nodes: Vec::new(),
+        let chain = S::C::new(
+            genesis.clone(),
+            BlockMD::mk_genesis_md(&genesis.clone(), Chain::<S::B, S::FR>::DAA2_N_BLOCKS),
+        );
+        MM {
+            honest_node: Node::new(0, chain.clone(), false, args.honest_hr),
+            attacker_node: Node::new(1, chain.clone(), true, args.attacker_hr),
             strategy: None,
-            args,
+            args: args.clone(),
             atk_params,
             atk_start_h: None,
-        };
-        for i in 0..n_nodes {
-            mm.add_node(Node::new(
-                i,
-                S::C::new(
-                    genesis.clone(),
-                    BlockMD::mk_genesis_md(&genesis.clone(), Chain::<S::B, S::FR>::DAA2_N_BLOCKS),
-                ),
-                i >= nodes_honest,
-                mining_attempts_per_tick,
-            ));
         }
-        info!("Created {} nodes.", mm.nodes.len());
-        mm
-    }
-
-    pub fn add_node(&mut self, node: Node<'a, S>) {
-        self.nodes.push(node);
     }
 
     #[cfg(test)]
     pub fn chain(&self) -> &S::C {
-        return &self.nodes.first().unwrap().chain;
+        return &self.honest_node.chain;
     }
 
     fn msgs_from_into_to(&mut self, msgs_from: Vec<Msg<S::B>>) -> Vec<MsgToNode<S::B>> {
@@ -107,48 +85,37 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
     pub fn check_and_set_atk_start_h(&mut self, ts: Timestamp) {
         if self.attack_started(ts) && self.atk_start_h.is_none() {
             self.atk_start_h = Some(Height::from(
-                self.nodes
-                    .first()
-                    .unwrap()
-                    .chain
-                    .get_heights_pub_priv()
-                    .public,
+                self.honest_node.chain.get_heights_pub_priv().public,
             ));
         }
     }
 
     pub fn tick(&mut self, ts: u32, msgs: Vec<Msg<S::B>>) -> Result<Vec<Msg<S::B>>, String> {
         let mut msgs_to = self.msgs_from_into_to(msgs);
-        let atk_node = self.nodes.last().unwrap();
-        let attack_started = self.attack_started(ts);
-        if attack_started && self.strategy.is_none() {
+        let atk_started = self.attack_started(ts);
+        if atk_started && self.strategy.is_none() {
             // let atk_start_height = atk_node.chain.get_heights_pub_priv().public;
             self.strategy.get_or_insert(R::init(
-                &atk_node.chain,
+                &self.attacker_node.chain,
                 self.atk_start_h.unwrap(),
                 self.atk_params,
             ));
         }
+        let atk_chain = &self.attacker_node.chain;
         if self.strategy.is_some() {
             let s = self.strategy.as_mut().unwrap();
             let attacker_msgs_to = msgs_to
                 .iter()
-                .map(|m| s.on_msg(m, &atk_node.chain))
+                .map(|m| s.on_msg(m, atk_chain))
                 .collect::<Vec<_>>()
                 .concat();
             msgs_to = [attacker_msgs_to, msgs_to].concat();
         }
-        let output_msgs = self
-            .nodes
-            .iter_mut()
-            .map(|node| {
-                let in_msgs = node.step(ts, &msgs_to, attack_started).unwrap();
-                if in_msgs.len() > 0 {
-                    debug!("\nGot messages: {:?}", in_msgs);
-                }
-                in_msgs
-            })
-            .concat();
+        let output_msgs = vec![
+            self.honest_node.step(ts, &msgs_to, atk_started).unwrap(),
+            self.attacker_node.step(ts, &msgs_to, atk_started).unwrap(),
+        ]
+        .concat();
         Ok(Vec::from(output_msgs))
     }
 
@@ -188,14 +155,14 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             if self
                 .strategy
                 .as_ref()
-                .map(|s| s.should_stop_simulation(ts, &self.nodes.last().unwrap().chain))
+                .map(|s| s.should_stop_simulation(ts, &self.attacker_node.chain))
                 .unwrap_or(false)
             {
                 break;
             }
         }
 
-        let chain = &self.nodes.last().unwrap().chain;
+        let chain = &self.attacker_node.chain;
         match self.strategy.as_ref().and_then(|s| s.get_results(chain)) {
             None => {
                 self.print_atk_summary(false, last_ts, chain);
@@ -238,7 +205,7 @@ mod tests {
 
     fn create_mm_no_priv<'a, S: CSystemT<'a>>() -> MM<'a, S, DoubleSpendStrat> {
         MM::<'a, S, DoubleSpendStrat>::new(
-            AttackArgs::new(20, 0, 33, 100),
+            AttackArgs::new(1000, 0, 100),
             DoubleSpendParams::new(100, 20),
         )
     }
@@ -249,7 +216,7 @@ mod tests {
         assert_ne!(hs.public, 0);
         assert_eq!(hs.private, 0);
 
-        for node in &mm.nodes[..] {
+        for node in vec![&mm.honest_node, &mm.attacker_node] {
             println!(
                 "baseline: {:?}, this node: {:?}, {:?}, {:?}",
                 hs,
@@ -296,7 +263,7 @@ mod tests {
     #[test]
     fn mm_with_dag_block_has_many_parents() {
         let mut mm = MM::<'_, DagCS, DoubleSpendStrat>::new(
-            AttackArgs::new(10, 0, 0, 100),
+            AttackArgs::new(1000, 0, 100),
             DoubleSpendParams::new(100, 20),
         );
 
