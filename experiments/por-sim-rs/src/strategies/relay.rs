@@ -125,6 +125,7 @@ impl<'a, S: CSystemT<'a>> SelfishMining<S> {
         // info!("[SM] pub / Δprev=0, returning: {:?}", ret_blocks);
         ret_blocks
     }
+
     fn sync_priv_to_pub(b: &S::B, atk_chain: &S::C, include_latest: bool) -> Vec<MsgToNode<S::B>> {
         let mut pre_ret = atk_chain.find_priv_blocks_not_in_pub();
         if include_latest {
@@ -137,37 +138,15 @@ impl<'a, S: CSystemT<'a>> SelfishMining<S> {
         // info!("[SM] pub / Δprev=1, returning: {:?}", ret_blocks);
         ret_blocks
     }
-}
 
-impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
-    type ResultsTy = SelfishMiningResult;
-    type Params = SelfishMiningParams;
-    fn init(_chain: &S::C, atk_start_h: Height, params: Self::Params) -> Self {
-        SelfishMining {
-            params,
-            // pub_height: chain.get_any_best_block(false).1.height,
-            // priv_height: chain.get_any_best_block(false).1.height,
-            priv_branch_len: 0,
-            blocks_from_private: Default::default(),
-            blocks_from_public: Default::default(),
-            atk_start_h,
-            _s: PhantomData,
-        }
-    }
-    fn on_msg(&mut self, msg_from: &MsgToNode<S::B>, atk_chain: &S::C) -> Vec<MsgToNode<S::B>> {
-        // let fm = atk_chain.get_fork_measure_pub_priv();
-        let h = atk_chain.get_heights_pub_priv();
+    fn on_msg_selfish_longest_chain(
+        &mut self,
+        msg_from: &MsgToNode<S::B>,
+        atk_chain: &S::C,
+    ) -> Vec<MsgToNode<S::B>> {
         // delta_prev is always calculated before appending blocks to chains (i.e., before msgs are processed)
-        let delta_prev = match self.params.chain_type {
-            // these will be heights
-            SmChainType::LongestChain => h.private - h.public,
-            SmChainType::WeightedChain => {
-                panic!("need to properly implement WeightedChain selfish mining")
-            }
-            SmChainType::WeightedDag => {
-                panic!("need to properly implement WeightedDag selfish mining")
-            }
-        };
+        let h = atk_chain.get_heights_pub_priv();
+        let delta_prev = h.private - h.public;
 
         match msg_from {
             MsgToNode::MsgBlock(b, is_private) => {
@@ -238,6 +217,35 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
+    type ResultsTy = SelfishMiningResult;
+    type Params = SelfishMiningParams;
+    fn init(_chain: &S::C, atk_start_h: Height, params: Self::Params) -> Self {
+        SelfishMining {
+            params,
+            // pub_height: chain.get_any_best_block(false).1.height,
+            // priv_height: chain.get_any_best_block(false).1.height,
+            priv_branch_len: 0,
+            blocks_from_private: Default::default(),
+            blocks_from_public: Default::default(),
+            atk_start_h,
+            _s: PhantomData,
+        }
+    }
+    fn on_msg(&mut self, msg_from: &MsgToNode<S::B>, atk_chain: &S::C) -> Vec<MsgToNode<S::B>> {
+        match self.params.chain_type {
+            // these will be heights
+            SmChainType::LongestChain => self.on_msg_selfish_longest_chain(msg_from, atk_chain),
+            SmChainType::WeightedChain => {
+                panic!("need to properly implement WeightedChain selfish mining")
+            }
+            SmChainType::WeightedDag => {
+                panic!("need to properly implement WeightedDag selfish mining")
             }
         }
     }
