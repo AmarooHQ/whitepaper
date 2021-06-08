@@ -4,12 +4,9 @@ use crate::chain::fork_rules::*;
 use crate::types::PassThruHashMap;
 use crate::types::*;
 use crate::ForkResult::BestBlock;
-use lru::LruCache;
-// use fnv::FnvHashMap;
-// use hashbrown;
-// use intmap::IntMap;
 use lazy_static::lazy_static;
 use log::*;
+use lru::LruCache;
 use std::cmp::max;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
@@ -27,7 +24,7 @@ pub mod fork_rules;
 #[derive(Debug, PartialEq, Eq)]
 pub enum ChainErr {
     BadPoW(HashID, HashID),
-    BlockRefsUnkParent(HashID, HashID),
+    BlockRefsUnkParent(HashID, HashID, bool),
     BadParentOrder((HashID, ChainWeight), (HashID, ChainWeight)),
     BadDifficulty,
     TsBeforeParent,
@@ -123,7 +120,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     fn get_chain_heads(&self, is_private: bool) -> &ChainHeads;
     fn get_chain_heads_mut(&mut self, is_private: bool) -> &mut ChainHeads;
     // fn validate_block_pure(&self, b: &B) -> Result<Arc<(B, BlockMD<B>)>, ChainErr>;
-    fn validate_block(&self, b: &B) -> Result<BlockMD<B>, ChainErr>;
+    fn validate_block(&self, b: &B, is_private: bool) -> Result<BlockMD<B>, ChainErr>;
     fn validate_block_local(&self, b: &B, is_private: bool) -> Result<(), ChainErr>;
     fn next_difficulty(&self, b: &B, b_meta: &BlockMD<B>) -> Difficulty;
     fn get_fork_measure_pub_priv(&self) -> Heights;
@@ -149,7 +146,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
                 b_c = b_cached;
             }
             None => {
-                let b_meta = self.validate_block(&b)?;
+                let b_meta = self.validate_block(&b, is_private)?;
                 Self::set_cached_block((b, b_meta));
                 b_c = Self::get_cached_block(&b_id).unwrap();
             }
@@ -237,6 +234,32 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
 
         // for u64
         u64::MAX / u64::from(d)
+    }
+
+    fn find_priv_blocks_not_in_pub(&self) -> Vec<B> {
+        self.find_missing_blocks_in(true)
+    }
+
+    fn find_pub_blocks_not_in_priv(&self) -> Vec<B> {
+        self.find_missing_blocks_in(false)
+    }
+
+    /// Return all blocks from one chain (priv or pub) that are needed to update the other
+    /// chain (pub or priv) so that both chains have the same history.
+    fn find_missing_blocks_in(&self, is_private: bool) -> Vec<B> {
+        // if is_private==true then we are looking for private blocks that aren't in pub
+        let sync_from_best = self.get_best_blocks(is_private);
+        let mut exclude_blocks: HashSet<_> = self.get_seen_blocks(!is_private).clone();
+        let mut missing_blocks = Vec::new();
+        for id in sync_from_best {
+            let b = Self::get_cached_block(id).unwrap().0.clone();
+            let bs = Vec::from_iter(b.all_prev_iter_excluding(&exclude_blocks));
+            exclude_blocks.extend(bs.iter().map(|b| b.get_hash()));
+            missing_blocks.extend(bs);
+        }
+        // make sure that the blocks we return are from lease recent to most recent.
+        missing_blocks.sort_by_key(|b| b.get_ts());
+        missing_blocks
     }
 
     /// Return priv blocks that are one better than known public blocks
@@ -540,14 +563,14 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
     fn validate_block_local(&self, b: &B, is_private: bool) -> Result<(), ChainErr> {
         for p_id in b.all_prev() {
             if !self.get_seen_blocks(is_private).contains(&p_id) {
-                return Err(BlockRefsUnkParent(b.get_hash(), p_id));
+                return Err(BlockRefsUnkParent(b.get_hash(), p_id, is_private));
             }
         }
 
         Ok(())
     }
 
-    fn validate_block(&self, b: &B) -> Result<BlockMD<B>, ChainErr> {
+    fn validate_block(&self, b: &B, is_private: bool) -> Result<BlockMD<B>, ChainErr> {
         if b.get_hash() > self.target_from_difficulty(b.get_difficulty()) {
             return Err(BadPoW(
                 b.get_hash(),
@@ -565,7 +588,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             .collect();
         for (p_id, pm) in pms.clone() {
             if pm.is_none() {
-                return Err(BlockRefsUnkParent(b.get_hash(), p_id.clone()));
+                return Err(BlockRefsUnkParent(b.get_hash(), p_id.clone(), is_private));
             }
             if b.get_ts() <= pm.unwrap().0.get_ts() {
                 return Err(TsBeforeParent);
@@ -584,8 +607,12 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
                             ));
                         }
                     }
-                    (_, Some(_)) => return Err(BlockRefsUnkParent(b.get_hash(), p1_id.clone())),
-                    (_, _) => return Err(BlockRefsUnkParent(b.get_hash(), p2_id.clone())),
+                    (_, Some(_)) => {
+                        return Err(BlockRefsUnkParent(b.get_hash(), p1_id.clone(), is_private))
+                    }
+                    (_, _) => {
+                        return Err(BlockRefsUnkParent(b.get_hash(), p2_id.clone(), is_private))
+                    }
                 }
             }
         }
@@ -860,7 +887,7 @@ mod tests {
 
         let b = _mk_draft_block(&chain, 10, false);
 
-        chain.validate_block(&b)?;
+        chain.validate_block(&b, false)?;
         assert_eq!(
             BlockMD::<B>::get_daa2_blocks(genesis.get_hash())
                 .unwrap()

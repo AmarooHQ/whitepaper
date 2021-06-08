@@ -110,11 +110,13 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         let target = self.chain.target_from_difficulty(b.get_difficulty());
         for _ in 0..max_attempts {
             if b.get_hash() < target {
-                let b_md = self.chain.validate_block(&b).unwrap();
+                let b_md = self.chain.validate_block(&b, mine_in_private).unwrap();
                 debug!(
-                    "\nN={:3} NEW_BLOCK H={:4}, D={:4}, ΣW={:8}, T={:4}, {:#x} ⭢  {:#x}",
+                    // "\nN={:3} NEW_BLOCK (priv={:}) H={:4}, D={:4}, ΣW={:8}, T={:4}, {:#x} ⭢  {:#x}",
+                    "\nN={:3} NEW_BLOCK (priv={:}) H={:4}, D={:4}, ΣW={:8}, T={:4}, {:#} ⭢  {:#}",
                     // "\nN={:} NEW_BLOCK H={:}, D={:}, T={:}, {:} ⭢  {:}",
                     self.id,
+                    mine_in_private,
                     b_md.height,
                     b_md.difficulty,
                     b_md.chain_weight,
@@ -197,7 +199,7 @@ mod tests {
         // create a valid block manually
         let b = n.chain.draft_block(10, false).test_set_work_bits(16);
         let id = b.get_hash();
-        let b_md = n.chain.validate_block(&b)?;
+        let b_md = n.chain.validate_block(&b, false)?;
         <SimpleCS as CSystemT>::B::set_cached_block((b, b_md));
         n.notify_of_block(id, false)?;
 

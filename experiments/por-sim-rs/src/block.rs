@@ -7,6 +7,8 @@ use lazy_static::lazy_static;
 use lru::LruCache;
 use rand::prelude::*;
 use rand::seq::IteratorRandom;
+use std::collections::HashSet;
+use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::iter::{FromIterator, IntoIterator};
@@ -48,6 +50,52 @@ impl<B: BlockT> Iterator for PrevBlockIter<B> {
     }
 }
 
+pub struct FilteredAllPrevBlockIter<'a, B: BlockT> {
+    last_block: Option<B>,
+    edge_blocks: VecDeque<HashID>,
+    exclude_blocks: &'a HashSet<HashID>,
+    seen_blocks: HashSet<HashID>,
+}
+
+impl<'a, B: BlockT> FilteredAllPrevBlockIter<'a, B> {
+    fn new(start_block: &B, exclude_blocks: &'a HashSet<HashID>) -> Self {
+        // start our edge blocks with the provided start_block
+        let edge_blocks = VecDeque::from(vec![start_block.get_hash()]);
+        FilteredAllPrevBlockIter {
+            last_block: None,
+            edge_blocks,
+            exclude_blocks,
+            seen_blocks: Default::default(),
+        }
+    }
+}
+
+impl<'a, B: BlockT> Iterator for FilteredAllPrevBlockIter<'a, B> {
+    type Item = B;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let p_id = self.edge_blocks.pop_front()?;
+        if self.seen_blocks.contains(&p_id) || self.exclude_blocks.contains(&p_id) {
+            return self.next();
+        }
+        self.seen_blocks.insert(p_id);
+        let p = B::get_cached_block(&p_id);
+        // genesis condition
+        if p_id == self.last_block.as_ref().map(|b| b.get_hash()).unwrap_or(0) {
+            None
+        } else {
+            match p {
+                None => None,
+                Some(p) => {
+                    self.edge_blocks.extend(p.0.all_prev());
+                    self.last_block = Some(p.0.clone());
+                    Some(p.0.clone())
+                }
+            }
+        }
+    }
+}
+
 pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + Hash {
     // note: this doesn't work b/c lazy_static inits those things as a Struct apparently.
     // const MY_CACHE: Mutex<PassThruHashMap<u64, Arc<(Self, BlockMD<Self>)>>>;
@@ -69,6 +117,13 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
         PrevBlockIter {
             curr_block: self.clone(),
         }
+    }
+
+    fn all_prev_iter_excluding<'a>(
+        &self,
+        exclude_blocks: &'a HashSet<HashID>,
+    ) -> FilteredAllPrevBlockIter<'a, Self> {
+        FilteredAllPrevBlockIter::new(self, exclude_blocks)
     }
 
     fn get_ts(&self) -> u32;

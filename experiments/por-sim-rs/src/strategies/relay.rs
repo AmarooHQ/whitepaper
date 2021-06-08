@@ -112,6 +112,33 @@ pub struct SelfishMiningParams {
     pub chain_type: SmChainType,
 }
 
+impl<'a, S: CSystemT<'a>> SelfishMining<S> {
+    fn sync_pub_to_priv(b: &S::B, atk_chain: &S::C, include_latest: bool) -> Vec<MsgToNode<S::B>> {
+        let mut pre_ret = atk_chain.find_pub_blocks_not_in_priv();
+        if include_latest {
+            pre_ret.push(b.clone());
+        }
+        let ret_blocks = pre_ret
+            .into_iter()
+            .map(|b1| MsgToNode::MsgBlock(b1, true))
+            .collect();
+        // info!("[SM] pub / Δprev=0, returning: {:?}", ret_blocks);
+        ret_blocks
+    }
+    fn sync_priv_to_pub(b: &S::B, atk_chain: &S::C, include_latest: bool) -> Vec<MsgToNode<S::B>> {
+        let mut pre_ret = atk_chain.find_priv_blocks_not_in_pub();
+        if include_latest {
+            pre_ret.push(b.clone());
+        }
+        let ret_blocks = pre_ret
+            .into_iter()
+            .map(|b1| MsgToNode::MsgBlock(b1, false))
+            .collect();
+        // info!("[SM] pub / Δprev=1, returning: {:?}", ret_blocks);
+        ret_blocks
+    }
+}
+
 impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
     type ResultsTy = SelfishMiningResult;
     type Params = SelfishMiningParams;
@@ -150,44 +177,37 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
                         // [SM] append block to pub chain -- recalc pub length.
                         // NB: -- this will happen when nodes process msgs (after this step),
                         // but worth noting in case we need to do calculations before then.
-                        let mut msgs_out = match delta_prev {
+                        let msgs_out: Vec<_> = match delta_prev {
                             0 => {
                                 debug!("[SM] pub / Δprev=0");
                                 // [SM] sync public and private chains
                                 self.priv_branch_len = 0;
                                 // return a msg that adds this block to the priv chain, too,
                                 // so the chains stay in sync.
-                                let mut pub_bs_to_add = vec![MsgToNode::MsgBlock(b.clone(), true)];
-                                let seen_priv_blocks = atk_chain.get_seen_blocks(true);
-                                for p in b.prev_iter() {
-                                    if seen_priv_blocks.contains(&p.get_hash()) {
-                                        break;
-                                    }
-                                    pub_bs_to_add.push(MsgToNode::MsgBlock(p.clone(), true));
-                                }
-                                pub_bs_to_add.reverse();
-                                pub_bs_to_add
+                                Self::sync_pub_to_priv(b, atk_chain, true)
                             }
                             1 => {
-                                debug!("[SM] pub / Δprev=1");
+                                info!("[SM] pub / Δprev=1");
                                 // [SM] publish last block of priv chain (there's only one)
                                 /* Note: SM algorithm doesn't include privateBranchLen<-0 for this case.
                                  * That's correct because the 'private' fork still exists
                                  * */
                                 // NB: we might have got multiple private heads, so iter over them and b'cast all
-                                atk_chain
-                                    .get_best_blocks(true)
-                                    .iter()
-                                    .map(|id| {
-                                        MsgToNode::MsgBlock(
-                                            S::C::get_cached_block(&*id).unwrap().0.clone(),
-                                            false,
-                                        )
-                                    })
-                                    .collect()
+                                // atk_chain
+                                //     .get_best_blocks(true)
+                                //     .iter()
+                                //     .map(|id| {
+                                //         MsgToNode::MsgBlock(
+                                //             S::C::get_cached_block(&*id).unwrap().0.clone(),
+                                //             false,
+                                //         )
+                                //     })
+                                // .collect()
+
+                                Self::sync_priv_to_pub(b, atk_chain, false)
                             }
                             2 => {
-                                debug!("[SM] pub / Δprev=2");
+                                info!("[SM] pub / Δprev=2");
                                 // [SM] publish all of private chain (should be 2 blocks)
                                 self.priv_branch_len = 0;
                                 /* NB: this is the same code as above. As long as chain's don't track
@@ -196,25 +216,18 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
                                  * to broadcast the parents of our best priv block.
                                  * */
 
-                                atk_chain
-                                    .get_best_blocks(true)
-                                    .iter()
-                                    .map::<Vec<_>, _>(|id| {
-                                        let b2 = S::C::get_cached_block(&*id).unwrap().0.clone();
-                                        let ps = b2.all_prev();
-                                        let b1s = ps.iter().map(|p_id| {
-                                            S::C::get_cached_block(&*p_id).unwrap().0.clone()
-                                        });
-                                        b1s.into_iter()
-                                            .chain(vec![b2].into_iter())
-                                            .map(|b| MsgToNode::MsgBlock(b, false))
-                                            .collect()
-                                    })
-                                    .collect::<Vec<_>>()
-                                    .concat()
+                                // let mut pre_ret = atk_chain.find_priv_blocks_not_in_pub();
+                                // pre_ret.push(b.clone());
+                                // let ret_blocks = pre_ret
+                                //     .into_iter()
+                                //     .map(|b1| MsgToNode::MsgBlock(b1, false))
+                                //     .collect();
+                                // info!("[SM] pub / Δprev=1, returning: {:?}", ret_blocks);
+                                // ret_blocks
+                                Self::sync_priv_to_pub(b, atk_chain, false)
                             }
                             _ => {
-                                debug!("[SM] pub / Δprev>2");
+                                info!("[SM] pub / Δprev>2");
                                 // [SM] publish first unpublished block from private chain
                                 /* NB: We only publish 1 priv block so that there are 2 heads of the
                                  * public chain: 1 honest, 1 selfish. Since we have >= 2 priv blocks
@@ -227,13 +240,10 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
                                     .collect()
                             }
                         };
-                        if delta_prev != 0 && (self.params.chain_type == SmChainType::WeightedDag) {
-                            msgs_out.push(MsgToNode::MsgBlock(b.clone(), true));
-                        }
                         msgs_out
                     }
                     true => {
-                        debug!("[SM] priv");
+                        info!("[SM] priv");
                         self.blocks_from_private.insert(b.get_hash());
                         // [SM] append block to priv chain -- recalc priv length
                         self.priv_branch_len += 1;
@@ -246,20 +256,16 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
                             // Then, in this branch (line 11) we publish all the private chain, which means
                             // publishing this current block.
 
-                            vec![
-                                atk_chain
-                                    .get_best_blocks(true)
-                                    .iter()
-                                    .map(|id| {
-                                        MsgToNode::MsgBlock(
-                                            S::C::get_cached_block(&*id).unwrap().0.clone(),
-                                            false,
-                                        )
-                                    })
-                                    .collect(),
-                                vec![MsgToNode::MsgBlock(b.clone(), false)],
-                            ]
-                            .concat()
+                            // let mut pre_ret = atk_chain.find_priv_blocks_not_in_pub();
+                            // pre_ret.push(b.clone());
+                            // let ret_blocks = pre_ret
+                            //     .into_iter()
+                            //     .map(|b1| MsgToNode::MsgBlock(b1, false))
+                            //     .collect();
+                            // info!("[SM] priv / Δprev=0, returning: {:?}", ret_blocks);
+                            // ret_blocks
+
+                            Self::sync_priv_to_pub(b, atk_chain, true)
                         } else {
                             vec![]
                         }
