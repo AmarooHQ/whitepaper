@@ -1,3 +1,4 @@
+use hashers::fx_hash::FxHasher;
 use hashers::null::PassThroughHasher;
 use std::collections::{HashMap, HashSet};
 use std::hash::BuildHasherDefault;
@@ -11,6 +12,6 @@ pub type Weight = Difficulty;
 pub type ChainWeight = Weight;
 
 pub type PassThruHashMap<K, V> = HashMap<K, V, BuildHasherDefault<PassThroughHasher>>;
-pub type PassThruHashSet<K> = HashSet<K, BuildHasherDefault<PassThroughHasher>>;
+pub type FxHashSet<K> = HashSet<K, BuildHasherDefault<FxHasher>>;
 
 pub type ChainHeads = PassThruHashMap<HashID, ChainWeight>;

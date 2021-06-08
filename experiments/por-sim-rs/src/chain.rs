@@ -68,12 +68,12 @@ pub struct Daa2Info {
 }
 
 pub struct Chain<B: BlockT, F: ForkRules<B> = LongestChain<B>> {
-    pub best_blocks: PassThruHashSet<HashID>,
+    pub best_blocks: FxHashSet<HashID>,
     pub_chain_heads: ChainHeads,
-    best_priv_blocks: PassThruHashSet<HashID>,
+    best_priv_blocks: FxHashSet<HashID>,
     priv_chain_heads: ChainHeads,
-    seen_pub_blocks: PassThruHashSet<HashID>,
-    seen_priv_blocks: PassThruHashSet<HashID>,
+    seen_pub_blocks: FxHashSet<HashID>,
+    seen_priv_blocks: FxHashSet<HashID>,
     goal_block_time: u32,
     _phantom_f: PhantomData<F>,
     _phantom_b: PhantomData<B>,
@@ -111,10 +111,10 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
         B::set_cached_block(b)
     }
 
-    fn get_best_blocks(&self, is_private: bool) -> &PassThruHashSet<HashID>;
-    fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut PassThruHashSet<HashID>;
-    fn get_seen_blocks(&self, is_private: bool) -> &PassThruHashSet<HashID>;
-    fn get_seen_blocks_mut(&mut self, is_private: bool) -> &mut PassThruHashSet<HashID>;
+    fn get_best_blocks(&self, is_private: bool) -> &FxHashSet<HashID>;
+    fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut FxHashSet<HashID>;
+    fn get_seen_blocks(&self, is_private: bool) -> &FxHashSet<HashID>;
+    fn get_seen_blocks_mut(&mut self, is_private: bool) -> &mut FxHashSet<HashID>;
     fn get_chain_heads(&self, is_private: bool) -> &ChainHeads;
     fn get_chain_heads_mut(&mut self, is_private: bool) -> &mut ChainHeads;
     // fn validate_block_pure(&self, b: &B) -> Result<Arc<(B, BlockMD<B>)>, ChainErr>;
@@ -247,7 +247,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     fn find_missing_blocks_in(&self, is_private: bool) -> Vec<B> {
         // if is_private==true then we are looking for private blocks that aren't in pub
         let sync_from_best = self.get_best_blocks(is_private);
-        let mut exclude_blocks: PassThruHashSet<_> = self.get_seen_blocks(!is_private).clone();
+        let mut exclude_blocks: FxHashSet<_> = self.get_seen_blocks(!is_private).clone();
         let mut missing_blocks = Vec::new();
         for id in sync_from_best {
             let b = Self::get_cached_block(id).unwrap().0.clone();
@@ -270,7 +270,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
         let best_pub_blocks = self.get_best_blocks(false);
 
         let mut next_edge = priv_blocks_tmp.clone();
-        let mut blocks_to_ret: PassThruHashSet<HashID> = Default::default();
+        let mut blocks_to_ret: FxHashSet<HashID> = Default::default();
         while next_edge.len() > 0 {
             let curr_edge = next_edge.clone();
             next_edge = Default::default();
@@ -282,7 +282,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
                 if b.1.chain_weight <= fm.public {
                     continue;
                 }
-                let mut add_to_edge: PassThruHashSet<HashID> = Default::default();
+                let mut add_to_edge: FxHashSet<HashID> = Default::default();
                 for p_id in b.0.all_prev() {
                     // if b has a parent in best_pub_blocks then b satisfies the condition
                     if best_pub_blocks.contains(&p_id) {
@@ -346,7 +346,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>> {
         }
 
         let mut intermediates = BTreeMap::<u32, BTreeSet<BInfo>>::new();
-        let mut intermediate_q = BTreeMap::<u32, PassThruHashSet<HashID>>::new();
+        let mut intermediate_q = BTreeMap::<u32, FxHashSet<HashID>>::new();
         let mut heights = Vec::new();
 
         for &id in bs {
@@ -475,7 +475,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         }
     }
 
-    fn get_best_blocks(&self, is_private: bool) -> &PassThruHashSet<HashID> {
+    fn get_best_blocks(&self, is_private: bool) -> &FxHashSet<HashID> {
         if is_private {
             &self.best_priv_blocks
         } else {
@@ -483,7 +483,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         }
     }
 
-    fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut PassThruHashSet<HashID> {
+    fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut FxHashSet<HashID> {
         if is_private {
             &mut self.best_priv_blocks
         } else {
@@ -491,7 +491,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         }
     }
 
-    fn get_seen_blocks(&self, is_private: bool) -> &PassThruHashSet<HashID> {
+    fn get_seen_blocks(&self, is_private: bool) -> &FxHashSet<HashID> {
         if is_private {
             &self.seen_priv_blocks
         } else {
@@ -499,7 +499,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         }
     }
 
-    fn get_seen_blocks_mut(&mut self, is_private: bool) -> &mut PassThruHashSet<HashID> {
+    fn get_seen_blocks_mut(&mut self, is_private: bool) -> &mut FxHashSet<HashID> {
         if is_private {
             &mut self.seen_priv_blocks
         } else {
