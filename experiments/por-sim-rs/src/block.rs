@@ -243,7 +243,7 @@ impl BlockT for Block {
         self.timestamp = ts
     }
 
-    #[inline]
+    #[inline(always)]
     fn increment_nonce(&mut self) {
         // self.id = hash_u128(self.id);
         self.id = hash_u64(self.id);
@@ -370,13 +370,9 @@ impl BlockT for DagBlock {
     fn set_ts(&mut self, ts: u32) {
         self.timestamp = ts
     }
-    #[inline]
+    #[inline(always)]
     fn increment_nonce(&mut self) {
-        // self.id = hash_u128(self.id);
         self.id = hash_u64(self.id);
-        // let bs = &self.id.to_be_bytes()[..];
-        // let h = &Sha3_256::digest(bs)[..16];
-        // self.id = HashID::from_be_bytes(h.try_into().unwrap());
     }
     fn get_difficulty(&self) -> Difficulty {
         self.d

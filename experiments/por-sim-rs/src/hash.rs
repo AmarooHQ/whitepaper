@@ -11,7 +11,7 @@ pub fn hash_u128(data: u128) -> u128 {
     u128::from(twox_hash::xxh3::hash64(&data.to_be_bytes()[..])) << 64
 }
 
-#[inline]
+#[inline(always)]
 pub fn hash_u64(data: u64) -> u64 {
     // for u64
     twox_hash::xxh3::hash64(&data.to_be_bytes()[..])
