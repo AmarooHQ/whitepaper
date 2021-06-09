@@ -5,6 +5,7 @@ use crate::types::*;
 use crate::CSystemT;
 use conv::prelude::*;
 use itertools::any;
+use itertools::max;
 use num::pow;
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -110,6 +111,10 @@ pub struct SelfishMiningResult {
     n_pub_blocks: f64,
     stale_priv_blocks: f64,
     stale_pub_blocks: f64,
+    ratio_main_chain_priv: f64,
+    ratio_main_chain_pub: f64,
+    main_chain_priv_c: f64,
+    main_chain_pub_c: f64,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -165,14 +170,14 @@ impl<'a, S: CSystemT<'a>> SelfishMining<S> {
             MsgToNode::MsgBlock(b, true) => {
                 info!("priv block mined: {}", b);
                 self.blocks_from_private.insert(b.get_hash());
-                if self.best_processed_h.private < b.get_height() {
-                    self.best_processed_h.private = b.get_height();
+                if self.best_processed_h.private >= b.get_height() {
+                    // return vec![];
                 } else {
-                    return vec![];
+                    self.best_processed_h.private = b.get_height();
+                    self.l_s += 1;
                 }
                 // selfish pool mines a new block
-                // new blocks should reference all public uncles
-                self.l_s += 1;
+                // new blocks should reference all priv uncles
                 if self.l_s == 2 && self.l_h == 1 {
                     self.set_l_s_and_l_h_to_zero();
                     // publish private branch
@@ -185,13 +190,13 @@ impl<'a, S: CSystemT<'a>> SelfishMining<S> {
             MsgToNode::MsgBlock(b, false) => {
                 info!("pub block mined: {}", b);
                 self.blocks_from_public.insert(b.get_hash());
-                if self.best_processed_h.public < b.get_height() {
-                    self.best_processed_h.public = b.get_height();
+                if self.best_processed_h.public >= b.get_height() {
+                    // return vec![];
                 } else {
-                    return vec![];
+                    self.best_processed_h.public = b.get_height();
+                    self.l_h += 1;
                 }
                 // public miner refs all unreferenced public uncles
-                self.l_h += 1;
                 if self.l_s < self.l_h {
                     self.set_l_s_and_l_h_to_zero();
                     // keep mining on this block
@@ -213,7 +218,25 @@ impl<'a, S: CSystemT<'a>> SelfishMining<S> {
                         self.l_s = self.l_s - self.l_h + 1;
                         self.l_h = 1;
                     }
-                    vec![]
+                    // let max_priv_height = max(atk_chain
+                    //     .find_first_priv_blocks_better_than_public()
+                    //     .iter()
+                    //     .map(|b| b.0.get_height()))
+                    // .unwrap_or(u32::MAX);
+                    let max_chain_weight =
+                        atk_chain.get_chain_weight_at(b.prev()) + b.get_difficulty() * 2;
+                    Self::sync_priv_to_pub(&b, atk_chain, false)
+                        .into_iter()
+                        .filter(|m| match m {
+                            MsgToNode::MsgBlock(pb, _) => {
+                                // (pb.get_height() < b.get_height() + 2
+                                //     && pb.get_difficulty() <= b.get_difficulty())
+                                //     || (pb.get_difficulty() > b.get_difficulty()
+                                //         && pb.get_height() < b.get_height() + 1)
+                                atk_chain.get_chain_weight_at(pb.get_hash()) <= max_chain_weight
+                            }
+                        })
+                        .collect()
                 }
             }
         }
@@ -325,7 +348,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
     }
 
     fn on_msg(&mut self, msg_from: &MsgToNode<S::B>, atk_chain: &S::C) -> Vec<MsgToNode<S::B>> {
-        match self.params.chain_type {
+        let ret_msgs = match self.params.chain_type {
             // these will be heights
             SmChainType::LongestChain => self.on_msg_selfish_longest_chain(msg_from, atk_chain),
             SmChainType::WeightedChain => {
@@ -335,7 +358,9 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
                 // panic!("need to properly implement WeightedDag selfish mining")
                 self.on_msg_selfish_ethereum(msg_from, atk_chain)
             }
-        }
+        };
+        info!("SM on_msg returning: {:?}", ret_msgs);
+        ret_msgs
     }
 
     fn get_results(&self, c: &S::C) -> Option<(Self::ResultsTy, bool)> {
@@ -348,14 +373,15 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
         let mut chain_pub_weight = 0.;
         let mut chain_priv_weight = 0.;
         let mut _chain_other_weight = 0.;
-        let mut heads: FxHashSet<HashID> = c.get_best_blocks(false).clone();
-        let mut seen: FxHashSet<HashID> = Default::default();
+
+        let mut heads: SeenBlocks = c.get_best_blocks(false).clone();
+        let mut seen: SeenBlocks = Default::default();
         loop {
             let h_vec: Vec<_> = heads.iter().filter(|h| !seen.contains(&h)).collect();
             if h_vec.len() == 0 {
                 break;
             }
-            let mut new_heads: FxHashSet<HashID> = Default::default();
+            let mut new_heads: SeenBlocks = Default::default();
             for id in h_vec {
                 seen.insert(*id);
                 let b = S::C::get_cached_block(&*id).unwrap();
@@ -376,6 +402,26 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
             }
             heads = new_heads;
         }
+
+        let mut main_chain_priv_c = 0.;
+        let mut main_chain_pub_c = 0.;
+        let mut _main_chain_other_c = 0.;
+        let mut main_chain_b = c.select_best_block(false);
+        loop {
+            if self.blocks_from_private.contains(&main_chain_b) {
+                main_chain_priv_c += 1.;
+            } else if self.blocks_from_public.contains(&main_chain_b) {
+                main_chain_pub_c += 1.;
+            } else {
+                _main_chain_other_c += 1.;
+            }
+            let next_main_chain_b = S::C::get_cached_block(&main_chain_b).unwrap().0.prev();
+            if next_main_chain_b == main_chain_b {
+                break;
+            }
+            main_chain_b = next_main_chain_b;
+        }
+
         let total_chain_count = chain_priv_count + chain_pub_count;
         let total_w = chain_priv_weight + chain_pub_weight;
         let n_priv_blocks = self.blocks_from_private.len().value_as::<f64>().unwrap();
@@ -389,7 +435,9 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
         let stale_priv_blocks = n_priv_blocks - chain_priv_count;
         let stale_pub_blocks = n_pub_blocks - chain_pub_count;
 
-        todo!("calc stuff for main chain vs uncles");
+        let total_main_chain_c = main_chain_priv_c + main_chain_pub_c;
+        let ratio_main_chain_priv = main_chain_priv_c / total_main_chain_c;
+        let ratio_main_chain_pub = main_chain_pub_c / total_main_chain_c;
 
         let alpha = ratio_priv_blocks_mined;
         let gamma = 0.5;
@@ -424,6 +472,10 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
                 n_pub_blocks,
                 stale_priv_blocks,
                 stale_pub_blocks,
+                ratio_main_chain_priv,
+                ratio_main_chain_pub,
+                main_chain_priv_c,
+                main_chain_pub_c,
             },
             success,
         ))
