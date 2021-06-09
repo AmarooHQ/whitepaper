@@ -307,7 +307,8 @@ impl Display for DagBlock {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "DagBlock@{:4} | {:#16x} -> {:?}",
+            // "DagBlock@{:4} | {:#16x} -> {:?}",
+            "DagBlock@{:4} | {:#} -> {:?}",
             self.timestamp, self.id, self.parents
         )
     }

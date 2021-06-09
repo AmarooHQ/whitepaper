@@ -243,7 +243,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
     /// chain (pub or priv) so that both chains have the same history.
     fn find_missing_blocks_in(&self, is_private: bool) -> Vec<B> {
         // if is_private==true then we are looking for private blocks that aren't in pub
-        let sync_from_best = self.get_best_blocks(is_private);
+        let sync_from_best = self.get_chain_heads(is_private).keys();
         let mut exclude_blocks: SeenBlocks = self.get_seen_blocks(!is_private).clone();
         let mut missing_blocks = Vec::new();
         for id in sync_from_best {
@@ -255,6 +255,13 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
         // make sure that the blocks we return are from lease recent to most recent.
         missing_blocks.sort_by_key(|b| (b.get_ts(), b.get_height()));
         missing_blocks
+    }
+
+    fn block_is_ancestor_of(&self, ancestor: HashID, descendant: HashID) -> bool {
+        match self.find_lca_and_intermediates(&vec![ancestor, descendant]) {
+            None => false,
+            Some(lca_r) => lca_r.0 == ancestor,
+        }
     }
 
     /// Return priv blocks that are one better than known public blocks
