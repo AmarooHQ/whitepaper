@@ -146,14 +146,13 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::block::*;
     use crate::block_metadata::*;
     use crate::chain::*;
-    use crate::cryptosystem::SimpleCS;
+    use crate::cryptosystem::*;
 
     #[test]
     fn block_is_added_to_chain() -> Result<(), String> {
-        let genesis = Block::genesis(0);
+        let genesis = <SimpleCS as CSystemT>::B::genesis(0);
         let net_args = NetworkArgs::new(10);
         let c = Chain::new(
             genesis.clone(),
@@ -198,7 +197,7 @@ mod tests {
 
     #[test]
     fn test_block_added_via_notify() -> Result<(), ChainErr> {
-        let genesis = Block::genesis(0);
+        let genesis = <SimpleCS as CSystemT>::B::genesis(0);
         let net_args = NetworkArgs::new(10);
         let c = Chain::new(
             genesis.clone(),

@@ -21,10 +21,12 @@ mod block;
 mod block_metadata;
 mod chain;
 mod cryptosystem;
+mod extrinsics;
 mod hash;
 mod message_manager;
 mod msg;
 mod node;
+mod state;
 mod strategies;
 mod types;
 

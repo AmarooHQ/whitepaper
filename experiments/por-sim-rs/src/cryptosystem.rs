@@ -2,7 +2,7 @@ use crate::block::*;
 use crate::chain::fork_rules::*;
 use crate::chain::*;
 
-pub trait CSystemT<'a> {
+pub trait CSystemT<'a>: Clone {
     type B: BlockT;
     type FR: ForkRules<Self::B>;
     type C: ChainT<'a, Self::B, Self::FR>;
@@ -16,14 +16,16 @@ pub trait CSystemT<'a> {
 //     type C = C;
 // }
 
+#[derive(Clone)]
 pub struct SimpleCS {}
 
 impl<'a> CSystemT<'a> for SimpleCS {
     type B = Block;
-    type FR = LongestChain<Block>;
+    type FR = LongestChain<Self::B>;
     type C = Chain<Self::B, Self::FR>;
 }
 
+#[derive(Clone)]
 pub struct WeightedChainCS {}
 
 impl<'a> CSystemT<'a> for WeightedChainCS {
@@ -32,6 +34,7 @@ impl<'a> CSystemT<'a> for WeightedChainCS {
     type C = Chain<Self::B, Self::FR>;
 }
 
+#[derive(Clone)]
 pub struct DagCS {}
 
 impl<'a> CSystemT<'a> for DagCS {

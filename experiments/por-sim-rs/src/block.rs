@@ -7,6 +7,7 @@ use lazy_static::lazy_static;
 use lru::LruCache;
 use rand::prelude::*;
 use rand::seq::IteratorRandom;
+use std::cmp::Ordering;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::hash::Hash;
@@ -165,7 +166,7 @@ pub trait ManyParentsBlockT: BlockT {
     ) -> Self;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Block {
     pub id: HashID,
     pub parent: HashID,
@@ -181,6 +182,24 @@ impl Display for Block {
             "Block@{:4} | {:#16x} -> {:#16x}",
             self.timestamp, self.id, self.parent
         )
+    }
+}
+
+impl PartialOrd for Block {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Block {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match self.get_height().cmp(&other.get_height()) {
+            Ordering::Equal => match self.get_difficulty().cmp(&other.get_difficulty()) {
+                Ordering::Equal => self.get_hash().cmp(&other.get_hash()),
+                _ord => _ord,
+            },
+            _ord => _ord,
+        }
     }
 }
 

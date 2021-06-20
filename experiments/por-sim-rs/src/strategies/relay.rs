@@ -5,7 +5,6 @@ use crate::types::*;
 use crate::CSystemT;
 use conv::prelude::*;
 use itertools::any;
-use itertools::max;
 use num::pow;
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -356,7 +355,8 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
             }
             SmChainType::WeightedDag => {
                 // panic!("need to properly implement WeightedDag selfish mining")
-                self.on_msg_selfish_ethereum(msg_from, atk_chain)
+                self.on_msg_selfish_ethereum(msg_from, atk_chain);
+                unimplemented!("Ethereum selfish mining not fully implemented (i.e., doesn't work)")
             }
         };
         info!("SM on_msg returning: {:?}", ret_msgs);
