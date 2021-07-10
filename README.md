@@ -4,7 +4,7 @@
 
 - the Makefile presumes you're running this in a linux environment
 - you'll need: make, pandoc v2.5, latexmk, git
-- ubuntu pkgs: `texlive-science`, `texlive-extra-utils`, `gnuplot`
+- ubuntu pkgs: `texlive-science`, `texlive-extra-utils`, `texlive-latex-extra`, `gnuplot`
 
 if you run into compile errors, you could try installing `texlive-full` -- not a great workaround but does solve some issues (b/c apparently we have a missing dep) -- or just use the docker build via `make docker-build && make docker`
 
