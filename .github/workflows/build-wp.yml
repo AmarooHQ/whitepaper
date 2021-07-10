@@ -18,4 +18,4 @@ jobs:
 
       - name: build whitepaper
         run: |
-          make docker DOCKER_CMD=./build.sh
+          make docker "DOCKER_CMD=bash build.sh"

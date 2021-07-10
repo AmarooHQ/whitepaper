@@ -18,7 +18,7 @@ jobs:
           default: true
           override: true
 
-      - name: build whitepaper
+      - name: run cargo test
         run: |
           cd experiments/por-sim-rs
           cargo test
