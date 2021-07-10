@@ -29,6 +29,8 @@ PDFGraphics = $(patsubst %_sag.tex,%_sag.pdf,$(StandAloneGraphicsTeXFiles))
 InputTeXFiles = $(wildcard *_input.tex)
 PWD = $(pwd)
 
+wp-graphics-standalone: $(PDFGraphics)
+
 %_sag.pdf: %_sag.tex
 	cd `dirname $<` && \
 	$(PDFLATEX) `basename $<`

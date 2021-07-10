@@ -18,4 +18,7 @@ jobs:
 
       - name: build whitepaper
         run: |
+          # make standalone graphics explicitly; shouldn't be required tho
+          make docker "DOCKER_CMD=make wp-graphics-standalone"
+          # make the rest of the whitepaper
           make docker "DOCKER_CMD=bash build.sh"
