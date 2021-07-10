@@ -1,0 +1,21 @@
+name: Build WP
+
+on:
+  push:
+    branches: '*'
+
+jobs:
+  build:
+    runs-on: 'self-hosted'
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: build docker container
+        shell: bash
+        run: |
+          make docker-build
+
+      - name: build whitepaper
+        run: |
+          make docker DOCKER_CMD=./build.sh

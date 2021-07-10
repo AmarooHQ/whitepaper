@@ -11,7 +11,9 @@ geometry=left=3cm,right=3cm,top=3cm,bottom=3cm
 
 # default loction that the WP pdf gets written to. Set OUTPUT_PDF to output somewhere else.
 OUTPUT_PDF_DEFAULT=$(WPRAW)-latest.pdf
-OUTPUT_PDF=${OUTPUT_PDF:-$(OUTPUT_PDF_DEFAULT)}
+ifndef OUTPUT_PDF
+override OUTPUT_PDF = $(OUTPUT_PDF_DEFAULT)
+endif
 
 default: whitepaper
 
@@ -111,8 +113,9 @@ init:
 docker-build:
 	docker build -f Dockerfile -t whitepaper-build:latest .
 
+# set DOCKER_CMD to run something other than the default `make`. e.g., `make docker DOCKER_CMD=./build.sh`
 docker:
-	docker run --rm -it -u `id -u ${USER}`:`id -g ${USER}` -v `pwd`:/work whitepaper-build:latest
+	docker run --rm -it -u `id -u ${USER}`:`id -g ${USER}` -v `pwd`:/work whitepaper-build:latest ${DOCKER_CMD}
 
 docker-bash:
 	docker run --rm -it -u `id -u ${USER}`:`id -g ${USER}` -v `pwd`:/work whitepaper-build:latest /bin/bash
