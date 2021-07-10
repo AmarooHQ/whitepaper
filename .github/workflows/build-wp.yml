@@ -18,5 +18,7 @@ jobs:
 
       - name: build whitepaper
         run: |
+          # make standalone graphics explicitly & in parallel
           NCPUS=$(lscpu | egrep '^CPU\(s\)' | awk '{ print $2 }')
-          make -j ${NCPUS:-4} docker "DOCKER_CMD=bash build.sh"
+          make docker "DOCKER_CMD=make -j ${NCPUS:-4} wp-graphics-standalone" && \
+            make docker "DOCKER_CMD=bash build.sh"
