@@ -5,6 +5,14 @@ WPFILE=$(WPNOEXT).markdown
 WPHTML=$(WPNOEXT).html
 WPTEX=$(WPNOEXT).tex
 
+# default properties for WP -- see `set-wp-properties` cmd
+papersize=a4
+geometry=left=3cm,right=3cm,top=3cm,bottom=3cm
+
+# default loction that the WP pdf gets written to. Set OUTPUT_PDF to output somewhere else.
+OUTPUT_PDF_DEFAULT=$(WPRAW)-latest.pdf
+OUTPUT_PDF=${OUTPUT_PDF:-$(OUTPUT_PDF_DEFAULT)}
+
 default: whitepaper
 
 # https://tex.stackexchange.com/questions/45/how-to-speed-up-latex-compilation-with-several-tikz-pictures
@@ -24,8 +32,7 @@ PWD = $(pwd)
 	$(PDFLATEX) `basename $<`
 	$(PDFCROP) $@ $@
 
-whitepaper: $(PDFGraphics) $(InputTeXFiles) build-whitepaper wp-pandoc mk-latex-pdf wc
-
+whitepaper: $(PDFGraphics) $(InputTeXFiles) build-whitepaper set-wp-properties wp-pandoc mk-latex-pdf wc
 whitepaper-skip-pandoc: $(PDFGraphics) $(InputTeXFiles) mk-latex-pdf wc
 
 # atm restrict this to just the UT folder, can generalize again later
@@ -39,6 +46,15 @@ build-whitepaper: %.md
 	  cat $$mdfile >> $(WPFILE) && \
 	  echo -n "\n\n" >> $(WPFILE) ; \
 	done
+
+# update properties in the whitepaper like papersize and geometry.
+# can be set by CLI args like `make whitepaper papersize=a5 geometry=1cm`
+set-wp-properties:
+	sed -r -i 's/^papersize: (.*)$$/papersize: '$(papersize)'/' $(WPFILE)
+	sed -r -i 's/^geometry: (.*)$$/geometry: '$(geometry)'/' $(WPFILE)
+
+	egrep '^papersize: (.*)$$' $(WPFILE)
+	egrep '^geometry: (.*)$$' $(WPFILE)
 
 wp-pandoc:
 	pandoc -s --number-sections --toc -f markdown -t latex -o $(WPTEX) $(WPFILE)
@@ -60,7 +76,7 @@ mk-latex-pdf:
 	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
 	makeglossaries -d $(OUTDIR) $(WPRAW)
 	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
-	cp $(WPNOEXT).pdf ./$(WPRAW)-latest.pdf
+	cp $(WPNOEXT).pdf $(OUTPUT_PDF)
 
 %.md:
 	echo 'skipping task for .md files'

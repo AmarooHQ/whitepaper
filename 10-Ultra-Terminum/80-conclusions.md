@@ -6,7 +6,7 @@
 
 \begin{figure}[H]
 \centering
-\includegraphics{trilemma/conflict_resolution_sag}
+\includegraphics[max width=\linewidth]{trilemma/conflict_resolution_sag}
 \caption{A solution to the core conflict of \textit{Buterin's Trilemma}.}
 \label{fig:trilemma-core-conflict-solved}
 \end{figure}

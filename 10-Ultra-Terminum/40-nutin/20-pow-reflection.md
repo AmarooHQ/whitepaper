@@ -32,7 +32,7 @@ Let's add such a contract to Ethereum and describe the relevant data and events 
 
 \begin{figure}[]
 \centering
-\includegraphics[height=0.3\textheight]{pow_refl_btc_eth_step1_sag}
+\includegraphics[max width=\linewidth, height=0.3\textheight]{pow_refl_btc_eth_step1_sag}
 \caption{Bitcoin headers, as they are produced, are included in Ethereum's state (via user made transactions). This is roughly how \textit{BTC Relay} works.}
 \label{fig:pr-btc-eth-step1}
 \end{figure}
@@ -55,7 +55,7 @@ This is conceptually similar to Ethereum tracking Bitcoin, and shown in \autoref
 
 \begin{figure}
 \centering
-\includegraphics[height=0.28\textheight]{pow_refl_step1_sag}
+\includegraphics[max width=\linewidth, height=0.28\textheight]{pow_refl_step1_sag}
 \caption{Step 1: Chain B's headers are tracked by Chain E.}
 \label{fig:pow_refl_step1}
 \end{figure}
@@ -79,7 +79,7 @@ Say that the protocol of Chain B is extended to add support for tracking Chain E
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=0.4\textheight]{pow_refl_step2_sag}
+\includegraphics[max width=\linewidth, height=0.4\textheight]{pow_refl_step2_sag}
 \caption{Step 2: Chain B and Chain E track each other's header-only chain.}
 \label{fig:pow_refl_step2}
 \end{figure}
@@ -101,7 +101,7 @@ Can we use a tracked chain for a different purpose? What happens if Chain B trac
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=0.4\textheight]{pow_refl_step3_sag}
+\includegraphics[max width=\linewidth, height=0.4\textheight]{pow_refl_step3_sag}
 \caption{Step 3: Chain B includes \textit{proofs of reflection} (PoRs) along with headers. Proofs of Reflection allow Chain B to know which of its own blocks are known to Chain E.}
 \label{fig:por-step3}
 \end{figure}
@@ -179,7 +179,7 @@ The final step in this progression is *mutual reflection* -- where both chains t
 
 \begin{figure}[]
 \centering
-\includegraphics[height=0.35\textheight]{pow_refl_step5_sag}
+\includegraphics[max width=\linewidth, height=0.35\textheight]{pow_refl_step5_sag}
 \caption{\textit{Proof of Reflection} between two UT Chains, Chain A and Chain B}
 \label{fig:por-step5}
 \end{figure}

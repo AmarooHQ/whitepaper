@@ -16,7 +16,7 @@ The definition of scalability is perhaps problematic. If the network growth, $O(
 
 \begin{figure}
 \centering
-\includegraphics{trilemma/core_conflict_sag}
+\includegraphics[max width=\linewidth]{trilemma/core_conflict_sag}
 \caption{A cloud of the core conflict of \textit{Buterin's Trilemma}.}
 \label{fig:trilemma-core-conflict}
 \end{figure}
@@ -41,7 +41,7 @@ A mistaken way to break the conflict is *merged mining* (aka AuxPoW). This metho
 
 \begin{figure}
 \centering
-\includegraphics{trilemma/mm_conflict_sag}
+\includegraphics[max width=\linewidth]{trilemma/mm_conflict_sag}
 \caption{A cloud showing the scaling conflict of \textit{merged mining}.}
 \label{fig:trilemma-mm-conflict}
 \end{figure}
