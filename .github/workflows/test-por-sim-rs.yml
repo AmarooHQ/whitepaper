@@ -1,0 +1,24 @@
+name: Test PoR Sim (Rust)
+
+on:
+  push:
+    branches: '*'
+
+jobs:
+  test:
+    runs-on: 'self-hosted'
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install rust toolchain
+        uses: actions-rs/toolchain@1
+        with:
+          toolchain: stable
+          default: true
+          override: true
+
+      - name: build whitepaper
+        run: |
+          cp experiments/por-sim-rs
+          cargo test
