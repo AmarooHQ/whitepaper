@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -x
+
 NCPUS=$(lscpu | egrep '^CPU\(s\)' | awk '{ print $2 }')
 make -j ${NCPUS:-4} wp-graphics-standalone
 make
