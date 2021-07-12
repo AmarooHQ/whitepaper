@@ -79,7 +79,7 @@ Say that the protocol of Chain B is extended to add support for tracking Chain E
 
 \begin{figure}[p]
 \centering
-\includegraphics[max width=\linewidth, height=0.4\textheight]{pow_refl_step2_sag}
+\includegraphics[max width=\linewidth, max height=0.4\textheight]{pow_refl_step2_sag}
 \caption{Step 2: Chain B and Chain E track each other's header-only chain.}
 \label{fig:pow_refl_step2}
 \end{figure}
@@ -101,7 +101,7 @@ Can we use a tracked chain for a different purpose? What happens if Chain B trac
 
 \begin{figure}[p]
 \centering
-\includegraphics[max width=\linewidth, height=0.4\textheight]{pow_refl_step3_sag}
+\includegraphics[max width=\linewidth, max height=0.4\textheight]{pow_refl_step3_sag}
 \caption{Step 3: Chain B includes \textit{proofs of reflection} (PoRs) along with headers. Proofs of Reflection allow Chain B to know which of its own blocks are known to Chain E.}
 \label{fig:por-step3}
 \end{figure}
