@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 
 
 """
-generate a comparison histogram of the average distances between tiles given different tiling methods.
+generate a comparison histogram of the average distances between tiles
+given different tiling methods.
 
 hypothesis: tree-tiling is more efficient than tesselating tilings.
 for a tesselating tiling, I devised a simple square based tiling that has v=4
