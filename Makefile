@@ -26,10 +26,12 @@ RM       = /bin/rm
 #StandAloneGraphicsTeXFiles = $(wildcard includes/ut/diags/*_sag.tex)
 StandAloneGraphicsTeXFiles = $(shell find ./ -iname \*_sag.tex)
 PDFGraphics = $(patsubst %_sag.tex,%_sag.pdf,$(StandAloneGraphicsTeXFiles))
+DVIGraphics = $(patsubst %_sag.tex,%_sag.dvi,$(StandAloneGraphicsTeXFiles))
 InputTeXFiles = $(wildcard *_input.tex)
 PWD = $(pwd)
 
 wp-graphics-standalone: $(PDFGraphics)
+wp-graphics-dvi: $(DVIGraphics)
 
 %_sag.pdf: %_sag.tex
 	cd `dirname $<` && \

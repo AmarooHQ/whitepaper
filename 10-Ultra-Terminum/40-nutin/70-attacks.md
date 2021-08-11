@@ -10,10 +10,10 @@
 
 ### Dialog: Attacks and Mitigation
 
-\newcommand{\nefName}{ExMalo}
+\newcommand{\nefName}{EMalo}
 \newcommand{\cMax}[1]{\ChatR{title={Max:},colback=Cerulean!20}{#1}}
 \newcommand{\cNef}[1]{\ChatL{title={\nefName:},colback=BrickRed!20}{#1}}
-\newcommand{\cSe}[1]{\ChatL{title={ExSe:},colback=ForestGreen!20}{#1}}
+\newcommand{\cSe}[1]{\ChatL{title={ESe:},colback=ForestGreen!20}{#1}}
 
 \begin{tcolorbox}[colback=black!70,coltext=white]
     \centering
