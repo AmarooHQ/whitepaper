@@ -26,6 +26,7 @@ includes/handout/*.md
 *.log
 
 includes/**/*.old
+includes/ut/diags/**/*.png
 *.synctex*
 *.out
 *.toc

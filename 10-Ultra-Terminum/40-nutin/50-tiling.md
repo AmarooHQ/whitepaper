@@ -4,19 +4,21 @@
 
 \defineTerm{Maximal Simplex}{A simplex with the maximum number of simplex-chains under $O(c)$ constraints}
 
-Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes are tiled, we call the result a *simplex-tiling*.
+Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes are tiled, I call the result a *simplex tiling*.
 
-\defineTerm{Simplex Tile}{A quadrifurcated maximal simplex}
+\defineTerm{Simplex Tile}{Like a simplex, but $75\%$ of the PoR capacity is reserved for reflections with \emph{neighboring} tiles; a quadrifurcated maximal simplex}
 
 \todo{terms and edit / refactor this section}
 
-A quadrifurcated maximal simplex. That is: it is a simplex that deliberately reserves only $\nicefrac{1}{4}$ of its otherwise maximum capacity for internal reflections. By definition, the maximum capacity of a tile is $\nicefrac{1}{4}$ the maximum capacity of an equivalent maximal simplex. Why quadrifurcate capacity like this? In a maximal simplex, all reflections are between simplex-chains within that simplex, i.e., all reflections are internal. However, by reserving $\nicefrac{3}{4}$ of a simplex's maximum capacity, that simplex (which thus becomes the root tile) can reflect all simplex-chains in 3 adjacent 'children' tiles. Those adjacent tiles do not reflect their siblings, though; initially, their only external reflections are with simplex-chains in the parent tile. Each child tile, at this stage, has only reserved 50% of the capacity of an equivalent maximal simplex -- 25% for externally reflecting its parent's simplex-chains, and 25% for internally reflecting its own simplex-chains. Thus, each tile is able to reflect all simplex-chains of the parent tile *and* two additional children tiles. Children tiles can be instantiated in an ad-hoc basis, i.e., as a simplex-tiling (or an individual tile) approaches maximum capacity.
+A simplex tile, on its own, is very similar to a standalone simplex. If a standalone simplex (of a given capacity) could host $1600$ simplex-chains, then an equivalent simplex tile will host $400$ (or maybe less); only $25\%$ of the PoR capacity is reserved for *internal* reflections -- i.e., reflections within that simplex tile. The other $75\%$ is reserved for *external* reflections to simplex-chains in *neighboring* tiles.
 
-\defineTerm{Simplex Tiling}{}
+That is: it is a simplex that deliberately reserves only $\nicefrac{1}{4}$ of its otherwise maximum PoR capacity for internal reflections. By definition, the maximum PoR capacity of a tile is $\nicefrac{1}{4}$ the maximum PoR capacity of an equivalent maximal simplex. Why quadrifurcate capacity like this? In a maximal simplex, all reflections are between simplex-chains within that simplex, i.e., all reflections are internal. However, if a simplex reserves $\nicefrac{3}{4}$ of a its maximum capacity, that simplex (which thus becomes the root tile) can reflect every simplex-chains in 3 adjacent 'child' tiles. Those adjacent tiles do not reflect their siblings, though; initially, their only external reflections are with simplex-chains in the parent tile. Each child tile, at this stage, has only reserved 50% of its full PoR capacity -- 25% for externally reflecting its parent's simplex-chains, and 25% for internally reflecting its own simplex-chains. Thus, each tile is able to reflect all simplex-chains of the parent tile *and* two additional children tiles. Children tiles can be instantiated in an ad-hoc basis, i.e., as a simplex-tiling (or an individual tile) approaches maximum capacity.
+
+\defineTerm{Simplex Tiling}{An interconnected graph of mutually reflecting simplexes. This graph grows in a scalable manner when simplex tiles have a valence $>= 3$}
 
 \todo{
     from forum: \\
-    max: It's not that `k` decreases, but the proportion of `k` dedicated to internal reflections decreases. like it's optimal to have `k/2` dedicated to reflections, and `k/2` dedicated to transactions. when tiling with a valence of 3, the `k/2` for reflections is quadrifurcated, so there's `k/8` dedicated for each group of reflections (internal, parent, child1, child2). \\
+    max:[When a simplex does tiling:] it's not that `k` decreases, but the proportion of `k` dedicated to internal reflections decreases. like it's optimal to have `k/2` dedicated to reflections, and `k/2` dedicated to transactions. when tiling with a valence of 3, the `k/2` for reflections is quadrifurcated, so there's `k/8` dedicated for each group of reflections (internal, parent, child1, child2). \\
     leesa: oki yup this makes a lot of sense now. I felt like the `k` explanations were helpful in solidifying understanding. I think bc it helped to make the concept more concrete since it linked back to the proofs.
 }
 

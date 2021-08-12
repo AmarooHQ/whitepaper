@@ -16,6 +16,8 @@ import hashlib
 import functools
 from subprocess import Popen, PIPE
 
+print("doesn't work")
+sys.exit(99)
 
 class cmds(object):
   pdflatex = 'pdflatex --shell-escape -file-line-error -interaction=nonstopmode --'
@@ -23,14 +25,14 @@ class cmds(object):
 
 
 latex_doc ='''
-\documentclass[border=2bp]{standalone}
-\usepackage{tikz}
+\\documentclass[border=2bp]{standalone}
+\\usepackage{tikz}
 \\begin{document}
 \\begingroup
 \\tikzset{every picture/.style={scale=1}}
 %(content)s
-\endgroup
-\end{document}
+\\endgroup
+\\end{document}
 '''
 
 # util to run command in a subprocess, and communicate with it.
@@ -38,20 +40,20 @@ def run(cmd, stdin=None, exit_on_error=True):
   # print '>', cmd
   p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
   if stdin:
-    p.stdin.write(stdin)
+    p.stdin.write(stdin.encode())
     p.stdin.close()
   p.wait()
 
   # error out if necessary
   if p.returncode != 0 and exit_on_error:
-    print '>', cmd
-    print 'Error.'
-    print '-' * 20, 'STDIN'
-    print stdin
-    print '-' * 20, 'STDOUT'
-    print p.stdout.read()
-    print '-' * 20, 'STDERR'
-    print p.stderr.read()
+    print('>', cmd)
+    print('Error.')
+    print('-' * 20, 'STDIN')
+    print(stdin)
+    print('-' * 20, 'STDOUT')
+    print(p.stdout.read())
+    print('-' * 20, 'STDERR')
+    print(p.stderr.read())
     sys.exit(p.returncode)
 
   return p.stdout.read()
@@ -61,7 +63,7 @@ def memoize_in_file(fn):
   @functools.wraps(fn)
   def memoized(*args, **kwds):
     i = fn.__name__ + str(*args) + str(**kwds)
-    h = hashlib.sha1(i).hexdigest()
+    h = hashlib.sha1(i.encode()).hexdigest()
     if os.path.exists(h):
       with open(h) as f:
         return f.read()
@@ -75,6 +77,8 @@ def memoize_in_file(fn):
 
 # conversion functions
 def tikz2tex(tikz):
+  if "\\documentclass" in tikz:
+    return tikz
   return latex_doc % {'content': tikz}
 
 def tex2pdf(tex):
@@ -94,18 +98,18 @@ def tikz2svg(tikz):
 
 # move to tmp because latex litters :(
 def chdir(inp):
-  h = hashlib.sha1(inp).hexdigest()
+  h = hashlib.sha1(inp.encode('utf8')).hexdigest()
   d = '/tmp/%s' % h
   run('mkdir -p %s' % d, exit_on_error=False)
   os.chdir(d)
 
 if __name__ == '__main__':
   if '-h' in sys.argv or '--help' in sys.argv:
-    print 'Usage: %s [<file>]' % sys.argv[0]
-    print 'Outputs svg conversion of tikz input (files or stdin).'
+    print('Usage: %s [<file>]' % sys.argv[0])
+    print('Outputs svg conversion of tikz input (files or stdin).')
     sys.exit(0)
 
   import fileinput
   lines = ''.join([l for l in fileinput.input()])
   chdir(lines)
-  print tikz2svg(lines)
+  print(tikz2svg(lines))

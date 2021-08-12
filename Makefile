@@ -27,16 +27,21 @@ RM       = /bin/rm
 StandAloneGraphicsTeXFiles = $(shell find ./ -iname \*_sag.tex)
 PDFGraphics = $(patsubst %_sag.tex,%_sag.pdf,$(StandAloneGraphicsTeXFiles))
 DVIGraphics = $(patsubst %_sag.tex,%_sag.dvi,$(StandAloneGraphicsTeXFiles))
+PNGGraphics = $(patsubst %_sag.pdf,%_sag.png,$(PDFGraphics))
 InputTeXFiles = $(wildcard *_input.tex)
 PWD = $(pwd)
 
 wp-graphics-standalone: $(PDFGraphics)
-wp-graphics-dvi: $(DVIGraphics)
+wp-graphics-png: $(PNGGraphics)
 
 %_sag.pdf: %_sag.tex
 	cd `dirname $<` && \
 	$(PDFLATEX) `basename $<`
 	$(PDFCROP) $@ $@
+
+%_sag.png: %_sag.pdf
+	cd `dirname $<` && \
+	convert -density 400 `basename $<` `basename $@`
 
 whitepaper: $(PDFGraphics) $(InputTeXFiles) build-whitepaper set-wp-properties wp-pandoc mk-latex-pdf wc
 whitepaper-skip-pandoc: $(PDFGraphics) $(InputTeXFiles) mk-latex-pdf wc
