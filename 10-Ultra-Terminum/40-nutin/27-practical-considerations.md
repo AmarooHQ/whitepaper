@@ -241,4 +241,4 @@ The average hash rate on each simplex chain, as described above, is always the s
 
 ### Reflection Censorship Attack
 
-\todo{is a refl censorship attack possible? meaningful? explore.}
+\todo{is a refl censorship attack possible? meaningful? explore. (NB: I don't think there's a viable strategy here, which is why I haven't prioritized writing this out.)}
