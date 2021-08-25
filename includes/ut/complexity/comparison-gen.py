@@ -19,7 +19,8 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
     ut_n_1_with_por = por_with_merkle_branches_n1_root(k, bf, bh, 32)
     ut_with_por_effective_bh = k / (2 * bf * ut_n_1_with_por)
     ut_n1_per_k = ut_n_1_with_por / k
-    ut_2_tps_with_por = k * ut_n_1_with_por / 2 / tx_size
+    ut_2_with_por = k * ut_n_1_with_por / 2
+    ut_3_with_por = k * ut_2_with_por / (df * dh)
 
     return {
         'btc_tps': k / tx_size,
@@ -34,8 +35,8 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
         'ut_n_1': k / (2 * bh * bf),
         'ut_n_2': k**2 / (4 * bh * bf * dh * df),
         'ut_n_1_with_por': ut_n_1_with_por,
-        'ut_2_tps_with_por': ut_2_tps_with_por,
-        'ut_3_tps_with_por': k * ut_2_tps_with_por / (df * dh) / tx_size,
+        'ut_2_tps_with_por': ut_2_with_por / tx_size,
+        'ut_3_tps_with_por': ut_3_with_por / tx_size,
         'ut_with_por_bh': ut_with_por_effective_bh,
         'ut_n1_per_k': ut_n1_per_k,
         'ut_3_optimal_dappchains': k / (2 * dh * df),
@@ -44,6 +45,8 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
     }
 
 def fmt_rounded_commas(value):
+    if isinstance(value, str):
+        return value
     return f"{round(value):,}" if 1 < value < 10**6 else f"\x24{value:.1e}}}\x24" \
         .replace("e+0", "e+").replace("e+", "\\times 10^{") \
         .replace("e-0", "e-").replace("e-", "\\times 10^{-")
@@ -53,19 +56,44 @@ def table_header(table_name):
         'tps': ['$O(c)$', '$O(c^2)$', '$O(c^2)$ UT', '$O(c^3)$ UT', '$O(c^4)$ UT'],
         'dappchains': ['$N_1$ (UT)', '$N_2$ (UT)', '$N_3$ (UT)', '$\Delta S$'],
         'tps_por': ['$N_1$', '$O(c^2)$ tps', '$O(c^3)$ tps', '$B_h$ + PoRs', '$\\nicefrac{N_1}{k}$'],
+        'compare_nets': ['Network', 'tps per host-chain', 'Network-wide tps'],
     })[table_name]
 
     col_sizes = ({
         'tps': ['---','----','----','----','----'],
         'dappchains': ['---', '----', '----', '----'],
         'tps_por': ['---', '----', '----', '----', '----'],
+        'compare_nets': ['------', '---', '---'],
     })[table_name]
 
+    col1_heading = ({
+        'compare_nets': '$k$, $B_f$, $B_h$',
+        'other': '$k$, $B_f$, $D_f$, $B_h$, $D_h$',
+    })[table_name if table_name in ['compare_nets'] else 'other']
+    headings.insert(0, col1_heading)
+
     return '\n'.join([
-        '| ' + ' | '.join(['$k$, $B_f$, $D_f$, $B_h$, $D_h$'] + headings) + ' |',
+        '| ' + ' | '.join(headings) + ' |',
         '|'.join(['', '--------'] \
         + col_sizes + [''])
     ])
+
+def format_table_row(row: str):
+    return row.strip() \
+            .replace('0.0016666666666666668', '\\nicefrac{1}{600}') \
+            .replace('0.016666666666666666', '\\nicefrac{1}{60}') \
+            .replace('0.025', '\\nicefrac{1}{40}') \
+            .replace('0.05', '\\nicefrac{1}{20}') \
+            .replace('0.06666666666666667', '\\nicefrac{1}{15}') \
+            .replace('0.08333333333333333', '\\nicefrac{1}{12}') \
+            .replace('0.16666666666666666', '\\nicefrac{1}{6}')
+
+def cols_to_str(params, cols):
+    return format_table_row(' | '.join(str(i) for i in
+            (['', '$' + ', '.join(map(str, list(params)[:-1])) + '$'] \
+                + list(map(fmt_rounded_commas, cols)) + [''])
+        ))
+
 
 def table_row(params, table_name):
     r = calc_tps_throughput(*params)
@@ -74,15 +102,23 @@ def table_row(params, table_name):
         'dappchains': [r['ut_n_1'], r['ut_n_2'], r['ut_n_3'], r['delta_s_Bps']],
         'tps_por': [r['ut_n_1_with_por'], r['ut_2_tps_with_por'], r['ut_3_tps_with_por'], r['ut_with_por_bh'], r['ut_n1_per_k']],
     })[table_name]
+    return cols_to_str(params, cols)
 
-    return ' | '.join(str(i) for i in
-            (['', '$' + ', '.join(map(str, list(params)[:-1])) + '$'] \
-                + list(map(fmt_rounded_commas, cols)) + [''])
-        ).strip() \
-            .replace('0.0016666666666666668', '\\nicefrac{1}{600}') \
-            .replace('0.016666666666666666', '\\nicefrac{1}{60}') \
-            .replace('0.06666666666666667', '\\nicefrac{1}{15}') \
-            .replace('0.05', '\\nicefrac{1}{20}').replace('0.025', '\\nicefrac{1}{40}')
+def table_row_compare(net: str, params, table_name):
+    p = params
+    r = calc_tps_throughput(p[0], p[1], p[1], p[2], p[2], p[3])
+    cols = ({
+        'UT': [net, r['ut_2_tps'] * 2,  # *2 b/c dapp-chain layer doesn't need to split blocks between txs and refls + we have B_{h,f} = D_{h,f}
+                r['ut_3_tps']],
+        'UT_PoRs': [net, r['ut_2_tps_with_por'] * 2,  # *2 b/c dapp-chain layer doesn't need to split blocks between txs and refls + we have B_{h,f} = D_{h,f}
+                r['ut_3_tps_with_por']],
+        'bitcoin': [net, r['btc_tps'], r['btc_tps']],
+        'cardano': [net, r['eth2_tps'], r['eth2_tps']],
+        'polkadot': [net, r['eth2_tps'], r['eth2_tps']],
+        'eth2': [net, r['eth2_tps'], r['eth2_tps']],
+    })[net]
+    return cols_to_str(params, cols)
+
 
 ## NOTE: too many table entries to be useful. it'd be nice to generate the data
 ## with a more ordered format, though.
@@ -125,8 +161,24 @@ row_inputs = [
     (3000, 1/60, 1/60, 1500, 1500, 250),
 ]
 
+comparison_k = 3000
+comparison_inputs = [
+    ('bitcoin', (comparison_k, 1/600, 80, 250)),
+    ('cardano', (comparison_k, 1/20, 1070, 250)),
+    ('polkadot', (comparison_k, 1/6, 288, 250)),
+    ('eth2', (comparison_k, 1/12, 192, 250)),
+    ('UT', (comparison_k, 1/15, 112, 250)),
+    ('UT_PoRs', (comparison_k, 1/15, 112, 250)),
+]
+
 for table_name in ['tps', 'dappchains', 'tps_por']:
     print(f"\n#### TABLE: {table_name}\n")
     print(table_header(table_name))
     for r in row_inputs:
         print(table_row(r, table_name))
+
+for table_name in ['compare_nets']:
+    print(f"\n### TABLE: {table_name}")
+    print(table_header(table_name))
+    for (net, r) in comparison_inputs:
+        print(table_row_compare(net, r, table_name))
