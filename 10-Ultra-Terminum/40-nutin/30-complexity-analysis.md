@@ -265,36 +265,33 @@ Note: In a production system, these proofs can be excluded from blocks by treati
 $k$: raw per-chain throughput (bytes/$s$) \newline
 $B_f$: simplex block frequency ($s^{-1}$) \newline
 $B_h$: simplex block header size (bytes) \newline
-$D_f$: dapp-chain block frequency ($s^{-1}$) \newline
-$D_h$: dapp-chain block header size (bytes) \newline
+$D_f = B_f$: dapp-chain block frequency ($s^{-1}$) \newline
+$D_h = B_h$: dapp-chain block header size (bytes) \newline
 \begin{comment}
 $Tx_{avg}$: average tx size (bytes)
 \end{comment}
 
-NB: For the purposes of the following table, the average transaction size is taken to be 250 bytes. Additionally, the discrepancy in header size (between $B_h$ and $D_h$) is due to the overhead of PoS mechanisms.
+NB: For the purposes of the following table, the average transaction size is taken to be 250 bytes.
+%% Additionally, the discrepancy in header size (between $B_h$ and $D_h$) is due to the overhead of PoS mechanisms.
 
-| $k$, $B_f$, $D_f$, $B_h$, $D_h$ | $O(c)$ | $O(c^2)$ | $O(c^2)$ UT | $O(c^3)$ UT | $O(c^4)$ UT |
-|--------|---|----|----|----|----|
-| $1000, \nicefrac{1}{15}, \nicefrac{1}{15}, 112, 250$ | 4 | 240 | 134 | 8,036 | 482,143 |
-| $3000, \nicefrac{1}{15}, \nicefrac{1}{15}, 112, 250$ | 12 | 2,160 | 1,205 | 216,964 | $3.9\times 10^{7}$ |
-| $30000, \nicefrac{1}{15}, \nicefrac{1}{15}, 112, 250$ | 120 | 216,000 | 120,536 | $2.2\times 10^{8}$ | $3.9\times 10^{11}$ |
-| $1000, \nicefrac{1}{60}, \nicefrac{1}{60}, 112, 250$ | 4 | 960 | 536 | 128,571 | $3.1\times 10^{7}$ |
-| $3000, \nicefrac{1}{60}, \nicefrac{1}{60}, 112, 250$ | 12 | 8,640 | 4,821 | $3.5\times 10^{6}$ | $2.5\times 10^{9}$ |
-| $3000, \nicefrac{1}{60}, \nicefrac{1}{60}, 112, 500$ | 12 | 4,320 | 4,821 | $1.7\times 10^{6}$ | $6.2\times 10^{8}$ |
-| $3000, \nicefrac{1}{60}, \nicefrac{1}{60}, 200, 250$ | 12 | 8,640 | 2,700 | $1.9\times 10^{6}$ | $1.4\times 10^{9}$ |
-| $3000, \nicefrac{1}{60}, \nicefrac{1}{60}, 200, 500$ | 12 | 4,320 | 2,700 | 972,000 | $3.5\times 10^{8}$ |
-| $30000, \nicefrac{1}{60}, \nicefrac{1}{60}, 200, 200$ | 120 | $1.1\times 10^{6}$ | 270,000 | $2.4\times 10^{9}$ | $2.2\times 10^{13}$ |
-| $30000, \nicefrac{1}{60}, \nicefrac{1}{60}, 112, 200$ | 120 | $1.1\times 10^{6}$ | 482,143 | $4.3\times 10^{9}$ | $3.9\times 10^{13}$ |
-| $1000, \nicefrac{1}{600}, \nicefrac{1}{600}, 112, 250$ | 4 | 9,600 | 5,357 | $1.3\times 10^{7}$ | $3.1\times 10^{10}$ |
-| $3000, \nicefrac{1}{600}, \nicefrac{1}{600}, 200, 250$ | 12 | 86,400 | 27,000 | $1.9\times 10^{8}$ | $1.4\times 10^{12}$ |
-| $3000, \nicefrac{1}{600}, \nicefrac{1}{600}, 112, 250$ | 12 | 86,400 | 48,214 | $3.5\times 10^{8}$ | $2.5\times 10^{12}$ |
-| $30000, \nicefrac{1}{600}, \nicefrac{1}{600}, 200, 200$ | 120 | $1.1\times 10^{7}$ | $2.7\times 10^{6}$ | $2.4\times 10^{11}$ | $2.2\times 10^{16}$ |
-| $30000, \nicefrac{1}{600}, \nicefrac{1}{600}, 112, 200$ | 120 | $1.1\times 10^{7}$ | $4.8\times 10^{6}$ | $4.3\times 10^{11}$ | $3.9\times 10^{16}$ |
-| $1000, \nicefrac{1}{60}, \nicefrac{1}{600}, 112, 250$ | 4 | 9,600 | 536 | $1.3\times 10^{6}$ | $3.1\times 10^{9}$ |
-| $3000, \nicefrac{1}{60}, \nicefrac{1}{600}, 112, 250$ | 12 | 86,400 | 4,821 | $3.5\times 10^{7}$ | $2.5\times 10^{11}$ |
-| $30000, \nicefrac{1}{60}, \nicefrac{1}{600}, 112, 250$ | 120 | $8.6\times 10^{6}$ | 482,143 | $3.5\times 10^{10}$ | $2.5\times 10^{15}$ |
-| $3000, \nicefrac{1}{60}, \nicefrac{1}{60}, 500, 500$ | 12 | 4,320 | 1,080 | 388,800 | $1.4\times 10^{8}$ |
-| $3000, \nicefrac{1}{60}, \nicefrac{1}{60}, 500, 700$ | 12 | 3,086 | 1,080 | 277,714 | $7.1\times 10^{7}$ |
+| $k$, $B_f$, $B_h$               | $O(c)$ | $O(c^2)$           | $O(c^2)$ UT        | $O(c^3)$ UT         | $O(c^4)$ UT         |
+|------|---|----|----|----|----|
+| $1000, \nicefrac{1}{15}, 112$   | 4      | 536                | 134                | 17,937              | $2.4\times 10^{6}$  |
+| $3000, \nicefrac{1}{15}, 112$   | 12     | 4,821              | 1,205              | 484,295             | $1.9\times 10^{8}$  |
+| $30000, \nicefrac{1}{15}, 112$  | 120    | 482,143            | 120,536            | $4.8\times 10^{8}$  | $1.9\times 10^{12}$ |
+| $1000, \nicefrac{1}{60}, 112$   | 4      | 2,143              | 536                | 286,990             | $1.5\times 10^{8}$  |
+| $3000, \nicefrac{1}{60}, 200$   | 12     | 10,800             | 2,700              | $2.4\times 10^{6}$  | $2.2\times 10^{9}$  |
+| $3000, \nicefrac{1}{60}, 112$   | 12     | 19,286             | 4,821              | $7.7\times 10^{6}$  | $1.2\times 10^{10}$ |
+| $30000, \nicefrac{1}{60}, 200$  | 120    | $1.1\times 10^{6}$ | 270,000            | $2.4\times 10^{9}$  | $2.2\times 10^{13}$ |
+| $30000, \nicefrac{1}{60}, 112$  | 120    | $1.9\times 10^{6}$ | 482,143            | $7.7\times 10^{9}$  | $1.2\times 10^{14}$ |
+| $1000, \nicefrac{1}{600}, 112$  | 4      | 21,429             | 5,357              | $2.9\times 10^{7}$  | $1.5\times 10^{11}$ |
+| $3000, \nicefrac{1}{600}, 200$  | 12     | 108,000            | 27,000             | $2.4\times 10^{8}$  | $2.2\times 10^{12}$ |
+| $3000, \nicefrac{1}{600}, 112$  | 12     | 192,857            | 48,214             | $7.7\times 10^{8}$  | $1.2\times 10^{13}$ |
+| $30000, \nicefrac{1}{600}, 200$ | 120    | $1.1\times 10^{7}$ | $2.7\times 10^{6}$ | $2.4\times 10^{11}$ | $2.2\times 10^{16}$ |
+| $30000, \nicefrac{1}{600}, 112$ | 120    | $1.9\times 10^{7}$ | $4.8\times 10^{6}$ | $7.7\times 10^{11}$ | $1.2\times 10^{17}$ |
+| $3000, \nicefrac{1}{60}, 500$   | 12     | 4,320              | 1,080              | 388,800             | $1.4\times 10^{8}$  |
+| $3000, \nicefrac{1}{60}, 1000$  | 12     | 2,160              | 540                | 97,200              | $1.7\times 10^{7}$  |
+| $3000, \nicefrac{1}{60}, 1500$  | 12     | 1,440              | 360                | 43,200              | $5.2\times 10^{6}$  |
 
 : A comparison of the maximum transaction throughput (transactions per second) given different scaling configurations.
 
@@ -314,32 +311,28 @@ S & = \frac{k_1}{2 \cdot B_f \cdot B_h} \cdot k_1 \cdot d \\
 \end{split}
 \end{equation}
 
-It is clear that $\Delta S$ has order $O(c^2)$, but how bad is this? For $k_1 = 3000$, $B_f = \frac{1}{60}$, and $B_h = 112$: $\Delta S \approx 2.4$ MB/s. With those figures: $N_1 \approx 800$ simplex-chains, $N_2 \approx 290,000$ dapp-chains, and maximum tps of $\sim 3.5\times 10^6$. Decreasing block times to 15s correspondingly decrease the bandwidth requirements to 0.6 MB/s for a simplex with $\sim 200$ chains, $\sim 18,000$ dapp-chains, and $\sim 210,000$ max tps.
+It is clear that $\Delta S$ has order $O(c^2)$, but how bad is this? For $k_1 = 3000$, $B_f = \frac{1}{60}$, and $B_h = 112$: $\Delta S \approx 2.4$ MB/s. With those figures: $N_1 \approx 800$ simplex-chains, $N_2 \approx 645,000$ dapp-chains, and maximum tps of $\sim 7.7\times 10^{6}$. Decreasing block times to 15s correspondingly decrease the bandwidth requirements to 0.6 MB/s for a simplex with $\sim 200$ chains, $\sim 40,000$ dapp-chains, and $\sim 484,000$ max tps.
 
 While $O(c^2)$ bandwidth scaling is not ideal, it's clear that -- especially in the early days of a UT simplex when there are fewer simplex-chains -- there are tolerable configurations available.
 
-| $k$, $B_f$, $D_f$, $B_h$, $D_h$ | $N_1$ (UT) | $N_2$ (UT) | $N_3$ (UT) | $\Delta S$ |
-|--------|---|----|----|----|
-| $1000, \nicefrac{1}{15}, \nicefrac{1}{15}, 112, 250$ | 67 | 2,009 | 120,536 | 66,964 |
-| $3000, \nicefrac{1}{15}, \nicefrac{1}{15}, 112, 250$ | 201 | 18,080 | $3.3\times 10^{6}$ | 602,679 |
-| $30000, \nicefrac{1}{15}, \nicefrac{1}{15}, 112, 250$ | 2,009 | $1.8\times 10^{6}$ | $3.3\times 10^{9}$ | $6.0\times 10^{7}$ |
-| $1000, \nicefrac{1}{60}, \nicefrac{1}{60}, 112, 250$ | 268 | 32,143 | $7.7\times 10^{6}$ | 267,857 |
-| $3000, \nicefrac{1}{60}, \nicefrac{1}{60}, 112, 250$ | 804 | 289,286 | $2.1\times 10^{8}$ | $2.4\times 10^{6}$ |
-| $3000, \nicefrac{1}{60}, \nicefrac{1}{60}, 112, 500$ | 804 | 144,643 | $5.2\times 10^{7}$ | $2.4\times 10^{6}$ |
-| $3000, \nicefrac{1}{60}, \nicefrac{1}{60}, 200, 250$ | 450 | 162,000 | $1.2\times 10^{8}$ | $1.4\times 10^{6}$ |
-| $3000, \nicefrac{1}{60}, \nicefrac{1}{60}, 200, 500$ | 450 | 81,000 | $2.9\times 10^{7}$ | $1.4\times 10^{6}$ |
-| $30000, \nicefrac{1}{60}, \nicefrac{1}{60}, 200, 200$ | 4,500 | $2.0\times 10^{7}$ | $1.8\times 10^{11}$ | $1.4\times 10^{8}$ |
-| $30000, \nicefrac{1}{60}, \nicefrac{1}{60}, 112, 200$ | 8,036 | $3.6\times 10^{7}$ | $3.3\times 10^{11}$ | $2.4\times 10^{8}$ |
-| $1000, \nicefrac{1}{600}, \nicefrac{1}{600}, 112, 250$ | 2,679 | $3.2\times 10^{6}$ | $7.7\times 10^{9}$ | $2.7\times 10^{6}$ |
-| $3000, \nicefrac{1}{600}, \nicefrac{1}{600}, 200, 250$ | 4,500 | $1.6\times 10^{7}$ | $1.2\times 10^{11}$ | $1.3\times 10^{7}$ |
-| $3000, \nicefrac{1}{600}, \nicefrac{1}{600}, 112, 250$ | 8,036 | $2.9\times 10^{7}$ | $2.1\times 10^{11}$ | $2.4\times 10^{7}$ |
-| $30000, \nicefrac{1}{600}, \nicefrac{1}{600}, 200, 200$ | 45,000 | $2.0\times 10^{9}$ | $1.8\times 10^{14}$ | $1.3\times 10^{9}$ |
-| $30000, \nicefrac{1}{600}, \nicefrac{1}{600}, 112, 200$ | 80,357 | $3.6\times 10^{9}$ | $3.3\times 10^{14}$ | $2.4\times 10^{9}$ |
-| $1000, \nicefrac{1}{60}, \nicefrac{1}{600}, 112, 250$ | 268 | 321,429 | $7.7\times 10^{8}$ | 267,857 |
-| $3000, \nicefrac{1}{60}, \nicefrac{1}{600}, 112, 250$ | 804 | $2.9\times 10^{6}$ | $2.1\times 10^{10}$ | $2.4\times 10^{6}$ |
-| $30000, \nicefrac{1}{60}, \nicefrac{1}{600}, 112, 250$ | 8,036 | $2.9\times 10^{8}$ | $2.1\times 10^{13}$ | $2.4\times 10^{8}$ |
-| $3000, \nicefrac{1}{60}, \nicefrac{1}{60}, 500, 500$ | 180 | 32,400 | $1.2\times 10^{7}$ | 540,000 |
-| $3000, \nicefrac{1}{60}, \nicefrac{1}{60}, 500, 700$ | 180 | 23,143 | $6.0\times 10^{6}$ | 540,000 |
+| $k$, $B_f$, $B_h$               | $N_1$ (UT) | $N_2$ (UT)         | $N_3$ (UT)          | $\Delta S$         |
+|------|----|-----|-----|-----|
+| $1000, \nicefrac{1}{15}, 112$   | 67         | 4,484              | 600,565             | 66,964             |
+| $3000, \nicefrac{1}{15}, 112$   | 201        | 40,358             | $1.6\times 10^{7}$  | 602,679            |
+| $30000, \nicefrac{1}{15}, 112$  | 2,009      | $4.0\times 10^{6}$ | $1.6\times 10^{10}$ | $6.0\times 10^{7}$ |
+| $1000, \nicefrac{1}{60}, 112$   | 268        | 71,747             | $3.8\times 10^{7}$  | 267,857            |
+| $3000, \nicefrac{1}{60}, 200$   | 450        | 202,500            | $1.8\times 10^{8}$  | $1.4\times 10^{6}$ |
+| $3000, \nicefrac{1}{60}, 112$   | 804        | 645,727            | $1.0\times 10^{9}$  | $2.4\times 10^{6}$ |
+| $30000, \nicefrac{1}{60}, 200$  | 4,500      | $2.0\times 10^{7}$ | $1.8\times 10^{11}$ | $1.4\times 10^{8}$ |
+| $30000, \nicefrac{1}{60}, 112$  | 8,036      | $6.5\times 10^{7}$ | $1.0\times 10^{12}$ | $2.4\times 10^{8}$ |
+| $1000, \nicefrac{1}{600}, 112$  | 2,679      | $7.2\times 10^{6}$ | $3.8\times 10^{10}$ | $2.7\times 10^{6}$ |
+| $3000, \nicefrac{1}{600}, 200$  | 4,500      | $2.0\times 10^{7}$ | $1.8\times 10^{11}$ | $1.3\times 10^{7}$ |
+| $3000, \nicefrac{1}{600}, 112$  | 8,036      | $6.5\times 10^{7}$ | $1.0\times 10^{12}$ | $2.4\times 10^{7}$ |
+| $30000, \nicefrac{1}{600}, 200$ | 45,000     | $2.0\times 10^{9}$ | $1.8\times 10^{14}$ | $1.3\times 10^{9}$ |
+| $30000, \nicefrac{1}{600}, 112$ | 80,357     | $6.5\times 10^{9}$ | $1.0\times 10^{15}$ | $2.4\times 10^{9}$ |
+| $3000, \nicefrac{1}{60}, 500$   | 180        | 32,400             | $1.2\times 10^{7}$  | 540,000            |
+| $3000, \nicefrac{1}{60}, 1000$  | 90         | 8,100              | $1.5\times 10^{6}$  | 270,000            |
+| $3000, \nicefrac{1}{60}, 1500$  | 60         | 3,600              | 432,000             | 180,000            |
 
 : UT's capacity and bandwidth requirements: $N_1, N_2, N_3, \text{and}\;\Delta S$ for various parameters.
 
@@ -355,6 +348,6 @@ Changing all header sizes by some factor has different effects for different UT 
 
 It is worth noting, though, that different header schemes can be used in each level of nesting. This means that if, say, dapp-chains need larger headers than simplex-chains, then there isn't a negative effect on the capacity of the simplex (i.e., the level(s) beneath).
 
-This effect is not unique to UT, though. In general, any system of sharding is also affected in this manner: when the headers of a child-chain are included in the parent-chain's blocks.
+This effect is not unique to UT, though. In general, any system of sharding is also affected in this manner when the headers of a child-chain are included in the parent-chain's blocks.
 
 Practically, this effect means that a decrease to the size of headers has *increasing* marginal benefit. Compared to $O(c)$ blockchains (e.g., Bitcoin), efficient header schemes are far more important for UT and sharded blockchain networks.

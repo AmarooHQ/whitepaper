@@ -77,24 +77,24 @@ def table_header(table_name):
     headings = ({
         'tps': ['$O(c)$', '$O(c^2)$', '$O(c^2)$ UT', '$O(c^3)$ UT', '$O(c^4)$ UT'],
         'dappchains': ['$N_1$ (UT)', '$N_2$ (UT)', '$N_3$ (UT)', '$\Delta S$'],
-        'tps_por': ['$N_1$', '$O(c^2)$ tps', '$N_2$', '$O(c^3)$ tps', 'PoR size (bytes)', '$\\nicefrac{N_1}{k}$'],
+        'tps_por': ['$N_1$', '$O(c^2)$ tps', '$N_2$', '$O(c^3)$ tps', 'PoR (bytes)', '$\\nicefrac{N_1}{k}$'],
         'compare_nets': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS'],
     })[table_name]
 
     col_sizes = ({
         'tps': ['---','----','----','----','----'],
-        'dappchains': ['---', '----', '----', '----'],
-        'tps_por': ['---', '---', '----', '----', '----', '----'],
-        'compare_nets': ['--------', '---------', '---', '---'],
+        'dappchains': ['----', '-----', '-----', '-----'],
+        'tps_por': ['---', '----', '----', '----', '-----', '----'],
+        'compare_nets': ['------', '-------', '---', '---'],
     })[table_name]
 
     col1_heading = ({
         'compare_nets': '$k$, $D_f$, $D_h$',
-        'other': '$k$, $B_f$, $D_f$, $B_h$, $D_h$',
+        'other': '$k$, $B_f$, $B_h$',
     })[table_name if table_name in ['compare_nets'] else 'other']
     headings.insert(0, col1_heading)
 
-    return [headings, ['--------'] + col_sizes]
+    return [headings, ['------'] + col_sizes]
 
     # return '\n'.join([
     #     '| ' + ' | '.join(headings) + ' |',
@@ -119,7 +119,8 @@ def format_params(params):
 
 
 def table_row(params, table_name):
-    r = calc_tps_throughput(*params)
+    p = params
+    r = calc_tps_throughput(p[0], p[1], p[1], p[2], p[2], p[3])
     cols = ({
         'tps': [format_params(params), r['btc_tps'], r['eth2_tps'], r['ut_2_tps'], r['ut_3_tps'], r['ut_4_tps']],
         'dappchains': [format_params(params), r['ut_n_1'], r['ut_n_2'], r['ut_n_3'], r['delta_s_Bps']],
@@ -130,7 +131,8 @@ def table_row(params, table_name):
 
 def mod_ut_por_params(p: Tuple) -> Tuple:
     r = calc_tps_throughput(p[0], p[1], p[1], p[2], p[2], p[3])
-    return (p[0], p[1], round(r['ut_with_por_bh']), p[3])
+    return p  # we don't need to alter D_h, just B_h, so don't mod the param
+    # return (p[0], p[1], round(r['ut_with_por_bh']), p[3])
 
 def mod_params_id(p: Tuple) -> Tuple:
     return p
@@ -139,12 +141,12 @@ def mod_params_id(p: Tuple) -> Tuple:
 def table_row_compare(net: str, params, table_name):
     p = params
     r = calc_tps_throughput(p[0], p[1], p[1], p[2], p[2], p[3])
-    mod_params = defaultdict(lambda: mod_params_id, **({'UT_PoRs': mod_ut_por_params}))
+    mod_params = defaultdict(lambda: mod_params_id, **({'UT+PoRs': mod_ut_por_params}))
     fp = format_params(mod_params[net](params))
     fn = net if 'UT' in net else net.capitalize()
     cols = ({
         'UT': [fp, fn, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps']],
-        'UT_PoRs': [fp, fn, r['ut_n_2_factor_with_por'], r['ut_3_tps_with_por_per_basechain'], r['ut_3_tps_with_por']],
+        'UT+PoRs': [fp, fn, r['ut_n_2_factor_with_por'], r['ut_3_tps_with_por_per_basechain'], r['ut_3_tps_with_por']],
         'bitcoin': [fp, fn, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps']],
         'cardano': [fp, fn,  r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
         'polkadot': [fp, fn, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
@@ -186,32 +188,25 @@ def pad_rows(rows: List[List[str]], ns: List[int]):
 
 row_inputs = [
     # ver fast chains
-    (1000, 1/15, 1/15, 112, 250, 250),
-    (3000, 1/15, 1/15, 112, 250, 250),
-    (30000, 1/15, 1/15, 112, 250, 250),
+    (1000, 1/15, 112, 250),
+    (3000, 1/15, 112, 250),
+    (30000, 1/15, 112, 250),
     # fast chains
-    (1000, 1/60, 1/60, 112, 250, 250),
-    (3000, 1/60, 1/60, 112, 250, 250),
-    (3000, 1/60, 1/60, 112, 500, 250),
-    (3000, 1/60, 1/60, 200, 250, 250),
-    (3000, 1/60, 1/60, 200, 500, 250),
-    (30000, 1/60, 1/60, 200, 200, 250),
-    (30000, 1/60, 1/60, 112, 200, 250),
+    (1000, 1/60, 112, 250),
+    (3000, 1/60, 200, 250),
+    (3000, 1/60, 112, 250),
+    (30000, 1/60, 200, 250),
+    (30000, 1/60, 112, 250),
     # slow chains
-    (1000, 1/600, 1/600, 112, 250, 250),
-    (3000, 1/600, 1/600, 200, 250, 250),
-    (3000, 1/600, 1/600, 112, 250, 250),
-    (30000, 1/600, 1/600, 200, 200, 250),
-    (30000, 1/600, 1/600, 112, 200, 250),
-    # fast root chain, slow dapp chains
-    (1000, 1/60, 1/600, 112, 250, 250),
-    (3000, 1/60, 1/600, 112, 250, 250),
-    (30000, 1/60, 1/600, 112, 250, 250),
+    (1000, 1/600, 112, 250),
+    (3000, 1/600, 200, 250),
+    (3000, 1/600, 112, 250),
+    (30000, 1/600, 200, 250),
+    (30000, 1/600, 112, 250),
     # big headers
-    (3000, 1/60, 1/60, 500, 500, 250),
-    (3000, 1/60, 1/60, 500, 700, 250),
-    (3000, 1/60, 1/60, 1000, 1000, 250),
-    (3000, 1/60, 1/60, 1500, 1500, 250),
+    (3000, 1/60, 500, 250),
+    (3000, 1/60, 1000, 250),
+    (3000, 1/60, 1500, 250),
 ]
 
 # Note: If eth2 really is as efficient as an 8kb update every ~27 hours then it's close enough to 0.
@@ -228,19 +223,28 @@ row_inputs = [
 #
 
 comparison_k = 3000
+comparison_k2 = 30000
 comparison_inputs = [
     ('bitcoin', (comparison_k, 1/600, 80, 250)),
     ('cardano', (comparison_k, 1/20, 1070, 250)),
     ('polkadot', (comparison_k, 1/6, 288, 250)),
     ('eth2', (comparison_k, 1/12, 200, 250)),
     ('UT', (comparison_k, 1/15, 112, 250)),
+    ('UT+PoRs', (comparison_k, 1/15, 112, 250)),
     ('UT (w/ tiling)', (comparison_k, 1/15, 112, 250)),
-    ('bitcoin (w/ extras)', (comparison_k, 1/600, 80, 250)),
-    ('cardano (w/ extras)', (comparison_k, 1/20, 1070 + 1024, 250)),
-    ('polkadot (w/ extras)', (comparison_k, 1/6, 288 + 1024, 250)),
-    ('eth2 (w/ extras)', (comparison_k, 1/12, 200 + (476 + 224 + 128 + 672 + 736 + 1024), 250)),
-    ('UT_PoRs', (comparison_k, 1/15, 112, 250)),
-    ('UT_PoRs (w/ tiling)', (comparison_k, 1/15, 112, 250)),
+    ('bitcoin', (comparison_k2, 1/600, 80, 250)),
+    ('cardano', (comparison_k2, 1/20, 1070, 250)),
+    ('polkadot', (comparison_k2, 1/6, 288, 250)),
+    ('eth2', (comparison_k2, 1/12, 200, 250)),
+    ('UT', (comparison_k2, 1/15, 112, 250)),
+    ('UT+PoRs', (comparison_k2, 1/15, 112, 250)),
+    ('UT (w/ tiling)', (comparison_k2, 1/15, 112, 250)),
+    # ('bitcoin (w/ extras)', (comparison_k, 1/600, 80, 250)),
+    # ('cardano (w/ extras)', (comparison_k, 1/20, 1070 + 1024, 250)),
+    # ('polkadot (w/ extras)', (comparison_k, 1/6, 288 + 1024, 250)),
+    # ('eth2 (w/ extras)', (comparison_k, 1/12, 200 + (476 + 224 + 128 + 672 + 736 + 1024), 250)),
+    # ('UT+PoRs', (comparison_k, 1/15, 112, 250)),
+    # ('UT+PoRs (w/ tiling)', (comparison_k, 1/15, 112, 250)),
 ]
 
 for table_name in ['tps', 'dappchains', 'tps_por']:

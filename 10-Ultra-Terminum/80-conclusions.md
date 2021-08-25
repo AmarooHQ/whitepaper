@@ -11,8 +11,10 @@
 \label{fig:trilemma-core-conflict-solved}
 \end{figure}
 
+### Comparison with 'the big 4'
+
 | $k$, $D_f$, $D_h$              | Network              | Scaling Factor | TPS per base-chain | Network-wide TPS |
-|--------|--------|---------|---|---|
+|------|------|-------|---|---|
 | $3000, \nicefrac{1}{600}, 80$  | Bitcoin              | 1              | 12                 | 12               |
 | $3000, \nicefrac{1}{20}, 1070$ | Cardano              | 56             | 673                | 673              |
 | $3000, \nicefrac{1}{6}, 288$   | Polkadot             | 62             | 750                | 750              |
@@ -23,7 +25,9 @@
 | $3000, \nicefrac{1}{20}, 2094$ | Cardano (w/ extras)  | 29             | 344                | 344              |
 | $3000, \nicefrac{1}{6}, 1312$  | Polkadot (w/ extras) | 14             | 165                | 165              |
 | $3000, \nicefrac{1}{12}, 3460$ | Eth2 (w/ extras)     | 10             | 125                | 125              |
-| $3000, \nicefrac{1}{15}, 331$  | UT_PoRs              | 215            | 2,586              | 175,841          |
-| $3000, \nicefrac{1}{15}, 112$  | UT_PoRs (w/ tiling)  | 215            | 2,586              | $\infty$         |
+| $3000, \nicefrac{1}{15}, 112$  | UT+PoRs              | 215            | 2,586              | 175,841          |
+| $3000, \nicefrac{1}{15}, 112$  | UT+PoRs (w/ tiling)  | 215            | 2,586              | $\infty$         |
 
 : A comparison between various networks of quantitative scaling properties. Transaction size is set to 250 bytes, $D_f = B_f$, and $D_h = B_h$. "TPS per base-chain" is a measure of the efficacy of sharding-esq schemes. "Scaling Factor" is the number of child-chains per nesting-level (e.g., number of shards, number of dapp-chains per base-chain, etc).
+
+\defineTerm{Simplex Tile}{Like a simplex, but $75\%$ of the PoR capacity is reserved for reflections with \emph{neighboring} tiles; a quadrifurcated maximal simplex}
