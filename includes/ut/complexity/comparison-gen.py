@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import Any, List
 from numpy.lib.scimath import sqrt
 from scipy.special import lambertw
 from numpy import log, log2, real
@@ -78,46 +79,64 @@ def table_header(table_name):
         + col_sizes + [''])
     ])
 
-def format_table_row(row: str):
-    return row.strip() \
+
+def format_table_row(row: List[Any]):
+    return list(fmt_rounded_commas(r).strip() \
             .replace('0.0016666666666666668', '\\nicefrac{1}{600}') \
             .replace('0.016666666666666666', '\\nicefrac{1}{60}') \
             .replace('0.025', '\\nicefrac{1}{40}') \
             .replace('0.05', '\\nicefrac{1}{20}') \
             .replace('0.06666666666666667', '\\nicefrac{1}{15}') \
             .replace('0.08333333333333333', '\\nicefrac{1}{12}') \
-            .replace('0.16666666666666666', '\\nicefrac{1}{6}')
+            .replace('0.16666666666666666', '\\nicefrac{1}{6}') for r in row)
 
-def cols_to_str(params, cols):
-    return format_table_row(' | '.join(str(i) for i in
-            (['', '$' + ', '.join(map(str, list(params)[:-1])) + '$'] \
-                + list(map(fmt_rounded_commas, cols)) + [''])
-        ))
+
+def format_params(params):
+    return '$' + ', '.join(map(str, list(params)[:-1])) + '$'
 
 
 def table_row(params, table_name):
     r = calc_tps_throughput(*params)
     cols = ({
-        'tps': [r['btc_tps'], r['eth2_tps'], r['ut_2_tps'], r['ut_3_tps'], r['ut_4_tps']],
-        'dappchains': [r['ut_n_1'], r['ut_n_2'], r['ut_n_3'], r['delta_s_Bps']],
-        'tps_por': [r['ut_n_1_with_por'], r['ut_2_tps_with_por'], r['ut_3_tps_with_por'], r['ut_with_por_bh'], r['ut_n1_per_k']],
+        'tps': [format_params(params), r['btc_tps'], r['eth2_tps'], r['ut_2_tps'], r['ut_3_tps'], r['ut_4_tps']],
+        'dappchains': [format_params(params), r['ut_n_1'], r['ut_n_2'], r['ut_n_3'], r['delta_s_Bps']],
+        'tps_por': [format_params(params), r['ut_n_1_with_por'], r['ut_2_tps_with_por'], r['ut_3_tps_with_por'], r['ut_with_por_bh'], r['ut_n1_per_k']],
     })[table_name]
-    return cols_to_str(params, cols)
+    return format_table_row(cols)
+
+
+def mod_ut_por_params(p):
+    r = calc_tps_throughput(p[0], p[1], p[1], p[2], p[2], p[3])
+    return (p[0], p[1], round(r['ut_with_por_bh']), p[3])
+
 
 def table_row_compare(net: str, params, table_name):
     p = params
     r = calc_tps_throughput(p[0], p[1], p[1], p[2], p[2], p[3])
     cols = ({
-        'UT': [net, r['ut_2_tps'] * 2,  # *2 b/c dapp-chain layer doesn't need to split blocks between txs and refls + we have B_{h,f} = D_{h,f}
+        'UT': [format_params(params), net, r['ut_2_tps'] * 2,  # *2 b/c dapp-chain layer doesn't need to split blocks between txs and refls + we have B_{h,f} = D_{h,f}
                 r['ut_3_tps']],
-        'UT_PoRs': [net, r['ut_2_tps_with_por'] * 2,  # *2 b/c dapp-chain layer doesn't need to split blocks between txs and refls + we have B_{h,f} = D_{h,f}
+        'UT_PoRs': [format_params(mod_ut_por_params(params)), net, r['ut_2_tps_with_por'] * 2,  # *2 b/c dapp-chain layer doesn't need to split blocks between txs and refls + we have B_{h,f} = D_{h,f}
                 r['ut_3_tps_with_por']],
-        'bitcoin': [net, r['btc_tps'], r['btc_tps']],
-        'cardano': [net, r['eth2_tps'], r['eth2_tps']],
-        'polkadot': [net, r['eth2_tps'], r['eth2_tps']],
-        'eth2': [net, r['eth2_tps'], r['eth2_tps']],
-    })[net]
-    return cols_to_str(params, cols)
+        'bitcoin': [format_params(params), net, r['btc_tps'], r['btc_tps']],
+        'cardano': [format_params(params), net, r['eth2_tps'], r['eth2_tps']],
+        'polkadot': [format_params(params), net, r['eth2_tps'], r['eth2_tps']],
+        'eth2': [format_params(params), net, r['eth2_tps'], r['eth2_tps']],
+    })[net.split(' ')[0]]
+    return format_table_row(cols)
+
+
+def row_to_str(cols: List[str]):
+    cols_str = ([''] + cols + [''])
+    return ' | '.join(cols_str).strip()
+
+
+def pad_rows(rows: List[List[str]], ns: List[int]):
+    for n in ns:
+        max_coln = max(map(lambda c: len(c[n]), rows))
+        for c in rows:
+            c[n] += ' ' * (max_coln - len(c[n]))
+    return rows
 
 
 ## NOTE: too many table entries to be useful. it'd be nice to generate the data
@@ -164,9 +183,13 @@ row_inputs = [
 comparison_k = 3000
 comparison_inputs = [
     ('bitcoin', (comparison_k, 1/600, 80, 250)),
+    ('bitcoin (w/ extras)', (comparison_k, 1/600, 80, 250)),
     ('cardano', (comparison_k, 1/20, 1070, 250)),
+    ('cardano (w/ extras)', (comparison_k, 1/20, 1070 + 1024, 250)),
     ('polkadot', (comparison_k, 1/6, 288, 250)),
+    ('polkadot (w/ extras)', (comparison_k, 1/6, 288 + 1024, 250)),
     ('eth2', (comparison_k, 1/12, 192, 250)),
+    ('eth2 (w/ extras)', (comparison_k, 1/12, 192 + 1024, 250)),
     ('UT', (comparison_k, 1/15, 112, 250)),
     ('UT_PoRs', (comparison_k, 1/15, 112, 250)),
 ]
@@ -174,11 +197,13 @@ comparison_inputs = [
 for table_name in ['tps', 'dappchains', 'tps_por']:
     print(f"\n#### TABLE: {table_name}\n")
     print(table_header(table_name))
-    for r in row_inputs:
-        print(table_row(r, table_name))
+    padded_rows = pad_rows(list(table_row(r, table_name) for r in row_inputs), [0])
+    rows = list(map(row_to_str, padded_rows))
+    print('\n'.join(rows))
 
 for table_name in ['compare_nets']:
     print(f"\n### TABLE: {table_name}")
     print(table_header(table_name))
-    for (net, r) in comparison_inputs:
-        print(table_row_compare(net, r, table_name))
+    padded_rows = pad_rows(list(table_row_compare(net, r, table_name) for (net, r) in comparison_inputs), [0, 1, 2, 3])
+    rows = list(map(row_to_str, padded_rows))
+    print('\n'.join(rows))
