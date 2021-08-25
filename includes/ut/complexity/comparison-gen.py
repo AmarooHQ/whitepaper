@@ -1,5 +1,6 @@
+from collections import defaultdict
 from decimal import Decimal
-from typing import Any, List
+from typing import Any, DefaultDict, List, Tuple
 from numpy.lib.scimath import sqrt
 from scipy.special import lambertw
 from numpy import log, log2, real
@@ -57,14 +58,14 @@ def table_header(table_name):
         'tps': ['$O(c)$', '$O(c^2)$', '$O(c^2)$ UT', '$O(c^3)$ UT', '$O(c^4)$ UT'],
         'dappchains': ['$N_1$ (UT)', '$N_2$ (UT)', '$N_3$ (UT)', '$\Delta S$'],
         'tps_por': ['$N_1$', '$O(c^2)$ tps', '$O(c^3)$ tps', '$B_h$ + PoRs', '$\\nicefrac{N_1}{k}$'],
-        'compare_nets': ['Network', 'tps per host-chain', 'Network-wide tps'],
+        'compare_nets': ['Network', 'TPS per host-chain', 'Network-wide TPS'],
     })[table_name]
 
     col_sizes = ({
         'tps': ['---','----','----','----','----'],
         'dappchains': ['---', '----', '----', '----'],
         'tps_por': ['---', '----', '----', '----', '----'],
-        'compare_nets': ['------', '---', '---'],
+        'compare_nets': ['--------', '---', '---'],
     })[table_name]
 
     col1_heading = ({
@@ -73,11 +74,13 @@ def table_header(table_name):
     })[table_name if table_name in ['compare_nets'] else 'other']
     headings.insert(0, col1_heading)
 
-    return '\n'.join([
-        '| ' + ' | '.join(headings) + ' |',
-        '|'.join(['', '--------'] \
-        + col_sizes + [''])
-    ])
+    return [headings, ['--------'] + col_sizes]
+
+    # return '\n'.join([
+    #     '| ' + ' | '.join(headings) + ' |',
+    #     '|'.join(['', '--------'] \
+    #     + col_sizes + [''])
+    # ])
 
 
 def format_table_row(row: List[Any]):
@@ -105,37 +108,50 @@ def table_row(params, table_name):
     return format_table_row(cols)
 
 
-def mod_ut_por_params(p):
+def mod_ut_por_params(p: Tuple) -> Tuple:
     r = calc_tps_throughput(p[0], p[1], p[1], p[2], p[2], p[3])
     return (p[0], p[1], round(r['ut_with_por_bh']), p[3])
+
+def mod_params_id(p: Tuple) -> Tuple:
+    return p
 
 
 def table_row_compare(net: str, params, table_name):
     p = params
     r = calc_tps_throughput(p[0], p[1], p[1], p[2], p[2], p[3])
+    mod_params = defaultdict(lambda: mod_params_id, **({'UT_PoRs': mod_ut_por_params}))
+    fp = format_params(mod_params[net](params))
+    fn = net if 'UT' in net else net.capitalize()
     cols = ({
-        'UT': [format_params(params), net, r['ut_2_tps'] * 2,  # *2 b/c dapp-chain layer doesn't need to split blocks between txs and refls + we have B_{h,f} = D_{h,f}
+        'UT': [fp, fn, r['ut_2_tps'] *4,  # *4 b/c dapp-chain layer doesn't need to split blocks between txs and refls + we have B_{h,f} = D_{h,f}
                 r['ut_3_tps']],
-        'UT_PoRs': [format_params(mod_ut_por_params(params)), net, r['ut_2_tps_with_por'] * 2,  # *2 b/c dapp-chain layer doesn't need to split blocks between txs and refls + we have B_{h,f} = D_{h,f}
+        'UT_PoRs': [fp, fn, r['ut_2_tps_with_por'] *4,  # *4 b/c dapp-chain layer doesn't need to split blocks between txs and refls + we have B_{h,f} = D_{h,f}
                 r['ut_3_tps_with_por']],
-        'bitcoin': [format_params(params), net, r['btc_tps'], r['btc_tps']],
-        'cardano': [format_params(params), net, r['eth2_tps'], r['eth2_tps']],
-        'polkadot': [format_params(params), net, r['eth2_tps'], r['eth2_tps']],
-        'eth2': [format_params(params), net, r['eth2_tps'], r['eth2_tps']],
+        'bitcoin': [fp, fn, r['btc_tps'], r['btc_tps']],
+        'cardano': [fp, fn, r['eth2_tps'], r['eth2_tps']],
+        'polkadot': [fp, fn, r['eth2_tps'], r['eth2_tps']],
+        'eth2': [fp, fn, r['eth2_tps'], r['eth2_tps']],
     })[net.split(' ')[0]]
     return format_table_row(cols)
 
+def is_table_aligner(item: str) -> bool:
+    return '-' in item and 0 == len(item.replace('-', ''))
+
+def space_item(item: str):
+    c = '' if is_table_aligner(item) else ' '
+    return f"{c}{item}{c}"
 
 def row_to_str(cols: List[str]):
-    cols_str = ([''] + cols + [''])
-    return ' | '.join(cols_str).strip()
+    cols_str = ([''] + list(space_item(c) for c in cols) + [''])
+    return '|'.join(cols_str).strip()
 
 
 def pad_rows(rows: List[List[str]], ns: List[int]):
-    for n in ns:
+    for n in (ns or range(len(rows[0]))):
         max_coln = max(map(lambda c: len(c[n]), rows))
         for c in rows:
-            c[n] += ' ' * (max_coln - len(c[n]))
+            char = '' if is_table_aligner(c[0]) else ' '
+            c[n] += char * (max_coln - len(c[n]))
     return rows
 
 
@@ -183,27 +199,31 @@ row_inputs = [
 comparison_k = 3000
 comparison_inputs = [
     ('bitcoin', (comparison_k, 1/600, 80, 250)),
-    ('bitcoin (w/ extras)', (comparison_k, 1/600, 80, 250)),
     ('cardano', (comparison_k, 1/20, 1070, 250)),
-    ('cardano (w/ extras)', (comparison_k, 1/20, 1070 + 1024, 250)),
     ('polkadot', (comparison_k, 1/6, 288, 250)),
-    ('polkadot (w/ extras)', (comparison_k, 1/6, 288 + 1024, 250)),
     ('eth2', (comparison_k, 1/12, 192, 250)),
-    ('eth2 (w/ extras)', (comparison_k, 1/12, 192 + 1024, 250)),
     ('UT', (comparison_k, 1/15, 112, 250)),
+    ('bitcoin (w/ extras)', (comparison_k, 1/600, 80, 250)),
+    ('cardano (w/ extras)', (comparison_k, 1/20, 1070 + 1024, 250)),
+    ('polkadot (w/ extras)', (comparison_k, 1/6, 288 + 1024, 250)),
+    ('eth2 (w/ extras)', (comparison_k, 1/12, 192 + 1024, 250)),
     ('UT_PoRs', (comparison_k, 1/15, 112, 250)),
+    ('UT (w/ tiling)', (comparison_k, 1/15, 112, 250)),
 ]
 
 for table_name in ['tps', 'dappchains', 'tps_por']:
     print(f"\n#### TABLE: {table_name}\n")
-    print(table_header(table_name))
-    padded_rows = pad_rows(list(table_row(r, table_name) for r in row_inputs), [0])
+    rows = table_header(table_name)
+    rows += list(table_row(r, table_name) for r in row_inputs)
+    padded_rows = pad_rows(rows, [])
     rows = list(map(row_to_str, padded_rows))
     print('\n'.join(rows))
 
 for table_name in ['compare_nets']:
     print(f"\n### TABLE: {table_name}")
-    print(table_header(table_name))
-    padded_rows = pad_rows(list(table_row_compare(net, r, table_name) for (net, r) in comparison_inputs), [0, 1, 2, 3])
-    rows = list(map(row_to_str, padded_rows))
-    print('\n'.join(rows))
+    rows = table_header(table_name)
+    rows += list(table_row_compare(net, r, table_name) for (net, r) in comparison_inputs)
+    rows[-1][-1] = '$\infty$'
+    padded_rows = pad_rows(rows, [])
+    rows_str = list(map(row_to_str, padded_rows))
+    print('\n'.join(rows_str))
