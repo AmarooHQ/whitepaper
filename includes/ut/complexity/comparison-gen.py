@@ -15,31 +15,51 @@ def por_with_merkle_branches_n1_root(k, bf, bh, g):
 
 
 def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
+    ut_n_1 = k / (2 * bh * bf)
+    ut_n_2_factor = k / (2 * dh * df)
+    ut_n_2 = ut_n_1 * ut_n_2_factor
     ut_2_tps = k**2 / (4 * bf * bh) / tx_size
     ut_3_tps = k**3 / (4 * bf * bh * df * dh) / tx_size
     ut_4_tps = k**4 / (4 * bf * bh * df**2 * dh**2) / tx_size
     ut_n_1_with_por = por_with_merkle_branches_n1_root(k, bf, bh, 32)
+    ut_k_1b_with_por = int(round(bf * ut_n_1_with_por * (bh + 32 * log2(ut_n_1_with_por))))
+    ut_k_1tx_with_por = k - ut_k_1b_with_por
+    ut_n_2_factor_with_por = ut_k_1tx_with_por / (dh * df)
+    # ut_n_2_factor_with_por = k / (2 * ut_with_por_effective_bh * df)  # do we need to include PoRs with the header size for N_2? I don't think so... --> don't need to be recorded in the simplex-chain
+    ut_n_2_with_por = ut_n_1_with_por * ut_n_2_factor_with_por
     ut_with_por_effective_bh = k / (2 * bf * ut_n_1_with_por)
     ut_n1_per_k = ut_n_1_with_por / k
-    ut_2_with_por = k * ut_n_1_with_por / 2
-    ut_3_with_por = k * ut_2_with_por / (df * dh)
+    ut_n_2_with_por = ut_n_1_with_por * ut_n_2_factor_with_por
+    ut_2_with_por = k * ut_n_1_with_por
+    ut_2_tps_with_por = ut_2_with_por / tx_size
+    ut_3_with_por = k * ut_n_2_with_por
+    ut_3_tps_with_por = ut_3_with_por / tx_size
 
     return {
         'btc_tps': k / tx_size,
+        'btc_n_2_factor': 1,
+        'btc_tps_per_basechain': k / tx_size,
         # c^2 estimate, remove constants to be optimistic
         'eth2_tps': k**2 / (df * dh) / tx_size,
+        'eth2_n_2_factor': k / (df * dh),
         'ut_2_tps': ut_2_tps,
         # c^3 estimate
         'ut_3_tps': ut_3_tps,
+        'ut_3_tps_per_basechain': ut_3_tps / ut_n_1,
         'ut_4_tps': ut_4_tps,
         'ut_m_tps': '{:.2f} million'.format(ut_3_tps / 1000000),
         'ut_chain_gb_per_year': k * 60 * 60 * 24 * 365.25 / (1024 ** 3),
-        'ut_n_1': k / (2 * bh * bf),
-        'ut_n_2': k**2 / (4 * bh * bf * dh * df),
+        'ut_n_1': ut_n_1,
+        'ut_n_2': ut_n_2,
+        'ut_n_2_factor': ut_n_2_factor,
         'ut_n_1_with_por': ut_n_1_with_por,
-        'ut_2_tps_with_por': ut_2_with_por / tx_size,
-        'ut_3_tps_with_por': ut_3_with_por / tx_size,
+        'ut_n_2_with_por': ut_n_2_with_por,
+        'ut_2_tps_with_por': ut_2_tps_with_por,
+        'ut_n_2_factor_with_por': ut_n_2_factor_with_por,
+        'ut_3_tps_with_por': ut_3_tps_with_por,
+        'ut_3_tps_with_por_per_basechain': ut_3_tps_with_por / ut_n_1_with_por,
         'ut_with_por_bh': ut_with_por_effective_bh,
+        'ut_por_size': ut_with_por_effective_bh - bh,
         'ut_n1_per_k': ut_n1_per_k,
         'ut_3_optimal_dappchains': k / (2 * dh * df),
         'ut_n_3': k**3 / (4 * bh * bf * dh**2 * df**2),
@@ -49,7 +69,7 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
 def fmt_rounded_commas(value):
     if isinstance(value, str):
         return value
-    return f"{round(value):,}" if 1 < value < 10**6 else f"\x24{value:.1e}}}\x24" \
+    return f"{round(value):,}" if 1 <= value < 10**6 else f"\x24{value:.1e}}}\x24" \
         .replace("e+0", "e+").replace("e+", "\\times 10^{") \
         .replace("e-0", "e-").replace("e-", "\\times 10^{-")
 
@@ -57,19 +77,19 @@ def table_header(table_name):
     headings = ({
         'tps': ['$O(c)$', '$O(c^2)$', '$O(c^2)$ UT', '$O(c^3)$ UT', '$O(c^4)$ UT'],
         'dappchains': ['$N_1$ (UT)', '$N_2$ (UT)', '$N_3$ (UT)', '$\Delta S$'],
-        'tps_por': ['$N_1$', '$O(c^2)$ tps', '$O(c^3)$ tps', '$B_h$ + PoRs', '$\\nicefrac{N_1}{k}$'],
-        'compare_nets': ['Network', 'TPS per host-chain', 'Network-wide TPS'],
+        'tps_por': ['$N_1$', '$O(c^2)$ tps', '$N_2$', '$O(c^3)$ tps', 'PoR size (bytes)', '$\\nicefrac{N_1}{k}$'],
+        'compare_nets': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS'],
     })[table_name]
 
     col_sizes = ({
         'tps': ['---','----','----','----','----'],
         'dappchains': ['---', '----', '----', '----'],
-        'tps_por': ['---', '----', '----', '----', '----'],
-        'compare_nets': ['--------', '---', '---'],
+        'tps_por': ['---', '---', '----', '----', '----', '----'],
+        'compare_nets': ['--------', '---------', '---', '---'],
     })[table_name]
 
     col1_heading = ({
-        'compare_nets': '$k$, $B_f$, $B_h$',
+        'compare_nets': '$k$, $D_f$, $D_h$',
         'other': '$k$, $B_f$, $D_f$, $B_h$, $D_h$',
     })[table_name if table_name in ['compare_nets'] else 'other']
     headings.insert(0, col1_heading)
@@ -103,7 +123,7 @@ def table_row(params, table_name):
     cols = ({
         'tps': [format_params(params), r['btc_tps'], r['eth2_tps'], r['ut_2_tps'], r['ut_3_tps'], r['ut_4_tps']],
         'dappchains': [format_params(params), r['ut_n_1'], r['ut_n_2'], r['ut_n_3'], r['delta_s_Bps']],
-        'tps_por': [format_params(params), r['ut_n_1_with_por'], r['ut_2_tps_with_por'], r['ut_3_tps_with_por'], r['ut_with_por_bh'], r['ut_n1_per_k']],
+        'tps_por': [format_params(params), r['ut_n_1_with_por'], r['ut_2_tps_with_por'], r['ut_n_2_with_por'], r['ut_3_tps_with_por'], r['ut_por_size'], r['ut_n1_per_k']],
     })[table_name]
     return format_table_row(cols)
 
@@ -123,14 +143,12 @@ def table_row_compare(net: str, params, table_name):
     fp = format_params(mod_params[net](params))
     fn = net if 'UT' in net else net.capitalize()
     cols = ({
-        'UT': [fp, fn, r['ut_2_tps'] *4,  # *4 b/c dapp-chain layer doesn't need to split blocks between txs and refls + we have B_{h,f} = D_{h,f}
-                r['ut_3_tps']],
-        'UT_PoRs': [fp, fn, r['ut_2_tps_with_por'] *4,  # *4 b/c dapp-chain layer doesn't need to split blocks between txs and refls + we have B_{h,f} = D_{h,f}
-                r['ut_3_tps_with_por']],
-        'bitcoin': [fp, fn, r['btc_tps'], r['btc_tps']],
-        'cardano': [fp, fn, r['eth2_tps'], r['eth2_tps']],
-        'polkadot': [fp, fn, r['eth2_tps'], r['eth2_tps']],
-        'eth2': [fp, fn, r['eth2_tps'], r['eth2_tps']],
+        'UT': [fp, fn, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps']],
+        'UT_PoRs': [fp, fn, r['ut_n_2_factor_with_por'], r['ut_3_tps_with_por_per_basechain'], r['ut_3_tps_with_por']],
+        'bitcoin': [fp, fn, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps']],
+        'cardano': [fp, fn,  r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
+        'polkadot': [fp, fn, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
+        'eth2': [fp, fn, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
     })[net.split(' ')[0]]
     return format_table_row(cols)
 
@@ -196,19 +214,33 @@ row_inputs = [
     (3000, 1/60, 1/60, 1500, 1500, 250),
 ]
 
+# Note: If eth2 really is as efficient as an 8kb update every ~27 hours then it's close enough to 0.
+# (https://hackmd.io/@wemeetagain/SkuswKu_r#Update-data-size)
+#
+# But if a proof is required, too, then that's an extra 3.2kb!
+# (https://hackmd.io/@wemeetagain/SkuswKu_r#Proof-sizes-Token-EE-Balance-Example)
+#
+# https://www.reddit.com/r/ethfinance/comments/ojafms/conjecture_how_far_can_rollups_data_shards_scale/
+# > expect each data shard to target 2.480 MB per block (PS: this is history, not state).
+# that's
+#
+# .
+#
+
 comparison_k = 3000
 comparison_inputs = [
     ('bitcoin', (comparison_k, 1/600, 80, 250)),
     ('cardano', (comparison_k, 1/20, 1070, 250)),
     ('polkadot', (comparison_k, 1/6, 288, 250)),
-    ('eth2', (comparison_k, 1/12, 192, 250)),
+    ('eth2', (comparison_k, 1/12, 200, 250)),
     ('UT', (comparison_k, 1/15, 112, 250)),
+    ('UT (w/ tiling)', (comparison_k, 1/15, 112, 250)),
     ('bitcoin (w/ extras)', (comparison_k, 1/600, 80, 250)),
     ('cardano (w/ extras)', (comparison_k, 1/20, 1070 + 1024, 250)),
     ('polkadot (w/ extras)', (comparison_k, 1/6, 288 + 1024, 250)),
-    ('eth2 (w/ extras)', (comparison_k, 1/12, 192 + 1024, 250)),
+    ('eth2 (w/ extras)', (comparison_k, 1/12, 200 + (476 + 224 + 128 + 672 + 736 + 1024), 250)),
     ('UT_PoRs', (comparison_k, 1/15, 112, 250)),
-    ('UT (w/ tiling)', (comparison_k, 1/15, 112, 250)),
+    ('UT_PoRs (w/ tiling)', (comparison_k, 1/15, 112, 250)),
 ]
 
 for table_name in ['tps', 'dappchains', 'tps_por']:
@@ -223,7 +255,9 @@ for table_name in ['compare_nets']:
     print(f"\n### TABLE: {table_name}")
     rows = table_header(table_name)
     rows += list(table_row_compare(net, r, table_name) for (net, r) in comparison_inputs)
-    rows[-1][-1] = '$\infty$'
+    for r in rows:
+        if 'tiling' in r[1]:
+            r[-1] = '$\infty$'
     padded_rows = pad_rows(rows, [])
     rows_str = list(map(row_to_str, padded_rows))
     print('\n'.join(rows_str))
