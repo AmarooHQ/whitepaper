@@ -120,7 +120,8 @@ def format_table_row(row: List[Any]):
             .replace('0.05', '\\nicefrac{1}{20}') \
             .replace('0.06666666666666667', '\\nicefrac{1}{15}') \
             .replace('0.08333333333333333', '\\nicefrac{1}{12}') \
-            .replace('0.16666666666666666', '\\nicefrac{1}{6}') for r in row)
+            .replace('0.16666666666666666', '\\nicefrac{1}{6}') \
+            .replace('1.8181818181818181', '\\nicefrac{1}{0.55}') for r in row)
 
 
 def format_params(params):
@@ -255,7 +256,7 @@ def mk_comparison_inputs(k: int):
     ''' returns a list of network params with a network name. '''
     return [
         ('bitcoin', (k, 1/600, 80, 250)),
-        ('solana', (k, 1/0.4, 141, 250)),
+        ('solana', (k, 1/0.55, 141, 250)),
         ('cardano', (k, 1/20, 1070, 250)),
         ('polkadot', (k, 1/6, 288, 250)),
         ('eth2', (k, 1/12, 200, 250)),
@@ -288,7 +289,7 @@ UT_1M_K = 3826
 '''For comparison_1m_tps: for non-UT we want to chose the *lowest* value of k where the total TPS rounds to 1.00*10^6; and for UT we want to choose the *largest* k that does similarly. This will minimize the 'out-scaling' ratios.'''
 comparison_1m_tps = [
     ('bitcoin', (250000000, 1/600, 80, 250)),
-    ('solana', (296900, 1/0.4, 141, 250)),
+    ('solana', (296900, 1/0.55, 141, 250)),
     ('cardano', (115700, 1/20, 1070, 250)),
     ('polkadot', (109810, 1/6, 288, 250)),
     ('eth2', (64600, 1/12, 200, 250)),
@@ -326,3 +327,41 @@ for table_name in ['compare_nets_3k', 'compare_nets_30k']:
 
 for table_name in ['comparison_1m_tps']:
     mk_table(table_name, lambda: list(table_row_1m_compare(net, r, UT_1M_K) for (net, r) in comparison_1m_tps))
+
+
+"""
+# Notes on props relevant to scalability of various chains
+
+### Polkadot:
+
+* header size: 288 bytes (via polkadot.js rpc)
+* block time: 6s
+
+https://telemetry.polkadot.io/#/Polkadot
+
+also I made a little `npm init && npm i -S polkadot.js` project to get the header size (which is pretty easy; polkadot.js seems good -- I've seen way worse)
+
+### Eth 2:
+
+* header size: 192 bytes (mb 224?) (via lighthouse beaconchain node http API)
+* 12s block times (inferred b/c there seems to be a very regular 5 blocks/min pattern; couldn't find a source as easily)
+
+### Cardano:
+
+* header size: 1070 B -- via https://liberlion.medium.com/what-you-should-know-about-cardano-part-1-8c59ebbace49 -- note: secondary source and doesn't provide citation
+* 20s block time -- inferred via ~4250 blocks per day -> v close to 20s block time; data from: https://messari.io/asset/cardano/charts/network-activity/blocks
+
+### Solana:
+
+* header size: 64 + 1 + (8+8+8+8) + 32 + 4 + 8 = 141 -> 144 bytes after padding
+* block time about 550ms atm (31/8/21) via https://explorer.solana.com/ -- this source says 600ms https://forkast.news/what-is-solana-why-hottest-blockchain/
+
+https://docs.rs/solana/0.16.6/src/solana/packet.rs.html#341 (the linked line is an incremental construction of the header layout)
+
+also WTF re their hardware requirements!? https://youtu.be/6HHHYtPPUaA?t=421 !!! J.C.
+
+also good on their validators getting access to zen3 threadrippers only weeks after specifications were *leaked*. :/ (the author meant 3000 series threadrippers which are zen2)
+
+how solana makes sure the validator base is decentralized enough :/ <https://twitter.com/aeyakovenko/status/1315689754743107584>
+
+"""
