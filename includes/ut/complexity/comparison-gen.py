@@ -1,6 +1,8 @@
+#!/usr/bin/env python3
+
 from collections import defaultdict
 from decimal import Decimal
-from typing import Any, DefaultDict, List, Tuple
+from typing import Any, DefaultDict, List, Optional, Tuple
 from numpy.lib.scimath import sqrt
 from scipy.special import lambertw
 from numpy import log, log2, real
@@ -69,29 +71,35 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
 def fmt_rounded_commas(value):
     if isinstance(value, str):
         return value
-    return f"{round(value):,}" if 1 <= value < 10**6 else f"\x24{value:.1e}}}\x24" \
+    return f"{round(value):,}" if 1 <= value < 10**6 else f"\x24{value:.2e}}}\x24" \
         .replace("e+0", "e+").replace("e+", "\\times 10^{") \
         .replace("e-0", "e-").replace("e-", "\\times 10^{-")
 
 def table_header(table_name):
     headings = ({
-        'tps': ['$O(c)$', '$O(c^2)$', '$O(c^2)$ UT', '$O(c^3)$ UT', '$O(c^4)$ UT'],
+        'tps': ['$O(c)$', '$O(c^2)$ (optimal)', '$O(c^2)$ UT', '$O(c^3)$ UT', '$O(c^4)$ UT'],
         'dappchains': ['$N_1$ (UT)', '$N_2$ (UT)', '$N_3$ (UT)', '$\Delta S$'],
         'tps_por': ['$N_1$', '$O(c^2)$ tps', '$N_2$', '$O(c^3)$ tps', 'PoR (bytes)', '$\\nicefrac{N_1}{k}$'],
-        'compare_nets': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS'],
+        'compare_nets_3k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'UT TPS out-scales by'],
+        'compare_nets_30k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'UT TPS out-scales by'],
+        'comparison_1m_tps': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'UT $k$ out-scales by'],
     })[table_name]
 
     col_sizes = ({
         'tps': ['---','----','----','----','----'],
         'dappchains': ['----', '-----', '-----', '-----'],
         'tps_por': ['---', '----', '----', '----', '-----', '----'],
-        'compare_nets': ['------', '-------', '---', '---'],
+        'compare_nets_3k': ['------', '-------', '---', '---', '---'],
+        'compare_nets_30k': ['------', '-------', '---', '---', '---'],
+        'comparison_1m_tps': ['------', '-------', '---', '---', '---'],
     })[table_name]
 
-    col1_heading = ({
-        'compare_nets': '$k$, $D_f$, $D_h$',
-        'other': '$k$, $B_f$, $B_h$',
-    })[table_name if table_name in ['compare_nets'] else 'other']
+    col_heading_lookup = {
+        'compare_nets_3k': '$k$, $D_f$, $D_h$',
+        'compare_nets_30k': '$k$, $D_f$, $D_h$',
+        'default': '$k$, $B_f$, $B_h$',
+    }
+    col1_heading = col_heading_lookup.get(table_name, col_heading_lookup['default'])
     headings.insert(0, col1_heading)
 
     return [headings, ['------'] + col_sizes]
@@ -108,6 +116,7 @@ def format_table_row(row: List[Any]):
             .replace('0.0016666666666666668', '\\nicefrac{1}{600}') \
             .replace('0.016666666666666666', '\\nicefrac{1}{60}') \
             .replace('0.025', '\\nicefrac{1}{40}') \
+            .replace('0.03333333333333333', '\\nicefrac{1}{30}') \
             .replace('0.05', '\\nicefrac{1}{20}') \
             .replace('0.06666666666666667', '\\nicefrac{1}{15}') \
             .replace('0.08333333333333333', '\\nicefrac{1}{12}') \
@@ -137,8 +146,7 @@ def mod_ut_por_params(p: Tuple) -> Tuple:
 def mod_params_id(p: Tuple) -> Tuple:
     return p
 
-
-def table_row_compare(net: str, params, table_name):
+def table_row_compare_inner(net: str, params):
     p = params
     r = calc_tps_throughput(p[0], p[1], p[1], p[2], p[2], p[3])
     mod_params = defaultdict(lambda: mod_params_id, **({'UT+PoRs': mod_ut_por_params}))
@@ -151,7 +159,19 @@ def table_row_compare(net: str, params, table_name):
         'cardano': [fp, fn,  r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
         'polkadot': [fp, fn, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
         'eth2': [fp, fn, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
+        'solana': [fp, fn, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
     })[net.split(' ')[0]]
+    return cols
+
+def ratio_to_x(ratio):
+    return str(math.floor(ratio)) + 'x'
+
+def table_row_compare(net: str, params, ut_tps: int):
+    cols = table_row_compare_inner(net, params)
+    return format_table_row(cols + [ratio_to_x(ut_tps / cols[-1])])
+
+def table_row_1m_compare(net: str, params, ut_k):
+    cols = table_row_compare_inner(net, params) + [ratio_to_x(params[0] / ut_k)]
     return format_table_row(cols)
 
 def is_table_aligner(item: str) -> bool:
@@ -192,21 +212,29 @@ row_inputs = [
     (3000, 1/15, 112, 250),
     (30000, 1/15, 112, 250),
     # fast chains
+    (1000, 1/30, 112, 250),
+    (3000, 1/30, 112, 250),
+    (30000, 1/30, 112, 250),
+    # moderate chains
     (1000, 1/60, 112, 250),
-    (3000, 1/60, 200, 250),
     (3000, 1/60, 112, 250),
-    (30000, 1/60, 200, 250),
     (30000, 1/60, 112, 250),
     # slow chains
     (1000, 1/600, 112, 250),
-    (3000, 1/600, 200, 250),
     (3000, 1/600, 112, 250),
-    (30000, 1/600, 200, 250),
     (30000, 1/600, 112, 250),
+    # bigger headers
+    # (1000, 1/60, 200, 250),
+    # (3000, 1/60, 200, 250),
+    # (30000, 1/60, 200, 250),
+    # (1000, 1/600, 200, 250),
+    # (3000, 1/600, 200, 250),
+    # (30000, 1/600, 200, 250),
     # big headers
-    (3000, 1/60, 500, 250),
-    (3000, 1/60, 1000, 250),
-    (3000, 1/60, 1500, 250),
+    (3000, 1/30, 200, 250),
+    (3000, 1/30, 500, 250),
+    (3000, 1/30, 1000, 250),
+    (3000, 1/30, 1500, 250),
 ]
 
 # Note: If eth2 really is as efficient as an 8kb update every ~27 hours then it's close enough to 0.
@@ -215,53 +243,81 @@ row_inputs = [
 # But if a proof is required, too, then that's an extra 3.2kb!
 # (https://hackmd.io/@wemeetagain/SkuswKu_r#Proof-sizes-Token-EE-Balance-Example)
 #
+# curious, a post about Eth2 reaching 14 million tps
 # https://www.reddit.com/r/ethfinance/comments/ojafms/conjecture_how_far_can_rollups_data_shards_scale/
 # > expect each data shard to target 2.480 MB per block (PS: this is history, not state).
-# that's
-#
-# .
+# that's: k ~= 206,000
+# plugging that in to comparison table: 1e7 (10million) tps; so in the ballpark
 #
 
-comparison_k = 3000
-comparison_k2 = 30000
-comparison_inputs = [
-    ('bitcoin', (comparison_k, 1/600, 80, 250)),
-    ('cardano', (comparison_k, 1/20, 1070, 250)),
-    ('polkadot', (comparison_k, 1/6, 288, 250)),
-    ('eth2', (comparison_k, 1/12, 200, 250)),
-    ('UT', (comparison_k, 1/15, 112, 250)),
-    ('UT+PoRs', (comparison_k, 1/15, 112, 250)),
-    ('UT (w/ tiling)', (comparison_k, 1/15, 112, 250)),
-    ('bitcoin', (comparison_k2, 1/600, 80, 250)),
-    ('cardano', (comparison_k2, 1/20, 1070, 250)),
-    ('polkadot', (comparison_k2, 1/6, 288, 250)),
-    ('eth2', (comparison_k2, 1/12, 200, 250)),
-    ('UT', (comparison_k2, 1/15, 112, 250)),
-    ('UT+PoRs', (comparison_k2, 1/15, 112, 250)),
-    ('UT (w/ tiling)', (comparison_k2, 1/15, 112, 250)),
-    # ('bitcoin (w/ extras)', (comparison_k, 1/600, 80, 250)),
-    # ('cardano (w/ extras)', (comparison_k, 1/20, 1070 + 1024, 250)),
-    # ('polkadot (w/ extras)', (comparison_k, 1/6, 288 + 1024, 250)),
-    # ('eth2 (w/ extras)', (comparison_k, 1/12, 200 + (476 + 224 + 128 + 672 + 736 + 1024), 250)),
-    # ('UT+PoRs', (comparison_k, 1/15, 112, 250)),
-    # ('UT+PoRs (w/ tiling)', (comparison_k, 1/15, 112, 250)),
+comparison_ks = {'compare_nets_3k': 3000, 'compare_nets_30k': 30000}
+def mk_comparison_inputs(k: int):
+    return [
+        ('bitcoin', (k, 1/600, 80, 250)),
+        ('solana', (k, 1/0.4, 141, 250)),
+        ('cardano', (k, 1/20, 1070, 250)),
+        ('polkadot', (k, 1/6, 288, 250)),
+        ('eth2', (k, 1/12, 200, 250)),
+        ('UT+PoRs', (k, 1/15, 112, 250)),
+        ('UT', (k, 1/15, 112, 250)),
+        ('UT (w/ tiling)', (k, 1/15, 112, 250)),
+    ]
+#     ('bitcoin', (comparison_k2, 1/600, 80, 250)),
+#     ('solana', (comparison_k2, 1/0.4, 141, 250)),
+#     ('cardano', (comparison_k2, 1/20, 1070, 250)),
+#     ('polkadot', (comparison_k2, 1/6, 288, 250)),
+#     ('eth2', (comparison_k2, 1/12, 200, 250)),
+#     ('UT+PoRs', (comparison_k2, 1/15, 112, 250)),
+#     ('UT', (comparison_k2, 1/15, 112, 250)),
+#     ('UT (w/ tiling)', (comparison_k2, 1/15, 112, 250)),
+#     # ('bitcoin (w/ extras)', (comparison_k, 1/600, 80, 250)),
+#     # ('cardano (w/ extras)', (comparison_k, 1/20, 1070 + 1024, 250)),
+#     # ('polkadot (w/ extras)', (comparison_k, 1/6, 288 + 1024, 250)),
+#     # ('eth2 (w/ extras)', (comparison_k, 1/12, 200 + (476 + 224 + 128 + 672 + 736 + 1024), 250)),
+#     # ('UT+PoRs', (comparison_k, 1/15, 112, 250)),
+#     # ('UT+PoRs (w/ tiling)', (comparison_k, 1/15, 112, 250)),
+#     # ('eth2', (206000, 1/12, 200, 250)),  # approx the '14m tps' claim above
+#     # ('UT', (8298, 1/15, 112, 250)),
+#     # ('solana', (248500, 1/0.4, 141, 250)),  # should match their '700k tps theoretical limit' claim
+#     # ('UT', (3393, 1/15, 112, 250)),
+# ]
+
+UT_1M_K = 3826
+
+comparison_1m_tps = [
+    ('bitcoin', (250000000, 1/600, 80, 250)),
+    ('solana', (296900, 1/0.4, 141, 250)),
+    ('cardano', (115700, 1/20, 1070, 250)),
+    ('polkadot', (109810, 1/6, 288, 250)),
+    ('eth2', (64600, 1/12, 200, 250)),
+    ('UT', (UT_1M_K, 1/15, 112, 250)),
 ]
 
-for table_name in ['tps', 'dappchains', 'tps_por']:
-    print(f"\n#### TABLE: {table_name}\n")
-    rows = table_header(table_name)
-    rows += list(table_row(r, table_name) for r in row_inputs)
-    padded_rows = pad_rows(rows, [])
-    rows = list(map(row_to_str, padded_rows))
-    print('\n'.join(rows))
-
-for table_name in ['compare_nets']:
+def mk_table(table_name, row_func):
     print(f"\n### TABLE: {table_name}")
     rows = table_header(table_name)
-    rows += list(table_row_compare(net, r, table_name) for (net, r) in comparison_inputs)
-    for r in rows:
-        if 'tiling' in r[1]:
-            r[-1] = '$\infty$'
+    rows += row_func()
     padded_rows = pad_rows(rows, [])
     rows_str = list(map(row_to_str, padded_rows))
     print('\n'.join(rows_str))
+
+
+for table_name in ['tps', 'dappchains', 'tps_por']:
+    mk_table(table_name, lambda: list(table_row(r, table_name) for r in row_inputs))
+
+for table_name in ['compare_nets_3k', 'compare_nets_30k']:
+    k = comparison_ks[table_name]
+    net_inputs = mk_comparison_inputs(k)
+    ut_row = table_row_compare_inner('UT', list(filter(lambda i: i[0] == 'UT', net_inputs))[0][1])
+    ut_tps: int = ut_row[-1]
+    def mk_row():
+        rows = list(table_row_compare(net, r, ut_tps) for (net, r) in net_inputs)
+        for r in rows:
+            if 'tiling' in r[1]:
+                r[-2] = '$\infty$'
+                r[-1] = '0x'
+        return rows
+    mk_table(table_name, mk_row)
+
+for table_name in ['comparison_1m_tps']:
+    mk_table(table_name, lambda: list(table_row_1m_compare(net, r, UT_1M_K) for (net, r) in comparison_1m_tps))

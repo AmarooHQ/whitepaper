@@ -4,7 +4,7 @@
 
 > However, Bitcoin encounters performance problems of low throughput and high transaction latency. Other cryptocurrencies based on proof-of-work also inherit the flaws, leading to more concerns about the scalability of blockchain.
 
-- Solutions to Scalability of Blockchain: A Survey (2020); 08962150.pdf; IPFS: QmbD8ad8a8cUgXERBThMGYAmzGjmDr2okPGsBGBrQJsv1k
+- Solutions to Scalability of Blockchain: A Survey (2020); 08962150.pdf; IPFS: QmbD8ad8a8cUgXERBThMGYAmzGjmDr2okPGsBGBrQJsv1k; <https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=8954616>; <https://web.archive.org/web/20210407071724/https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=8962150>
 
 > The list for brilliant, blockchain scalability solutions spans on. From blockchains that look less like chains and more like directed acyclic graphs [pictured above], to faster consensus algorithms like PoS, PoA, specifically mutations of federated BFTs and delegated BFTs that guarantee faster block finality & production… users now have a plethora of solutions to choose from.
 
