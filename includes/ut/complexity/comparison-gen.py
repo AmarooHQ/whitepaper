@@ -89,9 +89,9 @@ def table_header(table_name):
         'tps': ['---','----','----','----','----'],
         'dappchains': ['----', '-----', '-----', '-----'],
         'tps_por': ['---', '----', '----', '----', '-----', '----'],
-        'compare_nets_3k': ['------', '-------', '---', '---', '---'],
-        'compare_nets_30k': ['------', '-------', '---', '---', '---'],
-        'comparison_1m_tps': ['------', '-------', '---', '---', '---'],
+        'compare_nets_3k': ['------', '-------', '-----', '-------', '------'],
+        'compare_nets_30k': ['------', '-------', '-----', '-------', '------'],
+        'comparison_1m_tps': ['---', '---', '----', '-----', '----'],
     })[table_name]
 
     col_heading_lookup = {
@@ -164,7 +164,7 @@ def table_row_compare_inner(net: str, params):
     return cols
 
 def ratio_to_x(ratio):
-    return str(math.floor(ratio)) + 'x'
+    return f"${ratio:.1f}\\times$"
 
 def table_row_compare(net: str, params, ut_tps: int):
     cols = table_row_compare_inner(net, params)
@@ -252,6 +252,7 @@ row_inputs = [
 
 comparison_ks = {'compare_nets_3k': 3000, 'compare_nets_30k': 30000}
 def mk_comparison_inputs(k: int):
+    ''' returns a list of network params with a network name. '''
     return [
         ('bitcoin', (k, 1/600, 80, 250)),
         ('solana', (k, 1/0.4, 141, 250)),
@@ -260,7 +261,7 @@ def mk_comparison_inputs(k: int):
         ('eth2', (k, 1/12, 200, 250)),
         ('UT+PoRs', (k, 1/15, 112, 250)),
         ('UT', (k, 1/15, 112, 250)),
-        ('UT (w/ tiling)', (k, 1/15, 112, 250)),
+        ('UT w/ tiling', (k, 1/15, 112, 250)),
     ]
 #     ('bitcoin', (comparison_k2, 1/600, 80, 250)),
 #     ('solana', (comparison_k2, 1/0.4, 141, 250)),
@@ -269,7 +270,7 @@ def mk_comparison_inputs(k: int):
 #     ('eth2', (comparison_k2, 1/12, 200, 250)),
 #     ('UT+PoRs', (comparison_k2, 1/15, 112, 250)),
 #     ('UT', (comparison_k2, 1/15, 112, 250)),
-#     ('UT (w/ tiling)', (comparison_k2, 1/15, 112, 250)),
+#     ('UT w/ tiling', (comparison_k2, 1/15, 112, 250)),
 #     # ('bitcoin (w/ extras)', (comparison_k, 1/600, 80, 250)),
 #     # ('cardano (w/ extras)', (comparison_k, 1/20, 1070 + 1024, 250)),
 #     # ('polkadot (w/ extras)', (comparison_k, 1/6, 288 + 1024, 250)),
@@ -284,12 +285,14 @@ def mk_comparison_inputs(k: int):
 
 UT_1M_K = 3826
 
+'''For comparison_1m_tps: for non-UT we want to chose the *lowest* value of k where the total TPS rounds to 1.00*10^6; and for UT we want to choose the *largest* k that does similarly. This will minimize the 'out-scaling' ratios.'''
 comparison_1m_tps = [
     ('bitcoin', (250000000, 1/600, 80, 250)),
     ('solana', (296900, 1/0.4, 141, 250)),
     ('cardano', (115700, 1/20, 1070, 250)),
     ('polkadot', (109810, 1/6, 288, 250)),
     ('eth2', (64600, 1/12, 200, 250)),
+    ('UT+PoRs', (math.floor(UT_1M_K * 1.438), 1/15, 112, 250)),
     ('UT', (UT_1M_K, 1/15, 112, 250)),
 ]
 
@@ -305,6 +308,7 @@ def mk_table(table_name, row_func):
 for table_name in ['tps', 'dappchains', 'tps_por']:
     mk_table(table_name, lambda: list(table_row(r, table_name) for r in row_inputs))
 
+
 for table_name in ['compare_nets_3k', 'compare_nets_30k']:
     k = comparison_ks[table_name]
     net_inputs = mk_comparison_inputs(k)
@@ -314,10 +318,11 @@ for table_name in ['compare_nets_3k', 'compare_nets_30k']:
         rows = list(table_row_compare(net, r, ut_tps) for (net, r) in net_inputs)
         for r in rows:
             if 'tiling' in r[1]:
-                r[-2] = '$\infty$'
-                r[-1] = '0x'
+                r[-2] = '$\\infty$'
+                r[-1] = '$0.0\\times$'
         return rows
     mk_table(table_name, mk_row)
+
 
 for table_name in ['comparison_1m_tps']:
     mk_table(table_name, lambda: list(table_row_1m_compare(net, r, UT_1M_K) for (net, r) in comparison_1m_tps))
