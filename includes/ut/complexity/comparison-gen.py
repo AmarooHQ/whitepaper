@@ -359,6 +359,7 @@ also I made a little `npm init && npm i -S polkadot.js` project to get the heade
 https://docs.rs/solana/0.16.6/src/solana/packet.rs.html#341 (the linked line is an incremental construction of the header layout)
 
 also WTF re their hardware requirements!? https://youtu.be/6HHHYtPPUaA?t=421 !!! J.C.
+https://web.archive.org/web/20210831185445/https://docs.solana.com/running-validator/validator-reqs
 
 also good on their validators getting access to zen3 threadrippers only weeks after specifications were *leaked*. :/ (the author meant 3000 series threadrippers which are zen2)
 
