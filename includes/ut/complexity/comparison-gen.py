@@ -68,10 +68,28 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
         'delta_s_Bps': k**2 / (2 * bh * bf),
     }
 
-def fmt_rounded_commas(value):
+def bandwidth_to_k_solana(delta_s, bf, bh):
+    '''
+    assuming:
+        * PoH need to be transmitted infrequently (N > 100 say)
+        * An ordered list of msg hashes is required so validators know the order of txs
+        * Validators need to know that the transactions are valid too (given some state) and have received those txs
+    So validators need bandwidth: PoH packet + N*20 B for msg order + 176*N B for txs
+        * PoH packet lim-> 0; 176+20 for each transaction ~ 200B
+    '''
+    return delta_s
+
+
+def bandwidth_to_k(delta_s, bf, bh):
+    return {
+        'UT': math.floor(sqrt(2 * delta_s * bf * bh)),
+        'solana': delta_s
+    }
+
+def fmt_rounded_commas(value, non_sn_range=(1, 10**6)):
     if isinstance(value, str):
         return value
-    return f"{round(value):,}" if 1 <= value < 10**6 else f"\x24{value:.2e}}}\x24" \
+    return f"{round(value):,}" if non_sn_range[0] <= value < non_sn_range[1] else f"\x24{value:.2e}}}\x24" \
         .replace("e+0", "e+").replace("e+", "\\times 10^{") \
         .replace("e-0", "e-").replace("e-", "\\times 10^{-")
 
@@ -83,32 +101,29 @@ def table_header(table_name):
         'compare_nets_3k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'UT TPS out-scales by'],
         'compare_nets_30k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'UT TPS out-scales by'],
         'comparison_1m_tps': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'UT $k$ out-scales by'],
+        'comparison_1gbps': ['Network', '$k_1$', 'TPS', '$\\nicefrac{\\text{TPS}}{k_1}$ vs UT'], #, '$k_1 \cdot$ TPS vs UT', 'TPS vs UT', 'combined'],
     })[table_name]
 
-    col_sizes = ({
+    col_sizes = ['------'] + ({
         'tps': ['---','----','----','----','----'],
         'dappchains': ['----', '-----', '-----', '-----'],
         'tps_por': ['---', '----', '----', '----', '-----', '----'],
         'compare_nets_3k': ['------', '-------', '-----', '-------', '------'],
         'compare_nets_30k': ['------', '-------', '-----', '-------', '------'],
         'comparison_1m_tps': ['---', '---', '----', '-----', '----'],
+        'comparison_1gbps': ['---', '---', '---', '----'], #'-----', '------'],
     })[table_name]
 
     col_heading_lookup = {
         'compare_nets_3k': '$k$, $D_f$, $D_h$',
         'compare_nets_30k': '$k$, $D_f$, $D_h$',
+        'comparison_1gbps': '$\\Delta S$, $B_f$, $B_h$, Tx (B)',
         'default': '$k$, $B_f$, $B_h$',
     }
     col1_heading = col_heading_lookup.get(table_name, col_heading_lookup['default'])
     headings.insert(0, col1_heading)
 
-    return [headings, ['------'] + col_sizes]
-
-    # return '\n'.join([
-    #     '| ' + ' | '.join(headings) + ' |',
-    #     '|'.join(['', '--------'] \
-    #     + col_sizes + [''])
-    # ])
+    return [headings, col_sizes]
 
 
 def format_table_row(row: List[Any]):
@@ -124,9 +139,13 @@ def format_table_row(row: List[Any]):
             .replace('1.8181818181818181', '\\nicefrac{1}{0.55}') for r in row)
 
 
-def format_params(params):
-    return '$' + ', '.join(map(str, list(params)[:-1])) + '$'
+def format_params(params, strip_last_n=1):
+    ps = list(params)[:-1 * strip_last_n] if strip_last_n > 0 else list(params)
+    return '$' + ', '.join(map(str, ps)) + '$'
 
+def ratio_to_x(ratio):
+    # return f"${ratio:.1f}\\times$"
+    return f"$({fmt_rounded_commas(ratio).strip('$')})\\times$"
 
 def table_row(params, table_name):
     p = params
@@ -160,12 +179,9 @@ def table_row_compare_inner(net: str, params):
         'cardano': [fp, fn,  r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
         'polkadot': [fp, fn, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
         'eth2': [fp, fn, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
-        'solana': [fp, fn, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
+        # 'solana': [fp, fn, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],  # NOT ACCURATE
     })[net.split(' ')[0]]
     return cols
-
-def ratio_to_x(ratio):
-    return f"${ratio:.1f}\\times$"
 
 def table_row_compare(net: str, params, ut_tps: int):
     cols = table_row_compare_inner(net, params)
@@ -173,6 +189,28 @@ def table_row_compare(net: str, params, ut_tps: int):
 
 def table_row_1m_compare(net: str, params, ut_k):
     cols = table_row_compare_inner(net, params) + [ratio_to_x(params[0] / ut_k)]
+    return format_table_row(cols)
+
+def table_row_1gbps(net, params, ut_params):
+    ut_net, ut_ps = ut_params
+    ut_ds, ut_bf, ut_bh, ut_tx = ut_ps
+    ds, bf, bh, tx_size = params
+    k = math.floor(bandwidth_to_k(ds, bf, bh)[net])
+    k_ut = bandwidth_to_k(ut_ds, ut_bf, ut_bh)[ut_net]
+    r = calc_tps_throughput(k, bf, bf, bh, bh, tx_size)
+    r_ut = calc_tps_throughput(k_ut, ut_bf, ut_bf, ut_bh, ut_bh, ut_tx)
+    fp = format_params([fmt_rounded_commas(ds).strip('$'), bf, bh, tx_size], strip_last_n=0)
+    tps_val = ({
+        'UT': r['ut_2_tps'],
+        'solana': r['btc_tps'],
+    })[net]
+    vs_tps = tps_val / r_ut['ut_2_tps']
+    vs_k = k_ut / k
+    tps_per_k = tps_val / k
+    tps_per_k_ut = r_ut['ut_2_tps'] / k_ut
+    vs_combined = vs_tps * vs_k
+    vs_tps_per_k = tps_per_k / tps_per_k_ut
+    cols = [fp, net, k, tps_val, ratio_to_x(vs_tps_per_k)] #, ratio_to_x(vs_k), ratio_to_x(vs_tps), ratio_to_x(vs_combined)]
     return format_table_row(cols)
 
 def is_table_aligner(item: str) -> bool:
@@ -256,7 +294,7 @@ def mk_comparison_inputs(k: int):
     ''' returns a list of network params with a network name. '''
     return [
         ('bitcoin', (k, 1/600, 80, 250)),
-        ('solana', (k, 1/0.55, 141, 250)),
+        # ('solana', (k, 1/0.55, 141, 250)),
         ('cardano', (k, 1/20, 1070, 250)),
         ('polkadot', (k, 1/6, 288, 250)),
         ('eth2', (k, 1/12, 200, 250)),
@@ -289,7 +327,7 @@ UT_1M_K = 3826
 '''For comparison_1m_tps: for non-UT we want to chose the *lowest* value of k where the total TPS rounds to 1.00*10^6; and for UT we want to choose the *largest* k that does similarly. This will minimize the 'out-scaling' ratios.'''
 comparison_1m_tps = [
     ('bitcoin', (250000000, 1/600, 80, 250)),
-    ('solana', (296900, 1/0.55, 141, 250)),
+    # ('solana', (296900, 1/0.55, 141, 250)),
     ('cardano', (115700, 1/20, 1070, 250)),
     ('polkadot', (109810, 1/6, 288, 250)),
     ('eth2', (64600, 1/12, 200, 250)),
@@ -328,6 +366,21 @@ for table_name in ['compare_nets_3k', 'compare_nets_30k']:
 for table_name in ['comparison_1m_tps']:
     mk_table(table_name, lambda: list(table_row_1m_compare(net, r, UT_1M_K) for (net, r) in comparison_1m_tps))
 
+comparison_1gbps = [
+    ('solana', [1024 ** 3 // 8, 1/.5, 200, 200]),
+    ('UT', [1024 ** 3 // 8, 1/15, 112, 250]),
+]
+
+for table_name in ['comparison_1gbps']:
+    def gen_rows():
+        rs = []
+        ut_params = list(filter(lambda r: r[0] == 'UT', comparison_1gbps))[0]
+        for (net, ps) in comparison_1gbps:
+            r = table_row_1gbps(net, ps, ut_params)
+            r[1] = 'UT $O(c^2)$' if r[1] == 'UT' else r[1].capitalize()
+            rs += [r]
+        return rs
+    mk_table(table_name, gen_rows)
 
 """
 # Notes on props relevant to scalability of various chains
@@ -353,16 +406,18 @@ also I made a little `npm init && npm i -S polkadot.js` project to get the heade
 
 ### Solana:
 
-* header size: 64 + 1 + (8+8+8+8) + 32 + 4 + 8 = 141 -> 144 bytes after padding
-* block time about 550ms atm (31/8/21) via https://explorer.solana.com/ -- this source says 600ms https://forkast.news/what-is-solana-why-hottest-blockchain/
+NB: out of date, see bandwidth_to_k_solana
 
-https://docs.rs/solana/0.16.6/src/solana/packet.rs.html#341 (the linked line is an incremental construction of the header layout)
+* ~~header size: 64 + 1 + (8+8+8+8) + 32 + 4 + 8 = 141 -> 144 bytes after padding~~
+* ~~block time about 550ms atm (31/8/21) via https://explorer.solana.com/ -- this source says 600ms https://forkast.news/what-is-solana-why-hottest-blockchain/~~
 
-also WTF re their hardware requirements!? https://youtu.be/6HHHYtPPUaA?t=421 !!! J.C.
-https://web.archive.org/web/20210831185445/https://docs.solana.com/running-validator/validator-reqs
+~~https://docs.rs/solana/0.16.6/src/solana/packet.rs.html#341 (the linked line is an incremental construction of the header layout)~~
 
-also good on their validators getting access to zen3 threadrippers only weeks after specifications were *leaked*. :/ (the author meant 3000 series threadrippers which are zen2)
+~~also WTF re their hardware requirements!? https://youtu.be/6HHHYtPPUaA?t=421 !!! J.C.
+https://web.archive.org/web/20210831185445/https://docs.solana.com/running-validator/validator-reqs~~
 
-how solana makes sure the validator base is decentralized enough :/ <https://twitter.com/aeyakovenko/status/1315689754743107584>
+~~also good on their validators getting access to zen3 threadrippers only weeks after specifications were *leaked*. :/ (the author meant 3000 series threadrippers which are zen2)~~
+
+~~how solana makes sure the validator base is decentralized enough :/ <https://twitter.com/aeyakovenko/status/1315689754743107584>~~
 
 """
