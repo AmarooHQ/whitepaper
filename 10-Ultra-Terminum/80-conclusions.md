@@ -13,6 +13,8 @@
 
 ### Comparison with 'the big 4'
 
+\todo{experiment with inverting comparisons to UT (like with Solana table). instead of 'UT out-scales by $1000\times$, it'd be more like 'Network X vs UT X: $10^{-3}\times$'.}
+
 \defineTerm{Base-chain}{A chain that has no parent-chains; i.e., is at the base nesting level}
 
 \defineTerm{Scaling Factor}{For a given $k$, it is both the number of child-chains that a parent-chain can support, and the factor by which TPS increases with an additional nesting level. In effect, it allows for comparison of the efficacy of scaling schemes when $k$ is fixed. For some designs, the \emph{Scaling Factor} can change between nesting levels.}
