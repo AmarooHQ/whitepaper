@@ -54,12 +54,13 @@
 
 : A comparison of computational requirements (approximated by $k$) for 1 million TPS between UT and various other networks. Note: \emph{Scaling Factor} has a different (incomparable) meaning here, as it is dependant on $k$ which is not fixed. It is included for the sake of consistency between these tables.
 
-| $\Delta S$, $B_f$, $B_h$, Tx (B)                | Network     | $k_1$               | TPS     | $\nicefrac{\text{TPS}}{k_1}$ vs UT |
+| $\Delta S$, $B_f$, $B_h$, Tx (B)                | Network     | $k_1$               | TPS                 | $\nicefrac{\text{TPS}}{k_1}$ vs UT |
 |------|---|---|---|----|
-| $1.34\times 10^{8}, 2.0, 200, 200$              | Solana      | $1.34\times 10^{8}$ | 671,089 | $(8.34\times 10^{-4})\times$       |
-| $1.34\times 10^{8}, \nicefrac{1}{15}, 112, 250$ | UT $O(c^2)$ | 44,769              | 268,428 | $(1)\times$                        |
+| $1.34\times 10^{8}, 2.0, 200, 200$              | Solana      | $1.34\times 10^{8}$ | 671,089             | $(1.39\times 10^{-7})\times$       |
+| $1.34\times 10^{8}, \nicefrac{1}{15}, 112, 250$ | UT $O(c^2)$ | 44,769              | 268,428             | $(1.67\times 10^{-4})\times$       |
+| $1.34\times 10^{8}, \nicefrac{1}{15}, 112, 250$ | UT $O(c^3)$ | 44,769              | $1.61\times 10^{9}$ | $(1)\times$                        |
 
-: A comparison of various networks' $k_1$ and TPS given a maximum network throughput of 1 Gb/s ($\sim1.3\times 10^8$ B/s), and a direct comparison between the resultant TPS efficiency (against $k_1$) and that of UT's $O(c^2)$ configuration.
+: A comparison of various networks' $k_1$ and TPS given a maximum network throughput of 1 Gb/s ($\sim1.3\times 10^8$ B/s), and a direct comparison between the resultant TPS efficiency (against $k_1$) and that of UT's $O(c^3)$ configuration.
 
 \todo{make sure these tables aren't split over pages (they're short enough that we don't need to)}
 

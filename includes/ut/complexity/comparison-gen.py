@@ -83,6 +83,7 @@ def bandwidth_to_k_solana(delta_s, bf, bh):
 def bandwidth_to_k(delta_s, bf, bh):
     return {
         'UT': math.floor(sqrt(2 * delta_s * bf * bh)),
+        'UT3': math.floor(sqrt(2 * delta_s * bf * bh)),
         'solana': delta_s
     }
 
@@ -200,14 +201,17 @@ def table_row_1gbps(net, params, ut_params):
     r = calc_tps_throughput(k, bf, bf, bh, bh, tx_size)
     r_ut = calc_tps_throughput(k_ut, ut_bf, ut_bf, ut_bh, ut_bh, ut_tx)
     fp = format_params([fmt_rounded_commas(ds).strip('$'), bf, bh, tx_size], strip_last_n=0)
-    tps_val = ({
-        'UT': r['ut_2_tps'],
-        'solana': r['btc_tps'],
-    })[net]
-    vs_tps = tps_val / r_ut['ut_2_tps']
+    get_tps_val = lambda _r, _net: ({
+        'UT': _r['ut_2_tps'],
+        'UT3': _r['ut_3_tps'],
+        'solana': _r['btc_tps'],
+    })[_net]
+    tps_val = get_tps_val(r, net)
+    tps_val_ut = get_tps_val(r_ut, ut_net)
+    vs_tps = tps_val / tps_val_ut
     vs_k = k_ut / k
     tps_per_k = tps_val / k
-    tps_per_k_ut = r_ut['ut_2_tps'] / k_ut
+    tps_per_k_ut = tps_val_ut / k_ut
     vs_combined = vs_tps * vs_k
     vs_tps_per_k = tps_per_k / tps_per_k_ut
     cols = [fp, net, k, tps_val, ratio_to_x(vs_tps_per_k)] #, ratio_to_x(vs_k), ratio_to_x(vs_tps), ratio_to_x(vs_combined)]
@@ -369,15 +373,18 @@ for table_name in ['comparison_1m_tps']:
 comparison_1gbps = [
     ('solana', [1024 ** 3 // 8, 1/.5, 200, 200]),
     ('UT', [1024 ** 3 // 8, 1/15, 112, 250]),
+    ('UT3', [1024 ** 3 // 8, 1/15, 112, 250]),
 ]
 
 for table_name in ['comparison_1gbps']:
+    compare_to = 'UT3'
     def gen_rows():
         rs = []
-        ut_params = list(filter(lambda r: r[0] == 'UT', comparison_1gbps))[0]
+        ut_params = list(filter(lambda r: r[0] == compare_to, comparison_1gbps))[0]
+        get_network_name = lambda n: {'UT': 'UT $O(c^2)$', 'UT3': 'UT $O(c^3)$'}.get(n, n.capitalize())
         for (net, ps) in comparison_1gbps:
             r = table_row_1gbps(net, ps, ut_params)
-            r[1] = 'UT $O(c^2)$' if r[1] == 'UT' else r[1].capitalize()
+            r[1] = get_network_name(r[1])
             rs += [r]
         return rs
     mk_table(table_name, gen_rows)
