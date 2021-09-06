@@ -3,9 +3,9 @@
 from collections import defaultdict
 from decimal import Decimal
 from typing import Any, DefaultDict, List, Optional, Tuple
-from numpy.lib.scimath import sqrt
+from numpy.lib.scimath import sqrt, power
 from scipy.special import lambertw
-from numpy import log, log2, real
+from numpy import log, log2, real, floor
 import math
 
 
@@ -21,6 +21,7 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
     ut_n_2_factor = k / (2 * dh * df)
     ut_n_2 = ut_n_1 * ut_n_2_factor
     ut_2_tps = k**2 / (4 * bf * bh) / tx_size
+    ut_3_throughput = k**3 / (4 * bf * bh * df * dh)
     ut_3_tps = k**3 / (4 * bf * bh * df * dh) / tx_size
     ut_4_tps = k**4 / (4 * bf * bh * df**2 * dh**2) / tx_size
     ut_n_1_with_por = por_with_merkle_branches_n1_root(k, bf, bh, 32)
@@ -81,10 +82,30 @@ def bandwidth_to_k_solana(delta_s, bf, bh):
 
 
 def bandwidth_to_k(delta_s, bf, bh):
+    '''
+    UT2: DeltaS = k**2 / (2 * bh * bf)
+    power(2 * ds * bh * bf, 1/2)
+
+    UT3: DeltaS = k**3 / (4 * bf * bh * df * dh)
+    power(delta_s * bf * bf * bh * bh * 4, 1/3)
+    NB: technically DeltaS = T_2 + k**2 / (2 * bh * bf); but T_2 >> k**2 / (2 * bh * bf); like, < 0.1% for k=3000
+
+    eth2: T_2 = k**2 / (df * dh)
+    power(delta_s * bf * bh, 1/2)
+    '''
+    ut2_k = power(2 * delta_s * bf * bh, 1/2)
+    ut3_k = power(delta_s * bf * bf * bh * bh * 4, 1/3)
+
+    eth2_k = power(delta_s * bf * bh, 1/2)
+
     return {
-        'UT': math.floor(sqrt(2 * delta_s * bf * bh)),
-        'UT3': math.floor(sqrt(2 * delta_s * bf * bh)),
-        'solana': delta_s
+        'UT': ut2_k,
+        'UT3': ut3_k,
+        'eth2': eth2_k,
+        'polkadot': eth2_k,
+        'cardano': eth2_k,
+        'solana': delta_s,
+        'bitcoin': delta_s,
     }
 
 def fmt_rounded_commas(value, non_sn_range=(1, 10**6)):
@@ -99,25 +120,25 @@ def table_header(table_name):
         'tps': ['$O(c)$', '$O(c^2)$ (optimal)', '$O(c^2)$ UT', '$O(c^3)$ UT', '$O(c^4)$ UT'],
         'dappchains': ['$N_1$ (UT)', '$N_2$ (UT)', '$N_3$ (UT)', '$\Delta S$'],
         'tps_por': ['$N_1$', '$O(c^2)$ tps', '$N_2$', '$O(c^3)$ tps', 'PoR (bytes)', '$\\nicefrac{N_1}{k}$'],
-        'compare_nets_3k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'UT TPS out-scales by'],
-        'compare_nets_30k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'UT TPS out-scales by'],
-        'comparison_1m_tps': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'UT $k$ out-scales by'],
-        'comparison_1gbps': ['Network', '$k_1$', 'TPS', '$\\nicefrac{\\text{TPS}}{k_1}$ vs UT'], #, '$k_1 \cdot$ TPS vs UT', 'TPS vs UT', 'combined'],
+        'compare_nets_3k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'TPS vs \\newline UT $O(c^3)$'],
+        'compare_nets_30k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'TPS vs \\newline UT $O(c^3)$'],
+        'comparison_1m_tps': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', '$k$ vs UT $O(c^3)$'],
+        'comparison_1gbps': ['Network', 'TPS', '$k$ (B/s)', 'MB/chain/day'], #'$\\nicefrac{\\text{TPS}}{k_1}$ vs UT $O(c^3)$'], #, '$k_1 \cdot$ TPS vs UT', 'TPS vs UT', 'combined'],
     })[table_name]
 
     col_sizes = ['------'] + ({
         'tps': ['---','----','----','----','----'],
         'dappchains': ['----', '-----', '-----', '-----'],
         'tps_por': ['---', '----', '----', '----', '-----', '----'],
-        'compare_nets_3k': ['------', '-------', '-----', '-------', '------'],
-        'compare_nets_30k': ['------', '-------', '-----', '-------', '------'],
-        'comparison_1m_tps': ['---', '---', '----', '-----', '----'],
-        'comparison_1gbps': ['---', '---', '---', '----'], #'-----', '------'],
+        'compare_nets_3k': ['------', '-------', '-----', '-------', '-------'],
+        'compare_nets_30k': ['------', '------', '-----', '-------', '-------'],
+        'comparison_1m_tps': ['---', '---', '----', '-----', '-----'],
+        'comparison_1gbps': ['---', '---', '---', '----'], #'-----'], #'-----', '------'],
     })[table_name]
 
     col_heading_lookup = {
-        'compare_nets_3k': '$k$, $D_f$, $D_h$',
-        'compare_nets_30k': '$k$, $D_f$, $D_h$',
+        'compare_nets_3k': '$k$, $B_f$, $B_h$',
+        'compare_nets_30k': '$k$, $B_f$, $B_h$',
         'comparison_1gbps': '$\\Delta S$, $B_f$, $B_h$, Tx (B)',
         'default': '$k$, $B_f$, $B_h$',
     }
@@ -186,10 +207,10 @@ def table_row_compare_inner(net: str, params):
 
 def table_row_compare(net: str, params, ut_tps: int):
     cols = table_row_compare_inner(net, params)
-    return format_table_row(cols + [ratio_to_x(ut_tps / cols[-1])])
+    return format_table_row(cols + [ratio_to_x(cols[-1] / ut_tps)])
 
 def table_row_1m_compare(net: str, params, ut_k):
-    cols = table_row_compare_inner(net, params) + [ratio_to_x(params[0] / ut_k)]
+    cols = table_row_compare_inner(net, params) + [ratio_to_x(ut_k / params[0])]
     return format_table_row(cols)
 
 def table_row_1gbps(net, params, ut_params):
@@ -201,20 +222,25 @@ def table_row_1gbps(net, params, ut_params):
     r = calc_tps_throughput(k, bf, bf, bh, bh, tx_size)
     r_ut = calc_tps_throughput(k_ut, ut_bf, ut_bf, ut_bh, ut_bh, ut_tx)
     fp = format_params([fmt_rounded_commas(ds).strip('$'), bf, bh, tx_size], strip_last_n=0)
-    get_tps_val = lambda _r, _net: ({
-        'UT': _r['ut_2_tps'],
-        'UT3': _r['ut_3_tps'],
-        'solana': _r['btc_tps'],
+    get_net_vals = lambda _r, _net: ({
+        'UT': (_r['ut_2_tps'], _r['ut_n_1']),
+        'UT3': (_r['ut_3_tps'], _r['ut_n_2']),
+        'eth2': (_r['eth2_tps'], _r['eth2_n_2_factor']),
+        'polkadot': (_r['eth2_tps'], _r['eth2_n_2_factor']),
+        'cardano': (_r['eth2_tps'], _r['eth2_n_2_factor']),
+        'solana': (_r['btc_tps'], 1),
+        'bitcoin': (_r['btc_tps'], 1),
     })[_net]
-    tps_val = get_tps_val(r, net)
-    tps_val_ut = get_tps_val(r_ut, ut_net)
+    tps_val, n_chains = get_net_vals(r, net)
+    tps_val_ut, n_chains_ut = get_net_vals(r_ut, ut_net)
     vs_tps = tps_val / tps_val_ut
     vs_k = k_ut / k
     tps_per_k = tps_val / k
     tps_per_k_ut = tps_val_ut / k_ut
     vs_combined = vs_tps * vs_k
     vs_tps_per_k = tps_per_k / tps_per_k_ut
-    cols = [fp, net, k, tps_val, ratio_to_x(vs_tps_per_k)] #, ratio_to_x(vs_k), ratio_to_x(vs_tps), ratio_to_x(vs_combined)]
+    gb_p_chain_p_day = k * 86400 / 1024 / 1024
+    cols = [fp, net, tps_val, k, gb_p_chain_p_day]  #, ratio_to_x(vs_tps_per_k)] #, ratio_to_x(vs_k), ratio_to_x(vs_tps), ratio_to_x(vs_combined)]
     return format_table_row(cols)
 
 def is_table_aligner(item: str) -> bool:
@@ -362,7 +388,7 @@ for table_name in ['compare_nets_3k', 'compare_nets_30k']:
         for r in rows:
             if 'tiling' in r[1]:
                 r[-2] = '$\\infty$'
-                r[-1] = '$0.0\\times$'
+                r[-1] = '$(\\infty)\\times$'
         return rows
     mk_table(table_name, mk_row)
 
@@ -371,7 +397,11 @@ for table_name in ['comparison_1m_tps']:
     mk_table(table_name, lambda: list(table_row_1m_compare(net, r, UT_1M_K) for (net, r) in comparison_1m_tps))
 
 comparison_1gbps = [
-    ('solana', [1024 ** 3 // 8, 1/.5, 200, 200]),
+    ('solana', [1024 ** 3 // 8, 1/.5, 200, 250]),  # realistically, min 200 bytes tx size
+    ('bitcoin', [1024 ** 3 // 8, 1/600, 80, 250]),
+    ('cardano', [1024 ** 3 // 8, 1/20, 1070, 250]),
+    ('polkadot', [1024 ** 3 // 8, 1/6, 288, 250]),
+    ('eth2', [1024 ** 3 // 8, 1/12, 200, 250]),
     ('UT', [1024 ** 3 // 8, 1/15, 112, 250]),
     ('UT3', [1024 ** 3 // 8, 1/15, 112, 250]),
 ]
