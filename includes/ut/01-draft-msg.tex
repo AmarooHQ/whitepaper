@@ -1,30 +1,19 @@
 % \setcounter{tocdepth}{0}
 
-{\Huge{\textbf{Status of this draft}}}
+{\Large{\textbf{Draft Status}}}
 \par
 
-Currently this paper sits at the ``Draft 1'' stage; some sections are incomplete (where the ``todos'' are).
+Currently this paper sits at the ``Draft 1+'' stage; some sections are incomplete (where the ``todos'' are). Particularly the parts that talk about PoS/PoA and dappchains are incomplete.
 
-I have left those sections currently incomplete because they require parallel and ongoing revision and validation.
-
-In particular, further validation that Proof of Stake can be done securely \emph{at all} -- at least insofar as a \emph{blockchain} is concerned; DLTs are different and have weaker security requirements. This may not entirely align with some things I have written because I believed (and still do believe) that some Proof of Stake configurations may be \emph{possible} to do securely \emph{within} the hybrid security context that \emph{Ultra Terminum} provides.
-
-\emph{However}, \textbf{actually determining} whether PoS can \emph{ever} be done securely (including via UT's context) is significant work. It is a milestone that we are pursuing.
-
-My plan is to incrementally refactor the incomplete sections, which includes the following:
+{\Large{Draft 1+: Changes}}
 
 \begin{itemize}
-    \item Include methods by which dapp-chains are possible to do securely within a \emph{purely Proof of Work} UT context. I have devised a method for this.
-    \item Removing, altering, or rewriting the sections that mention \emph{Proof of Stake} to accurately represent the state-of-the-art and emphasize that UT doesn't require PoS for any of its scaling configurations.
-    \item Provide quantitative analysis of UT's security -- essentially this means: backing up the claim that attacking 1 of UT's chains is as difficult as attacking \emph{all} of UT's chains.
+    \item Iterating on comparisons to the ``big 4'' in \autoref{sec:conclusions}
+    \item Sketched out intuitive approach to tiling security \& polished tiling sections
+    \item Tables improved and simplified
+    \item Started to doubt PoS (particularly WRT dappchains) and the way I'd discussed it so far; we can still use PoS, but we don't need to. A major realization was that dappchains can be done via PoR, which is cleaner and more efficient than PoS dappchains anyway!
 \end{itemize}
 
-With regards to the last item in that list: although I am confident that UT does have these security properties, confidence is not science. Rigorous quantitative analysis is not so fallible, and producing it will tease out any crucial design choices.
-
-Thus, our focus is currently a near-comprehensive simulation of UT (and pre-existing PoW systems) to serve as the basis for the quantitative analysis. Work on this aspect is progressing smoothly.
-
---- \emph{Max}, June 2\textsuperscript{nd}
-
-\newpage
+{\Large{Release: Draft 1 (May 14th 2021)}}
 
 % \setcounter{tocdepth}{3}

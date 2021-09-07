@@ -88,7 +88,7 @@ def bandwidth_to_k(delta_s, bf, bh):
 
     UT3: DeltaS = k**3 / (4 * bf * bh * df * dh)
     power(delta_s * bf * bf * bh * bh * 4, 1/3)
-    NB: technically DeltaS = T_2 + k**2 / (2 * bh * bf); but T_2 >> k**2 / (2 * bh * bf); like, < 0.1% for k=3000
+    NB: technically DeltaS = T_2 + k**2 / (2 * bh * bf); but T_2 >> k**2 / (2 * bh * bf); like, > 99.9% for k=3000
 
     eth2: T_2 = k**2 / (df * dh)
     power(delta_s * bf * bh, 1/2)

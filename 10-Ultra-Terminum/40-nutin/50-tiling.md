@@ -310,5 +310,3 @@ Additionally, a model of tilings of similar capacity -- i.e., similar $N_{tiles}
     \caption{An example of a square tiling used in \autoref{fig:tiling-avg-dist-comparison}.}
     \label{fig:tiling-square}
 \end{figure}
-
-####

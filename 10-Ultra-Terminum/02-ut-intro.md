@@ -1,5 +1,4 @@
 \newpage
-
 # Introduction
 
 *Ultra Terminum* (UT) is a cooperative cross-chain consensus strategy that solves *Buterin's Trilemma*[^buterins-trilemma] (aka the *Scalability Trilemma*). That is: *Ultra Terminum* builds on existing consensus methods to produce a blockchain network that is highly distributed, highly secure, and highly scalable. In essence, UT is a new way to organize blockchains.

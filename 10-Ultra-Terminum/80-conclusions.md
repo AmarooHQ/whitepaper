@@ -1,5 +1,7 @@
 # Conclusions
 
+\label{sec:conclusions}
+
 ## Answering *Buterin's Trilemma*
 
 \todo{write out some explanation of how B.T. is answered.}
