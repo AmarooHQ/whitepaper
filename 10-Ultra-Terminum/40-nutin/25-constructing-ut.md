@@ -88,24 +88,53 @@ To maintain consistency with the geometric usage of the term *simplex*: a simple
     Dr. Gavin Wood; \href{https://cloudflare-ipfs.com/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Polkadot Whitepaper, s2.2}
 }
 
-*Dapp-chains* are the method by which *Ultra Terminum* exceeds $O(c^2)$ scaling without using the method described in \autoref{sec:tiling}. To be clear: the $O(c^2)$ configuration of UT is compatible with that other method (and it is thus sufficient to reach $O(n)$ scalability). However, there are *decisive* reasons to introduce and use *dapp-chains*. Dapp-chains provide features that the $O(n)$ scaling configuration alone cannot provide. Additionally, dapp-chains increase the simplex's scalability to $O(c^3)$ or $O(c^4)$.
+*Dapp-chains* are the method by which *Ultra Terminum* exceeds $O(c^2)$ scaling *without* using the method described in \autoref{sec:tiling}. To be clear: the $O(c^2)$ configuration of UT is compatible with that other method; dapp-chains are a *separate and independent* method of scaling. However, there are *decisive* reasons to introduce and use *dapp-chains*. Dapp-chains provide features that the $O(n)$ scaling configuration alone cannot easily provide. Additionally, dapp-chains increase the simplex's scalability to $O(c^3)$ or $O(c^4)$.
 
-\defineTerm{Dapp-chain}{An \emph{application-specific} PoS blockchain that may have architecturally distinct state- and transaction-schemes (distinct from those schemes used in the simplex, and other dapp-chains)}
+\defineTerm{Dapp-chain}{An \emph{application-specific} child-chain that is secured via the parent-chain. Dapp-chains may have architecturally distinct state- and transaction-schemes (distinct from those schemes used in the simplex, and other dapp-chains)}
 
-The headers of dapp-chains are encoded as simplex-transactions, which means that techniques like *slashing* are first-class operations within the *hybrid PoW* context provided by the simplex. This solves the *nothing at stake* problem for dapp-chains, provided the necessary PoS primitives can be encoded in a simplex-transaction[^pos-prim-simplex]. Practically speaking, a simple input-output transaction system with scripting capabilities (like that of Bitcoin) can be created to facilitate the necessary primitives. Additionally, different simplex-chains can implement different scripting systems, effectively facilitating *any* practical PoS-esq consensus mechanism.
+Dapp-chains are not restricted to any particular consensus method. They might use PoW, or PoS, or PoA, or something else. However, there \emph{are} some requirements that dapp-chains must meet. Dapp-chains have two defining characteristics: they share security with their parent-chain (via one-way PoR), and the simplex's root token can be moved from a simplex-chain to a dapp-chain and vice versa. To be clear: dapp-chains can have \emph{their own} token (and use that for mining rewards, etc), in addition to \emph{supporting} the simplex's root token.
+
+A simplex-chain \emph{must} validate the headers of its dapp-chains (similar to a light client). For some consensus methods that dapp-chains might choose (such as PoS), there might be special primitives that a host simplex-chain must support. However, only that host simplex-chain requires those primitives; other simplex-chains do not.
+
+Validating dapp-chain headers, on-chain, can be done via the following simple, clean, and extensible method: \emph{encode dapp-chain headers as simplex-level transactions}. This means that supporting new dapp-chain consensus methods is about as difficult as introducing new transaction types (or opcodes), and different simplex-chains have a great deal of freedom in choosing which dapp-chain consensus methods to support.
 
 \defineTerm{Header-transactions}{Dapp-chain headers that are encoded as simplex-level transactions; i.e., they are processed by a simplex-chain as a transaction, but they also function as the header for a dapp-chain block}
 
+Practically speaking, a simple input-output transaction system with scripting capabilities (like that of Bitcoin) can be created to facilitate the necessary primitives. Additionally, different simplex-chains can implement different scripting systems, effectively facilitating *any* practical consensus mechanism. There is not much (if any) overhead to using an input-output system like this: a header's parent hash is equivalent to a transaction input, the *output* can be omitted[^scriptpk], and other particulars of the header can be treated as an input script to the transaction[^scriptsig].
+
+[^scriptpk]: A header-transaction's output script can be generic (or templated) as it is the same for all header-transactions for that dapp-chain. In practice this can be as simple as a single opcode that validates that header. In Bitcoin, an output script is known as the `scriptPubKey`.
+
+[^scriptsig]: In Bitcoin, the input script to a transaction is called the `scriptSig`; see \url{https://en.bitcoin.it/wiki/Transaction}.
+
+#### Dapp-chain Security
+
+If the headers of dapp-chains are simplex-level transactions, what can we say about the security of dapp-chains?
+
+First, notice that there is no substantive difference between standalone headers and header-transactions. That means that *zero-confirmation* header-transactions are *exactly* as secure as a standalone counterparts (and at least as secure as zero-confirmation transactions).
+
+When a header-transaction is confirmed by the simplex, the corresponding dapp-chain can efficiently use one-way PoR to inherit the security (and security properties) of the host simplex-chain[^dc-por]. Similar to mutual PoR, this can provide a *security context* where otherwise-insecure methods of consensus can be done securely.
+
+[^dc-por]: Note: PoW dapp-chains will have a much lower difficulty than the host simplex-chain. Although a simplex-chain could do mutual PoR with dapp-chains, this is unnecessary and inefficient -- provided that this difficulty asymmetry exists. Although there is no fundamental reason that PoW dapp-chains must have a much lower difficulty, we should take care to use incentive structures that lead to this sort of outcome.
+
+With regards to doublespends, one-way PoR means that the reflected chain is *at least* as difficult to attack as the reflecting chain (as we covered in \autoref{sec:por-step4}). Since the parent simplex-chain is as difficult to attack as the complete simplex, each dapp-chain must therefore *also* be that difficult to attack.
+
+Note that parent-chains (generally) need to record their child-chains' headers *anyway*, so one-way PoR in this situation -- where a simplex-chain reflects child dapp-chains -- effectively has zero overhead.
+
+The only major, generic concern for dapp-chains -- that I can see -- is \emph{preventing DoS attacks}. This is one reason to favor PoS (or PoA) dapp-chains over PoW dapp-chains.
+
+#### PoS Dapp-chains
+
+If the headers of dapp-chains are encoded as simplex-transactions, then techniques like *slashing* are first-class operations within the *hybrid PoW* context provided by the simplex. This solves the *nothing at stake* problem for PoS dapp-chains, provided the necessary PoS primitives can be encoded in a simplex-transaction[^pos-prim-simplex].
+
 [^pos-prim-simplex]: In practice, this is always possible via dedicated opcodes; though it's preferable to use a lower-level DSL with some *reach*, and ideally with meaningful *universality*.
 
-There are numerous practical benefits to using dapp-chains in this fashion. One benefit is: the abstraction interface that exists between simplex-chains and dapp-chains means that existing PoS blockchain schemes can be easily integrated. Existing PoW blockchain schemes can be integrated, too, though will likely require some additional work.
+The abstraction layer between simplex-chains and dapp-chains brings practical benefits, too. For example: existing (open-source) PoS blockchain schemes can be easily integrated as dapp-chains. Given that dapp-chains inherit security properties of their parent-chain (via one-way PoR), if such a dapp-chain's consensus method supports *other* features -- e.g., [finality guarantees](https://github.com/w3f/consensus/blob/master/pdf/grandpa.pdf) -- those features are *free*.
 
-The most likely method of integration has four components: modification of the headers, modification of existing slashing protocols, implementation of a two-way peg, and support for intra-simplex SPV proofs. For example: [OpenEthereum](https://github.com/openethereum/openethereum) could be integrated as a dapp-chain with the creation of a new [header format](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/ethcore/types/src/header.rs), the creation or modification of a suitable [engine](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/ethcore/src/engines/basic_authority.rs), and the implementation of suitable [builtins](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/vm/builtin/src/lib.rs) that facilitate both the two-way peg and intra-simplex SPV proofs[^builtins-or-sc]. Naturally, there are some other components that are necessary, they they're also common over many dapp-chain integrations, like a component to actually publish header-transactions to the simplex.
+The most likely method of integration has four components: modification of the headers, modification of existing slashing protocols, implementation of a two-way peg, and support for intra-simplex SPV proofs. For example: [OpenEthereum](https://github.com/openethereum/openethereum) could be integrated as a dapp-chain with the creation of a new [header format](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/ethcore/types/src/header.rs), the creation or modification of a suitable [engine](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/ethcore/src/engines/basic_authority.rs), and the implementation of suitable [builtins](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/vm/builtin/src/lib.rs) that facilitate both the two-way peg and intra-simplex SPV proofs[^builtins-or-sc]. Naturally, there are some other components that are necessary, but those components are common over many dapp-chain integrations, like a component to broadcast header-transactions.
 
 [^builtins-or-sc]: Note: instead of builtins, these requirements could be met via EVM/WASM smart contracts.
 
-If the headers of dapp-chains are simplex-level transactions, what can we say about the security of dapp-chains? Since dapp-chains will use some sort of PoS scheme, and there is no substantive difference between standalone headers and header-transactions. That means that *zero-confirmation* header-transactions are *precisely* as secure as their standalone counterparts -- by definition. This means that other features -- e.g., [finality guarantees](https://github.com/w3f/consensus/blob/master/pdf/grandpa.pdf) -- are *free*. As these header-transactions are subsequently confirmed by the simplex, they inherit the typical security benefits that transactions gain from confirmation. Similar to reflection between PoW and PoS chains, dapp-chains also gain additional security benefits that would not normally be possible without the simplex.
-
+#### Future Dapp-chain Stuff (todo)
 
 \todo{finish below}
 
@@ -140,6 +169,6 @@ plan:
 
 - dapp-dapp-chains are the shards of dapp-chains
   - These are based on whatever is implemented in the dapp-chain; so abstracted away from UT
-  - If Eth2 is $O(c^2)$ with shards, and we modify Eth2 to run as a dapp-chain, then Eth2 shards would be dapp-dapp-chains and UT's max complexity would be $O(c^4)$.
+  - If Eth2 is $O(c^2)$ with shards, and we modify Eth2 to run as a dapp-chain, then Eth2 shards would be dapp-dapp-chains and UT's maximum complexity would be $O(c^4)$.
   - Basically we can use other $O(c^2)$ chains as needed to create lots of capacity w/ no loss of security
   - dapp-dapp-chains aren't a big deal really, just nice to have.
