@@ -1,0 +1,98 @@
+digraph PertChart {
+    compound=true;
+
+    // subgraph cluster_proofEngines {
+    //     label = "Proof Engines";
+    // }
+    powEngine [label = "PoW Engine"];
+    // posEngine [label = "PoS/PoA Engine"];
+
+    subgraph cluster_UtWhitePaper {
+        // style=filled;
+        // color=lightgrey;
+        // node [style=filled];
+        label = "UT WP Chapter";
+        por [label = "Proof of Reflection"];
+        simplex [label = "The Simplex"];
+        simplex -> por;
+        tiling [label="Simplex Tiling"];
+        tiling -> simplex;
+        dappChains [label = "Dappchains"];
+        dappChains -> simplex;
+    }
+
+    subgraph cluster_FutureWp {
+        label = "Future WP Chapters"
+        networkTopol [label="Network Topology"]
+        tokenomics [label="Tokenomics"];
+        amarooVision [label="Vision and Details 2"];
+    }
+
+    tokenomics -> dappChains [lhead=cluster_UtWhitePaper]
+    amarooVision -> dappChains [lhead=cluster_UtWhitePaper]
+    amarooVision -> tiling [lhead=cluster_UtWhitePaper]
+    networkTopol -> tiling [lhead=cluster_UtWhitePaper]
+
+    basicP2P [label="MVP P2P Layer"]
+
+    basicChain [label="MVP Chain"]
+    basicChain -> powEngine
+    basicChain -> basicP2P
+
+    lightClient [label="Headers-only Mode"]
+    lightClient -> basicChain
+
+    basicState [label="MVP State impl"]
+
+    basicProofs [label="MVP Merkle Branches"]
+    basicProofs -> basicState
+
+    basicPoR [label="MVP PoR impl"]
+    basicPoR -> por
+    // basicPoR -> basicChain
+    basicPoR -> lightClient
+    basicPoR -> basicProofs
+
+    multichainP2P [label="Multi-chain P2P Layer"]
+    multichainP2P -> basicP2P
+
+    basic2Chains [label="MVP 1-Simplex"]
+    basic2Chains -> basicPoR
+    basic2Chains -> multichainP2P
+    basicPoR -> simplex
+
+    basicDappChain [label="MVP Dapp-Chain"]
+    basicDappChain -> dappChains
+    basicDappChain -> basicPoR
+    basicDappChain -> multichainP2P
+
+    // lightClient -> basicChain -> dagDetails;
+    // TGE -> wpDraft1 [lhead=cluster_UtWhitePaper];
+
+    // TGE -> currencyMechanics;
+    // currencyMechanics -> reflectionNChains;
+    // reflectionNChains -> reflection2Chains;
+
+    // reflection2Chains -> simpleDappForSPV;
+    // simpleDappForSPV -> basicChain;
+    // p2pLayer -> networkTopol;
+    // reflection2Chains -> p2pLayer;
+    // simpleDappForSPV -> lightClient;
+    // lightClient -> powEngine;
+    // dappChains -> posEngine;
+    // dappChains -> currencyMechanics;
+    // bitcoinSpvDapp -> dappChains;
+    // fiatBridge -> dappChains;
+    // exchange -> fiatBridge;
+    // exchange -> cryptoExch;
+    // TGE -> bitcoinSpvDapp;
+    // cryptoExch -> TGE;
+    // cryptoExch -> reflectionNChains;
+    // TGE -> tgeLegalExploration;
+    // currencyMechanics -> wpDraft1 [lhead=cluster_UtWhitePaper];
+    // reflection2Chains -> placeholderCurrencyMechanics;
+    // placeholderCurrencyMechanics -> basicChain;
+    // powEngine -> basicChain;
+    // reflection2Chains -> utSpec;
+
+}

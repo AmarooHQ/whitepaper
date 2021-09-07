@@ -5,6 +5,13 @@
         },
         "sentence-length": {
             "max": 250
+        },
+        "stop-words": {  // https://github.com/sapegin/textlint-rule-stop-words
+            "defaultWords": false,
+            "words": [
+                ["dappchain"],
+                ["dappchains"],
+            ],
         }
     }
 }

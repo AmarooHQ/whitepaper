@@ -93,7 +93,9 @@ mk-latex-pdf:
 	echo 'skipping task for .md files'
 
 pert:
-	dot -Gdpi=300 -Tpng includes/pert/chart.gv -o includes/pert/chart.png
+	mkdir -p output/pert
+	dot -Gdpi=300 -Tpng includes/pert/chart.gv -o output/pert/chart.png
+	dot -Gdpi=300 -Tpng includes/pert/chart2.gv -o output/pert/chart2.png
 
 handout:
 	dot -Gdpi=300 -Tpng includes/handout/topic-tree.gv -o includes/handout/topic-tree.png

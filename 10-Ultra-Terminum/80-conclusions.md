@@ -66,7 +66,7 @@
 | $1.34\times 10^{8}, \nicefrac{1}{15}, 112, 250$  | UT $O(c^2)$ | 268,428 | 44,769              | 3,689               |
 | $1.34\times 10^{8}, \nicefrac{1}{15}, 112, 250$  | UT $O(c^3)$ | 536,428 | 3,104               | 256                 |
 
-: A comparison of various networks' $k_1$ and TPS given a maximum network (and network-wide) throughput of 1 Gb/s ($\sim1.3\times 10^8$ B/s). Also included is the rate at which chains on that network grow in size (which is proportional to $k$).
+: A comparison of various networks' $k$ and TPS given a maximum network-wide throughput of 1 Gb/s ($\sim1.3\times 10^8$ B/s). Also included is the rate at which chains on that network grow in size (which is proportional to $k$).
 
 \todo{make sure these tables aren't split over pages (they're short enough that we don't need to)}
 
