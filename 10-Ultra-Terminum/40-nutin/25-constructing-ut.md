@@ -18,19 +18,19 @@ In principle, the necessary capabilities (and actions) that some chains, $C_A$ a
 
 1. The headers of $C_A$ can be (and are) freely recorded -- promptly and unambiguously -- in $C_B$;
 2. The headers of $C_B$ can be (and are) freely recorded -- promptly and unambiguously -- in $C_A$; and
-3. $C_A$ is able to (and does) promptly prove that its headers have been recorded in $C_B$, and has full knowledge of which headers have been recorded.
+3. $C_A$ is able to (and does) promptly prove that its past headers have been recorded in $C_B$, and has full knowledge of which headers have been recorded.
 
 The benefits from *Proof of Reflection* begin as soon as $C_A$ integrates this knowledge into its chain-weighting algorithm, by a method suitably similar to \autoref{alg:refl-1-bw} and \autoref{alg:weightof-1}.
 
 If $C_A$ and $C_B$ are doing *mutual* Proof of Reflection, then both chains must satisfy all requirements.
 
-Is $C_A$ able to *simultaneously* do reflection with more than one other chain, e.g., $C_C ... C_Z$? Yes. There is nothing that we have covered so far that would prevent this. If *Proof of Reflection* is viable with a single other chain, then it is viable with *many* other chains. However, the dynamics do becoming increasingly complex, as we will soon see.
+Is $C_A$ able to *simultaneously* do reflection with more than one other chain, e.g., $C_C ... C_Z$? Yes. There is nothing that we have covered so far that would prevent this. If *Proof of Reflection* is viable with a single other chain, then it is viable with *many* other chains. However, the dynamics do become increasingly complex, as we will soon see.
 
 In order to support arbitrarily many reflections, we need to modify \textsc{ReflectedBlockWeight} from \autoref{alg:refl-1-bw} as shown in \autoref{alg:por-reflected-block-weight}.
 
-\input{includes/ut/algorithms/por-reflected-block-weight.tex}
-
 Note that \autoref{alg:por-reflected-block-weight} integrates the cap on weight contributed by each reflecting chain, as suggested in \autoref{sec:reflection-pow-and-pos}.
+
+\input{includes/ut/algorithms/por-reflected-block-weight.tex}
 
 ### The Simplex
 
@@ -74,7 +74,7 @@ When a blockchain is part of a simplex, it is called a *simplex-chain* (as disti
 
 To maintain consistency with the geometric usage of the term *simplex*: a simplex with $k+1$ chains is called a $k$-simplex or a $(k+1)$-chain simplex[^simplex-approx]. In a $k$-simplex, each simplex-chain has $k$ reflections (one reflection for each of the other simplex-chains). A $k$-simplex has, in total, ${k+1} \choose 2$ reflections.
 
-[^simplex-maths]: The name is taken from geometry (particularly: the higher-dimensional kind). A simplex, for a given dimensionality, is the uniquely simplest polytope; e.g., a line in 1D space, a triangle in 2D space, a tetrahedron in 3D space, etc. A $k$-dimensional simplex is known as a $k$-simplex. As shown in \autoref{fig:simplexes}, the 2D skew orthogonal projection of a $k$-simplex is identical to a diagram of all possible mutual reflections between $k+1$ blockchains, where each chain is represented by a vertex and each mutual reflection is represented by an edge.
+[^simplex-maths]: The name is taken from geometry (particularly: the higher-dimensional kind). A simplex, for a given dimensionality, is the uniquely simplest polytope; e.g., a line in 1D space, a triangle in 2D space, a tetrahedron in 3D space, etc. A $k$-dimensional simplex is known as a $k$-simplex. As shown in \autoref{fig:simplexes}, a particular 2D projection of a $k$-simplex is identical to a diagram of all possible mutual reflections between $k+1$ blockchains, where each chain is represented by a vertex and each mutual reflection is represented by an edge.
 
 [^simplex-approx]: \textbf{NB:} I will ignore this distinction for $k \gg 1$.
 
