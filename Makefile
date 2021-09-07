@@ -83,8 +83,8 @@ wc:
 	wc $(WPFILE)
 
 mk-latex-pdf:
-	# -rm $(WPNOEXT).glsdefs
 	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
+	-rm $(WPNOEXT).glsdefs
 	makeglossaries -d $(OUTDIR) $(WPRAW)
 	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
 	cp $(WPNOEXT).pdf $(OUTPUT_PDF)
