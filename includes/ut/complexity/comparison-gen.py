@@ -67,6 +67,7 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
         'ut_3_optimal_dappchains': k / (2 * dh * df),
         'ut_n_3': k**3 / (4 * bh * bf * dh**2 * df**2),
         'delta_s_Bps': k**2 / (2 * bh * bf),
+        'ut_confirmation_rate': ut_n_1 * bf,
     }
 
 def bandwidth_to_k_solana(delta_s, bf, bh):
@@ -122,7 +123,8 @@ def table_header(table_name):
         'tps_por': ['$N_1$', '$O(c^2)$ tps', '$N_2$', '$O(c^3)$ tps', 'PoR (bytes)', '$\\nicefrac{N_1}{k}$'],
         'compare_nets_3k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'TPS vs \\newline UT $O(c^3)$'],
         'compare_nets_30k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'TPS vs \\newline UT $O(c^3)$'],
-        'comparison_1m_tps': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', '$k$ vs UT $O(c^3)$'],
+        'comparison_1m_tps': ['Network', 'TPS per base-chain', 'Network-wide TPS', '$k$ vs UT $O(c^3)$', 'Equivalent UT $O(c^3)$ TPS'],
+        'comparison_1m_tps_conf_hz': ['Network', 'Equivalent UT $O(c^3)$ Confirmation Rate (Hz)'],
         'comparison_1gbps': ['Network', 'TPS', '$k$ (B/s)', 'MB/chain/day'], #'$\\nicefrac{\\text{TPS}}{k_1}$ vs UT $O(c^3)$'], #, '$k_1 \cdot$ TPS vs UT', 'TPS vs UT', 'combined'],
     })[table_name]
 
@@ -132,7 +134,8 @@ def table_header(table_name):
         'tps_por': ['---', '----', '----', '----', '-----', '----'],
         'compare_nets_3k': ['------', '-------', '-----', '-------', '-------'],
         'compare_nets_30k': ['------', '------', '-----', '-------', '-------'],
-        'comparison_1m_tps': ['---', '---', '----', '-----', '-----'],
+        'comparison_1m_tps': ['---', '----', '-----', '-----', '-----'],
+        'comparison_1m_tps_conf_hz': ['---', '----'],
         'comparison_1gbps': ['---', '---', '---', '----'], #'-----'], #'-----', '------'],
     })[table_name]
 
@@ -210,8 +213,20 @@ def table_row_compare(net: str, params, ut_tps: int):
     return format_table_row(cols + [ratio_to_x(cols[-1] / ut_tps)])
 
 def table_row_1m_compare(net: str, params, ut_k):
+    ut_cols = table_row_compare_inner('UT', params)
     cols = table_row_compare_inner(net, params) + [ratio_to_x(ut_k / params[0])]
+    #
+    cols_processed = cols[:2] + cols[3:] + [ut_cols[4]]
+    return format_table_row(cols_processed)
+
+def table_row_1m_hz_compare(net: str, params, ut_k):
+    p = params
+    r = calc_tps_throughput(p[0], p[1], p[1], p[2], p[2], p[3])
+    fp = format_params(params)
+    fn = net if 'UT' in net else net.capitalize()
+    cols = [fp, fn, f"{r['ut_confirmation_rate']:.1f}"]
     return format_table_row(cols)
+
 
 def table_row_1gbps(net, params, ut_params):
     ut_net, ut_ps = ut_params
@@ -352,19 +367,6 @@ def mk_comparison_inputs(k: int):
 #     # ('UT', (3393, 1/15, 112, 250)),
 # ]
 
-UT_1M_K = 3826
-
-'''For comparison_1m_tps: for non-UT we want to chose the *lowest* value of k where the total TPS rounds to 1.00*10^6; and for UT we want to choose the *largest* k that does similarly. This will minimize the 'out-scaling' ratios.'''
-comparison_1m_tps = [
-    ('bitcoin', (250000000, 1/600, 80, 250)),
-    # ('solana', (296900, 1/0.55, 141, 250)),
-    ('cardano', (115700, 1/20, 1070, 250)),
-    ('polkadot', (109810, 1/6, 288, 250)),
-    ('eth2', (64600, 1/12, 200, 250)),
-    ('UT+PoRs', (math.floor(UT_1M_K * 1.438), 1/15, 112, 250)),
-    ('UT', (UT_1M_K, 1/15, 112, 250)),
-]
-
 def mk_table(table_name, row_func):
     print(f"\n### TABLE: {table_name}")
     rows = table_header(table_name)
@@ -392,9 +394,21 @@ for table_name in ['compare_nets_3k', 'compare_nets_30k']:
         return rows
     mk_table(table_name, mk_row)
 
+UT_1M_K = 3826
 
-for table_name in ['comparison_1m_tps']:
-    mk_table(table_name, lambda: list(table_row_1m_compare(net, r, UT_1M_K) for (net, r) in comparison_1m_tps))
+'''For comparison_1m_tps: for non-UT we want to chose the *lowest* value of k where the total TPS rounds to 1.00*10^6; and for UT we want to choose the *largest* k that does similarly. This will minimize the 'out-scaling' ratios.'''
+comparison_1m_tps = [
+    ('bitcoin', (250000000, 1/600, 80, 250)),
+    # ('solana', (296900, 1/0.55, 141, 250)),
+    ('cardano', (115700, 1/20, 1070, 250)),
+    ('polkadot', (109810, 1/6, 288, 250)),
+    ('eth2', (64600, 1/12, 200, 250)),
+    ('UT+PoRs', (math.floor(UT_1M_K * 1.438), 1/15, 112, 250)),
+    ('UT', (UT_1M_K, 1/15, 112, 250)),
+]
+
+mk_table('comparison_1m_tps', lambda: list(table_row_1m_compare(net, r, UT_1M_K) for (net, r) in comparison_1m_tps))
+mk_table('comparison_1m_tps_conf_hz', lambda: list(table_row_1m_hz_compare(net, r, UT_1M_K) for (net, r) in comparison_1m_tps))
 
 comparison_1gbps = [
     ('solana', [1024 ** 3 // 8, 1/.5, 200, 250]),  # realistically, min 200 bytes tx size

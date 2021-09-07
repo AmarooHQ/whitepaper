@@ -5,17 +5,17 @@ I present \emph{Ultra Terminum}. \emph{Ultra Terminum} (UT) is a proof-agnostic 
 UT is far more than the sum of its parts. UT uses both PoW and PoS chains, and, by way of construction: sound PoW chains are secure and functional even if an attacker has >50\% of that chain's hash-rate; and sound PoS chains do not suffer from \emph{Nothing at Stake}, bribe attacks, or long-term attacks. Whether a chain is soundly constructed or not depends on conditions and protocols specified in this paper.
 \end{comment}
 \par
-With reasonable parameters (i.e., a per-chain load comparable to Bitcoin) and $O(c^3)$ scaling (the intended initial configuration), UT has capacity for 1 to 100 million tps without \emph{layer 2} scaling methods.
-\par
-Some existing $O(c^2)$ blockchain designs claim to be capable of 1 million tps. For comparison's sake, $O(c^3)$ UT configurations with similar parameters have a raw maximum capacity of between 1 and 20 billion tps. $10^9$ tps implies a system-wide maximum throughput around 230 GB/s of raw transactions.
+With reasonable parameters (i.e., a per-chain load comparable to Bitcoin) and $O(c^3)$ scaling (the intended initial configuration), UT has capacity between 100,000 and 100 million tps without \emph{layer 2} scaling methods.
 \par
 Depending on parameters, the capacity of $O(c^4)$ UT ranges between $10^8$ and $10^{15}$ tps.
 \par
 Capacity of the $O(n)$ configuration is \emph{independent} of parameters and is \emph{unbounded} -- i.e., practically infinite.
 \par
-Confirmation times within UT are $\frac{1}{O(c)}$, i.e., confirmation rate is $O(c)$.
+Confirmation times within UT are $\frac{1}{O(c)}$, i.e., confirmation rate is $O(c)$. It is expected that the initial configuration will have a maximum average confirmation frequency of 13.3 Hz.
 \par
-In the worst-case, UT out-scales Cardano, Eth2, and Polkadot by a factor of at least 81.
+Some existing $O(c^2)$ blockchain designs claim to be capable of 1 million tps. For comparison's sake, $O(c^3)$ UT configurations -- with equivalent parameters -- have a maximum capacity around 1 billion tps. These parameters imply a system-wide maximum throughput around 230 GB/s of raw transactions, and a confirmation frequency of 50-200 Hz.
+\par
+Depending on the measure, UT out-scales each of Cardano, Eth2, and Polkadot by a factor between 15 and 1,000.
 % \begin{comment}
 \newline
 \par
