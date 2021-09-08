@@ -2,6 +2,8 @@
 
 \label{sec:ut-complexity}
 
+\todo{review for references to PoS dapp-chains and update}
+
 UT has two primary methods of scaling: reflection and dapp-chains. Reflection is novel. Dapp-chains are similar to many of the scaling ideas proposed for other networks (Polkadot, Eth2, etc), though there are fewer restrictions on dapp-chains in UT compared to other designs. Additionally, dapp-chains in UT are hosted by the simplex. This provides additional security compared to 'naked' PoS chains without sacrificing any of their other developments (e.g., finality), and provides greater capacity than a single host-chain.
 
 A common method of sharding is to *nest* blockchains. For example, Ethereum 2 has a root-chain called *The Beacon Chain*.
@@ -52,6 +54,8 @@ Examples: Ethereum 2, Polkadot.
 
 Suppose the root-chain has a throughput of $k_1$ B/s and it can support up to $N_2$ nested chains. Those nested chains have headers of $D_h$ bytes that are produced at a frequency of $D_f$ ($s^{-1}$). Thus, each nested chain consumes \emph{at least} $D_f \cdot D_h$ B/s of the root-chain's capacity.
 
+\todo{Add note about eth2 equivalent}
+
 $N_2$ is thus given by:
 
 \begin{equation}
@@ -74,6 +78,8 @@ T_2 & = \frac{k_1 \cdot k_2}{D_f \cdot D_h} \\
 Thus $O(T_2) = O(c^2)$ as expected.
 
 ### Complexity of $O(c^2)$ Reflection
+
+\todo{add note about excluding PoRs}
 
 There is no root-chain for a collection of mutually reflecting blockchains (i.e., a simplex), so $N_1 \neq 1$. In a simplex, each chain has $k_1$ B/s capacity, but this is split between reflections and transactions. At this foundational level (where there is no nesting yet), headers are $B_h$ bytes with a frequency of $B_f$ Hz. There are $N_1$ simplex chains.
 
@@ -104,7 +110,7 @@ T_1 & = N_1 \cdot k_{1,tx} \label{eq:reflection-t1-start} \\
 & = N_1 \cdot k_1 - N_1^2 \cdot B_f \cdot B_h \label{eq:reflection-t1-in-terms-of-n1}
 \end{align}
 
-The optimal number of simplex-chains will maximize throughput. We can find that optimum via:
+The optimal number of simplex-chains will maximize throughput. We can find that maxima via:
 
 \begin{equation*}
 \begin{split}
