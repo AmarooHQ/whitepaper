@@ -19,7 +19,7 @@
 
 \defineTerm{Base-chain}{A chain that has no parent-chains; i.e., is at the base nesting level}
 
-\defineTerm{Scaling Factor}{For a given $k$, it is both the number of child-chains that a parent-chain can support, and the factor by which TPS increases with an additional nesting level. In effect, it allows for comparison of the efficacy of scaling schemes when $k$ is fixed. For some designs, the \emph{Scaling Factor} can change between nesting levels.}
+\defineTerm{Scaling Factor}{For a given $k$, it is both the number of child-chains that a parent-chain can support, and the factor by which TPS increases with an additional nesting level. In effect, it allows for comparison of the efficacy of scaling schemes when $k$ is fixed. For some designs, the \emph{Scaling Factor} can change between nesting levels}
 
 | $k$, $B_f$, $B_h$              | Network      | Scaling Factor | TPS per base-chain | Network-wide TPS | TPS vs \newline UT $O(c^3)$           |
 |------|------|-------|-----|-------|-------|

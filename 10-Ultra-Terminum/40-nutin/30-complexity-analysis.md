@@ -54,7 +54,7 @@ Examples: Ethereum 2, Polkadot.
 
 Suppose the root-chain has a throughput of $k_1$ B/s and it can support up to $N_2$ nested chains. Those nested chains have headers of $D_h$ bytes that are produced at a frequency of $D_f$ ($s^{-1}$). Thus, each nested chain consumes \emph{at least} $D_f \cdot D_h$ B/s of the root-chain's capacity.
 
-\todo{Add note about eth2 equivalent}
+\todo{Add note about eth2 equivalent header-size, at least 256 bytes, not 200}
 
 $N_2$ is thus given by:
 

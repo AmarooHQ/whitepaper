@@ -189,7 +189,15 @@ However, if an attacker performs a *repeating cycle* of these attacks, then they
 
 All that sounds good, but this thought experiment is flawed. It is *smoothed out* compared to what we'd expect in reality -- the discreet nature of block production and reflections is ignored. In \autoref{fig:dag-dos-1}, it's explicitly excluded! What happens if we include the affect of other simplex-chains, though? Well... something \emph{magical}.
 
-\todo{What's magical? Consider an attacker producing 2 blocks for every 1 honest block. What happens most of the time? Well the attackers blocks get reflected first, so there's like a big advantage over the honest blocks. The honest blocks will get reflected, too, but most of the time the attackers blocks will get the advantage from earlier reflections. \emph{Most} of the time. Occasionally, when an honest block is a bit lucky, it will be produced before the attackers blocks and start gaining reflections earlier. At that point, the attacker has lost -- they need to outpace the \emph{difference} in the number of reflections between the honest block and attacking blocks. So, unlike a normal doublespend (where the attacker wins if they \emph{ever} get ahead), how the honest network ends the DoS if it \emph{ever} gets ahead -- there's no viable strategy for the attacker besides to build on the honest blocks. There's extra stuff that can be done here, too, like honest users (not miners) creating transactions w/ large tx fee that depend on certain history (i.e. that some block is in the history of the chain). That will attract miners from other chains because RoI potential increases (potentially a lot). The attacker could include that transaction, but then they need to voluntarily end the DoS themselves. A reasonable strategy should be doable whereby the honest network can temporarily increase the number of miners so that the attacker has $<50\%$ of mining power.}
+\todo{What's magical? Chris to review / sanity check}
+
+Consider an attacker producing 2 blocks for every 1 honest block. What happens most of the time? Well the attackers blocks get reflected first, so there's like a big advantage over the honest blocks. The honest blocks will get reflected, too, but most of the time the attackers blocks will get the advantage from earlier reflections. \emph{Most} of the time. Occasionally, when an honest block is a bit lucky, it will be produced before the attackers blocks and start gaining reflections earlier. At that point, the attacker has lost -- they need to outpace the \emph{difference} in the number of reflections between the honest block and attacking blocks. So, unlike a normal doublespend (where the attacker wins if they \emph{ever} get ahead), now the honest network wins (ends the DoS) if it \emph{ever} gets ahead of the attacker -- after that point, there's no viable strategy for the attacker besides to build on the honest blocks. \emph{The asymmetry has flipped!}
+
+\todo{polish surrounding paragraphs}
+
+There's extra stuff that can be done here, too, like honest users (not miners) creating transactions w/ large tx fee that depend on certain history (i.e. that some block is in the history of the chain). That will attract miners from other chains because RoI potential increases (potentially a lot). The attacker could include that transaction, but then they need to voluntarily end the DoS themselves. Guess: A reasonable strategy is doable whereby the honest network can temporarily increase the number of miners so that the attacker has $<50\%$ of mining power (or at least enough to reliably end the DoS quickly).
+
+\todo{Note: asymmetry between honest nodes and attacker -- attacker can only build on own blocks, but honest network builds on both.}
 
 ### Qualities of Different Security Methods
 
@@ -241,6 +249,8 @@ One reason that we can predict that transactions will build up in this fashion (
 
 The average hash rate on each simplex chain, as described above, is always the same regardless of which of the two miner strategies are used. However, the variance of block production on each of these chains won't be that of a chain with 60s block times, it'll be that of a chain with 6s block times.
 
-### Reflection Censorship Attack
+### Reflection: Incentive and Censorship
 
 \todo{is a refl censorship attack possible? meaningful? explore. (NB: I don't think there's a viable strategy here, which is why I haven't prioritized writing this out.)}
+
+\todo{do a nash equilibrium thing to show that it's always in the interest of miners to publish headers -- intuition: including headers means that the *other chain's miner* has an incentive to include your header. that means that the next miner (on your chain) will be able to build on a heavier chain if they reflect that other chain's next header -- so that next miner (on the local chain) has an incentive to include that other chain's next header. If the original miner (who might chose not to publish the most recent header of that other chain) censors that reflection, then they disadvantage themselves relative to their competitors (other miners of that simplex-chain). Thus, it's never helpful to a miner to censor reflections (esp if we enforce the limit on k_b and k_tx); it doesn't help honest miners, and it makes an attackers chain-segment less competitive.}
