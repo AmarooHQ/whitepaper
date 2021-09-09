@@ -1,5 +1,7 @@
 # Reflection Including Merkle Branches
 
+\label{sec:por-with-proofs}
+
 What does a simplex look like if simplex-chains include explicit proofs of reflection (as merkle branches)?
 
 Let $g$ be the length of the digest in bytes, i.e., the size of the hashes used in our merkle trees.
