@@ -292,7 +292,9 @@ def pad_rows(rows: List[List[str]], ns: List[int]):
 
 row_inputs = [
     # ver fast chains
+    (1000, 1/15, 84, 250),
     (1000, 1/15, 112, 250),
+    (3000, 1/15, 84, 250),
     (3000, 1/15, 112, 250),
     (30000, 1/15, 112, 250),
     # fast chains
