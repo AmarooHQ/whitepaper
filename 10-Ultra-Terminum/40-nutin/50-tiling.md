@@ -310,3 +310,7 @@ Additionally, a model of tilings of similar capacity -- i.e., similar $N_{tiles}
     \caption{An example of a square tiling used in \autoref{fig:tiling-avg-dist-comparison}.}
     \label{fig:tiling-square}
 \end{figure}
+
+### Worst Case Tiling
+
+\todo{What's the worst case for tiling -- as a method? Probably that PoR isn't safe to do recursively in a way that works for $O(n)$ tiling. The implication of this would be that *every* miner needs *every* base-level (i.e., simplex-chain) block across all simplex tiles (which would enable edge-to-edge verification of all PoRs). In that case, an upper-bound is set based on minimum bandwidth requirements (for miners) and $\Delta S$ (see \autoref{sec:bandwidth-complexity}). For a given set of parameters, the limit is $N_{\text{tiles}} \cdot \nicefrac{\Delta S}{4} < \text{MinBandwidth}$.}
