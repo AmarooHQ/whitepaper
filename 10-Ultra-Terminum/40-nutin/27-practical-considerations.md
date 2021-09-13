@@ -74,6 +74,18 @@ If simplex-chains are segmented in this manner, then miners will be able to calc
 
 Given that the reflection-segments of simplex-chains will contain mostly repeated data (i.e., headers), and that these segments will have very similar resultant state, there should be numerous optimizations that are possible. For example, it's not necessary for a miner's node to re-download reflected headers since it already has most (or all) of them; that node just needs to know *which* headers are reflected. This reduces the effective size of simplex-blocks from $b$ to $b \cdot (\frac{g + B_h}{2B_h})$, where $g$ is the size of the relevant digest in bytes. For $g=32; B_h=112$, this reduces effective block size to $\sim 0.643 b$ --- an improvement of $\sim 35\%$.
 
+### Exploiting Segmented State
+
+\label{sec:exploiting-seg-state}
+
+\todo{Explain 'effective header size' (which will be useful for Eth2 discussion, too)}
+
+\todo{Explain how we use effective header size to effectively have 32 byte headers at base level -- $3.5\times$ optimization -- see WP forum post ``Effective header size and TPS (discovered a new optimization)''}
+
+\todo{Explain trimming zero bytes from PoW block hashes for 2-10 byte saving $-> 1.07\times$ to $1.45\times$ optimization}
+
+\todo{Total optimization (with decent sized network) over $4\times$ (mb up to $5\times$)}
+
 ### Confirmation Times
 
 \label{sec:confirmation-times}
