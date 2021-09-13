@@ -1,17 +1,17 @@
 
 I present \emph{Amaroo's} consensus mechanism: \emph{Ultra Terminum}. \emph{Ultra Terminum} (UT) is a proof-agnostic cross-chain consensus strategy providing $O(c^2)$, $O(c^3)$, $O(c^4)$, and $O(n)$ scaling configurations. UT remains secure against an attacker with up to $O(n)$ resources. UT is a \emph{silver bullet} that breaks the core conflict of \emph{Buterin's Trilemma}.
 \par
-With reasonable parameters (i.e., a per-chain load comparable to Bitcoin; 15s block times) and one level of nesting (the $O(c^3)$ configuration), UT has capacity for between 1.7 M and 3.1 M TPS without \emph{layer 2} scaling methods. In this configuration, halving the block time quadruples TPS.
+With reasonable parameters (i.e., a per-chain load comparable to Bitcoin -- $k = 3000$ B/s; 15s block times) and one level of nesting (the $O(c^3)$ configuration), UT has capacity for between 1.7 M and 3.1 M TPS without \emph{layer 2} scaling methods. In this configuration, halving the block time quadruples TPS.
 \par
 Depending on parameters, the capacity of $O(c^4)$ UT ranges between $10^8$ and $10^{15}$ TPS.
 \par
 Capacity of the $O(n)$ configuration is \emph{independent} of parameters and is \emph{unbounded} -- i.e., practically infinite.
 \par
-Confirmation times within UT are $\frac{1}{O(c)}$, i.e., confirmation rate is $O(c)$. It is expected that the initial configuration will have a maximum average confirmation frequency of 13.3 Hz.
+Confirmation times within UT are $\frac{1}{O(c)}$, i.e., confirmation rate is $O(c)$. It is expected that the initial configuration ($k = 3000$ B/s; one level of nesting) will have a maximum average confirmation frequency of 46.9 Hz.
 \par
-Some existing $O(c^2)$ blockchain designs claim to be capable of 1 million TPS. For comparison's sake, $O(c^3)$ UT configurations -- with equivalent parameters -- have a maximum capacity around 1 billion TPS. These parameters imply a system-wide maximum throughput around 230 GB/s of raw transactions, and a confirmation frequency of 50-200 Hz.
+Some existing $O(c^2)$ blockchain designs claim to be capable of 1 million TPS. For comparison's sake, $O(c^3)$ UT configurations -- with equivalent parameters -- have a maximum capacity over 1 billion TPS. These parameters imply a system-wide maximum throughput in the 100s of GB/s of raw transactions, and a confirmation frequency of 200-800 Hz.
 \par
-Depending on the measure, UT out-scales each of Cardano, Eth2, and Polkadot by a factor between 15 and 1,000.
+Depending on the measure, UT out-scales each of Cardano, Eth2, and Polkadot by a factor no less than 60.  % todo: note: it was 15x then I increased to 60x with header-omission + hash-compression optimizations. Need to double check that, tho.
 % \begin{comment}
 \newline
 \par
