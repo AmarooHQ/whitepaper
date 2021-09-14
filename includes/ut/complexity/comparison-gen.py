@@ -84,10 +84,10 @@ def bandwidth_to_k_solana(delta_s, bf, bh):
 
 def bandwidth_to_k(delta_s, bf, bh):
     '''
-    UT2: DeltaS = k**2 / (2 * bh * bf)
+    UT1: DeltaS = k**2 / (2 * bh * bf)
     power(2 * ds * bh * bf, 1/2)
 
-    UT3: DeltaS = k**3 / (4 * bf * bh * df * dh)
+    UT2: DeltaS = k**3 / (4 * bf * bh * df * dh)
     power(delta_s * bf * bf * bh * bh * 4, 1/3)
     NB: technically DeltaS = T_2 + k**2 / (2 * bh * bf); but T_2 >> k**2 / (2 * bh * bf); like, > 99.9% for k=3000
 
@@ -101,7 +101,7 @@ def bandwidth_to_k(delta_s, bf, bh):
 
     return {
         'UT': ut2_k,
-        'UT3': ut3_k,
+        'UT2': ut3_k,
         'eth2': eth2_k,
         'polkadot': eth2_k,
         'cardano': eth2_k,
@@ -118,18 +118,18 @@ def fmt_rounded_commas(value, non_sn_range=(1, 10**6)):
 
 def table_header(table_name):
     headings = ({
-        'tps': ['$O(c)$', '$O(c^2)$ (optimal)', '$O(c^2)$ UT', '$O(c^3)$ UT', '$O(c^4)$ UT'],
-        'dappchains': ['$N_1$ (UT)', '$N_2$ (UT)', '$N_3$ (UT)', '$\Delta S$'],
-        'tps_por': ['$N_1$', '$O(c^2)$ tps', '$N_2$', '$O(c^3)$ tps', 'PoR (bytes)', '$\\nicefrac{N_1}{k}$'],
-        'compare_nets_3k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'TPS vs \\newline UT $O(c^3)$'],
-        'compare_nets_30k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'TPS vs \\newline UT $O(c^3)$'],
-        'comparison_1m_tps': ['Network', 'TPS per base-chain', 'Network-wide TPS', '$k$ vs UT $O(c^3)$', 'Equivalent UT $O(c^3)$ TPS'],
-        'comparison_1m_tps_conf_hz': ['Network', 'Equivalent UT $O(c^3)$ Confirmation Rate (Hz)'],
-        'comparison_1gbps': ['Network', 'TPS', '$k$ (B/s)', 'MB/chain/day'], #'$\\nicefrac{\\text{TPS}}{k_1}$ vs UT $O(c^3)$'], #, '$k_1 \cdot$ TPS vs UT', 'TPS vs UT', 'combined'],
+        'tps': ['$O(c)$', 'Sharded $O(c^2)$', '$\\UT{1}$', '$\\UT{2}$', '$\\UT{3}$'],
+        'dappchains': ['$N_1$ ($\\UT{1}$)', '$N_2$ ($\\UT{2}$)', '$N_3$ ($\\UT{3}$)', '$\Delta S$'],
+        'tps_por': ['$N_1$', '$\\UT{1}$ tps', '$N_2$', '$\\UT{2}$ tps', 'PoR (bytes)', '$\\nicefrac{N_1}{k}$'],
+        'compare_nets_3k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'TPS vs \\newline $\\UT{2}$'],
+        'compare_nets_30k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'TPS vs \\newline $\\UT{2}$'],
+        'comparison_1m_tps': ['Network', 'TPS per base-chain', 'Network-wide TPS', '$k$ vs $\\UT{2}$', 'Equivalent $\\UT{2}$ TPS'],
+        'comparison_1m_tps_conf_hz': ['Network', 'Equivalent $\\UT{2}$ Confirmation Rate (Hz)'],
+        'comparison_1gbps': ['Network', 'TPS', '$k$ (B/s)', 'MB/chain/day'], #'$\\nicefrac{\\text{TPS}}{k_1}$ vs $\\UT{2}$'], #, '$k_1 \cdot$ TPS vs $\\UT{2}$', 'TPS vs $\\UT{2}$', 'combined'],
     })[table_name]
 
     col_sizes = ['------'] + ({
-        'tps': ['---','----','----','----','----'],
+        'tps': ['---','------','----','----','----'],
         'dappchains': ['----', '-----', '-----', '-----'],
         'tps_por': ['---', '----', '----', '----', '-----', '----'],
         'compare_nets_3k': ['------', '-------', '-----', '-------', '-------'],
@@ -143,7 +143,7 @@ def table_header(table_name):
         'compare_nets_3k': '$k$, $B_f$, $B_h$',
         'compare_nets_30k': '$k$, $B_f$, $B_h$',
         'comparison_1gbps': '$\\Delta S$, $B_f$, $B_h$, Tx (B)',
-        'default': '$k$, $B_f$, $B_h$',
+        'default': '$k$, $B_f$, $B_h$, $D_h$',
     }
     col1_heading = col_heading_lookup.get(table_name, col_heading_lookup['default'])
     headings.insert(0, col1_heading)
@@ -174,7 +174,7 @@ def ratio_to_x(ratio):
 
 def table_row(params, table_name):
     p = params
-    r = calc_tps_throughput(p[0], p[1], p[1], p[2], p[2], p[3])
+    r = calc_tps_throughput(p[0], p[1], p[1], p[2], p[3], p[4])
     cols = ({
         'tps': [format_params(params), r['btc_tps'], r['eth2_tps'], r['ut_2_tps'], r['ut_3_tps'], r['ut_4_tps']],
         'dappchains': [format_params(params), r['ut_n_1'], r['ut_n_2'], r['ut_n_3'], r['delta_s_Bps']],
@@ -194,12 +194,12 @@ def mod_params_id(p: Tuple) -> Tuple:
 def table_row_compare_inner(net: str, params):
     p = params
     r = calc_tps_throughput(p[0], p[1], p[1], p[2], p[2], p[3])
-    mod_params = defaultdict(lambda: mod_params_id, **({'UT+PoRs': mod_ut_por_params}))
+    mod_params = defaultdict(lambda: mod_params_id, **({'$\\UT{2}$+PoRs': mod_ut_por_params}))
     fp = format_params(mod_params[net](params))
-    fn = net if 'UT' in net else net.capitalize()
+    fn = {'UT': '$\\UT{2}$'}.get(net, net) if 'UT' in net else net.capitalize()
     cols = ({
         'UT': [fp, fn, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps']],
-        'UT+PoRs': [fp, fn, r['ut_n_2_factor_with_por'], r['ut_3_tps_with_por_per_basechain'], r['ut_3_tps_with_por']],
+        '$\\UT{2}$+PoRs': [fp, fn, r['ut_n_2_factor_with_por'], r['ut_3_tps_with_por_per_basechain'], r['ut_3_tps_with_por']],
         'bitcoin': [fp, fn, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps']],
         'cardano': [fp, fn,  r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
         'polkadot': [fp, fn, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
@@ -239,7 +239,7 @@ def table_row_1gbps(net, params, ut_params):
     fp = format_params([fmt_rounded_commas(ds).strip('$'), bf, bh, tx_size], strip_last_n=0)
     get_net_vals = lambda _r, _net: ({
         'UT': (_r['ut_2_tps'], _r['ut_n_1']),
-        'UT3': (_r['ut_3_tps'], _r['ut_n_2']),
+        'UT2': (_r['ut_3_tps'], _r['ut_n_2']),
         'eth2': (_r['eth2_tps'], _r['eth2_n_2_factor']),
         'polkadot': (_r['eth2_tps'], _r['eth2_n_2_factor']),
         'cardano': (_r['eth2_tps'], _r['eth2_n_2_factor']),
@@ -292,31 +292,27 @@ def pad_rows(rows: List[List[str]], ns: List[int]):
 
 row_inputs = [
     # ver fast chains
-    (1000, 1/15, 23, 250),  # temporary
-    (1000, 1/15, 32, 250),  # temporary
-    (1000, 1/15, 84, 250),
-    (1000, 1/15, 112, 250),
-    (1000, 1/30, 84, 250),  # temporary
-    (1000, 1/30, 112, 250),  # temporary
-    (3000, 1/15, 23, 250),  # temporary
-    (3000, 1/15, 32, 250),  # temporary
-    (3000, 1/15, 84, 250),
-    (3000, 1/15, 112, 250),
-    (3000, 1/30, 84, 250),  # temporary
-    (3000, 1/30, 112, 250),  # temporary
-    (30000, 1/15, 112, 250),
+    (1000, 1/15, 23, 84, 250),
+    (1000, 1/15, 32, 84, 250),
+    (1000, 1/15, 84, 84, 250),
+    (1000, 1/15, 112, 112, 250),
+    (3000, 1/15, 23, 84, 250),
+    (3000, 1/15, 32, 84, 250),
+    (3000, 1/15, 84, 84, 250),
+    (3000, 1/15, 112, 112, 250),
+    (30000, 1/15, 112, 112, 250),
     # fast chains
-    (1000, 1/30, 112, 250),
-    (3000, 1/30, 112, 250),
-    (30000, 1/30, 112, 250),
+    (1000, 1/30, 112, 112, 250),
+    (3000, 1/30, 112, 112, 250),
+    (30000, 1/30, 112, 112, 250),
     # moderate chains
-    (1000, 1/60, 112, 250),
-    (3000, 1/60, 112, 250),
-    (30000, 1/60, 112, 250),
+    (1000, 1/60, 112, 112, 250),
+    (3000, 1/60, 112, 112, 250),
+    (30000, 1/60, 112, 112, 250),
     # slow chains
-    (1000, 1/600, 112, 250),
-    (3000, 1/600, 112, 250),
-    (30000, 1/600, 112, 250),
+    (1000, 1/600, 112, 112, 250),
+    (3000, 1/600, 112, 112, 250),
+    (30000, 1/600, 112, 112, 250),
     # bigger headers
     # (1000, 1/60, 200, 250),
     # (3000, 1/60, 200, 250),
@@ -325,10 +321,10 @@ row_inputs = [
     # (3000, 1/600, 200, 250),
     # (30000, 1/600, 200, 250),
     # big headers
-    (3000, 1/30, 200, 250),
-    (3000, 1/30, 500, 250),
-    (3000, 1/30, 1000, 250),
-    (3000, 1/30, 1500, 250),
+    (3000, 1/30, 200, 200, 250),
+    (3000, 1/30, 500, 500, 250),
+    (3000, 1/30, 1000, 1000, 250),
+    (3000, 1/30, 1500, 1500, 250),
 ]
 
 # Note: If eth2 really is as efficient as an 8kb update every ~27 hours then it's close enough to 0.
@@ -353,24 +349,24 @@ def mk_comparison_inputs(k: int):
         ('cardano', (k, 1/20, 1070, 250)),
         ('polkadot', (k, 1/6, 288, 250)),
         ('eth2', (k, 1/12, 200, 250)),
-        ('UT+PoRs', (k, 1/15, 112, 250)),
+        ('$\\UT{2}$+PoRs', (k, 1/15, 112, 250)),
         ('UT', (k, 1/15, 112, 250)),
-        ('UT w/ tiling', (k, 1/15, 112, 250)),
+        ('UT inf', (k, 1/15, 112, 250)),
     ]
 #     ('bitcoin', (comparison_k2, 1/600, 80, 250)),
 #     ('solana', (comparison_k2, 1/0.4, 141, 250)),
 #     ('cardano', (comparison_k2, 1/20, 1070, 250)),
 #     ('polkadot', (comparison_k2, 1/6, 288, 250)),
 #     ('eth2', (comparison_k2, 1/12, 200, 250)),
-#     ('UT+PoRs', (comparison_k2, 1/15, 112, 250)),
+#     ('$\\UT{2}$+PoRs', (comparison_k2, 1/15, 112, 250)),
 #     ('UT', (comparison_k2, 1/15, 112, 250)),
 #     ('UT w/ tiling', (comparison_k2, 1/15, 112, 250)),
 #     # ('bitcoin (w/ extras)', (comparison_k, 1/600, 80, 250)),
 #     # ('cardano (w/ extras)', (comparison_k, 1/20, 1070 + 1024, 250)),
 #     # ('polkadot (w/ extras)', (comparison_k, 1/6, 288 + 1024, 250)),
 #     # ('eth2 (w/ extras)', (comparison_k, 1/12, 200 + (476 + 224 + 128 + 672 + 736 + 1024), 250)),
-#     # ('UT+PoRs', (comparison_k, 1/15, 112, 250)),
-#     # ('UT+PoRs (w/ tiling)', (comparison_k, 1/15, 112, 250)),
+#     # ('$\\UT{2}$+PoRs', (comparison_k, 1/15, 112, 250)),
+#     # ('$\\UT{2}$+PoRs (w/ tiling)', (comparison_k, 1/15, 112, 250)),
 #     # ('eth2', (206000, 1/12, 200, 250)),  # approx the '14m tps' claim above
 #     # ('UT', (8298, 1/15, 112, 250)),
 #     # ('solana', (248500, 1/0.4, 141, 250)),  # should match their '700k tps theoretical limit' claim
@@ -398,9 +394,12 @@ for table_name in ['compare_nets_3k', 'compare_nets_30k']:
     def mk_row():
         rows = list(table_row_compare(net, r, ut_tps) for (net, r) in net_inputs)
         for r in rows:
-            if 'tiling' in r[1]:
+            if 'UT inf' in r[1]:
+                r[1] = '$\\UTinf{}$'
                 r[-2] = '$\\infty$'
                 r[-1] = '$(\\infty)\\times$'
+            if 'UT' == r[1]:
+                r[1] = '$\\UT{2}$'
         return rows
     mk_table(table_name, mk_row)
 
@@ -413,7 +412,7 @@ comparison_1m_tps = [
     ('cardano', (115700, 1/20, 1070, 250)),
     ('polkadot', (109810, 1/6, 288, 250)),
     ('eth2', (64600, 1/12, 200, 250)),
-    ('UT+PoRs', (math.floor(UT_1M_K * 1.438), 1/15, 112, 250)),
+    ('$\\UT{2}$+PoRs', (math.floor(UT_1M_K * 1.438), 1/15, 112, 250)),
     ('UT', (UT_1M_K, 1/15, 112, 250)),
 ]
 
@@ -427,15 +426,15 @@ comparison_1gbps = [
     ('polkadot', [1024 ** 3 // 8, 1/6, 288, 250]),
     ('eth2', [1024 ** 3 // 8, 1/12, 200, 250]),
     ('UT', [1024 ** 3 // 8, 1/15, 112, 250]),
-    ('UT3', [1024 ** 3 // 8, 1/15, 112, 250]),
+    ('UT2', [1024 ** 3 // 8, 1/15, 112, 250]),
 ]
 
 for table_name in ['comparison_1gbps']:
-    compare_to = 'UT3'
+    compare_to = 'UT2'
     def gen_rows():
         rs = []
         ut_params = list(filter(lambda r: r[0] == compare_to, comparison_1gbps))[0]
-        get_network_name = lambda n: {'UT': 'UT $O(c^2)$', 'UT3': 'UT $O(c^3)$'}.get(n, n.capitalize())
+        get_network_name = lambda n: {'UT': '\\UT{1} $O(c^2)$', 'UT2': '\\UT{2}'}.get(n, n.capitalize())
         for (net, ps) in comparison_1gbps:
             r = table_row_1gbps(net, ps, ut_params)
             r[1] = get_network_name(r[1])

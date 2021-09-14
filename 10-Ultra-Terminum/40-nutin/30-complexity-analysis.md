@@ -272,7 +272,7 @@ $k$: raw per-chain throughput (bytes/$s$) \newline
 $B_f$: simplex block frequency ($s^{-1}$) \newline
 $B_h$: simplex block header size (bytes) \newline
 $D_f = B_f$: dapp-chain block frequency ($s^{-1}$) \newline
-$D_h = B_h$: dapp-chain block header size (bytes) \newline
+%% $D_h = B_h$: dapp-chain block header size (bytes) \newline
 \begin{comment}
 $Tx_{avg}$: average tx size (bytes)
 \end{comment}
@@ -280,26 +280,32 @@ $Tx_{avg}$: average tx size (bytes)
 NB: For the purposes of the following table, the average transaction size is taken to be 250 bytes.
 %% Additionally, the discrepancy in header size (between $B_h$ and $D_h$) is due to the overhead of PoS mechanisms.
 
-| $k$, $B_f$, $B_h$               | $O(c)$ | $O(c^2)$           | $O(c^2)$ UT        | $O(c^3)$ UT         | $O(c^4)$ UT         |
-|------|---|----|----|----|----|
-| $1000, \nicefrac{1}{15}, 112$   | 4      | 536                | 134                | 17,937              | $2.4\times 10^{6}$  |
-| $3000, \nicefrac{1}{15}, 112$   | 12     | 4,821              | 1,205              | 484,295             | $1.9\times 10^{8}$  |
-| $30000, \nicefrac{1}{15}, 112$  | 120    | 482,143            | 120,536            | $4.8\times 10^{8}$  | $1.9\times 10^{12}$ |
-| $1000, \nicefrac{1}{60}, 112$   | 4      | 2,143              | 536                | 286,990             | $1.5\times 10^{8}$  |
-| $3000, \nicefrac{1}{60}, 200$   | 12     | 10,800             | 2,700              | $2.4\times 10^{6}$  | $2.2\times 10^{9}$  |
-| $3000, \nicefrac{1}{60}, 112$   | 12     | 19,286             | 4,821              | $7.7\times 10^{6}$  | $1.2\times 10^{10}$ |
-| $30000, \nicefrac{1}{60}, 200$  | 120    | $1.1\times 10^{6}$ | 270,000            | $2.4\times 10^{9}$  | $2.2\times 10^{13}$ |
-| $30000, \nicefrac{1}{60}, 112$  | 120    | $1.9\times 10^{6}$ | 482,143            | $7.7\times 10^{9}$  | $1.2\times 10^{14}$ |
-| $1000, \nicefrac{1}{600}, 112$  | 4      | 21,429             | 5,357              | $2.9\times 10^{7}$  | $1.5\times 10^{11}$ |
-| $3000, \nicefrac{1}{600}, 200$  | 12     | 108,000            | 27,000             | $2.4\times 10^{8}$  | $2.2\times 10^{12}$ |
-| $3000, \nicefrac{1}{600}, 112$  | 12     | 192,857            | 48,214             | $7.7\times 10^{8}$  | $1.2\times 10^{13}$ |
-| $30000, \nicefrac{1}{600}, 200$ | 120    | $1.1\times 10^{7}$ | $2.7\times 10^{6}$ | $2.4\times 10^{11}$ | $2.2\times 10^{16}$ |
-| $30000, \nicefrac{1}{600}, 112$ | 120    | $1.9\times 10^{7}$ | $4.8\times 10^{6}$ | $7.7\times 10^{11}$ | $1.2\times 10^{17}$ |
-| $3000, \nicefrac{1}{60}, 500$   | 12     | 4,320              | 1,080              | 388,800             | $1.4\times 10^{8}$  |
-| $3000, \nicefrac{1}{60}, 1000$  | 12     | 2,160              | 540                | 97,200              | $1.7\times 10^{7}$  |
-| $3000, \nicefrac{1}{60}, 1500$  | 12     | 1,440              | 360                | 43,200              | $5.2\times 10^{6}$  |
+| $k$, $B_f$, $B_h$, $D_h$             | $O(c)$ | Sharded $O(c^2)$ | $\UT{1}$            | $\UT{2}$             | $\UT{3}$             |
+|------|---|------|----|----|----|
+| $1000, \nicefrac{1}{15}, 23, 84$     | 4      | 714                 | 652                 | 116,460              | $2.08\times 10^{7}$  |
+| $1000, \nicefrac{1}{15}, 32, 84$     | 4      | 714                 | 469                 | 83,705               | $1.49\times 10^{7}$  |
+| $1000, \nicefrac{1}{15}, 84, 84$     | 4      | 714                 | 179                 | 31,888               | $5.69\times 10^{6}$  |
+| $1000, \nicefrac{1}{15}, 112, 112$   | 4      | 536                 | 134                 | 17,937               | $2.40\times 10^{6}$  |
+| $3000, \nicefrac{1}{15}, 23, 84$     | 12     | 6,429               | 5,870               | $3.14\times 10^{6}$  | $1.68\times 10^{9}$  |
+| $3000, \nicefrac{1}{15}, 32, 84$     | 12     | 6,429               | 4,219               | $2.26\times 10^{6}$  | $1.21\times 10^{9}$  |
+| $3000, \nicefrac{1}{15}, 84, 84$     | 12     | 6,429               | 1,607               | 860,969              | $4.61\times 10^{8}$  |
+| $3000, \nicefrac{1}{15}, 112, 112$   | 12     | 4,821               | 1,205               | 484,295              | $1.95\times 10^{8}$  |
+| $30000, \nicefrac{1}{15}, 112, 112$  | 120    | 482,143             | 120,536             | $4.84\times 10^{8}$  | $1.95\times 10^{12}$ |
+| $1000, \nicefrac{1}{30}, 112, 112$   | 4      | 1,071               | 268                 | 71,747               | $1.92\times 10^{7}$  |
+| $3000, \nicefrac{1}{30}, 112, 112$   | 12     | 9,643               | 2,411               | $1.94\times 10^{6}$  | $1.56\times 10^{9}$  |
+| $30000, \nicefrac{1}{30}, 112, 112$  | 120    | 964,286             | 241,071             | $1.94\times 10^{9}$  | $1.56\times 10^{13}$ |
+| $1000, \nicefrac{1}{60}, 112, 112$   | 4      | 2,143               | 536                 | 286,990              | $1.54\times 10^{8}$  |
+| $3000, \nicefrac{1}{60}, 112, 112$   | 12     | 19,286              | 4,821               | $7.75\times 10^{6}$  | $1.25\times 10^{10}$ |
+| $30000, \nicefrac{1}{60}, 112, 112$  | 120    | $1.93\times 10^{6}$ | 482,143             | $7.75\times 10^{9}$  | $1.25\times 10^{14}$ |
+| $1000, \nicefrac{1}{600}, 112, 112$  | 4      | 21,429              | 5,357               | $2.87\times 10^{7}$  | $1.54\times 10^{11}$ |
+| $3000, \nicefrac{1}{600}, 112, 112$  | 12     | 192,857             | 48,214              | $7.75\times 10^{8}$  | $1.25\times 10^{13}$ |
+| $30000, \nicefrac{1}{600}, 112, 112$ | 120    | $1.93\times 10^{7}$ | $4.82\times 10^{6}$ | $7.75\times 10^{11}$ | $1.25\times 10^{17}$ |
+| $3000, \nicefrac{1}{30}, 200, 200$   | 12     | 5,400               | 1,350               | 607,500              | $2.73\times 10^{8}$  |
+| $3000, \nicefrac{1}{30}, 500, 500$   | 12     | 2,160               | 540                 | 97,200               | $1.75\times 10^{7}$  |
+| $3000, \nicefrac{1}{30}, 1000, 1000$ | 12     | 1,080               | 270                 | 24,300               | $2.19\times 10^{6}$  |
+| $3000, \nicefrac{1}{30}, 1500, 1500$ | 12     | 720                 | 180                 | 10,800               | 648,000              |
 
-: A comparison of the maximum transaction throughput (transactions per second) given different scaling configurations.
+: A comparison of the maximum transaction throughput (transactions per second) given different scaling configurations. Note that the \emph{Sharded $O(c^2)$} column is optimal if all headers are recorded in the base-chain.
 
 ### Bandwidth Complexity
 
@@ -321,24 +327,30 @@ It is clear that $\Delta S$ has order $O(c^2)$, but how bad is this? For $k_1 = 
 
 While $O(c^2)$ bandwidth scaling is not ideal, it's clear that -- especially in the early days of a UT simplex when there are fewer simplex-chains -- there are tolerable configurations available.
 
-| $k$, $B_f$, $B_h$               | $N_1$ (UT) | $N_2$ (UT)         | $N_3$ (UT)          | $\Delta S$         |
+| $k$, $B_f$, $B_h$, $D_h$             | $N_1$ ($\UT{1}$) | $N_2$ ($\UT{2}$)    | $N_3$ ($\UT{3}$)     | $\Delta S$          |
 |------|----|-----|-----|-----|
-| $1000, \nicefrac{1}{15}, 112$   | 67         | 4,484              | 600,565             | 66,964             |
-| $3000, \nicefrac{1}{15}, 112$   | 201        | 40,358             | $1.6\times 10^{7}$  | 602,679            |
-| $30000, \nicefrac{1}{15}, 112$  | 2,009      | $4.0\times 10^{6}$ | $1.6\times 10^{10}$ | $6.0\times 10^{7}$ |
-| $1000, \nicefrac{1}{60}, 112$   | 268        | 71,747             | $3.8\times 10^{7}$  | 267,857            |
-| $3000, \nicefrac{1}{60}, 200$   | 450        | 202,500            | $1.8\times 10^{8}$  | $1.4\times 10^{6}$ |
-| $3000, \nicefrac{1}{60}, 112$   | 804        | 645,727            | $1.0\times 10^{9}$  | $2.4\times 10^{6}$ |
-| $30000, \nicefrac{1}{60}, 200$  | 4,500      | $2.0\times 10^{7}$ | $1.8\times 10^{11}$ | $1.4\times 10^{8}$ |
-| $30000, \nicefrac{1}{60}, 112$  | 8,036      | $6.5\times 10^{7}$ | $1.0\times 10^{12}$ | $2.4\times 10^{8}$ |
-| $1000, \nicefrac{1}{600}, 112$  | 2,679      | $7.2\times 10^{6}$ | $3.8\times 10^{10}$ | $2.7\times 10^{6}$ |
-| $3000, \nicefrac{1}{600}, 200$  | 4,500      | $2.0\times 10^{7}$ | $1.8\times 10^{11}$ | $1.3\times 10^{7}$ |
-| $3000, \nicefrac{1}{600}, 112$  | 8,036      | $6.5\times 10^{7}$ | $1.0\times 10^{12}$ | $2.4\times 10^{7}$ |
-| $30000, \nicefrac{1}{600}, 200$ | 45,000     | $2.0\times 10^{9}$ | $1.8\times 10^{14}$ | $1.3\times 10^{9}$ |
-| $30000, \nicefrac{1}{600}, 112$ | 80,357     | $6.5\times 10^{9}$ | $1.0\times 10^{15}$ | $2.4\times 10^{9}$ |
-| $3000, \nicefrac{1}{60}, 500$   | 180        | 32,400             | $1.2\times 10^{7}$  | 540,000            |
-| $3000, \nicefrac{1}{60}, 1000$  | 90         | 8,100              | $1.5\times 10^{6}$  | 270,000            |
-| $3000, \nicefrac{1}{60}, 1500$  | 60         | 3,600              | 432,000             | 180,000            |
+| $1000, \nicefrac{1}{15}, 23, 84$     | 326              | 29,115              | $5.20\times 10^{6}$  | 326,087             |
+| $1000, \nicefrac{1}{15}, 32, 84$     | 234              | 20,926              | $3.74\times 10^{6}$  | 234,375             |
+| $1000, \nicefrac{1}{15}, 84, 84$     | 89               | 7,972               | $1.42\times 10^{6}$  | 89,286              |
+| $1000, \nicefrac{1}{15}, 112, 112$   | 67               | 4,484               | 600,565              | 66,964              |
+| $3000, \nicefrac{1}{15}, 23, 84$     | 978              | 262,034             | $1.40\times 10^{8}$  | $2.93\times 10^{6}$ |
+| $3000, \nicefrac{1}{15}, 32, 84$     | 703              | 188,337             | $1.01\times 10^{8}$  | $2.11\times 10^{6}$ |
+| $3000, \nicefrac{1}{15}, 84, 84$     | 268              | 71,747              | $3.84\times 10^{7}$  | 803,571             |
+| $3000, \nicefrac{1}{15}, 112, 112$   | 201              | 40,358              | $1.62\times 10^{7}$  | 602,679             |
+| $30000, \nicefrac{1}{15}, 112, 112$  | 2,009            | $4.04\times 10^{6}$ | $1.62\times 10^{10}$ | $6.03\times 10^{7}$ |
+| $1000, \nicefrac{1}{30}, 112, 112$   | 134              | 17,937              | $4.80\times 10^{6}$  | 133,929             |
+| $3000, \nicefrac{1}{30}, 112, 112$   | 402              | 161,432             | $1.30\times 10^{8}$  | $1.21\times 10^{6}$ |
+| $30000, \nicefrac{1}{30}, 112, 112$  | 4,018            | $1.61\times 10^{7}$ | $1.30\times 10^{11}$ | $1.21\times 10^{8}$ |
+| $1000, \nicefrac{1}{60}, 112, 112$   | 268              | 71,747              | $3.84\times 10^{7}$  | 267,857             |
+| $3000, \nicefrac{1}{60}, 112, 112$   | 804              | 645,727             | $1.04\times 10^{9}$  | $2.41\times 10^{6}$ |
+| $30000, \nicefrac{1}{60}, 112, 112$  | 8,036            | $6.46\times 10^{7}$ | $1.04\times 10^{12}$ | $2.41\times 10^{8}$ |
+| $1000, \nicefrac{1}{600}, 112, 112$  | 2,679            | $7.17\times 10^{6}$ | $3.84\times 10^{10}$ | $2.68\times 10^{6}$ |
+| $3000, \nicefrac{1}{600}, 112, 112$  | 8,036            | $6.46\times 10^{7}$ | $1.04\times 10^{12}$ | $2.41\times 10^{7}$ |
+| $30000, \nicefrac{1}{600}, 112, 112$ | 80,357           | $6.46\times 10^{9}$ | $1.04\times 10^{15}$ | $2.41\times 10^{9}$ |
+| $3000, \nicefrac{1}{30}, 200, 200$   | 225              | 50,625              | $2.28\times 10^{7}$  | 675,000             |
+| $3000, \nicefrac{1}{30}, 500, 500$   | 90               | 8,100               | $1.46\times 10^{6}$  | 270,000             |
+| $3000, \nicefrac{1}{30}, 1000, 1000$ | 45               | 2,025               | 182,250              | 135,000             |
+| $3000, \nicefrac{1}{30}, 1500, 1500$ | 30               | 900                 | 54,000               | 90,000              |
 
 : UT's capacity and bandwidth requirements: $N_1, N_2, N_3, \text{and}\;\Delta S$ for various parameters.
 
