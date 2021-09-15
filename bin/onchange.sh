@@ -25,7 +25,7 @@
 #
 
 #. _bash_colors.sh
-. _ci_logs.sh
+. $(dirname $0)/_ci_logs.sh
 
 EVENTS="CREATE,CLOSE_WRITE,DELETE,MODIFY,MOVED_FROM,MOVED_TO"
 
