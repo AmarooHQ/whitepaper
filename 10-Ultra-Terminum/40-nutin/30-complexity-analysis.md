@@ -332,7 +332,7 @@ Practically, this effect means that a decrease to the size of headers has *incre
 
 : TPS given optimizations
 
-%% INSERT ### TABLE: dappchains_optimized
+%% INSERT ### TABLE: dapp-chains_optimized
 
 : Using HOT simplex optimizations (Header Omission and Truncation)
 

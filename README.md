@@ -23,7 +23,7 @@ if you run into compile errors, you could try installing `texlive-full` -- not a
 
 The directory names are capitalized atm b/c I think it might be good to keep the option open of using the directory names as section headings, but mb that could be difficult if we want punctuation and stuff. IDK.
 
-I use this to compile and view quickly: `make && code ./output/whitepaper.pdf`
+~~I use this to compile and view quickly: `make && code ./output/whitepaper.pdf`~~ (used to). Now I use `bin/onchange.sh ./10-Ultra-Terminum  'make && cp whitepaper-latest.pdf /mnt/c/Users/xertrov/src/whitepaper/whitepaper-latest.pdf'` (and then refresh firefox)
 
 ## notes about latex graph stuff
 
