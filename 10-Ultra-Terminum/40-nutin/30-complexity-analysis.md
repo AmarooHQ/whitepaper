@@ -329,7 +329,7 @@ While $O(c^2)$ bandwidth scaling is not ideal, it's clear that -- especially in 
 
 %% ### TABLE: dappchains
 
-| $k$, $B_f$, $B_h$               | $N_1$ ($\UT{1}$) | $N_2$ ($\UT{2}$)    | $N_3$ ($\UT{3}$)     | $\Delta S$          | $\mathbb{C}^\prime \; (Hz)$ |
+| $k$, $B_f$, $B_h$               | $N_1$ ($\UT{1}$) | $N_2$ ($\UT{2}$)    | $N_3$ ($\UT{3}$)     | $\Delta S$          | $\mathbb{C}^\prime$ (Hz) |
 |------|----|-----|-----|-----|----|
 | $1000, \nicefrac{1}{15}, 84$    | 89               | 7,972               | $1.42\times 10^{6}$  | 89,286              | 5.95                        |
 | $1000, \nicefrac{1}{15}, 112$   | 67               | 4,484               | 600,565              | 66,964              | 4.46                        |
@@ -397,12 +397,13 @@ Practically, this effect means that a decrease to the size of headers has *incre
 | $3000, \nicefrac{1}{60}, 32, 84$   | 12     | 25,714           | 16,875   | $3.62\times 10^{7}$ | $7.75\times 10^{10}$ |
 | $3000, \nicefrac{1}{60}, 16, 80$   | 12     | 27,000           | 33,750   | $7.59\times 10^{7}$ | $1.71\times 10^{11}$ |
 | $3000, \nicefrac{1}{60}, 32, 112$  | 12     | 19,286           | 16,875   | $2.71\times 10^{7}$ | $4.36\times 10^{10}$ |
+| $64600, \nicefrac{1}{15}, 16, 80$  | 258    | $3.13\times 10^{6}$ | $3.91\times 10^{6}$ | $4.74\times 10^{10}$ | $5.74\times 10^{14}$ |
 
 : TPS given optimizations
 
 %% ### TABLE: dappchains_optimized
 
-| $k$, $B_f$, $B_h$, $D_h$           | $N_1$ ($\UT{1}$) | $N_2$ ($\UT{2}$)    | $N_3$ ($\UT{3}$)     | $\Delta S$          | $\mathbb{C}^\prime \; (Hz)$ |
+| $k$, $B_f$, $B_h$, $D_h$           | $N_1$ ($\UT{1}$) | $N_2$ ($\UT{2}$)    | $N_3$ ($\UT{3}$)     | $\Delta S$          | $\mathbb{C}^\prime$ (Hz) |
 |------|----|-----|-----|-----|----|
 | $3000, \nicefrac{1}{7}, 16, 80$    | 656              | 86,133              | $2.26\times 10^{7}$  | $1.97\times 10^{6}$ | 93.75                       |
 | $1000, \nicefrac{1}{15}, 16, 68$   | 469              | 51,700              | $1.14\times 10^{7}$  | 468,750             | 31.25                       |
@@ -425,6 +426,7 @@ Practically, this effect means that a decrease to the size of headers has *incre
 | $3000, \nicefrac{1}{60}, 32, 84$   | 2,812            | $3.01\times 10^{6}$ | $6.46\times 10^{9}$  | $8.44\times 10^{6}$ | 46.88                       |
 | $3000, \nicefrac{1}{60}, 16, 80$   | 5,625            | $6.33\times 10^{6}$ | $1.42\times 10^{10}$ | $1.69\times 10^{7}$ | 93.75                       |
 | $3000, \nicefrac{1}{60}, 32, 112$  | 2,812            | $2.26\times 10^{6}$ | $3.63\times 10^{9}$  | $8.44\times 10^{6}$ | 46.88                       |
+| $64600, \nicefrac{1}{15}, 16, 80$  | 30,281           | $1.83\times 10^{8}$ | $2.22\times 10^{12}$ | $1.96\times 10^{9}$ | 2,018.75                 |
 
 : Using HOT simplex optimizations (Header Omission and Truncation)
 

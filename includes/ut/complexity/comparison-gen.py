@@ -142,7 +142,6 @@ def tps_to_k(tps, tx_size, bf, bh):
     }
 
 
-
 def fmt_rounded_commas(value, non_sn_range=(1, 10**6), should_round=True):
     if isinstance(value, str):
         return value
@@ -155,7 +154,7 @@ def table_header(table_name: str):
     tn_no_opim = table_name.removesuffix("_optimized")
     _headings = ({
         'tps': ['$O(c)$', 'Sharded $O(c^2)$', '$\\UT{1}$', '$\\UT{2}$', '$\\UT{3}$'],
-        'dappchains': ['$N_1$ ($\\UT{1}$)', '$N_2$ ($\\UT{2}$)', '$N_3$ ($\\UT{3}$)', '$\\Delta S$', '$\\mathbb{C}^\\prime \\; (Hz)$'],
+        'dappchains': ['$N_1$ ($\\UT{1}$)', '$N_2$ ($\\UT{2}$)', '$N_3$ ($\\UT{3}$)', '$\\Delta S$', '$\\mathbb{C}^\\prime$ (Hz)'],
         'tps_por': ['$N_1$', '$\\UT{1}$ tps', '$N_2$', '$\\UT{2}$ tps', 'PoR (bytes)', '$\\nicefrac{N_1}{k}$'],
         'compare_nets_3k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'TPS vs \\newline $\\UT{2}$'],
         'compare_nets_30k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'TPS vs \\newline $\\UT{2}$'],
@@ -378,6 +377,7 @@ def mk_optimized_rows():
                 for b_h in [16, 32]:
                     dh2 = d_h - (16 if d_h == 84 else 32) if b_h == 16 else d_h
                     yield (k, b_f, b_h, dh2, 250)
+    yield (64600, 1/15, 16, 80, 250)
 
 optimized_row_inputs = list(mk_optimized_rows())
 

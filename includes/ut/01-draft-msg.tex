@@ -8,10 +8,10 @@ Currently this paper sits at the ``Draft 1+'' stage; some sections are incomplet
 {\Large{Draft 1+: Changes}}
 
 \begin{itemize}
-    \item (InProg) Rename like $O(c^2)$ configuration to UT2 in prep for $O(c^2 \cdot \log{n})$ refactor. (Note: atm that has only been changed in the abstract)
-    \item (InProg) Exploiting segmented state section: \autoref{sec:exploiting-seg-state}
+    \item (InProg) HOT optimization + Exploiting segmented state section: \autoref{sec:exploiting-seg-state} -- with the HOT optimization $\UT{1}$ (with no nesting) out-performs the theoretical max of a $O(c^2)$ sharded (nested) chain. The HOT optimization only works in $\UT{}$.
+    \item (InProg) Change UT nomenclature: ``$O(c^2)$ configuration'' becomes ``$\UT{2}$''. (Note: limited changes beyond the abstract and tables so far)
     \item Dapp-chains section: \autoref{sec:dapp-chains}
-    \item Iterating on comparisons to the ``big 4'' in \autoref{sec:conclusions}
+    \item Comparisons to the ``big 4'' in \autoref{sec:conclusions}
     \item Sketched out intuitive approach to tiling security \& polished tiling sections
     \item Tables improved and simplified
     \item Started to doubt PoS (particularly WRT dapp-chains) and the way I'd discussed it so far; we can still use PoS, but we don't need to. A major realization was that dapp-chains can be done via PoR, which is cleaner and more efficient than PoS dapp-chains anyway!
