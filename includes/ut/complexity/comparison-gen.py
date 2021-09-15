@@ -84,7 +84,7 @@ def bandwidth_to_k_solana(delta_s, bf, bh):
     return delta_s
 
 
-def bandwidth_to_k(delta_s, bf, bh):
+def bandwidth_to_k(delta_s, bf, bh, dh=None):
     '''
     UT1: DeltaS = k**2 / (2 * bh * bf)
     power(2 * ds * bh * bf, 1/2)
@@ -96,14 +96,17 @@ def bandwidth_to_k(delta_s, bf, bh):
     eth2: T_2 = k**2 / (df * dh)
     power(delta_s * bf * bh, 1/2)
     '''
-    ut2_k = power(2 * delta_s * bf * bh, 1/2)
-    ut3_k = power(delta_s * bf * bf * bh * bh * 4, 1/3)
+    dh = dh if dh is not None else bh
+    ut1_k = power(2 * delta_s * bf * bh, 1/2)
+    ut2_k = power(delta_s * bf * bf * bh * dh * 4, 1/3)
 
     eth2_k = power(delta_s * bf * bh, 1/2)
 
     return {
-        'UT': ut2_k,
-        'UT2': ut3_k,
+        'UT': ut1_k,
+        'UT+HOT': ut1_k,
+        'UT2': ut2_k,
+        'UT2+HOT': ut2_k,
         'eth2': eth2_k,
         'polkadot': eth2_k,
         'cardano': eth2_k,
@@ -111,10 +114,36 @@ def bandwidth_to_k(delta_s, bf, bh):
         'bitcoin': delta_s,
     }
 
-def fmt_rounded_commas(value, non_sn_range=(1, 10**6)):
+
+def tps_to_k(tps, tx_size, bf, bh):
+    hot_bh_reduction = ({84: 16, 112: 32})[bh]
+    throughput = tps*tx_size
+    ut1_k = power(throughput * 4 * bf * bh, 1/2)
+    ut1_hot_k = power(throughput * 4 * bf * 16, 1/2)
+    ut2_k = power(throughput * 4 * bf * bf * bh * bh, 1/3)
+    ut2_ho_k = power(throughput * 4 * bf * bf * (bh) * 32, 1/3)
+    ut2_hot_k = power(throughput * 4 * bf * bf * (bh - hot_bh_reduction) * 16, 1/3)
+
+    return {
+        'UT': ut1_k,
+        'UT+HOT': ut1_hot_k,
+        'UT2': ut2_k,
+        'UT2+HO': ut2_ho_k,
+        'UT2+HOT': ut2_hot_k,
+        # 'eth2': eth2_k,
+        # 'polkadot': eth2_k,
+        # 'cardano': eth2_k,
+        # 'solana': delta_s,
+        # 'bitcoin': delta_s,
+    }
+
+
+
+def fmt_rounded_commas(value, non_sn_range=(1, 10**6), should_round=True):
     if isinstance(value, str):
         return value
-    return f"{round(value):,}" if non_sn_range[0] <= value < non_sn_range[1] else f"\x24{value:.2e}}}\x24" \
+    mb_round = lambda v: f"{round(v):,}" if should_round else f"{v:,.3}"
+    return mb_round(value) if non_sn_range[0] <= value < non_sn_range[1] else f"\x24{value:.2e}}}\x24" \
         .replace("e+0", "e+").replace("e+", "\\times 10^{") \
         .replace("e-0", "e-").replace("e-", "\\times 10^{-")
 
@@ -174,11 +203,12 @@ def format_table_row(row: List[Any]):
 
 def format_params(params, strip_last_n=1):
     ps = list(params)[:-1 * strip_last_n] if strip_last_n > 0 else list(params)
-    return '$' + ', '.join(map(str, ps)) + '$'
+    conv_f = lambda p: str(p[1] if isinstance(p, list) else p)
+    return '$' + ', '.join(map(conv_f, ps)) + '$'
 
 def ratio_to_x(ratio):
     # return f"${ratio:.1f}\\times$"
-    return f"$({fmt_rounded_commas(ratio).strip('$')})\\times$"
+    return f"$({fmt_rounded_commas(ratio, should_round=False).strip('$')})\\times$"
 
 def table_row(params, table_name: str, r):
     fp = format_params(params)
@@ -199,13 +229,16 @@ def mod_params_id(p: Tuple) -> Tuple:
 
 def table_row_compare_inner(net: str, params):
     p = params
-    r = calc_tps_throughput(p[0], p[1], p[1], p[2], p[2], p[3])
+    bh, dh = (p[2], p[2]) if isinstance(p[2], int) else p[2]  # destructure if not an int
+    r = calc_tps_throughput(p[0], p[1], p[1], bh, dh, p[3])
     mod_params = defaultdict(lambda: mod_params_id, **({'$\\UT{2}$+PoRs': mod_ut_por_params}))
     fp = format_params(mod_params[net](params))
     fn = {'UT': '$\\UT{2}$'}.get(net, net) if 'UT' in net else net.capitalize()
     cols = ({
         'UT': [fp, fn, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps']],
         '$\\UT{2}$+PoRs': [fp, fn, r['ut_n_2_factor_with_por'], r['ut_3_tps_with_por_per_basechain'], r['ut_3_tps_with_por']],
+        '$\\UT{2}$+HO': [fp, fn, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps']],
+        '$\\UT{2}$+HOT': [fp, fn, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps']],
         'bitcoin': [fp, fn, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps']],
         'cardano': [fp, fn,  r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
         'polkadot': [fp, fn, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
@@ -219,7 +252,9 @@ def table_row_compare(net: str, params, ut_tps: int):
     return format_table_row(cols + [ratio_to_x(cols[-1] / ut_tps)])
 
 def table_row_1m_compare(net: str, params, ut_k):
-    ut_cols = table_row_compare_inner('UT', params)
+    p = params
+    ut_ps = p if isinstance(p[2], int) else (p[0], p[1], p[2][1], p[3])
+    ut_cols = table_row_compare_inner('UT', ut_ps)
     cols = table_row_compare_inner(net, params) + [ratio_to_x(ut_k / params[0])]
     #
     cols_processed = cols[:2] + cols[3:] + [ut_cols[4]]
@@ -227,7 +262,8 @@ def table_row_1m_compare(net: str, params, ut_k):
 
 def table_row_1m_hz_compare(net: str, params, ut_k):
     p = params
-    r = calc_tps_throughput(p[0], p[1], p[1], p[2], p[2], p[3])
+    bh, dh = (p[2], p[2]) if isinstance(p[2], int) else p[2]  # destructure if not an int
+    r = calc_tps_throughput(p[0], p[1], p[1], bh, dh, p[3])
     fp = format_params(params)
     fn = net if 'UT' in net else net.capitalize()
     cols = [fp, fn, f"{r['ut_confirmation_rate']:.1f}"]
@@ -237,15 +273,21 @@ def table_row_1m_hz_compare(net: str, params, ut_k):
 def table_row_1gbps(net, params, ut_params):
     ut_net, ut_ps = ut_params
     ut_ds, ut_bf, ut_bh, ut_tx = ut_ps
-    ds, bf, bh, tx_size = params
-    k = math.floor(bandwidth_to_k(ds, bf, bh)[net])
+    ds, bf, dh, tx_size = params  # note: I use d_h here b/c we want to format params then set b_h afterwards
+    bh = dh
+    if 'HOT' in net:
+        bh = 16
+        dh -= 16
+    fp = format_params([fmt_rounded_commas(ds).strip('$'), bf, dh, tx_size], strip_last_n=0)
+    k = math.floor(bandwidth_to_k(ds, bf, bh, dh=dh)[net])
     k_ut = bandwidth_to_k(ut_ds, ut_bf, ut_bh)[ut_net]
-    r = calc_tps_throughput(k, bf, bf, bh, bh, tx_size)
+    r = calc_tps_throughput(k, bf, bf, bh, dh, tx_size)
     r_ut = calc_tps_throughput(k_ut, ut_bf, ut_bf, ut_bh, ut_bh, ut_tx)
-    fp = format_params([fmt_rounded_commas(ds).strip('$'), bf, bh, tx_size], strip_last_n=0)
     get_net_vals = lambda _r, _net: ({
         'UT': (_r['ut_2_tps'], _r['ut_n_1']),
+        'UT+HOT': (_r['ut_2_tps'], _r['ut_n_1']),
         'UT2': (_r['ut_3_tps'], _r['ut_n_2']),
+        'UT2+HOT': (_r['ut_3_tps'], _r['ut_n_2']),
         'eth2': (_r['eth2_tps'], _r['eth2_n_2_factor']),
         'polkadot': (_r['eth2_tps'], _r['eth2_n_2_factor']),
         'cardano': (_r['eth2_tps'], _r['eth2_n_2_factor']),
@@ -328,7 +370,8 @@ def mk_optimized_rows():
         for k in ks:
             for d_h in [84, 112]:
                 for b_h in [16, 32]:
-                    yield (k, b_f, b_h, d_h, 250)
+                    dh2 = d_h - (16 if d_h == 84 else 32) if b_h == 16 else d_h
+                    yield (k, b_f, b_h, dh2, 250)
 
 optimized_row_inputs = list(mk_optimized_rows())
 
@@ -354,9 +397,10 @@ def mk_comparison_inputs(k: int):
         ('cardano', (k, 1/20, 1070, 250)),
         ('polkadot', (k, 1/6, 288, 250)),
         ('eth2', (k, 1/12, 200, 250)),
-        ('$\\UT{2}$+PoRs', (k, 1/15, 112, 250)),
-        ('UT', (k, 1/15, 112, 250)),
-        ('UT inf', (k, 1/15, 112, 250)),
+        ('$\\UT{2}$+PoRs', (k, 1/15, 84, 250)),
+        ('UT', (k, 1/15, 84, 250)),
+        ('$\\UT{2}$+HOT', (k, 1/15, [16, 84-16], 250)),
+        ('UT inf', (k, 1/15, 84, 250)),
     ]
 #     ('bitcoin', (comparison_k2, 1/600, 80, 250)),
 #     ('solana', (comparison_k2, 1/0.4, 141, 250)),
@@ -377,6 +421,39 @@ def mk_comparison_inputs(k: int):
 #     # ('solana', (248500, 1/0.4, 141, 250)),  # should match their '700k tps theoretical limit' claim
 #     # ('UT', (3393, 1/15, 112, 250)),
 # ]
+
+# UT_1M_K = 3826
+ALL_UT_1M_K = tps_to_k(1000000, 250, 1/15, 84)
+UT_1M_K = int(ALL_UT_1M_K['UT2']) + 1
+
+# math.floor(UT_1M_K * 0.598)
+
+'''For comparison_1m_tps: for non-UT we want to chose the *lowest* value of k where the total TPS rounds to 1.00*10^6; and for UT we want to choose the *largest* k that does similarly. This will minimize the 'out-scaling' ratios.'''
+comparison_1m_tps = [
+    ('bitcoin', (250000000, 1/600, 80, 250)),
+    # ('solana', (296900, 1/0.55, 141, 250)),
+    ('cardano', (115700, 1/20, 1070, 250)),
+    ('polkadot', (109810, 1/6, 288, 250)),
+    ('eth2', (64600, 1/12, 200, 250)),
+    ('$\\UT{2}$+PoRs', (math.floor(UT_1M_K * 1.536), 1/15, 84, 250)),
+    ('UT', (UT_1M_K, 1/15, 84, 250)),
+    # ('$\\UT{2}$+HO', (math.ceil(ALL_UT_1M_K['UT2+HO']), 1/15, [32, 84], 250)),
+    ('$\\UT{2}$+HOT', (math.ceil(ALL_UT_1M_K['UT2+HOT']), 1/15, [16, 68], 250)),
+]
+
+comparison_1gbps = [
+    ('solana', [1024 ** 3 // 8, 1/.5, 200, 250]),  # realistically, min 200 bytes tx size
+    ('bitcoin', [1024 ** 3 // 8, 1/600, 80, 250]),
+    ('cardano', [1024 ** 3 // 8, 1/20, 1070, 250]),
+    ('polkadot', [1024 ** 3 // 8, 1/6, 288, 250]),
+    ('eth2', [1024 ** 3 // 8, 1/12, 200, 250]),
+    ('UT', [1024 ** 3 // 8, 1/15, 84, 250]),
+    ('UT+HOT', [1024 ** 3 // 8, 1/15, 84, 250]),
+    ('UT2', [1024 ** 3 // 8, 1/15, 84, 250]),
+    ('UT2+HOT', [1024 ** 3 // 8, 1/15, 84, 250]),
+]
+
+
 
 def mk_table(table_name, row_func):
     print(f"\n### TABLE: {table_name}\n")
@@ -402,7 +479,7 @@ for table_name in ['compare_nets_3k', 'compare_nets_30k']:
         rows = list(table_row_compare(net, r, ut_tps) for (net, r) in net_inputs)
         for r in rows:
             if 'UT inf' in r[1]:
-                r[1] = '$\\UTinf{}$'
+                r[1] = '$\\UTinf{2}$'
                 r[-2] = '$\\infty$'
                 r[-1] = '$(\\infty)\\times$'
             if 'UT' == r[1]:
@@ -410,38 +487,15 @@ for table_name in ['compare_nets_3k', 'compare_nets_30k']:
         return rows
     mk_table(table_name, mk_row)
 
-UT_1M_K = 3826
-
-'''For comparison_1m_tps: for non-UT we want to chose the *lowest* value of k where the total TPS rounds to 1.00*10^6; and for UT we want to choose the *largest* k that does similarly. This will minimize the 'out-scaling' ratios.'''
-comparison_1m_tps = [
-    ('bitcoin', (250000000, 1/600, 80, 250)),
-    # ('solana', (296900, 1/0.55, 141, 250)),
-    ('cardano', (115700, 1/20, 1070, 250)),
-    ('polkadot', (109810, 1/6, 288, 250)),
-    ('eth2', (64600, 1/12, 200, 250)),
-    ('$\\UT{2}$+PoRs', (math.floor(UT_1M_K * 1.438), 1/15, 112, 250)),
-    ('UT', (UT_1M_K, 1/15, 112, 250)),
-]
-
 mk_table('comparison_1m_tps', lambda: list(table_row_1m_compare(net, r, UT_1M_K) for (net, r) in comparison_1m_tps))
 mk_table('comparison_1m_tps_conf_hz', lambda: list(table_row_1m_hz_compare(net, r, UT_1M_K) for (net, r) in comparison_1m_tps))
-
-comparison_1gbps = [
-    ('solana', [1024 ** 3 // 8, 1/.5, 200, 250]),  # realistically, min 200 bytes tx size
-    ('bitcoin', [1024 ** 3 // 8, 1/600, 80, 250]),
-    ('cardano', [1024 ** 3 // 8, 1/20, 1070, 250]),
-    ('polkadot', [1024 ** 3 // 8, 1/6, 288, 250]),
-    ('eth2', [1024 ** 3 // 8, 1/12, 200, 250]),
-    ('UT', [1024 ** 3 // 8, 1/15, 112, 250]),
-    ('UT2', [1024 ** 3 // 8, 1/15, 112, 250]),
-]
 
 for table_name in ['comparison_1gbps']:
     compare_to = 'UT2'
     def gen_rows():
         rs = []
         ut_params = list(filter(lambda r: r[0] == compare_to, comparison_1gbps))[0]
-        get_network_name = lambda n: {'UT': '\\UT{1} $O(c^2)$', 'UT2': '\\UT{2}'}.get(n, n.capitalize())
+        get_network_name = lambda n: {'UT': '$\\UT{1}$', 'UT+HOT': '$\\UT{1}$+HOT', 'UT2': '$\\UT{2}$', 'UT2+HOT': '$\\UT{2}$+HOT'}.get(n, n.capitalize())
         for (net, ps) in comparison_1gbps:
             r = table_row_1gbps(net, ps, ut_params)
             r[1] = get_network_name(r[1])
