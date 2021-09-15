@@ -57,6 +57,7 @@ build-whitepaper: %.md
 	  cat $$mdfile >> $(WPFILE) && \
 	  echo -n "\n\n" >> $(WPFILE) ; \
 	done
+	python3 includes/ut/complexity/comparison-gen.py --populate-wp-md
 
 # update properties in the whitepaper like papersize and geometry.
 # can be set by CLI args like `make whitepaper papersize=a5 geometry=1cm`

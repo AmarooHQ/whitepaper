@@ -459,16 +459,35 @@ comparison_1gbps = [
     ('UT2+HOT', [1024 ** 3 // 8, 1/15, 84, 250]),
 ]
 
-
+all_tables = {}
 
 def mk_table(table_name, row_func):
-    print(f"\n### TABLE: {table_name}\n")
     rows = table_header(table_name)
     rows += row_func()
     padded_rows = pad_rows(rows, [])
     rows_str = list(map(row_to_str, padded_rows))
-    print('\n'.join(rows_str))
-
+    all_tables[table_name] = '\n'.join(rows_str)
+    # running it from CLI
+    if '--populate-wp-md' not in sys.argv:
+        print(f"\n### TABLE: {table_name}\n")
+        print(all_tables[table_name])
+    else: # it's being run from makefile (or w/e)
+        # tables to ignore when run from makefile
+        if table_name in ['comparison_1m_tps_conf_hz']:
+            return
+        to_replace = f'%% INSERT ### TABLE: {table_name}'
+        print(f"Replacing `{to_replace}` with table {table_name} to output/whitepaper.markdown")
+        with open('./output/whitepaper.markdown', 'r') as f:
+            whitepaper_md = f.read()
+        pre_len = len(whitepaper_md)
+        whitepaper_md = whitepaper_md.replace(to_replace + "\n", all_tables[table_name] + "\n")
+        post_len = len(whitepaper_md)
+        if pre_len == post_len:
+            print(f"Warning: attempted to insert table {table_name} in whitepaper but it didn't look like that happened. (before: {pre_len} B, after: {post_len} B")
+            sys.exit(-1)
+        with open('./output/whitepaper.markdown', 'w') as f:
+            f.write(whitepaper_md)
+        print(f"Table {table_name} written to output/whitepaper.markdown")
 
 for table_name in ['tps', 'dappchains', 'tps_por']:
     tn_opt = f'{table_name}_optimized'
