@@ -313,6 +313,31 @@ Additionally, a model of tilings of similar capacity -- i.e., similar $N_{tiles}
 
 ### Worst Case Tiling
 
-\todo{What's the worst case for tiling -- as a method? Probably that PoR isn't safe to do non-recursively in a way that works for $O(n)$ tiling. The solution is to validate PoRs recursively which means that *every* miner needs *every* base-level (i.e., simplex-chain) block across all simplex tiles. That would enable edge-to-edge verification of all PoRs. In that case, an upper-bound is set based on minimum bandwidth requirements (for miners) and $\Delta S$ (see \autoref{sec:bandwidth-complexity}). For a given set of parameters, the limit is $N_{\text{tiles}} \cdot \nicefrac{\Delta S}{4} < \text{MinBandwidth}$.}
+\todo{write this section properly}
 
-\todo{possible extension: maybe PoRs can be provided to miners but excluded from blocks. Like you can be a full-node or a full-full-node, and full-full-nodes validate PoRs recursively in a way that isn't required for a single simplex. Or full-full-nodes are miners in a simplex, and full-full-full-nodes are miners in a tiling of simplexes.}
+What's the worst case for tiling -- as a method? Probably that PoR isn't safe to do non-recursively in a way that works for $O(n)$ tiling. The solution is to validate PoRs recursively which means that *every* miner needs *every* base-level (i.e., simplex-chain) block across all simplex tiles. That would enable edge-to-edge verification of all PoRs. In that case, an upper-bound is set based on minimum bandwidth requirements (for miners) and $\Delta S$ (see \autoref{sec:bandwidth-complexity}). For a given set of parameters, the limit is $N_{\text{tiles}} \cdot \nicefrac{\Delta S}{4} < \text{MinBandwidth}$.
+
+possible extension: maybe PoRs can be provided to miners but excluded from blocks. Like you can be a full-node or a full-full-node, and full-full-nodes validate PoRs recursively in a way that isn't required for a single simplex. Or full-full-nodes are miners in a simplex, and full-full-full-nodes are miners in a tiling of simplexes.
+
+#### A Thought (Draft)
+
+Thought: let's say that tiling *requires* edge-to-edge verification. Is it still useful? Yes.
+
+Let's *assume* there *is* significant work in a simplex-miner calculating and verifying the internal PoRs (via the method in \autoref{sec:segmented-state}). Since the number of mutual reflections in a simplex is $O(c^2)$, let's assume the algorithm a miner needs to run is $O(c^2)$, too[^opt1].
+
+[^opt1]: Note that there is significant room for optimization due to the repeated operations that need to be done for each simplex-chain.
+
+Now, let's consider two systems of equal (network wide) throughput: a tiling of depth 1 (with 4 tiles) and a single simplex. This should be an easy comparison if the tiling has a valence of 3.
+
+In the tiled system, with non-recursive validation, miners on the root tile need to do more work than miners on leaf tiles -- internal reflections for 4 tiles and 3 sets of inter-tile reflections. With recursive validation all miners (for all tiles) have this same burden.
+
+\begin{equation}
+\begin{split}
+& \text{Tiling Refls} = (\frac{N_1}{4})^2 \cdot (4 + 3) = \frac{7 N_1^2}{16} \\
+& \text{Simplex Refls} = N_1^2
+\end{split}
+\end{equation}
+
+So the complexity is the same, but there's a pretty steep discount (like 50%).
+
+Does that trend continue? Get better?

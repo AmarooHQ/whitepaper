@@ -15,6 +15,8 @@ def por_with_merkle_branches_n1_root(k, bf, bh, g):
     d = 2 * bf * g * real(lambertw(inner_w))
     return math.floor(k * ln2 / d)
 
+# ! NOTE: Older bits of this code still use the old UT nomenclature, like `ut_2_tps` is UT_1's tps -- T_1/tx_size
+# ! Just something to keep in mind as you're reading below. e.g. `ut_4_tps` corresponds to O(c^4) UT -- now called UT_3
 
 def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
     ut_n_1 = k / (2 * bh * bf)
@@ -116,8 +118,9 @@ def fmt_rounded_commas(value, non_sn_range=(1, 10**6)):
         .replace("e+0", "e+").replace("e+", "\\times 10^{") \
         .replace("e-0", "e-").replace("e-", "\\times 10^{-")
 
-def table_header(table_name):
-    headings = ({
+def table_header(table_name: str):
+    tn_no_opim = table_name.removesuffix("_optimized")
+    _headings = ({
         'tps': ['$O(c)$', 'Sharded $O(c^2)$', '$\\UT{1}$', '$\\UT{2}$', '$\\UT{3}$'],
         'dappchains': ['$N_1$ ($\\UT{1}$)', '$N_2$ ($\\UT{2}$)', '$N_3$ ($\\UT{3}$)', '$\Delta S$'],
         'tps_por': ['$N_1$', '$\\UT{1}$ tps', '$N_2$', '$\\UT{2}$ tps', 'PoR (bytes)', '$\\nicefrac{N_1}{k}$'],
@@ -126,9 +129,10 @@ def table_header(table_name):
         'comparison_1m_tps': ['Network', 'TPS per base-chain', 'Network-wide TPS', '$k$ vs $\\UT{2}$', 'Equivalent $\\UT{2}$ TPS'],
         'comparison_1m_tps_conf_hz': ['Network', 'Equivalent $\\UT{2}$ Confirmation Rate (Hz)'],
         'comparison_1gbps': ['Network', 'TPS', '$k$ (B/s)', 'MB/chain/day'], #'$\\nicefrac{\\text{TPS}}{k_1}$ vs $\\UT{2}$'], #, '$k_1 \cdot$ TPS vs $\\UT{2}$', 'TPS vs $\\UT{2}$', 'combined'],
-    })[table_name]
+    })
+    headings = _headings.get(table_name, _headings[tn_no_opim])
 
-    col_sizes = ['------'] + ({
+    _col_sizes = ({
         'tps': ['---','------','----','----','----'],
         'dappchains': ['----', '-----', '-----', '-----'],
         'tps_por': ['---', '----', '----', '----', '-----', '----'],
@@ -137,15 +141,19 @@ def table_header(table_name):
         'comparison_1m_tps': ['---', '----', '-----', '-----', '-----'],
         'comparison_1m_tps_conf_hz': ['---', '----'],
         'comparison_1gbps': ['---', '---', '---', '----'], #'-----'], #'-----', '------'],
-    })[table_name]
+    })
+    col_sizes = ['------'] + _col_sizes.get(table_name, _col_sizes[tn_no_opim])
 
     col_heading_lookup = {
         'compare_nets_3k': '$k$, $B_f$, $B_h$',
         'compare_nets_30k': '$k$, $B_f$, $B_h$',
         'comparison_1gbps': '$\\Delta S$, $B_f$, $B_h$, Tx (B)',
-        'default': '$k$, $B_f$, $B_h$, $D_h$',
+        'default_optimized': '$k$, $B_f$, $B_h$, $D_h$',
+        'default': '$k$, $B_f$, $B_h$',
     }
-    col1_heading = col_heading_lookup.get(table_name, col_heading_lookup['default'])
+    default_name = 'default'
+    default_name = 'default_optimized' if 'optimized' in table_name else default_name
+    col1_heading = col_heading_lookup.get(table_name, col_heading_lookup[default_name])
     headings.insert(0, col1_heading)
 
     return [headings, col_sizes]
@@ -172,16 +180,14 @@ def ratio_to_x(ratio):
     # return f"${ratio:.1f}\\times$"
     return f"$({fmt_rounded_commas(ratio).strip('$')})\\times$"
 
-def table_row(params, table_name):
-    p = params
-    r = calc_tps_throughput(p[0], p[1], p[1], p[2], p[3], p[4])
+def table_row(params, table_name: str, r):
+    fp = format_params(params)
     cols = ({
-        'tps': [format_params(params), r['btc_tps'], r['eth2_tps'], r['ut_2_tps'], r['ut_3_tps'], r['ut_4_tps']],
-        'dappchains': [format_params(params), r['ut_n_1'], r['ut_n_2'], r['ut_n_3'], r['delta_s_Bps']],
-        'tps_por': [format_params(params), r['ut_n_1_with_por'], r['ut_2_tps_with_por'], r['ut_n_2_with_por'], r['ut_3_tps_with_por'], r['ut_por_size'], r['ut_n1_per_k']],
-    })[table_name]
+        'tps': [fp, r['btc_tps'], r['eth2_tps'], r['ut_2_tps'], r['ut_3_tps'], r['ut_4_tps']],
+        'dappchains': [fp, r['ut_n_1'], r['ut_n_2'], r['ut_n_3'], r['delta_s_Bps']],
+        'tps_por': [fp, r['ut_n_1_with_por'], r['ut_2_tps_with_por'], r['ut_n_2_with_por'], r['ut_3_tps_with_por'], r['ut_por_size'], r['ut_n1_per_k']],
+    })[table_name.removesuffix("_optimized")]
     return format_table_row(cols)
-
 
 def mod_ut_por_params(p: Tuple) -> Tuple:
     r = calc_tps_throughput(p[0], p[1], p[1], p[2], p[2], p[3])
@@ -292,40 +298,39 @@ def pad_rows(rows: List[List[str]], ns: List[int]):
 
 row_inputs = [
     # ver fast chains
-    (1000, 1/15, 23, 84, 250),
-    (1000, 1/15, 32, 84, 250),
-    (1000, 1/15, 84, 84, 250),
-    (1000, 1/15, 112, 112, 250),
-    (3000, 1/15, 23, 84, 250),
-    (3000, 1/15, 32, 84, 250),
-    (3000, 1/15, 84, 84, 250),
-    (3000, 1/15, 112, 112, 250),
-    (30000, 1/15, 112, 112, 250),
+    (1000, 1/15, 84, 250),
+    (1000, 1/15, 112, 250),
+    (3000, 1/15, 84, 250),
+    (3000, 1/15, 112, 250),
+    (30000, 1/15, 112, 250),
     # fast chains
-    (1000, 1/30, 112, 112, 250),
-    (3000, 1/30, 112, 112, 250),
-    (30000, 1/30, 112, 112, 250),
+    (1000, 1/30, 112, 250),
+    (3000, 1/30, 112, 250),
+    (30000, 1/30, 112, 250),
     # moderate chains
-    (1000, 1/60, 112, 112, 250),
-    (3000, 1/60, 112, 112, 250),
-    (30000, 1/60, 112, 112, 250),
+    (1000, 1/60, 112, 250),
+    (3000, 1/60, 112, 250),
+    (30000, 1/60, 112, 250),
     # slow chains
-    (1000, 1/600, 112, 112, 250),
-    (3000, 1/600, 112, 112, 250),
-    (30000, 1/600, 112, 112, 250),
-    # bigger headers
-    # (1000, 1/60, 200, 250),
-    # (3000, 1/60, 200, 250),
-    # (30000, 1/60, 200, 250),
-    # (1000, 1/600, 200, 250),
-    # (3000, 1/600, 200, 250),
-    # (30000, 1/600, 200, 250),
+    (1000, 1/600, 112, 250),
+    (3000, 1/600, 112, 250),
+    (30000, 1/600, 112, 250),
     # big headers
-    (3000, 1/30, 200, 200, 250),
-    (3000, 1/30, 500, 500, 250),
-    (3000, 1/30, 1000, 1000, 250),
-    (3000, 1/30, 1500, 1500, 250),
+    (3000, 1/30, 200, 250),
+    (3000, 1/30, 500, 250),
+    (3000, 1/30, 1000, 250),
+    (3000, 1/30, 1500, 250),
 ]
+
+def mk_optimized_rows():
+    for b_f in [1/15, 1/60]:
+        ks = [1000, 3000] + ([30000] if b_f > 1/20 else [])
+        for k in ks:
+            for d_h in [84, 112]:
+                for b_h in [16, 32]:
+                    yield (k, b_f, b_h, d_h, 250)
+
+optimized_row_inputs = list(mk_optimized_rows())
 
 # Note: If eth2 really is as efficient as an 8kb update every ~27 hours then it's close enough to 0.
 # (https://hackmd.io/@wemeetagain/SkuswKu_r#Update-data-size)
@@ -374,7 +379,7 @@ def mk_comparison_inputs(k: int):
 # ]
 
 def mk_table(table_name, row_func):
-    print(f"\n### TABLE: {table_name}")
+    print(f"\n### TABLE: {table_name}\n")
     rows = table_header(table_name)
     rows += row_func()
     padded_rows = pad_rows(rows, [])
@@ -383,7 +388,9 @@ def mk_table(table_name, row_func):
 
 
 for table_name in ['tps', 'dappchains', 'tps_por']:
-    mk_table(table_name, lambda: list(table_row(r, table_name) for r in row_inputs))
+    tn_opt = f'{table_name}_optimized'
+    mk_table(table_name, lambda: list(table_row(r, table_name, calc_tps_throughput(r[0], r[1], r[1], r[2], r[2], r[3])) for r in row_inputs))
+    mk_table(tn_opt, lambda: list(table_row(r, tn_opt, calc_tps_throughput(r[0], r[1], r[1], r[2], r[3], r[4])) for r in optimized_row_inputs))
 
 
 for table_name in ['compare_nets_3k', 'compare_nets_30k']:
