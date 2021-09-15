@@ -10,6 +10,9 @@ import math
 import sys
 
 
+UT_NET_NAME_LOOKUP = {'UT': '$\\UT{1}$', 'UT+HOT': '$\\UT{1+\\text{HOT}}$', 'UT2': '$\\UT{2}$', 'UT2+HOT': '$\\UT{2+\\text{HOT}}$'}
+
+
 def por_with_merkle_branches_n1_root(k, bf, bh, g):
     ln2 = log(2)
     inner_w = (2 ** (bh / g - 1) * sqrt(math.e) * k * ln2)/(bf * g)
@@ -143,7 +146,7 @@ def tps_to_k(tps, tx_size, bf, bh):
 def fmt_rounded_commas(value, non_sn_range=(1, 10**6), should_round=True):
     if isinstance(value, str):
         return value
-    mb_round = lambda v: f"{round(v):,}" if should_round else f"{v:,.3}"
+    mb_round = lambda v: f"{round(v):,}" if should_round else f"{v:,.2f}"
     return mb_round(value) if non_sn_range[0] <= value < non_sn_range[1] else f"\x24{value:.2e}}}\x24" \
         .replace("e+0", "e+").replace("e+", "\\times 10^{") \
         .replace("e-0", "e-").replace("e-", "\\times 10^{-")
@@ -152,7 +155,7 @@ def table_header(table_name: str):
     tn_no_opim = table_name.removesuffix("_optimized")
     _headings = ({
         'tps': ['$O(c)$', 'Sharded $O(c^2)$', '$\\UT{1}$', '$\\UT{2}$', '$\\UT{3}$'],
-        'dappchains': ['$N_1$ ($\\UT{1}$)', '$N_2$ ($\\UT{2}$)', '$N_3$ ($\\UT{3}$)', '$\Delta S$'],
+        'dappchains': ['$N_1$ ($\\UT{1}$)', '$N_2$ ($\\UT{2}$)', '$N_3$ ($\\UT{3}$)', '$\\Delta S$', '$\\mathbb{C}^\\prime \\; (Hz)$'],
         'tps_por': ['$N_1$', '$\\UT{1}$ tps', '$N_2$', '$\\UT{2}$ tps', 'PoR (bytes)', '$\\nicefrac{N_1}{k}$'],
         'compare_nets_3k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'TPS vs \\newline $\\UT{2}$'],
         'compare_nets_30k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'TPS vs \\newline $\\UT{2}$'],
@@ -164,7 +167,7 @@ def table_header(table_name: str):
 
     _col_sizes = ({
         'tps': ['---','------','----','----','----'],
-        'dappchains': ['----', '-----', '-----', '-----'],
+        'dappchains': ['----', '-----', '-----', '-----', '----'],
         'tps_por': ['---', '----', '----', '----', '-----', '----'],
         'compare_nets_3k': ['------', '-------', '-----', '-------', '-------'],
         'compare_nets_30k': ['------', '------', '-----', '-------', '-------'],
@@ -216,7 +219,7 @@ def table_row(params, table_name: str, r):
     fp = format_params(params)
     cols = ({
         'tps': [fp, r['btc_tps'], r['eth2_tps'], r['ut_2_tps'], r['ut_3_tps'], r['ut_4_tps']],
-        'dappchains': [fp, r['ut_n_1'], r['ut_n_2'], r['ut_n_3'], r['delta_s_Bps']],
+        'dappchains': [fp, r['ut_n_1'], r['ut_n_2'], r['ut_n_3'], r['delta_s_Bps'], fmt_rounded_commas(r['ut_confirmation_rate'], should_round=False)],
         'tps_por': [fp, r['ut_n_1_with_por'], r['ut_2_tps_with_por'], r['ut_n_2_with_por'], r['ut_3_tps_with_por'], r['ut_por_size'], r['ut_n1_per_k']],
     })[table_name.removesuffix("_optimized")]
     return format_table_row(cols)
@@ -235,12 +238,12 @@ def table_row_compare_inner(net: str, params):
     r = calc_tps_throughput(p[0], p[1], p[1], bh, dh, p[3])
     mod_params = defaultdict(lambda: mod_params_id, **({'$\\UT{2}$+PoRs': mod_ut_por_params}))
     fp = format_params(mod_params[net](params))
-    fn = {'UT': '$\\UT{2}$'}.get(net, net) if 'UT' in net else net.capitalize()
+    fn = UT_NET_NAME_LOOKUP.get(net, net) if 'UT' in net else net.capitalize()
     cols = ({
         'UT': [fp, fn, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps']],
-        '$\\UT{2}$+PoRs': [fp, fn, r['ut_n_2_factor_with_por'], r['ut_3_tps_with_por_per_basechain'], r['ut_3_tps_with_por']],
-        '$\\UT{2}$+HO': [fp, fn, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps']],
-        '$\\UT{2}$+HOT': [fp, fn, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps']],
+        'UT2+PoRs': [fp, fn, r['ut_n_2_factor_with_por'], r['ut_3_tps_with_por_per_basechain'], r['ut_3_tps_with_por']],
+        'UT2+HO': [fp, fn, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps']],
+        'UT2+HOT': [fp, fn, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps']],
         'bitcoin': [fp, fn, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps']],
         'cardano': [fp, fn,  r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
         'polkadot': [fp, fn, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
@@ -400,9 +403,9 @@ def mk_comparison_inputs(k: int):
         ('cardano', (k, 1/20, 1070, 250)),
         ('polkadot', (k, 1/6, 288, 250)),
         ('eth2', (k, 1/12, 200, 250)),
-        ('$\\UT{2}$+PoRs', (k, 1/15, 84, 250)),
+        ('UT2+PoRs', (k, 1/15, 84, 250)),
         ('UT', (k, 1/15, 84, 250)),
-        ('$\\UT{2}$+HOT', (k, 1/15, [16, 84-16], 250)),
+        ('UT2+HOT', (k, 1/15, [16, 84-16], 250)),
         ('UT inf', (k, 1/15, 84, 250)),
     ]
 #     ('bitcoin', (comparison_k2, 1/600, 80, 250)),
@@ -438,10 +441,10 @@ comparison_1m_tps = [
     ('cardano', (115700, 1/20, 1070, 250)),
     ('polkadot', (109810, 1/6, 288, 250)),
     ('eth2', (64600, 1/12, 200, 250)),
-    ('$\\UT{2}$+PoRs', (math.floor(UT_1M_K * 1.536), 1/15, 84, 250)),
+    ('UT2+PoRs', (math.floor(UT_1M_K * 1.536), 1/15, 84, 250)),
     ('UT', (UT_1M_K, 1/15, 84, 250)),
     # ('$\\UT{2}$+HO', (math.ceil(ALL_UT_1M_K['UT2+HO']), 1/15, [32, 84], 250)),
-    ('$\\UT{2}$+HOT', (math.ceil(ALL_UT_1M_K['UT2+HOT']), 1/15, [16, 68], 250)),
+    ('UT2+HOT', (math.ceil(ALL_UT_1M_K['UT2+HOT']), 1/15, [16, 68], 250)),
 ]
 
 comparison_1gbps = [
@@ -498,7 +501,7 @@ for table_name in ['comparison_1gbps']:
     def gen_rows():
         rs = []
         ut_params = list(filter(lambda r: r[0] == compare_to, comparison_1gbps))[0]
-        get_network_name = lambda n: {'UT': '$\\UT{1}$', 'UT+HOT': '$\\UT{1}$+HOT', 'UT2': '$\\UT{2}$', 'UT2+HOT': '$\\UT{2}$+HOT'}.get(n, n.capitalize())
+        get_network_name = lambda n: UT_NET_NAME_LOOKUP.get(n, n.capitalize())
         for (net, ps) in comparison_1gbps:
             r = table_row_1gbps(net, ps, ut_params)
             r[1] = get_network_name(r[1])
