@@ -9,9 +9,14 @@
         "stop-words": {  // https://github.com/sapegin/textlint-rule-stop-words
             "defaultWords": false,
             "words": [
-                ["dappchain"],
-                ["dappchains"],
-            ],
+                ["dappchain", "dapp-chain"],
+                ["dappchains", "dapp-chains"],
+                ["dapp chain", "dapp-chain"],
+                ["dapp chains", "dapp-chains"],
+                ["DApp", "dapp"],
+                ["DApps", "dapps"],
+                ["hte", "the"],
+            ]
         }
     }
 }

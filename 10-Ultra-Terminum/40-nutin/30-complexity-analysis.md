@@ -208,7 +208,7 @@ T_1 & = \frac{k_1^2}{4 \cdot B_f \cdot B_h} \\
 
 Thus $O(T_2) = O(c^3)$.
 
-The maximum number of dapp chains is given by:
+The maximum number of dapp-chains is given by:
 
 \begin{equation*}
 \begin{split}
@@ -219,7 +219,7 @@ N_2 & = \frac{T_2}{k_2} \\
 
 #### UT with Dapp-Dapp-Chains
 
-If we say each dapp chain hosts shards or more dapp chains (such as Eth2 or Polkadot do), then via \autoref{eq:throughput-iter} and \autoref{eq:throughput-c-3},
+If we say each dapp-chain hosts shards or more dapp-chains (such as Eth2 or Polkadot do), then via \autoref{eq:throughput-iter} and \autoref{eq:throughput-c-3},
 
 \begin{equation}
 \label{eq:throughput-c-4}
@@ -304,7 +304,7 @@ It is clear that $\Delta S$ has order $O(c^2)$, but how bad is this? For $k_1 = 
 
 While $O(c^2)$ bandwidth scaling is not ideal, it's clear that -- especially in the early days of a UT simplex when there are fewer simplex-chains -- there are tolerable configurations available.
 
-%% INSERT ### TABLE: dappchains
+%% INSERT ### TABLE: dapp-chains
 
 : UT's capacity and bandwidth requirements: $N_1, N_2, N_3, \text{and}\;\Delta S$ for various parameters.
 
