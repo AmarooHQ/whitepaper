@@ -374,8 +374,11 @@ Practically, this effect means that a decrease to the size of headers has *incre
 
 \todo{present TPS and $N_x$ numbers using header-omission and hash-compression optimizations as mentioned in \autoref{sec:exploiting-seg-state}}
 
+%% ### TABLE: tps_optimized
+
 | $k$, $B_f$, $B_h$, $D_h$           | $O(c)$ | Sharded $O(c^2)$ | $\UT{1}$ | $\UT{2}$            | $\UT{3}$             |
 |------|---|------|----|----|----|
+| $3000, \nicefrac{1}{7}, 16, 80$    | 12     | 3,150            | 3,938    | $1.03\times 10^{6}$ | $2.71\times 10^{8}$  |
 | $1000, \nicefrac{1}{15}, 16, 68$   | 4      | 882              | 938      | 206,801             | $4.56\times 10^{7}$  |
 | $1000, \nicefrac{1}{15}, 32, 84$   | 4      | 714              | 469      | 83,705              | $1.49\times 10^{7}$  |
 | $1000, \nicefrac{1}{15}, 16, 80$   | 4      | 750              | 938      | 175,781             | $3.30\times 10^{7}$  |
@@ -399,8 +402,11 @@ Practically, this effect means that a decrease to the size of headers has *incre
 
 : TPS given optimizations
 
+%% ### TABLE: dappchains_optimized
+
 | $k$, $B_f$, $B_h$, $D_h$           | $N_1$ ($\UT{1}$) | $N_2$ ($\UT{2}$)    | $N_3$ ($\UT{3}$)     | $\Delta S$          |
 |------|----|-----|-----|-----|
+| $3000, \nicefrac{1}{7}, 16, 80$    | 656              | 86,133              | $2.26\times 10^{7}$  | $1.97\times 10^{6}$ |
 | $1000, \nicefrac{1}{15}, 16, 68$   | 469              | 51,700              | $1.14\times 10^{7}$  | 468,750             |
 | $1000, \nicefrac{1}{15}, 32, 84$   | 234              | 20,926              | $3.74\times 10^{6}$  | 234,375             |
 | $1000, \nicefrac{1}{15}, 16, 80$   | 469              | 43,945              | $8.24\times 10^{6}$  | 468,750             |
@@ -422,7 +428,7 @@ Practically, this effect means that a decrease to the size of headers has *incre
 | $3000, \nicefrac{1}{60}, 16, 80$   | 5,625            | $6.33\times 10^{6}$ | $1.42\times 10^{10}$ | $1.69\times 10^{7}$ |
 | $3000, \nicefrac{1}{60}, 32, 112$  | 2,812            | $2.26\times 10^{6}$ | $3.63\times 10^{9}$  | $8.44\times 10^{6}$ |
 
-: Using simplex optimizations (header-omission + hash-trimming)
+: Using HOT simplex optimizations (Header Omission and Truncation)
 
 #### Impact on the Impact of Header Size
 

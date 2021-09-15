@@ -7,6 +7,7 @@ from numpy.lib.scimath import sqrt, power
 from scipy.special import lambertw
 from numpy import log, log2, real, floor
 import math
+import sys
 
 
 def por_with_merkle_branches_n1_root(k, bf, bh, g):
@@ -198,6 +199,7 @@ def format_table_row(row: List[Any]):
             .replace('0.06666666666666667', '\\nicefrac{1}{15}') \
             .replace('0.08333333333333333', '\\nicefrac{1}{12}') \
             .replace('0.16666666666666666', '\\nicefrac{1}{6}') \
+            .replace('0.14285714285714285', '\\nicefrac{1}{7}') \
             .replace('1.8181818181818181', '\\nicefrac{1}{0.55}') for r in row)
 
 
@@ -365,6 +367,7 @@ row_inputs = [
 ]
 
 def mk_optimized_rows():
+    yield (3000, 1/7, 16, 80, 250)
     for b_f in [1/15, 1/60]:
         ks = [1000, 3000] + ([30000] if b_f > 1/20 else [])
         for k in ks:
@@ -467,8 +470,8 @@ def mk_table(table_name, row_func):
 for table_name in ['tps', 'dappchains', 'tps_por']:
     tn_opt = f'{table_name}_optimized'
     mk_table(table_name, lambda: list(table_row(r, table_name, calc_tps_throughput(r[0], r[1], r[1], r[2], r[2], r[3])) for r in row_inputs))
-    mk_table(tn_opt, lambda: list(table_row(r, tn_opt, calc_tps_throughput(r[0], r[1], r[1], r[2], r[3], r[4])) for r in optimized_row_inputs))
-
+    if table_name != 'tps_por':
+        mk_table(tn_opt, lambda: list(table_row(r, tn_opt, calc_tps_throughput(r[0], r[1], r[1], r[2], r[3], r[4])) for r in optimized_row_inputs))
 
 for table_name in ['compare_nets_3k', 'compare_nets_30k']:
     k = comparison_ks[table_name]
