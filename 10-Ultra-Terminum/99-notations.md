@@ -1,5 +1,11 @@
 \newpage
+
 # Notations {-}
+\fancypagestyle{notations}{%
+    \fancyhead[R]{Notations}
+}
+
+\thispagestyle{notations}
 
 %% ### TABLE: notations
 
