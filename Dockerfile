@@ -9,8 +9,11 @@ RUN wget https://github.com/jgm/pandoc/releases/download/2.5/pandoc-2.5-1-amd64.
     rm pandoc-2.5-1-amd64.deb
 
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y texlive-science texlive-extra-utils texlive-latex-extra && \
+    apt-get upgrade -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y python3 python3-pip texlive-science texlive-extra-utils texlive-latex-extra && \
     rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install -U numpy scipy
 
 WORKDIR /work
 
