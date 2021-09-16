@@ -70,7 +70,7 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
         'ut_with_por_bh': ut_with_por_effective_bh,
         'ut_por_size': ut_with_por_effective_bh - bh,
         'ut_n1_per_k': ut_n1_per_k,
-        'ut_3_optimal_dappchains': k / (2 * dh * df),
+        'ut_3_optimal_dapp-chains': k / (2 * dh * df),
         'ut_n_3': k**3 / (4 * bh * bf * dh**2 * df**2),
         'delta_s_Bps': k**2 / (2 * bh * bf),
         'ut_confirmation_rate': ut_n_1 * bf,
@@ -154,7 +154,7 @@ def table_header(table_name: str):
     tn_no_opim = table_name.removesuffix("_optimized")
     _headings = ({
         'tps': ['$O(c)$', 'Sharded $O(c^2)$', '$\\UT{1}$', '$\\UT{2}$', '$\\UT{3}$'],
-        'dappchains': ['$N_1$ ($\\UT{1}$)', '$N_2$ ($\\UT{2}$)', '$N_3$ ($\\UT{3}$)', '$\\Delta S$', '$\\mathbb{C}^\\prime$ (Hz)'],
+        'dapp-chains': ['$N_1$ ($\\UT{1}$)', '$N_2$ ($\\UT{2}$)', '$N_3$ ($\\UT{3}$)', '$\\Delta S$', '$\\mathbb{C}^\\prime$ (Hz)'],
         'tps_por': ['$N_1$', '$\\UT{1}$ tps', '$N_2$', '$\\UT{2}$ tps', 'PoR (bytes)', '$\\nicefrac{N_1}{k}$'],
         'compare_nets_3k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'TPS vs \\newline $\\UT{2}$'],
         'compare_nets_30k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'TPS vs \\newline $\\UT{2}$'],
@@ -166,7 +166,7 @@ def table_header(table_name: str):
 
     _col_sizes = ({
         'tps': ['---','------','----','----','----'],
-        'dappchains': ['----', '-----', '-----', '-----', '----'],
+        'dapp-chains': ['----', '-----', '-----', '-----', '----'],
         'tps_por': ['---', '----', '----', '----', '-----', '----'],
         'compare_nets_3k': ['------', '-------', '-----', '-------', '-------'],
         'compare_nets_30k': ['------', '------', '-----', '-------', '-------'],
@@ -218,7 +218,7 @@ def table_row(params, table_name: str, r):
     fp = format_params(params)
     cols = ({
         'tps': [fp, r['btc_tps'], r['eth2_tps'], r['ut_2_tps'], r['ut_3_tps'], r['ut_4_tps']],
-        'dappchains': [fp, r['ut_n_1'], r['ut_n_2'], r['ut_n_3'], r['delta_s_Bps'], fmt_rounded_commas(r['ut_confirmation_rate'], should_round=False)],
+        'dapp-chains': [fp, r['ut_n_1'], r['ut_n_2'], r['ut_n_3'], r['delta_s_Bps'], fmt_rounded_commas(r['ut_confirmation_rate'], should_round=False)],
         'tps_por': [fp, r['ut_n_1_with_por'], r['ut_2_tps_with_por'], r['ut_n_2_with_por'], r['ut_3_tps_with_por'], r['ut_por_size'], r['ut_n1_per_k']],
     })[table_name.removesuffix("_optimized")]
     return format_table_row(cols)
@@ -468,7 +468,7 @@ def mk_table(table_name, row_func):
     rows_str = list(map(row_to_str, padded_rows))
     all_tables[table_name] = '\n'.join(rows_str)
 
-for table_name in ['tps', 'dappchains', 'tps_por']:
+for table_name in ['tps', 'dapp-chains', 'tps_por']:
     tn_opt = f'{table_name}_optimized'
     mk_table(table_name, lambda: list(table_row(r, table_name, calc_tps_throughput(r[0], r[1], r[1], r[2], r[2], r[3])) for r in row_inputs))
     if table_name != 'tps_por':
