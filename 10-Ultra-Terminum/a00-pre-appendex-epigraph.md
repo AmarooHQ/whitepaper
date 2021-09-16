@@ -34,7 +34,7 @@
 | $k$                 | Approximate raw per-chain throughput at all levels of nesting; used to simplify reasoning and equations, especially in situations where all $k_i$ are equal. | bytes/second   |
 | $k_i$               | Raw per-chain throughput at $i^{th}$ level of nesting                                                                                                        | bytes/second   |
 | $T_i$               | Network throughput at $i^{th}$ level of nesting                                                                                                              | bytes/second   |
-| $N_i$               | Number of chains at nesting level $i$                                                                                                                        | chain count    |
+| $N_i$               | Number of chains at the $i^{th}$ level of nesting                                                                                                            | chain count    |
 | $B_{max}$           | Maximum block size                                                                                                                                           | bytes          |
 | $B_f$               | Base-chain block frequency                                                                                                                                   | Hz or $s^{-1}$ |
 | $B_h$               | Base-chain header size                                                                                                                                       | bytes          |
