@@ -30,9 +30,9 @@
 %% ### TABLE: notation
 
 | Term                | Definition                                                                                                                                                   | Unit           |
-| --------- | ------------------------------------------------------------------ | -------------- |
-| $k$                 | Approximate raw per-chain throughput at all levels of nesting; used to simplify reasoning and equations, especially in situations where all $k_i$ are equal. | bytes/second   |
-| $k_i$               | Raw per-chain throughput at $i^{th}$ level of nesting                                                                                                        | bytes/second   |
+| -------- | --------------------------------------------------------------- | -------------- |
+| $k_i$               | A generalization of block size; the per-chain raw throughput at the $i^{th}$ level of nesting.                                                               | bytes/second   |
+| $k$                 | The per-chain raw throughput across nesting levels. $k$ is used to simplify reasoning and equations, especially in situations where all $k_i$ are equal. | bytes/second   |
 | $T_i$               | Network throughput at $i^{th}$ level of nesting                                                                                                              | bytes/second   |
 | $N_i$               | Number of chains at the $i^{th}$ level of nesting                                                                                                            | chain count    |
 | $B_{max}$           | Maximum block size                                                                                                                                           | bytes          |
@@ -40,10 +40,10 @@
 | $B_h$               | Base-chain header size                                                                                                                                       | bytes          |
 | $D_f$               | Dapp-chain block frequency                                                                                                                                   | Hz or $s^{-1}$ |
 | $D_h$               | Dapp-chain header size                                                                                                                                       | bytes          |
-| $\Delta S$          | Network bandwidth requirements to acquire chain data                                                                                                         | bytes/second   |
+| $\Delta S$          | Network bandwidth requirements for a node to remain in sync with a given system                                                                              | bytes/second   |
 | $\mathbb{C}^\prime$ | Confirmation rate                                                                                                                                            | Hz             |
 
-: Notation used throughout the paper. \label{table:notation}
+: Notation used throughout this document. \label{table:notation}
 
 # Nomenclature {-}
 
@@ -51,17 +51,16 @@
 
 | Term        | Definition                                                                                                  |
 | ----------- | ----------------------------------------------------------------------------------------------------------- |
-| $\UT{1}$    | $O(c^2)$ scaling configuration in UT (nested chain)                                                         |
-| $\UT{2}$    | $O(c^3)$ scaling configuration in UT (nested dapp chains)                                                   |
-| $\UT{3}$    | $O(C^4)$ scaling configuration in UT (nested dapp-dapp chains)                                              |
-| $\UTinf{1}$ | Tiling of $\UT{1}$                                                                                          |
-| $\UTinf{2}$ | Tiling of $\UT{2}$                                                                                          |
-| $\UTinf{3}$ | Tiling of $\UT{3}$                                                                                          |
-| $+$HOT      | Protocol extension: header omission and truncation                                                          |
-| $+$HO       | Protocol extension: header omission                                                                         |
-| $+$PoRs     | The protocol extension whereby miners explicitly include the corresponding PoR for each header they reflect |
+| $\UT{i} | UT scaling configuration with $i$ levels of nesting |
+| $\UT{1}$    | UT nested chains with $O(c^2)$ complexity   |
+| $\UT{2}$    | UT nested dapp-chains with $O(c^3)$ complexity |
+| $\UT{3}$    | UT nested dapp-dapp-chains with $O(C^4)$ complexity           |
+| $\UTinf{i}$ | Tiling of $\UT{i}$                                                                                          |
+| +HOT        | Protocol extension: header omission and truncation                                                          |
+| +HO         | Protocol extension: header omission                                                                         |
+| +PoRs       | The protocol extension whereby miners explicitly include the corresponding PoR for each header they reflect |
 
-: The nomenclature defined through this wp. \label{table:nomenclature}
+: The nomenclature defined throughout this document. \label{table:nomenclature}
 
 \newpage
 \appendix
