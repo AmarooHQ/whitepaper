@@ -52,7 +52,7 @@
 | Term        | Definition                                                                                                  |
 | ----------- | ----------------------------------------------------------------------------------------------------------- |
 | $\UT{i} | UT scaling configuration with $i$ levels of nesting |
-| $\UT{1}$    | UT nested chains with $O(c^2)$ complexity   |
+| $\UT{1}$    | UT with $O(c^2)$ complexity   |
 | $\UT{2}$    | UT nested dapp-chains with $O(c^3)$ complexity |
 | $\UT{3}$    | UT nested dapp-dapp-chains with $O(C^4)$ complexity           |
 | $\UTinf{i}$ | Tiling of $\UT{i}$                                                                                          |
@@ -60,7 +60,7 @@
 | +HO         | Protocol extension: header omission                                                                         |
 | +PoRs       | The protocol extension whereby miners explicitly include the corresponding PoR for each header they reflect |
 
-: The nomenclature defined throughout this document. \label{table:nomenclature}
+: Nomenclature defined throughout this document. \label{table:nomenclature}
 
 \newpage
 \appendix
