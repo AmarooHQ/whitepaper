@@ -35,7 +35,8 @@
 | $k_i$ | Per-chain raw throughput at the $i^{th}$ level of nesting \newline A generalization of block size | bytes/second |
 | $k$ | Per-chain raw throughput across nesting levels \newline $k$ is used to simplify reasoning and equations, especially in situations where all $k_i$ are equal | bytes/second |
 | $T_i$ | Network throughput at the $i^{th}$ level of nesting | bytes/second |
-| $N_i$ | Number of chains at the $i^{th}$ level of nesting | chain count |
+| $N_i$ | Number of chains at the $i^{th}$ level of nesting | chains |
+| $N_\text{tiles}$ | Number of tiles in a simplex-tiling | tiles |
 | $B_{max}$ | Maximum block size | bytes |
 | $B_f$ | Base-chain block frequency | Hz or $s^{-1}$ |
 | $B_h$ | Base-chain header size | bytes |
