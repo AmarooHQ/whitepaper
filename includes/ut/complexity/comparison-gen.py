@@ -31,18 +31,28 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
     ut_3_tps = k**3 / (4 * bf * bh * df * dh) / tx_size
     ut_4_tps = k**4 / (4 * bf * bh * df**2 * dh**2) / tx_size
     ut_n_1_with_por = por_with_merkle_branches_n1_root(k, bf, bh, 32)
+    ut_n_1_with_port = por_with_merkle_branches_n1_root(k, bf, bh, 16)
     ut_k_1b_with_por = int(round(bf * ut_n_1_with_por * (bh + 32 * log2(ut_n_1_with_por))))
+    ut_k_1b_with_port = int(round(bf * ut_n_1_with_por * (bh + 16 * log2(ut_n_1_with_port))))
     ut_k_1tx_with_por = k - ut_k_1b_with_por
+    ut_k_1tx_with_port = k - ut_k_1b_with_port
     ut_n_2_factor_with_por = ut_k_1tx_with_por / (dh * df)
+    ut_n_2_factor_with_port = ut_k_1tx_with_port / (dh * df)
     # ut_n_2_factor_with_por = k / (2 * ut_with_por_effective_bh * df)  # do we need to include PoRs with the header size for N_2? I don't think so... --> don't need to be recorded in the simplex-chain
     ut_n_2_with_por = ut_n_1_with_por * ut_n_2_factor_with_por
+    ut_n_2_with_port = ut_n_1_with_port * ut_n_2_factor_with_port
     ut_with_por_effective_bh = k / (2 * bf * ut_n_1_with_por)
-    ut_n1_per_k = ut_n_1_with_por / k
-    ut_n_2_with_por = ut_n_1_with_por * ut_n_2_factor_with_por
+    ut_with_port_effective_bh = k / (2 * bf * ut_n_1_with_port)
+    ut_n1_per_k_with_por = ut_n_1_with_por / k
+    ut_n1_per_k_with_port = ut_n_1_with_port / k
     ut_2_with_por = k * ut_n_1_with_por
+    ut_2_with_port = k * ut_n_1_with_port
     ut_2_tps_with_por = ut_2_with_por / tx_size
+    ut_2_tps_with_port = ut_2_with_port / tx_size
     ut_3_with_por = k * ut_n_2_with_por
+    ut_3_with_port = k * ut_n_2_with_port
     ut_3_tps_with_por = ut_3_with_por / tx_size
+    ut_3_tps_with_port = ut_3_with_port / tx_size
 
     return {
         'btc_tps': k / tx_size,
@@ -62,14 +72,23 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
         'ut_n_2': ut_n_2,
         'ut_n_2_factor': ut_n_2_factor,
         'ut_n_1_with_por': ut_n_1_with_por,
+        'ut_n_1_with_port': ut_n_1_with_port,
         'ut_n_2_with_por': ut_n_2_with_por,
+        'ut_n_2_with_port': ut_n_2_with_port,
         'ut_2_tps_with_por': ut_2_tps_with_por,
+        'ut_2_tps_with_port': ut_2_tps_with_port,
         'ut_n_2_factor_with_por': ut_n_2_factor_with_por,
+        'ut_n_2_factor_with_port': ut_n_2_factor_with_port,
         'ut_3_tps_with_por': ut_3_tps_with_por,
+        'ut_3_tps_with_port': ut_3_tps_with_port,
         'ut_3_tps_with_por_per_basechain': ut_3_tps_with_por / ut_n_1_with_por,
+        'ut_3_tps_with_port_per_basechain': ut_3_tps_with_port / ut_n_1_with_port,
         'ut_with_por_bh': ut_with_por_effective_bh,
+        'ut_with_port_bh': ut_with_port_effective_bh,
         'ut_por_size': ut_with_por_effective_bh - bh,
-        'ut_n1_per_k': ut_n1_per_k,
+        'ut_port_size': ut_with_port_effective_bh - bh,
+        'ut_n1_per_k_with_por': ut_n1_per_k_with_por,
+        'ut_n1_per_k_with_port': ut_n1_per_k_with_port,
         'ut_3_optimal_dapp-chains': k / (2 * dh * df),
         'ut_n_3': k**3 / (4 * bh * bf * dh**2 * df**2),
         'delta_s_Bps': k**2 / (2 * bh * bf),
@@ -156,6 +175,7 @@ def table_header(table_name: str):
         'tps': ['$O(c)$', 'Sharded $O(c^2)$', '$\\UT{1}$', '$\\UT{2}$', '$\\UT{3}$'],
         'dapp-chains': ['$N_1$ ($\\UT{1}$)', '$N_2$ ($\\UT{2}$)', '$N_3$ ($\\UT{3}$)', '$\\Delta S$', '$\\mathbb{C}^\\prime$ (Hz)'],
         'tps_por': ['$N_1$', '$\\UT{1}$ tps', '$N_2$', '$\\UT{2}$ tps', 'PoR (bytes)', '$\\nicefrac{N_1}{k}$'],
+        'tps_port': ['$N_1$', '$\\UT{1}$ tps', '$N_2$', '$\\UT{2}$ tps', 'PoR (bytes)', '$\\nicefrac{N_1}{k}$'],
         'compare_nets_3k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'TPS vs \\newline $\\UT{2}$'],
         'compare_nets_30k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'TPS vs \\newline $\\UT{2}$'],
         'comparison_1m_tps': ['Network', 'TPS per base-chain', 'Network-wide TPS', '$k$ vs $\\UT{2}$', 'Equivalent $\\UT{2}$ TPS'],
@@ -168,6 +188,7 @@ def table_header(table_name: str):
         'tps': ['---','------','----','----','----'],
         'dapp-chains': ['----', '-----', '-----', '-----', '----'],
         'tps_por': ['---', '----', '----', '----', '-----', '----'],
+        'tps_port': ['---', '----', '----', '----', '-----', '----'],
         'compare_nets_3k': ['------', '-------', '-----', '-------', '-------'],
         'compare_nets_30k': ['------', '------', '-----', '-------', '-------'],
         'comparison_1m_tps': ['---', '----', '-----', '-----', '-----'],
@@ -219,7 +240,8 @@ def table_row(params, table_name: str, r):
     cols = ({
         'tps': [fp, r['btc_tps'], r['eth2_tps'], r['ut_2_tps'], r['ut_3_tps'], r['ut_4_tps']],
         'dapp-chains': [fp, r['ut_n_1'], r['ut_n_2'], r['ut_n_3'], r['delta_s_Bps'], fmt_rounded_commas(r['ut_confirmation_rate'], should_round=False)],
-        'tps_por': [fp, r['ut_n_1_with_por'], r['ut_2_tps_with_por'], r['ut_n_2_with_por'], r['ut_3_tps_with_por'], r['ut_por_size'], r['ut_n1_per_k']],
+        'tps_por': [fp, r['ut_n_1_with_por'], r['ut_2_tps_with_por'], r['ut_n_2_with_por'], r['ut_3_tps_with_por'], r['ut_por_size'], r['ut_n1_per_k_with_por']],
+        'tps_port': [fp, r['ut_n_1_with_port'], r['ut_2_tps_with_port'], r['ut_n_2_with_port'], r['ut_3_tps_with_port'], r['ut_port_size'], r['ut_n1_per_k_with_port']],
     })[table_name.removesuffix("_optimized")]
     return format_table_row(cols)
 
@@ -241,6 +263,7 @@ def table_row_compare_inner(net: str, params):
     cols = ({
         'UT': [fp, fn, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps']],
         'UT2+PoRs': [fp, fn, r['ut_n_2_factor_with_por'], r['ut_3_tps_with_por_per_basechain'], r['ut_3_tps_with_por']],
+        'UT2+PoRTs': [fp, fn, r['ut_n_2_factor_with_port'], r['ut_3_tps_with_port_per_basechain'], r['ut_3_tps_with_port']],
         'UT2+HO': [fp, fn, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps']],
         'UT2+HOT': [fp, fn, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps']],
         'bitcoin': [fp, fn, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps']],
@@ -442,6 +465,7 @@ comparison_1m_tps = [
     ('polkadot', (109810, 1/6, 288, 250)),
     ('eth2', (64600, 1/12, 200, 250)),
     ('UT2+PoRs', (math.floor(UT_1M_K * 1.536), 1/15, 84, 250)),
+    ('UT2+PoRTs', (math.floor(UT_1M_K * 1.536), 1/15, 84, 250)),
     ('UT', (UT_1M_K, 1/15, 84, 250)),
     # ('$\\UT{2}$+HO', (math.ceil(ALL_UT_1M_K['UT2+HO']), 1/15, [32, 84], 250)),
     ('UT2+HOT', (math.ceil(ALL_UT_1M_K['UT2+HOT']), 1/15, [16, 68], 250)),
@@ -468,10 +492,10 @@ def mk_table(table_name, row_func):
     rows_str = list(map(row_to_str, padded_rows))
     all_tables[table_name] = '\n'.join(rows_str)
 
-for table_name in ['tps', 'dapp-chains', 'tps_por']:
+for table_name in ['tps', 'dapp-chains', 'tps_por', 'tps_port']:
     tn_opt = f'{table_name}_optimized'
     mk_table(table_name, lambda: list(table_row(r, table_name, calc_tps_throughput(r[0], r[1], r[1], r[2], r[2], r[3])) for r in row_inputs))
-    if table_name != 'tps_por':
+    if 'tps_por' not in table_name:
         mk_table(tn_opt, lambda: list(table_row(r, tn_opt, calc_tps_throughput(r[0], r[1], r[1], r[2], r[3], r[4])) for r in optimized_row_inputs))
 
 for table_name in ['compare_nets_3k', 'compare_nets_30k']:
@@ -555,7 +579,7 @@ def main():
             print(all_tables[table_name])
         else: # it's being run from makefile (or w/e)
             # tables to ignore when run from makefile
-            if table_name in ['comparison_1m_tps_conf_hz']:
+            if table_name in ['comparison_1m_tps_conf_hz', 'tps_port']:
                 continue
             to_replace = f'%% INSERT ### TABLE: {table_name}'
             print(f"Replacing `{to_replace}` with table {table_name} to output/whitepaper.markdown")
