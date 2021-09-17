@@ -56,8 +56,8 @@
 | $\UT{2}$ | UT with nested dapp-chains -- $O(c^3)$ scalability |
 | $\UT{3}$ | UT with nested dapp-dapp-chains -- $O(c^4)$ scalability |
 | $\UTinf{i}$ | Tiling of $\UT{i}$ -- $O(n)$ scalability |
-| +HOT | Protocol extension: header omission and truncation |
 | +HO | Protocol extension: header omission |
+| +HOT | Protocol extension: header omission and truncation |
 | +PoRs | The protocol extension whereby simplex-chain miners explicitly include the corresponding PoR for each header they reflect |
 | +PoRTs | +PoRs with shorter proofs via hash-truncation |
 
