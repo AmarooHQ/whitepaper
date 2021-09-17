@@ -34,7 +34,7 @@
 | $\mathbb{C}^\prime$ | Confirmation rate | Hz |
 | $k_i$ | Per-chain raw throughput at the $i^{th}$ level of nesting \newline A generalization of block size | bytes/second |
 | $k$ | Per-chain raw throughput across nesting levels \newline $k$ is used to simplify reasoning and equations, especially in situations where all $k_i$ are equal | bytes/second |
-| $T_i$ | Network throughput at $i^{th}$ level of nesting | bytes/second |
+| $T_i$ | Network throughput at the $i^{th}$ level of nesting | bytes/second |
 | $N_i$ | Number of chains at the $i^{th}$ level of nesting | chain count |
 | $B_{max}$ | Maximum block size | bytes |
 | $B_f$ | Base-chain block frequency | Hz or $s^{-1}$ |
@@ -52,10 +52,10 @@
 | Term | Definition |
 | ------ | ----------------------------------------------------------------------- |
 | $\UT{i}$ | The UT scaling configuration with $i$ levels of nesting |
-| $\UT{1}$ | UT with base-level chains only -- $O(c^2)$ complexity |
-| $\UT{2}$ | UT with nested dapp-chains -- $O(c^3)$ complexity |
-| $\UT{3}$ | UT with nested dapp-dapp-chains -- $O(c^4)$ complexity |
-| $\UTinf{i}$ | Tiling of $\UT{i}$ -- $O(n)$ complexity |
+| $\UT{1}$ | UT with base-level chains only -- $O(c^2)$ scalability |
+| $\UT{2}$ | UT with nested dapp-chains -- $O(c^3)$ scalability |
+| $\UT{3}$ | UT with nested dapp-dapp-chains -- $O(c^4)$ scalability |
+| $\UTinf{i}$ | Tiling of $\UT{i}$ -- $O(n)$ scalability |
 | +HOT | Protocol extension: header omission and truncation |
 | +HO | Protocol extension: header omission |
 | +PoRs | The protocol extension whereby simplex-chain miners explicitly include the corresponding PoR for each header they reflect |
