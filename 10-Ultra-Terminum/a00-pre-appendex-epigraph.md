@@ -54,7 +54,7 @@
 | $\UT{i}$ | The UT scaling configuration with $i$ levels of nesting |
 | $\UT{1}$ | UT with base-level chains only -- $O(c^2)$ complexity |
 | $\UT{2}$ | UT with nested dapp-chains -- $O(c^3)$ complexity |
-| $\UT{3}$ | UT with nested dapp-dapp-chains -- $O(C^4)$ complexity |
+| $\UT{3}$ | UT with nested dapp-dapp-chains -- $O(c^4)$ complexity |
 | $\UTinf{i}$ | Tiling of $\UT{i}$ -- $O(n)$ complexity |
 | +HOT | Protocol extension: header omission and truncation |
 | +HO | Protocol extension: header omission |
