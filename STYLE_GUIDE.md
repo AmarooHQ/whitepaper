@@ -4,7 +4,7 @@ Note: please raise an issue if you spot a place where anything contradicts this 
 
 ## Authorship, Contributors, and Acknowledgement
 
-The three primary contribution-breakpoints are: *Authors*, *Contributors*, and *acknowledgements*. There are also two more breakpoints: *uncredited contributors* (e.g. someone who raises an issue regarding a typo) and *non-contributors*.
+The three primary contribution-breakpoints are: *Authors*, *Contributors*, and *acknowledgements*. There are also two more breakpoints: *uncredited contributors* and *non-contributors*.
 
 Note: there is a natural ambiguity between the *term* "Contributor" and the word *contributor*. For the sake of this section, the term *Contributor* will always be capitalized, and the word *contributor* (uncapitalized) refers to the general concept of *one who contributes*.
 
@@ -19,7 +19,7 @@ Note: there is a natural ambiguity between the *term* "Contributor" and the word
 
 ## Quoting & Referencing
 
-Quotation is preferred when practical. References are ideally reserved for insignificant matters (e.g. a link in a footnote to some source/evidence) and broad matters (such as a system that someone has put forward.)
+Quotation is preferred when practical. References are ideally reserved for insignificant matters (e.g. a link in a footnote to some source/evidence) and broad matters (such as a system that someone has put forward, or a topic / field of study.)
 
 **QUOTES MUST BE EXACT AND PROPER -- ZERO TOLERANCE FOR MISQUOTATIONS**
 
