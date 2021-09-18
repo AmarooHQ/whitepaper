@@ -156,16 +156,30 @@ Since all dapp-chain miners are required to run a full node of the parent-chain,
 
 A dapp-chain could, perhaps, have a rule like *X root tokens are created as part of the coinbase transaction and the miner of that block has free choice of the proportion of those which are provided as a transaction fee to the host-miner*.
 
+Example use-case: an existing blockchain migrates to become an *Amaroo* dapp-chain.
+
 ##### Method 2: Pay the simplex miner via a native DEX
 
 \bquote{
   [Regarding possible attacks when converting work via a DEX:] \convertingWeightDexNotImportant
 }{\autoref{sec:comparing-weight-dex}}
 
+\todo{write}
 
+Example use-case: a greenfield dapp-chain uses an Amaroo-compatible DEX (which requires no development effort) so that simplex-chain miners have lower operating costs; thus incenting simplex-chain miners to include their headers over those of others.
 
 ##### Method 3: Pay the simplex miner directly
 
+- overhead re: including extra tx details with block-header
+- advantage: the simplex-chain doesn't necessarily need to evaluate a headers-only version of the child-chain; all PoR work can be done on the child-chain only.
+
+Example use-cases:
+
+- A new (and ephemeral) dapp-chain is created to facilitate a national election[^election] that will result in a 200 GB audit log (facilitating unprivileged verification of the election result) and a peak votes-per-second over $10^5$. This demonstrates both *freedom of incentivization* (as there is none) and *freedom of protocol* as no payments are made and no restriction is placed on the nature of this dapp-chain's payload.
+
+- An existing *anchored*[^anchoring] blockchain migrates to become an Amaroo dapp-chain.
+
+[^anchoring]: The process by which data (or a secondary blockchain) includes the hash of some data in a blockchain (e.g. [Bitcoin](https://www.reddit.com/r/Bitcoin/comments/5xkvc1/psa_were_running_a_stress_test_of_our_blockchain/)). Anchoring *would* be a progenitor to PoR, except that I believe the idea of an [on-chain light client predates](https://github.com/XertroV/coppr/blob/master/chainheaders.py) the term *anchoring*. Though I think that the idea of time-stamping a hash (e.g., via an OP_RETURN transaction on Bitcoin) predates the idea of an on-chain light client.
 
 #### PoS Dapp-chains
 
