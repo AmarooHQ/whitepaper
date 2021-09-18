@@ -1,4 +1,4 @@
-## Constructing *Ultra Terminum*
+\subsection{\texorpdfstring{$\UT{i}$}{UT}: Constructing \emph{Ultra Terminum}}
 
 \label{sec:constructing-ut}
 
@@ -32,7 +32,9 @@ Note that \autoref{alg:por-reflected-block-weight} integrates the cap on weight 
 
 \input{includes/ut/algorithms/por-reflected-block-weight.tex}
 
-### The Simplex
+%% --- %%
+
+\input{includes/ut/headings/25-the-simplex.tex}
 
 \label{sec:the-simplex}
 
@@ -78,7 +80,9 @@ To maintain consistency with the geometric usage of the term *simplex*: a simple
 
 [^simplex-approx]: \textbf{NB:} I will ignore this distinction for $k \gg 1$.
 
-### Dapp-chains
+%% --- %%
+
+\input{includes/ut/headings/25-dapp-chains.tex}
 
 \label{sec:dapp-chains}
 
@@ -161,7 +165,11 @@ plan:
   dev potential;
 }
 
-#### Dapp-dapp-chains
+%% --- %%
+%% we don't technically need \texorpdfstring{}{}
+%% here b/c this subsubsubsection isn't in the TOC
+
+\input{includes/ut/headings/25-dapp-dapp-chains.tex}
 
 \todo{write it}
 

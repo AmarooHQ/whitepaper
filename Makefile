@@ -69,8 +69,9 @@ set-wp-properties:
 	egrep '^geometry: (.*)$$' $(WPFILE)
 
 wp-pandoc:
-	pandoc -s --number-sections --toc -f markdown -t latex -o $(WPTEX) $(WPFILE)
+	pandoc -s --number-sections --toc -f markdown+raw_tex -t latex -o $(WPTEX) $(WPFILE)
 	sed -i 's/\\%\\%/%/g' $(WPTEX)
+# sed -i 's/\\textbackslash{}/\\/g' $(WPTEX)
 
 wp-just-quotes: clean-wp-md
 	echo '' > $(WPFILE)

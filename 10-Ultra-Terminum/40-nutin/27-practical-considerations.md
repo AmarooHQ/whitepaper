@@ -186,7 +186,7 @@ Consider the situation where an attacker is attempting to deny service via the p
 
 [^nb-must]: The attacker could also fill the blocks with spam transactions. That's more work for the attacker, but also more work for the honest network (calculating and storing that state, maybe indefinitely). It's preferable that the attacker has minimal transactions in their blocks. It's tempting to think of ideas like: \emph{since the attackers blocks are empty, we can let honest nodes make larger blocks via some kind of weighted average block size calculation plus some flexibility in the size of blocks produced}. The problem with this is that it incents the attacker to fill their blocks with spam transactions, which is counterproductive.
 
-[^empty-nb]: Note that the attacker should still be reflecting other simplex-chains so as to maximize the total weight of the attacker's chain-segment. Given this, the attacker's blocks will contain reflected headers but no transactions.
+[^empty-nb]: Note that the attacker should still be reflecting other simplex-chains so as to maximize the total weight of the attacker's chain-segment. Given this, the attacker's blocks will contain reflected simplex-chain headers but no transactions.
 
 \begin{figure}
     \centering

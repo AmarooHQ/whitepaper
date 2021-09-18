@@ -221,8 +221,9 @@ def format_table_row(row: List[Any]):
             .replace('0.05', '\\nicefrac{1}{20}') \
             .replace('0.06666666666666667', '\\nicefrac{1}{15}') \
             .replace('0.08333333333333333', '\\nicefrac{1}{12}') \
-            .replace('0.16666666666666666', '\\nicefrac{1}{6}') \
             .replace('0.14285714285714285', '\\nicefrac{1}{7}') \
+            .replace('0.15384615384615385', '\\nicefrac{2}{13}') \
+            .replace('0.16666666666666666', '\\nicefrac{1}{6}') \
             .replace('1.8181818181818181', '\\nicefrac{1}{0.55}') for r in row)
 
 
@@ -392,15 +393,17 @@ row_inputs = [
 ]
 
 def mk_optimized_rows():
-    yield (3000, 1/7, 16, 80, 250)
+    offset_f = lambda d_h: 16 if d_h == 84 else 32
+    calc_dh2 = lambda b_h, d_h: d_h - offset_f(d_h) if b_h == 16 else d_h
     for b_f in [1/15, 1/60]:
         ks = [1000, 3000] + ([30000] if b_f > 1/20 else [])
         for k in ks:
             for d_h in [84, 112]:
                 for b_h in [16, 32]:
-                    dh2 = d_h - (16 if d_h == 84 else 32) if b_h == 16 else d_h
+                    dh2 = calc_dh2(b_h, d_h)
                     yield (k, b_f, b_h, dh2, 250)
-    yield (64600, 1/15, 16, 80, 250)
+    yield (3000, 2/13, 16, calc_dh2(16, 84), 250)
+    yield (64600, 1/15, 16, calc_dh2(16, 84), 250)
 
 optimized_row_inputs = list(mk_optimized_rows())
 

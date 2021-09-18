@@ -1,4 +1,4 @@
-## Tiling Simplexes
+\subsection{\texorpdfstring{$\text{UT}_{\aleph}$}{UT-aleph}: Tiling Simplexes}
 
 \label{sec:tiling}
 
