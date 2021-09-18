@@ -112,19 +112,60 @@ Practically speaking, a simple input-output transaction system with scripting ca
 
 #### Dapp-chain Security
 
+\label{sec:dapp-chain-security}
+
 If the headers of dapp-chains are simplex-level transactions, what can we say about the security of dapp-chains?
 
 First, notice that there is no substantive difference between standalone headers and header-transactions. That means that *zero-confirmation* header-transactions are *exactly* as secure as a standalone counterparts (and at least as secure as zero-confirmation transactions).
 
 When a header-transaction is confirmed by the simplex, the corresponding dapp-chain can efficiently use one-way PoR to inherit the security (and security properties) of the host simplex-chain[^dc-por]. Similar to mutual PoR, this can provide a *security context* where otherwise-insecure methods of consensus can be done securely.
 
-[^dc-por]: Note: PoW dapp-chains will have a much lower difficulty than the host simplex-chain. Although a simplex-chain could do mutual PoR with dapp-chains, this is unnecessary and inefficient -- provided that this difficulty asymmetry exists. Although there is no fundamental reason that PoW dapp-chains must have a much lower difficulty, we should take care to use incentive structures that lead to this sort of outcome.
+[^dc-por]: Note: PoW dapp-chains will have a much lower difficulty than the host simplex-chain. Although a simplex-chain could do mutual PoR with dapp-chains, this is unnecessary and inefficient -- provided that this difficulty asymmetry exists. Although there is no fundamental reason that PoW dapp-chains must have a much lower difficulty, we should take care to use incentive structures that lead to this sort of outcome provided such a policy increases security of the simplex.
 
 With regards to doublespends, one-way PoR means that the reflected chain is *at least* as difficult to attack as the reflecting chain (as we covered in \autoref{sec:por-step4}). Since the parent simplex-chain is as difficult to attack as the complete simplex, each dapp-chain must therefore *also* be that difficult to attack.
 
 Note that parent-chains (generally) need to record their child-chains' headers *anyway*, so one-way PoR in this situation -- where a simplex-chain reflects child dapp-chains -- effectively has zero overhead.
 
 The only major, generic concern for dapp-chains -- that I can see -- is \emph{preventing DoS attacks}. This is one reason to favor PoS (or PoA) dapp-chains over PoW dapp-chains.
+
+#### Three General Incentive Models for Dapp-chain Reflection
+
+If dapp-chain headers are included along-side transactions in simplex-blocks, is it not the case that both must be provide some kind of *transaction fee*? If not, how are simplex-miners to prioritize what to include in their blocks? Even if such a fee is *not always necessary*, the *ability* to provide a fee has decisive advantages -- like creating asymmetry between an attacker and honest miners.
+
+If it is possible to implement dapp-chains (or any system of child-chains) such that those chains have \emph{freedom of protocol} and \emph{freedom of incentivization} whilst inheriting the parent-chain's security, then we should strive to achieve that.
+
+\defineTerm{Freedom of Incentivization}{The property whereby child-chains are not restricted with regards to a choice of incentive-system (i.e., the nature and dynamics of their root token)}
+
+\defineTerm{Freedom of Protocol}{The property whereby child-chains are not restricted with regards to a choice of protocol (include scripting, accounting methods, block structures, etc)}
+
+\autoref{sec:comparing-weight-dex} details a conversion method whereby PoR is possible between chains using different root tokens via a DEX. Could dapp-chains use a protocol-level DEX to abstract their protocol and incentive-method away from those of it's parent-chain? Yes.
+
+Is this required for this abstraction? No.
+
+\todo{write "A General Incentive Model for Dapp-chains"}
+
+Here are three methods of abstraction which maintain the above freedoms.
+
+##### Method 1: Pay the simplex miner on the dapp-chain
+
+In this method, the dapp-chain uses its root token to pay both the dapp-chain miner and the simplex-chain miner (who includes the relevant dapp-chain header in their block).
+
+Since all dapp-chain miners are required to run a full node of the parent-chain, this is trivial. In essence, the host simplex-chain is a subset of the dapp-chain. Simplex-miners can run light clients[^hostminercollect] of the dapp-chain to regularly collect block-rewards.
+
+[^hostminercollect]: A simplex-miner could use other methods too, like maintaining full-nodes of each dapp-chain and continuously cycling through them (alternating which are running and which are not) to avoid massive computation requirements. Light clients seem obviously preferable where possible.
+
+A dapp-chain could, perhaps, have a rule like *X root tokens are created as part of the coinbase transaction and the miner of that block has free choice of the proportion of those which are provided as a transaction fee to the host-miner*.
+
+##### Method 2: Pay the simplex miner via a native DEX
+
+\bquote{
+  [Regarding possible attacks when converting work via a DEX:] \convertingWeightDexNotImportant
+}{\autoref{sec:comparing-weight-dex}}
+
+
+
+##### Method 3: Pay the simplex miner directly
+
 
 #### PoS Dapp-chains
 
