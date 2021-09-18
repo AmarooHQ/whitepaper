@@ -17,6 +17,8 @@ Note: there is a natural ambiguity between the *term* "Contributor" and the word
 | Uncredited contributor | A contributor without substantial contributions (e.g., pointing out typos or formatting errors). |
 | Non-contributor | Someone who is none of the above. |
 
+todo: 'order of magnitude' -- 2x or 3x or something, not 10x. e.g. 55%,30%,5%,5%,5% is like author-x2 and acknowledge-x3. 70%,10%,5%,5%,5%,5% is like author-x1, probs contributor-x1, acknowledge-x4. Note that if any of those 5% are narrow then there should be a byline.
+
 ## Quoting & Referencing
 
 Quotation is preferred when practical. References are ideally reserved for insignificant matters (e.g. a link in a footnote to some source/evidence) and broad matters (such as a system that someone has put forward, or a topic / field of study.)
