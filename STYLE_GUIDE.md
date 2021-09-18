@@ -10,6 +10,7 @@ Note: there is a natural ambiguity between the *term* "Contributor" and the word
 
 
 | Term | Description |
+|------|----------------------------------|
 | Author | A contributor who's contribution is within an order of magnitude of the largest contributor. |
 | Contributor | A contributor who's contribution is direct, distributed, and substantial but is not within an order of magnitude of the largest contributor. A *distributed* contribution is one which touches many parts of the paper and *broadly* improves it. Contributors are listed below Authors on the title page. |
 | Acknowledgments | A place to give credit to those who have *indirectly* contributed, or who have directly contributed *fungible* work (that which requires little creative effort), or work of a *narrow* focus (e.g., a single subsection). When a contribution of *narrow* focus is made, the author of that part should be directly credited both in the acknowledgements and with a byline for that (sub)section. *(To name someone in the acknowledgements: consent must be sought and granted.)* |
