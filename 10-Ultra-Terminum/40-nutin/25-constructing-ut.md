@@ -126,7 +126,7 @@ With regards to doublespends, one-way PoR means that the reflected chain is *at 
 
 Note that parent-chains (generally) need to record their child-chains' headers *anyway*, so one-way PoR in this situation -- where a simplex-chain reflects child dapp-chains -- effectively has zero overhead.
 
-The only major, generic concern for dapp-chains -- that I can see -- is \emph{preventing DoS attacks}. This is one reason to favor PoS (or PoA) dapp-chains over PoW dapp-chains.
+The only major, generic concern for dapp-chains -- that I can see -- is \emph{preventing DoS attacks}. This is one reason to favor PoS (or PoA) dapp-chains over PoW dapp-chains. Though perhaps we should wait for \autoref{sec:preventing-dos-attacks}.
 
 #### Three General Incentive Models for Dapp-chain Reflection
 
@@ -161,23 +161,26 @@ Example use-case: an existing blockchain migrates to become an *Amaroo* dapp-cha
 ##### Method 2: Pay the simplex miner via a native DEX
 
 \bquote{
-  [Regarding possible attacks when converting work via a DEX:] \convertingWeightDexNotImportant
+  [Regarding possible attacks when converting work via a DEX] \convertingWeightDexNotImportant
 }{\autoref{sec:comparing-weight-dex}}
 
 \todo{write}
 
-Example use-case: a greenfield dapp-chain uses an Amaroo-compatible DEX (which requires no development effort) so that simplex-chain miners have lower operating costs; thus incenting simplex-chain miners to include their headers over those of others.
+Example use-case: a greenfield dapp-chain uses an Amaroo-compatible DEX (which requires no development effort) so that simplex-miners have lower operating costs; thus incenting simplex-miners to include their headers over those of others.
 
 ##### Method 3: Pay the simplex miner directly
 
 - overhead re: including extra tx details with block-header
 - advantage: the simplex-chain doesn't necessarily need to evaluate a headers-only version of the child-chain; all PoR work can be done on the child-chain only.
+- disadvantage: can't do native SPV
 
 Example use-cases:
 
+- An existing *anchored*[^anchoring] blockchain migrates to become an Amaroo dapp-chain.
+
 - A new (and ephemeral) dapp-chain is created to facilitate a national election[^election] that will result in a 200 GB audit log (facilitating unprivileged verification of the election result) and a peak votes-per-second over $10^5$. This demonstrates both *freedom of incentivization* (as there is none) and *freedom of protocol* as no payments are made and no restriction is placed on the nature of this dapp-chain's payload.
 
-- An existing *anchored*[^anchoring] blockchain migrates to become an Amaroo dapp-chain.
+[^election]: The major problem that frustrated systems of end-to-end arbitrarily-verifiable online elections was the difficulty of implementing secret ballot. Today, there are at least three known methods: zero-knowledge proofs, homomorphic encryption, and [a CoinShuffle-based system of my own design](https://gitlab.com/exo-one/svst-docker/blob/master/svst-docs/secure.vote.white.napkin.md). (Note that it is [impossible to prevent the voter from creating some proof-of-vote](https://github.com/zack-bitcoin/amoveo-docs/issues/2) -- in these and all other systems of secret ballot.)
 
 [^anchoring]: The process by which data (or a secondary blockchain) includes the hash of some data in a blockchain (e.g. [Bitcoin](https://www.reddit.com/r/Bitcoin/comments/5xkvc1/psa_were_running_a_stress_test_of_our_blockchain/)). Anchoring *would* be a progenitor to PoR, except that I believe the idea of an [on-chain light client predates](https://github.com/XertroV/coppr/blob/master/chainheaders.py) the term *anchoring*. Though I think that the idea of time-stamping a hash (e.g., via an OP_RETURN transaction on Bitcoin) predates the idea of an on-chain light client.
 
