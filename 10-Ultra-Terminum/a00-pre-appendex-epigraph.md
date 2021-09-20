@@ -30,10 +30,10 @@
 %% ### TABLE: notation
 
 | Term | Definition | Unit |
-| ------ | ------------------------------------------------------------- | -------------- |
-| $\mathbb{C}^\prime$ | Confirmation rate | Hz |
-| $k_i$ | Average per-chain raw throughput at the $i^{th}$ level of nesting. \newline A generalization of block size. | bytes/second |
-| $k$ | Average per-chain raw throughput across nesting levels. \newline $k$ is used to simplify reasoning and equations, especially in situations where all $k_i$ are equal. | bytes/second |
+| ------ | ------------------------------------------------------------- | ------------ |
+| $\mathbb{C}^\prime$ | Confirmation rate. | Hz |
+| $k_i$ | A generalization of block size: the average per-chain raw throughput at the $i^{th}$ level of nesting. | bytes/second |
+| $k$ | Average per-chain raw throughput across nesting levels. $k$ is used to simplify reasoning and equations, especially in situations where all $k_i$ are equal. | bytes/second |
 | $T_i$ | Network throughput at the $i^{th}$ level of nesting. | bytes/second |
 | $N_i$ | Number of chains at the $i^{th}$ level of nesting. | chains |
 | $N_\text{tiles}$ | Number of tiles in a simplex-tiling. | tiles |
@@ -42,12 +42,12 @@
 | $B_h$ | Base-chain header size. | bytes |
 | $D_f$ | Dapp-chain block frequency. | Hz or $s^{-1}$ |
 | $D_h$ | Dapp-chain header size. | bytes |
-| $\Delta S$ | Minimum network bandwidth for a node to remain in sync with all simplex-chains. | bytes/second |
+| $\Delta S$ | Minimum network bandwidth for a \emph{mining} node to remain in sync with all simplex-chains. | bytes/second |
+| $\Delta s$ | Minimum network bandwidth for a full node to remain in sync a single simplex-chain (whilst also validating PoRs). | bytes/second |
 
 : Notation defined in this document. \label{table:notation}
 
 \begin{comment}
-| $\Delta s$ | Minimum network bandwidth for a node to remain in sync a single simplex-chain (whilst also validating PoRs). | bytes/second |
 \end{comment}
 
 
@@ -57,15 +57,15 @@
 
 | Term | Definition |
 | ------ | ----------------------------------------------------------------------- |
-| $\UT{i}$ | The UT scaling configuration with $i$ levels of nesting |
-| $\UT{1}$ | UT with base-level chains only -- $O(c^2)$ scalability |
-| $\UT{2}$ | UT with nested dapp-chains -- $O(c^3)$ scalability |
-| $\UT{3}$ | UT with nested dapp-dapp-chains -- $O(c^4)$ scalability |
-| $\UTinf{i}$ | Tiling of $\UT{i}$ -- $O(n)$ scalability |
-| +HO | Protocol extension: header omission |
-| +HOT | Protocol extension: header omission and truncation |
-| +PoRs | The protocol extension whereby simplex-chain miners explicitly include the corresponding PoR for each header they reflect |
-| +PoRTs | +PoRs with shorter proofs via hash-truncation |
+| $\UT{i}$ | The UT scaling configuration with $i$ levels of nesting. |
+| $\UT{1}$ | UT with base-level chains only -- $O(c^2)$ scalability. \autoref{sec:constructing-ut} |
+| $\UT{2}$ | UT with nested dapp-chains -- $O(c^3)$ scalability. \autoref{sec:dapp-chains} |
+| $\UT{3}$ | UT with nested dapp-dapp-chains -- $O(c^4)$ scalability. \autoref{sec:dapp-chains} |
+| $\UTinf{i}$ | Tiling of $\UT{i}$ -- $O(n)$ scalability. \autoref{sec:tiling} |
+| +HO | Protocol extension: header omission. \autoref{sec:exploiting-seg-state} |
+| +HOT | Protocol extension: header omission and truncation. \autoref{sec:exploiting-seg-state} |
+| +PoRs | The protocol extension whereby simplex-chain miners explicitly include the corresponding PoR for each header they reflect. \autoref{sec:por-with-proofs} |
+| +PoRTs | +PoRs with shorter proofs via hash-truncation. \autoref{sec:ext-ports} |
 
 : Nomenclature defined in this document. \label{table:nomenclature}
 

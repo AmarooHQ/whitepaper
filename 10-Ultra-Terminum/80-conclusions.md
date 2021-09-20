@@ -13,9 +13,9 @@
 \label{fig:trilemma-core-conflict-solved}
 \end{figure}
 
-### Comparison with 'the big 4'
+### Comparison: ``The Big 4''
 
-\todo{experiment with inverting comparisons to UT (like with Solana table). instead of \emph{UT out-scales by $1000\times$}, it'd be like \emph{Network X vs UT X: $10^{-3}\times$}.}
+Note: the following comparisons are indented to be an *apples to apples* between UT variants and ``The Big 4'': Bitcoin, Cardano, Eth2, and Polkadot. Cardano is an exception, here, as the Cardano and IOHK teams have been pursuing \emph{Layer 2} scalability solutions based on EUTXOs and Hydra. Their work is impressive, valuable, and good. I'm very excited to see their progress and I applaud their efforts. I mention this particularly because the nature of an *apples to apples* comparison casts Cardano in a light that some might consider to be misleading. However, these comparisons do not consider \emph{Layer 2} scalability solutions for one very simple reason: all networks can implement them in some fashion. It is not a fair (or accurate) comparison *of blockchain architecture* if \emph{Layer 2} scaling solutions are considered for some networks and not for others. Additionally, as mentioned in \href{Ethereum's \emph{Sharding FAQs}}{https://eth.wiki/sharding/Sharding-FAQs}, payment- and state-channels provide a *constant factor* increase in throughput, so those techniques will not improve a network's scaling complexity.
 
 \defineTerm{Base-chain}{A chain that has no parent-chains; i.e., is at the base nesting level}
 

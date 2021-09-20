@@ -14,6 +14,8 @@ The definition of scalability is perhaps problematic. If the network growth, $O(
 
 ## Core Conflict
 
+\label{sec:core-conflict}
+
 \begin{figure}
 \centering
 \includegraphics[max width=\linewidth]{trilemma/core_conflict_sag}

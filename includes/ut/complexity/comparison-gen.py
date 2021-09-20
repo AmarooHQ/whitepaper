@@ -370,7 +370,7 @@ def table_select_optimize_compare(tn, inputs):
                 col_inputs.append(table_row_compare_inner_all(gen_ps)['UT'])
             # get TPS
             print(col_inputs)
-            cols = format_table_row([prop[0]] + [fmt_rounded_commas(c[prop[1]], should_round=prop[2]) for c in col_inputs])
+            cols = format_table_row([prop[0]] + [fmt_rounded_commas(c[prop[1]], should_round=prop[2], non_sn_range=(0.01, 10**6)) for c in col_inputs])
             rows.append(cols)
     return rows
 

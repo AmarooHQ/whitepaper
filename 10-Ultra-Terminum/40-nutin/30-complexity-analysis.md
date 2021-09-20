@@ -342,7 +342,7 @@ Practically, this effect means that a decrease to the size of headers has *incre
 
 %% INSERT ### TABLE: compare_optimizations
 
-: Comparison of UT variants[^ut-vars-pors] at the base-layer ($k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions).
+: Comparison of UT variants[^ut-vars-pors] at the base-layer ($k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions). Time to sync (TTS) is measured against a fully utilized 10 MB/s network connection and assumes no software bottlenecks.
 
 [^ut-vars-pors]: For details of +PoRs and +PoRTs, see \autoref{sec:por-with-proofs}.
 
