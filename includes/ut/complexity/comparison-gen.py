@@ -2,7 +2,7 @@
 
 from collections import defaultdict
 from decimal import Decimal
-from typing import Any, DefaultDict, List, Optional, Tuple, TypeAlias, Union
+from typing import Any, DefaultDict, List, Optional, Tuple, Union
 from numpy.lib.scimath import sqrt, power
 from scipy.special import lambertw
 from numpy import log, log2, real, floor
