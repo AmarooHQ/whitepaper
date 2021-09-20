@@ -239,6 +239,8 @@ Do they want a highly secure base-chain, but variance in block times isn't a pro
 
 ### Lowering Block Production Variance
 
+\todo{redraft 'lowering block prod variance'}
+
 Is it possible to *dramatically* lower the variance of block production in PoW blockchains without altering incentive structures, compromising security, or changing the probability of generating a valid block?
 
 Yes. The method relies on the *structure* of the network, rather than the consensus protocol itself. Particularly, the network must be structured such that miners' choices result in decreased block production variance --- an emergent phenomenon. It's important not to try and make it artificially (e.g., by increasing the block reward with time-since-last-block) because you don't want ppl to game the system. It's better to have a simple system with emergent properties than a complex system with those properties \`\`designed in''.
@@ -257,7 +259,11 @@ Why wouldn't they just keep mining on the same chain? b/c in the time that they 
 
 We should thus expect that this configuration of chains actually *synchronizes* miners, resulting in block production that is somewhat regular and lower in variance.
 
-One reason that we can predict that transactions will build up in this fashion (with those fees and in a predictable way) is that most of the transactions that are included in simplex blocks will be dapp-chain-header-transactions. Since dapp-chains will use PoS, we should expect them to be predictable and regular.
+\defineTerm{Miner Resonance}{
+    The effect whereby block production \emph{variance} is reduced when miners can (and do) change the chain they are currently mining faster than blocks are produced for those chains
+}
+
+One reason that we can predict that transactions will build up in this fashion (with those fees and in a predictable way) is that most of the transactions that are included in simplex blocks will be dapp-chain-header-transactions. ~~Since dapp-chains will use PoS, we should expect them to be predictable and regular.~~
 
 The average hash rate on each simplex chain, as described above, is always the same regardless of which of the two miner strategies are used. However, the variance of block production on each of these chains won't be that of a chain with 60s block times, it'll be that of a chain with 6s block times.
 

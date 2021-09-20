@@ -10,8 +10,22 @@ import math
 import sys
 
 
-UT_NET_NAME_LOOKUP = {'UT': '$\\UT{1}$', 'UT+HOT': '$\\UT{1+\\text{HOT}}$', 'UT2': '$\\UT{2}$', 'UT2+HOT': '$\\UT{2+\\text{HOT}}$'}
+UT_NET_NAME_LOOKUP = {
+    'UT': '$\\UT{1}$', 'UT+HO': '$\\UT{1+\\text{HO}}$', 'UT+HOT': '$\\UT{1+\\text{HOT}}$', 'UT+PoRs': '$\\UT{1+\\text{PoRs}}$', 'UT+PoRTs': '$\\UT{1+\\text{PoRTs}}$',
+    'UT2': '$\\UT{2}$', 'UT2+HO': '$\\UT{2+\\text{HO}}$', 'UT2+HOT': '$\\UT{2+\\text{HOT}}$', 'UT2+PoRs': '$\\UT{2+\\text{PoRs}}$', 'UT2+PoRTs': '$\\UT{2+\\text{PoRTs}}$',
+}
 
+# HO and HOT optimization stuff
+
+HO_B_H = 32
+HOT_B_H = 16
+
+def hot_offset_f(d_h):
+    return HOT_B_H if d_h == 84 else HO_B_H
+
+def hot_calc_dh2(b_h, d_h):
+    # NOTE: b_h is expected to be 16 already if using +HOT
+    return d_h - hot_offset_f(d_h) if b_h == HOT_B_H else d_h
 
 def por_with_merkle_branches_n1_root(k, bf, bh, g):
     ln2 = log(2)
@@ -26,9 +40,11 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
     ut_n_1 = k / (2 * bh * bf)
     ut_n_2_factor = k / (2 * dh * df)
     ut_n_2 = ut_n_1 * ut_n_2_factor
+    ut_2_t1 = k**2 / (4 * bf * bh)
     ut_2_tps = k**2 / (4 * bf * bh) / tx_size
-    ut_3_throughput = k**3 / (4 * bf * bh * df * dh)
+    ut_3_t2 = k**3 / (4 * bf * bh * df * dh)
     ut_3_tps = k**3 / (4 * bf * bh * df * dh) / tx_size
+    ut_4_t3 = k**4 / (4 * bf * bh * df**2 * dh**2)
     ut_4_tps = k**4 / (4 * bf * bh * df**2 * dh**2) / tx_size
     ut_n_1_with_por = por_with_merkle_branches_n1_root(k, bf, bh, 32)
     ut_n_1_with_port = por_with_merkle_branches_n1_root(k, bf, bh, 16)
@@ -55,15 +71,20 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
     ut_3_tps_with_port = ut_3_with_port / tx_size
 
     return {
+        'btc_t1': k,
         'btc_tps': k / tx_size,
         'btc_n_2_factor': 1,
         'btc_tps_per_basechain': k / tx_size,
         # c^2 estimate, remove constants to be optimistic
+        'eth2_t2': k**2 / (df * dh),
         'eth2_tps': k**2 / (df * dh) / tx_size,
         'eth2_n_2_factor': k / (df * dh),
+        'ut_2_t1': ut_2_t1,
         'ut_2_tps': ut_2_tps,
         # c^3 estimate
+        'ut_3_t2': ut_3_t2,
         'ut_3_tps': ut_3_tps,
+        'ut_2_tps_per_basechain': ut_2_tps / ut_n_1,
         'ut_3_tps_per_basechain': ut_3_tps / ut_n_1,
         'ut_4_tps': ut_4_tps,
         'ut_m_tps': '{:.2f} million'.format(ut_3_tps / 1000000),
@@ -75,10 +96,16 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
         'ut_n_1_with_port': ut_n_1_with_port,
         'ut_n_2_with_por': ut_n_2_with_por,
         'ut_n_2_with_port': ut_n_2_with_port,
+        'ut_2_t1_with_por': ut_2_with_por,
+        'ut_2_t1_with_port': ut_2_with_port,
         'ut_2_tps_with_por': ut_2_tps_with_por,
         'ut_2_tps_with_port': ut_2_tps_with_port,
+        'ut_2_tps_with_por_per_basechain': ut_2_tps_with_por / ut_n_1_with_por,
+        'ut_2_tps_with_port_per_basechain': ut_2_tps_with_port / ut_n_1_with_port,
         'ut_n_2_factor_with_por': ut_n_2_factor_with_por,
         'ut_n_2_factor_with_port': ut_n_2_factor_with_port,
+        'ut_3_t2_with_por': ut_3_with_por,
+        'ut_3_t2_with_port': ut_3_with_port,
         'ut_3_tps_with_por': ut_3_tps_with_por,
         'ut_3_tps_with_port': ut_3_tps_with_port,
         'ut_3_tps_with_por_per_basechain': ut_3_tps_with_por / ut_n_1_with_por,
@@ -93,6 +120,9 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
         'ut_n_3': k**3 / (4 * bh * bf * dh**2 * df**2),
         'delta_s_Bps': k**2 / (2 * bh * bf),
         'ut_confirmation_rate': ut_n_1 * bf,
+        'ut_confirmation_rate_por': ut_n_1_with_por * bf,
+        'ut_confirmation_rate_port': ut_n_1_with_port * bf,
+        'btc_confirmation_rate': bf,
     }
 
 def bandwidth_to_k_solana(delta_s, bf, bh):
@@ -132,7 +162,8 @@ def bandwidth_to_k(delta_s, bf, bh, dh=None):
         'UT2+HOT': ut2_k,
         'eth2': eth2_k,
         'polkadot': eth2_k,
-        'cardano': eth2_k,
+        # 'cardano': eth2_k,
+        'cardano': delta_s,
         'solana': delta_s,
         'bitcoin': delta_s,
     }
@@ -181,6 +212,7 @@ def table_header(table_name: str):
         'comparison_1m_tps': ['Network', 'TPS per base-chain', 'Network-wide TPS', '$k$ vs $\\UT{2}$', 'Equivalent $\\UT{2}$ TPS'],
         'comparison_1m_tps_conf_hz': ['Network', 'Equivalent $\\UT{2}$ Confirmation Rate (Hz)'],
         'comparison_1gbps': ['Network', 'TPS', '$k$ (B/s)', 'MB/chain/day'], #'$\\nicefrac{\\text{TPS}}{k_1}$ vs $\\UT{2}$'], #, '$k_1 \cdot$ TPS vs $\\UT{2}$', 'TPS vs $\\UT{2}$', 'combined'],
+        'compare_optimizations': [UT_NET_NAME_LOOKUP[v] for v in ['UT+PoRs', 'UT+PoRTs', 'UT', 'UT+HO', 'UT+HOT']],
     })
     headings = _headings.get(table_name, _headings[tn_no_opim])
 
@@ -194,6 +226,7 @@ def table_header(table_name: str):
         'comparison_1m_tps': ['---', '----', '-----', '-----', '-----'],
         'comparison_1m_tps_conf_hz': ['---', '----'],
         'comparison_1gbps': ['---', '---', '---', '----'], #'-----'], #'-----', '------'],
+        'compare_optimizations': ['------', '------', '------', '------', '------']
     })
     col_sizes = ['------'] + _col_sizes.get(table_name, _col_sizes[tn_no_opim])
 
@@ -201,6 +234,7 @@ def table_header(table_name: str):
         'compare_nets_3k': '$k$, $B_f$, $B_h$',
         'compare_nets_30k': '$k$, $B_f$, $B_h$',
         'comparison_1gbps': '$\\Delta S$, $B_f$, $B_h$, Tx (B)',
+        'compare_optimizations': '',
         'default_optimized': '$k$, $B_f$, $B_h$, $D_h$',
         'default': '$k$, $B_f$, $B_h$',
     }
@@ -246,40 +280,73 @@ def table_row(params, table_name: str, r):
     })[table_name.removesuffix("_optimized")]
     return format_table_row(cols)
 
-def mod_ut_por_params(p: Tuple) -> Tuple:
-    r = calc_tps_throughput(p[0], p[1], p[1], p[2], p[2], p[3])
-    return p  # we don't need to alter D_h, just B_h, so don't mod the param
-    # return (p[0], p[1], round(r['ut_with_por_bh']), p[3])
-
 def mod_params_id(p: Tuple) -> Tuple:
     return p
 
-def table_row_compare_inner(net: str, params):
+CompareParams = tuple[int, float, int | tuple[int, int], int]
+
+def table_row_compare_inner_all(params: CompareParams):
+    print(params)
     p = params
     bh, dh = (p[2], p[2]) if isinstance(p[2], int) else p[2]  # destructure if not an int
     r = calc_tps_throughput(p[0], p[1], p[1], bh, dh, p[3])
-    mod_params = defaultdict(lambda: mod_params_id, **({'$\\UT{2}$+PoRs': mod_ut_por_params}))
-    fp = format_params(mod_params[net](params))
-    fn = UT_NET_NAME_LOOKUP.get(net, net) if 'UT' in net else net.capitalize()
+    fp = format_params(params)
+    # note: formatted name inserted via table_row_compare_inner
+    # params, scaling factor, tps/basechain, tps
     cols = ({
-        'UT': [fp, fn, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps']],
-        'UT2+PoRs': [fp, fn, r['ut_n_2_factor_with_por'], r['ut_3_tps_with_por_per_basechain'], r['ut_3_tps_with_por']],
-        'UT2+PoRTs': [fp, fn, r['ut_n_2_factor_with_port'], r['ut_3_tps_with_port_per_basechain'], r['ut_3_tps_with_port']],
-        'UT2+HO': [fp, fn, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps']],
-        'UT2+HOT': [fp, fn, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps']],
-        'bitcoin': [fp, fn, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps']],
-        'cardano': [fp, fn,  r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
-        'polkadot': [fp, fn, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
-        'eth2': [fp, fn, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],
-        # 'solana': [fp, fn, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],  # NOT ACCURATE
-    })[net.split(' ')[0]]
+        'UT': [fp, r['ut_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1']],
+        'UT+PoRs': [fp, r['ut_n_2_factor_with_por'], r['ut_2_tps_with_por_per_basechain'], r['ut_2_tps_with_por'], r['ut_confirmation_rate_por'], r['ut_2_t1_with_por']],
+        'UT+PoRTs': [fp, r['ut_n_2_factor_with_port'], r['ut_2_tps_with_port_per_basechain'], r['ut_2_tps_with_port'], r['ut_confirmation_rate_port'], r['ut_2_t1_with_port']],
+        'UT+HO': [fp, r['ut_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1']],
+        'UT+HOT': [fp, r['ut_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1']],
+        'UT2': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2']],
+        'UT2+PoRs': [fp, r['ut_n_2_factor_with_por'], r['ut_3_tps_with_por_per_basechain'], r['ut_3_tps_with_por'], r['ut_confirmation_rate'], r['ut_3_t2_with_por']],
+        'UT2+PoRTs': [fp, r['ut_n_2_factor_with_port'], r['ut_3_tps_with_port_per_basechain'], r['ut_3_tps_with_port'], r['ut_confirmation_rate'], r['ut_3_t2_with_port']],
+        'UT2+HO': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2']],
+        'UT2+HOT': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2']],
+        'bitcoin': [fp, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps'], r['btc_confirmation_rate'], r['btc_t1']],
+        # Cardano doesn't use sharding
+        'cardano': [fp, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps'], r['btc_confirmation_rate'], r['btc_t1']],
+        # Shareded cardano
+        # 'cardano': [fp,  r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2']],
+        'polkadot': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2']],
+        'eth2': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2']],
+        # 'solana': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],  # NOT ACCURATE
+    })
     return cols
 
-def table_row_compare(net: str, params, ut_tps: int):
+def table_select_optimize_compare(tn, inputs):
+    rows = []
+    for ps in inputs:
+        # (prop name, prop col, should_round)
+        for prop in [('TPS', 3, True), ('$\\mathbb{C}^\\prime$ (Hz)', 4, False)]:
+            row_deets = table_row_compare_inner_all(ps)
+            variants = ['UT+PoRs', 'UT+PoRTs', 'UT']
+            col_inputs = [row_deets[v] for v in variants]
+            # for variants: 'UT+HO', 'UT+HOT'
+            for bh in [32, 16]: # +HO first then +HOT
+                dh = ps[2]
+                dh2 = hot_calc_dh2(bh, dh)
+                gen_ps = (ps[0], ps[1], (bh, dh2), ps[3])
+                col_inputs.append(table_row_compare_inner_all(gen_ps)['UT'])
+            # get TPS
+            print(col_inputs)
+            cols = format_table_row([prop[0]] + [fmt_rounded_commas(c[prop[1]], should_round=prop[2]) for c in col_inputs])
+            rows.append(cols)
+    return rows
+
+def table_row_compare_inner(net: str, params: CompareParams):
+    all_cols = table_row_compare_inner_all(params)
+    fn = UT_NET_NAME_LOOKUP.get(net, net) if 'UT' in net else net.capitalize()
+    cols = all_cols[net.split(' ')[0]][:-2]  # remove extra cols from table_row_compare_inner_all
+    cols.insert(1, fn)
+    return cols
+
+def table_row_compare(net: str, params: CompareParams, ut_tps: int):
     cols = table_row_compare_inner(net, params)
     return format_table_row(cols + [ratio_to_x(cols[-1] / ut_tps)])
 
-def table_row_1m_compare(net: str, params, ut_k):
+def table_row_1m_compare(net: str, params: CompareParams, ut_k):
     p = params
     ut_ps = p if isinstance(p[2], int) else (p[0], p[1], p[2][1], p[3])
     ut_cols = table_row_compare_inner('UT', ut_ps)
@@ -288,7 +355,7 @@ def table_row_1m_compare(net: str, params, ut_k):
     cols_processed = cols[:2] + cols[3:] + [ut_cols[4]]
     return format_table_row(cols_processed)
 
-def table_row_1m_hz_compare(net: str, params, ut_k):
+def table_row_1m_hz_compare(net: str, params: CompareParams, ut_k):
     p = params
     bh, dh = (p[2], p[2]) if isinstance(p[2], int) else p[2]  # destructure if not an int
     r = calc_tps_throughput(p[0], p[1], p[1], bh, dh, p[3])
@@ -318,7 +385,7 @@ def table_row_1gbps(net, params, ut_params):
         'UT2+HOT': (_r['ut_3_tps'], _r['ut_n_2']),
         'eth2': (_r['eth2_tps'], _r['eth2_n_2_factor']),
         'polkadot': (_r['eth2_tps'], _r['eth2_n_2_factor']),
-        'cardano': (_r['eth2_tps'], _r['eth2_n_2_factor']),
+        'cardano': (_r['btc_tps'], 1),
         'solana': (_r['btc_tps'], 1),
         'bitcoin': (_r['btc_tps'], 1),
     })[_net]
@@ -393,19 +460,22 @@ row_inputs = [
 ]
 
 def mk_optimized_rows():
-    offset_f = lambda d_h: 16 if d_h == 84 else 32
-    calc_dh2 = lambda b_h, d_h: d_h - offset_f(d_h) if b_h == 16 else d_h
+    # offset_f = lambda d_h: 16 if d_h == 84 else 32
+    # calc_dh2 = lambda b_h, d_h: d_h - offset_f(d_h) if b_h == 16 else d_h
     for b_f in [1/15, 1/60]:
         ks = [1000, 3000] + ([30000] if b_f > 1/20 else [])
         for k in ks:
             for d_h in [84, 112]:
                 for b_h in [16, 32]:
-                    dh2 = calc_dh2(b_h, d_h)
+                    dh2 = hot_calc_dh2(b_h, d_h)
                     yield (k, b_f, b_h, dh2, 250)
-    yield (3000, 2/13, 16, calc_dh2(16, 84), 250)
-    yield (64600, 1/15, 16, calc_dh2(16, 84), 250)
+    yield (3000, 2/13, 16, hot_calc_dh2(16, 84), 250)
+    yield (64600, 1/15, 16, hot_calc_dh2(16, 84), 250)
 
 optimized_row_inputs = list(mk_optimized_rows())
+
+# Update table compare_optimizations in WP if these parameters change
+select_optimized_row_inputs: list[CompareParams] = [(3000, 1/15, 84, 250)]
 
 # Note: If eth2 really is as efficient as an 8kb update every ~27 hours then it's close enough to 0.
 # (https://hackmd.io/@wemeetagain/SkuswKu_r#Update-data-size)
@@ -421,7 +491,7 @@ optimized_row_inputs = list(mk_optimized_rows())
 #
 
 comparison_ks = {'compare_nets_3k': 3000, 'compare_nets_30k': 30000}
-def mk_comparison_inputs(k: int):
+def mk_comparison_inputs(k: int) -> list[tuple[str, CompareParams]]:
     ''' returns a list of network params with a network name. '''
     return [
         ('bitcoin', (k, 1/600, 80, 250)),
@@ -430,8 +500,8 @@ def mk_comparison_inputs(k: int):
         ('polkadot', (k, 1/6, 288, 250)),
         ('eth2', (k, 1/12, 200, 250)),
         ('UT2+PoRs', (k, 1/15, 84, 250)),
-        ('UT', (k, 1/15, 84, 250)),
-        ('UT2+HOT', (k, 1/15, [16, 84-16], 250)),
+        ('UT2', (k, 1/15, 84, 250)),
+        ('UT2+HOT', (k, 1/15, (16, 84-16), 250)),
         ('UT inf', (k, 1/15, 84, 250)),
     ]
 #     ('bitcoin', (comparison_k2, 1/600, 80, 250)),
@@ -464,14 +534,15 @@ UT_1M_K = int(ALL_UT_1M_K['UT2']) + 1
 comparison_1m_tps = [
     ('bitcoin', (250000000, 1/600, 80, 250)),
     # ('solana', (296900, 1/0.55, 141, 250)),
-    ('cardano', (115700, 1/20, 1070, 250)),
+    ('cardano', (250000000, 1/20, 1070, 250)),
+    # ('cardano', (115700, 1/20, 1070, 250)),
     ('polkadot', (109810, 1/6, 288, 250)),
     ('eth2', (64600, 1/12, 200, 250)),
     ('UT2+PoRs', (math.floor(UT_1M_K * 1.536), 1/15, 84, 250)),
-    ('UT2+PoRTs', (math.floor(UT_1M_K * 1.536), 1/15, 84, 250)),
-    ('UT', (UT_1M_K, 1/15, 84, 250)),
-    # ('$\\UT{2}$+HO', (math.ceil(ALL_UT_1M_K['UT2+HO']), 1/15, [32, 84], 250)),
-    ('UT2+HOT', (math.ceil(ALL_UT_1M_K['UT2+HOT']), 1/15, [16, 68], 250)),
+    ('UT2+PoRTs', (math.floor(UT_1M_K * 1.221), 1/15, 84, 250)),
+    ('UT2', (UT_1M_K, 1/15, 84, 250)),
+    ('UT2+HO', (math.ceil(ALL_UT_1M_K['UT2+HO']), 1/15, (32, 84), 250)),
+    ('UT2+HOT', (math.ceil(ALL_UT_1M_K['UT2+HOT']), 1/15, (16, 68), 250)),
 ]
 
 comparison_1gbps = [
@@ -504,7 +575,7 @@ for table_name in ['tps', 'dapp-chains', 'tps_por', 'tps_port']:
 for table_name in ['compare_nets_3k', 'compare_nets_30k']:
     k = comparison_ks[table_name]
     net_inputs = mk_comparison_inputs(k)
-    ut_row = table_row_compare_inner('UT', list(filter(lambda i: i[0] == 'UT', net_inputs))[0][1])
+    ut_row = table_row_compare_inner('UT', list(filter(lambda i: i[0] == 'UT2', net_inputs))[0][1])
     ut_tps: int = ut_row[-1]
     def mk_row():
         rows = list(table_row_compare(net, r, ut_tps) for (net, r) in net_inputs)
@@ -533,6 +604,8 @@ for table_name in ['comparison_1gbps']:
             rs += [r]
         return rs
     mk_table(table_name, gen_rows)
+
+mk_table('compare_optimizations', lambda: table_select_optimize_compare('compare_optimizations', select_optimized_row_inputs))
 
 """
 # Notes on props relevant to scalability of various chains
@@ -582,7 +655,7 @@ def main():
             print(all_tables[table_name])
         else: # it's being run from makefile (or w/e)
             # tables to ignore when run from makefile
-            if table_name in ['comparison_1m_tps_conf_hz', 'tps_port']:
+            if table_name in ['comparison_1m_tps_conf_hz']:
                 continue
             to_replace = f'%% INSERT ### TABLE: {table_name}'
             print(f"Replacing `{to_replace}` with table {table_name} to output/whitepaper.markdown")

@@ -1,8 +1,8 @@
-# Reflection Including Merkle Branches
+# The Simplex with Explicit PoRs
 
 \label{sec:por-with-proofs}
 
-What does a simplex look like if simplex-chains include explicit proofs of reflection (as merkle branches)?
+What does a simplex look like if simplex-chains include explicit proofs of reflection (as merkle branches)? This extension to UT is called +PoRs.
 
 Let $g$ be the length of the digest in bytes, i.e., the size of the hashes used in our merkle trees.
 
@@ -46,4 +46,12 @@ From \autoref{eq:simplex-N1-with-PoR}, we have $N_1$ that is of the form $N_1 = 
 
 %% INSERT ### TABLE: tps_por
 
-: The effect of including Proofs of Reflection with headers.
+: The effect of including Proofs of Reflection alongside headers (+PoRs).
+
+## PoRs with Truncation
+
+Since PoRs are merkle branches, and the leaves of that tree are headers (which have PoW attached), hash truncation works for the hashes comprising explicit PoRs. In effect, this protocol extension is a way to halve the additional overhead of +PoRs. It is called +PoRTs.
+
+%% INSERT ### TABLE: tps_port
+
+: The effect of including Proofs of Reflection, with truncated hashes, alongside headers (+PoRTs).
