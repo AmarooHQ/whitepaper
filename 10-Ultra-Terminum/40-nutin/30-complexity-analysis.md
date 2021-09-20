@@ -272,13 +272,15 @@ $k$: raw per-chain throughput (bytes/$s$) \newline
 $B_f$: simplex block frequency ($s^{-1}$) \newline
 $B_h$: simplex block header size (bytes) \newline
 $D_f = B_f$: dapp-chain block frequency ($s^{-1}$) \newline
-%% $D_h = B_h$: dapp-chain block header size (bytes) \newline
+$D_h = B_h$: dapp-chain block header size (bytes) \newline
 \begin{comment}
 $Tx_{avg}$: average tx size (bytes)
 \end{comment}
 
 NB: For the purposes of the following table, the average transaction size is taken to be 250 bytes.
-%% Additionally, the discrepancy in header size (between $B_h$ and $D_h$) is due to the overhead of PoS mechanisms.
+\begin{comment}
+Additionally, the discrepancy in header size (between $B_h$ and $D_h$) is due to the overhead of PoS mechanisms.
+\end{comment}
 
 %% INSERT ### TABLE: tps
 
@@ -330,15 +332,17 @@ Practically, this effect means that a decrease to the size of headers has *incre
 
 %% INSERT ### TABLE: tps_optimized
 
-: TPS given optimizations
+: TPS when using +HOT simplex optimizations (Header Omission and Truncation). Note that $B_h = 16$ implies +HOT, and $B_h = 32$ implies +HO (Header Omission without truncation).
 
 %% INSERT ### TABLE: dapp-chains_optimized
 
-: Using HOT simplex optimizations (Header Omission and Truncation)
+: Using +HOT simplex optimizations
 
 %% INSERT ### TABLE: compare_optimizations
 
-: Comparison of each UT variant at the base-layer ($k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions).
+: Comparison of UT variants[^ut-vars-pors] at the base-layer ($k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions).
+
+[^ut-vars-pors]: For details of +PoRs and +PoRTs, see \autoref{sec:por-with-proofs}.
 
 #### Impact on the Impact of Header Size
 

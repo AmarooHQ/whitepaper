@@ -11,8 +11,9 @@ import sys
 
 
 UT_NET_NAME_LOOKUP = {
-    'UT': '$\\UT{1}$', 'UT+HO': '$\\UT{1+\\text{HO}}$', 'UT+HOT': '$\\UT{1+\\text{HOT}}$', 'UT+PoRs': '$\\UT{1+\\text{PoRs}}$', 'UT+PoRTs': '$\\UT{1+\\text{PoRTs}}$',
+    'UT':  '$\\UT{1}$', 'UT+HO':  '$\\UT{1+\\text{HO}}$', 'UT+HOT':  '$\\UT{1+\\text{HOT}}$', 'UT+PoRs':  '$\\UT{1+\\text{PoRs}}$', 'UT+PoRTs':  '$\\UT{1+\\text{PoRTs}}$',
     'UT2': '$\\UT{2}$', 'UT2+HO': '$\\UT{2+\\text{HO}}$', 'UT2+HOT': '$\\UT{2+\\text{HOT}}$', 'UT2+PoRs': '$\\UT{2+\\text{PoRs}}$', 'UT2+PoRTs': '$\\UT{2+\\text{PoRTs}}$',
+    'UT3': '$\\UT{3}$', 'UT3+HO': '$\\UT{3+\\text{HO}}$', 'UT3+HOT': '$\\UT{3+\\text{HOT}}$', 'UT3+PoRs': '$\\UT{3+\\text{PoRs}}$', 'UT3+PoRTs': '$\\UT{3+\\text{PoRTs}}$',
 }
 
 # HO and HOT optimization stuff
@@ -31,7 +32,8 @@ def por_with_merkle_branches_n1_root(k, bf, bh, g):
     ln2 = log(2)
     inner_w = (2 ** (bh / g - 1) * sqrt(math.e) * k * ln2)/(bf * g)
     d = 2 * bf * g * real(lambertw(inner_w))
-    return math.floor(k * ln2 / d)
+    # return math.floor(k * ln2 / d)
+    return (k * ln2 / d)
 
 # ! NOTE: Older bits of this code still use the old UT nomenclature, like `ut_2_tps` is UT_1's tps -- T_1/tx_size
 # ! Just something to keep in mind as you're reading below. e.g. `ut_4_tps` corresponds to O(c^4) UT -- now called UT_3
@@ -118,7 +120,9 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
         'ut_n1_per_k_with_port': ut_n1_per_k_with_port,
         'ut_3_optimal_dapp-chains': k / (2 * dh * df),
         'ut_n_3': k**3 / (4 * bh * bf * dh**2 * df**2),
-        'delta_s_Bps': k**2 / (2 * bh * bf),
+        'delta_s_bps': k * ut_n_1,
+        'delta_s_bps_por': k * ut_n_1_with_por,
+        'delta_s_bps_port': k * ut_n_1_with_port,
         'ut_confirmation_rate': ut_n_1 * bf,
         'ut_confirmation_rate_por': ut_n_1_with_por * bf,
         'ut_confirmation_rate_port': ut_n_1_with_port * bf,
@@ -204,7 +208,10 @@ def table_header(table_name: str):
     tn_no_opim = table_name.removesuffix("_optimized")
     _headings = ({
         'tps': ['$O(c)$', 'Sharded $O(c^2)$', '$\\UT{1}$', '$\\UT{2}$', '$\\UT{3}$'],
+        'tps_optimized': ['$O(c)$', 'Sharded $O(c^2)$'] + [UT_NET_NAME_LOOKUP[n] for n in ['UT+HOT', 'UT2+HOT', 'UT3+HOT']],
         'dapp-chains': ['$N_1$ ($\\UT{1}$)', '$N_2$ ($\\UT{2}$)', '$N_3$ ($\\UT{3}$)', '$\\Delta S$', '$\\mathbb{C}^\\prime$ (Hz)'],
+        # 'dapp-chains_optimized': [f'$N_1$ ({UT_NET_NAME_LOOKUP["UT+HOT"]})', f'$N_2$ ({UT_NET_NAME_LOOKUP["UT2+HOT"]})', f'$N_3$ ({UT_NET_NAME_LOOKUP["UT3+HOT"]})', '$\\Delta S$', '$\\mathbb{C}^\\prime$ (Hz)'],
+        'dapp-chains_optimized': [f'$N_1$', f'$N_2$', f'$N_3$', '$\\Delta S$', '$\\mathbb{C}^\\prime$ (Hz)'],
         'tps_por': ['$N_1$', '$\\UT{1}$ tps', '$N_2$', '$\\UT{2}$ tps', 'PoR (bytes)', '$\\nicefrac{N_1}{k}$'],
         'tps_port': ['$N_1$', '$\\UT{1}$ tps', '$N_2$', '$\\UT{2}$ tps', 'PoR (bytes)', '$\\nicefrac{N_1}{k}$'],
         'compare_nets_3k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'TPS vs \\newline $\\UT{2}$'],
@@ -219,10 +226,11 @@ def table_header(table_name: str):
     _col_sizes = ({
         'tps': ['---','------','----','----','----'],
         'dapp-chains': ['----', '-----', '-----', '-----', '----'],
+        'dapp-chains_optimized': ['----', '-----', '-----', '----', '----'],
         'tps_por': ['---', '----', '----', '----', '-----', '----'],
         'tps_port': ['---', '----', '----', '----', '-----', '----'],
-        'compare_nets_3k': ['------', '-------', '-----', '-------', '-------'],
-        'compare_nets_30k': ['------', '------', '-----', '-------', '-------'],
+        'compare_nets_3k':  ['----', '---', '----', '------', '-------'],
+        'compare_nets_30k': ['----', '---', '----', '------', '-------'],
         'comparison_1m_tps': ['---', '----', '-----', '-----', '-----'],
         'comparison_1m_tps_conf_hz': ['---', '----'],
         'comparison_1gbps': ['---', '---', '---', '----'], #'-----'], #'-----', '------'],
@@ -274,7 +282,7 @@ def table_row(params, table_name: str, r):
     fp = format_params(params)
     cols = ({
         'tps': [fp, r['btc_tps'], r['eth2_tps'], r['ut_2_tps'], r['ut_3_tps'], r['ut_4_tps']],
-        'dapp-chains': [fp, r['ut_n_1'], r['ut_n_2'], r['ut_n_3'], r['delta_s_Bps'], fmt_rounded_commas(r['ut_confirmation_rate'], should_round=False)],
+        'dapp-chains': [fp, r['ut_n_1'], r['ut_n_2'], r['ut_n_3'], r['delta_s_bps'], fmt_rounded_commas(r['ut_confirmation_rate'], should_round=False)],
         'tps_por': [fp, r['ut_n_1_with_por'], r['ut_2_tps_with_por'], r['ut_n_2_with_por'], r['ut_3_tps_with_por'], r['ut_por_size'], r['ut_n1_per_k_with_por']],
         'tps_port': [fp, r['ut_n_1_with_port'], r['ut_2_tps_with_port'], r['ut_n_2_with_port'], r['ut_3_tps_with_port'], r['ut_port_size'], r['ut_n1_per_k_with_port']],
     })[table_name.removesuffix("_optimized")]
@@ -295,23 +303,23 @@ def table_row_compare_inner_all(params: CompareParams):
     # note: formatted name inserted via table_row_compare_inner
     # params, scaling factor, tps/basechain, tps
     cols = ({
-        'UT': [fp, r['ut_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1']],
-        'UT+PoRs': [fp, r['ut_n_2_factor_with_por'], r['ut_2_tps_with_por_per_basechain'], r['ut_2_tps_with_por'], r['ut_confirmation_rate_por'], r['ut_2_t1_with_por']],
-        'UT+PoRTs': [fp, r['ut_n_2_factor_with_port'], r['ut_2_tps_with_port_per_basechain'], r['ut_2_tps_with_port'], r['ut_confirmation_rate_port'], r['ut_2_t1_with_port']],
-        'UT+HO': [fp, r['ut_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1']],
-        'UT+HOT': [fp, r['ut_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1']],
-        'UT2': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2']],
-        'UT2+PoRs': [fp, r['ut_n_2_factor_with_por'], r['ut_3_tps_with_por_per_basechain'], r['ut_3_tps_with_por'], r['ut_confirmation_rate'], r['ut_3_t2_with_por']],
-        'UT2+PoRTs': [fp, r['ut_n_2_factor_with_port'], r['ut_3_tps_with_port_per_basechain'], r['ut_3_tps_with_port'], r['ut_confirmation_rate'], r['ut_3_t2_with_port']],
-        'UT2+HO': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2']],
-        'UT2+HOT': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2']],
-        'bitcoin': [fp, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps'], r['btc_confirmation_rate'], r['btc_t1']],
+        'UT+PoRs': [fp, r['btc_n_2_factor'], r['ut_2_tps_with_por_per_basechain'], r['ut_2_tps_with_por'], r['ut_confirmation_rate_por'], r['ut_2_t1_with_por'], r['ut_n_1_with_por'], r['delta_s_bps_por']],
+        'UT+PoRTs': [fp, r['btc_n_2_factor'], r['ut_2_tps_with_port_per_basechain'], r['ut_2_tps_with_port'], r['ut_confirmation_rate_port'], r['ut_2_t1_with_port'], r['ut_n_1_with_port'], r['delta_s_bps_port']],
+        'UT': [fp, r['btc_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1'], r['ut_n_1'], r['delta_s_bps']],
+        'UT+HO': [fp, r['btc_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1'], r['ut_n_1'], r['delta_s_bps']],
+        'UT+HOT': [fp, r['btc_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1'], r['ut_n_1'], r['delta_s_bps']],
+        'UT2+PoRs': [fp, r['ut_n_2_factor_with_por'], r['ut_3_tps_with_por_per_basechain'], r['ut_3_tps_with_por'], r['ut_confirmation_rate'], r['ut_3_t2_with_por'], r['delta_s_bps_por']],
+        'UT2+PoRTs': [fp, r['ut_n_2_factor_with_port'], r['ut_3_tps_with_port_per_basechain'], r['ut_3_tps_with_port'], r['ut_confirmation_rate'], r['ut_3_t2_with_port'], r['delta_s_bps_port']],
+        'UT2': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2'], r['delta_s_bps']],
+        'UT2+HO': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2'], r['delta_s_bps']],
+        'UT2+HOT': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2'], r['delta_s_bps']],
+        'bitcoin': [fp, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps'], r['btc_confirmation_rate'], r['btc_t1'], 'delta_s'],
         # Cardano doesn't use sharding
-        'cardano': [fp, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps'], r['btc_confirmation_rate'], r['btc_t1']],
+        'cardano': [fp, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps'], r['btc_confirmation_rate'], r['btc_t1'], 'delta_s'],
         # Shareded cardano
         # 'cardano': [fp,  r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2']],
-        'polkadot': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2']],
-        'eth2': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2']],
+        'polkadot': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2'], 'delta_s'],
+        'eth2': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2'], 'delta_s'],
         # 'solana': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],  # NOT ACCURATE
     })
     return cols
@@ -320,7 +328,12 @@ def table_select_optimize_compare(tn, inputs):
     rows = []
     for ps in inputs:
         # (prop name, prop col, should_round)
-        for prop in [('TPS', 3, True), ('$\\mathbb{C}^\\prime$ (Hz)', 4, False)]:
+        for prop in [
+            ('TPS', 3, True),
+            ('$N_1$', 6, True),
+            ('$\\mathbb{C}^\\prime$ (Hz)', 4, False),
+            ('$\\Delta S$ (B/s)', 7, True),
+            ]:
             row_deets = table_row_compare_inner_all(ps)
             variants = ['UT+PoRs', 'UT+PoRTs', 'UT']
             col_inputs = [row_deets[v] for v in variants]
@@ -339,7 +352,7 @@ def table_select_optimize_compare(tn, inputs):
 def table_row_compare_inner(net: str, params: CompareParams):
     all_cols = table_row_compare_inner_all(params)
     fn = UT_NET_NAME_LOOKUP.get(net, net) if 'UT' in net else net.capitalize()
-    cols = all_cols[net.split(' ')[0]][:-2]  # remove extra cols from table_row_compare_inner_all
+    cols = all_cols[net.split(' ')[0]][:4]  # remove extra cols from table_row_compare_inner_all
     cols.insert(1, fn)
     return cols
 
@@ -350,7 +363,7 @@ def table_row_compare(net: str, params: CompareParams, ut_tps: int):
 def table_row_1m_compare(net: str, params: CompareParams, ut_k):
     p = params
     ut_ps = p if isinstance(p[2], int) else (p[0], p[1], p[2][1], p[3])
-    ut_cols = table_row_compare_inner('UT', ut_ps)
+    ut_cols = table_row_compare_inner('UT2', ut_ps)
     cols = table_row_compare_inner(net, params) + [ratio_to_x(ut_k / params[0])]
     #
     cols_processed = cols[:2] + cols[3:] + [ut_cols[4]]
@@ -503,7 +516,7 @@ def mk_comparison_inputs(k: int) -> list[tuple[str, CompareParams]]:
         ('UT2+PoRs', (k, 1/15, 84, 250)),
         ('UT2', (k, 1/15, 84, 250)),
         ('UT2+HOT', (k, 1/15, (16, 84-16), 250)),
-        ('UT inf', (k, 1/15, 84, 250)),
+        ('UT2 inf', (k, 1/15, 84, 250)),
     ]
 #     ('bitcoin', (comparison_k2, 1/600, 80, 250)),
 #     ('solana', (comparison_k2, 1/0.4, 141, 250)),
@@ -576,17 +589,15 @@ for table_name in ['tps', 'dapp-chains', 'tps_por', 'tps_port']:
 for table_name in ['compare_nets_3k', 'compare_nets_30k']:
     k = comparison_ks[table_name]
     net_inputs = mk_comparison_inputs(k)
-    ut_row = table_row_compare_inner('UT', list(filter(lambda i: i[0] == 'UT2', net_inputs))[0][1])
+    ut_row = table_row_compare_inner('UT2', list(filter(lambda i: i[0] == 'UT2', net_inputs))[0][1])
     ut_tps: int = ut_row[-1]
     def mk_row():
         rows = list(table_row_compare(net, r, ut_tps) for (net, r) in net_inputs)
         for r in rows:
-            if 'UT inf' in r[1]:
+            if 'UT2 inf' in r[1]:
                 r[1] = '$\\UTinf{2}$'
                 r[-2] = '$\\infty$'
                 r[-1] = '$(\\infty)\\times$'
-            if 'UT' == r[1]:
-                r[1] = '$\\UT{2}$'
         return rows
     mk_table(table_name, mk_row)
 
