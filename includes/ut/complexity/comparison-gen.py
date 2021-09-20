@@ -132,6 +132,9 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
         'full_node_delta_s': ut_k1_full_node,
         'full_node_delta_s_por': k,  # the point of +PoRs is that you don't need to download all blocks
         'full_node_delta_s_port': k,  # the point of +PoRTs is that you don't need to download all blocks
+        'tts_1': ut_k1_full_node / 10000000 * (365.25 * 5),
+        'tts_1_por': k / 10000000 * (365.25 * 5),
+        'tts_1_port': k / 10000000 * (365.25 * 5),
         # todo end
         'ut_confirmation_rate': ut_n_1 * bf,
         'ut_confirmation_rate_por': ut_n_1_with_por * bf,
@@ -244,7 +247,7 @@ def table_header(table_name: str):
         'comparison_1m_tps': ['---', '----', '-----', '-----', '-----'],
         'comparison_1m_tps_conf_hz': ['---', '----'],
         'comparison_1gbps': ['---', '---', '---', '----'], #'-----'], #'-----', '------'],
-        'compare_optimizations': ['------', '------', '------', '------', '------']
+        'compare_optimizations': ['-----', '-----', '----', '-----', '-----']
     })
     col_sizes = ['------'] + _col_sizes.get(table_name, _col_sizes[tn_no_opim])
 
@@ -302,7 +305,7 @@ def mod_params_id(p: Tuple) -> Tuple:
     return p
 
 # CompareParams = tuple[int, float, int | tuple[int, int], int]
-CompareParams: TypeAlias = Tuple[int, float, Union[int, Tuple[int, int]], int]
+CompareParams = Tuple[int, float, Union[int, Tuple[int, int]], int]
 
 def table_row_compare_inner_all(params: CompareParams):
     print(params)
@@ -313,23 +316,23 @@ def table_row_compare_inner_all(params: CompareParams):
     # note: formatted name inserted via table_row_compare_inner
     # params, scaling factor, tps/basechain, tps
     cols = ({
-        'UT+PoRs': [fp, r['btc_n_2_factor'], r['ut_2_tps_with_por_per_basechain'], r['ut_2_tps_with_por'], r['ut_confirmation_rate_por'], r['ut_2_t1_with_por'], r['ut_n_1_with_por'], r['delta_s_bps_por'], r['full_node_delta_s_por']],
-        'UT+PoRTs': [fp, r['btc_n_2_factor'], r['ut_2_tps_with_port_per_basechain'], r['ut_2_tps_with_port'], r['ut_confirmation_rate_port'], r['ut_2_t1_with_port'], r['ut_n_1_with_port'], r['delta_s_bps_port'], r['full_node_delta_s_port']],
-        'UT': [fp, r['btc_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1'], r['ut_n_1'], r['delta_s_bps'], r['full_node_delta_s']],
-        'UT+HO': [fp, r['btc_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1'], r['ut_n_1'], r['delta_s_bps'], r['full_node_delta_s']],
-        'UT+HOT': [fp, r['btc_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1'], r['ut_n_1'], r['delta_s_bps'], r['full_node_delta_s']],
-        'UT2+PoRs': [fp, r['ut_n_2_factor_with_por'], r['ut_3_tps_with_por_per_basechain'], r['ut_3_tps_with_por'], r['ut_confirmation_rate'], r['ut_3_t2_with_por'], r['ut_n_1_with_por'], r['delta_s_bps_por'], r['full_node_delta_s_por']],
-        'UT2+PoRTs': [fp, r['ut_n_2_factor_with_port'], r['ut_3_tps_with_port_per_basechain'], r['ut_3_tps_with_port'], r['ut_confirmation_rate'], r['ut_3_t2_with_port'], r['ut_n_1_with_port'], r['delta_s_bps_port'], r['full_node_delta_s_port']],
-        'UT2': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2'], r['ut_n_1'], r['delta_s_bps'], r['full_node_delta_s']],
-        'UT2+HO': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2'], r['ut_n_1'], r['delta_s_bps'], r['full_node_delta_s']],
-        'UT2+HOT': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2'], r['ut_n_1'], r['delta_s_bps'], r['full_node_delta_s']],
-        'bitcoin': [fp, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps'], r['btc_confirmation_rate'], r['btc_t1'], 1, 'delta_s', 'full_node_delta_s'],
+        'UT+PoRs': [fp, r['btc_n_2_factor'], r['ut_2_tps_with_por_per_basechain'], r['ut_2_tps_with_por'], r['ut_confirmation_rate_por'], r['ut_2_t1_with_por'], r['ut_n_1_with_por'], r['delta_s_bps_por'], r['full_node_delta_s_por'], r['tts_1_por']],
+        'UT+PoRTs': [fp, r['btc_n_2_factor'], r['ut_2_tps_with_port_per_basechain'], r['ut_2_tps_with_port'], r['ut_confirmation_rate_port'], r['ut_2_t1_with_port'], r['ut_n_1_with_port'], r['delta_s_bps_port'], r['full_node_delta_s_port'], r['tts_1_port']],
+        'UT': [fp, r['btc_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1'], r['ut_n_1'], r['delta_s_bps'], r['full_node_delta_s'], r['tts_1']],
+        'UT+HO': [fp, r['btc_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1'], r['ut_n_1'], r['delta_s_bps'], r['full_node_delta_s'], r['tts_1']],
+        'UT+HOT': [fp, r['btc_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1'], r['ut_n_1'], r['delta_s_bps'], r['full_node_delta_s'], r['tts_1']],
+        'UT2+PoRs': [fp, r['ut_n_2_factor_with_por'], r['ut_3_tps_with_por_per_basechain'], r['ut_3_tps_with_por'], r['ut_confirmation_rate'], r['ut_3_t2_with_por'], r['ut_n_1_with_por'], r['delta_s_bps_por'], r['full_node_delta_s_por'], r['tts_1_por']],
+        'UT2+PoRTs': [fp, r['ut_n_2_factor_with_port'], r['ut_3_tps_with_port_per_basechain'], r['ut_3_tps_with_port'], r['ut_confirmation_rate'], r['ut_3_t2_with_port'], r['ut_n_1_with_port'], r['delta_s_bps_port'], r['full_node_delta_s_port'], r['tts_1_port']],
+        'UT2': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2'], r['ut_n_1'], r['delta_s_bps'], r['full_node_delta_s'], r['tts_1']],
+        'UT2+HO': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2'], r['ut_n_1'], r['delta_s_bps'], r['full_node_delta_s'], r['tts_1']],
+        'UT2+HOT': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2'], r['ut_n_1'], r['delta_s_bps'], r['full_node_delta_s'], r['tts_1']],
+        'bitcoin': [fp, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps'], r['btc_confirmation_rate'], r['btc_t1'], 1, 'delta_s', 'full_node_delta_s', 'time_to_sync_5yr_chain'],
         # Cardano doesn't use sharding
-        'cardano': [fp, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps'], r['btc_confirmation_rate'], r['btc_t1'], 1, 'delta_s', 'full_node_delta_s'],
+        'cardano': [fp, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps'], r['btc_confirmation_rate'], r['btc_t1'], 1, 'delta_s', 'full_node_delta_s', 'time_to_sync_5yr_chain'],
         # Shareded cardano
         # 'cardano': [fp,  r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2']],
-        'polkadot': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2'], 1, 'delta_s', 'full_node_delta_s'],
-        'eth2': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2'], 1, 'delta_s', 'full_node_delta_s'],
+        'polkadot': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2'], 1, 'delta_s', 'full_node_delta_s', 'time_to_sync_5yr_chain'],
+        'eth2': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2'], 1, 'delta_s', 'full_node_delta_s', 'time_to_sync_5yr_chain'],
     })
     return cols
 
@@ -343,6 +346,7 @@ def table_select_optimize_compare(tn, inputs):
             ('$\\mathbb{C}^\\prime$ (Hz)', 4, False),
             ('$\\Delta S$ (B/s)', 7, True),
             ('$\\Delta s$ (B/s)', 8, True),
+            ('TTS 5yrs (days)', 9, False),
             ]:
             row_deets = table_row_compare_inner_all(ps)
             variants = ['UT+PoRs', 'UT+PoRTs', 'UT']
@@ -522,7 +526,9 @@ def mk_comparison_inputs(k: int) -> list[tuple[str, CompareParams]]:
         # ('solana', (k, 1/0.55, 141, 250)),
         ('cardano', (k, 1/20, 1070, 250)),
         ('polkadot', (k, 1/6, 288, 250)),
-        ('eth2', (k, 1/12, 200, 250)),
+        ('eth2', (k, 1/12, 256, 250)),
+        ('UT', (k, 1/15, 84, 250)),
+        ('UT+HOT', (k, 1/15, (16, 68), 250)),
         ('UT2+PoRs', (k, 1/15, 84, 250)),
         ('UT2', (k, 1/15, 84, 250)),
         ('UT2+HOT', (k, 1/15, (16, 84-16), 250)),
@@ -532,14 +538,14 @@ def mk_comparison_inputs(k: int) -> list[tuple[str, CompareParams]]:
 #     ('solana', (comparison_k2, 1/0.4, 141, 250)),
 #     ('cardano', (comparison_k2, 1/20, 1070, 250)),
 #     ('polkadot', (comparison_k2, 1/6, 288, 250)),
-#     ('eth2', (comparison_k2, 1/12, 200, 250)),
+#     ('eth2', (comparison_k2, 1/12, 256, 250)),
 #     ('$\\UT{2}$+PoRs', (comparison_k2, 1/15, 112, 250)),
 #     ('UT', (comparison_k2, 1/15, 112, 250)),
 #     ('UT w/ tiling', (comparison_k2, 1/15, 112, 250)),
 #     # ('bitcoin (w/ extras)', (comparison_k, 1/600, 80, 250)),
 #     # ('cardano (w/ extras)', (comparison_k, 1/20, 1070 + 1024, 250)),
 #     # ('polkadot (w/ extras)', (comparison_k, 1/6, 288 + 1024, 250)),
-#     # ('eth2 (w/ extras)', (comparison_k, 1/12, 200 + (476 + 224 + 128 + 672 + 736 + 1024), 250)),
+#     # ('eth2 (w/ extras)', (comparison_k, 1/12, 256 + (476 + 224 + 128 + 672 + 736 + 1024), 250)),
 #     # ('$\\UT{2}$+PoRs', (comparison_k, 1/15, 112, 250)),
 #     # ('$\\UT{2}$+PoRs (w/ tiling)', (comparison_k, 1/15, 112, 250)),
 #     # ('eth2', (206000, 1/12, 200, 250)),  # approx the '14m tps' claim above
@@ -561,7 +567,9 @@ comparison_1m_tps = [
     ('cardano', (250000000, 1/20, 1070, 250)),
     # ('cardano', (115700, 1/20, 1070, 250)),
     ('polkadot', (109810, 1/6, 288, 250)),
-    ('eth2', (64600, 1/12, 200, 250)),
+    ('eth2', (64600, 1/12, 256, 250)),
+    ('UT', (ALL_UT_1M_K['UT'] + 1, 1/15, 84, 250)),
+    ('UT+HOT', (ALL_UT_1M_K['UT+HOT'] + 1, 1/15, (16, 68), 250)),
     ('UT2+PoRs', (UT_1M_K * 1.536, 1/15, 84, 250)),
     ('UT2+PoRTs', (UT_1M_K * 1.337, 1/15, 84, 250)),
     ('UT2', (UT_1M_K, 1/15, 84, 250)),
@@ -574,7 +582,7 @@ comparison_1gbps = [
     ('bitcoin', [1024 ** 3 // 8, 1/600, 80, 250]),
     ('cardano', [1024 ** 3 // 8, 1/20, 1070, 250]),
     ('polkadot', [1024 ** 3 // 8, 1/6, 288, 250]),
-    ('eth2', [1024 ** 3 // 8, 1/12, 200, 250]),
+    ('eth2', [1024 ** 3 // 8, 1/12, 256, 250]),
     ('UT', [1024 ** 3 // 8, 1/15, 84, 250]),
     ('UT+HOT', [1024 ** 3 // 8, 1/15, 84, 250]),
     ('UT2', [1024 ** 3 // 8, 1/15, 84, 250]),
@@ -645,6 +653,8 @@ also I made a little `npm init && npm i -S polkadot.js` project to get the heade
 
 * header size: 192 bytes (mb 224?) (via lighthouse beaconchain node http API)
 * 12s block times (inferred b/c there seems to be a very regular 5 blocks/min pattern; couldn't find a source as easily)
+
+* update note: every 10th block (200B) + 8192 / 10
 
 ### Cardano:
 
