@@ -16,6 +16,17 @@ UT_NET_NAME_LOOKUP = {
     'UT3': '$\\UT{3}$', 'UT3+HO': '$\\UT{3+\\text{HO}}$', 'UT3+HOT': '$\\UT{3+\\text{HOT}}$', 'UT3+PoRs': '$\\UT{3+\\text{PoRs}}$', 'UT3+PoRTs': '$\\UT{3+\\text{PoRTs}}$',
 }
 
+"""
+eth2:
+- 8192 validator set update data -- once per slot = 1/6.5 min
+  - per shard
+- 200 byte headers, only every 10th recorded
+  - per shard
+effective header size is 8192 / (6.5*60/12) + 200 * .1
+"""
+ETH2_EFFECTIVE_HEADER = int(8192 / (6.5*60/12) + 200 * .1)
+ETH2_1M_K = 75278
+
 # HO and HOT optimization stuff
 
 HO_B_H = 32
@@ -498,7 +509,7 @@ def mk_optimized_rows():
                     dh2 = hot_calc_dh2(b_h, d_h)
                     yield (k, b_f, b_h, dh2, 250)
     yield (3000, 2/13, 16, hot_calc_dh2(16, 84), 250)
-    yield (64600, 1/15, 16, hot_calc_dh2(16, 84), 250)
+    yield (ETH2_1M_K, 1/15, 16, hot_calc_dh2(16, 84), 250)
 
 optimized_row_inputs = list(mk_optimized_rows())
 
@@ -525,10 +536,10 @@ def mk_comparison_inputs(k: int) -> list[tuple[str, CompareParams]]:
         ('bitcoin', (k, 1/600, 80, 250)),
         # ('solana', (k, 1/0.55, 141, 250)),
         ('cardano', (k, 1/20, 1070, 250)),
-        ('polkadot', (k, 1/6, 288, 250)),
-        ('eth2', (k, 1/12, 256, 250)),
         ('UT', (k, 1/15, 84, 250)),
         ('UT+HOT', (k, 1/15, (16, 68), 250)),
+        ('polkadot', (k, 1/6, 288, 250)),
+        ('eth2', (k, 1/12, ETH2_EFFECTIVE_HEADER, 250)),
         ('UT2+PoRs', (k, 1/15, 84, 250)),
         ('UT2', (k, 1/15, 84, 250)),
         ('UT2+HOT', (k, 1/15, (16, 84-16), 250)),
@@ -538,14 +549,14 @@ def mk_comparison_inputs(k: int) -> list[tuple[str, CompareParams]]:
 #     ('solana', (comparison_k2, 1/0.4, 141, 250)),
 #     ('cardano', (comparison_k2, 1/20, 1070, 250)),
 #     ('polkadot', (comparison_k2, 1/6, 288, 250)),
-#     ('eth2', (comparison_k2, 1/12, 256, 250)),
+#     ('eth2', (comparison_k2, 1/12, ETH2_EFFECTIVE_HEADER, 250)),
 #     ('$\\UT{2}$+PoRs', (comparison_k2, 1/15, 112, 250)),
 #     ('UT', (comparison_k2, 1/15, 112, 250)),
 #     ('UT w/ tiling', (comparison_k2, 1/15, 112, 250)),
 #     # ('bitcoin (w/ extras)', (comparison_k, 1/600, 80, 250)),
 #     # ('cardano (w/ extras)', (comparison_k, 1/20, 1070 + 1024, 250)),
 #     # ('polkadot (w/ extras)', (comparison_k, 1/6, 288 + 1024, 250)),
-#     # ('eth2 (w/ extras)', (comparison_k, 1/12, 256 + (476 + 224 + 128 + 672 + 736 + 1024), 250)),
+#     # ('eth2 (w/ extras)', (comparison_k, 1/12, ETH2_EFFECTIVE_HEADER + (476 + 224 + 128 + 672 + 736 + 1024), 250)),
 #     # ('$\\UT{2}$+PoRs', (comparison_k, 1/15, 112, 250)),
 #     # ('$\\UT{2}$+PoRs (w/ tiling)', (comparison_k, 1/15, 112, 250)),
 #     # ('eth2', (206000, 1/12, 200, 250)),  # approx the '14m tps' claim above
@@ -566,12 +577,12 @@ comparison_1m_tps = [
     # ('solana', (296900, 1/0.55, 141, 250)),
     ('cardano', (250000000, 1/20, 1070, 250)),
     # ('cardano', (115700, 1/20, 1070, 250)),
+    ('UT', (int(ALL_UT_1M_K['UT']) + 1, 1/15, 84, 250)),
+    ('UT+HOT', (int(ALL_UT_1M_K['UT+HOT']) + 1, 1/15, (16, 68), 250)),
     ('polkadot', (109810, 1/6, 288, 250)),
-    ('eth2', (64600, 1/12, 256, 250)),
-    ('UT', (ALL_UT_1M_K['UT'] + 1, 1/15, 84, 250)),
-    ('UT+HOT', (ALL_UT_1M_K['UT+HOT'] + 1, 1/15, (16, 68), 250)),
-    ('UT2+PoRs', (UT_1M_K * 1.536, 1/15, 84, 250)),
-    ('UT2+PoRTs', (UT_1M_K * 1.337, 1/15, 84, 250)),
+    ('eth2', (ETH2_1M_K, 1/12, ETH2_EFFECTIVE_HEADER, 250)),
+    ('UT2+PoRs', (int(UT_1M_K * 1.536), 1/15, 84, 250)),
+    ('UT2+PoRTs', (int(UT_1M_K * 1.337), 1/15, 84, 250)),
     ('UT2', (UT_1M_K, 1/15, 84, 250)),
     ('UT2+HO', (math.ceil(ALL_UT_1M_K['UT2+HO']), 1/15, (32, 84), 250)),
     ('UT2+HOT', (math.ceil(ALL_UT_1M_K['UT2+HOT']), 1/15, (16, 68), 250)),
@@ -581,10 +592,10 @@ comparison_1gbps = [
     ('solana', [1024 ** 3 // 8, 1/.5, 200, 250]),  # realistically, min 200 bytes tx size
     ('bitcoin', [1024 ** 3 // 8, 1/600, 80, 250]),
     ('cardano', [1024 ** 3 // 8, 1/20, 1070, 250]),
-    ('polkadot', [1024 ** 3 // 8, 1/6, 288, 250]),
-    ('eth2', [1024 ** 3 // 8, 1/12, 256, 250]),
     ('UT', [1024 ** 3 // 8, 1/15, 84, 250]),
     ('UT+HOT', [1024 ** 3 // 8, 1/15, 84, 250]),
+    ('polkadot', [1024 ** 3 // 8, 1/6, 288, 250]),
+    ('eth2', [1024 ** 3 // 8, 1/12, ETH2_EFFECTIVE_HEADER, 250]),
     ('UT2', [1024 ** 3 // 8, 1/15, 84, 250]),
     ('UT2+HOT', [1024 ** 3 // 8, 1/15, 84, 250]),
 ]
