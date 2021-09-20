@@ -290,15 +290,17 @@ Additionally, the discrepancy in header size (between $B_h$ and $D_h$) is due to
 
 \label{sec:bandwidth-complexity}
 
-If miners temporarily keep the blocks of every simplex-chain (so that they can verify reflected headers correspond to existent blocks) then what is the complexity and burden of this?
+\todo{BW for full node: $\Delta s = k_1 + N_1 \cdot B_f \cdot g \cdot \log_2{N_1}$.}
 
-Each simplex-chain has a raw throughput of $k_1$ bytes/s. From \autoref{eq:simplex-N1} we know that $N_1 = \frac{k_1}{2 \cdot B_f \cdot B_h}$. The amount of storage, $S$, required to keep $d$ seconds worth of each simplex-chain's history is equal to the product of: the number of simplex-chains -- $N_1$, the raw throughput of each chain -- $k_1$, and the duration we want to store -- $d$. Let $\Delta S$ be the bandwidth requirements (in bytes/s) to facilitate this.
+If miners temporarily keep the blocks of every simplex-chain (so that they can verify reflected headers correspond to existent blocks) then what is the complexity and burden of this? Each simplex-chain has a raw throughput of $k_1$ bytes/s. From \autoref{eq:simplex-N1} we know that $N_1 = \frac{k_1}{2 \cdot B_f \cdot B_h}$.
+
+The amount of network bandwidth, $\Delta S$, required to download all blocks (as they are produced) across all simplex-chains is equal to the product of: the number of simplex-chains -- $N_1$, and the raw throughput of each chain -- $k_1$.
 
 \begin{equation}
 \begin{split}
-S & = \frac{k_1}{2 \cdot B_f \cdot B_h} \cdot k_1 \cdot d \\
-& = \frac{k_1^2 \cdot d}{2 \cdot B_f \cdot B_h}  \label{eq:bandwidth-req} \\
-\Delta S & = \frac{k_1^2}{2 \cdot B_f \cdot B_h}
+\Delta S & = N_1 \cdot k_1 \\
+& = \frac{k_1^2}{2 \cdot B_f \cdot B_h}
+\label{eq:bandwidth-req}
 \end{split}
 \end{equation}
 

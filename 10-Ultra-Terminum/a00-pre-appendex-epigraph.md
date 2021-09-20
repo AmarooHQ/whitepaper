@@ -32,19 +32,24 @@
 | Term | Definition | Unit |
 | ------ | ------------------------------------------------------------- | -------------- |
 | $\mathbb{C}^\prime$ | Confirmation rate | Hz |
-| $k_i$ | Average per-chain raw throughput at the $i^{th}$ level of nesting \newline A generalization of block size | bytes/second |
-| $k$ | Average per-chain raw throughput across nesting levels \newline $k$ is used to simplify reasoning and equations, especially in situations where all $k_i$ are equal | bytes/second |
-| $T_i$ | Network throughput at the $i^{th}$ level of nesting | bytes/second |
-| $N_i$ | Number of chains at the $i^{th}$ level of nesting | chains |
-| $N_\text{tiles}$ | Number of tiles in a simplex-tiling | tiles |
-| $B_{max}$ | Maximum block size | bytes |
-| $B_f$ | Base-chain block frequency | Hz or $s^{-1}$ |
-| $B_h$ | Base-chain header size | bytes |
-| $D_f$ | Dapp-chain block frequency | Hz or $s^{-1}$ |
-| $D_h$ | Dapp-chain header size | bytes |
-| $\Delta S$ | Minimum network bandwidth for a node to remain in sync with a given system | bytes/second |
+| $k_i$ | Average per-chain raw throughput at the $i^{th}$ level of nesting. \newline A generalization of block size. | bytes/second |
+| $k$ | Average per-chain raw throughput across nesting levels. \newline $k$ is used to simplify reasoning and equations, especially in situations where all $k_i$ are equal. | bytes/second |
+| $T_i$ | Network throughput at the $i^{th}$ level of nesting. | bytes/second |
+| $N_i$ | Number of chains at the $i^{th}$ level of nesting. | chains |
+| $N_\text{tiles}$ | Number of tiles in a simplex-tiling. | tiles |
+| $B_{max}$ | Maximum block size. | bytes |
+| $B_f$ | Base-chain block frequency. | Hz or $s^{-1}$ |
+| $B_h$ | Base-chain header size. | bytes |
+| $D_f$ | Dapp-chain block frequency. | Hz or $s^{-1}$ |
+| $D_h$ | Dapp-chain header size. | bytes |
+| $\Delta S$ | Minimum network bandwidth for a node to remain in sync with all simplex-chains. | bytes/second |
 
 : Notation defined in this document. \label{table:notation}
+
+\begin{comment}
+| $\Delta s$ | Minimum network bandwidth for a node to remain in sync a single simplex-chain (whilst also validating PoRs). | bytes/second |
+\end{comment}
+
 
 # Nomenclature {-}
 

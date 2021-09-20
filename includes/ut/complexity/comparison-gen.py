@@ -51,7 +51,9 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
     ut_n_1_with_por = por_with_merkle_branches_n1_root(k, bf, bh, 32)
     ut_n_1_with_port = por_with_merkle_branches_n1_root(k, bf, bh, 16)
     ut_k_1b_with_por = int(round(bf * ut_n_1_with_por * (bh + 32 * log2(ut_n_1_with_por))))
-    ut_k_1b_with_port = int(round(bf * ut_n_1_with_por * (bh + 16 * log2(ut_n_1_with_port))))
+    ut_k_1b_with_port = int(round(bf * ut_n_1_with_port * (bh + 16 * log2(ut_n_1_with_port))))
+    por_hash_len = 16 if bh == 16 else 32
+    ut_k1_full_node = k + int(bf * ut_n_1 * (bh + por_hash_len * log2(ut_n_1)))
     ut_k_1tx_with_por = k - ut_k_1b_with_por
     ut_k_1tx_with_port = k - ut_k_1b_with_port
     ut_n_2_factor_with_por = ut_k_1tx_with_por / (dh * df)
@@ -120,9 +122,17 @@ def calc_tps_throughput(k, bf, df, bh, dh, tx_size):
         'ut_n1_per_k_with_port': ut_n1_per_k_with_port,
         'ut_3_optimal_dapp-chains': k / (2 * dh * df),
         'ut_n_3': k**3 / (4 * bh * bf * dh**2 * df**2),
+        'delta_s_bps_btc': k,
         'delta_s_bps': k * ut_n_1,
-        'delta_s_bps_por': k * ut_n_1_with_por,
-        'delta_s_bps_port': k * ut_n_1_with_port,
+        # todo start
+        'delta_s_bps_por': k,
+        'delta_s_bps_port': k,  # the point of +PoRTs is that you don't need to download all blocks
+        # 'delta_s_bps_por_anyway': k * ut_n_1_with_por,
+        # 'delta_s_bps_port_anyway': k * ut_n_1_with_por,
+        'full_node_delta_s': ut_k1_full_node,
+        'full_node_delta_s_por': k,  # the point of +PoRs is that you don't need to download all blocks
+        'full_node_delta_s_port': k,  # the point of +PoRTs is that you don't need to download all blocks
+        # todo end
         'ut_confirmation_rate': ut_n_1 * bf,
         'ut_confirmation_rate_por': ut_n_1_with_por * bf,
         'ut_confirmation_rate_port': ut_n_1_with_port * bf,
@@ -196,10 +206,10 @@ def tps_to_k(tps, tx_size, bf, bh):
     }
 
 
-def fmt_rounded_commas(value, non_sn_range=(1, 10**6), should_round=True):
+def fmt_rounded_commas(value, non_sn_range=(1, 10**6), should_round=True, precision=2):
     if isinstance(value, str):
         return value
-    mb_round = lambda v: f"{round(v):,}" if should_round else f"{v:,.2f}"
+    mb_round = lambda v: f"{round(v):,}" if should_round else f"{v:,.{precision}f}"
     return mb_round(value) if non_sn_range[0] <= value < non_sn_range[1] else f"\x24{value:.2e}}}\x24" \
         .replace("e+0", "e+").replace("e+", "\\times 10^{") \
         .replace("e-0", "e-").replace("e-", "\\times 10^{-")
@@ -276,7 +286,7 @@ def format_params(params, strip_last_n=1):
 
 def ratio_to_x(ratio):
     # return f"${ratio:.1f}\\times$"
-    return f"$({fmt_rounded_commas(ratio, should_round=False).strip('$')})\\times$"
+    return f"$({fmt_rounded_commas(ratio, should_round=False, precision=3).strip('$')})\\times$"
 
 def table_row(params, table_name: str, r):
     fp = format_params(params)
@@ -303,24 +313,23 @@ def table_row_compare_inner_all(params: CompareParams):
     # note: formatted name inserted via table_row_compare_inner
     # params, scaling factor, tps/basechain, tps
     cols = ({
-        'UT+PoRs': [fp, r['btc_n_2_factor'], r['ut_2_tps_with_por_per_basechain'], r['ut_2_tps_with_por'], r['ut_confirmation_rate_por'], r['ut_2_t1_with_por'], r['ut_n_1_with_por'], r['delta_s_bps_por']],
-        'UT+PoRTs': [fp, r['btc_n_2_factor'], r['ut_2_tps_with_port_per_basechain'], r['ut_2_tps_with_port'], r['ut_confirmation_rate_port'], r['ut_2_t1_with_port'], r['ut_n_1_with_port'], r['delta_s_bps_port']],
-        'UT': [fp, r['btc_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1'], r['ut_n_1'], r['delta_s_bps']],
-        'UT+HO': [fp, r['btc_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1'], r['ut_n_1'], r['delta_s_bps']],
-        'UT+HOT': [fp, r['btc_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1'], r['ut_n_1'], r['delta_s_bps']],
-        'UT2+PoRs': [fp, r['ut_n_2_factor_with_por'], r['ut_3_tps_with_por_per_basechain'], r['ut_3_tps_with_por'], r['ut_confirmation_rate'], r['ut_3_t2_with_por'], r['delta_s_bps_por']],
-        'UT2+PoRTs': [fp, r['ut_n_2_factor_with_port'], r['ut_3_tps_with_port_per_basechain'], r['ut_3_tps_with_port'], r['ut_confirmation_rate'], r['ut_3_t2_with_port'], r['delta_s_bps_port']],
-        'UT2': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2'], r['delta_s_bps']],
-        'UT2+HO': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2'], r['delta_s_bps']],
-        'UT2+HOT': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2'], r['delta_s_bps']],
-        'bitcoin': [fp, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps'], r['btc_confirmation_rate'], r['btc_t1'], 'delta_s'],
+        'UT+PoRs': [fp, r['btc_n_2_factor'], r['ut_2_tps_with_por_per_basechain'], r['ut_2_tps_with_por'], r['ut_confirmation_rate_por'], r['ut_2_t1_with_por'], r['ut_n_1_with_por'], r['delta_s_bps_por'], r['full_node_delta_s_por']],
+        'UT+PoRTs': [fp, r['btc_n_2_factor'], r['ut_2_tps_with_port_per_basechain'], r['ut_2_tps_with_port'], r['ut_confirmation_rate_port'], r['ut_2_t1_with_port'], r['ut_n_1_with_port'], r['delta_s_bps_port'], r['full_node_delta_s_port']],
+        'UT': [fp, r['btc_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1'], r['ut_n_1'], r['delta_s_bps'], r['full_node_delta_s']],
+        'UT+HO': [fp, r['btc_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1'], r['ut_n_1'], r['delta_s_bps'], r['full_node_delta_s']],
+        'UT+HOT': [fp, r['btc_n_2_factor'], r['ut_2_tps_per_basechain'], r['ut_2_tps'], r['ut_confirmation_rate'], r['ut_2_t1'], r['ut_n_1'], r['delta_s_bps'], r['full_node_delta_s']],
+        'UT2+PoRs': [fp, r['ut_n_2_factor_with_por'], r['ut_3_tps_with_por_per_basechain'], r['ut_3_tps_with_por'], r['ut_confirmation_rate'], r['ut_3_t2_with_por'], r['ut_n_1_with_por'], r['delta_s_bps_por'], r['full_node_delta_s_por']],
+        'UT2+PoRTs': [fp, r['ut_n_2_factor_with_port'], r['ut_3_tps_with_port_per_basechain'], r['ut_3_tps_with_port'], r['ut_confirmation_rate'], r['ut_3_t2_with_port'], r['ut_n_1_with_port'], r['delta_s_bps_port'], r['full_node_delta_s_port']],
+        'UT2': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2'], r['ut_n_1'], r['delta_s_bps'], r['full_node_delta_s']],
+        'UT2+HO': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2'], r['ut_n_1'], r['delta_s_bps'], r['full_node_delta_s']],
+        'UT2+HOT': [fp, r['ut_n_2_factor'], r['ut_3_tps_per_basechain'], r['ut_3_tps'], r['ut_confirmation_rate'], r['ut_3_t2'], r['ut_n_1'], r['delta_s_bps'], r['full_node_delta_s']],
+        'bitcoin': [fp, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps'], r['btc_confirmation_rate'], r['btc_t1'], 1, 'delta_s', 'full_node_delta_s'],
         # Cardano doesn't use sharding
-        'cardano': [fp, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps'], r['btc_confirmation_rate'], r['btc_t1'], 'delta_s'],
+        'cardano': [fp, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps'], r['btc_confirmation_rate'], r['btc_t1'], 1, 'delta_s', 'full_node_delta_s'],
         # Shareded cardano
         # 'cardano': [fp,  r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2']],
-        'polkadot': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2'], 'delta_s'],
-        'eth2': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2'], 'delta_s'],
-        # 'solana': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps']],  # NOT ACCURATE
+        'polkadot': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2'], 1, 'delta_s', 'full_node_delta_s'],
+        'eth2': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2'], 1, 'delta_s', 'full_node_delta_s'],
     })
     return cols
 
@@ -333,6 +342,7 @@ def table_select_optimize_compare(tn, inputs):
             ('$N_1$', 6, True),
             ('$\\mathbb{C}^\\prime$ (Hz)', 4, False),
             ('$\\Delta S$ (B/s)', 7, True),
+            ('$\\Delta s$ (B/s)', 8, True),
             ]:
             row_deets = table_row_compare_inner_all(ps)
             variants = ['UT+PoRs', 'UT+PoRTs', 'UT']
@@ -552,8 +562,8 @@ comparison_1m_tps = [
     # ('cardano', (115700, 1/20, 1070, 250)),
     ('polkadot', (109810, 1/6, 288, 250)),
     ('eth2', (64600, 1/12, 200, 250)),
-    ('UT2+PoRs', (math.floor(UT_1M_K * 1.536), 1/15, 84, 250)),
-    ('UT2+PoRTs', (math.floor(UT_1M_K * 1.221), 1/15, 84, 250)),
+    ('UT2+PoRs', (UT_1M_K * 1.536, 1/15, 84, 250)),
+    ('UT2+PoRTs', (UT_1M_K * 1.337, 1/15, 84, 250)),
     ('UT2', (UT_1M_K, 1/15, 84, 250)),
     ('UT2+HO', (math.ceil(ALL_UT_1M_K['UT2+HO']), 1/15, (32, 84), 250)),
     ('UT2+HOT', (math.ceil(ALL_UT_1M_K['UT2+HOT']), 1/15, (16, 68), 250)),
