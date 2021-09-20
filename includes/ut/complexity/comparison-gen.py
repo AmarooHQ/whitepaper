@@ -2,7 +2,7 @@
 
 from collections import defaultdict
 from decimal import Decimal
-from typing import Any, DefaultDict, List, Optional, Tuple
+from typing import Any, DefaultDict, List, Optional, Tuple, TypeAlias, Union
 from numpy.lib.scimath import sqrt, power
 from scipy.special import lambertw
 from numpy import log, log2, real, floor
@@ -283,7 +283,8 @@ def table_row(params, table_name: str, r):
 def mod_params_id(p: Tuple) -> Tuple:
     return p
 
-CompareParams = tuple[int, float, int | tuple[int, int], int]
+# CompareParams = tuple[int, float, int | tuple[int, int], int]
+CompareParams: TypeAlias = Tuple[int, float, Union[int, Tuple[int, int]], int]
 
 def table_row_compare_inner_all(params: CompareParams):
     print(params)
