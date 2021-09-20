@@ -72,6 +72,7 @@ wp-pandoc:
 	pandoc -s --number-sections --toc -f markdown -t latex -o $(WPTEX) $(WPFILE)
 	sed -i 's/\\%\\%/%/g' $(WPTEX)
 
+# added to make testing quote boxes easier I think
 wp-just-quotes: clean-wp-md
 	echo '' > $(WPFILE)
 	cat 10-Ultra-Terminum/00.md >> $(WPFILE)
@@ -81,6 +82,7 @@ wp-just-quotes: clean-wp-md
 dev-build: wp-just-quotes wp-pandoc mk-latex-pdf
 
 wc:
+	find . -iname '*.md' -or -iname '*.tex' | grep -v node_mod | grep -v output | grep -v diags | xargs wc
 	wc $(WPFILE)
 
 mk-latex-pdf:
@@ -103,17 +105,21 @@ handout:
 	pandoc --standalone --mathjax -f markdown --pdf-engine=context -V fontsize=11.5pt -o includes/handout/exec-summary.pdf includes/handout/exec-summary.md
 	pandoc --standalone --mathjax -f markdown --pdf-engine=context -V fontsize=16pt -o includes/handout/terms.pdf includes/handout/terms.md
 
+# latex files anywhere
 clean: init
 	$(RM) -fv -- `find . -iname \*.aux -or -iname \*.gls* -or -iname \*.bak -or -iname \*.bbl -or -iname \*.blg -or -iname \*.log -or -iname \*.out -or -iname \*.toc -or -iname \*.tdo -or -iname _region.*`
 
+# standalone graphics pdfs
 deponly-clean:
 	$(RM) -fv -- `find ./ -iname \*_sag.pdf`
 
 depclean: clean deponly-clean
 
+# everything in output + the rest
 distclean: depclean
 	-rm -r $(OUTDIR)/*
 
+# usually good enough to fix failing builds
 clean-wp-md:
 	-rm .git/gitHeadInfo.gin
 	-rm $(WPFILE)
