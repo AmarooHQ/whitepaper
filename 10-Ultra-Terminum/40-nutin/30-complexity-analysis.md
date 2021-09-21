@@ -334,7 +334,12 @@ Practically, this effect means that a decrease to the size of headers has *incre
 
 %% INSERT ### TABLE: tps_optimized
 
-: TPS when using +HOT simplex optimizations (Header Omission and Truncation). Note that $B_h = 16$ implies +HOT, and $B_h = 32$ implies +HO (Header Omission without truncation).
+: TPS when using +HOT simplex optimizations (Header Omission and Truncation).
+
+\begin{comment}
+(From table description above -- commented b/c B_h=32 is commented in comparison-gen.py)
+Note that $B_h = 16$ implies +HOT, and $B_h = 32$ implies +HO (Header Omission without truncation).
+\end{comment}
 
 %% INSERT ### TABLE: dapp-chains_optimized
 

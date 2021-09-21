@@ -42,14 +42,15 @@
 | $B_h$ | Base-chain header size. | bytes |
 | $D_f$ | Dapp-chain block frequency. | Hz or $s^{-1}$ |
 | $D_h$ | Dapp-chain header size. | bytes |
-| $\Delta S$ | Minimum network bandwidth for a \emph{mining} node to remain in sync with all simplex-chains. | bytes/second |
+| TPS | Transactions per second. | tx/s |
+| $\Sigma$ TPS | Network-wide transactions per second. Primarily used when ``TPS'' alone would be ambiguous. | tx/s |
 | $\Delta s$ | Minimum network bandwidth for a full node to remain in sync a single simplex-chain (whilst also validating PoRs). | bytes/second |
+| $\Delta S$ | Minimum network bandwidth for a \emph{mining} node to remain in sync with all simplex-chains. | bytes/second |
 
 : Notation defined in this document. \label{table:notation}
 
 \begin{comment}
 \end{comment}
-
 
 # Nomenclature {-}
 
@@ -57,8 +58,8 @@
 
 | Term | Definition |
 | ------ | ----------------------------------------------------------------------- |
-| $\UT{i}$ | The UT scaling configuration with $i$ levels of nesting. |
-| $\UT{1}$ | UT with base-level chains only -- $O(c^2)$ scalability. \autoref{sec:constructing-ut} |
+| $\UT{i}$ | The UT scaling configuration with $i$ levels of nesting. \autoref{sec:constructing-ut} |
+| $\UT{1}$ | UT with base-level chains only -- $O(c^2)$ scalability. \autoref{sec:the-simplex} |
 | $\UT{2}$ | UT with nested dapp-chains -- $O(c^3)$ scalability. \autoref{sec:dapp-chains} |
 | $\UT{3}$ | UT with nested dapp-dapp-chains -- $O(c^4)$ scalability. \autoref{sec:dapp-chains} |
 | $\UTinf{i}$ | Tiling of $\UT{i}$ -- $O(n)$ scalability. \autoref{sec:tiling} |

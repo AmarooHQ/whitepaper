@@ -2,7 +2,7 @@
 
 \label{sec:constructing-ut}
 
-*Proof of Reflection* can be used to build $\UT{1}$ -- an $O(c^2)$ foundation for a blockchain network (called *the simplex*). This section details the construction of such a foundation, and how it can be extended up to $\UT{3}$ -- which has $O(c^4)$ complexity. The $O(n)$ scaling configuration is detailed in \autoref{sec:tiling}.
+*Proof of Reflection* can be used to build $\UT{1}$ -- an $O(c^2)$ foundation for a blockchain network (called *the simplex*). This section details the construction of such a foundation, and how it can be extended up to $\UT{3}$ -- which has $O(c^4)$ complexity. The $O(n)$ scaling configuration ($\UTinf{}$) is detailed in \autoref{sec:tiling}.
 
 Such a foundation (*the simplex*) is *not* a sharded blockchain -- there's no requirement that participating chains are interchangeable or using the same primitives. This was demonstrated via the example in \autoref{sec:two-blockchains}. Rather, *the simplex* is an emergent construct that is created via the *relationships* between blockchains. Instead of one blockchain being split into many (as occurs with sharding), *the simplex* is many blockchains becoming one coherent network.
 

@@ -14,6 +14,8 @@ UT_NET_NAME_LOOKUP = {
     'UT':  '$\\UT{1}$', 'UT+HO':  '$\\UT{1+\\text{HO}}$', 'UT+HOT':  '$\\UT{1+\\text{HOT}}$', 'UT+PoRs':  '$\\UT{1+\\text{PoRs}}$', 'UT+PoRTs':  '$\\UT{1+\\text{PoRTs}}$',
     'UT2': '$\\UT{2}$', 'UT2+HO': '$\\UT{2+\\text{HO}}$', 'UT2+HOT': '$\\UT{2+\\text{HOT}}$', 'UT2+PoRs': '$\\UT{2+\\text{PoRs}}$', 'UT2+PoRTs': '$\\UT{2+\\text{PoRTs}}$',
     'UT3': '$\\UT{3}$', 'UT3+HO': '$\\UT{3+\\text{HO}}$', 'UT3+HOT': '$\\UT{3+\\text{HOT}}$', 'UT3+PoRs': '$\\UT{3+\\text{PoRs}}$', 'UT3+PoRTs': '$\\UT{3+\\text{PoRTs}}$',
+    'UT2 inf': '$\\UTinf{2}$',
+    'ideal sharded': 'Opt.Shard',  # make sure you update the name in the WP if this changes, too.
 }
 
 """
@@ -188,6 +190,7 @@ def bandwidth_to_k(delta_s, bf, bh, dh=None):
         'UT+HOT': ut1_k,
         'UT2': ut2_k,
         'UT2+HOT': ut2_k,
+        'ideal sharded': eth2_k,
         'eth2': eth2_k,
         'polkadot': eth2_k,
         # 'cardano': eth2_k,
@@ -205,6 +208,7 @@ def tps_to_k(tps, tx_size, bf, bh):
     ut2_k = power(throughput * 4 * bf * bf * bh * bh, 1/3)
     ut2_ho_k = power(throughput * 4 * bf * bf * (bh) * 32, 1/3)
     ut2_hot_k = power(throughput * 4 * bf * bf * (bh - hot_bh_reduction) * 16, 1/3)
+    ideal_sharded = power(throughput * bf * (bh - hot_bh_reduction), 1/2)
 
     return {
         'UT': ut1_k,
@@ -212,6 +216,7 @@ def tps_to_k(tps, tx_size, bf, bh):
         'UT2': ut2_k,
         'UT2+HO': ut2_ho_k,
         'UT2+HOT': ut2_hot_k,
+        'ideal_sharded': ideal_sharded,
         # 'eth2': eth2_k,
         # 'polkadot': eth2_k,
         # 'cardano': eth2_k,
@@ -224,7 +229,7 @@ def fmt_rounded_commas(value, non_sn_range=(1, 10**6), should_round=True, precis
     if isinstance(value, str):
         return value
     mb_round = lambda v: f"{round(v):,}" if should_round else f"{v:,.{precision}f}"
-    return mb_round(value) if non_sn_range[0] <= value < non_sn_range[1] else f"\x24{value:.2e}}}\x24" \
+    return mb_round(value) if non_sn_range[0] <= value < non_sn_range[1] else f"\x24{value:.{precision}e}}}\x24" \
         .replace("e+0", "e+").replace("e+", "\\times 10^{") \
         .replace("e-0", "e-").replace("e-", "\\times 10^{-")
 
@@ -238,9 +243,9 @@ def table_header(table_name: str):
         'dapp-chains_optimized': [f'$N_1$', f'$N_2$', f'$N_3$', '$\\Delta S$', '$\\mathbb{C}^\\prime$ (Hz)'],
         'tps_por': ['$N_1$', '$\\UT{1}$ tps', '$N_2$', '$\\UT{2}$ tps', 'PoR (bytes)', '$\\nicefrac{N_1}{k}$'],
         'tps_port': ['$N_1$', '$\\UT{1}$ tps', '$N_2$', '$\\UT{2}$ tps', 'PoR (bytes)', '$\\nicefrac{N_1}{k}$'],
-        'compare_nets_3k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'TPS vs \\newline $\\UT{2}$'],
-        'compare_nets_30k': ['Network', 'Scaling Factor', 'TPS per base-chain', 'Network-wide TPS', 'TPS vs \\newline $\\UT{2}$'],
-        'comparison_1m_tps': ['Network', 'TPS per base-chain', 'Network-wide TPS', '$k$ vs $\\UT{2}$', 'Equivalent $\\UT{2}$ TPS'],
+        'compare_nets_3k': ['Network', 'Scaling Factor', '$\\nicefrac{\\Sigma \\text{TPS}}{N_1}$', '$\\Sigma$ TPS', 'TPS vs $\\UT{2}$'],
+        'compare_nets_30k': ['Network', 'Scaling Factor', '$\\nicefrac{\\Sigma \\text{TPS}}{N_1}$', '$\\Sigma$ TPS', 'TPS vs $\\UT{2}$'],
+        'comparison_1m_tps': ['Network', '$\\nicefrac{\\Sigma \\text{TPS}}{N_1}$', '$\\Sigma$ TPS', '$k$ vs $\\UT{2}$', 'Equivalent $\\UT{2}$ TPS'],
         'comparison_1m_tps_conf_hz': ['Network', 'Equivalent $\\UT{2}$ Confirmation Rate (Hz)'],
         'comparison_1gbps': ['Network', 'TPS', '$k$ (B/s)', 'MB/chain/day'], #'$\\nicefrac{\\text{TPS}}{k_1}$ vs $\\UT{2}$'], #, '$k_1 \cdot$ TPS vs $\\UT{2}$', 'TPS vs $\\UT{2}$', 'combined'],
         'compare_optimizations': [UT_NET_NAME_LOOKUP[v] for v in ['UT+PoRs', 'UT+PoRTs', 'UT', 'UT+HO', 'UT+HOT']],
@@ -253,9 +258,9 @@ def table_header(table_name: str):
         'dapp-chains_optimized': ['----', '-----', '-----', '----', '----'],
         'tps_por': ['---', '----', '----', '----', '-----', '----'],
         'tps_port': ['---', '----', '----', '----', '-----', '----'],
-        'compare_nets_3k':  ['----', '---', '----', '------', '-------'],
-        'compare_nets_30k': ['----', '---', '----', '------', '-------'],
-        'comparison_1m_tps': ['---', '----', '-----', '-----', '-----'],
+        'compare_nets_3k':  ['------', '---', '---', '----', '------'],
+        'compare_nets_30k': ['------', '---', '---', '----', '------'],
+        'comparison_1m_tps': ['---', '----', '---', '-----', '-----'],
         'comparison_1m_tps_conf_hz': ['---', '----'],
         'comparison_1gbps': ['---', '---', '---', '----'], #'-----'], #'-----', '------'],
         'compare_optimizations': ['-----', '-----', '----', '-----', '-----']
@@ -294,7 +299,9 @@ def format_table_row(row: List[Any]):
 
 
 def format_params(params, strip_last_n=1):
-    ps = list(params)[:-1 * strip_last_n] if strip_last_n > 0 else list(params)
+    ps = list(params)[:-1 * strip_last_n] if strip_last_n > 0 else list(params)  # remove TPS (last param)
+    k = ps[0]
+    ps[0] = k if isinstance(k, str) or k < 10**6 else fmt_rounded_commas(k, precision=1).replace('$', '')  # any K > 1m in scientific notation
     conv_f = lambda p: str(p[1] if isinstance(p, list) else p)
     return '$' + ', '.join(map(conv_f, ps)) + '$'
 
@@ -345,6 +352,7 @@ def table_row_compare_inner_all(params: CompareParams):
         'polkadot': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2'], 1, 'delta_s', 'full_node_delta_s', 'time_to_sync_5yr_chain'],
         'eth2': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2'], 1, 'delta_s', 'full_node_delta_s', 'time_to_sync_5yr_chain'],
     })
+    cols['ideal'] = cols['eth2']
     return cols
 
 def table_select_optimize_compare(tn, inputs):
@@ -355,9 +363,9 @@ def table_select_optimize_compare(tn, inputs):
             ('TPS', 3, True),
             ('$N_1$', 6, True),
             ('$\\mathbb{C}^\\prime$ (Hz)', 4, False),
-            ('$\\Delta S$ (B/s)', 7, True),
             ('$\\Delta s$ (B/s)', 8, True),
             ('TTS 5yrs (days)', 9, False),
+            ('$\\Delta S$ (B/s)', 7, True),
             ]:
             row_deets = table_row_compare_inner_all(ps)
             variants = ['UT+PoRs', 'UT+PoRTs', 'UT']
@@ -376,7 +384,7 @@ def table_select_optimize_compare(tn, inputs):
 
 def table_row_compare_inner(net: str, params: CompareParams):
     all_cols = table_row_compare_inner_all(params)
-    fn = UT_NET_NAME_LOOKUP.get(net, net) if 'UT' in net else net.capitalize()
+    fn = UT_NET_NAME_LOOKUP.get(net, net.capitalize())
     cols = all_cols[net.split(' ')[0]][:4]  # remove extra cols from table_row_compare_inner_all
     cols.insert(1, fn)
     return cols
@@ -422,6 +430,7 @@ def table_row_1gbps(net, params, ut_params):
         'UT+HOT': (_r['ut_2_tps'], _r['ut_n_1']),
         'UT2': (_r['ut_3_tps'], _r['ut_n_2']),
         'UT2+HOT': (_r['ut_3_tps'], _r['ut_n_2']),
+        'ideal sharded': (_r['eth2_tps'], _r['eth2_n_2_factor']),
         'eth2': (_r['eth2_tps'], _r['eth2_n_2_factor']),
         'polkadot': (_r['eth2_tps'], _r['eth2_n_2_factor']),
         'cardano': (_r['btc_tps'], 1),
@@ -502,13 +511,13 @@ def mk_optimized_rows():
     # offset_f = lambda d_h: 16 if d_h == 84 else 32
     # calc_dh2 = lambda b_h, d_h: d_h - offset_f(d_h) if b_h == 16 else d_h
     for b_f in [1/15, 1/60]:
-        ks = [1000, 3000] + ([30000] if b_f > 1/20 else [])
+        ks = [1000, 3000] + ([30000] if True or b_f > 1/20 else [])
         for k in ks:
             for d_h in [84, 112]:
-                for b_h in [16, 32]:
+                for b_h in [16]: # [16, 32]:  # exclude +HO for the moment
                     dh2 = hot_calc_dh2(b_h, d_h)
                     yield (k, b_f, b_h, dh2, 250)
-    yield (3000, 2/13, 16, hot_calc_dh2(16, 84), 250)
+    yield (3120, 1/6, 16, hot_calc_dh2(16, 84), 250)
     yield (ETH2_1M_K, 1/15, 16, hot_calc_dh2(16, 84), 250)
 
 optimized_row_inputs = list(mk_optimized_rows())
@@ -537,12 +546,13 @@ def mk_comparison_inputs(k: int) -> list[tuple[str, CompareParams]]:
         # ('solana', (k, 1/0.55, 141, 250)),
         ('cardano', (k, 1/20, 1070, 250)),
         ('UT', (k, 1/15, 84, 250)),
-        ('UT+HOT', (k, 1/15, (16, 68), 250)),
+        ('UT+HOT', (k, 1/15, 16, 250)),  # No dappchains so don't need tuple
         ('polkadot', (k, 1/6, 288, 250)),
         ('eth2', (k, 1/12, ETH2_EFFECTIVE_HEADER, 250)),
+        ('ideal sharded', (k, 1/15, 84-16, 250)),
         ('UT2+PoRs', (k, 1/15, 84, 250)),
         ('UT2', (k, 1/15, 84, 250)),
-        ('UT2+HOT', (k, 1/15, (16, 84-16), 250)),
+        ('UT2+HOT', (k, 1/15, (16, 84-16), 250)),  # TODO: the tuple gets printed atm, not the best
         ('UT2 inf', (k, 1/15, 84, 250)),
     ]
 #     ('bitcoin', (comparison_k2, 1/600, 80, 250)),
@@ -578,9 +588,10 @@ comparison_1m_tps = [
     ('cardano', (250000000, 1/20, 1070, 250)),
     # ('cardano', (115700, 1/20, 1070, 250)),
     ('UT', (int(ALL_UT_1M_K['UT']) + 1, 1/15, 84, 250)),
-    ('UT+HOT', (int(ALL_UT_1M_K['UT+HOT']) + 1, 1/15, (16, 68), 250)),
+    ('UT+HOT', (int(ALL_UT_1M_K['UT+HOT']) + 1, 1/15, 16, 250)),
     ('polkadot', (109810, 1/6, 288, 250)),
     ('eth2', (ETH2_1M_K, 1/12, ETH2_EFFECTIVE_HEADER, 250)),
+    ('ideal sharded', (int(ALL_UT_1M_K['ideal_sharded'] + 1), 1/15, (84-16), 250)),
     ('UT2+PoRs', (int(UT_1M_K * 1.536), 1/15, 84, 250)),
     ('UT2+PoRTs', (int(UT_1M_K * 1.337), 1/15, 84, 250)),
     ('UT2', (UT_1M_K, 1/15, 84, 250)),
@@ -596,8 +607,9 @@ comparison_1gbps = [
     ('UT+HOT', [1024 ** 3 // 8, 1/15, 84, 250]),
     ('polkadot', [1024 ** 3 // 8, 1/6, 288, 250]),
     ('eth2', [1024 ** 3 // 8, 1/12, ETH2_EFFECTIVE_HEADER, 250]),
+    ('ideal sharded', [1024 ** 3 // 8, 1/15, 68, 250]),
     ('UT2', [1024 ** 3 // 8, 1/15, 84, 250]),
-    ('UT2+HOT', [1024 ** 3 // 8, 1/15, 84, 250]),
+    ('UT2+HOT', [1024 ** 3 // 8, 1/15, 84, 250]),  # HOT accounted for later
 ]
 
 all_tables = {}
@@ -623,8 +635,8 @@ for table_name in ['compare_nets_3k', 'compare_nets_30k']:
     def mk_row():
         rows = list(table_row_compare(net, r, ut_tps) for (net, r) in net_inputs)
         for r in rows:
-            if 'UT2 inf' in r[1]:
-                r[1] = '$\\UTinf{2}$'
+            if 'UTinf{2}' in r[1]:
+                # r[1] = '$\\UTinf{2}$'
                 r[-2] = '$\\infty$'
                 r[-1] = '$(\\infty)\\times$'
         return rows
