@@ -427,6 +427,7 @@ def table_row_1gbps(net, params, ut_params):
     r_ut = calc_tps_throughput(k_ut, ut_bf, ut_bf, ut_bh, ut_bh, ut_tx)
     get_net_vals = lambda _r, _net: ({
         'UT': (_r['ut_2_tps'], _r['ut_n_1']),
+        'UT+HO': (_r['ut_2_tps'], _r['ut_n_1']),
         'UT+HOT': (_r['ut_2_tps'], _r['ut_n_1']),
         'UT2': (_r['ut_3_tps'], _r['ut_n_2']),
         'UT2+HOT': (_r['ut_3_tps'], _r['ut_n_2']),
@@ -546,6 +547,7 @@ def mk_comparison_inputs(k: int) -> list[tuple[str, CompareParams]]:
         # ('solana', (k, 1/0.55, 141, 250)),
         ('cardano', (k, 1/20, 1070, 250)),
         ('UT', (k, 1/15, 84, 250)),
+        ('UT+HO', (k, 1/15, 32, 250)),  # No dappchains so don't need tuple
         ('UT+HOT', (k, 1/15, 16, 250)),  # No dappchains so don't need tuple
         ('polkadot', (k, 1/6, 288, 250)),
         ('eth2', (k, 1/12, ETH2_EFFECTIVE_HEADER, 250)),
