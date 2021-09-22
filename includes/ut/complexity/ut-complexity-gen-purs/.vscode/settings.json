@@ -5,5 +5,12 @@
     "files.watcherExclude": {
         "**/.spago/**": true
     },
-    "purescript.formatter": "purty"
+    "purescript.formatter": "purty",
+    "editor.formatOnSave": true,
+    "editor.trimAutoWhitespace": true,
+    "files.autoSave": "onFocusChange",
+    "purescript.autocompleteAddImport": true,
+    "purescript.autocompleteGrouped": true,
+    "purescript.buildOpenedFiles": true,
+    "purescript.fastRebuild": true,
 }

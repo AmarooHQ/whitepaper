@@ -16,5 +16,10 @@ jobs:
         run: |
           make docker-build
 
+      - uses: purescript-contrib/setup-purescript@main
+      - run: |
+          cd includes/ut/complexity/ut-complexity-gen-purs
+          spago build
+
       - name: build whitepaper
         run: make docker "DOCKER_CMD=bash build.sh"

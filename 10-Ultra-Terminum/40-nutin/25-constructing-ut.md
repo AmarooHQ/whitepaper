@@ -172,7 +172,7 @@ Example use-case: a greenfield dapp-chain uses an Amaroo-compatible DEX (which r
 
 - overhead re: including extra tx details with block-header
 - advantage: the simplex-chain doesn't necessarily need to evaluate a headers-only version of the child-chain; all PoR work can be done on the child-chain only.
-- disadvantage: can't do native SPV
+- disadvantage: can't do native simplex-level SPV (note: any other dapp-chain can do native SPV to the simplex, tho, and from there do its own SPV. that might work for weird headers, or if Bf was lower, or as an optimization...)
 
 Example use-cases:
 
