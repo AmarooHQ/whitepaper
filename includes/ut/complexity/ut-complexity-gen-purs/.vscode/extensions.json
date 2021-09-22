@@ -1,0 +1,9 @@
+{
+    "recommendations": [
+        "mvakula.vscode-purty",
+        "nwolverson.ide-purescript",
+        "nwolverson.language-purescript",
+        "freebroccolo.input-assist",
+        "dhall.dhall-lang"
+    ]
+}
