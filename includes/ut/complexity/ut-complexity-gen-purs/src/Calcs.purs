@@ -5,6 +5,8 @@ import Prel
 import Data.List.NonEmpty (NonEmptyList, cons', fromList, head, singleton, tail)
 import Data.Maybe (fromMaybe)
 import Data.Tuple (Tuple)
+import Debug (trace)
+import Math (abs, ceil, floor, ln2, log)
 import Undefined (undefined)
 
 {-|
@@ -97,6 +99,32 @@ tradChainCalc ps = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts}
     tts = ((deltaSmallS * 5.0 * 365.25) / 10_000_000.0)
     confRate = (head ps.hfs).bf
 
+
+utPorsT1 :: Number -> Number -> Number -> Number -> Number -> Number
+utPorsT1 n1 k1 bf bh g = n1 * (k1 - bf * n1 * (bh + g * log2c n1))
+
+findMax :: Number -> Number -> (Number -> Number) -> (Number -> Number) -> Number
+findMax start delta f df = findMax' 0 (f start) start
+  where
+    findMax' counter f0 x0 = if counter > 5000 then x0 else if f0 <= f1 then (findMax' (counter + 1) f1 x1) else x1
+      where
+        f1 = f x1
+        x1 = x0 + delta
+    -- findMax' counter x0 = if counter > 5000 || abs (x0 - next) < epsilon then trace ("next:" <> show next <> " df:" <> show (df x0)) \_ -> next else findMax' (counter + 1) next
+    --   where
+    --     -- df = (f $ x0 + epsilon) - (f $ x0 - epsilon)
+    --     next = x0 - (f x0) / (df x0)
+
+findMaxPoRsN1 :: Params -> Number -> Number
+findMaxPoRsN1 ps g = floor $ findMax 1.0 1.0 utPorsT1Applied df
+  where
+    utPorsT1Applied n1 = utPorsT1 n1 k1 bf bh g
+    df n1 = (k1 * ln2 - bf * n1 * (g + bh * log 4.0) - 2.0 * bf * g * n1 * log n1) / ln2
+    k1 = head ps.ks
+    bf = hf.bf
+    bh = hf.bh
+    hf = head ps.hfs
+
 type UtParams = {explicitPoRs :: Boolean, headerOmission :: Boolean, hashTruncation :: Boolean}
 
 utChainCalc :: Params -> UtParams -> ChainStats
@@ -110,9 +138,9 @@ utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, con
     hf = (head ps1.hfs)
     bfbh = hf.bf * hf.bh
     k1 = head ps1.ks
+    n1 = if explicitPoRs then findMaxPoRsN1 ps1 hashSize else k1 / 2.0 / bfbh
     kB = if explicitPoRs then undefined else (k1 / 2.0)
     kTx = k1 - kB
-    n1 = kB / bfbh
     t1 = kTx * n1
     d1 = {n: n1, t: t1, tps: t1 / ps.txSize}
     -- NB: we want to re-adjust *unaltered params `ps` not `ps1` which we use for d1
@@ -120,12 +148,11 @@ utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, con
     ps2 = ps2Pre {hfs = (fixBH2 (head ps2Pre.hfs) `cons'` tail ps2Pre.hfs)}
     ps3 = paramsForNextNS $ ps2Pre
     deltaBigS = if explicitPoRs then undefined else n1 * k1
-    deltaSmallS = if explicitPoRs then k1 else k1 + n1 * hashSize * log2c 50.0
+    deltaSmallS = if explicitPoRs then k1 else k1 + n1 * hashSize * log2c n1
     tts = ((deltaSmallS * 5.0 * 365.25) / 10_000_000.0)
     confRate = hf.bf * n1
     d2 = calcNextNestingLevel ps2 d1
     d3 = calcNextNestingLevel ps3 d2
-
 
 allUtChainCalcs :: Params -> UtVariants _
 allUtChainCalcs ps =

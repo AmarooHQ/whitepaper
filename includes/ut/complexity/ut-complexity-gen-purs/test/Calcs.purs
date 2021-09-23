@@ -3,8 +3,11 @@ module Test.Calcs where
 import Calcs
 import Prel
 
+import Data.Array (zip)
 import Data.Int (floor, round)
 import Data.Ord (abs)
+import Data.Traversable (sequence, sequence_)
+import Data.Tuple (fst, snd)
 import Math (exp, log, pow)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (fail, shouldEqual)
@@ -26,9 +29,10 @@ genSample = runChainCalcFor
 
 expectTrue x = x `shouldEqual` true
 
-shouldBeCloseTo x y = not ((x - y) |> abs |> (-) 0.00001 |> (<) 0.0) |> when $
+shouldBeWithin d x y = not ((x - y) |> abs |> (-) d |> (<) 0.0) |> when $
   fail $ show x <> " != " <> show y
 
+shouldBeCloseTo = shouldBeWithin 0.00001
 
 tradSpec :: Spec Unit
 tradSpec = describe "trad chains" do
@@ -86,3 +90,28 @@ utSpec = describe "ut" do
         ut.d2 `shouldEqual` {n: n2, t: t1 * 100.0, tps: t1 * 100.0 / txSize}
       it "d3" do
         ut.d3 `shouldEqual` {n: n3, t: t3, tps: t3 / 500.0}
+      -- it "other" do
+      --   ut.tts `shouldEqual`
+
+    describe "ut comparison test vecs" do
+      let tpss = [39, 53, 50, 156, 312]
+          n1s = [19, 27, 50, 156, 312]
+          confRates = [1.93, 2.67, 5.00, 15.62, 31.25]
+          dss = [1000, 1000, 2403, 5143, 5643]
+          ttss = [0.18, 0.18, 0.44, 0.94, 1.03]
+          dbs = [1000, 1000, 50000, 156250, 312500]
+          s = basicSample.ut
+          -- exclude +T variant b/c py script doesn't get it
+          variants = [s.pors, s.ports, s.std, s.ho, s.hot]
+      it "TPS" do
+        ((\v -> floor v.d1.tps) <$> variants) `shouldEqual` tpss
+      it "N1" do
+        ((\v -> floor v.d1.n) <$> variants) `shouldEqual` n1s
+      it "ds" do
+        ((\v -> floor v.deltaSmallS) <$> variants) `shouldEqual` dss
+      it "dS" do
+        ((\v -> floor v.deltaBigS) <$> variants) `shouldEqual` dbs
+      it "Conf Rates" $
+        sequence_ $ (\t -> shouldBeWithin 0.005 (fst t) (snd t)) <$> zip ((\v -> v.confRate) <$> variants) confRates
+      it "TTS" $
+        sequence_ $ (\t -> shouldBeWithin 0.005 (fst t) (snd t)) <$> zip ((\v -> v.tts) <$> variants) ttss
