@@ -14,7 +14,7 @@ import Effect.Class (liftEffect)
 import Effect.Console as C
 import Math (exp, log, pow)
 import Test.Spec (Spec, describe, it)
-import Test.Spec.Assertions (fail, shouldEqual)
+import Test.Spec.Assertions (fail, shouldEqual, shouldNotEqual, shouldSatisfy)
 import Undefined (undefined)
 
 
@@ -67,12 +67,15 @@ utSpec = describe "ut" do
         basicSample.ut.std.d2 `dNShouldEqual` {n: 50.0 `pow` 2.0, t: 2500000.0, tps: 5000.0}
       it "d3" do
         basicSample.ut.std.d3 `dNShouldEqual` {n: 2500.0 * 100.0, t: 250000000.0, tps: 500000.0}
-      it "other" do
+      let dss = (1000.0 + 0.1 * 50.0 * (100.0 + 32.0 * log2c 50.0))  -- k + bf * N1 proofs * (bh + proof_size)
+          tts = 5.0 * 365.25 * dss / 10_000_000.0
+      it "confRate" do
         basicSample.ut.std.confRate `shouldEqual` 5.0
+      it "dbs" do
         basicSample.ut.std.deltaBigS `shouldEqual` (1000.0 * 50.0)
-        let dss = (1000.0 + 50.0 * 32.0 * log2c 50.0)  -- k + N1 proofs * proof_size
-            tts = 5.0 * 365.25 * dss / 10_000_000.0
+      it "dss" do
         basicSample.ut.std.deltaSmallS `shouldEqual` dss
+      it "tts" do
         basicSample.ut.std.tts `shouldBeCloseTo` tts
     describe "ut.ho" do
       let ut = basicSample.ut.ho
@@ -112,19 +115,25 @@ utSpec = describe "ut" do
         getBH1 utvs.hot `shouldEqual` 16.0
         getBH2 utvs.hot `shouldEqual` 84.0
         getBH3 utvs.hot `shouldEqual` 100.0  -- at nesting-l-3, truncation is not something we can realiably predict
-      it "truncation should shorten headers" do
+      it "truncation should shorten headers and PoRs" do
+        utvs.t.porBytes `shouldSatisfy` ((>) utvs.std.porBytes)
         getBH1 utvs.t `shouldEqual` 84.0
         getBH2 utvs.t `shouldEqual` 84.0
         getBH3 utvs.t `shouldEqual` 100.0
         getBH1 utvs.hot `shouldEqual` 16.0
         getBH2 utvs.hot `shouldEqual` 84.0
         getBH3 utvs.hot `shouldEqual` 100.0  -- at nesting-l-3, truncation is not something we can realiably predict
+      it "+PoRs variants shouldn't have kTx == kB" do
+        utvs.pors.kTx `shouldNotEqual` utvs.pors.kB
+        utvs.ports.kTx `shouldNotEqual` utvs.ports.kB
 
     describe "ut comparison test vecs" do
       let tpss = [50, 156, 312]
           n1s = [50, 156, 312]
           dbs = [50000, 156250, 312500]
           -- confRates = [1.93, 2.67, 5.00, 15.62, 31.25]
+          -- TTS isn't an exact match, but p close. Definitely *looks* mostly right WRT numbers coming out.
+          -- ttss = [0.44, 0.94, 1.03]
           s = basicSample.ut
           -- exclude +T variant b/c py script doesn't get it
           variants = [s.std, s.ho, s.hot]

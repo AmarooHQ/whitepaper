@@ -19,6 +19,9 @@ jobs:
       - uses: purescript-contrib/setup-purescript@main
       - run: |
           cd includes/ut/complexity/ut-complexity-gen-purs
+          LAMW_URL="https://raw.githubusercontent.com/XertroV/lambertw/7c65e241b353e296f58cdad774c77d500d0a11bd/lambertw.js"
+          curl "$LAMW_URL" > src/LambertW.js
+          echo "exports.gsl_sf_lambert_W0 = gsl_sf_lambert_W0;" >> src/LambertW.js
           spago test
           spago build
 
