@@ -1,8 +1,8 @@
 module Main where
 
-import Prelude
+import Prel
 
-import Calcs (ChainCalcs)
+import Calcs (ChainComplexities)
 import Effect (Effect)
 import Effect.Console (log)
 

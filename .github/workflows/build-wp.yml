@@ -19,6 +19,7 @@ jobs:
       - uses: purescript-contrib/setup-purescript@main
       - run: |
           cd includes/ut/complexity/ut-complexity-gen-purs
+          spago test
           spago build
 
       - name: build whitepaper

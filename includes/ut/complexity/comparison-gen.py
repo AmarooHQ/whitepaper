@@ -483,6 +483,7 @@ def pad_rows(rows: List[List[str]], ns: List[int]):
 #                         row_inputs.append((k, b_f, d_f, b_h, d_h, tx_avg))
 
 row_inputs = [
+    # (1000, 1/10, 100, 500),  # testing for purs
     # ver fast chains
     (1000, 1/15, 84, 250),
     (1000, 1/15, 112, 250),
@@ -509,8 +510,7 @@ row_inputs = [
 ]
 
 def mk_optimized_rows():
-    # offset_f = lambda d_h: 16 if d_h == 84 else 32
-    # calc_dh2 = lambda b_h, d_h: d_h - offset_f(d_h) if b_h == 16 else d_h
+    # yield (1000, 1/10, 32, 100, 500)  # testing for purs generator
     for b_f in [1/15, 1/60]:
         ks = [1000, 3000] + ([30000] if True or b_f > 1/20 else [])
         for k in ks:

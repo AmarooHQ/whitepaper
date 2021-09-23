@@ -13,4 +13,10 @@
     "purescript.autocompleteGrouped": true,
     "purescript.buildOpenedFiles": true,
     "purescript.fastRebuild": true,
+    "purescript.autocompleteAllModules": true,
+    "purescript.censorWarnings": [],
+    "purescript.preludeModule": "Prel",
+    "[purescript]": {
+        "editor.tabSize": 2,
+    },
 }
