@@ -139,15 +139,15 @@ utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, con
     bfbh = hf.bf * hf.bh
     k1 = head ps1.ks
     n1 = if explicitPoRs then findMaxPoRsN1 ps1 hashSize else k1 / 2.0 / bfbh
-    kB = if explicitPoRs then undefined else (k1 / 2.0)
-    kTx = k1 - kB
+    kTx = if explicitPoRs then k1 - hf.bf * n1 * (hf.bh + hashSize * log2c n1) else (k1 / 2.0)
+    kB = k1 - kTx
     t1 = kTx * n1
     d1 = {n: n1, t: t1, tps: t1 / ps.txSize}
     -- NB: we want to re-adjust *unaltered params `ps` not `ps1` which we use for d1
     ps2Pre = paramsForNextNS ps -- trim param-depth lists
     ps2 = ps2Pre {hfs = (fixBH2 (head ps2Pre.hfs) `cons'` tail ps2Pre.hfs)}
     ps3 = paramsForNextNS $ ps2Pre
-    deltaBigS = if explicitPoRs then undefined else n1 * k1
+    deltaBigS = if explicitPoRs then k1 else n1 * k1
     deltaSmallS = if explicitPoRs then k1 else k1 + n1 * hashSize * log2c n1
     tts = ((deltaSmallS * 5.0 * 365.25) / 10_000_000.0)
     confRate = hf.bf * n1

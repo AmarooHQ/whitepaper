@@ -111,7 +111,9 @@ utSpec = describe "ut" do
         ((\v -> floor v.deltaSmallS) <$> variants) `shouldEqual` dss
       it "dS" do
         ((\v -> floor v.deltaBigS) <$> variants) `shouldEqual` dbs
-      it "Conf Rates" $
+      it "Conf Rates" $ do
+        ((\v -> v.confRate) <$> variants) `shouldEqual` confRates
         sequence_ $ (\t -> shouldBeWithin 0.005 (fst t) (snd t)) <$> zip ((\v -> v.confRate) <$> variants) confRates
-      it "TTS" $
+      it "TTS" $ do
+        ((\v -> v.tts) <$> variants) `shouldEqual` ttss
         sequence_ $ (\t -> shouldBeWithin 0.005 (fst t) (snd t)) <$> zip ((\v -> v.tts) <$> variants) ttss
