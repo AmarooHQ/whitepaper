@@ -363,8 +363,8 @@ def table_select_optimize_compare(tn, inputs):
             ('TPS', 3, True),
             ('$N_1$', 6, True),
             ('$\\mathbb{C}^\\prime$ (Hz)', 4, False),
-            ('$\\Delta s$ (B/s)', 8, True),
-            ('TTS 5yrs (days)', 9, False),
+            # ('$\\Delta s$ (B/s)', 8, True),
+            # ('TTS 5yrs (days)', 9, False),
             ('$\\Delta S$ (B/s)', 7, True),
             ]:
             row_deets = table_row_compare_inner_all(ps)

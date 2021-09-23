@@ -2,7 +2,12 @@ module Calcs where
 
 import Prel
 
+import Data.Array (range)
+import Data.Array as A
+import Data.Int (toNumber)
+import Data.Int as I
 import Data.List.NonEmpty (NonEmptyList, cons', fromList, head, singleton, tail)
+import Data.List.NonEmpty as NEL
 import Data.Maybe (fromMaybe)
 import Data.Tuple (Tuple)
 import Debug (trace)
@@ -24,11 +29,18 @@ Any new UT variants should be added to the `UtVariants` type, and
 type ChainNestingParams
   = { bf :: Number, bh :: Number }
 
-type Params
-  = { ks :: NonEmptyList Number
-    , hfs :: NonEmptyList ChainNestingParams -- | List of {header,frequency} pairs
+type ParamsL l
+  = { ks :: l Number
+    , hfs :: l ChainNestingParams -- | List of {header,frequency} pairs
     , txSize :: Number
     }
+type Params = ParamsL NonEmptyList
+
+showableParams :: Params -> ParamsL Array
+showableParams p = {ks: NEL.toUnfoldable p.ks, hfs: NEL.toUnfoldable p.hfs, txSize: p.txSize}
+
+-- instance showParams :: Show Params where
+--   show {ks, hfs, txSize} = show {ks: NEL.toList ks, hfs: NEL.toList hfs, txSize}
 
 mkSimplePs :: Number -> ChainNestingParams -> Number -> Params
 mkSimplePs k hf txSize = {ks: singleton k, hfs: singleton hf, txSize}
@@ -46,7 +58,14 @@ type NestingStats
   = { tps :: Number
     , n :: Number
     , t :: Number
+    , p :: Params
     }
+
+stripParams :: NestingStats -> _
+stripParams {n, t, tps} = {n, t, tps}
+
+nsShowable :: NestingStats -> _
+nsShowable ns@{p} = ns { p = showableParams p }
 
 type ChainStats
   = { d1 :: NestingStats
@@ -56,7 +75,17 @@ type ChainStats
     , deltaSmallS :: Number
     , tts :: Number
     , confRate :: Number
+    , porBytes :: Number
+    , kTx :: Number
+    , kB :: Number
     }
+
+csStripP :: ChainStats -> _
+csStripP cs@{d1, d2, d3} = cs { d1 = nsShowable d1, d2 = nsShowable d2, d3 = nsShowable d3 }
+
+utvStripP :: UtVariants ChainStats -> _
+utvStripP {pors, ports, std, t, ho, hot} = { pors: csStripP pors, ports: csStripP ports, std: csStripP std, t: csStripP t, ho: csStripP ho, hot: csStripP hot }
+
 
 type ChainComplexities
   = { trad :: ChainStats
@@ -73,12 +102,12 @@ paramsForNextNS ps@{txSize} = {ks, hfs, txSize}
     hfs = tail ps.hfs |> fromList |> fromMaybe ps.hfs
 
 tradInitNS :: Params -> NestingStats
-tradInitNS ps = {n: 1.0, t: t, tps: t / ps.txSize}
+tradInitNS ps = {n: 1.0, t: t, tps: t / ps.txSize, p: ps}
   where t = head ps.ks
 
 
 calcNextNestingLevel :: Params -> NestingStats -> NestingStats
-calcNextNestingLevel ps nsPrev = {n, t, tps}
+calcNextNestingLevel ps nsPrev = {n, t, tps, p: ps}
   where
     n = nsPrev.t / bfbh
     t = nsPrev.t * k / bfbh
@@ -88,9 +117,9 @@ calcNextNestingLevel ps nsPrev = {n, t, tps}
     k = head ps.ks
 
 tradChainCalc :: Params -> ChainStats
-tradChainCalc ps = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts}
+tradChainCalc ps = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts, porBytes: 0.0, kTx: k, kB: 0.0}
   where
-    d1 = {n: 1.0, t: k, tps: k / ps.txSize}
+    d1 = {n: 1.0, t: k, tps: k / ps.txSize, p: ps}
     k = head ps.ks
     d2 = calcNextNestingLevel ps d1
     d3 = calcNextNestingLevel ps d2
@@ -100,57 +129,71 @@ tradChainCalc ps = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts}
     confRate = (head ps.hfs).bf
 
 
-utPorsT1 :: Number -> Number -> Number -> Number -> Number -> Number
-utPorsT1 n1 k1 bf bh g = n1 * (k1 - bf * n1 * (bh + g * log2c n1))
+porLen :: Number -> Number -> Number
+porLen hashSize n = hashSize * log2c n
 
-findMax :: Number -> Number -> (Number -> Number) -> (Number -> Number) -> Number
-findMax start delta f df = findMax' 0 (f start) start
-  where
-    findMax' counter f0 x0 = if counter > 5000 then x0 else if f0 <= f1 then (findMax' (counter + 1) f1 x1) else x1
-      where
-        f1 = f x1
-        x1 = x0 + delta
-    -- findMax' counter x0 = if counter > 5000 || abs (x0 - next) < epsilon then trace ("next:" <> show next <> " df:" <> show (df x0)) \_ -> next else findMax' (counter + 1) next
-    --   where
-    --     -- df = (f $ x0 + epsilon) - (f $ x0 - epsilon)
-    --     next = x0 - (f x0) / (df x0)
+
+utPorsT1 :: Number -> Number -> Number -> Number -> Number -> Number
+utPorsT1 n1 k1 bf bh g = n1 * (k1 - bf * n1 * (bh + porLen g n1))
+
+-- findMax :: Number -> Number -> (Number -> Number) -> Number
+-- findMax start delta f = findMax' 0 (f start) start
+--   where
+--     findMax' counter f0 x0 = if counter > 5000 then x0 else if f0 > f1 then x0 else (findMax' (counter + 1) f1 x1)
+--       where
+--         f1 = f x1
+--         x1 = x0 + delta
+--     -- findMax' counter x0 = if counter > 5000 || abs (x0 - next) < epsilon then trace ("next:" <> show next <> " df:" <> show (df x0)) \_ -> next else findMax' (counter + 1) next
+--     --   where
+--     --     -- df = (f $ x0 + epsilon) - (f $ x0 - epsilon)
+--     --     next = x0 - (f x0) / (df x0)
 
 findMaxPoRsN1 :: Params -> Number -> Number
-findMaxPoRsN1 ps g = floor $ findMax 1.0 1.0 utPorsT1Applied df
+findMaxPoRsN1 ps g = bestTN.n -- floor $ findMax 1.0 1.0 utPorsT1Applied
   where
+    -- inefficient, but foolproof (why I cared about performance before, IDK)
+    bestTN = sortedT1s |> A.last |> fromMaybe {a: 0.0, b: 0.0} |> (\{a,b} -> {n: a, t: b})
+    sortedT1s = A.sortBy (\o1 o2 -> compare o1.b o2.b) possibleT1s
+    possibleT1s = (nRange <#> utPorsT1Applied |> A.zip nRange) <#> tupToRec
+    nRange = A.range 1 (I.floor wontBeMoreThan) <#> I.toNumber
     utPorsT1Applied n1 = utPorsT1 n1 k1 bf bh g
-    df n1 = (k1 * ln2 - bf * n1 * (g + bh * log 4.0) - 2.0 * bf * g * n1 * log n1) / ln2
     k1 = head ps.ks
     bf = hf.bf
     bh = hf.bh
     hf = head ps.hfs
+    wontBeMoreThan = k1 / 2.0 / bf / bh  -- N1 without explicit PoRs
+    -- from WP, useful for some things.
+    utPorsDT1byDN1 n1 = (k1 * ln2 - bf * n1 * (g + bh * log 4.0) - 2.0 * bf * g * n1 * log n1) / ln2
 
 type UtParams = {explicitPoRs :: Boolean, headerOmission :: Boolean, hashTruncation :: Boolean}
 
 utChainCalc :: Params -> UtParams -> ChainStats
-utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, confRate, tts, deltaBigS, deltaSmallS}
+utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, confRate, tts, deltaBigS, deltaSmallS, porBytes, kTx, kB}
   where
     hashSize = if hashTruncation then 16.0 else 32.0
     htModBh bh = bh - (if hashTruncation then 16.0 else 0.0)
     fixBH1 r@{bh} = r {bh = (if headerOmission then hashSize else htModBh bh)}
     fixBH2 r@{bh} = r {bh = htModBh bh}
+    -- we have to modify the header size based on optimizations, but we don't want to pass
+    --  this to other levels of nesting, so we'll make params for each nesting level.
     ps1 = ps {hfs = (fixBH1 (head ps.hfs) `cons'` tail ps.hfs)}
     hf = (head ps1.hfs)
     bfbh = hf.bf * hf.bh
     k1 = head ps1.ks
-    n1 = if explicitPoRs then findMaxPoRsN1 ps1 hashSize else k1 / 2.0 / bfbh
-    kTx = if explicitPoRs then k1 - hf.bf * n1 * (hf.bh + hashSize * log2c n1) else (k1 / 2.0)
+    n1 = if explicitPoRs then findMaxPoRsN1 ps1 hashSize else (k1 / 2.0 / bfbh)
+    confRate = hf.bf * n1
+    porBytes = porLen hashSize n1
+    kTx = if explicitPoRs then k1 - hf.bf * n1 * (hf.bh + porBytes) else (k1 / 2.0)
     kB = k1 - kTx
     t1 = kTx * n1
-    d1 = {n: n1, t: t1, tps: t1 / ps.txSize}
+    d1 = {n: n1, t: t1, tps: t1 / ps.txSize, p: ps1}
     -- NB: we want to re-adjust *unaltered params `ps` not `ps1` which we use for d1
     ps2Pre = paramsForNextNS ps -- trim param-depth lists
     ps2 = ps2Pre {hfs = (fixBH2 (head ps2Pre.hfs) `cons'` tail ps2Pre.hfs)}
     ps3 = paramsForNextNS $ ps2Pre
     deltaBigS = if explicitPoRs then k1 else n1 * k1
-    deltaSmallS = if explicitPoRs then k1 else k1 + n1 * hashSize * log2c n1
-    tts = ((deltaSmallS * 5.0 * 365.25) / 10_000_000.0)
-    confRate = hf.bf * n1
+    deltaSmallS = if explicitPoRs then k1 else k1 + n1 * porBytes  -- TODO: figure this out
+    tts = ((deltaSmallS * 5.0 * 365.25) / 10_000_000.0)  -- TODO: figure this out
     d2 = calcNextNestingLevel ps2 d1
     d3 = calcNextNestingLevel ps3 d2
 
