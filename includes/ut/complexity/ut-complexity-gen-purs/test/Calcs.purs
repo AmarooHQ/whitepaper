@@ -3,17 +3,20 @@ module Test.Calcs where
 import Calcs
 import Prel
 
+import Control.Monad.Trans.Class (lift)
 import Data.Array (range)
 import Data.Array (zip)
 import Data.Int (floor, round, toNumber)
 import Data.Int as I
 import Data.List.NonEmpty as NEL
+import Data.Maybe (fromJust)
 import Data.Ord (abs)
 import Data.Traversable (sequence, sequence_)
 import Data.Tuple (fst, snd)
 import Effect.Class (liftEffect)
 import Effect.Console as C
 import Math (exp, log, pow)
+import Partial.Unsafe (unsafePartial)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (fail, shouldEqual, shouldNotEqual, shouldSatisfy)
 import Undefined (undefined)
@@ -106,27 +109,50 @@ utSpec = describe "ut" do
       --   ut.tts `shouldEqual`
 
     describe "UT variant effective header size" do
-      let getBH1 v = (v.d1.p.hfs |> NEL.head).bh
-          getBH2 v = (v.d2.p.hfs |> NEL.head).bh
-          getBH3 v = (v.d3.p.hfs |> NEL.head).bh
+      let getHF1 v = v.d1.p.hfs |> NEL.head
+          getHF2 v = v.d2.p.hfs |> NEL.head
+          getHF3 v = v.d3.p.hfs |> NEL.head
+          getK1 v = v.d1.p.ks |> NEL.head
+          getK2 v = v.d2.p.ks |> NEL.head
+          getK3 v = v.d3.p.ks |> NEL.head
       it "header omission should use hashSize" do
-        getBH1 utvs.ho `shouldEqual` 32.0
-        getBH2 utvs.ho `shouldEqual` 100.0
-        getBH3 utvs.ho `shouldEqual` 100.0
-        getBH1 utvs.hot `shouldEqual` 16.0
-        getBH2 utvs.hot `shouldEqual` 84.0
-        getBH3 utvs.hot `shouldEqual` 100.0  -- at nesting-l-3, truncation is not something we can realiably predict
+        (getHF1 utvs.ho).bh `shouldEqual` 32.0
+        (getHF2 utvs.ho).bh `shouldEqual` 100.0
+        (getHF3 utvs.ho).bh `shouldEqual` 100.0
+        (getHF1 utvs.hot).bh `shouldEqual` 16.0
+        (getHF2 utvs.hot).bh `shouldEqual` 84.0
+        (getHF3 utvs.hot).bh `shouldEqual` 100.0  -- at nesting-l-3, truncation is not something we can realiably predict
       it "truncation should shorten headers and PoRs" do
         utvs.t.porBytes `shouldSatisfy` ((>) utvs.std.porBytes)
-        getBH1 utvs.t `shouldEqual` 84.0
-        getBH2 utvs.t `shouldEqual` 84.0
-        getBH3 utvs.t `shouldEqual` 100.0
-        getBH1 utvs.hot `shouldEqual` 16.0
-        getBH2 utvs.hot `shouldEqual` 84.0
-        getBH3 utvs.hot `shouldEqual` 100.0  -- at nesting-l-3, truncation is not something we can realiably predict
+        (getHF1 utvs.t).bh `shouldEqual` 84.0
+        (getHF2 utvs.t).bh `shouldEqual` 84.0
+        (getHF3 utvs.t).bh `shouldEqual` 100.0
+        (getHF1 utvs.hot).bh `shouldEqual` 16.0
+        (getHF2 utvs.hot).bh `shouldEqual` 84.0
+        (getHF3 utvs.hot).bh `shouldEqual` 100.0  -- at nesting-l-3, truncation is not something we can realiably predict
       it "+PoRs variants shouldn't have kTx == kB" do
         utvs.pors.kTx `shouldNotEqual` utvs.pors.kB
         utvs.ports.kTx `shouldNotEqual` utvs.ports.kB
+      it "multi-tier headers work" do
+        let ps = { hfs: NEL.fromFoldable [{bf: 0.11, bh: 10.0}, {bf: 0.22, bh: 20.0}] |> unsafePartial fromJust
+                 , ks: NEL.cons 1111.0 $ NEL.singleton 2222.0
+                 , txSize: 500.0
+                 }
+            trad = tradChainCalc ps
+            ut = allUtChainCalcs ps
+        -- liftEffect $ C.log $ "t:" <> show trad
+            checkStats stats = do
+              getK1 stats `shouldEqual` 1111.0
+              getK2 stats `shouldEqual` 2222.0
+              getK3 stats `shouldEqual` 2222.0
+              (getHF1 stats).bh `shouldEqual` 10.0
+              (getHF2 stats).bh `shouldEqual` 20.0
+              (getHF3 stats).bh `shouldEqual` 20.0
+        checkStats trad
+        checkStats ut.std
+        (getHF1 ut.hot).bh `shouldEqual` 16.0
+        (getHF2 ut.hot).bh `shouldEqual` 4.0
+        (getHF3 ut.hot).bh `shouldEqual` 20.0
 
     describe "ut comparison test vecs" do
       let tpss = [50, 156, 312]

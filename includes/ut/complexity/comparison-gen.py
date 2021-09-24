@@ -537,7 +537,7 @@ select_optimized_row_inputs: list[CompareParams] = [(3000, 1/15, 84, 250)]
 # > expect each data shard to target 2.480 MB per block (PS: this is history, not state).
 # that's: k ~= 206,000
 # plugging that in to comparison table: 1e7 (10million) tps; so in the ballpark
-#
+
 
 comparison_ks = {'compare_nets_3k': 3000, 'compare_nets_30k': 30000}
 def mk_comparison_inputs(k: int) -> list[tuple[str, CompareParams]]:
