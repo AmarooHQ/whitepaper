@@ -13,3 +13,4 @@ main = do
   launchAff_ $ runSpec [consoleReporter] do
     tradSpec
     utSpec
+    auxStatsSpec

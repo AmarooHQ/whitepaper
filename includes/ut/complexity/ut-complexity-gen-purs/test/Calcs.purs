@@ -61,9 +61,32 @@ tradSpec = describe "trad chains" do
         basicSample.trad.deltaSmallS `shouldEqual` 1000.0
         basicSample.trad.tts `shouldBeCloseTo` 0.18262499999999998
 
+auxStatsSpec :: Spec Unit
+auxStatsSpec = describe "Aux Stats" do
+    let utvs = basicSample.ut
+        trad = basicSample.trad
+        stdAux = auxStats utvs.std
+        tradAux = auxStats trad
+    describe "scaling factors" do
+      it "noNesting" do
+        stdAux.scalingFactors.noNesting `shouldEqual` 1.0
+        tradAux.scalingFactors.noNesting `shouldEqual` 1.0
+      it "nesting" do
+        stdAux.scalingFactors.nesting `shouldEqual` (utvs.std.d2.n / utvs.std.d1.n * 2.0)
+        tradAux.scalingFactors.nesting `shouldEqual` (trad.d2.n / trad.d1.n)
+      it "tps/n1" do
+        stdAux.tpsPerBaseChain.d1 `shouldEqual` (0.5 * tradAux.tpsPerBaseChain.d1)
+        stdAux.tpsPerBaseChain.d2 `shouldEqual` (0.5 * tradAux.tpsPerBaseChain.d2)
+      it "n1PerK" do
+        stdAux.n1PerK `shouldEqual` (1.0 / stdAux.bfbh / 2.0)
+        tradAux.n1PerK `shouldEqual` 0.001
+
 utSpec :: Spec Unit
 utSpec = describe "ut" do
     let utvs = basicSample.ut
+        dss = (1000.0 + 0.1 * 50.0 * (100.0 + 32.0 * log2c 50.0))  -- k + bf * N1 proofs * (bh + proof_size)
+        tts = 5.0 * 365.25 * dss / 10_000_000.0
+
     describe "ut.std" do
       it "d1" do
         basicSample.ut.std.d1 `dNShouldEqual` {n: 50.0, t: 500.0 * 50.0, tps: 50.0}
@@ -71,8 +94,6 @@ utSpec = describe "ut" do
         basicSample.ut.std.d2 `dNShouldEqual` {n: 50.0 `pow` 2.0, t: 2500000.0, tps: 5000.0}
       it "d3" do
         basicSample.ut.std.d3 `dNShouldEqual` {n: 2500.0 * 100.0, t: 250000000.0, tps: 500000.0}
-      let dss = (1000.0 + 0.1 * 50.0 * (100.0 + 32.0 * log2c 50.0))  -- k + bf * N1 proofs * (bh + proof_size)
-          tts = 5.0 * 365.25 * dss / 10_000_000.0
       it "confRate" do
         basicSample.ut.std.confRate `shouldEqual` 5.0
       it "dbs" do
@@ -81,6 +102,7 @@ utSpec = describe "ut" do
         basicSample.ut.std.deltaSmallS `shouldEqual` dss
       it "tts" do
         basicSample.ut.std.tts `shouldBeCloseTo` tts
+
     describe "ut.ho" do
       let ut = basicSample.ut.ho
           bf = 0.1
@@ -155,12 +177,15 @@ utSpec = describe "ut" do
         (getHF3 ut.hot).bh `shouldEqual` 20.0
 
     describe "ut comparison test vecs" do
+      -- note that k=1000
       let tpss = [50, 156, 312]
           n1s = [50, 156, 312]
           dbs = [50000, 156250, 312500]
-          -- confRates = [1.93, 2.67, 5.00, 15.62, 31.25]
+          confRates = [5.00, 15.625, 31.25]
           -- TTS isn't an exact match, but p close. Definitely *looks* mostly right WRT numbers coming out.
-          -- ttss = [0.44, 0.94, 1.03]
+          -- ttss = [0.44, 0.94, 1.03]  -- from python gen
+          ttss = [0.45, 1.0, 1.10]  -- these are the new TTS figures; keeping them here to make sure we know if they change
+          dss = [2460, 5500, 6000]  -- these are the new TTS figures; keeping them here to make sure we know if they change
           s = basicSample.ut
           -- exclude +T variant b/c py script doesn't get it
           variants = [s.std, s.ho, s.hot]
@@ -170,14 +195,16 @@ utSpec = describe "ut" do
         ((\v -> floor v.d1.n) <$> variants) `shouldEqual` n1s
       it "dS" do
         ((\v -> floor v.deltaBigS) <$> variants) `shouldEqual` dbs
-      -- it "ds" do
-      --   ((\v -> floor v.deltaSmallS) <$> variants) `shouldEqual` dss
-      -- it "Conf Rates" $ do
-      --   ((\v -> v.confRate) <$> variants) `shouldEqual` confRates
-      --   sequence_ $ (\t -> shouldBeWithin 0.005 (fst t) (snd t)) <$> zip ((\v -> v.confRate) <$> variants) confRates
-      -- it "TTS" $ do
-      --   ((\v -> v.tts) <$> variants) `shouldEqual` ttss
-      --   sequence_ $ (\t -> shouldBeWithin 0.005 (fst t) (snd t)) <$> zip ((\v -> v.tts) <$> variants) ttss
+      it "ds" do
+        ((\v -> floor v.deltaSmallS) <$> variants) `shouldEqual` dss
+      it "Conf Rates" $ do
+        sequence_ $ (\t -> shouldBeWithin 0.005 (fst t) (snd t)) <$> zip ((\v -> v.confRate) <$> variants) confRates
+      it "TTS" $ do
+        sequence_ $ (\t -> shouldBeWithin 0.005 (fst t) (snd t)) <$> zip ((\v -> v.tts) <$> variants) ttss
+
+
+
+
 
     -- describe "+PoRs find max" do
     --   findMaxPoRsN1 (mkSimplePs 3000.0 {bf:0.06666, bh:84.0} 68.0) 16.0

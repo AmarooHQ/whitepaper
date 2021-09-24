@@ -188,7 +188,7 @@ utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, con
     d2 = calcNextNestingLevel ps2 d1
     d3 = calcNextNestingLevel ps3 d2
 
-allUtChainCalcs :: Params -> UtVariants _
+allUtChainCalcs :: Params -> UtVariants ChainStats
 allUtChainCalcs ps =
   { pors: utChainCalc ps {explicitPoRs: true, headerOmission: false, hashTruncation: false}
   , ports: utChainCalc ps {explicitPoRs: true, headerOmission: false, hashTruncation: true}
@@ -203,3 +203,13 @@ runChainCalcFor ps = {trad, ut}
   where
     trad = tradChainCalc ps
     ut = allUtChainCalcs ps
+
+-- | Calculate other stats based on ChainStats
+auxStats :: ChainStats -> _
+auxStats cs = {scalingFactors, tpsPerBaseChain, n1PerK, bfbh}
+  where
+    scalingFactors = {noNesting: 1.0, nesting: cs.d2.tps / cs.d1.tps}
+    tpsPerBaseChain = {d1: cs.d1.tps / cs.d1.n, d2: cs.d2.tps / cs.d1.n, d3: cs.d3.tps / cs.d1.n}
+    n1PerK = cs.d1.n / (cs.d1.p.ks |> NEL.head)
+    hf = cs.d1.p.hfs |> head
+    bfbh = hf.bf * hf.bh
