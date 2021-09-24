@@ -6,6 +6,7 @@ import Prel
 import Data.Array (range)
 import Data.Array (zip)
 import Data.Int (floor, round, toNumber)
+import Data.Int as I
 import Data.List.NonEmpty as NEL
 import Data.Ord (abs)
 import Data.Traversable (sequence, sequence_)
@@ -152,10 +153,15 @@ utSpec = describe "ut" do
       --   ((\v -> v.tts) <$> variants) `shouldEqual` ttss
       --   sequence_ $ (\t -> shouldBeWithin 0.005 (fst t) (snd t)) <$> zip ((\v -> v.tts) <$> variants) ttss
 
-    describe "easy testing" do
-      it "sandbox" do
-        liftEffect $ C.log $ show $ utvStripP $ allUtChainCalcs {
-          hfs: NEL.singleton {bf: 1.0/15.0, bh: 84.0}
-          , ks: NEL.singleton 3000.0
-          , txSize: 250.0
-          }
+    -- describe "+PoRs find max" do
+    --   findMaxPoRsN1 (mkSimplePs 3000.0 {bf:0.06666, bh:84.0} 68.0) 16.0
+
+    -- describe "easy testing" do
+    --   it "sandbox" do
+    --     liftEffect $ C.log $ show $
+    --       -- utvStripP $ allUtChainCalcs {
+    --       --   hfs: NEL.singleton {bf: 1.0/15.0, bh: 84.0}
+    --       --   , ks: NEL.singleton 3000.0
+    --       --   , txSize: 250.0
+    --       --   }
+    --       range 1 250 <#> I.toNumber <#> (\n1 -> utPorsT1 n1 3000.0 0.06666 68.0 16.0)
