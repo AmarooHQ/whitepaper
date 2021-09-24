@@ -22,9 +22,11 @@ to generate this file without the comments in this block.
   , "lists"
   , "math"
   , "maybe"
+  , "partial"
   , "prelude"
   , "psci-support"
   , "spec"
+  , "transformers"
   , "tuples"
   , "undefined"
   ]
