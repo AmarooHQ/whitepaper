@@ -1,4 +1,4 @@
-module Calcs where
+module Amaroo.WP.Calcs where
 
 import Prel
 
@@ -90,6 +90,7 @@ utvStripP {pors, ports, std, t, ho, hot} = { pors: csStripP pors, ports: csStrip
 type ChainComplexities
   = { trad :: ChainStats
     , ut :: UtVariants ChainStats
+    , ps :: Params
     }
 
 
@@ -199,7 +200,7 @@ allUtChainCalcs ps =
   }
 
 runChainCalcFor :: Params -> ChainComplexities
-runChainCalcFor ps = {trad, ut}
+runChainCalcFor ps = {trad, ut, ps}
   where
     trad = tradChainCalc ps
     ut = allUtChainCalcs ps

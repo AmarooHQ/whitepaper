@@ -1,8 +1,8 @@
-module Test.Calcs where
+module Test.Amaroo.WP.Calcs where
 
-import Calcs
 import Prel
 
+import Amaroo.WP.Calcs
 import Control.Monad.Trans.Class (lift)
 import Data.Array (range)
 import Data.Array (zip)
@@ -39,7 +39,7 @@ genSample = runChainCalcFor
 expectTrue x = x `shouldEqual` true
 
 shouldBeWithin d x y = not ((x - y) |> abs |> (-) d |> (<) 0.0) |> when $
-  fail $ show x <> " != " <> show y
+  fail $ show x <> " != " <> show y <> " (must be within " <> show d <> ")"
 
 shouldBeCloseTo = shouldBeWithin 0.00001
 
@@ -67,6 +67,12 @@ auxStatsSpec = describe "Aux Stats" do
         trad = basicSample.trad
         stdAux = auxStats utvs.std
         tradAux = auxStats trad
+    it "tps/n1" do
+      stdAux.tpsPerBaseChain.d1 `shouldEqual` (0.5 * tradAux.tpsPerBaseChain.d1)
+      stdAux.tpsPerBaseChain.d2 `shouldEqual` (0.5 * tradAux.tpsPerBaseChain.d2)
+    it "n1PerK" do
+      stdAux.n1PerK `shouldEqual` (1.0 / stdAux.bfbh / 2.0)
+      tradAux.n1PerK `shouldEqual` 0.001
     describe "scaling factors" do
       it "noNesting" do
         stdAux.scalingFactors.noNesting `shouldEqual` 1.0
@@ -74,18 +80,10 @@ auxStatsSpec = describe "Aux Stats" do
       it "nesting" do
         stdAux.scalingFactors.nesting `shouldEqual` (utvs.std.d2.n / utvs.std.d1.n * 2.0)
         tradAux.scalingFactors.nesting `shouldEqual` (trad.d2.n / trad.d1.n)
-      it "tps/n1" do
-        stdAux.tpsPerBaseChain.d1 `shouldEqual` (0.5 * tradAux.tpsPerBaseChain.d1)
-        stdAux.tpsPerBaseChain.d2 `shouldEqual` (0.5 * tradAux.tpsPerBaseChain.d2)
-      it "n1PerK" do
-        stdAux.n1PerK `shouldEqual` (1.0 / stdAux.bfbh / 2.0)
-        tradAux.n1PerK `shouldEqual` 0.001
 
 utSpec :: Spec Unit
 utSpec = describe "ut" do
     let utvs = basicSample.ut
-        dss = (1000.0 + 0.1 * 50.0 * (100.0 + 32.0 * log2c 50.0))  -- k + bf * N1 proofs * (bh + proof_size)
-        tts = 5.0 * 365.25 * dss / 10_000_000.0
 
     describe "ut.std" do
       it "d1" do
@@ -98,6 +96,9 @@ utSpec = describe "ut" do
         basicSample.ut.std.confRate `shouldEqual` 5.0
       it "dbs" do
         basicSample.ut.std.deltaBigS `shouldEqual` (1000.0 * 50.0)
+
+      let dss = (1000.0 + 0.1 * 50.0 * (100.0 + 32.0 * log2c 50.0))  -- k + bf * N1 proofs * (bh + proof_size)
+          tts = 5.0 * 365.25 * dss / 10_000_000.0
       it "dss" do
         basicSample.ut.std.deltaSmallS `shouldEqual` dss
       it "tts" do

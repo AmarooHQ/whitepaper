@@ -360,25 +360,28 @@ def table_select_optimize_compare(tn, inputs):
     for ps in inputs:
         # (prop name, prop col, should_round)
         for prop in [
+            ('Header Size (B)', 0, True, ps[2]),
             ('TPS', 3, True),
             ('$N_1$', 6, True),
             ('$\\mathbb{C}^\\prime$ (Hz)', 4, False),
-            # ('$\\Delta s$ (B/s)', 8, True),
-            # ('TTS 5yrs (days)', 9, False),
+            ('$\\Delta s$ (B/s)', 8, True),
+            ('TTS 5yrs (days)', 9, False),
             ('$\\Delta S$ (B/s)', 7, True),
             ]:
-            row_deets = table_row_compare_inner_all(ps)
-            variants = ['UT+PoRs', 'UT+PoRTs', 'UT']
-            col_inputs = [row_deets[v] for v in variants]
-            # for variants: 'UT+HO', 'UT+HOT'
-            for bh in [32, 16]: # +HO first then +HOT
-                dh = ps[2]
-                dh2 = hot_calc_dh2(bh, dh)
-                gen_ps = (ps[0], ps[1], (bh, dh2), ps[3])
-                col_inputs.append(table_row_compare_inner_all(gen_ps)['UT'])
-            # get TPS
-            print(col_inputs)
-            cols = format_table_row([prop[0]] + [fmt_rounded_commas(c[prop[1]], should_round=prop[2], non_sn_range=(0.01, 10**6)) for c in col_inputs])
+            if prop[1] == 0:
+                cols = format_table_row([prop[0]] + [prop[3], prop[3] - 16, prop[3], 32, 16])
+            else:
+                row_deets = table_row_compare_inner_all(ps)
+                variants = ['UT+PoRs', 'UT+PoRTs', 'UT']
+                col_inputs = [row_deets[v] for v in variants]
+                # for variants: 'UT+HO', 'UT+HOT'
+                for bh in [32, 16]: # +HO first then +HOT
+                    dh = ps[2]
+                    dh2 = hot_calc_dh2(bh, dh)
+                    gen_ps = (ps[0], ps[1], (bh, dh2), ps[3])
+                    col_inputs.append(table_row_compare_inner_all(gen_ps)['UT'])
+                # print(col_inputs)
+                cols = format_table_row([prop[0]] + [fmt_rounded_commas(c[prop[1]], should_round=prop[2], non_sn_range=(0.01, 10**6)) for c in col_inputs])
             rows.append(cols)
     return rows
 

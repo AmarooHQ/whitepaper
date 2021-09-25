@@ -8,6 +8,7 @@ import Math (ceil, log)
 
 -- (|>) :: \forall a b. a -> (a -> b) -> b
 infixl 1 applyFlipped as |>
+infixr 0 apply as <|
 
 log2 :: Number -> Number
 log2 x = log x / log 2.0
