@@ -30,6 +30,7 @@ to generate this file without the comments in this block.
   , "spec"
   , "strings"
   , "stringutils"
+  , "tailrec"
   , "transformers"
   , "tuples"
   , "undefined"

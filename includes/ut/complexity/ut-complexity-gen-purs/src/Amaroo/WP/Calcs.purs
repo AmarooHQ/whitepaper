@@ -59,6 +59,12 @@ type UtVariants a
     , hot :: a
     }
 
+type UtOptimizations
+  = { explicitPoRs :: Boolean
+    , headerOmission :: Boolean
+    , hashTruncation :: Boolean
+    }
+
 type NestingStats
   = { tps :: Number
     , n :: Number
@@ -145,19 +151,24 @@ utPorsT1 n1 k1 bf bh g = n1 * (k1 - bf * n1 * (bh + porLen g n1))
 
 -- todo: convert from sorted-array method to a fixed memory iteration where the maximum gets tracked
 findMaxPoRsN1 :: Params -> Number -> Number
-findMaxPoRsN1 ps g = bestTN.n -- floor $ findMax 1.0 1.0 utPorsT1Applied
+findMaxPoRsN1 ps g = (loopFindMaxF {i: 1, n: 0.0, t: 0.0}).n
   where
-    -- inefficient, but foolproof (why I cared about performance before, IDK)
-    bestTN = sortedT1s |> A.last |> fromMaybe {a: 0.0, b: 0.0} |> (\{a,b} -> {n: a, t: b})
-    sortedT1s = A.sortBy (\o1 o2 -> compare o1.b o2.b) possibleT1s
-    possibleT1s = (nRange <#> utPorsT1Applied |> A.zip nRange) <#> tupToRec
-    nRange = A.range 1 (I.floor wontBeMoreThan) <#> I.toNumber
+    -- answer = bestTN.n
+    -- -- inefficient, but foolproof (why I cared about performance before, IDK)
+    -- bestTN = sortedT1s |> A.last |> fromMaybe {a: 0.0, b: 0.0} |> (\{a,b} -> {n: a, t: b})
+    -- sortedT1s = A.sortBy (\o1 o2 -> compare o1.b o2.b) possibleT1s
+    -- possibleT1s = (nRange <#> utPorsT1Applied |> A.zip nRange) <#> tupToRec
+    loopFindMaxF m@{i, t} = if i >= wontBeMoreThan || t1 < 0.0 then m else loopFindMaxF (if t1 > t then {i: i + 1, n: i_, t: t1} else m {i = i + 1})
+      where
+        i_ = toNumber i
+        t1 = utPorsT1Applied i_
+    -- nRange = A.range 1 wontBeMoreThan <#> I.toNumber
     utPorsT1Applied n1 = utPorsT1 n1 k1 bf bh g
     k1 = head ps.ks
     bf = hf.bf
     bh = hf.bh
     hf = head ps.hfs
-    wontBeMoreThan = k1 / 2.0 / bf / bh  -- N1 without explicit PoRs
+    wontBeMoreThan = I.floor $ k1 / 2.0 / bf / bh  -- N1 without explicit PoRs
     -- from WP, useful for some things.
     -- | \frac{\d{T_1}}{\d{N_1}}
     utPorsDT1byDN1 n1 = (k1 * ln2 - bf * n1 * (g + bh * log 4.0) - 2.0 * bf * g * n1 * log n1) / ln2
@@ -195,15 +206,20 @@ utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, con
     d2 = calcNextNestingLevel ps2 d1
     d3 = calcNextNestingLevel ps3 d2
 
-allUtChainCalcs :: Params -> UtVariants ChainStats
-allUtChainCalcs ps =
-  { pors: utChainCalc ps {explicitPoRs: true, headerOmission: false, hashTruncation: false}
-  , ports: utChainCalc ps {explicitPoRs: true, headerOmission: false, hashTruncation: true}
-  , std: utChainCalc ps {explicitPoRs: false, headerOmission: false, hashTruncation: false}
-  , t: utChainCalc ps {explicitPoRs: false, headerOmission: false, hashTruncation: true}
-  , ho: utChainCalc ps {explicitPoRs: false, headerOmission: true, hashTruncation: false}
-  , hot: utChainCalc ps {explicitPoRs: false, headerOmission: true, hashTruncation: true}
+allUtChainCalcsF :: forall a. (UtOptimizations -> a) -> UtVariants a
+allUtChainCalcsF f =
+  { pors: f {explicitPoRs: true, headerOmission: false, hashTruncation: false}
+  , ports: f {explicitPoRs: true, headerOmission: false, hashTruncation: true}
+  , std: f {explicitPoRs: false, headerOmission: false, hashTruncation: false}
+  , t: f {explicitPoRs: false, headerOmission: false, hashTruncation: true}
+  , ho: f {explicitPoRs: false, headerOmission: true, hashTruncation: false}
+  , hot: f {explicitPoRs: false, headerOmission: true, hashTruncation: true}
   }
+
+
+allUtChainCalcs :: Params -> UtVariants ChainStats
+allUtChainCalcs ps = allUtChainCalcsF (utChainCalc ps)
+
 
 runChainCalcFor :: Params -> ChainComplexities
 runChainCalcFor ps = {trad, ut, ps}

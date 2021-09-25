@@ -3,7 +3,7 @@ module Amaroo.WP.Tables where
 import Amaroo.WP.Formatter
 import Prel
 
-import Amaroo.WP.Calcs (ChainStats, Params, ChainComplexities, auxStats, mkSimplePs, runChainCalcFor)
+import Amaroo.WP.Calcs (ChainComplexities, ChainStats, Params, allUtChainCalcsF, auxStats, mkSimplePs, runChainCalcFor, tradChainCalc, utChainCalc)
 import Amaroo.WP.Utils (diagonalApply)
 import Data.Array (filter, foldl, intercalate, (:))
 import Data.Int (Radix, decimal, toNumber)
@@ -272,18 +272,20 @@ netToTps (UT ut) cd = case utNameI ut of
 
 genCompareRow {net, p} = [fmtPsKBfBh p, show net] <> (fmtDyn fdPlain <$> [netToScalingFactor net aux, netToTps net cd / cd.d1.n, netToTps net cd])
   where
-    cd = netToChainStats net (runChainCalcFor p)
+    cd = netToChainStats net p
     aux = auxStats cd
 
-netToChainStats :: Network -> ChainComplexities -> ChainStats
-netToChainStats (UT (PoRs _)) cc = cc.ut.pors
-netToChainStats (UT (PoRTs _)) cc = cc.ut.ports
-netToChainStats (UT (Std _)) cc = cc.ut.std
-netToChainStats (UT (T _)) cc = cc.ut.t
-netToChainStats (UT (HO _)) cc = cc.ut.ho
-netToChainStats (UT (HOT _)) cc = cc.ut.hot
-netToChainStats (UT (Aleph v)) cc = netToChainStats (UT v) cc
-netToChainStats _ cc = cc.trad
+id x = x
+
+netToChainStats :: Network -> Params -> ChainStats
+netToChainStats (UT (PoRs _)) p = (utChainCalc p (allUtChainCalcsF id).pors)
+netToChainStats (UT (PoRTs _)) p = (utChainCalc p (allUtChainCalcsF id).ports)
+netToChainStats (UT (Std _)) p = (utChainCalc p (allUtChainCalcsF id).std)
+netToChainStats (UT (T _)) p = (utChainCalc p (allUtChainCalcsF id).t)
+netToChainStats (UT (HO _)) p = (utChainCalc p (allUtChainCalcsF id).ho)
+netToChainStats (UT (HOT _)) p = (utChainCalc p (allUtChainCalcsF id).hot)
+netToChainStats (UT (Aleph v)) p = netToChainStats (UT v) p
+netToChainStats _ p = tradChainCalc p
 -- netToChainStats (UT net) cc = unsafeThrowException $ error $ "[netToChainStats] unsupported UT net: " <> show net
 
 compareNets3k :: Table
@@ -300,8 +302,8 @@ compareNets30k =
 
 genCompare1MRow {net, p} = [fmtPsKBfBh p, show net] <> (fmtDyn fdPlain <$> [])
   where
-    cc = runChainCalcFor p
-    -- cs = netToChainStats net
+    -- cc = runChainCalcFor p
+    cs = netToChainStats net
     -- aux = auxStats cs
 
 compareNets1mTps :: Table
