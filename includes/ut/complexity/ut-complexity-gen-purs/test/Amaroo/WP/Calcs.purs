@@ -132,12 +132,12 @@ utSpec = describe "ut" do
       --   ut.tts `shouldEqual`
 
     describe "UT variant effective header size" do
-      let getHF1 v = v.d1.p.hfs |> NEL.head
-          getHF2 v = v.d2.p.hfs |> NEL.head
-          getHF3 v = v.d3.p.hfs |> NEL.head
-          getK1 v = v.d1.p.ks |> NEL.head
-          getK2 v = v.d2.p.ks |> NEL.head
-          getK3 v = v.d3.p.ks |> NEL.head
+      let getHF1 v = v.d1.p.hf
+          getHF2 v = v.d2.p.hf
+          getHF3 v = v.d3.p.hf
+          getK1 v = v.d1.p.k
+          getK2 v = v.d2.p.k
+          getK3 v = v.d3.p.k
       it "header omission should use hashSize" do
         (getHF1 utvs.ho).bh `shouldEqual` 32.0
         (getHF2 utvs.ho).bh `shouldEqual` 100.0

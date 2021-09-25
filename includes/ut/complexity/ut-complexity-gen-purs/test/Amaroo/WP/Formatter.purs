@@ -1,8 +1,9 @@
 module Test.Amaroo.WP.Formatter where
 
-import Amaroo.WP.Formatter
 import Prel
 
+import Amaroo.WP.Formatter
+import Amaroo.WP.Tables
 import Data.Int (decimal)
 import Data.Int as I
 import Test.Spec (Spec, describe, it)
@@ -11,7 +12,7 @@ import Test.Spec.Assertions (shouldEqual)
 
 testFSN m s = wrap "$" $ m <> "\\times 10^{" <> s <> "}"
 
-testFNF n d = "\\nicefrac{" <> I.toStringAs decimal n <> "}{" <> I.toStringAs decimal d <> "}"
+testFNF n d = "\\nicefrac{" <> I.toStringAs decimal n <> "}{" <> d <> "}"
 
 fmtSpec :: Spec Unit
 fmtSpec = describe "formatting" do
@@ -41,6 +42,13 @@ fmtSpec = describe "formatting" do
 
     it "fracts" do
       fmtFract (1.0 / 15.0) `shouldEqual` "\\nicefrac{1}{15}"
-      fmtFract (1.0 / 15.0) `shouldEqual` testFNF 1 15
-      fmtFract (1.0 / 60.0) `shouldEqual` testFNF 1 60
-      fmtFract (2.0 / 13.0) `shouldEqual` testFNF 2 13
+      fmtFract (1.0 / 15.0) `shouldEqual` testFNF 1 "15"
+      fmtFract (1.0 / 60.0) `shouldEqual` testFNF 1 "60"
+      fmtFract (2.0 / 13.0) `shouldEqual` testFNF 1 "6.5"
+      fmtFract (1.0 / 7.5) `shouldEqual` testFNF 1 "7.5"
+
+    it "dynamic" do
+      fmtDyn fdPlain 2345.6789 `shouldEqual` "2345.68"
+      fmtDyn fdStd 2345.6789 `shouldEqual` "2,345.7"
+      fmtDyn fdStd 23_456_789.11 `shouldEqual` testFSN "2.3" "7"
+      fmtDyn fdPlain 23_456_789.11 `shouldEqual` testFSN "2.35" "7"

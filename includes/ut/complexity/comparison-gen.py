@@ -268,8 +268,8 @@ def table_header(table_name: str):
     col_sizes = ['------'] + _col_sizes.get(table_name, _col_sizes[tn_no_opim])
 
     col_heading_lookup = {
-        'compare_nets_3k': '$k$, $B_f$, $B_h$',
-        'compare_nets_30k': '$k$, $B_f$, $B_h$',
+        # 'compare_nets_3k': '$k$, $B_f$, $B_h$',
+        # 'compare_nets_30k': '$k$, $B_f$, $B_h$',
         'comparison_1gbps': '$\\Delta S$, $B_f$, $B_h$, Tx (B)',
         'compare_optimizations': '',
         'default_optimized': '$k$, $B_f$, $B_h$, $D_h$',

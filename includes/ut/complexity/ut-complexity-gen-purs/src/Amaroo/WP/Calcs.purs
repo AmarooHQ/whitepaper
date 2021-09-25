@@ -36,6 +36,11 @@ type ParamsL l
     }
 type Params = ParamsL NonEmptyList
 
+type ParamsF = {k :: Number, hf :: ChainNestingParams, txSize :: Number}
+
+pToPF :: Params -> ParamsF
+pToPF p = {k: head p.ks, hf: head p.hfs, txSize: p.txSize}
+
 showableParams :: Params -> ParamsL Array
 showableParams p = {ks: NEL.toUnfoldable p.ks, hfs: NEL.toUnfoldable p.hfs, txSize: p.txSize}
 
@@ -58,14 +63,14 @@ type NestingStats
   = { tps :: Number
     , n :: Number
     , t :: Number
-    , p :: Params
+    , p :: ParamsF
     }
 
 stripParams :: NestingStats -> _
 stripParams {n, t, tps} = {n, t, tps}
 
-nsShowable :: NestingStats -> _
-nsShowable ns@{p} = ns { p = showableParams p }
+-- nsShowable :: NestingStats -> _
+-- nsShowable ns@{p} = ns { p = p }
 
 type ChainStats
   = { d1 :: NestingStats
@@ -81,7 +86,7 @@ type ChainStats
     }
 
 csStripP :: ChainStats -> _
-csStripP cs@{d1, d2, d3} = cs { d1 = nsShowable d1, d2 = nsShowable d2, d3 = nsShowable d3 }
+csStripP cs@{d1, d2, d3} = cs { d1 = stripParams d1, d2 = stripParams d2, d3 = stripParams d3 }
 
 utvStripP :: UtVariants ChainStats -> _
 utvStripP {pors, ports, std, t, ho, hot} = { pors: csStripP pors, ports: csStripP ports, std: csStripP std, t: csStripP t, ho: csStripP ho, hot: csStripP hot }
@@ -103,12 +108,12 @@ paramsForNextNS ps@{txSize} = {ks, hfs, txSize}
     hfs = tail ps.hfs |> fromList |> fromMaybe ps.hfs
 
 tradInitNS :: Params -> NestingStats
-tradInitNS ps = {n: 1.0, t: t, tps: t / ps.txSize, p: ps}
+tradInitNS ps = {n: 1.0, t: t, tps: t / ps.txSize, p: pToPF ps}
   where t = head ps.ks
 
 
 calcNextNestingLevel :: Params -> NestingStats -> NestingStats
-calcNextNestingLevel ps nsPrev = {n, t, tps, p: ps}
+calcNextNestingLevel ps nsPrev = {n, t, tps, p: pToPF ps}
   where
     n = nsPrev.t / bfbh
     t = nsPrev.t * k / bfbh
@@ -120,7 +125,7 @@ calcNextNestingLevel ps nsPrev = {n, t, tps, p: ps}
 tradChainCalc :: Params -> ChainStats
 tradChainCalc ps = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts, porBytes: 0.0, kTx: k, kB: 0.0}
   where
-    d1 = {n: 1.0, t: k, tps: k / ps.txSize, p: ps}
+    d1 = {n: 1.0, t: k, tps: k / ps.txSize, p: pToPF ps}
     k = head ps.ks
     ps2 = paramsForNextNS ps
     ps3 = paramsForNextNS ps2
@@ -138,6 +143,7 @@ porLen hashSize n = hashSize * log2c n
 utPorsT1 :: Number -> Number -> Number -> Number -> Number -> Number
 utPorsT1 n1 k1 bf bh g = n1 * (k1 - bf * n1 * (bh + porLen g n1))
 
+-- todo: convert from sorted-array method to a fixed memory iteration where the maximum gets tracked
 findMaxPoRsN1 :: Params -> Number -> Number
 findMaxPoRsN1 ps g = bestTN.n -- floor $ findMax 1.0 1.0 utPorsT1Applied
   where
@@ -178,7 +184,7 @@ utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, con
     kTx = if explicitPoRs then k1 - explicitPorsK else (k1 / 2.0)
     kB = k1 - kTx
     t1 = kTx * n1
-    d1 = {n: n1, t: t1, tps: t1 / ps.txSize, p: ps1}
+    d1 = {n: n1, t: t1, tps: t1 / ps.txSize, p: pToPF ps1}
     -- NB: we want to re-adjust *unaltered params `ps` not `ps1` which we use for d1
     ps2Pre = paramsForNextNS ps -- trim param-depth lists
     ps2 = ps2Pre {hfs = (fixBH2 (head ps2Pre.hfs) `cons'` tail ps2Pre.hfs)}
@@ -211,6 +217,6 @@ auxStats cs = {scalingFactors, tpsPerBaseChain, n1PerK, bfbh}
   where
     scalingFactors = {noNesting: 1.0, nesting: cs.d2.tps / cs.d1.tps}
     tpsPerBaseChain = {d1: cs.d1.tps / cs.d1.n, d2: cs.d2.tps / cs.d1.n, d3: cs.d3.tps / cs.d1.n}
-    n1PerK = cs.d1.n / (cs.d1.p.ks |> NEL.head)
-    hf = cs.d1.p.hfs |> head
+    n1PerK = cs.d1.n / (cs.d1.p.k)
+    hf = cs.d1.p.hf
     bfbh = hf.bf * hf.bh

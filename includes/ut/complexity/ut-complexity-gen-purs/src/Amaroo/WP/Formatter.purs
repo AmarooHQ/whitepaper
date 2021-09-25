@@ -5,8 +5,9 @@ import Prel
 import Amaroo.WP.Calcs (Params, ChainStats)
 import Data.Array (intercalate, reverse, (:))
 import Data.Array as A
+import Data.Int (toNumber)
 import Data.List.NonEmpty (head)
-import Data.Maybe (fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Number as N
 import Data.Number.Format (exponential, fixed, precision)
 import Data.Number.Format as NF
@@ -14,7 +15,7 @@ import Data.String (Pattern(..), contains, drop, length, split, stripPrefix, tak
 import Data.String.Utils (fromCharArray, toCharArray)
 import Effect.Exception (error)
 import Effect.Exception.Unsafe (unsafeThrowException)
-import Math (abs, floor)
+import Math (abs, floor, pow)
 import Undefined (undefined)
 
 
@@ -57,11 +58,23 @@ fmtFract n
   | n `vCloseTo` 0.05 = "\\nicefrac{1}{20}"
   | n `vCloseTo` 0.06666666666666667 = "\\nicefrac{1}{15}"
   | n `vCloseTo` 0.08333333333333333 = "\\nicefrac{1}{12}"
-  | n `vCloseTo` 0.15384615384615385 = "\\nicefrac{2}{13}"
+  | n `vCloseTo` 0.13333333333333333 = "\\nicefrac{1}{7.5}"
   | n `vCloseTo` 0.14285714285714285 = "\\nicefrac{1}{7}"
+  | n `vCloseTo` 0.15384615384615385 = "\\nicefrac{1}{6.5}"
   | n `vCloseTo` 0.16666666666666666 = "\\nicefrac{1}{6}"
   | n `vCloseTo` 1.8181818181818181 = "\\nicefrac{1}{0.55}"
   | otherwise = fmtCommasP 2 n
+
+fmtFixedP p = NF.toStringWith (fixed p)
+
+fmtDyn :: _ -> Number -> String
+fmtDyn {low, high, mp, commas} n = if outsideRange then fmtSciNot (fromMaybe 2 mp) n else
+    if commas then fmtP fmtCommasP fmtCommas else fmtFixedP (fromMaybe 2 mp) n
+  where
+    outsideRange = n < pow 10.0 (toNumber low) || n > pow 10.0 (toNumber high)
+    fmtP fP f = case mp of
+        Just p -> fP p n
+        Nothing -> f n
 
 fmtTps = fmtCommas
 
@@ -78,9 +91,9 @@ fmtPsKBfBhDh cs = _fmtParams [fmtCommas k, fmtFract hf.bf, fmtPlain hf.bh, fmtPl
   where
     ps1 = cs.d1.p
     ps2 = cs.d2.p
-    k = head ps1.ks
-    hf = head ps1.hfs
-    dh = (head ps2.hfs).bh
+    k = ps1.k
+    hf = ps1.hf
+    dh = ps2.hf.bh
 
 --- '$\\Delta S$, $B_f$, $B_h$, Tx (B)'
 fmt1GbpsPs :: ChainStats -> Params -> String
