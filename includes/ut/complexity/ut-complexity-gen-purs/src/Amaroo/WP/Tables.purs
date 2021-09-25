@@ -3,15 +3,15 @@ module Amaroo.WP.Tables where
 import Amaroo.WP.Formatter
 import Prel
 
-import Amaroo.WP.Calcs (ChainComplexities, ChainStats, Params, allUtChainCalcsF, auxStats, mkSimplePs, runChainCalcFor, tradChainCalc, utChainCalc)
-import Amaroo.WP.Utils (diagonalApply)
-import Data.Array (filter, foldl, intercalate, (:))
+import Amaroo.WP.Calcs (ChainComplexities, Params, UtVariants, ChainStats, allUtChainCalcs, allUtChainCalcsF, auxStats, mkSimplePs, pToPF, runChainCalcFor, tradChainCalc, utChainCalc)
+import Amaroo.WP.Utils (diagonalApply, ui)
+import Data.Array (drop, filter, foldl, intercalate, take, (:))
 import Data.Int (Radix, decimal, toNumber)
 import Data.Int (Radix, toStringAs) as I
 import Data.List.NonEmpty (head)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Number.Format as N
-import Data.String (Pattern(..), contains, length)
+import Data.String (Pattern(..), Replacement(..), contains, length, replaceAll)
 import Data.String.Utils as S
 import Effect.Exception (error)
 import Effect.Exception.Unsafe (unsafeThrowException)
@@ -139,6 +139,9 @@ _UT2HOT_1M_K = ut2TpsToK _1M 250.0 _UT_BF 16.0 _UT_BH_FOR_SHARDING
 _OPT_SHARD_1M_K = oc2TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING
 
 
+_UT_INIT_CONFIG = mkSimplePs 3000.0 {bf: _UT_BF, bh: _UT_BH} 250.0
+
+
 utComplexityParams :: Array Params
 utComplexityParams = do
   k <- [2000.0, 20000.0]
@@ -191,6 +194,10 @@ diagF1M = filter (notPoRs <<< \e -> e.net) <<< utVsOther
 utVsOther1M :: Array {net :: Network, p :: Params}
 utVsOther1M = diagonalApply diagF1M ut1MCompareKs
 
+-- Note: CBF -- it was only there b/c of solana's rediculous 700k tps claim anyway
+-- utVsOther1Gbps :: Array {net :: Network, p :: Params}
+-- utVsOther1Gbps =
+
 mkSpacer :: Int -> String
 mkSpacer n = S.repeat n "-" |> fromMaybe ""
 
@@ -210,8 +217,12 @@ tableTpsHot =
     , mkSpacer <$> [6, 3, 6, 4, 4, 4]
     ] <> (genTpsRow (\cd -> cd.ut.hot) <$> utComplexityData)
 
-fdPlain = {low: 0, high: 6, mp: Nothing, commas: false}
-fdStd = {low: 0, high: 6, mp: Just 1, commas: true}
+fdPlain = {low: -1, high: 6, mp: Just 1, commas: false, pOnlySi: false}
+fdPlainZero = fdPlain {mp = Just 0}
+fdStd = {low: -1, high: 6, mp: Just 1, commas: true, pOnlySi: false}
+fdStdZero = fdStd {mp = Just 0}
+fdStdTwo = fdStd {mp = Just 2}
+ftStdMixed = fdStdTwo {pOnlySi = true}
 
 genDappChainsRow utF cd = [fmtPsKBfBh cd.ps] <> (fmtDyn fdPlain <$> [(utF cd).d1.n, (utF cd).d2.n, (utF cd).d3.n, (utF cd).deltaBigS]) <> [fmtDyn fdPlain (utF cd).confRate]
 
@@ -269,7 +280,7 @@ netToTps (UT ut) cd = case utNameI ut of
   3 -> cd.d3.tps
   _ -> unsafeThrowException $ error $ "[netToTps] got bad level of nesting in UT network: " <> utName_ ut
 
-
+-- todo: fix fmtDyn fdPlain
 genCompareRow {net, p} = [fmtPsKBfBh p, show net] <> (fmtDyn fdPlain <$> [netToScalingFactor net aux, netToTps net cd / cd.d1.n, netToTps net cd])
   where
     cd = netToChainStats net p
@@ -286,7 +297,16 @@ netToChainStats (UT (HO _)) p = (utChainCalc p (allUtChainCalcsF id).ho)
 netToChainStats (UT (HOT _)) p = (utChainCalc p (allUtChainCalcsF id).hot)
 netToChainStats (UT (Aleph v)) p = netToChainStats (UT v) p
 netToChainStats _ p = tradChainCalc p
--- netToChainStats (UT net) cc = unsafeThrowException $ error $ "[netToChainStats] unsupported UT net: " <> show net
+
+netLookupChainStats :: Network -> UtVariants ChainStats -> ChainStats
+netLookupChainStats (UT (PoRs _)) utvs = utvs.pors
+netLookupChainStats (UT (PoRTs _)) utvs = utvs.ports
+netLookupChainStats (UT (Std _)) utvs = utvs.std
+netLookupChainStats (UT (T _)) utvs = utvs.t
+netLookupChainStats (UT (HO _)) utvs = utvs.ho
+netLookupChainStats (UT (HOT _)) utvs = utvs.hot
+netLookupChainStats (UT (Aleph v)) utvs = netLookupChainStats (UT v) utvs
+netLookupChainStats net _ = unsafeThrowException $ error $ "[netLookupChainStats] non UT network provided: " <> show net
 
 compareNets3k :: Table
 compareNets3k =
@@ -300,19 +320,59 @@ compareNets30k =
     , mkSpacer <$> [6, 6, 3, 3, 4, 6]
     ] <> (genCompareRow <$> utVsOther 30_000.0)
 
-genCompare1MRow {net, p} = [fmtPsKBfBh p, show net] <> (fmtDyn fdPlain <$> [])
+-- todo: fix fmtDyn fdPlain
+genCompare1MRow {net, p} = [fmtPsKBfBh p, show net] <> (fmtDyn fdPlain <$> [netToTps net cs / cs.d1.n, netToTps net cs, cs.k1 / (ut2TpsToK (netToTps net cs) p.txSize pf.hf.bf pf.hf.bh pf.hf.bh) , ut2.d2.tps])
   where
-    -- cc = runChainCalcFor p
-    cs = netToChainStats net
+    pf = pToPF p
+    ut2 = utChainCalc p (allUtChainCalcsF id).std
+    cs = netToChainStats net p
     -- aux = auxStats cs
 
 compareNets1mTps :: Table
 compareNets1mTps =
-    [ ["$k$, $B_f$, $B_h$", "Network", "$\\nicefrac{\\Sigma \\text{TPS}}{N_1}$", "$\\Sigma$ TPS", "$k$ vs $\\UT{2}$", "Equivalent $\\UT{2}$ TPS"]
+    [ ["$k$, $B_f$, $B_h$", "Network", "$\\nicefrac{\\Sigma \\text{TPS}}{N_1}$", "$\\Sigma$ TPS", "$k$ vs $\\UT{2}$", "Equiv. $\\UT{2}$ TPS"]
     , mkSpacer <$> [6, 6, 3, 3, 4, 6]
-    ]
-    <> (genCompare1MRow <$> utVsOther1M)
+    ] <> (genCompare1MRow <$> utVsOther1M)
 
+genCompare1GbpsRow {net, p} = [fmt1GbpsPs cs p, show net] <> (fmtDyn fdPlain <$> [netToTps net cs, k, mbChainDay])
+  where
+    mbChainDay = k * 86400.0 / 1024.0 / 1024.0
+    k = (pToPF p).k
+    cs = netToChainStats net p
+
+
+-- compareNets1Gbps :: Table
+-- compareNets1Gbps =
+--     [ ["$\\Delta S$, $B_f$, $B_h$, Tx (B)", "Network", "TPS", "$k$ (B/s)", "MB/chain/day"]
+--     , mkSpacer <$> [6, 3, 3, 3, 4]
+--     ] <> (genCompare1GbpsRow <$> utVsOther1Gbps)
+
+genCompareUtRow :: UtVariants ChainStats -> Array UtName -> {f :: ChainStats -> String, s :: String} -> Array String
+genCompareUtRow ut utvs {f, s} = [s] <> (getProp <$> utvs)
+  where
+    getProp = f <<< (\n -> netLookupChainStats (UT n) ut)
+
+optimizationProps =
+  [ {s: "$\\Sigma \\text{TPS}$", f: \cs -> fmtDyn fdPlainZero cs.d1.tps}
+  , {s: "$N_1$ (chains)", f: \cs -> fmtDyn fdPlainZero cs.d1.n}
+  , {s: "$\\mathbb{C}^\\prime$ (Hz)", f: \cs -> fmtDyn fdPlain cs.confRate}
+  , {s: "Effective $B_h$ (B)", f: \cs -> fmtDyn fdPlainZero cs.effBh}
+  , {s: "$\\Delta s$ (B/s)", f: \cs -> fmtDyn fdStdZero cs.deltaSmallS}
+  , {s: "TTS 5yrs (days)", f: \cs -> fmtDyn fdStdTwo cs.tts}
+  , {s: "$\\Delta S$ (B/s)", f: \cs -> fmtDyn ftStdMixed cs.deltaBigS}
+  ]
+
+compareUtOptimizations :: Table
+compareUtOptimizations =
+    [ [""] <> utNames variants
+    , mkSpacer <$> [6, 5, 5, 5, 5, 5, 5]
+    ] <> (genCompareUtRow ut variants <$> optimizationProps)
+  where
+    ut = allUtChainCalcs _UT_INIT_CONFIG
+    variants = [PoRs 1, PoRTs 1, Std 1, T 1, HO 1, HOT 1]
+
+fixRow2 :: Array String -> Array String
+fixRow2 rs = take 1 rs <> [replaceAll (Pattern " ") (Replacement "") $ ui rs 1] <> drop 2 rs
 
 showTable :: Table -> String
-showTable table = intercalate "\n" $ wrap "|" <$> intercalate "|" <$> table
+showTable table = (intercalate "\n" <<< fixRow2) $ (wrap "|" <<< wrap " " <<< intercalate " | ") <$> table

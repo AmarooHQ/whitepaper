@@ -87,8 +87,10 @@ type ChainStats
     , tts :: Number
     , confRate :: Number
     , porBytes :: Number
+    , effBh :: Number
     , kTx :: Number
     , kB :: Number
+    , k1 :: Number
     }
 
 csStripP :: ChainStats -> _
@@ -129,7 +131,7 @@ calcNextNestingLevel ps nsPrev = {n, t, tps, p: pToPF ps}
     k = head ps.ks
 
 tradChainCalc :: Params -> ChainStats
-tradChainCalc ps = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts, porBytes: 0.0, kTx: k, kB: 0.0}
+tradChainCalc ps = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts, porBytes: 0.0, effBh, kTx: k, kB: 0.0, k1: k}
   where
     d1 = {n: 1.0, t: k, tps: k / ps.txSize, p: pToPF ps}
     k = head ps.ks
@@ -141,6 +143,7 @@ tradChainCalc ps = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts, porBytes:
     deltaSmallS = k
     tts = ((deltaSmallS * 5.0 * 365.25) / 10_000_000.0)
     confRate = (head ps.hfs).bf
+    effBh = (head ps.hfs).bh
 
 
 porLen :: Number -> Number -> Number
@@ -176,7 +179,7 @@ findMaxPoRsN1 ps g = (loopFindMaxF {i: 1, n: 0.0, t: 0.0}).n
 type UtParams = {explicitPoRs :: Boolean, headerOmission :: Boolean, hashTruncation :: Boolean}
 
 utChainCalc :: Params -> UtParams -> ChainStats
-utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, confRate, tts, deltaBigS, deltaSmallS, porBytes, kTx, kB}
+utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, confRate, tts, deltaBigS, deltaSmallS, porBytes, effBh, kTx, kB, k1}
   where
     hashSize = if hashTruncation then 16.0 else 32.0
     htModBh bh = bh - (if hashTruncation then 16.0 else 0.0)
@@ -196,6 +199,7 @@ utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, con
     kB = k1 - kTx
     t1 = kTx * n1
     d1 = {n: n1, t: t1, tps: t1 / ps.txSize, p: pToPF ps1}
+    effBh = if explicitPoRs then d1.p.hf.bh + porBytes else d1.p.hf.bh
     -- NB: we want to re-adjust *unaltered params `ps` not `ps1` which we use for d1
     ps2Pre = paramsForNextNS ps -- trim param-depth lists
     ps2 = ps2Pre {hfs = (fixBH2 (head ps2Pre.hfs) `cons'` tail ps2Pre.hfs)}

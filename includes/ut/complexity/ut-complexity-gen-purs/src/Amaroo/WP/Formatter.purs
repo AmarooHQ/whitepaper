@@ -68,10 +68,12 @@ fmtFract n
 fmtFixedP p = NF.toStringWith (fixed p)
 
 fmtDyn :: _ -> Number -> String
-fmtDyn {low, high, mp, commas} n = if outsideRange then fmtSciNot (fromMaybe 2 mp) n else
-    if commas then fmtP fmtCommasP fmtCommas else fmtFixedP (fromMaybe 2 mp) n
+fmtDyn {low, high, mp, commas, pOnlySi} n = if outsideRange then fmtSciNot p n else
+    if commas then fmtP fmtCommasP fmtCommas else fmtFixedP p n
   where
-    outsideRange = n < pow 10.0 (toNumber low) || n > pow 10.0 (toNumber high)
+    p = fromMaybe 2 mp
+    outsideRange = n < pow 10.0 (toNumber low) + err || n >= pow 10.0 (toNumber high) - err
+    err = (pow 10.0 $ -1.0 * toNumber p) * 0.5
     fmtP fP f = case mp of
         Just p -> fP p n
         Nothing -> f n
