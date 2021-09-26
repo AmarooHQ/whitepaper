@@ -102,6 +102,7 @@ utvStripP {pors, ports, std, t, ho, hot} = { pors: csStripP pors, ports: csStrip
 
 type ChainComplexities
   = { trad :: ChainStats
+    , tradEth2 :: ChainStats
     , ut :: UtVariants ChainStats
     , ps :: Params
     }
@@ -130,21 +131,33 @@ calcNextNestingLevel ps nsPrev = {n, t, tps, p: pToPF ps}
     bfbh = h.bf * h.bh
     k = head ps.ks
 
-tradChainCalc :: Params -> ChainStats
-tradChainCalc ps = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts, porBytes: 0.0, effBh, kTx: k, kB: 0.0, k1: k}
+data TradVar = Trad | TradEth2
+
+eth2EffBh bh = floor $ 8192.0 / (6.5*60.0) * 12.0 + bh * 0.1
+
+tradChainCalc' :: Params -> TradVar -> ChainStats
+tradChainCalc' ps var = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts, porBytes: 0.0, effBh, kTx: k, kB: 0.0, k1: k}
   where
     d1 = {n: 1.0, t: k, tps: k / ps.txSize, p: pToPF ps}
     k = head ps.ks
+    hf = head ps.hfs
     ps2 = paramsForNextNS ps
+    hf2 = head ps2.hfs
     ps3 = paramsForNextNS ps2
-    d2 = calcNextNestingLevel ps2 d1
+    bhMod = case var of
+      Trad -> identity
+      TradEth2 -> eth2EffBh
+    effBh = bhMod hf2.bh
+    d2 = calcNextNestingLevel (ps2 { hfs = singleton {bf: hf2.bf, bh: effBh} }) d1
     d3 = calcNextNestingLevel ps3 d2
     deltaBigS = k
     deltaSmallS = k
     tts = ((deltaSmallS * 5.0 * 365.25) / 10_000_000.0)
-    confRate = (head ps.hfs).bf
-    effBh = (head ps.hfs).bh
+    confRate = hf.bf
 
+tradChainCalc ps = tradChainCalc' ps Trad
+
+tradChainCalcEth2 ps = tradChainCalc' ps TradEth2
 
 porLen :: Number -> Number -> Number
 porLen hashSize n = hashSize * log2c n
@@ -226,9 +239,10 @@ allUtChainCalcs ps = allUtChainCalcsF (utChainCalc ps)
 
 
 runChainCalcFor :: Params -> ChainComplexities
-runChainCalcFor ps = {trad, ut, ps}
+runChainCalcFor ps = {trad, ut, ps, tradEth2}
   where
     trad = tradChainCalc ps
+    tradEth2 = tradChainCalcEth2 ps
     ut = allUtChainCalcs ps
 
 -- | Calculate other stats based on ChainStats

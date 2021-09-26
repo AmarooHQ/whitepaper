@@ -11,11 +11,11 @@ import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 
 
-testFSN m s = wrap "$" $ m <> "\\times 10^{" <> s <> "}"
+testFSN m s = m <> "\\times 10^{" <> s <> "}"
 
 testFNF n d = "\\nicefrac{" <> I.toStringAs decimal n <> "}{" <> d <> "}"
 
-testFdPlain = {low: -1, high: 6, mp: Nothing, commas: false, pOnlySi: false}
+testFdPlain = fdDefaults {mp = Nothing, commas = false, pOnlySi = false, wSI = false}
 
 fmtSpec :: Spec Unit
 fmtSpec = describe "formatting" do
@@ -40,8 +40,8 @@ fmtSpec = describe "formatting" do
       fmtSciNot 1 10.0 `shouldEqual` testFSN "1.0" "1"
       fmtSciNot 1 13.0 `shouldEqual` testFSN "1.3" "1"
       fmtSciNot 1 73.0 `shouldEqual` testFSN "7.3" "1"
-      fmtSciNot 2 13_331_337.0 `shouldEqual` "$1.33\\times 10^{7}$"
-      fmtSciNot 2 0.000_000_13337 `shouldEqual` "$1.33\\times 10^{-7}$"
+      fmtSciNot 2 13_331_337.0 `shouldEqual` "1.33\\times 10^{7}"
+      fmtSciNot 2 0.000_000_13337 `shouldEqual` "1.33\\times 10^{-7}"
 
     it "fracts" do
       fmtFract (1.0 / 15.0) `shouldEqual` "\\nicefrac{1}{15}"
@@ -53,7 +53,7 @@ fmtSpec = describe "formatting" do
     it "dynamic" do
       fmtDyn testFdPlain 2345.6789 `shouldEqual` "2345.68"
       fmtDyn fdStd 2345.6789 `shouldEqual` "2,345.7"
-      fmtDyn fdStd 23_456_789.11 `shouldEqual` testFSN "2.3" "7"
+      fmtDyn fdStd 23_456_789.11 `shouldEqual` (wrap "$" $ testFSN "2.3" "7")
       fmtDyn testFdPlain 23_456_789.11 `shouldEqual` testFSN "2.35" "7"
       fmtDyn testFdPlain 1_000_000.0 `shouldEqual` testFSN "1.00" "6"
       fmtDyn testFdPlain 999_999.999 `shouldEqual` testFSN "1.00" "6"

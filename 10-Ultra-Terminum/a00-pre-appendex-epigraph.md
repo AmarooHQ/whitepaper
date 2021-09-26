@@ -44,7 +44,7 @@
 | $D_h$ | Dapp-chain header size. | bytes |
 | TPS | Transactions per second. | tx/s |
 | $\Sigma$ TPS | Network-wide transactions per second. Primarily used when ``TPS'' alone would be ambiguous. | tx/s |
-| $\Delta s$ | Minimum network bandwidth for a full node to remain in sync a single simplex-chain (whilst also validating PoRs). | bytes/second |
+| $\Delta s$ | Minimum network bandwidth for a full node to remain in sync with a single simplex-chain (whilst also validating PoRs). | bytes/second |
 | $\Delta S$ | Minimum network bandwidth for a \emph{mining} node to remain in sync with all simplex-chains. | bytes/second |
 
 : Notation defined in this document. \label{table:notation}
@@ -63,6 +63,7 @@
 | $\UT{2}$ | UT with nested dapp-chains -- $O(c^3)$ scalability. \autoref{sec:dapp-chains} |
 | $\UT{3}$ | UT with nested dapp-dapp-chains -- $O(c^4)$ scalability. \autoref{sec:dapp-chains} |
 | $\UTinf{i}$ | Tiling of $\UT{i}$ -- $O(n)$ scalability. \autoref{sec:tiling} |
+| +T | Protocol extension: hash truncation. \autoref{sec:exploiting-seg-state} |
 | +HO | Protocol extension: header omission. \autoref{sec:exploiting-seg-state} |
 | +HOT | Protocol extension: header omission and truncation. \autoref{sec:exploiting-seg-state} |
 | +PoRs | The protocol extension whereby simplex-chain miners explicitly include the corresponding PoR for each header they reflect. \autoref{sec:por-with-proofs} |

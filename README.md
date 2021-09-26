@@ -5,8 +5,11 @@
 - the Makefile presumes you're running this in a linux environment
 - you'll need: make, pandoc v2.5, latexmk, git
 - ubuntu pkgs: `texlive-science`, `texlive-extra-utils`, `texlive-latex-extra`, `gnuplot`
+- nodejs and npm (for purescript, for complexity tables generator)
 
 if you run into compile errors, you could try installing `texlive-full` -- not a great workaround but does solve some issues (b/c apparently we have a missing dep) -- or just use the docker build via `make docker-build && make docker`
+
+To compile the complexity tables generator: `cd includes/ut/complexity/ut-complexity-gen-purs && npm i && npm run bundle-for-wp`
 
 ### "supported" build env
 

@@ -13,6 +13,7 @@ import Data.Number.Format (exponential, fixed, precision)
 import Data.Number.Format as NF
 import Data.String (Pattern(..), contains, drop, length, split, stripPrefix, take)
 import Data.String.Utils (fromCharArray, toCharArray)
+import Data.Tuple (Tuple(..))
 import Effect.Exception (error)
 import Effect.Exception.Unsafe (unsafeThrowException)
 import Math (abs, floor, pow)
@@ -36,7 +37,7 @@ fmtCommasP p n = fmtCommas n <> (if length lsf == 0 then "" else "." <> lsf)
   where
     lsf = (NF.toStringWith (fixed p) n |> split (Pattern ".") |> A.drop 1 |> A.head |> fromMaybe "")
 
-_fmtSciNot [m, s] = wrap "$" $ m <> "\\times 10^{" <> (stripPrefix (Pattern "+") s |> fromMaybe s) <> "}"
+_fmtSciNot [m, s] = m <> "\\times 10^{" <> (stripPrefix (Pattern "+") s |> fromMaybe s) <> "}"
 _fmtSciNot i = unsafeThrowException (error $ "bad input to _fmtSciNot: " <> show i)
 
 fmtSciNot :: Int -> Number -> String
@@ -68,28 +69,41 @@ fmtFract n
 fmtFixedP p = NF.toStringWith (fixed p)
 
 fmtDyn :: _ -> Number -> String
-fmtDyn {low, high, mp, commas, pOnlySi} n = if outsideRange then fmtSciNot p n else
-    if commas then fmtP fmtCommasP fmtCommas else fmtFixedP p n
+fmtDyn {low, high, mp, commas, pOnlySi, wSI} n = if outsideRange then formattedSI else
+    if commas then fmtP fmtCommasP fmtCommas else fmtFixedP pNotSi n
   where
+    formattedSI = wrap (if wSI then "$" else "") $ fmtSciNot p n
     p = fromMaybe 2 mp
+    pNotSi = if pOnlySi then 0 else p
     outsideRange = n < pow 10.0 (toNumber low) + err || n >= pow 10.0 (toNumber high) - err
     err = (pow 10.0 $ -1.0 * toNumber p) * 0.5
-    fmtP fP f = case mp of
-        Just p -> fP p n
-        Nothing -> f n
+    fmtP fP f = case (Tuple pOnlySi mp) of
+        Tuple false (Just _) -> fP pNotSi n
+        Tuple _ _ -> f n
+
+fdDefaults = {low: -1, high: 6, mp: Just 1, commas: false, pOnlySi: false, wSI: true}
+fdK = fdDefaults {pOnlySi = true, wSI = false}
+fdPlain = fdDefaults {commas = false, pOnlySi = false}
+fdPlainZero = fdPlain {mp = Just 0}
+fdPlainTwo = fdPlain {mp = Just 2}
+fdStd = fdDefaults {commas = true, pOnlySi = false}
+fdStdZero = fdStd {mp = Just 0}
+fdStdTwo = fdStd {mp = Just 2}
+fdStdMixed = fdStdTwo {pOnlySi = true}
+fdPlainMixed = fdPlainTwo {pOnlySi = true}
 
 fmtTps = fmtCommas
 
 _fmtParams = wrap "$" <<< intercalate ", "
 
 fmtPsKBfBh :: Params -> String
-fmtPsKBfBh ps = _fmtParams [fmtCommas k, fmtFract hf.bf, fmtPlain hf.bh]
+fmtPsKBfBh ps = _fmtParams [fmtDyn fdK k, fmtFract hf.bf, fmtPlain hf.bh]
   where
     k = head ps.ks
     hf = head ps.hfs
 
 fmtPsKBfBhDh :: ChainStats -> String
-fmtPsKBfBhDh cs = _fmtParams [fmtCommas k, fmtFract hf.bf, fmtPlain hf.bh, fmtPlain dh]
+fmtPsKBfBhDh cs = _fmtParams [fmtDyn fdK k, fmtFract hf.bf, fmtPlain hf.bh, fmtPlain dh]
   where
     ps1 = cs.d1.p
     ps2 = cs.d2.p

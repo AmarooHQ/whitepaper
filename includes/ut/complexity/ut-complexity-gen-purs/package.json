@@ -7,7 +7,7 @@
     "test": "spago test",
     "run": "spago run",
     "bundle-here": "spago bundle-app",
-    "bundle-wp-root": "spago bundle-app --to ../../../../output/populateWPTables.js"
+    "bundle-for-wp": "spago bundle-app --to ../populateWPTables.js"
   },
   "author": "max",
   "license": "UNLICENSED",

@@ -15,13 +15,15 @@
 
 ### Comparison: ``The Big 4''
 
-Note: the following comparisons are indented to be an *apples to apples* between UT variants and ``The Big 4'': Bitcoin, Cardano, Eth2, and Polkadot. Cardano is an exception, here, as the Cardano and IOHK teams have been pursuing \emph{Layer 2} scalability solutions based on EUTXOs and Hydra. Their work is impressive, valuable, and good. I'm very excited to see their progress and I applaud their efforts. I mention this particularly because the nature of an *apples to apples* comparison casts Cardano in a light that some might consider to be misleading. However, these comparisons do not consider \emph{Layer 2} scalability solutions for one very simple reason: all networks can implement them in some fashion. It is not a fair (or accurate) comparison *of blockchain architecture* if \emph{Layer 2} scaling solutions are considered for some networks and not for others. Additionally, as mentioned in [Ethereum's *Sharding FAQs*](https://eth.wiki/sharding/Sharding-FAQs#how-does-plasma-state-channels-and-other-layer-2-technologies-fit-into-the-trilemma), payment- and state-channels provide a *constant factor* increase in throughput, so those techniques will not improve a network's scaling complexity.
+The following comparisons are indented to be an *apples to apples* between UT variants and ``The Big 4'': Bitcoin, Cardano, Eth2, and Polkadot. Cardano is an exception, here, as the Cardano and IOHK teams have been pursuing \emph{Layer 2} scalability solutions based on EUTXOs and Hydra. Their work is impressive, valuable, and good. I'm very excited to see their progress and I applaud their efforts. I mention this particularly because the nature of an *apples to apples* comparison casts Cardano in a light that some might consider to be misleading. However, these comparisons do not consider \emph{Layer 2} scalability solutions for one very simple reason: all networks can implement them in some fashion. It is not a fair (or accurate) comparison *of blockchain architecture* if \emph{Layer 2} scaling solutions are considered for some networks and not for others. Additionally, as mentioned in [Ethereum's *Sharding FAQs*](https://eth.wiki/sharding/Sharding-FAQs#how-does-plasma-state-channels-and-other-layer-2-technologies-fit-into-the-trilemma), payment- and state-channels provide a *constant factor* increase in throughput, so those techniques will not improve a network's scaling complexity as it is measured here.
 
-Additionally, a network named *Opt.Shard* is included. This is a theoretical network (standing for ``Optimal Sharding'') which uses the best parameters possible among UT configurations. No real-world sharded network has come close to this level of performance.
+Additionally, a network named *Optimal Sharding* is included. This is a theoretical network which uses the \emph{best parameters possible among UT configurations}. No real-world sharded network has come close to this level of performance, and it is incompatible with PoS.
 
 \defineTerm{Base-chain}{A chain that has no parent-chains; i.e., is at the base nesting level}
 
-\defineTerm{Scaling Factor}{For a given $k$, it is both the factor by which TPS increases with an additional nesting level. In effect, it allows for comparison of the efficacy of scaling schemes when $k$ is fixed. For some designs, the \emph{Scaling Factor} can change between nesting levels}
+\defineTerm{Scaling Factor}{
+    Also: ``Scale $\times$''. For a given $k$, it is the factor by which TPS increases with an additional nesting level. In effect, it allows for comparison of the efficacy of scaling schemes when $k$ is fixed. For some designs, the \emph{Scaling Factor} can change between nesting levels
+}
 
 %% INSERT ### TABLE: compare_nets_3k
 

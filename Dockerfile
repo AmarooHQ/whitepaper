@@ -15,6 +15,11 @@ RUN apt-get update && \
 
 RUN pip3 install -U numpy scipy
 
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs npm && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /work
 
 CMD ["make"]

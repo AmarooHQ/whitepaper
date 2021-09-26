@@ -57,7 +57,9 @@ build-whitepaper: %.md
 	  cat $$mdfile >> $(WPFILE) && \
 	  echo -n "\n\n" >> $(WPFILE) ; \
 	done
-	(cd includes/ut/complexity/ut-complexity-gen-purs && npm i && npm run bundle-wp-root) && node ./output/populateWPTables.js --populate-wp-md
+	node ./includes/ut/complexity/populateWPTables.js --populate-wp-md
+# if you need to build the above: cd includes/ut/complexity/ut-complexity-gen-purs && npm i && npm run bundle-for-wp
+
 
 # update properties in the whitepaper like papersize and geometry.
 # can be set by CLI args like `make whitepaper papersize=a5 geometry=1cm`
@@ -82,7 +84,7 @@ wp-just-quotes: clean-wp-md
 dev-build: wp-just-quotes wp-pandoc mk-latex-pdf
 
 wc:
-	find . -iname '*.md' -or -iname '*.tex' | grep -v node_mod | grep -v output | grep -v diags | xargs wc
+	find . -iname '*.md' -or -iname '*.tex' | grep -v node_mod | grep -v spago | grep -v output | grep -v diags | xargs wc
 	wc $(WPFILE)
 
 mk-latex-pdf:
