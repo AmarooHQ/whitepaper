@@ -384,7 +384,7 @@ optimizationProps =
   , {s: "$\\Delta s$ (B/s)", f: \cs -> fmtDyn fdStdZero cs.deltaSmallS}
   , {s: "TTS 5yrs (days)", f: \cs -> fmtDyn fdStdTwo cs.tts}
   , {s: "$\\Delta S$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.deltaBigS}
-  , {s: "Nesting TPS$\\times$", f: \cs -> fmtDyn fdStd (auxStats cs).scalingFactors.nesting}
+  -- , {s: "Nesting TPS$\\times$", f: \cs -> fmtDyn fdStd (auxStats cs).scalingFactors.nesting}
   ]
 
 compareUtOptimizations :: Table
