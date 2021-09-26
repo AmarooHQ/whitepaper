@@ -1,0 +1,63 @@
+# Hash Truncation - Invention Details
+
+- Title: A method for greatly reducing the size of thermodynamically secure hashing functions with no practical effect on near-term security, and subsequently improving the throughput of Proof of Work blockchains
+- Inventor: Max Kaye
+- Owner: Amaroo.com Pty Ltd
+
+## Background
+
+Cryptographic hashes have a wide variety of uses: e.g., to protect credentials (via hashing passwords), to confirm that some data is correct and/or authentic, as an identifier for looking-up or requesting data, and -- via the production and verification of a *special* output -- as a method to secure blockchains (such as Bitcoin).
+
+It's common knowledge (among those skilled in the art) that the security of a hash (or truncation of a hash) is measured in *bits* -- the binary digits which comprise it. This is because the *output* of a cryptographically secure hashing function (called a *digest*, which is a number of a certain length) has *random* digits. Particularly: when represented in binary, for all i digits: P(digit i == 0) = 0.5; there is a 50/50 chance that any given digit is 0 (and if it is not 0, then it must be 1).
+
+MD5 is a 16 byte (128 bit) hashing algorithm and is now considered *broken* in the cryptographic sense (i.e., it is no longer *cryptographically secure*). This is because it is *computationally feasible* for an attack to find a collision.
+
+Truncating a hash is acknowledged (by those skilled in the art) to, *generally* (i.e., near *universally*), weaken the result. Say you hash some data -- using a cryptographically secure hash function -- and the digest, call it Out1, is 128 bits long. Now hash some *different, arbitrary* data and call the digest Out2. There is a 1-in-2^128 chance that Out2 *exactly* matches Out1 (a collision). This is because, given the digests are random, there are 128 events of 0.5 probability which *all* **must** succeed for the digests to match. However, if you were to compare *only* the last 64 bits, then there would be half as many checks that need to succeed, meaning the odds of a collision are now 1-in-2^64 (and thus is is 2^64 times *easier* for an attacker to find a collision to a specific hash).
+
+### Proof of Work (PoW)
+
+PoW is a technique whereby hashes with specific properties are produced. In other words: a *partial collision* is found. In the case of Bitcoin, this is easy to confirm via *block hashes*. For example, this belongs to block 622021: `0000000000000000000b21d0fac25166d922f1a6a883c456a0d1dce2b4940d3a`. It is clear to see that this is a hash digest with *many* prefixing zero-bits (76 zero bits in this case).
+
+Notice the hash is trivially compressible: delete all prefixing zero-bytes and replacing them with a count of how many bytes were deleted. The digest, in this case is 090b21d0fac25166d922f1a6a883c456a0d1dce2b4940d3a -- 24 bytes, or 192 bits, long.
+
+#### Inventiveness:
+
+How is it possible that the digest of a cryptographically secure hashing algorithm -- 32 bytes large -- can be *reliably and reversibly* compressed to just 24 bytes? *It is because of the PoW!* The PoW requirement acts as a constraint on the digest -- because it is from a cryptographically secure hash function -- so, in essence, the PoW requirement *guarantees* that this *special* quality is held by the digest.
+
+Additionally, since this process (of generating Bitcoin blocks with associated PoWs) is an *ongoing and continuous* process, the special digests that are produced are done so *near the limits of technology*. The *result* of this process, in some way, *is a measurement* of civilization's best attempt at the problem of partial collisions.
+
+Let us call this special property *thermodynamic security*. That is, because the digests are *thermodynamically secure*, they are able to be compressed in this peculiar way.
+
+## Details of Invention
+
+Let H1 = the hash of Bitcoin block 622021: `0000000000000000000b21d0fac25166d922f1a6a883c456a0d1dce2b4940d3a`
+
+The core of this invention lies in two main realizations, and a third supplementary one.
+
+1. That, although the last 180 bits of H1 are essentially random, those bits *can only be valid* given some *additional quality* that the hash must possess -- this is the PoW check performed by Bitcoin.
+2. That the cycle of Bitcoin block production, whereby new PoWs are regularly calculated, is a *measure* of *the best extant human knowledge regarding the production of partial collisions* of a given hash function (in the case of H1, the function is SHA256).
+3. That a party with exclusive (or at least mostly-secret) knowledge enabling a more efficient mining process (which must directly link to knowledge of performing partial collisions) both will inevitably increase the *evidence* of hash-rate (via adjustments in Bitcoin's difficulty algorithm) *and* is incented to *keep this knowledge secret*. Thus the conditions under which this knowledge exists are *non-collaborative*, reducing the likelihood of significant collusion remaining undetected.
+
+**Note:** This method *relies* on the cryptographic security of the hash function; if an adversary were to *completely break* a hash function, then this method provides just as much security as using the full digest: basically zilch.
+
+- Call realization (1): segregated-randomness
+- Call realization (2): measure-of-knowledge
+- Call realization (3): anti-collaboration
+
+### This is the invention:
+
+Given a context of *thermodynamic security* and *segregated-randomness*, it is safe to use the *unconstrained* bits of a hash only and still maintain the full security of a hash. Additionally, given the output is a *measure-of-knowledge*, it can be used to measure the *excess capacity* in the security of a hash (measured in bits). Given that *excess capacity has no function* besides *buffer*. If something is *cryptographically secure*, then *at that point in time* there is nothing to be gained besides *being extra secure* which has zero practical benefit. (WRT home security, at some point *adding extra locks to your door* ceases to be beneficial -- they're adding *unneeded excess capacity*.)
+
+Given this context: it is safe to take *only a fraction* of the unconstrained bits and treat it with equivalent security of the full hash. For example, it is safe to take only the last 16 bytes (the last *half*) of H1 and treat it as though it has the full 32 bytes of security.
+
+If it is feasible for a PoW network (like Bitcoin) to produce X bits zero-bits as the most significant bits of a hash, then it indicates that *arbitrary* collisions of up to X bits are feasible. Therefore, truncating to X bits only is insecure (because we have examples of collisions of this length that are produced regularly). Based on the time-sensitivity of an attack, some buffer can be chosen. For example: 1 billion times harder than generating a Bitcoin block hash -- approximately 32 security-bits of *deemed necessary* buffer; let this buffer be B, and in this example B = 32. In such a context, it is safe to use the last (X + B) bits of a hash for *any short term* use. This is because the hash function is regularly used to produce hashes with *segregated-randomness*, which enables a *measure-of-knowledge* and that measure informs the security requirements *for short-term messages*.
+
+**Additionally:**, note that *short term* in this case is actually a *variable quantity* that can be chosen based on the security requirements. For example: in a *blockchain use-case*, and given sufficient B, the last X + B bits are secure for the *entire period* that a blockchain uses a *specific hashing algorithm* (after which time the blockchain can hard-fork to a new hashing algorithm). This is moderately useful for some blockchain networks (e.g., Bitcoin, Litecoin, Ethereum 1, etc) and incredibly useful for other blockchain networks (e.g., Amaroo) because it results in a reduction in storage and bandwidth usage -- which in some cases is *immensely* valuable.
+
+<!-- For example, an Ethereum transaction currently uses 20,000 gas to store 32 bytes of data on the Ethereum blockchain, (about $4 USD at 77 GWEI gas price) -->
+
+Thus, it is also a method for improving the *throughput* (transactions per second) of proof of work blockchains -- some more than others. It achieves this by reducing the overheads associated with storing, referring to, and proving data in blockchain networks.
+
+blockchains remain secure in part bc many collisions would need to be found for significant fraud (and this is trivial to guard against) -- so by the time there is substantial risk, the blockchain can have safely migrated to a new algorithm.
+
+It is additionally noted that this method is transitive through merkle trees, and thus can be used to reduce the size of a merkle branch *by 50%* when only 50% of a hash is used (i.e., which might be the the least-significant-bits -- or any other bits which are unconstrained by the thermodynamically secure context).
