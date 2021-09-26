@@ -2,12 +2,13 @@ module Amaroo.WP.Calcs where
 
 import Prel
 
+import Amaroo.WP.Utils (prel)
 import Data.Int (toNumber)
 import Data.Int as I
 import Data.List.NonEmpty (NonEmptyList, cons', fromList, head, singleton, tail)
 import Data.List.NonEmpty as NEL
 import Data.Maybe (fromMaybe)
-import Math (floor, ln2, log)
+import Math (ceil, floor, ln2, log)
 
 {-|
 
@@ -82,7 +83,9 @@ type ChainStats
     , tts :: Number
     , confRate :: Number
     , porBytes :: Number
+    , porBytes2 :: Number
     , effBh :: Number
+    , effDh :: Number
     , kTx :: Number
     , kB :: Number
     , k1 :: Number
@@ -120,7 +123,7 @@ calcNextNestingLevel :: Params -> NestingStats -> NestingStats
 calcNextNestingLevel ps nsPrev = {n, t, tps, p: pToPF ps}
   where
     n = nsPrev.t / bfbh
-    t = nsPrev.t * k / bfbh
+    t = n * k
     tps = t / ps.txSize
     h = head ps.hfs
     bfbh = h.bf * h.bh
@@ -128,10 +131,10 @@ calcNextNestingLevel ps nsPrev = {n, t, tps, p: pToPF ps}
 
 data TradVar = Trad | TradEth2
 
-eth2EffBh bh = floor $ 8192.0 / (6.5*60.0) * 12.0 + bh * 0.1
+eth2EffDh bh = floor $ 8192.0 / (6.5*60.0) * 12.0 + bh * 0.1
 
 tradChainCalc' :: Params -> TradVar -> ChainStats
-tradChainCalc' ps var = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts, porBytes: 0.0, effBh, kTx: k, kB: 0.0, k1: k}
+tradChainCalc' ps var = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts, effBh, effDh, kTx: k, k1: k, kB: 0.0, porBytes: 0.0, porBytes2: 0.0}
   where
     d1 = {n: 1.0, t: k, tps: k / ps.txSize, p: pToPF ps}
     k = head ps.ks
@@ -141,9 +144,10 @@ tradChainCalc' ps var = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts, porB
     ps3 = paramsForNextNS ps2
     bhMod = case var of
       Trad -> identity
-      TradEth2 -> eth2EffBh
-    effBh = bhMod hf2.bh
-    d2 = calcNextNestingLevel (ps2 { hfs = singleton {bf: hf2.bf, bh: effBh} }) d1
+      TradEth2 -> eth2EffDh
+    effBh = hf.bh
+    effDh = bhMod hf2.bh
+    d2 = calcNextNestingLevel (ps2 { hfs = singleton {bf: hf2.bf, bh: effDh} }) d1
     d3 = calcNextNestingLevel ps3 d2
     deltaBigS = k
     deltaSmallS = k
@@ -184,13 +188,18 @@ findMaxPoRsN1 ps g = (loopFindMaxF {i: 1, n: 0.0, t: 0.0}).n
     -- | \frac{\d{T_1}}{\d{N_1}}
     utPorsDT1byDN1 n1 = (k1 * ln2 - bf * n1 * (g + bh * log 4.0) - 2.0 * bf * g * n1 * log n1) / ln2
 
+applyDiscountToHash :: Number -> Number
+applyDiscountToHash bh = (bh - _) $ ceil $ (1.0 + prel {f: 80.0, t: 112.0, v: bh}) * 16.0
+
 type UtParams = {explicitPoRs :: Boolean, headerOmission :: Boolean, hashTruncation :: Boolean}
 
 utChainCalc :: Params -> UtParams -> ChainStats
-utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, confRate, tts, deltaBigS, deltaSmallS, porBytes, effBh, kTx, kB, k1}
+utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, confRate, tts, deltaBigS, deltaSmallS, porBytes, porBytes2, effBh, effDh, kTx, kB, k1}
   where
     hashSize = if hashTruncation then 16.0 else 32.0
-    htModBh bh = bh - (if hashTruncation then 16.0 else 0.0)
+    -- ~~if bh<96 (1/2 way between 80 and 112) then only discount 1 hash, otherwise 2~~
+    -- discount between 1 and two hashes worth depending on bh (inverse linear interpolate)
+    htModBh bh = if hashTruncation then applyDiscountToHash bh else bh
     fixBH1 r@{bh} = r {bh = (if headerOmission then hashSize else htModBh bh)}
     fixBH2 r@{bh} = r {bh = htModBh bh}
     -- we have to modify the header size based on optimizations, but we don't want to pass
@@ -202,7 +211,7 @@ utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, con
     n1 = if explicitPoRs then findMaxPoRsN1 ps1 hashSize else (k1 / 2.0 / bfbh)
     confRate = hf.bf * n1
     porBytes = porLen hashSize n1
-    explicitPorsK = hf.bf * n1 * (porBytes + hf.bh)
+    explicitPorsK = hf.bf * n1 * (porBytes + htModBh hf.bh)
     kTx = if explicitPoRs then k1 - explicitPorsK else (k1 / 2.0)
     kB = k1 - kTx
     t1 = kTx * n1
@@ -216,6 +225,8 @@ utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, con
     deltaSmallS = if explicitPoRs then k1 else k1 + explicitPorsK  -- TODO: figure this out
     tts = ((5.0 * 365.25) * deltaSmallS / 10_000_000.0)  -- TODO: figure this out
     d2 = calcNextNestingLevel ps2 d1
+    porBytes2 = porLen hashSize (d2.n / n1)
+    effDh = d2.p.hf.bh  -- Note: don't take into account porBytes2 -- if explicitPoRs then d2.p.hf.bh + porBytes2 else d2.p.hf.bh
     d3 = calcNextNestingLevel ps3 d2
 
 allUtChainCalcsF :: forall a. (UtOptimizations -> a) -> UtVariants a

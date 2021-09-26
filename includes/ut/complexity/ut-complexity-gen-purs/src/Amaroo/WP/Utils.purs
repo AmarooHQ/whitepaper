@@ -14,3 +14,9 @@ diagonalApply_ f bs i
     | otherwise = [ui (f $ ui bs i) i] <> diagonalApply_ f bs (i + 1)
 
 diagonalApply f bs = diagonalApply_ f bs 0
+
+lerp :: {f :: Number, t :: Number, pct :: Number} -> Number
+lerp {f, t, pct} = min t $ max f $ f + (t - f) * pct
+
+prel :: {f :: Number, t :: Number, v :: Number} -> Number
+prel {f, t, v} = max 0.0 (v - f) |> min (t - f) |> (_ / (t - f))

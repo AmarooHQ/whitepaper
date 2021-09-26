@@ -119,6 +119,7 @@ utSpec = describe "ut" do
         ut.d1 `dNShouldEqual` {n: n1, t: t1, tps: t1 / txSize}
         round ut.d1.tps `shouldEqual` 156
         round ut.d1.n `shouldEqual` 156
+        round (auxStats ut).scalingFactors.nesting `shouldEqual` (round $ ut.d2.tps / ut.d1.tps)
       it "d2" do
         -- constants from comparison-gen.py
         floor ut.d2.n `shouldEqual` 7_812
@@ -138,20 +139,21 @@ utSpec = describe "ut" do
           getK1 v = v.d1.p.k
           getK2 v = v.d2.p.k
           getK3 v = v.d3.p.k
+          tDiscount bh = bh - ((bh - 80.0) / (112.0 - 80.0) + 1.0) * 16.0
       it "header omission should use hashSize" do
         (getHF1 utvs.ho).bh `shouldEqual` 32.0
         (getHF2 utvs.ho).bh `shouldEqual` 100.0
         (getHF3 utvs.ho).bh `shouldEqual` 100.0
         (getHF1 utvs.hot).bh `shouldEqual` 16.0
-        (getHF2 utvs.hot).bh `shouldEqual` 84.0
+        (getHF2 utvs.hot).bh `shouldEqual` tDiscount 100.0
         (getHF3 utvs.hot).bh `shouldEqual` 100.0  -- at nesting-l-3, truncation is not something we can realiably predict
       it "truncation should shorten headers and PoRs" do
         utvs.t.porBytes `shouldSatisfy` ((>) utvs.std.porBytes)
-        (getHF1 utvs.t).bh `shouldEqual` 84.0
-        (getHF2 utvs.t).bh `shouldEqual` 84.0
+        (getHF1 utvs.t).bh `shouldEqual` tDiscount 100.0
+        (getHF2 utvs.t).bh `shouldEqual` tDiscount 100.0
         (getHF3 utvs.t).bh `shouldEqual` 100.0
         (getHF1 utvs.hot).bh `shouldEqual` 16.0
-        (getHF2 utvs.hot).bh `shouldEqual` 84.0
+        (getHF2 utvs.hot).bh `shouldEqual` tDiscount 100.0
         (getHF3 utvs.hot).bh `shouldEqual` 100.0  -- at nesting-l-3, truncation is not something we can realiably predict
       it "+PoRs variants shouldn't have kTx == kB" do
         utvs.pors.kTx `shouldNotEqual` utvs.pors.kB
@@ -185,8 +187,8 @@ utSpec = describe "ut" do
           confRates = [5.00, 15.625, 31.25]
           -- TTS isn't an exact match, but p close. Definitely *looks* mostly right WRT numbers coming out.
           -- ttss = [0.44, 0.94, 1.03]  -- from python gen
-          ttss = [0.45, 1.0, 1.10]  -- these are the new TTS figures; keeping them here to make sure we know if they change
-          dss = [2460, 5500, 6000]  -- these are the new TTS figures; keeping them here to make sure we know if they change
+          ttss = [0.45, 1.0, 1.004]  -- these are the new TTS figures; keeping them here to make sure we know if they change
+          dss = [2460, 5500, 5500]  -- these are the new TTS figures; keeping them here to make sure we know if they change
           s = basicSample.ut
           -- exclude +T variant b/c py script doesn't get it
           variants = [s.std, s.ho, s.hot]

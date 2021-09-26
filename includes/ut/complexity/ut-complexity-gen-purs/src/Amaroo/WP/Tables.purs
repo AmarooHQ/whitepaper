@@ -2,19 +2,21 @@ module Amaroo.WP.Tables where
 
 import Prel
 
-import Amaroo.WP.Calcs (ChainStats, Params, UtVariants, allUtChainCalcs, allUtChainCalcsF, auxStats, eth2EffBh, mkSimplePs, pToPF, runChainCalcFor, tradChainCalc, tradChainCalcEth2, utChainCalc)
-import Amaroo.WP.Formatter (fdPlain, fdPlainMixed, fdPlainZero, fdStdMixed, fdStdTwo, fdStdZero, fmt1GbpsPs, fmtDyn, fmtPsKBfBh, wrap)
+import Amaroo.WP.Calcs (ChainStats, Params, UtVariants, allUtChainCalcs, allUtChainCalcsF, applyDiscountToHash, auxStats, mkSimplePs, pToPF, runChainCalcFor, tradChainCalc, tradChainCalcEth2, utChainCalc)
+import Amaroo.WP.Formatter (fdPlain, fdPlainMixed, fdPlainZero, fdStd, fdStdMixed, fdStdTwo, fdStdZero, fmt1GbpsPs, fmtDyn, fmtPsKBfBh, fmtPsKBfBhDh, wrap)
 import Amaroo.WP.Utils (diagonalApply, ui)
 import Data.Array (drop, filter, intercalate, take)
 import Data.Int (decimal, toNumber)
 import Data.Int (toStringAs) as I
-import Data.Maybe (fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe, isJust, fromJust)
 import Data.Number (infinity)
 import Data.String (Pattern(..), Replacement(..), length, replaceAll)
 import Data.String.Utils as S
+import Data.Traversable (sequence)
 import Effect.Exception (error)
 import Effect.Exception.Unsafe (unsafeThrowException)
 import Math (pow)
+import Partial.Unsafe (unsafePartial)
 
 {-|
 
@@ -121,7 +123,6 @@ _CARDANO_1M_K = _BTC_1M_K
 
 _ETH2_BF = btToF 12
 _ETH2_BH = 200.0
-_ETH2_EFF_BH = eth2EffBh _ETH2_BH
 _ETH2_1M_K = 75278.0
 
 _POLKADOT_BH = 288.0
@@ -129,12 +130,14 @@ _POLKADOT_1M_K = 109810.0
 
 _UT_BF = 1.0 / 15.0
 _UT_BH = 84.0
-_UT_BH_FOR_SHARDING = 68.0
+_UT_BH_FOR_SHARDING = applyDiscountToHash _UT_BH
 _UT_HF = {bh: _UT_BH, bf: _UT_BF}
 
 _UT1_1M_K = ut1TpsToK _1M 250.0 _UT_BF _UT_BH
+_UT1T_1M_K = ut1TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING
 _UT1HOT_1M_K = ut1TpsToK _1M 250.0 _UT_BF 16.0
 _UT2_1M_K = ut2TpsToK _1M 250.0 _UT_BF _UT_BH _UT_BH
+_UT2T_1M_K = ut2TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING _UT_BH_FOR_SHARDING
 _UT2HOT_1M_K = ut2TpsToK _1M 250.0 _UT_BF 16.0 _UT_BH_FOR_SHARDING
 _OPT_SHARD_1M_K = oc2TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING
 
@@ -166,25 +169,27 @@ instance showNetwork :: Show Network where
   show OptShard = "Optimal Sharding"
   show (UT ut) = utName_ ut
 
-utVsOther :: Number -> Array {net :: Network, p :: Params}
-utVsOther k =
-    [ {net: Bitcoin, p: mkSimplePs k {bf: btToF 600, bh: 80.0} tx }
-    , {net: Cardano, p: mkSimplePs k {bf: btToF 20, bh: _CARDANO_BH} tx }
-    , {net: UT (PoRs 1), p: mkSimplePs k _UT_HF tx }
-    , {net: UT (Std 1), p: mkSimplePs k _UT_HF tx }
-    , {net: UT (HOT 1), p: mkSimplePs k _UT_HF tx }
-    , {net: Polkadot, p: mkSimplePs k {bf: btToF 6, bh: _POLKADOT_BH} tx }
-    , {net: Eth2, p: mkSimplePs k {bf: _ETH2_BF, bh: _ETH2_BH} tx }
-    , {net: OptShard, p: mkSimplePs k {bf: _UT_BF, bh: _UT_BH_FOR_SHARDING} tx }
-    , {net: UT (PoRs 2), p: mkSimplePs k _UT_HF tx }
-    , {net: UT (Std 2), p: mkSimplePs k _UT_HF tx }
-    , {net: UT (HOT 2), p: mkSimplePs k _UT_HF tx }
-    , {net: UT (Aleph (HOT 2)), p: mkSimplePs k _UT_HF tx }
+utVsOther :: Array ({net :: Network, p :: Number -> Params, oneMTps :: Maybe Number})
+utVsOther =
+    [ {net: Bitcoin, p: \k -> mkSimplePs k {bf: btToF 600, bh: 80.0} tx, oneMTps: Just _BTC_1M_K}
+    , {net: Cardano, p: \k -> mkSimplePs k {bf: btToF 20, bh: _CARDANO_BH} tx, oneMTps: Just _CARDANO_1M_K}
+    , {net: UT (PoRs 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Nothing}
+    , {net: UT (Std 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1_1M_K}
+    , {net: UT (T 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1T_1M_K}
+    , {net: UT (HOT 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1HOT_1M_K}
+    , {net: Polkadot, p: \k -> mkSimplePs k {bf: btToF 6, bh: _POLKADOT_BH} tx, oneMTps: Just _POLKADOT_1M_K}
+    , {net: Eth2, p: \k -> mkSimplePs k {bf: _ETH2_BF, bh: _ETH2_BH} tx, oneMTps: Just _ETH2_1M_K}
+    , {net: OptShard, p: \k -> mkSimplePs k {bf: _UT_BF, bh: _UT_BH_FOR_SHARDING} tx, oneMTps: Just _OPT_SHARD_1M_K}
+    , {net: UT (PoRs 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Nothing}
+    , {net: UT (Std 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2_1M_K}
+    , {net: UT (T 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2T_1M_K}
+    , {net: UT (HOT 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2HOT_1M_K}
+    , {net: UT (Aleph (HOT 2)), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Nothing}
     ]
   where
     tx = 250.0
 
-ut1MCompareKs = [_BTC_1M_K, _CARDANO_1M_K, _UT1_1M_K, _UT1HOT_1M_K, _POLKADOT_1M_K, _ETH2_1M_K, _OPT_SHARD_1M_K, _UT2_1M_K, _UT2HOT_1M_K]
+ut1MCompareKs = [_BTC_1M_K, _CARDANO_1M_K, _UT1_1M_K, _UT1T_1M_K, _UT1HOT_1M_K, _POLKADOT_1M_K, _ETH2_1M_K, _OPT_SHARD_1M_K, _UT2_1M_K, _UT2T_1M_K, _UT2HOT_1M_K]
 
 id x = x
 
@@ -218,11 +223,18 @@ isAleph :: Network -> Boolean
 isAleph (UT (Aleph _)) = true
 isAleph _ = false
 
-diagF1M :: Number -> Array _
-diagF1M = filter (notPoRs <<< \e -> e.net) <<< utVsOther
+-- diagF1M :: Number -> Array _
+-- diagF1M = filter (notPoRs <<< \e -> e.net) <<< utVsOther
+
+-- utVsOther1MOld :: Array {net :: Network, p :: Params}
+-- utVsOther1MOld = diagonalApply diagF1M ut1MCompareKs
 
 utVsOther1M :: Array {net :: Network, p :: Params}
-utVsOther1M = diagonalApply diagF1M ut1MCompareKs
+utVsOther1M = unsafePartial fromJust $ sequence $ calc1M <$> filter (\{oneMTps} -> isJust oneMTps) utVsOther
+  where
+    calc1M {net, p, oneMTps} = case oneMTps of
+      Just k -> Just {net, p: p k}
+      Nothing -> Nothing
 
 -- Note: CBF -- it was only there b/c of solana's rediculous 700k tps claim anyway
 -- utVsOther1Gbps :: Array {net :: Network, p :: Params}
@@ -233,7 +245,7 @@ mkSpacer n = S.repeat n "-" |> fromMaybe ""
 
 getTps ns = ns.tps
 
-genTpsRow utF cd = [fmtPsKBfBh cd.ps] <> (fmtDyn fdStdMixed <$> getTps <$> [cd.trad.d1, cd.trad.d2, (utF cd).d1, (utF cd).d2, (utF cd).d3])
+genTpsRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> getTps <$> [cd.trad.d1, cd.trad.d2, (utF cd).d1, (utF cd).d2, (utF cd).d3])
 
 tableTps :: Table
 tableTps =
@@ -247,7 +259,7 @@ tableTpsHot =
     , mkSpacer <$> [6, 2, 5, 4, 4, 4]
     ] <> (genTpsRow (\cd -> cd.ut.hot) <$> utComplexityData)
 
-genDappChainsRow utF cd = [fmtPsKBfBh cd.ps] <> (fmtDyn fdStdMixed <$> [(utF cd).d1.n, (utF cd).d2.n, (utF cd).d3.n, (utF cd).deltaBigS]) <> [fmtDyn fdStdTwo (utF cd).confRate]
+genDappChainsRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> [(utF cd).d1.n, (utF cd).d2.n, (utF cd).d3.n, (utF cd).deltaBigS]) <> [fmtDyn fdStdTwo (utF cd).confRate]
 
 dappChains :: Table
 dappChains =
@@ -262,7 +274,7 @@ dappChainsHot =
     ] <> (genDappChainsRow (\cd -> cd.ut.hot) <$> utComplexityData)
 
 -- TODO: replace `fmtDyn fdPlain`
-genPoRRow utF cd = [fmtPsKBfBh cd.ps] <> (fmtDyn fdStdMixed <$> [ut.d1.n, ut.d1.tps, ut.d2.n, ut.d2.tps, ut.porBytes]) -- <> (fmtDyn fdStdTwo <$> [ut.d1.n / ut.d1.p.k])
+genPoRRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> [ut.d1.n, ut.d1.tps, ut.d2.n, ut.d2.tps, ut.porBytes]) -- <> (fmtDyn fdStdTwo <$> [ut.d1.n / ut.d1.p.k])
   where
     ut = utF cd
 
@@ -306,8 +318,9 @@ netToTps (UT ut) cd = case utNameI ut of
   _ -> unsafeThrowException $ error $ "[netToTps] got bad level of nesting in UT network: " <> utName_ ut
 
 -- todo: fix fmtDyn fdPlain
-genCompareRow {net, p} = [fmtPsKBfBh p, show net] <> [fmtDyn fdPlainMixed cs.effBh] <> (fmtDyn fdStdTwo <$> [scalingFactor, tpsPerBaseChain]) <> (fmtDyn fdStdMixed <$> [tps])
+genCompareRow k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdPlainMixed <$> [cs.effBh, cs.effDh]) <> (fmtDyn fdStdTwo <$> [scalingFactor, tpsPerBaseChain]) <> (fmtDyn fdStdMixed <$> [tps])
   where
+    p = o.p k
     cs = netToChainStats net p
     aux = auxStats cs
     -- n1 = if isAleph net then infinity else cs.d1.n
@@ -316,20 +329,20 @@ genCompareRow {net, p} = [fmtPsKBfBh p, show net] <> [fmtDyn fdPlainMixed cs.eff
     scalingFactor = netToScalingFactor net aux
 
 compareNetsTH =
-    [ ["$k$, $B_f$, $B_h$", "Network", "Eff. $B_h$", "Scale $\\times$", "$\\nicefrac{\\Sigma\\;\\text{TPS}}{N_1}$", "$\\Sigma$ TPS"] -- , "TPS vs " <> (utName_ $ Std 2)]
-    , mkSpacer <$> [5, 6, 3, 3, 4, 3] -- , 6]
+    [ ["$k$, $B_f$, $B_h$", "Network", "Eff.$B_h$", "Eff.$D_h$", "Scale $\\times$", "$\\nicefrac{\\Sigma\\;\\text{TPS}}{N_1}$", "$\\Sigma$ TPS"] -- , "TPS vs " <> (utName_ $ Std 2)]
+    , mkSpacer <$> [5, 6, 2, 2, 3, 4, 3] -- , 6]
     ]
 
 compareNets3k :: Table
 compareNets3k =
-    compareNetsTH <> (genCompareRow <$> utVsOther 3_000.0)
+    compareNetsTH <> (genCompareRow 3_000.0 <$> utVsOther)
 
 compareNets30k :: Table
 compareNets30k =
-    compareNetsTH <> (genCompareRow <$> utVsOther 30_000.0)
+    compareNetsTH <> (genCompareRow 30_000.0 <$> utVsOther)
 
 -- todo: fix fmtDyn fdPlain
-genCompare1MRow {net, p} = [fmtPsKBfBh p, show net] <> (fmtDyn fdStdTwo <$> [netToTps net cs / cs.d1.n, netToTps net cs]) <> (fmtDyn fdStdMixed <$> [ut2.d2.tps]) -- , cs.k1 / ut2K])
+genCompare1MRow {net, p} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdStdTwo <$> [netToTps net cs / cs.d1.n, netToTps net cs]) <> (fmtDyn fdStdMixed <$> [ut2.d2.tps]) -- , cs.k1 / ut2K])
   where
     ut2K = ut2TpsToK (netToTps net cs) p.txSize pf.hf.bf pf.hf.bh pf.hf.bh
     pf = pToPF p
@@ -371,6 +384,7 @@ optimizationProps =
   , {s: "$\\Delta s$ (B/s)", f: \cs -> fmtDyn fdStdZero cs.deltaSmallS}
   , {s: "TTS 5yrs (days)", f: \cs -> fmtDyn fdStdTwo cs.tts}
   , {s: "$\\Delta S$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.deltaBigS}
+  , {s: "Nesting TPS$\\times$", f: \cs -> fmtDyn fdStd (auxStats cs).scalingFactors.nesting}
   ]
 
 compareUtOptimizations :: Table

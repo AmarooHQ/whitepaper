@@ -2,7 +2,7 @@ module Amaroo.WP.Formatter where
 
 import Prel
 
-import Amaroo.WP.Calcs (Params, ChainStats)
+import Amaroo.WP.Calcs (ChainStats, Params, ParamsF)
 import Data.Array (intercalate, reverse)
 import Data.Array as A
 import Data.Int (toNumber)
@@ -96,11 +96,11 @@ fmtTps = fmtCommas
 
 _fmtParams = wrap "$" <<< intercalate ", "
 
-fmtPsKBfBh :: Params -> String
+fmtPsKBfBh :: ParamsF -> String
 fmtPsKBfBh ps = _fmtParams [fmtDyn fdK k, fmtFract hf.bf, fmtPlain hf.bh]
   where
-    k = head ps.ks
-    hf = head ps.hfs
+    k = ps.k
+    hf = ps.hf
 
 fmtPsKBfBhDh :: ChainStats -> String
 fmtPsKBfBhDh cs = _fmtParams [fmtDyn fdK k, fmtFract hf.bf, fmtPlain hf.bh, fmtPlain dh]
