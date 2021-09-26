@@ -35,9 +35,11 @@ Additionally, a network named *Opt.Shard* is included. This is a theoretical net
 
 : A comparison of computational requirements (approximated by $k$) for 1 million TPS between UT and various other networks. UT's equivalent TPS is also provided (for the $O(c^3)$ configuration of UT given identical parameters).
 
-%% INSERT ### TABLE: comparison_1gbps
+\begin{comment}
+%% INS--ERT ### TABLE: comparison_1gbps
 
 : A comparison of various networks' $k$ and TPS given a maximum network-wide throughput of 1 Gb/s ($\sim1.3\times 10^8$ B/s). Also included is the rate at which chains on that network grow in size (which is proportional to $k$).
+\end{comment}
 
 \todo{make sure these tables aren't split over pages (they're short enough that we don't need to)}
 
