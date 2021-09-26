@@ -35,7 +35,7 @@ Additionally, a network named *Optimal Sharding* is included. This is a theoreti
 
 %% INSERT ### TABLE: comparison_1m_tps
 
-: A comparison of computational requirements (approximated by $k$) for 1 million TPS between UT and various other networks. UT's equivalent TPS is also provided (for the $O(c^3)$ configuration of UT given identical parameters).
+: A comparison of computational requirements (approximated by $k$) for 1 million TPS between UT and various other networks. $\UT{2}$'s equivalent TPS is also provided (given the same parameters).
 
 \begin{comment}
 %% INS--ERT ### TABLE: comparison_1gbps

@@ -9,6 +9,7 @@ import Data.Array (drop, filter, intercalate, take)
 import Data.Int (decimal, toNumber)
 import Data.Int (toStringAs) as I
 import Data.Maybe (fromMaybe)
+import Data.Number (infinity)
 import Data.String (Pattern(..), Replacement(..), length, replaceAll)
 import Data.String.Utils as S
 import Effect.Exception (error)
@@ -213,6 +214,10 @@ notPoRs (UT (PoRs _)) = false
 notPoRs (UT (PoRTs _)) = false
 notPoRs _ = true
 
+isAleph :: Network -> Boolean
+isAleph (UT (Aleph _)) = true
+isAleph _ = false
+
 diagF1M :: Number -> Array _
 diagF1M = filter (notPoRs <<< \e -> e.net) <<< utVsOther
 
@@ -257,20 +262,22 @@ dappChainsHot =
     ] <> (genDappChainsRow (\cd -> cd.ut.hot) <$> utComplexityData)
 
 -- TODO: replace `fmtDyn fdPlain`
-genPoRRow utF cd = [fmtPsKBfBh cd.ps] <> (fmtDyn fdStdZero <$> [ut.d1.n, ut.d1.tps, ut.d2.n, ut.d2.tps, ut.porBytes]) <> (fmtDyn fdStdTwo <$> [ut.d1.n / ut.d1.p.k])
+genPoRRow utF cd = [fmtPsKBfBh cd.ps] <> (fmtDyn fdStdMixed <$> [ut.d1.n, ut.d1.tps, ut.d2.n, ut.d2.tps, ut.porBytes]) -- <> (fmtDyn fdStdTwo <$> [ut.d1.n / ut.d1.p.k])
   where
     ut = utF cd
 
+porTableSpacer = mkSpacer <$> [6, 2, 5, 4, 5, 3] -- , 4]
+
 tpsPor :: Table
 tpsPor =
-    [ ["$k$, $B_f$, $B_h$", "$N_1$", (utName_ $ PoRs 1) <> " TPS", "$N_2$", (utName_ $ PoRs 2) <> " TPS", "PoR (B)", "$\\nicefrac{N_1}{k}$"]
-    , mkSpacer <$> [6, 3, 4, 4, 4, 5, 4]
+    [ ["$k$, $B_f$, $B_h$", "$N_1$", (utName_ $ PoRs 1) <> " TPS", "$N_2$", (utName_ $ PoRs 2) <> " TPS", "PoR (B)"] -- , "$\\nicefrac{N_1}{k}$"]
+    , porTableSpacer
     ] <> (genPoRRow (\cd -> cd.ut.pors) <$> utComplexityData)
 
 tpsPort :: Table
 tpsPort =
-    [ ["$k$, $B_f$, $B_h$", "$N_1$", (utName_ $ PoRTs 1) <> " TPS", "$N_2$", (utName_ $ PoRTs 2) <> " TPS", "PoR (B)", "$\\nicefrac{N_1}{k}$"]
-    , mkSpacer <$> [6, 3, 4, 4, 4, 5, 4]
+    [ ["$k$, $B_f$, $B_h$", "$N_1$", (utName_ $ PoRTs 1) <> " TPS", "$N_2$", (utName_ $ PoRTs 2) <> " TPS", "PoR (B)"] -- , "$\\nicefrac{N_1}{k}$"]
+    , porTableSpacer
     ] <> (genPoRRow (\cd -> cd.ut.ports) <$> utComplexityData)
 
 netToScalingFactor :: Network -> _ -> Number
@@ -299,14 +306,18 @@ netToTps (UT ut) cd = case utNameI ut of
   _ -> unsafeThrowException $ error $ "[netToTps] got bad level of nesting in UT network: " <> utName_ ut
 
 -- todo: fix fmtDyn fdPlain
-genCompareRow {net, p} = [fmtPsKBfBh p, show net] <> [fmtDyn fdPlainMixed cs.effBh] <> (fmtDyn fdPlain <$> [netToScalingFactor net aux, netToTps net cs / cs.d1.n]) <> (fmtDyn fdStdMixed <$> [netToTps net cs])
+genCompareRow {net, p} = [fmtPsKBfBh p, show net] <> [fmtDyn fdPlainMixed cs.effBh] <> (fmtDyn fdStdTwo <$> [scalingFactor, tpsPerBaseChain]) <> (fmtDyn fdStdMixed <$> [tps])
   where
     cs = netToChainStats net p
     aux = auxStats cs
+    -- n1 = if isAleph net then infinity else cs.d1.n
+    tps = if isAleph net then infinity else netToTps net cs
+    tpsPerBaseChain = netToTps net cs / cs.d1.n
+    scalingFactor = netToScalingFactor net aux
 
 compareNetsTH =
-    [ ["$k$, $B_f$, $B_h$", "Network", "Eff. $B_h$", "Scale $\\times$", "$\\nicefrac{\\Sigma \\text{TPS}}{N_1}$", "$\\Sigma$ TPS"] -- , "TPS vs " <> (utName_ $ Std 2)]
-    , mkSpacer <$> [5, 6, 3, 3, 3, 3] -- , 6]
+    [ ["$k$, $B_f$, $B_h$", "Network", "Eff. $B_h$", "Scale $\\times$", "$\\nicefrac{\\Sigma\\;\\text{TPS}}{N_1}$", "$\\Sigma$ TPS"] -- , "TPS vs " <> (utName_ $ Std 2)]
+    , mkSpacer <$> [5, 6, 3, 3, 4, 3] -- , 6]
     ]
 
 compareNets3k :: Table
@@ -328,8 +339,8 @@ genCompare1MRow {net, p} = [fmtPsKBfBh p, show net] <> (fmtDyn fdStdTwo <$> [net
 
 compareNets1mTps :: Table
 compareNets1mTps =
-    [ ["$k$, $B_f$, $B_h$", "Network", "$\\nicefrac{\\Sigma \\text{TPS}}{N_1}$", "$\\Sigma$ TPS", "$\\UT{2}$ $\\Sigma$ TPS"] -- , "$k$ vs Equiv. $\\UT{2}$"]
-    , mkSpacer <$> [7, 7, 3, 3, 5] -- , 5]
+    [ ["$k$, $B_f$, $B_h$", "Network", "$\\nicefrac{\\Sigma\\;\\text{TPS}}{N_1}$", "$\\Sigma$ TPS", "$\\UT{2}$ $\\Sigma$ TPS"] -- , "$k$ vs Equiv. $\\UT{2}$"]
+    , mkSpacer <$> [5, 5, 3, 3, 3] -- , 5]
     ] <> (genCompare1MRow <$> utVsOther1M)
 
 
@@ -352,7 +363,7 @@ genCompareUtRow ut utvs {f, s} = [s] <> (getProp <$> utvs)
     getProp = f <<< (\n -> netLookupChainStats (UT n) ut)
 
 optimizationProps =
-  [ {s: "$\\Sigma \\text{TPS}$", f: \cs -> fmtDyn fdPlainZero cs.d1.tps}
+  [ {s: "$\\Sigma$ TPS", f: \cs -> fmtDyn fdPlainZero cs.d1.tps}
   , {s: "$N_1$ (chains)", f: \cs -> fmtDyn fdPlainZero cs.d1.n}
   , {s: "$\\mathbb{C}^\\prime$ (Hz)", f: \cs -> fmtDyn fdPlain cs.confRate}
   , {s: "Effective $B_h$ (B)", f: \cs -> fmtDyn fdPlainZero cs.effBh}

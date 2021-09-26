@@ -7,6 +7,7 @@ import Prel
 import Data.Int (decimal)
 import Data.Int as I
 import Data.Maybe (Maybe(..))
+import Data.Number (infinity)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 
@@ -59,3 +60,6 @@ fmtSpec = describe "formatting" do
       fmtDyn testFdPlain 999_999.999 `shouldEqual` testFSN "1.00" "6"
       fmtDyn testFdPlain 0.9 `shouldEqual` "0.90"
       fmtDyn testFdPlain 0.1 `shouldEqual` testFSN "1.00" "-1"
+
+    it "infty" do
+      fmtDyn testFdPlain infinity `shouldEqual` "$\\infty$"

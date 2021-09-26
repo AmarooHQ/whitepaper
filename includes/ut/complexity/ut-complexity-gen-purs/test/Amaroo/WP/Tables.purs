@@ -39,6 +39,7 @@ utNamesSpec = describe "tables" do
         ]
 
     it "1m compare len" do
+      -- note: because we filter the output of (utVsOther 1.0), it's inconvenient to test length (utVsOther 1.0) == length ut1mcompareks
       length utVsOther1M `shouldEqual` length ut1MCompareKs
 
     it "1m compare has tps == 1m as much as possible" do
