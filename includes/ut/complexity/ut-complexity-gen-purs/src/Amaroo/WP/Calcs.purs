@@ -2,17 +2,12 @@ module Amaroo.WP.Calcs where
 
 import Prel
 
-import Data.Array (range)
-import Data.Array as A
 import Data.Int (toNumber)
 import Data.Int as I
 import Data.List.NonEmpty (NonEmptyList, cons', fromList, head, singleton, tail)
 import Data.List.NonEmpty as NEL
 import Data.Maybe (fromMaybe)
-import Data.Tuple (Tuple)
-import Debug (trace)
-import Math (abs, ceil, floor, ln2, log)
-import Undefined (undefined)
+import Math (floor, ln2, log)
 
 {-|
 

@@ -3,13 +3,12 @@ module Amaroo.WP.Formatter where
 import Prel
 
 import Amaroo.WP.Calcs (Params, ChainStats)
-import Data.Array (intercalate, reverse, (:))
+import Data.Array (intercalate, reverse)
 import Data.Array as A
 import Data.Int (toNumber)
 import Data.List.NonEmpty (head)
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Number as N
-import Data.Number.Format (exponential, fixed, precision)
+import Data.Number.Format (exponential, fixed)
 import Data.Number.Format as NF
 import Data.String (Pattern(..), contains, drop, length, split, stripPrefix, take)
 import Data.String.Utils (fromCharArray, toCharArray)
@@ -17,7 +16,6 @@ import Data.Tuple (Tuple(..))
 import Effect.Exception (error)
 import Effect.Exception.Unsafe (unsafeThrowException)
 import Math (abs, floor, pow)
-import Undefined (undefined)
 
 
 wrap :: String -> String -> String

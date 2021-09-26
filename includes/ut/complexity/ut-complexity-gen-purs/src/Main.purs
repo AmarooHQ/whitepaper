@@ -1,13 +1,12 @@
 module Main where
 
-import Amaroo.WP.Calcs
-import Amaroo.WP.Tables
 import Prel
 
 import Amaroo.WP.Formatter (wrap)
+import Amaroo.WP.Tables (Table, compareNets1mTps, compareNets30k, compareNets3k, compareUtOptimizations, dappChains, dappChainsHot, showTable, tableTps, tableTpsHot, tpsPor, tpsPort)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.State (State, modify_, runState)
-import Data.Array (elem, filter, intercalate, length)
+import Data.Array (elem, filter, intercalate)
 import Data.String (Pattern(..), Replacement(..), contains, replace)
 import Data.String.Utils (lines)
 import Data.Traversable (sequence)
@@ -18,7 +17,6 @@ import Effect.Exception (error, throwException)
 import Node.Buffer as B
 import Node.Encoding (Encoding(..))
 import Node.FS.Sync as FS
-import Undefined (undefined)
 
 foreign import argv :: Array String
 
@@ -78,9 +76,6 @@ replaceAllTablesInWP dryRun = do
       _ <- sequence $ replaceTable <$> allTables
       pure unit
 
--- populateMd :: State String Unit
--- populateMd
-
 wnltn tn = wrap "\n" $ "### TABLE: " <> tn
 
 logTable (Tuple (TableName tn) t) = do
@@ -93,22 +88,9 @@ logAllTables = do
 
 main :: Effect Unit
 main = do
-    -- f "tps" tableTps
-    -- f "tps_optimized" tableTpsHot
-    -- f "dapp-chains" dappChains
-    -- f "dapp-chains_optimized" dappChainsHot
-    -- f "tps_por" tpsPor
-    -- f "tps_port" tpsPort
-    -- f "compare_nets_3k" compareNets3k
-    -- f "compare_nets_30k" compareNets30k
-    -- f "comparison_1m_tps" compareNets1mTps
-    -- f "compare_optimizations" compareUtOptimizations
-    -- -- f "comparison_1gbps" compareNets1Gpbs
-    runMain
-    -- if not checkF
-    --   then throwException $ error "checkF failed"
-    --   else C.log "checkF passed"
+    if shouldPopulateMd
+      then replaceAllTablesInWP dryRun
+      else logAllTables
   where
     shouldPopulateMd = elem "--populate-wp-md" argv
     dryRun = elem "--dry-run" argv
-    runMain = if shouldPopulateMd then replaceAllTablesInWP dryRun else logAllTables

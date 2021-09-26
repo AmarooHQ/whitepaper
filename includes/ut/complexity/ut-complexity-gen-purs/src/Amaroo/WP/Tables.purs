@@ -1,22 +1,19 @@
 module Amaroo.WP.Tables where
 
-import Amaroo.WP.Formatter
 import Prel
 
-import Amaroo.WP.Calcs (ChainComplexities, ChainStats, Params, UtVariants, allUtChainCalcs, allUtChainCalcsF, auxStats, eth2EffBh, mkSimplePs, pToPF, runChainCalcFor, tradChainCalc, tradChainCalcEth2, utChainCalc)
+import Amaroo.WP.Calcs (ChainStats, Params, UtVariants, allUtChainCalcs, allUtChainCalcsF, auxStats, eth2EffBh, mkSimplePs, pToPF, runChainCalcFor, tradChainCalc, tradChainCalcEth2, utChainCalc)
+import Amaroo.WP.Formatter (fdPlain, fdPlainMixed, fdPlainZero, fdStdMixed, fdStdTwo, fdStdZero, fmt1GbpsPs, fmtDyn, fmtPsKBfBh, wrap)
 import Amaroo.WP.Utils (diagonalApply, ui)
-import Data.Array (drop, filter, foldl, intercalate, take, (:))
-import Data.Int (Radix, decimal, toNumber)
-import Data.Int (Radix, toStringAs) as I
-import Data.List.NonEmpty (head)
-import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Number.Format as N
-import Data.String (Pattern(..), Replacement(..), contains, length, replaceAll)
+import Data.Array (drop, filter, intercalate, take)
+import Data.Int (decimal, toNumber)
+import Data.Int (toStringAs) as I
+import Data.Maybe (fromMaybe)
+import Data.String (Pattern(..), Replacement(..), length, replaceAll)
 import Data.String.Utils as S
 import Effect.Exception (error)
 import Effect.Exception.Unsafe (unsafeThrowException)
-import Math (floor, pow)
-import Undefined (undefined)
+import Math (pow)
 
 {-|
 

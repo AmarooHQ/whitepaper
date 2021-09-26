@@ -1,8 +1,8 @@
 module Test.Amaroo.WP.Tables where
 
-import Amaroo.WP.Tables
 import Prel
 
+import Amaroo.WP.Tables
 import Data.Array (all, head, length, tail)
 import Data.Array.Partial as AP
 import Data.Int (decimal, toStringAs)
