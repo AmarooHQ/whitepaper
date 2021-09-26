@@ -4,7 +4,10 @@
   "description": "generate complexity tables for WP",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "spago test",
+    "run": "spago run",
+    "bundle-here": "spago bundle-app",
+    "bundle-wp-root": "spago bundle-app --to ../../../../output/populateWPTables.js"
   },
   "author": "max",
   "license": "UNLICENSED",
@@ -12,7 +15,6 @@
     "purescript": "^0.14.4",
     "purescript-psa": "^0.8.2",
     "purty": "^7.0.0",
-    "sloc": "^0.2.1",
     "spago": "^0.20.3"
   }
 }
