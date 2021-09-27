@@ -8,6 +8,7 @@ import Control.Monad.Trans.Class (lift)
 import Data.Array (intercalate, range)
 import Data.Array (zip)
 import Data.Array as A
+import Data.Either (Either(..), fromLeft, isLeft)
 import Data.Int (floor, round, toNumber)
 import Data.Int as I
 import Data.List.NonEmpty as NEL
@@ -21,8 +22,10 @@ import Math (ceil, exp, log, pow)
 import Node.Encoding (Encoding(..))
 import Node.FS.Sync (writeTextFile)
 import Partial.Unsafe (unsafePartial)
-import Test.Spec (Spec, describe, it)
+import Test.QuickCheck (Result(..))
+import Test.Spec (Spec, describe, it, pending')
 import Test.Spec.Assertions (fail, shouldEqual, shouldNotEqual, shouldSatisfy)
+import Test.Spec.QuickCheck (quickCheck)
 import Undefined (undefined)
 
 
@@ -111,7 +114,8 @@ utSpec = describe "ut" do
 
       let n1 = 50.0
           k = 1000.0
-          dss = k + 0.1 * n1 * (32.0 + 32.0 * log2c n1)  -- k + bf * N1 proofs * (hash(bh) + proof_size)
+          -- note, don't add bh (because we don't omit headers in std) and don't add hash(bh) b/c it's the last element in the PoR branch
+          dss = k + 0.1 * n1 * (32.0 * log2c n1)  -- k + bf * N1 proofs * (proof_size)
           tts = 5.0 * 365.25 * dss / 10_000_000.0
       it "dss" do
         basicSample.ut.std.deltaSmallS `shouldEqual` dss
@@ -201,8 +205,8 @@ utSpec = describe "ut" do
           confRates = [5.00, 15.625, 31.25]
           -- TTS isn't an exact match, but p close. Definitely *looks* mostly right WRT numbers coming out.
           -- ttss = [0.44, 0.94, 1.03]  -- from python gen
-          ttss = [0.387, 1.198, 1.427]  -- these are the new TTS figures; keeping them here to make sure we know if they change
-          dss = [2120, 6562, 7812]  -- these are the new TTS figures; keeping them here to make sure we know if they change
+          ttss = [0.358, 1.198, 1.427]  -- these are the new TTS figures; keeping them here to make sure we know if they change
+          dss = [1960, 6562, 7812]  -- these are the new TTS figures; keeping them here to make sure we know if they change
           s = basicSample.ut
           -- exclude +T variant b/c py script doesn't get it
           variants = [s.std, s.ho, s.hot]
@@ -218,6 +222,9 @@ utSpec = describe "ut" do
         sequence_ $ (\t -> shouldBeWithin 0.005 (fst t) (snd t)) <$> zip ((\v -> v.confRate) <$> variants) confRates
       it "TTS" $ do
         sequence_ $ (\t -> shouldBeWithin 0.005 (fst t) (snd t)) <$> zip ((\v -> v.tts) <$> variants) ttss
+
+    pending' "passes quickchecks" do
+      quickCheck utChecks
 
     let record_k_vs_n1_forPoRs_csv = false
     if record_k_vs_n1_forPoRs_csv
@@ -246,3 +253,28 @@ utSpec = describe "ut" do
     --       --   , txSize: 250.0
     --       --   }
     --       range 1 250 <#> I.toNumber <#> (\n1 -> utPorsT1 n1 3000.0 0.06666 68.0 16.0)
+
+utChecks :: Params -> UtParams -> Result
+utChecks p utp = doUtChecks p utp ut
+  where
+    ut = utChainCalc p utp
+
+orError :: Boolean -> String -> Either String Unit
+orError b e = if b then Right unit else Left e
+
+infixl 1 orError as <?
+
+doUtChecks :: Params -> UtParams -> ChainStats -> Result
+doUtChecks p utp cs = if A.length filteredRes == 0
+    then Success
+    else Failed $ A.intercalate "\n * " $ ["UT checks failed -- P(" <> show p <> "), UTP(" <> show utp <> "):"] <> errMsgs
+  where
+    filteredRes = A.filter isLeft results
+    errMsgs = fromLeft ":( no error (you should never see this)" <$> filteredRes
+    results =
+      [
+      -- , Left "test fail"
+      -- , Left "oh no"
+      -- , false <? "well that didn't work"
+      -- , true <? "but this did"
+      ]

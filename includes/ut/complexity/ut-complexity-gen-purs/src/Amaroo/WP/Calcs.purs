@@ -211,8 +211,8 @@ utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, con
     n1 = if explicitPoRs then findMaxPoRsN1 ps1 hashSize else (k1 / 2.0 / bfbh)
     confRate = hf.bf * n1
     porBytes = porLen hashSize n1
-    -- if we are using headerOmission, then we need to download headers + PoRs, but otherwise the hash is fine
-    bhForExplicitPorsK = if headerOmission then htModBh (head ps.hfs).bh else hashSize
+    -- if we are using headerOmission, then we need to download headers + PoRs, but otherwise the hash is fine (which is the last element in the branch, anyway)
+    bhForExplicitPorsK = if headerOmission then htModBh (head ps.hfs).bh else 0.0
     explicitPorsK = hf.bf * n1 * (porBytes + bhForExplicitPorsK)
     kTx = if explicitPoRs then k1 - explicitPorsK else (k1 / 2.0)
     kB = k1 - kTx
