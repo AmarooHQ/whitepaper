@@ -32,3 +32,4 @@ includes/ut/diags/**/*.png
 *.toc
 *.ignore
 **/*.pyc
+*/testing/*

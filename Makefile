@@ -5,6 +5,8 @@ WPFILE=$(WPNOEXT).markdown
 WPHTML=$(WPNOEXT).html
 WPTEX=$(WPNOEXT).tex
 
+PURS_GEN_DIR=includes/ut/complexity/ut-complexity-gen-purs
+
 # default properties for WP -- see `set-wp-properties` cmd
 papersize=a4
 geometry=left=3cm,right=3cm,top=3cm,bottom=3cm
@@ -96,6 +98,19 @@ mk-latex-pdf:
 
 %.md:
 	echo 'skipping task for .md files'
+
+purs-setup:
+	cd $(PURS_GEN_DIR) && \
+	npm i
+
+purs-build:
+	cd $(PURS_GEN_DIR) && \
+	npm run bundle-for-wp
+
+# for development, I suggest cd-ing to PURS_GEN_DIR and running `spago test -w` or similar to auto-rebuild and test
+purs-test:
+	cd $(PURS_GEN_DIR) && \
+	npm run test
 
 pert:
 	mkdir -p output/pert

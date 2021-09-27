@@ -18,7 +18,7 @@ Truncating a hash is acknowledged (by those skilled in the art) to, *generally* 
 
 PoW is a technique whereby hashes with specific properties are produced. In other words: a *partial collision* is found. In the case of Bitcoin, this is easy to confirm via *block hashes*. For example, this belongs to block 622021: `0000000000000000000b21d0fac25166d922f1a6a883c456a0d1dce2b4940d3a`. It is clear to see that this is a hash digest with *many* prefixing zero-bits (76 zero bits in this case).
 
-Notice the hash is trivially compressible: delete all prefixing zero-bytes and replacing them with a count of how many bytes were deleted. The digest, in this case is 090b21d0fac25166d922f1a6a883c456a0d1dce2b4940d3a -- 24 bytes, or 192 bits, long.
+Notice the hash is trivially compressible: delete all prefixing zero-bytes and replacing them with a count of how many bytes were deleted. The digest, in this case is `090b21d0fac25166d922f1a6a883c456a0d1dce2b4940d3a` -- 24 bytes, or 192 bits, long.
 
 #### Inventiveness:
 
