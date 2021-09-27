@@ -93,6 +93,7 @@ auxStatsSpec = describe "Aux Stats" do
 utSpec :: Spec Unit
 utSpec = describe "ut" do
     let utvs = basicSample.ut
+        std = utvs.std
 
     describe "ut.std" do
       it "d1" do
@@ -105,8 +106,12 @@ utSpec = describe "ut" do
         basicSample.ut.std.confRate `shouldEqual` 5.0
       it "dbs" do
         basicSample.ut.std.deltaBigS `shouldEqual` (1000.0 * 50.0)
+      it "k" do
+        std.k1 `shouldEqual` 1000.0
 
-      let dss = (1000.0 + 0.1 * 50.0 * (100.0 + 32.0 * log2c 50.0))  -- k + bf * N1 proofs * (bh + proof_size)
+      let n1 = 50.0
+          k = 1000.0
+          dss = k + 0.1 * n1 * (32.0 + 32.0 * log2c n1)  -- k + bf * N1 proofs * (hash(bh) + proof_size)
           tts = 5.0 * 365.25 * dss / 10_000_000.0
       it "dss" do
         basicSample.ut.std.deltaSmallS `shouldEqual` dss
@@ -196,8 +201,8 @@ utSpec = describe "ut" do
           confRates = [5.00, 15.625, 31.25]
           -- TTS isn't an exact match, but p close. Definitely *looks* mostly right WRT numbers coming out.
           -- ttss = [0.44, 0.94, 1.03]  -- from python gen
-          ttss = [0.45, 1.0, 1.004]  -- these are the new TTS figures; keeping them here to make sure we know if they change
-          dss = [2460, 5500, 5500]  -- these are the new TTS figures; keeping them here to make sure we know if they change
+          ttss = [0.387, 1.198, 1.427]  -- these are the new TTS figures; keeping them here to make sure we know if they change
+          dss = [2120, 6562, 7812]  -- these are the new TTS figures; keeping them here to make sure we know if they change
           s = basicSample.ut
           -- exclude +T variant b/c py script doesn't get it
           variants = [s.std, s.ho, s.hot]
@@ -214,15 +219,18 @@ utSpec = describe "ut" do
       it "TTS" $ do
         sequence_ $ (\t -> shouldBeWithin 0.005 (fst t) (snd t)) <$> zip ((\v -> v.tts) <$> variants) ttss
 
-    describe "PoR experiment" do
-      it "prints" do
-        let r = kRange {from: 100.0, to: 1_000_000.0, step: 100.0}
-        liftEffect $ writeTextFile UTF8 "test-output-ports-k-vs-n1.csv" $ intercalate "\n" $
-          r <#> (\k -> Tuple k $ flip findMaxPoRsN1 16.0 $ mkSimplePs k {bf: btToF 15, bh: applyDiscountToHash 84.0} 250.0)
-            <#> (\(Tuple k n) -> show k <> "," <> show n)
-        liftEffect $ writeTextFile UTF8 "test-output-pors-k-vs-n1.csv" $ intercalate "\n" $
-          r <#> (\k -> Tuple k $ flip findMaxPoRsN1 32.0 $ mkSimplePs k {bf: btToF 15, bh: applyDiscountToHash 84.0} 250.0)
-            <#> (\(Tuple k n) -> show k <> "," <> show n)
+    let record_k_vs_n1_forPoRs_csv = false
+    if record_k_vs_n1_forPoRs_csv
+      then describe "PoR experiment" do
+        it "prints" do
+          let r = kRange {from: 100.0, to: 1_000_000.0, step: 100.0}
+          liftEffect $ writeTextFile UTF8 "test-output-ports-k-vs-n1.csv" $ intercalate "\n" $
+            r <#> (\k -> Tuple k $ flip findMaxPoRsN1 16.0 $ mkSimplePs k {bf: btToF 15, bh: applyDiscountToHash 84.0} 250.0)
+              <#> (\(Tuple k n) -> show k <> "," <> show n)
+          liftEffect $ writeTextFile UTF8 "test-output-pors-k-vs-n1.csv" $ intercalate "\n" $
+            r <#> (\k -> Tuple k $ flip findMaxPoRsN1 32.0 $ mkSimplePs k {bf: btToF 15, bh: 84.0} 250.0)
+              <#> (\(Tuple k n) -> show k <> "," <> show n)
+      else pure unit
 
 
 
