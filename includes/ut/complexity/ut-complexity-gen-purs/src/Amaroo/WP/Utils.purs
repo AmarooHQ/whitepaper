@@ -2,7 +2,8 @@ module Amaroo.WP.Utils where
 
 import Prel
 
-import Data.Array (length, unsafeIndex)
+import Data.Array (filter, head, length, splitAt, tail, unsafeIndex)
+import Data.Maybe (Maybe(..), fromMaybe)
 import Partial.Unsafe (unsafePartial)
 
 ui :: forall a. Array a -> Int -> a
@@ -20,3 +21,13 @@ lerp {f, t, pct} = min t $ max f $ f + (t - f) * pct
 
 prel :: {f :: Number, t :: Number, v :: Number} -> Number
 prel {f, t, v} = max 0.0 (v - f) |> min (t - f) |> (_ / (t - f))
+
+uniq :: forall a. (Eq a) => Array a -> Array a
+uniq xs = checkPosRec {i: 0, xs}
+  where
+    checkPosRec {i, xs} = if i >= length xs
+      then xs
+      else splitAt i xs |> filterAfter |> \{before, after} -> checkPosRec {i: i + 1, xs: before <> after}
+    filterAfter {before, after} = case head after of
+      Just h -> {before, after: [h] <> (tail after |> fromMaybe [] |> filter (_ /= h))}
+      Nothing -> {before, after}

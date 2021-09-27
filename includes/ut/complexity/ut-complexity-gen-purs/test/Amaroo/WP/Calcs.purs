@@ -1,21 +1,25 @@
 module Test.Amaroo.WP.Calcs where
 
+import Amaroo.WP.Calcs
 import Prel
 
-import Amaroo.WP.Calcs
+import Amaroo.WP.Tables (btToF)
 import Control.Monad.Trans.Class (lift)
-import Data.Array (range)
+import Data.Array (intercalate, range)
 import Data.Array (zip)
+import Data.Array as A
 import Data.Int (floor, round, toNumber)
 import Data.Int as I
 import Data.List.NonEmpty as NEL
 import Data.Maybe (fromJust)
 import Data.Ord (abs)
 import Data.Traversable (sequence, sequence_)
-import Data.Tuple (fst, snd)
+import Data.Tuple (Tuple(..), fst, snd)
 import Effect.Class (liftEffect)
 import Effect.Console as C
-import Math (exp, log, pow)
+import Math (ceil, exp, log, pow)
+import Node.Encoding (Encoding(..))
+import Node.FS.Sync (writeTextFile)
 import Partial.Unsafe (unsafePartial)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (fail, shouldEqual, shouldNotEqual, shouldSatisfy)
@@ -44,6 +48,11 @@ shouldBeWithin d x y = not ((x - y) |> abs |> (-) d |> (<) 0.0) |> when $
 shouldBeCloseTo = shouldBeWithin 0.00001
 
 dNShouldEqual actual@{n, t, tps} expected = {n, t, tps} `shouldEqual` expected
+
+kRange :: _ -> Array Number
+kRange {from, to, step} = A.range 0 nEntries <#> \i -> from + step * toNumber i
+  where
+    nEntries = I.ceil $ (to - from) / step
 
 tradSpec :: Spec Unit
 tradSpec = describe "trad chains" do
@@ -205,7 +214,15 @@ utSpec = describe "ut" do
       it "TTS" $ do
         sequence_ $ (\t -> shouldBeWithin 0.005 (fst t) (snd t)) <$> zip ((\v -> v.tts) <$> variants) ttss
 
-
+    describe "PoR experiment" do
+      it "prints" do
+        let r = kRange {from: 100.0, to: 1_000_000.0, step: 100.0}
+        liftEffect $ writeTextFile UTF8 "test-output-ports-k-vs-n1.csv" $ intercalate "\n" $
+          r <#> (\k -> Tuple k $ flip findMaxPoRsN1 16.0 $ mkSimplePs k {bf: btToF 15, bh: applyDiscountToHash 84.0} 250.0)
+            <#> (\(Tuple k n) -> show k <> "," <> show n)
+        liftEffect $ writeTextFile UTF8 "test-output-pors-k-vs-n1.csv" $ intercalate "\n" $
+          r <#> (\k -> Tuple k $ flip findMaxPoRsN1 32.0 $ mkSimplePs k {bf: btToF 15, bh: applyDiscountToHash 84.0} 250.0)
+            <#> (\(Tuple k n) -> show k <> "," <> show n)
 
 
 

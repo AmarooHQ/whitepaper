@@ -1,11 +1,13 @@
 module Test.Amaroo.WP.Tables where
 
+import Amaroo.WP.Tables
+import Amaroo.WP.Tables.Types
 import Prel
 
-import Amaroo.WP.Tables
 import Data.Array (all, head, length, tail)
 import Data.Array.Partial as AP
 import Data.Int (decimal, toStringAs)
+import Data.String as S
 import Data.Traversable (and, sequence, sequence_)
 import Data.Tuple (Tuple(..))
 import Effect.Class.Console as C
@@ -26,6 +28,13 @@ allTheSame xs = and $ map ((==) $ _head xs) (_tail xs)
 
 utNamesSpec :: Spec Unit
 utNamesSpec = describe "tables" do
+    it "spaces (md)" do
+      mkSpacer 1 `shouldEqual` "---"
+      mkSpacer 2 `shouldEqual` "---"
+      mkSpacer 3 `shouldEqual` "---"
+      mkSpacer 4 `shouldEqual` "----"
+      mkSpacer 5 `shouldEqual` "-----"
+      mkSpacer 6 `shouldEqual` "------"
     it "ut names" do
       shouldEqual (utNames [PoRs 1, PoRTs 2, Std 3, T 1, HO 2, HOT 3, Aleph (Std 2), Aleph (HOT 1)]) $
         [ mkUtTestName "PoRs" 1
@@ -56,4 +65,6 @@ utNamesSpec = describe "tables" do
       sequence_ $ do
         (Tuple (TableName tn) (Table hdrs aligns table)) <- allTables
         let ls = length <$> ([hdrs, aligns.md] <> table)
-        pure $ shouldSatisfy ls allTheSame
+        pure $ do
+          S.length aligns.texTabular `shouldEqual` (length aligns.md)
+          shouldSatisfy ls allTheSame
