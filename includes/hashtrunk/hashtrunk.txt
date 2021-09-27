@@ -58,6 +58,8 @@ If it is feasible for a PoW network (like Bitcoin) to produce X bits zero-bits a
 
 Thus, it is also a method for improving the *throughput* (transactions per second) of proof of work blockchains -- some more than others. It achieves this by reducing the overheads associated with storing, referring to, and proving data in blockchain networks.
 
-blockchains remain secure in part bc many collisions would need to be found for significant fraud (and this is trivial to guard against) -- so by the time there is substantial risk, the blockchain can have safely migrated to a new algorithm.
+Say *50%* of a hash is used (under this method) -- in the case of H1 (and Bitcoin hashes) this could be the last 16 bytes. How does the *history* of a blockchain fair?
 
-It is additionally noted that this method is transitive through merkle trees, and thus can be used to reduce the size of a merkle branch *by 50%* when only 50% of a hash is used (i.e., which might be the the least-significant-bits -- or any other bits which are unconstrained by the thermodynamically secure context).
+Perhaps some blockchain architects and/or cryptographers (who are skilled in the art) would be concerned that 16 bytes is too few; that it would be too easy for collisions to be found. Can an attacker to take advantage of this situation? First: not only would the collisions need to be against very *old* data -- the larger PoW requirements on new data prevent a viable attack -- and old data can be pruned. Thus being able to find collisions would not generally enable fraud. Second: for any significant fraud to occur, many collisions would need to be found, which makes this trivial to guard against. The result is, by the time there is substantial risk, the blockchain can have safely migrated to a new algorithm.
+
+It is additionally noted that this method is transitive through merkle trees when the leaves are PoW endowed hashes, and thus can be used to reduce the size of a merkle branch *by 50%* when only 50% of a hash is used (i.e., which might be the the least-significant-bits -- or any other bits which are unconstrained by the thermodynamically secure context).

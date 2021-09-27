@@ -54,6 +54,6 @@ utNamesSpec = describe "tables" do
 
     it "all tables are square (all rows same len)" do
       sequence_ $ do
-        (Tuple (TableName tn) table) <- allTables
-        let ls = length <$> table
+        (Tuple (TableName tn) (Table hdrs aligns table)) <- allTables
+        let ls = length <$> ([hdrs, aligns.md] <> table)
         pure $ shouldSatisfy ls allTheSame

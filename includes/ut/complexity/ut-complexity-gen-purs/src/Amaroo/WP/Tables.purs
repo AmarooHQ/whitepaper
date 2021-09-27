@@ -63,8 +63,13 @@ https://web.archive.org/web/20210831185445/https://docs.solana.com/running-valid
 
 -}
 
+data ColAlignment
 
-type Table = Array (Array String)
+type Headings = Array String
+type Alignments = {md :: Array String, latex :: Unit}
+type Rows = Array (Array String)
+
+data Table = Table Headings Alignments Rows
 
 data UtName = PoRs Int | PoRTs Int | Std Int | T Int | HO Int | HOT Int | Aleph UtName
 
@@ -248,30 +253,30 @@ getTps ns = ns.tps
 genTpsRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> getTps <$> [cd.trad.d1, cd.trad.d2, (utF cd).d1, (utF cd).d2, (utF cd).d3])
 
 tableTps :: Table
-tableTps =
-    [ ["$k$, $B_f$, $B_h$", "$O(c)$", "Sharded $O(c^2)$"] <> utNames [Std 1, Std 2, Std 3]
-    , mkSpacer <$> [6, 2, 5, 4, 4, 4]
-    ] <> (genTpsRow (\cd -> cd.ut.std) <$> utComplexityData)
+tableTps = Table
+    (["$k$, $B_f$, $B_h$", "$O(c)$", "Sharded $O(c^2)$"] <> utNames [Std 1, Std 2, Std 3])
+    {md: mkSpacer <$> [6, 2, 5, 4, 4, 4], latex: unit}
+    (genTpsRow (\cd -> cd.ut.std) <$> utComplexityData)
 
 tableTpsHot :: Table
-tableTpsHot =
-    [ ["$k$, $B_f$, $B_h$", "$O(c)$", "Sharded $O(c^2)$"] <> utNames [HOT 1, HOT 2, HOT 3]
-    , mkSpacer <$> [6, 2, 5, 4, 4, 4]
-    ] <> (genTpsRow (\cd -> cd.ut.hot) <$> utComplexityData)
+tableTpsHot = Table
+    (["$k$, $B_f$, $B_h$", "$O(c)$", "Sharded $O(c^2)$"] <> utNames [HOT 1, HOT 2, HOT 3])
+    {md: mkSpacer <$> [6, 2, 5, 4, 4, 4], latex: unit}
+    (genTpsRow (\cd -> cd.ut.hot) <$> utComplexityData)
 
 genDappChainsRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> [(utF cd).d1.n, (utF cd).d2.n, (utF cd).d3.n, (utF cd).deltaBigS]) <> [fmtDyn fdStdTwo (utF cd).confRate]
 
 dappChains :: Table
-dappChains =
-    [ ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$", "$\\mathbb{C}^\\prime$ (Hz)"]
-    , mkSpacer <$> [6, 4, 5, 5, 5, 4]
-    ] <> (genDappChainsRow (\cd -> cd.ut.std) <$> utComplexityData)
+dappChains = Table
+    ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$", "$\\mathbb{C}^\\prime$ (Hz)"]
+    {md: mkSpacer <$> [6, 4, 5, 5, 5, 4], latex: unit}
+    (genDappChainsRow (\cd -> cd.ut.std) <$> utComplexityData)
 
 dappChainsHot :: Table
-dappChainsHot =
-    [ ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$", "$\\mathbb{C}^\\prime$ (Hz)"]
-    , mkSpacer <$> [6, 4, 5, 5, 5, 4]
-    ] <> (genDappChainsRow (\cd -> cd.ut.hot) <$> utComplexityData)
+dappChainsHot = Table
+    ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$", "$\\mathbb{C}^\\prime$ (Hz)"]
+    {md: mkSpacer <$> [6, 4, 5, 5, 5, 4], latex: unit}
+    (genDappChainsRow (\cd -> cd.ut.hot) <$> utComplexityData)
 
 -- TODO: replace `fmtDyn fdPlain`
 genPoRRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> [ut.d1.n, ut.d1.tps, ut.d2.n, ut.d2.tps, ut.porBytes]) -- <> (fmtDyn fdStdTwo <$> [ut.d1.n / ut.d1.p.k])
@@ -281,16 +286,16 @@ genPoRRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> [ut.d1.n
 porTableSpacer = mkSpacer <$> [6, 2, 5, 4, 5, 3] -- , 4]
 
 tpsPor :: Table
-tpsPor =
-    [ ["$k$, $B_f$, $B_h$", "$N_1$", (utName_ $ PoRs 1) <> " TPS", "$N_2$", (utName_ $ PoRs 2) <> " TPS", "PoR (B)"] -- , "$\\nicefrac{N_1}{k}$"]
-    , porTableSpacer
-    ] <> (genPoRRow (\cd -> cd.ut.pors) <$> utComplexityData)
+tpsPor = Table
+    ["$k$, $B_f$, $B_h$", "$N_1$", (utName_ $ PoRs 1) <> " TPS", "$N_2$", (utName_ $ PoRs 2) <> " TPS", "PoR (B)"] -- , "$\\nicefrac{N_1}{k}$"]
+    {md: porTableSpacer, latex: unit}
+    (genPoRRow (\cd -> cd.ut.pors) <$> utComplexityData)
 
 tpsPort :: Table
-tpsPort =
-    [ ["$k$, $B_f$, $B_h$", "$N_1$", (utName_ $ PoRTs 1) <> " TPS", "$N_2$", (utName_ $ PoRTs 2) <> " TPS", "PoR (B)"] -- , "$\\nicefrac{N_1}{k}$"]
-    , porTableSpacer
-    ] <> (genPoRRow (\cd -> cd.ut.ports) <$> utComplexityData)
+tpsPort = Table
+    ["$k$, $B_f$, $B_h$", "$N_1$", (utName_ $ PoRTs 1) <> " TPS", "$N_2$", (utName_ $ PoRTs 2) <> " TPS", "PoR (B)"] -- , "$\\nicefrac{N_1}{k}$"]
+    {md: porTableSpacer, latex: unit}
+    (genPoRRow (\cd -> cd.ut.ports) <$> utComplexityData)
 
 netToScalingFactor :: Network -> _ -> Number
 netToScalingFactor Bitcoin aux = aux.scalingFactors.noNesting
@@ -328,18 +333,17 @@ genCompareRow k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdPlainMix
     tpsPerBaseChain = netToTps net cs / cs.d1.n
     scalingFactor = netToScalingFactor net aux
 
-compareNetsTH =
-    [ ["$k$, $B_f$, $B_h$", "Network", "Eff.$B_h$", "Eff.$D_h$", "Scale $\\times$", "$\\nicefrac{\\Sigma\\;\\text{TPS}}{N_1}$", "$\\Sigma$ TPS"] -- , "TPS vs " <> (utName_ $ Std 2)]
-    , mkSpacer <$> [5, 6, 2, 2, 3, 4, 3] -- , 6]
-    ]
+compareNetsTH = Table
+    ["$k$, $B_f$, $B_h$", "Network", "Eff.$B_h$", "Eff.$D_h$", "Scale $\\times$", "$\\nicefrac{\\Sigma\\;\\text{TPS}}{N_1}$", "$\\Sigma$ TPS"] -- , "TPS vs " <> (utName_ $ Std 2)]
+    {md: mkSpacer <$> [5, 6, 2, 2, 3, 4, 3], latex: unit}
 
 compareNets3k :: Table
 compareNets3k =
-    compareNetsTH <> (genCompareRow 3_000.0 <$> utVsOther)
+    compareNetsTH (genCompareRow 3_000.0 <$> utVsOther)
 
 compareNets30k :: Table
 compareNets30k =
-    compareNetsTH <> (genCompareRow 30_000.0 <$> utVsOther)
+    compareNetsTH (genCompareRow 30_000.0 <$> utVsOther)
 
 -- todo: fix fmtDyn fdPlain
 genCompare1MRow {net, p} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdStdTwo <$> [netToTps net cs / cs.d1.n, netToTps net cs]) <> (fmtDyn fdStdMixed <$> [ut2.d2.tps]) -- , cs.k1 / ut2K])
@@ -351,10 +355,10 @@ genCompare1MRow {net, p} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdStdTwo 
     -- aux = auxStats cs
 
 compareNets1mTps :: Table
-compareNets1mTps =
-    [ ["$k$, $B_f$, $B_h$", "Network", "$\\nicefrac{\\Sigma\\;\\text{TPS}}{N_1}$", "$\\Sigma$ TPS", "$\\UT{2}$ $\\Sigma$ TPS"] -- , "$k$ vs Equiv. $\\UT{2}$"]
-    , mkSpacer <$> [5, 5, 3, 3, 3] -- , 5]
-    ] <> (genCompare1MRow <$> utVsOther1M)
+compareNets1mTps = Table
+    ["$k$, $B_f$, $B_h$", "Network", "$\\nicefrac{\\Sigma\\;\\text{TPS}}{N_1}$", "$\\Sigma$ TPS", "$\\UT{2}$ $\\Sigma$ TPS"] -- , "$k$ vs Equiv. $\\UT{2}$"]
+    {md: mkSpacer <$> [5, 5, 3, 3, 3], latex: unit}
+    (genCompare1MRow <$> utVsOther1M)
 
 
 genCompare1GbpsRow {net, p} = [fmt1GbpsPs cs p, show net] <> (fmtDyn fdPlain <$> [netToTps net cs, k, mbChainDay])
@@ -388,10 +392,10 @@ optimizationProps =
   ]
 
 compareUtOptimizations :: Table
-compareUtOptimizations =
-    [ [""] <> utNames variants
-    , mkSpacer <$> [7, 4, 5, 3, 4, 4, 4]
-    ] <> (genCompareUtRow ut variants <$> optimizationProps)
+compareUtOptimizations = Table
+    ([""] <> utNames variants)
+    {md: mkSpacer <$> [7, 4, 5, 3, 4, 4, 4], latex: unit}
+    (genCompareUtRow ut variants <$> optimizationProps)
   where
     ut = allUtChainCalcs _UT_INIT_CONFIG
     variants = [PoRs 1, PoRTs 1, Std 1, T 1, HO 1, HOT 1]
@@ -400,4 +404,4 @@ fixRow2 :: Array String -> Array String
 fixRow2 rs = take 1 rs <> [replaceAll (Pattern " ") (Replacement "") $ ui rs 1] <> drop 2 rs
 
 showTable :: Table -> String
-showTable table = (intercalate "\n" <<< fixRow2) $ (wrap "|" <<< wrap " " <<< intercalate " | ") <$> table
+showTable (Table headings {md} table) = (intercalate "\n" <<< fixRow2) $ (wrap "|" <<< wrap " " <<< intercalate " | ") <$> ([headings, md] <> table)
