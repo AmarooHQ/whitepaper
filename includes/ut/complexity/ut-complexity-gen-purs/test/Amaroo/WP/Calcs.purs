@@ -358,6 +358,7 @@ utNoExplicitPoRsN1 hashTrunc p =
       bf = p.hf.bf
   in p.k / 2.0 / bf / bh
 
+porsForRangesQC :: Number -> Result
 porsForRangesQC _k = normalAnswer == rangesAnswer <?> "Mismatching: " <> show {expected: normalAnswer, got: rangesAnswer}
   where
     k = enlarge 3000.0 _k
@@ -387,9 +388,9 @@ porsForRangesQC _k = normalAnswer == rangesAnswer <?> "Mismatching: " <> show {e
 paramsGen :: Gen Params
 paramsGen = do
     bh <- choose 40.0 500.0
-    k <- (max (5.0 * bh) <<< add bh) <$> choose 1000.0 10000.0
-    bt <- chooseInt 1 20
     tx <- choose 50.0 1000.0
+    k <- (max (3.0 * (bh + tx)) <<< add tx <<< add bh) <$> choose 1000.0 10000.0
+    bt <- chooseInt 1 20
     pure $ mkSimplePs k {bf: btToF bt, bh} tx
 
 utChecks :: Params -> Result
@@ -410,8 +411,8 @@ doUtChecks p uts = if A.length filteredRes == 0
     utStdNperTps = uts.std.d1.n / uts.std.d1.tps
     results =
       [ Right unit
-      , isWithin 0.3 (uts.pors.d1.n / uts.pors.d1.tps) utStdNperTps <? "+PoRs should have a tps ratio v similar to std -- " <> show (uts.pors.d1.n / uts.pors.d1.tps) <> " vs " <> show utStdNperTps
-      , isWithin 0.3 (uts.ports.d1.n / uts.ports.d1.tps) utStdNperTps <? "+PoRTs should have a tps ratio v similar to std -- " <> show (uts.ports.d1.n / uts.ports.d1.tps) <> " vs " <> show utStdNperTps
+      , isWithin 0.20 (uts.pors.d1.n / uts.pors.d1.tps) utStdNperTps <? "+PoRs should have a tps ratio v similar to std -- " <> show (uts.pors.d1.n / uts.pors.d1.tps) <> " vs " <> show utStdNperTps
+      , isWithin 0.20 (uts.ports.d1.n / uts.ports.d1.tps) utStdNperTps <? "+PoRTs should have a tps ratio v similar to std -- " <> show (uts.ports.d1.n / uts.ports.d1.tps) <> " vs " <> show utStdNperTps
       , isWithin 0.01 (uts.t.d1.n / uts.t.d1.tps) utStdNperTps <? "+T should have a tps ratio v similar to std"
       , isWithin 0.01 (uts.ho.d1.n / uts.ho.d1.tps) utStdNperTps <? "+HO should have a tps ratio v similar to std"
       , isWithin 0.01 (uts.hot.d1.n / uts.hot.d1.tps) utStdNperTps <? "+HOT should have a tps ratio v similar to std"

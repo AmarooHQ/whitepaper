@@ -8,6 +8,7 @@ import Amaroo.WP.Formatter (fdPlain, fdPlainMixed, fdPlainZero, fdStd, fdStdMixe
 import Amaroo.WP.Tables.Booktabs (LatexTablePos(..), TPositioning(..), renderBooktabs)
 import Amaroo.WP.Utils (diagonalApply, ui)
 import Data.Array (drop, filter, intercalate, take)
+import Data.Array as A
 import Data.Int (decimal, toNumber)
 import Data.Int (toStringAs) as I
 import Data.Maybe (Maybe(..), fromJust, fromMaybe, isJust)
@@ -78,7 +79,7 @@ iToS = I.toStringAs decimal
 
 sToExt s = if length s > 0 then "+\\text{" <> s <> "}" else ""
 
-utNameInner f i e = f $ iToS i <> sToExt e
+utNameInner f i e = f $ (if i <= 0 then "" else iToS i) <> sToExt e
 
 utNameI :: UtName -> Int
 utNameI (PoRs i) = i
@@ -148,7 +149,7 @@ utComplexityParams :: Array Params
 utComplexityParams = do
       k <- [3000.0, 30000.0]
       bf <- [1.0 / 7.5, 1.0 / 15.0, 1.0 / 30.0, 1.0 / 60.0]
-      bh <- [84.0, 112.0]
+      bh <- [112.0, 84.0]
       txSize <- [250.0]
       pure $ mkSimplePs k {bf, bh} txSize
     <> [ mkSimplePs _ETH2_1M_K {bf: btToF 15, bh: 84.0} 250.0 ]
@@ -320,7 +321,7 @@ netToTps (UT ut) cd = case utNameI ut of
   _ -> unsafeThrowException $ error $ "[netToTps] got bad level of nesting in UT network: " <> utName_ ut
 
 -- todo: fix fmtDyn fdPlain
-genCompareRow k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdPlainMixed <$> [cs.effBh, cs.effDh]) <> (fmtDyn fdStdZero <$> [scalingFactor, tpsPerBaseChain]) <> (fmtDyn fdStdMixed <$> [tps])
+genCompareRow k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdPlainMixed <$> [cs.effBh, cs.effDh]) <> ([fmtDyn fdStdZero scalingFactor, fmtDyn fdStd tpsPerBaseChain]) <> (fmtDyn fdStdMixed <$> [tps])
   where
     p = o.p k
     cs = netToChainStats net p
@@ -382,18 +383,27 @@ genCompareUtRow uts props v = [utName_ v] <> (propGens <@> (getCS v))
     getCS n = netLookupChainStats (UT n) uts
     propGens = (\{f} -> f) <$> props
 
+-- {s: "$\\Sigma$ TPS", f: \cs -> fmtDyn fdPlainZero cs.d1.tps}
+
 optimizationProps1 =
-  [ {s: "$\\Sigma$ TPS", f: \cs -> fmtDyn fdPlainZero cs.d1.tps}
-  , {s: "$N_1$ (chains)", f: \cs -> fmtDyn fdPlainZero cs.d1.n}
+  [ {s: "$N_1$", f: \cs -> fmtDyn fdStdMixed cs.d1.n}
+  -- , {s: "$T_1$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.d1.t}
+  , {s: "$\\Sigma\\;\\text{TPS}_{1}$", f: \cs -> fmtDyn fdStdMixed cs.d1.tps}
+  , {s: "$N_2$", f: \cs -> fmtDyn fdStdMixed cs.d2.n}
+  , {s: "$\\Sigma\\;\\text{TPS}_{2}$", f: \cs -> fmtDyn fdStdMixed cs.d2.tps}
+  -- , {s: "$T_2$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.d2.t}
+  -- , {s: "$T_3$ (B/s)", f: \cs -> fmtDyn fdPlainZero cs.d3.t}
+  -- , {s: "$N_3$", f: \cs -> fmtDyn fdPlainZero cs.d3.n}
   , {s: "$\\mathbb{C}^\\prime$ (Hz)", f: \cs -> fmtDyn fdPlain cs.confRate}
   , {s: "E. $B_h$ (B)", f: \cs -> fmtDyn fdPlainZero cs.effBh}
+  -- , {s: "E. $D_h$ (B)", f: \cs -> fmtDyn fdPlainZero cs.effDh}
   , {s: "PoR (B)", f: \cs -> fmtDyn fdPlainZero cs.porBytes}
   ]
 
 optimizationProps2 =
   [ {s: "$\\Delta s$ (B/s)", f: \cs -> fmtDyn fdStdZero cs.deltaSmallS}
   , {s: "$\\text{TTS}_{5yrs}$ (days)", f: \cs -> fmtDyn fdStdTwo cs.tts}
-  , {s: "Chain 5yrs (GB)", f: \cs -> fmtDyn fdStdTwo (cs.deltaSmallS * 86400.0 * 365.25 * 5.0 / 1024.0 / 1024.0 / 1024.0)}
+  , {s: "Chain-GB/yr", f: \cs -> fmtDyn fdStdTwo (cs.deltaSmallS * 86400.0 * 365.25 / 1024.0 / 1024.0 / 1024.0)}
   , {s: "$\\Delta S$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.deltaBigS}
   , {s: "$\\Sigma$ $\\text{TTS}_{5yrs}$ (days)", f: \cs -> fmtDyn fdStdTwo cs.sigmaTts}
   -- , {s: "$\\nicefrac{\\Sigma\\;\\text{TPS}}{\\Delta s}$ (Tx/B)", f: \cs -> fmtDyn fdStdTwo (cs.d1.tps / cs.deltaSmallS)}
@@ -414,21 +424,22 @@ compareUtOptimizationsFlipped = Table
 compareUtOptimizations :: Table
 compareUtOptimizations = Table
     ([""] <> (oProps <#> (\{s} -> s)))
-    {md: mkSpacer <$> [1, 1, 1, 1, 1, 1], texTabular: "lrrrrr"}
+    {md: mkSpacer <$> A.replicate (l+1) 3, texTabular: "l" <> repeatSafe l "r"}
     (genCompareUtRow ut oProps <$> variants)
   where
     ut = allUtChainCalcs _UT_INIT_CONFIG
-    variants = [PoRs 1, PoRTs 1, Std 1, T 1, HO 1, HOT 1]
+    variants = [PoRs 0, PoRTs 0, Std 0, T 0, HO 0, HOT 0]
     oProps = optimizationProps1
+    l = A.length oProps
 
 compareUtOptimizations2 :: Table
 compareUtOptimizations2 = Table
     ([""] <> (oProps <#> (\{s} -> s)))
-    {md: mkSpacer <$> [1, 1, 1, 1, 1, 1], texTabular: "lrrrrr"}
+    {md: mkSpacer <$> A.replicate 6 3, texTabular: "l" <> repeatSafe 5 "r"}
     (genCompareUtRow ut oProps <$> variants)
   where
     ut = allUtChainCalcs _UT_INIT_CONFIG
-    variants = [PoRs 1, PoRTs 1, Std 1, T 1, HO 1, HOT 1]
+    variants = [PoRs 0, PoRTs 0, Std 0, T 0, HO 0, HOT 0]
     oProps = optimizationProps2
 
 fixRow2 :: Array String -> Array String
@@ -438,4 +449,4 @@ showMdTable :: Table -> String
 showMdTable (Table headings {md} table) = (intercalate "\n" <<< fixRow2) $ (wrap "|" <<< wrap " " <<< intercalate " | ") <$> ([headings, md] <> table)
 
 showTable :: Table -> String
-showTable table = renderBooktabs (TPositioning [Hereish, TablePage]) {label: Nothing, caption: Nothing} table
+showTable table = renderBooktabs (TPositioning [Hereish, Top, Bottom, Override]) {label: Nothing, caption: Nothing} table

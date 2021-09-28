@@ -345,18 +345,18 @@ Note that $B_h = 16$ implies +HOT, and $B_h = 32$ implies +HO (Header Omission w
 
 : Values of $N_i$, $\mathbb{C}^\prime$, and $\Delta S$ for a simplex using +HOT simplex optimizations.
 
-\autoref{table:compare_optimizations} and \autoref{table:compare_optimizations2} show a comparison between UT variants. Note that the +PoRs and +PoRTs extensions are covered in \autoref{sec:por-with-proofs}.
-
 #### Impact on the Impact of Header Size
 
 \todo{headers at base layer don't matter now -- only for nesting -- so PoS chains (even with big headers) might be okay at base layer without impacting scalability}
 
 ### Comparison of UT Variants
 
+\autoref{table:compare_optimizations} and \autoref{table:compare_optimizations2} show a comparison between UT variants. Note that the +PoRs and +PoRTs extensions are covered in \autoref{sec:por-with-proofs}.
+
 %% INSERT ### TABLE: compare_optimizations
 
-: Comparison of UT variants at the base-layer. Parameters are: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions.
+: Comparison of UT variants. Parameters are: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions. ``E. $B_h$'' means the \emph{effective} header-size.
 
 %% INSERT ### TABLE: compare_optimizations2
 
-: Comparison of UT variants at the base-layer. Parameters are: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions. The time to sync 5 years of history, including verifying PoRs ($\text{TTS}_{5yrs}$) measured against a fully utilized 10 MB/s network connection and assumes no software bottlenecks. The equivalent for \emph{all} PoRs in the simplex being verified ($\Sigma$ $\text{TTS}_{5yrs}$) is also shown.
+: Comparison of UT variants. Parameters are: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions. The time to sync 5 years of a simplex-chain's history, including verifying PoRs ($\text{TTS}_{5yrs}$) is measured against a fully utilized 10 MB/s network connection and assumes no software bottlenecks. The equivalent for \emph{all} simplex-chains and PoRs being verified ($\Sigma$ $\text{TTS}_{5yrs}$) is also shown.
