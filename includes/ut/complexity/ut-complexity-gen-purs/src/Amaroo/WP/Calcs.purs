@@ -3,12 +3,16 @@ module Amaroo.WP.Calcs where
 import Prel
 
 import Amaroo.WP.Utils (prel)
+import Data.Array as A
 import Data.Int (toNumber)
 import Data.Int as I
 import Data.List.NonEmpty (NonEmptyList, cons', fromList, head, singleton, tail)
 import Data.List.NonEmpty as NEL
-import Data.Maybe (fromMaybe)
-import Math (ceil, floor, ln2, log)
+import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Tuple (Tuple(..))
+import Effect.Exception (error)
+import Effect.Exception.Unsafe (unsafeThrowException)
+import Math (abs, ceil, floor, ln2, log, (%))
 
 {-|
 
@@ -81,6 +85,7 @@ type ChainStats
     , deltaBigS :: Number
     , deltaSmallS :: Number
     , tts :: Number
+    , sigmaTts :: Number
     , confRate :: Number
     , porBytes :: Number
     , porBytes2 :: Number
@@ -134,7 +139,7 @@ data TradVar = Trad | TradEth2
 eth2EffDh bh = floor $ 8192.0 / (6.5*60.0) * 12.0 + bh * 0.1
 
 tradChainCalc' :: Params -> TradVar -> ChainStats
-tradChainCalc' ps var = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts, effBh, effDh, kTx: k, k1: k, kB: 0.0, porBytes: 0.0, porBytes2: 0.0}
+tradChainCalc' ps var = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts, sigmaTts, effBh, effDh, kTx: k, k1: k, kB: 0.0, porBytes: 0.0, porBytes2: 0.0}
   where
     d1 = {n: 1.0, t: k, tps: k / ps.txSize, p: pToPF ps}
     k = head ps.ks
@@ -152,6 +157,7 @@ tradChainCalc' ps var = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts, effB
     deltaBigS = k
     deltaSmallS = k
     tts = ((deltaSmallS * 5.0 * 365.25) / 10_000_000.0)
+    sigmaTts = tts
     confRate = hf.bf
 
 tradChainCalc ps = tradChainCalc' ps Trad
@@ -164,29 +170,61 @@ porLen hashSize n = hashSize * log2c n
 utPorsT1 :: Number -> Number -> Number -> Number -> Number -> Number
 utPorsT1 n1 k1 bf bh g = n1 * (k1 - bf * n1 * (bh + porLen g n1))
 
--- todo: convert from sorted-array method to a fixed memory iteration where the maximum gets tracked
-findMaxPoRsN1 :: Params -> Number -> Number
-findMaxPoRsN1 ps g = (loopFindMaxF {i: 1, n: 0.0, t: 0.0}).n
+type LoopFindMax = {i :: Int, t :: Number}
+
+loopFindMaxPoRsN1F :: Params -> Number -> LoopFindMax -> LoopFindMax
+loopFindMaxPoRsN1F ps g initM = inner ({i: initM.i, t: initM.t, bestI: 0 }) |> \{bestI,t} -> {i: bestI,t}
   where
-    -- answer = bestTN.n
-    -- -- inefficient, but foolproof (why I cared about performance before, IDK)
-    -- bestTN = sortedT1s |> A.last |> fromMaybe {a: 0.0, b: 0.0} |> (\{a,b} -> {n: a, t: b})
-    -- sortedT1s = A.sortBy (\o1 o2 -> compare o1.b o2.b) possibleT1s
-    -- possibleT1s = (nRange <#> utPorsT1Applied |> A.zip nRange) <#> tupToRec
-    loopFindMaxF m@{i, t} = if i >= wontBeMoreThan || t1 < 0.0 then m else loopFindMaxF (if t1 > t then {i: i + 1, n: i_, t: t1} else m {i = i + 1})
+    inner m@{i, t} = if i >= wontBeMoreThan || t1 < 0.0 || t1 < t * 0.96 || (t1 < t && (abs $ log2 bestN) % 1.0 > 0.01)
+        then m
+        else inner (
+          if t1 > t
+            then {i: i + 1, bestI: i, t: t1}
+            else {i: i + 1, bestI: m.bestI, t: m.t})
       where
-        i_ = toNumber i
-        t1 = utPorsT1Applied i_
+        bestN = toNumber m.bestI
+        n = toNumber i
+        t1 = utPorsT1Applied n
     -- nRange = A.range 1 wontBeMoreThan <#> I.toNumber
     utPorsT1Applied n1 = utPorsT1 n1 k1 bf bh g
     k1 = head ps.ks
     bf = hf.bf
     bh = hf.bh
     hf = head ps.hfs
-    wontBeMoreThan = I.floor $ k1 / 2.0 / bf / bh  -- N1 without explicit PoRs
+    wontBeMoreThan = I.ceil $ k1 / 2.0 / bf / bh  -- N1 without explicit PoRs * 2.0
     -- from WP, useful for some things.
     -- | \frac{\d{T_1}}{\d{N_1}}
     utPorsDT1byDN1 n1 = (k1 * ln2 - bf * n1 * (g + bh * log 4.0) - 2.0 * bf * g * n1 * log n1) / ln2
+
+-- todo: convert from sorted-array method to a fixed memory iteration where the maximum gets tracked
+findMaxPoRsN1 :: Params -> Number -> Number
+findMaxPoRsN1 ps g = (loopFindMaxPoRsN1F ps g {i: 1, t: 0.0}).i |> toNumber
+  -- where
+    -- answer = bestTN.n
+    -- -- inefficient, but foolproof (why I cared about performance before, IDK)
+    -- bestTN = sortedT1s |> A.last |> fromMaybe {a: 0.0, b: 0.0} |> (\{a,b} -> {n: a, t: b})
+    -- sortedT1s = A.sortBy (\o1 o2 -> compare o1.b o2.b) possibleT1s
+    -- possibleT1s = (nRange <#> utPorsT1Applied |> A.zip nRange) <#> tupToRec
+
+-- | This will *efficiently* calculate the best N_1s for some array of parameters, provided N_1 will monotonically increase (which it does for increasing k)
+findMaxPoRsN1ForRanges :: {g :: Number, r :: Array Params} -> Array (Tuple Params LoopFindMax)
+findMaxPoRsN1ForRanges {g, r} = (inner {last: Nothing, next: A.head r, rest: A.tail r, outs: []}).outs
+  where
+    -- init condition
+    inner {last: Nothing, next: Just ps, rest: Just rLeft, outs} =
+        inner {last: Just res, next: A.head rLeft, rest: A.tail rLeft, outs: outs <> [Tuple ps res]}
+      where
+        res = loopFindMaxPoRsN1F ps g {i: 1, t: 0.0}
+    inner {last: Just l, next: Just ps, rest, outs} =
+        if res.t < l.t
+          then unsafeThrowException $ error $ "findMaxPoRsN1ForRanges assumes that the output (n) will always increase as the input params are iterated over. but curr.t < last.t! " <> show {curr: res, last: l}
+          else inner {last: Just res, next: A.head =<< rest, rest: A.tail =<< rest, outs: outs <> [Tuple ps res]}
+      where
+        res = loopFindMaxPoRsN1F ps g {i: newStartI, t: newStartT}
+        newStartI = max 1 l.i
+        newStartT = utPorsT1 (toNumber newStartI - 1.0) pf.k pf.hf.bf pf.hf.bh g
+        pf = pToPF ps
+    inner endState = endState
 
 applyDiscountToHash :: Number -> Number
 applyDiscountToHash bh = (bh - _) $ ceil $ (1.0 + prel {f: 80.0, t: 112.0, v: bh}) * 16.0
@@ -194,7 +232,7 @@ applyDiscountToHash bh = (bh - _) $ ceil $ (1.0 + prel {f: 80.0, t: 112.0, v: bh
 type UtParams = {explicitPoRs :: Boolean, headerOmission :: Boolean, hashTruncation :: Boolean}
 
 utChainCalc :: Params -> UtParams -> ChainStats
-utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, confRate, tts, deltaBigS, deltaSmallS, porBytes, porBytes2, effBh, effDh, kTx, kB, k1}
+utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, confRate, tts, sigmaTts, deltaBigS, deltaSmallS, porBytes, porBytes2, effBh, effDh, kTx, kB, k1}
   where
     hashSize = if hashTruncation then 16.0 else 32.0
     -- ~~if bh<96 (1/2 way between 80 and 112) then only discount 1 hash, otherwise 2~~
@@ -223,9 +261,10 @@ utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, con
     ps2Pre = paramsForNextNS ps -- trim param-depth lists
     ps2 = ps2Pre {hfs = (fixBH2 (head ps2Pre.hfs) `cons'` tail ps2Pre.hfs)}
     ps3 = paramsForNextNS $ ps2Pre
-    deltaBigS = if explicitPoRs then k1 + explicitPorsK else n1 * k1
+    deltaBigS = n1 * k1 -- wp says: "The amount of network bandwidth, $\Delta S$, required to download all blocks (as they are produced) across all simplex-chains is"
     deltaSmallS = if explicitPoRs then k1 else k1 + explicitPorsK  -- TODO: figure this out
     tts = ((5.0 * 365.25) * deltaSmallS / 10_000_000.0)
+    sigmaTts = ((5.0 * 365.25) * (n1 * k1) / 10_000_000.0)
     d2 = calcNextNestingLevel ps2 d1
     porBytes2 = porLen hashSize (d2.n / n1)
     effDh = d2.p.hf.bh  -- Note: don't take into account porBytes2 -- if explicitPoRs then d2.p.hf.bh + porBytes2 else d2.p.hf.bh

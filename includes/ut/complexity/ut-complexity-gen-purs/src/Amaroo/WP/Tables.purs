@@ -382,24 +382,31 @@ genCompareUtRow uts props v = [utName_ v] <> (propGens <@> (getCS v))
     getCS n = netLookupChainStats (UT n) uts
     propGens = (\{f} -> f) <$> props
 
-optimizationProps =
+optimizationProps1 =
   [ {s: "$\\Sigma$ TPS", f: \cs -> fmtDyn fdPlainZero cs.d1.tps}
   , {s: "$N_1$ (chains)", f: \cs -> fmtDyn fdPlainZero cs.d1.n}
   , {s: "$\\mathbb{C}^\\prime$ (Hz)", f: \cs -> fmtDyn fdPlain cs.confRate}
   , {s: "E. $B_h$ (B)", f: \cs -> fmtDyn fdPlainZero cs.effBh}
-  , {s: "PoR Size (B)", f: \cs -> fmtDyn fdPlainZero cs.porBytes}
-  , {s: "$\\Delta s$ (B/s)", f: \cs -> fmtDyn fdStdZero cs.deltaSmallS}
-  , {s: "TTS 5yrs (days)", f: \cs -> fmtDyn fdStdTwo cs.tts}
-  , {s: "$\\Delta S$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.deltaBigS}
-  , {s: "$\\nicefrac{\\Sigma\\;\\text{TPS}}{\\Delta s}$ (Tx/B)", f: \cs -> fmtDyn fdStdTwo (cs.d1.tps / cs.deltaSmallS)}
-  -- , {s: "Nesting TPS$\\times$", f: \cs -> fmtDyn fdStd (auxStats cs).scalingFactors.nesting}
+  , {s: "PoR (B)", f: \cs -> fmtDyn fdPlainZero cs.porBytes}
   ]
+
+optimizationProps2 =
+  [ {s: "$\\Delta s$ (B/s)", f: \cs -> fmtDyn fdStdZero cs.deltaSmallS}
+  , {s: "$\\text{TTS}_{5yrs}$ (days)", f: \cs -> fmtDyn fdStdTwo cs.tts}
+  , {s: "Chain 5yrs (GB)", f: \cs -> fmtDyn fdStdTwo (cs.deltaSmallS * 86400.0 * 365.25 * 5.0 / 1024.0 / 1024.0 / 1024.0)}
+  , {s: "$\\Delta S$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.deltaBigS}
+  , {s: "$\\Sigma$ $\\text{TTS}_{5yrs}$ (days)", f: \cs -> fmtDyn fdStdTwo cs.sigmaTts}
+  -- , {s: "$\\nicefrac{\\Sigma\\;\\text{TPS}}{\\Delta s}$ (Tx/B)", f: \cs -> fmtDyn fdStdTwo (cs.d1.tps / cs.deltaSmallS)}
+  -- , {s: "Scale $\\times$", f: \cs -> fmtDyn fdStd (auxStats cs).scalingFactors.nesting}
+  ]
+
+allOptimizationProps = optimizationProps1 <> optimizationProps2
 
 compareUtOptimizationsFlipped :: Table
 compareUtOptimizationsFlipped = Table
     ([""] <> utNames variants)
     {md: mkSpacer <$> [7, 4, 5, 3, 4, 4, 4], texTabular: repeatSafe 7 "l"}
-    (genCompareFlippedUtRow ut variants <$> optimizationProps)
+    (genCompareFlippedUtRow ut variants <$> allOptimizationProps)
   where
     ut = allUtChainCalcs _UT_INIT_CONFIG
     variants = [PoRs 1, PoRTs 1, Std 1, T 1, HO 1, HOT 1]
@@ -412,17 +419,17 @@ compareUtOptimizations = Table
   where
     ut = allUtChainCalcs _UT_INIT_CONFIG
     variants = [PoRs 1, PoRTs 1, Std 1, T 1, HO 1, HOT 1]
-    oProps = take 5 optimizationProps
+    oProps = optimizationProps1
 
 compareUtOptimizations2 :: Table
 compareUtOptimizations2 = Table
     ([""] <> (oProps <#> (\{s} -> s)))
-    {md: mkSpacer <$> [1, 1, 1, 1, 1], texTabular: "lrrrr"}
+    {md: mkSpacer <$> [1, 1, 1, 1, 1, 1], texTabular: "lrrrrr"}
     (genCompareUtRow ut oProps <$> variants)
   where
     ut = allUtChainCalcs _UT_INIT_CONFIG
     variants = [PoRs 1, PoRTs 1, Std 1, T 1, HO 1, HOT 1]
-    oProps = drop 5 $ optimizationProps
+    oProps = optimizationProps2
 
 fixRow2 :: Array String -> Array String
 fixRow2 rs = take 1 rs <> [replaceAll (Pattern " ") (Replacement "") $ ui rs 1] <> drop 2 rs

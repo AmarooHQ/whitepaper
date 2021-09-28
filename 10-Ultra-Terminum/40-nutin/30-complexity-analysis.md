@@ -347,14 +347,16 @@ Note that $B_h = 16$ implies +HOT, and $B_h = 32$ implies +HO (Header Omission w
 
 \autoref{table:compare_optimizations} and \autoref{table:compare_optimizations2} show a comparison between UT variants. Note that the +PoRs and +PoRTs extensions are covered in \autoref{sec:por-with-proofs}.
 
+#### Impact on the Impact of Header Size
+
+\todo{headers at base layer don't matter now -- only for nesting -- so PoS chains (even with big headers) might be okay at base layer without impacting scalability}
+
+### Comparison of UT Variants
+
 %% INSERT ### TABLE: compare_optimizations
 
 : Comparison of UT variants at the base-layer. Parameters are: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions.
 
 %% INSERT ### TABLE: compare_optimizations2
 
-: Comparison of UT variants at the base-layer. Parameters are: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions. Time to sync (TTS) is measured against a fully utilized 10 MB/s network connection and assumes no software bottlenecks.
-
-#### Impact on the Impact of Header Size
-
-\todo{headers at base layer don't matter now -- only for nesting -- so PoS chains (even with big headers) might be okay at base layer without impacting scalability}
+: Comparison of UT variants at the base-layer. Parameters are: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions. The time to sync 5 years of history, including verifying PoRs ($\text{TTS}_{5yrs}$) measured against a fully utilized 10 MB/s network connection and assumes no software bottlenecks. The equivalent for \emph{all} PoRs in the simplex being verified ($\Sigma$ $\text{TTS}_{5yrs}$) is also shown.

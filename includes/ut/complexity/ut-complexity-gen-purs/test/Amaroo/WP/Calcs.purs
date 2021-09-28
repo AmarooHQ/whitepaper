@@ -9,21 +9,23 @@ import Data.Array (intercalate, range)
 import Data.Array (zip)
 import Data.Array as A
 import Data.Either (Either(..), fromLeft, isLeft)
-import Data.Int (floor, round, toNumber)
+import Data.Int (toNumber)
 import Data.Int as I
 import Data.List.NonEmpty as NEL
 import Data.Maybe (fromJust)
-import Data.Ord (abs)
 import Data.Traversable (sequence, sequence_)
 import Data.Tuple (Tuple(..), fst, snd)
+import Debug (debugger, spy)
+import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Console as C
-import Math (ceil, exp, log, pow)
+import Math (abs, ceil, exp, floor, log, pow, round)
 import Node.Encoding (Encoding(..))
 import Node.FS.Sync (writeTextFile)
 import Partial.Unsafe (unsafePartial)
-import Test.QuickCheck (Result(..))
-import Test.Spec (Spec, describe, it, pending')
+import Prelude (identity)
+import Test.QuickCheck (Result(..), (<?>))
+import Test.Spec (Spec, describe, it, pending, pending')
 import Test.Spec.Assertions (fail, shouldEqual, shouldNotEqual, shouldSatisfy)
 import Test.Spec.QuickCheck (quickCheck)
 import Undefined (undefined)
@@ -116,11 +118,17 @@ utSpec = describe "ut" do
           k = 1000.0
           -- note, don't add bh (because we don't omit headers in std) and don't add hash(bh) b/c it's the last element in the PoR branch
           dss = k + 0.1 * n1 * (32.0 * log2c n1)  -- k + bf * N1 proofs * (proof_size)
+          dS = k * n1
           tts = 5.0 * 365.25 * dss / 10_000_000.0
+          stts = 5.0 * 365.25 * dS / 10_000_000.0
       it "dss" do
         basicSample.ut.std.deltaSmallS `shouldEqual` dss
       it "tts" do
         basicSample.ut.std.tts `shouldBeCloseTo` tts
+        basicSample.ut.std.sigmaTts `shouldBeCloseTo` stts
+
+    describe "ut.pors" do
+      pending "ut.pors"
 
     describe "ut.ho" do
       let ut = basicSample.ut.ho
@@ -135,15 +143,15 @@ utSpec = describe "ut" do
           n3 = t3 / 1000.0
       it "d1" do
         ut.d1 `dNShouldEqual` {n: n1, t: t1, tps: t1 / txSize}
-        round ut.d1.tps `shouldEqual` 156
-        round ut.d1.n `shouldEqual` 156
-        round (auxStats ut).scalingFactors.nesting `shouldEqual` (round $ ut.d2.tps / ut.d1.tps)
+        I.round ut.d1.tps `shouldEqual` 156
+        I.round ut.d1.n `shouldEqual` 156
+        I.round (auxStats ut).scalingFactors.nesting `shouldEqual` (I.round $ ut.d2.tps / ut.d1.tps)
       it "d2" do
         -- constants from comparison-gen.py
-        floor ut.d2.n `shouldEqual` 7_812
-        round (t2 / txSize) `shouldEqual` 15_625
-        round t2 `shouldEqual` (15_625 * 500)
-        round ut.d2.tps `shouldEqual` 15_625
+        I.floor ut.d2.n `shouldEqual` 7_812
+        I.round (t2 / txSize) `shouldEqual` 15_625
+        I.round t2 `shouldEqual` (15_625 * 500)
+        I.round ut.d2.tps `shouldEqual` 15_625
         ut.d2 `dNShouldEqual` {n: n2, t: t1 * 100.0, tps: t1 * 100.0 / txSize}
       it "d3" do
         ut.d3 `dNShouldEqual` {n: n3, t: t3, tps: t3 / 500.0}
@@ -211,13 +219,13 @@ utSpec = describe "ut" do
           -- exclude +T variant b/c py script doesn't get it
           variants = [s.std, s.ho, s.hot]
       it "TPS" do
-        ((\v -> floor v.d1.tps) <$> variants) `shouldEqual` tpss
+        ((\v -> I.floor v.d1.tps) <$> variants) `shouldEqual` tpss
       it "N1" do
-        ((\v -> floor v.d1.n) <$> variants) `shouldEqual` n1s
+        ((\v -> I.floor v.d1.n) <$> variants) `shouldEqual` n1s
       it "dS" do
-        ((\v -> floor v.deltaBigS) <$> variants) `shouldEqual` dbs
+        ((\v -> I.floor v.deltaBigS) <$> variants) `shouldEqual` dbs
       it "ds" do
-        ((\v -> floor v.deltaSmallS) <$> variants) `shouldEqual` dss
+        ((\v -> I.floor v.deltaSmallS) <$> variants) `shouldEqual` dss
       it "Conf Rates" $ do
         sequence_ $ (\t -> shouldBeWithin 0.005 (fst t) (snd t)) <$> zip ((\v -> v.confRate) <$> variants) confRates
       it "TTS" $ do
@@ -226,20 +234,102 @@ utSpec = describe "ut" do
     pending' "passes quickchecks" do
       quickCheck utChecks
 
+    describe "PoR consistency checks" do
+      it "numbers from tables (or otherwise calculated)" do
+        let getN1PoRs k = flip findMaxPoRsN1 32.0 $ mkSimplePs k {bf: btToF 15, bh: 84.0} 250.0
+            getN1PoRTs k = flip findMaxPoRsN1 16.0 $ mkSimplePs k {bf: btToF 15, bh: applyDiscountToHash 84.0} 250.0
+        getN1PoRs 3000.0 `shouldEqual` 64.0
+        getN1PoRTs 3000.0 `shouldEqual` 126.0
+        findMaxPoRsN1 (mkSimplePs 3000.0 {bf: btToF 60, bh: 112.0} 250.0) 32.0 `shouldEqual` 245.0
+        -- from
+        getN1PoRTs 100000.0 `shouldEqual` 2907.0
+        getN1PoRTs 200000.0 `shouldEqual` 5474.0
+        getN1PoRTs 300000.0 `shouldEqual` 8192.0
+        getN1PoRTs 400000.0 `shouldEqual` 10345.0
+        getN1PoRTs 500000.0 `shouldEqual` 12931.0
+        getN1PoRTs 600000.0 `shouldEqual` 15517.0
+        getN1PoRTs 700000.0 `shouldEqual` 16384.0
+        getN1PoRTs 800000.0 `shouldEqual` 16384.0
+        getN1PoRTs 900000.0 `shouldEqual` 22059.0
+        getN1PoRTs 1000000.0 `shouldEqual` 24510.0
+
+    -- Note: probs best to leave this as `false` b/c it is slooooow
     let record_k_vs_n1_forPoRs_csv = false
     if record_k_vs_n1_forPoRs_csv
       then describe "PoR experiment" do
+        -- hypothesis: close enough to O(c) scaling of N1 -- roughly linear vs k
         it "prints" do
-          let r = kRange {from: 100.0, to: 1_000_000.0, step: 100.0}
+          let r = kRange {from: 100.0, to: 100_000.0, step: 100.0}
+              r2 = kRange {from: 10_000.0, to: 100_000_000.0, step: 10_000.0}
           liftEffect $ writeTextFile UTF8 "test-output-ports-k-vs-n1.csv" $ intercalate "\n" $
             r <#> (\k -> Tuple k $ flip findMaxPoRsN1 16.0 $ mkSimplePs k {bf: btToF 15, bh: applyDiscountToHash 84.0} 250.0)
               <#> (\(Tuple k n) -> show k <> "," <> show n)
           liftEffect $ writeTextFile UTF8 "test-output-pors-k-vs-n1.csv" $ intercalate "\n" $
             r <#> (\k -> Tuple k $ flip findMaxPoRsN1 32.0 $ mkSimplePs k {bf: btToF 15, bh: 84.0} 250.0)
               <#> (\(Tuple k n) -> show k <> "," <> show n)
+          -- -- NB: This one is v slow
+          liftEffect $ C.log $ "Warning, about to calculate PoRs table for k in (10_000, 100_000_000) with a step size of 10_000. This may take some time"
+          liftEffect $ writeTextFile UTF8 "test-output-ports-k-vs-n1-waymore.csv" $ intercalate "\n" $
+            r2 <#> (\k -> Tuple k $ flip findMaxPoRsN1 16.0 $ mkSimplePs k {bf: btToF 15, bh: applyDiscountToHash 84.0} 250.0)
+              <#> (\(Tuple k n) -> show k <> "," <> show n)
       else pure unit
 
+    describe "por exp 2" do
+      it "quickchecks" do
+        quickCheck porsForRangesQC
+      it "test findMaxPoRsN1ForRanges" do
+        let r10MPors = kRange {from: 10_000.0, to: 10_000_000.0, step: 10_000.0}
+                  <#> (\k -> mkSimplePs k {bf: btToF 15, bh: 84.0} 250.0)
+            r10MPorts = kRange {from: 10_000.0, to: 10_000_000.0, step: 10_000.0}
+                  <#> (\k -> mkSimplePs k {bf: btToF 15, bh: applyDiscountToHash 84.0} 250.0)
+            rPors = kRange {from: 100.0, to: 100_000.0, step: 33.33333333333}
+                  <#> round <#> (\k -> mkSimplePs k {bf: btToF 15, bh: 84.0} 250.0)
+            rPorts = kRange {from: 100.0, to: 100_000.0, step: 33.33333333333}
+                  <#> round <#> (\k -> mkSimplePs k {bf: btToF 15, bh: applyDiscountToHash 84.0} 250.0)
+        -- -- liftEffect $ C.log $ "testing new pors for ranges"
+        -- liftEffect $ writeTextFile UTF8 "ports-k-vs-n1-to10MBs.csv" $ intercalate "\n" $
+        --   findMaxPoRsN1ForRanges {g: 16.0, r} <#> (\(Tuple ps {i}) -> show (pToPF ps).k <> "," <> show i)
+        liftEffect $ writePoRTableToCsv {r: r10MPors, g: 32.0, fn: "pors-k-vs-n-to-k-eq-10M.csv"}
+        liftEffect $ writePoRTableToCsv {r: r10MPorts, g: 16.0, fn: "ports-k-vs-n-to-k-eq-10M.csv"}
+        liftEffect $ writePoRTableToCsv {r: rPors, g: 32.0, fn: "pors-k-vs-n-to-k-eq-100000.csv"}
+        liftEffect $ writePoRTableToCsv {r: rPorts, g: 16.0, fn: "ports-k-vs-n-to-k-eq-100000.csv"}
+      it "large headers approx (w/in ~33%) of +PoRs" do
+        let tx = 250.0
+            utL = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 276.0} tx) {explicitPoRs: false, hashTruncation: false, headerOmission: false}
+            utP = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 84.0} tx) {explicitPoRs: true, hashTruncation: false, headerOmission: false}
+            utLT = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 178.0} tx) {explicitPoRs: false, hashTruncation: true, headerOmission: false}
+            utPT = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 84.0} tx) {explicitPoRs: true, hashTruncation: true, headerOmission: false}
+        -- +PoRs and std
+        utP.d1.tps `shouldBeWithin 0.5` 558.0
+        utP.d1.n `shouldBeWithin 0.5` 64.0
+        utL.d1.tps `shouldBeWithin 70.0` utP.d1.tps  -- 489 vs 558
+        utL.d1.n `shouldBeWithin 20.0` utP.d1.n  -- 82 vs 64
+        -- +T
+        utPT.d1.tps `shouldBeWithin 0.5` 1038.0
+        utPT.d1.n `shouldBeWithin 0.5` 126.0
+        utLT.d1.tps `shouldBeWithin 130.0` utPT.d1.tps  -- 925 vs 1038
+        utLT.d1.n `shouldBeWithin 30.0` utPT.d1.n  -- 154 vs 126
 
+writePoRTableToCsv :: {fn :: String, g :: Number, r :: Array Params} -> Effect Unit
+writePoRTableToCsv {fn, g, r} = writeTextFile UTF8 fn $ intercalate "\n" $
+          findMaxPoRsN1ForRanges {g, r} <#> (\(Tuple ps {i}) -> intercalate "," $ show <$> [(pToPF ps).k, toNumber i, (utNoExplicitPoRsN1 (g == 16.0) (pToPF ps))])
+
+utNoExplicitPoRsN1 hashTrunc p =
+  let bh = p.hf.bh # (if hashTrunc then applyDiscountToHash else identity)
+      bf = p.hf.bf
+  in p.k / 2.0 / bf / bh
+
+porsForRangesQC _k = normalAnswer == rangesAnswer <?> "Mismatching: " <> show {expected: normalAnswer, got: rangesAnswer}
+  where
+    k = enlarge 3000.0 _k
+    enlarge target i = if abs i < target then enlarge (abs target) (abs $ 10.0 * i) else floor i
+    normalAnswer = {k: lastRangeK, n: flip findMaxPoRsN1 16.0 $ mkSimplePs lastRangeK {bf: btToF 15, bh: applyDiscountToHash 84.0} 250.0}
+    rangesAnswer = findMaxPoRsN1ForRanges {g: 16.0, r: inputRanges}
+                    |> A.last |> unsafePartial fromJust |> (\(Tuple ps {i}) -> {k:(pToPF ps).k, n: toNumber i})
+    inputRanges = (\inK -> mkSimplePs inK {bf: btToF 15, bh: applyDiscountToHash 84.0} 250.0)
+                    <$> rangeKs
+    rangeKs = kRange {from: floor $ k / 2.0, to: ceil k, step: floor $ k / 20.0}
+    lastRangeK = unsafePartial fromJust $ A.last rangeKs
 
     -- describe "+PoRs find max" do
     --   findMaxPoRsN1 (mkSimplePs 3000.0 {bf:0.06666, bh:84.0} 68.0) 16.0
