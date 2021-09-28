@@ -226,8 +226,8 @@ findMaxPoRsN1ForRanges {g, r} = (inner {last: Nothing, next: A.head r, rest: A.t
         pf = pToPF ps
     inner endState = endState
 
-applyDiscountToHash :: Number -> Number
-applyDiscountToHash bh = (bh - _) $ ceil $ (1.0 + prel {f: 80.0, t: 112.0, v: bh}) * 16.0
+applyTDiscountToBH :: Number -> Number
+applyTDiscountToBH bh = (bh - _) $ ceil $ (1.0 + prel {f: 80.0, t: 112.0, v: bh}) * 16.0
 
 type UtParams = {explicitPoRs :: Boolean, headerOmission :: Boolean, hashTruncation :: Boolean}
 
@@ -235,9 +235,10 @@ utChainCalc :: Params -> UtParams -> ChainStats
 utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, confRate, tts, sigmaTts, deltaBigS, deltaSmallS, porBytes, porBytes2, effBh, effDh, kTx, kB, k1}
   where
     hashSize = if hashTruncation then 16.0 else 32.0
+    origBh = (head ps.hfs).bh
     -- ~~if bh<96 (1/2 way between 80 and 112) then only discount 1 hash, otherwise 2~~
     -- discount between 1 and two hashes worth depending on bh (inverse linear interpolate)
-    htModBh bh = if hashTruncation then applyDiscountToHash bh else bh
+    htModBh bh = if hashTruncation then applyTDiscountToBH bh else bh
     fixBH1 r@{bh} = r {bh = (if headerOmission then hashSize else htModBh bh)}
     fixBH2 r@{bh} = r {bh = htModBh bh}
     -- we have to modify the header size based on optimizations, but we don't want to pass
@@ -249,10 +250,11 @@ utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, con
     n1 = if explicitPoRs then findMaxPoRsN1 ps1 hashSize else (k1 / 2.0 / bfbh)
     confRate = hf.bf * n1
     porBytes = porLen hashSize n1
-    -- if we are using headerOmission, then we need to download headers + PoRs, but otherwise the hash is fine (which is the last element in the branch, anyway)
-    bhForExplicitPorsK = if headerOmission then htModBh (head ps.hfs).bh else 0.0
-    explicitPorsK = hf.bf * n1 * (porBytes + bhForExplicitPorsK)
-    kTx = if explicitPoRs then k1 - explicitPorsK else (k1 / 2.0)
+    -- if we are using headerOmission -> then we need to download headers + PoRs
+    -- else if we are doingExplicitPoRs but otherwise the hash is fine (which is the last element in the branch, anyway)
+    explicitPorsK = confRate * porBytes
+    explicitHeadersK = confRate * htModBh origBh
+    kTx = if explicitPoRs then (k1 - explicitPorsK - explicitHeadersK) else (k1 / 2.0)
     kB = k1 - kTx
     t1 = kTx * n1
     d1 = {n: n1, t: t1, tps: t1 / ps.txSize, p: pToPF ps1}
@@ -262,7 +264,7 @@ utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, con
     ps2 = ps2Pre {hfs = (fixBH2 (head ps2Pre.hfs) `cons'` tail ps2Pre.hfs)}
     ps3 = paramsForNextNS $ ps2Pre
     deltaBigS = n1 * k1 -- wp says: "The amount of network bandwidth, $\Delta S$, required to download all blocks (as they are produced) across all simplex-chains is"
-    deltaSmallS = if explicitPoRs then k1 else k1 + explicitPorsK  -- TODO: figure this out
+    deltaSmallS = if explicitPoRs then k1 else k1 + explicitPorsK + (if headerOmission then explicitHeadersK else 0.0)  -- TODO: write up in WP
     tts = ((5.0 * 365.25) * deltaSmallS / 10_000_000.0)
     sigmaTts = ((5.0 * 365.25) * (n1 * k1) / 10_000_000.0)
     d2 = calcNextNestingLevel ps2 d1

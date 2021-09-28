@@ -4,31 +4,28 @@ import Amaroo.WP.Calcs
 import Prel
 
 import Amaroo.WP.Tables (btToF)
-import Control.Monad.Trans.Class (lift)
-import Data.Array (intercalate, range)
-import Data.Array (zip)
+import Data.Array (intercalate, zip)
 import Data.Array as A
 import Data.Either (Either(..), fromLeft, isLeft)
 import Data.Int (toNumber)
 import Data.Int as I
 import Data.List.NonEmpty as NEL
 import Data.Maybe (fromJust)
-import Data.Traversable (sequence, sequence_)
+import Data.Traversable (sequence_)
 import Data.Tuple (Tuple(..), fst, snd)
-import Debug (debugger, spy)
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Console as C
-import Math (abs, ceil, exp, floor, log, pow, round)
+import Math (abs, ceil, floor, pow, round)
 import Node.Encoding (Encoding(..))
 import Node.FS.Sync (writeTextFile)
 import Partial.Unsafe (unsafePartial)
 import Prelude (identity)
 import Test.QuickCheck (Result(..), (<?>))
-import Test.Spec (Spec, describe, it, pending, pending')
+import Test.QuickCheck.Gen (Gen, choose, chooseInt)
+import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (fail, shouldEqual, shouldNotEqual, shouldSatisfy)
 import Test.Spec.QuickCheck (quickCheck)
-import Undefined (undefined)
 
 
 basicTestPs :: _
@@ -47,12 +44,20 @@ genSample = runChainCalcFor
 
 expectTrue x = x `shouldEqual` true
 
-shouldBeWithin d x y = not ((x - y) |> abs |> (-) d |> (<) 0.0) |> when $
-  fail $ show x <> " != " <> show y <> " (must be within " <> show d <> ")"
+isWithin d x y = (x - y) |> abs |> (d - _) |> (_ > 0.0)
+
+shouldBeWithin d x y = isWithin d x y |> not |> when $
+  fail $ show x <> " /= " <> show y <> " (must be within " <> show d <> ")"
 
 shouldBeCloseTo = shouldBeWithin 0.00001
 
 dNShouldEqual actual@{n, t, tps} expected = {n, t, tps} `shouldEqual` expected
+
+dNShouldBeVClose a e = (t a.n e.n && t a.t e.t && t a.tps e.tps) |> not |> when $
+    fail $ show {n: a.n, t: a.t, tps: a.tps} <> " /= " <> show e <> " (values must be within " <> show d <> ")"
+  where
+    t x y = isWithin d x y
+    d = 0.000001
 
 kRange :: _ -> Array Number
 kRange {from, to, step} = A.range 0 nEntries <#> \i -> from + step * toNumber i
@@ -97,9 +102,17 @@ auxStatsSpec = describe "Aux Stats" do
 
 utSpec :: Spec Unit
 utSpec = describe "ut" do
+    describe "misc" do
+      it "has a working isWithin function" do
+        quickCheck \n -> isWithin 0.000000001 n n <?> "isWithin broken! t0 " <> show n
+        quickCheck \n -> isWithin 0.0001 n n <?> "isWithin broken! t1 " <> show n
+        quickCheck \n -> not (isWithin 0.00001 n (n + 0.000011)) <?> "isWithin broken! t2 " <> show n
+        quickCheck \n -> (isWithin 1.0 n (n + 0.8)) <?> "isWithin broken! t3 " <> show n
+        quickCheck \n -> (isWithin 1.0 n (n - 0.8)) <?> "isWithin broken! t4 " <> show n
+        quickCheck \n -> not (isWithin 1.0 n (n - 1.8)) <?> "isWithin broken! t5 " <> show n
+
     let utvs = basicSample.ut
         std = utvs.std
-
     describe "ut.std" do
       it "d1" do
         basicSample.ut.std.d1 `dNShouldEqual` {n: 50.0, t: 500.0 * 50.0, tps: 50.0}
@@ -127,8 +140,29 @@ utSpec = describe "ut" do
         basicSample.ut.std.tts `shouldBeCloseTo` tts
         basicSample.ut.std.sigmaTts `shouldBeCloseTo` stts
 
-    describe "ut.pors" do
-      pending "ut.pors"
+    sequence_ $ do
+      (Tuple getCs (Tuple g bh)) <- [Tuple (\vs -> vs.pors) $ Tuple 32.0 100.0, Tuple (\vs -> vs.ports) $ Tuple 16.0 (applyTDiscountToBH 100.0)]
+      pure $ do
+        let name = if g == 32.0 then "pors" else "ports"
+            ps = mkSimplePs 1000.0 {bh, bf: 0.1} 500.0
+        describe ("ut." <> name) do
+          let n1 = findMaxPoRsN1 ps g
+              porSize = porLen g n1
+              kTx = 1000.0 - n1 * (bh + porSize) * 0.1
+              t1 = n1 * kTx
+              ut = getCs utvs
+          it "should not increase throughput to add more chains" do
+            t1 `shouldSatisfy` (_ > (n1 + 1.0) * (1000.0 - ((n1 + 1.0) * porSize)))
+          it "kTx matches" do
+            ut.kTx `shouldEqual` kTx
+          it "d1" do
+            ut.d1 `dNShouldEqual` {n: n1, t: t1, tps: t1 / 500.0}
+          it "d2" do
+            let n2 = n1 * (kTx / 0.1 / bh)
+                t2 = n2 * 1000.0
+                tps2 = t2 / 500.0
+            ut.d2 `dNShouldBeVClose` {n: n2, t: t2, tps: tps2}
+
 
     describe "ut.ho" do
       let ut = basicSample.ut.ho
@@ -231,13 +265,10 @@ utSpec = describe "ut" do
       it "TTS" $ do
         sequence_ $ (\t -> shouldBeWithin 0.005 (fst t) (snd t)) <$> zip ((\v -> v.tts) <$> variants) ttss
 
-    pending' "passes quickchecks" do
-      quickCheck utChecks
-
     describe "PoR consistency checks" do
       it "numbers from tables (or otherwise calculated)" do
         let getN1PoRs k = flip findMaxPoRsN1 32.0 $ mkSimplePs k {bf: btToF 15, bh: 84.0} 250.0
-            getN1PoRTs k = flip findMaxPoRsN1 16.0 $ mkSimplePs k {bf: btToF 15, bh: applyDiscountToHash 84.0} 250.0
+            getN1PoRTs k = flip findMaxPoRsN1 16.0 $ mkSimplePs k {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0
         getN1PoRs 3000.0 `shouldEqual` 64.0
         getN1PoRTs 3000.0 `shouldEqual` 126.0
         findMaxPoRsN1 (mkSimplePs 3000.0 {bf: btToF 60, bh: 112.0} 250.0) 32.0 `shouldEqual` 245.0
@@ -262,7 +293,7 @@ utSpec = describe "ut" do
           let r = kRange {from: 100.0, to: 100_000.0, step: 100.0}
               r2 = kRange {from: 10_000.0, to: 100_000_000.0, step: 10_000.0}
           liftEffect $ writeTextFile UTF8 "test-output-ports-k-vs-n1.csv" $ intercalate "\n" $
-            r <#> (\k -> Tuple k $ flip findMaxPoRsN1 16.0 $ mkSimplePs k {bf: btToF 15, bh: applyDiscountToHash 84.0} 250.0)
+            r <#> (\k -> Tuple k $ flip findMaxPoRsN1 16.0 $ mkSimplePs k {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0)
               <#> (\(Tuple k n) -> show k <> "," <> show n)
           liftEffect $ writeTextFile UTF8 "test-output-pors-k-vs-n1.csv" $ intercalate "\n" $
             r <#> (\k -> Tuple k $ flip findMaxPoRsN1 32.0 $ mkSimplePs k {bf: btToF 15, bh: 84.0} 250.0)
@@ -270,7 +301,7 @@ utSpec = describe "ut" do
           -- -- NB: This one is v slow
           liftEffect $ C.log $ "Warning, about to calculate PoRs table for k in (10_000, 100_000_000) with a step size of 10_000. This may take some time"
           liftEffect $ writeTextFile UTF8 "test-output-ports-k-vs-n1-waymore.csv" $ intercalate "\n" $
-            r2 <#> (\k -> Tuple k $ flip findMaxPoRsN1 16.0 $ mkSimplePs k {bf: btToF 15, bh: applyDiscountToHash 84.0} 250.0)
+            r2 <#> (\k -> Tuple k $ flip findMaxPoRsN1 16.0 $ mkSimplePs k {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0)
               <#> (\(Tuple k n) -> show k <> "," <> show n)
       else pure unit
 
@@ -281,11 +312,11 @@ utSpec = describe "ut" do
         let r10MPors = kRange {from: 10_000.0, to: 10_000_000.0, step: 10_000.0}
                   <#> (\k -> mkSimplePs k {bf: btToF 15, bh: 84.0} 250.0)
             r10MPorts = kRange {from: 10_000.0, to: 10_000_000.0, step: 10_000.0}
-                  <#> (\k -> mkSimplePs k {bf: btToF 15, bh: applyDiscountToHash 84.0} 250.0)
+                  <#> (\k -> mkSimplePs k {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0)
             rPors = kRange {from: 100.0, to: 100_000.0, step: 33.33333333333}
                   <#> round <#> (\k -> mkSimplePs k {bf: btToF 15, bh: 84.0} 250.0)
             rPorts = kRange {from: 100.0, to: 100_000.0, step: 33.33333333333}
-                  <#> round <#> (\k -> mkSimplePs k {bf: btToF 15, bh: applyDiscountToHash 84.0} 250.0)
+                  <#> round <#> (\k -> mkSimplePs k {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0)
         -- -- liftEffect $ C.log $ "testing new pors for ranges"
         -- liftEffect $ writeTextFile UTF8 "ports-k-vs-n1-to10MBs.csv" $ intercalate "\n" $
         --   findMaxPoRsN1ForRanges {g: 16.0, r} <#> (\(Tuple ps {i}) -> show (pToPF ps).k <> "," <> show i)
@@ -293,29 +324,37 @@ utSpec = describe "ut" do
         liftEffect $ writePoRTableToCsv {r: r10MPorts, g: 16.0, fn: "ports-k-vs-n-to-k-eq-10M.csv"}
         liftEffect $ writePoRTableToCsv {r: rPors, g: 32.0, fn: "pors-k-vs-n-to-k-eq-100000.csv"}
         liftEffect $ writePoRTableToCsv {r: rPorts, g: 16.0, fn: "ports-k-vs-n-to-k-eq-100000.csv"}
+
+    describe "+PoRs vs large headers checks" do
       it "large headers approx (w/in ~33%) of +PoRs" do
         let tx = 250.0
             utL = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 276.0} tx) {explicitPoRs: false, hashTruncation: false, headerOmission: false}
             utP = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 84.0} tx) {explicitPoRs: true, hashTruncation: false, headerOmission: false}
-            utLT = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 178.0} tx) {explicitPoRs: false, hashTruncation: true, headerOmission: false}
-            utPT = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 84.0} tx) {explicitPoRs: true, hashTruncation: true, headerOmission: false}
         -- +PoRs and std
-        utP.d1.tps `shouldBeWithin 0.5` 558.0
+        utP.d1.tps `shouldBeWithin 0.5` 467.0
         utP.d1.n `shouldBeWithin 0.5` 64.0
-        utL.d1.tps `shouldBeWithin 70.0` utP.d1.tps  -- 489 vs 558
+        utL.d1.tps `shouldBeWithin 30.0` utP.d1.tps  -- 489 vs 467
         utL.d1.n `shouldBeWithin 20.0` utP.d1.n  -- 82 vs 64
+      it "large headers approx (w/in ~33%) of +PoRTs" do
+        let tx = 250.0
+            utLT = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 178.0} tx) {explicitPoRs: false, hashTruncation: false, headerOmission: false}
+            utPT = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 84.0} tx) {explicitPoRs: true, hashTruncation: true, headerOmission: false}
         -- +T
-        utPT.d1.tps `shouldBeWithin 0.5` 1038.0
+        utPT.d1.tps `shouldBeWithin 0.5` 758.0
         utPT.d1.n `shouldBeWithin 0.5` 126.0
-        utLT.d1.tps `shouldBeWithin 130.0` utPT.d1.tps  -- 925 vs 1038
-        utLT.d1.n `shouldBeWithin 30.0` utPT.d1.n  -- 154 vs 126
+        utLT.d1.tps `shouldBeWithin 2.0` utPT.d1.tps  -- 758.4269 vs 758.4191  -- suspiciously close?
+        utLT.d1.n `shouldBeWithin 1.0` utPT.d1.n  -- 126.4 vs 126  -- !!! also super close
+
+    describe "quickchecks" do
+      it "passes" do
+        quickCheck (utChecks <$> paramsGen)
 
 writePoRTableToCsv :: {fn :: String, g :: Number, r :: Array Params} -> Effect Unit
 writePoRTableToCsv {fn, g, r} = writeTextFile UTF8 fn $ intercalate "\n" $
           findMaxPoRsN1ForRanges {g, r} <#> (\(Tuple ps {i}) -> intercalate "," $ show <$> [(pToPF ps).k, toNumber i, (utNoExplicitPoRsN1 (g == 16.0) (pToPF ps))])
 
 utNoExplicitPoRsN1 hashTrunc p =
-  let bh = p.hf.bh # (if hashTrunc then applyDiscountToHash else identity)
+  let bh = p.hf.bh # (if hashTrunc then applyTDiscountToBH else identity)
       bf = p.hf.bf
   in p.k / 2.0 / bf / bh
 
@@ -323,10 +362,10 @@ porsForRangesQC _k = normalAnswer == rangesAnswer <?> "Mismatching: " <> show {e
   where
     k = enlarge 3000.0 _k
     enlarge target i = if abs i < target then enlarge (abs target) (abs $ 10.0 * i) else floor i
-    normalAnswer = {k: lastRangeK, n: flip findMaxPoRsN1 16.0 $ mkSimplePs lastRangeK {bf: btToF 15, bh: applyDiscountToHash 84.0} 250.0}
+    normalAnswer = {k: lastRangeK, n: flip findMaxPoRsN1 16.0 $ mkSimplePs lastRangeK {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0}
     rangesAnswer = findMaxPoRsN1ForRanges {g: 16.0, r: inputRanges}
                     |> A.last |> unsafePartial fromJust |> (\(Tuple ps {i}) -> {k:(pToPF ps).k, n: toNumber i})
-    inputRanges = (\inK -> mkSimplePs inK {bf: btToF 15, bh: applyDiscountToHash 84.0} 250.0)
+    inputRanges = (\inK -> mkSimplePs inK {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0)
                     <$> rangeKs
     rangeKs = kRange {from: floor $ k / 2.0, to: ceil k, step: floor $ k / 20.0}
     lastRangeK = unsafePartial fromJust $ A.last rangeKs
@@ -344,26 +383,38 @@ porsForRangesQC _k = normalAnswer == rangesAnswer <?> "Mismatching: " <> show {e
     --       --   }
     --       range 1 250 <#> I.toNumber <#> (\n1 -> utPorsT1 n1 3000.0 0.06666 68.0 16.0)
 
-utChecks :: Params -> UtParams -> Result
-utChecks p utp = doUtChecks p utp ut
-  where
-    ut = utChainCalc p utp
+
+paramsGen :: Gen Params
+paramsGen = do
+    bh <- choose 40.0 500.0
+    k <- (max (5.0 * bh) <<< add bh) <$> choose 1000.0 10000.0
+    bt <- chooseInt 1 20
+    tx <- choose 50.0 1000.0
+    pure $ mkSimplePs k {bf: btToF bt, bh} tx
+
+utChecks :: Params -> Result
+utChecks p = doUtChecks p $ allUtChainCalcs p
 
 orError :: Boolean -> String -> Either String Unit
 orError b e = if b then Right unit else Left e
 
 infixl 1 orError as <?
 
-doUtChecks :: Params -> UtParams -> ChainStats -> Result
-doUtChecks p utp cs = if A.length filteredRes == 0
+doUtChecks :: Params -> UtVariants ChainStats -> Result
+doUtChecks p uts = if A.length filteredRes == 0
     then Success
-    else Failed $ A.intercalate "\n * " $ ["UT checks failed -- P(" <> show p <> "), UTP(" <> show utp <> "):"] <> errMsgs
+    else Failed $ A.intercalate "\n * " $ ["UT checks failed -- P(" <> show p <> "):"] <> errMsgs
   where
     filteredRes = A.filter isLeft results
     errMsgs = fromLeft ":( no error (you should never see this)" <$> filteredRes
+    utStdNperTps = uts.std.d1.n / uts.std.d1.tps
     results =
-      [
-      -- , Left "test fail"
+      [ Right unit
+      , isWithin 0.3 (uts.pors.d1.n / uts.pors.d1.tps) utStdNperTps <? "+PoRs should have a tps ratio v similar to std -- " <> show (uts.pors.d1.n / uts.pors.d1.tps) <> " vs " <> show utStdNperTps
+      , isWithin 0.3 (uts.ports.d1.n / uts.ports.d1.tps) utStdNperTps <? "+PoRTs should have a tps ratio v similar to std -- " <> show (uts.ports.d1.n / uts.ports.d1.tps) <> " vs " <> show utStdNperTps
+      , isWithin 0.01 (uts.t.d1.n / uts.t.d1.tps) utStdNperTps <? "+T should have a tps ratio v similar to std"
+      , isWithin 0.01 (uts.ho.d1.n / uts.ho.d1.tps) utStdNperTps <? "+HO should have a tps ratio v similar to std"
+      , isWithin 0.01 (uts.hot.d1.n / uts.hot.d1.tps) utStdNperTps <? "+HOT should have a tps ratio v similar to std"
       -- , Left "oh no"
       -- , false <? "well that didn't work"
       -- , true <? "but this did"

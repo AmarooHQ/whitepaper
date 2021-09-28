@@ -4,13 +4,11 @@ import Prel
 
 import Amaroo.WP.Utils (lerp, prel, uniq)
 import Data.Array (all, filter, length)
-import Effect.Class.Console as C
 import Math (abs, (%))
 import Test.QuickCheck ((<?>))
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 import Test.Spec.QuickCheck (quickCheck)
-import Undefined (undefined)
 
 
 newtype LerpIn = LerpIn {f :: Number, t :: Number, pct :: Number}

@@ -3,7 +3,7 @@ module Amaroo.WP.Tables where
 import Amaroo.WP.Tables.Types
 import Prel
 
-import Amaroo.WP.Calcs (ChainStats, Params, UtVariants, allUtChainCalcs, allUtChainCalcsF, applyDiscountToHash, auxStats, mkSimplePs, pToPF, runChainCalcFor, tradChainCalc, tradChainCalcEth2, utChainCalc)
+import Amaroo.WP.Calcs (ChainStats, Params, UtVariants, allUtChainCalcs, allUtChainCalcsF, applyTDiscountToBH, auxStats, mkSimplePs, pToPF, runChainCalcFor, tradChainCalc, tradChainCalcEth2, utChainCalc)
 import Amaroo.WP.Formatter (fdPlain, fdPlainMixed, fdPlainZero, fdStd, fdStdMixed, fdStdTwo, fdStdZero, fmt1GbpsPs, fmtDyn, fmtPsKBfBh, fmtPsKBfBhDh, wrap)
 import Amaroo.WP.Tables.Booktabs (LatexTablePos(..), TPositioning(..), renderBooktabs)
 import Amaroo.WP.Utils (diagonalApply, ui)
@@ -129,7 +129,7 @@ _POLKADOT_1M_K = 109810.0
 
 _UT_BF = 1.0 / 15.0
 _UT_BH = 84.0
-_UT_BH_FOR_SHARDING = applyDiscountToHash _UT_BH
+_UT_BH_FOR_SHARDING = applyTDiscountToBH _UT_BH
 _UT_HF = {bh: _UT_BH, bf: _UT_BF}
 
 _UT1_1M_K = ut1TpsToK _1M 250.0 _UT_BF _UT_BH
@@ -438,4 +438,4 @@ showMdTable :: Table -> String
 showMdTable (Table headings {md} table) = (intercalate "\n" <<< fixRow2) $ (wrap "|" <<< wrap " " <<< intercalate " | ") <$> ([headings, md] <> table)
 
 showTable :: Table -> String
-showTable table = renderBooktabs (TPositioning [Hereish, Bottom, TablePage, Override]) {label: Nothing, caption: Nothing} table
+showTable table = renderBooktabs (TPositioning [Hereish, TablePage]) {label: Nothing, caption: Nothing} table
