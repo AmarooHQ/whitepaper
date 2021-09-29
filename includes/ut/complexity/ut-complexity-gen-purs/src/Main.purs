@@ -3,15 +3,15 @@ module Main where
 import Prel
 
 import Amaroo.WP.Formatter (wrap)
-import Amaroo.WP.Tables (compareNets1mTps, compareNets30k, compareNets3k, compareUtOptimizations, compareUtOptimizations2, dappChains, dappChainsHot, showTable, tableTps, tableTpsHot, tpsPor, tpsPort)
-import Amaroo.WP.Tables.Booktabs (LatexTablePos(..), TPositioning(..), renderBooktabs)
-import Amaroo.WP.Tables.Types (Table(..))
+import Amaroo.WP.Tables (compareNets1mTps, compareNets30k, compareNets3k, compareUtOptimizations, compareUtOptimizations2, dappChains, dappChainsHot, showLatexTable, tableTps, tableTpsHot, tpsPor, tpsPort)
+import Amaroo.WP.Tables.Booktabs (renderBooktabs)
+import Amaroo.WP.Tables.Types (LatexTablePos(..), TPositioning(..), TableDesc(..))
 import Control.Alt ((<|>))
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.State (State, modify_, runState)
 import Data.Array (drop, dropWhile, elem, filter, head, intercalate, take, takeWhile)
 import Data.Maybe (Maybe(..), fromMaybe, isJust)
-import Data.String (Pattern(..), Replacement(..), contains, replace)
+import Data.String (Pattern(..), contains)
 import Data.String as S
 import Data.String.Utils (lines)
 import Data.Traversable (sequence)
@@ -30,22 +30,25 @@ _WP_FILE_PATH = "./output/whitepaper.markdown"
 
 genStrToReplace tn = "%% INSERT ### TABLE: " <> tn
 
-newtype TableName = TableName String
+defaultPositioning :: Array LatexTablePos
+defaultPositioning = [Hereish, Bottom, TablePage, Override]
 
+tablePageOnly :: Array LatexTablePos
+tablePageOnly = [TablePage]
 
-allTables :: Array (Tuple TableName Table)
+allTables :: Array TableDesc
 allTables =
-    [ Tuple (TableName "tps") tableTps
-    , Tuple (TableName "tps_optimized") tableTpsHot
-    , Tuple (TableName "dapp-chains") dappChains
-    , Tuple (TableName "dapp-chains_optimized") dappChainsHot
-    , Tuple (TableName "tps_por") tpsPor
-    , Tuple (TableName "tps_port") tpsPort
-    , Tuple (TableName "compare_nets_3k") compareNets3k
-    , Tuple (TableName "compare_nets_30k") compareNets30k
-    , Tuple (TableName "comparison_1m_tps") compareNets1mTps
-    , Tuple (TableName "compare_optimizations") compareUtOptimizations
-    , Tuple (TableName "compare_optimizations2") compareUtOptimizations2
+    [ TD "tps" tableTps defaultPositioning
+    , TD "tps_optimized" tableTpsHot defaultPositioning
+    , TD "dapp-chains" dappChains defaultPositioning
+    , TD "dapp-chains_optimized" dappChainsHot defaultPositioning
+    , TD "tps_por" tpsPor defaultPositioning
+    , TD "tps_port" tpsPort defaultPositioning
+    , TD "compare_optimizations" compareUtOptimizations defaultPositioning
+    , TD "compare_optimizations2" compareUtOptimizations2 defaultPositioning
+    , TD "compare_nets_3k" compareNets3k tablePageOnly
+    , TD "compare_nets_30k" compareNets30k tablePageOnly
+    , TD "comparison_1m_tps" compareNets1mTps tablePageOnly
     ]
 
 
@@ -59,12 +62,12 @@ readWhitepaperMd = do
       else do
         throwError $ error "./output/whitepaper.markdown does not exist -- bailing out."
 
-renderTable :: Table -> TableName -> Maybe String -> String
-renderTable table (TableName tn) caption = renderBooktabs (TPositioning [Hereish, Bottom, TablePage, Override]) {label: Just tn, caption} table
+renderTable :: TableDesc -> Maybe String -> String
+renderTable (TD tn table pos) caption = renderBooktabs (TPositioning pos) {label: Just tn, caption} table
 
-insertReplacement :: Table -> TableName -> {before :: Array String, mid :: _, after :: Array String} -> Array String
-insertReplacement table tn {before, mid: Just caption, after} = before <> [renderTable table tn caption] <> after
-insertReplacement _ _ {before, mid: Nothing, after} = before <> after
+insertReplacement :: TableDesc -> {before :: Array String, mid :: _, after :: Array String} -> Array String
+insertReplacement td {before, mid: Just caption, after} = before <> [renderTable td caption] <> after
+insertReplacement _ {before, mid: Nothing, after} = before <> after
 
 toBeforeTableAfter tn ls = {before: takeWhile (_ /= toReplace) ls, mid, after}
   where
@@ -81,10 +84,10 @@ getCaption [_, blank, caption] = if S.length blank == 0
     trimmedCaption = S.trim caption
 getCaption _ = unsafeThrowException $ error "getCaption recieved an array with length /= 3"
 
-replaceTable :: Tuple TableName Table -> State String Unit
-replaceTable (Tuple _tn@(TableName tn) table) = modify_ replaceTableAndCaption
-  where
-    replaceTableAndCaption md = md |> lines |> toBeforeTableAfter tn |> insertReplacement table _tn |> intercalate "\n"
+replaceTable :: TableDesc -> State String Unit
+replaceTable td@(TD tn _ _) = modify_ $ lines >>> toBeforeTableAfter tn >>> insertReplacement td >>> intercalate "\n"
+  -- where
+  --   replaceTableAndCaption md = md |> lines |> toBeforeTableAfter tn |> insertReplacement td |> intercalate "\n"
 
 
 replaceAllTablesInWP :: Boolean -> Effect Unit
@@ -109,9 +112,9 @@ replaceAllTablesInWP dryRun = do
 
 wnltn tn = wrap "\n" $ "### TABLE: " <> tn
 
-logTable (Tuple (TableName tn) t) = do
+logTable (TD tn t _) = do
   C.log $ wnltn tn
-  C.log $ showTable t
+  C.log $ showLatexTable t
 
 logAllTables = do
   _ <- sequence $ logTable <$> allTables

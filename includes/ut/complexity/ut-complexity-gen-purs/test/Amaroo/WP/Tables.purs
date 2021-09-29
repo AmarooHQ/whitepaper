@@ -1,17 +1,15 @@
 module Test.Amaroo.WP.Tables where
 
-import Amaroo.WP.Tables
-import Amaroo.WP.Tables.Types
 import Prel
 
-import Data.Array (all, head, length, tail)
+import Amaroo.WP.Tables
+import Amaroo.WP.Tables.Types
+import Data.Array (length)
 import Data.Array.Partial as AP
 import Data.Int (decimal, toStringAs)
 import Data.String as S
 import Data.Traversable (and, sequence, sequence_)
-import Data.Tuple (Tuple(..))
-import Effect.Class.Console as C
-import Main (TableName(..), allTables)
+import Main (allTables)
 import Partial.Unsafe (unsafePartial)
 import Test.Amaroo.WP.Calcs (shouldBeWithin)
 import Test.Spec (Spec, describe, it)
@@ -47,9 +45,9 @@ utNamesSpec = describe "tables" do
         , "$\\UTinf{1+\\text{HOT}}$"
         ]
 
-    it "1m compare len" do
-      -- note: because we filter the output of (utVsOther 1.0), it's inconvenient to test length (utVsOther 1.0) == length ut1mcompareks
-      length utVsOther1M `shouldEqual` length ut1MCompareKs
+    -- it "1m compare len" do
+    --   -- note: because we filter the output of (utVsOther 1.0), it's inconvenient to test length (utVsOther 1.0) == length ut1mcompareks
+    --   length utVsOther1M `shouldEqual` length ut1MCompareKs
 
     it "1m compare has tps == 1m as much as possible" do
       _ <- sequence $ do
@@ -63,7 +61,7 @@ utNamesSpec = describe "tables" do
 
     it "all tables are square (all rows same len)" do
       sequence_ $ do
-        (Tuple (TableName tn) (Table hdrs aligns table)) <- allTables
+        (TD _ (Table hdrs aligns table) _) <- allTables
         let ls = length <$> ([hdrs, aligns.md] <> table)
         pure $ do
           S.length aligns.texTabular `shouldEqual` (length aligns.md)

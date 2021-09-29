@@ -2,7 +2,7 @@ module Test.Main where
 
 import Prel
 
-import Amaroo.WP.Tables.Types (Table(..))
+import Amaroo.WP.Tables.Types (LatexTablePos(..), Table(..), TableDesc(..))
 import Control.Monad.State (runState)
 import Data.Array (drop, zip)
 import Data.Foldable (sequence_)
@@ -12,7 +12,7 @@ import Data.String.Utils (lines)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (launchAff_)
-import Main (TableName(..), getCaption, insertReplacement, replaceTable, toBeforeTableAfter)
+import Main (getCaption, insertReplacement, replaceTable, toBeforeTableAfter)
 import Test.Amaroo.WP.Calcs (auxStatsSpec, tradSpec, utSpec)
 import Test.Amaroo.WP.Formatter (fmtSpec)
 import Test.Amaroo.WP.Tables (utNamesSpec)
@@ -24,6 +24,7 @@ import Test.Spec.Reporter.Console (consoleReporter)
 import Test.Spec.Runner (runSpec)
 import Undefined (undefined)
 
+pos = [Hereish, Bottom, TablePage, Override]
 sampleAsdf1 = "\\begin{table}[hbp!]\n\\centering\n\\label{table:tn1}\n\\begin{tabular}{asdf1}\n\\toprule\n \\\\\n\\midrule\n\\bottomrule\n\\end{tabular}\n\\end{table}"
 sampleAsdf2 = "\\begin{table}[hbp!]\n\\centering\n\\caption{Test caption} \\label{table:tn1}\n\\begin{tabular}{asdf2}\n\\toprule\n \\\\\n\\midrule\n\\bottomrule\n\\end{tabular}\n\\end{table}"
 tableAsdf1 = (Table [] {md: [], texTabular: "asdf1"} [])
@@ -51,16 +52,16 @@ main = do
 
     describe "replaceTable" do
       it "insertReplace works" do
-        insertReplacement undefined undefined {before: ["1"], mid: Nothing, after: ["2"]} `shouldEqual` ["1", "2"]
-        insertReplacement tableAsdf1 (TableName "tn1") {before: ["1"], mid: Just Nothing, after: ["2"]} `shouldEqual` ["1", sampleAsdf1, "2"]
-        insertReplacement tableAsdf2 (TableName "tn1") {before: ["1"], mid: Just (Just "Test caption"), after: ["2"]} `shouldEqual` ["1", sampleAsdf2, "2"]
+        insertReplacement undefined {before: ["1"], mid: Nothing, after: ["2"]} `shouldEqual` ["1", "2"]
+        insertReplacement (TD "tn1" tableAsdf1 pos) {before: ["1"], mid: Just Nothing, after: ["2"]} `shouldEqual` ["1", sampleAsdf1, "2"]
+        insertReplacement (TD "tn1" tableAsdf2 pos) {before: ["1"], mid: Just (Just "Test caption"), after: ["2"]} `shouldEqual` ["1", sampleAsdf2, "2"]
       it "handles captions" do
         getCaption ["", "", "Not a caption"] `shouldEqual` Nothing
         getCaption ["", "", ": a caption"] `shouldEqual` Just ("a caption")
         getCaption ["jkhfgkjhg", "", "Table: a caption2"] `shouldEqual` Just ("a caption2")
         getCaption ["", "not blank", ": a caption"] `shouldEqual` Nothing
       it "works with sample" do
-        let (Tuple _ res1) = runState (replaceTable (Tuple (TableName "tn1") tableAsdf2)) sample1
+        let (Tuple _ res1) = runState (replaceTable (TD "tn1" tableAsdf2 pos)) sample1
             pairs = zip (lines res1) (lines res1Expected)
             expMid = toBeforeTableAfter "tn1" $ lines sample1
         (lines sample1 |> drop 3) `shouldEqual` ["", ": Test caption", "", ""]

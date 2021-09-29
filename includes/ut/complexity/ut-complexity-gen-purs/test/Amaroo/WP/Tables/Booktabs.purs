@@ -2,8 +2,8 @@ module Test.Amaroo.WP.Tables.Booktabs (booktabsSpec) where
 
 import Prel
 
-import Amaroo.WP.Tables.Types (Table(..))
-import Amaroo.WP.Tables.Booktabs (LatexTablePos(..), TPositioning(..), renderBooktabs)
+import Amaroo.WP.Tables.Types (Table(..), LatexTablePos(..), TPositioning(..))
+import Amaroo.WP.Tables.Booktabs (renderBooktabs)
 import Data.Array (zip)
 import Data.Foldable (sequence_)
 import Data.Maybe (Maybe(..))

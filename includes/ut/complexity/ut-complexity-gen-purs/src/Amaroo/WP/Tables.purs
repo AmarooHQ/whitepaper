@@ -5,7 +5,8 @@ import Prel
 
 import Amaroo.WP.Calcs (ChainStats, Params, UtVariants, allUtChainCalcs, allUtChainCalcsF, applyTDiscountToBH, auxStats, mkSimplePs, pToPF, runChainCalcFor, tradChainCalc, tradChainCalcEth2, utChainCalc)
 import Amaroo.WP.Formatter (fdPlain, fdPlainMixed, fdPlainZero, fdStd, fdStdMixed, fdStdTwo, fdStdZero, fmt1GbpsPs, fmtDyn, fmtPsKBfBh, fmtPsKBfBhDh, wrap)
-import Amaroo.WP.Tables.Booktabs (LatexTablePos(..), TPositioning(..), renderBooktabs)
+import Amaroo.WP.Tables.Booktabs (renderBooktabs)
+import Amaroo.WP.Tables.Types (LatexTablePos(..), TPositioning(..))
 import Amaroo.WP.Utils (diagonalApply, ui)
 import Data.Array (drop, filter, intercalate, take)
 import Data.Array as A
@@ -133,12 +134,17 @@ _UT_BH = 84.0
 _UT_BH_FOR_SHARDING = applyTDiscountToBH _UT_BH
 _UT_HF = {bh: _UT_BH, bf: _UT_BF}
 
+_UT1PORTS_1M_K = 131250.0  -- manual binary search
 _UT1_1M_K = ut1TpsToK _1M 250.0 _UT_BF _UT_BH
 _UT1T_1M_K = ut1TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING
+_UT1HO_1M_K = ut1TpsToK _1M 250.0 _UT_BF 32.0
 _UT1HOT_1M_K = ut1TpsToK _1M 250.0 _UT_BF 16.0
+
+_UT2PORTS_1M_K = 3790.0  -- manual binary search
 _UT2_1M_K = ut2TpsToK _1M 250.0 _UT_BF _UT_BH _UT_BH
 _UT2T_1M_K = ut2TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING _UT_BH_FOR_SHARDING
 _UT2HOT_1M_K = ut2TpsToK _1M 250.0 _UT_BF 16.0 _UT_BH_FOR_SHARDING
+
 _OPT_SHARD_1M_K = oc2TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING
 
 
@@ -173,15 +179,18 @@ utVsOther :: Array ({net :: Network, p :: Number -> Params, oneMTps :: Maybe Num
 utVsOther =
     [ {net: Bitcoin, p: \k -> mkSimplePs k {bf: btToF 600, bh: 80.0} tx, oneMTps: Just _BTC_1M_K}
     , {net: Cardano, p: \k -> mkSimplePs k {bf: btToF 20, bh: _CARDANO_BH} tx, oneMTps: Just _CARDANO_1M_K}
-    , {net: UT (PoRs 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Nothing}
-    , {net: UT (Std 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1_1M_K}
+    -- , {net: UT (PoRs 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Nothing}
+    , {net: UT (PoRTs 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1PORTS_1M_K}
+    -- , {net: UT (Std 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1_1M_K}
     , {net: UT (T 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1T_1M_K}
+    -- , {net: UT (HO 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1HO_1M_K}
     , {net: UT (HOT 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1HOT_1M_K}
     , {net: Polkadot, p: \k -> mkSimplePs k {bf: btToF 6, bh: _POLKADOT_BH} tx, oneMTps: Just _POLKADOT_1M_K}
     , {net: Eth2, p: \k -> mkSimplePs k {bf: _ETH2_BF, bh: _ETH2_BH} tx, oneMTps: Just _ETH2_1M_K}
     , {net: OptShard, p: \k -> mkSimplePs k {bf: _UT_BF, bh: _UT_BH_FOR_SHARDING} tx, oneMTps: Just _OPT_SHARD_1M_K}
-    , {net: UT (PoRs 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Nothing}
-    , {net: UT (Std 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2_1M_K}
+    -- , {net: UT (PoRs 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Nothing}
+    , {net: UT (PoRTs 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2PORTS_1M_K}
+    -- , {net: UT (Std 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2_1M_K}
     , {net: UT (T 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2T_1M_K}
     , {net: UT (HOT 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2HOT_1M_K}
     , {net: UT (Aleph (HOT 2)), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Nothing}
@@ -189,7 +198,7 @@ utVsOther =
   where
     tx = 250.0
 
-ut1MCompareKs = [_BTC_1M_K, _CARDANO_1M_K, _UT1_1M_K, _UT1T_1M_K, _UT1HOT_1M_K, _POLKADOT_1M_K, _ETH2_1M_K, _OPT_SHARD_1M_K, _UT2_1M_K, _UT2T_1M_K, _UT2HOT_1M_K]
+-- ut1MCompareKs = [_BTC_1M_K, _CARDANO_1M_K, _UT1_1M_K, _UT1T_1M_K, _UT1HO_1M_K, _UT1HOT_1M_K, _POLKADOT_1M_K, _ETH2_1M_K, _OPT_SHARD_1M_K, _UT2_1M_K, _UT2T_1M_K, _UT2HOT_1M_K]
 
 id x = x
 
@@ -448,5 +457,5 @@ fixRow2 rs = take 1 rs <> [replaceAll (Pattern " ") (Replacement "") $ ui rs 1] 
 showMdTable :: Table -> String
 showMdTable (Table headings {md} table) = (intercalate "\n" <<< fixRow2) $ (wrap "|" <<< wrap " " <<< intercalate " | ") <$> ([headings, md] <> table)
 
-showTable :: Table -> String
-showTable table = renderBooktabs (TPositioning [Hereish, Top, Bottom, Override]) {label: Nothing, caption: Nothing} table
+showLatexTable :: Table -> String
+showLatexTable table = renderBooktabs (TPositioning [Hereish, Top, Bottom, Override]) {label: Nothing, caption: Nothing} table
