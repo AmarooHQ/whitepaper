@@ -1,0 +1,35 @@
+\documentclass[a4paper,]{article}
+% \documentclass{scrreprt}
+
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath,amsfonts}
+\usepackage[left=3cm,right=3cm,top=3cm,bottom=3cm]{geometry}
+\usepackage{longtable,booktabs}
+\usepackage{nicefrac}
+\usepackage{ifthen}
+
+
+\newcommand{\UT}[1]{\text{UT}_{#1}}
+%%\newcommand{\UT1}{\UT{1}}
+%%\newcommand{\UT2}{\UT{2}}
+%%\newcommand{\UT3}{\UT{3}}
+\newcommand{\UTinf}[1]{
+    \ifthenelse{\equal{#1}{}} {
+        \UT{\aleph}
+    } {
+        \UT{\aleph #1}
+    }
+}
+
+
+\begin{document}
+
+\begin{section}{Section 1}
+
+%% INSERT ### TABLE: lp_compare_optimizations
+
+%% INSERT ### TABLE: lp_compare_networks
+
+\end{section}
+
+\end{document}

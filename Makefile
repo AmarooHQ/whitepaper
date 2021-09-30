@@ -5,6 +5,11 @@ WPFILE=$(WPNOEXT).markdown
 WPHTML=$(WPNOEXT).html
 WPTEX=$(WPNOEXT).tex
 
+
+LP_DIR=includes/ut/lp
+LP_TABLES=$(LP_DIR)/tables.tex
+LP_TABLES_OUT=$(OUTDIR)/tables.tex
+
 PURS_GEN_DIR=includes/ut/complexity/ut-complexity-gen-purs
 
 # default properties for WP -- see `set-wp-properties` cmd
@@ -98,6 +103,13 @@ mk-latex-pdf:
 
 %.md:
 	echo 'skipping task for .md files'
+
+mk-lp-tables:
+	cp $(LP_TABLES) $(LP_TABLES_OUT)
+	export REPLACE_TABLES_IN=$(LP_TABLES_OUT) && \
+	node ./includes/ut/complexity/populateWPTables.js --populate-wp-md --lp-tables
+	latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(LP_TABLES_OUT)
+	cp $(OUTDIR)/tables.pdf ./tables.pdf
 
 purs-setup:
 	cd $(PURS_GEN_DIR) && \

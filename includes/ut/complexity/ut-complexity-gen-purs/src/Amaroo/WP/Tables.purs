@@ -69,6 +69,8 @@ https://web.archive.org/web/20210831185445/https://docs.solana.com/running-valid
 
 data UtName = PoRs Int | PoRTs Int | Std Int | T Int | HO Int | HOT Int | Aleph UtName
 
+derive instance eqUtName :: Eq UtName
+
 utBaseN :: String -> String
 utBaseN inner = "\\UT{" <> inner <> "}"
 
@@ -78,7 +80,7 @@ utAlephN inner = "\\UTinf{" <> inner <> "}"
 
 iToS = I.toStringAs decimal
 
-sToExt s = if length s > 0 then "+\\text{" <> s <> "}" else ""
+sToExt s = if length s > 0 then "+\\text{" <> s <> "}" else "+\\emptyset"
 
 utNameInner f i e = f $ (if i <= 0 then "" else iToS i) <> sToExt e
 
@@ -94,8 +96,8 @@ utNameI (Aleph n) = utNameI n
 utNameE :: UtName -> String
 utNameE (PoRs _) = "PoRs"
 utNameE (PoRTs _) = "PoRTs"
-utNameE (Std _) = ""
-utNameE (T _) = "T"
+utNameE (Std _) = "OP"
+utNameE (T _) = "OPT"
 utNameE (HO _) = "HO"
 utNameE (HOT _) = "HOT"
 utNameE (Aleph n) = utNameE n
@@ -134,12 +136,14 @@ _UT_BH = 84.0
 _UT_BH_FOR_SHARDING = applyTDiscountToBH _UT_BH
 _UT_HF = {bh: _UT_BH, bf: _UT_BF}
 
+_UT1PORS_1M_K = 250000.0  -- manual binary search
 _UT1PORTS_1M_K = 131250.0  -- manual binary search
 _UT1_1M_K = ut1TpsToK _1M 250.0 _UT_BF _UT_BH
 _UT1T_1M_K = ut1TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING
 _UT1HO_1M_K = ut1TpsToK _1M 250.0 _UT_BF 32.0
 _UT1HOT_1M_K = ut1TpsToK _1M 250.0 _UT_BF 16.0
 
+_UT2PORS_1M_K = 7000.0  -- manual binary search
 _UT2PORTS_1M_K = 3790.0  -- manual binary search
 _UT2_1M_K = ut2TpsToK _1M 250.0 _UT_BF _UT_BH _UT_BH
 _UT2T_1M_K = ut2TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING _UT_BH_FOR_SHARDING
@@ -167,6 +171,8 @@ btToF t = 1.0 / (toNumber t)
 
 data Network = Bitcoin | Cardano | Eth2 | Polkadot | OptShard | UT UtName
 
+derive instance eqNetwork :: Eq Network
+
 instance showNetwork :: Show Network where
   show Bitcoin = "Bitcoin"
   show Cardano = "Cardano"
@@ -179,18 +185,19 @@ utVsOther :: Array ({net :: Network, p :: Number -> Params, oneMTps :: Maybe Num
 utVsOther =
     [ {net: Bitcoin, p: \k -> mkSimplePs k {bf: btToF 600, bh: 80.0} tx, oneMTps: Just _BTC_1M_K}
     , {net: Cardano, p: \k -> mkSimplePs k {bf: btToF 20, bh: _CARDANO_BH} tx, oneMTps: Just _CARDANO_1M_K}
-    -- , {net: UT (PoRs 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Nothing}
+    , {net: UT (PoRs 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1PORS_1M_K}
     , {net: UT (PoRTs 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1PORTS_1M_K}
-    -- , {net: UT (Std 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1_1M_K}
+    , {net: UT (Std 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1_1M_K}
     , {net: UT (T 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1T_1M_K}
-    -- , {net: UT (HO 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1HO_1M_K}
+    , {net: UT (HO 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1HO_1M_K}
     , {net: UT (HOT 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1HOT_1M_K}
+    , {net: UT (Aleph (HOT 1)), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Nothing}
     , {net: Polkadot, p: \k -> mkSimplePs k {bf: btToF 6, bh: _POLKADOT_BH} tx, oneMTps: Just _POLKADOT_1M_K}
     , {net: Eth2, p: \k -> mkSimplePs k {bf: _ETH2_BF, bh: _ETH2_BH} tx, oneMTps: Just _ETH2_1M_K}
     , {net: OptShard, p: \k -> mkSimplePs k {bf: _UT_BF, bh: _UT_BH_FOR_SHARDING} tx, oneMTps: Just _OPT_SHARD_1M_K}
-    -- , {net: UT (PoRs 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Nothing}
+    , {net: UT (PoRs 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2PORS_1M_K}
     , {net: UT (PoRTs 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2PORTS_1M_K}
-    -- , {net: UT (Std 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2_1M_K}
+    , {net: UT (Std 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2_1M_K}
     , {net: UT (T 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2T_1M_K}
     , {net: UT (HOT 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2HOT_1M_K}
     , {net: UT (Aleph (HOT 2)), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Nothing}
@@ -344,6 +351,10 @@ compareNetsTH = Table
     ["$k$, $B_f$, $B_h$", "Network", "E. $B_h$ (B)", "E. $D_h$ (B)", "Scale $\\times$", "$\\nicefrac{\\Sigma\\;\\text{TPS}}{N_1}$", "$\\Sigma$ TPS"] -- , "TPS vs " <> (utName_ $ Std 2)]
     {md: mkSpacer <$> [5, 6, 2, 2, 3, 4, 3], texTabular: "llrrrrr"}
 
+compareNetsConciseTH = Table
+    ["$k$, $B_f$, $B_h$", "Network", "Scale $\\times$", "$\\nicefrac{\\Sigma\\;\\text{TPS}}{N_1}$", "$\\Sigma$ TPS"] -- , "TPS vs " <> (utName_ $ Std 2)]
+    {md: mkSpacer <$> [5, 6, 3, 4, 3], texTabular: "llrrr"}
+
 compareNets3k :: Table
 compareNets3k =
     compareNetsTH (genCompareRow 3_000.0 <$> utVsOther)
@@ -351,6 +362,28 @@ compareNets3k =
 compareNets30k :: Table
 compareNets30k =
     compareNetsTH (genCompareRow 30_000.0 <$> utVsOther)
+
+makeCompareRowConcise [ps, net, _, _, scale, tpsPerN, tps] = [ps, net, scale, tpsPerN, tps]
+makeCompareRowConcise _ = unsafeThrowException $ error "makeCompareRowConcise got wrong number of cols"
+
+
+filterRows rows = rows
+
+lpCompareNetworks :: Table
+lpCompareNetworks = compareNetsConciseTH t
+  where
+    t = (makeCompareRowConcise <<< genCompareRow 3_000.0) <$> utVsOther
+      -- append (A.filter (\{net} -> net == Bitcoin) rows)
+      -- $ append (A.filter (\{net} -> net == UT (PoRTs 1)) rows)
+      -- $ append (A.filter (\{net} -> net == Eth2) rows)
+      -- $ append (A.filter (\{net} -> net == UT (Std 1)) rows)
+      -- $ append (A.filter (\{net} -> net == UT (T 1)) rows)
+      -- $ append (A.filter (\{net} -> net == OptShard) rows)
+      -- $ append (A.filter (\{net} -> net == UT (HOT 1)) rows)
+      -- $ append (A.filter (\{net} -> net == UT (PoRTs 2)) rows)
+      -- $ append (A.filter (\{net} -> net == UT (T 2)) rows)
+      -- $ (A.filter (\{net} -> net == UT (HOT 2)) rows)
+
 
 -- todo: fix fmtDyn fdPlain
 genCompare1MRow {net, p} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdStdTwo <$> [netToTps net cs / cs.d1.n, netToTps net cs]) <> (fmtDyn fdStdMixed <$> [ut2.d2.tps]) -- , cs.k1 / ut2K])
@@ -394,6 +427,9 @@ genCompareUtRow uts props v = [utName_ v] <> (propGens <@> (getCS v))
 
 -- {s: "$\\Sigma$ TPS", f: \cs -> fmtDyn fdPlainZero cs.d1.tps}
 
+type OProps = {s :: String, f :: (ChainStats -> String)}
+
+optimizationProps1 :: Array OProps
 optimizationProps1 =
   [ {s: "$N_1$", f: \cs -> fmtDyn fdStdMixed cs.d1.n}
   -- , {s: "$T_1$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.d1.t}
@@ -409,6 +445,7 @@ optimizationProps1 =
   , {s: "PoR (B)", f: \cs -> fmtDyn fdPlainZero cs.porBytes}
   ]
 
+optimizationProps2 :: Array OProps
 optimizationProps2 =
   [ {s: "$\\Delta s$ (B/s)", f: \cs -> fmtDyn fdStdZero cs.deltaSmallS}
   , {s: "$\\text{TTS}_{5yrs}$ (days)", f: \cs -> fmtDyn fdStdTwo cs.tts}
@@ -450,6 +487,27 @@ compareUtOptimizations2 = Table
     ut = allUtChainCalcs _UT_INIT_CONFIG
     variants = [PoRs 0, PoRTs 0, Std 0, T 0, HO 0, HOT 0]
     oProps = optimizationProps2
+
+
+mkCompareUtOptimizations :: Array OProps -> Table
+mkCompareUtOptimizations oProps = Table
+    ([""] <> (oProps <#> (\{s} -> s)))
+    {md: mkSpacer <$> A.replicate 6 3, texTabular: "l" <> repeatSafe 5 "r"}
+    (genCompareUtRow ut oProps <$> variants)
+  where
+    ut = allUtChainCalcs _UT_INIT_CONFIG
+    variants = [PoRs 0, PoRTs 0, Std 0, T 0, HO 0, HOT 0]
+
+_fmtStd = fmtDyn fdStdMixed
+
+lpCompareUtOptimizations1 :: Table
+lpCompareUtOptimizations1 = mkCompareUtOptimizations
+    [ {s: "$\\Sigma\\;\\text{TPS}_{1}$ (tx/s)", f: \cs -> _fmtStd cs.d1.tps}
+    , {s: "$N_1$ (chains)", f: \cs -> _fmtStd cs.d1.n}
+    , {s: "$\\mathbb{C}^\\prime$ (Hz)", f: \cs -> fmtDyn fdStd cs.confRate}
+    , {s: "$\\Sigma\\;\\text{TPS}_{2}$ (tx/s)", f: \cs -> _fmtStd cs.d2.tps}
+    , {s: "$N_2$ (chains)", f: \cs -> _fmtStd cs.d2.n}
+    ]
 
 fixRow2 :: Array String -> Array String
 fixRow2 rs = take 1 rs <> [replaceAll (Pattern " ") (Replacement "") $ ui rs 1] <> drop 2 rs
