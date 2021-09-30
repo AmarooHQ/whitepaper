@@ -37,11 +37,11 @@ utNamesSpec = describe "tables" do
       shouldEqual (utNames [PoRs 1, PoRTs 2, Std 3, T 1, HO 2, HOT 3, Aleph (Std 2), Aleph (HOT 1)]) $
         [ mkUtTestName "PoRs" 1
         , mkUtTestName "PoRTs" 2
-        , mkUtTestNameStd 3
-        , mkUtTestName "T" 1
+        , mkUtTestName "OP" 3
+        , mkUtTestName "OPT" 1
         , mkUtTestName "HO" 2
         , mkUtTestName "HOT" 3
-        , "$\\UTinf{2}$"
+        , "$\\UTinf{2+\\text{OP}}$"
         , "$\\UTinf{1+\\text{HOT}}$"
         ]
 

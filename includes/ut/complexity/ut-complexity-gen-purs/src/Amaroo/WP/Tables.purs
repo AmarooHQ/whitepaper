@@ -136,14 +136,14 @@ _UT_BH = 84.0
 _UT_BH_FOR_SHARDING = applyTDiscountToBH _UT_BH
 _UT_HF = {bh: _UT_BH, bf: _UT_BF}
 
-_UT1PORS_1M_K = 250000.0  -- manual binary search
+_UT1PORS_1M_K = 177000.0  -- manual binary search
 _UT1PORTS_1M_K = 131250.0  -- manual binary search
 _UT1_1M_K = ut1TpsToK _1M 250.0 _UT_BF _UT_BH
 _UT1T_1M_K = ut1TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING
 _UT1HO_1M_K = ut1TpsToK _1M 250.0 _UT_BF 32.0
 _UT1HOT_1M_K = ut1TpsToK _1M 250.0 _UT_BF 16.0
 
-_UT2PORS_1M_K = 7000.0  -- manual binary search
+_UT2PORS_1M_K = 4870.0  -- manual binary search
 _UT2PORTS_1M_K = 3790.0  -- manual binary search
 _UT2_1M_K = ut2TpsToK _1M 250.0 _UT_BF _UT_BH _UT_BH
 _UT2T_1M_K = ut2TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING _UT_BH_FOR_SHARDING

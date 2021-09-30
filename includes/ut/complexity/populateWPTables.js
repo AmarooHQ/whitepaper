@@ -4289,9 +4289,9 @@ var PS = {};
       }
   } ]);
   var _UT2PORTS_1M_K = 3790.0;
-  var _UT2PORS_1M_K = 7000.0;
+  var _UT2PORS_1M_K = 4870.0;
   var _UT1PORTS_1M_K = 131250.0;
-  var _UT1PORS_1M_K = 250000.0;
+  var _UT1PORS_1M_K = 177000.0;
   var _POLKADOT_BH = 288.0;
   var _POLKADOT_1M_K = 109810.0;
   var _ETH2_BH = 200.0;
@@ -5690,7 +5690,7 @@ var PS = {};
               if (format instanceof Markdown) {
                   return Amaroo_WP_Tables.showMdTable;
               };
-              throw new Error("Failed pattern match at Main (line 141, column 16 - line 143, column 30): " + [ format.constructor.name ]);
+              throw new Error("Failed pattern match at Main (line 142, column 16 - line 144, column 30): " + [ format.constructor.name ]);
           })();
           return function __do() {
               Effect_Console.log(wnltn(v.value0))();
@@ -5706,7 +5706,7 @@ var PS = {};
           if (v1.mid instanceof Data_Maybe.Nothing) {
               return Data_Semigroup.append(Data_Semigroup.semigroupArray)(v1.before)(v1.after);
           };
-          throw new Error("Failed pattern match at Main (line 93, column 1 - line 93, column 108): " + [ v.constructor.name, v1.constructor.name ]);
+          throw new Error("Failed pattern match at Main (line 94, column 1 - line 94, column 108): " + [ v.constructor.name, v1.constructor.name ]);
       };
   };
   var getEnv = function (name) {
@@ -5769,7 +5769,7 @@ var PS = {};
       })());
   };
   var defaultPositioning = [ Amaroo_WP_Tables_Types.Hereish.value, Amaroo_WP_Tables_Types.Top.value, Amaroo_WP_Tables_Types.Bottom.value, Amaroo_WP_Tables_Types.Override.value ];
-  var lpTables = [ new Amaroo_WP_Tables_Types.TD("lp_compare_optimizations", Amaroo_WP_Tables.lpCompareUtOptimizations1, defaultPositioning), new Amaroo_WP_Tables_Types.TD("lp_compare_networks", Amaroo_WP_Tables.lpCompareNetworks, defaultPositioning) ];
+  var lpTables = [ new Amaroo_WP_Tables_Types.TD("lp_compare_optimizations", Amaroo_WP_Tables.lpCompareUtOptimizations1, defaultPositioning), new Amaroo_WP_Tables_Types.TD("lp_compare_networks", Amaroo_WP_Tables.lpCompareNetworks, defaultPositioning), new Amaroo_WP_Tables_Types.TD("comparison_1m_tps", Amaroo_WP_Tables.compareNets1mTps, tablePageOnly) ];
   var wpTables = [ new Amaroo_WP_Tables_Types.TD("tps", Amaroo_WP_Tables.tableTps, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_optimized", Amaroo_WP_Tables.tableTpsHot, defaultPositioning), new Amaroo_WP_Tables_Types.TD("dapp-chains", Amaroo_WP_Tables.dappChains, defaultPositioning), new Amaroo_WP_Tables_Types.TD("dapp-chains_optimized", Amaroo_WP_Tables.dappChainsHot, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_por", Amaroo_WP_Tables.tpsPor, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_port", Amaroo_WP_Tables.tpsPort, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations", Amaroo_WP_Tables.compareUtOptimizations, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations2", Amaroo_WP_Tables.compareUtOptimizations2, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_nets_3k", Amaroo_WP_Tables.compareNets3k, tablePageOnly), new Amaroo_WP_Tables_Types.TD("compare_nets_30k", Amaroo_WP_Tables.compareNets30k, tablePageOnly), new Amaroo_WP_Tables_Types.TD("comparison_1m_tps", Amaroo_WP_Tables.compareNets1mTps, tablePageOnly) ];
   var allTables = (function () {
       var $41 = Data_Array.elem(Data_Eq.eqString)("--lp-tables")($foreign.argv);

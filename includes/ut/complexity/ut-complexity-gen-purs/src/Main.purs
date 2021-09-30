@@ -70,6 +70,7 @@ lpTables =
     -- , TD "lp_compare_optimizations2" lpCompareUtOptimizations2 defaultPositioning
     -- , TD "lp_compare_optimizations3" lpCompareUtOptimizations3 defaultPositioning
     , TD "lp_compare_networks" lpCompareNetworks defaultPositioning
+    , TD "comparison_1m_tps" compareNets1mTps tablePageOnly
     ]
 
 allTables :: Array TableDesc
