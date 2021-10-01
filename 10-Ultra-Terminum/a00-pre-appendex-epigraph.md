@@ -56,18 +56,18 @@
 
 %% ### TABLE: nomenclature
 
-| Term | Definition |
-| ------ | ----------------------------------------------------------------------- |
-| $\UT{i}$ | The UT scaling configuration with $i$ levels of nesting. \autoref{sec:constructing-ut} |
-| $\UT{1}$ | UT with base-level chains only -- $O(c^2)$ scalability. \autoref{sec:the-simplex} |
-| $\UT{2}$ | UT with nested dapp-chains -- $O(c^3)$ scalability. \autoref{sec:dapp-chains} |
-| $\UT{3}$ | UT with nested dapp-dapp-chains -- $O(c^4)$ scalability. \autoref{sec:dapp-chains} |
-| $\UTinf{i}$ | Tiling of $\UT{i}$ -- $O(n)$ scalability. \autoref{sec:tiling} |
-| +T | Protocol extension: hash truncation. \autoref{sec:exploiting-seg-state} |
-| +HO | Protocol extension: header omission. \autoref{sec:exploiting-seg-state} |
-| +HOT | Protocol extension: header omission and truncation. \autoref{sec:exploiting-seg-state} |
-| +PoRs | The protocol extension whereby simplex-chain miners explicitly include the corresponding PoR for each header they reflect. \autoref{sec:por-with-proofs} |
-| +PoRTs | +PoRs with shorter proofs via hash-truncation. \autoref{sec:ext-ports} |
+| Term | Definition | Location |
+| ------ | ------------------------------------------------------------- | ----------- |
+| $\UT{i}$ | The UT scaling configuration with $i$ levels of nesting. | \autoref{sec:constructing-ut} |
+| $\UT{1}$ | UT with base-level chains only -- $O(c^2)$ scalability. | \autoref{sec:the-simplex} |
+| $\UT{2}$ | UT with nested dapp-chains -- $O(c^3)$ scalability. | \autoref{sec:dapp-chains} |
+| $\UT{3}$ | UT with nested dapp-dapp-chains -- $O(c^4)$ scalability. | \autoref{sec:dapp-chains} |
+| $\UTinf{i}$ | Tiling of $\UT{i}$ -- $O(n)$ scalability. | \autoref{sec:tiling} |
+| +T | Protocol extension: hash truncation. | \autoref{sec:exploiting-seg-state} |
+| +HO | Protocol extension: header omission. | \autoref{sec:exploiting-seg-state} |
+| +HOT | Protocol extension: header omission and truncation. | \autoref{sec:exploiting-seg-state} |
+| +PoRs | The protocol extension whereby simplex-chain miners explicitly include the corresponding PoR for each header they reflect. | \autoref{sec:por-with-proofs} |
+| +PoRTs | +PoRs with shorter proofs via hash-truncation. | \autoref{sec:ext-ports} |
 
 : Nomenclature defined in this document. \label{table:nomenclature}
 
