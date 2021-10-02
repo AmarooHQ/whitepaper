@@ -3,7 +3,7 @@ module Main where
 import Prel
 
 import Amaroo.WP.Formatter (wrap)
-import Amaroo.WP.Tables (compareNets1mTps, compareNets30k, compareNets3k, compareUtOptimizations, compareUtOptimizations2, dappChains, dappChainsHot, lpCompareNetworks, lpCompareUtOptimizations1, showLatexTable, showMdTable, tableTps, tableTpsHot, tpsPor, tpsPort)
+import Amaroo.WP.Tables (compareNets1mTps, compareNets30k, compareNets3k, compareUtOptimizations, compareUtOptimizations2, dappChains, dappChainsHot, lpCompareNetworks, lpCompareUt1Eth2, lpCompareUt1OptShard, lpCompareUt2OptShard, lpCompareUtOptimizations1, showHtmlTable, showLatexTable, showMdTable, tableTps, tableTpsHot, tpsPor, tpsPort)
 import Amaroo.WP.Tables.Booktabs (renderBooktabs)
 import Amaroo.WP.Tables.Types (LatexTablePos(..), TPositioning(..), TableDesc(..))
 import Control.Alt ((<|>))
@@ -28,7 +28,7 @@ import Node.FS.Sync as FS
 foreign import argv :: Array String
 foreign import getEnvOrEmpty :: String -> String
 
-data Format = Markdown | Latex
+data Format = Markdown | Latex | HTML
 
 getEnv :: String -> Maybe String
 getEnv name = getEnvOrEmpty name |> \e -> if S.length e == 0 then Nothing else Just e
@@ -66,11 +66,14 @@ wpTables =
 
 lpTables :: Array TableDesc
 lpTables =
-    [ TD "lp_compare_optimizations" lpCompareUtOptimizations1 defaultPositioning
+    [ TD "lp_compare_networks" lpCompareNetworks defaultPositioning
+    , TD "comparison_1m_tps" compareNets1mTps tablePageOnly
+    , TD "lp_compare_optimizations_1" lpCompareUtOptimizations1 defaultPositioning
+    , TD "lp_compare_ut1_to_eth2" lpCompareUt1Eth2 defaultPositioning
+    , TD "lp_compare_ut1_to_optshard" lpCompareUt1OptShard defaultPositioning
+    , TD "lp_compare_ut2_to_optshard" lpCompareUt2OptShard defaultPositioning
     -- , TD "lp_compare_optimizations2" lpCompareUtOptimizations2 defaultPositioning
     -- , TD "lp_compare_optimizations3" lpCompareUtOptimizations3 defaultPositioning
-    , TD "lp_compare_networks" lpCompareNetworks defaultPositioning
-    , TD "comparison_1m_tps" compareNets1mTps tablePageOnly
     ]
 
 allTables :: Array TableDesc
@@ -142,6 +145,7 @@ logTable format (TD tn t _) = do
     showFunc = case format of
       Latex -> showLatexTable
       Markdown -> showMdTable
+      HTML -> showHtmlTable tn
 
 logAllTables format = do
   _ <- sequence $ logTable format <$> allTables
@@ -155,4 +159,6 @@ main = do
   where
     shouldPopulateMd = elem "--populate-wp-md" argv
     dryRun = elem "--dry-run" argv
-    format = if elem "--markdown" argv then Markdown else Latex
+    format = if elem "--markdown" argv
+      then Markdown
+      else if elem "--html" argv then HTML else Latex

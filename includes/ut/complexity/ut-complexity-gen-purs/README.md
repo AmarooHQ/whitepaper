@@ -19,9 +19,13 @@ TODO:
 * quickcheck tests would be nice
 * the markdown table-replace stuff seems to work fine, mb test? probs good to have tests (e.g. for the error msg when tables aren't replaced)
 
-## actually testing table replacement -- command 
+## actually testing table replacement -- command
 
 `spago bundle-app && (cd ../../../../ ; make build-whitepaper ; node includes/ut/complexity/ut-complexity-gen-purs/index.js --populate-wp-md --dry-run)`
+
+## compile new LP tables on change
+
+`npm run bundle-for-wp -- -w --then "cd ../../../../ && make mk-lp-tables"`
 
 <!--
 ## lambert W function

@@ -22,6 +22,12 @@ import Math (abs, floor, pow)
 wrap :: String -> String -> String
 wrap wrapWith toWrap = wrapWith <> toWrap <> wrapWith
 
+wrapXml :: String -> String -> String
+wrapXml tag inner = ("<" <> tag <> ">") <> inner <> ("</" <> tag <> ">")
+
+wrapXmlWAttr :: String -> String -> String -> String
+wrapXmlWAttr tag attr inner = ("<" <> tag <> " " <> attr <> ">") <> inner <> ("</" <> tag <> ">")
+
 chunk :: Int -> String -> Array String
 chunk n s = if length s <= 3 then [s] else [take 3 s] <> chunk n (drop 3 s)
 

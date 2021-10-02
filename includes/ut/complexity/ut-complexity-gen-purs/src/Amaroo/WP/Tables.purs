@@ -4,7 +4,7 @@ import Amaroo.WP.Tables.Types
 import Prel
 
 import Amaroo.WP.Calcs (ChainStats, Params, UtVariants, allUtChainCalcs, allUtChainCalcsF, applyTDiscountToBH, auxStats, mkSimplePs, pToPF, runChainCalcFor, tradChainCalc, tradChainCalcEth2, utChainCalc)
-import Amaroo.WP.Formatter (fdPlain, fdPlainMixed, fdPlainZero, fdStd, fdStdMixed, fdStdTwo, fdStdZero, fmt1GbpsPs, fmtDyn, fmtPsKBfBh, fmtPsKBfBhDh, wrap)
+import Amaroo.WP.Formatter (fdPlain, fdPlainMixed, fdPlainZero, fdStd, fdStdMixed, fdStdTwo, fdStdZero, fmt1GbpsPs, fmtDyn, fmtPsKBfBh, fmtPsKBfBhDh, wrap, wrapXml, wrapXmlWAttr)
 import Amaroo.WP.Tables.Booktabs (renderBooktabs)
 import Amaroo.WP.Tables.Types (LatexTablePos(..), TPositioning(..))
 import Amaroo.WP.Utils (diagonalApply, ui)
@@ -147,6 +147,7 @@ _UT2PORS_1M_K = 4870.0  -- manual binary search
 _UT2PORTS_1M_K = 3790.0  -- manual binary search
 _UT2_1M_K = ut2TpsToK _1M 250.0 _UT_BF _UT_BH _UT_BH
 _UT2T_1M_K = ut2TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING _UT_BH_FOR_SHARDING
+_UT2HO_1M_K = ut2TpsToK _1M 250.0 _UT_BF 32.0 _UT_BH
 _UT2HOT_1M_K = ut2TpsToK _1M 250.0 _UT_BF 16.0 _UT_BH_FOR_SHARDING
 
 _OPT_SHARD_1M_K = oc2TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING
@@ -181,7 +182,9 @@ instance showNetwork :: Show Network where
   show OptShard = "Opt.Shard"
   show (UT ut) = utName_ ut
 
-utVsOther :: Array ({net :: Network, p :: Number -> Params, oneMTps :: Maybe Number})
+type UtVsOtherDesc = {net :: Network, p :: Number -> Params, oneMTps :: Maybe Number}
+
+utVsOther :: Array UtVsOtherDesc
 utVsOther =
     [ {net: Bitcoin, p: \k -> mkSimplePs k {bf: btToF 600, bh: 80.0} tx, oneMTps: Just _BTC_1M_K}
     , {net: Cardano, p: \k -> mkSimplePs k {bf: btToF 20, bh: _CARDANO_BH} tx, oneMTps: Just _CARDANO_1M_K}
@@ -199,6 +202,7 @@ utVsOther =
     , {net: UT (PoRTs 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2PORTS_1M_K}
     , {net: UT (Std 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2_1M_K}
     , {net: UT (T 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2T_1M_K}
+    , {net: UT (HO 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2HO_1M_K}
     , {net: UT (HOT 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2HOT_1M_K}
     , {net: UT (Aleph (HOT 2)), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Nothing}
     ]
@@ -509,11 +513,62 @@ lpCompareUtOptimizations1 = mkCompareUtOptimizations
     , {s: "$N_2$ (chains)", f: \cs -> _fmtStd cs.d2.n}
     ]
 
+genLpCompareRow k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdStdMixed <$> [effBh, tps])
+  where
+    p = o.p k
+    cs = netToChainStats net p
+    effBh = case net of
+      Eth2 -> cs.effDh
+      OptShard -> cs.effDh
+      _ -> cs.effBh
+    tps = if isAleph net then infinity else netToTps net cs
+
+genLpCompare2Row k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdStdMixed <$> [cs.effBh, cs.effDh, tps])
+  where
+    p = o.p k
+    cs = netToChainStats net p
+    tps = if isAleph net then infinity else netToTps net cs
+
+lpCompareTH = Table
+    ["$k$, $B_f$, $B_h$", "Network", "Eff. $B_h$ (B)", "$\\Sigma$ TPS (tx/s)"]
+    {md: mkSpacer <$> [5, 6, 3, 3], texTabular: "llrr"}
+
+lpCompare2TH = Table
+    ["$k$, $B_f$, $B_h$", "Network", "Eff. $B_h$ (B)", "Eff. $D_h$ (B)", "$\\Sigma$ TPS (tx/s)"]
+    {md: mkSpacer <$> [5, 6, 3, 3, 3], texTabular: "llrrr"}
+
+filterUtVsOther :: Array Network -> Array UtVsOtherDesc
+filterUtVsOther nets = do
+    n <- nets
+    A.filter (\{net} -> net == n) utVsOther
+
+lpCompareUt1Eth2 :: Table
+lpCompareUt1Eth2 = lpCompareTH $ (genLpCompareRow 3000.0) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), UT (T 1), Eth2])
+
+lpCompareUt1OptShard :: Table
+lpCompareUt1OptShard = lpCompareTH $ (genLpCompareRow 3000.0) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), UT (T 1), Eth2, UT (HOT 1), OptShard])
+
+lpCompareUt2OptShard :: Table
+lpCompareUt2OptShard = lpCompare2TH $ (genLpCompare2Row 3000.0) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), UT (T 1), Eth2, UT (HOT 1), OptShard, UT (PoRTs 2), UT(T 2), UT (HOT 2)])
+
+
 fixRow2 :: Array String -> Array String
 fixRow2 rs = take 1 rs <> [replaceAll (Pattern " ") (Replacement "") $ ui rs 1] <> drop 2 rs
+
+latexToMathjax :: String -> String
+latexToMathjax = replaceAll (Pattern "\\nicefrac") (Replacement "\\frac")
+    <<< replaceAll (Pattern "\\UT") (Replacement "\\text{UT}_")
+    <<< replaceAll (Pattern "\\UTinf{") (Replacement "\\text{UT}_{\\aleph ")
 
 showMdTable :: Table -> String
 showMdTable (Table headings {md} table) = (intercalate "\n" <<< fixRow2) $ (wrap "|" <<< wrap " " <<< intercalate " | ") <$> ([headings, md] <> table)
 
 showLatexTable :: Table -> String
 showLatexTable table = renderBooktabs (TPositioning [Hereish, Top, Bottom, Override]) {label: Nothing, caption: Nothing} table
+
+showHtmlTable :: String -> Table -> String
+showHtmlTable _id (Table headings _ table) = latexToMathjax $ wrapXmlWAttr "table" ("id=\"" <> _id <> "\"") $ flip append "\n" $
+    wXmlWNs "tr" (join $ wrapXml "th" <$> headings) <> (join $ (wXmlWNs "tr" <<< join <<< map (wrapXml "td")) <$> table)
+  where
+    join = intercalate ""
+    wXmlWNs tag = append "\n" <<< wrapXml tag

@@ -1,15 +1,15 @@
 module Test.Amaroo.WP.Tables where
 
-import Prel
-
 import Amaroo.WP.Tables
 import Amaroo.WP.Tables.Types
+import Prel
+
 import Data.Array (length)
 import Data.Array.Partial as AP
 import Data.Int (decimal, toStringAs)
 import Data.String as S
 import Data.Traversable (and, sequence, sequence_)
-import Main (allTables)
+import Main (allTables, lpTables)
 import Partial.Unsafe (unsafePartial)
 import Test.Amaroo.WP.Calcs (shouldBeWithin)
 import Test.Spec (Spec, describe, it)
@@ -61,7 +61,7 @@ utNamesSpec = describe "tables" do
 
     it "all tables are square (all rows same len)" do
       sequence_ $ do
-        (TD _ (Table hdrs aligns table) _) <- allTables
+        (TD _ (Table hdrs aligns table) _) <- allTables <> lpTables
         let ls = length <$> ([hdrs, aligns.md] <> table)
         pure $ do
           S.length aligns.texTabular `shouldEqual` (length aligns.md)
