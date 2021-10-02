@@ -8,7 +8,7 @@ import Data.Array as A
 import Data.Int (toNumber)
 import Data.List.NonEmpty (head)
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Number (isFinite, isNaN)
+import Data.Number (isFinite)
 import Data.Number.Format (exponential, fixed)
 import Data.Number.Format as NF
 import Data.String (Pattern(..), contains, drop, length, split, stripPrefix, take)

@@ -26,7 +26,7 @@ That is: it is a simplex that deliberately reserves only $\nicefrac{1}{4}$ of it
 
 \label{sec:tile-valence}
 
-Tiles *must* have a valance of $>= 3$ for $O(n)$ scaling. If tiles had a valence of 0, then no additional tiles can be added. If tiles had a valence of 1, then only a single additional tile could be added (for a total of 2) but no more. If tiles had a valance of 2, then the 'shape' that the tiles created would be a linear chain; a tile-chain. For a tile-chain of length $n$, proving state on the far end of the chain would take $n$ SPV proofs, which is untenable.
+Tiles *must* have a valance of $\ge 3$ for $O(n)$ scaling. If tiles had a valence of 0, then no additional tiles can be added. If tiles had a valence of 1, then only a single additional tile could be added (for a total of 2) but no more. If tiles had a valance of 2, then the 'shape' that the tiles created would be a linear chain; a tile-chain. For a tile-chain of length $n$, proving state on the far end of the chain would take $n$ SPV proofs, which is untenable.
 
 However, if tiles have a valance of $3$, then each tile has up to 3 neighbors. For all tiles but the first, this is equivalent to being a node in a binary tree (where each non-root, non-leaf node has 1 parent and 2 children: 3 neighbors). In essence, this method of tiling simplexes results in 3 distinct binary trees as children of a single root tile -- this can be seen in \autoref{fig:tiled-simplex-5-d4}.
 
@@ -49,7 +49,7 @@ Increasing the valence beyond 3 does not make sense, though. There are two reaso
 
 A tiling 'iteration' is the process by which new tiles are added. For the sake of simplicity and demonstration, each iteration will add *all possible new tiles* as children of all 'leaf' tiles -- though in reality there's no requirement that new tiles be added at the same time, or that tiles are added in a balanced fashion.
 
-We start from the foundation that each tile has a maximum of $\frac{N_1}{4}$ simplex-chains, where $N_1$ is the maximum capacity of a maximal simplex. That is: if one computer (based on $O(c)$ reasoning) could be a full-node[^simplex-full-validation] for a simplex-chain in a 4000-simplex, then each tile will have, at most, 1000 simplex-chains. Since a tile is adjacent to $<=3$ other tiles, a tiled simplex-chain will have, at most, $N_1$ reflections (since a tile and its neighbors have, at most, $\frac{N_1}{4}$ simplex-chains, and all of those simplex-chains are reflected).
+We start from the foundation that each tile has a maximum of $\frac{N_1}{4}$ simplex-chains, where $N_1$ is the maximum capacity of a maximal simplex. That is: if one computer (based on $O(c)$ reasoning) could be a full-node[^simplex-full-validation] for a simplex-chain in a 4000-simplex, then each tile will have, at most, 1000 simplex-chains. Since a tile is adjacent to $\le 3$ other tiles, a tiled simplex-chain will have, at most, $N_1$ reflections (since a tile and its neighbors have, at most, $\frac{N_1}{4}$ simplex-chains, and all of those simplex-chains are reflected).
 
 [^simplex-full-validation]: A full-node for a simplex-chain does not need to fully validate any other simplex-chains, or dapp-chains on that simplex-chain. Header-only validation is fine.
 
@@ -160,34 +160,11 @@ What are the implications of tiled simplexes compared to a standalone simplex?
 
 e.g., The leaf tiles in \autoref{fig:tiled-simplex-5-d2} have simplex-chains that are weaker than an equiv 20-chain simplex. The root tile has equiv security, though. This is true even though both systems have 20 simplex-chains total.
 
-this only happens when leaf tiles + their children have $==$ weight to their direct parent, tho. that is: if the parent has $>=$ simplex-chains, then isolated attacks on the the descendant tiles always fail b/c the parent tile has $>$ weight.
+this only happens when leaf tiles + their children have $==$ weight to their direct parent, tho. that is: if the parent has $\ge$ simplex-chains, then isolated attacks on the the descendant tiles always fail b/c the parent tile has $>$ weight.
 
 main idea: if you want to attack a simplex tile in the middle of the graph, then you *must* attack it's peers -- b/c that's where *most* of the security contribution comes from (75% at max cap). on the edges mb things are different. my intuition is that, if sensible precautionary parameters are maintained, then it can be done securely. but there are failure modes when the sec contribs from adjacent tiles are out of wack.
 
-
-\begin{comment}
-
-#### Upper Bound
-
-Solving problems via the creation of new knowledge, i.e., *progress*, has no upper bound[^boi-progress]. Additionally: "If something is permitted by the laws of physics, then the only thing that can prevent it from being technologically possible is not knowing how."[^boi-optimism] Thus, there are no know near-term[^near-term-limit] limits to the expansion of human civilization, our population, or our economy[^boi-spaceship-earth]; and consequently, there is no near-term limit on $n$.
-
-[^boi-progress]: The explanations by which we *know* that progress is unbounded are a primary focus of David Deutsch's *The Beginning of Infinity* (2011).
-[^boi-optimism]: *The Beginning of Infinity* p. 231.
-[^near-term-limit]: By *near-term*, I mean: within the next $10^7$ years or so.
-[^boi-spaceship-earth]: I guess a common response to this will be something like Spaceship Earth. The myth of Spaceship Earth is refuted in *The Beginning of Infinity*, Ch 3 (*The Spark*).
-
-
-Dyson swarms can hold, say, $10^{15}$ people[^dyson-pop] on the low end. \todo{finish dyson pop stuff}
-
-Galaxies that are close enough to us, and that have a low enough relative velocity, can remain within a relevant (to us) inter-galactic civilization. Some of these galaxies are gravitationally bound to our own, so -- if humanity is successful -- will be part of our inter-galactic civilization 'for free'. Galaxies within, give or take, $10^21 km$ ($\sim$1 billion light-years) have a low enough relative velocity. We can colonize these galaxies and use devices such as Shkadov thrusters to move them close enough to Milkdromeda so that they remain part of an inter-galactic civilization[^move-galaxies] (i.e., 2-way communication is possible). Within those galaxies, there are approximately $10^17$ stars[^stars-1b-ly].
-
-[^dyson-pop]: \todo{\url{https://www.youtube.com/watch?v=Ef-mxjYkllw&t=1089s}}
-[^move-galaxies]: *Intergalactic Colonization* by Isaac Arthur, <https://youtu.be/xRB7a89Jh7w?t=1618>, 26:58
-[^stars-1b-ly]: <http://www.icc.dur.ac.uk/~tt/Lectures/Galaxies/LocalGroup/Back/superc.html>, <https://archive.vn/wEu5E>, <http://web.archive.org/web/20201021141956/http://www.icc.dur.ac.uk/~tt/Lectures/Galaxies/LocalGroup/Back/superc.html>
-
-\end{comment}
-
-### Variants
+### Tiling Variants
 
 #### Alternate and Equivalent Tiling
 
@@ -251,15 +228,77 @@ First, the confirmation rate is much slower -- both intra-tile and inter-tile. I
 
 Second, because the inter-tile confirmation rate is *worst case*, the window for attack (via the private creation of chain-segments) is correspondingly longer. That is, the window for attack is also *worst case* for a chosen block frequency.
 
+#### Higher Valencies
+
+The tree-method of tiling (which we've just covered) works for valencies higher than 3. \autoref{fig:tiling-v4} shows a tiling of valence 4, and \autoref{fig:tiling-v5} shows a tiling of valence 5.
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_v4_s7_d1_sag}
+        \caption{1st iteration. 5 tiles.}
+        \label{fig:tiled-simplex-v4-d1}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_v4_s7_d2_sag}
+        \caption{2nd iteration. 17 tiles.}
+        \label{fig:tiled-simplex-v4-d2}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_v4_s7_d3_sag}
+        \caption{3rd iteration. 53 tiles.}
+        \label{fig:tiled-simplex-v4-d3}
+    \end{subfigure}%%
+    \caption{Tiling of valence 4.}
+    \label{fig:tiling-v4}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_v5_s7_d1_sag}
+        \caption{1st iteration. 6 tiles.}
+        \label{fig:tiled-simplex-v5-d1}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_v5_s7_d2_sag}
+        \caption{2nd iteration. 26 tiles.}
+        \label{fig:tiled-simplex-v5-d2}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_v5_s7_d3_sag}
+        \caption{3rd iteration. 106 tiles.}
+        \label{fig:tiled-simplex-v5-d3}
+    \end{subfigure}%%
+    \caption{Tiling of valence 5.}
+    \label{fig:tiling-v5}
+\end{figure}
+
 #### Tessellating tiles are less efficient
 
 Because $O(\log_2 n) < O(\sqrt{n})$.
 
 In a tessellating set of tiles, we can approximate the *maximum* distance between tiles via a geometric interpretation: for a set of $n$ tessellating tiles, each tile having a constant area, then the full area is $\propto {n}$. Thus, the maximal distance between tiles is $\propto \sqrt{n}$.
 
-However, using the tree method, the *maximal* distance between any 2 of $n$ tiles, is $\sim \log_2 n$. So it's (maybe counterintuitively) more efficient to use non-tessellating tiles.
+However, using the tree method (with $v=3$), the *maximal* distance between any 2 of $n$ tiles, is $\sim \log_2 n$. So it's (maybe counterintuitively) more efficient to use non-tessellating tiles.
 
-Additionally, a model of tilings of similar capacity -- i.e., similar $N_{tiles}$ -- shows that the *average* distance between tiles is lower for tree-based tilings.
+Additionally, a model of tilings of similar capacity -- i.e., similar $N_{tiles}$ -- shows that the *average* distance between tiles is lower for tree-based tilings. \autoref{fig:tiling-avg-dist-comparison} shows a comparison of the average distance between tiles given different tiling methods. The square tessellating method produces the tiling shown in \autoref{fig:tiling-square}.
 
 \begin{figure}
 \centering
@@ -278,7 +317,7 @@ Additionally, a model of tilings of similar capacity -- i.e., similar $N_{tiles}
         \caption{Tree of valence 4.}
     \end{subfigure}%%
     \hspace{0.03\textwidth}
-    \caption{Shown are the distances between randomly selected tiles for two tiling methods -- the tree method (which this section primarily concerns) and a simple square tessellating method.}
+    \caption{Shown are the distances between randomly selected tiles for two tiling methods -- the tree method (which this section primarily concerns) and a simple square tessellating method. Valence and depth parameters were chosen so that the number of tiles are comparable.}
     \label{fig:tiling-avg-dist-comparison}
 \end{figure}
 

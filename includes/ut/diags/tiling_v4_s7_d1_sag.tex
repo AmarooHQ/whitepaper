@@ -12,17 +12,11 @@
 % overwrite (either \providecommand or \renewcommand) to control the parts of the diagram which are drawn or not.
 
 \begin{document}%
-\providecommand\TilingDepth{3}%
-\providecommand\TilingInitSize{10}%
-\providecommand\TilingScaleConst{1.5}%
-\providecommand\TilingSizeToNodeRRatio{4}%
-\providecommand\TilingValence{3}%
-\providecommand\SimplexChains{5}%
-\providecommand\TilingAltPattern{1}%
-\providecommand\TilingAutoRotate{1}%
-\providecommand\TilingMonoColor{0}%
+% tiling params
+\providecommand\TilingDepth{1}%
+\input{tiling_v4_series1_params.tex}%
 \input{tiling-macro}%
-\begin{tikzpicture}[rotate=90]%
+\begin{tikzpicture}%
     \TikzSimplexTiling%
 \end{tikzpicture}%
 \end{document}

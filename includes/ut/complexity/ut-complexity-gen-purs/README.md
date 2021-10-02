@@ -23,6 +23,10 @@ TODO:
 
 `spago bundle-app && (cd ../../../../ ; make build-whitepaper ; node includes/ut/complexity/ut-complexity-gen-purs/index.js --populate-wp-md --dry-run)`
 
+## compile new PW on change
+
+`npm run bundle-for-wp -- -w --then "cd ../../../../ && make"`
+
 ## compile new LP tables on change
 
 `npm run bundle-for-wp -- -w --then "cd ../../../../ && make mk-lp-tables"`
