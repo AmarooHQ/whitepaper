@@ -3,7 +3,7 @@ module Main where
 import Prel
 
 import Amaroo.WP.Formatter (wrap)
-import Amaroo.WP.Tables (compareNets1mTps, compareNets30k, compareNets3k, compareUtOptimizations, compareUtOptimizations2, dappChains, dappChainsHot, lpCompareNetworks, lpCompareUt1Eth2, lpCompareUt1OptShard, lpCompareUt2OptShard, lpCompareUtOptimizations1, showHtmlTable, showLatexTable, showMdTable, tableTps, tableTpsHot, tpsPor, tpsPort)
+import Amaroo.WP.Tables (compareNets1mTps, compareNets20k, compareNets3k, compareUtOptimizations, compareUtOptimizations2, dappChains, dappChainsHot, lpCompareNetworks, lpCompareUt1Eth2, lpCompareUt1OptShard, lpCompareUt2OptShard, lpCompareUtOptimizations1, showHtmlTable, showLatexTable, showMdTable, tableTps, tableTpsHot, tpsPor, tpsPort)
 import Amaroo.WP.Tables.Booktabs (renderBooktabs)
 import Amaroo.WP.Tables.Types (LatexTablePos(..), TPositioning(..), TableDesc(..))
 import Control.Alt ((<|>))
@@ -60,7 +60,7 @@ wpTables =
     , TD "compare_optimizations" compareUtOptimizations defaultPositioning
     , TD "compare_optimizations2" compareUtOptimizations2 defaultPositioning
     , TD "compare_nets_3k" compareNets3k tablePageOnly
-    , TD "compare_nets_30k" compareNets30k tablePageOnly
+    , TD "compare_nets_20k" compareNets20k tablePageOnly
     , TD "comparison_1m_tps" compareNets1mTps tablePageOnly
     ]
 

@@ -225,6 +225,9 @@ utSpec = describe "ut" do
                  }
             trad = tradChainCalc ps
             ut = allUtChainCalcs ps
+            ps2 = mkNestedPs 1111.0 {bf: 0.11, bh: 10.0} {bf: 0.22, bh: 20.0} 500.0
+            trad2 = tradChainCalc ps2
+            ut2 = allUtChainCalcs ps2
         -- liftEffect $ C.log $ "t:" <> show trad
             checkStats stats = do
               getK1 stats `shouldEqual` 1111.0
@@ -238,6 +241,14 @@ utSpec = describe "ut" do
         (getHF1 ut.hot).bh `shouldEqual` 16.0
         (getHF2 ut.hot).bh `shouldEqual` 4.0
         (getHF3 ut.hot).bh `shouldEqual` 20.0
+        trad2.d1.p.hf.bh `shouldEqual` 10.0
+        trad2.d2.p.hf.bh `shouldEqual` 20.0
+        trad2.d1.p.hf.bf `shouldEqual` 0.11
+        trad2.d2.p.hf.bf `shouldEqual` 0.22
+        ut2.std.d1.p.hf.bh `shouldEqual` 10.0
+        ut2.std.d2.p.hf.bh `shouldEqual` 20.0
+        ut2.std.d1.p.hf.bf `shouldEqual` 0.11
+        ut2.std.d2.p.hf.bf `shouldEqual` 0.22
 
     describe "ut comparison test vecs" do
       -- note that k=1000

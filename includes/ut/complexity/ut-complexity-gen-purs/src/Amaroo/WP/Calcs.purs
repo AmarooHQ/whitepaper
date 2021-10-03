@@ -4,6 +4,7 @@ import Prel
 
 import Amaroo.WP.Utils (prel)
 import Data.Array as A
+import Data.Array.NonEmpty (cons)
 import Data.Int (toNumber)
 import Data.Int as I
 import Data.List.NonEmpty (NonEmptyList, cons', fromList, head, singleton, tail)
@@ -12,7 +13,7 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
 import Effect.Exception (error)
 import Effect.Exception.Unsafe (unsafeThrowException)
-import Math (abs, ceil, floor, ln2, log, (%))
+import Math (abs, ceil, floor, ln2, log, pow, (%))
 
 {-|
 
@@ -49,6 +50,9 @@ showableParams p = {ks: NEL.toUnfoldable p.ks, hfs: NEL.toUnfoldable p.hfs, txSi
 
 mkSimplePs :: Number -> ChainNestingParams -> Number -> Params
 mkSimplePs k hf txSize = {ks: singleton k, hfs: singleton hf, txSize}
+
+mkNestedPs :: Number -> ChainNestingParams -> ChainNestingParams -> Number -> Params
+mkNestedPs k hf hf2 txSize = {ks: singleton k, hfs: hf `NEL.cons` singleton hf2, txSize}
 
 type UtVariants a
   = { pors :: a
@@ -106,6 +110,7 @@ utvStripP {pors, ports, std, t, ho, hot} = { pors: csStripP pors, ports: csStrip
 type ChainComplexities
   = { trad :: ChainStats
     , tradEth2 :: ChainStats
+    , tradPolkadot :: ChainStats
     , ut :: UtVariants ChainStats
     , ps :: Params
     }
@@ -123,20 +128,38 @@ tradInitNS :: Params -> NestingStats
 tradInitNS ps = {n: 1.0, t: t, tps: t / ps.txSize, p: pToPF ps}
   where t = head ps.ks
 
+type NestingCap = {maxN :: Number}
 
-calcNextNestingLevel :: Params -> NestingStats -> NestingStats
-calcNextNestingLevel ps nsPrev = {n, t, tps, p: pToPF ps}
+calcNextNestingLevel' :: NestingCap -> Params -> NestingStats -> NestingStats
+calcNextNestingLevel' {maxN} ps nsPrev = {n, t, tps, p: pToPF ps}
   where
-    n = nsPrev.t / bfbh
+    n = min maxN $ nsPrev.t / bfbh
     t = n * k
     tps = t / ps.txSize
     h = head ps.hfs
     bfbh = h.bf * h.bh
     k = head ps.ks
 
-data TradVar = Trad | TradEth2
+calcNextNestingLevel :: Params -> NestingStats -> NestingStats
+calcNextNestingLevel = calcNextNestingLevel' {maxN: pow 10.0 12.0}
 
-eth2EffDh bh = floor $ 8192.0 / (6.5*60.0) * 12.0 + bh * 0.1
+data TradVar = Trad | TradEth2 | TradPolkadot
+
+committeeUpdatePerBlock = 8192.0 / 32.0
+
+-- eth2EffBh bh = floor $ committeeUpdatePerBlock + bh
+-- counting committee updates doesn't matter so don't bother
+eth2EffBh bh = bh
+
+-- note: committeeUpdatePerBlock is not needed for Dh (but is needed for light clients of the beacon chain)
+
+eth2AttestationSize = 256.0
+
+-- eth2EffDh dh = dh + eth2AttestationSize
+-- Don't count attestation size (except 32 B) b/c it's sorta a constant overhead and I don't count it for polkadot so w/e
+eth2EffDh dh = dh + 32.0
+
+polkadotEffDh _ = 819.0  -- via polkadot.js block.extrinsics[1].method.args[0].backedCandidates[0].encodedLength; seems constant, but not every paraId included every block -- https://github.com/AmarooHQ/polkadot-effective-dh/blob/master/main.js
 
 tradChainCalc' :: Params -> TradVar -> ChainStats
 tradChainCalc' ps var = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts, sigmaTts, effBh, effDh, kTx: k, k1: k, kB: 0.0, porBytes: 0.0, porBytes2: 0.0}
@@ -148,11 +171,18 @@ tradChainCalc' ps var = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts, sigm
     hf2 = head ps2.hfs
     ps3 = paramsForNextNS ps2
     bhMod = case var of
-      Trad -> identity
+      TradEth2 -> eth2EffBh
+      _ -> identity
+    dhMod = case var of
       TradEth2 -> eth2EffDh
-    effBh = hf.bh
-    effDh = bhMod hf2.bh
-    d2 = calcNextNestingLevel (ps2 { hfs = singleton {bf: hf2.bf, bh: effDh} }) d1
+      TradPolkadot -> polkadotEffDh
+      _ -> identity
+    effBh = bhMod hf.bh
+    effDh = dhMod hf2.bh
+    d2Calc = case var of
+      TradEth2 -> calcNextNestingLevel' {maxN: 1024.0}
+      _ -> calcNextNestingLevel
+    d2 = d2Calc (ps2 { hfs = singleton {bf: hf2.bf, bh: effDh} }) d1
     d3 = calcNextNestingLevel ps3 d2
     deltaBigS = k
     deltaSmallS = k
@@ -160,9 +190,14 @@ tradChainCalc' ps var = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts, sigm
     sigmaTts = tts
     confRate = hf.bf
 
+tradChainCalc :: Params -> ChainStats
 tradChainCalc ps = tradChainCalc' ps Trad
 
+tradChainCalcEth2 :: Params -> ChainStats
 tradChainCalcEth2 ps = tradChainCalc' ps TradEth2
+
+tradChainCalcPolkadot :: Params -> ChainStats
+tradChainCalcPolkadot ps = tradChainCalc' ps TradPolkadot
 
 porLen :: Number -> Number -> Number
 porLen hashSize n = hashSize * log2c n
@@ -288,10 +323,11 @@ allUtChainCalcs ps = allUtChainCalcsF (utChainCalc ps)
 
 
 runChainCalcFor :: Params -> ChainComplexities
-runChainCalcFor ps = {trad, ut, ps, tradEth2}
+runChainCalcFor ps = {trad, ut, ps, tradEth2, tradPolkadot}
   where
     trad = tradChainCalc ps
     tradEth2 = tradChainCalcEth2 ps
+    tradPolkadot = tradChainCalcPolkadot ps
     ut = allUtChainCalcs ps
 
 -- | Calculate other stats based on ChainStats

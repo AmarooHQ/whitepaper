@@ -4,9 +4,11 @@ import Amaroo.WP.Tables
 import Amaroo.WP.Tables.Types
 import Prel
 
+import Amaroo.WP.Calcs (mkNestedPs, mkSimplePs, tradChainCalcEth2, tradChainCalcPolkadot)
 import Data.Array (length)
+import Data.Array as A
 import Data.Array.Partial as AP
-import Data.Int (decimal, toStringAs)
+import Data.Int (decimal, toNumber, toStringAs)
 import Data.String as S
 import Data.Traversable (and, sequence, sequence_)
 import Main (allTables, lpTables)
@@ -50,6 +52,11 @@ utNamesSpec = describe "tables" do
     --   length utVsOther1M `shouldEqual` length ut1MCompareKs
 
     it "1m compare has tps == 1m as much as possible" do
+      -- let ccs = do
+      --       k <- ((\i -> 244_200.0 + i * 100.0) <<< toNumber) <$> A.range 0 20
+      --       -- pure $ tradChainCalcPolkadot $ mkSimplePs k {bf: _POLKADOT_BF, bh: _POLKADOT_BH} 250.0
+      --       pure $ tradChainCalcEth2 $ mkNestedPs k {bf: _ETH2_BF, bh: _ETH2_BH} {bf: _ETH2_BF, bh: _ETH2_DH} 250.0
+      -- (ccs <#> \cc -> cc.d2.tps) `shouldEqual` []
       _ <- sequence $ do
         {net, p} <- utVsOther1M
         let cs = netToChainStats net p

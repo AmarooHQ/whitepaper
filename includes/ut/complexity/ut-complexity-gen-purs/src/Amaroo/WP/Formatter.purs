@@ -8,7 +8,7 @@ import Data.Array as A
 import Data.Int (toNumber)
 import Data.List.NonEmpty (head)
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Number (isFinite)
+import Data.Number (isFinite, isNaN)
 import Data.Number.Format (exponential, fixed)
 import Data.Number.Format as NF
 import Data.String (Pattern(..), contains, drop, length, split, stripPrefix, take)
@@ -75,7 +75,7 @@ fmtFixedP p = NF.toStringWith (fixed p)
 
 fmtDyn :: _ -> Number -> String
 fmtDyn {low, high, mp, commas, pOnlySi, wSI} n =
-    if not (isFinite n) then wrap "$" "\\infty" else
+    if not (isFinite n) then (if isNaN n then "-" else wrap "$" "\\infty") else
       if outsideRange then wrap (if wSI then "$" else "") $ fmtSciNot p n else
         if commas then fmtP fmtCommasP fmtCommas else fmtFixedP pNotSi n
   where

@@ -4,7 +4,7 @@
 
 \todo{review for references to PoS dapp-chains and update}
 
-UT has two primary methods of scaling: reflection and dapp-chains. Reflection is novel. Dapp-chains are similar to many of the scaling ideas proposed for other networks (Polkadot, Eth2, etc), though there are fewer restrictions on dapp-chains in UT compared to other designs. Additionally, dapp-chains in UT are hosted by the simplex. This provides additional security compared to 'naked' PoS chains without sacrificing any of their other developments (e.g., finality), and provides greater capacity than a single host-chain.
+UT has two primary methods of scaling: reflection and dapp-chains. Reflection is novel. Dapp-chains are similar to many of the sharding and pseudo-sharding ideas proposed for other networks (Polkadot, Eth2, etc), though there are fewer restrictions on dapp-chains in UT compared to other designs. Additionally, dapp-chains in UT are hosted by the simplex. In the case of PoS dapp-chains, this provides \emph{additional} security compared to 'naked' PoS chains -- and without compromising on any other associated developments (e.g., finality). Hosting dapp-chains on simplex-chains also provides greater maximum capacity than a single host-chain can.
 
 A common method of sharding is to *nest* blockchains. For example, Ethereum 2 has a root-chain called *The Beacon Chain*.
 
@@ -12,25 +12,27 @@ A common method of sharding is to *nest* blockchains. For example, Ethereum 2 ha
     The Beacon Chain will conduct or coordinate the expanded network of shards and stakers. But it won't be like the Ethereum mainnet of today. It can't handle accounts or smart contracts.
 }{\url{https://ethereum.org/en/eth2/beacon-chain/}}
 
-This type of configuration, where a root-chain facilitates shards, is referred to as *nesting* in this section. The shards of Ethereum 2 are *a level of nesting* above the root-chain. Sometimes people use terms like *layer 2* to describe this sort of nesting, though such usage of *layer 2* is ambiguous and potentially misleading. It easily confuses nesting with off-chain scaling methods (such as payment channels or ephemeral 'child' blockchains, e.g., Plasma), and it potentially misleads readers about the security properties of nested blockchains. Nested blockchains *can* faithfully inherit the security properties of their parent-chains, which is not the case for layer 2 solutions. Furthermore, terms like *layer x* cannot accurately describe UT's design. Would UT's dapp-chains (having equal or better security properties than comparable chains like Ethereum 2, Polkadot, or Cardano) be *layer 1* or *layer 2*? It would be misleading to call them *layer 2* because UT dapp-chains have all the security qualities of other PoS chains, *and more*. If they were called *layer 1* chains, then what is the simplex -- *layer 0*? It is clear that the common idea behind *layer 1/2* scaling does not have sufficient capacity to accurately describe UT's simplex- and dapp-chains; it is inadequate.
+This type of configuration, where a host-chain facilitates shards, is referred to as *nesting* in this section. The shards of Ethereum 2 are *a level of nesting* above the Beacon Chain.
 
-The following derivations focus on *throughput* of particular blockchain designs and scaling configurations. Raw throughput of a network, $T_i$, is measured in bytes/sec (B/s) for some level of nesting, $i$. Note that $T_i$ directly corresponds to a design's maximum transactions per second (tps) via ${tps}_i = \nicefrac{T_i}{Tx_{avg}}$, where $Tx_{avg}$ is the average size of a transaction. The raw B/s throughput of a chain at the $i^{th}$ level of nesting is denoted by $k_i$. Note that $T_i$ is a *calculated* value, but $k_i$ is a *parameter* that may be chosen. An increase to $k_i$ is equivalent or similar to an increase in maximum block size.
+Sometimes (but not always) people use terms like *layer 2* to describe this sort of nesting, though such usage of *layer 2* is ambiguous and potentially misleading. It easily confuses nesting with off-chain scaling methods (such as payment channels or ephemeral 'child' blockchains, e.g., Plasma), and it potentially misleads readers about the security properties of nested blockchains. Nested blockchains *can* faithfully inherit the security properties of their parent-chains, which is not the case for layer 2 solutions.
 
-Shown below are relationships between the number of chains at a level of nesting, $N_i$, and the network throughput at that level of nesting, $T_i$. For most existing blockchain designs, note that $N_1 = 1$.
+Furthermore, terms like *layer x* cannot accurately describe UT's design. Consider a PoS dapp-chain on UT. Would that dapp-chain be *layer 1* or *layer 2*? It would be misleading to call them *layer 2* whilst comparable chains (like Ethereum 2, Polkadot, or Cardano) are called *layer 1*. Such UT dapp-chains have all the security qualities equivalent stand-alone PoS chains, *and more*. If they were called *layer 1* chains, then what is the simplex -- *layer 0*? It is clear that the common idea behind *layer 1/2* scaling does not have sufficient capacity to accurately describe UT's simplex- and dapp-chains; it is inadequate.
 
-Additionally, $O(k_i)$ is defined via $O(k_i) \equiv O(c)$.
+The following derivations focus on *throughput* of particular blockchain designs and scaling configurations. Raw throughput of a network, $T_i$, is measured in bytes/sec (B/s) for some level of nesting, $i$. Note that $T_i$ directly corresponds to a design's maximum transactions per second (TPS) via $\text{Tx}_{i} = \nicefrac{T_i}{\text{Tx}_{\text{avg}}}$, where $\text{Tx}_{\text{avg}}$ is the average size of a transaction. The raw B/s throughput of a chain at the $i^{\text{th}}$ level of nesting is denoted by $k_i$. Note that $T_i$ is a *calculated* value, but $k_i$ is a *parameter* that may be chosen. An increase to $k_i$ is equivalent or similar to an increase in maximum block size.
+
+Shown below are relationships between the maximum number of chains at a level of nesting, $N_i$, and the maximum network throughput at that level of nesting, $T_i$. For most existing blockchain designs, note that $N_1 = 1$.
+
+Additionally, $O(k_i)$ is \emph{defined} as $O(k_i) \equiv O(c)$.
 
 ### Complexity of $O(c)$ Chains
 
 Example: Bitcoin.
 
-The *raw throughput*, $k_1$, can be calculated for existing chains (e.g., Bitcoin) via the product of the maximum block size, $B_{max}$ (in bytes), and the block production frequency, $B_f$ (in hertz, or $s^{-1}$):
+The *raw throughput*, $k_1$, can be calculated for existing chains (e.g., Bitcoin) via the product of the maximum block size, $B_{\text{max}}$ (in bytes), and the block production frequency, $B_f$ (in hertz, or $s^{-1}$):
 
 \begin{equation*}
-k_1 = B_{max} \cdot B_f
+k_1 = B_{\text{max}} \cdot B_f
 \end{equation*}
-
-Care should be taken to account for protocol extensions like *Segregated Witness* that effectively reduce the size of transactions (or, equivalently, increase the effective maximum block size).
 
 The *throughput*, $T_1$, of an $O(c)$ chain is equivalent to its raw throughput:
 
@@ -40,10 +42,12 @@ T_1 = k_1
 
 The complexity order of the network is given by $O(T_1) = O(k_1) = O(c)$ as expected.
 
-For Bitcoin, given $k_1 \approx 2000$ B/s (accounting for SegWit), and $Tx_{avg} = 500$ B, then
+Care should be taken to account for protocol extensions like *Segregated Witness* that effectively reduce the size of transactions by $\nicefrac{1}{4}$.
+
+For Bitcoin -- given $k_1 \approx 1700$ B/s, and transaction size $\text{Tx}_{\text{avg}} = 500 \cdot \nicefrac{3}{4}$ B -- the maximum TPS is given by:
 
 \begin{equation*}
-{tps}_{Bitcoin,max} \approx \frac{2000}{Tx_{avg}} \approx 4
+{\text{TPS}}_{\text{Bitcoin}} \approx \frac{1700}{\text{Tx}_{\text{avg}}} \approx 4.5
 \end{equation*}
 
 This is what we expect based on the measured real-world performance of Bitcoin.
@@ -52,11 +56,30 @@ This is what we expect based on the measured real-world performance of Bitcoin.
 
 Examples: Ethereum 2, Polkadot.
 
-Suppose the root-chain has a throughput of $k_1$ B/s and it can support up to $N_2$ nested chains. Those nested chains have headers of $D_h$ bytes that are produced at a frequency of $D_f$ ($s^{-1}$). Thus, each nested chain consumes \emph{at least} $D_f \cdot D_h$ B/s of the root-chain's capacity.
+Suppose the root-chain has a throughput of $k_1$ B/s and it can support up to $N_2$ nested chains. Those nested chains have headers of $D_h$ bytes that are produced at a frequency of $D_f$ ($s^{-1}$). If \emph{all} headers of nested chains are recorded in the host chain, then each nested chain consumes \emph{at least} $D_f \cdot D_h$ B/s of the root-chain's capacity.
 
-\todo{Add note about eth2 equivalent header-size, at least 256 bytes, not 200}
+It's typical, though, that the headers of nested chains, alone, are not sufficient: additional data is required. For example, in an *Ethereum 2* beacon block, each shard has a header size of 280 B, but there is additional overhead, and a reasonable lower-bound is that each header uses a minimum of 312 B per beacon block[^eth2-dh]. In the case of *Polkadot*, it is [measurable](https://github.com/AmarooHQ/polkadot-effective-dh/blob/5cd0f0d21ff1cd3c57d1c2af70aaf6d8ee19dc11/main.js) that a minimum of 819 B is used in the `paraInclusion.candidateBacked` extrinsic (i.e., transaction), so a lower-bound on the effective header size of a parachain is 819 B (this does not include *bitfields*[^bitfields]).
 
-$N_2$ is thus given by:
+In those situations, with regards to these complexity derivations, one can use the *effective* header size as a replacement for the *raw* header size.
+
+[^eth2-dh]: The *current* Ethereum 2 [sharding spec](https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/sharding/beacon-chain.md#beaconblockbody) has capacity for 2:1 attestations to shards per block (with 64 shards), but only 32 B of each attestation is dedicated to sharding. The spec also has capacity for 4:1 shard headers to shards per block. It seems reasonable that capacity which exists will be used within reason. Thus a reasonable lower-bound for the effective header-size of shards is taken via: $1\times$ headers per shard per block, $1\times$ attestations per shard per block (which do not count towards effective header-size), and $1\times$ 32 B per attestation per block. Shards have headers of 280 B, so the minimum effective header size is taken to be 312 B. (note: a required dependency of the current sharding spec is the [current merge spec](https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/merge/beacon-chain.md#beaconblockbody) and [current phase0 spec](https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/phase0/beacon-chain.md).)
+
+[^bitfields]: Bitfields is a Polkadot term -- it's a list of hundreds of signatures, totalling $> 14$ KB per block on the current Kusama testnet (October $3^{\text{rd}}$ 2021).
+
+\begin{comment}
+I think Eth2 sharding (wrt headers) has a larger effective Dh than we calculated before:
+
+* attestations: 8 + 8 + 32 + 2*(8 + 32) + 32 + 96 = 256
+  * https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md#attestationdata
+* SignedShardBlobHeader: 96 + (8 * 4 + (48 + 8 + 48 + 32 + 8*2)) = 280
+  * https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md#shard-work-status
+
+Both are included in the BeaconBlockBody: https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md#beaconblockbody  (inherits from https://github.com/ethereum/consensus-specs/blob/dev/specs/merge/beacon-chain.md#beaconblockbody). The sharding spec for BeaconBlockBody has: shard_headers: List[SignedShardBlobHeader, MAX_SHARDS * MAX_SHARD_HEADERS_PER_SHARD] which seems to indicate that headers would be included every block (for every shard). note: MAX_SHARD_HEADERS_PER_SHARD=4
+
+There's enough capacity for attestations (128 each block for 64 shards) that they could be done each block. That doesn't include any committee stuff.
+\end{comment}
+
+Thus, $N_2$ is given by:
 
 \begin{equation}
 \label{eq:n2-for-c2-traditional}

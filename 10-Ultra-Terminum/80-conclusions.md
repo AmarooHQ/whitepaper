@@ -15,7 +15,7 @@
 
 ### Comparison: ``The Big 4''
 
-The following comparisons (\autoref{table:compare_nets_3k}, \autoref{table:compare_nets_30k}, and \autoref{table:comparison_1m_tps}) are indented to be an *apples to apples* between UT variants and ``The Big 4'': Bitcoin, Cardano, Eth2, and Polkadot. Cardano is an exception, here, as the Cardano/IOHK team has not been pursuing \emph{Layer 1} scalability solutions -- unlike the Eth2 and Polkadot teams -- and are focusing instead on a \emph{Layer 2} solution: Hydra via EUTXOs. Their work is good and promising. I mention this particularly because the nature of an *apples to apples* comparison casts Cardano in a light that some might consider to be misleading. However, these comparisons do not consider \emph{Layer 2} scalability solutions for one very simple reason: all networks can implement them in some fashion. It is not a fair (or accurate) comparison *of blockchain architecture* if \emph{Layer 2} scaling solutions are considered for some networks and not for others. Additionally, as mentioned in [Ethereum's *Sharding FAQs*](https://eth.wiki/sharding/Sharding-FAQs#how-does-plasma-state-channels-and-other-layer-2-technologies-fit-into-the-trilemma), payment- and state-channels provide a *constant factor* increase in throughput, so those techniques will not improve a network's scaling complexity as it is measured here.
+The following comparisons (\autoref{table:compare_nets_3k}, \autoref{table:compare_nets_20k}, and \autoref{table:comparison_1m_tps}) are indented to be an *apples to apples* between UT variants and ``The Big 4'': Bitcoin, Cardano, Eth2, and Polkadot. Cardano is an exception, here, as the Cardano/IOHK team has not been pursuing \emph{Layer 1} scalability solutions -- unlike the Eth2 and Polkadot teams -- and are focusing instead on a \emph{Layer 2} solution: Hydra via EUTXOs. Their work is good and promising. I mention this particularly because the nature of an *apples to apples* comparison casts Cardano in a light that some might consider to be misleading. However, these comparisons do not consider \emph{Layer 2} scalability solutions for one very simple reason: all networks can implement them in some fashion. It is not a fair (or accurate) comparison *of blockchain architecture* if \emph{Layer 2} scaling solutions are considered for some networks and not for others. Additionally, as mentioned in [Ethereum's *Sharding FAQs*](https://eth.wiki/sharding/Sharding-FAQs#how-does-plasma-state-channels-and-other-layer-2-technologies-fit-into-the-trilemma), payment- and state-channels provide a *constant factor* increase in throughput, so those techniques will not improve a network's scaling complexity as it is measured here.
 
 Additionally, a network named *Opt.Shard* (for *Optimal Sharding*) is included in these comparisons. This is a theoretical network which uses the \emph{best parameters possible among UT configurations}. No real-world sharded network has come close to this level of performance, and it is incompatible with PoS.
 
@@ -29,9 +29,9 @@ Additionally, a network named *Opt.Shard* (for *Optimal Sharding*) is included i
 
 : A comparison of quantitative scaling properties between UT and various networks given $k = 3000$ bytes/s. Transaction size is set to 250 bytes, $D_f = B_f$, and $D_h = B_h$.
 
-%% INSERT ### TABLE: compare_nets_30k
+%% INSERT ### TABLE: compare_nets_20k
 
-: Similar to the previous table, but with $k = 30$ KB/s instead of 3 KB/s.
+: Similar to the previous table, but with $k = 20$ KB/s instead of 3 KB/s.
 
 %% INSERT ### TABLE: comparison_1m_tps
 

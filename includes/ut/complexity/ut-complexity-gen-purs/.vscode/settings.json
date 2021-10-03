@@ -1,6 +1,6 @@
 {
-    "purescript.addSpagoSources": true,
-    "purescript.addNpmPath": true,
+    // "purescript.addSpagoSources": true,
+    // "purescript.addNpmPath": true,
     "purescript.buildCommand": "spago build --purs-args --json-errors",
     "files.watcherExclude": {
         "**/.spago/**": true
@@ -9,9 +9,9 @@
     "editor.formatOnSave": true,
     "editor.trimAutoWhitespace": true,
     "files.autoSave": "onFocusChange",
-    "purescript.autocompleteAddImport": true,
-    "purescript.autocompleteGrouped": true,
-    "purescript.buildOpenedFiles": true,
+    // "purescript.autocompleteAddImport": true,
+    // "purescript.autocompleteGrouped": true,
+    // "purescript.buildOpenedFiles": true,
     "purescript.fastRebuild": true,
     // "purescript.autocompleteAllModules": true,
     "purescript.censorWarnings": ["MissingTypeDeclaration", "WildcardInferredType"],

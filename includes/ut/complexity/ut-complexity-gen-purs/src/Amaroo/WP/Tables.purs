@@ -3,7 +3,7 @@ module Amaroo.WP.Tables where
 import Amaroo.WP.Tables.Types
 import Prel
 
-import Amaroo.WP.Calcs (ChainStats, Params, UtVariants, allUtChainCalcs, allUtChainCalcsF, applyTDiscountToBH, auxStats, mkSimplePs, pToPF, runChainCalcFor, tradChainCalc, tradChainCalcEth2, utChainCalc)
+import Amaroo.WP.Calcs (Params, UtVariants, ChainStats, allUtChainCalcs, allUtChainCalcsF, applyTDiscountToBH, auxStats, mkNestedPs, mkSimplePs, pToPF, runChainCalcFor, tradChainCalc, tradChainCalcEth2, tradChainCalcPolkadot, utChainCalc)
 import Amaroo.WP.Formatter (fdPlain, fdPlainMixed, fdPlainZero, fdStd, fdStdMixed, fdStdTwo, fdStdZero, fmt1GbpsPs, fmtDyn, fmtPsKBfBh, fmtPsKBfBhDh, wrap, wrapXml, wrapXmlWAttr)
 import Amaroo.WP.Tables.Booktabs (renderBooktabs)
 import Amaroo.WP.Tables.Types (LatexTablePos(..), TPositioning(..))
@@ -13,7 +13,7 @@ import Data.Array as A
 import Data.Int (decimal, toNumber)
 import Data.Int (toStringAs) as I
 import Data.Maybe (Maybe(..), fromJust, fromMaybe, isJust)
-import Data.Number (infinity)
+import Data.Number (infinity, nan)
 import Data.String (Pattern(..), Replacement(..), length, replaceAll)
 import Data.String.Utils as S
 import Data.Traversable (sequence)
@@ -129,10 +129,15 @@ _CARDANO_1M_K = _BTC_1M_K
 
 _ETH2_BF = btToF 12
 _ETH2_BH = 200.0
-_ETH2_1M_K = 75278.0
+_ETH2_DH = 280.0
+-- _ETH2_1M_K = 105_700.0
+_ETH2_1M_K = 244_200.0
 
+_POLKADOT_BF = btToF 6
 _POLKADOT_BH = 288.0
-_POLKADOT_1M_K = 109810.0
+_POLKADOT_DH = 288.0
+-- _POLKADOT_1M_K = 109_810.0
+_POLKADOT_1M_K = 184_800.0
 
 _UT_BF = 1.0 / 15.0
 _UT_BH = 84.0
@@ -158,15 +163,17 @@ _OPT_SHARD_1M_K = oc2TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING
 
 _UT_INIT_CONFIG = mkSimplePs 3000.0 _UT_HF 250.0
 
+_COMPARE_20K = 20_000.0
 
 utComplexityParams :: Array Params
 utComplexityParams = do
-      k <- [3000.0, 30000.0]
+      k <- [3000.0, _COMPARE_20K]
       bf <- [1.0 / 7.5, 1.0 / 15.0, 1.0 / 30.0, 1.0 / 60.0]
       bh <- [112.0, 84.0]
       txSize <- [250.0]
       pure $ mkSimplePs k {bf, bh} txSize
-    <> [ mkSimplePs _ETH2_1M_K {bf: btToF 15, bh: 84.0} 250.0 ]
+    <> [ mkSimplePs _POLKADOT_1M_K {bf: btToF 15, bh: 84.0} 250.0
+       , mkSimplePs _ETH2_1M_K {bf: btToF 15, bh: 84.0} 250.0 ]
 
 utComplexityData = runChainCalcFor <$> utComplexityParams
 
@@ -198,8 +205,8 @@ utVsOther =
     , {net: UT (HO 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1HO_1M_K}
     , {net: UT (HOT 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1HOT_1M_K}
     , {net: UT (Aleph (HOT 1)), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Nothing}
-    , {net: Polkadot, p: \k -> mkSimplePs k {bf: btToF 6, bh: _POLKADOT_BH} tx, oneMTps: Just _POLKADOT_1M_K}
-    , {net: Eth2, p: \k -> mkSimplePs k {bf: _ETH2_BF, bh: _ETH2_BH} tx, oneMTps: Just _ETH2_1M_K}
+    , {net: Polkadot, p: \k -> mkSimplePs k {bf: _POLKADOT_BF, bh: _POLKADOT_BH} tx, oneMTps: Just _POLKADOT_1M_K}
+    , {net: Eth2, p: \k -> mkNestedPs k {bf: _ETH2_BF, bh: _ETH2_BH} {bf: _ETH2_BF, bh: _ETH2_DH} tx, oneMTps: Just _ETH2_1M_K}
     , {net: OptShard, p: \k -> mkSimplePs k {bf: _UT_BF, bh: _UT_BH_FOR_SHARDING} tx, oneMTps: Just _OPT_SHARD_1M_K}
     , {net: UT (PoRs 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2PORS_1M_K}
     , {net: UT (PoRTs 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2PORTS_1M_K}
@@ -229,6 +236,15 @@ filteredUtVsOther = filterUtVsOther compareNetsFilterList
 
 id x = x
 
+utNestingLvl :: UtName -> Int
+utNestingLvl (PoRs i) = i
+utNestingLvl (PoRTs i) = i
+utNestingLvl (Std i) = i
+utNestingLvl (T i) = i
+utNestingLvl (HO i) = i
+utNestingLvl (HOT i) = i
+utNestingLvl (Aleph other) = utNestingLvl other
+
 netToChainStats :: Network -> Params -> ChainStats
 netToChainStats (UT (PoRs _)) p = (utChainCalc p (allUtChainCalcsF id).pors)
 netToChainStats (UT (PoRTs _)) p = (utChainCalc p (allUtChainCalcsF id).ports)
@@ -238,6 +254,7 @@ netToChainStats (UT (HO _)) p = (utChainCalc p (allUtChainCalcsF id).ho)
 netToChainStats (UT (HOT _)) p = (utChainCalc p (allUtChainCalcsF id).hot)
 netToChainStats (UT (Aleph v)) p = netToChainStats (UT v) p
 netToChainStats Eth2 p = tradChainCalcEth2 p
+netToChainStats Polkadot p = tradChainCalcPolkadot p
 netToChainStats _ p = tradChainCalc p
 
 netLookupChainStats :: Network -> UtVariants ChainStats -> ChainStats
@@ -261,6 +278,12 @@ netToScalingFactor (UT ut) aux = case utNameI ut of
   2 -> aux.scalingFactors.nesting
   3 -> aux.scalingFactors.nesting
   _ -> unsafeThrowException $ error $ "[netToScalingFactor] got bad level of nesting in UT network: " <> utName_ ut
+
+netToN2 :: Network -> ChainStats -> Number
+netToN2 Bitcoin _ = nan
+netToN2 Cardano _ = nan
+netToN2 (UT ut) cs = if utNestingLvl ut >= 2 then cs.d2.n else nan
+netToN2 _ cs = cs.d2.n
 
 netToTps :: Network -> ChainStats -> Number
 netToTps Bitcoin cd = cd.d1.tps
@@ -355,7 +378,7 @@ tpsPort :: Table
 tpsPort = porTpsHeader PoRTs (genPoRRow (\cd -> cd.ut.ports) <$> utComplexityData)
 
 -- todo: fix fmtDyn fdPlain
-genCompareRow k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdPlainMixed <$> [cs.effBh, cs.effDh]) <> ([fmtDyn fdStdZero scalingFactor, fmtDyn fdStd tpsPerBaseChain]) <> (fmtDyn fdStdMixed <$> [tps])
+genCompareRow k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdPlainMixed <$> [cs.effBh, cs.effDh]) <> ([fmtDyn fdStdZero scalingFactor, fmtDyn fdStdMixed n2]) <> (fmtDyn fdStdMixed <$> [tps])
   where
     p = o.p k
     cs = netToChainStats net p
@@ -364,24 +387,31 @@ genCompareRow k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdPlainMix
     tps = if isAleph net then infinity else netToTps net cs
     tpsPerBaseChain = netToTps net cs / cs.d1.n
     scalingFactor = netToScalingFactor net aux
+    n2 = if isAleph net then infinity else netToN2 net cs
 
 compareNetsTH = Table
-    ["$k$, $B_f$, $B_h$", "Network", "E. $B_h$ (B)", "E. $D_h$ (B)", "Scale $\\times$", "$\\nicefrac{\\Sigma\\;\\text{TPS}}{N_1}$", "$\\Sigma$ TPS"] -- , "TPS vs " <> (utName_ $ Std 2)]
+    ["$k$, $B_f$, $B_h$", "Network", "E. $B_h$ (B)", "E. $D_h$ (B)", "Scale $\\times$"
+    -- , "$\\nicefrac{\\Sigma\\;\\text{TPS}}{N_1}$"
+    , "$N_2$"
+    , "$\\Sigma$ TPS"] -- , "TPS vs " <> (utName_ $ Std 2)]
     {md: mkSpacer <$> [5, 6, 2, 2, 3, 4, 3], texTabular: "llrrrrr"}
 
 compareNetsConciseTH = Table
-    ["$k$, $B_f$, $B_h$", "Network", "Scale $\\times$", "$\\nicefrac{\\Sigma\\;\\text{TPS}}{N_1}$", "$\\Sigma$ TPS"] -- , "TPS vs " <> (utName_ $ Std 2)]
+    ["$k$, $B_f$, $B_h$", "Network", "Scale $\\times$"
+    -- , "$\\nicefrac{\\Sigma\\;\\text{TPS}}{N_1}$"
+    , "$N_2$"
+    , "$\\Sigma$ TPS"] -- , "TPS vs " <> (utName_ $ Std 2)]
     {md: mkSpacer <$> [5, 6, 3, 4, 3], texTabular: "llrrr"}
 
 compareNets3k :: Table
 compareNets3k =
     compareNetsTH (genCompareRow 3_000.0 <$> filteredUtVsOther)
 
-compareNets30k :: Table
-compareNets30k =
-    compareNetsTH (genCompareRow 30_000.0 <$> filteredUtVsOther)
+compareNets20k :: Table
+compareNets20k =
+    compareNetsTH (genCompareRow _COMPARE_20K <$> filteredUtVsOther)
 
-makeCompareRowConcise [ps, net, _, _, scale, tpsPerN, tps] = [ps, net, scale, tpsPerN, tps]
+makeCompareRowConcise [ps, net, _, _, scale, n2, tps] = [ps, net, scale, n2, tps]
 makeCompareRowConcise _ = unsafeThrowException $ error "makeCompareRowConcise got wrong number of cols"
 
 
@@ -404,17 +434,22 @@ lpCompareNetworks = compareNetsConciseTH t
 
 
 -- todo: fix fmtDyn fdPlain
-genCompare1MRow {net, p} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdStdTwo <$> [netToTps net cs / cs.d1.n, netToTps net cs]) <> (fmtDyn fdStdMixed <$> [ut2.d2.tps]) -- , cs.k1 / ut2K])
+genCompare1MRow {net, p} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdStdMixed <$> [n2, netToTps net cs]) <> (fmtDyn fdStdMixed <$> [ut2.d2.tps]) -- , cs.k1 / ut2K])
   where
     ut2K = ut2TpsToK (netToTps net cs) p.txSize pf.hf.bf pf.hf.bh pf.hf.bh
     pf = pToPF p
     ut2 = utChainCalc p (allUtChainCalcsF id).t
     cs = netToChainStats net p
+    tpsPerN1 = netToTps net cs / cs.d1.n
+    n2 = netToN2 net cs
     -- aux = auxStats cs
 
 compareNets1mTps :: Table
 compareNets1mTps = Table
-    ["$k$, $B_f$, $B_h$", "Network", "$\\nicefrac{\\Sigma\\;\\text{TPS}}{N_1}$", "$\\Sigma$ TPS", "Equiv. " <> utName_ (T 2) <> " $\\Sigma$ TPS"] -- , "$k$ vs Equiv. $\\UT{2}$"]
+    ["$k$, $B_f$, $B_h$", "Network"
+    -- , "$\\nicefrac{\\Sigma\\;\\text{TPS}}{N_1}$"
+    , "$N_2$"
+    , "$\\Sigma$ TPS", "Equiv. " <> utName_ (T 2) <> " $\\Sigma$ TPS"] -- , "$k$ vs Equiv. $\\UT{2}$"]
     {md: mkSpacer <$> [5, 5, 3, 3, 3], texTabular: "llrrr"}
     (genCompare1MRow <$> utVsOther1M)
 
@@ -552,13 +587,13 @@ lpCompare2TH = Table
     {md: mkSpacer <$> [5, 6, 3, 3, 3], texTabular: "llrrr"}
 
 lpCompareUt1Eth2 :: Table
-lpCompareUt1Eth2 = lpCompareTH $ (genLpCompareRow 3000.0) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), UT (T 1), Eth2])
+lpCompareUt1Eth2 = lpCompareTH $ (genLpCompareRow 3000.0) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), Eth2, UT (T 1)])
 
 lpCompareUt1OptShard :: Table
-lpCompareUt1OptShard = lpCompareTH $ (genLpCompareRow 3000.0) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), UT (T 1), Eth2, UT (HOT 1), OptShard])
+lpCompareUt1OptShard = lpCompareTH $ (genLpCompareRow 3000.0) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), Eth2, UT (T 1), UT (HOT 1), OptShard])
 
 lpCompareUt2OptShard :: Table
-lpCompareUt2OptShard = lpCompare2TH $ (genLpCompare2Row 3000.0) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), UT (T 1), Eth2, UT (HOT 1), OptShard, UT (PoRTs 2), UT(T 2), UT (HOT 2)])
+lpCompareUt2OptShard = lpCompare2TH $ (genLpCompare2Row 3000.0) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), Eth2, UT (T 1), UT (HOT 1), OptShard, UT (PoRTs 2), UT(T 2), UT (HOT 2)])
 
 
 fixRow2 :: Array String -> Array String
