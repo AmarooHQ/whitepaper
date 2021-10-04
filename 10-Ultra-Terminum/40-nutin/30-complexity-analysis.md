@@ -130,7 +130,9 @@ Since each simplex-chain reserves $k_{1,tx}$ B/s for transactions, the total thr
 \begin{align}
 T_1 & = N_1 \cdot k_{1,tx} \label{eq:reflection-t1-start} \\
 & = N_1(k_1 - N_1 \cdot B_f \cdot B_h) \notag \\
+%% & = N_1(k_1 - (N_1 - 1) \cdot B_f \cdot B_h) \notag \\
 & = N_1 \cdot k_1 - N_1^2 \cdot B_f \cdot B_h \label{eq:reflection-t1-in-terms-of-n1}
+%% & = N_1 \cdot k_1 - N_1^2 \cdot B_f \cdot B_h + N_1 \cdot B_f \cdot B_h \label{eq:reflection-t1-in-terms-of-n1}
 \end{align}
 
 The optimal number of simplex-chains will maximize throughput. We can find that maxima via:
@@ -138,6 +140,7 @@ The optimal number of simplex-chains will maximize throughput. We can find that 
 \begin{equation*}
 \begin{split}
 \frac{dT_1}{dN_1} & = k_1 - 2 \cdot N_1 \cdot B_f \cdot B_h
+%% \frac{dT_1}{dN_1} & = k_1 - 2 \cdot N_1 \cdot B_f \cdot B_h - B_f \cdot B_h
 \end{split}
 \end{equation*}
 
@@ -147,7 +150,9 @@ At $\frac{dT_1}{dN_1} = 0$:
 \label{eq:simplex-N1}
 \begin{split}
 k_1 & = 2 \cdot N_1 \cdot B_f \cdot B_h \\
+%% k_1 - B_f \cdot B_h & = 2 \cdot N_1 \cdot B_f \cdot B_h \\
 \therefore N_1 & = \frac{k_1}{2 \cdot B_f \cdot B_h}
+%% \therefore N_1 & = \frac{k_1 - B_f \cdot B_h}{2 \cdot B_f \cdot B_h}
 \end{split}
 \end {equation}
 
@@ -242,7 +247,7 @@ N_2 & = \frac{T_2}{k_2} \\
 
 #### UT with Dapp-Dapp-Chains
 
-If we say each dapp-chain hosts shards or more dapp-chains (such as Eth2 or Polkadot do), then via \autoref{eq:throughput-iter} and \autoref{eq:throughput-c-3},
+If we say each dapp-chain hosts shards or more dapp-chains (e.g., as a dapp-chain version of Eth2 or Polkadot would), then via \autoref{eq:throughput-iter} and \autoref{eq:throughput-c-3},
 
 \begin{equation}
 \label{eq:throughput-c-4}
@@ -300,7 +305,7 @@ $D_h = B_h$: dapp-chain block header size (bytes) \newline
 $Tx_{avg}$: average tx size (bytes)
 \end{comment}
 
-NB: For the purposes of the following table, the average transaction size is taken to be 250 bytes.
+NB: For the purposes of \autoref{table:tps}, the average transaction size is taken to be 250 bytes.
 \begin{comment}
 Additionally, the discrepancy in header size (between $B_h$ and $D_h$) is due to the overhead of PoS mechanisms.
 \end{comment}
@@ -313,7 +318,10 @@ Additionally, the discrepancy in header size (between $B_h$ and $D_h$) is due to
 
 \label{sec:bandwidth-complexity}
 
-\todo{BW for full node: $\Delta s = k_1 + N_1 \cdot B_f \cdot g \cdot \log_2{N_1}$.}
+\todo{
+BW for full node: $\Delta s = k_1 + N_1 \cdot B_f \cdot g \cdot \log_2{N_1}$. BW for all headers (w/o header omission):
+$N_1 \cdot B_h \cdot B_f = \frac{k_1 \cdot B_h \cdot B_f}{2 \cdot B_h \cdot B_f} = \frac{k_1}{2} = O(c)$
+}
 
 If miners temporarily keep the blocks of every simplex-chain (so that they can verify reflected headers correspond to existent blocks) then what is the complexity and burden of this? Each simplex-chain has a raw throughput of $k_1$ bytes/s. From \autoref{eq:simplex-N1} we know that $N_1 = \frac{k_1}{2 \cdot B_f \cdot B_h}$.
 

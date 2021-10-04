@@ -8,11 +8,15 @@
 
 \todo{Review this section. Got some feedback that this section was unclear. Is nomenclature introduced prior to this section? check if there's something that interacts with DAGs and mention if so.}
 
-What would happen if a header -- with valid PoW but *without* a valid block -- were to be reflected? That would mean that chain A contains a header, $H_{1a}$, for chain B for which no block is available. This does not break chain B, but it could mean that other blocks on chain B temporarily have a harder time competing, or waste the resources of chain B nodes as they go looking for that block, $B_{1a}$. Furthermore, it risks chain B miners doing SPV mining, which is bad.
+What would happen if a header -- with valid PoW but *without* a valid block -- were to be reflected? Let's consider the two chains (L and R) from \autoref{fig:por-step5}.
 
-After $H_{1a}$ is reflected, chain B miners shouldn't build on that header without validating the block. Eventually they'd produce a valid block, $B_{1b}$. But $B_{1b}$ (and it's header, $H_{1b}$) wouldn't be reflected yet. So $B_{1a}$ would have priority over $B_{1b}$ until $B_{2b}$ (building on $B_{1b}$) is created and both $H_{1b}$ and $H_{2b}$ are reflected. After that, a minor chain re-org would restore normality.
+That would mean that chain L contains a header, $H_{1a}$, for chain R for which no block is available.
 
-There is at least one way to ensure that reflected headers are available. That is: miners on both chain A and chain B should *refuse* to build on blocks that include headers without a known block. This would mean that the chain A block (which includes $H_{1a}$) is *invalid* on chain A while $B_{1a}$ is unavailable. If such a method is feasible, then the malicious chain A miner has greater opportunity cost to produce a block reflecting $H_{1a}$. Moreover, this method prevents chain A (and its miners) from contributing to a potential attack on chain B.
+This does not break chain R, but it could mean that other blocks on chain R temporarily have a harder time competing, or waste the resources of chain R nodes as they go looking for that block, $B_{1a}$. Furthermore, it risks chain R miners doing SPV mining, which is bad.
+
+After $H_{1a}$ is reflected, chain R miners shouldn't build on that header without validating the block. Eventually they'd produce a valid block, $B_{1b}$. But $B_{1b}$ (and it's header, $H_{1b}$) wouldn't be reflected yet. So $B_{1a}$ would have priority over $B_{1b}$ until $B_{2b}$ (building on $B_{1b}$) is created and both $H_{1b}$ and $H_{2b}$ are reflected. After that, a minor chain re-org would restore normality.
+
+There is at least one way to ensure that reflected headers are available. That is: miners on both chain L and chain R should *refuse* to build on blocks that include headers without a known block. This would mean that the chain L block (which includes $H_{1a}$) is *invalid* on chain L while $B_{1a}$ is unavailable. If such a method is feasible, then the malicious chain L miner has greater opportunity cost to produce a block reflecting $H_{1a}$. Moreover, this method prevents chain L (and its miners) from contributing to a potential attack on chain R.
 
 For this to work, though, miners must verify that blocks *exist* for all reflected headers. Is this practical if there are $10^3$ or $10^4$ reflected chains in a simplex? The miners are only required to do very small amounts of computation on these other blocks, so their computational capacity won't be a bottleneck here. Furthermore, they don't need to keep these other blocks indefinitely, just long enough to be confident that they reflect only headers with existent blocks. So they won't need much extra disk space, either -- after a few years, the history of a simplex chain will be larger than, say, the last 12 hours of all simplex-chains' histories combined. What miners will need is *bandwidth*.
 
@@ -22,9 +26,15 @@ The complexity and impact of this strategy is discussed in \autoref{sec:bandwidt
 
 \label{sec:proving-reflection}
 
-If simplex-chains' consensus protocol requires accounting for reflected work, then nodes must have some method whereby they know which work (in a particular chain's history) has been reflected. That is: a node for chain A must be able to answer the question *For each other simplex-chain, which blocks in chain A's history have been reflected?* This means that each node must have $N_1 - 1$ answers for a simplex of $N_1$ chains.
+If simplex-chains' consensus protocol requires accounting for reflected work, then nodes must have some method whereby they know which work (in a particular chain's history) has been reflected. That is: a node for chain L must be able to answer the question *For each other simplex-chain, which blocks in chain L's history have been reflected?* This means that each node must have $N_1 - 1$ answers for a simplex of $N_1$ chains.
 
-There is a trivial method: include merkle branch proofs along with reflected headers. Specifically: when a miner on chain A includes a header from chain B, they should also include a merkle branch that shows the most recent chain A header that has been reflected by chain B. Miners would need to do this for *all* simplex-chains that they reflect. Predictably, this has overhead with order $O(N_1 \cdot \log_2 N_1)$, where $N_1$ is the number of chains in the simplex. This method has complexity $O(c \cdot \log_2 c)$ which is discussed in \autoref{sec:complexity-reflection-proof}.
+There is a trivial method: include merkle branch proofs along with reflected headers. Specifically: when a miner on chain L mines a block that includes a header from chain R, they should also include -- along-side the header -- a merkle branch that shows the most recent chain L ancestor that has been reflected by chain R.
+
+\begin{comment}
+(Note: in some sense, the full PoR cannot be included *in* a newly created block, since the PoR depends *on* that newly created block. Although a miner can *commit* to a PoR when mining a block, the PoR can only be fully constructed after the relevant merkle-root has been calculated. It is possible to segment the block-creation process so that PoRs can be directly included, but this is clunky and arguably unnecessary.)
+\end{comment}
+
+Miners would need to do this for *all* simplex-chains that they reflect. Predictably, this has overhead with order $O(N_1 \cdot \log_2 N_1)$, where $N_1$ is the number of chains in the simplex. This method has complexity $O(c \cdot \log_2 c)$ which is discussed in \autoref{sec:complexity-reflection-proof}.
 
 Do we *need* to include proofs of reflection, though? Is it possible to avoid the explicit inclusion of those proofs, potentially allowing for $O(c)$ complexity instead?
 
@@ -82,7 +92,13 @@ Given that the reflection-segments of simplex-chains will contain mostly repeate
 
 \todo{Explain how we use effective header size to effectively have 32 byte headers at base level -- $3.5\times$ optimization -- see WP forum post ``Effective header size and TPS (discovered a new optimization)''}
 
-\todo{Explain trimming zero bytes from PoW block hashes for 2-10 byte saving $-> 1.07\times$ to $1.45\times$ optimization}
+\todo{Explain trimming zero bytes from PoW block hashes for 2-10 byte saving $\rightarrow 1.07\times$ to $1.45\times$ optimization; tho truncation $\rightarrow 2\times$ optimization.}
+
+* explicit proofs + headers (+PoRs)
+* omitted proofs + headers (+OP)
+* explicit proofs + header omission (+HOPoRs)
+* implicit proofs + header omission (+HO)
+* for each of the above: +T for truncation
 
 \todo{Total optimization (with decent sized network) over $4\times$ (mb up to $5\times$)}
 
@@ -90,7 +106,7 @@ Given that the reflection-segments of simplex-chains will contain mostly repeate
 
 \label{sec:confirmation-times}
 
-A confirmation is a *discreet* event that occurs when a block is produced. When an attacker is performing a hash-rate based doublespend attack they are, effectively, racing the honest network; that race is measured in confirmations, not *time*.
+A confirmation is a *discrete* event that occurs when a block is produced. When an attacker is performing a hash-rate based doublespend attack they are, effectively, racing the honest network; that race is measured in confirmations, not *time*.
 
 \bquote{
     The probability of success [of a double-spend attempt] depends on the number of blocks [by which the honest network has an advantage], and not on the time constant $T_0$.
@@ -199,7 +215,7 @@ How does such an attack fair? The challenge of such a DoS attack is to prevent h
 
 However, if an attacker performs a *repeating cycle* of these attacks, then they may be able to decrease the effective capacity of the chain by a factor of $A_{blocks} = \nicefrac{q}{p}$. The opportunity cost of this attack (for the attacker) is the lost transaction fees.
 
-All that sounds good, but this thought experiment is flawed. It is *smoothed out* compared to what we'd expect in reality -- the discreet nature of block production and reflections is ignored. In \autoref{fig:dag-dos-1}, it's explicitly excluded! What happens if we include the affect of other simplex-chains, though? Well... something \emph{magical}.
+All that sounds good, but this thought experiment is flawed. It is *smoothed out* compared to what we'd expect in reality -- the discrete nature of block production and reflections is ignored. In \autoref{fig:dag-dos-1}, it's explicitly excluded! What happens if we include the affect of other simplex-chains, though? Well... something \emph{magical}.
 
 Consider an attacker producing 2 blocks for every 1 honest block. What happens most of the time? Well the attackers blocks get reflected first, so there's like a big advantage over the honest blocks. The honest blocks will get reflected, too, but most of the time the attackers blocks will get the advantage from earlier reflections. \emph{Most} of the time. Occasionally, when an honest block is a bit lucky, it will be produced before the attackers blocks and start gaining reflections earlier. At that point, the attacker has lost -- they need to outpace the \emph{difference} in the number of reflections between the honest block and attacking blocks. So, unlike a normal doublespend (where the attacker wins if they \emph{ever} get ahead), now the honest network wins (ends the DoS) if it \emph{ever} gets ahead of the attacker -- after that point, there's no viable strategy for the attacker besides to build on the honest blocks. \emph{The asymmetry has flipped!}
 
@@ -269,4 +285,6 @@ The average hash rate on each simplex chain, as described above, is always the s
 
 \todo{is a refl censorship attack possible? meaningful? explore. (NB: I don't think there's a viable strategy here, which is why I haven't prioritized writing this out.)}
 
-\todo{Add a nash equilibrium diagram + explanation to show that it's always in the interest of miners to publish headers -- intuition: including headers means that the \emph{other chain's miner} has an incentive to include your header. that means that the next miner (on your chain) will be able to build on a heavier chain if they reflect that other chain's next header -- so that next miner (on the local chain) has an incentive to include that other chain's next header. If the original miner (who might chose not to publish the most recent header of that other chain) censors that reflection, then they disadvantage themselves relative to their competitors (other miners of that simplex-chain). Thus, it's never helpful to a miner to censor reflections (esp if we enforce the limit on $k_b$ and $k_{tx}$). It doesn't help honest miners, and it makes an attackers chain-segment less competitive.}
+\todo{
+    Add a nash equilibrium diagram + explanation to show that it's always in the interest of miners to publish headers -- intuition: including headers means that the \emph{other chain's miner} has an incentive to include your header. that means that the next miner (on your chain) will be able to build on a heavier chain if they reflect that other chain's next header -- so that next miner (on the local chain) has an incentive to include that other chain's next header. If the original miner (who might chose not to publish the most recent header of that other chain) censors that reflection, then they disadvantage themselves relative to their competitors (other miners of that simplex-chain). Thus, it's never helpful to a miner to censor reflections (esp if we enforce the limit on $k_b$ and $k_{tx}$). It doesn't help honest miners, and it makes an attackers chain-segment less competitive.
+}

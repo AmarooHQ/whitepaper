@@ -4,7 +4,7 @@ import Amaroo.WP.Tables.Types
 import Prel
 
 import Amaroo.WP.Calcs (Params, UtVariants, ChainStats, allUtChainCalcs, allUtChainCalcsF, applyTDiscountToBH, auxStats, mkNestedPs, mkSimplePs, pToPF, runChainCalcFor, tradChainCalc, tradChainCalcEth2, tradChainCalcPolkadot, utChainCalc)
-import Amaroo.WP.Formatter (fdPlain, fdPlainMixed, fdPlainZero, fdStd, fdStdMixed, fdStdTwo, fdStdZero, fmt1GbpsPs, fmtDyn, fmtPsKBfBh, fmtPsKBfBhDh, wrap, wrapXml, wrapXmlWAttr)
+import Amaroo.WP.Formatter (fdPlain, fdPlainMixed, fdPlainZero, fdStd, fdStdMixed, fdStdNoSiMixed, fdStdTwo, fdStdZero, fmt1GbpsPs, fmtDyn, fmtPsKBfBh, fmtPsKBfBhDh, wrap, wrapXml, wrapXmlWAttr)
 import Amaroo.WP.Tables.Booktabs (renderBooktabs)
 import Amaroo.WP.Tables.Types (LatexTablePos(..), TPositioning(..))
 import Amaroo.WP.Utils (diagonalApply, ui)
@@ -319,6 +319,13 @@ utVsOther1M = unsafePartial fromJust $ sequence $ calc1M <$> filter (\{oneMTps} 
       Just k -> Just {net, p: p k}
       Nothing -> Nothing
 
+utVsOther1MAll :: Array {net :: Network, p :: Params}
+utVsOther1MAll = unsafePartial fromJust $ sequence $ calc1M <$> filter (\{oneMTps} -> isJust oneMTps) utVsOther
+  where
+    calc1M {net, p, oneMTps} = case oneMTps of
+      Just k -> Just {net, p: p k}
+      Nothing -> Nothing
+
 -- Note: CBF -- it was only there b/c of solana's rediculous 700k tps claim anyway
 -- utVsOther1Gbps :: Array {net :: Network, p :: Params}
 -- utVsOther1Gbps =
@@ -453,6 +460,15 @@ compareNets1mTps = Table
     {md: mkSpacer <$> [5, 5, 3, 3, 3], texTabular: "llrrr"}
     (genCompare1MRow <$> utVsOther1M)
 
+compareNets1mTpsAll :: Table
+compareNets1mTpsAll = Table
+    ["$k$, $B_f$, $B_h$", "Network"
+    -- , "$\\nicefrac{\\Sigma\\;\\text{TPS}}{N_1}$"
+    , "$N_2$"
+    , "$\\Sigma$ TPS", "Equiv. " <> utName_ (T 2) <> " $\\Sigma$ TPS"] -- , "$k$ vs Equiv. $\\UT{2}$"]
+    {md: mkSpacer <$> [5, 5, 3, 3, 3], texTabular: "llrrr"}
+    (genCompare1MRow <$> utVsOther1MAll)
+
 
 genCompare1GbpsRow {net, p} = [fmt1GbpsPs cs p, show net] <> (fmtDyn fdPlain <$> [netToTps net cs, k, mbChainDay])
   where
@@ -572,18 +588,18 @@ genLpCompareRow k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdStdMix
       _ -> cs.effBh
     tps = if isAleph net then infinity else netToTps net cs
 
-genLpCompare2Row k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdStdMixed <$> [cs.effBh, cs.effDh, tps])
+genLpCompare2Row k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdStdNoSiMixed <$> [cs.effBh, cs.effDh, tps])
   where
     p = o.p k
     cs = netToChainStats net p
     tps = if isAleph net then infinity else netToTps net cs
 
 lpCompareTH = Table
-    ["$k$, $B_f$, $B_h$", "Network", "Eff. $B_h$ (B)", "$\\Sigma$ TPS (tx/s)"]
+    ["$k$, $B_f$, $B_h$", "Network", "E. $B_h$ (B)", "$\\Sigma$ TPS (tx/s)"]
     {md: mkSpacer <$> [5, 6, 3, 3], texTabular: "llrr"}
 
 lpCompare2TH = Table
-    ["$k$, $B_f$, $B_h$", "Network", "Eff. $B_h$ (B)", "Eff. $D_h$ (B)", "$\\Sigma$ TPS (tx/s)"]
+    ["$k$, $B_f$, $B_h$", "Network", "E. $B_h$ (B)", "E. $D_h$ (B)", "$\\Sigma$ TPS (tx/s)"]
     {md: mkSpacer <$> [5, 6, 3, 3, 3], texTabular: "llrrr"}
 
 lpCompareUt1Eth2 :: Table
@@ -594,6 +610,9 @@ lpCompareUt1OptShard = lpCompareTH $ (genLpCompareRow 3000.0) <$> (filterUtVsOth
 
 lpCompareUt2OptShard :: Table
 lpCompareUt2OptShard = lpCompare2TH $ (genLpCompare2Row 3000.0) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), Eth2, UT (T 1), UT (HOT 1), OptShard, UT (PoRTs 2), UT(T 2), UT (HOT 2)])
+
+lpCompareUt2OptShard20k :: Table
+lpCompareUt2OptShard20k = lpCompare2TH $ (genLpCompare2Row _COMPARE_20K) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), Eth2, UT (T 1), UT (HOT 1), OptShard, UT (PoRTs 2), UT(T 2), UT (HOT 2)])
 
 
 fixRow2 :: Array String -> Array String
