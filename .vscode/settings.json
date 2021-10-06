@@ -55,6 +55,7 @@
         "Namecoin's",
         "newcommand",
         "nicefrac",
+        "Nunc",
         "parachain",
         "Polkadot",
         "Polkadot's",
@@ -72,6 +73,7 @@
         "Sompolinsky",
         "subsectionautorefname",
         "there'll",
+        "Ultimum",
         "uncriticized",
         "unpaywalled",
         "unvalidated",
@@ -79,6 +81,7 @@
         "varnothing",
         "Vitalik",
         "WASM",
+        "Yoad",
         "Yonatan",
         "Zack",
         "ZKPs",
@@ -103,7 +106,14 @@
         "coltext",
         "tocdepth",
         "endignore",
-        "colbacktitle"
+        "colbacktitle",
+        "purescript",
+        "spago",
+        "purs",
+        "papersize",
+        "pandoc",
+        "keepaspectratio",
+        "algs"
     ],
     "cSpell.flagWords": [
         "hte"

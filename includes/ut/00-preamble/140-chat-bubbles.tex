@@ -1,0 +1,29 @@
+%% chat bubbles
+
+\newcommand{\ChatRaw}[2]{
+    \begin{tcolorbox}[
+        #1
+    ]
+    \begin{varwidth}{0.8\textwidth}
+    #2
+    \end{varwidth}
+    \end{tcolorbox}
+}
+
+\newcommand{\ChatL}[2]{
+    \ChatRaw{hbox,#1}{#2}
+}
+
+\newcommand{\ChatR}[2]{
+    \begin{flushright}
+    \ChatRaw{hbox,#1}{#2}
+    \end{flushright}
+}
+
+%% pill / chip / tag like thing
+
+\newcommand{\pill}[1][]{
+    \tcbox[enhanced,box align=base,nobeforeafter,colback=cyan,colframe=cyan,size=fbox]{#1}
+}
+
+\def\checkmark{\tikz\fill[scale=0.25](0,.35) -- (.25,0) -- (1,.7) -- (.25,.15) -- cycle;}

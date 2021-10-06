@@ -1,0 +1,14 @@
+%% glossary utility stuff
+
+\makeglossaries
+
+\newcommand\defineTerm[2]{
+    \newglossaryentry{#1}
+    {
+        name={#1},
+        description={#2},
+    }
+    \begin{tcolorbox}[]
+    \textbf{\Gls{#1}}: #2.
+    \end{tcolorbox}
+}

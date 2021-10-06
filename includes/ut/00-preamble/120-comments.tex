@@ -1,0 +1,20 @@
+%% comments
+
+\newcommand{\listcommentname}{Comments}
+\newlistof{comment}{com}{\listcommentname}
+
+\newcounter{mkcommentcounter}
+\newcommand{\mk}[1]{
+    \refstepcounter{mkcommentcounter}%
+    \refstepcounter{comment}%
+    \begin{tcolorbox}[
+        colback=maxsColor!80!white,
+        coltext=white,
+        title={Comment (Max) [\themkcommentcounter]}
+    ]
+    \label{commentref:mk\themkcommentcounter}
+    \label{commentref:\thecomment}
+    #1
+    \end{tcolorbox}
+    \addcontentsline{com}{comment}{\protect{\thecomment. } \truncate{0.8\linewidth}{#1}}
+}
