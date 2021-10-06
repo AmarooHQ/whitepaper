@@ -307,6 +307,8 @@ There are some other conjectured solutions to the *Nothing at Stake* problem. Th
 
 \todo{refelct only chains that reflect your history; if they favor a different history, then you should be building on that history instead, so don't reflect those blocks -- i.e. ppl should calculate weight to be 0.}
 
+%% END ### RELEASE
+
 %% BEGIN ### DRAFT
 
 #### PoS Bribe Attacks
