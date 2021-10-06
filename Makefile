@@ -12,6 +12,10 @@ LP_TABLES_OUT=$(OUTDIR)/tables.tex
 
 PURS_GEN_DIR=includes/ut/complexity/ut-complexity-gen-purs
 
+# preprocessor defualt
+PP_MODE=draft
+PP_LINT_FLAG=
+
 # default properties for WP -- see `set-wp-properties` cmd
 papersize=a4
 geometry=left=3cm,right=3cm,top=3cm,bottom=3cm
@@ -22,7 +26,17 @@ ifndef OUTPUT_PDF
 override OUTPUT_PDF = $(OUTPUT_PDF_DEFAULT)
 endif
 
+
 default: whitepaper
+
+release: PP_MODE=release
+release: whitepaper
+
+cilint: PP_MODE=lint
+cilint: whitepaper
+
+wp-no-lint: PP_LINT_FLAG="--no-lint-check"
+wp-no-lint: whitepaper
 
 # https://tex.stackexchange.com/questions/45/how-to-speed-up-latex-compilation-with-several-tikz-pictures
 TIME     = /usr/bin/time -p
@@ -38,6 +52,9 @@ PNGGraphics = $(patsubst %_sag.pdf,%_sag.png,$(PDFGraphics))
 InputTeXFiles = $(wildcard *_input.tex)
 PWD = $(pwd)
 
+watch:
+	bin/onchange.sh 10-Ultra-Terminum "make"
+
 wp-graphics-standalone: $(PDFGraphics)
 wp-graphics-png: $(PNGGraphics)
 
@@ -50,7 +67,7 @@ wp-graphics-png: $(PNGGraphics)
 	cd `dirname $<` && \
 	convert -density 400 `basename $<` `basename $@`
 
-whitepaper: $(PDFGraphics) $(InputTeXFiles) build-whitepaper set-wp-properties wp-pandoc mk-latex-pdf wc
+whitepaper: $(PDFGraphics) $(InputTeXFiles) build-whitepaper set-wp-properties wp-pandoc preprocess-build mk-latex-pdf wc
 whitepaper-skip-pandoc: $(PDFGraphics) $(InputTeXFiles) mk-latex-pdf wc
 
 # atm restrict this to just the UT folder, can generalize again later
@@ -64,6 +81,7 @@ build-whitepaper: %.md
 	  cat $$mdfile >> $(WPFILE) && \
 	  echo -n "\n\n" >> $(WPFILE) ; \
 	done
+	# replace tables placeholder with actual tables
 	node ./includes/ut/complexity/populateWPTables.js --populate-wp-md
 # if you need to build the above: cd includes/ut/complexity/ut-complexity-gen-purs && npm i && npm run bundle-for-wp
 
@@ -93,6 +111,11 @@ dev-build: wp-just-quotes wp-pandoc mk-latex-pdf
 wc:
 	find . -iname '*.md' -or -iname '*.tex' | grep -v node_mod | grep -v spago | grep -v output | grep -v diags | xargs wc
 	wc $(WPFILE)
+
+# preprocess tex for draft/release/lint
+preprocess-build:
+	python3 bin/preprocessModes.py process-tex $(WPTEX) --mode $(PP_MODE) --allow-in-place $(PP_LINT_FLAG)
+	python3 bin/preprocessModes.py set-todos-render $(WPTEX) --mode $(PP_MODE) --allow-in-place
 
 mk-latex-pdf:
 	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
