@@ -1,0 +1,56 @@
+%% preserve original quote cmd
+
+\let\oldquote=\quote
+\let\endoldquote=\endquote
+
+%% quoting env using mdframed
+
+%% -- a bit buggy use quote or bquote below
+
+\newenvironment{mdquote}{\begin{mdframed}[
+    innerleftmargin=1em,
+    innertopmargin=.75em,
+    innerbottommargin=.75em,
+    skipabove=0.5em,
+    backgroundcolor=gray!15,
+    linewidth=1,
+    leftline=true,
+    rightline=false,
+    topline=false,
+    bottomline=false,
+]}{\end{mdframed}}
+
+%% less buggy quoting using tcolorbox
+
+\renewenvironment{quote}[1][]{
+    \begin{tcolorbox}[
+        colback=gray!15,colbacktitle=gray!15,
+        tile,
+        borderline west={0.75pt}{0pt}{black},
+        breakable,
+        #1]
+}{
+    \end{tcolorbox}
+}
+
+%% conditionally add attribution to block quotes
+
+\newcommand{\q}[1]{
+    \begin{quote}{hbox}
+    #1
+    \end{quote}
+}
+
+\newcommand{\bquote}[2]
+    {
+        \begin{quote}{}
+        #1
+        \IfNoValueTF{#2}{}{
+
+            \noindent
+            \xrfill[0.7ex]{0.5pt}
+            \vspace{0em}
+            \begin{flushright} \textit{--- #2} \end{flushright}
+        }
+        \end{quote}
+    }

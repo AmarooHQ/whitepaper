@@ -1,0 +1,10 @@
+% UT convenience function
+
+\newcommand{\UT}[1]{\text{UT}_{#1}}
+\newcommand{\UTinf}[1]{
+    \ifthenelse{\equal{#1}{}} {
+        \UT{\aleph}
+    } {
+        \UT{\aleph #1}
+    }
+}

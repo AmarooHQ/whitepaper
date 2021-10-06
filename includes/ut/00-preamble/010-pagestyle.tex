@@ -1,0 +1,19 @@
+\pagestyle{fancy}
+\fancyfoot[C]{\thepage\ of \zpageref{LastPage}\preparedfor}
+
+\fancypagestyle{firststyle}
+{
+    \fancyhf{}
+    \fancyfoot[L]{\thepage\ of \zpageref{LastPage}\preparedfor}
+    \fancyfoot[R]{Compiled: \today\ at \currenttime \\ \scriptsize{\texttt{\gitAbbrevHash{} \textbullet\;\gitAuthorDate}}}
+}
+
+\newcommand\nofancyhdr{
+    %% tell fancyhdr to not do a style on this page
+    \fancypagestyle{plain}{
+        \fancyhf{}
+        \fancyhead[RE,RO]{}
+        \fancyfoot[C]{\thepage\ of \zpageref{LastPage}\preparedfor}
+    }
+    \thispagestyle{plain}
+}
