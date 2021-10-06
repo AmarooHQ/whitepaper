@@ -30,7 +30,8 @@ jobs:
         run: |
           make docker "DOCKER_CMD=bash -c 'make cilint'"
           make docker "DOCKER_CMD=bash -c 'make release'" || true
-          (grep '\\todo{' output/whitepaper.tex && (echo "todo present in release whitepaper.tex"; exit 1)) || true
+          # No matches for \todo{ should be found
+          grep -qzv '\\todo{' output/whitepaper.tex
 
       - name: build whitepaper
         run: make docker "DOCKER_CMD=bash build.sh"
