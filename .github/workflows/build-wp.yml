@@ -26,5 +26,8 @@ jobs:
           spago build
           npm run bundle-for-wp
 
+      - name: lint whitepaper
+        run: make docker "DOCKER_CMD=bash -c 'make cilint'"
+
       - name: build whitepaper
         run: make docker "DOCKER_CMD=bash build.sh"
