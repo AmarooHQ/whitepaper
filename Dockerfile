@@ -20,6 +20,8 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs npm && \
     rm -rf /var/lib/apt/lists/*
 
+RUN pip3 install -U click
+
 WORKDIR /work
 
 CMD ["make"]

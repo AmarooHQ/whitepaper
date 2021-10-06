@@ -1,3 +1,5 @@
+%% BEGIN ### RELEASE
+
 \subsection{\texorpdfstring{$\text{UT}_{\aleph}$}{UT-aleph}: Tiling Simplexes}
 
 \label{sec:tiling}
@@ -380,3 +382,5 @@ In the tiled system, with non-recursive validation, miners on the root tile need
 So the complexity is the same, but there's a pretty steep discount (like 50%).
 
 Does that trend continue? Get better?
+
+%% END ### RELEASE

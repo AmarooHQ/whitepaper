@@ -1,3 +1,5 @@
+%% BEGIN ### RELEASE
+
 \subsection{\texorpdfstring{$\UT{i}$}{UT}: Constructing \emph{Ultra Terminum}}
 
 \label{sec:constructing-ut}
@@ -238,3 +240,5 @@ plan:
   - If Eth2 is $O(c^2)$ with shards, and we modify Eth2 to run as a dapp-chain, then Eth2 shards would be dapp-dapp-chains and UT's maximum complexity would be $O(c^4)$.
   - Basically we can use other $O(c^2)$ chains as needed to create lots of capacity w/ no loss of security
   - dapp-dapp-chains aren't a big deal really, just nice to have.
+
+%% END ### RELEASE

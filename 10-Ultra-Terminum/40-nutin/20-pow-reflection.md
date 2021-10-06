@@ -1,3 +1,5 @@
+%% BEGIN ### RELEASE
+
 ## Proof of Reflection
 
 \label{sec:proof-of-reflection}
@@ -357,3 +359,5 @@ Particularly, Hess starts his proof with S1:
 - Merged Mining allows attacking merged chains at 0 cost.
 - that means that if a parent chain and a merged mined child chain where to reflect one another, then the weight contributed via merged mining must be 0 -- no additional work was actually done beyond that of the parent-chain.
 - Also, if some other chain reflects both a parent chain *and* a merged mined child chain, then the net benefit is equal to *only* the work contributed by the reflecting parent chain.
+
+%% END ### RELEASE

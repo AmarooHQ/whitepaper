@@ -6,6 +6,8 @@ import click
 
 TAG_ALL = "*"
 RENDER_TODOS_REPLACE = "\\newcommand*{\\ErrorOnReleaseIfTODOs}{1}"
+PREPROCESS_START_FLAG = "% RELEASE-LINT-START"
+
 
 @click.group()
 def cli():
@@ -21,7 +23,7 @@ def cut_out(tag: str, contents: str):
     end_match = f"% END \#\#\#"
     lines = contents.split('\n')
 
-    get_open_close = lambda l: (l.split(' ')[1], ' '.join(l.split(' ')[3:]))
+    get_open_close = lambda l: (l.split(' ')[1], l.split(' ', 2)[2])
     any_match = lambda l: l.startswith(start_match) or l.startswith(end_match)
 
     boundaries_all = list((get_open_close(l), i, l) for (i, l) in enumerate(lines) if any_match(l.strip()))
@@ -30,7 +32,8 @@ def cut_out(tag: str, contents: str):
 
     for (i, (((be, tag_), li1, l1), ((be2, tag2_), li2, l2))) in enumerate(zipped_bounds_all):
         if be == be2 or (tag_ != tag2_ and i % 2 == 0):
-            raise Exception(f"Bad start/end tag combo (mismatching) at lines {li1} and {li2}.\nStart tag: {l1}\nEnd tag: {l2}")
+            sample = '\n'.join(lines[li1:li1+10])
+            raise Exception(f"Bad start/end tag combo (mismatching) at lines {li1} and {li2}.\nStart tag: {be} | {tag_}\nEnd tag: {be2} | {tag2_}\n\n\tFile Sample at line {li1}:\n\n---\n{sample}\n---\n")
 
     zipped_bounds = list(b for (i, b) in enumerate(zipped_bounds_all) if i % 2 == 0)
     ranges = list((start, end) for ((_, start, _), (_, end, _)) in zipped_bounds)
@@ -48,10 +51,12 @@ def process_file_contents_mode(mode: str, file_contents: str):
 
 
 def do_lint_check(file_contents: str):
-    all_content_lines =  file_contents.split('\\begin{document}')[1].split('\\end{document}')[0]
-    should_be_empty = all_content_lines.replace(' ', '').replace('\n', '')
+    # NB: we don't need to split at \begin{document} because that comes after PREPROCESSOR_START_FLAG
+    all_content_lines =  file_contents.split('\\end{document}')[0]
+    f_no_comments = '\n'.join(l for l in all_content_lines.splitlines() if not l.startswith("%"))
+    should_be_empty = f_no_comments.replace(' ', '').replace('\n', '')
     if len(should_be_empty) > 0:
-        raise Exception(f"Lint check failed! Offending content:\n\n---\n{should_be_empty}\n---\n\nPlease ensure this content is within DRAFT or RELEASE section tags")
+        raise Exception(f"Lint check failed! Offending content:\n\n---\n{all_content_lines}\n---\n\nPlease ensure this content is within DRAFT or RELEASE section tags. Number offending chars: {len(all_content_lines)}\n")
 
 
 @cli.command()
@@ -77,6 +82,11 @@ def process_tex(input_file_path: str, mode: str, output_dir: Optional[str], md_c
     with open(input_file, 'r') as f:
         file_contents = f.read()
 
+    if PREPROCESS_START_FLAG not in file_contents:
+        raise Exception(f"Unable to find flag indicating start of section to be preprocessed. Please add `%{PREPROCESS_START_FLAG}`")
+
+    [unlinted_file_start, file_contents] = file_contents.split(PREPROCESS_START_FLAG, 1)
+
     output_contents = process_file_contents_mode(mode, file_contents)
     output_file = output_dir_path / file_name_w_ext
 
@@ -91,9 +101,8 @@ def process_tex(input_file_path: str, mode: str, output_dir: Optional[str], md_c
     if print_output:
         print(output_contents)
     else:
-        # with open(output_file, 'w') as f:
-            # f.write(file_contents)
-        pass
+        with open(output_file, 'w') as f:
+            f.write('\n'.join([unlinted_file_start, output_contents]))
     return
 
 
