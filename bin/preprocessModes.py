@@ -49,11 +49,11 @@ def process_file_contents_mode(mode: str, file_contents: str):
 
 
 def do_lint_check(file_contents: str):
-    f_no_comments = '\n'.join(l for l in file_contents.splitlines() if not l.startswith("%"))
-    all_content_lines =  f_no_comments.split('\\begin{document}')[1].split('\\end{document}')[0]
-    should_be_empty = all_content_lines.replace(' ', '').replace('\n', '')
+    all_content_lines =  file_contents.split('\\begin{document}')[1].split('\\end{document}')[0]
+    f_no_comments = '\n'.join(l for l in all_content_lines.splitlines() if not l.startswith("%"))
+    should_be_empty = f_no_comments.replace(' ', '').replace('\n', '')
     if len(should_be_empty) > 0:
-        raise Exception(f"Lint check failed! Offending content:\n\n---\n{should_be_empty}\n---\n\nPlease ensure this content is within DRAFT or RELEASE section tags")
+        raise Exception(f"Lint check failed! Offending content:\n\n---\n{all_content_lines}\n---\n\nPlease ensure this content is within DRAFT or RELEASE section tags. Number offending chars: {len(all_content_lines)}\n")
 
 
 @cli.command()
