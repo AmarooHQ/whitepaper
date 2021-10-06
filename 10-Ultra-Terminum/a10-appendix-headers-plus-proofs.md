@@ -53,7 +53,7 @@ From \autoref{eq:simplex-N1-with-PoR}, we have $N_1$ that is of the form $N_1 = 
 
 \label{sec:ext-ports}
 
-Since PoRs are merkle branches, and the leaves of that tree are headers (which have PoW attached), hash truncation works for the hashes comprising explicit PoRs. In effect, this protocol extension is a way to halve the additional overhead of +PoRs. It is called +PoRTs.
+Since PoRs are merkle branches, and the leaves of that tree are headers (which have PoW attached), hash truncation works for the hashes comprising explicit PoRs. In effect, this protocol extension is a way to halve the overhead of +PoRs. It is called +PoRTs.
 
 %% INSERT ### TABLE: tps_port
 

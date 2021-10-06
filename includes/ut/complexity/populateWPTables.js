@@ -1362,6 +1362,17 @@ var PS = {};
           return hashSize * Prel.log2c(n);
       };
   };
+  var utHOPorsT1 = function (n1) {
+      return function (k1) {
+          return function (bf) {
+              return function (v) {
+                  return function (g) {
+                      return n1 * (k1 - bf * n1 * porLen(g)(n1));
+                  };
+              };
+          };
+      };
+  };
   var utPorsT1 = function (n1) {
       return function (k1) {
           return function (bf) {
@@ -1423,75 +1434,83 @@ var PS = {};
           };
       };
   };
-  var loopFindMaxPoRsN1F = function (ps) {
-      return function (g) {
-          return function (initM) {
-              var k1 = Data_List_NonEmpty.head(ps.ks);
-              var hf = Data_List_NonEmpty.head(ps.hfs);
-            
-              // from WP, useful for some things.
-              // | \frac{\d{T_1}}{\d{N_1}}
+  var loopFindMaxPoRsN1F = function (utT1F) {
+      return function (ps) {
+          return function (g) {
+              return function (initM) {
+                  var k1 = Data_List_NonEmpty.head(ps.ks);
+                  var hf = Data_List_NonEmpty.head(ps.hfs);
+                
+                  // from WP, useful for some things.
+                  // | \frac{\d{T_1}}{\d{N_1}}
   var utPorsDT1byDN1 = function (n1) {
-                  return (k1 * $$Math.ln2 - hf.bf * n1 * (g + hf.bh * $$Math.log(4.0)) - 2.0 * hf.bf * g * n1 * $$Math.log(n1)) / $$Math.ln2;
-              };
-            
-              // nRange = A.range 1 wontBeMoreThan <#> I.toNumber
+                      return (k1 * $$Math.ln2 - hf.bf * n1 * (g + hf.bh * $$Math.log(4.0)) - 2.0 * hf.bf * g * n1 * $$Math.log(n1)) / $$Math.ln2;
+                  };
+                
+                  // nRange = A.range 1 wontBeMoreThan <#> I.toNumber
   var utPorsT1Applied = function (n1) {
-                  return utPorsT1(n1)(k1)(hf.bf)(hf.bh)(g);
-              };
-              var wontBeMoreThan = Data_Int.ceil(k1 / 2.0 / hf.bf / hf.bh);
-              var inner = function ($copy_v) {
-                  var $tco_done = false;
-                  var $tco_result;
-                  function $tco_loop(v) {
-                      var n = Data_Int.toNumber(v.i);
-                      var t1 = utPorsT1Applied(n);
-                      var bestN = Data_Int.toNumber(v.bestI);
-                      var $27 = v.i >= wontBeMoreThan || (t1 < 0.0 || (t1 < v.t * 0.96 || t1 < v.t && $$Math.remainder($$Math.abs(Prel.log2(bestN)))(1.0) > 1.0e-2));
-                      if ($27) {
-                          $tco_done = true;
-                          return v;
-                      };
-                      $copy_v = (function () {
-                          var $28 = t1 > v.t;
-                          if ($28) {
+                      return utT1F(n1)(k1)(hf.bf)(hf.bh)(g);
+                  };
+                  var wontBeMoreThan = Data_Int.ceil(k1 / hf.bf / hf.bh);
+                  var inner = function ($copy_v) {
+                      var $tco_done = false;
+                      var $tco_result;
+                      function $tco_loop(v) {
+                          var n = Data_Int.toNumber(v.i);
+                          var t1 = utPorsT1Applied(n);
+                          var bestN = Data_Int.toNumber(v.bestI);
+                          var $32 = v.i >= wontBeMoreThan || (t1 < 0.0 || (t1 < v.t * 0.96 || t1 < v.t && $$Math.remainder($$Math.abs(Prel.log2(bestN)))(1.0) > 1.0e-2));
+                          if ($32) {
+                              $tco_done = true;
+                              return v;
+                          };
+                          $copy_v = (function () {
+                              var $33 = t1 > v.t;
+                              if ($33) {
+                                  return {
+                                      i: v.i + 1 | 0,
+                                      bestI: v.i,
+                                      t: t1
+                                  };
+                              };
                               return {
                                   i: v.i + 1 | 0,
-                                  bestI: v.i,
-                                  t: t1
+                                  bestI: v.bestI,
+                                  t: v.t
                               };
-                          };
-                          return {
-                              i: v.i + 1 | 0,
-                              bestI: v.bestI,
-                              t: v.t
-                          };
-                      })();
-                      return;
+                          })();
+                          return;
+                      };
+                      while (!$tco_done) {
+                          $tco_result = $tco_loop($copy_v);
+                      };
+                      return $tco_result;
                   };
-                  while (!$tco_done) {
-                      $tco_result = $tco_loop($copy_v);
-                  };
-                  return $tco_result;
+                  return (function (v) {
+                      return {
+                          i: v.bestI,
+                          t: v.t
+                      };
+                  })(inner({
+                      i: initM.i,
+                      t: initM.t,
+                      bestI: 0
+                  }));
               };
-              return (function (v) {
-                  return {
-                      i: v.bestI,
-                      t: v.t
-                  };
-              })(inner({
-                  i: initM.i,
-                  t: initM.t,
-                  bestI: 0
-              }));
           };
       };
-  };
-
-  // todo: convert from sorted-array method to a fixed memory iteration where the maximum gets tracked
+  };                                                                  
   var findMaxPoRsN1 = function (ps) {
       return function (g) {
-          return Data_Int.toNumber((loopFindMaxPoRsN1F(ps)(g)({
+          return Data_Int.toNumber((loopFindMaxPoRsN1F(utPorsT1)(ps)(g)({
+              i: 1,
+              t: 0.0
+          })).i);
+      };
+  };                                                                      
+  var findMaxHOPoRsN1 = function (ps) {
+      return function (g) {
+          return Data_Int.toNumber((loopFindMaxPoRsN1F(utHOPorsT1)(ps)(g)({
               i: 1,
               t: 0.0
           })).i);
@@ -1636,6 +1655,78 @@ var PS = {};
           v: bh
       })) * 16.0));
   };
+  var utCalcHOPoRs = function (ps) {
+      return function (v) {
+        
+          // NB: we want to re-adjust *unaltered params `ps` not `ps1` which we use for d1
+  var ps2Pre = paramsForNextNS(ps);
+          var ps3 = paramsForNextNS(ps2Pre);
+          var origBh = (Data_List_NonEmpty.head(ps.hfs)).bh;
+          var k1 = Data_List_NonEmpty.head(ps.ks);
+          var htModBh = function (bh) {
+              if (v.hashTruncation) {
+                  return applyTDiscountToBH(bh);
+              };
+              return bh;
+          };
+          var hf = Data_List_NonEmpty.head(ps.hfs);
+          var hashSize = (function () {
+              if (v.hashTruncation) {
+                  return 16.0;
+              };
+              return 32.0;
+          })();
+          var n1 = findMaxHOPoRsN1(ps)(hashSize);
+          var porBytes = porLen(hashSize)(n1);
+          var fixBH2 = function (v1) {
+              return {
+                  bh: htModBh(v1.bh),
+                  bf: v1.bf
+              };
+          };
+          var ps2 = {
+              hfs: Data_List_NonEmpty["cons'"](fixBH2(Data_List_NonEmpty.head(ps2Pre.hfs)))(Data_List_NonEmpty.tail(ps2Pre.hfs)),
+              ks: ps2Pre.ks,
+              txSize: ps2Pre.txSize
+          };
+          var deltaBigS = n1 * k1;
+          var sigmaTts = (5.0 * 365.25 * deltaBigS) / 1.0e7;
+          var confRate = hf.bf * n1;
+          var explicitHeadersK = confRate * htModBh(origBh);
+          var deltaSmallS = k1 + explicitHeadersK;
+          var tts = (5.0 * 365.25 * deltaSmallS) / 1.0e7;
+          var explicitPorsK = confRate * porBytes;
+          var kTx = k1 - explicitPorsK;
+          var kB = k1 - kTx;
+          var t1 = kTx * n1;
+          var d1 = {
+              n: n1,
+              t: t1,
+              tps: t1 / ps.txSize,
+              p: pToPF(ps)
+          };
+          var d2 = calcNextNestingLevel(ps2)(d1);
+          var d3 = calcNextNestingLevel(ps3)(d2);
+          var porBytes2 = porLen(hashSize)(d2.n / n1);
+          return {
+              d1: d1,
+              d2: d2,
+              d3: d3,
+              confRate: confRate,
+              tts: tts,
+              sigmaTts: sigmaTts,
+              deltaBigS: deltaBigS,
+              deltaSmallS: deltaSmallS,
+              porBytes: porBytes,
+              porBytes2: porBytes2,
+              effBh: porBytes,
+              effDh: d2.p.hf.bh,
+              kTx: kTx,
+              kB: kB,
+              k1: k1
+          };
+      };
+  };
   var utChainCalc = function (ps) {
       return function (v) {
         
@@ -1741,6 +1832,12 @@ var PS = {};
               };
               return d1.p.hf.bh;
           })();
+          var $96 = v.explicitPoRs && v.headerOmission;
+          if ($96) {
+              return utCalcHOPoRs(ps)({
+                  hashTruncation: v.hashTruncation
+              });
+          };
           return {
               d1: d1,
               d2: d2,
@@ -1770,6 +1867,16 @@ var PS = {};
           ports: f({
               explicitPoRs: true,
               headerOmission: false,
+              hashTruncation: true
+          }),
+          hopors: f({
+              explicitPoRs: true,
+              headerOmission: true,
+              hashTruncation: false
+          }),
+          hoports: f({
+              explicitPoRs: true,
+              headerOmission: true,
               hashTruncation: true
           }),
           std: f({
@@ -2746,8 +2853,8 @@ var PS = {};
           return 0.0 > Data_Function.flip(Data_Ring.sub(Data_Ring.ringNumber))(1.0e-8)($$Math.abs(a - b));
       };
   };
-  var rev = function ($39) {
-      return Data_String_Utils.fromCharArray(Data_Array.reverse(Data_String_Utils.toCharArray($39)));
+  var rev = function ($41) {
+      return Data_String_Utils.fromCharArray(Data_Array.reverse(Data_String_Utils.toCharArray($41)));
   };
   var fmtPlain = Data_Number_Format.toString;
   var fmtFixedP = function (p) {
@@ -2759,13 +2866,15 @@ var PS = {};
       mp: new Data_Maybe.Just(1),
       commas: false,
       pOnlySi: false,
-      wSI: true
+      wSI: true,
+      infLikeNan: false
   };
   var fdK = {
       pOnlySi: true,
       wSI: false,
       commas: fdDefaults.commas,
       high: fdDefaults.high,
+      infLikeNan: fdDefaults.infLikeNan,
       low: fdDefaults.low,
       mp: fdDefaults.mp
   };
@@ -2773,6 +2882,7 @@ var PS = {};
       commas: false,
       pOnlySi: false,
       high: fdDefaults.high,
+      infLikeNan: fdDefaults.infLikeNan,
       low: fdDefaults.low,
       mp: fdDefaults.mp,
       wSI: fdDefaults.wSI
@@ -2781,6 +2891,7 @@ var PS = {};
       mp: new Data_Maybe.Just(2),
       commas: fdPlain.commas,
       high: fdPlain.high,
+      infLikeNan: fdPlain.infLikeNan,
       low: fdPlain.low,
       pOnlySi: fdPlain.pOnlySi,
       wSI: fdPlain.wSI
@@ -2789,6 +2900,7 @@ var PS = {};
       pOnlySi: true,
       commas: fdPlainTwo.commas,
       high: fdPlainTwo.high,
+      infLikeNan: fdPlainTwo.infLikeNan,
       low: fdPlainTwo.low,
       mp: fdPlainTwo.mp,
       wSI: fdPlainTwo.wSI
@@ -2797,6 +2909,7 @@ var PS = {};
       mp: new Data_Maybe.Just(0),
       commas: fdPlain.commas,
       high: fdPlain.high,
+      infLikeNan: fdPlain.infLikeNan,
       low: fdPlain.low,
       pOnlySi: fdPlain.pOnlySi,
       wSI: fdPlain.wSI
@@ -2805,6 +2918,7 @@ var PS = {};
       commas: true,
       pOnlySi: false,
       high: fdDefaults.high,
+      infLikeNan: fdDefaults.infLikeNan,
       low: fdDefaults.low,
       mp: fdDefaults.mp,
       wSI: fdDefaults.wSI
@@ -2813,6 +2927,7 @@ var PS = {};
       mp: new Data_Maybe.Just(2),
       commas: fdStd.commas,
       high: fdStd.high,
+      infLikeNan: fdStd.infLikeNan,
       low: fdStd.low,
       pOnlySi: fdStd.pOnlySi,
       wSI: fdStd.wSI
@@ -2821,6 +2936,16 @@ var PS = {};
       pOnlySi: true,
       commas: fdStdTwo.commas,
       high: fdStdTwo.high,
+      infLikeNan: fdStdTwo.infLikeNan,
+      low: fdStdTwo.low,
+      mp: fdStdTwo.mp,
+      wSI: fdStdTwo.wSI
+  };
+  var fdStdNoSiMixed = {
+      pOnlySi: true,
+      high: 15,
+      commas: fdStdTwo.commas,
+      infLikeNan: fdStdTwo.infLikeNan,
       low: fdStdTwo.low,
       mp: fdStdTwo.mp,
       wSI: fdStdTwo.wSI
@@ -2829,14 +2954,15 @@ var PS = {};
       mp: new Data_Maybe.Just(0),
       commas: fdStd.commas,
       high: fdStd.high,
+      infLikeNan: fdStd.infLikeNan,
       low: fdStd.low,
       pOnlySi: fdStd.pOnlySi,
       wSI: fdStd.wSI
   };
   var chunk = function (n) {
       return function (s) {
-          var $13 = Data_String_CodePoints.length(s) <= 3;
-          if ($13) {
+          var $14 = Data_String_CodePoints.length(s) <= 3;
+          if ($14) {
               return [ s ];
           };
           return Data_Semigroup.append(Data_Semigroup.semigroupArray)([ Data_String_CodePoints.take(3)(s) ])(chunk(n)(Data_String_CodePoints.drop(3)(s)));
@@ -2849,8 +2975,8 @@ var PS = {};
       return function (n) {
           var lsf = Data_Maybe.fromMaybe("")(Data_Array.head(Data_Array.drop(1)(Data_String_Common.split(".")(Data_Number_Format.toStringWith(Data_Number_Format.fixed(p))(n)))));
           return fmtCommas(n) + (function () {
-              var $14 = Data_String_CodePoints.length(lsf) === 0;
-              if ($14) {
+              var $15 = Data_String_CodePoints.length(lsf) === 0;
+              if ($15) {
                   return "";
               };
               return "." + lsf;
@@ -2906,10 +3032,10 @@ var PS = {};
       return Effect_Exception_Unsafe.unsafeThrowException(Effect_Exception.error("bad input to _fmtSciNot: " + Data_Show.show(Data_Show.showArray(Data_Show.showString))(v)));
   };
   var fmtSciNot = function (precision) {
-      var $40 = Data_String_Common.split("e");
-      var $41 = Data_Number_Format.toStringWith(Data_Number_Format.exponential(precision));
-      return function ($42) {
-          return _fmtSciNot($40($41($42)));
+      var $42 = Data_String_Common.split("e");
+      var $43 = Data_Number_Format.toStringWith(Data_Number_Format.exponential(precision));
+      return function ($44) {
+          return _fmtSciNot($42($43($44)));
       };
   };
   var fmtDyn = function (v) {
@@ -2932,10 +3058,10 @@ var PS = {};
           };
           var err = $$Math.pow(10.0)(-1.0 * Data_Int.toNumber(p)) * 0.5;
           var outsideRange = n < $$Math.pow(10.0)(Data_Int.toNumber(v.low)) + err || n >= $$Math.pow(10.0)(Data_Int.toNumber(v.high)) - err;
-          var $28 = !Data_Number["isFinite"](n);
-          if ($28) {
-              var $29 = Data_Number["isNaN"](n);
-              if ($29) {
+          var $29 = !Data_Number["isFinite"](n);
+          if ($29) {
+              var $30 = Data_Number["isNaN"](n) || v.infLikeNan;
+              if ($30) {
                   return "-";
               };
               return wrap("$")("\\infty");
@@ -2955,10 +3081,10 @@ var PS = {};
       };
   };
   var _fmtParams = (function () {
-      var $43 = wrap("$");
-      var $44 = Data_Array.intercalate(Data_Monoid.monoidString)(", ");
-      return function ($45) {
-          return $43($44($45));
+      var $45 = wrap("$");
+      var $46 = Data_Array.intercalate(Data_Monoid.monoidString)(", ");
+      return function ($47) {
+          return $45($46($47));
       };
   })();
   var fmtPsKBfBh = function (ps) {
@@ -2974,6 +3100,7 @@ var PS = {};
   exports["fdStdZero"] = fdStdZero;
   exports["fdStdTwo"] = fdStdTwo;
   exports["fdStdMixed"] = fdStdMixed;
+  exports["fdStdNoSiMixed"] = fdStdNoSiMixed;
   exports["fdPlainMixed"] = fdPlainMixed;
   exports["fmtPsKBfBh"] = fmtPsKBfBh;
 })(PS);
@@ -3347,7 +3474,6 @@ var PS = {};
   exports["traversableArray"] = traversableArray;
 })(PS);
 (function($PS) {
-  // Generated by purs version 0.14.4
   "use strict";
   $PS["Amaroo.WP.Tables"] = $PS["Amaroo.WP.Tables"] || {};
   var exports = $PS["Amaroo.WP.Tables"];
@@ -3393,6 +3519,24 @@ var PS = {};
           return new PoRTs(value0);
       };
       return PoRTs;
+  })();
+  var HOPoRs = (function () {
+      function HOPoRs(value0) {
+          this.value0 = value0;
+      };
+      HOPoRs.create = function (value0) {
+          return new HOPoRs(value0);
+      };
+      return HOPoRs;
+  })();
+  var HOPoRTs = (function () {
+      function HOPoRTs(value0) {
+          this.value0 = value0;
+      };
+      HOPoRTs.create = function (value0) {
+          return new HOPoRTs(value0);
+      };
+      return HOPoRTs;
   })();
   var Std = (function () {
       function Std(value0) {
@@ -3495,6 +3639,14 @@ var PS = {};
               $tco_done = true;
               return v.value0;
           };
+          if (v instanceof HOPoRs) {
+              $tco_done = true;
+              return v.value0;
+          };
+          if (v instanceof HOPoRTs) {
+              $tco_done = true;
+              return v.value0;
+          };
           if (v instanceof Std) {
               $tco_done = true;
               return v.value0;
@@ -3515,7 +3667,7 @@ var PS = {};
               $copy_v = v.value0;
               return;
           };
-          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 239, column 1 - line 239, column 30): " + [ v.constructor.name ]);
+          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 251, column 1 - line 251, column 30): " + [ v.constructor.name ]);
       };
       while (!$tco_done) {
           $tco_result = $tco_loop($copy_v);
@@ -3531,6 +3683,14 @@ var PS = {};
               return v.value0;
           };
           if (v instanceof PoRTs) {
+              $tco_done = true;
+              return v.value0;
+          };
+          if (v instanceof HOPoRs) {
+              $tco_done = true;
+              return v.value0;
+          };
+          if (v instanceof HOPoRTs) {
               $tco_done = true;
               return v.value0;
           };
@@ -3573,6 +3733,14 @@ var PS = {};
               $tco_done = true;
               return "PoRTs";
           };
+          if (v instanceof HOPoRs) {
+              $tco_done = true;
+              return "HOPoRs";
+          };
+          if (v instanceof HOPoRTs) {
+              $tco_done = true;
+              return "HOPoRTs";
+          };
           if (v instanceof Std) {
               $tco_done = true;
               return "OP";
@@ -3593,7 +3761,7 @@ var PS = {};
               $copy_v = v.value0;
               return;
           };
-          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 99, column 1 - line 99, column 28): " + [ v.constructor.name ]);
+          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 101, column 1 - line 101, column 28): " + [ v.constructor.name ]);
       };
       while (!$tco_done) {
           $tco_result = $tco_loop($copy_v);
@@ -3633,12 +3801,16 @@ var PS = {};
       })(table);
   };
   var sToExt = function (s) {
-      var $78 = Data_String_CodePoints.length(s) > 0;
-      if ($78) {
+      var $91 = Data_String_CodePoints.length(s) > 0;
+      if ($91) {
           return "+\\text{" + (s + "}");
       };
       return "+\\emptyset";
   };
+
+  // Note: CBF -- it was only there b/c of solana's rediculous 700k tps claim anyway
+  // utVsOther1Gbps :: Array {net :: Network, p :: Params}
+  // utVsOther1Gbps =
   var repeatSafe = function (n) {
       return function (s) {
           return Data_Maybe.fromMaybe("")(Data_String_Utils.repeat(n)(s));
@@ -3688,8 +3860,8 @@ var PS = {};
               return Data_Number.nan;
           };
           if (v instanceof UT) {
-              var $86 = utNestingLvl(v.value0) >= 2;
-              if ($86) {
+              var $103 = utNestingLvl(v.value0) >= 2;
+              if ($103) {
                   return v1.d2.n;
               };
               return Data_Number.nan;
@@ -3707,37 +3879,37 @@ var PS = {};
       };
       return Effect_Exception_Unsafe.unsafeThrowException(Effect_Exception.error("makeCompareRowConcise got wrong number of cols"));
   };
-  var lpCompareTH = Amaroo_WP_Tables_Types.Table.create([ "$k$, $B_f$, $B_h$", "Network", "Eff. $B_h$ (B)", "$\\Sigma$ TPS (tx/s)" ])({
+  var lpCompareTH = Amaroo_WP_Tables_Types.Table.create([ "$k$, $B_f$, $B_h$", "Network", "E. $B_h$ (B)", "$\\Sigma$ TPS (tx/s)" ])({
       md: Data_Functor.map(Data_Functor.functorArray)(mkSpacer)([ 5, 6, 3, 3 ]),
       texTabular: "llrr"
   });
-  var lpCompare2TH = Amaroo_WP_Tables_Types.Table.create([ "$k$, $B_f$, $B_h$", "Network", "Eff. $B_h$ (B)", "Eff. $D_h$ (B)", "$\\Sigma$ TPS (tx/s)" ])({
+  var lpCompare2TH = Amaroo_WP_Tables_Types.Table.create([ "$k$, $B_f$, $B_h$", "Network", "E. $B_h$ (B)", "E. $D_h$ (B)", "$\\Sigma$ TPS (tx/s)" ])({
       md: Data_Functor.map(Data_Functor.functorArray)(mkSpacer)([ 5, 6, 3, 3, 3 ]),
       texTabular: "llrrr"
   });
   var latexToMathjax = (function () {
-      var $217 = Data_String_Common.replaceAll("\\nicefrac")("\\frac");
-      var $218 = Data_String_Common.replaceAll("\\UT")("\\text{UT}_");
-      var $219 = Data_String_Common.replaceAll("\\UTinf{")("\\text{UT}_{\\aleph ");
-      return function ($220) {
-          return $217($218($219($220)));
+      var $254 = Data_String_Common.replaceAll("\\nicefrac")("\\frac");
+      var $255 = Data_String_Common.replaceAll("\\UT")("\\text{UT}_");
+      var $256 = Data_String_Common.replaceAll("\\UTinf{")("\\text{UT}_{\\aleph ");
+      return function ($257) {
+          return $254($255($256($257)));
       };
   })();
   var showHtmlTable = function (_id) {
       return function (v) {
           var wXmlWNs = function (tag) {
-              var $221 = Data_Semigroup.append(Data_Semigroup.semigroupString)("\x0a");
-              var $222 = Amaroo_WP_Formatter.wrapXml(tag);
-              return function ($223) {
-                  return $221($222($223));
+              var $258 = Data_Semigroup.append(Data_Semigroup.semigroupString)("\x0a");
+              var $259 = Amaroo_WP_Formatter.wrapXml(tag);
+              return function ($260) {
+                  return $258($259($260));
               };
           };
           var join = Data_Array.intercalate(Data_Monoid.monoidString)("");
           return latexToMathjax(Amaroo_WP_Formatter.wrapXmlWAttr("table")("id=\"" + (_id + "\""))(Data_Function.flip(Data_Semigroup.append(Data_Semigroup.semigroupString))("\x0a")(wXmlWNs("tr")(join(Data_Functor.map(Data_Functor.functorArray)(Amaroo_WP_Formatter.wrapXml("th"))(v.value0))) + join(Data_Functor.map(Data_Functor.functorArray)((function () {
-              var $224 = wXmlWNs("tr");
-              var $225 = Data_Functor.map(Data_Functor.functorArray)(Amaroo_WP_Formatter.wrapXml("td"));
-              return function ($226) {
-                  return $224(join($225($226)));
+              var $261 = wXmlWNs("tr");
+              var $262 = Data_Functor.map(Data_Functor.functorArray)(Amaroo_WP_Formatter.wrapXml("td"));
+              return function ($263) {
+                  return $261(join($262($263)));
               };
           })())(v.value2)))));
       };
@@ -3764,6 +3936,14 @@ var PS = {};
               if (v instanceof UT && v.value0 instanceof PoRTs) {
                   $tco_done = true;
                   return Amaroo_WP_Calcs.utChainCalc(p)((Amaroo_WP_Calcs.allUtChainCalcsF(id)).ports);
+              };
+              if (v instanceof UT && v.value0 instanceof HOPoRs) {
+                  $tco_done = true;
+                  return Amaroo_WP_Calcs.utChainCalc(p)((Amaroo_WP_Calcs.allUtChainCalcsF(id)).hopors);
+              };
+              if (v instanceof UT && v.value0 instanceof HOPoRTs) {
+                  $tco_done = true;
+                  return Amaroo_WP_Calcs.utChainCalc(p)((Amaroo_WP_Calcs.allUtChainCalcsF(id)).hoports);
               };
               if (v instanceof UT && v.value0 instanceof Std) {
                   $tco_done = true;
@@ -3808,8 +3988,8 @@ var PS = {};
       return function (i) {
           return function (e) {
               return f((function () {
-                  var $120 = i <= 0;
-                  if ($120) {
+                  var $141 = i <= 0;
+                  if ($141) {
                       return "";
                   };
                   return iToS(i);
@@ -3824,9 +4004,9 @@ var PS = {};
       return utNameInner(utBaseN)(utNameI(v))(utNameE(v));
   };
   var utName_ = (function () {
-      var $227 = Amaroo_WP_Formatter.wrap("$");
-      return function ($228) {
-          return $227(utName($228));
+      var $264 = Amaroo_WP_Formatter.wrap("$");
+      return function ($265) {
+          return $264(utName($265));
       };
   })();
   var netToScalingFactor = function (v) {
@@ -3859,7 +4039,7 @@ var PS = {};
               };
               return Effect_Exception_Unsafe.unsafeThrowException(Effect_Exception.error("[netToScalingFactor] got bad level of nesting in UT network: " + utName_(v.value0)));
           };
-          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 270, column 1 - line 270, column 45): " + [ v.constructor.name, aux.constructor.name ]);
+          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 288, column 1 - line 288, column 45): " + [ v.constructor.name, aux.constructor.name ]);
       };
   };
   var netToTps = function (v) {
@@ -3892,7 +4072,7 @@ var PS = {};
               };
               return Effect_Exception_Unsafe.unsafeThrowException(Effect_Exception.error("[netToTps] got bad level of nesting in UT network: " + utName_(v.value0)));
           };
-          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 288, column 1 - line 288, column 44): " + [ v.constructor.name, cd.constructor.name ]);
+          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 306, column 1 - line 306, column 44): " + [ v.constructor.name, cd.constructor.name ]);
       };
   };
   var showNetwork = {
@@ -3915,7 +4095,7 @@ var PS = {};
           if (v instanceof UT) {
               return utName_(v.value0);
           };
-          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 187, column 1 - line 193, column 28): " + [ v.constructor.name ]);
+          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 195, column 1 - line 201, column 28): " + [ v.constructor.name ]);
       }
   };
   var netLookupChainStats = function ($copy_v) {
@@ -3931,6 +4111,14 @@ var PS = {};
               if (v instanceof UT && v.value0 instanceof PoRTs) {
                   $tco_done = true;
                   return v1.ports;
+              };
+              if (v instanceof UT && v.value0 instanceof HOPoRs) {
+                  $tco_done = true;
+                  return v1.hopors;
+              };
+              if (v instanceof UT && v.value0 instanceof HOPoRTs) {
+                  $tco_done = true;
+                  return v1.hoports;
               };
               if (v instanceof UT && v.value0 instanceof Std) {
                   $tco_done = true;
@@ -3971,6 +4159,8 @@ var PS = {};
           return Data_Semigroup.append(Data_Semigroup.semigroupArray)([ Amaroo_WP_Formatter.fmtPsKBfBh(Amaroo_WP_Calcs.pToPF(cd.ps)) ])(Data_Functor.map(Data_Functor.functorArray)(Data_Functor.map(Data_Functor.functorFn)(Amaroo_WP_Formatter.fmtDyn(Amaroo_WP_Formatter.fdStdMixed))(getTps))([ cd.trad.d1, cd.trad.d2, (utF(cd)).d1, (utF(cd)).d2, (utF(cd)).d3 ]));
       };
   };
+
+  // TODO: replace `fmtDyn fdPlain`
   var genPoRRow = function (utF) {
       return function (cd) {
           var ut = utF(cd);
@@ -3991,8 +4181,8 @@ var PS = {};
               return cs.effBh;
           })();
           var tps = (function () {
-              var $152 = isAleph(v.net);
-              if ($152) {
+              var $177 = isAleph(v.net);
+              if ($177) {
                   return Data_Number.infinity;
               };
               return netToTps(v.net)(cs);
@@ -4005,13 +4195,13 @@ var PS = {};
           var p = v.p(k);
           var cs = netToChainStats(v.net)(p);
           var tps = (function () {
-              var $156 = isAleph(v.net);
-              if ($156) {
+              var $181 = isAleph(v.net);
+              if ($181) {
                   return Data_Number.infinity;
               };
               return netToTps(v.net)(cs);
           })();
-          return Data_Semigroup.append(Data_Semigroup.semigroupArray)([ Amaroo_WP_Formatter.fmtPsKBfBh(Amaroo_WP_Calcs.pToPF(p)), Data_Show.show(showNetwork)(v.net) ])(Data_Functor.map(Data_Functor.functorArray)(Amaroo_WP_Formatter.fmtDyn(Amaroo_WP_Formatter.fdStdMixed))([ cs.effBh, cs.effDh, tps ]));
+          return Data_Semigroup.append(Data_Semigroup.semigroupArray)([ Amaroo_WP_Formatter.fmtPsKBfBh(Amaroo_WP_Calcs.pToPF(p)), Data_Show.show(showNetwork)(v.net) ])(Data_Functor.map(Data_Functor.functorArray)(Amaroo_WP_Formatter.fmtDyn(Amaroo_WP_Formatter.fdStdNoSiMixed))([ cs.effBh, cs.effDh, tps ]));
       };
   };
   var genDappChainsRow = function (utF) {
@@ -4037,15 +4227,17 @@ var PS = {};
           var p = v.p(k);
           var cs = netToChainStats(v.net)(p);
           var n2 = (function () {
-              var $162 = isAleph(v.net);
-              if ($162) {
+              var $187 = isAleph(v.net);
+              if ($187) {
                   return Data_Number.infinity;
               };
               return netToN2(v.net)(cs);
           })();
-          var tps = (function () {
-              var $163 = isAleph(v.net);
-              if ($163) {
+        
+          // n1 = if isAleph net then infinity else cs.d1.n
+  var tps = (function () {
+              var $188 = isAleph(v.net);
+              if ($188) {
                   return Data_Number.infinity;
               };
               return netToTps(v.net)(cs);
@@ -4070,11 +4262,11 @@ var PS = {};
   };
   var showMdTable = function (v) {
       return Data_Array.intercalate(Data_Monoid.monoidString)("\x0a")(fixRow2(Data_Functor.map(Data_Functor.functorArray)((function () {
-          var $230 = Amaroo_WP_Formatter.wrap("|");
-          var $231 = Amaroo_WP_Formatter.wrap(" ");
-          var $232 = Data_Array.intercalate(Data_Monoid.monoidString)(" | ");
-          return function ($233) {
-              return $230($231($232($233)));
+          var $267 = Amaroo_WP_Formatter.wrap("|");
+          var $268 = Amaroo_WP_Formatter.wrap(" ");
+          var $269 = Data_Array.intercalate(Data_Monoid.monoidString)(" | ");
+          return function ($270) {
+              return $267($268($269($270)));
           };
       })())(Data_Semigroup.append(Data_Semigroup.semigroupArray)([ v.value0, v.value1.md ])(v.value2))));
   };
@@ -4096,6 +4288,12 @@ var PS = {};
                   return x.value0 === y.value0;
               };
               if (x instanceof PoRTs && y instanceof PoRTs) {
+                  return x.value0 === y.value0;
+              };
+              if (x instanceof HOPoRs && y instanceof HOPoRs) {
+                  return x.value0 === y.value0;
+              };
+              if (x instanceof HOPoRTs && y instanceof HOPoRTs) {
                   return x.value0 === y.value0;
               };
               if (x instanceof Std && y instanceof Std) {
@@ -4142,6 +4340,52 @@ var PS = {};
           };
       }
   };
+
+  /**
+ * |
+ * 
+ * # Tables for UT WP (and Amaroo WPs in general)
+ * 
+ * ## Notes on props relevant to scalability of various chains
+ * 
+ * ### Polkadot:
+ * 
+ * * header size: 288 bytes (via polkadot.js rpc)
+ * * block time: 6s
+ * 
+ * https://telemetry.polkadot.io/#/Polkadot
+ * 
+ * also I made a little `npm init && npm i -S polkadot.js` project to get the header size (which is pretty easy; polkadot.js seems good -- I've seen way worse)
+ * 
+ * ### Eth 2:
+ * 
+ * * header size: 192 bytes (mb 224?) (via lighthouse beaconchain node http API)
+ * * 12s block times (inferred b/c there seems to be a very regular 5 blocks/min pattern; couldn't find a source as easily)
+ * 
+ * * update note: every 10th block (200B) + 8192 / 10
+ * 
+ * ### Cardano:
+ * 
+ * * header size: 1070 B -- via https://liberlion.medium.com/what-you-should-know-about-cardano-part-1-8c59ebbace49 -- note: secondary source and doesn't provide citation
+ * * 20s block time -- inferred via ~4250 blocks per day -> v close to 20s block time; data from: https://messari.io/asset/cardano/charts/network-activity/blocks
+ * 
+ * ### Solana:
+ * 
+ * NB: out of date, see bandwidth_to_k_solana
+ * 
+ * * ~~header size: 64 + 1 + (8+8+8+8) + 32 + 4 + 8 = 141 -> 144 bytes after padding~~
+ * * ~~block time about 550ms atm (31/8/21) via https://explorer.solana.com/ -- this source says 600ms https://forkast.news/what-is-solana-why-hottest-blockchain/~~
+ * 
+ * ~~https://docs.rs/solana/0.16.6/src/solana/packet.rs.html#341 (the linked line is an incremental construction of the header layout)~~
+ * 
+ * ~~also WTF re their hardware requirements!? https://youtu.be/6HHHYtPPUaA?t=421 !!! J.C.
+ * https://web.archive.org/web/20210831185445/https://docs.solana.com/running-validator/validator-reqs~~
+ * 
+ * ~~also good on their validators getting access to zen3 threadrippers only weeks after specifications were *leaked*. :/ (the author meant 3000 series threadrippers which are zen2)~~
+ * 
+ * ~~how solana makes sure the validator base is decentralized enough :/ <https://twitter.com/aeyakovenko/status/1315689754743107584>~~
+ * 
+ */  
   var confRateTex = "\\mathbb{C}^\\prime";
   var confRateTh = Amaroo_WP_Formatter.wrap("$")(confRateTex) + " (Hz)";
   var optimizationProps1 = [ {
@@ -4190,7 +4434,7 @@ var PS = {};
       md: Data_Functor.map(Data_Functor.functorArray)(mkSpacer)([ 5, 6, 2, 2, 3, 4, 3 ]),
       texTabular: "llrrrrr"
   });
-  var compareNetsFilterList = [ Bitcoin.value, Cardano.value, new UT(new PoRTs(1)), new UT(new T(1)), new UT(new HOT(1)), Polkadot.value, Eth2.value, OptShard.value, new UT(new PoRTs(2)), new UT(new T(2)), new UT(new HOT(2)), new UT(new Aleph(new HOT(2))) ];
+  var compareNetsFilterList = [ Bitcoin.value, Cardano.value, new UT(new PoRTs(1)), new UT(new HOPoRTs(1)), new UT(new HOT(1)), Polkadot.value, Eth2.value, OptShard.value, new UT(new PoRTs(2)), new UT(new HOPoRTs(2)), new UT(new HOT(2)), new UT(new Aleph(new HOT(2))) ];
   var compareNetsConciseTH = Amaroo_WP_Tables_Types.Table.create([ "$k$, $B_f$, $B_h$", "Network", "Scale $\\times$", "$N_2$", "$\\Sigma$ TPS" ])({
       md: Data_Functor.map(Data_Functor.functorArray)(mkSpacer)([ 5, 6, 3, 4, 3 ]),
       texTabular: "llrrr"
@@ -4208,7 +4452,7 @@ var PS = {};
   };
   var _UT_INIT_CONFIG = Amaroo_WP_Calcs.mkSimplePs(3000.0)(_UT_HF)(250.0);
   var compareUtOptimizations = (function () {
-      var variants = [ new PoRs(0), new PoRTs(0), new Std(0), new T(0), new HO(0), new HOT(0) ];
+      var variants = [ new PoRs(0), new PoRTs(0), new HOPoRs(0), new HOPoRTs(0), new Std(0), new T(0), new HO(0), new HOT(0) ];
       var ut = Amaroo_WP_Calcs.allUtChainCalcs(_UT_INIT_CONFIG);
       var l = Data_Array.length(optimizationProps1);
       return new Amaroo_WP_Tables_Types.Table(Data_Semigroup.append(Data_Semigroup.semigroupArray)([ "" ])(Data_Functor.mapFlipped(Data_Functor.functorArray)(optimizationProps1)(function (v) {
@@ -4219,7 +4463,7 @@ var PS = {};
       }, Data_Functor.map(Data_Functor.functorArray)(genCompareUtRow(ut)(optimizationProps1))(variants));
   })();
   var compareUtOptimizations2 = (function () {
-      var variants = [ new PoRs(0), new PoRTs(0), new Std(0), new T(0), new HO(0), new HOT(0) ];
+      var variants = [ new PoRs(0), new PoRTs(0), new HOPoRs(0), new HOPoRTs(0), new Std(0), new T(0), new HO(0), new HOT(0) ];
       var ut = Amaroo_WP_Calcs.allUtChainCalcs(_UT_INIT_CONFIG);
       return new Amaroo_WP_Tables_Types.Table(Data_Semigroup.append(Data_Semigroup.semigroupArray)([ "" ])(Data_Functor.mapFlipped(Data_Functor.functorArray)(optimizationProps2)(function (v) {
           return v.s;
@@ -4229,7 +4473,7 @@ var PS = {};
       }, Data_Functor.map(Data_Functor.functorArray)(genCompareUtRow(ut)(optimizationProps2))(variants));
   })();
   var mkCompareUtOptimizations = function (oProps) {
-      var variants = [ new PoRs(0), new PoRTs(0), new Std(0), new T(0), new HO(0), new HOT(0) ];
+      var variants = [ new PoRs(0), new PoRTs(0), new HOPoRs(0), new HOPoRTs(0), new Std(0), new T(0), new HO(0), new HOT(0) ];
       var ut = Amaroo_WP_Calcs.allUtChainCalcs(_UT_INIT_CONFIG);
       return new Amaroo_WP_Tables_Types.Table(Data_Semigroup.append(Data_Semigroup.semigroupArray)([ "" ])(Data_Functor.mapFlipped(Data_Functor.functorArray)(oProps)(function (v) {
           return v.s;
@@ -4266,14 +4510,22 @@ var PS = {};
   } ]);
   var _UT2PORTS_1M_K = 3790.0;
   var _UT2PORS_1M_K = 4870.0;
+  var _UT2HOPORTS_1M_K = 3450.0;
+  var _UT2HOPORS_1M_K = 4400.0;
   var _UT1PORTS_1M_K = 131250.0;
   var _UT1PORS_1M_K = 177000.0;
+  var _UT1HOPORTS_1M_K = 113500.0;
+  var _UT1HOPORS_1M_K = 160000.0;
   var _POLKADOT_BH = 288.0;
   var _POLKADOT_BF = btToF(6);
+
+  // _POLKADOT_1M_K = 109_810.0
   var _POLKADOT_1M_K = 184800.0;
   var _ETH2_DH = 280.0;
   var _ETH2_BH = 200.0;
   var _ETH2_BF = btToF(12);
+
+  // _ETH2_1M_K = 105_700.0
   var _ETH2_1M_K = 244200.0;
   var _COMPARE_20K = 20000.0;
   var utComplexityParams = Data_Semigroup.append(Data_Semigroup.semigroupArray)(Control_Bind.bind(Control_Bind.bindArray)([ 3000.0, _COMPARE_20K ])(function (k) {
@@ -4369,6 +4621,18 @@ var PS = {};
       },
       oneMTps: new Data_Maybe.Just(_UT1PORTS_1M_K)
   }, {
+      net: new UT(new HOPoRs(1)),
+      p: function (k) {
+          return Amaroo_WP_Calcs.mkSimplePs(k)(_UT_HF)(250.0);
+      },
+      oneMTps: new Data_Maybe.Just(_UT1HOPORS_1M_K)
+  }, {
+      net: new UT(new HOPoRTs(1)),
+      p: function (k) {
+          return Amaroo_WP_Calcs.mkSimplePs(k)(_UT_HF)(250.0);
+      },
+      oneMTps: new Data_Maybe.Just(_UT1HOPORTS_1M_K)
+  }, {
       net: new UT(new Std(1)),
       p: function (k) {
           return Amaroo_WP_Calcs.mkSimplePs(k)(_UT_HF)(250.0);
@@ -4441,6 +4705,18 @@ var PS = {};
       },
       oneMTps: new Data_Maybe.Just(_UT2PORTS_1M_K)
   }, {
+      net: new UT(new HOPoRs(2)),
+      p: function (k) {
+          return Amaroo_WP_Calcs.mkSimplePs(k)(_UT_HF)(250.0);
+      },
+      oneMTps: new Data_Maybe.Just(_UT2HOPORS_1M_K)
+  }, {
+      net: new UT(new HOPoRTs(2)),
+      p: function (k) {
+          return Amaroo_WP_Calcs.mkSimplePs(k)(_UT_HF)(250.0);
+      },
+      oneMTps: new Data_Maybe.Just(_UT2HOPORTS_1M_K)
+  }, {
       net: new UT(new Std(2)),
       p: function (k) {
           return Amaroo_WP_Calcs.mkSimplePs(k)(_UT_HF)(250.0);
@@ -4475,6 +4751,11 @@ var PS = {};
   var filteredUtVsOther = filterUtVsOther(compareNetsFilterList);
   var compareNets20k = compareNetsTH(Data_Functor.map(Data_Functor.functorArray)(genCompareRow(_COMPARE_20K))(filteredUtVsOther));
   var compareNets3k = compareNetsTH(Data_Functor.map(Data_Functor.functorArray)(genCompareRow(3000.0))(filteredUtVsOther));
+
+  // diagF1M :: Number -> Array _
+  // diagF1M = filter (notPoRs <<< \e -> e.net) <<< utVsOther
+  // utVsOther1MOld :: Array {net :: Network, p :: Params}
+  // utVsOther1MOld = diagonalApply diagF1M ut1MCompareKs
   var utVsOther1M = (function () {
       var calc1M = function (v) {
           if (v.oneMTps instanceof Data_Maybe.Just) {
@@ -4486,12 +4767,14 @@ var PS = {};
           if (v.oneMTps instanceof Data_Maybe.Nothing) {
               return Data_Maybe.Nothing.value;
           };
-          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 318, column 32 - line 320, column 25): " + [ v.oneMTps.constructor.name ]);
+          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 338, column 32 - line 340, column 25): " + [ v.oneMTps.constructor.name ]);
       };
       return Data_Maybe.fromJust()(Data_Traversable.sequence(Data_Traversable.traversableArray)(Data_Maybe.applicativeMaybe)(Data_Functor.map(Data_Functor.functorArray)(calc1M)(Data_Array.filter(function (v) {
           return Data_Maybe.isJust(v.oneMTps);
       })(filteredUtVsOther))));
   })();
+
+  // aux = auxStats cs
   var compareNets1mTps = new Amaroo_WP_Tables_Types.Table([ "$k$, $B_f$, $B_h$", "Network", "$N_2$", "$\\Sigma$ TPS", "Equiv. " + (utName_(new T(2)) + " $\\Sigma$ TPS") ], {
       md: Data_Functor.map(Data_Functor.functorArray)(mkSpacer)([ 5, 5, 3, 3, 3 ]),
       texTabular: "llrrr"
@@ -4499,15 +4782,37 @@ var PS = {};
   var lpCompareUt1Eth2 = lpCompareTH(Data_Functor.map(Data_Functor.functorArray)(genLpCompareRow(3000.0))(filterUtVsOther([ Bitcoin.value, new UT(new PoRTs(1)), Eth2.value, new UT(new T(1)) ])));
   var lpCompareUt1OptShard = lpCompareTH(Data_Functor.map(Data_Functor.functorArray)(genLpCompareRow(3000.0))(filterUtVsOther([ Bitcoin.value, new UT(new PoRTs(1)), Eth2.value, new UT(new T(1)), new UT(new HOT(1)), OptShard.value ])));
   var lpCompareUt2OptShard = lpCompare2TH(Data_Functor.map(Data_Functor.functorArray)(genLpCompare2Row(3000.0))(filterUtVsOther([ Bitcoin.value, new UT(new PoRTs(1)), Eth2.value, new UT(new T(1)), new UT(new HOT(1)), OptShard.value, new UT(new PoRTs(2)), new UT(new T(2)), new UT(new HOT(2)) ])));
+  var lpCompareUt2OptShard20k = lpCompare2TH(Data_Functor.map(Data_Functor.functorArray)(genLpCompare2Row(_COMPARE_20K))(filterUtVsOther([ Bitcoin.value, new UT(new PoRTs(1)), Eth2.value, new UT(new T(1)), new UT(new HOT(1)), OptShard.value, new UT(new PoRTs(2)), new UT(new T(2)), new UT(new HOT(2)) ])));
   var lpCompareNetworks = (function () {
       var t = Data_Functor.map(Data_Functor.functorArray)((function () {
-          var $234 = genCompareRow(3000.0);
-          return function ($235) {
-              return makeCompareRowConcise($234($235));
+          var $271 = genCompareRow(3000.0);
+          return function ($272) {
+              return makeCompareRowConcise($271($272));
           };
       })())(utVsOther);
       return compareNetsConciseTH(t);
   })();
+  var utVsOther1MAll = (function () {
+      var calc1M = function (v) {
+          if (v.oneMTps instanceof Data_Maybe.Just) {
+              return new Data_Maybe.Just({
+                  net: v.net,
+                  p: v.p(v.oneMTps.value0)
+              });
+          };
+          if (v.oneMTps instanceof Data_Maybe.Nothing) {
+              return Data_Maybe.Nothing.value;
+          };
+          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 345, column 32 - line 347, column 25): " + [ v.oneMTps.constructor.name ]);
+      };
+      return Data_Maybe.fromJust()(Data_Traversable.sequence(Data_Traversable.traversableArray)(Data_Maybe.applicativeMaybe)(Data_Functor.map(Data_Functor.functorArray)(calc1M)(Data_Array.filter(function (v) {
+          return Data_Maybe.isJust(v.oneMTps);
+      })(utVsOther))));
+  })();
+  var compareNets1mTpsAll = new Amaroo_WP_Tables_Types.Table([ "$k$, $B_f$, $B_h$", "Network", "$N_2$", "$\\Sigma$ TPS", "Equiv. " + (utName_(new T(2)) + " $\\Sigma$ TPS") ], {
+      md: Data_Functor.map(Data_Functor.functorArray)(mkSpacer)([ 5, 5, 3, 3, 3 ]),
+      texTabular: "llrrr"
+  }, Data_Functor.map(Data_Functor.functorArray)(genCompare1MRow)(utVsOther1MAll));
   exports["tableTps"] = tableTps;
   exports["tableTpsHot"] = tableTpsHot;
   exports["dappChains"] = dappChains;
@@ -4518,12 +4823,14 @@ var PS = {};
   exports["compareNets20k"] = compareNets20k;
   exports["lpCompareNetworks"] = lpCompareNetworks;
   exports["compareNets1mTps"] = compareNets1mTps;
+  exports["compareNets1mTpsAll"] = compareNets1mTpsAll;
   exports["compareUtOptimizations"] = compareUtOptimizations;
   exports["compareUtOptimizations2"] = compareUtOptimizations2;
   exports["lpCompareUtOptimizations1"] = lpCompareUtOptimizations1;
   exports["lpCompareUt1Eth2"] = lpCompareUt1Eth2;
   exports["lpCompareUt1OptShard"] = lpCompareUt1OptShard;
   exports["lpCompareUt2OptShard"] = lpCompareUt2OptShard;
+  exports["lpCompareUt2OptShard20k"] = lpCompareUt2OptShard20k;
   exports["showMdTable"] = showMdTable;
   exports["showLatexTable"] = showLatexTable;
   exports["showHtmlTable"] = showHtmlTable;
@@ -5688,7 +5995,7 @@ var PS = {};
               if (format instanceof HTML) {
                   return Amaroo_WP_Tables.showHtmlTable(v.value0);
               };
-              throw new Error("Failed pattern match at Main (line 145, column 16 - line 148, column 31): " + [ format.constructor.name ]);
+              throw new Error("Failed pattern match at Main (line 146, column 16 - line 149, column 31): " + [ format.constructor.name ]);
           })();
           return function __do() {
               Effect_Console.log(wnltn(v.value0))();
@@ -5704,7 +6011,7 @@ var PS = {};
           if (v1.mid instanceof Data_Maybe.Nothing) {
               return Data_Semigroup.append(Data_Semigroup.semigroupArray)(v1.before)(v1.after);
           };
-          throw new Error("Failed pattern match at Main (line 97, column 1 - line 97, column 108): " + [ v.constructor.name, v1.constructor.name ]);
+          throw new Error("Failed pattern match at Main (line 98, column 1 - line 98, column 108): " + [ v.constructor.name, v1.constructor.name ]);
       };
   };
   var getEnv = function (name) {
@@ -5767,7 +6074,7 @@ var PS = {};
       })());
   };
   var defaultPositioning = [ Amaroo_WP_Tables_Types.Hereish.value, Amaroo_WP_Tables_Types.Top.value, Amaroo_WP_Tables_Types.Bottom.value, Amaroo_WP_Tables_Types.Override.value ];
-  var lpTables = [ new Amaroo_WP_Tables_Types.TD("lp_compare_networks", Amaroo_WP_Tables.lpCompareNetworks, defaultPositioning), new Amaroo_WP_Tables_Types.TD("comparison_1m_tps", Amaroo_WP_Tables.compareNets1mTps, tablePageOnly), new Amaroo_WP_Tables_Types.TD("lp_compare_optimizations_1", Amaroo_WP_Tables.lpCompareUtOptimizations1, defaultPositioning), new Amaroo_WP_Tables_Types.TD("lp_compare_ut1_to_eth2", Amaroo_WP_Tables.lpCompareUt1Eth2, defaultPositioning), new Amaroo_WP_Tables_Types.TD("lp_compare_ut1_to_optshard", Amaroo_WP_Tables.lpCompareUt1OptShard, defaultPositioning), new Amaroo_WP_Tables_Types.TD("lp_compare_ut2_to_optshard", Amaroo_WP_Tables.lpCompareUt2OptShard, defaultPositioning) ];
+  var lpTables = [ new Amaroo_WP_Tables_Types.TD("lp_compare_networks", Amaroo_WP_Tables.lpCompareNetworks, defaultPositioning), new Amaroo_WP_Tables_Types.TD("comparison_1m_tps", Amaroo_WP_Tables.compareNets1mTps, tablePageOnly), new Amaroo_WP_Tables_Types.TD("comparison_1m_tps_all", Amaroo_WP_Tables.compareNets1mTpsAll, tablePageOnly), new Amaroo_WP_Tables_Types.TD("lp_compare_optimizations_1", Amaroo_WP_Tables.lpCompareUtOptimizations1, defaultPositioning), new Amaroo_WP_Tables_Types.TD("lp_compare_ut1_to_eth2", Amaroo_WP_Tables.lpCompareUt1Eth2, defaultPositioning), new Amaroo_WP_Tables_Types.TD("lp_compare_ut1_to_optshard", Amaroo_WP_Tables.lpCompareUt1OptShard, defaultPositioning), new Amaroo_WP_Tables_Types.TD("lp_compare_ut2_to_optshard", Amaroo_WP_Tables.lpCompareUt2OptShard, defaultPositioning), new Amaroo_WP_Tables_Types.TD("lp_compare_ut2_to_optshard_20k", Amaroo_WP_Tables.lpCompareUt2OptShard20k, defaultPositioning) ];
   var wpTables = [ new Amaroo_WP_Tables_Types.TD("tps", Amaroo_WP_Tables.tableTps, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_optimized", Amaroo_WP_Tables.tableTpsHot, defaultPositioning), new Amaroo_WP_Tables_Types.TD("dapp-chains", Amaroo_WP_Tables.dappChains, defaultPositioning), new Amaroo_WP_Tables_Types.TD("dapp-chains_optimized", Amaroo_WP_Tables.dappChainsHot, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_por", Amaroo_WP_Tables.tpsPor, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_port", Amaroo_WP_Tables.tpsPort, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations", Amaroo_WP_Tables.compareUtOptimizations, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations2", Amaroo_WP_Tables.compareUtOptimizations2, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_nets_3k", Amaroo_WP_Tables.compareNets3k, tablePageOnly), new Amaroo_WP_Tables_Types.TD("compare_nets_20k", Amaroo_WP_Tables.compareNets20k, tablePageOnly), new Amaroo_WP_Tables_Types.TD("comparison_1m_tps", Amaroo_WP_Tables.compareNets1mTps, tablePageOnly) ];
   var allTables = (function () {
       var $41 = Data_Array.elem(Data_Eq.eqString)("--lp-tables")($foreign.argv);

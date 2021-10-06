@@ -74,3 +74,11 @@ Add this to vscode settings (JSON), or modify accordingly.
   * `make docker` to build once
   * `docker run --rm -it -u $(id -u ${USER}):$(id -g ${USER}) -v $(pwd):/work whitepaper-build:latest /bin/bash` in project root directory (or `make docker-bash`)
   * in resulting shell, run `make` to build whitepaper as normal.
+
+## tables generator
+
+* run `make purs-setup` to install initial stuff (requires nodejs + npm)
+* run `make purs-build` to build `./includes/ut/complexity/populateWPTables.js` (which is what actually does the find/replace with WP tables in `./output/whitepaper.markdown` before pandoc)
+* run `make purs-test` to test
+
+For developing: I suggest opening `./includes/ut/complexity/ut-complexity-gen-purs/` in a new VSCode window (the purescript extension doesn't work well if the purs folder isn't the workspace root). Check the generator [README](includes/ut/complexity/ut-complexity-gen-purs/README.md) for more.
