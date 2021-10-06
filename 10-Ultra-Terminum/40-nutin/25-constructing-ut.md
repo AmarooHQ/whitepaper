@@ -94,11 +94,13 @@ To maintain consistency with the geometric usage of the term *simplex*: a simple
     Dr. Gavin Wood; \href{https://cloudflare-ipfs.com/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Polkadot Whitepaper, s2.2}
 }
 
-*Dapp-chains* are the method by which *Ultra Terminum* exceeds $O(c^2)$ scaling *without* using the method described in \autoref{sec:tiling}. To be clear: the $O(c^2)$ configuration of UT is compatible with that other method; dapp-chains are a *separate and independent* method of scaling. However, there are *decisive* reasons to introduce and use *dapp-chains*. Dapp-chains provide features that the $O(n)$ scaling configuration alone cannot easily provide. Additionally, dapp-chains increase the simplex's scalability to $O(c^3)$ or $O(c^4)$.
+*Dapp-chains* are the method by which *Ultra Terminum* exceeds $O(c^2)$ scaling *without* using the method described in \autoref{sec:tiling}. To be clear: the $O(c^2)$ configuration of UT is compatible with that other method; dapp-chains are a *separate and independent* method of scaling. However, there are *decisive* reasons to introduce and use *dapp-chains*. Dapp-chains provide features that the $O(n)$ scaling configuration alone cannot \emph{easily} provide. Additionally, dapp-chains increase the simplex's scalability to $O(c^3)$ or $O(c^4)$.
 
 \defineTerm{Dapp-chain}{An \emph{application-specific} child-chain that is secured via the parent-chain. Dapp-chains may have architecturally distinct state- and transaction-schemes (distinct from those schemes used in the simplex, and other dapp-chains)}
 
-Dapp-chains are not restricted to any particular foundational consensus method. They might use PoW, or PoS, or PoA, or something else. However, there \emph{are} some requirements that dapp-chains must meet. Dapp-chains have two defining characteristics: they share security with their parent-chain (via one-way PoR), and the simplex's root token can be moved from a simplex-chain to a dapp-chain and vice versa. To be clear: dapp-chains can have \emph{their own} token (and use that for mining rewards, etc), in addition to \emph{supporting} the simplex's root token.
+Dapp-chains are not restricted to any particular foundational consensus method. They might use PoW, or PoS, or PoA, or something else. This means dapp-chains can have \emph{their own} token (and use that for mining rewards, etc).
+
+\todo{edit from here}
 
 A simplex-chain \emph{must} validate the headers of its dapp-chains (similar to a light client). For some consensus methods that dapp-chains might choose (such as PoS), there might be special primitives that a host simplex-chain must support. However, only that host simplex-chain requires those primitives; other simplex-chains do not.
 

@@ -261,11 +261,19 @@ This is defined so that it can be quoted later and doesn't need to be updated in
 
 \label{sec:reflection-pow-and-pos}
 
-\todo{Consider moving this section to somewhere else after the simplex is discussed.}
+\todo{Proofread this section for PoS consistency}
+
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
 
 \textbf{Important:} It is not clear whether PoS schemes can \emph{ever} be secure. However, there are decisive criticisms[^dec-crits-pos] of \emph{pure} PoS systems.
 
 [^dec-crits-pos]: See \todo{refs}
+
+%% END ### DRAFT
+
+%% BEGIN ### RELEASE
 
 Perhaps one of the most interesting features of *Proof of Reflection* is that PoW chains and PoS chains can reflect one another. Up till now, we've contextualized the weight of a reflection via the *work* required to produce a block. But the concept of *work* does not neatly apply to foundational consensus mechanisms that do not require the utilization of some physical resource -- such as PoS.
 
