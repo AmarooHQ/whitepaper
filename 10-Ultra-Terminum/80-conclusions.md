@@ -51,4 +51,4 @@ Additionally, a network named *Opt.Shard* (for *Optimal Sharding*) is included i
 
 Why go to the effort of these comparisons (besides so that we have the numbers are at hand)?
 
-%% BEGIN ### RELEASE
+%% END ### RELEASE

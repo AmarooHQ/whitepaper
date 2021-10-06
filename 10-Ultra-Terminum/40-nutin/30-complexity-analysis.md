@@ -1,3 +1,5 @@
+%% BEGIN ### RELEASE
+
 ## Scaling Complexity Analysis of *Ultra Terminum*
 
 \label{sec:ut-complexity}
@@ -391,3 +393,5 @@ Note that $B_h = 16$ implies +HOT, and $B_h = 32$ implies +HO (Header Omission w
 %% INSERT ### TABLE: compare_optimizations2
 
 : Comparison of UT variants. Parameters are: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions. The time to sync 5 years of a simplex-chain's history, including verifying PoRs ($\text{TTS}_{5yrs}$) is measured against a fully utilized 10 MB/s network connection and assumes no software bottlenecks. The equivalent for \emph{all} simplex-chains and PoRs being verified ($\Sigma$ $\text{TTS}_{5yrs}$) is also shown.
+
+%% END ### RELEASE

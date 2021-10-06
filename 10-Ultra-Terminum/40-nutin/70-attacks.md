@@ -1,3 +1,5 @@
+%% BEGIN ### RELEASE
+
 ## Attacks
 
 *Ultra Terminum* -- with appropriate configuration -- is resistant to the following attacks; see the linked section for discussion:
@@ -140,65 +142,4 @@
 Your message could not be delivered. This is usually because you don't share a server with the recipient or the recipient is only accepting direct messages from friends.
 \end{tcolorbox}
 
-
-\begin{comment}
-
-### Dialog 2
-
-\mk{
-  should redo the intro -- too slow / wasted space on page.
-}
-
-\cMax{
-  chatlog-{\lowercase{\nefName}}.txt (6 KB)
-}
-
-\cMax{
-  What do you think?
-}
-
-\cSe{
-  Seems okay as illustration, but it's not very detailed.
-}
-
-\cMax{
-  Any ideas on what I should do?
-}
-
-\cSe{
-  Convince \emph{me}.
-}
-
-\cSe{
-  I've read the WP. Let's start from the top --- reflection. Start from first principles and build the idea up. I'll ask Qs as we go.
-}
-
-\todo{
-  Continue dialog.
-}
-
-\end{comment}
-\begin{comment}
-
-### 51% and double-spends
-
-\todo{discuss 51 percent and how difficult it is in UT vs Bitcoin, et al.}
-
-### Poisoning the Well
-
-\todo{the deliberate and malicious production of malformed data}
-
-- e.g., making blocks with valid PoW but invalid contents so that they get reflected (soln: miners can reject blocks or link to blocks as invalid; no block reward for producer)
-
-### Selfish Mining
-
-\todo{discuss selfish mining, and how it doesn't work}
-
-- Proof of Reflection means that withholding blocks is a big disadvantage b/c you want the network (and other chains) to know about them ASAP. Attack doesn't work.
-
-### DAG based attacks
-
-- creating lots of DAG blocks to link back to with low PoW (soln: no variable PoW targets or min limit)
-- more backlinks -> larger headers -> lower total throughput (soln: max numbers of backlinks + min PoW target)
-
-\end{comment}
+%% END ### RELEASE
