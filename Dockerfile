@@ -13,15 +13,13 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y python3 python3-pip texlive-science texlive-extra-utils texlive-latex-extra && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install -U numpy scipy
+RUN pip3 install -U numpy scipy click
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs npm && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs npm expect && \
     rm -rf /var/lib/apt/lists/*
-
-RUN pip3 install -U click
 
 WORKDIR /work
 
-CMD ["make"]
+CMD ["unbuffer", "make"]

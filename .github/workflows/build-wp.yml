@@ -27,12 +27,12 @@ jobs:
           npm run bundle-for-wp
 
       - name: build whitepaper
-        run: make docker "DOCKER_CMD=bash build.sh"
+        run: make docker "DOCKER_CMD=unbuffer bash build.sh"
 
       - name: lint whitepaper
         run: |
-          make docker "DOCKER_CMD=bash -c 'make cilint'"
+          make docker "DOCKER_CMD=unbuffer bash -c 'make cilint'"
 
       - name: build release whitepaper
         run: |
-          make docker "DOCKER_CMD=bash -c 'make release'"
+          make docker "DOCKER_CMD=unbuffer bash -c 'make release'"

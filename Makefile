@@ -33,7 +33,7 @@ release: PP_MODE=release
 release: whitepaper
 release:
 	# No matches for \todo{ should be found
-	grep -qzv '\\todo{' output/whitepaper.tex || (unbuffer bash bin/msg_error.sh 'Detected `\\\\todo{` in output/whitepaper.tex during release build.'; exit 1)
+	grep -qzv '\\todo{' output/whitepaper.tex || (bash bin/msg_error.sh 'Detected `\\\\todo{` in output/whitepaper.tex during release build.'; exit 1)
 
 cilint: PP_MODE=lint
 cilint: whitepaper
@@ -127,10 +127,10 @@ mk-latex-pdf:
 	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
 	cp $(WPNOEXT).pdf $(OUTPUT_PDF)
 	cp $(WPNOEXT).pdf $(WPRAW)-$(PP_MODE).pdf
-	unbuffer bash bin/msg_good.sh "Copied build to\n  - $(OUTPUT_PDF)\n  - $(WPRAW)-$(PP_MODE).pdf"
+	bash bin/msg_good.sh "Copied build to\n  - $(OUTPUT_PDF)\n  - $(WPRAW)-$(PP_MODE).pdf"
 
 finished-msg:
-	unbuffer bash bin/msg_good.sh 'Finished build for mode=$(PP_MODE)'
+	bash bin/msg_good.sh 'Finished build for mode=$(PP_MODE)'
 
 %.md:
 	echo 'skipping task for .md files'
@@ -197,3 +197,8 @@ docker:
 
 docker-bash:
 	docker run --rm -it -u `id -u ${USER}`:`id -g ${USER}` -v `pwd`:/work whitepaper-build:latest /bin/bash
+
+
+
+test-colors:
+	msg_good "test"

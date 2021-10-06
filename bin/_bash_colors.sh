@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # source: https://github.com/mercuriev/bash_colors/blob/b9b7dbd67e1567cbb2352d1ef630873c89cfb5a0/bash_colors.sh
 #
