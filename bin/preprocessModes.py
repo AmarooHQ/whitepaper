@@ -18,8 +18,8 @@ def in_any_range(ranges: list[Tuple[int, int]], i: int):
 
 
 def cut_out(tag: str, contents: str):
-    start_match = f"% BEGIN ###"
-    end_match = f"% END ###"
+    start_match = f"% BEGIN \#\#\#"
+    end_match = f"% END \#\#\#"
     lines = contents.split('\n')
 
     get_open_close = lambda l: (l.split(' ')[1], ' '.join(l.split(' ')[3:]))
