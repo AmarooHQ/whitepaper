@@ -1,10 +1,12 @@
 {
     "rules": {
         "en-max-word-count": {
-            "max" : 40
+            "max" : 40,
+            "severity": "warning"
         },
         "sentence-length": {
-            "max": 250
+            "max": 250,
+            "severity": "warning"
         },
         "stop-words": {  // https://github.com/sapegin/textlint-rule-stop-words
             "defaultWords": false,
@@ -18,6 +20,7 @@
                 ["DApps", "dapps"],
                 ["hte", "the"],
                 ["discreet", "discrete"],
+                ["DOS", "DoS"]
             ]
         }
     }

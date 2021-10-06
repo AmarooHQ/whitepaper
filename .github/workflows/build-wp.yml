@@ -37,6 +37,8 @@ jobs:
         shell: bash
         run: |
           make docker "DOCKER_CMD=bash -c 'make cilint'"
+          npm i
+          npm run lint
 
       - name: build release whitepaper
         shell: bash

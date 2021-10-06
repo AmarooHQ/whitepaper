@@ -65,7 +65,7 @@ Here are some additional underlying assumptions that are either common or which 
 
 * Sharing PoW security requires merged mining.
 * Sharing PoW security requires that chains use the same hashing algorithm.
-* Simultaneously securing a network with PoW and PoS is not possible without compromises (like that PoW miners could DOS PoS validators or vice versa).
+* Simultaneously securing a network with PoW and PoS is not possible without compromises (like that PoW miners could DoS PoS validators or vice versa).
 * It is unsafe for miners/validators to build on unvalidated histories (as is done with SPV mining, which *is* unsafe).
 
 These assumptions *are* true in lots of cases (arguably in all cases up to now). Do they need to be?
