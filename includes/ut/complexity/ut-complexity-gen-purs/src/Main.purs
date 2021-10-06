@@ -20,7 +20,6 @@ import Effect (Effect)
 import Effect.Console as C
 import Effect.Exception (error, throwException)
 import Effect.Exception.Unsafe (unsafeThrowException)
-import Effect.Unsafe (unsafePerformEffect)
 import Node.Buffer as B
 import Node.Encoding (Encoding(..))
 import Node.FS.Sync as FS

@@ -71,7 +71,7 @@ confRateTex = "\\mathbb{C}^\\prime"
 
 confRateTh = wrap "$" confRateTex <> " (Hz)"
 
-data UtName = PoRs Int | PoRTs Int | Std Int | T Int | HO Int | HOT Int | Aleph UtName
+data UtName = PoRs Int | PoRTs Int | HOPoRs Int | HOPoRTs Int | Std Int | T Int | HO Int | HOT Int | Aleph UtName
 
 derive instance eqUtName :: Eq UtName
 
@@ -90,6 +90,8 @@ utNameInner f i e = f $ (if i <= 0 then "" else iToS i) <> sToExt e
 utNameI :: UtName -> Int
 utNameI (PoRs i) = i
 utNameI (PoRTs i) = i
+utNameI (HOPoRs i) = i
+utNameI (HOPoRTs i) = i
 utNameI (Std i) = i
 utNameI (T i) = i
 utNameI (HO i) = i
@@ -99,6 +101,8 @@ utNameI (Aleph n) = utNameI n
 utNameE :: UtName -> String
 utNameE (PoRs _) = "PoRs"
 utNameE (PoRTs _) = "PoRTs"
+utNameE (HOPoRs _) = "HOPoRs"
+utNameE (HOPoRTs _) = "HOPoRTs"
 utNameE (Std _) = "OP"
 utNameE (T _) = "OPT"
 utNameE (HO _) = "HO"
@@ -146,6 +150,8 @@ _UT_HF = {bh: _UT_BH, bf: _UT_BF}
 
 _UT1PORS_1M_K = 177000.0  -- manual binary search
 _UT1PORTS_1M_K = 131250.0  -- manual binary search
+_UT1HOPORS_1M_K = 160_000.0  -- manual search
+_UT1HOPORTS_1M_K = 113_500.0  -- manual search
 _UT1_1M_K = ut1TpsToK _1M 250.0 _UT_BF _UT_BH
 _UT1T_1M_K = ut1TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING
 _UT1HO_1M_K = ut1TpsToK _1M 250.0 _UT_BF 32.0
@@ -153,6 +159,8 @@ _UT1HOT_1M_K = ut1TpsToK _1M 250.0 _UT_BF 16.0
 
 _UT2PORS_1M_K = 4870.0  -- manual binary search
 _UT2PORTS_1M_K = 3790.0  -- manual binary search
+_UT2HOPORS_1M_K = 4400.0  -- manual search
+_UT2HOPORTS_1M_K = 3450.0  -- manual search
 _UT2_1M_K = ut2TpsToK _1M 250.0 _UT_BF _UT_BH _UT_BH
 _UT2T_1M_K = ut2TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING _UT_BH_FOR_SHARDING
 _UT2HO_1M_K = ut2TpsToK _1M 250.0 _UT_BF 32.0 _UT_BH
@@ -200,6 +208,8 @@ utVsOther =
     , {net: Cardano, p: \k -> mkSimplePs k {bf: btToF 20, bh: _CARDANO_BH} tx, oneMTps: Just _CARDANO_1M_K}
     , {net: UT (PoRs 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1PORS_1M_K}
     , {net: UT (PoRTs 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1PORTS_1M_K}
+    , {net: UT (HOPoRs 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1HOPORS_1M_K}
+    , {net: UT (HOPoRTs 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1HOPORTS_1M_K}
     , {net: UT (Std 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1_1M_K}
     , {net: UT (T 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1T_1M_K}
     , {net: UT (HO 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1HO_1M_K}
@@ -210,6 +220,8 @@ utVsOther =
     , {net: OptShard, p: \k -> mkSimplePs k {bf: _UT_BF, bh: _UT_BH_FOR_SHARDING} tx, oneMTps: Just _OPT_SHARD_1M_K}
     , {net: UT (PoRs 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2PORS_1M_K}
     , {net: UT (PoRTs 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2PORTS_1M_K}
+    , {net: UT (HOPoRs 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2HOPORS_1M_K}
+    , {net: UT (HOPoRTs 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2HOPORTS_1M_K}
     , {net: UT (Std 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2_1M_K}
     , {net: UT (T 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2T_1M_K}
     , {net: UT (HO 2), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT2HO_1M_K}
@@ -229,7 +241,7 @@ filterRecsByNet recs nets = do
     A.filter (\{net} -> net == n) recs
 
 compareNetsFilterList :: Array Network
-compareNetsFilterList = [Bitcoin, Cardano, UT (PoRTs 1), UT (T 1), UT (HOT 1), Polkadot, Eth2, OptShard, UT (PoRTs 2), UT (T 2), UT (HOT 2), UT (Aleph (HOT 2))]
+compareNetsFilterList = [Bitcoin, Cardano, UT (PoRTs 1), UT (HOPoRTs 1), UT (HOT 1), Polkadot, Eth2, OptShard, UT (PoRTs 2), UT (HOPoRTs 2), UT (HOT 2), UT (Aleph (HOT 2))]
 
 filteredUtVsOther :: Array UtVsOtherDesc
 filteredUtVsOther = filterUtVsOther compareNetsFilterList
@@ -239,6 +251,8 @@ id x = x
 utNestingLvl :: UtName -> Int
 utNestingLvl (PoRs i) = i
 utNestingLvl (PoRTs i) = i
+utNestingLvl (HOPoRs i) = i
+utNestingLvl (HOPoRTs i) = i
 utNestingLvl (Std i) = i
 utNestingLvl (T i) = i
 utNestingLvl (HO i) = i
@@ -248,6 +262,8 @@ utNestingLvl (Aleph other) = utNestingLvl other
 netToChainStats :: Network -> Params -> ChainStats
 netToChainStats (UT (PoRs _)) p = (utChainCalc p (allUtChainCalcsF id).pors)
 netToChainStats (UT (PoRTs _)) p = (utChainCalc p (allUtChainCalcsF id).ports)
+netToChainStats (UT (HOPoRs _)) p = (utChainCalc p (allUtChainCalcsF id).hopors)
+netToChainStats (UT (HOPoRTs _)) p = (utChainCalc p (allUtChainCalcsF id).hoports)
 netToChainStats (UT (Std _)) p = (utChainCalc p (allUtChainCalcsF id).std)
 netToChainStats (UT (T _)) p = (utChainCalc p (allUtChainCalcsF id).t)
 netToChainStats (UT (HO _)) p = (utChainCalc p (allUtChainCalcsF id).ho)
@@ -260,6 +276,8 @@ netToChainStats _ p = tradChainCalc p
 netLookupChainStats :: Network -> UtVariants ChainStats -> ChainStats
 netLookupChainStats (UT (PoRs _)) utvs = utvs.pors
 netLookupChainStats (UT (PoRTs _)) utvs = utvs.ports
+netLookupChainStats (UT (HOPoRs _)) utvs = utvs.hopors
+netLookupChainStats (UT (HOPoRTs _)) utvs = utvs.hoports
 netLookupChainStats (UT (Std _)) utvs = utvs.std
 netLookupChainStats (UT (T _)) utvs = utvs.t
 netLookupChainStats (UT (HO _)) utvs = utvs.ho
@@ -300,6 +318,8 @@ netToTps (UT ut) cd = case utNameI ut of
 notPoRs :: Network -> Boolean
 notPoRs (UT (PoRs _)) = false
 notPoRs (UT (PoRTs _)) = false
+notPoRs (UT (HOPoRs _)) = false
+notPoRs (UT (HOPoRTs _)) = false
 notPoRs _ = true
 
 isAleph :: Network -> Boolean
@@ -534,7 +554,7 @@ compareUtOptimizationsFlipped = Table
     (genCompareFlippedUtRow ut variants <$> allOptimizationProps)
   where
     ut = allUtChainCalcs _UT_INIT_CONFIG
-    variants = [PoRs 1, PoRTs 1, Std 1, T 1, HO 1, HOT 1]
+    variants = [PoRs 1, PoRTs 1, HOPoRs 1, HOPoRTs 1, Std 1, T 1, HO 1, HOT 1]
 
 compareUtOptimizations :: Table
 compareUtOptimizations = Table
@@ -543,7 +563,7 @@ compareUtOptimizations = Table
     (genCompareUtRow ut oProps <$> variants)
   where
     ut = allUtChainCalcs _UT_INIT_CONFIG
-    variants = [PoRs 0, PoRTs 0, Std 0, T 0, HO 0, HOT 0]
+    variants = [PoRs 0, PoRTs 0, HOPoRs 0, HOPoRTs 0, Std 0, T 0, HO 0, HOT 0]
     oProps = optimizationProps1
     l = A.length oProps
 
@@ -554,7 +574,7 @@ compareUtOptimizations2 = Table
     (genCompareUtRow ut oProps <$> variants)
   where
     ut = allUtChainCalcs _UT_INIT_CONFIG
-    variants = [PoRs 0, PoRTs 0, Std 0, T 0, HO 0, HOT 0]
+    variants = [PoRs 0, PoRTs 0, HOPoRs 0, HOPoRTs 0, Std 0, T 0, HO 0, HOT 0]
     oProps = optimizationProps2
 
 
@@ -565,7 +585,7 @@ mkCompareUtOptimizations oProps = Table
     (genCompareUtRow ut oProps <$> variants)
   where
     ut = allUtChainCalcs _UT_INIT_CONFIG
-    variants = [PoRs 0, PoRTs 0, Std 0, T 0, HO 0, HOT 0]
+    variants = [PoRs 0, PoRTs 0, HOPoRs 0, HOPoRTs 0, Std 0, T 0, HO 0, HOT 0]
 
 _fmtStd = fmtDyn fdStdMixed
 

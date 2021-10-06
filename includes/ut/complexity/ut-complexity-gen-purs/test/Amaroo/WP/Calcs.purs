@@ -335,6 +335,10 @@ utSpec = describe "ut" do
         liftEffect $ writePoRTableToCsv {r: r10MPorts, g: 16.0, fn: "ports-k-vs-n-to-k-eq-10M.csv"}
         liftEffect $ writePoRTableToCsv {r: rPors, g: 32.0, fn: "pors-k-vs-n-to-k-eq-100000.csv"}
         liftEffect $ writePoRTableToCsv {r: rPorts, g: 16.0, fn: "ports-k-vs-n-to-k-eq-100000.csv"}
+        liftEffect $ writeHOPoRTableToCsv {r: r10MPors, g: 32.0, fn: "hopors-k-vs-n-to-k-eq-10M.csv"}
+        liftEffect $ writeHOPoRTableToCsv {r: r10MPorts, g: 16.0, fn: "hoports-k-vs-n-to-k-eq-10M.csv"}
+        liftEffect $ writeHOPoRTableToCsv {r: rPors, g: 32.0, fn: "hopors-k-vs-n-to-k-eq-100000.csv"}
+        liftEffect $ writeHOPoRTableToCsv {r: rPorts, g: 16.0, fn: "hoports-k-vs-n-to-k-eq-100000.csv"}
 
     describe "+PoRs vs large headers checks" do
       it "large headers approx (w/in ~33%) of +PoRs" do
@@ -362,10 +366,14 @@ utSpec = describe "ut" do
 
 writePoRTableToCsv :: {fn :: String, g :: Number, r :: Array Params} -> Effect Unit
 writePoRTableToCsv {fn, g, r} = writeTextFile UTF8 fn $ intercalate "\n" $
-          findMaxPoRsN1ForRanges {g, r} <#> (\(Tuple ps {i}) -> intercalate "," $ show <$> [(pToPF ps).k, toNumber i, (utNoExplicitPoRsN1 (g == 16.0) (pToPF ps))])
+          findMaxPoRsN1ForRanges {g, r} <#> (\(Tuple ps {i}) -> intercalate "," $ show <$> [(pToPF ps).k, toNumber i, (utNoExplicitPoRsN1 (pToPF ps))])
 
-utNoExplicitPoRsN1 hashTrunc p =
-  let bh = p.hf.bh # (if hashTrunc then applyTDiscountToBH else identity)
+writeHOPoRTableToCsv :: {fn :: String, g :: Number, r :: Array Params} -> Effect Unit
+writeHOPoRTableToCsv {fn, g, r} = writeTextFile UTF8 fn $ intercalate "\n" $ append ["k, N1, \"N1 w/o PoRs\", T1"] $
+          findMaxHOPoRsN1ForRanges {g, r} <#> (\(Tuple ps {i, t}) -> intercalate "," $ show <$> [(pToPF ps).k, toNumber i, (utNoExplicitPoRsN1 (pToPF ps)), t])
+
+utNoExplicitPoRsN1 p =
+  let bh = p.hf.bh
       bf = p.hf.bf
   in p.k / 2.0 / bf / bh
 

@@ -74,8 +74,8 @@ fmtFract n
 fmtFixedP p = NF.toStringWith (fixed p)
 
 fmtDyn :: _ -> Number -> String
-fmtDyn {low, high, mp, commas, pOnlySi, wSI} n =
-    if not (isFinite n) then (if isNaN n || true then "-" else wrap "$" "\\infty") else
+fmtDyn {low, high, mp, commas, pOnlySi, wSI, infLikeNan} n =
+    if not (isFinite n) then (if isNaN n || infLikeNan then "-" else wrap "$" "\\infty") else
       if outsideRange then wrap (if wSI then "$" else "") $ fmtSciNot p n else
         if commas then fmtP fmtCommasP fmtCommas else fmtFixedP pNotSi n
   where
@@ -87,7 +87,7 @@ fmtDyn {low, high, mp, commas, pOnlySi, wSI} n =
         Tuple false (Just _) -> fP pNotSi n
         Tuple _ _ -> f n
 
-fdDefaults = {low: -1, high: 7, mp: Just 1, commas: false, pOnlySi: false, wSI: true}
+fdDefaults = {low: -1, high: 6, mp: Just 1, commas: false, pOnlySi: false, wSI: true, infLikeNan: false}
 fdK = fdDefaults {pOnlySi = true, wSI = false}
 fdPlain = fdDefaults {commas = false, pOnlySi = false}
 fdPlainZero = fdPlain {mp = Just 0}

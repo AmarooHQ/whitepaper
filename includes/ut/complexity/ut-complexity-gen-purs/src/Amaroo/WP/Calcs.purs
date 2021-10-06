@@ -57,6 +57,8 @@ mkNestedPs k hf hf2 txSize = {ks: singleton k, hfs: hf `NEL.cons` singleton hf2,
 type UtVariants a
   = { pors :: a
     , ports :: a
+    , hopors :: a
+    , hoports :: a
     , std :: a
     , t :: a
     , ho :: a
@@ -205,10 +207,13 @@ porLen hashSize n = hashSize * log2c n
 utPorsT1 :: Number -> Number -> Number -> Number -> Number -> Number
 utPorsT1 n1 k1 bf bh g = n1 * (k1 - bf * n1 * (bh + porLen g n1))
 
+utHOPorsT1 :: Number -> Number -> Number -> _ -> Number -> Number
+utHOPorsT1 n1 k1 bf _ g = n1 * (k1 - bf * n1 * porLen g n1)
+
 type LoopFindMax = {i :: Int, t :: Number}
 
-loopFindMaxPoRsN1F :: Params -> Number -> LoopFindMax -> LoopFindMax
-loopFindMaxPoRsN1F ps g initM = inner ({i: initM.i, t: initM.t, bestI: 0 }) |> \{bestI,t} -> {i: bestI,t}
+loopFindMaxPoRsN1F :: _ -> Params -> Number -> LoopFindMax -> LoopFindMax
+loopFindMaxPoRsN1F utT1F ps g initM = inner ({i: initM.i, t: initM.t, bestI: 0 }) |> \{bestI,t} -> {i: bestI,t}
   where
     inner m@{i, t} = if i >= wontBeMoreThan || t1 < 0.0 || t1 < t * 0.96 || (t1 < t && (abs $ log2 bestN) % 1.0 > 0.01)
         then m
@@ -221,45 +226,47 @@ loopFindMaxPoRsN1F ps g initM = inner ({i: initM.i, t: initM.t, bestI: 0 }) |> \
         n = toNumber i
         t1 = utPorsT1Applied n
     -- nRange = A.range 1 wontBeMoreThan <#> I.toNumber
-    utPorsT1Applied n1 = utPorsT1 n1 k1 bf bh g
+    utPorsT1Applied n1 = utT1F n1 k1 bf bh g
     k1 = head ps.ks
     bf = hf.bf
     bh = hf.bh
     hf = head ps.hfs
-    wontBeMoreThan = I.ceil $ k1 / 2.0 / bf / bh  -- N1 without explicit PoRs * 2.0
+    wontBeMoreThan = I.ceil $ k1 / bf / bh  -- N1 without explicit PoRs * 2.0
     -- from WP, useful for some things.
     -- | \frac{\d{T_1}}{\d{N_1}}
     utPorsDT1byDN1 n1 = (k1 * ln2 - bf * n1 * (g + bh * log 4.0) - 2.0 * bf * g * n1 * log n1) / ln2
 
--- todo: convert from sorted-array method to a fixed memory iteration where the maximum gets tracked
 findMaxPoRsN1 :: Params -> Number -> Number
-findMaxPoRsN1 ps g = (loopFindMaxPoRsN1F ps g {i: 1, t: 0.0}).i |> toNumber
-  -- where
-    -- answer = bestTN.n
-    -- -- inefficient, but foolproof (why I cared about performance before, IDK)
-    -- bestTN = sortedT1s |> A.last |> fromMaybe {a: 0.0, b: 0.0} |> (\{a,b} -> {n: a, t: b})
-    -- sortedT1s = A.sortBy (\o1 o2 -> compare o1.b o2.b) possibleT1s
-    -- possibleT1s = (nRange <#> utPorsT1Applied |> A.zip nRange) <#> tupToRec
+findMaxPoRsN1 ps g = (loopFindMaxPoRsN1F utPorsT1 ps g {i: 1, t: 0.0}).i |> toNumber
+
+findMaxHOPoRsN1 :: Params -> Number -> Number
+findMaxHOPoRsN1 ps g = (loopFindMaxPoRsN1F utHOPorsT1 ps g {i: 1, t: 0.0}).i |> toNumber
 
 -- | This will *efficiently* calculate the best N_1s for some array of parameters, provided N_1 will monotonically increase (which it does for increasing k)
-findMaxPoRsN1ForRanges :: {g :: Number, r :: Array Params} -> Array (Tuple Params LoopFindMax)
-findMaxPoRsN1ForRanges {g, r} = (inner {last: Nothing, next: A.head r, rest: A.tail r, outs: []}).outs
+findMaxPoRsN1ForRanges' :: _ -> {g :: Number, r :: Array Params} -> Array (Tuple Params LoopFindMax)
+findMaxPoRsN1ForRanges' utT1F {g, r} = (inner {last: Nothing, next: A.head r, rest: A.tail r, outs: []}).outs
   where
     -- init condition
     inner {last: Nothing, next: Just ps, rest: Just rLeft, outs} =
         inner {last: Just res, next: A.head rLeft, rest: A.tail rLeft, outs: outs <> [Tuple ps res]}
       where
-        res = loopFindMaxPoRsN1F ps g {i: 1, t: 0.0}
+        res = loopFindMaxPoRsN1F utT1F ps g {i: 1, t: 0.0}
     inner {last: Just l, next: Just ps, rest, outs} =
         if res.t < l.t
           then unsafeThrowException $ error $ "findMaxPoRsN1ForRanges assumes that the output (n) will always increase as the input params are iterated over. but curr.t < last.t! " <> show {curr: res, last: l}
           else inner {last: Just res, next: A.head =<< rest, rest: A.tail =<< rest, outs: outs <> [Tuple ps res]}
       where
-        res = loopFindMaxPoRsN1F ps g {i: newStartI, t: newStartT}
+        res = loopFindMaxPoRsN1F utT1F ps g {i: newStartI, t: newStartT}
         newStartI = max 1 l.i
-        newStartT = utPorsT1 (toNumber newStartI - 1.0) pf.k pf.hf.bf pf.hf.bh g
+        newStartT = utT1F (toNumber newStartI - 1.0) pf.k pf.hf.bf pf.hf.bh g
         pf = pToPF ps
     inner endState = endState
+
+findMaxPoRsN1ForRanges :: {g :: Number, r :: Array Params} -> Array (Tuple Params LoopFindMax)
+findMaxPoRsN1ForRanges = findMaxPoRsN1ForRanges' utPorsT1
+
+findMaxHOPoRsN1ForRanges :: {g :: Number, r :: Array Params} -> Array (Tuple Params LoopFindMax)
+findMaxHOPoRsN1ForRanges = findMaxPoRsN1ForRanges' utHOPorsT1
 
 applyTDiscountToBH :: Number -> Number
 applyTDiscountToBH bh = (bh - _) $ ceil $ (1.0 + prel {f: 80.0, t: 112.0, v: bh}) * 16.0
@@ -267,7 +274,10 @@ applyTDiscountToBH bh = (bh - _) $ ceil $ (1.0 + prel {f: 80.0, t: 112.0, v: bh}
 type UtParams = {explicitPoRs :: Boolean, headerOmission :: Boolean, hashTruncation :: Boolean}
 
 utChainCalc :: Params -> UtParams -> ChainStats
-utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, confRate, tts, sigmaTts, deltaBigS, deltaSmallS, porBytes, porBytes2, effBh, effDh, kTx, kB, k1}
+utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} =
+    if explicitPoRs && headerOmission
+      then utCalcHOPoRs ps {hashTruncation}
+      else {d1, d2, d3, confRate, tts, sigmaTts, deltaBigS, deltaSmallS, porBytes, porBytes2, effBh, effDh, kTx, kB, k1}
   where
     hashSize = if hashTruncation then 16.0 else 32.0
     origBh = (head ps.hfs).bh
@@ -307,10 +317,47 @@ utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} = {d1, d2, d3, con
     effDh = d2.p.hf.bh  -- Note: don't take into account porBytes2 -- if explicitPoRs then d2.p.hf.bh + porBytes2 else d2.p.hf.bh
     d3 = calcNextNestingLevel ps3 d2
 
+utCalcHOPoRs :: Params -> _ -> ChainStats
+utCalcHOPoRs ps {hashTruncation} = {d1, d2, d3, confRate, tts, sigmaTts, deltaBigS, deltaSmallS, porBytes, porBytes2, effBh, effDh, kTx, kB, k1}
+  where
+    hashSize = if hashTruncation then 16.0 else 32.0
+    origBh = (head ps.hfs).bh
+    htModBh bh = if hashTruncation then applyTDiscountToBH bh else bh
+    fixBH2 r@{bh} = r {bh = htModBh bh}
+    ps1 = ps -- {hfs = (fixBH1 (head ps.hfs) `cons'` tail ps.hfs)}
+    n1 = findMaxHOPoRsN1 ps1 hashSize
+    porBytes = porLen hashSize n1
+    effBh = porBytes
+    k1 = head ps1.ks
+    hf = (head ps1.hfs)
+    confRate = hf.bf * n1
+    explicitPorsK = confRate * porBytes
+    kTx = k1 - explicitPorsK
+    kB = k1 - kTx
+    t1 = kTx * n1
+    d1 = {n: n1, t: t1, tps: t1 / ps.txSize, p: pToPF ps1}
+
+    explicitHeadersK = confRate * htModBh origBh
+
+    -- NB: we want to re-adjust *unaltered params `ps` not `ps1` which we use for d1
+    ps2Pre = paramsForNextNS ps -- trim param-depth lists
+    ps2 = ps2Pre {hfs = (fixBH2 (head ps2Pre.hfs) `cons'` tail ps2Pre.hfs)}
+    ps3 = paramsForNextNS $ ps2Pre
+    deltaBigS = n1 * k1 -- wp says: "The amount of network bandwidth, $\Delta S$, required to download all blocks (as they are produced) across all simplex-chains is"
+    deltaSmallS = k1 + explicitHeadersK
+    tts = ((5.0 * 365.25) * deltaSmallS / 10_000_000.0)
+    sigmaTts = ((5.0 * 365.25) * deltaBigS / 10_000_000.0)
+    d2 = calcNextNestingLevel ps2 d1
+    porBytes2 = porLen hashSize (d2.n / n1)
+    effDh = d2.p.hf.bh  -- Note: don't take into account porBytes2 -- if explicitPoRs then d2.p.hf.bh + porBytes2 else d2.p.hf.bh
+    d3 = calcNextNestingLevel ps3 d2
+
 allUtChainCalcsF :: forall a. (UtOptimizations -> a) -> UtVariants a
 allUtChainCalcsF f =
   { pors: f {explicitPoRs: true, headerOmission: false, hashTruncation: false}
   , ports: f {explicitPoRs: true, headerOmission: false, hashTruncation: true}
+  , hopors: f {explicitPoRs: true, headerOmission: true, hashTruncation: false}
+  , hoports: f {explicitPoRs: true, headerOmission: true, hashTruncation: true}
   , std: f {explicitPoRs: false, headerOmission: false, hashTruncation: false}
   , t: f {explicitPoRs: false, headerOmission: false, hashTruncation: true}
   , ho: f {explicitPoRs: false, headerOmission: true, hashTruncation: false}
