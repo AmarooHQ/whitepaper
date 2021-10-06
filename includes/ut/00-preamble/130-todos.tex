@@ -1,19 +1,27 @@
 %% custom todo
 
-\newcommand{\listtodoname}{Todos}
-\newlistof{todo}{todo}{\listtodoname}
+\ifthenelse{\equal{\RenderTODOs}{1}}
+{
+    \newcommand{\listtodoname}{Todos}
+    \newlistof{todo}{todo}{\listtodoname}
 
-\newcounter{todocounter}
-\newcommand{\todo}[1]{
-    \refstepcounter{todocounter}%
-    \refstepcounter{todo}%
-    \begin{tcolorbox}[
-        colback=maxsColor!20!white,
-        title={TODO [\thetodo]}
-    ]
-    \label{todoref:\thetodo}
-    #1
-    \end{tcolorbox}
-    \addcontentsline{todo}{todo}{\protect{\thetodo. } \truncate{0.8\linewidth}{#1}}
+    \newcounter{todocounter}
+    \newcommand{\todo}[1]{
+        \refstepcounter{todocounter}%
+        \refstepcounter{todo}%
+        \begin{tcolorbox}[
+            colback=maxsColor!20!white,
+            title={TODO [\thetodo]}
+        ]
+        \label{todoref:\thetodo}
+        #1
+        \end{tcolorbox}
+        \addcontentsline{todo}{todo}{\protect{\thetodo. } \truncate{0.8\linewidth}{#1}}
+    }
+    \let\todo\todo
 }
-\let\todo\todo
+{
+    \newcommand{\listoftodo}{}
+    \newcommand{\listtodoname}{}
+    \newcommand{\todo}[1]{}
+}
