@@ -27,7 +27,10 @@ jobs:
           npm run bundle-for-wp
 
       - name: lint whitepaper
-        run: make docker "DOCKER_CMD=bash -c 'make cilint'"
+        run: |
+          make docker "DOCKER_CMD=bash -c 'make cilint'"
+          make docker "DOCKER_CMD=bash -c 'make release'" || true
+          (grep '\\todo{' output/whitepaper.tex && (echo "todo present in release whitepaper.tex"; exit 1)) || true
 
       - name: build whitepaper
         run: make docker "DOCKER_CMD=bash build.sh"

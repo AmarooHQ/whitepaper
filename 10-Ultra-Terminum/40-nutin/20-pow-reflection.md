@@ -247,6 +247,10 @@ Instead of using the same token on multiple chains, a similar method could work 
 
 One can use the same principles to compare work between chains that have different root tokens. Such a method is detailed in \autoref{alg:weightof-dex}. However, there is a major new caveat with this method: the DEX and price-finding methods now become *part* of the consensus methods of those chains. This caveat makes this context (with differing root tokens) much harder to reason about, and introduces questions like *What is the effect of front running?* and *Could an attacker exploit market conditions to perform a doublespend when they wouldn't normally be able to?*
 
+\begin{comment}
+This is defined so that it can be quoted later and doesn't need to be updated in multiple locations.
+\end{comment}
+
 \def\convertingWeightDexNotImportant{In the context of \emph{Ultra Terminum} and \emph{Amaroo}, these aren't questions that are important to answer. If \emph{Proof of Reflection} is ever used to secure multiple chains with heterogenous tokens, it's likely that either these questions will need to be answered or alternate methods will need to be devised.}
 
 \convertingWeightDexNotImportant
@@ -303,6 +307,8 @@ There are some other conjectured solutions to the *Nothing at Stake* problem. Th
 
 \todo{refelct only chains that reflect your history; if they favor a different history, then you should be building on that history instead, so don't reflect those blocks -- i.e. ppl should calculate weight to be 0.}
 
+%% BEGIN ### DRAFT
+
 #### PoS Bribe Attacks
 
 \todo{write -- PoS Bribe Attacks}
@@ -326,32 +332,6 @@ How UT solves these problems: PoS simplex-chains don't need to have the decision
 
 \todo{soundness of PoS -- or remove from abstract}
 
-#### Answers to Zack Hess's Criticism of Hybrid PoW/PoS
-
-The hybrid \emph{context} that UT provides[^hybrid-context] is different to the context provided by a single blockchain that uses a hybrid PoW/PoS consensus mechanism. In UT, each chain is either PoW or PoS (or something else).
-
-[^hybrid-context]: Note that UT can work exclusively with PoW chains, so in the case that PoS cannot be done securely (even with UT's improvements) then this does not break UT fundamentally. Particularly: at the very least the $O(c^2)$ and $O(n)$ configurations still work.
-
-\bquote{
-  If it is the kind of PoS mechanism that is based on something like coin-age, so even if most PoS validators stop participating, PoS blocks can still be found, then we need to consider a some cases based on the fork-choice rule. In a hybrid design, the fork-choice rule depends on some combination of P = portion of PoS validators participating, and H = the amount of hashpower. \\
-  \\
-  We have a fork choice rule weight(H, P). \\
-  \\
-  Increasing PoS participation, or increasing hashpower, can only have a positive influence on the weight of that subchain. (We will use proof by contradiction to show that this supposition is false.) \\
-  \\
-  S1: H1 > H0. \\
-  \\
-  \dots
-}{Zack Hess; \href{https://github.com/zack-bitcoin/amoveo-docs/blob/9a4ffa2e800c24772fd68e1f745b6a14967e59c2/other_blockchains/pow_pos_hybrid.md}{PoW/PoS Hybrid Consensus Mechanisms}}
-
-In UT, the weight contributed by a PoW or PoS reflection depends on the conversion method (part of UT's fork-choice rule), which depends on the value on each of those chains. Thus, it's not the case that ``increasing PoS participation, or increasing hashpower, can only have a positive influence on the weight of that subchain''[^subchain].
-
-Particularly, Hess starts his proof with S1:
-
-\todo{finish hybrid pow/pos stuff or clean up}
-
-[^subchain]: The idea of \emph{subchains} is specific to individual blockchains that use a hybrid PoW/PoS consensus mechanism. I think the correct conversion of the idea of a \emph{subchain} to a UT context is to view the simplex (see \autoref{sec:the-simplex}) as a single chain, and simplex-chains as subchains.
-
 ### The Insecurity of Merged Mining in UT
 
 \todo{write -- The Insecurity of Merged Mining}
@@ -360,4 +340,4 @@ Particularly, Hess starts his proof with S1:
 - that means that if a parent chain and a merged mined child chain where to reflect one another, then the weight contributed via merged mining must be 0 -- no additional work was actually done beyond that of the parent-chain.
 - Also, if some other chain reflects both a parent chain *and* a merged mined child chain, then the net benefit is equal to *only* the work contributed by the reflecting parent chain.
 
-%% END ### RELEASE
+%% END ### DRAFT
