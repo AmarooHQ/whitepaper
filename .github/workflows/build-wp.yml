@@ -31,14 +31,14 @@ jobs:
 
       - name: build whitepaper
         shell: bash
-        run: unbuffer make docker "DOCKER_CMD=unbuffer bash build.sh"
+        run: make docker "DOCKER_CMD=bash build.sh"
 
       - name: lint whitepaper
         shell: bash
         run: |
-          unbuffer make docker "DOCKER_CMD=unbuffer bash -c 'make cilint'"
+          make docker "DOCKER_CMD=bash -c 'make cilint'"
 
       - name: build release whitepaper
         shell: bash
         run: |
-          unbuffer make docker "DOCKER_CMD=unbuffer bash -c 'make release'"
+          make docker "DOCKER_CMD=bash -c 'make release'"
