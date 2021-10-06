@@ -23,10 +23,12 @@ def cut_out(tag: str, contents: str):
     end_match = f"% END \\#\\#\\#"
     lines = contents.split('\n')
 
-    get_open_close = lambda l: (l.split(' ')[1], l.split(' ', 2)[2])
+    def get_open_close(l: str):
+        [_, be, _, tag] = l.split(' ', 3)
+        return (be, tag)
     any_match = lambda l: l.startswith(start_match) or l.startswith(end_match)
 
-    boundaries_all = list((get_open_close(l), i, l) for (i, l) in enumerate(lines) if any_match(l.strip()))
+    boundaries_all = list((get_open_close(l.strip()), i, l) for (i, l) in enumerate(lines) if any_match(l.strip()))
     boundaries = list(filter(lambda a: a[0][1] == tag.upper() or tag == TAG_ALL, boundaries_all))
     zipped_bounds_all = list(zip(boundaries[:-1], boundaries[1:]))
 
@@ -87,6 +89,7 @@ def process_tex(input_file_path: str, mode: str, output_dir: Optional[str], md_c
 
     [unlinted_file_start, file_contents] = file_contents.split(PREPROCESS_START_FLAG, 1)
 
+    processed_file_start = process_file_contents_mode(mode, unlinted_file_start)
     output_contents = process_file_contents_mode(mode, file_contents)
     output_file = output_dir_path / file_name_w_ext
 
@@ -98,11 +101,13 @@ def process_tex(input_file_path: str, mode: str, output_dir: Optional[str], md_c
         # continue if this succeeds
         do_lint_check(process_file_contents_mode("lint", file_contents))
 
+    final_output = '\n'.join([processed_file_start, output_contents])
+
     if print_output:
-        print(output_contents)
+        print(final_output)
     else:
         with open(output_file, 'w') as f:
-            f.write('\n'.join([unlinted_file_start, output_contents]))
+            f.write(final_output)
     return
 
 

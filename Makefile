@@ -115,12 +115,11 @@ wc:
 # preprocess tex for draft/release/lint
 preprocess-build:
 	python3 bin/preprocessModes.py process-tex $(WPTEX) --mode $(PP_MODE) --allow-in-place $(PP_LINT_FLAG)
-	python3 bin/preprocessModes.py set-todos-render $(WPTEX) --mode $(PP_MODE) --allow-in-place
 
 mk-latex-pdf:
 	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
-	-rm $(WPNOEXT).glsdefs
-	makeglossaries -d $(OUTDIR) $(WPRAW)
+	# -rm $(WPNOEXT).glsdefs
+	makeglossaries-lite -o $(OUTDIR) $(WPNOEXT)
 	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
 	cp $(WPNOEXT).pdf $(OUTPUT_PDF)
 
