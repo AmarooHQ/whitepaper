@@ -5,7 +5,7 @@ from pathlib import Path
 import click
 
 TAG_ALL = "*"
-RENDER_TODOS_REPLACE = "\\newcommand\\ShouldRenderTodos{1}"
+RENDER_TODOS_REPLACE = "\\newcommand*{\\ErrorOnReleaseIfTODOs}{1}"
 PREPROCESS_START_FLAG = "% RELEASE-LINT-START"
 
 
@@ -110,9 +110,36 @@ def process_tex(input_file_path: str, mode: str, output_dir: Optional[str], md_c
 @click.argument('input_file_path', nargs=1)
 @click.option('--mode', required=True, type=click.Choice(['release', 'draft', 'lint']))
 @click.option('--allow-in-place/--no-allow-in-place', default=False)
-def set_todos_render(input_file_path: str, mode: str, allow_in_place: bool):
-    # todo: chris
-    pass
+@click.option('--output-dir', required=False, help="Relative path to output directory")
+@click.option('--print-output/--no-print-output', default=False)
+def set_todos_render(input_file_path: str, output_dir: Optional[str], mode: str, allow_in_place: bool, print_output: bool):
+    # Minor checks to ensure an output is provided
+    if not allow_in_place and output_dir is None:
+        raise Exception("Please specify one of: --allow-in-place or --output-dir")
+
+    with open(input_file_path, 'r') as f:
+        file_contents = f.read()
+
+    if mode == "release":
+        # Release mode is set the string to false
+        file_contents = file_contents.replace(RENDER_TODOS_REPLACE, "")
+
+    # We need to save the file
+    input_file = Path(input_file_path)
+    file_name_w_ext = input_file.name
+    input_dir = input_file.parent
+    output_dir_path = Path(output_dir if output_dir else input_dir)
+
+    output_file = output_dir_path / file_name_w_ext
+
+    # If debugging, print out
+    if print_output:
+        print(file_contents)
+    else:
+        with open(output_file, 'w') as f:
+            f.write(file_contents)
+
+    return
 
 
 if __name__ == "__main__":
