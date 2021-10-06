@@ -1,10 +1,10 @@
 %% custom todo
 
-\ifthenelse{\equal{\RenderTODOs}{1}}
-{
-    \newcommand{\listtodoname}{Todos}
-    \newlistof{todo}{todo}{\listtodoname}
+\newcommand{\listtodoname}{Todos}
+\newlistof{todo}{todo}{\listtodoname}
 
+\ifthenelse{\equal{\ErrorOnReleaseIfTODOs}{1}}
+{
     \newcounter{todocounter}
     \newcommand{\todo}[1]{
         \refstepcounter{todocounter}%
@@ -20,8 +20,4 @@
     }
     \let\todo\todo
 }
-{
-    \newcommand{\listoftodo}{}
-    \newcommand{\listtodoname}{}
-    \newcommand{\todo}[1]{}
-}
+{}
