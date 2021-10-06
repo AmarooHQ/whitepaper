@@ -17,7 +17,10 @@ jobs:
           make docker-build
 
       - uses: purescript-contrib/setup-purescript@main
-      - run: |
+
+      - name: "purescript tables generator"
+        shell: bash
+        run: |
           cd includes/ut/complexity/ut-complexity-gen-purs
           #LAMW_URL="https://raw.githubusercontent.com/XertroV/lambertw/7c65e241b353e296f58cdad774c77d500d0a11bd/lambertw.js"
           #curl "$LAMW_URL" > src/LambertW.js
@@ -27,12 +30,15 @@ jobs:
           npm run bundle-for-wp
 
       - name: build whitepaper
-        run: make docker "DOCKER_CMD=unbuffer bash build.sh"
+        shell: bash
+        run: unbuffer make docker "DOCKER_CMD=unbuffer bash build.sh"
 
       - name: lint whitepaper
+        shell: bash
         run: |
-          make docker "DOCKER_CMD=unbuffer bash -c 'make cilint'"
+          unbuffer make docker "DOCKER_CMD=unbuffer bash -c 'make cilint'"
 
       - name: build release whitepaper
+        shell: bash
         run: |
-          make docker "DOCKER_CMD=unbuffer bash -c 'make release'"
+          unbuffer make docker "DOCKER_CMD=unbuffer bash -c 'make release'"
