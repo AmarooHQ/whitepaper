@@ -1,3 +1,5 @@
+%% BEGIN ### RELEASE
+
 # Conclusions
 
 \label{sec:conclusions}
@@ -48,3 +50,5 @@ Additionally, a network named *Opt.Shard* (for *Optimal Sharding*) is included i
 \todo{write something about 'apples to apples' and why UT is $O(c^3)$ and the others are $O(c^2)$ (except bitcoin) + the exclusion of any easily replicable tech (like more layers of nesting, payment channels, etc)}
 
 Why go to the effort of these comparisons (besides so that we have the numbers are at hand)?
+
+%% BEGIN ### RELEASE

@@ -1,3 +1,5 @@
+%% BEGIN ### RELEASE
+
 # The Simplex with Explicit PoRs
 
 \label{sec:por-with-proofs}
@@ -58,3 +60,5 @@ Since PoRs are merkle branches, and the leaves of that tree are headers (which h
 %% INSERT ### TABLE: tps_port
 
 : The effect of including Proofs of Reflection, with truncated hashes, alongside headers (+PoRTs).
+
+%% END ### RELEASE

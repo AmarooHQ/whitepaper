@@ -1,3 +1,5 @@
+%% BEGIN ### RELEASE
+
 \newpage
 
 # Buterin's Trilemma
@@ -73,3 +75,5 @@ NB: I call them *assumptions*; some people will likely (and rightly) take issue 
 ## Conjecture: A Principle of Scaling
 
 A scalable system *can* have components with complexities worse than $O(c)$ *if and only if* those components are not *bottlenecks*. As long as there is *excess capacity* in those components, the system can still scale.
+
+%% END ### RELEASE

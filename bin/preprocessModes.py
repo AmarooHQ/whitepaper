@@ -49,7 +49,8 @@ def process_file_contents_mode(mode: str, file_contents: str):
 
 
 def do_lint_check(file_contents: str):
-    all_content_lines =  file_contents.split('\\begin{document}')[1].split('\\end{document}')[0]
+    f_no_comments = '\n'.join(l for l in file_contents.splitlines() if not l.startswith("%"))
+    all_content_lines =  f_no_comments.split('\\begin{document}')[1].split('\\end{document}')[0]
     should_be_empty = all_content_lines.replace(' ', '').replace('\n', '')
     if len(should_be_empty) > 0:
         raise Exception(f"Lint check failed! Offending content:\n\n---\n{should_be_empty}\n---\n\nPlease ensure this content is within DRAFT or RELEASE section tags")
@@ -92,9 +93,8 @@ def process_tex(input_file_path: str, mode: str, output_dir: Optional[str], md_c
     if print_output:
         print(output_contents)
     else:
-        # with open(output_file, 'w') as f:
-            # f.write(file_contents)
-        pass
+        with open(output_file, 'w') as f:
+            f.write(file_contents)
     return
 
 

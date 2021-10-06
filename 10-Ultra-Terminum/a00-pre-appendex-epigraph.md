@@ -1,3 +1,4 @@
+%% BEGIN ### RELEASE
 
 %% comment out closing epigraph
 \begin{comment}
@@ -74,3 +75,5 @@
 
 \newpage
 \appendix
+
+%% END ### RELEASE

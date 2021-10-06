@@ -1,3 +1,5 @@
+%% BEGIN ### RELEASE
+
 \newpage
 # Introduction
 
@@ -37,3 +39,5 @@ And you'll need to understand the following to understand how *Ultra Terminum* t
 * Generalizations of Nakamoto Consensus to DAGs (particularly, read [*Inclusive Block Chain Protocols*](https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy)[^incl-proto])
 
 [^incl-proto]: \href{https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy}{\textit{Inclusive Block Chain Protocols}} by Yoad Lewenberg, Yonatan Sompolinsky, and Aviv Zohar. \href{https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Avivz Mirror}, \href{http://web.archive.org/web/20210426004808/https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Archive.org Mirror}
+
+%% END ### RELEASE
