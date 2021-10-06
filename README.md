@@ -82,3 +82,19 @@ Add this to vscode settings (JSON), or modify accordingly.
 * run `make purs-test` to test
 
 For developing: I suggest opening `./includes/ut/complexity/ut-complexity-gen-purs/` in a new VSCode window (the purescript extension doesn't work well if the purs folder isn't the workspace root). Check the generator [README](includes/ut/complexity/ut-complexity-gen-purs/README.md) for more.
+
+
+## preprocessor (to cut out sections based on build)
+
+see `bin/preprocessorModes.py`
+
+* start a section with `%% BEGIN ### <tag_name>`
+* close a section with `%% END ### <tag_name>`
+
+Tag names:
+
+* `DRAFT`, `RELEASE`
+
+### BUILD FAILURES
+
+Builds will fail if, after all content between these sections (inclusive of tags) has been stripped, there is any non-empty lines after `\begin{document}` and before `\end{document}`. (this is done via `--mode lint`)
