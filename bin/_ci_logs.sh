@@ -17,3 +17,7 @@ function msg_warn {
 function msg_error {
     clr_bold clr_red "\n> $1\n"
 }
+
+function msg_bad {
+    msg_error "$1"
+}

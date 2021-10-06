@@ -31,6 +31,9 @@ default: whitepaper
 
 release: PP_MODE=release
 release: whitepaper
+release:
+	# No matches for \todo{ should be found
+	grep -qzv '\\todo{' output/whitepaper.tex || (bin/msg_error.sh 'Detected `\\\\todo{` in output/whitepaper.tex during release build.'; exit 1)
 
 cilint: PP_MODE=lint
 cilint: whitepaper
@@ -67,7 +70,7 @@ wp-graphics-png: $(PNGGraphics)
 	cd `dirname $<` && \
 	convert -density 400 `basename $<` `basename $@`
 
-whitepaper: $(PDFGraphics) $(InputTeXFiles) build-whitepaper set-wp-properties wp-pandoc preprocess-build mk-latex-pdf wc
+whitepaper: $(PDFGraphics) $(InputTeXFiles) build-whitepaper set-wp-properties wp-pandoc preprocess-build mk-latex-pdf wc finished-msg
 whitepaper-skip-pandoc: $(PDFGraphics) $(InputTeXFiles) mk-latex-pdf wc
 
 # atm restrict this to just the UT folder, can generalize again later
@@ -122,6 +125,9 @@ mk-latex-pdf:
 	makeglossaries-lite -o $(OUTDIR) $(WPNOEXT)
 	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
 	cp $(WPNOEXT).pdf $(OUTPUT_PDF)
+
+finished-msg:
+	bin/msg_good.sh 'Finished build for mode=$(PP_MODE)'
 
 %.md:
 	echo 'skipping task for .md files'
