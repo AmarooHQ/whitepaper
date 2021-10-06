@@ -298,9 +298,9 @@ Given the right set-up, a PoW chain gains an *incredible* security advantage fro
 
 \textbf{Note:} The attack scenario above assumes two important things: the attacker is only attacking the PoW chain via a \emph{mining in private} strategy, and that the attacker is not attacking the PoS chain that is reflecting the PoW chain. These are not safe assumptions in general.
 
-What about the PoS chain, though; what benefits does it gain from this relationship? The answer here is simple: by reflecting with a PoW chain, the PoS chain gains *thermodynamic security*; the PoS chain's history is *thermodynamically secured* by the PoW chain. \textbf{This solves the \emph{Nothing at Stake} problem for any well constructed PoS scheme.} Furthermore, it is possible for error-correction methods like \emph{slashing} to be implemented *on the PoW chain*, not the PoS chain. Granted, such a change being done well requires subtle and precise protocol design, but these changes are *in principle* possible with tolerable overhead.
+What about the PoS chain, though; what benefits does it gain from this relationship? The answer here is simple: by reflecting with a PoW chain, the PoS chain gains *thermodynamic security*; the PoS chain's history is *thermodynamically secured* by the PoW chain. \textbf{This solves the \emph{Nothing at Stake} problem for any well constructed PoS scheme.} Furthermore, it is possible for error-correction methods like \emph{slashing} to be implemented *on the PoW chain*, not the PoS chain. Moving the staking and error correction methods to a different chain will require subtle and precise protocol design, but such changes are *in principle* possible with tolerable overhead.
 
-There are some (as yet) unsolved problems that arise through this design, such as the *economic* details of managing block rewards across the PoW and PoS chains. Given that solutions to this problem likely depend on the specific details of the relevant PoS systems, this problem is not addressed here.
+There are some (as yet) unsolved problems that arise through this design, such as the *economic* details of managing block rewards across the PoW and PoS chains. Given that solutions to this problem likely depend on the specific details of the relevant PoS systems, this problem is not addressed here. Note: conversion methods for reflected weight, like \autoref{alg:por-reflected-block-weight}, will work provided a well defined \textsc{WeightOf} function exists.
 
 There are some other conjectured solutions to the *Nothing at Stake* problem. The two examples that follow solve the problem via mechanisms that are *external* to the protocol itself, i.e., hard-coded checkpoints and the requirement that nodes are online ``frequently''. The solution provided by mutual reflection with a PoW blockchain -- i.e., thermodynamic security -- is provided *by the protocol itself* and can only *increase* the security of PoS mechanisms. Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
 
@@ -313,11 +313,11 @@ There are some other conjectured solutions to the *Nothing at Stake* problem. Th
   Provided that stakeholders are frequently online, nothing at stake is taken care of by our analysis of forkable strings (even if the adversary brute-forces all possible strategies to fork the evolving blockchain in the near future, there is none that is viable), and our chain selection rule that instructs players to ignore very deep forks that deviate from the block they received the last time they were online.
 }{\href{http://cloudflare-ipfs.com/ipfs/QmWCAHyi35SeXH2E4e8jRVk7yNse2x6D14uPfABnhagbvN}{Ouroboros: A Provably Secure Proof-of-Stake Blockchain Protocol, s10}}
 
-\todo{refelct only chains that reflect your history; if they favor a different history, then you should be building on that history instead, so don't reflect those blocks -- i.e. ppl should calculate weight to be 0.}
-
 %% END ### RELEASE
 
 %% BEGIN ### DRAFT
+
+\todo{refelct only chains that reflect your history; if they favor a different history, then you should be building on that history instead, so don't reflect those blocks -- i.e. ppl should calculate weight to be 0.}
 
 #### PoS Bribe Attacks
 

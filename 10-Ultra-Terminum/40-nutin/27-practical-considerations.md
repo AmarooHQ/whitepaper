@@ -90,11 +90,7 @@ Given that the reflection-segments of simplex-chains will contain mostly repeate
 
 \label{sec:exploiting-seg-state}
 
-\todo{Explain 'effective header size' (which will be useful for Eth2 discussion, too)}
-
-\todo{Explain how we use effective header size to effectively have 32 byte headers at base level -- $3.5\times$ optimization -- see WP forum post ``Effective header size and TPS (discovered a new optimization)''}
-
-\todo{Explain trimming zero bytes from PoW block hashes for 2-10 byte saving $\rightarrow 1.07\times$ to $1.45\times$ optimization; tho truncation $\rightarrow 2\times$ optimization.}
+\todo{Explain how we use effective header size to effectively have 32 byte headers at base level -- $3.5\times$ optimization -- see WP msg board post ``Effective header size and TPS (discovered a new optimization)''}
 
 * explicit proofs + headers (+PoRs)
 * omitted proofs + headers (+OP)
@@ -102,7 +98,7 @@ Given that the reflection-segments of simplex-chains will contain mostly repeate
 * implicit proofs + header omission (+HO)
 * for each of the above: +T for truncation
 
-\todo{Total optimization (with decent sized network) over $4\times$ (mb up to $5\times$)}
+Total buffer via optimizations $\sim 20\times$
 
 ### Confirmation Times
 
@@ -194,7 +190,9 @@ For the purposes of this paper, we are concerned with the method detailed in *In
     \label{fig:dag-simple-segments}
 \end{figure}
 
-Some basic block-dag segments are shown in \autoref{fig:dag-simple-segments}. If the figures do not speak for themselves, then I suggest you revisit some of the material linked in \autoref{sec:block-dag-lineage}.
+Some basic block-dag segments are shown in \autoref{fig:dag-simple-segments}.
+
+\todo{DAG Background}
 
 #### Preventing DoS Attacks
 
