@@ -26,12 +26,13 @@ jobs:
           spago build
           npm run bundle-for-wp
 
+      - name: build whitepaper
+        run: make docker "DOCKER_CMD=bash build.sh"
+
       - name: lint whitepaper
         run: |
           make docker "DOCKER_CMD=bash -c 'make cilint'"
-          make docker "DOCKER_CMD=bash -c 'make release'" || true
-          # No matches for \todo{ should be found
-          grep -qzv '\\todo{' output/whitepaper.tex
 
-      - name: build whitepaper
-        run: make docker "DOCKER_CMD=bash build.sh"
+      - name: build release whitepaper
+        run: |
+          make docker "DOCKER_CMD=bash -c 'make release'"
