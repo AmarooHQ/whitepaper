@@ -33,3 +33,4 @@ includes/ut/diags/**/*.png
 *.ignore
 **/*.pyc
 */testing/*
+/package-lock.json
