@@ -30,6 +30,7 @@ endif
 default: whitepaper
 
 release: PP_MODE=release
+release: textlint
 release: whitepaper
 release:
 	# No matches for \todo{ should be found
@@ -131,6 +132,9 @@ mk-latex-pdf:
 
 finished-msg:
 	bash bin/msg_good.sh 'Finished build for mode=$(PP_MODE)'
+
+textlint:
+	npm run lint
 
 %.md:
 	echo 'skipping task for .md files'
