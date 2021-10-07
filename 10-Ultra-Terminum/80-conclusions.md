@@ -31,8 +31,6 @@ Additionally, a network named *Opt.Shard* (for *Optimal Sharding*) is included i
 This is a theoretical network which uses the \emph{best parameters possible among UT configurations}.
 No real-world sharded network has come close to this level of performance, and it is incompatible with PoS.
 
-\defineTerm{Base-chain}{A chain that has no parent-chains; i.e., is at the base nesting level}
-
 \defineTerm{Scaling Factor}{
     Also: ``Scale $\times$''. For a given $k$, it is the factor by which TPS increases with an additional nesting level.
     In effect, it allows for comparison of the efficacy of scaling schemes when $k$ is fixed.

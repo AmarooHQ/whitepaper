@@ -272,8 +272,6 @@ This is defined so that it can be quoted later and doesn't need to be updated in
 
 \label{sec:reflection-pow-and-pos}
 
-\todo{Proofread this section for PoS consistency}
-
 %% END ### RELEASE
 
 %% BEGIN ### DRAFT
@@ -285,6 +283,12 @@ This is defined so that it can be quoted later and doesn't need to be updated in
 %% END ### DRAFT
 
 %% BEGIN ### RELEASE
+
+\aside{
+  Whether PoS systems \emph{can} be secure is not a focus of this paper.
+  There are still \href{https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/proof_of_stake.md}{criticisms of PoS} without \href{https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/the_defence_of_pos.md}{adequate answers}.
+  The intention of sections like this is not to endorse PoS, but rather to explore what is possible \emph{if} PoS can be done securely.
+}
 
 Perhaps one of the most interesting features of *Proof of Reflection* is that PoW chains and PoS chains can reflect one another. Up till now, we've contextualized the weight of a reflection via the *work* required to produce a block. But the concept of *work* does not neatly apply to foundational consensus mechanisms that do not require the utilization of some physical resource -- such as PoS.
 

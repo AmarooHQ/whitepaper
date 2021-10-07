@@ -96,9 +96,15 @@ To maintain consistency with the geometric usage of the term *simplex*: a simple
 
 *Dapp-chains* are the method by which *Ultra Terminum* exceeds $O(c^2)$ scaling *without* using the method described in \autoref{sec:tiling}. To be clear: the $O(c^2)$ configuration of UT is compatible with that other method; dapp-chains are a *separate and independent* method of scaling. However, there are *decisive* reasons to introduce and use *dapp-chains*. Dapp-chains provide features that the $O(n)$ scaling configuration alone cannot \emph{easily} provide. Additionally, dapp-chains increase the simplex's scalability to $O(c^3)$ or $O(c^4)$.
 
-\defineTerm{Dapp-chain}{An \emph{application-specific} child-chain that is secured via the parent-chain. Dapp-chains may have architecturally distinct state- and transaction-schemes (distinct from those schemes used in the simplex, and other dapp-chains)}
+\defineTerm{Dapp-chain}{
+  An \emph{application-specific} child-chain that is secured via the parent-chain. Dapp-chains may have architecturally distinct state- and transaction-schemes (distinct from those schemes used in the simplex, and other dapp-chains)
+}
 
-Dapp-chains are not restricted to any particular foundational consensus method. They might use PoW, or PoS, or PoA, or something else. This means dapp-chains can have \emph{their own} token (and use that for mining rewards, etc).
+Dapp-chains are not restricted to any particular foundational consensus method.
+They might use PoW, or PoS, or PoA, or something else.
+This means dapp-chains can have \emph{their own} token (and use that for mining rewards, etc).
+However, dapp-chains are also able to use *Proof of Reflection* with their host simplex-chain.
+With a suitable foundational consensus method, PoR enables dapp-chains to be as secure as their host simplex-chain with no appreciable overhead.
 
 \todo{edit from here}
 
