@@ -1,6 +1,6 @@
 %% BEGIN ### RELEASE
 
-\newpage
+%% \newpage
 
 # Buterin's Trilemma
 
@@ -12,7 +12,14 @@ For some magnitude of computational resources (computation, bandwidth, storage, 
 * Security --- the system is secure against attackers with up to $O(n)$ resources.
 * Scalability --- the system can process $O(n)$ transactions with $O(n) > O(c)$; this means that, as the network grows, the throughput of the system grows faster than the computational resources required per user.
 
-The definition of scalability is perhaps problematic. If the network growth, $O(n)$, becomes bottlenecked by an $O(c^2)$ scaling configuration, is the network really scalable? I prefer an alternative definition of scalability: the system can process $O(n)$ transactions in $O(1)$ time, i.e., confirmations neither take longer nor become more scarce as $n$ and/or $c$ change.
+The definition of scalability is perhaps problematic.
+If the network growth, $O(n)$, becomes bottlenecked by an $O(c^2)$ scaling configuration[^oc2-scaling], is the network really scalable?
+I prefer an alternative definition of scalability: the system can process $O(n)$ transactions in $O(1)$ time, i.e., confirmations neither take longer nor become more scarce as $n$ and/or $c$ change.
+
+[^oc2-scaling]: The standard method of sharding (or hosting child-chains generally) is to replace transactions with shard-headers.
+Extra data might also be required.
+If the host-chain has $O(c)$ capacity, then it should be able support $O(c)$ shards (presuming a secure method of sharding is known and in use).
+Each shard has $O(c)$ capacity also, thus the full system has $O(c^2)$ capacity.
 
 ## Core Conflict
 
