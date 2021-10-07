@@ -21,15 +21,13 @@ As UT is primarily a method of *structuring* a blockchain network, the scalabili
 
 UT's unique structure means that confirmation times within UT are of order $\frac{1}{O(c)}$. This is a significant improvement over existing architectures, which are of order $O(1)$. This means that, as computers get more powerful, confirmation times in UT will approach 0.
 
-\todo{Background added re $O(c^2)$ and DAG stuff}
-
 %% END ### RELEASE
 
 %% BEGIN ### DRAFT
 
 ## Assumed Knowledge
 
-\todo{add planned background stuff to relevant sections and remove this section}
+\todo{move anything from this section out -- e.g., references if needed}
 
 You will need to understand (or, perhaps, have mastered) the following concepts to reliably understand the foundations of *Proof of Reflection* and *Ultra Terminum*:
 

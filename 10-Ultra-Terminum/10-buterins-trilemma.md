@@ -2,6 +2,12 @@
 
 %% \newpage
 
+\begin{comment}
+keep toc to d=2 for this section. default is d=3
+\end{comment}
+
+\addtocontents{toc}{\protect\setcounter{tocdepth}{2}}
+
 # Buterin's Trilemma
 
 [The trilemma](https://eth.wiki/sharding/Sharding-FAQs) is as follows:
@@ -82,5 +88,11 @@ NB: I call them *assumptions*; some people will likely (and rightly) take issue 
 ## Conjecture: A Principle of Scaling
 
 A scalable system *can* have components with complexities worse than $O(c)$ *if and only if* those components are not *bottlenecks*. As long as there is *excess capacity* in those components, the system can still scale.
+
+\begin{comment}
+end of section, reset toc to default
+\end{comment}
+
+\addtocontents{toc}{\protect\setcounter{tocdepth}{3}}
 
 %% END ### RELEASE

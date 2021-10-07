@@ -2,6 +2,7 @@
 \todo{revisit all PoS references to note optionality}
 \todo{explain header size: 112 = 80 + 32 (btc efficiency + an extra parent to support DAG data struct)}
 \todo{compress ToC a bit if needed (need to search for how -- idea is to keep it to one page)}
+\todo{get Notation and Nomenclature ToC entry on one line (not sure how)}
 
 %% END ### RELEASE
 
