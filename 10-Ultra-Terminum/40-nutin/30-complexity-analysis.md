@@ -320,7 +320,7 @@ Additionally, the discrepancy in header size (between $B_h$ and $D_h$) is due to
 
 \label{sec:bandwidth-complexity}
 
-\todo{
+\todoDraftOnly{
 BW for full node: $\Delta s = k_1 + N_1 \cdot B_f \cdot g \cdot \log_2{N_1}$. BW for all headers (w/o header omission):
 $N_1 \cdot B_h \cdot B_f = \frac{k_1 \cdot B_h \cdot B_f}{2 \cdot B_h \cdot B_f} = \frac{k_1}{2} = O(c)$
 }
@@ -363,7 +363,7 @@ Practically, this effect means that a decrease to the size of headers has *incre
 
 ### Optimizations
 
-\todo{present TPS and $N_x$ numbers using header-omission and hash-compression optimizations as mentioned in \autoref{sec:exploiting-seg-state}}
+\todoDraftOnly{present TPS and $N_x$ numbers using header-omission and hash-compression optimizations as mentioned in \autoref{sec:exploiting-seg-state}}
 
 %% INSERT ### TABLE: tps_optimized
 
@@ -378,9 +378,17 @@ Note that $B_h = 16$ implies +HOT, and $B_h = 32$ implies +HO (Header Omission w
 
 : Values of $N_i$, $\mathbb{C}^\prime$, and $\Delta S$ for a simplex using +HOT simplex optimizations.
 
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
+
 #### Impact on the Impact of Header Size
 
 \todo{headers at base layer don't matter now -- only for nesting -- so PoS chains (even with big headers) might be okay at base layer without impacting scalability}
+
+%% END ### DRAFT
+
+%% BEGIN ### RELEASE
 
 ### Comparison of UT Variants
 

@@ -22,7 +22,7 @@
   \For{$B_r$ in $Blocks_{R}$}
     \State RCHs $\gets$ \Call{ReflectedChainHeads}{$B_r$, $state$} \Comment{Local blocks reflected by $B_r$}
     \If {$block$ in RCHs}
-      \State $s\gets s\;+$ \Call{WeightOf}{$B_r$, $state$}
+      \State $s\gets s\;+$ \Call{WeightOf}{$B_r$, $state$} \Comment{NB: network specific, e.g., \autoref{alg:weightof-1}}
     \EndIf
   \EndFor
   \State \Return{s}

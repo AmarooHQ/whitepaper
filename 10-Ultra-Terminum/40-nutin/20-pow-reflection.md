@@ -124,15 +124,22 @@ Could we use Chain L's knowledge *that it's own history is reflected in Chain R*
 
 \label{sec:por-step4}
 
-Before we discuss a change that Chain L could make, it is important to note that chain-work done with one hashing algorithm is *not generally convertible* to 'equivalent' work done via another hashing algorithm. For example, there is no meaningful *generic* answer to the question \emph{how many double SHA256 hashes is one Ethash hash worth?} In fact, there is no meaningful answer to similar questions that use any other other combination of hashing algorithms, either. It is not possible to *generically and universally* convert between qualitatively different units[^et-conversion]. It is *only* to do this within some *context* where with a *defined* conversion method. We'll look at some such contexts later.
+Before we discuss a change that Chain L could make, it is important to note that chain-work done with one hashing algorithm is *not generally convertible* to 'equivalent' work done via another hashing algorithm.
+For example, there is no meaningful *generic* answer to the question *how many double SHA256[^btc2sha] hashes is one Ethash hash worth?*
+In fact, there is no meaningful answer to similar questions that use any other other combination of hashing algorithms, either.
+It is not possible to *generically and universally* convert between qualitatively different units[^et-conversion].
+It is *only* possible to do this within some *context* with a *defined* conversion method. We'll look at some such contexts later.
 
-[^et-conversion]: The philosophical generalization of *qualitative conversion* and the *necessary* role that *goals* and *context* play is [Elliot Temple's](https://elliottemple.com) idea. It is covered in his [*Critical Fallibilism Course*](https://gumroad.com/l/mhtbA). It's also partially covered in (or related to) [Elliot's *Yes or No Philosophy* course](https://gumroad.com/l/hxqsh) and some of his articles, e.g., [*IGCs* ({Idea, Goal, Context} triples)](https://curi.us/2387-igcs) and [*Bottleneck Examples*](https://curi.us/2353-bottleneck-examples).
+[^et-conversion]: The philosophical generalization of *qualitative conversion* and the *necessary* role that *goals* and *context* play is [Elliot Temple's](https://elliottemple.com) idea. See [Multi-Factor Decision Making Math](https://criticalfallibilism.com/multi-factor-decision-making-math/) for some relevant background. The topic is covered in his [*Critical Fallibilism Course*](https://gumroad.com/l/mhtbA).
 
-NB: Bitcoin does two SHA256 hashes per block, which is why I refer to ``double SHA256'' above.
+\begin{comment} It's also partially covered in (or related to) [Elliot's *Yes or No Philosophy* course](https://gumroad.com/l/hxqsh) and some of his articles, e.g., [*IGCs* ({Idea, Goal, Context} triples)](https://curi.us/2387-igcs) and [*Bottleneck Examples*](https://curi.us/2353-bottleneck-examples). \end{comment}
+
+[^btc2sha]: Bitcoin does two SHA256 hashes per block.
 
 For the purposes of our hypothetical construction, let's say that L and R do *equal work over equal time*. In the current example, that means that the work required to produce either $L_i$ or $R_j$ is the same. *For the sake of this construction, we'll also presume this relationship doesn't change over time*. Our constant of conversion is thus: 1 *R Blocks per L Block*.
 
-NB: we're not that concerned with whether this is a reasonable assumption or not; right now, we just need a way to convert the work done on each chain into the same units. (Some methods for doing this will be discussed in \autoref{sec:comparing-diff-pows}.)
+NB: we're not that concerned with whether this is a reasonable assumption in the real world or not; right now, we just need a way to convert the work done on each chain into the same units.
+(Some methods for doing this will be discussed in \autoref{sec:comparing-diff-pows}.)
 
 Currently, the Chain L network chooses the \`\`heaviest'' (most worked) chain as its common history. Chain L calculates the \`\`weight'' of blocks (i.e., how much work went in to them) via an estimation of how many hashes were required -- say these are measured in *double SHA256 hashes*. For the purposes of illustration, let's normalize this number to be in terms of *L Blocks* -- instead of *double SHA256 hashes*; that's easy, since each block is worth 1 *L Block* by definition. Now, we can also measure the work in *R Blocks*, too (that being: 1 *R Block*).
 

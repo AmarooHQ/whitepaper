@@ -10,7 +10,7 @@ Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes
 
 \defineTerm{Simplex Tile}{Like a simplex, but $75\%$ of the PoR capacity is reserved for reflections with \emph{neighboring} tiles; a quadrifurcated maximal simplex}
 
-\todo{terms and edit / refactor this section}
+\todoDraftOnly{terms and edit / refactor this section}
 
 A simplex tile, on its own, is very similar to a standalone simplex. If a standalone simplex (of a given capacity) could host $1600$ simplex-chains, then an equivalent simplex tile will host $400$ (or maybe less); only $25\%$ of the PoR capacity is reserved for *internal* reflections -- i.e., reflections within that simplex tile. The other $75\%$ is reserved for *external* reflections to simplex-chains in *neighboring* tiles.
 
@@ -18,7 +18,7 @@ That is: it is a simplex that deliberately reserves only $\nicefrac{1}{4}$ of it
 
 \defineTerm{Simplex Tiling}{An interconnected graph of mutually reflecting simplexes. This graph grows in a scalable manner when simplex tiles have a valence $>= 3$}
 
-\todo{
+\todoDraftOnly{
     from forum: \\
     max:[When a simplex does tiling:] it's not that `k` decreases, but the proportion of `k` dedicated to internal reflections decreases. like it's optimal to have `k/2` dedicated to reflections, and `k/2` dedicated to transactions. when tiling with a valence of 3, the `k/2` for reflections is quadrifurcated, so there's `k/8` dedicated for each group of reflections (internal, parent, child1, child2). \\
     leesa: oki yup this makes a lot of sense now. I felt like the `k` explanations were helpful in solidifying understanding. I think bc it helped to make the concept more concrete since it linked back to the proofs.
@@ -149,6 +149,10 @@ O(c^j \cdot N_{tiles}) & = O(c^j \cdot \frac{n}{c^j}) \\
 
 For all practical purposes, simplex-tiling provides unbounded capacity.
 
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
+
 #### Security Implications
 
 \begin{comment}
@@ -165,6 +169,10 @@ e.g., The leaf tiles in \autoref{fig:tiled-simplex-5-d2} have simplex-chains tha
 this only happens when leaf tiles + their children have $==$ weight to their direct parent, tho. that is: if the parent has $\ge$ simplex-chains, then isolated attacks on the the descendant tiles always fail b/c the parent tile has $>$ weight.
 
 main idea: if you want to attack a simplex tile in the middle of the graph, then you *must* attack it's peers -- b/c that's where *most* of the security contribution comes from (75% at max cap). on the edges mb things are different. my intuition is that, if sensible precautionary parameters are maintained, then it can be done securely. but there are failure modes when the sec contribs from adjacent tiles are out of wack.
+
+%% END ### DRAFT
+
+%% BEGIN ### RELEASE
 
 ### Tiling Variants
 
@@ -352,6 +360,10 @@ Additionally, a model of tilings of similar capacity -- i.e., similar $N_{tiles}
     \label{fig:tiling-square}
 \end{figure}
 
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
+
 ### Worst Case Tiling
 
 \todo{write this section properly}
@@ -383,4 +395,4 @@ So the complexity is the same, but there's a pretty steep discount (like 50%).
 
 Does that trend continue? Get better?
 
-%% END ### RELEASE
+%% END ### DRAFT

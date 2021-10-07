@@ -263,11 +263,11 @@ After this (approximate) point, the weight of the honest chain-segment, which in
 However, if an attacker performs a *repeating cycle* of these attacks, then they may be able to decrease the effective capacity of the chain by a factor of $A_{blocks} = \nicefrac{q}{p}$.
 The opportunity cost of this attack, for the attacker, is at least as much as the lost transaction fees.
 
-All that sounds good so far, but this thought experiment is flawed. It is *smoothed out* compared to what we'd expect in reality -- the discrete nature of block production and reflections is ignored. In \autoref{fig:dag-dos-1}, it's explicitly excluded! What happens if we include the affect of other simplex-chains, though? Well... something \emph{magical}.
+All that sounds good so far, but this thought experiment is flawed. It is *smoothed out* compared to what we'd expect in reality -- the discrete nature of block production and reflections is ignored. In \autoref{fig:dag-dos-1}, it's explicitly excluded! What happens if we include the effect of other simplex-chains, though? Well... something \emph{magical}.
 
 Consider an attacker producing 2 blocks for every 1 honest block. What happens most of the time? Well the attackers blocks get reflected first, so there's like a big advantage over the honest blocks. The honest blocks will get reflected, too, but most of the time the attackers blocks will get the advantage from earlier reflections. \emph{Most} of the time. Occasionally, when an honest block is a bit lucky, it will be produced before the attackers blocks and start gaining reflections earlier. At that point, the attacker has lost -- they need to outpace the \emph{difference} in the number of reflections between the honest block and attacking blocks. So, unlike a normal doublespend (where the attacker wins if they \emph{ever} get ahead), now the honest network wins (ends the DoS) if it \emph{ever} gets ahead of the attacker -- after that point, there's no viable strategy for the attacker besides to build on the honest blocks. \emph{The asymmetry has flipped!}
 
-\todo{polish surrounding paragraphs}
+\todoDraftOnly{polish surrounding paragraphs}
 
 There's extra stuff that can be done here, too, like honest users (not miners) creating transactions w/ large tx fee that depend on certain history (i.e. that some honest block is in the history of the chain). That will attract miners from other chains dut to unrealized RoI (potentially a lot). The attacker could include that transaction, but then they need to voluntarily end the DoS themselves. Is there a reasonable strategy whereby the honest network can temporarily increase the number of miners? If there was, the attacker would then have $<50\%$ of mining power, ending the DoS quickly.
 
@@ -301,7 +301,7 @@ Do they want a highly secure base-chain, but variance in block times isn't a pro
 
 ### Lowering Block Production Variance
 
-\todo{redraft 'lowering block prod variance'}
+\todoDraftOnly{redraft 'lowering block prod variance'}
 
 Is it possible to *dramatically* lower the variance of block production in PoW blockchains without altering incentive structures, compromising security, or changing the probability of generating a valid block?
 
@@ -311,13 +311,13 @@ Say you have a network with 10 chains: $C_0, C_1, C_2, ..., C_9$. If the network
 
 If the network has spare capacity (i.e., transactions are mostly cleared out with each block; the mempool for each chain is ~empty) then we have a situation like this:
 
-Set $t=0$ to be immediately after a block is published on a chain. then, as $t$ progresses, transactions with fees should build up in the mempool, so $TxFees \propto t$. The reward for mining a block is $r + TxFees$ for some block reward, $r$. if $TxFees \propto t$ then $r + TxFees \propto K + t$ for some constant $K$.
+Set $t=0$ to be immediately after a block is published on a chain. then, as $t$ progresses, transactions with fees should build up in the mempool, so $\text{TxFees} \propto t$. The reward for mining a block is $r + \text{TxFees}$ for some block reward, $r$. if $\text{TxFees} \propto t$ then $r + \text{TxFees} \propto K + t$ for some constant $K$.
 
-The potential reward-over-time for a miner ($t$ vs $r + TxFees$) looks like a sawtooth function with a y-axis offset. It builds as more transactions pile up, and drops back to the baseline reward after a block.
+The potential reward-over-time for a miner ($t$ vs $r + \text{TxFees}$) looks like a sawtooth function with a y-axis offset. It builds as more transactions pile up, and drops back to the baseline reward after a block.
 
-If the miners $M_0, ..., M_9$ are capable of working on one of any $\{C_0, ..., C_9\}$ (and they have identical ROI profiles to the other miners), then they're incented to work on the chain with the most transactions in the mempool. That means: miners should, roughly, work the chain that has gone the longest without a block. What should we expect based on those incentives? Miners should work on each chain only in the final moments of the block production cycle. If block times were set to 60s, then they'd start mining at like the 54s mark b/c that's how they maximize their ROI.
+If the miners $M_0, ..., M_9$ are capable of working on one of any $\{C_0, ..., C_9\}$ (and they have identical ROI profiles to the other miners), then they're incented to work on the chain with the most transactions in the mempool. That means: miners should, roughly, work the chain that has gone the longest without a block. What should we expect based on those incentives? Miners should work on each chain only in the final moments of the block production cycle. If block times were set to 60s, then they'd start mining at like the 54s mark because that's how they maximize their ROI.
 
-Why wouldn't they just keep mining on the same chain? b/c in the time that they focused on one chain, another one passed that >54s high-ROI threshold and thus has the best ROI potential per hash done.
+Why wouldn't they just keep mining on the same chain? Because in the time that they focused on one chain, another one passed that >54s high-ROI threshold and thus has the best ROI potential per hash done.
 
 We should thus expect that this configuration of chains actually *synchronizes* miners, resulting in block production that is somewhat regular and lower in variance.
 
@@ -325,9 +325,13 @@ We should thus expect that this configuration of chains actually *synchronizes* 
     The effect whereby block production \emph{variance} is reduced when miners can (and do) change the chain they are currently mining faster than blocks are produced for those chains
 }
 
-One reason that we can predict that transactions will build up in this fashion (with those fees and in a predictable way) is that most of the transactions that are included in simplex blocks will be dapp-chain-header-transactions. ~~Since dapp-chains will use PoS, we should expect them to be predictable and regular.~~
+One reason that we can predict that transactions will build up in this fashion (with those fees and in a predictable way) is that most of the transactions that are included in simplex blocks will be dapp-chain-header-transactions.
 
 The average hash rate on each simplex chain, as described above, is always the same regardless of which of the two miner strategies are used. However, the variance of block production on each of these chains won't be that of a chain with 60s block times, it'll be that of a chain with 6s block times.
+
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
 
 ### Reflection: Incentive and Censorship
 
@@ -337,4 +341,4 @@ The average hash rate on each simplex chain, as described above, is always the s
     Add a nash equilibrium diagram + explanation to show that it's always in the interest of miners to publish headers -- intuition: including headers means that the \emph{other chain's miner} has an incentive to include your header. that means that the next miner (on your chain) will be able to build on a heavier chain if they reflect that other chain's next header -- so that next miner (on the local chain) has an incentive to include that other chain's next header. If the original miner (who might chose not to publish the most recent header of that other chain) censors that reflection, then they disadvantage themselves relative to their competitors (other miners of that simplex-chain). Thus, it's never helpful to a miner to censor reflections (esp if we enforce the limit on $k_b$ and $k_{tx}$). It doesn't help honest miners, and it makes an attackers chain-segment less competitive.
 }
 
-%% END ### RELEASE
+%% END ### DRAFT
