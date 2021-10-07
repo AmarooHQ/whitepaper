@@ -200,6 +200,10 @@ The most likely method of integration has four components: modification of the h
 
 [^builtins-or-sc]: Note: instead of builtins, these requirements could be met via EVM/WASM smart contracts.
 
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
+
 #### Future Dapp-chain Stuff (todo)
 
 \todo{finish below}
@@ -243,4 +247,4 @@ plan:
   - Basically we can use other $O(c^2)$ chains as needed to create lots of capacity w/ no loss of security
   - dapp-dapp-chains aren't a big deal really, just nice to have.
 
-%% END ### RELEASE
+%% END ### DRAFT

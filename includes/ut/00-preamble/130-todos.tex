@@ -3,21 +3,39 @@
 \newcommand{\listtodoname}{Todos}
 \newlistof{todo}{todo}{\listtodoname}
 
-\ifthenelse{\equal{\ErrorOnReleaseIfTODOs}{1}}
-{
-    \newcounter{todocounter}
-    \newcommand{\todo}[1]{
-        \refstepcounter{todocounter}%
-        \refstepcounter{todo}%
-        \begin{tcolorbox}[
-            colback=maxsColor!20!white,
-            title={TODO [\thetodo]}
+\newcounter{todocounter}
+\newcommand{\todoDirect}[1]{
+    \refstepcounter{todocounter}%
+    \refstepcounter{todo}%
+    \begin{tcolorbox}[
+        colback=maxsColor!20!white,
+        title={TODO [\thetodo]}
         ]
         \label{todoref:\thetodo}
         #1
-        \end{tcolorbox}
-        \addcontentsline{todo}{todo}{\protect{\thetodo. } \truncate{0.8\linewidth}{#1}}
+    \end{tcolorbox}
+    \addcontentsline{todo}{todo}{\protect{\thetodo. } \truncate{0.8\linewidth}{#1}}
+}
+
+\ifthenelse{\equal{\BuildMode}{draft}}{
+    \newcommand{\todoDraftOnly}[1]{
+        \todoDirect{
+            #1
+        }
+    }
+}{
+    \newcommand{\todoDraftOnly}[1]{
+    }
+}
+
+
+
+\ifthenelse{\equal{\ErrorOnReleaseIfTODOs}{no}}
+{
+    \newcommand{\todo}[1]{
+        \todoDirect{
+            #1
+        }
     }
     \let\todo\todo
-}
-{}
+}{}

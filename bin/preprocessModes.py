@@ -2,6 +2,7 @@
 
 from typing import Optional, Tuple
 from pathlib import Path
+from datetime import datetime
 import click
 
 TAG_ALL = "*"
@@ -9,44 +10,71 @@ RENDER_TODOS_REPLACE = "\\newcommand*{\\ErrorOnReleaseIfTODOs}{1}"
 PREPROCESS_START_FLAG = "% RELEASE-LINT-START"
 
 
+EXPECTED_SEGMENT_TAGS = ["RELEASE", "DRAFT"]
+
+
 @click.group()
 def cli():
     pass
+
+
+def release_label():
+    now = datetime.now()
+    year, week, dow = now.isocalendar()
+    THURS = 4
+    FRI = 5
+    prefix = "" if dow == THURS else "pre-"
+    return f"{prefix}{year % 100}.{week // 2}"
 
 
 def in_any_range(ranges: list[Tuple[int, int]], i: int):
     return any(low <= i <= high for (low, high) in ranges)
 
 
-def cut_out(tag: str, contents: str):
+def cut_out(tag: str, contents: str, extra_line_nums=0):
     start_match = f"% BEGIN \\#\\#\\#"
     end_match = f"% END \\#\\#\\#"
     lines = contents.split('\n')
 
-    def get_open_close(l: str):
+    def get_open_close(l: str, line_number=0):
         [_, be, _, tag] = l.split(' ', 3)
+        if tag not in EXPECTED_SEGMENT_TAGS:
+            raise Exception(f"Found unknown tag on line {line_number}:\n\ttag: `{tag}`")
         return (be, tag)
-    any_match = lambda l: l.startswith(start_match) or l.startswith(end_match)
 
-    boundaries_all = list((get_open_close(l.strip()), i, l) for (i, l) in enumerate(lines) if any_match(l.strip()))
+    def any_match(l: str):
+        return l.startswith(start_match) or l.startswith(end_match)
+
+    boundaries_all = list((get_open_close(l.strip(), line_number=i+extra_line_nums), i, l) for (i, l) in enumerate(lines) if any_match(l.strip()))
     boundaries = list(filter(lambda a: a[0][1] == tag.upper() or tag == TAG_ALL, boundaries_all))
     zipped_bounds_all = list(zip(boundaries[:-1], boundaries[1:]))
+
+    print("\n".join(map(str, zipped_bounds_all)))
 
     for (i, (((be, tag_), li1, l1), ((be2, tag2_), li2, l2))) in enumerate(zipped_bounds_all):
         if be == be2 or (tag_ != tag2_ and i % 2 == 0):
             sample = '\n'.join(lines[li1:li1+10])
-            raise Exception(f"Bad start/end tag combo (mismatching) at lines {li1} and {li2}.\nStart tag: {be} | {tag_}\nEnd tag: {be2} | {tag2_}\n\n\tFile Sample at line {li1}:\n\n---\n{sample}\n---\n")
+            raise Exception(f"""Bad start/end tag combo (mismatching) at lines {li1 + extra_line_nums} and {li2 + extra_line_nums}.
+  - Start tag: {be} | {tag_}
+  - End tag: {be2} | {tag2_}
+
+\tFile Sample at line {li1 + extra_line_nums}:
+
+---
+{sample}
+---
+""")
 
     zipped_bounds = list(b for (i, b) in enumerate(zipped_bounds_all) if i % 2 == 0)
     ranges = list((start, end) for ((_, start, _), (_, end, _)) in zipped_bounds)
     return "\n".join(l for (i, l) in enumerate(lines) if not in_any_range(ranges, i))
 
 
-def process_file_contents_mode(mode: str, file_contents: str):
+def process_file_contents_mode(mode: str, file_contents: str, extra_line_nums=0):
     if mode == "release":
-        return cut_out("DRAFT", file_contents)
+        return cut_out("DRAFT", file_contents, extra_line_nums=extra_line_nums)
     if mode == "lint":
-        return cut_out("*", file_contents)
+        return cut_out("*", file_contents, extra_line_nums=extra_line_nums)
     if mode == "draft":
         return file_contents
     raise Exception("no matching mode!")
@@ -89,8 +117,8 @@ def process_tex(input_file_path: str, mode: str, output_dir: Optional[str], md_c
 
     [unlinted_file_start, file_contents] = file_contents.split(PREPROCESS_START_FLAG, 1)
 
-    processed_file_start = process_file_contents_mode(mode, unlinted_file_start)
-    output_contents = process_file_contents_mode(mode, file_contents)
+    processed_file_start = process_file_contents_mode(mode, unlinted_file_start).replace('--RELEASE-LABEL--', release_label())
+    output_contents = process_file_contents_mode(mode, file_contents, extra_line_nums=len(unlinted_file_start.splitlines()))
     output_file = output_dir_path / file_name_w_ext
 
     if mode == "lint":

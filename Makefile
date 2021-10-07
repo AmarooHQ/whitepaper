@@ -71,7 +71,7 @@ wp-graphics-png: $(PNGGraphics)
 	cd `dirname $<` && \
 	convert -density 400 `basename $<` `basename $@`
 
-whitepaper: $(PDFGraphics) $(InputTeXFiles) build-whitepaper set-wp-properties wp-pandoc preprocess-build mk-latex-pdf wc finished-msg
+whitepaper: $(PDFGraphics) $(InputTeXFiles) build-whitepaper set-wp-properties wp-pandoc mk-latex-pdf wc finished-msg
 whitepaper-skip-pandoc: $(PDFGraphics) $(InputTeXFiles) mk-latex-pdf wc
 
 # atm restrict this to just the UT folder, can generalize again later
@@ -120,8 +120,9 @@ wc:
 # preprocess tex for draft/release/lint
 preprocess-build:
 	python3 bin/preprocessModes.py process-tex $(WPTEX) --mode $(PP_MODE) --allow-in-place $(PP_LINT_FLAG)
+	bash bin/msg_good.sh "Finished preprocessing of $(WPTEX) in mode $(PP_MODE)"
 
-mk-latex-pdf:
+mk-latex-pdf: preprocess-build
 	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
 	# -rm $(WPNOEXT).glsdefs
 	makeglossaries-lite -o $(OUTDIR) $(WPNOEXT)

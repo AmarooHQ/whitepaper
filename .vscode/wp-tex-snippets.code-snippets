@@ -17,32 +17,32 @@
 	// }
 	"begin draft/release section": {
 		"prefix": "BEGIN",
-		"body": "%% BEGIN ### $1",
+		"body": "%% BEGIN ### $1\n\n",
 		"description": "start a draft/release section",
 	},
 	"end draft/release section": {
 		"prefix": "END",
-		"body": "%% END ### $1",
+		"body": "%% END ### $1\n\n",
 		"description": "start a draft/release section",
 	},
 	"begin release": {
 		"prefix": "beginrelease",
-		"body": "%% BEGIN ### RELEASE",
+		"body": "%% BEGIN ### RELEASE\n\n",
 		"description": "start a release section"
 	},
 	"end release": {
 		"prefix": "endrelease",
-		"body": "%% END ### RELEASE",
+		"body": "%% END ### RELEASE\n\n",
 		"description": "end a release section"
 	},
 	"begin draft": {
 		"prefix": "begindraft",
-		"body": "%% BEGIN ### DRAFT",
+		"body": "%% BEGIN ### DRAFT\n\n",
 		"description": "start a draft section"
 	},
 	"end draft": {
 		"prefix": "enddraft",
-		"body": "%% END ### DRAFT",
+		"body": "%% END ### DRAFT\n\n",
 		"description": "end a draft section"
 	},
 }
