@@ -209,7 +209,7 @@ In order to convert otherwise unconvertible units, one must define a suitable go
 [^cucumber-goldratt]: This example is from Eli Goldratt's *The Choice* (2008).
 [^conv-other-gc-pairs]: NB: Other {goal, context} pairs could work, too, and would have different methods of conversion.
 
-In the case of *Proof of Reflection*, we need to define a suitable goal and context to enable this conversion, and come up with ideas for how to do that conversion. Our goal is straight forward, and the same as other consensus mechanisms: we want a blockchain system that is as difficult as possible to attack. The context is the architectures of both the PoR implementation and the blockchains in question, plus the rest of the world (including attackers). More specifically: the difficulty of an attack against a blockchain network is typically analysed from the context of an attacker's *risk vs reward* where the attacker has a goal of *profit*.
+In the case of *Proof of Reflection*, we need to define a suitable goal and context to enable this conversion, and come up with ideas for how to do that conversion. Our goal is straightforward, and the same as other consensus mechanisms: we want a blockchain system that is as difficult as possible to attack. The context is the architectures of both the PoR implementation and the blockchains in question, plus the rest of the world (including attackers). More specifically: the difficulty of an attack against a blockchain network is typically analysed from the context of an attacker's *risk vs reward* where the attacker has a goal of *profit*.
 
 Two ideas follow that create two distinct IGCs.
 

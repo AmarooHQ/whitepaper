@@ -23,8 +23,9 @@ def release_label():
     year, week, dow = now.isocalendar()
     THURS = 4
     FRI = 5
-    prefix = "" if dow == THURS else "pre-"
-    return f"{prefix}{year % 100}.{week // 2}"
+    week += 0 if dow <= FRI else 1
+    prefix = "" if dow == FRI else "pre-"
+    return f"{prefix}{year}.{week // 2}"
 
 
 def in_any_range(ranges: list[Tuple[int, int]], i: int):

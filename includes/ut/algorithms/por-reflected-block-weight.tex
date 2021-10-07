@@ -3,9 +3,9 @@
 \label{alg:por-reflected-block-weight}
 \begin{algorithmic}
 \Procedure{ReflectedBlockWeight}{$block, state$}
-  \State $s\gets 0$
+  \State $s\gets 0$ \Comment{Sum of weights}
   \For{$C_i$ in \Call{AllReflectingChains}{$state$}}
-    \State $s_C \gets 0$
+    \State $s_C \gets 0$ \Comment{Sum of weights for this chain}
     \State $n \gets 0$
     \State $Blocks_{i} \gets$ \Call{ReflectingBlocks}{$C_i$, $state$} \Comment{Reflecting blocks from $C_i$}
     \For{$B_{i,j}$ in $Blocks_{i}$}
@@ -16,10 +16,10 @@
       \EndIf
     \EndFor
     \State $B_f \gets $ \Call{BlockFrequencySelf}{$state$}
-    \State $C_f \gets $ \Call{BlockFrequencyOfChain}{$C$, $state$}
-    \State $e \gets C_f \div B_f$ \Comment{Expected blocks from $C$}
+    \State $C_f \gets $ \Call{BlockFrequencyOfChain}{$C_i$, $state$}
+    \State $e \gets C_f \div B_f$ \Comment{Expected blocks from $C_i$}
     \If {$n > 0$}
-      \State weightMod $\gets$ min(1, $e \div n$) \Comment{This caps the contribution of $C$ per block}
+      \State weightMod $\gets$ min(1, $e \div n$) \Comment{This caps the contribution of $C_i$ per block}
       \State $s \gets s_C\;\cdot$ weightMod $+\; s$
     \EndIf
   \EndFor

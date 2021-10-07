@@ -17,12 +17,12 @@
 \EndProcedure
 \\
 \Procedure{ReflectedBlockWeight}{$block, state$}
-  \State $s\gets 0$
-  \State $Blocks_{E} \gets$ \Call{ReflectingEBlocks}{$state$} \Comment{Chain E blocks that reflect the local chain}
-  \For{$B_e$ in $Blocks_{E}$}
-    \State RCHs $\gets$ \Call{ReflectedChainHeads}{$B_e$, $state$} \Comment{Local blocks reflected by $B_e$}
+  \State $s\gets 0$ \Comment{Sum of weights}
+  \State $Blocks_{R} \gets$ \Call{ReflectingRBlocks}{$state$} \Comment{Chain R blocks that reflect the local chain}
+  \For{$B_r$ in $Blocks_{R}$}
+    \State RCHs $\gets$ \Call{ReflectedChainHeads}{$B_r$, $state$} \Comment{Local blocks reflected by $B_r$}
     \If {$block$ in RCHs}
-      \State $s\gets s\;+$ \Call{WeightOf}{$B_e$, $state$}
+      \State $s\gets s\;+$ \Call{WeightOf}{$B_r$, $state$}
     \EndIf
   \EndFor
   \State \Return{s}

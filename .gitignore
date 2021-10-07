@@ -34,3 +34,4 @@ includes/ut/diags/**/*.png
 **/*.pyc
 */testing/*
 /package-lock.json
+/_copy_wp.sh
