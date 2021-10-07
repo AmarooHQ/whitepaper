@@ -93,7 +93,7 @@ side by side figures: https://tex.stackexchange.com/questions/37581/latex-figure
 
 ### Complexity Analysis
 
-Two elements of complexity will be analysed: the size of SPV proofs between simplex-chains, and the network overall.
+Two elements of complexity will be analyzed: the size of SPV proofs between simplex-chains, and the network overall.
 
 #### Tiling Complexity
 

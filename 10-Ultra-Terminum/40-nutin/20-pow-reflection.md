@@ -7,7 +7,7 @@
 \aside{
   A note on the term ``miner'': Consensus protocols sometimes choose a new name for the role of \emph{block producer}.
   For example: ``validator'', ``baker'', ``collator'', etc.
-  In this document, the term ``miner'' refers to the generic role of \emph{block producer} in an inclusive sense, not specifically to block producers on PoW chains.
+  In this document, the term ``miner'' refers to the generic role of \emph{block producer} in an inclusive sense, not specifically to block producers of PoW chains.
 }
 
 Can blockchains work cooperatively to secure each other? It certainly seems that there is nothing *in principle* that prohibits this. Can we come up with a way to do this?
@@ -17,6 +17,8 @@ The idea of one blockchain 'tracking' another blockchain via chain-headers and i
 [^xc1]: <https://bitcointalk.org/index.php?topic=198032.0>, <https://bitcointalk.org/index.php?topic=598784.0>
 [^xc3]: <https://github.com/XertroV/coppr/blob/master/chainheaders.py>
 [^xc4]: <https://github.com/ethereum/btcrelay>
+
+\todo{Option: refactor this section replacing "track" (e.g., Ethereum tracks Bitcoin) with terms "projection" and "image" from LP.}
 
 ### Tracking Bitcoin Headers and Txs from Ethereum
 
@@ -153,6 +155,8 @@ Yes, and we must modify the block-weight calculation so that it accounts for wor
 
 \input{includes/ut/algorithms/por-chainweight-1.tex}
 
+\todoDraftOnly{Check this section for LP consistency regarding equal work explanation and WeightOf = ReflectedWeight}
+
 What is the meaning and impact of this change?
 
 The *meaning* of this change is that Chain L now incorporates work done on Chain R *into Chain L's own calculation of the heaviest worked chain*.
@@ -184,7 +188,12 @@ It's worth noting that there are still potential attacks on Chain L at this poin
 
 How can we prevent this sort of attack? The attack is predicated on Chain R *not* accounting for the added weight from reflections. Chain R can easily account for that weight, though, with some protocol changes. First: the total chain-weight[^total-vs-rel-chain-weight], *including reflections*, can be committed to via a field in the header. Based on this field, a headers-only version of the chain can be constructed correctly. Full nodes of Chain L can now also validate the claimed weight against the verifiable weight, and a mismatch invalidates the block. Second: When such a block is found (where the claimed chain-weight violates the protocol), full nodes can construct a fraud proof. Chain R should then confirm the fraud proof (i.e., record it on-chain) and thus prevent the attackers blocks from taking priority and/or gaining reflections. Third: Chain R already knows its own headers, and so it only requires the necessary merkle branches to verify the reflections between Chain L and Chain R. This third method provides an additional means of detecting blocks that are invalid due to fraudulent chain-weight claims in the header.
 
+In the worst case, we would need to *recursively* verify proofs of reflection (those of our own chain, and reflecting chains).
+This overhead is discussed in \autoref{sec:segmented-state} and \autoref{sec:exploiting-seg-state}, and analyzed in \autoref{sec:bandwidth-complexity}.
+
 [^total-vs-rel-chain-weight]: Instead of the total chain-weight, the change in total chain-weight can be committed to instead. These are essentially equivalent.
+
+\todoDraftOnly{develop ideas around fraud proofs -- or omit}
 
 #### Step 5. Mutual Reflection
 
@@ -213,16 +222,19 @@ How can we design a system that allows for sensible comparisons between Proofs o
 
 The core problem is that the work done on different chains is measured using different units -- and those units aren't convertible. This applies to blockchains that use the same hashing algorithm, too, since there may be different costs and factors that are implicit in the mining of each of those chains. One hash is not necessarily worth exactly one hash in different contexts.
 
-Revisiting *qualitative conversion* from \autoref{sec:por-step4}: the way we will analyse (and criticize) potential solutions is via the concept of IGCs -- {Idea, Goal, Context} triples[^igcs]. The *idea* component contains *the method* of conversion such that the the goal is satisfied in the given context. The three elements of an IGC are all of the components that are required to evaluate criticisms and thus determine whether the IGC succeeds or fails.
+Revisiting *qualitative conversion* from \autoref{sec:por-step4}: the way we will analyze (and criticize) potential solutions is via the concept of IGCs -- {Idea, Goal, Context} triples[^igcs].
+The *idea* component contains *the method* of conversion such that the the goal is satisfied in the given context.
+The three elements of an IGC are all of the components that are required to evaluate criticisms and thus determine whether the IGC succeeds or fails.
 
-[^igcs]: IGCs are a method of structuring ideas (solutions to problems) so that they can be effectively analysed and criticized. They're also an introduction to the thinking methods and techniques of *Critical Fallibilism*. See \url{https://curi.us/2387-igcs}.
+[^igcs]: IGCs are a method of structuring ideas (solutions to problems) so that they can be effectively analyzed and criticized.
+They're also an introduction to the thinking methods and techniques of *Critical Fallibilism*. See \url{https://curi.us/2387-igcs}.
 
 In order to convert otherwise unconvertible units, one must define a suitable goal and context for that conversion to make sense. For example: *is a cucumber longer than it is green?*[^cucumber-goldratt] That question doesn't make sense because we can't convert between length and color. However, consider the situation where you want to win a cucumber competition, and points are awarded for a cucumber based on both its consistency of color and its length (and nothing else). Based on the specific rules, you could figure out a way to convert both color and length into points. This would help you pick the best of your cucumbers to enter into the competition, and your developing of that method means that you also now have a way to convert color and length via whatever relationship you came up with. Depending on the specific rules, you could now say things like *1cm of length is worth 3 blemishes*. In order to make sense of *converting between a cucumber's color and length*, you need both the *context* of the competition's rules and also the *goal* of maximizing the number of points[^conv-other-gc-pairs].
 
 [^cucumber-goldratt]: This example is from Eli Goldratt's *The Choice* (2008).
 [^conv-other-gc-pairs]: NB: Other {goal, context} pairs could work, too, and would have different methods of conversion.
 
-In the case of *Proof of Reflection*, we need to define a suitable goal and context to enable this conversion, and come up with ideas for how to do that conversion. Our goal is straightforward, and the same as other consensus mechanisms: we want a blockchain system that is as difficult as possible to attack. The context is the architectures of both the PoR implementation and the blockchains in question, plus the rest of the world (including attackers). More specifically: the difficulty of an attack against a blockchain network is typically analysed from the context of an attacker's *risk vs reward* where the attacker has a goal of *profit*.
+In the case of *Proof of Reflection*, we need to define a suitable goal and context to enable this conversion, and come up with ideas for how to do that conversion. Our goal is straightforward, and the same as other consensus mechanisms: we want a blockchain system that is as difficult as possible to attack. The context is the architectures of both the PoR implementation and the blockchains in question, plus the rest of the world (including attackers). More specifically: the difficulty of an attack against a blockchain network is typically analyzed from the context of an attacker's *risk vs reward* where the attacker has a goal of *profit*.
 
 Two ideas follow that create two distinct IGCs.
 
