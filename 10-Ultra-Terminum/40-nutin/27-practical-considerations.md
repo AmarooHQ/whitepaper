@@ -204,7 +204,7 @@ For the purposes of this paper, we are concerned with the method detailed in *In
 
 [^iota-oct-2015]: \href{https://bitcointalk.org/index.php?topic=1216479.0}{IOTA BitcoinTalk thread}.
 
-[^inclusive-july-2015]: \href{https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy}{Inclusive Block Chain Protocols}.
+[^inclusive-july-2015]: \href{https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy}{\textit{Inclusive Block Chain Protocols}} by Yoad Lewenberg, Yonatan Sompolinsky, and Aviv Zohar. \href{https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Avivz Mirror}, \href{http://web.archive.org/web/20210426004808/https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Archive.org Mirror}
 
 [^redisc]: As far as I can tell, the linearization methods produce identical results.
 

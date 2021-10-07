@@ -21,6 +21,12 @@ As UT is primarily a method of *structuring* a blockchain network, the scalabili
 
 UT's unique structure means that confirmation times within UT are of order $\frac{1}{O(c)}$. This is a significant improvement over existing architectures, which are of order $O(1)$. This means that, as computers get more powerful, confirmation times in UT will approach 0.
 
+\todo{Background added re $O(c^2)$ and DAG stuff}
+
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
+
 ## Assumed Knowledge
 
 \todo{add planned background stuff to relevant sections and remove this section}
@@ -38,4 +44,4 @@ And you'll need to understand the following to understand how *Ultra Terminum* t
 
 [^incl-proto]: \href{https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy}{\textit{Inclusive Block Chain Protocols}} by Yoad Lewenberg, Yonatan Sompolinsky, and Aviv Zohar. \href{https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Avivz Mirror}, \href{http://web.archive.org/web/20210426004808/https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Archive.org Mirror}
 
-%% END ### RELEASE
+%% END ### DRAFT
