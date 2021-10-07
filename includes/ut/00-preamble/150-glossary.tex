@@ -3,12 +3,14 @@
 \makeglossaries
 
 \newcommand\defineTerm[2]{
+    \makeatletter
     \newglossaryentry{#1}
     {
         name={#1},
         description={#2},
     }
     \begin{tcolorbox}[]
-    \textbf{\Gls{#1}}: #2.
+    \textbf{\Gls{#1}}: \trim@post@space{#2}.
     \end{tcolorbox}
+    \makeatother
 }

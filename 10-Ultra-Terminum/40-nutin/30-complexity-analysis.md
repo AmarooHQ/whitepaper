@@ -102,7 +102,7 @@ T_2 & = \frac{k_1 \cdot k_2}{D_f \cdot D_h} \\
 
 Thus $O(T_2) = O(c^2)$ as expected.
 
-### Complexity of $O(c^2)$ Reflection
+### Complexity of $\UT{1}$
 
 \todo{add note about excluding PoRs}
 

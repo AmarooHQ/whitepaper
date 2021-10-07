@@ -4,6 +4,12 @@
 
 \label{sec:proof-of-reflection}
 
+\aside{
+  A note on the term ``miner'': Consensus protocols sometimes choose a new name for the role of \emph{block producer}.
+  For example: ``validator'', ``baker'', ``collator'', etc.
+  In this document, the term ``miner'' refers to the generic role of \emph{block producer} in an inclusive sense, not specifically to block producers on PoW chains.
+}
+
 Can blockchains work cooperatively to secure each other? It certainly seems that there is nothing *in principle* that prohibits this. Can we come up with a way to do this?
 
 The idea of one blockchain 'tracking' another blockchain via chain-headers and its state via SPV proofs is not new. In 2013[^xc1], I (loosely) proposed a system which used this method to support rich cross-chain exchange. I wrote a simplified implementation of this method in the very early days of Ethereum[^xc3], a precursor to the later-successful BTC Relay[^xc4]. The general idea of one blockchain tracking the headers of another will be our starting point.
@@ -32,7 +38,7 @@ Let's add such a contract to Ethereum and describe the relevant data and events 
 
 \begin{figure}[]
 \centering
-\includegraphics[max width=\linewidth, height=0.3\textheight]{pow_refl_btc_eth_step1_sag}
+\includegraphics[max width=\linewidth, height=0.4\textheight]{pow_refl_btc_eth_step1_sag}
 \caption{Bitcoin headers, as they are produced, are included in Ethereum's state (via user made transactions). This is roughly how \textit{BTC Relay} works.}
 \label{fig:pr-btc-eth-step1}
 \end{figure}

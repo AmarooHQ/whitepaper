@@ -124,8 +124,8 @@ preprocess-build:
 
 mk-latex-pdf: preprocess-build
 	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
-	# -rm $(WPNOEXT).glsdefs
-	makeglossaries-lite -o $(OUTDIR) $(WPNOEXT)
+	#-rm $(WPNOEXT).glsdefs
+	(cd $(OUTDIR) && makeglossaries $(WPRAW))
 	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
 	cp $(WPNOEXT).pdf $(OUTPUT_PDF)
 	cp $(WPNOEXT).pdf $(WPRAW)-$(PP_MODE).pdf

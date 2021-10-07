@@ -8,17 +8,26 @@
 
 \label{sec:availability-of-blocks}
 
-\todo{Review this section. Got some feedback that this section was unclear. Is nomenclature introduced prior to this section? check if there's something that interacts with DAGs and mention if so.}
+\todoDraftOnly{Review this section. Got some feedback that this section was unclear. Is nomenclature introduced prior to this section? check if there's something that interacts with DAGs and mention if so.}
 
 What would happen if a header -- with valid PoW but *without* a valid block -- were to be reflected? Let's consider the two chains (L and R) from \autoref{fig:por-step5}.
 
-That would mean that chain L contains a header, $H_{1a}$, for chain R for which no block is available.
+That would mean that chain L contains a header, $H_{R,1a}$, for chain R for which no block is available.
 
-This does not break chain R, but it could mean that other blocks on chain R temporarily have a harder time competing, or waste the resources of chain R nodes as they go looking for that block, $B_{1a}$. Furthermore, it risks chain R miners doing SPV mining, which is bad.
+This does not break chain R, but it could mean that other blocks on chain R temporarily have a harder time competing, or waste the resources of chain R nodes as they go looking for that block, $B_{R,1a}$.
+Furthermore, it risks chain R miners doing SPV mining, which is bad.
 
-After $H_{1a}$ is reflected, chain R miners shouldn't build on that header without validating the block. Eventually they'd produce a valid block, $B_{1b}$. But $B_{1b}$ (and it's header, $H_{1b}$) wouldn't be reflected yet. So $B_{1a}$ would have priority over $B_{1b}$ until $B_{2b}$ (building on $B_{1b}$) is created and both $H_{1b}$ and $H_{2b}$ are reflected. After that, a minor chain re-org would restore normality.
+After $H_{R,1a}$ is reflected, chain R miners shouldn't build on that header without validating the block (so they should not mine on top of it).
+Before long they'd produce an alternate valid block, $B_{R,1b}$.
+But $B_{R,1b}$ (and it's header, $H_{R,1b}$) wouldn't be reflected yet.
+So $B_{R,1a}$ would have priority over $B_{R,1b}$ until $B_{R,2b}$ (building on $B_{R,1b}$) is created and both $H_{R,1b}$ and $H_{R,2b}$ are reflected.
+After that, a minor chain re-org would restore normality.
 
-There is at least one way to ensure that reflected headers are available. That is: miners on both chain L and chain R should *refuse* to build on blocks that include headers without a known block. This would mean that the chain L block (which includes $H_{1a}$) is *invalid* on chain L while $B_{1a}$ is unavailable. If such a method is feasible, then the malicious chain L miner has greater opportunity cost to produce a block reflecting $H_{1a}$. Moreover, this method prevents chain L (and its miners) from contributing to a potential attack on chain R.
+There is at least one way to ensure that blocks of reflected headers are available.
+That is: miners on both chain L and chain R should *refuse* to build on blocks that include headers without a known block.
+This would mean that the chain L block (which includes $H_{R,1a}$) is *invalid* on chain L while $B_{R,1a}$ is unavailable.
+If such a method is feasible, then the malicious chain L miner has greater opportunity cost to produce a block reflecting $H_{R,1a}$.
+Moreover, this method prevents chain L (and its miners) from contributing to a potential attack on chain R.
 
 For this to work, though, miners must verify that blocks *exist* for all reflected headers. Is this practical if there are $10^3$ or $10^4$ reflected chains in a simplex? The miners are only required to do very small amounts of computation on these other blocks, so their computational capacity won't be a bottleneck here. Furthermore, they don't need to keep these other blocks indefinitely, just long enough to be confident that they reflect only headers with existent blocks. So they won't need much extra disk space, either -- after a few years, the history of a simplex chain will be larger than, say, the last 12 hours of all simplex-chains' histories combined. What miners will need is *bandwidth*.
 
@@ -28,9 +37,14 @@ The complexity and impact of this strategy is discussed in \autoref{sec:bandwidt
 
 \label{sec:proving-reflection}
 
-If simplex-chains' consensus protocol requires accounting for reflected work, then nodes must have some method whereby they know which work (in a particular chain's history) has been reflected. That is: a node for chain L must be able to answer the question *For each other simplex-chain, which blocks in chain L's history have been reflected?* This means that each node must have $N_1 - 1$ answers for a simplex of $N_1$ chains.
+If simplex-chains' consensus protocols require accounting for reflected work, then nodes must have some method whereby they know which work (in a particular chain's history) has been reflected.
+That is: a node for chain L must be able to answer the question *For each other simplex-chain, which blocks in chain L's history have been reflected?*
+This means that each node must have $N_1 - 1$ answers, per block, for a simplex of $N_1$ chains.
 
-There is a trivial method: include merkle branch proofs along with reflected headers. Specifically: when a miner on chain L mines a block that includes a header from chain R, they should also include -- along-side the header -- a merkle branch that shows the most recent chain L ancestor that has been reflected by chain R.
+There is a trivial method: with each header, include the corresponding merkle branch which proves reflection.
+Specifically: when a miner on chain L mines a block that includes a header from chain R, they should also include -- along-side the header -- a merkle branch that shows the most recent chain L ancestor that has been reflected by chain R.
+For example, block $B_{L,i+1}$ might include a proof that $H_{L,i}$ was reflected by $B_{R,j}$.
+That branch is the only required branch, as chain L nodes are \emph{already} aware whether $H_{R,j}$ was reflected by $B_{L,i+1}$.
 
 \begin{comment}
 (Note: in some sense, the full PoR cannot be included *in* a newly created block, since the PoR depends *on* that newly created block. Although a miner can *commit* to a PoR when mining a block, the PoR can only be fully constructed after the relevant merkle-root has been calculated. It is possible to segment the block-creation process so that PoRs can be directly included, but this is clunky and arguably unnecessary.)
@@ -38,11 +52,22 @@ There is a trivial method: include merkle branch proofs along with reflected hea
 
 Miners would need to do this for *all* simplex-chains that they reflect. Predictably, this has overhead with order $O(N_1 \cdot \log_2 N_1)$, where $N_1$ is the number of chains in the simplex. This method has complexity $O(c \cdot \log_2 c)$ which is discussed in \autoref{sec:complexity-reflection-proof}.
 
+\defineTerm{Explicit Proofs (+PoRs)}{
+    The UT protocol variant wherein miners/validators explicitly record \emph{both} reflected headers \emph{and} the single missing merkle branch required to prove reflection
+}
+
 Do we *need* to include proofs of reflection, though? Is it possible to avoid the explicit inclusion of those proofs, potentially allowing for $O(c)$ complexity instead?
 
 If miners of any simplex-chain download the blocks of *all* simplex-chains -- as mentioned in \autoref{sec:availability-of-blocks} -- then including all necessary proofs of reflection can be made redundant. Since miners, theoretically, have all the necessary data to construct the proofs, do those miners need to actually include those proofs? Could we treat those proofs as witnesses and prune them -- similar to SegWit?
 
-There would be some downsides to excluding the proofs of reflection. For one, it would mean that simplex-chain nodes, during an initial sync, would not be able to verify Proofs of Reflection without auxillary data -- potentially a lot. Secondly, it would mean that miners *must* track the state of *all* reflections in the simplex for some period of time so that they ensure the integrity of the reflection protocol. Given \autoref{sec:availability-of-blocks}, this is possible without significant overhead.
+\defineTerm{Omitted Proofs (+OP)}{
+    The UT protocol variant wherein miners/validators explicitly record \emph{only} reflected headers, such that necessary proofs of reflection are deterministically recalculable
+}
+
+There would be some downsides to omitting the proofs of reflection.
+For one, it would mean that simplex-chain nodes, during an initial sync, would not be able to verify the PoRs without auxillary data -- potentially a lot.
+Secondly, it would mean that miners *must* track the state of *all* reflections in the simplex for some period of time so that they ensure the integrity of the reflection protocol.
+Given \autoref{sec:availability-of-blocks}, this is possible without significant overhead.
 
 A practical method for treating proofs of reflection as witnesses that may be excluded/pruned is discussed in \autoref{sec:segmented-state}.
 
@@ -66,7 +91,8 @@ One of the reasons for this tradition is that transactions are (typically) permi
 
 However, it is not necessary for a protocol to allow *any and all* transactions to depend on global state. A protocol could specify that certain transactions may depend only on a strictly defined subset of global state, i.e., a well defined *segment* of global state that is independently calculable.
 
-Simplex-chains can use this technique to their advantage by segmenting both transactions and state which are specific to Proofs of Reflection. That way, the state of a simplex-chain's reflections can be calculated without needing to calculate the remaining state for that simplex-chain.
+Simplex-chains can use this technique to their advantage by segmenting both transactions and state which are specific to Proof of Reflection.
+qThat way, the state of a simplex-chain's reflections can be calculated without needing to calculate the remaining state for that simplex-chain.
 
 We could specify the state-transition of simplex-chains (using Ethereum's nomenclature) like this:
 
@@ -82,13 +108,28 @@ Where, at some time $t$: $\sigma_{R,t}$ is the segment of state that is tracking
 
 In essence \autoref{eq:segregated-state} shows that $\sigma_{R,t}$ depends *only* on the $\sigma_{R,t-1}$ state-segment and the current transaction, whereas $\sigma_{\star,t}$ depends on global state.
 
-If simplex-chains are segmented in this manner, then miners will be able to calculate the reflection-state of other simplex-chains without calculating their complete state. This would allow them to deterministically calculate proofs of reflection for all other simplex-chains.
-
-Given that the reflection-segments of simplex-chains will contain mostly repeated data (i.e., headers), and that these segments will have very similar resultant state, there should be numerous optimizations that are possible. For example, it's not necessary for a miner's node to re-download reflected headers since it already has most (or all) of them; that node just needs to know *which* headers are reflected. This reduces the effective size of simplex-blocks from $b$ to $b \cdot (\frac{g + B_h}{2B_h})$, where $g$ is the size of the relevant digest in bytes. For $g=32; B_h=112$, this reduces effective block size to $\sim 0.643 b$ --- an improvement of $\sim 35\%$.
+If simplex-chains are segmented in this manner, then miners will be able to calculate the reflection-state of other simplex-chains without calculating their complete state.
+This would allow them to deterministically calculate proofs of reflection for all other simplex-chains.
 
 ### Exploiting Segmented State
 
 \label{sec:exploiting-seg-state}
+
+Given that the reflection-segments of simplex-chains will contain mostly redundant data (i.e., headers), there should be numerous optimizations that are possible.
+
+For example, it's not necessary for a miner's node to re-download reflected headers since it already has most (or all) of them; that node just needs to know *which* headers are reflected.
+Transmitting the \emph{hashes} of headers, only, reduces the effective size of simplex-blocks[^sb-size] from $b$ to $b \cdot (\frac{g + B_h}{2B_h})$, where $g$ is the size of the relevant digest in bytes.
+For $g=32; B_h=112$, this reduces effective block size to $\sim 0.643 b$ --- an improvement of $\sim 35\%$.
+
+[^sb-size]: Assuming those blocks dedicate 50% capacity to transactions, and 50% to reflected headers (without PoRs).
+
+However, \emph{instead} of using that technique to \emph{minimize bandwidth} we could instead use it to \emph{maximize the number of simplex-chains}.
+If simplex-blocks dedicate $\nicefrac{1}{2}$ of their capacity to reflections, then we can reduce that burden by $\nicefrac{32}{B_h} \approx 70\%$, \emph{or} we could increase the capacity for reflections by $\nicefrac{B_h}{32} \approx 300\%$!
+
+\defineTerm{Header Omission (+HO)}{
+    The UT protocol variant wherein miners/validators explicitly record \emph{only} the hashes of reflected headers.
+    A requirement is that block producers must eagerly download the headers of all simplex-chains and deterministically recalculate the relevant Proofs of Reflection
+}
 
 \todo{Explain how we use effective header size to effectively have 32 byte headers at base level -- $3.5\times$ optimization -- see WP msg board post ``Effective header size and TPS (discovered a new optimization)''}
 

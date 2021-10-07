@@ -16,8 +16,10 @@
     \vspace*{\fill}
 \end{comment}
 
-\newpage
+\clearpage
+
 \printglossaries
+
 \newpage
 
 # Notation {-}
@@ -57,21 +59,29 @@
 
 %% ### TABLE: nomenclature
 
-| Term | Definition | Reference |
-| ------ | ------------------------------------------------------------- | ----------- |
-| $\UT{i}$ | The UT scaling configuration with $i$ levels of nesting. | \autoref{sec:constructing-ut} |
-| $\UT{1}$ | UT with base-level chains only -- $O(c^2)$ scalability. | \autoref{sec:the-simplex} |
-| $\UT{2}$ | UT with nested dapp-chains -- $O(c^3)$ scalability. | \autoref{sec:dapp-chains} |
-| $\UT{3}$ | UT with nested dapp-dapp-chains -- $O(c^4)$ scalability. | \autoref{sec:dapp-chains} |
-| $\UTinf{i}$ | Tiling of $\UT{i}$ -- $O(n)$ scalability. | \autoref{sec:tiling} |
-| +PoRs | The protocol extension whereby simplex-chain miners explicitly include the corresponding PoR for each header they reflect. | \autoref{sec:por-with-proofs} |
-| +PoRTs | +PoRs with shorter proofs and smaller headers via hash-truncation. | \autoref{sec:ext-ports} |
-| +OP | Protocol extension: omitted proofs. | \autoref{sec:exploiting-seg-state} |
-| +OPT | Protocol extension: omitted proofs and smaller headers via hash truncation. | \autoref{sec:exploiting-seg-state} |
-| +HO | Protocol extension: header omission. | \autoref{sec:exploiting-seg-state} |
-| +HOT | Protocol extension: header omission and truncation. | \autoref{sec:exploiting-seg-state} |
-
-: Nomenclature defined in this document. \label{table:nomenclature}
+\begin{table}[H]
+\centering
+\caption{Nomenclature defined in this document. \label{table:nomenclature}}
+\begin{tabular}{lll}
+\toprule
+Term & Definition & Reference \\
+\midrule
+{$\UT{i}$} & {The UT scaling configuration with $i$ levels of nesting.} & {\autoref{sec:constructing-ut}} \\
+{$\UT{1}$} & {UT with base-level chains only -- $O(c^2)$ scalability.} & {\autoref{sec:the-simplex}} \\
+{$\UT{2}$} & {UT with nested dapp-chains -- $O(c^3)$ scalability.} & {\autoref{sec:dapp-chains}} \\
+{$\UT{3}$} & {UT with nested dapp-dapp-chains -- $O(c^4)$ scalability.} & {\autoref{sec:dapp-chains}} \\
+{$\UTinf{i}$} & {Tiling of $\UT{i}$ -- $O(n)$ scalability.} & {\autoref{sec:tiling}} \\
+{+PoRs} & {Protocol variant: explicit proofs.} & {\autoref{sec:proving-reflection}} \\
+{+PoRTs} & {Protocol variant: explicit proofs + truncation.} & {\autoref{sec:ext-ports}} \\
+{+HOPoRs} & {Protocol variant: explicit proofs + header omission.} & {\autoref{sec:proving-reflection}} \\
+{+HOPoRTs} & {Protocol variant: explicit proofs + header omission + truncation.} & {\autoref{sec:ext-ports}} \\
+{+OP} & {Protocol variant: omitted proofs.} & {\autoref{sec:proving-reflection}} \\
+{+OPT} & {Protocol variant: omitted proofs + truncation.} & {\autoref{sec:exploiting-seg-state}} \\
+{+HO} & {Protocol variant: omitted proofs + header omission.} & {\autoref{sec:exploiting-seg-state}} \\
+{+HOT} & {Protocol variant: omitted proofs + header omission + truncation.} & {\autoref{sec:exploiting-seg-state}} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \newpage
 \appendix
