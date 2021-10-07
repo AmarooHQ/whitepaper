@@ -48,6 +48,12 @@ defaultPositioning = [Hereish, Top, Bottom, Override]
 tablePageOnly :: Array LatexTablePos
 tablePageOnly = [TablePage]
 
+hereish :: Array LatexTablePos
+hereish = [Hereish]
+
+here :: Array LatexTablePos
+here = [Here]
+
 wpTables :: Array TableDesc
 wpTables =
     [ TD "tps" tableTps defaultPositioning
@@ -58,9 +64,9 @@ wpTables =
     , TD "tps_port" tpsPort defaultPositioning
     , TD "compare_optimizations" compareUtOptimizations defaultPositioning
     , TD "compare_optimizations2" compareUtOptimizations2 defaultPositioning
-    , TD "compare_nets_3k" compareNets3k tablePageOnly
-    , TD "compare_nets_20k" compareNets20k tablePageOnly
-    , TD "comparison_1m_tps" compareNets1mTps tablePageOnly
+    , TD "compare_nets_3k" compareNets3k hereish
+    , TD "compare_nets_20k" compareNets20k hereish
+    , TD "comparison_1m_tps" compareNets1mTps hereish
     ]
 
 lpTables :: Array TableDesc

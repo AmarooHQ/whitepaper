@@ -101,7 +101,7 @@ If our tiling is balanced (in the sense that a binary tree can be balanced) then
 
 \begin{equation}
 \begin{split}
-N_{tiles} & = 3 \cdot (2^{h} - 1) + 1 \\
+N_{\text{tiles}} & = 3 \cdot (2^{h} - 1) + 1 \\
 & = 3 \cdot 2^h - 2 \label{eq:n-tiles}
 \end{split}
 \end{equation}
@@ -109,21 +109,21 @@ N_{tiles} & = 3 \cdot (2^{h} - 1) + 1 \\
 and in general, for some valence, $v \ge 3$:
 
 \begin{equation}
-N_{tiles} = v \cdot \frac{(v-1)^h - 1}{v - 2} + 1
+N_{\text{tiles}} = v \cdot \frac{(v-1)^h - 1}{v - 2} + 1
 \end{equation}
 
 Since we defined the height of each tree as $h-1$, the maximal distance between leaf tiles is $2h$, which is also the maximal number of SPV proofs required to prove state between any two simplex-chains. Given \autoref{eq:n-tiles}:
 
 \begin{equation}
 \begin{split}
-N_{tiles} & = 3 \cdot 2^h - 2 \\
-\log_{2}(\frac{N_{tiles} + 2}{3}) & = h \label{eq:tiles-h}
+N_{\text{tiles}} & = 3 \cdot 2^h - 2 \\
+\log_{2}(\frac{N_{\text{tiles}} + 2}{3}) & = h \label{eq:tiles-h}
 \end{split}
 \end{equation}
 
-Thus, the maximal distance between leaf tiles is $2 \cdot \log_{2}(\frac{N_{tiles} + 2}{3})$, and thus the number of SPV proofs required (across simplex-chains) scales with $O(\log_2 N_{tiles})$.
+Thus, the maximal distance between leaf tiles is $2 \cdot \log_{2}(\frac{N_{\text{tiles}} + 2}{3})$, and thus the number of SPV proofs required (across simplex-chains) scales with $O(\log_2 N_{tiles})$.
 
-Since tiles can be added in an ad-hoc fashion depending on current capacity, and each tile has capacity in $O(c^j); j \in \{2,3,4\}$, it must be that $N_{tiles} \approx \frac{n}{c^j}$. Thus $O(N_{tiles}) = O(\frac{n}{c^j})$.
+Since tiles can be added in an ad-hoc fashion depending on current capacity, and each tile has capacity in $O(c^j); j \in \{2,3,4\}$, it must be that $N_{\text{tiles}} \approx \frac{n}{c^j}$. Thus $O(N_{tiles}) = O(\frac{n}{c^j})$.
 
 Given \autoref{eq:spv-complexity}, dapp-chain inter-tile SPV proofs have order:
 
@@ -178,7 +178,7 @@ main idea: if you want to attack a simplex tile in the middle of the graph, then
 
 #### Alternate and Equivalent Tiling
 
-There exists an alternate tiling that begins with two tiles instead of one, though the iteration algorithm is the same. It is shown in \autoref{fig:alt-tiling}. It has $N_{tiles} = 2^{h+2} - 2$.
+There exists an alternate tiling that begins with two tiles instead of one, though the iteration algorithm is the same. It is shown in \autoref{fig:alt-tiling}. It has $N_{\text{tiles}} = 2^{h+2} - 2$.
 
 \begin{figure}
     \centering

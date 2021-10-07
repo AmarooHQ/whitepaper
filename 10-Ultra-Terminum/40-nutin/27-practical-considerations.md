@@ -117,21 +117,22 @@ This would allow them to deterministically calculate proofs of reflection for al
 
 Given that the reflection-segments of simplex-chains will contain mostly redundant data (i.e., headers), there should be numerous optimizations that are possible.
 
-For example, it's not necessary for a miner's node to re-download reflected headers since it already has most (or all) of them; that node just needs to know *which* headers are reflected.
+For example, it's not necessary for a miner's node to re-download reflected headers since it already has most (or all) of them; that node just needs to know *which* headers are reflected and in what order.
 Transmitting the \emph{hashes} of headers, only, reduces the effective size of simplex-blocks[^sb-size] from $b$ to $b \cdot (\frac{g + B_h}{2B_h})$, where $g$ is the size of the relevant digest in bytes.
 For $g=32; B_h=112$, this reduces effective block size to $\sim 0.643 b$ --- an improvement of $\sim 35\%$.
 
 [^sb-size]: Assuming those blocks dedicate 50% capacity to transactions, and 50% to reflected headers (without PoRs).
 
 However, \emph{instead} of using that technique to \emph{minimize bandwidth} we could instead use it to \emph{maximize the number of simplex-chains}.
-If simplex-blocks dedicate $\nicefrac{1}{2}$ of their capacity to reflections, then we can reduce that burden by $\nicefrac{32}{B_h} \approx 70\%$, \emph{or} we could increase the capacity for reflections by $\nicefrac{B_h}{32} \approx 300\%$!
+If simplex-blocks dedicate $\nicefrac{1}{2}$ of their capacity to reflections, then we can reduce that burden by $1 - \nicefrac{32}{B_h} \approx 70\%$, \emph{or} we could increase the capacity for reflections by $\nicefrac{B_h}{32} \approx 300\%$!
 
 \defineTerm{Header Omission (+HO)}{
     The UT protocol variant wherein miners/validators explicitly record \emph{only} the hashes of reflected headers.
     A requirement is that block producers must eagerly download the headers of all simplex-chains and deterministically recalculate the relevant Proofs of Reflection
 }
 
-\todo{Explain how we use effective header size to effectively have 32 byte headers at base level -- $3.5\times$ optimization -- see WP msg board post ``Effective header size and TPS (discovered a new optimization)''}
+\todo{+HOPoRs}
+\todo{+T}
 
 * explicit proofs + headers (+PoRs)
 * omitted proofs + headers (+OP)
@@ -271,9 +272,11 @@ Consider an attacker producing 2 blocks for every 1 honest block. What happens m
 
 \todoDraftOnly{polish surrounding paragraphs}
 
-There's extra stuff that can be done here, too, like honest users (not miners) creating transactions w/ large tx fee that depend on certain history (i.e. that some honest block is in the history of the chain). That will attract miners from other chains dut to unrealized RoI (potentially a lot). The attacker could include that transaction, but then they need to voluntarily end the DoS themselves. Is there a reasonable strategy whereby the honest network can temporarily increase the number of miners? If there was, the attacker would then have $<50\%$ of mining power, ending the DoS quickly.
+There's extra stuff that can be done here, too, like honest users (not miners) creating transactions with a large tx fee that depend on certain history (i.e. that some honest block is in the history of the chain). That will attract miners from other chains dut to unrealized RoI (potentially a lot). The attacker could include that transaction, but then they need to voluntarily end the DoS themselves. Is there a reasonable strategy whereby the honest network can temporarily increase the number of miners? If there was, the attacker would then have $<50\%$ of mining power, ending the DoS quickly.
 
 \todoDraftOnly{Note: asymmetry between honest nodes and attacker -- attacker can only build on own blocks, but honest network builds on both.}
+
+\todoDraftOnly{Dynamic average block-size for simplex-chains based on dapp-chain headers having some PoW}
 
 ### Qualities of Different Security Methods
 

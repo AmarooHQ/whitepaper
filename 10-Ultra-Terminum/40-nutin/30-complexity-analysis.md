@@ -394,7 +394,7 @@ Note that $B_h = 16$ implies +HOT, and $B_h = 32$ implies +HO (Header Omission w
 
 ### Comparison of UT Variants
 
-\autoref{table:compare_optimizations} and \autoref{table:compare_optimizations2} show a comparison between UT variants. Note that the +PoRs and +PoRTs extensions are covered in \autoref{sec:por-with-proofs}.
+\autoref{table:compare_optimizations} and \autoref{table:compare_optimizations2} show a comparison between UT variants. Note that the +PoRs variants are covered in \autoref{sec:por-with-proofs}.
 
 %% INSERT ### TABLE: compare_optimizations
 

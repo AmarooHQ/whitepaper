@@ -13,7 +13,7 @@ As a consensus method[^ut-consensus-method], UT differs from existing consensus 
 
 [^ut-consensus-method]: Whether *Ultra Terminum* is a consensus method or not is somewhat unclear. On the one hand: a new combination of methods is still a method. On the other hand: UT provides a way to modify most/all other consensus methods, and UT doesn't provide a way to run a *single* blockchain. This is why I've described it as a cross-chain consensus *strategy*.
 
-UT is capable of supporting millions of transactions per second in the same security environment afforded by a traditional blockchain (like Bitcoin or Eth1).
+UT is capable of supporting millions of transactions per second with similar network parameters (like block size) to those of traditional blockchains (like Bitcoin or Eth1).
 
 At the core of *Ultra Terminum* is a new method for sharing security: *Proof of Reflection*. This technique (which works in conjunction with PoW, PoS, etc) allows the incremental construction of complex blockchain networks with powerful scaling properties. *Proof of Reflection* is how *Ultra Terminum* (excluding nested chains) scales with order $O(c^2)$, and is the basis for unbounded $O(n)$ scaling. UT's higher-order scaling configurations, $O(c^3)$ and $O(c^4)$, require dapp-chains: chains that are application-specific and which inherit security properties from the foundational structure.
 

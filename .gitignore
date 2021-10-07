@@ -35,3 +35,4 @@ includes/ut/diags/**/*.png
 */testing/*
 /package-lock.json
 /_copy_wp.sh
+.psc-ide-port

@@ -73,7 +73,7 @@ Term & Definition & Reference \\
 {$\UTinf{i}$} & {Tiling of $\UT{i}$ -- $O(n)$ scalability.} & {\autoref{sec:tiling}} \\
 {+PoRs} & {Protocol variant: explicit proofs.} & {\autoref{sec:proving-reflection}} \\
 {+PoRTs} & {Protocol variant: explicit proofs + truncation.} & {\autoref{sec:ext-ports}} \\
-{+HOPoRs} & {Protocol variant: explicit proofs + header omission.} & {\autoref{sec:proving-reflection}} \\
+{+HOPoRs} & {Protocol variant: explicit proofs + header omission.} & {\autoref{sec:exploiting-seg-state}} \\
 {+HOPoRTs} & {Protocol variant: explicit proofs + header omission + truncation.} & {\autoref{sec:ext-ports}} \\
 {+OP} & {Protocol variant: omitted proofs.} & {\autoref{sec:proving-reflection}} \\
 {+OPT} & {Protocol variant: omitted proofs + truncation.} & {\autoref{sec:exploiting-seg-state}} \\

@@ -69,6 +69,10 @@ https://web.archive.org/web/20210831185445/https://docs.solana.com/running-valid
 
 confRateTex = "\\mathbb{C}^\\prime"
 
+sigmaTps :: Maybe Int -> String
+sigmaTps (Just n) = "$\\Sigma\\;\\text{TPS}_{" <> show n <> "}$"
+sigmaTps Nothing = "$\\Sigma\\;\\text{TPS}$"
+
 confRateTh = wrap "$" confRateTex <> " (Hz)"
 
 data UtName = PoRs Int | PoRTs Int | HOPoRs Int | HOPoRTs Int | Std Int | T Int | HO Int | HOT Int | Aleph UtName
@@ -241,7 +245,7 @@ filterRecsByNet recs nets = do
     A.filter (\{net} -> net == n) recs
 
 compareNetsFilterList :: Array Network
-compareNetsFilterList = [Bitcoin, Cardano, UT (PoRTs 1), UT (HOPoRTs 1), UT (HOT 1), Polkadot, Eth2, OptShard, UT (PoRTs 2), UT (HOPoRTs 2), UT (HOT 2), UT (Aleph (HOT 2))]
+compareNetsFilterList = [Bitcoin, Cardano, UT (PoRTs 1), UT (HOPoRTs 1), UT (T 1), UT (HOT 1), Polkadot, Eth2, OptShard, UT (PoRTs 2), UT (HOPoRTs 2), UT (T 2), UT (HOT 2), UT (Aleph (HOT 2))]
 
 filteredUtVsOther :: Array UtVsOtherDesc
 filteredUtVsOther = filterUtVsOther compareNetsFilterList
@@ -362,7 +366,7 @@ genTpsRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> getTps <
 
 tableTps :: Table
 tableTps = Table
-    (["$k$, $B_f$, $B_h$", "$O(c)$", "Sharded $O(c^2)$"] <> utNames [Std 1, Std 2, Std 3])
+    (["$k$, $B_f$, $B_h$", "$O(c)$", "Sharded $O(c^2)$"] <> utNames [Std 1, Std 2, Std 3])  -- , sigmaTps 1, sigmaTps 2, sigmaTps 3]
     {md: mkSpacer <$> [6, 2, 5, 4, 4, 4], texTabular: "lrrrrr"}
     (genTpsRow (\cd -> cd.ut.std) <$> utComplexityData)
 

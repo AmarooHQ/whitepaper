@@ -2,10 +2,10 @@
 
 # Acknowledgements
 
-Leesa Dang, for her help editing, transcribing, and improving the readability of the paper.
+Leesa Dang, for her help editing, transcribing, proofreading, and improving the readability of the paper.
 
-Chris ``Nakatoli'' Natoli \todo{fill in details}
+Dr. Chris Natoli \todo{asdf}
 
-Especially Elliot Temple, who helped me to find the beginning of my infinity.
+Elliot Temple, who helped me to find the beginning of my infinity.
 
 %% END ### RELEASE
