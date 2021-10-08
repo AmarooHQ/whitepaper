@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-from typing import Optional, Tuple
+from typing import Callable, Optional, Tuple, Union
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 import click
 
 TAG_ALL = "*"
@@ -18,14 +18,22 @@ def cli():
     pass
 
 
-def release_label():
-    now = datetime.now()
+def release_label(d: Union[datetime, Callable[[], datetime]] = datetime.now):
+    now = d if isinstance(d, datetime) else d()
     year, week, dow = now.isocalendar()
-    THURS = 4
+    week += 1  # weeks (1,2) // 2 -> 1 this way -- aligns to schedule
+    THURS = 4  # for testing or w/e
     FRI = 5
     week += 0 if dow <= FRI else 1
-    prefix = "" if dow == FRI else "pre-"
+    prefix = "" if dow == FRI and week % 2 == 1 else "pre-"
     return f"{prefix}{year}.{week // 2}"
+
+
+@cli.command()
+def print_release_label():
+    n = datetime.now()
+    dates = [n + timedelta(days=i) for i in range(-14, 15)]
+    print('\n'.join(f"{list(d.isocalendar())}\t -> {release_label(d) if d != n else release_label() + ' (today)'}" for d in dates))
 
 
 def in_any_range(ranges: list[Tuple[int, int]], i: int):

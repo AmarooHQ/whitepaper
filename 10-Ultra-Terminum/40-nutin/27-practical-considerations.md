@@ -183,7 +183,7 @@ This mitigates the selfish mining[^selfish-mining] attack.
 Up to this point, simplex-chains have been treated like traditional blockchains, where each block has only one parent.
 Since the vast majority of a simplex-chain's security is provided by other simplex-chains (and only a small amount comes from that chain's foundational consensus method), are attacks like an empty-block Denial of Service[^empty-dos] (DoS) possible?
 If a simplex-chain were to use PoW, then it might be (relatively) trivial for an attacker to perform such an attack.
-This is because -- in traditional blockchains -- controlling more than 50% of the blocks produced provides *exclusive* control over *which candidate child blocks win* (i.e., are accepting into the canonical chain).
+This is because -- in traditional blockchains -- controlling more than 50% of the blocks produced provides *exclusive* control over *which candidate child blocks win* (i.e., are accepted into the canonical chain).
 Is there a way that we can mitigate this risk?
 If blocks were permitted *more* than a single parent, can this *exclusivity* be denied?
 
@@ -370,7 +370,7 @@ Consider an attacker producing 2 blocks for every 1 honest block. What happens m
 
 \todoDraftOnly{polish surrounding paragraphs}
 
-There's extra stuff that can be done here, too, like honest users (not miners) creating transactions with a large tx fee that depend on certain history (i.e. that some honest block is in the history of the chain). That will attract miners from other chains dut to unrealized RoI (potentially a lot). The attacker could include that transaction, but then they need to voluntarily end the DoS themselves. Is there a reasonable strategy whereby the honest network can temporarily increase the number of miners? If there was, the attacker would then have $<50\%$ of mining power, ending the DoS quickly.
+There's extra stuff that can be done here, too, like honest users (not miners) creating transactions with a large tx fee that depend on certain history (i.e. that some honest block is in the history of the chain). That will attract miners from other chains due to unrealized RoI (potentially a lot). The attacker could include that transaction, but then they need to voluntarily end the DoS themselves. Is there a reasonable strategy whereby the honest network can temporarily increase the number of miners? If there was, the attacker would then have $<50\%$ of mining power, ending the DoS quickly.
 
 \todoDraftOnly{Note: asymmetry between honest nodes and attacker -- attacker can only build on own blocks, but honest network builds on both.}
 
