@@ -12,7 +12,7 @@
 
 Can blockchains work cooperatively to secure each other? It certainly seems that there is nothing *in principle* that prohibits this. Can we come up with a way to do this?
 
-The idea of one blockchain 'imaging' another blockchain via chain-headers and its state via SPV proofs is not new. In 2013[^xc1], I (loosely) proposed a system which used this method to support rich cross-chain exchange. I wrote a simplified implementation of this method in the very early days of Ethereum[^xc3], a precursor to the later-successful BTC Relay[^xc4]. The general idea of one blockchain imaging the headers of another will be our starting point.
+The idea of one blockchain 'tracking' another blockchain via chain-headers and its state via SPV proofs is not new. In 2013[^xc1], I (loosely) proposed a system which used this method to support rich cross-chain exchange. I wrote a simplified implementation of this method in the very early days of Ethereum[^xc3], a precursor to the later-successful BTC Relay[^xc4]. The general idea of one blockchain tracking the headers of another will be our starting point.
 
 [^xc1]: <https://bitcointalk.org/index.php?topic=198032.0>, <https://bitcointalk.org/index.php?topic=598784.0>
 [^xc3]: <https://github.com/XertroV/coppr/blob/master/chainheaders.py>
@@ -20,9 +20,10 @@ The idea of one blockchain 'imaging' another blockchain via chain-headers and it
 
 \todo{Option: refactor this section replacing "track" (e.g., Ethereum tracks Bitcoin) with terms "projection" and "image" from LP.}
 
-### Imaging Bitcoin Headers and Txs from Ethereum
+### Including a Projection of Bitcoin in Ethereum
 
-The idea that Ethereum smart contracts (SCs) can image Bitcoin chain-headers is well understood. Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is not that difficult. In principle, any chain that supports some headers-only mode can be imaged in this way. In practice that can be difficult (e.g., Ethereum's EVM doesn't support memory hard hashes unless special cases are introduced). But we're not interested in practicality *at the moment*.
+// LD: this is where i've added in the transition between tracking to images/projection. It's not the best imo and I felt like it would fit nicer in this section than in the prev section. up to you to change tho.
+The idea that Ethereum smart contracts (SCs) can track Bitcoin chain-headers is well understood. I will refer to Ethereum tracking Bitcoin as an *image*, whereby Ethereum *images* Bitcoin. The inverse would mean that we are creating a *projection* of Bitcoin in Ethereum. Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is not that difficult. In principle, any chain that supports some headers-only mode can include projections in this way. In practice that can be difficult (e.g., Ethereum's EVM doesn't support memory hard hashes unless special cases are introduced). But we're not interested in practicality *at the moment*.
 
 Let's add such a contract to Ethereum and describe the relevant data and events in the following table. \autoref{fig:pr-btc-eth-step1} illustrates this. Note: \autoref{fig:pr-btc-eth-step1} includes some variance in Ethereum's block production rate, similar to what might be observed in a real-world environment.
 
@@ -30,13 +31,13 @@ Let's add such a contract to Ethereum and describe the relevant data and events 
 |---|---|---|-----|------|
 | $\vdots$ |||||
 | 0 | k ||||
-| 1 | | j | $BTC_k$ header | Images $BTC_{0 \cdots k}$ |
+| 1 | | j | $BTC_k$ header | Projection of $BTC_{0 \cdots k}$ |
 | $\vdots$ |||||
 | 40 | k + 1 ||||
-| 41 | | j + 40 | $BTC_{k+1}$ header | Images $BTC_{0 \cdots k+1}$ |
+| 41 | | j + 40 | $BTC_{k+1}$ header | Projection of $BTC_{0 \cdots k+1}$ |
 | $\vdots$ |||||
 
-: Data and events for both Bitcoin and Ethereum as blocks are produced and Bitcoin headers are imaged via an Ethereum SC.
+: Data and events for both Bitcoin and Ethereum as blocks are produced and a projection of Bitcoin headers is included in an Ethereum SC.
 
 \begin{figure}[]
 \centering
@@ -47,7 +48,7 @@ Let's add such a contract to Ethereum and describe the relevant data and events 
 
 After a Bitcoin block is produced, an Ethereum miner includes a transaction containing the Bitcoin header, which updates the SC imaging the Bitcoin chain. In reality there are practical concerns about incenting someone to produce such a transaction (among other things); we're not concerned with those here. We're just concerned with the relationships that exist and what they can do.
 
-Why would a chain want to image another chain? The typical answer is to prove transactions or state occurred on the foreign chain. On Ethereum, one could build a trustless $\text{BTC}\leftrightarrow\text{ETH}$ market, for example.
+Why would a chain want to include a projection of another chain? The typical answer is to prove transactions or state occurred on the foreign chain. On Ethereum, one could build a trustless $\text{BTC}\leftrightarrow\text{ETH}$ market, for example.
 
 ### Incremental Implementation of Proof of Reflection
 
@@ -55,44 +56,44 @@ Why would a chain want to image another chain? The typical answer is to prove tr
 
 Let's build up the idea via a hypothetical situation with two distinct blockchains. For simplicity, you can imagine these as Bitcoin and Ethereum 1 -- at least to start with. However, keep in mind that the changes required to support *Proof of Reflection* are unlikely to ever be integrated with either Bitcoin or Ethereum (and reaching social agreement about the details would be difficult, to say the least).
 
-Our starting case is that both chains use different Proof of Work algorithms and neither images the other. For simplicity, the following progression will use two blockchains with identical block times, and will not account for variance in block production.
+Our starting case is that both chains use different Proof of Work algorithms and neither includes a projection of the other. For simplicity, the following progression will use two blockchains with identical block times, and will not account for variance in block production.
 
-#### Step 1. Chain R images Chain L
+#### Step 1. A projection of Chain L in Chain R
 
-This is conceptually similar to Ethereum imaging Bitcoin, and shown in \autoref{fig:pow_refl_step1}.
+This is conceptually similar to having a projection of Bitcoin in Ethereum, and shown in \autoref{fig:pow_refl_step1}.
 
 \begin{figure}
 \centering
 \includegraphics[max width=\linewidth, height=0.28\textheight]{pow_refl_step1_sag}
-\caption{Step 1: Chain L's headers are imaged by Chain R.}
+\caption{Step 1: A projection of chain L is included in Chain R.}
 \label{fig:pow_refl_step1}
 \end{figure}
 
 Similar to before, Chain R will include Chain L's headers as they are produced. Note that this can be a protocol-level implementation; it does not have to be at the smart contract level -- as it would be with Ethereum.
 
-#### Step 2. Chain L images Chain R
+#### Step 2. A projection of Chain R in Chain L
 
-Say that the protocol of Chain L is extended to add support to contain an image of Chain R's headers. That is, a bespoke protocol extension is created that allows/requires miners to publish known Chain R headers along with their Chain L block. Similar to the way Chain R projects Chain L, now Chain L also projects Chain R. This is shown in \autoref{fig:pow_refl_step2} and the following table.
+Say that the protocol of Chain L is extended to add support to contain a projection of Chain R's headers. That is, a bespoke protocol extension is created that allows/requires miners to publish known Chain R headers along with their Chain L block. Similar to the way Chain R projects Chain L, now Chain L also projects Chain R. This is shown in \autoref{fig:pow_refl_step2} and the following table.
 
 | Time | L block made | L block contents | L state | R block made | R block contents | R state |
 |--|---|-----|------|---|-----|------|
 | $\vdots$ |||||||
-| 0 | k | $R_{j-1}$ header | Images $R_{0 \cdots j-1}$ ||||
-| 1 | ||| j | $L_{k}$ header | Images $L_{0 \cdots k}$ |
-| 2 | k + 1 | $R_{j}$ header | Images $R_{0 \cdots j}$ ||||
-| 3 | ||| j + 1 | $L_{k+1}$ header | Images $L_{0 \cdots k+1}$ |
+| 0 | k | $R_{j-1}$ header | Projection of $R_{0 \cdots j-1}$ ||||
+| 1 | ||| j | $L_{k}$ header | Projection of $L_{0 \cdots k}$ |
+| 2 | k + 1 | $R_{j}$ header | Projection of $R_{0 \cdots j}$ ||||
+| 3 | ||| j + 1 | $L_{k+1}$ header | Projection of $L_{0 \cdots k+1}$ |
 | $\vdots$ |||||||
 
-: Both Chain L and Chain R image each-other's headers.
+: Both Chain L and Chain R include a projection of each-other's headers.
 
 \begin{figure}[p]
 \centering
 \includegraphics[max width=\linewidth, max height=0.4\textheight]{pow_refl_step2_sag}
-\caption{Step 2: Chain L and Chain R image each other's header-only chain.}
+\caption{Step 2: Chain L and Chain R contain a projection of each other's header-only chain.}
 \label{fig:pow_refl_step2}
 \end{figure}
 
-#### Step 3. Chain L images Chain R's image of Chain L
+#### Step 3. A projection of Chain R in Chain L's projection of Chain R
 
 Can we use an imaged chain for a different purpose? What happens if Chain L tracks whether Chain L's history is confirmed within Chain R? This can be done via the inclusion of merkle branches that prove the particular state of Chain R that contains this information. These merkle branches are known as *Proofs of Reflection* (PoRs). Events and data are shown in the following table and \autoref{fig:por-step3}.
 
