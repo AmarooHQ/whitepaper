@@ -95,7 +95,7 @@ Say that the protocol of Chain L is extended to add support to contain a project
 
 #### Step 3. A projection of Chain R in Chain L's projection of Chain R
 
-Can we use an imaged chain for a different purpose? What happens if Chain L tracks whether Chain L's history is confirmed within Chain R? This can be done via the inclusion of merkle branches that prove the particular state of Chain R that contains this information. These merkle branches are known as *Proofs of Reflection* (PoRs). Events and data are shown in the following table and \autoref{fig:por-step3}.
+Can we use a projection of a chain for a different purpose? What happens if Chain L tracks whether Chain L's history is confirmed within Chain R? This can be done via the inclusion of merkle branches that prove the particular state of Chain R that contains this information. These merkle branches are known as *Proofs of Reflection* (PoRs). Events and data are shown in the following table and \autoref{fig:por-step3}.
 
 | Time | L block made | L block contents | L state | R block made | R block contents | R state |
 |--|---|------|------|---|-----|------|
