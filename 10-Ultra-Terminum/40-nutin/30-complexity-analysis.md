@@ -4,8 +4,6 @@
 
 \label{sec:ut-complexity}
 
-\todo{review for references to PoS dapp-chains and update}
-
 UT has two primary methods of scaling: reflection and dapp-chains. Reflection is novel. Dapp-chains are similar to many of the sharding and pseudo-sharding ideas proposed for other networks (Polkadot, Eth2, etc), though there are fewer restrictions on dapp-chains in UT compared to other designs. Additionally, dapp-chains in UT are hosted by the simplex. In the case of PoS dapp-chains, this provides \emph{additional} security compared to 'naked' PoS chains -- and without compromising on any other associated developments (e.g., finality). Hosting dapp-chains on simplex-chains also provides greater maximum capacity than a single base-chain can.
 
 A common method of sharding is to *nest* blockchains. For example, Ethereum 2 has a root-chain called *The Beacon Chain*.
@@ -106,9 +104,10 @@ Thus $O(T_2) = O(c^2)$ as expected.
 
 ### Complexity of $\UT{1}$
 
-\todo{add note about excluding PoRs}
-
 There is no single root-chain for a collection of mutually reflecting blockchains (i.e., a simplex), so $N_1 \neq 1$. What is $N_1$ then? In a simplex, each chain has $k_1$ B/s capacity, but this is split between reflections and transactions. At this foundational level (where there is no nesting yet), headers are $B_h$ bytes with a frequency of $B_f$ Hz. There are $N_1$ simplex chains.
+
+For the purpose of \autoref{sec:ut-complexity} we will *not* be considering the impact of *explicitly* including PoRs along with block headers (i.e., the +PoRs UT variants).
+The methods we use here are easily generalized to account for those variants, and associated analysis can be found in \autoref{sec:por-with-proofs}.
 
 Reflecting a single simplex-chain requires $B_f \cdot B_h$ B/s of capacity, and each simplex-chain must reflect $N_1 - 1 \approx N_1$ other simplex-chains. This means that a simplex-chain must reserve $N_1 \cdot B_f \cdot B_h$ B/s of its capacity for reflections, denoted by $k_{1,B} = N_1 \cdot B_f \cdot B_h$. Additionally, simplex-chains must reserve some capacity for transactions, $k_{1,tx}$.
 
@@ -199,7 +198,7 @@ Thus, from the definition of $k_1$ in \autoref{eq:k1-reflection-defn}:
 k_{1,B} = \frac{k_1}{2}
 \end{equation*}
 
-### Dapp-Chains and the Complexity of $O(c^3)$ and $O(c^4)$ UT
+### Dapp-Chains and the Complexity of $\UT{2}$ and $\UT{3}$
 
 #### Dapp-Chains
 
@@ -217,7 +216,7 @@ Therefore, via the same logic used for \autoref{eq:t2-for-c2-traditional}:
 T_{i+1} = T_i \cdot \frac{k_{i+1}}{D_f \cdot D_h}
 \end{equation}
 
-Note that this relationship only holds for the traditional sharding model of securing sharded chains via their inclusion in a parent-chain, e.g., UT's dapp-chains and dapp-dapp-chains, or existing $O(c^2)$ designs.
+Note that this relationship only holds for the traditional sharding model of securing sharded chains via their inclusion in a parent-chain, e.g., UT's dapp-chains ($\UT{2}$) and dapp-dapp-chains ($\UT{3}$), or existing $O(c^2)$ designs.
 
 Combining these yields:
 
@@ -226,7 +225,7 @@ Combining these yields:
 N_{i+1} = \frac{T_{i+1}}{k_{i+1}}
 \end{equation}
 
-#### UT with Dapp-Chains
+#### UT with Dapp-Chains ($\UT{2}$)
 
 Starting with \autoref{eq:simplex-T1} and building on \autoref{eq:throughput-iter}:
 
@@ -249,7 +248,7 @@ N_2 & = \frac{T_2}{k_2} \\
 \end{split}
 \end{equation*}
 
-#### UT with Dapp-Dapp-Chains
+#### UT with Dapp-Dapp-Chains ($\UT{3}$)
 
 If we say each dapp-chain hosts shards or more dapp-chains (e.g., as a dapp-chain version of Eth2 or Polkadot would), then via \autoref{eq:throughput-iter} and \autoref{eq:throughput-c-3},
 
@@ -280,7 +279,7 @@ N_3 & = \frac{T_3}{k_3} \\
 
 Each chain -- at full capacity -- operates with order $O(c)$ by definition. Thus its state has order $O(c)$ also. The size of SPV proofs scale logarithmically with the set you're proving membership of, e.g., the number of transactions, or size of the chain's state, etc. Thus, SPV proofs scale with order $O(\log_2 c)$.
 
-For a given $O(c^j); j \in \{2,3,4\}$ configuration of UT, a chain can process SPV proofs of state on another chain. For $j = 4$, the furthest that a transaction can occur from its host simplex-chain is in the 3rd level of nesting (i.e., a dapp-dapp-chain). It would require $j-1$ SPV proofs to \`\`ascend'' from the host simplex-chain to a dapp-dapp-chain. However, given that full nodes of a dapp-dapp-chain are required to be full nodes of both the host dapp-chain and the host simplex-chain, transactions in that dapp-dapp-chain do not need to provide SPV proofs of state in either of those host chains -- full nodes already have those details. That is: transactions which \`\`descend'' the levels of nesting can do so with $O(1)$ cost. SPV proofs are only required when transactions \`\`ascend'' the levels of nesting to other simplex-, dapp-, or dapp-dapp-chains.
+For a given $O(c^j); j \in \{2,3,4\}$ configuration of UT (i.e., $\UT{1}$, $\UT{2}$, $\UT{3}$), a chain can process SPV proofs of state on another chain. For $j = 4$, the furthest that a transaction can occur from its host simplex-chain is in the 3rd level of nesting (i.e., a dapp-dapp-chain). It would require $j-1$ SPV proofs to \`\`ascend'' from the host simplex-chain to a dapp-dapp-chain. However, given that full nodes of a dapp-dapp-chain are required to be full nodes of both the host dapp-chain and the host simplex-chain, transactions in that dapp-dapp-chain do not need to provide SPV proofs of state in either of those host chains -- full nodes already have those details. That is: transactions which \`\`descend'' the levels of nesting can do so with $O(1)$ cost. SPV proofs are only required when transactions \`\`ascend'' the levels of nesting to other simplex-, dapp-, or dapp-dapp-chains.
 
 Thus, the maximum number of SPV proofs required to prove state anywhere in a UT simplex is $j$.
 
@@ -351,7 +350,7 @@ While $O(c^2)$ bandwidth scaling is not ideal, it's clear that -- especially in 
 
 \label{sec:impact-of-header-size}
 
-\autoref{eq:throughput-iter} shows that UT's throughput is inversely proportional to the size of headers, $D_h$, for that given depth of nesting (this is true for $O(c^2)$ UT configurations, too). It also shows that throughput is inversely proportional to the block frequency, $D_f$, and proportional to chosen raw throughput, $k$.
+\autoref{eq:throughput-iter} shows that UT's throughput is inversely proportional to the size of headers, $D_h$, for that given depth of nesting (this is true for $\UT{1}$, too). It also shows that throughput is inversely proportional to the block frequency, $D_f$, and proportional to chosen raw throughput, $k$.
 
 Of these three values (header size, block frequency, and raw throughput), header size is the only value we *cannot* choose arbitrarily. To maintain overall throughput, doubling the header size requires one of: halving the block production frequency (i.e., doubling the block target time), or doubling the chain's raw throughput, or some combination of those two options. One such combination would be to decrease the block production frequency by a factor of $\nicefrac{1}{\sqrt{2}}$ and increase the raw throughput by a factor of $\sqrt{2}$.
 
@@ -369,12 +368,7 @@ Practically, this effect means that a decrease to the size of headers has *incre
 
 %% INSERT ### TABLE: tps_optimized
 
-: TPS when using +HOT simplex optimizations (Header Omission and Truncation).
-
-\begin{comment}
-(From table description above -- commented b/c B_h=32 is commented in comparison-gen.py)
-Note that $B_h = 16$ implies +HOT, and $B_h = 32$ implies +HO (Header Omission without truncation).
-\end{comment}
+: TPS when using +HOT simplex optimizations (Header Omission and +T).
 
 %% INSERT ### TABLE: dapp-chains_optimized
 

@@ -106,13 +106,17 @@ This means dapp-chains can have \emph{their own} token (and use that for mining 
 However, dapp-chains are also able to use *Proof of Reflection* with their host simplex-chain.
 With a suitable foundational consensus method, PoR enables dapp-chains to be as secure as their host simplex-chain with no appreciable overhead.
 
-\todo{edit from here}
+It's preferable that a simplex-chain validate the headers of its dapp-chains (similar to a light client), though this is not required.
+For some consensus methods that dapp-chains might choose (such as PoS), there might be special primitives that a host simplex-chain must support.
+However, only that host simplex-chain requires those primitives; other simplex-chains do not.
+This means that simplex-chains can *specialize* in hosting *particular types* of dapp-chains, providing a rich and efficient environments (for nodes of simplex-chains *and* dapp-chains).
 
-A simplex-chain \emph{must} validate the headers of its dapp-chains (similar to a light client). For some consensus methods that dapp-chains might choose (such as PoS), there might be special primitives that a host simplex-chain must support. However, only that host simplex-chain requires those primitives; other simplex-chains do not.
+Validating dapp-chain headers, on-chain, can be done via the following simple, clean, and extensible method: \emph{encode dapp-chain headers as simplex-level transactions}.
+This means that supporting new dapp-chain consensus methods is about as difficult as introducing new transaction types (or opcodes), and different simplex-chains have a great deal of freedom in choosing which dapp-chain consensus methods to support.
 
-Validating dapp-chain headers, on-chain, can be done via the following simple, clean, and extensible method: \emph{encode dapp-chain headers as simplex-level transactions}. This means that supporting new dapp-chain consensus methods is about as difficult as introducing new transaction types (or opcodes), and different simplex-chains have a great deal of freedom in choosing which dapp-chain consensus methods to support.
-
-\defineTerm{Header-transactions}{Dapp-chain headers that are encoded as simplex-level transactions; i.e., they are processed by a simplex-chain as a transaction, but they also function as the header for a dapp-chain block}
+\defineTerm{Header-transactions}{
+  Dapp-chain headers that are encoded as simplex-level transactions; i.e., they are processed by a simplex-chain as a transaction, but they also function as the header for a dapp-chain block
+}
 
 Practically speaking, a simple input-output transaction system with scripting capabilities (like that of Bitcoin) can be created to facilitate the necessary primitives. Additionally, different simplex-chains can implement different scripting systems, effectively facilitating *any* practical consensus mechanism. There is not much (if any) overhead to using an input-output system like this: a header's parent hash is equivalent to a transaction input, the *output* can be omitted[^scriptpk], and other particulars of the header can be treated as an input script to the transaction[^scriptsig].
 
@@ -144,15 +148,17 @@ If dapp-chain headers are included along-side transactions in simplex-blocks, is
 
 If it is possible to implement dapp-chains (or any system of child-chains) such that those chains have \emph{freedom of protocol} and \emph{freedom of incentivization} whilst inheriting the parent-chain's security, then we should strive to achieve that.
 
-\defineTerm{Freedom of Incentivization}{The property whereby child-chains are not restricted with regards to a choice of incentive-system (i.e., the nature and dynamics of their root token)}
+\defineTerm{Freedom of Incentivization}{
+  The property whereby child-chains are not restricted with regards to a choice of incentive-system (i.e., the nature and dynamics of their root token)
+}
 
-\defineTerm{Freedom of Protocol}{The property whereby child-chains are not restricted with regards to a choice of protocol (include scripting, accounting methods, block structures, etc)}
+\defineTerm{Freedom of Protocol}{
+  The property whereby child-chains are not restricted with regards to a choice of protocol (include scripting, accounting methods, block structures, etc)
+}
 
 \autoref{sec:comparing-weight-dex} details a conversion method whereby PoR is possible between chains using different root tokens via a DEX. Could dapp-chains use a protocol-level DEX to abstract their protocol and incentive-method away from those of it's parent-chain? Yes.
 
 Is this required for this abstraction? No.
-
-\todo{write "A General Incentive Model for Dapp-chains"}
 
 Here are three methods of abstraction which maintain the above freedoms.
 
@@ -162,7 +168,8 @@ In this method, the dapp-chain uses its root token to pay both the dapp-chain mi
 
 Since all dapp-chain miners are required to run a full node of the parent-chain, this is trivial. In essence, the host simplex-chain is a subset of the dapp-chain. Simplex-miners can run light clients[^hostminercollect] of the dapp-chain to regularly collect block-rewards.
 
-[^hostminercollect]: A simplex-miner could use other methods too, like maintaining full-nodes of each dapp-chain and continuously cycling through them (alternating which are running and which are not) to avoid massive computation requirements. Light clients seem obviously preferable where possible.
+[^hostminercollect]: A simplex-miner could use other methods too, like maintaining full nodes of each dapp-chain and continuously cycling through them (alternating which are running and which are not) to avoid massive computation requirements.
+Light clients seem obviously preferable where possible.
 
 A dapp-chain could, perhaps, have a rule like *X root tokens are created as part of the coinbase transaction and the miner of that block has free choice of the proportion of those which are provided as a transaction fee to the host-miner*.
 
@@ -170,19 +177,41 @@ Example use-case: an existing blockchain migrates to become an *Amaroo* dapp-cha
 
 ##### Method 2: Pay the simplex miner via a native DEX
 
+When a dapp-chain hosts a native DEX, it can use that DEX for PoR. However:
+
 \bquote{
   [Regarding possible attacks when converting work via a DEX] \convertingWeightDexNotImportant
 }{\autoref{sec:comparing-weight-dex}}
 
-\todo{write}
+The limited context of a DEX with only one trading pair (between the dapp-chain's root token and the ROO) makes this problem reasonably tractable.
+Note that a conservative implementation of a DEX between this pair *only relies on local state* -- that of the host simplex-chain and the dapp-chain, all of which is accessible to dapp-chain full nodes.
+The simplest method of preventing market manipulation (that might allow for some attack on the dapp-chain) is to calculate PoR weight via an *old* exchange rate (e.g., from 24 hours ago), or to use an *average* over some period of time.
+Both of these ensure that *competition between blocks* (at any given time) is not dependant on the *current* DEX execution.
+With regards to dapp-chains using Proof of Reflection, this is sufficient.
+
+\begin{comment}
+Furthermore, *manipulating the DEX* (in an attempt to manipulate consensus) is self-defeating.
+If an attacker manipulates the price of the dapp-chain's root token *down*, then the attackers blocks weigh less.
+If an attacker manipulates the price of the dapp-chain's root token *up*, ...
+\end{comment}
+
+Given a DEX, the dapp-chain can use this to automatically convert some of the mining reward to the root token of the host simplex-chain.
+These rewards could accrue over time and be bundled into far fewer transactions than would otherwise be necessary and automatically managed by the DEX.
+
+\todoDraftOnly{Pay the simplex miner via a native DEX.
+dex is on dapp-chain
+and dex only used for root token <-> roo
+and dex executed on dapp-chain
+no risk, and only local data, so okay for PoR}
 
 Example use-case: a greenfield dapp-chain uses an Amaroo-compatible DEX (which requires no development effort) so that simplex-miners have lower operating costs; thus incenting simplex-miners to include their headers over those of others.
 
 ##### Method 3: Pay the simplex miner directly
 
-- overhead re: including extra tx details with block-header
-- advantage: the simplex-chain doesn't necessarily need to evaluate a headers-only version of the child-chain; all PoR work can be done on the child-chain only.
-- disadvantage: can't do native simplex-level SPV (note: any other dapp-chain can do native SPV to the simplex, tho, and from there do its own SPV. that might work for weird headers, or if Bf was lower, or as an optimization...)
+If the dapp-chain is willing to forego more efficient SPV transactions (or otherwise doesn't require them), and it is willing to bear the full burden of PoR in this context, then simply recording the hash of a dapp-chain header might be sufficient.
+In such a case, transactions in the style of Bitcoin's OP_RETURN transaction format provide everything required.
+This makes sense if the dapp-chain has exceptionally large headers, or if the dapp-chain does not wish to *disclose* the headers themselves (perhaps it is a private/permissioned network).
+In any case, since it is impossible to stop users including hashes in transactions, this is always a method by which dapp-chains can enable PoR with the host simplex-chain.
 
 Example use-cases:
 
@@ -192,7 +221,9 @@ Example use-cases:
 
 [^election]: The major problem that frustrated systems of end-to-end arbitrarily-verifiable online elections was the difficulty of implementing secret ballot. Today, there are at least three known methods: zero-knowledge proofs, homomorphic encryption, and [a CoinShuffle-based system of my own design](https://gitlab.com/exo-one/svst-docker/blob/master/svst-docs/secure.vote.white.napkin.md). (Note that it is [impossible to prevent the voter from creating some proof-of-vote](https://github.com/zack-bitcoin/amoveo-docs/issues/2) -- in these and all other systems of secret ballot.)
 
-[^anchoring]: **Anchoring**: The process by which the hash of some data (perhaps a secondary chain's blocks) is included in transactions of a primary blockchain (e.g. [Bitcoin](https://www.reddit.com/r/Bitcoin/comments/5xkvc1/psa_were_running_a_stress_test_of_our_blockchain/)). Anchoring *would* be a progenitor to PoR, except that I believe the idea of an [on-chain light client predates](https://github.com/XertroV/coppr/blob/master/chainheaders.py) the term *anchoring*. Though I think that the idea of time-stamping a hash (e.g., via an OP_RETURN transaction on Bitcoin) predates the idea of an on-chain light client.
+[^anchoring]: **Anchoring**: The process by which the hash of some data (perhaps a secondary chain's blocks) is included in transactions of a primary blockchain (e.g., [Bitcoin](https://www.reddit.com/r/Bitcoin/comments/5xkvc1/psa_were_running_a_stress_test_of_our_blockchain/)).
+Anchoring *would* be a progenitor to PoR, except that I believe the idea of an [on-chain light client predates](https://github.com/XertroV/coppr/blob/master/chainheaders.py) the term *anchoring*.
+Though I think that the idea of time-stamping a hash (e.g., via an OP_RETURN transaction on Bitcoin) predates the idea of an on-chain light client.
 
 #### PoS Dapp-chains
 

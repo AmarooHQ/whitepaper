@@ -51,14 +51,24 @@ From \autoref{eq:simplex-N1-with-PoR}, we have $N_1$ that is of the form $N_1 = 
 
 : The effect of including Proofs of Reflection alongside headers (+PoRs).
 
-## PoRs with Truncation
+## PoRs with +T
 
 \label{sec:ext-ports}
 
-Since PoRs are merkle branches, and the leaves of that tree are headers (which have PoW attached), hash truncation works for the hashes comprising explicit PoRs. In effect, this protocol extension is a way to halve the overhead of +PoRs. It is called +PoRTs.
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
+
+Since PoRs are merkle branches, and the leaves of that tree are headers (which have PoW attached), +T works for the hashes comprising explicit PoRs.
+
+%% END ### DRAFT
+
+%% BEGIN ### RELEASE
+
+In effect, this protocol extension is a way to halve the overhead of +PoRs. It is called +PoRTs.
 
 %% INSERT ### TABLE: tps_port
 
-: The effect of including Proofs of Reflection, with truncated hashes, alongside headers (+PoRTs).
+: The effect of including Proofs of Reflection, with +T, alongside headers (+PoRTs).
 
 %% END ### RELEASE

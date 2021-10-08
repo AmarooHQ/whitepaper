@@ -131,16 +131,22 @@ If simplex-blocks dedicate $\nicefrac{1}{2}$ of their capacity to reflections, t
     A requirement is that block producers must eagerly download the headers of all simplex-chains and deterministically recalculate the relevant Proofs of Reflection
 }
 
-\todo{+HOPoRs}
-\todo{+T}
+Starting with +PoRs, we have just reached the +HO variant via *omitting proofs* (+OP).
+However, it is not the *proofs* that are redundant, but the *headers*.
+Does *header omission* with *explicit proofs* provide any advantages? Yes.
 
-* explicit proofs + headers (+PoRs)
-* omitted proofs + headers (+OP)
-* explicit proofs + header omission (+HOPoRs)
-* implicit proofs + header omission (+HO)
-* for each of the above: +T for truncation
+Particularly, if miners include only the single missing merkle branch associated with the necessary PoRs, then *no additional information* is required besides the *header* itself.
+Headers are trivial to acquire from the network, and each only needs to be acquired once, regardless of the number of PoRs it is a part of.
+Since the *hash of each header* is *part* of the missing PoR merkle branch, miners only need to provided *an ordered list of merkle branches* for full PoR verifiability.
+Additionally, these merkle branches *will be part of specific SPV proofs*, so when a cross-chain SPV transaction (that uses those branches) is made, it can omit those parts of the proof (replacing them with a pointer).
 
-Total buffer via optimizations $\sim 20\times$
+This UT protocol variant is +HOPoRs, the combination of *header omission* (+HO) and *explicit proofs* (+PoRs). It may present decisive advantages for implementations of *simplex tilings* (which are introduced in \autoref{sec:tiling}).
+
+\aside{
+    There is an independent protocol variant (from those above) called +T which provides a significant reduction to proof size and header size. This optimization is currently redacted. \\
+    \\
+    Each protocol variant thus far has a corresponding combination-variant, e.g., +PoRs and +PoRTs, +HO and +HOT, etc.
+}
 
 ### Confirmation Times
 
@@ -174,11 +180,14 @@ This mitigates the selfish mining[^selfish-mining] attack.
 
 \label{sec:dos-and-dags}
 
-There are decisive advantages to using DAGs (instead of trees) as the fundamental structure of a chain. Namely, multiple histories (both compatible and incompatible) can be merged into a single, consistent history -- a feature which eliminates stale blocks and thwarts attacks like an empty-block Denial of Service[^empty-dos]. UT's simplex-chains must be block-DAGs to remain functional and avoid such DoS attacks.
+Up to this point, simplex-chains have been treated like traditional blockchains, where each block has only one parent.
+Since the vast majority of a simplex-chain's security is provided by other simplex-chains (and only a small amount comes from that chain's foundational consensus method), are attacks like an empty-block Denial of Service[^empty-dos] (DoS) possible?
+If a simplex-chain were to use PoW, then it might be (relatively) trivial for an attacker to perform such an attack.
+This is because -- in traditional blockchains -- controlling more than 50% of the blocks produced provides *exclusive* control over *which candidate child blocks win* (i.e., are accepting into the canonical chain).
+Is there a way that we can mitigate this risk?
+If blocks were permitted *more* than a single parent, can this *exclusivity* be denied?
 
 [^empty-dos]: For an example of this attack, see \href{https://bitcointalk.org/index.php?topic=56675.msg678006\#msg678006}{Luke Jr's attack on Coiledcoin}.
-
-\textbf{Note:} often the motivation for using a block-DAG instead of a block-tree is to increase the block frequency. Since block-DAGs can reference multiple previous blocks, the stale-rate can approach (or reach) 0. Increasing the block frequency is counter-productive in UT, though, since UT is sensitive to the size and number of headers that are produced (see \autoref{sec:impact-of-header-size}). In UT, the purpose of using block-DAGs is to thwart certain attacks, not to increase the block frequency. The intention is for UT simplex-chains to use fairly typical block frequencies -- possibly decreasing those frequencies over time to increase capacity. Using smaller block frequencies also decreases the data-overhead of multiple parents (this overhead typically increases the header size by 32 bytes per parent).
 
 #### Block-DAG Lineage
 
@@ -210,7 +219,36 @@ For the purposes of this paper, we are concerned with the method detailed in *In
 
 [^teto-2016]: \href{https://github.com/wildbunny/docs/blob/master/T.E.T.O-draft.pdf}{T.E.T.O Draft} by Paul Firth.
 
+##### A Criticism of GHOST
+
+GHOST allows for blocks to link to a single canonical parent and multiple *uncle* blocks.
+In the full GHOST algorithm, uncle blocks contribute *weight* to the canonical chain-segment, but do not contribute *transactions*.
+Thus, uncles have *no ability* to substantially contribute to the canonical chain's *state*.
+
+Consider an empty-block DoS against a chain using GHOST.
+If an attacker were to perform an empty-block DoS, the attacker could link back to honest miners' blocks as uncles, but never parents.
+Given this, there is no easy way for the honest miners to end or mitigate the DoS.
+The attacker can include honest miners' chain-work in a purely *beneficial* way -- there is a symmetry, thus honest miners (and the network) are at the mercy of the attacker.
+
+Why does this symmetry exist?
+Because the *cumulative weight* of each block (including uncles) is *divorced* from *the set of transactions* that is contributed by that block.
+However, with a full DAG-chain, when an attacker links to uncles in this way *they must allow for the execution of all non-conflicting transactions* (i.e., those which would not cause a doublespend to occur).
+Thus, GHOST *does not mitigate* empty-block DoS attacks; *only* a full DAG-chain can do that.
+
 #### Basic Structure
+
+There are decisive advantages to using DAGs (instead of trees) as the fundamental structure of a chain.
+Namely, multiple histories (both compatible and incompatible) can be merged into a single, consistent history -- a feature which eliminates stale blocks and thwarts attacks like an empty-block DoS.
+UT's simplex-chains must be block-DAGs to remain functional and avoid such DoS attacks.
+
+\textbf{Note:} often the motivation for using a block-DAG instead of a block-tree is to increase the block frequency.
+Since block-DAGs can reference multiple previous blocks, the stale-rate can approach (or reach) 0.
+Increasing the block frequency is counter-productive in UT, though, since UT is sensitive to the size and number of headers that are produced (see \autoref{sec:impact-of-header-size}).
+In UT, the purpose of using block-DAGs is to thwart certain attacks, not to increase the block frequency.
+The intention is for UT simplex-chains to use fairly typical block frequencies -- possibly decreasing those frequencies over time to increase capacity.
+Using smaller block frequencies also decreases the data-overhead of multiple parents (this overhead typically increases the header size by 32 bytes per parent).
+
+Some basic block-dag segments are shown in \autoref{fig:dag-simple-segments}.
 
 \begin{figure}[H]
     \begin{subfigure}[t]{.31\linewidth}
@@ -238,9 +276,69 @@ For the purposes of this paper, we are concerned with the method detailed in *In
     \label{fig:dag-simple-segments}
 \end{figure}
 
-Some basic block-dag segments are shown in \autoref{fig:dag-simple-segments}.
+<!--
+\begin{comment}
 
-\todo{DAG Background}
+# DAG BG plan
+
+https://3.basecamp.com/4985262/buckets/20820958/messages/4184917383#__recording_4203214425
+
+- Inclusive blockchain protocols details a method to define the order of blocks in a DAG.
+    - This technique not only selects a main chain in a DAG, but also selectively incorporates blocks not on this canonical chain as long as they do not conflict.
+- Conflicting transactions are ordered in the order that they arrived.
+
+
+- sorting blocks
+  - essence: prioritize execution based on security contribution (weight)
+    - priority: goes first
+    - can recursively apply through a dag
+    - the specific details aren't important here (ref inclusive paper)
+    - main details:
+      - ordering is convergent and stable provided dag doesn't get to 'wide'
+- conflicts
+  - can be handled however the proto likes
+
+
+goal: support this sentence (top of section):
+
+> There are decisive advantages to using DAGs (instead of trees) as the fundamental structure of a chain. Namely, multiple histories (both compatible and incompatible) can be merged into a single, consistent history -- a feature which eliminates stale blocks and thwarts attacks like an empty-block Denial of Service
+
+[^incl-proto]: \href{https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy}{\textit{Inclusive Block Chain Protocols}} by Yoad Lewenberg, Yonatan Sompolinsky, and Aviv Zohar. \href{https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Avivz Mirror}, \href{http://web.archive.org/web/20210426004808/https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Archive.org Mirror}
+
+\end{comment}
+-->
+
+The essence of DAG-based consensus (at least the kind we're concerned with) is to *prioritize execution* of blocks and transactions based on the *security contribution* (i.e., weight) of each parent block (and that parent's ancestry).
+Based on a *most recent common direct[^directanc] ancestor*, we can decide which parent's *history* has priority execution.
+Prioritized blocks are positioned *earlier* in the final ordering.
+
+[^directanc]: In DAG (or DAG-like) chains, direct ancestors are sometimes called the *pivot chain* or *main chain*.
+Provided that parent blocks *are sorted by cumulative work*, the chain of *direct ancestors* between a given block and the genesis block must be the *single heaviest path* between the two. (This is the case for UT.)
+
+If a DAG-chain's best block has two parents, each parent will have a *subgraph of blocks* between itself and the *most recent common direct ancestor* (of the two parents).
+The subgraph which takes priority is that of the *prioritized parent's ancestry*.
+If that subgraph is a chain, then the ordering and execution of blocks is trivial.
+If it is not, then there must be another subgraph within that subgraph, and this algorithm is applied recursively.
+After the prioritized subgraph is processed, the remaining blocks (those that are only ancestors of the remaining parent block) are ordered and applied -- invoking recursion where necessary.
+Finally, the best block is applied.
+In this way, all blocks are executed after their ancestors, and there is a clear and ordering that trivially converges.
+
+In the case that more than two parent blocks are permitted, there is a trivial generalization of the above.
+That is: replace all but the first (best) parent with a *virtual parent block* that links back to all remaining *actual* parent blocks.
+This can be repeated to allow for arbitrarily many parents.
+
+\begin{comment}
+The methods described in the Inclusive Block Chain Protocols detail orderings that provide a canonical main path in a DAG which is also inclusive of other blocks that do not strictly lie on this path.
+This hints to the fact that ordering is convergent and stable in a DAG provided that it doesn't get too *wide*,
+where width is a measure of the number of concurrent chain-heads that can be merged.
+\end{comment}
+
+We should expect that conflicting transactions (which might otherwise be attempted doublespends) arise during this process.
+Ancestors of one block may not be ancestors of another.
+The exact protocol for handling conflicts is up to the implementation, but a trivial method is that blocks commit to (via hash-pointers) conflicting transactions.
+If a miner produces an invalid block (which is invalid only because it breaks this rule), then other miners can flag it as a conflicting *block* via a similar mechanism.
+
+Further reading: [*Inclusive Block Chain Protocols*](https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy)
 
 #### Preventing DoS Attacks
 
@@ -268,9 +366,7 @@ The opportunity cost of this attack, for the attacker, is at least as much as th
 
 All that sounds good so far, but this thought experiment is flawed. It is *smoothed out* compared to what we'd expect in reality -- the discrete nature of block production and reflections is ignored. In \autoref{fig:dag-dos-1}, it's explicitly excluded! What happens if we include the effect of other simplex-chains, though? Well... something \emph{magical}.
 
-\todo{Improve following para}
-
-Consider an attacker producing 2 blocks for every 1 honest block. What happens most of the time? Well the attackers blocks get reflected first, so there's like a big advantage over the honest blocks. The honest blocks will get reflected, too, but most of the time the attackers blocks will get the advantage from earlier reflections. \emph{Most} of the time. Occasionally, when an honest block is a bit lucky, it will be produced before the attackers blocks and start gaining reflections earlier. At that point, the attacker has lost -- they need to outpace the \emph{difference} in the number of reflections between the honest block and attacking blocks. So, unlike a normal doublespend (where the attacker wins if they \emph{ever} get ahead), now the honest network wins (ends the DoS) if it \emph{ever} gets ahead of the attacker -- after that point, there's no viable strategy for the attacker besides to build on the honest blocks. \emph{The asymmetry has flipped!}
+Consider an attacker producing 2 blocks for every 1 honest block. What happens most of the time? Well the attackers blocks get reflected first, so those blocks have an appreciable advantage over the honest blocks. The honest blocks will get reflected, too, but most of the time the attackers blocks will get the advantage from earlier reflections. \emph{Most} of the time. Occasionally, when an honest block is a bit lucky, it will be produced before the attackers blocks and start gaining reflections earlier. At that point, the attacker has lost -- they need to outpace the \emph{difference} in the number of reflections between the honest block and attacking blocks. So, unlike a normal doublespend (where the attacker wins if they \emph{ever} get ahead), now the honest network wins (ends the DoS) if it \emph{ever} gets ahead of the attacker -- after that point, there's no viable strategy for the attacker besides to build on the honest blocks. \emph{The asymmetry has flipped!}
 
 \todoDraftOnly{polish surrounding paragraphs}
 

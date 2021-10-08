@@ -3,10 +3,10 @@
 %% \newpage
 
 \begin{comment}
-keep toc to d=2 for this section. default is d=3
+keep toc to d=1 for this section. default is d=3
 \end{comment}
 
-\addtocontents{toc}{\protect\setcounter{tocdepth}{2}}
+\addtocontents{toc}{\protect\setcounter{tocdepth}{1}}
 
 # Buterin's Trilemma
 
