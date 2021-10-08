@@ -18,11 +18,15 @@ The idea of one blockchain 'tracking' another blockchain via chain-headers and i
 [^xc3]: <https://github.com/XertroV/coppr/blob/master/chainheaders.py>
 [^xc4]: <https://github.com/ethereum/btcrelay>
 
-\todo{Option: refactor this section replacing "track" (e.g., Ethereum tracks Bitcoin) with terms "projection" and "image" from LP.}
+The general idea of an on-chain headers-only version of another chain does not -- to my knowledge -- have a name. Herein this is called a *projection*. The generalized process via which projections are created is called *imaging*.
 
-### Tracking Bitcoin Headers and Txs from Ethereum
+\defineTerm{Projection}{
+  A \emph{projection} of a chain is its \emph{headers-only} version which is recorded and evaluated \emph{by a different chain}. For example \href{https://github.com/ethereum/btcrelay}{BTC Relay} is a smart contract by which Ethereum can host a \emph{projection} of Bitcoin. The \emph{act} of one chain creating and maintaining the reflection of another is called \emph{imaging}
+}
 
-The idea that Ethereum smart contracts (SCs) can track Bitcoin chain-headers is well understood. Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is not that difficult. In principle, any chain that supports some headers-only mode can be tracked in this way. In practice that can be difficult (e.g., Ethereum's EVM doesn't support memory hard hashes unless special cases are introduced). But we're not interested in practicality *at the moment*.
+### A Projection of Bitcoin in Ethereum
+
+The idea that Ethereum smart contracts (SCs) can track Bitcoin chain-headers is well understood -- i.e., Ethereum *images* Bitcoin. The result of this is that the *projection* of Bitcoin is available to Ethereum users and SCs. Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is not that difficult. In principle, any chain that supports some headers-only mode can include projections in this way. In practice that can be difficult (e.g., Ethereum's EVM doesn't support memory hard hashes unless special cases are introduced). But we're not interested in practicality *at the moment*.
 
 Let's add such a contract to Ethereum and describe the relevant data and events in the following table. \autoref{fig:pr-btc-eth-step1} illustrates this. Note: \autoref{fig:pr-btc-eth-step1} includes some variance in Ethereum's block production rate, similar to what might be observed in a real-world environment.
 
@@ -30,24 +34,24 @@ Let's add such a contract to Ethereum and describe the relevant data and events 
 |---|---|---|-----|------|
 | $\vdots$ |||||
 | 0 | k ||||
-| 1 | | j | $BTC_k$ header | Tracks $BTC_{0 \cdots k}$ |
+| 1 | | j | $BTC_k$ header | Records $BTC_{0 \cdots k}$ |
 | $\vdots$ |||||
 | 40 | k + 1 ||||
-| 41 | | j + 40 | $BTC_{k+1}$ header | Tracks $BTC_{0 \cdots k+1}$ |
+| 41 | | j + 40 | $BTC_{k+1}$ header | Records $BTC_{0 \cdots k+1}$ |
 | $\vdots$ |||||
 
-: Data and events for both Bitcoin and Ethereum as blocks are produced and Bitcoin headers are tracked via an Ethereum SC.
+: Data and events for both Bitcoin and Ethereum as blocks are produced and a projection of Bitcoin in Ethereum is maintained via Bitcoin headers being included in an Ethereum SC.
 
 \begin{figure}[]
 \centering
-\includegraphics[max width=\linewidth, height=0.4\textheight]{pow_refl_btc_eth_step1_sag}
+\includegraphics[max width=\linewidth, height=0.35\textheight]{pow_refl_btc_eth_step1_sag}
 \caption{Bitcoin headers, as they are produced, are included in Ethereum's state (via user made transactions). This is roughly how \textit{BTC Relay} works.}
 \label{fig:pr-btc-eth-step1}
 \end{figure}
 
-After a Bitcoin block is produced, an Ethereum miner includes a transaction containing the Bitcoin header, which updates the SC tracking the Bitcoin chain. In reality there are practical concerns about incenting someone to produce such a transaction (among other things); we're not concerned with those here. We're just concerned with the relationships that exist and what they can do.
+After a Bitcoin block is produced, an Ethereum miner includes a transaction containing the Bitcoin header, which updates the SC imaging the Bitcoin chain. In reality there are practical concerns about incenting someone to produce such a transaction (among other things); we're not concerned with those here. We're just concerned with the relationships that exist and what they can do.
 
-Why would a chain want to track another chain? The typical answer is to prove transactions or state occurred on the foreign chain. On Ethereum, one could build a trustless $\text{BTC}\leftrightarrow\text{ETH}$ market, for example.
+Why would a chain want to include a projection of another chain? The typical answer is to prove transactions or state occurred on the foreign chain. On Ethereum, one could build a trustless $\text{BTC}\leftrightarrow\text{ETH}$ market, for example.
 
 ### Incremental Implementation of Proof of Reflection
 
@@ -55,57 +59,66 @@ Why would a chain want to track another chain? The typical answer is to prove tr
 
 Let's build up the idea via a hypothetical situation with two distinct blockchains. For simplicity, you can imagine these as Bitcoin and Ethereum 1 -- at least to start with. However, keep in mind that the changes required to support *Proof of Reflection* are unlikely to ever be integrated with either Bitcoin or Ethereum (and reaching social agreement about the details would be difficult, to say the least).
 
-Our starting case is that both chains use different Proof of Work algorithms and neither tracks the other. For simplicity, the following progression will use two blockchains with identical block times, and will not account for variance in block production.
+Our starting case is that both chains use different Proof of Work algorithms and neither includes a projection of the other. For simplicity, the following progression will use two blockchains with identical block times, and will not account for variance in block production.
 
-#### Step 1. Chain R tracks Chain L
+#### Step 1. Chain R images Chain L
 
-This is conceptually similar to Ethereum tracking Bitcoin, and shown in \autoref{fig:pow_refl_step1}.
+This is conceptually similar to having a projection of Bitcoin in Ethereum, and shown in \autoref{fig:pow_refl_step1}.
 
 \begin{figure}
 \centering
 \includegraphics[max width=\linewidth, height=0.28\textheight]{pow_refl_step1_sag}
-\caption{Step 1: Chain L's headers are tracked by Chain R.}
+\caption{Step 1: Chain R images Chain L; thus Chain R hosts a \emph{projection} of Chain L.}
 \label{fig:pow_refl_step1}
 \end{figure}
 
 Similar to before, Chain R will include Chain L's headers as they are produced. Note that this can be a protocol-level implementation; it does not have to be at the smart contract level -- as it would be with Ethereum.
 
-#### Step 2. Chain L tracks Chain R
+#### Step 2. Chain L images Chain R
 
-Say that the protocol of Chain L is extended to add support for tracking Chain R's headers. That is, a bespoke protocol extension is created that allows/requires miners to publish known Chain R headers along with their Chain L block. Similar to the way Chain R tracks Chain L, now Chain L also tracks Chain R. This is shown in \autoref{fig:pow_refl_step2} and the following table.
+Say that the protocol of Chain L is extended to support a projection of Chain R. That is, a bespoke protocol extension is created that allows/requires miners to publish known Chain R headers along with their Chain L block. Similar to the way Chain R images Chain L, now Chain L also images Chain R. This is shown in \autoref{fig:pow_refl_step2} and the following table.
 
-| Time | L block made | L block contents | L state | R block made | R block contents | R state |
-|--|---|-----|------|---|-----|------|
-| $\vdots$ |||||||
-| 0 | k | $R_{j-1}$ header | Tracks $R_{0 \cdots j-1}$ ||||
-| 1 | ||| j | $L_{k}$ header | Tracks $L_{0 \cdots k}$ |
-| 2 | k + 1 | $R_{j}$ header | Tracks $R_{0 \cdots j}$ ||||
-| 3 | ||| j + 1 | $L_{k+1}$ header | Tracks $L_{0 \cdots k+1}$ |
-| $\vdots$ |||||||
+\begin{table}[H]
+\centering
+\caption{Both Chain L and Chain R host a projection of each-other.}
+\resizebox{\textwidth}{!} {%
+\begin{tabular}{lllllll}
+\toprule
+{Time} & {L block made} & {L block contents} & {L state} & {R block made} & {R block contents} & {R state} \\
+\midrule
+{$\vdots$} & {} & {} & {} & {} & {} & {} \\
+{0} & {k} & {$R_{j-1}$ header} & {Records $R_{0 \cdots j-1}$} & {} & {} & {} \\
+{1} & {} & {} & {} & { j} & {$L_{k}$ header} & {Records $L_{0 \cdots k}$} \\
+{2} & {k + 1} & {$R_{j}$ header} & {Records $R_{0 \cdots j}$} & {} & {} & {} \\
+{3} & {} & {} & {} & {j + 1} & {$L_{k+1}$ header} & {Records $L_{0 \cdots k+1}$} \\
+{$\vdots$} & {} & {} & {} & {} & {} & {} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
 
-: Both Chain L and Chain R track each-other's headers.
 
 \begin{figure}[p]
 \centering
 \includegraphics[max width=\linewidth, max height=0.4\textheight]{pow_refl_step2_sag}
-\caption{Step 2: Chain L and Chain R track each other's header-only chain.}
+\caption{Step 2: Chain L and Chain R contain a projection of each other's header-only chain.}
 \label{fig:pow_refl_step2}
 \end{figure}
 
-#### Step 3. Chain L tracks Chain R's tracking of Chain L
+#### Step 3. Chain L's *reflection* in Chain R
 
-Can we use a tracked chain for a different purpose? What happens if Chain L tracks whether Chain L's history is confirmed within Chain R? This can be done via the inclusion of merkle branches that prove the particular state of Chain R that contains this information. These merkle branches are known as *Proofs of Reflection* (PoRs). Events and data are shown in the following table and \autoref{fig:por-step3}.
+Can we use a projection of a chain for a different purpose? What happens if Chain L tracks whether Chain L's history is confirmed within Chain R? This can be done via the inclusion of merkle branches that prove the particular state of Chain R that contains this information. These merkle branches are known as *Proofs of Reflection* (PoRs). In essence, Chain L uses its projection of Chain R to prove that its *own history* matches that of it's *projection* in Chain R. Chain L proves that it is *reflected* in Chain R. Events and data are shown in the following table and \autoref{fig:por-step3}.
 
 | Time | L block made | L block contents | L state | R block made | R block contents | R state |
 |--|---|------|------|---|-----|------|
 | $\vdots$ |||||||
-| 0 | k | $R_{j-1}$ header + Merkle proof of $L_{k-1}$ | Tracks $R_{0 \cdots j-1}$ *and* knows that Chain R tracks $L_{0 \cdots k-1}$ ||||
-| 1 | ||| j | $L_{k}$ header | Tracks $L_{0 \cdots k}$ |
-| 2 | k + 1 | $R_{j}$ header + Merkle proof of $L_{k}$ | Tracks $R_{0 \cdots j}$ *and* knows that R tracks $L_{0 \cdots k}$ ||||
-| 3 | ||| j + 1 | $L_{k+1}$ header | Tracks $L_{0 \cdots k+1}$ |
+| 0 | k | $R_{j-1}$ header + Merkle proof of $L_{k-1}$ | Records $R_{0 \cdots j-1}$ *and* knows that Chain R records $L_{0 \cdots k-1}$ ||||
+| 1 | ||| j | $L_{k}$ header | Records $L_{0 \cdots k}$ |
+| 2 | k + 1 | $R_{j}$ header + Merkle proof of $L_{k}$ | Records $R_{0 \cdots j}$ *and* knows that Chain R records $L_{0 \cdots k}$ ||||
+| 3 | ||| j + 1 | $L_{k+1}$ header | Records $L_{0 \cdots k+1}$ |
 | $\vdots$ |||||||
 
-: Chain L tracks which headers are known about by Chain R. That is: Chain L includes *proofs of reflection*.
+: Chain L records which of its headers are known about by Chain R. That is: Chain L includes *proofs of reflection*.
 
 \begin{figure}[p]
 \centering
@@ -114,7 +127,7 @@ Can we use a tracked chain for a different purpose? What happens if Chain L trac
 \label{fig:por-step3}
 \end{figure}
 
-Chain L now knows *which L blocks are tracked by Chain R*, i.e., which local blocks are known about by some external source. Put another way: Chain L's history is confirmed *not only* by new Chain L blocks, *but also* by Chain R blocks. There's no data-availability concern here since Chain L nodes *know* that they have the blocks that Chain R knows about.
+Chain L now knows *which L blocks are recorded by Chain R*, i.e., which local blocks are known about by some external source. Put another way: Chain L's history is confirmed *not only* by new Chain L blocks, *but also* by Chain R blocks. There's no data-availability concern here since Chain L nodes *know* that they have the blocks that Chain R knows about.
 
 **Important:** Soon, these confirmations will have real and useful meaning. Under the right conditions, an appropriate configuration of *Proof of Reflection* results in an increase in the *rate* that confirmations are acquired. This is the first hint of $\frac{1}{O(c)}$ confirmation time.
 
@@ -163,7 +176,9 @@ The *meaning* of this change is that Chain L now incorporates work done on Chain
 
 When a chain does this we say *Chain L (or Chain L's work) is **reflected** in Chain R*. This technique is what is meant by the term *Proof of Reflection*.
 
-\defineTerm{Proof of Reflection (PoR)}{The consensus technique whereby a blockchain becomes more difficult to attack via the inclusion of proofs that its history is tracked and confirmed by another blockchain}
+\defineTerm{Proof of Reflection (PoR)}{
+  The consensus technique whereby a blockchain becomes more difficult to attack via the weighted inclusion of proofs that its history is reflected in another blockchain
+}
 
 One particular *impact* of this change is that a doublespend attack (e.g., by withholding a privately mined chain that reverts a transaction) must now be performed *not only* against Chain L, *but also and simultaneously* against Chain R.
 
@@ -182,7 +197,7 @@ Note that, as the Chain L tip is gaining reflections from Chain R, miners on Cha
 
 How is it that Chain L miners can know the partial state of Chain R that is required to produce the necessary PoRs? Typically a blockchain network will support some light-client protocol that allows nodes to ask for such proofs, and that is one method. However, it is possible to design a blockchain system so that this is not required, and one such method is discussed in \autoref{sec:segmented-state}.
 
-It's worth noting that there are still potential attacks on Chain L at this point. For example: what if an attacker mines a doublespend in private and produces a longer chain-segment than the honest chain? At this point the attacker can publish their blocks even though the honest chain-segment still weighs more due to reflections. Why would they do this? Well, if Chain R is tracking Chain L's headers-only chain without accounting for reflections, then the attackers chain-segment appears to have more work than the honest chain-segment. Thus Chain R's reflection of Chain L will reorganize to favor the attacker's chain-segment. If the attacker has more hash power than the honest miners (i.e., $q > p$[^hr-footnote]) then they can use this reorganization as a foothold to launch a normal 51% attack.
+It's worth noting that there are still potential attacks on Chain L at this point. For example: what if an attacker mines a doublespend in private and produces a longer chain-segment than the honest chain? At this point the attacker can publish their blocks even though the honest chain-segment still weighs more due to reflections. Why would they do this? Well, if Chain R images Chain L's headers-only chain without accounting for reflections, then the attackers chain-segment appears to have more work than the honest chain-segment. Thus Chain R's reflection of Chain L will reorganize to favor the attacker's chain-segment. If the attacker has more hash power than the honest miners (i.e., $q > p$[^hr-footnote]) then they can use this reorganization as a foothold to launch a normal 51% attack.
 
 [^hr-footnote]: In \href{https://bitcoin.org/bitcoin.pdf}{Satoshi's original paper} the parameters $p$ and $q$ represent the probability that the next block will be found by an honest node or the attacker, respectively. This convention has been continued in subsequent analysis, e.g., Rosenfeld's \href{https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{\emph{Analysis of hash-rate-based double-spending}}, and is continued here, also.
 
@@ -197,7 +212,7 @@ This overhead is discussed in \autoref{sec:segmented-state} and \autoref{sec:exp
 
 #### Step 5. Mutual Reflection
 
-The final step in this progression is *mutual reflection* -- where both chains track one-another and include the necessary PoRs and modifications to their chain-weight algorithms. This is shown in \autoref{fig:por-step5}.
+The final step in this progression is *mutual reflection* -- where both chains image one-another and include the necessary PoRs and modifications to their chain-weight algorithms. This is shown in \autoref{fig:por-step5}.
 
 \begin{figure}[]
 \centering
@@ -210,7 +225,7 @@ When two chains (Chain L and Chain R) mutually reflect each-other, detecting att
 
 There are several details that still require discussion, though, such as: *how exactly is weight contributed by a reflecting chain converted to weight in the local chain?* (discussed in \autoref{sec:comparing-diff-pows}); and *how can proofs of reflection be calculated without the requirement that miners are full nodes of both chains?* (discussed in \autoref{sec:practical-considerations}). This last question is particularly important for moving beyond mutual reflection between only two chains.
 
-The *essence* of *Proof of Reflection* should now be apparent. *In principle*, we can make blockchains more difficult to attack based on the idea that *blockchains can track the history of other blockchains (and confirm a chain's history like they do transactions)*. *In principle*, it is possible to increase the security of a blockchain via *reflection* and to increase the security of multiple blockchains via *mutual reflection*.
+The *essence* of *Proof of Reflection* should now be apparent. *In principle*, we can make blockchains more difficult to attack based on the idea that *blockchains can include a projection of the history of other blockchains (and confirm a chain's history like they do transactions)*. *In principle*, it is possible to increase the security of a blockchain via *reflection* and to increase the security of multiple blockchains via *mutual reflection*.
 
 ### Comparing Incomparable Proofs of Work
 

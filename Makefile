@@ -1,6 +1,6 @@
 OUTDIR=output
-WPRAW=whitepaper
-WPNOEXT=$(OUTDIR)/$(WPRAW)
+WPFILENAME=whitepaper
+WPNOEXT=$(OUTDIR)/$(WPFILENAME)
 WPFILE=$(WPNOEXT).markdown
 WPHTML=$(WPNOEXT).html
 WPTEX=$(WPNOEXT).tex
@@ -21,7 +21,7 @@ papersize=a4
 geometry=left=3cm,right=3cm,top=3cm,bottom=3cm
 
 # default loction that the WP pdf gets written to. Set OUTPUT_PDF to output somewhere else.
-OUTPUT_PDF_DEFAULT=$(WPRAW)-latest.pdf
+OUTPUT_PDF_DEFAULT=$(WPFILENAME)-latest.pdf
 ifndef OUTPUT_PDF
 override OUTPUT_PDF = $(OUTPUT_PDF_DEFAULT)
 endif
@@ -124,13 +124,16 @@ preprocess-build:
 
 mk-latex-pdf: preprocess-build
 	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
-	#-rm $(WPNOEXT).glsdefs
-	(cd $(OUTDIR) && makeglossaries $(WPRAW))
+	#-rm $(WPNOEXT).gl*
+	(cd $(OUTDIR) && makeglossaries $(WPFILENAME))
 	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
 	cp $(WPNOEXT).pdf $(OUTPUT_PDF)
 	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE).pdf
-	cp $(WPNOEXT).pdf $(WPRAW)-$(PP_MODE).pdf
-	bash bin/msg_good.sh "Copied build to\n  - $(OUTPUT_PDF)\n  - $(WPNOEXT)-$(PP_MODE).pdf\n  - $(WPRAW)-$(PP_MODE).pdf"
+	cp $(WPNOEXT).pdf $(WPFILENAME)-$(PP_MODE).pdf
+	bash bin/msg_good.sh "Copied build to\n  - $(OUTPUT_PDF)\n  - $(WPNOEXT)-$(PP_MODE).pdf\n  - $(WPFILENAME)-$(PP_MODE).pdf"
+
+glossary-fix-1:
+	rm -v $(WPNOEXT).gl*
 
 finished-msg:
 	bash bin/msg_good.sh 'Finished build for mode=$(PP_MODE)'
