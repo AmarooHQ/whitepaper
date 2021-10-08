@@ -20,10 +20,15 @@ The idea of one blockchain 'tracking' another blockchain via chain-headers and i
 
 \todo{Option: refactor this section replacing "track" (e.g., Ethereum tracks Bitcoin) with terms "projection" and "image" from LP.}
 
-### Including a Projection of Bitcoin in Ethereum
+The general idea of an on-chain headers-only version of another chain does not -- to my knowledge -- have a name. Herein this is called a *projection*. The generalized process via which projections are created is called *imaging*.
 
-// LD: this is where i've added in the transition between tracking to images/projection. It's not the best imo and I felt like it would fit nicer in this section than in the prev section. up to you to change tho.
-The idea that Ethereum smart contracts (SCs) can track Bitcoin chain-headers is well understood. I will refer to Ethereum tracking Bitcoin as an *image*, whereby Ethereum *images* Bitcoin. The inverse would mean that there exists a *projection* of Bitcoin in Ethereum. Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is not that difficult. In principle, any chain that supports some headers-only mode can include projections in this way. In practice that can be difficult (e.g., Ethereum's EVM doesn't support memory hard hashes unless special cases are introduced). But we're not interested in practicality *at the moment*.
+\defineTerm{Projection}{
+  A *projection* of a chain is its *headers-only* version which is recorded and evaluated *by a different chain*. For example [BTC Relay](https://github.com/ethereum/btcrelay) is a smart contract by which Ethereum can host a *projection* of Bitcoin. The *act* of one chain creating and maintaining the reflection of another is called *imaging*
+}
+
+### A Projection of Bitcoin in Ethereum
+
+The idea that Ethereum smart contracts (SCs) can track Bitcoin chain-headers is well understood -- i.e., Ethereum *images* Bitcoin. The result of this is that the *projection* of Bitcoin is available to Ethereum users and SCs. Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is not that difficult. In principle, any chain that supports some headers-only mode can include projections in this way. In practice that can be difficult (e.g., Ethereum's EVM doesn't support memory hard hashes unless special cases are introduced). But we're not interested in practicality *at the moment*.
 
 Let's add such a contract to Ethereum and describe the relevant data and events in the following table. \autoref{fig:pr-btc-eth-step1} illustrates this. Note: \autoref{fig:pr-btc-eth-step1} includes some variance in Ethereum's block production rate, similar to what might be observed in a real-world environment.
 
@@ -164,8 +169,7 @@ The *meaning* of this change is that Chain L now incorporates work done on Chain
 
 When a chain does this we say *Chain L (or Chain L's work) is **reflected** in Chain R*. This technique is what is meant by the term *Proof of Reflection*.
 
-//todo: redefine PoR - check that the glossary updates too, idt mine updated last time?
-\defineTerm{Proof of Reflection (PoR)}{The consensus technique whereby a blockchain becomes more difficult to attack via the inclusion of proofs that its history is tracked and confirmed by another blockchain}
+\defineTerm{Proof of Reflection (PoR)}{The consensus technique whereby a blockchain becomes more difficult to attack via the weighted inclusion of proofs that its history is reflected in another blockchain}
 
 One particular *impact* of this change is that a doublespend attack (e.g., by withholding a privately mined chain that reverts a transaction) must now be performed *not only* against Chain L, *but also and simultaneously* against Chain R.
 
