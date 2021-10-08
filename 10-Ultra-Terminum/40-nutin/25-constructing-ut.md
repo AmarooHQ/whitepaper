@@ -152,8 +152,6 @@ If it is possible to implement dapp-chains (or any system of child-chains) such 
 
 Is this required for this abstraction? No.
 
-\todo{write "A General Incentive Model for Dapp-chains"}
-
 Here are three methods of abstraction which maintain the above freedoms.
 
 ##### Method 1: Pay the simplex miner on the dapp-chain
@@ -175,7 +173,11 @@ Example use-case: an existing blockchain migrates to become an *Amaroo* dapp-cha
   [Regarding possible attacks when converting work via a DEX] \convertingWeightDexNotImportant
 }{\autoref{sec:comparing-weight-dex}}
 
-\todo{write}
+\todo{Pay the simplex miner via a native DEX.
+dex is on dapp-chain
+and dex only used for root token <-> roo
+and dex executed on dapp-chain
+no risk, and only local data, so okay for PoR}
 
 Example use-case: a greenfield dapp-chain uses an Amaroo-compatible DEX (which requires no development effort) so that simplex-miners have lower operating costs; thus incenting simplex-miners to include their headers over those of others.
 

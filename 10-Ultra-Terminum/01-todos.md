@@ -1,6 +1,4 @@
-\todo{$50\%$ -- rewrite dapp-chains to use PoR (the previous plan was to use a hybrid PoS system, but it turns out that isn't necessary; PoR is beter and more efficient)}
-\todo{explain header size: 112 = 80 + 32 (btc efficiency + an extra parent to support DAG data struct)}
-\todo{compress ToC a bit if needed (need to search for how -- idea is to keep it to one page)}
+\todoDraftOnly{explain header size: 112 = 80 + 32 (btc efficiency + an extra parent to support DAG data struct)}
 
 %% END ### RELEASE
 
