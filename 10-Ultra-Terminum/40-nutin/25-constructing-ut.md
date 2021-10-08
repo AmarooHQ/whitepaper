@@ -162,7 +162,8 @@ In this method, the dapp-chain uses its root token to pay both the dapp-chain mi
 
 Since all dapp-chain miners are required to run a full node of the parent-chain, this is trivial. In essence, the host simplex-chain is a subset of the dapp-chain. Simplex-miners can run light clients[^hostminercollect] of the dapp-chain to regularly collect block-rewards.
 
-[^hostminercollect]: A simplex-miner could use other methods too, like maintaining full-nodes of each dapp-chain and continuously cycling through them (alternating which are running and which are not) to avoid massive computation requirements. Light clients seem obviously preferable where possible.
+[^hostminercollect]: A simplex-miner could use other methods too, like maintaining full nodes of each dapp-chain and continuously cycling through them (alternating which are running and which are not) to avoid massive computation requirements.
+Light clients seem obviously preferable where possible.
 
 A dapp-chain could, perhaps, have a rule like *X root tokens are created as part of the coinbase transaction and the miner of that block has free choice of the proportion of those which are provided as a transaction fee to the host-miner*.
 
@@ -192,7 +193,9 @@ Example use-cases:
 
 [^election]: The major problem that frustrated systems of end-to-end arbitrarily-verifiable online elections was the difficulty of implementing secret ballot. Today, there are at least three known methods: zero-knowledge proofs, homomorphic encryption, and [a CoinShuffle-based system of my own design](https://gitlab.com/exo-one/svst-docker/blob/master/svst-docs/secure.vote.white.napkin.md). (Note that it is [impossible to prevent the voter from creating some proof-of-vote](https://github.com/zack-bitcoin/amoveo-docs/issues/2) -- in these and all other systems of secret ballot.)
 
-[^anchoring]: **Anchoring**: The process by which the hash of some data (perhaps a secondary chain's blocks) is included in transactions of a primary blockchain (e.g. [Bitcoin](https://www.reddit.com/r/Bitcoin/comments/5xkvc1/psa_were_running_a_stress_test_of_our_blockchain/)). Anchoring *would* be a progenitor to PoR, except that I believe the idea of an [on-chain light client predates](https://github.com/XertroV/coppr/blob/master/chainheaders.py) the term *anchoring*. Though I think that the idea of time-stamping a hash (e.g., via an OP_RETURN transaction on Bitcoin) predates the idea of an on-chain light client.
+[^anchoring]: **Anchoring**: The process by which the hash of some data (perhaps a secondary chain's blocks) is included in transactions of a primary blockchain (e.g., [Bitcoin](https://www.reddit.com/r/Bitcoin/comments/5xkvc1/psa_were_running_a_stress_test_of_our_blockchain/)).
+Anchoring *would* be a progenitor to PoR, except that I believe the idea of an [on-chain light client predates](https://github.com/XertroV/coppr/blob/master/chainheaders.py) the term *anchoring*.
+Though I think that the idea of time-stamping a hash (e.g., via an OP_RETURN transaction on Bitcoin) predates the idea of an on-chain light client.
 
 #### PoS Dapp-chains
 

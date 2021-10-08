@@ -51,9 +51,9 @@ Increasing the valence beyond 3 does not make sense, though. There are two reaso
 
 A tiling 'iteration' is the process by which new tiles are added. For the sake of simplicity and demonstration, each iteration will add *all possible new tiles* as children of all 'leaf' tiles -- though in reality there's no requirement that new tiles be added at the same time, or that tiles are added in a balanced fashion.
 
-We start from the foundation that each tile has a maximum of $\frac{N_1}{4}$ simplex-chains, where $N_1$ is the maximum capacity of a maximal simplex. That is: if one computer (based on $O(c)$ reasoning) could be a full-node[^simplex-full-validation] for a simplex-chain in a 4000-simplex, then each tile will have, at most, 1000 simplex-chains. Since a tile is adjacent to $\le 3$ other tiles, a tiled simplex-chain will have, at most, $N_1$ reflections (since a tile and its neighbors have, at most, $\frac{N_1}{4}$ simplex-chains, and all of those simplex-chains are reflected).
+We start from the foundation that each tile has a maximum of $\frac{N_1}{4}$ simplex-chains, where $N_1$ is the maximum capacity of a maximal simplex. That is: if one computer (based on $O(c)$ reasoning) could be a full node[^simplex-full-validation] for a simplex-chain in a 4000-simplex, then each tile will have, at most, 1000 simplex-chains. Since a tile is adjacent to $\le 3$ other tiles, a tiled simplex-chain will have, at most, $N_1$ reflections (since a tile and its neighbors have, at most, $\frac{N_1}{4}$ simplex-chains, and all of those simplex-chains are reflected).
 
-[^simplex-full-validation]: A full-node for a simplex-chain does not need to fully validate any other simplex-chains, or dapp-chains on that simplex-chain. Header-only validation is fine.
+[^simplex-full-validation]: A full node for a simplex-chain does not need to fully validate any other simplex-chains, or dapp-chains on that simplex-chain. Header-only validation is fine.
 
 Our starting point is a $\frac{N_1}{4}$-simplex which constitutes a single tile. This is shown in \autoref{fig:tiled-simplex-5-d1}.
 
@@ -370,7 +370,7 @@ Additionally, a model of tilings of similar capacity -- i.e., similar $N_{tiles}
 
 What's the worst case for tiling -- as a method? Probably that PoR isn't safe to do non-recursively in a way that works for $O(n)$ tiling. The solution is to validate PoRs recursively which means that *every* miner needs *every* base-level (i.e., simplex-chain) block across all simplex tiles. That would enable edge-to-edge verification of all PoRs. In that case, an upper-bound is set based on minimum bandwidth requirements (for miners) and $\Delta S$ (see \autoref{sec:bandwidth-complexity}). For a given set of parameters, the limit is $N_{\text{tiles}} \cdot \nicefrac{\Delta S}{4} < \text{MinBandwidth}$.
 
-possible extension: maybe PoRs can be provided to miners but excluded from blocks. Like you can be a full-node or a full-full-node, and full-full-nodes validate PoRs recursively in a way that isn't required for a single simplex. Or full-full-nodes are miners in a simplex, and full-full-full-nodes are miners in a tiling of simplexes.
+possible extension: maybe PoRs can be provided to miners but excluded from blocks. Like you can be a full node or a full-full-node, and full-full-nodes validate PoRs recursively in a way that isn't required for a single simplex. Or full-full-nodes are miners in a simplex, and full-full-full-nodes are miners in a tiling of simplexes.
 
 #### A Thought (Draft)
 

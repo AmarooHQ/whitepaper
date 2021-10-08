@@ -22,7 +22,8 @@
 
 \newpage
 
-# Notation {-}
+\section*{Notation}
+\addcontentsline{toc}{section}{Notation and Nomenclature}
 \fancypagestyle{notation}{%
     \fancyhead[L]{}
     \fancyhead[R]{Notation \& Nomenclature}
@@ -55,7 +56,7 @@
 \begin{comment}
 \end{comment}
 
-# Nomenclature {-}
+\section*{Nomenclature}
 
 %% ### TABLE: nomenclature
 
@@ -72,13 +73,13 @@ Term & Definition & Reference \\
 {$\UT{3}$} & {UT with nested dapp-dapp-chains -- $O(c^4)$ scalability.} & {\autoref{sec:dapp-chains}} \\
 {$\UTinf{i}$} & {Tiling of $\UT{i}$ -- $O(n)$ scalability.} & {\autoref{sec:tiling}} \\
 {+PoRs} & {Protocol variant: explicit proofs.} & {\autoref{sec:proving-reflection}} \\
-{+PoRTs} & {Protocol variant: explicit proofs + truncation.} & {\autoref{sec:ext-ports}} \\
+{+PoRTs} & {Protocol variant: explicit proofs + T.} & {\autoref{sec:ext-ports}} \\
 {+HOPoRs} & {Protocol variant: explicit proofs + header omission.} & {\autoref{sec:exploiting-seg-state}} \\
-{+HOPoRTs} & {Protocol variant: explicit proofs + header omission + truncation.} & {\autoref{sec:ext-ports}} \\
+{+HOPoRTs} & {Protocol variant: explicit proofs + header omission + T.} & {\autoref{sec:ext-ports}} \\
 {+OP} & {Protocol variant: omitted proofs.} & {\autoref{sec:proving-reflection}} \\
-{+OPT} & {Protocol variant: omitted proofs + truncation.} & {\autoref{sec:exploiting-seg-state}} \\
+{+OPT} & {Protocol variant: omitted proofs + T.} & {\autoref{sec:exploiting-seg-state}} \\
 {+HO} & {Protocol variant: omitted proofs + header omission.} & {\autoref{sec:exploiting-seg-state}} \\
-{+HOT} & {Protocol variant: omitted proofs + header omission + truncation.} & {\autoref{sec:exploiting-seg-state}} \\
+{+HOT} & {Protocol variant: omitted proofs + header omission + T.} & {\autoref{sec:exploiting-seg-state}} \\
 \bottomrule
 \end{tabular}
 \end{table}

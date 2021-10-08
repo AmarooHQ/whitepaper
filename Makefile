@@ -128,8 +128,9 @@ mk-latex-pdf: preprocess-build
 	(cd $(OUTDIR) && makeglossaries $(WPRAW))
 	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
 	cp $(WPNOEXT).pdf $(OUTPUT_PDF)
+	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE).pdf
 	cp $(WPNOEXT).pdf $(WPRAW)-$(PP_MODE).pdf
-	bash bin/msg_good.sh "Copied build to\n  - $(OUTPUT_PDF)\n  - $(WPRAW)-$(PP_MODE).pdf"
+	bash bin/msg_good.sh "Copied build to\n  - $(OUTPUT_PDF)\n  - $(WPNOEXT)-$(PP_MODE).pdf\n  - $(WPRAW)-$(PP_MODE).pdf"
 
 finished-msg:
 	bash bin/msg_good.sh 'Finished build for mode=$(PP_MODE)'
