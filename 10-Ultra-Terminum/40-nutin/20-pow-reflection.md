@@ -23,7 +23,7 @@ The idea of one blockchain 'tracking' another blockchain via chain-headers and i
 ### Including a Projection of Bitcoin in Ethereum
 
 // LD: this is where i've added in the transition between tracking to images/projection. It's not the best imo and I felt like it would fit nicer in this section than in the prev section. up to you to change tho.
-The idea that Ethereum smart contracts (SCs) can track Bitcoin chain-headers is well understood. I will refer to Ethereum tracking Bitcoin as an *image*, whereby Ethereum *images* Bitcoin. The inverse would mean that we are creating a *projection* of Bitcoin in Ethereum. Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is not that difficult. In principle, any chain that supports some headers-only mode can include projections in this way. In practice that can be difficult (e.g., Ethereum's EVM doesn't support memory hard hashes unless special cases are introduced). But we're not interested in practicality *at the moment*.
+The idea that Ethereum smart contracts (SCs) can track Bitcoin chain-headers is well understood. I will refer to Ethereum tracking Bitcoin as an *image*, whereby Ethereum *images* Bitcoin. The inverse would mean that there exists a *projection* of Bitcoin in Ethereum. Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is not that difficult. In principle, any chain that supports some headers-only mode can include projections in this way. In practice that can be difficult (e.g., Ethereum's EVM doesn't support memory hard hashes unless special cases are introduced). But we're not interested in practicality *at the moment*.
 
 Let's add such a contract to Ethereum and describe the relevant data and events in the following table. \autoref{fig:pr-btc-eth-step1} illustrates this. Note: \autoref{fig:pr-btc-eth-step1} includes some variance in Ethereum's block production rate, similar to what might be observed in a real-world environment.
 
@@ -31,13 +31,13 @@ Let's add such a contract to Ethereum and describe the relevant data and events 
 |---|---|---|-----|------|
 | $\vdots$ |||||
 | 0 | k ||||
-| 1 | | j | $BTC_k$ header | Projection of $BTC_{0 \cdots k}$ |
+| 1 | | j | $BTC_k$ header | Records $BTC_{0 \cdots k}$ |
 | $\vdots$ |||||
 | 40 | k + 1 ||||
-| 41 | | j + 40 | $BTC_{k+1}$ header | Projection of $BTC_{0 \cdots k+1}$ |
+| 41 | | j + 40 | $BTC_{k+1}$ header | Records $BTC_{0 \cdots k+1}$ |
 | $\vdots$ |||||
 
-: Data and events for both Bitcoin and Ethereum as blocks are produced and a projection of Bitcoin headers is included in an Ethereum SC.
+: Data and events for both Bitcoin and Ethereum as blocks are produced and a projection of Bitcoin in Ethereum is maintained via Bitcoin headers being included in an Ethereum SC.
 
 \begin{figure}[]
 \centering
@@ -78,10 +78,10 @@ Say that the protocol of Chain L is extended to add support to contain a project
 | Time | L block made | L block contents | L state | R block made | R block contents | R state |
 |--|---|-----|------|---|-----|------|
 | $\vdots$ |||||||
-| 0 | k | $R_{j-1}$ header | Projection of $R_{0 \cdots j-1}$ ||||
-| 1 | ||| j | $L_{k}$ header | Projection of $L_{0 \cdots k}$ |
-| 2 | k + 1 | $R_{j}$ header | Projection of $R_{0 \cdots j}$ ||||
-| 3 | ||| j + 1 | $L_{k+1}$ header | Projection of $L_{0 \cdots k+1}$ |
+| 0 | k | $R_{j-1}$ header | Records $R_{0 \cdots j-1}$ ||||
+| 1 | ||| j | $L_{k}$ header | Records $L_{0 \cdots k}$ |
+| 2 | k + 1 | $R_{j}$ header | Records $R_{0 \cdots j}$ ||||
+| 3 | ||| j + 1 | $L_{k+1}$ header | Records $L_{0 \cdots k+1}$ |
 | $\vdots$ |||||||
 
 : Both Chain L and Chain R include a projection of each-other's headers.
@@ -100,13 +100,13 @@ Can we use an imaged chain for a different purpose? What happens if Chain L trac
 | Time | L block made | L block contents | L state | R block made | R block contents | R state |
 |--|---|------|------|---|-----|------|
 | $\vdots$ |||||||
-| 0 | k | $R_{j-1}$ header + Merkle proof of $L_{k-1}$ | Images $R_{0 \cdots j-1}$ *and* knows that Chain R images $L_{0 \cdots k-1}$ ||||
-| 1 | ||| j | $L_{k}$ header | Images $L_{0 \cdots k}$ |
-| 2 | k + 1 | $R_{j}$ header + Merkle proof of $L_{k}$ | Images $R_{0 \cdots j}$ *and* knows that R images $L_{0 \cdots k}$ ||||
-| 3 | ||| j + 1 | $L_{k+1}$ header | Images $L_{0 \cdots k+1}$ |
+| 0 | k | $R_{j-1}$ header + Merkle proof of $L_{k-1}$ | Records $R_{0 \cdots j-1}$ *and* knows that Chain R records $L_{0 \cdots k-1}$ ||||
+| 1 | ||| j | $L_{k}$ header | Records $L_{0 \cdots k}$ |
+| 2 | k + 1 | $R_{j}$ header + Merkle proof of $L_{k}$ | Records $R_{0 \cdots j}$ *and* knows that Chain R records $L_{0 \cdots k}$ ||||
+| 3 | ||| j + 1 | $L_{k+1}$ header | Records $L_{0 \cdots k+1}$ |
 | $\vdots$ |||||||
 
-: Chain L images which headers are known about by Chain R. That is: Chain L includes *proofs of reflection*.
+: Chain L records which headers are known about by Chain R. That is: Chain L includes *proofs of reflection*.
 
 \begin{figure}[p]
 \centering
@@ -115,7 +115,7 @@ Can we use an imaged chain for a different purpose? What happens if Chain L trac
 \label{fig:por-step3}
 \end{figure}
 
-Chain L now knows *which L blocks are imaged by Chain R*, i.e., which local blocks are known about by some external source. Put another way: Chain L's history is confirmed *not only* by new Chain L blocks, *but also* by Chain R blocks. There's no data-availability concern here since Chain L nodes *know* that they have the blocks that Chain R knows about.
+Chain L now knows *which L blocks are recorded by Chain R*, i.e., which local blocks are known about by some external source. Put another way: Chain L's history is confirmed *not only* by new Chain L blocks, *but also* by Chain R blocks. There's no data-availability concern here since Chain L nodes *know* that they have the blocks that Chain R knows about.
 
 **Important:** Soon, these confirmations will have real and useful meaning. Under the right conditions, an appropriate configuration of *Proof of Reflection* results in an increase in the *rate* that confirmations are acquired. This is the first hint of $\frac{1}{O(c)}$ confirmation time.
 
@@ -164,7 +164,7 @@ The *meaning* of this change is that Chain L now incorporates work done on Chain
 
 When a chain does this we say *Chain L (or Chain L's work) is **reflected** in Chain R*. This technique is what is meant by the term *Proof of Reflection*.
 
-\defineTerm{Proof of Reflection (PoR)}{The consensus technique whereby a blockchain becomes more difficult to attack via the inclusion of proofs that its history is imaged and confirmed by another blockchain}
+\defineTerm{Proof of Reflection (PoR)}{The consensus technique whereby a blockchain becomes more difficult to attack via the inclusion of proofs that its history is tracked and confirmed by another blockchain}
 
 One particular *impact* of this change is that a doublespend attack (e.g., by withholding a privately mined chain that reverts a transaction) must now be performed *not only* against Chain L, *but also and simultaneously* against Chain R.
 
@@ -211,7 +211,7 @@ When two chains (Chain L and Chain R) mutually reflect each-other, detecting att
 
 There are several details that still require discussion, though, such as: *how exactly is weight contributed by a reflecting chain converted to weight in the local chain?* (discussed in \autoref{sec:comparing-diff-pows}); and *how can proofs of reflection be calculated without the requirement that miners are full nodes of both chains?* (discussed in \autoref{sec:practical-considerations}). This last question is particularly important for moving beyond mutual reflection between only two chains.
 
-The *essence* of *Proof of Reflection* should now be apparent. *In principle*, we can make blockchains more difficult to attack based on the idea that *blockchains can contain an image of the history of other blockchains (and confirm a chain's history like they do transactions)*. *In principle*, it is possible to increase the security of a blockchain via *reflection* and to increase the security of multiple blockchains via *mutual reflection*.
+The *essence* of *Proof of Reflection* should now be apparent. *In principle*, we can make blockchains more difficult to attack based on the idea that *blockchains can include a projection of the history of other blockchains (and confirm a chain's history like they do transactions)*. *In principle*, it is possible to increase the security of a blockchain via *reflection* and to increase the security of multiple blockchains via *mutual reflection*.
 
 ### Comparing Incomparable Proofs of Work
 
