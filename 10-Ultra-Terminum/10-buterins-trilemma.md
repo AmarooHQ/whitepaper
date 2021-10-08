@@ -1,6 +1,6 @@
 %% BEGIN ### RELEASE
 
-\newpage
+%% \newpage
 
 \begin{comment}
 keep toc to d=1 for this section. default is d=3
