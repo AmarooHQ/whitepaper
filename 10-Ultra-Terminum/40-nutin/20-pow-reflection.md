@@ -73,7 +73,7 @@ Similar to before, Chain R will include Chain L's headers as they are produced. 
 
 #### Step 2. A projection of Chain R in Chain L
 
-Say that the protocol of Chain L is extended to add support to contain a projection of Chain R's headers. That is, a bespoke protocol extension is created that allows/requires miners to publish known Chain R headers along with their Chain L block. Similar to the way Chain R projects Chain L, now Chain L also projects Chain R. This is shown in \autoref{fig:pow_refl_step2} and the following table.
+Say that the protocol of Chain L is extended to add support to contain a projection of Chain R's headers. That is, a bespoke protocol extension is created that allows/requires miners to publish known Chain R headers along with their Chain L block. Similar to the way Chain R images Chain L, now Chain L also images Chain R. This is shown in \autoref{fig:pow_refl_step2} and the following table.
 
 | Time | L block made | L block contents | L state | R block made | R block contents | R state |
 |--|---|-----|------|---|-----|------|
