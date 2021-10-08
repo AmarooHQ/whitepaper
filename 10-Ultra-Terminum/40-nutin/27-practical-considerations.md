@@ -140,7 +140,7 @@ Headers are trivial to acquire from the network, and each only needs to be acqui
 Since the *hash of each header* is *part* of the missing PoR merkle branch, miners only need to provided *an ordered list of merkle branches* for full PoR verifiability.
 Additionally, these merkle branches *will be part of specific SPV proofs*, so when a cross-chain SPV transaction (that uses those branches) is made, it can omit those parts of the proof (replacing them with a pointer).
 
-This UT protocol variant is +HOPoRs, the combination of *header omission* (+HO) and *explicit proofs* (+PoRs).
+This UT protocol variant is +HOPoRs, the combination of *header omission* (+HO) and *explicit proofs* (+PoRs). It may present decisive advantages for implementations of *simplex tilings* (which are introduced in \autoref{sec:tiling}).
 
 \aside{
     There is an independent protocol variant (from those above) called +T which provides a significant reduction to proof size and header size. This optimization is currently redacted. \\
