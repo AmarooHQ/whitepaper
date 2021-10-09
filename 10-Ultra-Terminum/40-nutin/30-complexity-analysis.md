@@ -106,8 +106,9 @@ Thus $O(T_2) = O(c^2)$ as expected.
 
 There is no single root-chain for a collection of mutually reflecting blockchains (i.e., a simplex), so $N_1 \neq 1$. What is $N_1$ then? In a simplex, each chain has $k_1$ B/s capacity, but this is split between reflections and transactions. At this foundational level (where there is no nesting yet), headers are $B_h$ bytes with a frequency of $B_f$ Hz. There are $N_1$ simplex chains.
 
-For the purpose of \autoref{sec:ut-complexity} we will *not* be considering the impact of *explicitly* including PoRs along with block headers (i.e., the +PoRs UT variants).
+For the purpose of \autoref{sec:ut-complexity} we will generally *not* consider the impact of *explicitly* including PoRs along with block headers (i.e., the +PoRs UT variants).
 The methods we use here are easily generalized to account for those variants, and associated analysis can be found in \autoref{sec:por-with-proofs}.
+Unless otherwise stated, \autoref{sec:ut-complexity} analyses the $\UT{+OP}$ variant.
 
 Reflecting a single simplex-chain requires $B_f \cdot B_h$ B/s of capacity, and each simplex-chain must reflect $N_1 - 1 \approx N_1$ other simplex-chains. This means that a simplex-chain must reserve $N_1 \cdot B_f \cdot B_h$ B/s of its capacity for reflections, denoted by $k_{1,B} = N_1 \cdot B_f \cdot B_h$. Additionally, simplex-chains must reserve some capacity for transactions, $k_{1,tx}$.
 
@@ -321,10 +322,26 @@ Additionally, the discrepancy in header size (between $B_h$ and $D_h$) is due to
 
 \label{sec:bandwidth-complexity}
 
-\todoDraftOnly{
-BW for full node: $\Delta s = k_1 + N_1 \cdot B_f \cdot g \cdot \log_2{N_1}$. BW for all headers (w/o header omission):
-$N_1 \cdot B_h \cdot B_f = \frac{k_1 \cdot B_h \cdot B_f}{2 \cdot B_h \cdot B_f} = \frac{k_1}{2} = O(c)$
-}
+What data must a full node download? A full node must be able to *completely validate* a *single chain*. Thus, a full node of a simplex-chain needs to download all blocks for that simplex-chain, and all auxiliary data to verify PoRs. Provided that the PoRs and corresponding headers remain available (which they always do[^alwaysdo]), the total depends on which UT protocol variant is used (some already include that auxiliary data).
+
+[^alwaysdo]: The necessary PoRs are, at the very least, part of other simplex-chains, so "always do" assumes that simplex-chains themselves remain available, excluding planned shutdown. Since all blockchain networks *depend* on the availability of their chains, this is a safe assumption.
+
+The data a full node requires are: each block, the headers of all reflecting chains, and the missing branches for all PoRs. Network-wide, headers consume $N_1 \cdot B_f \cdot B_h$ B/s, and PoRs (only for that specific chain) use $N_1 \cdot B_f \cdot g \cdot \ceil{\log_2 N_1}$ B/s. Let's denote the total bandwidth required $\Delta s$. In the worst case, where both headers and PoRs must be downloaded:
+
+\begin{equation}
+\begin{split}
+\Delta s & = k_1 + (N_1 \cdot B_f \cdot B_h) + (N_1 \cdot B_f \cdot g \cdot \ceil{\log_2 N_1}) \\
+& = k_1 + N_1 \cdot B_f \cdot ( B_h + g \cdot \ceil{\log_2 N_1})
+\end{split}
+\end{equation}
+
+Thus $O(\Delta s) = O(k_1 + k_1 \cdot \log_2 k_1) = O(c \cdot \log_2 c)$.
+
+However, with *explicit PoRs* (variants including +PoRs), $\Delta s \le k_1 + N_1 \cdot B_f \cdot B_h = O(k_1) = O(c)$.
+
+\todoDraftOnly{in effect: we get to choose the aspect that the $\log c$ influences -- this matters b/c of \emph{a principle of scaling} section. we get to choose based on *worst case* so basically scalability isn't affected by that term b/c we can always put it in the non-bottleneck component.}
+
+That is for a full node. What about the bandwidth required to verify *the entire simplex*?
 
 If miners temporarily keep the blocks of every simplex-chain (so that they can verify that reflected headers correspond to existent blocks) then what is the complexity and burden of this? Each simplex-chain has a raw throughput of $k_1$ bytes/s. From \autoref{eq:simplex-N1} we know that $N_1 = \frac{k_1}{2 \cdot B_f \cdot B_h}$.
 
@@ -340,7 +357,7 @@ The amount of network bandwidth, $\Delta S$, required to download all blocks (as
 
 It is clear that $\Delta S$ has order $O(c^2)$, but how bad is this? For $k_1 = 3000$, $B_f = \frac{1}{60}$, and $B_h = 112$: $\Delta S \approx 2.4$ MB/s. With those figures: $N_1 \approx 800$ simplex-chains, $N_2 \approx 645,000$ dapp-chains, and maximum tps of $\sim 7.7\times 10^{6}$. Decreasing block times to 15s correspondingly decrease the bandwidth requirements to 0.6 MB/s for a simplex with $\sim 200$ chains, $\sim 40,000$ dapp-chains, and $\sim 484,000$ max tps.
 
-While $O(c^2)$ bandwidth scaling is not ideal, it's clear that -- especially in the early days of a UT simplex when there are fewer simplex-chains -- there are tolerable configurations available.
+While $O(c^2)$ bandwidth scaling is not ideal, it's clear that -- especially in the early days of a UT simplex when there are fewer simplex-chains -- there are tolerable configurations available; i.e., there is *excess capacity*.
 
 %% INSERT ### TABLE: dapp-chains
 
