@@ -156,7 +156,7 @@ If it is possible to implement dapp-chains (or any system of child-chains) such 
   The property whereby child-chains are not restricted with regards to a choice of protocol (include scripting, accounting methods, block structures, etc)
 }
 
-\autoref{sec:comparing-weight-dex} details a conversion method whereby PoR is possible between chains using different root tokens via a DEX. Could dapp-chains use a protocol-level DEX to abstract their protocol and incentive-method away from those of it's parent-chain? Yes.
+\autoref{sec:comparing-weight-dex} details a conversion method whereby PoR is possible between chains using different root tokens via a DEX. Could dapp-chains use a \emph{protocol-level} DEX to abstract their protocol and incentive-method away from those of it's parent-chain? Yes.
 
 Is this required for this abstraction? No.
 
@@ -217,9 +217,12 @@ Example use-cases:
 
 - An existing *anchored*[^anchoring] blockchain migrates to become an Amaroo dapp-chain.
 
-- A new (and ephemeral) dapp-chain is created to facilitate a national election[^election] that will result in a 200 GB audit log (facilitating unprivileged verification of the election result) and a peak votes-per-second over $10^5$. This demonstrates both *freedom of incentivization* (as there is none) and *freedom of protocol* as no payments are made and no restriction is placed on the nature of this dapp-chain's payload.
+- A new (and ephemeral) dapp-chain is created to facilitate a national election that will result in a 200 GB audit log (facilitating unprivileged verification of the election result) and a peak votes-per-second over $10^5$.
+This demonstrates both *freedom of incentivization* (as there is none) and *freedom of protocol* as no payments are made and no restriction is placed on the nature of this dapp-chain's payload.
 
-[^election]: The major problem that frustrated systems of end-to-end arbitrarily-verifiable online elections was the difficulty of implementing secret ballot. Today, there are at least three known methods: zero-knowledge proofs, homomorphic encryption, and [a CoinShuffle-based system of my own design](https://gitlab.com/exo-one/svst-docker/blob/master/svst-docs/secure.vote.white.napkin.md). (Note that it is [impossible to prevent the voter from creating some proof-of-vote](https://github.com/zack-bitcoin/amoveo-docs/issues/2) -- in these and all other systems of secret ballot.)
+\begin{comment}
+<!-- [^election]: The major problem that frustrated systems of end-to-end arbitrarily-verifiable online elections was the difficulty of implementing secret ballot. Today, there are at least three known methods: zero-knowledge proofs, homomorphic encryption, and [a CoinShuffle-based system of my own design](https://gitlab.com/exo-one/svst-docker/blob/master/svst-docs/secure.vote.white.napkin.md). (Note that it is [impossible to prevent the voter from creating some proof-of-vote](https://github.com/zack-bitcoin/amoveo-docs/issues/2) -- in these and all other systems of secret ballot.) -->
+\end{comment}
 
 [^anchoring]: **Anchoring**: The process by which the hash of some data (perhaps a secondary chain's blocks) is included in transactions of a primary blockchain (e.g., [Bitcoin](https://www.reddit.com/r/Bitcoin/comments/5xkvc1/psa_were_running_a_stress_test_of_our_blockchain/)).
 Anchoring *would* be a progenitor to PoR, except that I believe the idea of an [on-chain light client predates](https://github.com/XertroV/coppr/blob/master/chainheaders.py) the term *anchoring*.

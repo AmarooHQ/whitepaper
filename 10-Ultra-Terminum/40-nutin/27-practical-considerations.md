@@ -115,7 +115,7 @@ This would allow them to deterministically calculate proofs of reflection for al
 
 \label{sec:exploiting-seg-state}
 
-Given that the reflection-segments of simplex-chains will contain mostly redundant data (i.e., headers), there should be numerous optimizations that are possible.
+Given that the reflection-segments of simplex-chains will contain mostly redundant data (i.e., headers), numerous optimizations are possible.
 
 For example, it's not necessary for a miner's node to re-download reflected headers since it already has most (or all) of them; that node just needs to know *which* headers are reflected and in what order.
 Transmitting the \emph{hashes} of headers, only, reduces the effective size of simplex-blocks[^sb-size] from $b$ to $b \cdot (\frac{g + B_h}{2B_h})$, where $g$ is the size of the relevant digest in bytes.

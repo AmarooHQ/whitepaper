@@ -26,7 +26,7 @@ The general idea of an on-chain headers-only version of another chain does not -
 
 ### A Projection of Bitcoin in Ethereum
 
-The idea that Ethereum smart contracts (SCs) can track Bitcoin chain-headers is well understood -- i.e., Ethereum *images* Bitcoin. The result of this is that the *projection* of Bitcoin is available to Ethereum users and SCs. Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is not that difficult. In principle, any chain that supports some headers-only mode can include projections in this way. In practice that can be difficult (e.g., Ethereum's EVM doesn't support memory hard hashes unless special cases are introduced). But we're not interested in practicality *at the moment*.
+The idea that Ethereum smart contracts (SCs) can track Bitcoin chain-headers is well understood -- i.e., Ethereum *images* Bitcoin. The result of this is that the *projection* of Bitcoin is available to Ethereum users and SCs. Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is viable. In principle, any chain that supports some headers-only mode can include projections in this way. In practice that can be difficult (e.g., Ethereum's EVM doesn't support memory hard hashes unless special cases are introduced). But we're not interested in practicality *at the moment*.
 
 Let's add such a contract to Ethereum and describe the relevant data and events in the following table. \autoref{fig:pr-btc-eth-step1} illustrates this. Note: \autoref{fig:pr-btc-eth-step1} includes some variance in Ethereum's block production rate, similar to what might be observed in a real-world environment.
 
@@ -231,6 +231,8 @@ The *essence* of *Proof of Reflection* should now be apparent. *In principle*, w
 
 \label{sec:comparing-diff-pows}
 
+\todoDraftOnly {rewrite this section}
+
 For Proof of Reflection to work effectively, there must be some method of comparing and converting the *work* done by reflecting chains. Earlier, we simply *set* a ratio between Chain L blocks and Chain R blocks, but that isn't suitable for a production network.
 
 How can we design a system that allows for sensible comparisons between Proofs of Work that use different hashing algorithms?
@@ -255,7 +257,9 @@ Two ideas follow that create two distinct IGCs.
 
 #### A Single Root Token Across Multiple Chains
 
-\defineTerm{Root Token (RT)}{The sole network-level token required by typical blockchain protocols. e.g., Bitcoin has BTC, Ethereum has ETH, Polkadot has DOT, Cardano has ADA, etc}
+\defineTerm{Root Token (RT)}{
+  The typically sole network-level token required by blockchain protocols. e.g., Bitcoin has BTC, Ethereum has ETH, Polkadot has DOT, Cardano has ADA, Amaroo has ROO, etc
+}
 
 \begin{comment}
 The simplest method for comparing work done via different algorithms is for all reflecting chains to measure that work via a common unit. How can we do this? We could try to measure it in some external unit like USD. However, that would require accounting for external factors like the availability of silicon and mining rigs, the cost of electricity, and various exchange rates. Accounting for those external factors impractical, so whatever method we choose, those factors must *cancel out*.
@@ -359,7 +363,7 @@ There are some other conjectured solutions to the *Nothing at Stake* problem. Th
 
 %% BEGIN ### DRAFT
 
-\todo{refelct only chains that reflect your history; if they favor a different history, then you should be building on that history instead, so don't reflect those blocks -- i.e. ppl should calculate weight to be 0.}
+\todo{reflect only chains that reflect your history; if they favor a different history, then you should be building on that history instead, so don't reflect those blocks -- i.e. ppl should calculate weight to be 0.}
 
 #### PoS Bribe Attacks
 

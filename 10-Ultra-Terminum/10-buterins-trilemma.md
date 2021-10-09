@@ -65,7 +65,7 @@ A mistaken way to break the conflict is *merged mining* (aka AuxPoW). This metho
 
 An underlying assumption here is that maximally sharing security across the network requires miners to maintain a record of all chains and do validation on all those chains. The naive solution (sharding, mentioned above) conflicts with secure methods of merged mining. It seems like progress is impossible.
 
-We have some hints to conditions that might belong to a *silver bullet* solution:
+We have some hints to conditions that might belong to a solution:
 
 * We can share security between chains/shards and can use small blocks.
 * We can share security without miners keeping and validating all chains/shards.
