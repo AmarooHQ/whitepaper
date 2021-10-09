@@ -44,7 +44,7 @@ This means that each node must have $N_1 - 1$ answers, per block, for a simplex 
 There is a trivial method: with each header, include the corresponding merkle branch which proves reflection.
 Specifically: when a miner on chain L mines a block that includes a header from chain R, they should also include -- along-side the header -- a merkle branch that shows the most recent chain L ancestor that has been reflected by chain R.
 For example, block $B_{L,i+1}$ might include a proof that $H_{L,i}$ was reflected by $B_{R,j}$.
-That branch is the only required branch, as chain L nodes are \emph{already} aware whether $H_{R,j}$ was reflected by $B_{L,i+1}$.
+That branch is the only required branch (i.e., the \emph{missing} branch), as chain L nodes are \emph{already} aware whether $H_{R,j}$ was reflected by $B_{L,i+1}$.
 
 \begin{comment}
 (Note: in some sense, the full PoR cannot be included *in* a newly created block, since the PoR depends *on* that newly created block. Although a miner can *commit* to a PoR when mining a block, the PoR can only be fully constructed after the relevant merkle-root has been calculated. It is possible to segment the block-creation process so that PoRs can be directly included, but this is clunky and arguably unnecessary.)
@@ -92,7 +92,7 @@ One of the reasons for this tradition is that transactions are (typically) permi
 However, it is not necessary for a protocol to allow *any and all* transactions to depend on global state. A protocol could specify that certain transactions may depend only on a strictly defined subset of global state, i.e., a well defined *segment* of global state that is independently calculable.
 
 Simplex-chains can use this technique to their advantage by segmenting both transactions and state which are specific to Proof of Reflection.
-qThat way, the state of a simplex-chain's reflections can be calculated without needing to calculate the remaining state for that simplex-chain.
+That way, the state of a simplex-chain's reflections can be calculated without needing to calculate the remaining state for that simplex-chain.
 
 We could specify the state-transition of simplex-chains (using Ethereum's nomenclature) like this:
 
@@ -334,7 +334,7 @@ where width is a measure of the number of concurrent chain-heads that can be mer
 \end{comment}
 
 We should expect that conflicting transactions (which might otherwise be attempted doublespends) arise during this process.
-Ancestors of one block may not be ancestors of another.
+Ancestors of one parent may not be ancestors of another parent.
 The exact protocol for handling conflicts is up to the implementation, but a trivial method is that blocks commit to (via hash-pointers) conflicting transactions.
 If a miner produces an invalid block (which is invalid only because it breaks this rule), then other miners can flag it as a conflicting *block* via a similar mechanism.
 
@@ -370,7 +370,7 @@ Consider an attacker producing 2 blocks for every 1 honest block. What happens m
 
 \todoDraftOnly{polish surrounding paragraphs}
 
-There's extra stuff that can be done here, too, like honest users (not miners) creating transactions with a large tx fee that depend on certain history (i.e. that some honest block is in the history of the chain). That will attract miners from other chains due to unrealized RoI (potentially a lot). The attacker could include that transaction, but then they need to voluntarily end the DoS themselves. Is there a reasonable strategy whereby the honest network can temporarily increase the number of miners? If there was, the attacker would then have $<50\%$ of mining power, ending the DoS quickly.
+There's more that can be done here, too, like honest users (not miners) creating transactions (with large fees) that depend on certain history (i.e. that some honest block is in the history of the chain). That will attract miners from other chains due to unrealized RoI (potentially a lot). The attacker could include that transaction, but then they need to voluntarily end the DoS themselves. Is there a reasonable strategy whereby the honest network can temporarily increase the number of miners? If there was, the attacker would then have $<50\%$ of mining power, ending the DoS quickly.
 
 \todoDraftOnly{Note: asymmetry between honest nodes and attacker -- attacker can only build on own blocks, but honest network builds on both.}
 

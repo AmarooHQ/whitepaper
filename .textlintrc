@@ -32,6 +32,8 @@
                 ["full-node", "full node"],
                 ["full-nodes", "full nodes"],
                 ["dut"],
+                ["<=", "\\le"],
+                [">=", "\\ge"],
             ]
         }
     }

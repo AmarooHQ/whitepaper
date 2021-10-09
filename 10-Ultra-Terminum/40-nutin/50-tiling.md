@@ -138,7 +138,7 @@ O(\log_2 c + \log_2 N_{tiles}) & = O(\log_2 c + \log_2 \frac{n}{c^j}) \\
 
 #### Network Complexity
 
-Since $O(N_{tiles}) = O(\frac{n}{c^j})$, and each tile has order $O(c^j)$, the complexity of the network  overall is given by the product of a tile's order by the number of tiles:
+Since $O(N_{tiles}) = O(\frac{n}{c^j})$, and each tile has order $O(c^j)$, the complexity of the network overall is given by the product of a tile's order by the number of tiles:
 
 \begin{equation}
 \begin{split}
@@ -371,6 +371,20 @@ Additionally, a model of tilings of similar capacity -- i.e., similar $N_{tiles}
 What's the worst case for tiling -- as a method? Probably that PoR isn't safe to do non-recursively in a way that works for $O(n)$ tiling. The solution is to validate PoRs recursively which means that *every* miner needs *every* base-level (i.e., simplex-chain) block across all simplex tiles. That would enable edge-to-edge verification of all PoRs. In that case, an upper-bound is set based on minimum bandwidth requirements (for miners) and $\Delta S$ (see \autoref{sec:bandwidth-complexity}). For a given set of parameters, the limit is $N_{\text{tiles}} \cdot \nicefrac{\Delta S}{4} < \text{MinBandwidth}$.
 
 possible extension: maybe PoRs can be provided to miners but excluded from blocks. Like you can be a full node or a full-full-node, and full-full-nodes validate PoRs recursively in a way that isn't required for a single simplex. Or full-full-nodes are miners in a simplex, and full-full-full-nodes are miners in a tiling of simplexes.
+
+<!-- for each tile:
+- work(0.5 * child + self) < work(other child + parent)
+- work(children) < (self + parent)
+
+## - work(self) < work(children) [nb: exception for work(self) > 0.5 * work(whole_network), and parents of leaf nodes]
+
+- work(self) < work(parent)
+- work(self) > work(child)
+- work(self + parent) > work(children)
+
+ -->
+
+
 
 #### A Thought (Draft)
 
