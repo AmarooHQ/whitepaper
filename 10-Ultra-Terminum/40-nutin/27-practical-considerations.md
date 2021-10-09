@@ -145,7 +145,7 @@ This UT protocol variant is +HOPoRs, the combination of *header omission* (+HO) 
 \aside{
     There is an independent protocol variant (from those above) called +T which provides a significant reduction to proof size and header size. This optimization is currently redacted. \\
     \\
-    Each protocol variant thus far has a corresponding combination-variant, e.g., +PoRs and +PoRTs, +HO and +HOT, etc.
+    Each protocol variant thus far has a corresponding +T variant, e.g., +PoRs and +PoRTs, +HO and +HOT, etc.
 }
 
 ### Confirmation Times
@@ -166,7 +166,7 @@ Let *confirmation time* be the duration breakpoint beyond which enough confirmat
 
 [^approach-zero]: To say that confirmation time approaches 0 only tells the latter half of the process by which a transaction becomes confirmed. The first half of that process is *getting an initial confirmation*, which is effectively a small, but constant, overhead.
 
-A 200-simplex with $B_f = \nicefrac{1}{15}$ has a confirmation rate of $\mathbb{C}^\prime = \nicefrac{40}{3} \approx 13.3$ Hz. An 800-simplex with $B_f = \nicefrac{1}{60}$ has the same confirmation rate. A 1400-simplex (the maximal simplex given \emph{Amaroo}'s initial configuration) with $B_f = \nicefrac{1}{15}$ has $\mathbb{C}^\prime \approx 93$ Hz. This is $\sim 46.5\times$ faster than EOS/Solana, $\sim 1116\times$ faster than Eth2, $\sim 1400\times$ faster than Ethereum, and $\sim 55,800\times$ faster than Bitcoin.
+A 200-simplex with $B_f = \nicefrac{1}{15}$ has a confirmation rate of $\mathbb{C}^\prime = \nicefrac{40}{3} \approx 13.3$ Hz. An 800-simplex with $B_f = \nicefrac{1}{60}$ has the same confirmation rate. A 1400-simplex (the optimized maximal simplex given \emph{Amaroo's} initial configuration) with $B_f = \nicefrac{1}{15}$ has $\mathbb{C}^\prime \approx 93$ Hz. This is $\sim 46.5\times$ faster than EOS/Solana, $\sim 1116\times$ faster than Eth2, $\sim 1400\times$ faster than Ethereum, and $\sim 55,800\times$ faster than Bitcoin.
 
 Note that PoR incents miners to publish blocks as soon as possible so that those blocks begin gaining reflections.
 If a miner does not publish a block immediately, then the reflections in that block become out-of-date very quickly as there are new, additional headers to reflect arriving constantly.
@@ -368,11 +368,16 @@ All that sounds good so far, but this thought experiment is flawed. It is *smoot
 
 Consider an attacker producing 2 blocks for every 1 honest block. What happens most of the time? Well the attackers blocks get reflected first, so those blocks have an appreciable advantage over the honest blocks. The honest blocks will get reflected, too, but most of the time the attackers blocks will get the advantage from earlier reflections. \emph{Most} of the time. Occasionally, when an honest block is a bit lucky, it will be produced before the attackers blocks and start gaining reflections earlier. At that point, the attacker has lost -- they need to outpace the \emph{difference} in the number of reflections between the honest block and attacking blocks. So, unlike a normal doublespend (where the attacker wins if they \emph{ever} get ahead), now the honest network wins (ends the DoS) if it \emph{ever} gets ahead of the attacker -- after that point, there's no viable strategy for the attacker besides to build on the honest blocks. \emph{The asymmetry has flipped!}
 
-\todoDraftOnly{polish surrounding paragraphs}
+There's more that can be done here, too, like honest users (not necessarily miners) creating transactions (with large fees) that depend on certain history (i.e. that some honest block is in the history of the chain).
+That will attract miners from other chains due to unrealized RoI (potentially a lot).
+The attacker could include that transaction, but then they need to voluntarily end the DoS themselves.
+If you're worried about that, because it seems like miners might empty-block DoS simplex-chains, consider: when in equilibrium, that situation is essentially the same as an efficient market (for transaction execution).
 
-There's more that can be done here, too, like honest users (not miners) creating transactions (with large fees) that depend on certain history (i.e. that some honest block is in the history of the chain). That will attract miners from other chains due to unrealized RoI (potentially a lot). The attacker could include that transaction, but then they need to voluntarily end the DoS themselves. Is there a reasonable strategy whereby the honest network can temporarily increase the number of miners? If there was, the attacker would then have $<50\%$ of mining power, ending the DoS quickly.
+Is there a reasonable strategy whereby the honest network can temporarily increase the number of miners?
+If there were, it'd be possible to temporarily limit the attacker to $<50\%$ of mining power, ending the DoS quickly.
+(See \autoref{sec:miner-resonance}.)
 
-\todoDraftOnly{Note: asymmetry between honest nodes and attacker -- attacker can only build on own blocks, but honest network builds on both.}
+\todoDraftOnly{The above should work for simplex-chains *and* dapp-chains}
 
 \todoDraftOnly{Dynamic average block-size for simplex-chains based on dapp-chain headers having some PoW}
 
@@ -403,6 +408,8 @@ Do they want a highly secure base-chain, but variance in block times isn't a pro
 [^asic-variance]: Note that simplex-chains with PoW algorithms for which there are ASICs can have lower variance, too, if there are multiple simplex-chains with that same algorithm.
 
 ### Lowering Block Production Variance
+
+\label{sec:miner-resonance}
 
 \todoDraftOnly{redraft 'lowering block prod variance'}
 

@@ -38,15 +38,16 @@
 | Term | Definition | Unit |
 | ------ | ------------------------------------------------------------- | ------------ |
 | $\mathbb{C}^\prime$ | Confirmation rate. | Hz |
+| $g$ | Hash digest size. | bytes |
 | $k_i$ | A generalization of block size: the average per-chain raw throughput at the $i^{th}$ level of nesting. | bytes/second |
 | $k$ | Average per-chain raw throughput across nesting levels. $k$ is used to simplify reasoning and equations, especially in situations where all $k_i$ are equal. | bytes/second |
 | $T_i$ | Network throughput at the $i^{th}$ level of nesting. | bytes/second |
 | $N_i$ | Number of chains at the $i^{th}$ level of nesting. | chains |
 | $N_\text{tiles}$ | Number of tiles in a simplex-tiling. | tiles |
 | $B_{max}$ | Maximum block size. | bytes |
-| $B_f$ | Base-chain block frequency. | Hz or $s^{-1}$ |
+| $B_f$ | Base-chain block frequency. | Hz |
 | $B_h$ | Base-chain header size. | bytes |
-| $D_f$ | Dapp-chain block frequency. | Hz or $s^{-1}$ |
+| $D_f$ | Dapp-chain block frequency. | Hz |
 | $D_h$ | Dapp-chain header size. | bytes |
 | TPS | Transactions per second. | tx/s |
 | $\Sigma\;\text{TPS}_{i}$ | Network-wide transactions per second at the $i^{\text{th}}$ level of nesting (given no additional levels). Primarily used when ``TPS'' alone would be ambiguous. | tx/s |

@@ -56,7 +56,7 @@ A mistaken way to break the conflict is *merged mining* (aka AuxPoW). This metho
 
 \autoref{fig:trilemma-mm-conflict} shows the cloud for the merged mining conflict.
 
-\begin{figure}
+\begin{figure}[H]
 \centering
 \includegraphics[max width=\linewidth]{trilemma/mm_conflict_sag}
 \caption{A cloud showing the scaling conflict of \textit{merged mining}.}
