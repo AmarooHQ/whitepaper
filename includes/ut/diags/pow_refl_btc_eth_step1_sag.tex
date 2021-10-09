@@ -8,6 +8,10 @@
 \def\input@path{{./includes/}{./includes/ut/diags/}}
 \makeatother
 
+\input{../../refl_entropy}
+\providecommand\EntropyIn{9001}
+\providecommand\ChainVarianceMathSeed{\EntropyIn}
+
 \begin{document}
 % default params for image
 \providecommand\DrawBtcState{0}%
@@ -19,9 +23,9 @@
 \providecommand\DrawEthLT{3}%
 \providecommand\DrawBtcLT{3}%
 \providecommand\NameChainA{Bitcoin}%
-\providecommand\AbbrChainA{BTC}%
+\providecommand\AbbrChainA{\text{BTC}}%
 \providecommand\NameChainB{Ethereum}%
-\providecommand\AbbrChainB{ETH}%
+\providecommand\AbbrChainB{\text{ETH}}%
 \providecommand\ChainBBlocksN{40}%
 \providecommand\ChainBBlocksNHasVariance{1}%
 \providecommand\ChainVarianceMathSeed{9001}%

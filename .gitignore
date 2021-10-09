@@ -16,6 +16,7 @@ node_modules
 *.pgf-plot.*
 *.pgf-plot.gnuplot
 includes/**/*.pdf
+includes/**/*.ps
 includes/handout/*.md
 *.dvi
 *.pdf
@@ -36,3 +37,4 @@ includes/ut/diags/**/*.png
 /package-lock.json
 /_copy_wp.sh
 .psc-ide-port
+includes/refl_entropy

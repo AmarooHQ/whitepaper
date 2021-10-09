@@ -12,7 +12,9 @@
 % overwrite (either \providecommand or \renewcommand) to control the parts of the diagram which are drawn or not.
 
 \begin{document}%
-\providecommand\TilingDepth{6}%
+% this graphic isn't used, and it's expensive to generate, so don't bother unless we need it
+% \providecommand\TilingDepth{6}%
+\providecommand\TilingDepth{4}%
 \providecommand\TilingInitSize{5}%
 \providecommand\TilingScaleConst{1.4}%
 \providecommand\TilingValence{3}%
@@ -20,6 +22,7 @@
 \providecommand\RainbowColors{1}%
 \providecommand\TilingDrawGroups{1}%
 \providecommand\TilingDrawAllReflections{1}%
+% \providecommand\TilingOnlyTopHalf{1}%
 \input{tiling-macro}%
 \begin{tikzpicture}%
     \TikzSimplexTiling%

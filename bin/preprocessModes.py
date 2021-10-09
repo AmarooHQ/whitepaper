@@ -36,6 +36,15 @@ def print_release_label():
     print('\n'.join(f"{list(d.isocalendar())}\t -> {release_label(d) if d != n else release_label() + ' (today)'}" for d in dates))
 
 
+@cli.command()
+@click.option('--git', required=True, help="git shorthash for entropy")
+def set_entropy(git: str):
+    with open('includes/refl_entropy', 'w') as f:
+        gitNum = int(git, 16)
+        f.write(f"\\providecommand\\EntropyIn{{{str(gitNum)}}}")
+    print(f"Wrote entropy: {gitNum}")
+
+
 def in_any_range(ranges: list[Tuple[int, int]], i: int):
     return any(low <= i <= high for (low, high) in ranges)
 

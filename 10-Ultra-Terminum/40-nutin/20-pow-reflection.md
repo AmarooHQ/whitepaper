@@ -32,13 +32,13 @@ Let's add such a contract to Ethereum and describe the relevant data and events 
 
 | Time (~15s increments) | Bitcoin block made | Eth block made | Eth block contents | Eth state |
 |---|---|---|-----|------|
-| $\vdots$ |||||
-| 0 | k ||||
-| 1 | | j | $BTC_k$ header | Records $BTC_{0 \cdots k}$ |
-| $\vdots$ |||||
-| 40 | k + 1 ||||
-| 41 | | j + 40 | $BTC_{k+1}$ header | Records $BTC_{0 \cdots k+1}$ |
-| $\vdots$ |||||
+| $\vdots$ | | | | |
+| 0 | k | | | |
+| 1 | | j | $\text{BTC}_k$ header | Records $\text{BTC}_{0 \cdots k}$ |
+| $\vdots$ | | | | |
+| 40 | k + 1 | | | |
+| 41 | | j + 40 | $\text{BTC}_{k+1}$ header | Records $\text{BTC}_{0 \cdots k+1}$ |
+| $\vdots$ | | | | |
 
 : Data and events for both Bitcoin and Ethereum as blocks are produced and a projection of Bitcoin in Ethereum is maintained via Bitcoin headers being included in an Ethereum SC.
 
@@ -111,12 +111,12 @@ Can we use a projection of a chain for a different purpose? What happens if Chai
 
 | Time | L block made | L block contents | L state | R block made | R block contents | R state |
 |--|---|------|------|---|-----|------|
-| $\vdots$ |||||||
-| 0 | k | $R_{j-1}$ header + Merkle proof of $L_{k-1}$ | Records $R_{0 \cdots j-1}$ *and* knows that Chain R records $L_{0 \cdots k-1}$ ||||
-| 1 | ||| j | $L_{k}$ header | Records $L_{0 \cdots k}$ |
-| 2 | k + 1 | $R_{j}$ header + Merkle proof of $L_{k}$ | Records $R_{0 \cdots j}$ *and* knows that Chain R records $L_{0 \cdots k}$ ||||
-| 3 | ||| j + 1 | $L_{k+1}$ header | Records $L_{0 \cdots k+1}$ |
-| $\vdots$ |||||||
+| $\vdots$ | | | | | | |
+| 0 | k | $R_{j-1}$ header + Merkle proof of $L_{k-1}$ | Records $R_{0 \cdots j-1}$ *and* knows that Chain R records $L_{0 \cdots k-1}$ | | | |
+| 1 | | | | j | $L_{k}$ header | Records $L_{0 \cdots k}$ |
+| 2 | k + 1 | $R_{j}$ header + Merkle proof of $L_{k}$ | Records $R_{0 \cdots j}$ *and* knows that Chain R records $L_{0 \cdots k}$ | | | |
+| 3 | | | | j + 1 | $L_{k+1}$ header | Records $L_{0 \cdots k+1}$ |
+| $\vdots$ | | | | | | |
 
 : Chain L records which of its headers are known about by Chain R. That is: Chain L includes *proofs of reflection*.
 

@@ -13,6 +13,7 @@
 \providecommand\TilingDrawGroups{0}%
 \providecommand\TilingAltPattern{0}%
 \providecommand\TilingLineColor{black}%
+\providecommand\TilingOnlyTopHalf{0}%
 \input{simplex-macro}%
 % \makeatletter%
 % \def\fillRGB#1#2#3{\pgfsys@color@rgb@fill{#1}{#2}{#3}}%
@@ -61,7 +62,8 @@
                 \pgfmathsetmacro\newSxNodeR{\nodeR/sqrt(\TilingScaleConst)}
                 \xdef\nodeR{\newSxNodeR}
                 \renewcommand\SimplexNodeRadius{\nodeR}
-                \foreach \s in {1,...,\createCurrent} {
+                \pgfmathsetmacro\createCurrentMbTrimmed{\createCurrent * (1 - 0.5 * \TilingOnlyTopHalf * max(0, min(1, \d - 1)))}
+                \foreach \s in {1,...,\createCurrentMbTrimmed} {
                         \def\parentSimplex{\nodeNameRoot/0/1}
                         \pgfmathsetmacro\parentId{0}
                         \ifnum 1=\xintifboolexpr{1 < \d || \TilingAltPattern = 1}{1}{0}
@@ -113,6 +115,9 @@
                             \renewcommand\SimplexRotationMod{\finalRotation}
                         \fi
 
+                        \pgfmathparse{\timesRun+1}
+                        \xdef\timesRun{\pgfmathresult}
+
                         \TikzSimplex
                         \ifnum 1=\TilingDrawGroups
                             \begin{pgfonlayer}{groups}
@@ -127,8 +132,6 @@
                         % \node () [yshift=30pt] at (\SimplexNodeName//1) {$\nNodesTotal$};
                         % \node () [yshift=20pt] at (\SimplexNodeName//1) {\parentSimplex};
 
-                        \pgfmathparse{\timesRun+1}
-                        \xdef\timesRun{\pgfmathresult}
                         \ifnum 0>\d
                             % don't draw debug info for these depths
                         \else

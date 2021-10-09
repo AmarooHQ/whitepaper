@@ -29,6 +29,7 @@ endif
 
 default: whitepaper
 
+release: entropy
 release: PP_MODE=release
 release: textlint
 release: whitepaper
@@ -42,15 +43,22 @@ cilint: whitepaper
 wp-no-lint: PP_LINT_FLAG="--no-lint-check"
 wp-no-lint: whitepaper
 
+entropy:
+	git update-index --assume-unchanged includes/refl_entropy
+	python3 bin/preprocessModes.py set-entropy --git $(shell git rev-parse --short HEAD)
+	-rm includes/ut/diags/pow_refl_btc_eth_step1_sag.pdf
+
 # https://tex.stackexchange.com/questions/45/how-to-speed-up-latex-compilation-with-several-tikz-pictures
 TIME     = /usr/bin/time -p
-LATEXMK  = latexmk -silent -f -g --pdf
+# LATEXMK  = latexmk -silent -f -g -ps
 PDFLATEX = latexmk -pdf -shell-escape -interaction=batchmode
+PSLATEX = latexmk -ps -shell-escape -interaction=batchmode
 PDFCROP  = pdfcrop
 RM       = /bin/rm
 #StandAloneGraphicsTeXFiles = $(wildcard includes/ut/diags/*_sag.tex)
 StandAloneGraphicsTeXFiles = $(shell find ./ -iname \*_sag.tex)
 PDFGraphics = $(patsubst %_sag.tex,%_sag.pdf,$(StandAloneGraphicsTeXFiles))
+PSGraphics = $(patsubst %_sag.tex,%_sag.ps,$(StandAloneGraphicsTeXFiles))
 DVIGraphics = $(patsubst %_sag.tex,%_sag.dvi,$(StandAloneGraphicsTeXFiles))
 PNGGraphics = $(patsubst %_sag.pdf,%_sag.png,$(PDFGraphics))
 InputTeXFiles = $(wildcard *_input.tex)
@@ -60,12 +68,18 @@ watch:
 	bin/onchange.sh 10-Ultra-Terminum "make"
 
 wp-graphics-standalone: $(PDFGraphics)
+wp-graphics-ps: $(PSGraphics)
 wp-graphics-png: $(PNGGraphics)
 
 %_sag.pdf: %_sag.tex
 	cd `dirname $<` && \
 	$(PDFLATEX) `basename $<`
 	$(PDFCROP) $@ $@
+
+%_sag.ps: %_sag.tex
+	cd `dirname $<` && \
+	$(PSLATEX) `basename $<`
+# $(PDFCROP) $@ $@
 
 %_sag.png: %_sag.pdf
 	cd `dirname $<` && \
@@ -181,6 +195,7 @@ clean: init
 # standalone graphics pdfs
 deponly-clean:
 	$(RM) -fv -- `find ./ -iname \*_sag.pdf`
+	$(RM) -fv -- `find ./ -iname \*_sag.ps`
 
 depclean: clean deponly-clean
 
