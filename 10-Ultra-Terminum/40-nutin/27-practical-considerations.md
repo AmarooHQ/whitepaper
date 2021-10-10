@@ -181,7 +181,7 @@ This mitigates the selfish mining[^selfish-mining] attack.
 \label{sec:dos-and-dags}
 
 Up to this point, simplex-chains have been treated like traditional blockchains, where each block has only one parent.
-Since the vast majority of a simplex-chain's security is provided by other simplex-chains (and only a small amount comes from that chain's foundational consensus method), are attacks like an empty-block Denial of Service[^empty-dos] (DoS) possible?
+Since the vast majority of a simplex-chain's security is provided by other simplex-chains (and only a small proportion comes from that chain's foundational consensus method), are attacks like an empty-block Denial of Service[^empty-dos] (DoS) possible?
 If a simplex-chain were to use PoW, then it might be (relatively) trivial for an attacker to perform such an attack.
 This is because -- in traditional blockchains -- controlling more than 50% of the blocks produced provides *exclusive* control over *which candidate child blocks win* (i.e., are accepted into the canonical chain).
 Is there a way that we can mitigate this risk?
@@ -381,9 +381,15 @@ If there were, it'd be possible to temporarily limit the attacker to $<50\%$ of 
 
 \todoDraftOnly{Dynamic average block-size for simplex-chains based on dapp-chain headers having some PoW}
 
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
+
 ### Qualities of Different Security Methods
 
-\label{sec:quality-groups}
+\label{sec:quality-groups-unused}
+
+\todo{This is draft now -- either re-write or cut.}
 
 Consider these 3 categories of methods of securing a blockchain:
 
@@ -407,6 +413,10 @@ Do they want a highly secure base-chain, but variance in block times isn't a pro
 
 [^asic-variance]: Note that simplex-chains with PoW algorithms for which there are ASICs can have lower variance, too, if there are multiple simplex-chains with that same algorithm.
 
+%% END ### DRAFT
+
+%% BEGIN ### RELEASE
+
 ### Lowering Block Production Variance
 
 \label{sec:miner-resonance}
@@ -415,7 +425,7 @@ Do they want a highly secure base-chain, but variance in block times isn't a pro
 
 Is it possible to *dramatically* lower the variance of block production in PoW blockchains without altering incentive structures, compromising security, or changing the probability of generating a valid block?
 
-Yes. The method relies on the *structure* of the network, rather than the consensus protocol itself. Particularly, the network must be structured such that miners' choices result in decreased block production variance --- an emergent phenomenon. It's important not to try and make it artificially (e.g., by increasing the block reward with time-since-last-block) because you don't want people to game the system. It's better to have a simple system with emergent properties than a complex system with those properties \`\`designed in''.
+Yes. The method relies on the *structure* of the network, rather than the consensus protocol itself. Particularly, the network must be structured such that miners' choices result in decreased block production variance --- an emergent phenomenon. It's important that it's emergent and not synthetic (e.g., by increasing the block reward with time-since-last-block) because we don't want people to game the system. It's better to have a simple system with emergent properties than a complex system with those properties \`\`designed in''.
 
 Say you have a network with 10 chains: $C_0, C_1, C_2, ..., C_9$. If the networks are separate, then you have 10 groups of miners: $M_0, M_1, M_2, ..., M_9$. They have to choose one chain to mine on, so the distribution of miners is expected to be approximately the distribution of normalized block rewards + tx fees. The proportions of block rewards between $C_i$ & $C_j$ don't really matter, we expect the mining groups $M_i$ & $M_j$ will just sort themselves out due to market forces. For simplicity, though, this example assumes that mining rewards and the distribution of miners is an even 10% across the board.
 
