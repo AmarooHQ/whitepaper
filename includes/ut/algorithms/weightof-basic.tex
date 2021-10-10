@@ -1,9 +1,9 @@
 \begin{algorithm}
 \caption{A simplistic \textsc{WeightOf} for networks of a single root token}\label{alg:weightof-1}
 \begin{algorithmic}
-\Procedure{WeightOf}{$B_i, state$} \Comment{The weight of a reflecting block normalized to coins}
+\Procedure{WeightOf}{$B_i, state$} \Comment{The weight of a block normalized to coins}
     \State $t \gets$ \Call{BlockTimestamp}{$B_i$}
-    \State $C \gets$ \Call{ChainOf}{$B_i$, $state$}
+    \State $C \gets$ \Call{ChainOf}{$B_i$, $state$} \Comment{Either the local or a reflecting chain}
     \State $r \gets$ \Call{BlockRewardOfChainAt}{$C$, $t$, $state$} \Comment{Block reward of $C$ at $t$}
     \State \Return{$r$}
 \EndProcedure

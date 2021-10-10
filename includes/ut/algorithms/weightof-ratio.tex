@@ -1,8 +1,8 @@
 \begin{algorithm}
-\caption{\textsc{WeightOf} for networks of a single root token based on the ratio of root tokens that it hosts}
+\caption{A \textsc{WeightOf} function for networks of a single root token based on the ratio of root tokens that it hosts}
 \label{alg:weightof-ratio}
 \begin{algorithmic}
-\Procedure{WeightOf}{$B_i, state$} \Comment{The weight of a reflecting block normalized to coins}
+\Procedure{WeightOf}{$B_i, state$} \Comment{The weight of a block normalized to coins}
     \State $t \gets$ \Call{BlockTimestamp}{$B_i$}
     \State $C \gets$ \Call{ChainOf}{$B_i$, $state$}
     \State $r \gets$ \Call{RootTokenRatioOnChainAt}{$C$, $t$, $state$} \Comment{Proportion of all RTs on $C$ at $t$}

@@ -228,10 +228,6 @@ The *essence* of *Proof of Reflection* should now be apparent. *In principle*, w
 
 \todo{finish rewrite this section}
 
-<!-- \todoDraftOnly{see re-write below} -->
-
-<!-- \input{20-por/30-comparing-work-1} -->
-
 %% END ### RELEASE
 
 %% BEGIN ### DRAFT
@@ -296,18 +292,6 @@ This is defined so that it can be quoted later and doesn't need to be updated in
 
 \label{sec:reflection-pow-and-pos}
 
-%% END ### RELEASE
-
-%% BEGIN ### DRAFT
-
-\textbf{Important:} It is not clear whether PoS schemes can \emph{ever} be secure. However, there are decisive criticisms[^dec-crits-pos] of \emph{pure} PoS systems.
-
-[^dec-crits-pos]: See \todo{refs}
-
-%% END ### DRAFT
-
-%% BEGIN ### RELEASE
-
 \aside{
   Whether PoS systems \emph{can} be secure is not a focus of this paper.
   There are still \href{https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/proof_of_stake.md}{criticisms of PoS} without \href{https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/the_defence_of_pos.md}{adequate answers}.
@@ -335,7 +319,11 @@ However, consider the case that *the security contribution of the PoW chain is \
 
 Given the right set-up, a PoW chain gains an *incredible* security advantage from mutual reflection with a PoS chain.
 
-\textbf{Note:} The attack scenario above assumes two important things: the attacker is only attacking the PoW chain via a \emph{mining in private} strategy, and that the attacker is not attacking the PoS chain that is reflecting the PoW chain. These are not safe assumptions in general.
+\aside{
+  \textbf{Note:} The attack scenario above assumes that the attacker is not attacking the PoS chain that is reflecting the PoW chain.
+  That is not a safe assumption.
+  Additionally, with traditional blockchains (which are trees), an empty-block DoS is possible -- this is addressed in \autoref{sec:dos-and-dags}.
+}
 
 What about the PoS chain, though; what benefits does it gain from this relationship? The answer here is simple: by reflecting with a PoW chain, the PoS chain gains *thermodynamic security*; the PoS chain's history is *thermodynamically secured* by the PoW chain. \textbf{This solves the \emph{Nothing at Stake} problem for any well constructed PoS scheme.} Furthermore, it is possible for error-correction methods like \emph{slashing} to be implemented *on the PoW chain*, not the PoS chain. Moving the staking and error correction methods to a different chain will require subtle and precise protocol design, but such changes are *in principle* possible with tolerable overhead.
 
