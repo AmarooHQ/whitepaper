@@ -141,15 +141,8 @@ Could we use Chain L's knowledge *that it's own history is reflected in Chain R*
 
 Before we discuss a change that Chain L could make, it is important to note that chain-work done with one hashing algorithm is *not generally convertible* to 'equivalent' work done via another hashing algorithm.
 For example, there is no meaningful *generic* answer to the question *how many double SHA256[^btc2sha] hashes is one Ethash hash worth?*
-In fact, there is no meaningful answer to similar questions that use any other other combination of hashing algorithms, either.
-It is not possible to *generically and universally* convert between qualitatively different units[^et-conversion].
-It is *only* possible to do this within some *context* with a *defined* conversion method. We'll look at some such contexts later.
 
-[^et-conversion]: The philosophical generalization of *qualitative conversion* and the *necessary* role that *goals* and *context* play is [Elliot Temple's](https://elliottemple.com) idea. See [Multi-Factor Decision Making Math](https://criticalfallibilism.com/multi-factor-decision-making-math/) for some relevant background. The topic is covered in his [*Critical Fallibilism Course*](https://gumroad.com/l/mhtbA).
-
-\begin{comment} It's also partially covered in (or related to) [Elliot's *Yes or No Philosophy* course](https://gumroad.com/l/hxqsh) and some of his articles, e.g., [*IGCs* ({Idea, Goal, Context} triples)](https://curi.us/2387-igcs) and [*Bottleneck Examples*](https://curi.us/2353-bottleneck-examples). \end{comment}
-
-[^btc2sha]: Bitcoin does two SHA256 hashes per block.
+[^btc2sha]: Bitcoin uses $\text{Hash}(x) = \text{SHA256}(\text{SHA256}(x))$ as it's PoW hash.
 
 For the purposes of our hypothetical construction, let's say that L and R do *equal work over equal time*. In the current example, that means that the work required to produce either $L_i$ or $R_j$ is the same. *For the sake of this construction, we'll also presume this relationship doesn't change over time*. Our constant of conversion is thus: 1 *R Blocks per L Block*.
 
@@ -227,33 +220,29 @@ There are several details that still require discussion, though, such as: *how e
 
 The *essence* of *Proof of Reflection* should now be apparent. *In principle*, we can make blockchains more difficult to attack based on the idea that *blockchains can include a projection of the history of other blockchains (and confirm a chain's history like they do transactions)*. *In principle*, it is possible to increase the security of a blockchain via *reflection* and to increase the security of multiple blockchains via *mutual reflection*.
 
+\todoDraftOnly{PoW -- 2 chains using the same algorithm isn't insecure!}
+
 ### Comparing Incomparable Proofs of Work
 
 \label{sec:comparing-diff-pows}
 
-\todoDraftOnly {rewrite this section}
+\todo{finish rewrite this section}
 
-For Proof of Reflection to work effectively, there must be some method of comparing and converting the *work* done by reflecting chains. Earlier, we simply *set* a ratio between Chain L blocks and Chain R blocks, but that isn't suitable for a production network.
+<!-- \todoDraftOnly{see re-write below} -->
 
-How can we design a system that allows for sensible comparisons between Proofs of Work that use different hashing algorithms?
+<!-- \input{20-por/30-comparing-work-1} -->
 
-The core problem is that the work done on different chains is measured using different units -- and those units aren't convertible. This applies to blockchains that use the same hashing algorithm, too, since there may be different costs and factors that are implicit in the mining of each of those chains. One hash is not necessarily worth exactly one hash in different contexts.
+%% END ### RELEASE
 
-Revisiting *qualitative conversion* from \autoref{sec:por-step4}: the way we will analyze (and criticize) potential solutions is via the concept of IGCs -- {Idea, Goal, Context} triples[^igcs].
-The *idea* component contains *the method* of conversion such that the the goal is satisfied in the given context.
-The three elements of an IGC are all of the components that are required to evaluate criticisms and thus determine whether the IGC succeeds or fails.
+%% BEGIN ### DRAFT
 
-[^igcs]: IGCs are a method of structuring ideas (solutions to problems) so that they can be effectively analyzed and criticized.
-They're also an introduction to the thinking methods and techniques of *Critical Fallibilism*. See \url{https://curi.us/2387-igcs}.
+#### (NB: draft of new version)
 
-In order to convert otherwise unconvertible units, one must define a suitable goal and context for that conversion to make sense. For example: *is a cucumber longer than it is green?*[^cucumber-goldratt] That question doesn't make sense because we can't convert between length and color. However, consider the situation where you want to win a cucumber competition, and points are awarded for a cucumber based on both its consistency of color and its length (and nothing else). Based on the specific rules, you could figure out a way to convert both color and length into points. This would help you pick the best of your cucumbers to enter into the competition, and your developing of that method means that you also now have a way to convert color and length via whatever relationship you came up with. Depending on the specific rules, you could now say things like *1cm of length is worth 3 blemishes*. In order to make sense of *converting between a cucumber's color and length*, you need both the *context* of the competition's rules and also the *goal* of maximizing the number of points[^conv-other-gc-pairs].
+\input{20-por/30-comparing-work-3}
 
-[^cucumber-goldratt]: This example is from Eli Goldratt's *The Choice* (2008).
-[^conv-other-gc-pairs]: NB: Other {goal, context} pairs could work, too, and would have different methods of conversion.
+%% END ### DRAFT
 
-In the case of *Proof of Reflection*, we need to define a suitable goal and context to enable this conversion, and come up with ideas for how to do that conversion. Our goal is straightforward, and the same as other consensus mechanisms: we want a blockchain system that is as difficult as possible to attack. The context is the architectures of both the PoR implementation and the blockchains in question, plus the rest of the world (including attackers). More specifically: the difficulty of an attack against a blockchain network is typically analyzed from the context of an attacker's *risk vs reward* where the attacker has a goal of *profit*.
-
-Two ideas follow that create two distinct IGCs.
+%% BEGIN ### RELEASE
 
 #### A Single Root Token Across Multiple Chains
 
@@ -298,6 +287,10 @@ This is defined so that it can be quoted later and doesn't need to be updated in
 \convertingWeightDexNotImportant
 
 \input{includes/ut/algorithms/weightof-dex.tex}
+
+### Converting Confirmations
+
+\todo{draft converting confirmations -- basically by using confirmations instead of hashes we can convert between PoW and PoS and whatever (as long as it has some reasonable notion of a confirmation)}
 
 ### Reflection Between PoW and PoS Chains
 

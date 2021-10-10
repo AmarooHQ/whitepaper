@@ -1,0 +1,59 @@
+For Proof of Reflection to work effectively, there must be some method
+of comparing and converting the \emph{work} done by reflecting chains.
+Earlier, we simply \emph{set} a ratio between Chain L blocks and Chain R
+blocks, but that isn't suitable for a production network.
+
+How can we design a system that allows for sensible comparisons between
+Proofs of Work that use different hashing algorithms?
+
+The core problem is that the work done on different chains is measured
+using different units -- and those units aren't convertible. This
+applies to blockchains that use the same hashing algorithm, too, since
+there may be different costs and factors that are implicit in the mining
+of each of those chains. One hash is not necessarily worth exactly one
+hash in different contexts.
+
+Revisiting \emph{qualitative conversion} from \autoref{sec:por-step4}:
+the way we will analyze (and criticize) potential solutions is via the
+concept of IGCs -- \{Idea, Goal, Context\} triples\footnote{IGCs are a
+  method of structuring ideas (solutions to problems) so that they can
+  be effectively analyzed and criticized. They're also an introduction
+  to the thinking methods and techniques of \emph{Critical Fallibilism}.
+  See \url{https://curi.us/2387-igcs}.}. The \emph{idea} component
+contains \emph{the method} of conversion such that the the goal is
+satisfied in the given context. The three elements of an IGC are all of
+the components that are required to evaluate criticisms and thus
+determine whether the IGC succeeds or fails.
+
+In order to convert otherwise unconvertible units, one must define a
+suitable goal and context for that conversion to make sense. For
+example: \emph{is a cucumber longer than it is green?}\footnote{This
+  example is from Eli Goldratt's \emph{The Choice} (2008).} That
+question doesn't make sense because we can't convert between length and
+color. However, consider the situation where you want to win a cucumber
+competition, and points are awarded for a cucumber based on both its
+consistency of color and its length (and nothing else). Based on the
+specific rules, you could figure out a way to convert both color and
+length into points. This would help you pick the best of your cucumbers
+to enter into the competition, and your developing of that method means
+that you also now have a way to convert color and length via whatever
+relationship you came up with. Depending on the specific rules, you
+could now say things like \emph{1cm of length is worth 3 blemishes}. In
+order to make sense of \emph{converting between a cucumber's color and
+length}, you need both the \emph{context} of the competition's rules and
+also the \emph{goal} of maximizing the number of points\footnote{NB:
+  Other \{goal, context\} pairs could work, too, and would have
+  different methods of conversion.}.
+
+In the case of \emph{Proof of Reflection}, we need to define a suitable
+goal and context to enable this conversion, and come up with ideas for
+how to do that conversion. Our goal is straightforward, and the same as
+other consensus mechanisms: we want a blockchain system that is as
+difficult as possible to attack. The context is the architectures of
+both the PoR implementation and the blockchains in question, plus the
+rest of the world (including attackers). More specifically: the
+difficulty of an attack against a blockchain network is typically
+analyzed from the context of an attacker's \emph{risk vs reward} where
+the attacker has a goal of \emph{profit}.
+
+Two ideas follow that create two distinct IGCs.

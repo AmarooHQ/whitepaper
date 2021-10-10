@@ -1,0 +1,57 @@
+
+
+For \emph{Proof of Reflection} to work, we must alter the \emph{fork rule} (which returns chain-weight).
+We add block-weights up to get the chain-weight.
+PoW chains use \emph{the expected number of hashes to produce a block} as the measure of \emph{work}.\footnote{Alternatively, something that's \emph{linearly convertible} to number-of-hashes (like difficulty) can be used instead.}
+So, for mutually reflecting PoW chains, we need a way to \emph{compare and convert} hashes done on L to hashes done on R.
+
+If we are to compare (and convert) work between PoW chains, then we \emph{must} be able to convert between L-hashes and R-hashes \emph{in a consistent way}.
+Consistency, here, means the conversion shouldn't change the outcome of the fork rule;
+if the fork rule said that $L_{i \cdots j,a} > L_{i \cdots j,b}$ when using L-hashes as the units, then it \emph{should give the same result} for \emph{all} cases when the units are changed to R-hashes.
+
+% footnote on 'easiest': \footnote{This might be the \emph{only} way to keep things consistent; but for our purposes, it doesn't matter.}
+
+Since both weight and hashes can be \emph{summed}, an easy way for this to work is for us to use a \emph{linear} conversion method (i.e., the units are proportional and we have some \emph{constant of conversion} for that specific situation).
+That doesn't require that \emph{mid-states} are linearly convertible, though.
+However, if some mid-states \emph{are} linearly convertible (to and from hashes), then \emph{the fork rule should work for the absolute value of those units, too}.
+
+When it comes to comparing work, we're going to normalize some factors against time.
+These are the factors which \emph{naturally come as rates}, even though they're often measured in absolutes.
+For example: instead of measuring work in hashes, we'll immediately convert to \emph{hashes per second};
+instead of measuring \emph{block rewards}, we'll measure \emph{income per second} and \emph{inflation rate}.
+Even though the act of block production is \emph{discrete}, blockchains have a \emph{block target time}; a way of keeping things consistent \emph{over time} (at least in the short term).
+Since a block represents a discrete amount of work, and has a known, measurable target time, we can unify the two via the idea of \emph{rate of work}, e.g., \emph{hashes per second}.
+Making this conversion up-front will simplify the work to come, since block production frequencies don't need to be accounted for.
+
+\aside{
+    If we can measure the \emph{rate of work} in some direct way (e.g., number of hashes) then we can also \emph{scale block rewards according to both the network difficulty and the demonstrated rate of work}.
+    This enables dynamic block production (i.e., blocks with a flexible minimum difficulty).
+    This would (probably) be disruptive to a traditional blockchain, due to many stale blocks.
+    For UT, it becomes relevant with \autoref{sec:dos-and-dags}, and particularly with \autoref{sec:preventing-dos-attacks}.
+}
+
+\textbf{Here's the problem:} \emph{universal and generic} conversion between qualitatively different units is impossible.\footnote{See \href{https://criticalfallibilism.com/multi-factor-decision-making-math}{Multi-Factor Decision Making Math} and \href{https://curi.gumroad.com/l/mhtbA}{Critical Fallibilism Course}, both by Elliot Temple.}
+We need a specific \emph{goal} and \emph{context} to successfully convert -- in fact, the \emph{goal} is what \emph{enables} us to judge whether it's a successful method of conversion or not.
+
+The goal of this conversion is the only thing we know right now: to convert chain-work so that \emph{PoR works}.
+The \emph{conversion} shouldn't introduce any vulnerabilities, and it should work within the constraints that we talked about above.
+
+In order to discuss \emph{how} to convert (i.e., the ideas themselves) we need to know the \emph{context} that we operate in.
+We know some of the context already: the rest of the world, e.g., we know about some ways to attack blockchains.
+However, that's just background context.
+What specific contexts can help us convert?
+Here are two:
+
+
+
+\begin{comment}
+In fact, there is no meaningful answer to similar questions that use any other other combination of hashing algorithms, either.
+It is not possible to *generically and universally* convert between qualitatively different units[^et-conversion].
+It is *only* possible to do this within some *context* with a *defined* conversion method. We'll look at some such contexts later.
+
+[^et-conversion]: The philosophical generalization of *qualitative conversion* and the *necessary* role that *goals* and *context* play is [Elliot Temple's](https://elliottemple.com) idea. See [Multi-Factor Decision Making Math](https://criticalfallibilism.com/multi-factor-decision-making-math/) for some relevant background. The topic is covered in his [*Critical Fallibilism Course*](https://gumroad.com/l/mhtbA).
+
+\begin{comment}
+<!-- It's also partially covered in (or related to) [Elliot's *Yes or No Philosophy* course](https://gumroad.com/l/hxqsh) and some of his articles, e.g., [*IGCs* ({Idea, Goal, Context} triples)](https://curi.us/2387-igcs) and [*Bottleneck Examples*](https://curi.us/2353-bottleneck-examples). -->
+
+\end{comment}

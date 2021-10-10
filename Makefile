@@ -117,6 +117,9 @@ wp-pandoc:
 	pandoc -s --number-sections --toc -f markdown -t latex -o $(WPTEX) $(WPFILE)
 	sed -i 's/\\%\\%/%/g' $(WPTEX)
 
+pandoc-stdin:
+	pandoc -s --numbered-sections -f markdown -t latex
+
 # added to make testing quote boxes easier I think
 wp-just-quotes: clean-wp-md
 	echo '' > $(WPFILE)
