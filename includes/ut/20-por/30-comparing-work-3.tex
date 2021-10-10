@@ -1,17 +1,20 @@
 
 
-For \emph{Proof of Reflection} to work, we must alter the \emph{fork rule} (which returns chain-weight).
+For \emph{Proof of Reflection} to work, we must alter the \emph{fork rule} (which compares the chain-weight of two candidate best-blocks).
 We sum block-weights to get the chain-weight.
 PoW chains use \emph{the expected number of hashes to produce a block} as the measure of \emph{work}.\footnote{Alternatively, something that's \emph{linearly convertible} to number-of-hashes (like difficulty) can be used instead.}
 So, for mutually reflecting PoW chains, we need a way to \emph{compare and convert} hashes done on L to hashes done on R.
 
-If we are to compare (and convert) work between PoW chains, then we \emph{must} be able to convert between L-hashes and R-hashes \emph{in a consistent way}.
+If we are to convert work between PoW chains, then we \emph{must} be able to convert between L-hashes and R-hashes \emph{in a consistent way}.
 Consistency, here, means the conversion shouldn't change the outcome of the fork rule;
-if the fork rule said that $L_{i \cdots j,a} > L_{i \cdots j,b}$ when using L-hashes as the units, then it \emph{should give the same result} for \emph{all} cases when the units are changed to R-hashes.
+if the fork rule said that $L_{i \cdots j,a} > L_{i \cdots j,b}$ when using L-hashes as the units, then it should give the same result for \emph{all} cases when the units are changed to R-hashes.
+
+\todoDraftOnly{QuickCheck property tests on the properties described}
 
 % footnote on 'easiest': \footnote{This might be the \emph{only} way to keep things consistent; but for our purposes, it doesn't matter.}
 
-Since both weight and hashes can be \emph{summed}, an easy way for this to work is for us to use a \emph{linear} conversion method (i.e., the units are \emph{proportional} and we have some \emph{constant of conversion} for that specific situation, and all units \emph{share an origin}).
+Since both weight and hashes can be \emph{summed}, an easy way for this to work is for us to use a \emph{linear} conversion method (i.e., the units are \emph{proportional}, we have some \emph{constant of conversion} for that specific situation, and all units \emph{share an origin}).
+In effect, for any two values, the \emph{ratio} between linearly converted values represented in same units is \emph{constant}, regardless of which units those values are represented in.
 This doesn't imply that \emph{mid-states} are linearly convertible, though.
 However, if some mid-states \emph{are} linearly convertible (to and from hashes), then \emph{the fork rule should work for the absolute value of those units, too}.
 
@@ -24,7 +27,7 @@ Since a block represents a discrete amount of work, and has a known, measurable 
 Making this conversion up-front will simplify the work to come, since block production frequencies don't need to be accounted for.
 
 \aside{
-    If we can measure the \emph{rate of work} in some direct way (e.g., number of hashes) then we can also \emph{scale block rewards according to both the network difficulty and the demonstrated rate of work}.
+    If we can measure the \emph{rate of work} in some direct way (e.g., number of hashes per block) then we can also \emph{scale block rewards according to both the network difficulty and the demonstrated rate of work}.
     This enables dynamic block production (i.e., blocks with a flexible minimum difficulty).
     This would (probably) be disruptive to a traditional blockchain, due to many stale blocks.
     For UT, it becomes relevant with \autoref{sec:dos-and-dags}, and particularly with \autoref{sec:preventing-dos-attacks}.
@@ -36,10 +39,10 @@ We need a specific \emph{goal} and \emph{context} to successfully convert -- in 
 The goal of this conversion is the only specific thing we know right now: to convert chain-work so that \emph{PoR works}.
 The \emph{conversion} shouldn't introduce any vulnerabilities, and it should work within the constraints that we talked about above.
 
-In order to discuss \emph{how} to convert (i.e., the ideas themselves) we need to know the \emph{context} that we operate in.
+In order to discuss \emph{how} to convert we need to know the \emph{context} that we operate in.
 We know some of the context already: the rest of the world, e.g., we know about some ways to attack blockchains.
 However, that's just background context.
-What specific contexts can help us convert?
+What specific contexts can \emph{facilitate} conversion?
 Here are two:
 
 % continue on to single-root-token-multi-chain conversion method
