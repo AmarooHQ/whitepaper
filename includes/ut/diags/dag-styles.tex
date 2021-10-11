@@ -1,6 +1,9 @@
 % defaults if they don't exist
 \providecommand\DagHighlightSubtree{0}%
 \providecommand\DagLinearizeSubtree{999}%
+\providecommand\DagFocusVirtualNodes{0}
+
+\usetikzlibrary{patterns}
 
 % min subtree depth is 3
 \def\dagParentsLineStyle{\xintifboolexpr{4 > \DagLinearizeSubtree}{dashed}{solid}}
@@ -33,17 +36,27 @@
 \tikzstyle{subtree3PA} = []
 \tikzstyle{subtree3LA} = [draw=none]
 \tikzstyle{subtree3Best} = []
+\tikzstyle{subtree1Tmpl} = [fill=blue!20]
+\tikzstyle{subtree2Tmpl} = [fill=red!20]
+
+\xintifboolexpr{1 == \DagFocusVirtualNodes}{
+    \tikzstyle{virtual} = [double, fill=white!50!yellow!45]
+}{
+    \tikzstyle{virtual} = []
+}
 
 \xintifboolexpr{1 <= min(\DagHighlightSubtree, \DagLinearizeSubtree)}{
-    \tikzstyle{subtree1} = [fill=blue!20]
+    \tikzstyle{subtree1} = [subtree1Tmpl, double]
     \tikzstyle{subtree1Best} = []
 }{}
-\xintifboolexpr{2 <= min(\DagHighlightSubtree, \DagLinearizeSubtree)}{
-    \tikzstyle{subtree2} = [fill=red!20]
+    \xintifboolexpr{2 <= min(\DagHighlightSubtree, \DagLinearizeSubtree)}{
+    \tikzstyle{subtree1} = [subtree1Tmpl]
+    \tikzstyle{subtree2} = [subtree2Tmpl, double]
     \tikzstyle{subtree2Best} = []
 }{}
 \xintifboolexpr{3 <= min(\DagHighlightSubtree, \DagLinearizeSubtree)}{
-    \tikzstyle{subtree3} = [fill=green!20]
+    \tikzstyle{subtree3} = [fill=green!20, double]
+    \tikzstyle{subtree2} = [subtree2Tmpl]
     \tikzstyle{subtree3Best} = []
 }{}
 

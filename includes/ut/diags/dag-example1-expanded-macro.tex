@@ -2,7 +2,6 @@
 \providecommand\DagHighlightSubtree{0}%
 \providecommand\DagHighlightSubtreeDepth{0}%
 \providecommand\DagLinearizeSubtree{999}%
-% \providecommand\DagVirtualNode{1}%
 
 \input{dag-styles}%
 
@@ -30,7 +29,7 @@
     \node (block3leftmid) [below = of $(block2/1)!0.5!(block2/2)$] {};
     \node (block3rightmid) [below = of $(block2/3)!0.5!(block2/2)$] {};
 
-    \node (blockV3) [block, subtree1, subtree2] at (block3leftmid |- block2Vmid) {$V_{i+2,1}$ \\[-0.2em] \scriptsize{$\Sigma_{w}=2$}};
+    \node (blockV3) [block, subtree1, subtree2, virtual] at (block3leftmid |- block2Vmid) {$V_{i+2,1}$ \\[-0.2em] \scriptsize{$\Sigma_{w}=2$}};
 
     \node (block3/1) [block, subtree1] at (block3leftmid |- block3mid) {$\AbbrChain_{i+2,1}$ \\[-0.2em] \scriptsize{$\Sigma_{w}=4$}};
     \node (block3/2) [block] at (block3rightmid |- block3mid) {$\AbbrChain_{i+2,2}$ \\[-0.2em] \scriptsize{$\Sigma_{w}=3$}};

@@ -315,25 +315,23 @@ Prioritized blocks are positioned *earlier* in the final ordering.
 [^directanc]: In DAG (or DAG-like) chains, direct ancestors are sometimes called the *pivot chain* or *main chain*.
 Provided that parent blocks *are sorted by cumulative work*, the chain of *direct ancestors* between a given block and the genesis block must be the *single heaviest path* between the two. (This is the case for UT.)
 
-If a DAG-chain's best block has two parents, each parent will have a *subgraph of blocks* between itself and the *most recent common direct ancestor* (of the two parents).
+Let's limit DAG-chain blocks to two parents. If the best block has two parents, then each parent will have a *subgraph of blocks* between itself and the *most recent common direct ancestor* of the two parents.
 The subgraph which takes priority is that of the *prioritized parent's ancestry*.
 If that subgraph is a chain, then the ordering and execution of blocks is trivial.
 If it is not, then there must be another subgraph within that subgraph, and this algorithm is applied recursively.
 After the prioritized subgraph is processed, the remaining blocks (those that are only ancestors of the remaining parent block) are ordered and applied -- invoking recursion where necessary.
 Finally, the best block is applied.
-In this way, all blocks are executed after their ancestors, and there is a clear and ordering that trivially converges.
+In this way, all blocks are executed after their ancestors, and there is a clear and total ordering that trivially converges.
 
 In the case that more than two parent blocks are permitted, there is a trivial generalization of the above.
 That is: replace \emph{all} but the last (worst) parent with a *virtual parent block* that links back to all remaining *actual* parent blocks (but contributes zero block-weight itself).
-Replacing the best parents with virtual blocks (rather than worst blocks) means that the fork rule works automatically.
+Replacing the best parents (rather than the worst parents) with a virtual block means that the fork rule works automatically.
 This can be repeated to allow for arbitrarily many parents.
 
 \autoref{fig:dag-ex1-full} is an example of this algorithm for a moderately complex chain-segment ($B_i\cdots B_{i+3}$ which is 7 blocks total), and each step is enumerated and explained.
 
-\todoDraftOnly{Update \autoref{fig:dag-ex1-full} to use some kind of patterns (in addition to color) for grayscale compatibility (both printing and for ppl who are color blind)}
-
 \begin{figure}[p]
-    \caption{Example: sorting a moderately complex block-DAG; note that the left parent is always the best parent, so will have priority. \label{fig:dag-ex1-full}}
+    \caption{Example: sorting a moderately complex block-DAG; note that the left parent is always the best parent, so will have priority. Each block is annotated with its \emph{chain-weight} ($\Sigma_w$). \label{fig:dag-ex1-full}}
     \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
         \centering
@@ -403,16 +401,10 @@ This can be repeated to allow for arbitrarily many parents.
         \vskip 0pt
         \centering
         \includegraphics[width=.95\linewidth]{dag_example1_expanded_order_70_sag}
-        \caption{And finally we order the last remaining blocks.}
+        \caption{And finally we order the last remaining blocks. (We could remove virtual blocks too).}
         \label{fig:dag-ex1-order-70}
     \end{subfigure}
 \end{figure}
-
-\begin{comment}
-The methods described in the Inclusive Block Chain Protocols detail orderings that provide a canonical main path in a DAG which is also inclusive of other blocks that do not strictly lie on this path.
-This hints to the fact that ordering is convergent and stable in a DAG provided that it doesn't get too *wide*,
-where width is a measure of the number of concurrent chain-heads that can be merged.
-\end{comment}
 
 We should expect that conflicting transactions (which might otherwise be attempted doublespends) arise during this process.
 Ancestors of one parent may not be ancestors of another parent.
