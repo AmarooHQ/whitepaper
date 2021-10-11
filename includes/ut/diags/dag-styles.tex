@@ -36,11 +36,13 @@
 \tikzstyle{subtree3PA} = []
 \tikzstyle{subtree3LA} = [draw=none]
 \tikzstyle{subtree3Best} = []
+% these colors work okay for b/w printing
 \tikzstyle{subtree1Tmpl} = [fill=blue!20]
 \tikzstyle{subtree2Tmpl} = [fill=red!20]
+\tikzstyle{subtree3Tmpl} = [fill=green!20]
 
 \xintifboolexpr{1 == \DagFocusVirtualNodes}{
-    \tikzstyle{virtual} = [double, fill=white!50!yellow!45]
+    \tikzstyle{virtual} = [double, fill=white!20!yellow!55]
 }{
     \tikzstyle{virtual} = []
 }
@@ -55,7 +57,7 @@
     \tikzstyle{subtree2Best} = []
 }{}
 \xintifboolexpr{3 <= min(\DagHighlightSubtree, \DagLinearizeSubtree)}{
-    \tikzstyle{subtree3} = [fill=green!20, double]
+    \tikzstyle{subtree3} = [subtree3Tmpl, double]
     \tikzstyle{subtree2} = [subtree2Tmpl]
     \tikzstyle{subtree3Best} = []
 }{}
