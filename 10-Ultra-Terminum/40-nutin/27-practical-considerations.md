@@ -461,4 +461,6 @@ The average hash rate on each simplex chain, as described above, is always the s
     Add a nash equilibrium diagram + explanation to show that it's always in the interest of miners to publish headers -- intuition: including headers means that the \emph{other chain's miner} has an incentive to include your header. that means that the next miner (on your chain) will be able to build on a heavier chain if they reflect that other chain's next header -- so that next miner (on the local chain) has an incentive to include that other chain's next header. If the original miner (who might chose not to publish the most recent header of that other chain) censors that reflection, then they disadvantage themselves relative to their competitors (other miners of that simplex-chain). Thus, it's never helpful to a miner to censor reflections (esp if we enforce the limit on $k_b$ and $k_{tx}$). It doesn't help honest miners, and it makes an attackers chain-segment less competitive.
 }
 
+Does a miner ever benefit from withholding reflections?
+
 %% END ### DRAFT

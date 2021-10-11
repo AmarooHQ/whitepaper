@@ -224,3 +224,7 @@ docker:
 
 docker-bash:
 	docker run --rm -it -u `id -u ${USER}`:`id -g ${USER}` -v `pwd`:/work whitepaper-build:latest /bin/bash
+
+# run a little python3 server from output dir
+serve:
+	cd $(OUTDIR) && python3 -m http.server 3131
