@@ -1,9 +1,16 @@
+% defaults if they don't exist
+\providecommand\DagHighlightSubtree{0}%
+\providecommand\DagLinearizeSubtree{999}%
+
+% min subtree depth is 3
+\def\dagParentsLineStyle{\xintifboolexpr{4 > \DagLinearizeSubtree}{dashed}{solid}}
+
 \tikzstyle{chainName} = [rectangle, rounded corners, minimum width=2cm, minimum height=0.8cm, text centered, draw=black]%
-\tikzstyle{block} = [rectangle, minimum width=1cm, minimum height=0.7cm, draw=black]%
+\tikzstyle{block} = [rectangle, minimum width=1cm, minimum height=0.7cm, draw=black, align=center]%
 \tikzstyle{state} = [text width=8.6em]%
 \tikzstyle{dots} = [inner sep=0pt, text height=10pt]%
 \tikzstyle{arrowTime} = [stealth reversed-stealth, shorten >= -2pt, shorten <= -2pt]%
-\tikzstyle{arrowParent} = [thick, ->, -to, shorten >= 2pt, shorten <= 2pt]%
+\tikzstyle{arrowParent} = [\dagParentsLineStyle, thick, ->, -to, shorten >= 2pt, shorten <= 2pt]%
 \tikzstyle{arrowRefl} = [thick, dashed, ->, -to, shorten >= 2pt, shorten <= 2pt]%
 \tikzstyle{braceLL} = [decorate, decoration={brace,amplitude=6pt,mirror,raise=2pt}]%
 \tikzstyle{braceLR} = [decorate, decoration={brace,amplitude=6pt,raise=-8pt}]%
@@ -11,3 +18,48 @@
 \tikzstyle{braceRR} = [decorate, decoration={brace,amplitude=6pt,raise=2pt}]%
 \tikzstyle{braceRL} = [decorate, decoration={brace,amplitude=6pt,raise=-8pt,mirror}]%
 \tikzstyle{ethBraceR} = [braceRR, sloped]%
+
+\tikzstyle{subtree0LA} = [draw=none]
+\tikzstyle{subtree0PA} = []
+\tikzstyle{subtree1} = []
+\tikzstyle{subtree1PA} = []
+\tikzstyle{subtree1LA} = [draw=none]
+\tikzstyle{subtree1Best} = []
+\tikzstyle{subtree2} = []
+\tikzstyle{subtree2PA} = []
+\tikzstyle{subtree2LA} = [draw=none]
+\tikzstyle{subtree2Best} = []
+\tikzstyle{subtree3} = []
+\tikzstyle{subtree3PA} = []
+\tikzstyle{subtree3LA} = [draw=none]
+\tikzstyle{subtree3Best} = []
+
+\xintifboolexpr{1 <= min(\DagHighlightSubtree, \DagLinearizeSubtree)}{
+    \tikzstyle{subtree1} = [fill=blue!20]
+    \tikzstyle{subtree1Best} = []
+}{}
+\xintifboolexpr{2 <= min(\DagHighlightSubtree, \DagLinearizeSubtree)}{
+    \tikzstyle{subtree2} = [fill=red!20]
+    \tikzstyle{subtree2Best} = []
+}{}
+\xintifboolexpr{3 <= min(\DagHighlightSubtree, \DagLinearizeSubtree)}{
+    \tikzstyle{subtree3} = [fill=green!20]
+    \tikzstyle{subtree3Best} = []
+}{}
+
+\xintifboolexpr{3 >= \DagLinearizeSubtree}{
+    \tikzstyle{subtree3PA} = [draw=none]
+    \tikzstyle{subtree3LA} = [arrowParent, solid]
+}{}
+\xintifboolexpr{2 >= \DagLinearizeSubtree}{
+    \tikzstyle{subtree2PA} = [draw=none]
+    \tikzstyle{subtree2LA} = [arrowParent, solid]
+}{}
+\xintifboolexpr{1 >= \DagLinearizeSubtree}{
+    \tikzstyle{subtree1PA} = [draw=none]
+    \tikzstyle{subtree1LA} = [arrowParent, solid]
+}{}
+\xintifboolexpr{0 >= (\DagLinearizeSubtree)}{
+    \tikzstyle{subtree0PA} = [draw=none]
+    \tikzstyle{subtree0LA} = [arrowParent, solid]
+}{}

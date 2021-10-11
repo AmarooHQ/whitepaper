@@ -260,17 +260,7 @@ The *essence* of *Proof of Reflection* should now be apparent. *In principle*, w
 
 \todo{finish rewrite this section}
 
-%% END ### RELEASE
-
-%% BEGIN ### DRAFT
-
-#### (NB: draft of new version)
-
 \input{20-por/30-comparing-work-3}
-
-%% END ### DRAFT
-
-%% BEGIN ### RELEASE
 
 #### A Single Root Token Across Multiple Chains
 

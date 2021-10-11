@@ -121,7 +121,7 @@
         "algs"
     ],
     "cSpell.flagWords": [
-        "hte", "DOS", "teh"
+        "hte", "DOS", "teh", "\\being{"
     ],
     "cSpell.ignoreRegExpList": [
         "\\usepackage{([a-z,]*)}",

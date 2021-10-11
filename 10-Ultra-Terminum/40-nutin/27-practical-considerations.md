@@ -324,8 +324,88 @@ Finally, the best block is applied.
 In this way, all blocks are executed after their ancestors, and there is a clear and ordering that trivially converges.
 
 In the case that more than two parent blocks are permitted, there is a trivial generalization of the above.
-That is: replace all but the first (best) parent with a *virtual parent block* that links back to all remaining *actual* parent blocks.
+That is: replace all but the last (worst) parent with a *virtual parent block* that links back to all remaining *actual* parent blocks (but contributes zero block-weight itself).
 This can be repeated to allow for arbitrarily many parents.
+
+\autoref{fig:dag-ex1-full} is an example of this algorithm for a moderately complex chain-segment ($B_i\cdots B_{i+3}$ which is 7 blocks total), and each step is enumerated and explained.
+
+\todo{continue and finish}
+
+\begin{figure}[p]
+    \caption{Example: sorting a moderately complex block-DAG; note that the left parent is always the best parent, so will have priority. \label{fig:dag-ex1-full}}
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=.95\linewidth]{dag_example1_sag}
+        \vspace{0.55em}
+        \caption{How should we order this block-DAG? Note: children should \emph{always} be after their parents, and \emph{prioritization} means \emph{earlier execution}.}
+        \label{fig:dag-ex1}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=.95\linewidth]{dag_example1_expanded_order_00_sag}
+        \caption{The first thing we should do is create any virtual nodes that are required ($V_{i+2,1}$).}
+        \label{fig:dag-ex1-order-00}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=.95\linewidth]{dag_example1_expanded_order_10_sag}
+        \caption{Since there are two parents, we look at the \emph{prioritized subgraph} (i.e., most worked).}
+        \label{fig:dag-ex1-order-10}
+    \end{subfigure}
+
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=.95\linewidth]{dag_example1_expanded_order_20_sag}
+        \caption{Again, there are two parents, so we look at the \emph{next} prioritized subgraph.}
+        \label{fig:dag-ex1-order-20}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=.95\linewidth]{dag_example1_expanded_order_30_sag}
+        \caption{We've found a chain. These blocks have the highest priority, so are executed first.}
+        \label{fig:dag-ex1-order-30}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=.95\linewidth]{dag_example1_expanded_order_40_sag}
+        \caption{We're now \emph{ordering} the blocks -- the solid arrows represent the final ordering. In this step we order the highest priority blocks.}
+        \label{fig:dag-ex1-order-40}
+    \end{subfigure}
+
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=.95\linewidth]{dag_example1_expanded_order_50_sag}
+        \caption{Now that the highest priority blocks are ordered, we can order the \emph{previous} subgraph.}
+        \label{fig:dag-ex1-order-50}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=.95\linewidth]{dag_example1_expanded_order_60_sag}
+        \caption{Once more, we order the next-in-line subgraph.}
+        \label{fig:dag-ex1-order-60}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=.95\linewidth]{dag_example1_expanded_order_70_sag}
+        \caption{And finally we order the last remaining blocks.}
+        \label{fig:dag-ex1-order-70}
+    \end{subfigure}
+\end{figure}
 
 \begin{comment}
 The methods described in the Inclusive Block Chain Protocols detail orderings that provide a canonical main path in a DAG which is also inclusive of other blocks that do not strictly lie on this path.

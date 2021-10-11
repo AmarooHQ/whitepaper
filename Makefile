@@ -16,6 +16,11 @@ PURS_GEN_DIR=includes/ut/complexity/ut-complexity-gen-purs
 PP_MODE=draft
 PP_LINT_FLAG=
 
+NCPUS = $(shell lscpu | egrep '^CPU.s' | awk '{ print $$2 }')
+ifeq ($(NCPUS),)
+	NCPUS = 4
+endif
+
 # default properties for WP -- see `set-wp-properties` cmd
 papersize=a4
 geometry=left=3cm,right=3cm,top=3cm,bottom=3cm
@@ -201,6 +206,26 @@ deponly-clean:
 	$(RM) -fv -- `find ./ -iname \*_sag.ps`
 
 depclean: clean deponly-clean
+
+depclean-por:
+	$(RM) -fv -- `find ./ -iname pow_refl\*_sag.pdf`
+
+depclean-tiling:
+	$(RM) -fv -- `find ./ -iname tiling\*_sag.pdf`
+
+depclean-simplex:
+	$(RM) -fv -- `find ./ -iname simplex\*_sag.pdf`
+
+depclean-%:
+	$(RM) -fv -- `find ./ -iname $*\*_sag.pdf`
+
+#re-make SAG files with a given name-prefix
+sag-%:
+	$(MAKE) depclean-$*
+	if [ -z "`find ./ -iname $*\*_sag.tex`" ]; then echo 'no matching files'; else $(MAKE) -j $(NCPUS) `find ./ -iname $*\*_sag.tex | sed 's/\.tex$$/.pdf/'`; fi
+
+# run make for output files based on input files:
+# $(MAKE) `find ./ -iname $*\*_sag.tex | sed 's/\.tex$$/.pdf/'`
 
 # everything in output + the rest
 distclean: depclean
