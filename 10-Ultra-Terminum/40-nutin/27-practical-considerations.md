@@ -324,12 +324,13 @@ Finally, the best block is applied.
 In this way, all blocks are executed after their ancestors, and there is a clear and ordering that trivially converges.
 
 In the case that more than two parent blocks are permitted, there is a trivial generalization of the above.
-That is: replace all but the last (worst) parent with a *virtual parent block* that links back to all remaining *actual* parent blocks (but contributes zero block-weight itself).
+That is: replace \emph{all} but the last (worst) parent with a *virtual parent block* that links back to all remaining *actual* parent blocks (but contributes zero block-weight itself).
+Replacing the best parents with virtual blocks (rather than worst blocks) means that the fork rule works automatically.
 This can be repeated to allow for arbitrarily many parents.
 
 \autoref{fig:dag-ex1-full} is an example of this algorithm for a moderately complex chain-segment ($B_i\cdots B_{i+3}$ which is 7 blocks total), and each step is enumerated and explained.
 
-\todo{continue and finish}
+\todoDraftOnly{Update \autoref{fig:dag-ex1-full} to use some kind of patterns (in addition to color) for grayscale compatibility (both printing and for ppl who are color blind)}
 
 \begin{figure}[p]
     \caption{Example: sorting a moderately complex block-DAG; note that the left parent is always the best parent, so will have priority. \label{fig:dag-ex1-full}}
