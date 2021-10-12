@@ -38,6 +38,8 @@ module.exports = {
                 "/\\bQm[A-Za-z0-9]{30,}\\b/",
                 "/\\b[a-f0-9]{7,}\\b/",
                 "/\\b[a-z_]+\\b/",
+                "/Example_5/",
+                "/_Trading_across_chains/",
                 "EVM", "ETH", "BTC", "Eth", "step[0-9]", "SCs", "DEX",
                 // "/^\\newcommand(.*)$/",
                 "/=[A-Za-z{]{2,}/", "GL", "Refls", "MinBand", "/child[12]/", "Simplex",
