@@ -93,6 +93,9 @@ wp-graphics-png: $(PNGGraphics)
 whitepaper: $(PDFGraphics) $(InputTeXFiles) build-whitepaper set-wp-properties wp-pandoc mk-latex-pdf wc finished-msg
 whitepaper-skip-pandoc: $(PDFGraphics) $(InputTeXFiles) mk-latex-pdf wc
 
+par-gfx:
+	$(MAKE) -j $(NCPUS) $(PDFGraphics)
+
 # atm restrict this to just the UT folder, can generalize again later
 # to do that: replace '10-Ultra-Terminum' with '*-*'
 # nb: add `clean-wp-md` as a dependency if there are issues building.
