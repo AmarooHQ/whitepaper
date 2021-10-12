@@ -179,7 +179,7 @@ For example, there is no meaningful *generic* answer to the question *how many d
 For the purposes of our hypothetical construction, let's say that L and R do *equal work over equal time*. In the current example, that means that the work required to produce either $L_i$ or $R_j$ is the same. *For the sake of this construction, we'll also presume this relationship doesn't change over time*. Our constant of conversion is thus: 1 *R Blocks per L Block*.
 
 NB: we're not that concerned with whether this is a reasonable assumption in the real world or not; right now, we just need a way to convert the work done on each chain into the same units.
-(Some methods for doing this will be discussed in \autoref{sec:comparing-diff-pows}.)
+(Some methods for doing this will be discussed in \autoref{sec:comparing-chain-work}.)
 
 Currently, the Chain L network chooses the \`\`heaviest'' (most worked) chain as its common history. Chain L calculates the \`\`weight'' of blocks (i.e., how much work went in to them) via an estimation of how many hashes were required -- say these are measured in *double SHA256 hashes*. For the purposes of illustration, let's normalize this number to be in terms of *L Blocks* -- instead of *double SHA256 hashes*; that's easy, since each block is worth 1 *L Block* by definition. Now, we can also measure the work in *R Blocks*, too (that being: 1 *R Block*).
 
@@ -216,7 +216,7 @@ It's worth noting that, at this point, there is no benefit to Chain R's security
 
 Naturally, if there were a large difference in target block frequencies (e.g., 10 minutes vs 15 seconds) then there would also be a good deal of latency before a chain gains the security benefit from reflected work. For this reason, *Proof of Reflection* makes the most sense when used with high frequency chains, or chains of similar frequencies. One downside of this is that shortening the block production frequency requires the inclusion of more block headers. In the scheme of things, this can be somewhat significant but is not a deal-breaker.
 
-Practical methods of comparing (and converting the weight of) different Proofs of Work are discussed in \autoref{sec:comparing-diff-pows}.
+Practical methods of comparing (and converting the weight of) different Proofs of Work are discussed in \autoref{sec:comparing-chain-work}.
 
 Note that, as the Chain L tip is gaining reflections from Chain R, miners on Chain L are incented to include as many Chain R headers (and PoRs) as possible. That's because each new header will add weight to the *parent* of the block which the Chain L miner is attempting to produce. This increases the overall chain-weight that the miner is building on, and thus contributes to their block becoming part of the most-worked chain.
 
@@ -248,7 +248,8 @@ The final step in this progression is *mutual reflection* -- where both chains i
 
 When two chains (Chain L and Chain R) mutually reflect each-other, detecting attacks becomes easier. The security of both Chain L and R are partially dependant on each others' histories (along with their own, of course). If one chain is attacked, where some alternate chain-segment is published, then that chain's nodes will know that those blocks have not been reflected - potentially indicating that the recently-published chain-segment was constructed in private or constructed after the fact.
 
-There are several details that still require discussion, though, such as: *how exactly is weight contributed by a reflecting chain converted to weight in the local chain?* (discussed in \autoref{sec:comparing-diff-pows}); and *how can proofs of reflection be calculated without the requirement that miners are full nodes of both chains?* (discussed in \autoref{sec:practical-considerations}). This last question is particularly important for moving beyond mutual reflection between only two chains.
+There are several details that still require discussion, though, such as: *how exactly is weight contributed by a reflecting chain converted to weight in the local chain?* (discussed in \autoref{sec:comparing-chain-work}); and *how can proofs of reflection be calculated without the requirement that miners are full nodes of both chains?* (discussed in \autoref{sec:practical-considerations}).
+This last question is particularly important for moving beyond mutual reflection between only two chains.
 
 The *essence* of *Proof of Reflection* should now be apparent. *In principle*, we can make blockchains more difficult to attack based on the idea that *blockchains can include a projection of the history of other blockchains (and confirm a chain's history like they do transactions)*. *In principle*, it is possible to increase the security of a blockchain via *reflection* and to increase the security of multiple blockchains via *mutual reflection*.
 
@@ -256,7 +257,7 @@ The *essence* of *Proof of Reflection* should now be apparent. *In principle*, w
 
 ### Comparing Incomparable Proofs of Work
 
-\label{sec:comparing-diff-pows}
+\label{sec:comparing-chain-work}
 
 \input{20-por/30-comparing-work-3}
 
