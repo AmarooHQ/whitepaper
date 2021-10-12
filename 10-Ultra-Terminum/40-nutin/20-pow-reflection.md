@@ -317,15 +317,57 @@ Thus, for PoW chains, there is an exact conversion between \emph{work and confir
 Over short time-scales, this conversion ratio is approximately constant (in general it's a function that accepts a timestamp as input).
 Thus, \emph{chain-weight} (as represented in figures via $\Sigma_w$, e.g. \autoref{fig:dag-ex1-full}) can be represented either in something like \emph{hashes} or \emph{difficulty} -- though those numbers be unwieldy -- \textbf{or} chain-weight can simply be in terms of \emph{confirmations}.
 
-However, if we convert \emph{work to confirmations}, will we end up with something \emph{incompatible and contradictory} to the traditional notion of ``a confirmation''?
-There are definitely differences.
-For example: if we convert confirmations, then \emph{we'll have non-integer confirmations}, and what does 0.88 confirmations mean?
-Is that less good than a normal confirmation?
-Even though \emph{confirmations are still discrete},
+\aside{
+  If we convert \emph{work to confirmations}, will we end up with something \emph{incompatible and contradictory} to the traditional notion of ``a confirmation''?
+  There are definitely differences.
+  For example: if we convert confirmations, then \emph{we'll have non-integer confirmations}, and what does 0.88 confirmations mean?
+  Is that less good than a normal confirmation?
 
-Why think about chain-weight in terms of \emph{confirmations} instead of \emph{work}?
+  This problem arises because \emph{we're not actually converting work to confirmations}, per se: we're converting \emph{another chain's work} into \emph{equivalent-confirmations} relative to something.
+  Converted confirmations are \emph{in terms of the local chain's confirmations}.
+  Most likely, those equivalent-confirmations will be relative either to some known historical confirmation, or to that of the \emph{current} block.
+}
+
+Why think about chain-weight in terms of \emph{equivalent-confirmations} instead of \emph{work}?
 There are a few reasons.
-First,
+First, \emph{confirmations are general!}
+If we reason in terms of \emph{confirmations} instead of \emph{work}, then \emph{maybe} we can apply these ideas to \emph{other chains} that don't use PoW.
+Second, it \emph{simplifies thinking}.
+The purpose of converting chain-weight is clearer and easier to reason about.
+Finally, it makes explicit the requirement that \emph{we can only compare to a grounded context}.
+
+There is no way to \emph{universally} say \emph{X work on L is worth Y work on R} without adding necessary context like \emph{when} that conversion is happening.
+Confirmations (like work) require that grounding.
+For confirmations (not work), this is true even when converting confirmations \emph{from the same chain}.
+For example, we can say that the single confirmation provided by Bitcoin block 704610 is \emph{equivalent} to approximately 19,893,045,000,000 genesis-confirmations.\footnote{A genesis-confirmation is relative to the Bitcoin genesis block -- which had a difficulty of exactly 1.}
+The conversion-ratio is equivalent to the difficulty of block 704610.
+That is, it would take a chain of $\sim$ 20 trillion blocks (each with 1 genesis-confirmation worth of work) to match the weight of block 704610.
+
+When will conversion methods fail for converting confirmations?
+
+\emph{Proof of Reflection} adds block-weight in discrete amounts.
+Some alternative distributed ledger networks (in essence: DLTs) do not produce network-wide discrete updates.
+So it's not clear how those would use PoR themselves or be used by another chain for PoR.
+Examples: Hedera uses Hashgraph; Solana uses Proof of History (PoH).\footnote{
+  It's also not clear how either Hashgraph or PoH networks could support cross-chain transactions in general.
+}
+
+PoR also requires that \emph{state can be verified} in the reflecting chain.
+Some blockchains obscure their state (e.g. Monero).
+If we can't \emph{publicly verify} PoRs, we can't convert chain-work, so they can't be used \emph{for} reflection (such networks could perhaps do one-way PoR, though).
+In that case, protocol upgrades might enable \emph{mutual} PoR.
+Some DLTs don't have meaningful network-wide state; i.e., there is no single, consistent view of that network's history.
+In this case we can't convert.
+Example: IOTA uses The Tangle.
+
+PoR also needs a way to normalize the idea of \`\`a confirmation'' so they can be compared.
+Consider a PoA chain with \emph{irregular} block production.
+It has discrete updates, and state can be verified against it.
+But, what does each confirmation \emph{mean?}
+Is a block that is produced soon after its parent worth as much as a block produced a long time after its parent?
+For non-PoW chains, we'll need conversion methods that have non-arbitrary answers for these questions.
+
+In general, my intuition is that we can almost always use PoR with networks that fit the \emph{traditional} idea of blockchains. (And when we can't, a protocol change could fix that.)
 
 ### Reflection Between PoW and PoS Chains
 
@@ -343,7 +385,9 @@ Perhaps one of the most interesting features of *Proof of Reflection* is that Po
 
 Putting the issue of *conversion* aside for a moment, is it possible *in principle* for PoW and PoS chains to reflect one another? Yes. Additionally, PoR provides decisive advantages *both* for PoW chains *and* PoS chains, though there are some additional problems that must be solved, too.
 
-If a PoW chain is reflected in a PoS chain, then an attacker will likely need more than just computational resources to attack the PoW chain. Consider a PoW chain and a PoS chain that share a root token, and each chain hosts approximately 50% of the total supply. If the two chains have equal block production frequencies, then 50% of the network's security comes from each chain.
+If a PoW chain is reflected in a PoS chain, then an attacker will likely need more than just computational resources to attack the PoW chain.
+Consider a PoW chain and a PoS chain that share a root token, and each chain hosts approximately 50% of the total supply.
+If the two chains have equal block production frequencies, then (using \autoref{alg:weightof-ratio}) 50% of the network's security comes from each chain.
 
 Consider an attack on the PoW chain and presume that the difficulty on the PoW chain is constant over the attack, i.e., the PoW chain's difficulty doesn't adjust quickly enough to react to the attack. Additionally, assume the attacker has *not* been contributing to the network before the attack, i.e., their hash-rate is not accounted for in the PoW chain's difficulty. Given the two chains are mutually reflecting, half of the network's security is provided by the PoS chain (and thus immune to the attacker in this case). Therefore, a successful attacker -- *using the traditional method of mining a competing chain-segment in private* -- must generate more blocks than both chains combined. That means the attacker needs *twice* the honest hash-rate for a guaranteed successful attack.
 
@@ -364,9 +408,15 @@ Given the right set-up, a PoW chain gains an *incredible* security advantage fro
   Additionally, with traditional blockchains (which are trees), an empty-block DoS is possible -- this is addressed in \autoref{sec:dos-and-dags}.
 }
 
-What about the PoS chain, though; what benefits does it gain from this relationship? The answer here is simple: by reflecting with a PoW chain, the PoS chain gains *thermodynamic security*; the PoS chain's history is *thermodynamically secured* by the PoW chain. \textbf{This solves the \emph{Nothing at Stake} problem for any well constructed PoS scheme.} Furthermore, it is possible for error-correction methods like \emph{slashing} to be implemented *on the PoW chain*, not the PoS chain. Moving the staking and error correction methods to a different chain will require subtle and precise protocol design, but such changes are *in principle* possible with tolerable overhead.
+What about the PoS chain, though; what benefits does it gain from this relationship?
+The answer here is simple: by using mutual PoR with a PoW chain, the PoS chain gains *thermodynamic security*; the PoS chain's history is *thermodynamically secured* by the PoW chain.
+\textbf{This solves the \emph{Nothing at Stake} problem for any well constructed PoS scheme.}
+Furthermore, it is possible for error-correction methods like \emph{slashing} to be implemented *on the PoW chain*, not the PoS chain.
+Moving the staking and error correction methods to a different chain will require subtle and precise protocol design, but such changes are *in principle* possible with tolerable overhead.
 
-There are some (as yet) unsolved problems that arise through this design, such as the *economic* details of managing block rewards across the PoW and PoS chains. Given that solutions to this problem likely depend on the specific details of the relevant PoS systems, this problem is not addressed here. Note: conversion methods for reflected weight, like \autoref{alg:por-reflected-block-weight}, will work provided a well defined \textsc{WeightOf} function exists.
+There are some (as yet) unsolved problems that arise through this design, such as the *economic* details of managing block rewards across the PoW and PoS chains.
+Given that solutions to this problem likely depend on the specific details of the relevant PoS systems, this problem is not addressed here.
+Note: conversion methods for reflected weight, like \autoref{alg:por-reflected-block-weight}, will work provided a well defined \textsc{WeightOf} function exists.
 
 There are some other conjectured solutions to the *Nothing at Stake* problem. The two examples that follow solve the problem via mechanisms that are *external* to the protocol itself, i.e., hard-coded checkpoints and the requirement that nodes are online ``frequently''. The solution provided by mutual reflection with a PoW blockchain -- i.e., thermodynamic security -- is provided *by the protocol itself* and can only *increase* the security of PoS mechanisms. Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
 
@@ -391,7 +441,9 @@ There are some other conjectured solutions to the *Nothing at Stake* problem. Th
 
 *Pure* PoS blockchains are inherently insecure. This is the underlying reason why modern protocols still resort to external methods of security (as mentioned above). Even with those external security measures, PoS chains are generally weak to bribe attacks.
 
-\bquote{PoS must fail in one of these ways, A or B: \newline
+\bquote{The proof that PoS is impossible, it heavily relys on a symmetry in PoS; the attacker coalition is symmetric against the defender coalition. [...] \newline
+[...] \newline
+PoS must fail in one of these ways, A or B: \newline
 \newline
 A) Once attackers have $>51\%$ of validator stake they can maintain the attack perpetually. They control who is added to the validator set. They can censor anything. They can use censorship to push through arbitrary soft-fork updates, including updates to change the consensus mechanism to PoW. Users who don't like the new rules are incentivized to sell to users who do like the new rules.\newline
 \newline
