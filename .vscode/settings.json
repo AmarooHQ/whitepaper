@@ -198,6 +198,7 @@
     "latex-workshop.latex.search.rootFiles.include": [
         "includes/**/*.tex",
     ],
+    "latex-workshop.latex.autoBuild.interval": 1000,
     "latex-workshop.latex.watch.files.ignore": [
         "**/*.bbx",
         "**/*.bbl",

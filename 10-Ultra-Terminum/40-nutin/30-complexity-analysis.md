@@ -33,13 +33,11 @@ Additionally, $O(k_i)$ is \emph{defined} as $O(k_i) \equiv O(c)$.
 Example: Bitcoin.
 
 The *raw throughput*, $k_1$, can be calculated for existing chains (e.g., Bitcoin) via the product of the maximum block size, $B_{\text{max}}$ (in bytes), and the block production frequency, $B_f$ (in hertz, or $s^{-1}$):
-
 \begin{equation*}
 k_1 = B_{\text{max}} \cdot B_f
 \end{equation*}
 
 The *throughput*, $T_1$, of an $O(c)$ chain is equivalent to its raw throughput:
-
 \begin{equation*}
 T_1 = k_1
 \end{equation*}
@@ -49,7 +47,6 @@ The complexity order of the network is given by $O(T_1) = O(k_1) = O(c)$ as expe
 Care should be taken to account for protocol extensions like *Segregated Witness* that effectively reduce the size of transactions by $\nicefrac{1}{4}$.
 
 For Bitcoin -- given $k_1 \approx 1700$ B/s, and transaction size $\text{Tx}_{\text{avg}} = 500 \cdot \nicefrac{3}{4}$ B -- the maximum TPS is given by:
-
 \begin{equation*}
 {\text{TPS}}_{\text{Bitcoin}} \approx \frac{1700}{\text{Tx}_{\text{avg}}} \approx 4.5
 \end{equation*}
@@ -155,7 +152,6 @@ T_1 & = N_1 \cdot k_{1,tx} \label{eq:reflection-t1-start} \\
 \end{align}
 
 The optimal number of simplex-chains will maximize throughput. We can find that maxima via:
-
 \begin{equation*}
 \begin{split}
 \frac{dT_1}{dN_1} & = k_1 - 2 \cdot N_1 \cdot B_f \cdot B_h
@@ -190,7 +186,6 @@ T_1 & = k_1 \cdot \frac{k_1}{2 \cdot B_f \cdot B_h} - B_f \cdot B_h \cdot \frac{
 Thus $O(T_1) = O(k_1^2) = O(c^2)$.
 
 What are $k_{1,B}$ and $k_{1,tx}$ in terms of $k_1$? From \autoref{eq:reflection-t1-start} and \autoref{eq:simplex-T1}:
-
 \begin{equation*}
 \begin{split}
 N_1 \cdot k_{1,tx} & = \frac{k_1^2}{4 \cdot B_f \cdot B_h}
@@ -198,7 +193,6 @@ N_1 \cdot k_{1,tx} & = \frac{k_1^2}{4 \cdot B_f \cdot B_h}
 \end{equation*}
 
 Substituting $N_1$ from \autoref{eq:simplex-N1} gives:
-
 \begin{equation*}
 \begin{split}
 \label{eq:k-tx-optimal}
@@ -208,7 +202,6 @@ k_{1,tx} & = \frac{k_1}{2}
 \end{equation*}
 
 Thus, from the definition of $k_1$ in \autoref{eq:k1-reflection-defn}:
-
 \begin{equation*}
 k_{1,B} = \frac{k_1}{2}
 \end{equation*}
@@ -251,7 +244,6 @@ T_1 & = \frac{k_1^2}{4 \cdot B_f \cdot B_h} \\
 Thus $O(T_2) = O(c^3)$.
 
 The maximum number of dapp-chains is given by:
-
 \begin{equation*}
 \begin{split}
 N_2 & = \frac{T_2}{k_2} \\
@@ -275,7 +267,6 @@ Thus $O(T_3) = O(c^4)$.
 Note that the derivation of $T_3$ presumes that the parameters $D_f$ and $D_h$ are the same for both dapp-chains and dapp-dapp-chains.
 
 Via \autoref{eq:simple-scaling} and \autoref{eq:throughput-c-4}:
-
 \begin{equation*}
 \begin{split}
 N_3 & = \frac{T_3}{k_3} \\
