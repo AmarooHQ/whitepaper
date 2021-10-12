@@ -41,23 +41,25 @@
 \tikzstyle{subtree2Tmpl} = [fill=red!20]
 \tikzstyle{subtree3Tmpl} = [fill=green!20]
 
+\tikzstyle{focusedBlock} = [double, thick]
+
 \xintifboolexpr{1 == \DagFocusVirtualNodes}{
-    \tikzstyle{virtual} = [double, fill=white!20!yellow!55]
+    \tikzstyle{virtual} = [focusedBlock, fill=white!20!yellow!55]
 }{
     \tikzstyle{virtual} = []
 }
 
 \xintifboolexpr{1 <= min(\DagHighlightSubtree, \DagLinearizeSubtree)}{
-    \tikzstyle{subtree1} = [subtree1Tmpl, double]
+    \tikzstyle{subtree1} = [subtree1Tmpl, focusedBlock]
     \tikzstyle{subtree1Best} = []
 }{}
     \xintifboolexpr{2 <= min(\DagHighlightSubtree, \DagLinearizeSubtree)}{
     \tikzstyle{subtree1} = [subtree1Tmpl]
-    \tikzstyle{subtree2} = [subtree2Tmpl, double]
+    \tikzstyle{subtree2} = [subtree2Tmpl, focusedBlock]
     \tikzstyle{subtree2Best} = []
 }{}
 \xintifboolexpr{3 <= min(\DagHighlightSubtree, \DagLinearizeSubtree)}{
-    \tikzstyle{subtree3} = [subtree3Tmpl, double]
+    \tikzstyle{subtree3} = [subtree3Tmpl, focusedBlock]
     \tikzstyle{subtree2} = [subtree2Tmpl]
     \tikzstyle{subtree3Best} = []
 }{}

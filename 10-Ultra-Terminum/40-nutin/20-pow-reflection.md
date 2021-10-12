@@ -258,8 +258,6 @@ The *essence* of *Proof of Reflection* should now be apparent. *In principle*, w
 
 \label{sec:comparing-diff-pows}
 
-\todo{finish rewrite this section}
-
 \input{20-por/30-comparing-work-3}
 
 #### A Single Root Token Across Multiple Chains
@@ -307,8 +305,6 @@ This is defined so that it can be quoted later and doesn't need to be updated in
 \input{includes/ut/algorithms/weightof-dex.tex}
 
 ### Converting Confirmations
-
-\todo{draft converting confirmations -- basically by using confirmations instead of hashes we can convert between PoW and PoS and whatever (as long as it has some reasonable notion of a confirmation)}
 
 So far, we've considered PoW chains only.
 Conversion of chain-weight between PoW chains can work \emph{if and only if} we can convert between \emph{work} (i.e., hashes) done on each chain -- given an appropriate context.
@@ -429,36 +425,12 @@ There are some other conjectured solutions to the *Nothing at Stake* problem. Th
   Provided that stakeholders are frequently online, nothing at stake is taken care of by our analysis of forkable strings (even if the adversary brute-forces all possible strategies to fork the evolving blockchain in the near future, there is none that is viable), and our chain selection rule that instructs players to ignore very deep forks that deviate from the block they received the last time they were online.
 }{\href{https://cloudflare-ipfs.com/ipfs/QmWCAHyi35SeXH2E4e8jRVk7yNse2x6D14uPfABnhagbvN}{Ouroboros: A Provably Secure Proof-of-Stake Blockchain Protocol, s10}}
 
+
 %% END ### RELEASE
 
 %% BEGIN ### DRAFT
 
-\todo{reflect only chains that reflect your history; if they favor a different history, then you should be building on that history instead, so don't reflect those blocks -- i.e. ppl should calculate weight to be 0.}
 
-#### PoS Bribe Attacks
-
-\todo{write -- PoS Bribe Attacks}
-
-*Pure* PoS blockchains are inherently insecure. This is the underlying reason why modern protocols still resort to external methods of security (as mentioned above). Even with those external security measures, PoS chains are generally weak to bribe attacks.
-
-\bquote{The proof that PoS is impossible, it heavily relys on a symmetry in PoS; the attacker coalition is symmetric against the defender coalition. [...] \newline
-[...] \newline
-PoS must fail in one of these ways, A or B: \newline
-\newline
-A) Once attackers have $>51\%$ of validator stake they can maintain the attack perpetually. They control who is added to the validator set. They can censor anything. They can use censorship to push through arbitrary soft-fork updates, including updates to change the consensus mechanism to PoW. Users who don't like the new rules are incentivized to sell to users who do like the new rules.\newline
-\newline
-B) Alternatively, if there is a way for the users to decide that the current validator set is majority attackers, and that they should be punished, this is a recovery mechanism. The attackers can use propaganda to abuse this recovery mechanism. If an attacker can convince the users that the current validator set are attackers, then the users will rob those honest validators of their stake.}{Zack Hess; \href{https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/the_defence_of_pos.md}{The Defense of PoS}}
-
-
-NOTES:
-
-I've been reading this: \href{https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/the_defence_of_pos.md}{The Defense of PoS}
-
-I think that PoS might require something like UT/the simplex to work. Particularly, wrt the above quote from Zack Hess:
-
-How UT solves these problems: PoS simplex-chains don't need to have the decision of validator sets within their own chain; it can be external in a reflected PoW chain. Thus having >51% of the validator stake doesn't break the protocol. In a normal blockchain it would b/c a DoS would be possible, but that doesn't work in UT b/c simplex-chains are DAGs. (Though an attacker can potentially delay transactions for a few minutes, repeatedly, and thus reduce overall capacity by some factor.)
-
-\todo{soundness of PoS -- or remove from abstract}
 
 ### The Insecurity of Merged Mining in UT
 
@@ -467,5 +439,9 @@ How UT solves these problems: PoS simplex-chains don't need to have the decision
 - Merged Mining allows attacking merged chains at 0 cost.
 - that means that if a parent chain and a merged mined child chain where to reflect one another, then the weight contributed via merged mining must be 0 -- no additional work was actually done beyond that of the parent-chain.
 - Also, if some other chain reflects both a parent chain *and* a merged mined child chain, then the net benefit is equal to *only* the work contributed by the reflecting parent chain.
+
+
+\todo{PoR in general: (nb: check if this is sufficiently answered) reflect only chains that reflect your history; if they favor a different history, then you should be building on that history instead, so don't reflect those blocks -- i.e. ppl should calculate weight to be 0.}
+
 
 %% END ### DRAFT

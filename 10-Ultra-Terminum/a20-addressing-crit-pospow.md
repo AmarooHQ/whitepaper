@@ -1,6 +1,35 @@
 %% BEGIN ### DRAFT
 
-\begin{comment}
+\todo{This section on PoS is mostly notes, }
+
+# Bribe attacks
+
+
+
+#### PoS Bribe Attacks
+
+\todo{write -- PoS Bribe Attacks}
+
+*Pure* PoS blockchains are inherently insecure. This is the underlying reason why modern protocols still resort to external methods of security (as mentioned above). Even with those external security measures, PoS chains are generally weak to bribe attacks.
+
+\bquote{The proof that PoS is impossible, it heavily relys on a symmetry in PoS; the attacker coalition is symmetric against the defender coalition. [...] \newline
+[...] \newline
+PoS must fail in one of these ways, A or B: \newline
+\newline
+A) Once attackers have $>51\%$ of validator stake they can maintain the attack perpetually. They control who is added to the validator set. They can censor anything. They can use censorship to push through arbitrary soft-fork updates, including updates to change the consensus mechanism to PoW. Users who don't like the new rules are incentivized to sell to users who do like the new rules.\newline
+\newline
+B) Alternatively, if there is a way for the users to decide that the current validator set is majority attackers, and that they should be punished, this is a recovery mechanism. The attackers can use propaganda to abuse this recovery mechanism. If an attacker can convince the users that the current validator set are attackers, then the users will rob those honest validators of their stake.}{Zack Hess; \href{https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/the_defence_of_pos.md}{The Defense of PoS}}
+
+
+NOTES:
+
+I've been reading this: \href{https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/the_defence_of_pos.md}{The Defense of PoS}
+
+I think that PoS might require something like UT/the simplex to work. Particularly, wrt the above quote from Zack Hess:
+
+How UT solves these problems: PoS simplex-chains don't need to have the decision of validator sets within their own chain; it can be external in a reflected PoW chain. Thus having >51% of the validator stake doesn't break the protocol. In a normal blockchain it would b/c a DoS would be possible, but that doesn't work in UT b/c simplex-chains are DAGs. (Though an attacker can potentially delay transactions for a few minutes, repeatedly, and thus reduce overall capacity by some factor.)
+
+
 # Addressing Zack Hess's Criticism of Hybrid PoW/PoS
 
 Zack Hess has a criticism of hybrid PoW/PoS systems. Since UT might have PoS simplex-chains at some point, it's important that UT be able to address as yet[^asyet] unanswered criticisms like this one.
@@ -72,6 +101,5 @@ Particularly, Hess starts his proof with S1:
 \todo{finish hybrid pow/pos stuff or clean up}
 
 [^subchain]: The idea of \emph{subchains} is specific to individual blockchains that use a hybrid PoW/PoS consensus mechanism. I think the correct conversion of the idea of a \emph{subchain} to a UT context is to view the simplex (see \autoref{sec:the-simplex}) as a single chain, and simplex-chains as subchains.
-\end{comment}
 
 %% END ### DRAFT

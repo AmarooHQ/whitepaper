@@ -6,7 +6,7 @@ PoW chains use \emph{the expected number of hashes to produce a block} as the me
 So, for mutually reflecting PoW chains, we need a way to \emph{compare and convert} hashes done on L to hashes done on R.
 
 If we are to convert work between PoW chains, then we \emph{must} be able to convert between L-hashes and R-hashes \emph{in a consistent way}.
-Consistency, here, means the conversion shouldn't change the outcome of the fork rule; if the fork rule said that $L_{i \cdots j,a} > L_{i \cdots j,b}$ when using L-hashes as the units, then it should give the same result for \emph{all} cases when the units are changed to R-hashes.
+Consistency, here, means the conversion shouldn't change the outcome of the fork rule; if the fork rule says $L_{i \cdots j,a} > L_{i \cdots j,b}$ in terms of L-hashes, then it should give the same result for \emph{all} cases when the units are changed to R-hashes.
 
 \todoDraftOnly{QuickCheck property tests on the properties described}
 
