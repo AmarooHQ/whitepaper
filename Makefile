@@ -42,9 +42,10 @@ release:
 	# No matches for \todo{ should be found
 	grep -qzv '\\todo{' output/whitepaper.tex || (grep '\\todo{' output/whitepaper.tex | wc -l; bash bin/msg_error.sh 'Detected `\\\\todo{` in output/whitepaper.tex during release build.'; exit 1)
 
-cilint: PP_MODE=lint
-cilint: whitepaper
-cilint:
+cilint-prep: PP_MODE=lint
+cilint-prep: whitepaper
+
+cilint: cilint-prep
 	npm i
 	npm run lint
 
