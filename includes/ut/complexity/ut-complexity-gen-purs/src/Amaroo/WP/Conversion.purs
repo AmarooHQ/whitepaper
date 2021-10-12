@@ -1,6 +1,6 @@
 module Amaroo.WP.Conversion where
 
-import Prel
+-- import Prel
 
 {-|
 
@@ -16,7 +16,7 @@ Example checks:
 
 |-}
 
-weightOf_coinsSimple :: Block -> State -> Number
-weightOf_coinsSimple b state = blockRewardOfAt_coinsSimple (chainOf b) (b.timestamp) state
+-- weightOf_coinsSimple :: Block -> State -> Number
+-- weightOf_coinsSimple b state = blockRewardOfAt_coinsSimple (chainOf b) (b.timestamp) state
 
-weightOf_
+-- weightOf_
