@@ -1,3 +1,6 @@
+\providecommand{\PoRArrowShortenDist}{3pt}
+\providecommand{\PoRAcuteArrowShortenDist}{10pt}
+
 \tikzstyle{chainName} = [rectangle, rounded corners, minimum width=2cm, minimum height=0.8cm, text centered, draw=black]%
 \tikzstyle{block} = [rectangle, minimum width=1cm, minimum height=0.7cm, draw=black]%
 \tikzstyle{state} = [text width=8.6em]%
@@ -5,11 +8,13 @@
 \tikzstyle{arrowTime} = [stealth reversed-stealth, shorten >= -2pt, shorten <= -2pt]%
 \tikzstyle{arrowParent} = [thick, ->, -to, shorten >= 2pt, shorten <= 2pt]%
 
-\tikzstyle{reflHead} = [{Stealth[reversed, scale=0.9, width=0.8em]}-{Stealth[scale=0.9, width=0.8em]}]
+\tikzstyle{reflHead} = [{Stealth[reversed, scale=0.9, width=0.7em]}-{Stealth[scale=0.9, width=0.8em]}]
 \tikzstyle{arrowRefl} = [thick, double distance=1pt, reflHead, shorten >= 2pt, shorten <= 2pt]%
 \tikzstyle{arrowReflL} = [arrowRefl, double=black!10!green!50]%
 \tikzstyle{arrowReflR} = [arrowRefl, double=purple!40]%
-\tikzstyle{arrowRefl2} = [double=yellow, double distance=1pt, thick, reflHead, join=bevel, shorten >= 3pt, shorten <= 3pt]%
+\tikzstyle{arrowRefl2} = [double=yellow, double distance=1pt, thick, reflHead, join=bevel, shorten >= \PoRArrowShortenDist, shorten <= \PoRArrowShortenDist]%
+\tikzstyle{arrowRefl2LR} = [double=yellow, double distance=1pt, thick, reflHead, join=bevel, shorten >= \PoRAcuteArrowShortenDist, shorten <= \PoRArrowShortenDist]%
+\tikzstyle{arrowRefl2RL} = [double=yellow, double distance=1pt, thick, reflHead, join=bevel, shorten >= \PoRArrowShortenDist, shorten <= \PoRAcuteArrowShortenDist]%
 \tikzstyle{braceLL} = [decorate, decoration={brace,amplitude=6pt,mirror,raise=2pt}]%
 \tikzstyle{braceLR} = [decorate, decoration={brace,amplitude=6pt,raise=-8pt}]%
 \tikzstyle{ethBraceL} = [braceLL, sloped, rotate=180]%

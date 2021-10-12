@@ -179,12 +179,12 @@
                                 % draw both full path and partial path -- over the top of one another so we get all the arrow heads.
                                 \ifnum 2<\xinteval{abs(2 * \StopPoRArrowsAt - 3)}
                                     \draw [arrowRefl2] (rOne) -- (rTwo) -- (rThree) -- (rOne);
-                                    \draw [arrowRefl2] (rThree) -- (rOne);
+                                    \draw [arrowRefl2RL] (rThree) -- (rOne);
                                     \reflectLine[draw]{rTwo}{rThree}{rOne}{0.08};
                                 \fi
                                 \ifnum 1<\xinteval{abs(2 * \StopPoRArrowsAt - 1)}
-                                    \draw [arrowRefl2] (rOne) -- (rTwo) -- (rThree);
-                                    \draw [arrowRefl2] (rTwo) -- (rThree);
+                                    \draw [arrowRefl2LR] (rOne) -- (rTwo) -- (rThree);
+                                    \draw [arrowRefl2LR] (rTwo) -- (rThree);
                                     \reflectLine[draw]{rOne}{rTwo}{rThree}{0.1};
                                 \fi
                                 \ifnum 0<\StopPoRArrowsAt
@@ -301,12 +301,12 @@
                             % draw both full path and partial path -- over the top of one another so we get all the arrow heads.
                             \ifnum 2<\xinteval{abs(2 * \StopPoRArrowsAt - 3)}
                                 \draw [arrowRefl2] (rOne) -- (rTwo) -- (rThree) -- (rOne);
-                                \draw [arrowRefl2] (rThree) -- (rOne);
+                                \draw [arrowRefl2RL] (rThree) -- (rOne);
                                 \reflectLine[draw]{rTwo}{rThree}{rOne}{0.08};
                             \fi
                             \ifnum 1<\xinteval{abs(2 * \StopPoRArrowsAt - 1)}
-                                \draw [arrowRefl2] (rOne) -- (rTwo) -- (rThree);
-                                \draw [arrowRefl2] (rTwo) -- (rThree);
+                                \draw [arrowRefl2LR] (rOne) -- (rTwo) -- (rThree);
+                                \draw [arrowRefl2LR] (rTwo) -- (rThree);
                                 \reflectLine[draw]{rOne}{rTwo}{rThree}{0.1};
                             \fi
                             \ifnum 0<\StopPoRArrowsAt
