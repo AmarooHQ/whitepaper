@@ -93,6 +93,7 @@ module.exports = {
                 [">=", "\\ge"],
                 ["\\being{", "\\begin{"],
                 ["re-write", "rewrite"],
+                ["[a-zA-Z]+_[a-zA-Z0-9,]+\^"], // probs won't work, but it's regex for x_y^z in latex that should probs be {x_y}^z
             ]
         }
     }
