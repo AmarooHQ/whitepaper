@@ -346,7 +346,7 @@ When will conversion methods fail for converting confirmations?
 Some alternative distributed ledger networks (in essence: DLTs) do not produce network-wide discrete updates.
 So it's not clear how those would use PoR themselves or be used by another chain for PoR.
 Examples: Hedera uses Hashgraph; Solana uses Proof of History (PoH).\footnote{
-  It's also not clear how either Hashgraph or PoH networks could support cross-chain transactions in general.
+  It's also not clear how either Hashgraph or PoH networks could support network-level cross-chain transactions in general (though methods like Bitcoin's \href{https://en.bitcoin.it/wiki/Contract\#Example_5:_Trading_across_chains}{atomic cross-chain transaction script} could still work).
 }
 
 PoR also requires that \emph{state can be verified} in the reflecting chain.

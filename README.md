@@ -98,3 +98,7 @@ Tag names:
 ### BUILD FAILURES
 
 Builds will fail if, after all content between these sections (inclusive of tags) has been stripped, there is any non-empty lines after `\begin{document}` and before `\end{document}`. (this is done via `--mode lint`)
+
+## errors and solutions
+
+* `Illegal parameter number in definition of \Hy@tempa.` -- a URL has a hash in it -- escape the hash. `.html#heading` -> `.html\#heading`

@@ -2,6 +2,9 @@ module Amaroo.WP.Conversion where
 
 -- import Prel
 
+-- import Data.Tuple (Tuple(..))
+-- import Prelude (class Semiring)
+
 {-|
 
 Quickcheck conversion properties.
@@ -20,3 +23,19 @@ Example checks:
 -- weightOf_coinsSimple b state = blockRewardOfAt_coinsSimple (chainOf b) (b.timestamp) state
 
 -- weightOf_
+
+data State = State Int
+
+newtype Timestamp = Timestamp Int
+
+class BlockWeight b where
+  weightOf :: b -> Number
+  timestampOf :: b -> Timestamp
+
+class Network n where
+  getFrequencyOf :: n -> State
+
+class (BlockWeight b, Network n) <= ConvBlockWeight n b where
+  reflectedWeightOf :: n -> b -> Number
+  networkInflation :: n -> b -> Number
+  ratioTokensOn :: n -> b -> Number
