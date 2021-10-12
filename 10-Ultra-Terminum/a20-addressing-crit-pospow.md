@@ -1,10 +1,10 @@
 %% BEGIN ### DRAFT
 
-\todo{This section on PoS is mostly notes, }
+# PoS and Bribe attacks
 
-# Bribe attacks
+\todo{This section on PoS is mostly notes, see source for commented stuff}
 
-
+\begin{comment}
 
 #### PoS Bribe Attacks
 
@@ -41,7 +41,7 @@ The hybrid \emph{context} that UT provides[^hybrid-context] is different to the 
 [^hybrid-context]: Note that UT can work exclusively with PoW chains, so in the case that PoS cannot be done securely (even with UT's improvements) then this does not break UT fundamentally.
 
 \bquote{
-  \cdots \\
+  \dots \\
   \\
   If it is the kind of PoS mechanism that is based on something like coin-age, so even if most PoS validators stop participating, PoS blocks can still be found, then we need to consider a some cases based on the fork-choice rule. In a hybrid design, the fork-choice rule depends on some combination of P = portion of PoS validators participating, and H = the amount of hashpower. \\
   \\
@@ -101,5 +101,7 @@ Particularly, Hess starts his proof with S1:
 \todo{finish hybrid pow/pos stuff or clean up}
 
 [^subchain]: The idea of \emph{subchains} is specific to individual blockchains that use a hybrid PoW/PoS consensus mechanism. I think the correct conversion of the idea of a \emph{subchain} to a UT context is to view the simplex (see \autoref{sec:the-simplex}) as a single chain, and simplex-chains as subchains.
+
+\end{comment}
 
 %% END ### DRAFT
