@@ -310,6 +310,23 @@ This is defined so that it can be quoted later and doesn't need to be updated in
 
 \todo{draft converting confirmations -- basically by using confirmations instead of hashes we can convert between PoW and PoS and whatever (as long as it has some reasonable notion of a confirmation)}
 
+So far, we've considered PoW chains only.
+Conversion of chain-weight between PoW chains can work \emph{if and only if} we can convert between \emph{work} (i.e., hashes) done on each chain -- given an appropriate context.
+For a given PoW block, the network knows exactly how much work is implied by that block -- the expected number of hashes to produce it.
+Thus, for PoW chains, there is an exact conversion between \emph{work and confirmations} (for some context at some point in time).
+Over short time-scales, this conversion ratio is approximately constant (in general it's a function that accepts a timestamp as input).
+Thus, \emph{chain-weight} (as represented in figures via $\Sigma_w$, e.g. \autoref{fig:dag-ex1-full}) can be represented either in something like \emph{hashes} or \emph{difficulty} -- though those numbers be unwieldy -- \textbf{or} chain-weight can simply be in terms of \emph{confirmations}.
+
+However, if we convert \emph{work to confirmations}, will we end up with something \emph{incompatible and contradictory} to the traditional notion of ``a confirmation''?
+There are definitely differences.
+For example: if we convert confirmations, then \emph{we'll have non-integer confirmations}, and what does 0.88 confirmations mean?
+Is that less good than a normal confirmation?
+Even though \emph{confirmations are still discrete},
+
+Why think about chain-weight in terms of \emph{confirmations} instead of \emph{work}?
+There are a few reasons.
+First,
+
 ### Reflection Between PoW and PoS Chains
 
 \label{sec:reflection-pow-and-pos}

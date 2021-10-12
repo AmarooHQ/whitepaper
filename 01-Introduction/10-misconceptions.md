@@ -29,7 +29,7 @@ If a proof-of-stake network had the same chain parameters as Bitcoin -- i.e., a 
 
 ### PoW is "wasteful"
 
-Another common misconception is that proof-of-work is "wasteful"[^pow-waste]. This ignores a qualitative difference between PoW and PoS: PoW has *thermodynamic* security. That is, an attempt to re-write a PoW chain's history requires the *destructive* use of energy. By comparison, PoS only consumes negligible energy.
+Another common misconception is that proof-of-work is "wasteful"[^pow-waste]. This ignores a qualitative difference between PoW and PoS: PoW has *thermodynamic* security. That is, an attempt to rewrite a PoW chain's history requires the *destructive* use of energy. By comparison, PoS only consumes negligible energy.
 
 This means that there are no laws of physics which prevent re-writing the arbitrary history of a PoS chain[^phys-info]. There are thus many methods of re-writing PoS chains' histories, because "if something is permitted by the laws of physics, then the only thing that can prevent it from being technologically possible is not knowing how"[^boi-optimism].
 

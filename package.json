@@ -6,9 +6,16 @@
     "textlint-rule-stop-words": "^2.0.9"
   },
   "scripts": {
-    "lint": "textlint ./10-Ultra-Terminum/**/*.md"
+    "lint": "textlint ./10-Ultra-Terminum/**/*.md ./includes/ut/content/**/*.tex"
   },
   "dependencies": {
-    "textlint-plugin-latex2e": "^1.1.4"
+    "@textlint/regexp-string-matcher": "^1.1.0",
+    "dictionary-en": "^3.1.0",
+    "jsonc-require": "^1.0.1",
+    "textlint-plugin-latex2e": "^1.1.4",
+    "textlint-rule-ginger": "^2.2.1",
+    "textlint-rule-spelling": "^0.3.0",
+    "textlint-rule-terminology": "^2.1.5",
+    "textlint-rule-write-good": "^2.0.0"
   }
 }

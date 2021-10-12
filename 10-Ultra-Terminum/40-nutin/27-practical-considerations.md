@@ -484,7 +484,7 @@ If there were, it'd be possible to temporarily limit the attacker to $<50\%$ of 
 
 \label{sec:quality-groups-unused}
 
-\todo{This is draft now -- either re-write or cut.}
+\todo{This is draft now -- either rewrite or cut.}
 
 Consider these 3 categories of methods of securing a blockchain:
 
