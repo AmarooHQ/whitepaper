@@ -12,7 +12,8 @@ A common method of sharding is to *nest* blockchains. For example, Ethereum 2 ha
     The Beacon Chain will conduct or coordinate the expanded network of shards and stakers. But it won't be like the Ethereum mainnet of today. It can't handle accounts or smart contracts.
 }{\url{https://ethereum.org/en/eth2/beacon-chain/}}
 
-This type of configuration, where a base-chain facilitates child-chains, is referred to as *nesting* in this paper. The shards of Ethereum 2 are *a level of nesting* above the Beacon Chain.
+This type of configuration, where a base-chain facilitates child-chains, is referred to as *nesting* in this paper.
+The shards of Ethereum 2 are *a level of nesting* above the Beacon Chain.
 
 \defineTerm{Base-chain}{A chain that has no parent-chains; i.e., is at the base nesting level}
 
@@ -84,16 +85,18 @@ Suppose the root-chain has a throughput of $k_1$ B/s and it can support up to $N
 }
 
 \begin{comment}
-I think Eth2 sharding (wrt headers) has a larger effective Dh than we calculated before:
+<!-- I think Eth2 sharding (wrt headers) has a larger effective Dh than we calculated before:
 
 * attestations: 8 + 8 + 32 + 2*(8 + 32) + 32 + 96 = 256
-  * https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md\#attestationdata
+  * https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md#attestationdata
 * SignedShardBlobHeader: 96 + (8 * 4 + (48 + 8 + 48 + 32 + 8*2)) = 280
-  * https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md\#shard-work-status
+  * https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md#shard-work-status
 
-Both are included in the BeaconBlockBody: https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md\#beaconblockbody  (inherits from https://github.com/ethereum/consensus-specs/blob/dev/specs/merge/beacon-chain.md\#beaconblockbody). The sharding spec for BeaconBlockBody has: shard_headers: List[SignedShardBlobHeader, MAX_SHARDS * MAX_SHARD_HEADERS_PER_SHARD] which seems to indicate that headers would be included every block (for every shard). note: MAX_SHARD_HEADERS_PER_SHARD=4
+Both are included in the BeaconBlockBody: https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md#beaconblockbody  (inherits from https://github.com/ethereum/consensus-specs/blob/dev/specs/merge/beacon-chain.md#beaconblockbody).
+The sharding spec for BeaconBlockBody has: shard_headers: List[SignedShardBlobHeader, MAX_SHARDS * MAX_SHARD_HEADERS_PER_SHARD] which seems to indicate that headers would be included every block (for every shard).
+note: MAX_SHARD_HEADERS_PER_SHARD=4.
 
-There's enough capacity for attestations (128 each block for 64 shards) that they could be done each block. That doesn't include any committee stuff.
+There's enough capacity for attestations (128 each block for 64 shards) that they could be done each block. That doesn't include any committee stuff. -->
 \end{comment}
 
 Thus, $N_2$ is given by:

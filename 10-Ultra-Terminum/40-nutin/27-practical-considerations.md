@@ -520,7 +520,10 @@ Do they want a highly secure base-chain, but variance in block times isn't a pro
 
 Is it possible to *dramatically* lower the variance of block production in PoW blockchains without altering incentive structures, compromising security, or changing the probability of generating a valid block?
 
-Yes. The method relies on the *structure* of the network, rather than the consensus protocol itself. Particularly, the network must be structured such that miners' choices result in decreased block production variance --- an emergent phenomenon. It's important that it's emergent and not synthetic (e.g., by increasing the block reward with time-since-last-block) because we don't want people to game the system. It's better to have a simple system with emergent properties than a complex system with those properties \`\`designed in''.
+Yes. The method relies on the *structure* of the network, rather than the consensus protocol itself.
+Particularly, the network must be structured such that miners' choices result in decreased block production variance --- an emergent phenomenon.
+It's important that it's emergent and not synthetic (e.g., by increasing the block reward with time-since-last-block) because we don't want people to game the system.
+It's better to have a simple system with emergent properties than a complex system with those properties \`\`designed in''.
 
 Say you have a network with 10 chains: $C_0, C_1, C_2, ..., C_9$. If the networks are separate, then you have 10 groups of miners: $M_0, M_1, M_2, ..., M_9$. They have to choose one chain to mine on, so the distribution of miners is expected to be approximately the distribution of normalized block rewards + tx fees. The proportions of block rewards between $C_i$ & $C_j$ don't really matter, we expect the mining groups $M_i$ & $M_j$ will just sort themselves out due to market forces. For simplicity, though, this example assumes that mining rewards and the distribution of miners is an even 10% across the board.
 
