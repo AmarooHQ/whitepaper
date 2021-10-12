@@ -6,7 +6,7 @@
 
 UT has two primary methods of scaling: reflection and dapp-chains. Reflection is novel. Dapp-chains are similar to many of the sharding and pseudo-sharding ideas proposed for other networks (Polkadot, Eth2, etc), though there are fewer restrictions on dapp-chains in UT compared to other designs. Additionally, dapp-chains in UT are hosted by the simplex. In the case of PoS dapp-chains, this provides \emph{additional} security compared to 'naked' PoS chains -- and without compromising on any other associated developments (e.g., finality). Hosting dapp-chains on simplex-chains also provides greater maximum capacity than a single base-chain.
 
-A common method of sharding is to *nest* blockchains. For example, Ethereum 2 has *The Beacon Chain* -- it's root-chain (the single base-chain of a network).
+A common method of sharding is to *nest* blockchains. For example, Ethereum 2 has *The Beacon Chain* -- its root-chain (the single base-chain of a network).
 
 \bquote{
     The Beacon Chain will conduct or coordinate the expanded network of shards and stakers. But it won't be like the Ethereum mainnet of today. It can't handle accounts or smart contracts.

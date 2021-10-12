@@ -163,7 +163,7 @@ e.g., The leaf tiles in \autoref{fig:tiled-simplex-5-d2} have simplex-chains tha
 
 this only happens when leaf tiles + their children have $==$ weight to their direct parent, tho. that is: if the parent has $\ge$ simplex-chains, then isolated attacks on the the descendant tiles always fail b/c the parent tile has $>$ weight.
 
-main idea: if you want to attack a simplex tile in the middle of the graph, then you *must* attack it's peers -- b/c that's where *most* of the security contribution comes from (75% at max cap). on the edges mb things are different. my intuition is that, if sensible precautionary parameters are maintained, then it can be done securely. but there are failure modes when the sec contribs from adjacent tiles are out of wack.
+main idea: if you want to attack a simplex tile in the middle of the graph, then you *must* attack its peers -- b/c that's where *most* of the security contribution comes from (75% at max cap). on the edges mb things are different. my intuition is that, if sensible precautionary parameters are maintained, then it can be done securely. but there are failure modes when the sec contribs from adjacent tiles are out of wack.
 
 %% END ### DRAFT
 

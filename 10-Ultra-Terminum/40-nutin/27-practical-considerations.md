@@ -19,7 +19,7 @@ Furthermore, it risks chain R miners doing SPV mining, which is bad.
 
 After $H_{R,1a}$ is reflected, chain R miners shouldn't build on that header without validating the block (so they should not mine on top of it).
 Before long they'd produce an alternate valid block, $B_{R,1b}$.
-But $B_{R,1b}$ (and it's header, $H_{R,1b}$) wouldn't be reflected yet.
+But $B_{R,1b}$ (and its header, $H_{R,1b}$) wouldn't be reflected yet.
 So $B_{R,1a}$ would have priority over $B_{R,1b}$ until $B_{R,2b}$ (building on $B_{R,1b}$) is created and both $H_{R,1b}$ and $H_{R,2b}$ are reflected.
 After that, a minor chain re-org would restore normality.
 

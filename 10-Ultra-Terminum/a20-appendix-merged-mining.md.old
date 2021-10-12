@@ -23,7 +23,7 @@ Note that all relevant data for a Bitcoin block (the parent block, consensus det
 
 ## AuxPoW (aka Merged Mining)
 
-Miners commit to a specific *extension* (or *update*, *block*) to a network's *history* (it's *blockchain*, or *ledger*) by generating proofs (*mining*) that include a *single and unambiguous* group of non-conflicting transactions. That's what *mining* is. When generating the proofs for consensus mechanisms (PoW, PoS, PoA, etc), the miners (or auditors, or bakers, or w/e) have some control over the contents of the block they're generating. If they are able to include some arbitrary data in their draft block -- which ensures that data will be 'rolled up' into the proof -- then their generated solution(s) imply the knowledge of, and intent to include, said arbitrary data in the proof.
+Miners commit to a specific *extension* (or *update*, *block*) to a network's *history* (its *blockchain*, or *ledger*) by generating proofs (*mining*) that include a *single and unambiguous* group of non-conflicting transactions. That's what *mining* is. When generating the proofs for consensus mechanisms (PoW, PoS, PoA, etc), the miners (or auditors, or bakers, or w/e) have some control over the contents of the block they're generating. If they are able to include some arbitrary data in their draft block -- which ensures that data will be 'rolled up' into the proof -- then their generated solution(s) imply the knowledge of, and intent to include, said arbitrary data in the proof.
 
 If miners are able to commit some *additional* data, which is also singular and unambiguous, could that data be used in a way that takes advantage of the work associated with the proof? Yes. In principle there is no significant difference between each data that can be shown to be included in a proof; the only significant factor is whether such data can be proven to have been included with appropriate properties for its intended use.
 
@@ -61,7 +61,7 @@ nmcVerify target btcBlockHeader btcBlock nmcBlockHeader
 ```
 %%TC:endignore
 
-This is to say: the validity of a Namecoin block is based on it's singular and unambiguous inclusion in a Bitcoin block, and the *work* (in PoW) is calculated based on the hash of the Bitcoin block, not the Namecoin block. This indirection is why merged mining is referred to as *Auxiliary PoW* or AuxPoW; a Bitcoin miner can generate valid blocks for *both* Bitcoin and Namecoin *simultaneously*.
+This is to say: the validity of a Namecoin block is based on its singular and unambiguous inclusion in a Bitcoin block, and the *work* (in PoW) is calculated based on the hash of the Bitcoin block, not the Namecoin block. This indirection is why merged mining is referred to as *Auxiliary PoW* or AuxPoW; a Bitcoin miner can generate valid blocks for *both* Bitcoin and Namecoin *simultaneously*.
 
 Is this example verification function one that could work? In principle, *yes* (though there are practical considerations that would make this particular verification function decisively worse than alternatives).
 

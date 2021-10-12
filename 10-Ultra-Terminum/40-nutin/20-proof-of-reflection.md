@@ -107,9 +107,9 @@ Say that the protocol of Chain L is extended to support a projection of Chain R.
 
 #### Step 3. Chain L's *reflection* in Chain R
 
-Can we use a projection of a chain for a different purpose? What happens if Chain L tracks whether Chain L's history is confirmed within Chain R? This can be done via merkle branches that prove the particular states of Chain R which contain this information. In essence, Chain L uses its projection of Chain R to prove that its *own history* matches that of it's *projection* in Chain R. Chain L proves that it is *reflected* in Chain R.
+Can we use a projection of a chain for a different purpose? What happens if Chain L tracks whether Chain L's history is confirmed within Chain R? This can be done via merkle branches that prove the particular states of Chain R which contain this information. In essence, Chain L uses its projection of Chain R to prove that its *own history* matches that of its *projection* in Chain R. Chain L proves that it is *reflected* in Chain R.
 
-What does this proof look like? The following progression is shown in \autoref{fig:por-step3-parts}. First, Chain L must prove that it's history is reflected, so we first find the most recently reflected header, $L_{i+1}$ (ideally, this is the previous L block). Secondly, we want to prove that $L_{i+1}$ is also the \emph{best block} (for Chain L) according to \emph{Chain R's} projection of Chain L, using the best known R block, $R_{j+1}$. For that, we need a merkle branch showing $L_{i+1}$ is part of $R_{j+1}$'s state -- this is sometimes referred to as the \emph{missing} merkle branch. Thirdly, we want to prove that $R_{j+1}$ is the \emph{best block} according to Chain L's projection of Chain R. We can do that via a merkle branch, too, but full nodes of Chain L already know whether $R_{j+1}$ is the best block or not, so this branch doesn't need to be explicit. However, L's nodes must be able to generate it. The \emph{full} collection of information required to prove reflection is called a *proof of reflection*.
+What does this proof look like? The following progression is shown in \autoref{fig:por-step3-parts}. First, Chain L must prove that its history is reflected, so we first find the most recently reflected header, $L_{i+1}$ (ideally, this is the previous L block). Secondly, we want to prove that $L_{i+1}$ is also the \emph{best block} (for Chain L) according to \emph{Chain R's} projection of Chain L, using the best known R block, $R_{j+1}$. For that, we need a merkle branch showing $L_{i+1}$ is part of $R_{j+1}$'s state -- this is sometimes referred to as the \emph{missing} merkle branch. Thirdly, we want to prove that $R_{j+1}$ is the \emph{best block} according to Chain L's projection of Chain R. We can do that via a merkle branch, too, but full nodes of Chain L already know whether $R_{j+1}$ is the best block or not, so this branch doesn't need to be explicit. However, L's nodes must be able to generate it. The \emph{full} collection of information required to prove reflection is called a *proof of reflection*.
 
 \begin{figure}[H]
     \begin{subfigure}[t]{.31\textwidth}
@@ -161,11 +161,15 @@ Segments of Chain L and R (events and data) are shown in the following table and
 
 Chain L now knows *which L blocks are recorded by Chain R*, i.e., which local blocks are known about by some external source. Put another way: Chain L's history is confirmed *not only* by new Chain L blocks, *but also* by Chain R blocks. There's no data-availability concern here since Chain L nodes *know* that they have the blocks that Chain R knows about.
 
-**Important:** Soon, these confirmations will have real and useful meaning. Under the right conditions, an appropriate configuration of *Proof of Reflection* results in an increase in the *rate* that confirmations are acquired. This is the first hint of $\frac{1}{O(c)}$ confirmation time.
+\aside{
+  \textbf{Important:} Soon, these confirmations will have real and useful meaning.
+  Under the right conditions, an appropriate configuration of \emph{Proof of Reflection} results in an increase in the \emph{rate} that confirmations are acquired.
+  This is the first hint of $\frac{1}{O(c)}$ confirmation time.
+}
 
 At this point, if an attacker was to publish an alternate, better Chain L history, then Chain L nodes would reorganize around the *new* history published by the attacker, and the attacker's block headers would end up being recorded in Chain R and causing a reorganization there, too. Currently, this configuration does not add any security to Chain L.
 
-Could we use Chain L's knowledge *that it's own history is reflected in Chain R* to *prevent* such an attack?
+Could we use Chain L's knowledge *that its own history is reflected in Chain R* to *prevent* such an attack?
 
 #### Step 4. One Way Reflection
 
@@ -174,7 +178,7 @@ Could we use Chain L's knowledge *that it's own history is reflected in Chain R*
 Before we discuss a change that Chain L could make, it is important to note that chain-work done with one hashing algorithm is *not generally convertible* to 'equivalent' work done via another hashing algorithm.
 For example, there is no meaningful *generic* answer to the question *how many double SHA256[^btc2sha] hashes is one Ethash hash worth?*
 
-[^btc2sha]: Bitcoin uses $\text{Hash}(x) = \text{SHA256}(\text{SHA256}(x))$ as it's PoW hash.
+[^btc2sha]: Bitcoin uses $\text{Hash}(x) = \text{SHA256}(\text{SHA256}(x))$ as its PoW hash.
 
 For the purposes of our hypothetical construction, let's say that L and R do *equal work over equal time*. In the current example, that means that the work required to produce either $L_i$ or $R_j$ is the same. *For the sake of this construction, we'll also presume this relationship doesn't change over time*. Our constant of conversion is thus: 1 *R Blocks per L Block*.
 
@@ -212,7 +216,7 @@ Why? The privately mined blocks to perform the attack *are not known about* by C
 * the private chain-segment must contribute more total work to the Chain L blockchain than the public chain-segment does -- *including* the relevant Chain R chain-segment; *or*
 * the attacker must *additionally* produce a private Chain R chain-segment such that the *total* work of both private chain-segments is greater than the total work of both public chain-segments, and publish both chain-segments simultaneously.
 
-It's worth noting that, at this point, there is no benefit to Chain R's security. That's because Chain R isn't 'reading' the reflected work back from Chain L. Thus a doublespend attack against Chain R has the expected, non-reflected profile -- it isn't more difficult to attack Chain R yet. However, Chain R can take advantage of the reflection. The main requirements are: the inclusion of appropriate proofs of reflection that show known Chain R blocks according to Chain L, and an update to Chain R's block-weight calculations to account for the reflected work. *Proof of Reflection* doesn't automatically secure both chains; each chain can proactively and independently take advantage of *Proof of Reflection*.
+Note that, at this point, there is no benefit to Chain R's security. That's because Chain R isn't 'reading' the reflected work back from Chain L. Thus a doublespend attack against Chain R has the expected, non-reflected profile -- it isn't more difficult to attack Chain R yet. However, Chain R can take advantage of the reflection. The main requirements are: the inclusion of appropriate proofs of reflection that show known Chain R blocks according to Chain L, and an update to Chain R's block-weight calculations to account for the reflected work. *Proof of Reflection* doesn't automatically secure both chains; each chain can proactively and independently take advantage of *Proof of Reflection*.
 
 Naturally, if there were a large difference in target block frequencies (e.g., 10 minutes vs 15 seconds) then there would also be a good deal of latency before a chain gains the security benefit from reflected work. For this reason, *Proof of Reflection* makes the most sense when used with high frequency chains, or chains of similar frequencies. One downside of this is that shortening the block production frequency requires the inclusion of more block headers. In the scheme of things, this can be somewhat significant but is not a deal-breaker.
 
@@ -222,7 +226,7 @@ Note that, as the Chain L tip is gaining reflections from Chain R, miners on Cha
 
 How is it that Chain L miners can know the partial state of Chain R that is required to produce the necessary PoRs? Typically a blockchain network will support some light-client protocol that allows nodes to ask for such proofs, and that is one method. However, it is possible to design a blockchain system so that this is not required, and one such method is discussed in \autoref{sec:segmented-state}.
 
-It's worth noting that there are still potential attacks on Chain L at this point. For example: what if an attacker mines a doublespend in private and produces a longer chain-segment than the honest chain? At this point the attacker can publish their blocks even though the honest chain-segment still weighs more due to reflections. Why would they do this? Well, if Chain R images Chain L's headers-only chain without accounting for reflections, then the attackers chain-segment appears to have more work than the honest chain-segment. Thus Chain R's reflection of Chain L will reorganize to favor the attacker's chain-segment. If the attacker has more hash power than the honest miners (i.e., $q > p$[^hr-footnote]) then they can use this reorganization as a foothold to launch a normal 51% attack.
+It's worth noting that there are still potential attacks on Chain L. For example: what if an attacker mines a doublespend in private and produces a longer chain-segment than the honest chain? At this point the attacker can publish their blocks even though the honest chain-segment still weighs more due to reflections. Why would they do this? Well, if Chain R images Chain L's headers-only chain without accounting for reflections, then the attackers chain-segment appears to have more work than the honest chain-segment. Thus Chain R's reflection of Chain L will reorganize to favor the attacker's chain-segment. If the attacker has more hash power than the honest miners (i.e., $q > p$[^hr-footnote]) then they can use this reorganization as a foothold to launch a normal 51% attack.
 
 [^hr-footnote]: In \href{https://bitcoin.org/bitcoin.pdf}{Satoshi's original paper} the parameters $p$ and $q$ represent the probability that the next block will be found by an honest node or the attacker, respectively. This convention has been continued in subsequent analysis, e.g., Rosenfeld's \href{https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{\emph{Analysis of hash-rate-based double-spending}}, and is continued here, also.
 
@@ -357,7 +361,7 @@ Some DLTs don't have meaningful network-wide state; i.e., there is no single, co
 In this case we can't convert.
 Example: IOTA uses The Tangle.
 
-PoR also needs a way to normalize the idea of \`\`a confirmation'' so they can be compared.
+PoR also needs a way to normalize the idea of \`\`a confirmation'' so confirmations can be compared.
 Consider a PoA chain with \emph{irregular} block production.
 It has discrete updates, and state can be verified against it.
 But, what does each confirmation \emph{mean?}

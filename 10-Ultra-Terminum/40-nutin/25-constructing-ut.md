@@ -156,7 +156,7 @@ If it is possible to implement dapp-chains (or any system of child-chains) such 
   The property whereby child-chains are not restricted with regards to a choice of protocol (include scripting, accounting methods, block structures, etc)
 }
 
-\autoref{sec:comparing-weight-dex} details a conversion method whereby PoR is possible between chains using different root tokens via a DEX. Could dapp-chains use a \emph{protocol-level} DEX to abstract their protocol and incentive-method away from those of it's parent-chain? Yes.
+\autoref{sec:comparing-weight-dex} details a conversion method whereby PoR is possible between chains using different root tokens via a DEX. Could dapp-chains use a \emph{protocol-level} DEX to abstract their protocol and incentive-method away from those of its parent-chain? Yes.
 
 Is this required for this abstraction? No.
 
@@ -265,7 +265,7 @@ plan:
   - use tech like mimblewimble without changing the entire system
   - in general deploy new tech quickly, low risk, high cadence, isolated (sandboxed)
     - tangent about sandbox: is there some good structural principles that prevent classes of attacks? I guess that requiring SPV cross-chain proofs and/or latency stops lots of that (e.g., no re-entrancy). **nb:** i'm wrong about no re-entrancy here; that sorta attack can still be done step-by-step manually sending SPV proofs back and forth or w/e.
-    - it does mean that we can maintain guarantees about the ROO and it's distribution and things, tho. like we know how much is where, and it shouldn't leave without being accounted for.
+    - it does mean that we can maintain guarantees about the ROO and its distribution and things, tho. like we know how much is where, and it shouldn't leave without being accounted for.
   - low overhead for integrating wallets b/c mostly stuff is the same (e.g., interfaces, etc)
     - nb: need a common format for addresses or some understanding of them at a data/type level
   - *all* the layer-2 solns
