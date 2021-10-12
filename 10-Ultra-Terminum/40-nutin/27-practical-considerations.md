@@ -430,18 +430,38 @@ Consider the situation where an attacker is attempting to deny service via the p
     \label{fig:dag-dos-1}
 \end{figure}
 
-How does such an attack fair? The challenge of such a DoS attack is to prevent honest miners from extending the attacker's chain-segment. For traditional (non-DAG) chains -- where each non-genesis block has exactly one parent -- this is accomplished as soon as the attacker is able to reliably produce a heavier chain-segment than the honest network for a given period. (Typically, this means the attacker produces blocks more frequently.) However, if blocks are allowed to have *more* than one parent then there *is no point* where an attacker can *maintain* a DoS attack indefinitely. Instead, they can only *delay the execution* of some transactions for a short period of time.
+How does such an attack fair?
+The challenge of such a DoS attack is to prevent honest miners from extending the attacker's chain-segment.
+For traditional (non-DAG) chains -- where each non-genesis block has exactly one parent -- this is accomplished as soon as the attacker is able to reliably produce a heavier chain-segment than the honest network for a given period.
+(Typically, this means the attacker produces blocks more frequently.)
+
+However, if blocks are allowed to have *more* than one parent then there *is no point* where an attacker can *maintain* a DoS attack indefinitely. Instead, they can only *delay the execution* of some transactions for a short period of time.
 Particularly, if an attacker can produce $A_{blocks} = \nicefrac{q}{p} > 1$ for every 1 block produced by the honest network, then the attack can delay transactions for up to $A_{blocks} \cdot B_f^{-1}$ seconds, where $B_f$ is the frequency of block production (in Hz).
 After this (approximate) point, the weight of the honest chain-segment, which includes the attacker's chain-segment, is always greatest.
 
-However, if an attacker performs a *repeating cycle* of these attacks, then they may be able to decrease the effective capacity of the chain by a factor of $A_{blocks} = \nicefrac{q}{p}$.
+If an attacker performs a *repeating cycle* of these attacks, then they may be able to decrease the effective capacity of the chain by a factor of $A_{blocks} = \nicefrac{q}{p}$.
 The opportunity cost of this attack, for the attacker, is at least as much as the lost transaction fees.
 
-All that sounds good so far, but this thought experiment is flawed. It is *smoothed out* compared to what we'd expect in reality -- the discrete nature of block production and reflections is ignored. In \autoref{fig:dag-dos-1}, it's explicitly excluded! What happens if we include the effect of other simplex-chains, though? Well... something \emph{magical}.
+All that sounds okay so far (maybe not that last bit), but this thought experiment is flawed. It is *smoothed out* compared to what we'd expect in reality -- the discrete and probabilistic natures of block production and reflections are ignored. In \autoref{fig:dag-dos-1}, those're explicitly excluded! What happens if we include the effect of other simplex-chains, though? Well... something \emph{magical}.
 
-Consider an attacker producing 2 blocks for every 1 honest block. What happens most of the time? Well the attackers blocks get reflected first, so those blocks have an appreciable advantage over the honest blocks. The honest blocks will get reflected, too, but most of the time the attackers blocks will get the advantage from earlier reflections. \emph{Most} of the time. Occasionally, when an honest block is a bit lucky, it will be produced before the attackers blocks and start gaining reflections earlier. At that point, the attacker has lost -- they need to outpace the \emph{difference} in the number of reflections between the honest block and attacking blocks. So, unlike a normal doublespend (where the attacker wins if they \emph{ever} get ahead), now the honest network wins (ends the DoS) if it \emph{ever} gets ahead of the attacker -- after that point, there's no viable strategy for the attacker besides to build on the honest blocks. \emph{The asymmetry has flipped!}
+Consider an attacker producing 2 blocks for every 1 honest block.
+What happens most of the time?
+Well the attackers blocks get reflected first, so those blocks have an appreciable advantage over the honest blocks.
+The honest blocks will get reflected, too, but most of the time the attackers blocks will get the advantage from earlier reflections.
+\emph{Most} of the time.
+Occasionally, when an honest block is a bit lucky, an honest block will beat the attackers next block -- gaining reflections earlier.
+At that point, the attacker has lost -- they need to outpace the \emph{difference} in the number of reflections between the honest block and attacking blocks.
+So, unlike a normal doublespend (where the attacker wins if they \emph{ever} get ahead), now the honest network wins (ends the DoS) if it \emph{ever} gets ahead of the attacker -- after that point, there's no viable strategy for the attacker besides to build on the honest blocks.
+\emph{The asymmetry has flipped!}
 
-There's more that can be done here, too, like honest users (not necessarily miners) creating transactions (with large fees) that depend on certain history (i.e. that some honest block is in the history of the chain).
+\begin{comment}
+- mk
+cut from after "when an honest block is a bit lucky":
+> (which will be more often if there's \emph{miner resonance})
+it's worth noting the convergence better than we do atm (right now, that's: "If there were, it'd be possible to temporarily limit the attacker to $<50\%$ of mining power, ending the DoS quickly. (See \autoref{sec:miner-resonance}.))"
+\end{comment}
+
+There's more that can be done here, too, like honest users (not necessarily miners) creating transactions (with large fees) that depend on certain history (i.e., that some honest block is in the history of the chain).
 That will attract miners from other chains due to unrealized RoI (potentially a lot).
 The attacker could include that transaction, but then they need to voluntarily end the DoS themselves.
 If you're worried about that, because it seems like miners might empty-block DoS simplex-chains, consider: when in equilibrium, that situation is essentially the same as an efficient market (for transaction execution).
@@ -449,6 +469,8 @@ If you're worried about that, because it seems like miners might empty-block DoS
 Is there a reasonable strategy whereby the honest network can temporarily increase the number of miners?
 If there were, it'd be possible to temporarily limit the attacker to $<50\%$ of mining power, ending the DoS quickly.
 (See \autoref{sec:miner-resonance}.)
+
+
 
 \todoDraftOnly{The above should work for simplex-chains *and* dapp-chains}
 

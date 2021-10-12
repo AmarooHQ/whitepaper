@@ -6,7 +6,7 @@
     "textlint-rule-stop-words": "^2.0.9"
   },
   "scripts": {
-    "lint": "textlint ./10-Ultra-Terminum"
+    "lint": "textlint ./10-Ultra-Terminum/**/*.md"
   },
   "dependencies": {
     "textlint-plugin-latex2e": "^1.1.4"

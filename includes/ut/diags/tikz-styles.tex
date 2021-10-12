@@ -4,8 +4,10 @@
 \tikzstyle{dots} = [inner sep=0pt, text height=10pt]%
 \tikzstyle{arrowTime} = [stealth reversed-stealth, shorten >= -2pt, shorten <= -2pt]%
 \tikzstyle{arrowParent} = [thick, ->, -to, shorten >= 2pt, shorten <= 2pt]%
-\tikzstyle{arrowRefl} = [thick, dashed, ->, -to, shorten >= 2pt, shorten <= 2pt]%
-\tikzstyle{arrowRefl2} = [double=yellow, double distance=1pt, thick, stealth reversed-stealth, join=bevel, shorten >= 4pt, shorten <= 4pt]%
+\tikzstyle{arrowRefl} = [thick, double distance=1pt, {Stealth[reversed, scale=0.8]}-{Stealth[scale=0.8]}, shorten >= 2pt, shorten <= 2pt]%
+\tikzstyle{arrowReflL} = [arrowRefl, double=black!10!green!50]%
+\tikzstyle{arrowReflR} = [arrowRefl, double=purple!40]%
+\tikzstyle{arrowRefl2} = [double=yellow, double distance=1pt, thick, {Stealth[reversed, scale=0.8]}-{Stealth[scale=0.8]}, join=bevel, shorten >= 4pt, shorten <= 4pt]%
 \tikzstyle{braceLL} = [decorate, decoration={brace,amplitude=6pt,mirror,raise=2pt}]%
 \tikzstyle{braceLR} = [decorate, decoration={brace,amplitude=6pt,raise=-8pt}]%
 \tikzstyle{ethBraceL} = [braceLL, sloped, rotate=180]%

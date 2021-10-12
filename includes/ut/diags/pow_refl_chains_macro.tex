@@ -21,7 +21,7 @@
 \providecommand\StopPoRArrowsAt{3}
 \providecommand\DrawPoRMirrors{1}
 \input{tikz-styles}%
-\usetikzlibrary{snakes}
+\usetikzlibrary{snakes, arrows.meta}
 
 % https://tex.stackexchange.com/questions/233246/create-angle-bisectors-in-tikz
 \newcommand{\bissectDraw}[6][]{%
@@ -151,7 +151,7 @@
                 % reflection arrow, only on nodes 2 and beyond
                 \ifnum 1=\DrawBtcRefl
                     \ifnum 1<\x
-                        \draw [arrowRefl] (btc\x) --
+                        \draw [arrowReflL] (btc\x) --
                         node [anchor=center, above, sloped] {\btcHeaders}
                         node [anchor=center, below, sloped] {\porLabel}
                         (\ethAll\r);
@@ -166,10 +166,10 @@
                             % PoR arrows
                             \ifnum 1=\xinteval{min(1, \xinteval{\DrawAllPoRArrows + abs(\StopPoRArrowsAt)})}
                                 % points of arrows on cross-chain bits
-                                \coordinate (tl) at ($(lReflTL\x)!0.2!(lReflTR\x)$);
-                                \coordinate (tr) at ($(lReflTL\x)!0.70!(lReflTR\x)$);
-                                \coordinate (bl) at ($(lReflBL\x)!0.2!(lReflBR\x)$);
-                                \coordinate (br) at ($(lReflBL\x)!0.70!(lReflBR\x)$);
+                                \coordinate (tl) at ($(lReflTL\x)!0.23!(lReflTR\x)$);
+                                \coordinate (tr) at ($(lReflTL\x)!0.67!(lReflTR\x)$);
+                                \coordinate (bl) at ($(lReflBL\x)!0.23!(lReflBR\x)$);
+                                \coordinate (br) at ($(lReflBL\x)!0.67!(lReflBR\x)$);
                                 % points on triangle (arrows co between two of them)
                                 \coordinate (rOne) at ($(bl)!10pt!90:(br)$);
                                 \coordinate (rTwo) at ($(tl)!-10pt!90:(tr)$);
@@ -273,7 +273,7 @@
 
                 % eth refl
                 \ifnum 1=\DrawEthRefl
-                    \draw [arrowRefl] (ethS\x) --
+                    \draw [arrowReflR] (ethS\x) --
                     node [anchor=center, above, sloped] {\ethHeaders}
                     node [anchor=center, below, sloped] {\porLabel}
                     (\oPrev);

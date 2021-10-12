@@ -28,6 +28,7 @@
                 ["N_{tiles}", "N_{\\text{tiles}}"],
                 ["analyse"],  // british spelling, disallow but don't fix so we don't break quotes
                 ["analysed"],
+                ["analyses"],
                 ["e.g. ", "e.g., "],
                 ["i.e. ", "i.e., "],
                 ["full-node", "full node"],
