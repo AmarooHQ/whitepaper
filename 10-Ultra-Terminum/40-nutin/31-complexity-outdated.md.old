@@ -39,7 +39,6 @@ to maximize $k_{tx} \cdot k_r$ we set $k_{tx} = k_r = \frac{k}{2}$ => so final c
 Basically, replace $k_{tx}$ with dapp-chain headers. so dapp-chain capacity decreases from `k^2/bh` to `k^2/2bh` (for dapp-chain values of `b` and `h`). but we get to multiply by `k[r]/bh = k/2bh` rchains (for reflected chain values of `b` and `h`).
 
 it's unlikely that `b` and `h` will be the same for reflected parent PoW chains and dapp-chains, but presuming they are:
-
 \begin{equation}
 Throughput_{Total} = \frac{k^3}{4 \cdot B_f \cdot B_h \cdot D_f \cdot D_h}
 \end{equation}
@@ -55,7 +54,6 @@ the total ($t$) number of dapp-chains we can have is $t = r\cdot d$. We know tha
 \todo[inline]{The below is right tho}
 
 Thus, the maximum number of dapp chains is given by:
-
 \begin{equation}
 N_2 = \frac{k_1^2}{4 \cdot B_f \cdot B_h \cdot D_f \cdot D_h}
 \end{equation}

@@ -95,7 +95,6 @@ Simplex-chains can use this technique to their advantage by segmenting both tran
 That way, the state of a simplex-chain's reflections can be calculated without needing to calculate the remaining state for that simplex-chain.
 
 We could specify the state-transition of simplex-chains (using Ethereum's nomenclature) like this:
-
 \begin{equation}
 \begin{split}
 \label{eq:segregated-state}

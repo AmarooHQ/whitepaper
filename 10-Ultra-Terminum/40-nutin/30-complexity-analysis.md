@@ -101,7 +101,6 @@ There's enough capacity for attestations (128 each block for 64 shards) that the
 \end{comment}
 
 Thus, $N_2$ is given by:
-
 \begin{equation}
 \label{eq:n2-for-c2-traditional}
 N_2 = \frac{k_1}{D_f \cdot D_h}
@@ -110,7 +109,6 @@ N_2 = \frac{k_1}{D_f \cdot D_h}
 NB: For blockchains of this design: $N_1 = 1$.
 
 If each nested chain has a throughput capacity of $k_2$ B/s, then:
-
 \begin{equation}
 \label{eq:t2-for-c2-traditional}
 \begin{split}
@@ -132,7 +130,6 @@ Unless otherwise stated, \autoref{sec:ut-complexity} analyzes the $\UT{\text{+OP
 Reflecting a single simplex-chain requires $B_f \cdot B_h$ B/s of capacity, and each simplex-chain must reflect $N_1 - 1 \approx N_1$ other simplex-chains. This means that a simplex-chain must reserve $N_1 \cdot B_f \cdot B_h$ B/s of its capacity for reflections, denoted by $k_{1,B} = N_1 \cdot B_f \cdot B_h$. Additionally, simplex-chains must reserve some capacity for transactions, $k_{1,tx}$.
 
 Since simplex-chains must split their capacity between reflections and transactions, set:
-
 \begin{equation}
 \begin{split}
 \label{eq:k1-reflection-defn}
@@ -142,7 +139,6 @@ k_{1,tx} & = k_1 - k_{1,B}
 \end{equation}
 
 Given $k_{1,B} = N_1 \cdot B_f \cdot B_h$:
-
 \begin{equation}
 \label{eq:k-optimal}
 k_{1,tx} = k_1 - N_1 \cdot B_f \cdot B_h
@@ -182,7 +178,6 @@ k_1 & = 2 \cdot N_1 \cdot B_f \cdot B_h \\
 Thus $O(N_1) = O(k_1) = O(c)$.
 
 From \autoref{eq:reflection-t1-in-terms-of-n1} and substituting $N_1$ from \autoref{eq:simplex-N1}:
-
 \begin{equation}
 \label{eq:simplex-T1}
 \begin{split}
@@ -223,14 +218,12 @@ k_{1,B} = \frac{k_1}{2}
 #### Dapp-Chains
 
 If a system supports nested chains, then we can say that for some throughput, $T_i$, at nesting level $i$, that $(i+1)^{th}$ nesting level can support $N_{i+1}$ nested chains via:
-
 \begin{equation}
 \label{eq:N-i-plus-1-in-terms-of-Ti}
 N_{i+1} = \frac{T_i}{D_f \cdot D_h}
 \end{equation}
 
 Therefore, via the same logic used for \autoref{eq:t2-for-c2-traditional}:
-
 \begin{equation}
 \label{eq:throughput-iter}
 T_{i+1} = T_i \cdot \frac{k_{i+1}}{D_f \cdot D_h}
@@ -239,7 +232,6 @@ T_{i+1} = T_i \cdot \frac{k_{i+1}}{D_f \cdot D_h}
 Note that this relationship only holds for the traditional sharding model of securing sharded chains via their inclusion in a parent-chain, e.g., UT's dapp-chains ($\UT{2}$) and dapp-dapp-chains ($\UT{3}$), or existing $O(c^2)$ designs.
 
 Combining these yields:
-
 \begin{equation}
 \label{eq:simple-scaling}
 N_{i+1} = \frac{T_{i+1}}{k_{i+1}}
@@ -248,7 +240,6 @@ N_{i+1} = \frac{T_{i+1}}{k_{i+1}}
 #### UT with Dapp-Chains ($\UT{2}$)
 
 Starting with \autoref{eq:simplex-T1} and building on \autoref{eq:throughput-iter}:
-
 \begin{equation}
 \begin{split}
 \label{eq:throughput-c-3}
@@ -271,7 +262,6 @@ N_2 & = \frac{T_2}{k_2} \\
 #### UT with Dapp-Dapp-Chains ($\UT{3}$)
 
 If we say each dapp-chain hosts shards or more dapp-chains (e.g., as a dapp-chain version of Eth2 or Polkadot would), then via \autoref{eq:throughput-iter} and \autoref{eq:throughput-c-3},
-
 \begin{equation}
 \label{eq:throughput-c-4}
 \begin{split}
@@ -304,7 +294,6 @@ For a given $O(c^j); j \in \{2,3,4\}$ configuration of UT (i.e., $\UT{1}$, $\UT{
 Thus, the maximum number of SPV proofs required to prove state anywhere in a UT simplex is $j$.
 
 Since $j$ is constant, cross-chain SPV proofs therefore have order:
-
 \begin{equation}
 O(j \cdot \log_2 c) = O(\log_2 c) \label{eq:spv-complexity}
 \end{equation}
@@ -346,7 +335,6 @@ What data must a full node download? A full node must be able to *completely val
 [^alwaysdo]: The necessary PoRs are, at the very least, part of other simplex-chains, so "always do" assumes that simplex-chains themselves remain available, excluding planned shutdown. Since all blockchain networks *depend* on the availability of their chains, this is a safe assumption.
 
 The data a full node requires are: each block, the headers of all reflecting chains, and the missing branches for all PoRs. Network-wide, headers consume $N_1 \cdot B_f \cdot B_h$ B/s, and PoRs (only for that specific chain) use $N_1 \cdot B_f \cdot g \cdot \ceil{\log_2 N_1}$ B/s. Let's denote the total bandwidth required $\Delta s$. In the worst case, where both headers and PoRs must be downloaded:
-
 \begin{equation}
 \begin{split}
 \Delta s & = k_1 + (N_1 \cdot B_f \cdot B_h) + (N_1 \cdot B_f \cdot g \cdot \ceil{\log_2 N_1}) \\
@@ -365,7 +353,6 @@ That is for a full node. What about the bandwidth required to verify *the entire
 If miners temporarily keep the blocks of every simplex-chain (so that they can verify that reflected headers correspond to existent blocks) then what is the complexity and burden of this? Each simplex-chain has a raw throughput of $k_1$ bytes/s. From \autoref{eq:simplex-N1} we know that $N_1 = \frac{k_1}{2 \cdot B_f \cdot B_h}$.
 
 The amount of network bandwidth, $\Delta S$, required to download all blocks (as they are produced) across all simplex-chains is equal to the product of: the number of simplex-chains -- $N_1$, and the raw throughput of each chain -- $k_1$.
-
 \begin{equation}
 \begin{split}
 \Delta S & = N_1 \cdot k_1 \\
