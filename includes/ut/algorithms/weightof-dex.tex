@@ -7,8 +7,8 @@
     \State $C \gets$ \Call{ChainOf}{$B_i$, $state$}
     \State $C_r \gets$ \Call{BlockRewardOfChainAt}{$C$, $t$, $state$} \Comment{Block reward of $C$ at $t$}
     % \State $C_f \gets$ \Call{BlockFrequencyOfChain}{$C$} \Comment{Block production Hz of $C$}
-    \State $X \gets$ \Call{ExchangeRateOfCoinToLocalAt}{$C$, $t$, $state$}
-    \State \Return{$X \cdot C_r$}
+    \State $X_{C\rightarrow L} \gets$ \Call{ExchangeRateOfCoinToLocalAt}{$C$, $t$, $state$}
+    \State \Return{$C_r \cdot X_{C\rightarrow L}$}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}

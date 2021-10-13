@@ -366,7 +366,7 @@ Thus, \emph{any} common units, which are linearly convertible both from a reflec
       \\[0.5em]
     \implies {R_r}^\prime = \; & R_r \cdot R_f
       & &\frac{\text{R-coins}}{\text{second}}
-      & & \nonumber
+      & & \text{Declare }{R_r}^\prime \nonumber
       \\[0.5em]
     \implies \; & {R_r}^\prime \cdot X_{R\rightarrow L}
       & &\frac{\text{L-coins}}{\text{second}}
