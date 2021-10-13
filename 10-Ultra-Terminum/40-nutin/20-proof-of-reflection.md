@@ -497,7 +497,7 @@ In general, my intuition is that we can almost always use PoR with networks that
     & &\frac{\text{L-blocks}}{\text{R-blocks}}
     & & \nonumber
     \\[0.5em]
-  \therefore \text{ConBlocks}_{R\rightarrow L}(b) = \; & \frac{R_r}{L_r} \cdot r \cdot b
+  \therefore \text{ConvBlocks}_{R\rightarrow L}(b) = \; & \frac{R_r}{L_r} \cdot r \cdot b
     & &\text{R-blocks }\rightarrow\text{ L-blocks}
     & & \label{eq:por-conv-blocks}
 \end{align}

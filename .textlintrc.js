@@ -23,6 +23,7 @@ module.exports = {
                 "/\\b[0-9]+[xs]\\b/g",  // numbers with units
                 "/\\b[0-9A-Za-z]_[0-9A-Za-z]?\\b/g",
                 "/\\b[a-z]?[0-9A-Za-z]_[0-9A-Za-z]?\\b/g",
+                "/\\b[a-z]?_[0-9A-Za-z]+\\b/g",
                 "/\\b[A-Z]+(_[A-Z_]+)+\\b/g",
                 "/\\b[0-9]+\\b/g",
                 "Dapp", "dapp", "sharding",
@@ -53,6 +54,7 @@ module.exports = {
                 "2B_h", "EOS", "Solana", "Ittay", "Eyal", "Emin", "Sirer", "Trustless",
                 "Petersburg", "SegWit", "s2", "TOC", "Incentivization",
                 "ReflectedBlockWeight", "Ouroboros", "s10",
+                "ConvReward", "ConvBlocks"
             ],
         },
         "en-max-word-count": {
