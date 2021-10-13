@@ -57,7 +57,7 @@ A straightforward answer (which can be globally known, too) is \emph{the ratio o
 We can have a \emph{network wide} rule that there is some \emph{network wide inflation rate}, and each chain's block reward is the product of the \emph{ratio} of coins on that chain with the entire supply.
 This way, the global inflation rate is predictable, even though the coins produced \emph{on each chain} (via block rewards) are variable.
 Moreover, we should expect that the \emph{value to the community} of each chain roughly matches the \emph{distribution of the community's activities}, and the \emph{distribution of security}, too.
-This method is also consistent with the idea of {equal work for equal reward}.
+This method is also consistent with the idea of \emph{equal work for equal reward}.
 We can rely on that idea because \emph{equality of work} is a result of the market (for block rewards) formed by participating miners.
 
 If the network uses this rule to determine block reward, then, for either chain $C$, what can we say?
@@ -71,5 +71,5 @@ Let's combine this with \autoref{eq:conv-reward-to-hashes} to create our next \t
 \input{includes/ut/algorithms/weightof-ratio.tex}
 
 \aside{
-    Note: if one of the local chain's blocks is passed to \textsc{WeightOf}, it works out as expected.
+    Note: the result of passing a local block to these \textsc{WeightOf}s matches the expected result.
 }

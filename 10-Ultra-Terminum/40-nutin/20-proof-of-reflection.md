@@ -268,7 +268,7 @@ The *essence* of *Proof of Reflection* should now be apparent. *In principle*, w
 #### Theoretical Conversion
 
 Consider a traditional blockchain (like Bitcoin, or Ethereum 1).
-We know that traditional blockchains have properties specific to blocks, like: reward per block (coins/block); a block target time (seconds/block) -- or block frequency (blocks/second); and a difficulty (approx: hashes/block).
+We know that traditional blockchains have properties specific to blocks, like: reward per block (coins/block); a block target time (seconds/block) -- or block frequency (blocks/second); and a difficulty (hashes/block).
 There are also \emph{network-wide} properties, too, like the \emph{inflation rate} (coins/second).
 The \emph{instantaneous} relationship between these properties is defined by the protocol -- it's \emph{context}.
 How can we use these relationships to our advantage?
@@ -281,6 +281,8 @@ How can we use these relationships to our advantage?
 The units that we have to work with are: blocks, seconds, coins, and hashes.
 There are actually multiple types of blocks (L-blocks and R-blocks), coins (L-coins and R-coins), and hashes (L-hashes and R-hashes).
 We can't combine those unless we're able to convert those values to some common units.
+
+\todoDraftOnly{'unit' or 'units' -- not sure}
 
 If we ignore some of the normal constraints on consensus algorithms -- like where information comes from -- what information could help us convert?
 If we had \emph{an exchange rate} between L-coins and R-coins, then we can trivially convert between them.
@@ -331,8 +333,8 @@ Well, no.
 We only need to \emph{end up} with L-hashes.
 
 Consider the case for a two-stage linear conversion method.
-That is: we convert the input into some common units (they could be anything), then we convert those common units into the final units.
-If both partial-conversions \emph{linear}, then we must have a situation like this:
+That is: we convert the input into some common units (which could be anything), then we convert those common units into the final units.
+If both partial-conversions are \emph{linear}, then we must have a situation like this:
 \begin{align*}
   \text{Convert}_{L\rightarrow R}(\dots) =&\; \text{Conv}_1(\text{Conv}_2(\dots))
     & & \\[0.5em]
@@ -396,21 +398,7 @@ Thus, \emph{any} common units, which are linearly convertible both from a reflec
 
 \label{sec:conversion-single-root-token}
 
-%% END ### RELEASE
-
-%% BEGIN ### DRAFT
-
-##### new draft of section
-
 \input{20-por/40-single-root-token-2.tex}
-
-##### previous release version of this section
-
-%% END ### DRAFT
-
-%% BEGIN ### RELEASE
-
-\input{20-por/40-single-root-token-1.tex}
 
 #### Different Root Tokens with a DEX
 
@@ -437,7 +425,7 @@ Conversion of chain-weight between PoW chains can work \emph{if and only if} we 
 For a given PoW block, the network knows exactly how much work is implied by that block -- the expected number of hashes to produce it.
 Thus, for PoW chains, there is an exact conversion between \emph{work and confirmations} (for some context at some point in time).
 Over short time-scales, this conversion ratio is approximately constant (in general it's a function that accepts a timestamp as input).
-Thus, \emph{chain-weight} (as represented in figures via $\Sigma_w$, e.g. \autoref{fig:dag-ex1-full}) can be represented either in something like \emph{hashes} or \emph{difficulty} -- though those numbers be unwieldy -- \textbf{or} chain-weight can simply be in terms of \emph{confirmations}.
+Thus, \emph{chain-weight} (as represented in figures via $\Sigma_w$, e.g. \autoref{fig:dag-ex1-full}) can be represented either in something like \emph{hashes} or \emph{difficulty} \textbf{or} chain-weight can simply be in terms of \emph{confirmations}.
 
 \aside{
   If we convert \emph{work to confirmations}, will we end up with something \emph{incompatible and contradictory} to the traditional notion of ``a confirmation''?
@@ -446,7 +434,7 @@ Thus, \emph{chain-weight} (as represented in figures via $\Sigma_w$, e.g. \autor
   Is that less good than a normal confirmation?
 
   This problem arises because \emph{we're not actually converting work to confirmations}, per se: we're converting \emph{another chain's work} into \emph{equivalent-confirmations} relative to something.
-  Converted confirmations are \emph{in terms of the local chain's confirmations}.
+  Equivalent-confirmations are another chains confirmations that have been \emph{converted to be in terms of the local chain's confirmations}.
   Most likely, those equivalent-confirmations will be relative either to some known historical confirmation, or to that of the \emph{current} block.
 }
 
@@ -462,8 +450,8 @@ There is no way to \emph{universally} say \emph{X work on L is worth Y work on R
 Confirmations (like work) require that grounding.
 For confirmations (not work), this is true even when converting confirmations \emph{from the same chain}.
 For example, we can say that the single confirmation provided by Bitcoin block 704610 is \emph{equivalent} to approximately 19,893,045,000,000 genesis-confirmations.\footnote{A genesis-confirmation is relative to the Bitcoin genesis block -- which had a difficulty of exactly 1.}
-The conversion-ratio is equivalent to the difficulty of block 704610.
-That is, it would take a chain of $\sim$ 20 trillion blocks (each with 1 genesis-confirmation worth of work) to match the weight of block 704610.
+The conversion-ratio is equal to the difficulty of block 704610.
+That is, it would take a chain of $\sim$ 20 trillion blocks, each with 1 genesis-confirmation worth of work, to match the weight of block 704610.
 
 When will conversion methods fail for converting confirmations?
 
