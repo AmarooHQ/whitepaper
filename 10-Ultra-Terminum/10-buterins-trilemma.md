@@ -22,7 +22,7 @@ The definition of scalability is perhaps problematic.
 If the network growth, $O(n)$, becomes bottlenecked by an $O(c^2)$ scaling configuration, is the network really scalable?
 I prefer an alternative definition of scalability: the system can process $O(n)$ transactions in $O(1)$ time, i.e., confirmations neither take longer nor become more scarce as $n$ and/or $c$ change.
 
-Why is $O(c^2)$ and important breakpoint for scaling configurations? Sharding.
+Why is $O(c^2)$ an important breakpoint for scaling configurations? Sharding.
 The standard method of sharding (or hosting child-chains generally) is to replace transactions with shard-headers.
 Extra data might also be required.
 If the host-chain has $O(c)$ capacity, then it should be able support $O(c)$ shards (presuming a secure method of sharding is known and in use).
