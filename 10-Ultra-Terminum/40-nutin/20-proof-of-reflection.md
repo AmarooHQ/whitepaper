@@ -265,31 +265,141 @@ The *essence* of *Proof of Reflection* should now be apparent. *In principle*, w
 
 \input{20-por/30-comparing-work-3}
 
+#### Theoretical Conversion
+
+Consider a traditional blockchain (like Bitcoin, or Ethereum 1).
+We know that traditional blockchains have properties specific to blocks, like: reward per block (coins/block); a block target time (seconds/block) -- or block frequency (blocks/second); and a difficulty (approx: hashes/block).
+There are also \emph{network-wide} properties, too, like the \emph{inflation rate} (coins/second).
+The \emph{instantaneous} relationship between these properties is defined by the protocol -- it's \emph{context}.
+How can we use these relationships to our advantage?
+
+\aside{
+  With regards to Proof of Reflection, consider that we \emph{only} need to convert \emph{simultaneous} work.
+  That means: PoR does not need to be able to convert chain-work between chains \emph{over time}, only \emph{for some given moment}.
+}
+
+The units that we have to work with are: blocks, seconds, coins, and hashes.
+There are actually multiple types of blocks (L-blocks and R-blocks), coins (L-coins and R-coins), and hashes (L-hashes and R-hashes).
+We can't combine those unless we're able to convert those values to some common units.
+
+If we ignore some of the normal constraints on consensus algorithms -- like where information comes from -- what information could help us convert?
+If we had \emph{an exchange rate} between L-coins and R-coins, then we can trivially convert between them.
+If we have that, then, for our current purpose, we can treat L-coins and R-coins as the same units -- because we can \emph{always} convert between them.
+So now we have L-blocks, R-blocks, coins, and L-hashes and R-hashes.
+
+Let's consider Chain L, and give some of these properties variables: $L_f$ (L-blocks/s) for block frequency, $L_r$ (L-coins/L-block) for the block reward, and $L_d$ (L-hashes/L-block) -- the difficulty. We can multiply combinations of these to get new units: $L_f \cdot L_d$ gives us L-hashes/s; $L_f \cdot L_r$ gives L-coins/s, and $\nicefrac{L_d}{L_r}$ gives us \textbf{L-hashes/L-coin}.
+
+Now, let's add that exchange rate: $r$ (L-coins/R-coin).
+And some variables for Chain R which correspond to Chain L's above: $R_f$, $R_r$, and $R_d$.
+There's a symmetry between chains L and R, so we already know that $\nicefrac{R_d}{R_r}$ gives us R-hashes/R-coin.
+\begin{align}
+  & \frac{L_d}{L_r}
+    & &\frac{\text{L-hashes}}{\text{L-coin}}
+    & & \nonumber
+    \\[0.5em]
+  \implies \; & \frac{L_d}{L_r} \cdot r
+    & &\frac{\text{L-hashes}}{\text{R-coin}}
+    & &\text{multiply by }r \nonumber
+    \\[0.5em]
+  \implies \; & \frac{L_d}{L_r} \cdot r \cdot \frac{R_r}{R_d}
+    & &\frac{\text{L-hashes}}{\text{R-hash}}
+    & &\text{divide by }\nicefrac{R_d}{R_r} \label{eq:por-conversion-const-1}
+    \\[0.5em]
+  \therefore \text{ConvWork}_{R\rightarrow L}(w) = \; & \frac{L_d}{L_r} \cdot r \cdot \frac{R_r}{R_d} \cdot w
+    & &\text{R-hashes }\rightarrow\text{ L-hashes}
+    & & \label{eq:por-conv-work}
+\end{align}
+
+With \autoref{eq:por-conversion-const-1}, \textbf{we have just found our first constant of conversion.}
+Of course, we need to figure out a way to get the exchange rate that is \emph{at least as secure} as the consensus algorithms (otherwise we'd be introducing a new weakest-link).
+That can't be too hard, right?
+
+Can we \emph{avoid} that exchange rate, though?
+Well, there is a case where $r=1$: \emph{when L-coins $\equiv$ R-coins}, i.e., both chains use the same root-token.
+In that case, $\nicefrac{L_d}{L_r} \cdot \nicefrac{R_r}{R_d}$ gives us L-hashes/R-hash directly.
+
+Okay, so far so good.
+Are there any \emph{other} values which we can sum up, though?
+Let's set $r=1$ and consider the term $\nicefrac{L_d}{L_r} \cdot R_r$ (L-hashes/R-block).
+When we're \emph{summing} weights as part of calculating chain-weight (e.g., that of \autoref{alg:refl-1-bw}, or \autoref{alg:por-reflected-block-weight}), do we need to sum L-hashes?
+Well, no.
+We only need to \emph{end up} with L-hashes.
+
+Consider the case for a two-stage linear conversion method.
+That is: we convert the input into some common units (they could be anything), then we convert those common units into the final units.
+If both partial-conversions \emph{linear}, then we must have a situation like this:
+\begin{align*}
+  \text{Convert}_{L\rightarrow R}(\dots) =&\; \text{Conv}_1(\text{Conv}_2(\dots))
+    & & \\[0.5em]
+  =&\; X_1 \cdot \text{Conv}_2(\dots)
+    & &\text{for some constant of conversion, }X_1
+\end{align*}
+
+Let's sum multiple conversions, e.g., as done in \autoref{alg:refl-1-bw}:
+\begin{align*}
+  \sum\limits_{i=0}^n \text{Convert}_{L\rightarrow R}(\dots) =&\; \sum\limits_{i=0}^n X_1 \cdot \text{Conv}_2(\dots)
+    & &\text{} \\[0.5em]
+  =&\; X_1 \cdot \sum\limits_{i=0}^n \text{Conv}_2(\dots)
+    & &\text{factorize }X_1
+\end{align*}
+
+Thus, \emph{any} common units, which are linearly convertible both from a reflecting chain's block and to local chain-work, can be used during summation.
+
+<!-- & \frac{R_r}{L_r}
+  & &\frac{\text{R-coins }\cdot\text{ L-blocks}}{\text{R-block }\cdot\text{ L-coin}}
+  & & \nonumber
+  \\ -->
+
+\aside{
+  Before we move on, let's consider:
+  \begin{align}
+    & R_r
+      & &\frac{\text{R-coins}}{\text{R-block}}
+      & & \text{R's block reward} \nonumber
+      \\[0.5em]
+    \implies \; & R_r \cdot r
+      & &\frac{\text{L-coins}}{\text{R-block}}
+      & & \nonumber
+      \\[0.5em]
+    & \frac{L_f}{R_f}
+      & &\frac{\text{L-blocks}}{\text{R-block}}
+      & & \text{block frequency ratio} \nonumber
+      \\[0.5em]
+    \implies \; & \frac{R_f}{L_f} \cdot R_r \cdot r
+      & &\frac{\text{L-coins}}{\text{L-block}}
+      & & \text{divide by }\frac{L_f}{R_f} \nonumber
+      \\[0.5em]
+    \therefore \text{ConvReward}_{R\rightarrow L}(R_r) = \; & \frac{R_f}{L_f} \cdot R_r \cdot r
+      & & \frac{\text{R-coins}}{\text{R-block}} \rightarrow \frac{\text{L-coins}}{\text{L-block}}
+      & & \label{eq:por-conv-reward}
+  \end{align}
+
+  Is it possible that we can convert chain-work \emph{by summing block rewards?}
+}
+
 #### A Single Root Token Across Multiple Chains
+
+\label{sec:conversion-single-root-token}
 
 \defineTerm{Root Token (RT)}{
   The typically sole network-level token required by blockchain protocols. e.g., Bitcoin has BTC, Ethereum has ETH, Polkadot has DOT, Cardano has ADA, Amaroo has ROO, etc
 }
 
-\begin{comment}
-The simplest method for comparing work done via different algorithms is for all reflecting chains to measure that work via a common unit. How can we do this? We could try to measure it in some external unit like USD. However, that would require accounting for external factors like the availability of silicon and mining rigs, the cost of electricity, and various exchange rates. Accounting for those external factors impractical, so whatever method we choose, those factors must *cancel out*.
-\end{comment}
+%% END ### RELEASE
 
-In blockchains like Bitcoin and Ethereum, block rewards are denominated in the *root token* of that chain. What if we had two chains with the same root token?
+%% BEGIN ### DRAFT
 
-Consider two PoW blockchains that share a root token, but use different hashing algorithms. We can't directly compare their rates of work because the PoW algorithms are different, but we \emph{can} compare their rates of *token generation via block rewards* (normalized against time). Why does this work? Market externalities are encapsulated by the *economic* decisions that miners have to make. Thus, the rate of work of each chain will approach equilibrium, and if both are at equilibrium we can say that the work contributed to each chain is in proportion to the token generation rate. What do I mean by this? Let's look at an example.
+##### new draft of section
 
-Say we had Chain L and Chain R: two PoW chains using different algorithms, but with the *same* root token and the same block production rate. Firstly, we need a way to determine what their block rewards are, and the intuitive solution is to set each chain's block reward proportionally to the percentage of root tokens (i.e., *coins*) on that chain. Say that 100% of the root tokens should correspond to 50 coins generated per block. So, if one chain had 60% of the root tokens, then 30 coins are generated per block *on that chain*, and (since we only have 2 chains) *the other chain* has 20 coins generated per block -- corresponding to the remaining 40% of root tokens. One reason this method makes sense is that the *ratio* of coins on each chain is not affected by block rewards. We can generalize the method by normalizing against time so that we're comparing the rates of coin production rather than the block rewards themselves.
+\input{20-por/40-single-root-token-2.tex}
 
-Now that we know what the block rewards are, and have defined them in terms of the percentage of total coins that are on that chain, we can work on comparing the chains' hash rates. What sort of foundation could we do this from? What about *equal work for equal reward*? Because we have defined block rewards in terms of *where* root tokens are held, we can measure things like *hashes per token* (when considering block rewards particularly). Crucially, we can measure this *for each chain*, which allows us to -- *contextually* -- make claims like 100 hashes on Chain L are worth 25 hashes on Chain R.
+##### previous release version of this section
 
-Since we know the percentage of root tokens on each chain for each moment in history, we can safely use that figure in chain-weight calculations. The reliability of that data will be the same as the reliability of the blockchains themselves, provided we enforce the 2-way peg that ensures no root tokens are created or destroyed (which would violate protocol rules).
+%% END ### DRAFT
 
-\autoref{alg:weightof-1} and \autoref{alg:weightof-ratio} detail simplistic \textsc{WeightOf} functions that return a weight normalized in coins (i.e., root tokens). It does not account for some things, e.g., changes to the difficulty of $C$ over time.
+%% BEGIN ### RELEASE
 
-\input{includes/ut/algorithms/weightof-basic.tex}
-
-\input{includes/ut/algorithms/weightof-ratio.tex}
+\input{20-por/40-single-root-token-1.tex}
 
 #### Different Root Tokens with a DEX
 
@@ -369,6 +479,41 @@ Is a block that is produced soon after its parent worth as much as a block produ
 For non-PoW chains, we'll need conversion methods that have non-arbitrary answers for these questions.
 
 In general, my intuition is that we can almost always use PoR with networks that fit the \emph{traditional} idea of blockchains. (And when we can't, a protocol change could fix that.)
+
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
+
+\begin{align}
+  \text{Consider: } & \frac{R_d}{L_d}
+    & &\frac{\text{R-hashes }\cdot\text{ L-blocks}}{\text{R-block }\cdot\text{ L-hash}}
+    & & \nonumber
+    \\[0.5em]
+  \implies \; & \frac{R_d}{L_d} \cdot \left( \frac{L_d}{L_r} \cdot r \cdot \frac{R_r}{R_d} \right)
+    & &\frac{\text{L-blocks}}{\text{R-blocks}}
+    & &\text{from \autoref{eq:por-conversion-const-1}} \nonumber
+    \\[0.5em]
+  = \; & \frac{R_r}{L_r} \cdot r
+    & &\frac{\text{L-blocks}}{\text{R-blocks}}
+    & & \nonumber
+    \\[0.5em]
+  \therefore \text{ConBlocks}_{R\rightarrow L}(b) = \; & \frac{R_r}{L_r} \cdot r \cdot b
+    & &\text{R-blocks }\rightarrow\text{ L-blocks}
+    & & \label{eq:por-conv-blocks}
+\end{align}
+
+<!-- \begin{align}
+  & L_r & &\text{(L-coins/L-block)} & \\
+  & \frac{L_r}{R_r} & &\text{(L-coins/L-block)} & \\
+  & \frac{L_d}{L_r} \cdot
+
+  & \frac{L_d}{L_r} \cdot r \cdot \frac{R_r}{R_d} & &\text{(L-hashes/R-hash)} & \\
+  =& \frac{L_d}{L_r} \cdot \frac{R_r}{R_d} & &\text{(L-hashes/R-hash)} & &\text{since }r = 1
+\end{align} -->
+
+%% END ### DRAFT
+
+%% BEGIN ### RELEASE
 
 ### Reflection Between PoW and PoS Chains
 
