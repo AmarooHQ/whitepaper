@@ -50,7 +50,7 @@ module.exports = {
                 "paraInclusion",
                 "candidateBacked",
                 "BitcoinTalk",
-                "/L[0-9]{2,}/",
+                "/\\bL[0-9]{2,}\\b/",
                 "2B_h", "EOS", "Solana", "Ittay", "Eyal", "Emin", "Sirer", "Trustless",
                 "Petersburg", "SegWit", "s2", "TOC", "Incentivization",
                 "ReflectedBlockWeight", "Ouroboros", "s10",

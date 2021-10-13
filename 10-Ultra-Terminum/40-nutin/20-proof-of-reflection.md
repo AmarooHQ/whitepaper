@@ -314,13 +314,16 @@ With \autoref{eq:por-conversion-const-1}, \textbf{we have just found our first c
 Of course, we need to figure out a way to get the exchange rate that is \emph{at least as secure} as the consensus algorithms (otherwise we'd be introducing a new weakest-link).
 That can't be too hard, right?
 
+\defineTerm{Root Token (RT)}{
+  The typically sole network-level token required by blockchain protocols. e.g., Bitcoin has BTC, Ethereum has ETH, Polkadot has DOT, Cardano has ADA, Amaroo has ROO, etc
+}
+
 Can we \emph{avoid} that exchange rate, though?
-Well, there is a case where $r=1$: \emph{when L-coins $\equiv$ R-coins}, i.e., both chains use the same root-token.
+Well, there is a case where $r=1$: \textbf{when L-coins $\equiv$ R-coins}, i.e., both chains use the same root token.
 In that case, $\nicefrac{L_d}{L_r} \cdot \nicefrac{R_r}{R_d}$ gives us L-hashes/R-hash directly.
 
 Okay, so far so good.
 Are there any \emph{other} values which we can sum up, though?
-Let's set $r=1$ and consider the term $\nicefrac{L_d}{L_r} \cdot R_r$ (L-hashes/R-block).
 When we're \emph{summing} weights as part of calculating chain-weight (e.g., that of \autoref{alg:refl-1-bw}, or \autoref{alg:por-reflected-block-weight}), do we need to sum L-hashes?
 Well, no.
 We only need to \emph{end up} with L-hashes.
@@ -380,10 +383,6 @@ Thus, \emph{any} common units, which are linearly convertible both from a reflec
 #### A Single Root Token Across Multiple Chains
 
 \label{sec:conversion-single-root-token}
-
-\defineTerm{Root Token (RT)}{
-  The typically sole network-level token required by blockchain protocols. e.g., Bitcoin has BTC, Ethereum has ETH, Polkadot has DOT, Cardano has ADA, Amaroo has ROO, etc
-}
 
 %% END ### RELEASE
 
