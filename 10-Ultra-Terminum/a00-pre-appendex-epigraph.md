@@ -88,6 +88,17 @@ Term & Definition & Reference \\
 \end{table}
 
 \newpage
+
+\listoffigures
+
+\newpage
+
+\listoftables
+
+%%\listofalgorithms
+
+\newpage
+
 \appendix
 
 %% END ### RELEASE
