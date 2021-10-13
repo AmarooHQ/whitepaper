@@ -1,15 +1,14 @@
 \begin{algorithm}
-\caption{A \textsc{WeightOf} function for PoR between chains with a different root token}
+\caption{A \textsc{WeightOf} function for PoR between chains with a different root token and equal block frequencies}
 \label{alg:weightof-dex}
 \begin{algorithmic}
 \Procedure{WeightOf}{$B_i, state$} \Comment{The weight of a block normalized to coins}
     \State $t \gets$ \Call{BlockTimestamp}{$B_i$}
     \State $C \gets$ \Call{ChainOf}{$B_i$, $state$}
-    \State $r \gets$ \Call{BlockRewardOfChainAt}{$C$, $t$, $state$} \Comment{Block reward of $C$ at $t$}
-    \State $\mathbb{C} \gets$ \Call{GetCoinDenomination}{$r$} \Comment{Native currency of $C$ (i.e., it's coin)}
-    % \State $f \gets$ \Call{BlockFrequencyOfChain}{$C$} \Comment{Block production Hz of $C$}
-    \State $x \gets$ \Call{ExchangeRateOfCoinToLocalAt}{$\mathbb{C}$, $t$, $state$}
-    \State \Return{$x \cdot r$}
+    \State $C_r \gets$ \Call{BlockRewardOfChainAt}{$C$, $t$, $state$} \Comment{Block reward of $C$ at $t$}
+    % \State $C_f \gets$ \Call{BlockFrequencyOfChain}{$C$} \Comment{Block production Hz of $C$}
+    \State $X \gets$ \Call{ExchangeRateOfCoinToLocalAt}{$C$, $t$, $state$}
+    \State \Return{$X \cdot C_r$}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}

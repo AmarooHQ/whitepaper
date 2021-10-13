@@ -289,23 +289,25 @@ So now we have L-blocks, R-blocks, coins, and L-hashes and R-hashes.
 
 Let's consider Chain L, and give some of these properties variables: $L_f$ (L-blocks/s) for block frequency, $L_r$ (L-coins/L-block) for the block reward, and $L_d$ (L-hashes/L-block) -- the difficulty. We can multiply combinations of these to get new units: $L_f \cdot L_d$ gives us L-hashes/s; $L_f \cdot L_r$ gives L-coins/s, and $\nicefrac{L_d}{L_r}$ gives us \textbf{L-hashes/L-coin}.
 
-Now, let's add that exchange rate: $r$ (L-coins/R-coin).
+Now, let's add that exchange rate: $X_{R\rightarrow L}$ (L-coins/R-coin).
 And some variables for Chain R which correspond to Chain L's above: $R_f$, $R_r$, and $R_d$.
 There's a symmetry between chains L and R, so we already know that $\nicefrac{R_d}{R_r}$ gives us R-hashes/R-coin.
+
+Can we find some function, $\text{ConvWork}_{R\rightarrow L}(w)$, that converts R-hashes to L-hashes?
 \begin{align}
   & \frac{L_d}{L_r}
     & &\frac{\text{L-hashes}}{\text{L-coin}}
     & & \nonumber
     \\[0.5em]
-  \implies \; & \frac{L_d}{L_r} \cdot r
+  \implies \; & \frac{L_d}{L_r} \cdot X_{R\rightarrow L}
     & &\frac{\text{L-hashes}}{\text{R-coin}}
-    & &\text{multiply by }r \nonumber
+    & &\text{multiply by }X_{R\rightarrow L} \nonumber
     \\[0.5em]
-  \implies \; & \frac{L_d}{L_r} \cdot r \cdot \frac{R_r}{R_d}
+  \implies \; & \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot \frac{R_r}{R_d}
     & &\frac{\text{L-hashes}}{\text{R-hash}}
     & &\text{divide by }\nicefrac{R_d}{R_r} \label{eq:por-conversion-const-1}
     \\[0.5em]
-  \therefore \text{ConvWork}_{R\rightarrow L}(w) = \; & \frac{L_d}{L_r} \cdot r \cdot \frac{R_r}{R_d} \cdot w
+  \therefore \text{ConvWork}_{R\rightarrow L}(w) = \; & \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot \frac{R_r}{R_d} \cdot w
     & &\text{R-hashes }\rightarrow\text{ L-hashes}
     & & \label{eq:por-conv-work}
 \end{align}
@@ -334,16 +336,16 @@ If both partial-conversions \emph{linear}, then we must have a situation like th
 \begin{align*}
   \text{Convert}_{L\rightarrow R}(\dots) =&\; \text{Conv}_1(\text{Conv}_2(\dots))
     & & \\[0.5em]
-  =&\; X_1 \cdot \text{Conv}_2(\dots)
-    & &\text{for some constant of conversion, }X_1
+  =&\; V_1 \cdot \text{Conv}_2(\dots)
+    & &\text{for some constant of conversion, }V_1
 \end{align*}
 
 Let's sum multiple conversions, e.g., as done in \autoref{alg:refl-1-bw}:
 \begin{align*}
-  \sum\limits_{i=0}^n \text{Convert}_{L\rightarrow R}(\dots) =&\; \sum\limits_{i=0}^n X_1 \cdot \text{Conv}_2(\dots)
+  \sum\limits_{i=0}^n \text{Convert}_{L\rightarrow R}(\dots) =&\; \sum\limits_{i=0}^n V_1 \cdot \text{Conv}_2(\dots)
     & &\text{} \\[0.5em]
-  =&\; X_1 \cdot \sum\limits_{i=0}^n \text{Conv}_2(\dots)
-    & &\text{factorize }X_1
+  =&\; V_1 \cdot \sum\limits_{i=0}^n \text{Conv}_2(\dots)
+    & &\text{factorize out }V_1
 \end{align*}
 
 Thus, \emph{any} common units, which are linearly convertible both from a reflecting chain's block and to local chain-work, can be used during summation.
@@ -360,25 +362,35 @@ Thus, \emph{any} common units, which are linearly convertible both from a reflec
       & &\frac{\text{R-coins}}{\text{R-block}}
       & & \text{R's block reward} \nonumber
       \\[0.5em]
-    \implies \; & R_r \cdot r
-      & &\frac{\text{L-coins}}{\text{R-block}}
+    \implies {R_r}^\prime = \; & R_r \cdot R_f
+      & &\frac{\text{R-coins}}{\text{second}}
       & & \nonumber
       \\[0.5em]
-    & \frac{L_f}{R_f}
-      & &\frac{\text{L-blocks}}{\text{R-block}}
+    \implies \; & {R_r}^\prime \cdot X_{R\rightarrow L}
+      & &\frac{\text{L-coins}}{\text{second}}
+      & & \nonumber
+      \\[0.5em]
+    \therefore \text{ConvIncome}_{R\rightarrow L}({R_r}^\prime) = \; & {R_r}^\prime \cdot X_{R\rightarrow L}
+      & & \frac{\text{R-coins}}{\text{second}} \rightarrow \frac{\text{L-coins}}{\text{second}}
+      & & \label{eq:por-conv-reward-rate}
+      \\[0.5em]
+    & \frac{R_f}{L_f}
+      & & \frac{\text{R-blocks}}{\text{L-block}}
       & & \text{block frequency ratio} \nonumber
       \\[0.5em]
-    \implies \; & \frac{R_f}{L_f} \cdot R_r \cdot r
-      & &\frac{\text{L-coins}}{\text{L-block}}
-      & & \text{divide by }\frac{L_f}{R_f} \nonumber
+    \implies \; & \frac{R_f}{L_f} \cdot R_r \cdot X_{R\rightarrow L}
+      & & \frac{\text{L-coins}}{\text{L-block}}
+      & & \nonumber
       \\[0.5em]
-    \therefore \text{ConvReward}_{R\rightarrow L}(R_r) = \; & \frac{R_f}{L_f} \cdot R_r \cdot r
+    \therefore \text{ConvReward}_{R\rightarrow L}(R_r) = \; & \frac{R_f}{L_f} \cdot R_r \cdot X_{R\rightarrow L}
       & & \frac{\text{R-coins}}{\text{R-block}} \rightarrow \frac{\text{L-coins}}{\text{L-block}}
       & & \label{eq:por-conv-reward}
   \end{align}
 
   Is it possible that we can convert chain-work \emph{by summing block rewards?}
 }
+
+\todoDraftOnly{Add new vars to nomenclature table}
 
 #### A Single Root Token Across Multiple Chains
 
@@ -488,15 +500,15 @@ In general, my intuition is that we can almost always use PoR with networks that
     & &\frac{\text{R-hashes }\cdot\text{ L-blocks}}{\text{R-block }\cdot\text{ L-hash}}
     & & \nonumber
     \\[0.5em]
-  \implies \; & \frac{R_d}{L_d} \cdot \left( \frac{L_d}{L_r} \cdot r \cdot \frac{R_r}{R_d} \right)
+  \implies \; & \frac{R_d}{L_d} \cdot \left( \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot \frac{R_r}{R_d} \right)
     & &\frac{\text{L-blocks}}{\text{R-blocks}}
     & &\text{from \autoref{eq:por-conversion-const-1}} \nonumber
     \\[0.5em]
-  = \; & \frac{R_r}{L_r} \cdot r
+  = \; & \frac{R_r}{L_r} \cdot X_{R\rightarrow L}
     & &\frac{\text{L-blocks}}{\text{R-blocks}}
     & & \nonumber
     \\[0.5em]
-  \therefore \text{ConvBlocks}_{R\rightarrow L}(b) = \; & \frac{R_r}{L_r} \cdot r \cdot b
+  \therefore \text{ConvBlocks}_{R\rightarrow L}(b) = \; & \frac{R_r}{L_r} \cdot X_{R\rightarrow L} \cdot b
     & &\text{R-blocks }\rightarrow\text{ L-blocks}
     & & \label{eq:por-conv-blocks}
 \end{align}
