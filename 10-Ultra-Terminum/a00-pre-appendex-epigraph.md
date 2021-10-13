@@ -25,10 +25,10 @@
 \newpage
 
 \section*{Notation}
-\addcontentsline{toc}{section}{Notation and Nomenclature}
+\addcontentsline{toc}{section}{Notation, Nomenclature, and Lists of Figures and Tables}
 \fancypagestyle{notation}{%
     \fancyhead[L]{}
-    \fancyhead[R]{Notation \& Nomenclature}
+    \fancyhead[R]{\emph{Notation, Nomenclature, Figures, \& Tables}}
 }
 
 \thispagestyle{notation}

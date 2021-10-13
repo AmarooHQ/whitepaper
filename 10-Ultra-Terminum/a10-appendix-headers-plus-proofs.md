@@ -48,7 +48,7 @@ From \autoref{eq:simplex-N1-with-PoR}, we have $N_1$ that is of the form $N_1 = 
 
 %% INSERT ### TABLE: tps_por
 
-: The effect of including Proofs of Reflection alongside headers (+PoRs).
+: The results of including Proofs of Reflection alongside headers (+PoRs).
 
 ## PoRs with +T
 
@@ -68,6 +68,6 @@ In effect, this protocol extension is a way to halve the overhead of +PoRs. It i
 
 %% INSERT ### TABLE: tps_port
 
-: The effect of including Proofs of Reflection, with +T, alongside headers (+PoRTs).
+: The results of including Proofs of Reflection, with +T, alongside headers (+PoRTs).
 
 %% END ### RELEASE
