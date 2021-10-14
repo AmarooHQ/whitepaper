@@ -177,32 +177,18 @@ Example use-case: an existing blockchain migrates to become an *Amaroo* dapp-cha
 
 ##### Method 2: Pay the simplex miner via a native DEX
 
-When a dapp-chain hosts a native DEX, it can use that DEX for PoR. However:
+When a dapp-chain hosts a native DEX, it can use that DEX for PoR.
+The general case (where a reflecting chain contributes far more chain-work than the reflected chain) was discussed in \autoref{sec:comparing-weight-dex}.
 
-\bquote{
-  [Regarding possible attacks when converting work via a DEX] \convertingWeightDexNotImportant
-}{\autoref{sec:comparing-weight-dex}}
-
-The limited context of a DEX with only one trading pair (between the dapp-chain's root token and the ROO) makes this problem reasonably tractable.
+Consider the limited context of a DEX with only one required trading pair (between the dapp-chain's root token and the ROO), combined with the security-contribution differential between a simplex-chain and a dapp-chain.
 Note that a conservative implementation of a DEX between this pair *only relies on local state* -- that of the host simplex-chain and the dapp-chain, all of which is accessible to dapp-chain full nodes.
 The simplest method of preventing market manipulation (that might allow for some attack on the dapp-chain) is to calculate PoR weight via an *old* exchange rate (e.g., from 24 hours ago), or to use an *average* over some period of time.
 Both of these ensure that *competition between blocks* (at any given time) is not dependant on the *current* DEX execution.
 With regards to dapp-chains using Proof of Reflection, this is sufficient.
 
-\begin{comment}
-Furthermore, *manipulating the DEX* (in an attempt to manipulate consensus) is self-defeating.
-If an attacker manipulates the price of the dapp-chain's root token *down*, then the attackers blocks weigh less.
-If an attacker manipulates the price of the dapp-chain's root token *up*, ...
-\end{comment}
-
 Given a DEX, the dapp-chain can use this to automatically convert some of the mining reward to the root token of the host simplex-chain.
 These rewards could accrue over time and be bundled into far fewer transactions than would otherwise be necessary and automatically managed by the DEX.
-
-\todoDraftOnly{Pay the simplex miner via a native DEX.
-dex is on dapp-chain
-and dex only used for root token <-> roo
-and dex executed on dapp-chain
-no risk, and only local data, so okay for PoR}
+Unlike the previous method, this method doesn't require the simplex-chain miner to ever interact with dapp-chains (besides including their header-transactions); however, the protocol is more complex.
 
 Example use-case: a greenfield dapp-chain uses an Amaroo-compatible DEX (which requires no development effort) so that simplex-miners have lower operating costs; thus incenting simplex-miners to include their headers over those of others.
 

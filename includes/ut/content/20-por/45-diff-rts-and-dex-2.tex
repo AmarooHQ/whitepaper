@@ -1,0 +1,120 @@
+Our starting point will be \autoref{eq:por-conv-work}:
+\begin{align}
+  \text{ConvWork}_{R\rightarrow L}(w) = \; & \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot \frac{R_r}{R_d} \cdot w
+    & &\text{R-hashes }\rightarrow\text{ L-hashes}
+    \nonumber
+    % \\[0.5em]
+%   = \; & \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot \frac{R_r}{R_d} \cdot w
+%     & &\text{R-hashes }\rightarrow\text{ L-hashes}
+\end{align}
+
+It's easy to see that we can work with this -- of course, the \textsc{WeightOf} function needs access to R's difficulty and block reward, and the exchange rate, too.
+Do we \emph{need} to use $R_d$, though?
+Surely \emph{any} conversion to L-hashes/L-block will work, right?
+
+Let's see:
+\begin{align}
+    & \frac{L_d}{L_r}
+        & & \frac{\text{L-hashes}}{\text{L-coin}}
+        \nonumber
+        \\[0.5em]
+    & \frac{L_d}{L_r} \cdot X_{R\rightarrow L}
+        & & \frac{\text{L-hashes}}{\text{R-coin}}
+        \nonumber
+        \\[0.5em]
+    & \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot R_r
+        & & \frac{\text{L-hashes}}{\text{R-block}}
+        \nonumber
+        \\[0.5em]
+    & \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot R_r \cdot \frac{R_f}{L_f}
+        & & \frac{\text{L-hashes}}{\text{L-block}}
+        \nonumber
+        \\[0.5em]
+    \therefore \text{ConvDEX}_{R\rightarrow L}(R_r) = \; & \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot R_r \cdot \frac{R_f}{L_f}
+          & &\frac{\text{R-coins}}{\text{R-block}}\rightarrow\frac{\text{L-hashes}}{\text{L-block}}
+          \label{eq:por-conv-dex}
+\end{align}
+
+Okay, so we \emph{can} convert to L's block-weight \emph{without knowing R's difficulty}.
+It's good to know that we have \emph{options} there -- there's \emph{excess capacity} in the values we can convert between.
+If one value is not available, then we can substitute a combination of other values.
+(This is relevant for \autoref{sec:converting-confirmations}.)
+
+\todoDraftOnly{This (above) is one of the properties that we should quickcheck}
+
+To move forward, we need to use $X_{R\rightarrow L}$ in a new \textsc{WeightOf} function -- \emph{where does that value come from?}
+
+The value can't be hard-coded, or provided by a third party -- these would introduce vulnerabilities.
+We need an accurate exchange rate for the moment of conversion, too -- one that is reactive enough to remain up-to-date, and precise enough to be useful.
+It also needs to be \emph{provable}; in practice, it needs to be \emph{on-chain} and available to both chains (and they should agree on the exchange rate).
+If that wasn't the case, how could one chain validate another chain's PoRs?
+Ideally, the exchange rate should \emph{already} be recorded in \emph{both} chains.
+(This way, full nodes of either chain do not need extra data to calculate/verify chain-weight.)
+
+\textbf{However,} there is a major loop-hole in some of the above requirements: they only matter for \emph{mutual PoR}.
+What's different if we consider \emph{one-way PoR} instead?
+
+In the case of one-way PoR, the reflecting chain doesn't need to know much about the reflected chain, and the heavy lifting (like the burden of knowing exchange rates) can be offloaded to \emph{the reflected chain only}.
+Provided that the source of the exchange rate is a \emph{well-built}, protocol-level DEX, are there any real issues?
+
+Let's consider this limited case first: one-way PoR where the \emph{reflected} chain hosts a DEX between it's root token, and the RT of the \emph{reflecting} chain.
+Using \autoref{eq:por-conv-dex}, we can write \autoref{alg:weightof-dex-one-way}.
+
+\input{includes/ut/algorithms/weightof-dex.tex}
+
+% \begin{algorithm}
+% \caption{A \textsc{WeightOf} function for one-way PoR between chains with different root tokens}
+% \label{alg:weightof-dex-one-way}
+% \begin{algorithmic}
+% \Procedure{WeightOf}{$B_i$, $state$} \Comment{Convert reflecting weight to local via a DEX}
+%     \State $t \gets$ \Call{BlockTimestamp}{$B_i$}
+%     \State $C \gets$ \Call{ChainOf}{$B_i$, $state$}
+%     \State $C_r \gets$ \Call{BlockRewardOfChainAt}{$C$, $t$, $state$} \Comment{Block reward of $C$ at $t$}
+%     \State $C_f \gets$ \Call{BlockFrequencyOfChainAt}{$C$, $t$, $state$}
+%     \State $L_d \gets$ \Call{DifficultyOfLocalAt}{$t$, $state$}
+%     \State $L_f \gets$ \Call{BlockFrequencyOfLocalAt}{$t$, $state$}
+%     \State $L_r \gets$ \Call{BlockRewardOfLocalAt}{$t$, $state$}
+%     \State $X_{C\rightarrow L} \gets$ \Call{ExchangeRateOfCoinToLocalAt}{$C$, $t$, $state$}
+%     % \State $w \gets$ \Call{$\text{ConvDEX}_{R\rightarrow L}$}{$L_d$, $L_f$, $L_r$, $C_f$, $C_r$, $X_{C\rightarrow L}$}
+%     \State \Return{\Call{$\text{ConvDEX}_{R\rightarrow L}$}{$L_d$, $L_f$, $L_r$, $C_f$, $C_r$, $X_{C\rightarrow L}$}}
+% \EndProcedure
+% \\
+% \Procedure{$\text{ConvDEX}_{R\rightarrow L}$}{$L_d$, $L_f$, $L_r$, $R_f$, $R_r$, $X_{R\rightarrow L}$} \Comment{Returns L-hashes/L-block}
+%     \State \Return{$(L_d \div L_r) \cdot X_{R\rightarrow L} \cdot R_r \cdot (R_f \div L_f)$} \Comment{See \autoref{eq:por-conv-dex}}
+% \EndProcedure
+% \end{algorithmic}
+% \end{algorithm}
+
+This \emph{seems} okay; of course, it \emph{still depends on the DEX}.
+That means that an attack on the DEX might be a way to attack the consensus algorithm.
+Did we just introduce a vulnerability?
+
+If an attacker \emph{reduces} the exchange rate (L-coins/R-coin) somehow, then that will \emph{decrease} the weight of reflected blocks.
+For example, an attacker might sell \emph{a lot} of L-coins all at once (or cause that to happen through traditional market manipulation).
+If the exchange rate goes down, then the \emph{rate of work} (i.e., how fast chain-weight is accumulated) of Chain L will \emph{seem} to decrease.
+
+However, this isn't \emph{always} relevant: if Chain R is \emph{much} more secure than Chain L, then this doesn't change much in practice.
+Say that Chain R contributes $\sim 100\times$ as much chain-weight as L does.
+For an attacker targeting Chain L, reducing the exchange rate \emph{by half} means that the weight of reflecting blocks is halved.
+So the attacker would need to add $\sim 50\times$ the \emph{current} hash-rate of L to compete against the reflections from R.
+If the attacker was mining in \emph{public}, that would increase the local difficulty by $\sim 50\times$, which \emph{increases} the weight of reflecting blocks by $\sim 50\times$, too.
+Of course, the attacker \emph{could} still mine in private,\footnote{
+    For the purpose of UT and Amaroo, this turns out to be a non-issue.
+    See \autoref{sec:the-simplex}, \autoref{sec:dapp-chain-security}, \autoref{sec:dos-and-dags}, and \autoref{sec:miner-resonance}.
+} provided the exchange rate stays low.
+Even though the attacker gets a $50\%$ discount via market manipulation, this is still a very difficult attack (and very noticeable).
+In effect, attacking L is at least as difficult as attacking R.
+
+If an attacker \emph{increases} the exchange rate (L-coins/R-coin) somehow, then that will \emph{increase} the weight of reflecting blocks.
+This does not help the attacker.
+
+It seems that \emph{in principle} there are some cases where it's safe to use $\text{ConvDEX}_{R\rightarrow L}$ for one-way PoR.
+We'll revisit this later in \autoref{sec:dapp-chain-security}.
+
+What about mutual PoR, though?
+Notice that \autoref{alg:weightof-dex-one-way} is trivially generalized for mutual reflection by replacing \textsc{GetLocalDexRateFromAt} with a suitable \textsc{ExchangeRateToLocalOfAt}, i.e., a DEX that satisfies the requirements we specified earlier.
+So it seems like our \emph{conversion method} should work; the weak-link is the DEX, not the conversion.
+
+In the context of \emph{Ultra Terminum} and \emph{Amaroo}, this isn't an important problem to solve.
+After all, this is a paper about \emph{consensus}, not trustless, decentralized, cross-chain, protocol-level markets.
+If \emph{mutual PoR} is ever used to secure multiple chains with heterogenous tokens, this problem will need to be answered, though.

@@ -404,23 +404,13 @@ Thus, \emph{any} common units, which are linearly convertible both from a reflec
 
 \label{sec:comparing-weight-dex}
 
-\todoDraftOnly{redraft this section}
-
-Instead of using the same token on multiple chains, a similar method could work between chains with different root tokens. Implicit in the above single-token methods was a 1:1 conversion ratio between root tokens held on each chain. Can we not replace that with an exchange rate? If that exchange rate was provided via a trustless and decentralized exchange, could that not also be a reasonable context to do this sort of conversion?
-
-One can use the same principles to compare work between chains that have different root tokens. Such a method is detailed in \autoref{alg:weightof-dex}. However, there is a major new caveat with this method: the DEX and price-finding methods now become *part* of the consensus methods of those chains. This caveat makes this context (with differing root tokens) much harder to reason about, and introduces questions like *What is the effect of front running?* and *Could an attacker exploit market conditions to perform a doublespend when they wouldn't normally be able to?*
-
-\begin{comment}
-This is defined so that it can be quoted later and doesn't need to be updated in multiple locations.
-\end{comment}
-
-\def\convertingWeightDexNotImportant{In the context of \emph{Ultra Terminum} and \emph{Amaroo}, these aren't questions that are important to answer. If \emph{Proof of Reflection} is ever used to secure multiple chains with heterogenous tokens, it's likely that either these questions will need to be answered or alternate methods will need to be devised.}
-
-\convertingWeightDexNotImportant
-
-\input{includes/ut/algorithms/weightof-dex.tex}
+\input{20-por/45-diff-rts-and-dex-2.tex}
 
 ### Converting Confirmations
+
+\label{sec:converting-confirmations}
+
+%% eq:por-conv-dex
 
 So far, we've considered PoW chains only.
 Conversion of chain-weight between PoW chains can work \emph{if and only if} we can convert between \emph{work} (i.e., hashes) done on each chain -- given an appropriate context.

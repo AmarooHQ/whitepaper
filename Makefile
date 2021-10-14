@@ -33,6 +33,7 @@ endif
 
 
 default: whitepaper
+draft: default
 
 release: entropy
 release: PP_MODE=release
@@ -130,7 +131,7 @@ wp-pandoc:
 	sed -i 's/\\%\\%/%/g' $(WPTEX)
 
 pandoc-stdin:
-	pandoc -s --numbered-sections -f markdown -t latex
+	pandoc -s --number-sections -f markdown -t latex
 
 # added to make testing quote boxes easier I think
 wp-just-quotes: clean-wp-md

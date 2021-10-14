@@ -181,7 +181,8 @@
     "latex-workshop.latex.autoBuild.run": "onFileChange",
     "[latex]": {
         "editor.formatOnPaste": false,
-        "editor.suggestSelection": "recentlyUsedByPrefix"
+        "editor.suggestSelection": "recentlyUsedByPrefix",
+        "editor.wordWrap": "on"
     },
     "latex-workshop.latex.tools": [
         {
