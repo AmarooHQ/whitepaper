@@ -38,13 +38,7 @@ Note that \autoref{alg:por-reflected-block-weight} integrates the cap on weight 
 
 \input{includes/ut/headings/25-the-simplex.tex}
 
-\label{sec:the-simplex}
-
-\defineTerm{Simplex}{The single coherent structure that emerges from a collection of blockchains that mutually reflect each-other}
-
-When two or more blockchains *mutually reflect* each-other, they form a *simplex*[^simplex-maths]. For the sake of brevity: all *reflections* within a simplex are *mutual reflections*, and I will omit *mutual* from now on when discussing them. Examples of simplexes are shown in \autoref{fig:simplexes}.
-
-\begin{figure}
+\begin{figure}[H]
     \begin{subfigure}{.31\linewidth}
         \vskip 0pt
         \centering
@@ -71,6 +65,12 @@ When two or more blockchains *mutually reflect* each-other, they form a *simplex
     \caption{Simplexes of increasing capacity. Vertices are simplex-chains. Edges are the reflections between simplex-chains.}
     \label{fig:simplexes}
 \end{figure}
+
+\label{sec:the-simplex}
+
+\defineTerm{Simplex}{The single coherent structure that emerges from a collection of blockchains that mutually reflect each-other}
+
+When two or more blockchains *mutually reflect* each-other, they form a *simplex*[^simplex-maths]. For the sake of brevity: all *reflections* within a simplex are *mutual reflections*, and I will omit *mutual* from now on when discussing them. Examples of simplexes are shown in \autoref{fig:simplexes}.
 
 When a blockchain is part of a simplex, it is called a *simplex-chain* (as distinct from *dapp-chains*).
 
