@@ -3,27 +3,32 @@
 \label{alg:por-reflected-block-weight}
 \begin{algorithmic}
 \Procedure{ReflectedBlockWeight}{$block, state$}
-  \State $s\gets 0$ \Comment{Sum of weights}
-  \For{$C_i$ in \Call{AllReflectingChains}{$state$}}
-    \State $s_C \gets 0$ \Comment{Sum of weights for this chain}
+  \State $w\gets 0$ \Comment{Sum of weights}
+  \For{$C$ in \Call{AllReflectingChains}{$state$}}
+    \State $w_C \gets 0$ \Comment{Sum of weights for this chain}
     \State $n \gets 0$
-    \State $Blocks_{i} \gets$ \Call{ReflectingBlocks}{$C_i$, $state$} \Comment{Reflecting blocks from $C_i$}
-    \For{$B_{i,j}$ in $Blocks_{i}$}
-      \State RCHs $\gets$ \Call{ReflectedChainHeads}{$B_{i,j}$, $state$} \Comment{Local blocks reflected by $B_{i,j}$}
+    \State $blocks \gets$ \Call{Reflectingb}{$C$, $state$} \Comment{Reflecting blocks from $C$}
+    \For{$B_i$ in $blocks$}
+      \State RCHs $\gets$ \Call{ReflectedChainHeads}{$B_i$, $state$} \Comment{Local blocks reflected by $B_i$}
       \If {$block$ in RCHs}
         \State $n \gets n + 1$
-        \State $s_C\gets s_C \; +$ \Call{WeightOf}{$B_{i,j}$, $state$}
+        \State $s_C \gets s_C \; +$ \Call{WeightOf}{$B_i$, $state$}
       \EndIf
     \EndFor
-    \State $B_f \gets $ \Call{BlockFrequencySelf}{$state$}
-    \State $C_f \gets $ \Call{BlockFrequencyOfChain}{$C_i$, $state$}
-    \State $e \gets C_f \div B_f$ \Comment{Expected blocks from $C_i$}
-    \If {$n > 0$}
-      \State weightMod $\gets$ min(1, $e \div n$) \Comment{This caps the contribution of $C_i$ per block}
-      \State $s \gets s_C\;\cdot$ weightMod $+\; s$
-    \EndIf
+    \State $\text{weightMod} \gets $ \Call{CapWorkOf}{$C$, $n$, $state$}
+    \State $s \gets s + s_C \cdot \text{weightMod}$
   \EndFor
   \State \Return{$s$}
 \EndProcedure \Comment{This is an inefficient method and would not be used in production.}
+\\
+\Procedure{CapWorkOf}{$C$, $n$, $state$} \Comment{A simplistic method for capping work}
+  \If {$n \le 0$}
+    \State \Return{0}
+  \EndIf
+  \State $B_f \gets $ \Call{BlockFrequencySelf}{$state$}
+  \State $C_f \gets $ \Call{BlockFrequencyOfChain}{$C$, $state$}
+  \State $e \gets C_f \div B_f$ \Comment{Expected blocks from $C$}
+  \State \Return{min(1, $e \div n$)} \Comment{This caps the contribution of $C_i$ per block}
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
