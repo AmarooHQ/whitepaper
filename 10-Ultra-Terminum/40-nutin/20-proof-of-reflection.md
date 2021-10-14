@@ -109,7 +109,14 @@ Say that the protocol of Chain L is extended to support a projection of Chain R.
 
 Can we use a projection of a chain for a different purpose? What happens if Chain L tracks whether Chain L's history is confirmed within Chain R? This can be done via merkle branches that prove the particular states of Chain R which contain this information. In essence, Chain L uses its projection of Chain R to prove that its *own history* matches that of its *projection* in Chain R. Chain L proves that it is *reflected* in Chain R.
 
-What does this proof look like? The following progression is shown in \autoref{fig:por-step3-parts}. First, Chain L must prove that its history is reflected, so we first find the most recently reflected header, $L_{i+1}$ (ideally, this is the previous L block). Secondly, we want to prove that $L_{i+1}$ is also the \emph{best block} (for Chain L) according to \emph{Chain R's} projection of Chain L, using the best known R block, $R_{j+1}$. For that, we need a merkle branch showing $L_{i+1}$ is part of $R_{j+1}$'s state -- this is sometimes referred to as the \emph{missing} merkle branch. Thirdly, we want to prove that $R_{j+1}$ is the \emph{best block} according to Chain L's projection of Chain R. We can do that via a merkle branch, too, but full nodes of Chain L already know whether $R_{j+1}$ is the best block or not, so this branch doesn't need to be explicit. However, L's nodes must be able to generate it. The \emph{full} collection of information required to prove reflection is called a *proof of reflection*.
+What does this proof look like? The following progression is shown in \autoref{fig:por-step3-parts}.
+First, Chain L must prove that its history is reflected, so we first find the most recently reflected header, $L_{i+1}$ (ideally, this is the previous L block).
+Secondly, we want to prove that $L_{i+1}$ is also the \emph{best block} (for Chain L) according to \emph{Chain R's} projection of Chain L, using the best known R block, $R_{j+1}$.
+For that, we need a merkle branch showing $L_{i+1}$ is part of $R_{j+1}$'s state -- this is sometimes referred to (in this paper) as the \emph{missing} merkle branch.
+Thirdly, we want to prove that $R_{j+1}$ is the \emph{best block} according to Chain L's projection of Chain R.
+We can do that via a merkle branch, too, but full nodes of Chain L already know whether $R_{j+1}$ is the best block or not, so this branch doesn't need to be explicit.
+However, L's nodes must be able to generate it.
+The \emph{full} collection of information required to prove reflection is called a *proof of reflection*.
 
 \begin{figure}[H]
     \begin{subfigure}[t]{.31\textwidth}
