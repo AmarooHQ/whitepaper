@@ -270,7 +270,7 @@ The *essence* of *Proof of Reflection* should now be apparent. *In principle*, w
 Consider a traditional blockchain (like Bitcoin, or Ethereum 1).
 We know that traditional blockchains have properties specific to blocks, like: reward per block (coins/block); a block target time (seconds/block) -- or block frequency (blocks/second); and a difficulty (hashes/block).
 There are also \emph{network-wide} properties, too, like the \emph{inflation rate} (coins/second).
-The \emph{instantaneous} relationship between these properties is defined by the protocol -- it's \emph{context}.
+The \emph{instantaneous} relationship between these properties is defined by the protocol -- its \emph{context}.
 How can we use these relationships to our advantage?
 
 \aside{
@@ -303,11 +303,11 @@ Can we find some function, $\text{ConvWork}_{R\rightarrow L}(w)$, that converts 
     \\[0.5em]
   \implies \; & \frac{L_d}{L_r} \cdot X_{R\rightarrow L}
     & &\frac{\text{L-hashes}}{\text{R-coin}}
-    & &\text{multiply by }X_{R\rightarrow L} \nonumber
+    & &\text{Multiply by }X_{R\rightarrow L} \nonumber
     \\[0.5em]
   \implies \; & \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot \frac{R_r}{R_d}
     & &\frac{\text{L-hashes}}{\text{R-hash}}
-    & &\text{divide by }\nicefrac{R_d}{R_r} \label{eq:por-conversion-const-1}
+    & &\text{Divide by }\nicefrac{R_d}{R_r} \label{eq:por-conversion-const-1}
     \\[0.5em]
   \therefore \text{ConvWork}_{R\rightarrow L}(w) = \; & \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot \frac{R_r}{R_d} \cdot w
     & &\text{R-hashes }\rightarrow\text{ L-hashes}
@@ -339,7 +339,7 @@ If both partial-conversions are \emph{linear}, then we must have a situation lik
   \text{Convert}_{L\rightarrow R}(\dots) =&\; \text{Conv}_1(\text{Conv}_2(\dots))
     & & \\[0.5em]
   =&\; V_1 \cdot \text{Conv}_2(\dots)
-    & &\text{for some constant of conversion, }V_1
+    & &\text{For some constant of conversion, }V_1
 \end{align*}
 
 Let's sum multiple conversions, e.g., as done in \autoref{alg:refl-1-bw}:
@@ -347,7 +347,7 @@ Let's sum multiple conversions, e.g., as done in \autoref{alg:refl-1-bw}:
   \sum\limits_{i=0}^n \text{Convert}_{L\rightarrow R}(\dots) =&\; \sum\limits_{i=0}^n V_1 \cdot \text{Conv}_2(\dots)
     & &\text{} \\[0.5em]
   =&\; V_1 \cdot \sum\limits_{i=0}^n \text{Conv}_2(\dots)
-    & &\text{factorize out }V_1
+    & &\text{Factorize out }V_1
 \end{align*}
 
 Thus, \emph{any} common units, which are linearly convertible both from a reflecting chain's block and to local chain-work, can be used during summation.
@@ -378,7 +378,7 @@ Thus, \emph{any} common units, which are linearly convertible both from a reflec
       \\[0.5em]
     & \frac{R_f}{L_f}
       & & \frac{\text{R-blocks}}{\text{L-block}}
-      & & \text{block frequency ratio} \nonumber
+      & & \text{Block frequency ratio} \nonumber
       \\[0.5em]
     \implies \; & \frac{R_f}{L_f} \cdot R_r \cdot X_{R\rightarrow L}
       & & \frac{\text{L-coins}}{\text{L-block}}
@@ -471,40 +471,93 @@ For non-PoW chains, we'll need conversion methods that have non-arbitrary answer
 
 In general, my intuition is that we can almost always use PoR with networks that fit the \emph{traditional} idea of blockchains. (And when we can't, a protocol change could fix that.)
 
-%% END ### RELEASE
-
-%% BEGIN ### DRAFT
-
+Now, \textbf{converting confirmations,} how do we actually do it?
+Consider the \emph{excess capacity} in our methods of conversion that we covered in \autoref{sec:comparing-weight-dex}.
+If we want to convert confirmations, then we'll need to abstract away from the idea of \emph{difficulty} in our conversion method.
+Thus, \emph{there is no $R_d$ for us to rely on.}
+Instead, we'll need to use the other values at our disposal ($R_f$ and $R_r$).
 \begin{align}
   \text{Consider: } & \frac{R_d}{L_d}
     & &\frac{\text{R-hashes }\cdot\text{ L-blocks}}{\text{R-block }\cdot\text{ L-hash}}
     & & \nonumber
     \\[0.5em]
   \implies \; & \frac{R_d}{L_d} \cdot \left( \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot \frac{R_r}{R_d} \right)
-    & &\frac{\text{L-blocks}}{\text{R-blocks}}
-    & &\text{from \autoref{eq:por-conversion-const-1}} \nonumber
+    & &\frac{\text{L-blocks}}{\text{R-block}}
+    & &\text{From \autoref{eq:por-conversion-const-1}} \nonumber
     \\[0.5em]
   = \; & \frac{R_r}{L_r} \cdot X_{R\rightarrow L}
-    & &\frac{\text{L-blocks}}{\text{R-blocks}}
-    & & \nonumber
+    & &\frac{\text{L-blocks}}{\text{R-block}}
+    & & \text{Reduce} \nonumber
     \\[0.5em]
   \therefore \text{ConvBlocks}_{R\rightarrow L}(b) = \; & \frac{R_r}{L_r} \cdot X_{R\rightarrow L} \cdot b
     & &\text{R-blocks }\rightarrow\text{ L-blocks}
     & & \label{eq:por-conv-blocks}
+    \\[0.5em]
+  \therefore \text{ConvBToCoins}_{R\rightarrow L}(b) = \; & R_r \cdot X_{R\rightarrow L} \cdot b
+    & &\text{R-blocks }\rightarrow\text{ L-coins}
+    & & \nonumber
 \end{align}
 
-<!-- \begin{align}
-  & L_r & &\text{(L-coins/L-block)} & \\
-  & \frac{L_r}{R_r} & &\text{(L-coins/L-block)} & \\
-  & \frac{L_d}{L_r} \cdot
+Notice that L-coins are easily converted to blocks via the conversion constant $\nicefrac{1}{L_r}$, and hashes via the conversion constant $\nicefrac{L_d}{L_r}$.
 
-  & \frac{L_d}{L_r} \cdot r \cdot \frac{R_r}{R_d} & &\text{(L-hashes/R-hash)} & \\
-  =& \frac{L_d}{L_r} \cdot \frac{R_r}{R_d} & &\text{(L-hashes/R-hash)} & &\text{since }r = 1
-\end{align} -->
+#### Coins per Confirmation
 
-%% END ### DRAFT
+In practice, given a cross-chain network, it seems very elegant to measure block-weight in coins.
+Note that this doesn't necessarily have real-world meaning.
+One example where it does is \autoref{sec:conversion-single-root-token}.
+Let's consider measuring block-weight in coins, starting with the conversion used in \autoref{alg:weightof-ratio}.
+\begin{align}
+  & C_r \cdot \frac{C_f}{L_f} \cdot \frac{L_d}{L_r}
+    & & \frac{\text{L-hashes}}{\text{L-block}}
+    & & \text{See \autoref{alg:weightof-ratio}}
+    \nonumber
+    \\[0.5em]
+  \implies \; & C_r \cdot \frac{C_f}{L_f}
+    & &\frac{\text{L-coins}}{\text{L-block}}
+    & &\text{Divide by } \nicefrac{L_d}{L_r}
+    \nonumber
+    \\[0.5em]
+  = \; & \frac{{C_r}^\prime}{L_f}
+    & &\frac{\text{L-coins}}{\text{L-block}}
+    & &\text{Group } {C_r}^\prime
+    \nonumber
+    \\[0.5em]
+  \sum\limits_{C \in \{L, R\}} \frac{{C_r}^\prime}{L_f} = \; & \frac{{L_r}^\prime + {R_r}^\prime}{L_f}
+    & &\frac{\text{L-coins}}{\text{L-block}}
+    & &\text{Sum coins (as a proxy for weight)}
+    \label{eq:chain-coin-weight}
+\end{align}
 
-%% BEGIN ### RELEASE
+What does \autoref{eq:chain-coin-weight} imply if L and R are the only two chains in a context like \autoref{sec:conversion-single-root-token}?
+Notice that, in this case, ${L_r}^\prime + {R_r}^\prime = I$, the network-wide inflation rate.
+One implication is that weight (measured in coins) effectively counts \emph{how much of the full network} is contributing to Chain L's security -- represented via the coins that were minted in those contributing blocks.
+
+If the network is functioning well, we should expect that summing these values \emph{over the full history of the chain} should be close to the sum of all coins minted through block rewards.
+Of course, this is only useful over \emph{multiple} chains.
+If a single, traditional blockchain tried to do this, then all chain-weights would be identical!
+This happens because the conversion methods we're covering \emph{don't try to convert work done at different times.}
+PoR only every converts \emph{near-simultaneous work.}
+
+While measuring weight in coins (in this case, at least) seems to have some meaning, we probably shouldn't \emph{leave} chain-weight in those units.
+The difficulty of a PoW network converts network size (participation) into hashes, and it is adjusted regularly.
+If a chain-weight measurement doesn't account for this, then \emph{how does it include participation at all?}
+Without including participation in chain-weight, how can two local alternate histories be meaningfully compared?
+When measuring and converting chain-work, we \emph{always} want to convert confirmations or coins back to meaningful units which factor in \emph{participation} in some way.
+
+
+<!-- = \; & \frac{C_t \cdot I}{G_t \cdot C_f} \cdot \frac{C_f}{L_f} \cdot \frac{L_d}{L_r}
+  & & C_r: \text{ Substitute \autoref{eq:srt-reward}}
+  \\[0.5em]
+= \; & \frac{C_t \cdot I}{G_t \cdot C_f} \cdot \frac{C_f}{L_f} \cdot \frac{L_d \cdot G_t \cdot L_f}{L_t \cdot I}
+  & & L_r: \text{ Substitute \autoref{eq:srt-reward}}
+  \\[0.5em]
+= \; & \frac{C_t}{L_t} \cdot L_d
+  & & \text{Reduce}
+  \\[0.5em]
+= \; & (\frac{G_t}{L_t} - 1) \cdot L_d
+  & & \text{If } C_t = G_t - L_t
+  \\[0.5em] -->
+
 
 ### Reflection Between PoW and PoS Chains
 

@@ -43,12 +43,12 @@ Since that's a simple fix, let's drop our assumptions about equal block frequenc
 But where do we get the reflecting chain's block reward?
 To start with, we can't let each chain \emph{set} its own reward, that would break the two-way peg.
 It also means \emph{the reflecting chain shouldn't be the source of that data}.
-We could retrieve it from state (if it's prior calculated), but for the sake of this example, let's calculate it in the \textsc{WeightOf} function.
+We could retrieve it from state (if it's already calculated), but for the sake of this example, let's calculate it in the \textsc{WeightOf} function.
 
 Right now, we don't have enough \emph{context} to know what to do; \emph{what contexts would be useful?}
 
 What \emph{purpose} does a block reward fulfil?
-It must be something about \emph{security}, because that's how miners are incented to mine.
+It must be something about \emph{security}, because that's how miners are motivated to mine.
 If we have multiple chains, why should one chain be more secure than another?
 One reason is because \emph{more commerce happens there;} i.e., more of the network relies on \emph{that} chain compared to the other one.
 
@@ -63,7 +63,10 @@ We can rely on that idea because \emph{equality of work} is a result of the mark
 If the network uses this rule to determine block reward, then, for either chain $C$, what can we say?
 Let: $I$ be the network-wide inflation rate (coins/s); $G_t$ be the network-wide root token supply (coins); and $C_t$ be the number of root tokens on chain $C$ (coins). $C_f$ is the frequency of chain $C$ (blocks/s).
 \begin{equation} \label{eq:srt-reward}
-    C_r \cdot C_f = \frac{C_t}{G_t} \cdot I
+\begin{split}
+    C_r \cdot C_f & = \frac{C_t}{G_t} \cdot I \\
+    C_r &= \frac{C_t \cdot I}{G_t \cdot C_f}
+\end{split}
 \end{equation}
 
 Let's combine this with \autoref{eq:conv-reward-to-hashes} to create our next \textsc{WeightOf} algorithm:

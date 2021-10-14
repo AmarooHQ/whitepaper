@@ -111,10 +111,12 @@ This does not help the attacker.
 It seems that \emph{in principle} there are some cases where it's safe to use $\text{ConvDEX}_{R\rightarrow L}$ for one-way PoR.
 We'll revisit this later in \autoref{sec:dapp-chain-security}.
 
-What about mutual PoR, though?
-Notice that \autoref{alg:weightof-dex-one-way} is trivially generalized for mutual reflection by replacing \textsc{GetLocalDexRateFromAt} with a suitable \textsc{ExchangeRateToLocalOfAt}, i.e., a DEX that satisfies the requirements we specified earlier.
-So it seems like our \emph{conversion method} should work; the weak-link is the DEX, not the conversion.
+\aside{
+    What about mutual PoR, though?
+    Notice that \autoref{alg:weightof-dex-one-way} is trivially generalized for mutual reflection by replacing \textsc{GetLocalDexRateFromAt} with a suitable \textsc{ExchangeRateToLocalOfAt}, i.e., a DEX that satisfies the requirements we specified earlier.
+    So it seems like our \emph{conversion method} should work; the weak-link is the DEX, not the conversion.
 
-In the context of \emph{Ultra Terminum} and \emph{Amaroo}, this isn't an important problem to solve.
-After all, this is a paper about \emph{consensus}, not trustless, decentralized, cross-chain, protocol-level markets.
-If \emph{mutual PoR} is ever used to secure multiple chains with heterogenous tokens, this problem will need to be answered, though.
+    In the context of \emph{Ultra Terminum} and \emph{Amaroo}, this isn't an important problem to solve.
+    After all, this is a paper about \emph{consensus}, not trustless, decentralized, cross-chain, protocol-level markets.
+    If \emph{mutual PoR} is ever used to secure multiple chains with heterogenous tokens, this problem will need to be answered, though.
+}
