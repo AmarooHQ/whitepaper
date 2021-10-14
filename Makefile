@@ -16,6 +16,11 @@ PURS_GEN_DIR=includes/ut/complexity/ut-complexity-gen-purs
 PP_MODE=draft
 PP_LINT_FLAG=
 
+NCPUS = $(shell lscpu | egrep '^CPU.s' | awk '{ print $$2 }')
+ifeq ($(NCPUS),)
+	NCPUS = 4
+endif
+
 # default properties for WP -- see `set-wp-properties` cmd
 papersize=a4
 geometry=left=3cm,right=3cm,top=3cm,bottom=3cm
@@ -37,8 +42,12 @@ release:
 	# No matches for \todo{ should be found
 	grep -qzv '\\todo{' output/whitepaper.tex || (grep '\\todo{' output/whitepaper.tex | wc -l; bash bin/msg_error.sh 'Detected `\\\\todo{` in output/whitepaper.tex during release build.'; exit 1)
 
-cilint: PP_MODE=lint
-cilint: whitepaper
+cilint-prep: PP_MODE=lint
+cilint-prep: whitepaper
+
+cilint: cilint-prep
+	npm i
+	npm run lint
 
 wp-no-lint: PP_LINT_FLAG="--no-lint-check"
 wp-no-lint: whitepaper
@@ -88,6 +97,9 @@ wp-graphics-png: $(PNGGraphics)
 whitepaper: $(PDFGraphics) $(InputTeXFiles) build-whitepaper set-wp-properties wp-pandoc mk-latex-pdf wc finished-msg
 whitepaper-skip-pandoc: $(PDFGraphics) $(InputTeXFiles) mk-latex-pdf wc
 
+par-gfx:
+	$(MAKE) -j $(NCPUS) $(PDFGraphics)
+
 # atm restrict this to just the UT folder, can generalize again later
 # to do that: replace '10-Ultra-Terminum' with '*-*'
 # nb: add `clean-wp-md` as a dependency if there are issues building.
@@ -116,6 +128,9 @@ set-wp-properties:
 wp-pandoc:
 	pandoc -s --number-sections --toc -f markdown -t latex -o $(WPTEX) $(WPFILE)
 	sed -i 's/\\%\\%/%/g' $(WPTEX)
+
+pandoc-stdin:
+	pandoc -s --numbered-sections -f markdown -t latex
 
 # added to make testing quote boxes easier I think
 wp-just-quotes: clean-wp-md
@@ -199,6 +214,26 @@ deponly-clean:
 
 depclean: clean deponly-clean
 
+depclean-por:
+	$(RM) -fv -- `find ./ -iname pow_refl\*_sag.pdf`
+
+depclean-tiling:
+	$(RM) -fv -- `find ./ -iname tiling\*_sag.pdf`
+
+depclean-simplex:
+	$(RM) -fv -- `find ./ -iname simplex\*_sag.pdf`
+
+depclean-%:
+	$(RM) -fv -- `find ./ -iname $*\*_sag.pdf`
+
+#re-make SAG files with a given name-prefix
+sag-%:
+	$(MAKE) depclean-$*
+	if [ -z "`find ./ -iname $*\*_sag.tex`" ]; then echo 'no matching files'; else $(MAKE) -j $(NCPUS) `find ./ -iname $*\*_sag.tex | sed 's/\.tex$$/.pdf/'`; fi
+
+# run make for output files based on input files:
+# $(MAKE) `find ./ -iname $*\*_sag.tex | sed 's/\.tex$$/.pdf/'`
+
 # everything in output + the rest
 distclean: depclean
 	-rm -r $(OUTDIR)/*
@@ -221,3 +256,7 @@ docker:
 
 docker-bash:
 	docker run --rm -it -u `id -u ${USER}`:`id -g ${USER}` -v `pwd`:/work whitepaper-build:latest /bin/bash
+
+# run a little python3 server from output dir
+serve:
+	cd $(OUTDIR) && python3 -m http.server 3131

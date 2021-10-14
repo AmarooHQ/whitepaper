@@ -156,7 +156,7 @@ If it is possible to implement dapp-chains (or any system of child-chains) such 
   The property whereby child-chains are not restricted with regards to a choice of protocol (include scripting, accounting methods, block structures, etc)
 }
 
-\autoref{sec:comparing-weight-dex} details a conversion method whereby PoR is possible between chains using different root tokens via a DEX. Could dapp-chains use a \emph{protocol-level} DEX to abstract their protocol and incentive-method away from those of it's parent-chain? Yes.
+\autoref{sec:comparing-weight-dex} details a conversion method whereby PoR is possible between chains using different root tokens via a DEX. Could dapp-chains use a \emph{protocol-level} DEX to abstract their protocol and incentive-method away from those of its parent-chain? Yes.
 
 Is this required for this abstraction? No.
 
@@ -209,7 +209,7 @@ Example use-case: a greenfield dapp-chain uses an Amaroo-compatible DEX (which r
 ##### Method 3: Pay the simplex miner directly
 
 If the dapp-chain is willing to forego more efficient SPV transactions (or otherwise doesn't require them), and it is willing to bear the full burden of PoR in this context, then simply recording the hash of a dapp-chain header might be sufficient.
-In such a case, transactions in the style of Bitcoin's OP_RETURN transaction format provide everything required.
+In such a case, transactions (in the style of Bitcoin's \textsc{OP\_RETURN} transaction format) provide everything required.
 This makes sense if the dapp-chain has exceptionally large headers, or if the dapp-chain does not wish to *disclose* the headers themselves (perhaps it is a private/permissioned network).
 In any case, since it is impossible to stop users including hashes in transactions, this is always a method by which dapp-chains can enable PoR with the host simplex-chain.
 
@@ -226,17 +226,21 @@ This demonstrates both *freedom of incentivization* (as there is none) and *free
 
 [^anchoring]: **Anchoring**: The process by which the hash of some data (perhaps a secondary chain's blocks) is included in transactions of a primary blockchain (e.g., [Bitcoin](https://www.reddit.com/r/Bitcoin/comments/5xkvc1/psa_were_running_a_stress_test_of_our_blockchain/)).
 Anchoring *would* be a progenitor to PoR, except that I believe the idea of an [on-chain light client predates](https://github.com/XertroV/coppr/blob/master/chainheaders.py) the term *anchoring*.
-Though I think that the idea of time-stamping a hash (e.g., via an OP_RETURN transaction on Bitcoin) predates the idea of an on-chain light client.
+Though I think that the idea of time-stamping a hash (e.g., via an \textsc{OP\_RETURN} transaction on Bitcoin) predates the idea of an on-chain light client.
 
 #### PoS Dapp-chains
 
-If the headers of dapp-chains are encoded as simplex-transactions, then techniques like *slashing* are first-class operations within the *hybrid PoW* context provided by the simplex. This solves the *nothing at stake* problem for PoS dapp-chains, provided the necessary PoS primitives can be encoded in a simplex-transaction[^pos-prim-simplex].
+If the headers of dapp-chains are encoded as simplex-transactions, then techniques like *slashing* are first-class operations within the *hybrid PoW* context provided by the simplex.
+This solves the *nothing at stake* problem for PoS dapp-chains, provided the necessary PoS primitives can be encoded in a simplex-transaction.
 
-[^pos-prim-simplex]: In practice, this is always possible via dedicated opcodes; though it's preferable to use a lower-level DSL with some *reach*, and ideally with meaningful *universality*.
+The abstraction layer between simplex-chains and dapp-chains brings practical benefits, too.
+For example: existing (open-source) PoS blockchain schemes can be easily integrated as dapp-chains.
+Given that dapp-chains inherit security properties of their parent-chain (via one-way PoR), if such a dapp-chain's consensus method supports *other* features -- e.g., [finality guarantees](https://github.com/w3f/consensus/blob/master/pdf/grandpa.pdf) -- those features are *free*.
+(Sharding, too, for that matter\dots)
 
-The abstraction layer between simplex-chains and dapp-chains brings practical benefits, too. For example: existing (open-source) PoS blockchain schemes can be easily integrated as dapp-chains. Given that dapp-chains inherit security properties of their parent-chain (via one-way PoR), if such a dapp-chain's consensus method supports *other* features -- e.g., [finality guarantees](https://github.com/w3f/consensus/blob/master/pdf/grandpa.pdf) -- those features are *free*.
-
-The most likely method of integration has four components: modification of the headers (and integration of PoR), modification of existing slashing protocols, implementation of a two-way peg, and support for intra-simplex SPV proofs. For example: [OpenEthereum](https://github.com/openethereum/openethereum) could be integrated as a dapp-chain with the creation of a new [header format](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/ethcore/types/src/header.rs), the creation or modification of a suitable [engine](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/ethcore/src/engines/basic_authority.rs), and the implementation of suitable [builtins](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/vm/builtin/src/lib.rs) that facilitate both the two-way peg and intra-simplex SPV proofs[^builtins-or-sc]. Naturally, there are some other components that are necessary, but those components are common over many dapp-chain integrations, like a component to broadcast header-transactions.
+The most likely method of integration has three core components: modification of the headers (and integration of PoR), modification of existing slashing protocols, and support for intra-simplex SPV proofs.
+For example: [OpenEthereum](https://github.com/openethereum/openethereum) could be integrated as a dapp-chain with the creation of a new [header format](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/ethcore/types/src/header.rs), the creation or modification of a suitable [engine](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/ethcore/src/engines/basic_authority.rs), and the implementation of suitable [builtins](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/vm/builtin/src/lib.rs) that facilitate intra-simplex SPV proofs[^builtins-or-sc] and any other useful features.
+Naturally, there are some other components that are necessary (like a component for broadcasting header-transactions), but those components are common over many dapp-chain integrations and only need to be written once for each *kind* of dapp-chain.
 
 [^builtins-or-sc]: Note: instead of builtins, these requirements could be met via EVM/WASM smart contracts.
 
@@ -261,7 +265,7 @@ plan:
   - use tech like mimblewimble without changing the entire system
   - in general deploy new tech quickly, low risk, high cadence, isolated (sandboxed)
     - tangent about sandbox: is there some good structural principles that prevent classes of attacks? I guess that requiring SPV cross-chain proofs and/or latency stops lots of that (e.g., no re-entrancy). **nb:** i'm wrong about no re-entrancy here; that sorta attack can still be done step-by-step manually sending SPV proofs back and forth or w/e.
-    - it does mean that we can maintain guarantees about the ROO and it's distribution and things, tho. like we know how much is where, and it shouldn't leave without being accounted for.
+    - it does mean that we can maintain guarantees about the ROO and its distribution and things, tho. like we know how much is where, and it shouldn't leave without being accounted for.
   - low overhead for integrating wallets b/c mostly stuff is the same (e.g., interfaces, etc)
     - nb: need a common format for addresses or some understanding of them at a data/type level
   - *all* the layer-2 solns

@@ -3,7 +3,7 @@
 %% \newpage
 
 \begin{comment}
-keep toc to d=1 for this section. default is d=3
+keep toc to d=1 for this section -- reduces ToC page size. default is d=3
 \end{comment}
 
 \addtocontents{toc}{\protect\setcounter{tocdepth}{1}}
@@ -19,10 +19,11 @@ For some magnitude of computational resources (computation, bandwidth, storage, 
 * Scalability --- the system can process $O(n)$ transactions with $O(n) > O(c)$; this means that, as the network grows, the throughput of the system grows faster than the computational resources required per user.
 
 The definition of scalability is perhaps problematic.
-If the network growth, $O(n)$, becomes bottlenecked by an $O(c^2)$ scaling configuration[^oc2-scaling], is the network really scalable?
+If the network growth, $O(n)$, becomes bottlenecked by an $O(c^2)$ scaling configuration, is the network really scalable?
 I prefer an alternative definition of scalability: the system can process $O(n)$ transactions in $O(1)$ time, i.e., confirmations neither take longer nor become more scarce as $n$ and/or $c$ change.
 
-[^oc2-scaling]: The standard method of sharding (or hosting child-chains generally) is to replace transactions with shard-headers.
+Why is $O(c^2)$ an important breakpoint for scaling configurations? Sharding.
+The standard method of sharding (or hosting child-chains generally) is to replace transactions with shard-headers.
 Extra data might also be required.
 If the host-chain has $O(c)$ capacity, then it should be able support $O(c)$ shards (presuming a secure method of sharding is known and in use).
 Each shard has $O(c)$ capacity also, thus the full system has $O(c^2)$ capacity.
@@ -56,7 +57,7 @@ A mistaken way to break the conflict is *merged mining* (aka AuxPoW). This metho
 
 \autoref{fig:trilemma-mm-conflict} shows the cloud for the merged mining conflict.
 
-\begin{figure}
+\begin{figure}[H]
 \centering
 \includegraphics[max width=\linewidth]{trilemma/mm_conflict_sag}
 \caption{A cloud showing the scaling conflict of \textit{merged mining}.}

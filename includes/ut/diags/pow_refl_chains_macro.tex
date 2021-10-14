@@ -3,6 +3,7 @@
 \providecommand\DrawBtcRefl{0}%
 \providecommand\DrawEthRefl{0}%
 \providecommand\DrawPoRLabel{0}%
+\providecommand\DrawHeaderLabel{0}%
 \providecommand\DrawPoRInState{0}%
 \providecommand\DrawPoRForChainB{1}%
 \providecommand\DrawEthLT{3}%
@@ -11,10 +12,40 @@
 \providecommand\AbbrChainA{BTC}%
 \providecommand\NameChainB{Ethereum}%
 \providecommand\AbbrChainB{ETH}%
+\providecommand\ChainBDistFromA{4cm}%
 \providecommand\ChainBBlocksN{40}%
 \providecommand\ChainBBlocksNHasVariance{0}%
 \providecommand\ChainVarianceMathSeed{9001}%
+\providecommand\UseNewPoR{0}
+\providecommand\DrawAllPoRArrows{1}
+\providecommand\StopPoRArrowsAt{3}
+\providecommand\DrawPoRMirrors{1}
 \input{tikz-styles}%
+\usetikzlibrary{snakes, arrows.meta}
+
+% https://tex.stackexchange.com/questions/233246/create-angle-bisectors-in-tikz
+\newcommand{\bissectDraw}[6][]{%
+    \path[#1] let
+        \p1 = ($(#3)!1cm!(#2)$),
+        \p2 = ($(#3)!1cm!(#4)$),
+        \p3 = ($(\p1) + (\p2) - (#3)$)
+    in
+        ($(#3)!#6!(\p3)$) -- ($(\p3)!#5!(#3)$) ;
+    }
+\newcommand{\reflectLine}[5][]{%
+    \ifnum 1=\DrawPoRMirrors
+    \path[#1] let
+        \p4 = ($(#3)$),
+        \p1 = ($(#3)!1cm!(#2)$),
+        \p2 = ($(#3)!1cm!(#4)$),
+        \p3 = ($(\p1) + (\p2) - (#3)$)
+    in
+        % ($(#3)!#6!(\p3)$) -- ($(\p3)!#5!(#3)$) ;
+        ($(\p4)!#5!90:(\p3)$) -- ($(\p4)!-#5!90:(\p3)$);
+    \fi
+    }
+
+
 \newcommand\TikzBlockchainPowReflection{
     \pgfmathtruncatemacro\lastBtc{round(\DrawBtcLT-1)}
     \pgfmathtruncatemacro\lastEth{round(\DrawEthLT-1)}
@@ -28,6 +59,7 @@
         \def\ethAll{ethAll}
         % to facilitate variance in bblocks
         \xdef\tmpBBlocksN{\ChainBBlocksN}
+        \xdef\lastEthChainSegmentLen{\tmpBBlocksN}
         \xdef\bBlocksCount{0}
         \pgfmathsetseed{\ChainVarianceMathSeed}
         \pgfmathtruncatemacro{\blocksNVarOffset}{int(0.3 * \ChainBBlocksN)}
@@ -37,8 +69,12 @@
         \def\ethPorIncl{\lastEthChainSegmentLen\:PoRs}
     \fi
 
+    \def\porArrowXShift{0.2cm}
+    \def\porArrowYShift{0.2cm}
+    \def\porArrowMShift{0.2cm}
+
     \node (btcChain) [chainName] {\NameChainA};
-    \node (ethChain) [chainName, right of=btcChain, xshift=4cm] {\NameChainB};
+    \node (ethChain) [chainName, right of=btcChain, xshift=\ChainBDistFromA] {\NameChainB};
 
     \foreach \net/\oNet in {btc/eth,eth/btc} {
             \node (\net Dots) [below of=\net Chain, yshift=0cm] {$\vdots$};
@@ -103,17 +139,59 @@
                 % end btc state
 
                 \def\porLabel{}
-                \ifnum 1=\DrawPoRLabel
+                \ifnum 1=\xinteval{\DrawPoRLabel * (\DrawPoRLabel + \UseNewPoR)}
                     \def\porLabel{\scriptsize{and \ethPorIncl}}
+                \fi
+
+                \def\btcHeaders{}
+                \ifnum 1=\xinteval{\DrawHeaderLabel * (\DrawHeaderLabel + \UseNewPoR)}
+                    \def\btcHeaders{\scriptsize{include \ethPorHeaders}}
                 \fi
 
                 % reflection arrow, only on nodes 2 and beyond
                 \ifnum 1=\DrawBtcRefl
                     \ifnum 1<\x
-                        \draw [arrowRefl] (btc\x) --
-                        node [anchor=center, above, sloped] {\scriptsize{include \ethPorHeaders}}
+                        \draw [arrowReflL] (btc\x) --
+                        node [anchor=center, above, sloped] {\btcHeaders}
                         node [anchor=center, below, sloped] {\porLabel}
                         (\ethAll\r);
+
+                        % new PoR Arrows
+                        \ifnum 1=\UseNewPoR
+                            % points of triangle
+                            \node (lReflBL\x) [] at (btc\x) {};
+                            \node (lReflTL\x) [] at (\prevNode) {};
+                            \node (lReflTR\x) [] at (\ethAll\r) {};
+                            \node (lReflBR\x) [] at (\ethAll\r) {};
+                            % PoR arrows
+                            \ifnum 1=\xinteval{min(1, \xinteval{\DrawAllPoRArrows + abs(\StopPoRArrowsAt)})}
+                                % points of arrows on cross-chain bits
+                                \coordinate (tl) at ($(lReflTL\x)!0.23!(lReflTR\x)$);
+                                \coordinate (tr) at ($(lReflTL\x)!0.67!(lReflTR\x)$);
+                                \coordinate (bl) at ($(lReflBL\x)!0.23!(lReflBR\x)$);
+                                \coordinate (br) at ($(lReflBL\x)!0.67!(lReflBR\x)$);
+                                % points on triangle (arrows co between two of them)
+                                \coordinate (rOne) at ($(bl)!10pt!90:(br)$);
+                                \coordinate (rTwo) at ($(tl)!-10pt!90:(tr)$);
+                                \coordinate (rThreeT) at ($(tr)!10pt!90:(tl)$);
+                                \coordinate (rThreeB) at ($(br)!-10pt!90:(bl)$);
+                                \coordinate (rThree) at ($(rThreeT)!0.5!(rThreeB)$);
+                                % draw both full path and partial path -- over the top of one another so we get all the arrow heads.
+                                \ifnum 2<\xinteval{abs(2 * \StopPoRArrowsAt - 3)}
+                                    \draw [arrowRefl2] (rOne) -- (rTwo) -- (rThree) -- (rOne);
+                                    \draw [arrowRefl2RL] (rThree) -- (rOne);
+                                    \reflectLine[draw]{rTwo}{rThree}{rOne}{0.08};
+                                \fi
+                                \ifnum 1<\xinteval{abs(2 * \StopPoRArrowsAt - 1)}
+                                    \draw [arrowRefl2LR] (rOne) -- (rTwo) -- (rThree);
+                                    \draw [arrowRefl2LR] (rTwo) -- (rThree);
+                                    \reflectLine[draw]{rOne}{rTwo}{rThree}{0.1};
+                                \fi
+                                \ifnum 0<\StopPoRArrowsAt
+                                    \draw [arrowRefl2] (rOne) -- (rTwo);
+                                \fi
+                            \fi
+                        \fi
                     \fi
                 \fi
             \fi
@@ -184,16 +262,59 @@
                 \fi
 
                 \def\porLabel{}
-                \ifnum 1=\xintifboolexpr{\DrawPoRInState = 1 && \DrawPoRForChainB = 1}{1}{0}
+                \ifnum 1=\xintifboolexpr{\DrawPoRInState = 1 && \DrawPoRForChainB = 1 && 0 = \UseNewPoR}{1}{0}
                     \def\porLabel{\scriptsize{and PoR}}
+                \fi
+
+                \def\ethHeaders{}
+                \ifnum 1=\xinteval{\DrawHeaderLabel * (\DrawHeaderLabel + \UseNewPoR)}
+                    \def\ethHeaders{\scriptsize{include header}}
                 \fi
 
                 % eth refl
                 \ifnum 1=\DrawEthRefl
-                    \draw [arrowRefl] (ethS\x) --
-                    node [anchor=center, above, sloped] {\scriptsize{include header}}
+                    \draw [arrowReflR] (ethS\x) --
+                    node [anchor=center, above, sloped] {\ethHeaders}
                     node [anchor=center, below, sloped] {\porLabel}
                     (\oPrev);
+
+                    % new PoR Arrows
+                    \ifnum 1=\xinteval{\UseNewPoR * min(1, \x - 1) * \DrawPoRForChainB}
+                        % points of triangle
+                        \node (lReflBL\x) [] at (ethS\x) {};
+                        \node (lReflTL\x) [] at (\prevNode) {};
+                        \node (lReflTR\x) [] at (\oPrev) {};
+                        \node (lReflBR\x) [] at (\oPrev) {};
+                        % PoR arrows
+                        \ifnum 1=\xinteval{min(1, \xinteval{\DrawAllPoRArrows + abs(\StopPoRArrowsAt)})}
+                            % points of arrows on cross-chain bits
+                            \coordinate (tl) at ($(lReflTL\x)!0.23!(lReflTR\x)$);
+                            \coordinate (tr) at ($(lReflTL\x)!0.67!(lReflTR\x)$);
+                            \coordinate (bl) at ($(lReflBL\x)!0.23!(lReflBR\x)$);
+                            \coordinate (br) at ($(lReflBL\x)!0.67!(lReflBR\x)$);
+                            % points on triangle (arrows co between two of them)
+                            \coordinate (rOne) at ($(bl)!-10pt!90:(br)$);
+                            \coordinate (rTwo) at ($(tl)!10pt!90:(tr)$);
+                            \coordinate (rThreeT) at ($(tr)!-10pt!90:(tl)$);
+                            \coordinate (rThreeB) at ($(br)!10pt!90:(bl)$);
+                            \coordinate (rThree) at ($(rThreeT)!0.5!(rThreeB)$);
+                            % draw both full path and partial path -- over the top of one another so we get all the arrow heads.
+                            \ifnum 2<\xinteval{abs(2 * \StopPoRArrowsAt - 3)}
+                                \draw [arrowRefl2] (rOne) -- (rTwo) -- (rThree) -- (rOne);
+                                \draw [arrowRefl2RL] (rThree) -- (rOne);
+                                \reflectLine[draw]{rTwo}{rThree}{rOne}{0.08};
+                            \fi
+                            \ifnum 1<\xinteval{abs(2 * \StopPoRArrowsAt - 1)}
+                                \draw [arrowRefl2LR] (rOne) -- (rTwo) -- (rThree);
+                                \draw [arrowRefl2LR] (rTwo) -- (rThree);
+                                \reflectLine[draw]{rOne}{rTwo}{rThree}{0.1};
+                            \fi
+                            \ifnum 0<\StopPoRArrowsAt
+                                \draw [arrowRefl2] (rOne) -- (rTwo);
+                            \fi
+
+                        \fi
+                    \fi
                 \fi
             \fi
         }%

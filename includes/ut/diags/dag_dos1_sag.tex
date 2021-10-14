@@ -8,8 +8,6 @@
 \def\input@path{{./includes/}{./includes/ut/diags/}}
 \makeatother
 
-% todo: make the diagram show an attempted empty-blocks DoS
-
 \begin{document}
 \input{dag-styles}%
 \providecommand\DagNodeDist{0.8cm}
@@ -51,7 +49,7 @@
     \foreach \h in {2,...,4} {
         \pgfmathtruncatemacro\prevH{int(\h-1)}
         \pgfmathtruncatemacro\prevA{int((\h-1)*2)}
-        \pgfmathtruncatemacro\sigmawH{\prevH + \prevA}
+        \pgfmathtruncatemacro\sigmawH{\prevH + \prevA + 1}
         \xdef\prevNodes{blockH\prevH,blockA\prevA}
         \xdef\nodePosDir{right}
         \xdef\nodePosRel{blockH\prevH -| blockA\prevA.east}

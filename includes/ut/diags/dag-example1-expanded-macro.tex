@@ -1,0 +1,63 @@
+
+\providecommand\DagHighlightSubtree{0}%
+\providecommand\DagHighlightSubtreeDepth{0}%
+\providecommand\DagLinearizeSubtree{999}%
+
+\input{dag-styles}%
+
+\newcommand\TikzDagExpanded{
+    \providecommand\AbbrChain{B}
+    \node (prevDots) [yshift=0cm] {$\vdots$};
+
+    \node (block1) [block, subtree1, subtree2, subtree3, below = of prevDots, yshift=0.2cm] {$\AbbrChain_{i}$ \\[-0.2em] \scriptsize{$\Sigma_{w}=0$}};
+    \draw [arrowParent, subtree3PA] (block1) -- (prevDots);
+    \draw [subtree3LA] (block1) -- (prevDots);
+
+    \node (block2mid) [below = of block1] {};
+    \node (block2/2) [block, subtree1, subtree2] at (block2mid) {$\AbbrChain_{i+1,2}$ \\[-0.2em] \scriptsize{$\Sigma_{w}=1$}};
+    \node (block2/1) [block, subtree1, subtree2, subtree3, left = of block2/2] {$\AbbrChain_{i+1,1}$ \\[-0.2em] \scriptsize{$\Sigma_{w}=1$}};
+    \node (block2/3) [block, subtree1, right = of block2/2] {$\AbbrChain_{i+1,3}$ \\[-0.2em] \scriptsize{$\Sigma_{w}=1$}};
+    \draw [arrowParent, subtree3PA] (block2/1) -- (block1);
+    \draw [arrowParent, subtree2PA] (block2/2) -- (block1);
+    \draw [arrowParent, subtree1PA] (block2/3) -- (block1);
+    \draw [subtree3LA] (block2/1) -- (block1);
+    \draw [subtree2LA] (block2/2) -- (block2/1);
+
+    \node (block2Vmid) [below = of block2mid, yshift=-10pt] {};
+    \node (block3mid) [below = of block2Vmid, yshift=-10pt] {};
+
+    \node (block3leftmid) [below = of $(block2/1)!0.5!(block2/2)$] {};
+    \node (block3rightmid) [below = of $(block2/3)!0.5!(block2/2)$] {};
+
+    \node (blockV3) [block, subtree1, subtree2, virtual] at (block3leftmid |- block2Vmid) {$V_{i+2,1}$ \\[-0.2em] \scriptsize{$\Sigma_{w}=2$}};
+
+    \node (block3/1) [block, subtree1] at (block3leftmid |- block3mid) {$\AbbrChain_{i+2,1}$ \\[-0.2em] \scriptsize{$\Sigma_{w}=4$}};
+    \node (block3/2) [block] at (block3rightmid |- block3mid) {$\AbbrChain_{i+2,2}$ \\[-0.2em] \scriptsize{$\Sigma_{w}=3$}};
+    % \draw [arrowParent, subtree0PA] (block3/1) -- (block2/1);
+    \draw [arrowParent, subtree2PA] (blockV3) -- (block2/1);
+    \draw [arrowParent, subtree2PA] (blockV3) -- (block2/2);
+    \draw [arrowParent, subtree1PA] (block3/1) -- (blockV3);
+    \draw [arrowParent, subtree1PA] (block3/1) -- (block2/3);
+    \draw [arrowParent, subtree0PA] (block3/2) -- (block2/2);
+    \draw [arrowParent, subtree0PA] (block3/2) -- (block2/3);
+
+    \draw [subtree2LA] (blockV3) -- (block2/2);
+    \draw [subtree1LA] (block2/3) -- (blockV3);
+    \draw [subtree1LA] (block3/1) -- (block2/3);
+    \draw [subtree0LA] (block3/2) -- (block3/1);
+
+    \node (block4) [block, subtree1Best, below = of block3mid] {$\AbbrChain_{i+3}$ \\[-0.2em] \scriptsize{$\Sigma_{w}=6$}};
+    \draw [arrowParent, subtree0PA] (block4) -- (block3/1);
+    \draw [arrowParent, subtree0PA] (block4) -- (block3/2);
+
+    \draw [subtree0LA] (block4) -- (block3/2);
+
+    \xdef\xs{0cm}
+    \xdef\topNode{prevDots}
+    \xdef\botNode{block4}
+    \xdef\leftMostNode{block2/1}
+
+    \node (topLeft) [left = of \topNode -| \leftMostNode, minimum width=0, xshift=\xs] {};
+    \node (botLeft) [left = of \botNode.south -| \leftMostNode, minimum width=0, xshift=\xs] {};
+    \draw [arrowTime] (topLeft) node () [anchor=west, yshift=-10pt] {\textit{Time}} -- (botLeft);
+}%

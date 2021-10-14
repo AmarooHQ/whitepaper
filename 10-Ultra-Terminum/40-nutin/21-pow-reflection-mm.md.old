@@ -28,7 +28,7 @@ This is a table that's similar to the Bitcoin/Ethereum tables above, except that
 | 1.5 | ||| k+1 | NMC[k+1] header | Tracks NMC chain up to NMC[k+1] |
 | ... |||||||
 
-How can Namecoin alter it's 'block weight' calculation to take advantage of this? How can we structure things to help Namecoin prevent attacks?
+How can Namecoin alter its 'block weight' calculation to take advantage of this? How can we structure things to help Namecoin prevent attacks?
 
 NB: it is assumed that `hashrate(NMC) < hashrate(BTC)` and `totalHashrate([NMC, BTC]) = hashrate(BTC)`. That means that `1 NmcBlock` must 'weigh' less than `1 BtcBlock`. For this example: `2 NmcBlocks = 1 BtcBlock`; i.e. `2 BtcBlocks/NmcBlock` is our constant of conversion.
 

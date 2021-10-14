@@ -1,8 +1,8 @@
 \begin{algorithm}
-\caption{A simplistic \textsc{WeightOf} for reflections in a blockchain with a different root token}
+\caption{A \textsc{WeightOf} function for PoR between chains with a different root token}
 \label{alg:weightof-dex}
 \begin{algorithmic}
-\Procedure{WeightOf}{$B_i, state$} \Comment{The weight of a reflecting block normalized to coins}
+\Procedure{WeightOf}{$B_i, state$} \Comment{The weight of a block normalized to coins}
     \State $t \gets$ \Call{BlockTimestamp}{$B_i$}
     \State $C \gets$ \Call{ChainOf}{$B_i$, $state$}
     \State $r \gets$ \Call{BlockRewardOfChainAt}{$C$, $t$, $state$} \Comment{Block reward of $C$ at $t$}

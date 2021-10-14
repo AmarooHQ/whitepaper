@@ -36,7 +36,7 @@ jobs:
       - name: lint whitepaper
         shell: bash
         run: |
-          make docker "DOCKER_CMD=bash -c 'make cilint'"
+          make docker "DOCKER_CMD=bash -c 'make cilint-prep'"
           npm i
           npm run lint
 

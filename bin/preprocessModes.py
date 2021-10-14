@@ -135,8 +135,11 @@ def process_tex(input_file_path: str, mode: str, output_dir: Optional[str], md_c
 
     [unlinted_file_start, file_contents] = file_contents.split(PREPROCESS_START_FLAG, 1)
 
-    processed_file_start = process_file_contents_mode(mode, unlinted_file_start).replace('--RELEASE-LABEL--', release_label())
-    output_contents = process_file_contents_mode(mode, file_contents, extra_line_nums=len(unlinted_file_start.splitlines()))
+    processed_file_start = process_file_contents_mode(mode, unlinted_file_start) \
+                            .replace('--RELEASE-LABEL--', release_label())
+    output_contents = process_file_contents_mode(mode, file_contents, extra_line_nums=len(unlinted_file_start.splitlines())) \
+                            .replace('% BEGIN \\#\\#\\# DRAFT\n', '\\hruleMarker{Begin DRAFT}\n') \
+                            .replace('% END \\#\\#\\# DRAFT\n', '\\hruleMarker{End DRAFT}\n')
     output_file = output_dir_path / file_name_w_ext
 
     if mode == "lint":

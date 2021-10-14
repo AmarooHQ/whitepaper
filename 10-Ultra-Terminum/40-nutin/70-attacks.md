@@ -84,7 +84,9 @@
 
 \cMax{
   \q{I have lots of ROO for PoS chains.}
-  GL with that. Since the PoS chains are reflected in the PoW chains, you can't screw with their history to brute-force a favorable quorum --- you'd have to re-write way too much PoW history for that. If you're already PoS mining, then your stake will get slashed the second you publish, so the rest of the network will calc those PoS blocks to have a negative weight.
+  GL with that.
+  Since the PoS chains are reflected in the PoW chains, you can't screw with their history to brute-force a favorable quorum --- you'd have to rewrite way too much PoW history for that.
+  If you're already PoS mining, then your stake will get slashed the second you publish, so the rest of the network will calc those PoS blocks to have a negative weight.
 }
 \begin{comment}
 %% From above quote
@@ -99,7 +101,7 @@ Bribes don't work either b/c the PoS set-up is done on a different chain and ref
   %% this box grew too much
   \q{
     \begin{varwidth}{0.91\linewidth}
-    Since the PoS chains are reflected in the PoW chains, you can't screw with their history to brute-force a favorable quorum --- you'd have to re-write way too much PoW history for that.
+    Since the PoS chains are reflected in the PoW chains, you can't screw with their history to brute-force a favorable quorum --- you'd have to rewrite way too much PoW history for that.
     \end{varwidth}
   }
   Like I said, it'll cost you more than it costs me. Have you forgotten that I can launch these attacks simultaneously?

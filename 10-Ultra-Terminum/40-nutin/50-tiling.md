@@ -98,7 +98,6 @@ Two elements of complexity will be analyzed: the size of SPV proofs between simp
 #### Tiling Complexity
 
 If our tiling is balanced (in the sense that a binary tree can be balanced) then the root tile has 3 children, each of which is the root node of a balanced binary tree. If those trees have a height of $h-1$, then each have $2^{h} - 1$ total nodes. The height of the trees is set to $h-1$ so that the full tiling has a height of $h$. The number of tiles in the full tiling is thus:
-
 \begin{equation}
 \begin{split}
 N_{\text{tiles}} & = 3 \cdot (2^{h} - 1) + 1 \\
@@ -107,13 +106,11 @@ N_{\text{tiles}} & = 3 \cdot (2^{h} - 1) + 1 \\
 \end{equation}
 
 and in general, for some valence, $v \ge 3$:
-
 \begin{equation}
 N_{\text{tiles}} = v \cdot \frac{(v-1)^h - 1}{v - 2} + 1
 \end{equation}
 
 Since we defined the height of each tree as $h-1$, the maximal distance between leaf tiles is $2h$, which is also the maximal number of SPV proofs required to prove state between any two simplex-chains. Given \autoref{eq:n-tiles}:
-
 \begin{equation}
 \begin{split}
 N_{\text{tiles}} & = 3 \cdot 2^h - 2 \\
@@ -126,7 +123,6 @@ Thus, the maximal distance between leaf tiles is $2 \cdot \log_{2}(\frac{N_{\tex
 Since tiles can be added in an ad-hoc fashion depending on current capacity, and each tile has capacity in $O(c^j); j \in \{2,3,4\}$, it must be that $N_{\text{tiles}} \approx \frac{n}{c^j}$. Thus $O(N_{tiles}) = O(\frac{n}{c^j})$.
 
 Given \autoref{eq:spv-complexity}, dapp-chain inter-tile SPV proofs have order:
-
 \begin{equation}
 \begin{split}
 O(\log_2 c + \log_2 N_{tiles}) & = O(\log_2 c + \log_2 \frac{n}{c^j}) \\
@@ -139,7 +135,6 @@ O(\log_2 c + \log_2 N_{tiles}) & = O(\log_2 c + \log_2 \frac{n}{c^j}) \\
 #### Network Complexity
 
 Since $O(N_{tiles}) = O(\frac{n}{c^j})$, and each tile has order $O(c^j)$, the complexity of the network overall is given by the product of a tile's order by the number of tiles:
-
 \begin{equation}
 \begin{split}
 O(c^j \cdot N_{tiles}) & = O(c^j \cdot \frac{n}{c^j}) \\
@@ -168,7 +163,7 @@ e.g., The leaf tiles in \autoref{fig:tiled-simplex-5-d2} have simplex-chains tha
 
 this only happens when leaf tiles + their children have $==$ weight to their direct parent, tho. that is: if the parent has $\ge$ simplex-chains, then isolated attacks on the the descendant tiles always fail b/c the parent tile has $>$ weight.
 
-main idea: if you want to attack a simplex tile in the middle of the graph, then you *must* attack it's peers -- b/c that's where *most* of the security contribution comes from (75% at max cap). on the edges mb things are different. my intuition is that, if sensible precautionary parameters are maintained, then it can be done securely. but there are failure modes when the sec contribs from adjacent tiles are out of wack.
+main idea: if you want to attack a simplex tile in the middle of the graph, then you *must* attack its peers -- b/c that's where *most* of the security contribution comes from (75% at max cap). on the edges mb things are different. my intuition is that, if sensible precautionary parameters are maintained, then it can be done securely. but there are failure modes when the sec contribs from adjacent tiles are out of wack.
 
 %% END ### DRAFT
 
@@ -397,7 +392,6 @@ Let's *assume* there *is* significant work in a simplex-miner calculating and ve
 Now, let's consider two systems of equal (network wide) throughput: a tiling of depth 1 (with 4 tiles) and a single simplex. This should be an easy comparison if the tiling has a valence of 3.
 
 In the tiled system, with non-recursive validation, miners on the root tile need to do more work than miners on leaf tiles -- internal reflections for 4 tiles and 3 sets of inter-tile reflections. With recursive validation all miners (for all tiles) have this same burden.
-
 \begin{equation}
 \begin{split}
 & \text{Tiling Refls} = (\frac{N_1}{4})^2 \cdot (4 + 3) = \frac{7 N_1^2}{16} \\

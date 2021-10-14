@@ -41,25 +41,31 @@
     \end{quote}
 }
 
-\newcommand{\bquote}[2]
-    {
-        \begin{quote}{}
-        #1
-        \IfNoValueTF{#2}{}{
+\newcommand{\bquote}[2]{
+    \begin{quote}{}
+    #1
+    \IfNoValueTF{#2}{}{
 
-            \noindent
-            \xrfill[0.7ex]{0.5pt}
-            \vspace{0em}
-            \begin{flushright} \textit{--- #2} \end{flushright}
-        }
-        \end{quote}
+        \noindent
+        \xrfill[0.7ex]{0.5pt}
+        \vspace{0em}
+        \begin{flushright} \textit{--- #2} \end{flushright}
     }
+    \end{quote}
+}
 
-\newcommand{\aside}[1]{
+\newenvironment{easide}{
     \begin{tcolorbox}[
         colback=gray!15,colbacktitle=gray!15,
+        parbox=false,
         tile,
         breakable]
-    #1
+}{
     \end{tcolorbox}
+}
+
+\newcommand{\aside}[1]{
+    \begin{easide}
+    #1
+    \end{easide}
 }

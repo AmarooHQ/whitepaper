@@ -1,0 +1,37 @@
+\todo{Note: this copy isn't used}
+
+For \emph{Proof of Reflection} to work, we must alter the \emph{fork rule} (which returns chain-weight).
+We add block-weights up to get the chain-weight.
+So, for mutually reflecting PoW chains, we need a way to \emph{compare and convert} hashes on one chain to hashes on the other.
+
+Let's start with the simplest case: identical chains (L and R); they have identical block rewards, block times, root token exchange rates, PoW algorithms, etc.
+In this case, it's trivial to see that generating a block for either is equally difficult.
+Thus, our conversion ratio is one L-hash to one R-hash. Easy.
+
+In fact, if the best available mining hardware is identical for both chains, and the PoW algorithm is identical, then one L-hash is always worth one R-hash.
+At equilibrium, any differences in block reward, block frequency, RT exchange rate, etc, \emph{must} cancel out (i.e., be $1:1$) when converting between values of chain-hashes.
+
+$$
+\text{convertToMid}_1(\text{nHashes}(L_1), L_{\text{meta}}) = \text{convertToMid}_1(\text{nHashes}(R_1), R_{\text{meta}})
+$$
+
+NB: $L_\text{meta}$ and $R_\text{meta}$ contain all the other variables required for conversion (whatever they are). Note: it's possible that $L_\text{meta} \ne R_\text{meta}$.
+
+\begin{comment}
+    root token introduced later
+\end{comment}
+
+Next, say the root-tokens of L and R differ in \emph{exchange rate}.
+Since block rewards are denominated in root-tokens, we can convert directly between those root tokens to convert directly between block rewards.
+The nature of mining is that hash-rate is directly proportional to blocks mined, and blocks mined is directly proportional to income.
+If the work \emph{per-block} is equivalent, and all else being equal, then the the block rewards could be scaled \emph{inversely} to balance that change in exchange rates out.
+
+$$
+convertToMid_2(r\cdot L_\text{blockReward}, \dots) = convertToMid_2(R_\text{blockReward}, \dots)
+$$
+
+What if L and R have different block times (but still the same PoW algorithms), though?
+In this case, it's not the absolute block reward that matters.
+That's because, for work to be \emph{equivalent}, miners should make the same RoI \emph{in the same duration} (assuming identical market forces).
+So it's actually the \emph{time adjusted block reward} that we're interested in; i.e., the inflation rate.
+If the converted \emph{value} of \emph{income per second} is equal for miners

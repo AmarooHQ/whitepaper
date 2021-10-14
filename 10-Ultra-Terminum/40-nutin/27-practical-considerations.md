@@ -19,7 +19,7 @@ Furthermore, it risks chain R miners doing SPV mining, which is bad.
 
 After $H_{R,1a}$ is reflected, chain R miners shouldn't build on that header without validating the block (so they should not mine on top of it).
 Before long they'd produce an alternate valid block, $B_{R,1b}$.
-But $B_{R,1b}$ (and it's header, $H_{R,1b}$) wouldn't be reflected yet.
+But $B_{R,1b}$ (and its header, $H_{R,1b}$) wouldn't be reflected yet.
 So $B_{R,1a}$ would have priority over $B_{R,1b}$ until $B_{R,2b}$ (building on $B_{R,1b}$) is created and both $H_{R,1b}$ and $H_{R,2b}$ are reflected.
 After that, a minor chain re-org would restore normality.
 
@@ -95,7 +95,6 @@ Simplex-chains can use this technique to their advantage by segmenting both tran
 That way, the state of a simplex-chain's reflections can be calculated without needing to calculate the remaining state for that simplex-chain.
 
 We could specify the state-transition of simplex-chains (using Ethereum's nomenclature) like this:
-
 \begin{equation}
 \begin{split}
 \label{eq:segregated-state}
@@ -145,7 +144,7 @@ This UT protocol variant is +HOPoRs, the combination of *header omission* (+HO) 
 \aside{
     There is an independent protocol variant (from those above) called +T which provides a significant reduction to proof size and header size. This optimization is currently redacted. \\
     \\
-    Each protocol variant thus far has a corresponding combination-variant, e.g., +PoRs and +PoRTs, +HO and +HOT, etc.
+    Each protocol variant thus far has a corresponding +T variant, e.g., +PoRs and +PoRTs, +HO and +HOT, etc.
 }
 
 ### Confirmation Times
@@ -166,7 +165,7 @@ Let *confirmation time* be the duration breakpoint beyond which enough confirmat
 
 [^approach-zero]: To say that confirmation time approaches 0 only tells the latter half of the process by which a transaction becomes confirmed. The first half of that process is *getting an initial confirmation*, which is effectively a small, but constant, overhead.
 
-A 200-simplex with $B_f = \nicefrac{1}{15}$ has a confirmation rate of $\mathbb{C}^\prime = \nicefrac{40}{3} \approx 13.3$ Hz. An 800-simplex with $B_f = \nicefrac{1}{60}$ has the same confirmation rate. A 1400-simplex (the maximal simplex given \emph{Amaroo}'s initial configuration) with $B_f = \nicefrac{1}{15}$ has $\mathbb{C}^\prime \approx 93$ Hz. This is $\sim 46.5\times$ faster than EOS/Solana, $\sim 1116\times$ faster than Eth2, $\sim 1400\times$ faster than Ethereum, and $\sim 55,800\times$ faster than Bitcoin.
+A 200-simplex with $B_f = \nicefrac{1}{15}$ has a confirmation rate of $\mathbb{C}^\prime = \nicefrac{40}{3} \approx 13.3$ Hz. An 800-simplex with $B_f = \nicefrac{1}{60}$ has the same confirmation rate. A 1400-simplex (the optimized maximal simplex given \emph{Amaroo's} initial configuration) with $B_f = \nicefrac{1}{15}$ has $\mathbb{C}^\prime \approx 93$ Hz. This is $\sim 46.5\times$ faster than EOS/Solana, $\sim 1116\times$ faster than Eth2, $\sim 1400\times$ faster than Ethereum, and $\sim 55,800\times$ faster than Bitcoin.
 
 Note that PoR incents miners to publish blocks as soon as possible so that those blocks begin gaining reflections.
 If a miner does not publish a block immediately, then the reflections in that block become out-of-date very quickly as there are new, additional headers to reflect arriving constantly.
@@ -181,7 +180,7 @@ This mitigates the selfish mining[^selfish-mining] attack.
 \label{sec:dos-and-dags}
 
 Up to this point, simplex-chains have been treated like traditional blockchains, where each block has only one parent.
-Since the vast majority of a simplex-chain's security is provided by other simplex-chains (and only a small amount comes from that chain's foundational consensus method), are attacks like an empty-block Denial of Service[^empty-dos] (DoS) possible?
+Since the vast majority of a simplex-chain's security is provided by other simplex-chains (and only a small proportion comes from that chain's foundational consensus method), are attacks like an empty-block Denial of Service[^empty-dos] (DoS) possible?
 If a simplex-chain were to use PoW, then it might be (relatively) trivial for an attacker to perform such an attack.
 This is because -- in traditional blockchains -- controlling more than 50% of the blocks produced provides *exclusive* control over *which candidate child blocks win* (i.e., are accepted into the canonical chain).
 Is there a way that we can mitigate this risk?
@@ -315,23 +314,96 @@ Prioritized blocks are positioned *earlier* in the final ordering.
 [^directanc]: In DAG (or DAG-like) chains, direct ancestors are sometimes called the *pivot chain* or *main chain*.
 Provided that parent blocks *are sorted by cumulative work*, the chain of *direct ancestors* between a given block and the genesis block must be the *single heaviest path* between the two. (This is the case for UT.)
 
-If a DAG-chain's best block has two parents, each parent will have a *subgraph of blocks* between itself and the *most recent common direct ancestor* (of the two parents).
+Let's limit DAG-chain blocks to two parents. If the best block has two parents, then each parent will have a *subgraph of blocks* between itself and the *most recent common direct ancestor* of the two parents.
 The subgraph which takes priority is that of the *prioritized parent's ancestry*.
 If that subgraph is a chain, then the ordering and execution of blocks is trivial.
 If it is not, then there must be another subgraph within that subgraph, and this algorithm is applied recursively.
 After the prioritized subgraph is processed, the remaining blocks (those that are only ancestors of the remaining parent block) are ordered and applied -- invoking recursion where necessary.
 Finally, the best block is applied.
-In this way, all blocks are executed after their ancestors, and there is a clear and ordering that trivially converges.
+In this way, all blocks are executed after their ancestors, and there is a clear and total ordering that trivially converges.
 
 In the case that more than two parent blocks are permitted, there is a trivial generalization of the above.
-That is: replace all but the first (best) parent with a *virtual parent block* that links back to all remaining *actual* parent blocks.
+That is: replace \emph{all} but the last (worst) parent with a *virtual parent block* that links back to all remaining *actual* parent blocks (but contributes zero block-weight itself).
+Replacing the best parents (rather than the worst parents) with a virtual block means that the fork rule works automatically.
 This can be repeated to allow for arbitrarily many parents.
 
-\begin{comment}
-The methods described in the Inclusive Block Chain Protocols detail orderings that provide a canonical main path in a DAG which is also inclusive of other blocks that do not strictly lie on this path.
-This hints to the fact that ordering is convergent and stable in a DAG provided that it doesn't get too *wide*,
-where width is a measure of the number of concurrent chain-heads that can be merged.
-\end{comment}
+\autoref{fig:dag-ex1-full} is an example of this algorithm for a moderately complex chain-segment ($B_i\cdots B_{i+3}$ which is 7 blocks total), and each step is enumerated and explained.
+
+\begin{figure}[p]
+    \caption{Example: sorting a moderately complex block-DAG; note that the left parent is always the best parent, so will have priority. Each block is annotated with its \emph{chain-weight} ($\Sigma_w$). \label{fig:dag-ex1-full}}
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=.95\linewidth]{dag_example1_sag}
+        \vspace{0.55em}
+        \caption{How should we order this block-DAG? Note: children should \emph{always} be after their parents, and \emph{prioritization} means \emph{earlier execution}.}
+        \label{fig:dag-ex1}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=.95\linewidth]{dag_example1_expanded_order_00_sag}
+        \caption{The first thing we should do is create any virtual nodes that are required ($V_{i+2,1}$).}
+        \label{fig:dag-ex1-order-00}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=.95\linewidth]{dag_example1_expanded_order_10_sag}
+        \caption{Since there are two parents, we look at the \emph{prioritized subgraph} (i.e., most worked).}
+        \label{fig:dag-ex1-order-10}
+    \end{subfigure}
+
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=.95\linewidth]{dag_example1_expanded_order_20_sag}
+        \caption{Again, there are two parents, so we look at the \emph{next} prioritized subgraph.}
+        \label{fig:dag-ex1-order-20}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=.95\linewidth]{dag_example1_expanded_order_30_sag}
+        \caption{We've found a chain. These blocks have the highest priority, so are executed first.}
+        \label{fig:dag-ex1-order-30}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=.95\linewidth]{dag_example1_expanded_order_40_sag}
+        \caption{We're now \emph{ordering} the blocks -- the solid arrows represent the final ordering. In this step we order the highest priority blocks.}
+        \label{fig:dag-ex1-order-40}
+    \end{subfigure}
+
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=.95\linewidth]{dag_example1_expanded_order_50_sag}
+        \caption{Now that the highest priority blocks are ordered, we can order the \emph{previous} subgraph.}
+        \label{fig:dag-ex1-order-50}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=.95\linewidth]{dag_example1_expanded_order_60_sag}
+        \caption{Once more, we order the next-in-line subgraph.}
+        \label{fig:dag-ex1-order-60}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=.95\linewidth]{dag_example1_expanded_order_70_sag}
+        \caption{And finally we order the last remaining blocks. (We could remove virtual blocks too).}
+        \label{fig:dag-ex1-order-70}
+    \end{subfigure}
+\end{figure}
 
 We should expect that conflicting transactions (which might otherwise be attempted doublespends) arise during this process.
 Ancestors of one parent may not be ancestors of another parent.
@@ -357,28 +429,61 @@ Consider the situation where an attacker is attempting to deny service via the p
     \label{fig:dag-dos-1}
 \end{figure}
 
-How does such an attack fair? The challenge of such a DoS attack is to prevent honest miners from extending the attacker's chain-segment. For traditional (non-DAG) chains -- where each non-genesis block has exactly one parent -- this is accomplished as soon as the attacker is able to reliably produce a heavier chain-segment than the honest network for a given period. (Typically, this means the attacker produces blocks more frequently.) However, if blocks are allowed to have *more* than one parent then there *is no point* where an attacker can *maintain* a DoS attack indefinitely. Instead, they can only *delay the execution* of some transactions for a short period of time.
+How does such an attack fair?
+The challenge of such a DoS attack is to prevent honest miners from extending the attacker's chain-segment.
+For traditional (non-DAG) chains -- where each non-genesis block has exactly one parent -- this is accomplished as soon as the attacker is able to reliably produce a heavier chain-segment than the honest network for a given period.
+(Typically, this means the attacker produces blocks more frequently.)
+
+However, if blocks are allowed to have *more* than one parent then there *is no point* where an attacker can *maintain* a DoS attack indefinitely. Instead, they can only *delay the execution* of some transactions for a short period of time.
 Particularly, if an attacker can produce $A_{blocks} = \nicefrac{q}{p} > 1$ for every 1 block produced by the honest network, then the attack can delay transactions for up to $A_{blocks} \cdot B_f^{-1}$ seconds, where $B_f$ is the frequency of block production (in Hz).
 After this (approximate) point, the weight of the honest chain-segment, which includes the attacker's chain-segment, is always greatest.
 
-However, if an attacker performs a *repeating cycle* of these attacks, then they may be able to decrease the effective capacity of the chain by a factor of $A_{blocks} = \nicefrac{q}{p}$.
+If an attacker performs a *repeating cycle* of these attacks, then they may be able to decrease the effective capacity of the chain by a factor of $A_{blocks} = \nicefrac{q}{p}$.
 The opportunity cost of this attack, for the attacker, is at least as much as the lost transaction fees.
 
-All that sounds good so far, but this thought experiment is flawed. It is *smoothed out* compared to what we'd expect in reality -- the discrete nature of block production and reflections is ignored. In \autoref{fig:dag-dos-1}, it's explicitly excluded! What happens if we include the effect of other simplex-chains, though? Well... something \emph{magical}.
+All that sounds okay so far (maybe not that last bit), but this thought experiment is flawed. It is *smoothed out* compared to what we'd expect in reality -- the discrete and probabilistic natures of block production and reflections are ignored. In \autoref{fig:dag-dos-1}, those're explicitly excluded! What happens if we include the effect of other simplex-chains, though? Well... something \emph{magical}.
 
-Consider an attacker producing 2 blocks for every 1 honest block. What happens most of the time? Well the attackers blocks get reflected first, so those blocks have an appreciable advantage over the honest blocks. The honest blocks will get reflected, too, but most of the time the attackers blocks will get the advantage from earlier reflections. \emph{Most} of the time. Occasionally, when an honest block is a bit lucky, it will be produced before the attackers blocks and start gaining reflections earlier. At that point, the attacker has lost -- they need to outpace the \emph{difference} in the number of reflections between the honest block and attacking blocks. So, unlike a normal doublespend (where the attacker wins if they \emph{ever} get ahead), now the honest network wins (ends the DoS) if it \emph{ever} gets ahead of the attacker -- after that point, there's no viable strategy for the attacker besides to build on the honest blocks. \emph{The asymmetry has flipped!}
+Consider an attacker producing 2 blocks for every 1 honest block.
+What happens most of the time?
+Well the attackers blocks get reflected first, so those blocks have an appreciable advantage over the honest blocks.
+The honest blocks will get reflected, too, but most of the time the attackers blocks will get the advantage from earlier reflections.
+\emph{Most} of the time.
+Occasionally, when an honest block is a bit lucky, an honest block will beat the attackers next block -- gaining reflections earlier.
+At that point, the attacker has lost -- they need to outpace the \emph{difference} in the number of reflections between the honest block and attacking blocks.
+So, unlike a normal doublespend (where the attacker wins if they \emph{ever} get ahead), now the honest network wins (ends the DoS) if it \emph{ever} gets ahead of the attacker -- after that point, there's no viable strategy for the attacker besides to build on the honest blocks.
+\emph{The asymmetry has flipped!}
 
-\todoDraftOnly{polish surrounding paragraphs}
+\begin{comment}
+- mk
+cut from after "when an honest block is a bit lucky":
+> (which will be more often if there's \emph{miner resonance})
+it's worth noting the convergence better than we do atm (right now, that's: "If there were, it'd be possible to temporarily limit the attacker to $<50\%$ of mining power, ending the DoS quickly. (See \autoref{sec:miner-resonance}.))"
+\end{comment}
 
-There's more that can be done here, too, like honest users (not miners) creating transactions (with large fees) that depend on certain history (i.e. that some honest block is in the history of the chain). That will attract miners from other chains due to unrealized RoI (potentially a lot). The attacker could include that transaction, but then they need to voluntarily end the DoS themselves. Is there a reasonable strategy whereby the honest network can temporarily increase the number of miners? If there was, the attacker would then have $<50\%$ of mining power, ending the DoS quickly.
+There's more that can be done here, too, like honest users (not necessarily miners) creating transactions (with large fees) that depend on certain history (i.e., that some honest block is in the history of the chain).
+That will attract miners from other chains due to unrealized RoI (potentially a lot).
+The attacker could include that transaction, but then they need to voluntarily end the DoS themselves.
+If you're worried about that, because it seems like miners might empty-block DoS simplex-chains, consider: when in equilibrium, that situation is essentially the same as an efficient market (for transaction execution).
 
-\todoDraftOnly{Note: asymmetry between honest nodes and attacker -- attacker can only build on own blocks, but honest network builds on both.}
+Is there a reasonable strategy whereby the honest network can temporarily increase the number of miners?
+If there were, it'd be possible to temporarily limit the attacker to $<50\%$ of mining power, ending the DoS quickly.
+(See \autoref{sec:miner-resonance}.)
+
+
+
+\todoDraftOnly{The above should work for simplex-chains *and* dapp-chains}
 
 \todoDraftOnly{Dynamic average block-size for simplex-chains based on dapp-chain headers having some PoW}
 
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
+
 ### Qualities of Different Security Methods
 
-\label{sec:quality-groups}
+\label{sec:quality-groups-unused}
+
+\todo{This is draft now -- either rewrite or cut.}
 
 Consider these 3 categories of methods of securing a blockchain:
 
@@ -402,13 +507,22 @@ Do they want a highly secure base-chain, but variance in block times isn't a pro
 
 [^asic-variance]: Note that simplex-chains with PoW algorithms for which there are ASICs can have lower variance, too, if there are multiple simplex-chains with that same algorithm.
 
+%% END ### DRAFT
+
+%% BEGIN ### RELEASE
+
 ### Lowering Block Production Variance
+
+\label{sec:miner-resonance}
 
 \todoDraftOnly{redraft 'lowering block prod variance'}
 
 Is it possible to *dramatically* lower the variance of block production in PoW blockchains without altering incentive structures, compromising security, or changing the probability of generating a valid block?
 
-Yes. The method relies on the *structure* of the network, rather than the consensus protocol itself. Particularly, the network must be structured such that miners' choices result in decreased block production variance --- an emergent phenomenon. It's important not to try and make it artificially (e.g., by increasing the block reward with time-since-last-block) because you don't want people to game the system. It's better to have a simple system with emergent properties than a complex system with those properties \`\`designed in''.
+Yes. The method relies on the *structure* of the network, rather than the consensus protocol itself.
+Particularly, the network must be structured such that miners' choices result in decreased block production variance --- an emergent phenomenon.
+It's important that it's emergent and not synthetic (e.g., by increasing the block reward with time-since-last-block) because we don't want people to game the system.
+It's better to have a simple system with emergent properties than a complex system with those properties \`\`designed in''.
 
 Say you have a network with 10 chains: $C_0, C_1, C_2, ..., C_9$. If the networks are separate, then you have 10 groups of miners: $M_0, M_1, M_2, ..., M_9$. They have to choose one chain to mine on, so the distribution of miners is expected to be approximately the distribution of normalized block rewards + tx fees. The proportions of block rewards between $C_i$ & $C_j$ don't really matter, we expect the mining groups $M_i$ & $M_j$ will just sort themselves out due to market forces. For simplicity, though, this example assumes that mining rewards and the distribution of miners is an even 10% across the board.
 
@@ -443,5 +557,7 @@ The average hash rate on each simplex chain, as described above, is always the s
 \todo{
     Add a nash equilibrium diagram + explanation to show that it's always in the interest of miners to publish headers -- intuition: including headers means that the \emph{other chain's miner} has an incentive to include your header. that means that the next miner (on your chain) will be able to build on a heavier chain if they reflect that other chain's next header -- so that next miner (on the local chain) has an incentive to include that other chain's next header. If the original miner (who might chose not to publish the most recent header of that other chain) censors that reflection, then they disadvantage themselves relative to their competitors (other miners of that simplex-chain). Thus, it's never helpful to a miner to censor reflections (esp if we enforce the limit on $k_b$ and $k_{tx}$). It doesn't help honest miners, and it makes an attackers chain-segment less competitive.
 }
+
+Does a miner ever benefit from withholding reflections?
 
 %% END ### DRAFT
