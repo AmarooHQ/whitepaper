@@ -1,0 +1,27 @@
+\documentclass[]{standalone}
+\usepackage[T1]{fontenc}\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usepackage{xintexpr}
+\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
+
+\makeatletter
+\def\input@path{{./includes/}{./includes/ut/diags/}}
+\makeatother
+
+
+\providecommand\DaaInitialNodePlacement{0,0}
+
+
+\input{daa_macro}
+
+\begin{document}
+\begin{tikzpicture}[node distance=7em]
+  \node (daa1Init) [] at (\DaaInitialNodePlacement) {};
+  \renewcommand\DaaInitialNodePlacement{daa1Init}
+  \DrawTikzDaaMacro
+  \node (daa2Init) [yshift=6em] at (daa1Init) {};
+  \renewcommand\DaaInitialNodePlacement{daa2Init}
+  \renewcommand\MirrorVertical{1}
+  \DrawTikzDaaMacro
+\end{tikzpicture}
+\end{document}

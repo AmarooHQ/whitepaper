@@ -481,18 +481,47 @@ What's going on?
 
 \todo{hold up}
 
+Let's consider some units with \emph{real-world} interpretations -- not abstract algebra.
+
+* \emph{Relative block frequencies} --- This has real-world meaning: Ethereum 1 produces approximately 40 Ethereum-blocks in the same world-time that Bitcoin produces 1 Bitcoin-block.
+* \emph{Relative block weights} --- This has real-world meaning:
+
 \begin{figure}[H]
 \centering
 \includegraphics[max width=\linewidth, max height=0.3\textheight]{diff_adjustment_alg_sag}
-\caption{The difficulty adjustment algorithm governs the relationship between the inputs: target block frequency and network participation, and the outputs: the network difficulty and the confirmation rate. The difficulty implies a confirmation rate only because participation has been factored in -- there's \emph{implicit context} in those values.}
+\caption{
+  The difficulty adjustment algorithm governs the relationship between the inputs: target block frequency, network history, and network participation; and the output: the network difficulty.
+  The difficulty is how \emph{confirmations} and \emph{coins} become \textbf{laden} with \emph{implicit context}.
+  If we don't account for this \emph{implicit context} then our conversions will be nonsensical.
+  The implicit context is \emph{network participation} -- thus, those values which are \emph{context laden} have their units prefixed with \texttt{n-}, for ``network''.
+}
 \label{fig:daa-conversion}
 \end{figure}
 
-\begin{comment}
-\begin{equation*}
-  \text{Target Blocks/second }\rightarrow\text{ [ Difficulty Adjustment Algorithm ] }\rightarrow\text{ Confirmations/second}
-\end{equation*}
-\end{comment}
+\begin{align}
+  ? & = \frac{L_f}{R_f}
+    & & \frac{\text{L-blocks} \cdot \text{R-seconds}}{\text{L-second} \cdot \text{R-block}}
+    & & \text{Relative frequencies}
+    \label{eq:rel-conf-hz}
+    \\[0.5em]
+  %  ? & = \frac{R_r}{L_r} \cdot X_{R\rightarrow L}
+  %    %& & \frac{\text{L-blocks} \cdot (\text{R-coins} \rightarrow \text{L-coins})}{\text{L-coins} \cdot \text{R-block}}
+  %    & & \frac{\text{L-blocks} \cdot \text{L-coins}}{\text{L-coins} \cdot \text{R-block}}
+  %    & & \text{Relative block rewards via } X_{R\rightarrow L}
+  %    \nonumber
+  %    \\[0.5em]
+  %  ? & = \frac{R_r}{L_r} \cdot X_{R\rightarrow L}
+  %    & & \frac{\text{L-blocks} \cdot (\text{R-coins} \rightarrow \text{L-coins})}{\text{L-coins} \cdot \text{R-block}}
+  %    %& & \frac{\text{L-blocks} \cdot \text{L-coins}}{\text{L-coins} \cdot \text{R-block}}
+  %    & & \text{Relative block rewards via } X_{R\rightarrow L}
+  %    \nonumber
+  %    \\[0.5em]
+  ? & = \frac{R_r}{L_r} \cdot X_{R\rightarrow L}
+    & & \frac{\text{L-blocks}}{\text{R-block}} \cdot \cancelto{1}{\frac{\text{R-coins} \cdot \text{L-coins}}{\text{L-coins} \cdot \text{R-coins}}}
+    %& & \frac{\text{L-blocks} \cdot \text{L-coins}}{\text{L-coins} \cdot \text{R-block}}
+    & & \text{Relative block weights via } X_{R\rightarrow L}
+    \label{eq:rel-block-weight}
+\end{align}
 
 re block freq and conf rate: everything about them is the same except their nature
 

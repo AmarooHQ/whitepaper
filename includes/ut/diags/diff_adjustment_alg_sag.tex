@@ -8,37 +8,71 @@
 \def\input@path{{./includes/}{./includes/ut/diags/}}
 \makeatother
 
-\input{./tikz-styles}
+\input{daa_macro}
 
-\providecommand\DaaHeight{2em}
+% \input{./tikz-styles}
+
+% \providecommand\DaaHeight{2em}
+% \providecommand\XShiftTargetBf{3.5em}
+% \providecommand\MirrorVertical{0}
+% \providecommand\UnitPrefix{n-}
+% \providecommand\TikzNodePrefix{}
+
+% \providecommand\n[1]{}
+
+% \tikzstyle{contextArrow} = [->, double]
 
 \begin{document}
-\begin{tikzpicture}[node distance=6em]
+\begin{tikzpicture}[node distance=7em]
+  \DrawTikzDaaMacro
+  % \tikzstyle{ctxLabelAll} = [anchor=center, sloped, align=center]
+  % \ifnum 1=\MirrorVertical
+  %   \tikzstyle{aboveOf} = [below of = #1]
+  %   \tikzstyle{belowOf} = [above of = #1]
+  %   \tikzstyle{ctxLabel} = [ctxLabelAll, below]
+  %   \tikzstyle{ctxLabelAlt} = [ctxLabelAll, above]
+  %   \newcommand\vMod{}
+  %   \newcommand\vNorth{south}
+  %   \newcommand\vSouth{north}
+  % \else
+  %   \tikzstyle{aboveOf} = [above of = #1]
+  %   \tikzstyle{belowOf} = [below of = #1]
+  %   \tikzstyle{ctxLabel} = [ctxLabelAll, above]
+  %   \tikzstyle{ctxLabelAlt} = [ctxLabelAll, below]
+  %   \newcommand\vMod{-}
+  %   \newcommand\vNorth{north}
+  %   \newcommand\vSouth{south}
+  % \fi
+  % \renewcommand\n[1]{\TikzNodePrefix#1}
 
-  \node (chainHist) [align=center] {Chain History \\ (n-blocks/n-second)};
-  \node (previousDifficulty) [yshift=-\DaaHeight, below of = chainHist, align=center] {Previous difficulty \\ (hashes/n-block)};
+  % \node (\n{chainHist}) [align=center] {Chain History \\ (\UnitPrefix{}blocks/\UnitPrefix{}second)};
+  % \node (\n{previousDifficulty}) [yshift=\vMod\DaaHeight, belowOf={\n{chainHist}}, align=center] {Previous difficulty \\ (hashes/\UnitPrefix{}block)};
 
-  \node (cr) [right of = chainHist, xshift=7cm, align=center] {Confirmation rate \\ (n-blocks/n-second)};
-  \node (difficulty) [yshift=-\DaaHeight, below of = cr, align=center] {Difficulty \\ (hashes/n-block)};
+  % \node (\n{cr}) [right of = \n{chainHist}, xshift=7cm, align=center] {Confirmation rate \\ (\UnitPrefix{}blocks/\UnitPrefix{}second)};
+  % \node (\n{difficulty}) [yshift=\vMod\DaaHeight, belowOf={\n{cr}}, align=center] {Difficulty \\ (hashes/\UnitPrefix{}block)};
+  % \node (\n{coins}) [align=center, xshift=0.5em] at ($(\n{cr}.east)!0.5!(\n{difficulty}.east)$) {Block Reward \\ (\UnitPrefix{}coins/\UnitPrefix{}block)};
 
-%   \node (ch) [align=center, xshift=-2em] at ($(chainHist)!0.5!(previousDifficulty)$) {Chain history};
-  \node (targetBF) [align=center, xshift=-2em] at ($(chainHist)!0.5!(previousDifficulty)$) {Target Block Hz \\ (blocks/second)};
+  % \node (\n{targetBF}) [align=center, xshift=-\XShiftTargetBf] at ($(\n{chainHist})!0.5!(\n{previousDifficulty})$) {Target Block Freq. \\ (blocks/second)};
 
-  \coordinate (topmid) at ($(chainHist)!0.5!(cr)$);
-  \coordinate (botmid) at ($(previousDifficulty)!0.5!(difficulty)$);
-  \coordinate (midmid) at ($(topmid)!0.5!(botmid)$);
+  % % DAA NODE
 
-  \node (daa) [chainName] at (midmid) {$\; \rightarrow$ Difficulty Adjustment Algorithm $\rightarrow \;$};
+  % \coordinate (\n{topmid}) at ($(\n{chainHist})!0.5!(\n{cr})$);
+  % \coordinate (\n{botmid}) at ($(\n{previousDifficulty})!0.5!(\n{difficulty})$);
+  % \coordinate (\n{midmid}) at ($(\n{topmid})!0.5!(\n{botmid})$);
 
-  \draw [->, thick] (chainHist) [shorten >= 2pt] -- (daa.west |- daa.north);
-  \draw [->, thick, shorten >= 2pt] (targetBF) -- (daa.west);
-  \draw [->, thick] (previousDifficulty) [shorten >= 2pt] -- (daa.west |- daa.south);
+  % \node (\n{daa}) [chainName, double] at (\n{midmid}) {$\; \rightarrow$ Difficulty Adjustment Algorithm $\rightarrow \;$};
 
-  \draw [->, thick] (daa.east |- daa.south) [shorten <= 2pt] -- (difficulty);
-%   \draw [->] (daa.east |- daa.north) -- (cr);
-  \draw [->, double] (difficulty) -- node [anchor=center, above, sloped, align=center] {implicit \\ context} (cr);
-  \draw [->, double] (previousDifficulty) -- node [anchor=center, above, sloped, align=center] {implicit context} (difficulty);
-  \draw [->, double] (cr) -- node [anchor=center, below, sloped, align=center] {implicit context feedback} (chainHist);
+  % % ARROWS
+
+  % \draw (\n{chainHist}) [->, thick, shorten >= 2pt] -- (\n{daa}.west |- \n{daa}.\vNorth);
+  % \draw (\n{targetBF}) [->, thick, shorten >= 2pt] -- (\n{daa}.west);
+  % \draw (\n{previousDifficulty}) [->, thick, shorten >= 2pt] -- (\n{daa}.west |- \n{daa}.\vSouth);
+
+  % \draw (\n{daa}.east |- \n{daa}.\vSouth) [->, thick, shorten <= 2pt] -- (\n{difficulty});
+  % \draw [contextArrow] (\n{difficulty}) -- node [ctxLabel] {implicit \\ context} (\n{cr});
+  % \draw [contextArrow] (\n{difficulty}) -- node [ctxLabel] {} (\n{coins});
+  % \draw [contextArrow] (\n{previousDifficulty}) -- node [ctxLabel] {implicit context} (\n{difficulty});
+  % \draw [contextArrow] (\n{cr}) -- node [ctxLabelAlt] {implicit context feedback} (\n{chainHist});
 
 \end{tikzpicture}
 \end{document}
