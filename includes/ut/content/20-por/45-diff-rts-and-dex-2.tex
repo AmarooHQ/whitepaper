@@ -10,7 +10,7 @@ Our starting point will be \autoref{eq:por-conv-work}:
 
 It's easy to see that we can work with this -- of course, the \textsc{WeightOf} function needs access to R's difficulty and block reward, and the exchange rate, too.
 Do we \emph{need} to use $R_d$, though?
-Surely \emph{any} conversion to L-hashes/L-block will work, right?
+Surely \emph{any} conversion to L-hashes will work, right?
 
 Let's see:
 \begin{align}
@@ -26,13 +26,18 @@ Let's see:
         & & \frac{\text{L-hashes}}{\text{R-block}}
         \nonumber
         \\[0.5em]
-    & \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot R_r \cdot \frac{R_f}{L_f}
-        & & \frac{\text{L-hashes}}{\text{L-block}}
-        \nonumber
-        \\[0.5em]
-    \therefore \text{ConvDEX}_{R\rightarrow L}(R_r) = \; & \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot R_r \cdot \frac{R_f}{L_f}
-          & &\frac{\text{R-coins}}{\text{R-block}}\rightarrow\frac{\text{L-hashes}}{\text{L-block}}
-          \label{eq:por-conv-dex}
+    \therefore \text{ConvDEX}_{R\rightarrow L}(b) = \; & \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot R_r \cdot b
+        & & \text{R-blocks }\rightarrow\text{ L-hashes}
+        \label{eq:por-conv-dex}
+    % isn't R-block -> L-hashes enough?
+    %     \\[0.5em]
+    % & \frac{1}{L_r} \cdot X_{R\rightarrow L} \cdot R_r \cdot \frac{R_f}{L_f}
+    %     & & \frac{\text{L-hashes}}{\text{L-block}}
+    %     \nonumber
+    %     \\[0.5em]
+    % \therefore \text{ConvDEX}_{R\rightarrow L}(R_r) = \; & \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot R_r \cdot \frac{R_f}{L_f}
+    %       & &\frac{\text{R-coins}}{\text{R-block}}\rightarrow\frac{\text{L-hashes}}{\text{L-block}}
+    %       \label{eq:por-conv-dex}
 \end{align}
 
 Okay, so we \emph{can} convert to L's block-weight \emph{without knowing R's difficulty}.

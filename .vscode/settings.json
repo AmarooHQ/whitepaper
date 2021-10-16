@@ -127,7 +127,9 @@
         "Yonatan",
         "Zack",
         "ZKPs",
-        "Zohar"
+        "Zohar",
+        "Scrypt",
+        "FPGA",
     ],
     "cSpell.ignoreWords": [
         "subsectionautorefname",

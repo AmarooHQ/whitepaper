@@ -346,7 +346,7 @@ Here are the key assumptions:
 
 * Both L and R started on the same day, with the same block rewards (in their respective root tokens), block frequencies, and inflation schedules.
 * L and R have equal money supplies, and (by chance) the exchange rate has been stable at $X_{R\rightarrow L} = 3$ L-coins/R-coin.
-* L and R use different PoW algorithms, L uses Scrypt (similar to Litecoin) and R uses SHA256 (similar to Bitcoin).
+* L and R use different PoW algorithms, L uses something like Scrypt (similar to Litecoin) and R uses something like SHA256 (similar to Bitcoin).
 * ASIC/FPGA mining doesn't exist yet, but GPU mining does.
 * (In this thought experiment) the best GPUs for mining Scrypt and SHA256 are of the same brand and model -- i.e. the same supply is responsible for the hardware of *all* miners, regardless of which chain they mine.
 * There's no comparative advantage between GPU makes/models -- i.e., a miner can't increase their revenue by cleverly organizing which GPUs mine which networks.
@@ -423,12 +423,19 @@ Thus, we can say that a miner's revenue is \emph{equal} regardless of which chai
 
 So, the ratio of \emph{difficulties} should be $21 \frac{\text{R-hashes}\cdot\text{L-blocks}}{\text{L-hash}\cdot\text{R-block}}$; or, R's difficulty \emph{value} should be $21\times$ L's difficulty \emph{value}.
 
+Why did $X_{R\rightarrow L}\text{, }R_r\text{, and }L_r$ equal 3, though?
+First, notice that the units did not change with that operation.
+Next, we know the exchange rate $X_{R\rightarrow L}=3$; we said so earlier.
+So it must be that $\nicefrac{R_r}{L_r}=1$.
+This is only possible because we began \emph{calculating} numerical values.
+We said earlier that L and R have -- numerically -- identical block rewards, so it must be that $\nicefrac{R_r}{L_r}=1$ \emph{in this case.}
+
 \begin{comment}
 Does this make sense?
 A miner can do $7\times$ the hashes on R (compared to L), but only produces $\nicefrac{7h}{R_d}$ R-blocks.
 Those will give a return of $7h \cdot \nicefrac{R_r}{R_d}$ R-coins.
 Alternatively, the miner could do $h$ hashes on L to produce $\nicefrac{h}{L_d}$ L-blocks.
-That provides a return of $h \cdot \nicefrac{L_r}{L_d}$ L_coins.
+That provides a return of $h \cdot \nicefrac{L_r}{L_d}$ L-coins.
 The exchange rate is 3 L-coins/R-coin, so naturally a miner needs to make more L-coins ....
 \end{comment}
 
@@ -465,7 +472,7 @@ Consider:
     \nonumber
 \end{align}
 
-These two values are \textbf{not} equal (or comparable), and nothing we've said implies that they should be equal.
+These two values are \textbf{not} equal (or comparable), and nothing we've said implies that they should be!
 On the one hand, we have a ratio of the value of block creation; and on the other, we have something like *relative block frequencies.*
 But they have the same units!
 What's going on?
