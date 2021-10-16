@@ -356,9 +356,9 @@ Here are the key assumptions:
 
 What should we expect regarding the conversion of work?
 To start with, let's note that GPU miners could work on either chain -- good hardware for one chain is good hardware for the other, too.
-We know that the block rewards (in root tokens) and block frequencies are the same -- so the exchange rate is going to play a role in RoI.
+We know that the block rewards (in root tokens) and block frequencies are the same -- so the exchange rate is going to play a dominant role in RoI (since the only other difference is difficulty and hash-rate).
 If a miner could break even by making 30 L-coins, then they could also break even by making 10 R-coins.
-They'd need to make $3\times$ as many L-coins as R-coins -- the exchange rate.
+They'd need to make $3\times$ as many L-coins as R-coins -- that's the exchange rate.
 If L and R used the same hashing algorithm, then we could compare difficulties to see if this makes sense -- does that miner make $3\times$ as many L-blocks as they would R-blocks?
 
 In this case, though, the difficulties are set for \emph{different hashing algorithms} -- so how many hashes can GPUs do for each hash?
@@ -480,6 +480,49 @@ What's going on?
 ##### Hold Up! We Need to Talk About $\nicefrac{L_f}{R_f}$ and $\nicefrac{R_r}{L_r} \cdot X_{R\rightarrow L}$
 
 \todo{hold up}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\linewidth, max height=0.3\textheight]{diff_adjustment_alg_sag}
+\caption{The difficulty adjustment algorithm governs the relationship between the inputs: target block frequency and network participation, and the outputs: the network difficulty and the confirmation rate. The difficulty implies a confirmation rate only because participation has been factored in -- there's \emph{implicit context} in those values.}
+\label{fig:daa-conversion}
+\end{figure}
+
+\begin{comment}
+\begin{equation*}
+  \text{Target Blocks/second }\rightarrow\text{ [ Difficulty Adjustment Algorithm ] }\rightarrow\text{ Confirmations/second}
+\end{equation*}
+\end{comment}
+
+re block freq and conf rate: everything about them is the same except their nature
+
+you need more than the target frequency to know why B_d => conf/sec -- it includes participation, and the implication only holds *because* participation is included.
+
+ratio of targets => relative block production frequencies
+
+ratio of confirmations => relative block-weight
+
+different units:
+
+- 'network seconds'
+- and or 'blocks' vs 'R-blocks' (i.e. blocks vs confirmations)
+- mb need both?
+
+$\frac{L_f}{R_f}$ implies that those units (L-blocks/R-block) are different from ratio of confirmation rates.
+frequency of confirmations => just same as last time
+seconds must be different
+network seconds
+
+can't divide conf rate (blocks/n-second) by block freq (blocks/s) to get (s/n-seconds) either -- so blocks must be diff units too.
+
+~~DAA is a constant of conversion -- in effect.~~ no -- it does more.
+information is *lost* through the DAA.
+
+(w-blocks/w-second) and (hashes/n-second) -> (hashes/r-block, r-blocks/r-second)
+
+only thing objective is the number of hashes
+
+
 
 ##### Conversions and Sums
 

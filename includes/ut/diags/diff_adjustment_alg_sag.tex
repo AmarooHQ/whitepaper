@@ -1,0 +1,44 @@
+\documentclass[]{standalone}
+\usepackage[T1]{fontenc}\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usepackage{xintexpr}
+\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
+
+\makeatletter
+\def\input@path{{./includes/}{./includes/ut/diags/}}
+\makeatother
+
+\input{./tikz-styles}
+
+\providecommand\DaaHeight{2em}
+
+\begin{document}
+\begin{tikzpicture}[node distance=6em]
+
+  \node (chainHist) [align=center] {Chain History \\ (n-blocks/n-second)};
+  \node (previousDifficulty) [yshift=-\DaaHeight, below of = chainHist, align=center] {Previous difficulty \\ (hashes/n-block)};
+
+  \node (cr) [right of = chainHist, xshift=7cm, align=center] {Confirmation rate \\ (n-blocks/n-second)};
+  \node (difficulty) [yshift=-\DaaHeight, below of = cr, align=center] {Difficulty \\ (hashes/n-block)};
+
+%   \node (ch) [align=center, xshift=-2em] at ($(chainHist)!0.5!(previousDifficulty)$) {Chain history};
+  \node (targetBF) [align=center, xshift=-2em] at ($(chainHist)!0.5!(previousDifficulty)$) {Target Block Hz \\ (blocks/second)};
+
+  \coordinate (topmid) at ($(chainHist)!0.5!(cr)$);
+  \coordinate (botmid) at ($(previousDifficulty)!0.5!(difficulty)$);
+  \coordinate (midmid) at ($(topmid)!0.5!(botmid)$);
+
+  \node (daa) [chainName] at (midmid) {$\; \rightarrow$ Difficulty Adjustment Algorithm $\rightarrow \;$};
+
+  \draw [->, thick] (chainHist) [shorten >= 2pt] -- (daa.west |- daa.north);
+  \draw [->, thick, shorten >= 2pt] (targetBF) -- (daa.west);
+  \draw [->, thick] (previousDifficulty) [shorten >= 2pt] -- (daa.west |- daa.south);
+
+  \draw [->, thick] (daa.east |- daa.south) [shorten <= 2pt] -- (difficulty);
+%   \draw [->] (daa.east |- daa.north) -- (cr);
+  \draw [->, double] (difficulty) -- node [anchor=center, above, sloped, align=center] {implicit \\ context} (cr);
+  \draw [->, double] (previousDifficulty) -- node [anchor=center, above, sloped, align=center] {implicit context} (difficulty);
+  \draw [->, double] (cr) -- node [anchor=center, below, sloped, align=center] {implicit context feedback} (chainHist);
+
+\end{tikzpicture}
+\end{document}
