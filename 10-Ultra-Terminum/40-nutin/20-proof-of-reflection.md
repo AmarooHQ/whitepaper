@@ -302,6 +302,8 @@ Now, let's add that exchange rate: $X_{R\rightarrow L}$ (L-coins/R-coin).
 And some variables for Chain R which correspond to Chain L's above: $R_f$, $R_r$, and $R_d$.
 There's a symmetry between chains L and R, so we already know that $\nicefrac{R_d}{R_r}$ gives us R-hashes/R-coin.
 
+##### Converting Block-Weights
+
 Can we find some function, $\text{ConvWork}_{R\rightarrow L}(w)$, that converts R-hashes to L-hashes?
 \begin{align}
   & \frac{L_d}{L_r}
@@ -321,17 +323,158 @@ Can we find some function, $\text{ConvWork}_{R\rightarrow L}(w)$, that converts 
     & & \label{eq:por-conv-work}
 \end{align}
 
-With \autoref{eq:por-conversion-const-1}, \textbf{we have just found our first constant of conversion.}
-Of course, we need to figure out a way to get the exchange rate that is \emph{at least as secure} as the consensus algorithms (otherwise we'd be introducing a new weakest-link).
-That can't be too hard, right?
+With \autoref{eq:por-conversion-const-1}, \textbf{we have just found our first constant of conversion for \textbf{block-weight.}}
+
+What's going on here?
+We start out by observing $\nicefrac{L_d}{L_r}$ gives us a value in units of $\frac{\text{L-hashes}}{\text{L-coin}}$.
+This is a constant of conversion from L-coins to L-hashes for a given moment -- if some miner earned $x$ L-coins today, then $x \cdot \frac{L_d}{L_r}$ would tell you roughly how many hashes were done to earn that reward.
+Next, we multiply by the exchange rate to find the constant of conversion for $\frac{\text{L-hashes}}{\text{R-coin}}$.
+Then, we divide by $\nicefrac{R_d}{R_r}$ to find the constant of conversion for $\frac{\text{L-hashes}}{\text{R-hash}}$.
+This is the constant of conversion for R-hashes to L-hashes.
+It tells us \emph{the relative weight} contributed to each network by each hash performed.
+Finally, we can deduce the function $\text{ConvWork}_{R\rightarrow L}(w)$ which takes a value of R-hashes and returns a value of L-hashes.
+
+Let's sanity check this.
 
 \defineTerm{Root Token (RT)}{
   The typically sole network-level token required by blockchain protocols. e.g., Bitcoin has BTC, Ethereum has ETH, Polkadot has DOT, Cardano has ADA, Amaroo has ROO, etc
 }
 
-Can we \emph{avoid} that exchange rate, though?
-Well, there is a case where $r=1$: \textbf{when L-coins $\equiv$ R-coins}, i.e., both chains use the same root token.
-In that case, $\nicefrac{L_d}{L_r} \cdot \nicefrac{R_r}{R_d}$ gives us L-hashes/R-hash directly.
+Consider two blockchains (L and R) that are \emph{very} similar to Bitcoin.
+Unless otherwise specified, the chains are identical.
+Here are the key assumptions:
+
+* Both L and R started on the same day, with the same block rewards (in their respective root tokens), block frequencies, and inflation schedules.
+* L and R have equal money supplies, and (by chance) the exchange rate has been stable at $X_{R\rightarrow L} = 3$ L-coins/R-coin.
+* L and R use different PoW algorithms, L uses Scrypt (similar to Litecoin) and R uses SHA256 (similar to Bitcoin).
+* ASIC/FPGA mining doesn't exist yet, but GPU mining does.
+* (In this thought experiment) the best GPUs for mining Scrypt and SHA256 are of the same brand and model -- i.e. the same supply is responsible for the hardware of *all* miners, regardless of which chain they mine.
+* There's no comparative advantage between GPU makes/models -- i.e., a miner can't increase their revenue by cleverly organizing which GPUs mine which networks.
+* The cost of running both L and R nodes is negligible.
+* L and R have perfect difficulty adjustment algorithms.
+* The miner(s) used in this thought experiment are small relative to the total population of miners -- their choices don't meaningfully impact network hash rates or difficulty adjustments.
+
+What should we expect regarding the conversion of work?
+To start with, let's note that GPU miners could work on either chain -- good hardware for one chain is good hardware for the other, too.
+We know that the block rewards (in root tokens) and block frequencies are the same -- so the exchange rate is going to play a role in RoI.
+If a miner could break even by making 30 L-coins, then they could also break even by making 10 R-coins.
+They'd need to make $3\times$ as many L-coins as R-coins -- the exchange rate.
+If L and R used the same hashing algorithm, then we could compare difficulties to see if this makes sense -- does that miner make $3\times$ as many L-blocks as they would R-blocks?
+
+In this case, though, the difficulties are set for \emph{different hashing algorithms} -- so how many hashes can GPUs do for each hash?
+Say a GPU can do 7 SHA256 hashes for each 1 Scrypt hash.
+A miner that can do $h$ Scrypt hashes/day should be able to do $7h$ SHA256 hashes/day.
+That same miner should be able to make $h \cdot \nicefrac{L_r}{L_d}$ coins per day -- L's coins per block, divided by L's difficulty (hashes per block) gives us a constant of conversion with units L-coins/L-hash.
+Of course, the miner could, instead, mine on R, thus making $7h \cdot \nicefrac{R_r}{R_d}$ coins per day.
+How do we know which is better?
+We use the exchange rate, of course!
+
+If miners could swap from their current chain to the other chain and \emph{increase their revenue}, then we should expect some to do that.
+In turn, we expect each chain's difficulty to change, reflecting that change in participation.
+If some miners (on the whole) moved from L to R, then we'd expect L's difficulty to decrease and R's difficulty to increase proportionate to how many miners moved.
+Since this is an \emph{arbitrage opportunity} (for miners), we expect that any profitability gap will quickly be closed.
+Thus, we can say that a miner's revenue is \emph{equal} regardless of which chain they're mining: $\text{Revenue}_L = \text{Revenue}_R$ when measured in the same units.
+
+\begin{align}
+  \text{Revenue}_L & = h \cdot \frac{L_r}{L_d}
+    & & \text{L-coins}
+    & & \text{Revenue on L}
+    \label{eq:rev-L}
+    \\[0.5em]
+  \text{Revenue}_R & = 7h \cdot \frac{R_r}{R_d} \cdot X_{R\rightarrow L}
+    & & \text{L-coins}
+    & & \text{Revenue on R in L-coins}
+    \label{eq:rev-R}
+    \\[0.5em]
+  \text{Revenue}_L & = \text{Revenue}_R
+    & & \text{L-coins}
+    & & \text{The equality we set above}
+    \nonumber
+    \\[0.5em]
+  \therefore h \cdot \frac{L_r}{L_d} & = 7h \cdot \frac{R_r}{R_d} \cdot X_{R\rightarrow L}
+    & & \text{L-coins}
+    & & \text{\autoref{eq:rev-L} and \autoref{eq:rev-R}}
+    \nonumber
+    \\[0.5em]
+  \frac{L_r}{L_d} & = 7 \cdot \frac{R_r}{R_d} \cdot X_{R\rightarrow L}
+    & & \frac{\text{L-coins}}{\text{L-hash}}
+    & & \text{Divide by }h
+    \nonumber
+    \\[0.5em]
+  \frac{1}{L_d} & = 7 \cdot \frac{R_r}{L_r \cdot R_d} \cdot X_{R\rightarrow L}
+    & & \frac{\text{L-blocks}}{\text{L-hash}}
+    & & \text{Divide by }L_r
+    \nonumber
+    \\[0.5em]
+  \frac{R_d}{L_d} & = 7 \cdot \frac{R_r}{L_r} \cdot X_{R\rightarrow L}
+    & & \frac{\text{R-hashes }\cdot\text{ L-blocks}}{\text{L-hash }\cdot\text{ R-block}}
+    & & \text{Multiply by }R_d
+    \nonumber
+    \\[0.5em]
+    \frac{R_d}{L_d} & = (7 \cdot 3)
+    & & \frac{\text{R-hashes }\cdot\text{ L-blocks}}{\text{L-hash }\cdot\text{ R-block}}
+    & & \text{Sub }X_{R\rightarrow L}\text{, }R_r\text{, and }L_r
+    \\[0.5em]
+    R_d & = 21 L_d
+    & & \frac{\text{R-hashes}}{\text{R-block}}
+    & & \text{Rearrange}
+    \label{eq:rev-diff-ratio}
+\end{align}
+
+So, the ratio of \emph{difficulties} should be $21 \frac{\text{R-hashes}\cdot\text{L-blocks}}{\text{L-hash}\cdot\text{R-block}}$; or, R's difficulty \emph{value} should be $21\times$ L's difficulty \emph{value}.
+
+\begin{comment}
+Does this make sense?
+A miner can do $7\times$ the hashes on R (compared to L), but only produces $\nicefrac{7h}{R_d}$ R-blocks.
+Those will give a return of $7h \cdot \nicefrac{R_r}{R_d}$ R-coins.
+Alternatively, the miner could do $h$ hashes on L to produce $\nicefrac{h}{L_d}$ L-blocks.
+That provides a return of $h \cdot \nicefrac{L_r}{L_d}$ L_coins.
+The exchange rate is 3 L-coins/R-coin, so naturally a miner needs to make more L-coins ....
+\end{comment}
+
+Let's consider \autoref{eq:por-conv-work} in light of the above.
+
+\begin{align}
+  \text{ConvWork}_{R\rightarrow L}(w) = \; & \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot \frac{R_r}{R_d} \cdot w
+    & &\text{R-hashes }\rightarrow\text{ L-hashes}
+    & &\text{\autoref{eq:por-conv-work}}
+    \nonumber
+    \\[0.5em]
+  = \: & \frac{1}{21} \cdot \frac{R_r}{L_r} \cdot X_{R\rightarrow L} \cdot w
+    & &\text{L-hashes}
+    & &\text{Sub }\nicefrac{L_d}{R_d}\text{ from \autoref{eq:rev-diff-ratio}}
+    \nonumber
+    \\[0.5em]
+  = \: & \frac{3}{21} \cdot w \; = \; \frac{w}{7}
+    & &\text{L-hashes}
+    & &\text{Sub }\frac{R_r}{L_r} \cdot X_{R\rightarrow L}\text{ as before}
+    \nonumber
+\end{align}
+
+We said this was true earlier -- 1 L-hash is worth 7 R-hashes. Thus far, we have not yet found an inconsistency (i.e., we don't yet have a reason to think this won't work).
+
+There is, however, an inconsistency lurking.
+Consider:
+\begin{align}
+  & \frac{R_r}{L_r} \cdot X_{R\rightarrow L}
+    & &\frac{\text{L-blocks}}{\text{R-block}}
+    \nonumber
+    \\[0.5em]
+  & \frac{L_f}{R_f}
+    & &\frac{\text{L-blocks}}{\text{R-block}}
+    \nonumber
+\end{align}
+
+These two values are \textbf{not} equal (or comparable), and nothing we've said implies that they should be equal.
+On the one hand, we have a ratio of the value of block creation; and on the other, we have something like *relative block frequencies.*
+But they have the same units!
+What's going on?
+
+##### Hold Up! We Need to Talk About $\nicefrac{L_f}{R_f}$ and $\nicefrac{R_r}{L_r} \cdot X_{R\rightarrow L}$
+
+\todo{hold up}
+
+##### Conversions and Sums
 
 Okay, so far so good.
 Are there any \emph{other} values which we can sum up, though?
@@ -400,6 +543,13 @@ Thus, \emph{any} common units, which are linearly convertible both from a reflec
 }
 
 \todoDraftOnly{Add new vars to nomenclature table}
+
+Of course, we need to figure out a way to get the exchange rate that is \emph{at least as secure} as the consensus algorithms (otherwise we'd be introducing a new weakest-link).
+That can't be too hard, right?
+
+Can we \emph{avoid} that exchange rate, though?
+Well, there is a case where $r=1$: \textbf{when L-coins $\equiv$ R-coins}, i.e., both chains use the same root token.
+In that case, $\nicefrac{L_d}{L_r} \cdot \nicefrac{R_r}{R_d}$ gives us L-hashes/R-hash directly.
 
 #### A Single Root Token Across Multiple Chains
 
