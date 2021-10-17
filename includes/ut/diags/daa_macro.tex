@@ -1,18 +1,28 @@
 \input{./tikz-styles}
 
 \providecommand\DaaHeight{2em}
-\providecommand\XShiftTargetBf{4.1em}
+\providecommand\XShiftTargetBf{3.9em}
 \providecommand\MirrorVertical{0}
 \providecommand\UnitPrefix{N-}
 \providecommand\TikzNodePrefix{}
 \providecommand\DaaInitialNodePlacement{0,0}
+\providecommand\MinerRevenueArrowStyle{networkCtxArrowLR}
 
 \providecommand\n[1]{}
 \providecommand\vMod{-}
 \providecommand\vNorth{north}
 \providecommand\vSouth{south}
 
-\tikzstyle{contextArrow} = [->, double, dashed]
+\tikzstyle{daaArrowsR} = [-{Straight Barb[#1]}]
+\tikzstyle{daaArrowsLR} = [{Straight Barb[#1]}-{Straight Barb[#1]}]
+\tikzstyle{ctxDash} = [dash pattern=on 0.5em off 0.15em]
+
+\tikzstyle{networkCtxArrow} = [daaArrowsR, thick, ctxDash]
+\tikzstyle{networkCtxArrowLR} = [daaArrowsLR, thick, ctxDash]
+\tikzstyle{marketCtxArrow} = [daaArrowsR, double, ctxDash]
+\tikzstyle{bothCtxArrow} = [daaArrowsR={scale=0.7}, thick, double, ctxDash]
+\tikzstyle{bothCtxArrowLR} = [daaArrowsLR={scale=0.7}, thick, double, ctxDash]
+\tikzstyle{revCtxArrow} = [\MinerRevenueArrowStyle]
 
 \newcommand\DrawTikzDaaMacro{
     \tikzstyle{ctxLabelAll} = [anchor=center, sloped, align=center]
@@ -61,20 +71,24 @@
 
     % ARROWS
 
-    \draw (\n{chainHist}) [->, thick, shorten >= 2pt] -- (\n{daa}.west |- \n{daa}.\vNorth);
-    \draw (\n{targetBF}) [->, thick, shorten >= 2pt] -- (\n{daa}.west);
-    \draw (\n{previousDifficulty}) [->, thick, shorten >= 2pt] -- (\n{daa}.west |- \n{daa}.\vSouth);
+    % DAA
 
+    \draw (\n{chainHist}) [daaArrowsR, thick, shorten >= 2pt] -- (\n{daa}.west |- \n{daa}.\vNorth);
+    \draw (\n{targetBF}) [daaArrowsR={scale=1.4}, shorten >= 2pt] -- (\n{daa}.west);
+    \draw (\n{previousDifficulty}) [daaArrowsR, thick, shorten >= 2pt] -- (\n{daa}.west |- \n{daa}.\vSouth);
     %  |- \n{daa}.\vSouth
-    % \draw (\n{daa}.east) [->, thick, shorten <= 2pt] -- (\n{daaCtxMid});
-    \draw (\n{daa}.east |- \n{daa}.\vSouth) [->, thick, shorten <= 2pt] -- (\n{daaCtxBR});
-    % \draw [contextArrow] (\n{daaCtxBR}) -- node [ctxLabel, diffCrArrow] {\UnitPrefix{}network} (\n{daaCtxTR});
-    % \draw [contextArrow] (\n{daaCtxBR}) -- node [ctxLabelAlt, diffCrArrowAlt] {context} (\n{daaCtxTR});
-    \draw [contextArrow] (\n{daaCtxBR}) -- node [ctxLabel, diffCrArrow] {} (\n{daaCtxTR});
-    \draw [contextArrow] (\n{daaCtxBR}) -- node [ctxLabelAlt, diffCrArrowAlt] {} (\n{daaCtxTR});
-    % \draw [contextArrow] (\n{daaCtxBR}) -- node [ctxLabel] {} (\n{daaCtxMid});
-    \draw [contextArrow] (\n{daaCtxMid}) -- node [ctxLabel] {} (\n{daaCtxTR});
-    \draw [contextArrow] (\n{daaCtxMid}) -- node [ctxLabel] {} (\n{daaCtxBR});
-    \draw [contextArrow] (\n{previousDifficulty}) -- node [ctxLabel] {implicit \UnitPrefix{}network context} (\n{daaCtxBR});
-    \draw [contextArrow] (\n{daaCtxTR}) -- node [ctxLabelAlt] {\UnitPrefix{}network context feedback} (\n{chainHist});
+    % \draw (\n{daa}.east) [daaArrowsR, thick, shorten <= 2pt] -- (\n{daaCtxMid});
+    \draw (\n{daa}.east |- \n{daa}.\vSouth) [daaArrowsR, thick, shorten <= 2pt] -- (\n{daaCtxBR});
+
+    % CTX
+
+    % \draw [networkCtxArrow] (\n{daaCtxBR}) -- node [ctxLabel, diffCrArrow] {\UnitPrefix{}network} (\n{daaCtxTR});
+    % \draw [networkCtxArrow] (\n{daaCtxBR}) -- node [ctxLabelAlt, diffCrArrow] {context} (\n{daaCtxTR});
+    \draw [revCtxArrow] (\n{daaCtxBR}) -- node [ctxLabel, diffCrArrow] {} (\n{daaCtxTR});
+    % \draw [networkCtxArrow] (\n{daaCtxBR}) -- node [ctxLabelAlt, diffCrArrow] {} (\n{daaCtxTR});
+    % \draw [networkCtxArrow] (\n{daaCtxBR}) -- node [ctxLabel] {} (\n{daaCtxMid});
+    \draw [revCtxArrow] (\n{daaCtxMid}) -- node [ctxLabel] {} (\n{daaCtxTR});
+    \draw [revCtxArrow] (\n{daaCtxMid}) -- node [ctxLabel] {} (\n{daaCtxBR});
+    \draw [networkCtxArrow] (\n{previousDifficulty}) -- node [ctxLabel] {implicit \UnitPrefix{}network context} (\n{daaCtxBR});
+    \draw [networkCtxArrow] (\n{daaCtxTR}) -- node [ctxLabelAlt] {\UnitPrefix{}network context feedback} (\n{chainHist});
 }

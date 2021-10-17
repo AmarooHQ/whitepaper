@@ -539,6 +539,8 @@ If seconds are not \emph{context laden}, then $\nicefrac{L_f}{R_f}$ gives us \em
 \includegraphics[max width=\linewidth]{diff_adjustment_alg_times_2_sag}
 \caption{
   How are the implicit contexts of two different networks related?
+  Without the market context, there's no conversion path that allows for the conversion of work.
+  These are the same conversion that miners perform to determine which network is most profitable to mine on.
 }
 \label{fig:daa-conversion}
 \end{figure}

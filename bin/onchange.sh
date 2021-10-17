@@ -44,6 +44,10 @@ fi
 
 msg_good "Watching directory $DIRECTORY; will run \`$CMD_TO_RUN\` in $CURRENT_DIR on change"
 
+msg_good "Running \`$CMD_TO_RUN\` in 1s for first time"
+
+(sleep 1 && (cd $CURRENT_DIR && eval "$CMD_TO_RUN") || true)
+
 (
   cd $DIRECTORY
   inotifywait -e "$EVENTS" -m -r --format '%:e %f' . | (
