@@ -7,12 +7,11 @@
     \State $C \gets$ \Call{ChainOf}{$B_i$, $state$}
     \State $r \gets$ \Call{RootTokenRatioOnChainAt}{$C$, $t$, $state$} \Comment{Proportion of all RTs on $C$ at $t$}
     \State $C_f \gets$ \Call{BlockFrequencyOfChain}{$C$, $state$} \Comment{Block production Hz of $C$}
-    \State $L_f \gets$ \Call{LocalBlockFrequency}{$state$}
     \State $I \gets$ \Call{NetworkInflation}{$state$} \Comment{coins/s created over the entire network}
     \State $C_r \gets r \cdot I \cdot C_f^{-1}$ \Comment{See \autoref{eq:srt-reward}}
     \State $L_r \gets$ \Call{LocalBlockRewardAt}{$t$, $state$}
     \State $L_d \gets$ \Call{LocalBlockDifficultyAt}{$t$, $state$}
-    \State \Return{$C_r \cdot (C_f \div L_f) \cdot (L_d \div L_r)$}
+    \State \Return{$C_r \cdot (L_d \div L_r)$}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}

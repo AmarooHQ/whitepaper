@@ -5,16 +5,19 @@ There are, naturally, questions to answer,
     like \emph{How are block rewards managed?}
     and \emph{How can the root token be on two blockchains at once?}
 
-Let's consider the following \emph{restricted case} first: the chains (L and R) both have \emph{equal block frequencies}, and a two-way peg between the chains ensures that no coins are ever created or destroyed.
+Let's consider the following \emph{restricted case} first: the chains (L and R) both have a two-way peg between, ensuring that no coins are ever created or destroyed.
 
-In this case, \autoref{eq:por-conv-reward} collapses to
-\begin{equation} \label{eq:por-conv-same-rt-and-bf}
-\begin{split}
+\todo{fix this}
+
+In this case, \autoref{eq:por-conv-work} collapses to
+\begin{align}
+    \text{ConvWork}_{R\rightarrow L}(w) = \; & \frac{L_d}{L_r} \cdot \cancelto{1}{X_{R\rightarrow L}} \cdot \frac{R_r}{R_d} \cdot w
+    \\
     \text{ConvReward}_{R\rightarrow L}(R_r)
         &= \cancelto{1}{\frac{R_f}{L_f}} \cdot R_r \cdot \cancelto{1}{X_{R\rightarrow L}} \\
         &= R_r
-\end{split}
-\end{equation}
+        \label{eq:por-conv-work}
+\end{align}
 
 After this, we need to convert the result (L-coins/L-block) to hashes.
 It's worth remembering that block-weight is \emph{the number of hashes it takes to make one block}.
@@ -62,12 +65,35 @@ We can rely on that idea because \emph{equality of work} is a result of the mark
 
 If the network uses this rule to determine block reward, then, for either chain $C$, what can we say?
 Let: $I$ be the network-wide inflation rate (coins/s); $G_t$ be the network-wide root token supply (coins); and $C_t$ be the number of root tokens on chain $C$ (coins). $C_f$ is the frequency of chain $C$ (blocks/s).
-\begin{equation} \label{eq:srt-reward}
-\begin{split}
-    C_r \cdot C_f & = \frac{C_t}{G_t} \cdot I \\
-    C_r &= \frac{C_t \cdot I}{G_t \cdot C_f}
-\end{split}
-\end{equation}
+
+\begin{align}
+    C_r \cdot C_f & = \frac{C_t}{G_t} \cdot I
+        & & \frac{\text{C-coins}}{\text{second}}
+        \nonumber
+        \\[0.5em]
+    C_r & = \frac{C_t \cdot I}{G_t \cdot C_f}
+        & & \frac{\text{C-coins}}{\text{C-block}}
+        & &
+        \label{eq:srt-reward}
+\end{align}
+
+\begin{align}
+    & \; \frac{R_r}{L_r}
+        & & \frac{\text{L-blocks}}{\text{R-block}}
+        \nonumber
+        \\[0.5em]
+    =& \; \frac{R_t \cdot I}{G_t \cdot R_f} \cdot \frac{G_t \cdot L_f}{L_t \cdot I}
+        & & \frac{\text{L-blocks}}{\text{R-block}}
+        & & \text{Sub \autoref{eq:srt-reward}}
+        \nonumber
+        \\[0.5em]
+    =& \; \cancelto{1}{\frac{G_t \cdot I}{G_t \cdot I}} \cdot \frac{R_t \cdot L_f}{L_t \cdot R_f}
+        & & \frac{\text{L-blocks}}{\text{R-block}}
+        & & \text{Sub \autoref{eq:srt-reward}}
+        \nonumber
+\end{align}
+
+
 
 Let's combine this with \autoref{eq:conv-reward-to-hashes} to create our next \textsc{WeightOf} algorithm:
 

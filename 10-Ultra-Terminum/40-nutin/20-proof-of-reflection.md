@@ -524,7 +524,7 @@ If seconds are not \emph{context laden}, then $\nicefrac{L_f}{R_f}$ gives us \em
 
 \begin{figure}[H]
 \centering
-\includegraphics[max width=\linewidth, max height=0.3\textheight]{diff_adjustment_alg_sag}
+\includegraphics[max width=\linewidth]{diff_adjustment_alg_sag}
 \caption{
   The difficulty adjustment algorithm governs the relationship between the inputs: the previous difficulty, the target block frequency, and network participation (chain history); and the output: the network difficulty.
   The difficulty is how \emph{confirmations} and \emph{coins} become \textbf{laden} with \emph{implicit context}.
@@ -540,7 +540,7 @@ If seconds are not \emph{context laden}, then $\nicefrac{L_f}{R_f}$ gives us \em
 \caption{
   How are the implicit contexts of two different networks related?
   Without the market context, there's no conversion path that allows for the conversion of work.
-  These are the same conversion that miners perform to determine which network is most profitable to mine on.
+  These are the same conversions that miners use to determine which network is most profitable for them.
 }
 \label{fig:daa-conversion}
 \end{figure}
@@ -616,28 +616,16 @@ Thus, \emph{any} common units, which are linearly convertible both from a reflec
       & &\frac{\text{R-coins}}{\text{R-block}}
       & & \text{R's block reward} \nonumber
       \\[0.5em]
-    \implies {R_r}^\prime = \; & R_r \cdot R_f
-      & &\frac{\text{R-coins}}{\text{second}}
-      & & \text{Declare }{R_r}^\prime \nonumber
+    \implies \; & \frac{R_r}{R_d}
+      & &\frac{\text{R-coins}}{\text{R-hash}}
+      & & \text{} \nonumber
       \\[0.5em]
-    \implies \; & {R_r}^\prime \cdot X_{R\rightarrow L}
-      & &\frac{\text{L-coins}}{\text{second}}
+    \implies \; & \frac{R_r}{R_d} \cdot X_{R\rightarrow L}
+      & &\frac{\text{L-coins}}{\text{R-hash}}
       & & \nonumber
       \\[0.5em]
-    \therefore \text{ConvIncome}_{R\rightarrow L}({R_r}^\prime) = \; & {R_r}^\prime \cdot X_{R\rightarrow L}
-      & & \frac{\text{R-coins}}{\text{second}} \rightarrow \frac{\text{L-coins}}{\text{second}}
-      & & \label{eq:por-conv-reward-rate}
-      \\[0.5em]
-    & \frac{R_f}{L_f}
-      & & \frac{\text{R-blocks}}{\text{L-block}}
-      & & \text{Block frequency ratio} \nonumber
-      \\[0.5em]
-    \implies \; & \frac{R_f}{L_f} \cdot R_r \cdot X_{R\rightarrow L}
-      & & \frac{\text{L-coins}}{\text{L-block}}
-      & & \nonumber
-      \\[0.5em]
-    \therefore \text{ConvReward}_{R\rightarrow L}(R_r) = \; & \frac{R_f}{L_f} \cdot R_r \cdot X_{R\rightarrow L}
-      & & \frac{\text{R-coins}}{\text{R-block}} \rightarrow \frac{\text{L-coins}}{\text{L-block}}
+    \therefore \text{ConvReward}_{R\rightarrow L}(w) = \; & \frac{R_r}{R_d} \cdot X_{R\rightarrow L} \cdot w
+      & & \text{R-hashes} \rightarrow \text{L-coins}
       & & \label{eq:por-conv-reward}
   \end{align}
 

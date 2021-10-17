@@ -7,6 +7,9 @@
 \providecommand\TikzNodePrefix{}
 \providecommand\DaaInitialNodePlacement{0,0}
 \providecommand\MinerRevenueArrowStyle{networkCtxArrowLR}
+\providecommand\SwapDifficultyAndRevenue{0}
+\providecommand\SwapConfirmationRateAndRevenue{0}
+\providecommand\ConfRateGeneral{0}
 
 \providecommand\n[1]{}
 \providecommand\vMod{-}
@@ -19,7 +22,8 @@
 
 \tikzstyle{networkCtxArrow} = [daaArrowsR, thick, ctxDash]
 \tikzstyle{networkCtxArrowLR} = [daaArrowsLR, thick, ctxDash]
-\tikzstyle{marketCtxArrow} = [daaArrowsR, double, ctxDash]
+\tikzstyle{marketCtxArrow} = [daaArrowsR={scale=0.85}, double, ctxDash]
+\tikzstyle{marketCtxArrowLR} = [daaArrowsLR={scale=0.85}, double, ctxDash]
 \tikzstyle{bothCtxArrow} = [daaArrowsR={scale=0.7}, thick, double, ctxDash]
 \tikzstyle{bothCtxArrowLR} = [daaArrowsLR={scale=0.7}, thick, double, ctxDash]
 \tikzstyle{revCtxArrow} = [\MinerRevenueArrowStyle]
@@ -52,12 +56,36 @@
     \node (\n{chainHist}) [align=center] at (\DaaInitialNodePlacement) {Chain History \\ (\UnitPrefix{}blocks/\UnitPrefix{}second)};
     \node (\n{previousDifficulty}) [yshift=\vMod\DaaHeight, belowOf={\n{chainHist}}, align=center] {Previous difficulty \\ (\UnitPrefix{}hashes/\UnitPrefix{}block)};
 
-    \node (\n{daaCtxTR}) [right of = \n{chainHist}, xshift=7cm, align=center] {Confirmation rate \\ (\UnitPrefix{}blocks/\UnitPrefix{}second)};
-
     % \node (\n{daaCtxBR}) [yshift=\vMod\DaaHeight, belowOf={\n{daaCtxTR}}, align=center] {Miner Revenue \\ (\UnitPrefix{}coins/\UnitPrefix{}block)};
     % \node (\n{daaCtxMid}) [align=center, xshift=4.0em] at ($(\n{daaCtxTR})!0.5!(\n{daaCtxBR})$) {Difficulty \\ (\UnitPrefix{}hashes/\UnitPrefix{}block)};
-    \node (\n{daaCtxBR}) [yshift=\vMod\DaaHeight, belowOf={\n{daaCtxTR}}, align=center] {Difficulty \\ (\UnitPrefix{}hashes/\UnitPrefix{}block)};
-    \node (\n{daaCtxMid}) [align=center, xshift=5.0em] at ($(\n{daaCtxTR})!0.5!(\n{daaCtxBR})$) {Miner Revenue \\ (\UnitPrefix{}coins/\UnitPrefix{}block)};
+    \xdef\confUnits{\UnitPrefix{}second}
+    \ifnum 1=\ConfRateGeneral
+        \xdef\confUnits{second}
+    \fi
+
+    \xdef\trNode{Confirmation rate \\ (\UnitPrefix{}blocks/\confUnits)}
+    \xdef\brNode{Difficulty \\ (\UnitPrefix{}hashes/\UnitPrefix{}block)}
+    \xdef\midNode{Miner Revenue \\ (\UnitPrefix{}coins/\UnitPrefix{}block)}
+    \xdef\daaOutTo{\n{daaCtxBR}}
+    \xdef\daaOutFrom{\n{daa}.east |- \n{daa}.\vSouth}
+    \ifnum 1=\SwapDifficultyAndRevenue
+        \xdef\brTemp{\midNode}
+        \xdef\midNode{\brNode}
+        \xdef\brNode{\brTemp}
+        \xdef\daaOutTo{\n{daaCtxMid}}
+        \xdef\daaOutFrom{\n{daa}.east}
+    \fi
+    \ifnum 1=\SwapConfirmationRateAndRevenue
+        \xdef\trTemp{\midNode}
+        \xdef\midNode{\trNode}
+        \xdef\trNode{\trTemp}
+    \fi
+
+    \node (\n{daaCtxTR}) [right of = \n{chainHist}, xshift=20em, align=center] {\trNode};
+    \node (\n{daaCtxBR}) [yshift=\vMod\DaaHeight, belowOf={\n{daaCtxTR}}, align=center] {\brNode};
+    \node (\n{daaCtxMid}) [align=center, xshift=6.0em] at ($(\n{daaCtxTR})!0.5!(\n{daaCtxBR})$) {\midNode};
+
+
 
     \node (\n{targetBF}) [align=center, xshift=-\XShiftTargetBf] at ($(\n{chainHist})!0.5!(\n{previousDifficulty})$) {Target Block Freq. \\ (blocks/second)};
 
@@ -74,11 +102,11 @@
     % DAA
 
     \draw (\n{chainHist}) [daaArrowsR, thick, shorten >= 2pt] -- (\n{daa}.west |- \n{daa}.\vNorth);
-    \draw (\n{targetBF}) [daaArrowsR={scale=1.4}, shorten >= 2pt] -- (\n{daa}.west);
+    \draw (\n{targetBF}) [daaArrowsR={scale=1.4}, shorten >= 3pt] -- (\n{daa}.west);
     \draw (\n{previousDifficulty}) [daaArrowsR, thick, shorten >= 2pt] -- (\n{daa}.west |- \n{daa}.\vSouth);
     %  |- \n{daa}.\vSouth
     % \draw (\n{daa}.east) [daaArrowsR, thick, shorten <= 2pt] -- (\n{daaCtxMid});
-    \draw (\n{daa}.east |- \n{daa}.\vSouth) [daaArrowsR, thick, shorten <= 2pt] -- (\n{daaCtxBR});
+    \draw (\daaOutFrom) [daaArrowsR, thick, shorten <= 2pt] -- (\daaOutTo);
 
     % CTX
 
