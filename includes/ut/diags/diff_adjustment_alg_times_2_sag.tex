@@ -2,6 +2,7 @@
 \usepackage[T1]{fontenc}\usepackage{tikz}
 \usepackage{amsmath, amsfonts}
 \usepackage{xintexpr}
+\usepackage{nicefrac}
 \usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
 
 \makeatletter
@@ -18,10 +19,36 @@
 \begin{tikzpicture}[node distance=7em]
   \node (daa1Init) [] at (\DaaInitialNodePlacement) {};
   \renewcommand\DaaInitialNodePlacement{daa1Init}
+  \renewcommand\TikzNodePrefix{L}
+  \renewcommand\UnitPrefix{L-}
   \DrawTikzDaaMacro
-  \node (daa2Init) [yshift=6em] at (daa1Init) {};
+  \node (daa2Init) [yshift=-24em] at (daa1Init) {};
   \renewcommand\DaaInitialNodePlacement{daa2Init}
   \renewcommand\MirrorVertical{1}
+  \renewcommand\TikzNodePrefix{R}
+  \renewcommand\UnitPrefix{R-}
   \DrawTikzDaaMacro
+
+  \node (coinsMid) [xshift=2.0em] at ($(LdaaCtxMid)!0.5!(RdaaCtxMid)$) {};
+
+  \draw [contextArrow, <->, rounded corners=2.5em] (RdaaCtxMid) -- (coinsMid |- RdaaCtxBR.east) --
+      node [ctxLabelAlt] {$X_{R\rightarrow L}$}
+      node [ctxLabel] {market context}
+      (coinsMid |- LdaaCtxBR.east) -- (LdaaCtxMid);
+  % \draw [contextArrow, <->, rounded corners=1.5em] (RdaaCtxBR.east) -- (coinsMid |- RdaaCtxBR.east) --
+  %     node [ctxLabelAlt] {$X_{R\rightarrow L}$}
+  %     node [ctxLabel] {market context}
+  %     (coinsMid |- LdaaCtxBR.east) -- (LdaaCtxBR.east);
+
+  \node (diffMid) [] at ($(LdaaCtxBR)!0.5!(RdaaCtxBR)$) {};
+
+  \draw [contextArrow, <->] (LdaaCtxBR) -- (RdaaCtxBR);
+
+  \node (freqMid) [xshift=-2.5em] at ($(LtargetBF)!0.5!(RtargetBF)$) {};
+
+  \draw [<->, dashed] (freqMid |- RtargetBF.north) --
+      node [ctxLabelAlt] {``world'' context}
+      node [ctxLabel] {$\nicefrac{L_f}{R_f}$}
+      (freqMid |- LtargetBF.south);
 \end{tikzpicture}
 \end{document}

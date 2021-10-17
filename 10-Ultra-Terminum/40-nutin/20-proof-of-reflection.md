@@ -484,24 +484,21 @@ What's going on?
 Let's consider some units with \emph{real-world} interpretations -- not abstract algebra.
 
 * \emph{Relative block frequencies} --- This has real-world meaning: Ethereum 1 produces approximately 40 Ethereum-blocks in the same world-time that Bitcoin produces 1 Bitcoin-block.
-* \emph{Relative block weights} --- This has real-world meaning:
-
-\begin{figure}[H]
-\centering
-\includegraphics[max width=\linewidth, max height=0.3\textheight]{diff_adjustment_alg_sag}
-\caption{
-  The difficulty adjustment algorithm governs the relationship between the inputs: target block frequency, network history, and network participation; and the output: the network difficulty.
-  The difficulty is how \emph{confirmations} and \emph{coins} become \textbf{laden} with \emph{implicit context}.
-  If we don't account for this \emph{implicit context} then our conversions will be nonsensical.
-  The implicit context is \emph{network participation} -- thus, those values which are \emph{context laden} have their units prefixed with \texttt{n-}, for ``network''.
+* \emph{Relative block weights} --- This has real-world meaning: how much harder is it to generate a block on one network vs another network?
+* \emph{Relative confirmations} --- This has real-world meaning: how many more confirmations does one network take (compared to another) to reach equivalent security?\footnote{
+  ``Equivalent security'' means that a doublespend attempt on one network is just as risky, costly, etc, as a doublespend attempt on the other network.
+  To do this comparison, we start by picking some $q$ for the attacker on L, a transaction value (in L-coins), L's block reward, and then finding boundary of attack-viability (measured in L-confirmations).
+  The boundary of attack-viability is where rules of thumb around confirmation times come from, e.g., \emph{for Bitcoin, a transaction is safe after 6 confirmations.}
+  Next, we consider an \emph{equivalently valuable} transaction on R (converting via the exchange rate), and an equivalent attacker (using \autoref{eq:por-conv-work} to convert).
+  How many confirmations are needed on R so that $\text{P}_L(\text{attack success}) = \text{P}_R(\text{attack success})$?
 }
-\label{fig:daa-conversion}
-\end{figure}
 
+Naively, \emph{relative block frequencies} seems to be in the same units as the other two: L-blocks/R-blocks; but they \emph{cannot} be the in the same units as they \emph{mean different things}.
+Consider -- if we do not cancel *seconds*:
 \begin{align}
   ? & = \frac{L_f}{R_f}
     & & \frac{\text{L-blocks} \cdot \text{R-seconds}}{\text{L-second} \cdot \text{R-block}}
-    & & \text{Relative frequencies}
+    & & \text{Relative frequencies (or confirmations)}
     \label{eq:rel-conf-hz}
     \\[0.5em]
   %  ? & = \frac{R_r}{L_r} \cdot X_{R\rightarrow L}
@@ -522,6 +519,30 @@ Let's consider some units with \emph{real-world} interpretations -- not abstract
     & & \text{Relative block weights via } X_{R\rightarrow L}
     \label{eq:rel-block-weight}
 \end{align}
+
+If seconds are not \emph{context laden}, then $\nicefrac{L_f}{R_f}$ gives us \emph{relative block frequencies} -- the value's meaning is about \emph{block-events} and has lost any implicit context given by the DAA.
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\linewidth, max height=0.3\textheight]{diff_adjustment_alg_sag}
+\caption{
+  The difficulty adjustment algorithm governs the relationship between the inputs: the previous difficulty, the target block frequency, and network participation (chain history); and the output: the network difficulty.
+  The difficulty is how \emph{confirmations} and \emph{coins} become \textbf{laden} with \emph{implicit context}.
+  If we don't account for this \emph{implicit context} then our conversions will be nonsensical.
+  The implicit context is \emph{network participation} -- thus, those values which are \emph{context laden} have their units prefixed with \texttt{N-}, for ``network''.
+}
+\label{fig:daa-conversion}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\linewidth]{diff_adjustment_alg_times_2_sag}
+\caption{
+  How are the implicit contexts of two different networks related?
+}
+\label{fig:daa-conversion}
+\end{figure}
+
 
 re block freq and conf rate: everything about them is the same except their nature
 

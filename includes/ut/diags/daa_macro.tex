@@ -1,9 +1,9 @@
 \input{./tikz-styles}
 
 \providecommand\DaaHeight{2em}
-\providecommand\XShiftTargetBf{3.5em}
+\providecommand\XShiftTargetBf{4.1em}
 \providecommand\MirrorVertical{0}
-\providecommand\UnitPrefix{n-}
+\providecommand\UnitPrefix{N-}
 \providecommand\TikzNodePrefix{}
 \providecommand\DaaInitialNodePlacement{0,0}
 
@@ -12,15 +12,19 @@
 \providecommand\vNorth{north}
 \providecommand\vSouth{south}
 
-\tikzstyle{contextArrow} = [->, double]
+\tikzstyle{contextArrow} = [->, double, dashed]
 
 \newcommand\DrawTikzDaaMacro{
     \tikzstyle{ctxLabelAll} = [anchor=center, sloped, align=center]
+    \tikzstyle{diffCrArrow} = []
+    \tikzstyle{diffCrArrowAlt} = []
     \ifnum 1=\MirrorVertical
       \tikzstyle{aboveOf} = [below of = ##1]
       \tikzstyle{belowOf} = [above of = ##1]
       \tikzstyle{ctxLabel} = [ctxLabelAll, below]
       \tikzstyle{ctxLabelAlt} = [ctxLabelAll, above]
+      \tikzstyle{diffCrArrow} = [rotate=-180, above]
+      \tikzstyle{diffCrArrowAlt} = [rotate=-180, below]
       \renewcommand\vMod{}
       \renewcommand\vNorth{south}
       \renewcommand\vSouth{north}
@@ -38,16 +42,19 @@
     \node (\n{chainHist}) [align=center] at (\DaaInitialNodePlacement) {Chain History \\ (\UnitPrefix{}blocks/\UnitPrefix{}second)};
     \node (\n{previousDifficulty}) [yshift=\vMod\DaaHeight, belowOf={\n{chainHist}}, align=center] {Previous difficulty \\ (\UnitPrefix{}hashes/\UnitPrefix{}block)};
 
-    \node (\n{cr}) [right of = \n{chainHist}, xshift=7cm, align=center] {Confirmation rate \\ (\UnitPrefix{}blocks/\UnitPrefix{}second)};
-    \node (\n{difficulty}) [yshift=\vMod\DaaHeight, belowOf={\n{cr}}, align=center] {Difficulty \\ (\UnitPrefix{}hashes/\UnitPrefix{}block)};
-    \node (\n{coins}) [align=center, xshift=1.5em] at ($(\n{cr}.east)!0.5!(\n{difficulty}.east)$) {Block Reward \\ (\UnitPrefix{}coins/\UnitPrefix{}block)};
+    \node (\n{daaCtxTR}) [right of = \n{chainHist}, xshift=7cm, align=center] {Confirmation rate \\ (\UnitPrefix{}blocks/\UnitPrefix{}second)};
+
+    % \node (\n{daaCtxBR}) [yshift=\vMod\DaaHeight, belowOf={\n{daaCtxTR}}, align=center] {Miner Revenue \\ (\UnitPrefix{}coins/\UnitPrefix{}block)};
+    % \node (\n{daaCtxMid}) [align=center, xshift=4.0em] at ($(\n{daaCtxTR})!0.5!(\n{daaCtxBR})$) {Difficulty \\ (\UnitPrefix{}hashes/\UnitPrefix{}block)};
+    \node (\n{daaCtxBR}) [yshift=\vMod\DaaHeight, belowOf={\n{daaCtxTR}}, align=center] {Difficulty \\ (\UnitPrefix{}hashes/\UnitPrefix{}block)};
+    \node (\n{daaCtxMid}) [align=center, xshift=5.0em] at ($(\n{daaCtxTR})!0.5!(\n{daaCtxBR})$) {Miner Revenue \\ (\UnitPrefix{}coins/\UnitPrefix{}block)};
 
     \node (\n{targetBF}) [align=center, xshift=-\XShiftTargetBf] at ($(\n{chainHist})!0.5!(\n{previousDifficulty})$) {Target Block Freq. \\ (blocks/second)};
 
     % DAA NODE
 
-    \coordinate (\n{topmid}) at ($(\n{chainHist})!0.5!(\n{cr})$);
-    \coordinate (\n{botmid}) at ($(\n{previousDifficulty})!0.5!(\n{difficulty})$);
+    \coordinate (\n{topmid}) at ($(\n{chainHist})!0.5!(\n{daaCtxTR})$);
+    \coordinate (\n{botmid}) at ($(\n{previousDifficulty})!0.5!(\n{daaCtxBR})$);
     \coordinate (\n{midmid}) at ($(\n{topmid})!0.5!(\n{botmid})$);
 
     \node (\n{daa}) [chainName, double] at (\n{midmid}) {$\; \rightarrow$ Difficulty Adjustment Algorithm $\rightarrow \;$};
@@ -58,9 +65,16 @@
     \draw (\n{targetBF}) [->, thick, shorten >= 2pt] -- (\n{daa}.west);
     \draw (\n{previousDifficulty}) [->, thick, shorten >= 2pt] -- (\n{daa}.west |- \n{daa}.\vSouth);
 
-    \draw (\n{daa}.east |- \n{daa}.\vSouth) [->, thick, shorten <= 2pt] -- (\n{difficulty});
-    \draw [contextArrow] (\n{difficulty}) -- node [ctxLabel] {implicit \\ context} (\n{cr});
-    \draw [contextArrow] (\n{difficulty}) -- node [ctxLabel] {} (\n{coins});
-    \draw [contextArrow] (\n{previousDifficulty}) -- node [ctxLabel] {implicit context} (\n{difficulty});
-    \draw [contextArrow] (\n{cr}) -- node [ctxLabelAlt] {implicit context feedback} (\n{chainHist});
+    %  |- \n{daa}.\vSouth
+    % \draw (\n{daa}.east) [->, thick, shorten <= 2pt] -- (\n{daaCtxMid});
+    \draw (\n{daa}.east |- \n{daa}.\vSouth) [->, thick, shorten <= 2pt] -- (\n{daaCtxBR});
+    % \draw [contextArrow] (\n{daaCtxBR}) -- node [ctxLabel, diffCrArrow] {\UnitPrefix{}network} (\n{daaCtxTR});
+    % \draw [contextArrow] (\n{daaCtxBR}) -- node [ctxLabelAlt, diffCrArrowAlt] {context} (\n{daaCtxTR});
+    \draw [contextArrow] (\n{daaCtxBR}) -- node [ctxLabel, diffCrArrow] {} (\n{daaCtxTR});
+    \draw [contextArrow] (\n{daaCtxBR}) -- node [ctxLabelAlt, diffCrArrowAlt] {} (\n{daaCtxTR});
+    % \draw [contextArrow] (\n{daaCtxBR}) -- node [ctxLabel] {} (\n{daaCtxMid});
+    \draw [contextArrow] (\n{daaCtxMid}) -- node [ctxLabel] {} (\n{daaCtxTR});
+    \draw [contextArrow] (\n{daaCtxMid}) -- node [ctxLabel] {} (\n{daaCtxBR});
+    \draw [contextArrow] (\n{previousDifficulty}) -- node [ctxLabel] {implicit \UnitPrefix{}network context} (\n{daaCtxBR});
+    \draw [contextArrow] (\n{daaCtxTR}) -- node [ctxLabelAlt] {\UnitPrefix{}network context feedback} (\n{chainHist});
 }

@@ -10,69 +10,8 @@
 
 \input{daa_macro}
 
-% \input{./tikz-styles}
-
-% \providecommand\DaaHeight{2em}
-% \providecommand\XShiftTargetBf{3.5em}
-% \providecommand\MirrorVertical{0}
-% \providecommand\UnitPrefix{n-}
-% \providecommand\TikzNodePrefix{}
-
-% \providecommand\n[1]{}
-
-% \tikzstyle{contextArrow} = [->, double]
-
 \begin{document}
 \begin{tikzpicture}[node distance=7em]
   \DrawTikzDaaMacro
-  % \tikzstyle{ctxLabelAll} = [anchor=center, sloped, align=center]
-  % \ifnum 1=\MirrorVertical
-  %   \tikzstyle{aboveOf} = [below of = #1]
-  %   \tikzstyle{belowOf} = [above of = #1]
-  %   \tikzstyle{ctxLabel} = [ctxLabelAll, below]
-  %   \tikzstyle{ctxLabelAlt} = [ctxLabelAll, above]
-  %   \newcommand\vMod{}
-  %   \newcommand\vNorth{south}
-  %   \newcommand\vSouth{north}
-  % \else
-  %   \tikzstyle{aboveOf} = [above of = #1]
-  %   \tikzstyle{belowOf} = [below of = #1]
-  %   \tikzstyle{ctxLabel} = [ctxLabelAll, above]
-  %   \tikzstyle{ctxLabelAlt} = [ctxLabelAll, below]
-  %   \newcommand\vMod{-}
-  %   \newcommand\vNorth{north}
-  %   \newcommand\vSouth{south}
-  % \fi
-  % \renewcommand\n[1]{\TikzNodePrefix#1}
-
-  % \node (\n{chainHist}) [align=center] {Chain History \\ (\UnitPrefix{}blocks/\UnitPrefix{}second)};
-  % \node (\n{previousDifficulty}) [yshift=\vMod\DaaHeight, belowOf={\n{chainHist}}, align=center] {Previous difficulty \\ (hashes/\UnitPrefix{}block)};
-
-  % \node (\n{cr}) [right of = \n{chainHist}, xshift=7cm, align=center] {Confirmation rate \\ (\UnitPrefix{}blocks/\UnitPrefix{}second)};
-  % \node (\n{difficulty}) [yshift=\vMod\DaaHeight, belowOf={\n{cr}}, align=center] {Difficulty \\ (hashes/\UnitPrefix{}block)};
-  % \node (\n{coins}) [align=center, xshift=0.5em] at ($(\n{cr}.east)!0.5!(\n{difficulty}.east)$) {Block Reward \\ (\UnitPrefix{}coins/\UnitPrefix{}block)};
-
-  % \node (\n{targetBF}) [align=center, xshift=-\XShiftTargetBf] at ($(\n{chainHist})!0.5!(\n{previousDifficulty})$) {Target Block Freq. \\ (blocks/second)};
-
-  % % DAA NODE
-
-  % \coordinate (\n{topmid}) at ($(\n{chainHist})!0.5!(\n{cr})$);
-  % \coordinate (\n{botmid}) at ($(\n{previousDifficulty})!0.5!(\n{difficulty})$);
-  % \coordinate (\n{midmid}) at ($(\n{topmid})!0.5!(\n{botmid})$);
-
-  % \node (\n{daa}) [chainName, double] at (\n{midmid}) {$\; \rightarrow$ Difficulty Adjustment Algorithm $\rightarrow \;$};
-
-  % % ARROWS
-
-  % \draw (\n{chainHist}) [->, thick, shorten >= 2pt] -- (\n{daa}.west |- \n{daa}.\vNorth);
-  % \draw (\n{targetBF}) [->, thick, shorten >= 2pt] -- (\n{daa}.west);
-  % \draw (\n{previousDifficulty}) [->, thick, shorten >= 2pt] -- (\n{daa}.west |- \n{daa}.\vSouth);
-
-  % \draw (\n{daa}.east |- \n{daa}.\vSouth) [->, thick, shorten <= 2pt] -- (\n{difficulty});
-  % \draw [contextArrow] (\n{difficulty}) -- node [ctxLabel] {implicit \\ context} (\n{cr});
-  % \draw [contextArrow] (\n{difficulty}) -- node [ctxLabel] {} (\n{coins});
-  % \draw [contextArrow] (\n{previousDifficulty}) -- node [ctxLabel] {implicit context} (\n{difficulty});
-  % \draw [contextArrow] (\n{cr}) -- node [ctxLabelAlt] {implicit context feedback} (\n{chainHist});
-
 \end{tikzpicture}
 \end{document}
