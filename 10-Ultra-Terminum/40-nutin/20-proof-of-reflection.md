@@ -542,7 +542,7 @@ If seconds are not \emph{context laden}, then $\nicefrac{L_f}{R_f}$ gives us \em
   Without the market context, there's no conversion path that allows for the conversion of work.
   These are the same conversions that miners use to determine which network is most profitable for them.
 }
-\label{fig:daa-conversion}
+\label{fig:daa-conversion-2}
 \end{figure}
 
 

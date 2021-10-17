@@ -10,6 +10,7 @@
 \providecommand\SwapDifficultyAndRevenue{0}
 \providecommand\SwapConfirmationRateAndRevenue{0}
 \providecommand\ConfRateGeneral{0}
+\providecommand\HideChainHistUnits{0}
 
 \providecommand\n[1]{}
 \providecommand\vMod{-}
@@ -53,7 +54,12 @@
     \fi
     \renewcommand\n[1]{\TikzNodePrefix##1}
 
-    \node (\n{chainHist}) [align=center] at (\DaaInitialNodePlacement) {Chain History \\ (\UnitPrefix{}blocks/\UnitPrefix{}second)};
+    \xdef\chainHistText{Chain History \\ (\UnitPrefix{}blocks/\UnitPrefix{}second)}
+    \ifnum 1=\HideChainHistUnits
+        \xdef\chainHistText{Chain History}
+    \fi
+
+    \node (\n{chainHist}) [align=center] at (\DaaInitialNodePlacement) {\chainHistText};
     \node (\n{previousDifficulty}) [yshift=\vMod\DaaHeight, belowOf={\n{chainHist}}, align=center] {Previous difficulty \\ (\UnitPrefix{}hashes/\UnitPrefix{}block)};
 
     % \node (\n{daaCtxBR}) [yshift=\vMod\DaaHeight, belowOf={\n{daaCtxTR}}, align=center] {Miner Revenue \\ (\UnitPrefix{}coins/\UnitPrefix{}block)};
@@ -63,9 +69,14 @@
         \xdef\confUnits{second}
     \fi
 
+    \xdef\coinsUnits{\UnitPrefix{}coins}
+    \ifnum 1=\CoinsGeneral
+        \xdef\coinsUnits{coins}
+    \fi
+
     \xdef\trNode{Confirmation rate \\ (\UnitPrefix{}blocks/\confUnits)}
     \xdef\brNode{Difficulty \\ (\UnitPrefix{}hashes/\UnitPrefix{}block)}
-    \xdef\midNode{Miner Revenue \\ (\UnitPrefix{}coins/\UnitPrefix{}block)}
+    \xdef\midNode{Miner Revenue \\ (\coinsUnits/\UnitPrefix{}block)}
     \xdef\daaOutTo{\n{daaCtxBR}}
     \xdef\daaOutFrom{\n{daa}.east |- \n{daa}.\vSouth}
     \ifnum 1=\SwapDifficultyAndRevenue

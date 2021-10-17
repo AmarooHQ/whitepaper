@@ -16,7 +16,6 @@ In this case, \autoref{eq:por-conv-work} collapses to
     \text{ConvReward}_{R\rightarrow L}(R_r)
         &= \cancelto{1}{\frac{R_f}{L_f}} \cdot R_r \cdot \cancelto{1}{X_{R\rightarrow L}} \\
         &= R_r
-        \label{eq:por-conv-work}
 \end{align}
 
 After this, we need to convert the result (L-coins/L-block) to hashes.
@@ -69,33 +68,61 @@ Let: $I$ be the network-wide inflation rate (coins/s); $G_t$ be the network-wide
 \begin{align}
     C_r \cdot C_f & = \frac{C_t}{G_t} \cdot I
         & & \frac{\text{C-coins}}{\text{second}}
+        & & \text{As set above}
         \nonumber
         \\[0.5em]
     C_r & = \frac{C_t \cdot I}{G_t \cdot C_f}
         & & \frac{\text{C-coins}}{\text{C-block}}
-        & &
-        \label{eq:srt-reward}
-\end{align}
-
-\begin{align}
-    & \; \frac{R_r}{L_r}
-        & & \frac{\text{L-blocks}}{\text{R-block}}
-        \nonumber
+        & & \label{eq:srt-reward}
         \\[0.5em]
-    =& \; \frac{R_t \cdot I}{G_t \cdot R_f} \cdot \frac{G_t \cdot L_f}{L_t \cdot I}
+    \therefore \frac{R_r}{L_r}=& \; \frac{R_t \cdot I}{G_t \cdot R_f} \cdot \frac{G_t \cdot L_f}{L_t \cdot I}
         & & \frac{\text{L-blocks}}{\text{R-block}}
-        & & \text{Sub \autoref{eq:srt-reward}}
+        & & \text{\autoref{eq:srt-reward}}
         \nonumber
-        \\[0.5em]
+        \\[0.0em]
     =& \; \cancelto{1}{\frac{G_t \cdot I}{G_t \cdot I}} \cdot \frac{R_t \cdot L_f}{L_t \cdot R_f}
         & & \frac{\text{L-blocks}}{\text{R-block}}
-        & & \text{Sub \autoref{eq:srt-reward}}
-        \nonumber
+        & & \text{by \emph{definition}}
+        \label{eq:srt-block-ratios}
 \end{align}
 
+\todo{write about the fig}
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[max width=\linewidth]{diff_adjustment_alg_times_3_sag}
+    \caption{
+      How does implicit context change when considering networks of a single root token?
+      By \emph{definition}, $L_f$ and $L_r$ are convertible via \autoref{eq:srt-block-ratios}.
+      In essence: both L and R have convertible factors that are dependant on the same meaning of ``seconds''.
+    }
+    \label{fig:daa-raa-conversion}
+\end{figure}
 
 
 Let's combine this with \autoref{eq:conv-reward-to-hashes} to create our next \textsc{WeightOf} algorithm:
+\begin{align}
+    & \; \frac{L_d}{L_r} \cdot \frac{R_r}{R_d} \cdot \cancelto{1}{X_{R\rightarrow L}}
+        & & \frac{\text{L-hashes}}{\text{R-hash}}
+        & & \text{\autoref{eq:por-conversion-const-1}}
+        \nonumber
+        \\[0.5em]
+    \implies & \; \frac{R_r}{L_r} \cdot L_d
+        & & \frac{\text{L-hashes}}{\text{R-block}}
+        & & \text{Multiply by } R_d
+        \nonumber
+        \\[0.5em]
+    = & \; \frac{R_t \cdot L_f}{L_t \cdot R_f} \cdot L_d
+        & & \frac{\text{L-hashes}}{\text{R-block}}
+        & & \text{\autoref{eq:srt-block-ratios}}
+        \nonumber
+        \\[0.5em]
+    \therefore \text{ConvSRT}_{R\rightarrow L}(b) = & \; \frac{R_t \cdot L_f}{L_t \cdot R_f} \cdot L_d \cdot b
+        & & \text{R-blocks } \rightarrow \text{ L-hashes}
+        & &
+        \label{eq:conv-srt}
+\end{align}
 
 \input{includes/ut/algorithms/weightof-ratio.tex}
 

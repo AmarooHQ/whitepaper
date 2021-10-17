@@ -16,6 +16,8 @@
 \providecommand\SwapConfirmationRateAndRevenue{1}
 \providecommand\MirrorVertical{1}
 \providecommand\ConfRateGeneral{1}
+\providecommand\CoinsGeneral{0}
+\providecommand\HideChainHistUnits{1}
 
 \tikzstyle{dec} = [decoration={
       text along path,
@@ -42,7 +44,7 @@
   \renewcommand\TikzNodePrefix{L}
   \renewcommand\UnitPrefix{L-}
   \DrawTikzDaaMacro
-  \node (daa2Init) [yshift=-10em] at (daa1Init) {};
+  \node (daa2Init) [yshift=-9em] at (daa1Init) {};
   \renewcommand\DaaInitialNodePlacement{daa2Init}
   \renewcommand\MirrorVertical{0}
   \renewcommand\TikzNodePrefix{R}
@@ -91,9 +93,12 @@
 
   % RAA
 
-  \node (raa) [chainName, double, align=center] at ($(Rdaa)!0.5!(Ldaa)$) {$\; \rightarrow {{\text{\normalsize{Reward Adjustment}}} \atop {\text{\normalsize{Algorithm}}}} \rightarrow \;$};
+  % \xdef\raaInner{{\text{\normalsize{Reward Adjustment}}} \atop {\text{\normalsize{Algorithm}}}}
+  \xdef\raaInner{\text{ Reward Adjustment Algorithm }}
 
-  \node (targetInflation) [align=center, xshift=3.1em] at (freqMid) {Target Inflation Rate \\ (Coins/sec)};
+  \node (raa) [chainName, double, align=center] at ($(Rdaa)!0.5!(Ldaa)$) {$\; \rightarrow \raaInner \rightarrow \;$};
+
+  \node (targetInflation) [align=center, xshift=3.1em] at (freqMid) {Target Inflation Rate \\ (coins/second)};
   \node (targetInfTo) [xshift=-3.1em, align=center] at (targetInflation) { \\ \\ };
 
   \draw [marketCtxArrowLR] (freqMid |- LtargetBF.south) -- (targetInfTo);
