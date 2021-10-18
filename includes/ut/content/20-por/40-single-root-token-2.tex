@@ -1,0 +1,75 @@
+
+The first example is \emph{one network split over two chains}.
+Both chains use the same \emph{root token}.
+There are, naturally, questions to answer,
+    like \emph{How are block rewards managed?}
+    and \emph{How can the root token be on two blockchains at once?}
+
+Let's consider the following \emph{restricted case} first: the chains (L and R) both have \emph{equal block frequencies}, and a two-way peg between the chains ensures that no coins are ever created or destroyed.
+
+In this case, \autoref{eq:por-conv-reward} collapses to
+\begin{equation} \label{eq:por-conv-same-rt-and-bf}
+\begin{split}
+    \text{ConvReward}_{R\rightarrow L}(R_r)
+        &= \cancelto{1}{\frac{R_f}{L_f}} \cdot R_r \cdot \cancelto{1}{X_{R\rightarrow L}} \\
+        &= R_r
+\end{split}
+\end{equation}
+
+After this, we need to convert the result (L-coins/L-block) to hashes.
+It's worth remembering that block-weight is \emph{the number of hashes it takes to make one block}.
+It just so happens that we're measuring the number of hashes for \emph{a single block}, so the \emph{per block} part of the resulting units \emph{cancels out}.
+\begin{align}
+& \frac{L_d}{L_r}
+    & & \frac{\text{L-hashes}}{\text{L-coin}}
+    & & \text{A constant of conversion} \nonumber
+    \\[0.5em]
+\implies \; & \frac{L_d}{L_r} \cdot \text{ConvReward}_{R\rightarrow L}(R_r)
+    & & \frac{\text{L-hashes}}{\text{L-block}}
+    & & \text{Convert to local weight} \label{eq:conv-reward-to-hashes}
+\end{align}
+
+Let's use this method to write our first \textsc{WeightOf} function: \autoref{alg:weightof-1}.
+
+\aside{
+    Note: the algorithms we define here will be general -- they'll work for \emph{both} the local and any reflecting chains.
+}
+
+\input{includes/ut/algorithms/weightof-basic.tex}
+
+If block frequencies aren't equal, we should multiply the result (any of them) by $\nicefrac{R_f}{L_f}$ to get the correct conversion.
+Since that's a simple fix, let's drop our assumptions about equal block frequencies going forward.
+
+But where do we get the reflecting chain's block reward?
+To start with, we can't let each chain \emph{set} its own reward, that would break the two-way peg.
+It also means \emph{the reflecting chain shouldn't be the source of that data}.
+We could retrieve it from state (if it's prior calculated), but for the sake of this example, let's calculate it in the \textsc{WeightOf} function.
+
+Right now, we don't have enough \emph{context} to know what to do; \emph{what contexts would be useful?}
+
+What \emph{purpose} does a block reward fulfil?
+It must be something about \emph{security}, because that's how miners are incented to mine.
+If we have multiple chains, why should one chain be more secure than another?
+One reason is because \emph{more commerce happens there;} i.e., more of the network relies on \emph{that} chain compared to the other one.
+
+What would make sense, given the context of a commerce-imbalance, to base the block reward on?
+A straightforward answer (which can be globally known, too) is \emph{the ratio of root tokens on each chain.}
+We can have a \emph{network wide} rule that there is some \emph{network wide inflation rate}, and each chain's block reward is the product of the \emph{ratio} of coins on that chain with the entire supply.
+This way, the global inflation rate is predictable, even though the coins produced \emph{on each chain} (via block rewards) are variable.
+Moreover, we should expect that the \emph{value to the community} of each chain roughly matches the \emph{distribution of the community's activities}, and the \emph{distribution of security}, too.
+This method is also consistent with the idea of \emph{equal work for equal reward}.
+We can rely on that idea because \emph{equality of work} is a result of the market (for block rewards) formed by participating miners.
+
+If the network uses this rule to determine block reward, then, for either chain $C$, what can we say?
+Let: $I$ be the network-wide inflation rate (coins/s); $G_t$ be the network-wide root token supply (coins); and $C_t$ be the number of root tokens on chain $C$ (coins). $C_f$ is the frequency of chain $C$ (blocks/s).
+\begin{equation} \label{eq:srt-reward}
+    C_r \cdot C_f = \frac{C_t}{G_t} \cdot I
+\end{equation}
+
+Let's combine this with \autoref{eq:conv-reward-to-hashes} to create our next \textsc{WeightOf} algorithm:
+
+\input{includes/ut/algorithms/weightof-ratio.tex}
+
+\aside{
+    Note: the result of passing a local block to these \textsc{WeightOf}s matches the expected result.
+}

@@ -23,6 +23,7 @@ module.exports = {
                 "/\\b[0-9]+[xs]\\b/g",  // numbers with units
                 "/\\b[0-9A-Za-z]_[0-9A-Za-z]?\\b/g",
                 "/\\b[a-z]?[0-9A-Za-z]_[0-9A-Za-z]?\\b/g",
+                "/\\b[a-z]?_[0-9A-Za-z]+\\b/g",
                 "/\\b[A-Z]+(_[A-Z_]+)+\\b/g",
                 "/\\b[0-9]+\\b/g",
                 "Dapp", "dapp", "sharding",
@@ -49,10 +50,11 @@ module.exports = {
                 "paraInclusion",
                 "candidateBacked",
                 "BitcoinTalk",
-                "/L[0-9]{2,}/",
+                "/\\bL[0-9]{2,}\\b/",
                 "2B_h", "EOS", "Solana", "Ittay", "Eyal", "Emin", "Sirer", "Trustless",
                 "Petersburg", "SegWit", "s2", "TOC", "Incentivization",
                 "ReflectedBlockWeight", "Ouroboros", "s10",
+                "ConvReward", "ConvBlocks"
             ],
         },
         "en-max-word-count": {
@@ -93,6 +95,7 @@ module.exports = {
                 [">=", "\\ge"],
                 ["\\being{", "\\begin{"],
                 ["re-write", "rewrite"],
+                ["[a-zA-Z]+_[a-zA-Z0-9,]+\^"], // probs won't work, but it's regex for x_y^z in latex that should probs be {x_y}^z
             ]
         }
     }

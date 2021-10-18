@@ -1,0 +1,61 @@
+\todo{note: this is cut content}
+
+\begin{comment}
+The simplest method for comparing work done via different algorithms is for all reflecting chains to measure that work via a common unit. How can we do this? We could try to measure it in some external unit like USD. However, that would require accounting for external factors like the availability of silicon and mining rigs, the cost of electricity, and various exchange rates. Accounting for those external factors impractical, so whatever method we choose, those factors must *cancel out*.
+\end{comment}
+
+In blockchains like Bitcoin and Ethereum, block rewards are denominated
+in the \emph{root token} of that chain. What if we had two chains with
+the same root token?
+
+Consider two PoW blockchains that share a root token, but use different
+hashing algorithms. We can't directly compare their rates of work
+because the PoW algorithms are different, but we \emph{can} compare
+their rates of \emph{token generation via block rewards} (normalized
+against time). Why does this work? Market externalities are encapsulated
+by the \emph{economic} decisions that miners have to make. Thus, the
+rate of work of each chain will approach equilibrium, and if both are at
+equilibrium we can say that the work contributed to each chain is in
+proportion to the token generation rate. What do I mean by this? Let's
+look at an example.
+
+Say we had Chain L and Chain R: two PoW chains using different
+algorithms, but with the \emph{same} root token and the same block
+production rate. Firstly, we need a way to determine what their block
+rewards are, and the intuitive solution is to set each chain's block
+reward proportionally to the percentage of root tokens (i.e.,
+\emph{coins}) on that chain. Say that 100\% of the root tokens should
+correspond to 50 coins generated per block. So, if one chain had 60\% of
+the root tokens, then 30 coins are generated per block \emph{on that
+chain}, and (since we only have 2 chains) \emph{the other chain} has 20
+coins generated per block -- corresponding to the remaining 40\% of root
+tokens. One reason this method makes sense is that the \emph{ratio} of
+coins on each chain is not affected by block rewards. We can generalize
+the method by normalizing against time so that we're comparing the rates
+of coin production rather than the block rewards themselves.
+
+Now that we know what the block rewards are, and have defined them in
+terms of the percentage of total coins that are on that chain, we can
+work on comparing the chains' hash rates. What sort of foundation could
+we do this from? What about \emph{equal work for equal reward}? Because
+we have defined block rewards in terms of \emph{where} root tokens are
+held, we can measure things like \emph{hashes per token} (when
+considering block rewards particularly). Crucially, we can measure this
+\emph{for each chain}, which allows us to -- \emph{contextually} -- make
+claims like 100 hashes on Chain L are worth 25 hashes on Chain R.
+
+Since we know the percentage of root tokens on each chain for each
+moment in history, we can safely use that figure in chain-weight
+calculations. The reliability of that data will be the same as the
+reliability of the blockchains themselves, provided we enforce the 2-way
+peg that ensures no root tokens are created or destroyed (which would
+violate protocol rules).
+
+\autoref{alg:weightof-1} and \autoref{alg:weightof-ratio} detail
+simplistic \textsc{WeightOf} functions that return a weight normalized
+in coins (i.e., root tokens). It does not account for some things, e.g.,
+changes to the difficulty of \(C\) over time.
+
+\input{includes/ut/algorithms/weightof-basic.tex}
+
+\input{includes/ut/algorithms/weightof-ratio.tex}

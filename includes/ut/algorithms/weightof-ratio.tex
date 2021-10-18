@@ -2,13 +2,17 @@
 \caption{A \textsc{WeightOf} function for networks of a single root token based on the ratio of root tokens that it hosts}
 \label{alg:weightof-ratio}
 \begin{algorithmic}
-\Procedure{WeightOf}{$B_i, state$} \Comment{The weight of a block normalized to coins}
+\Procedure{WeightOf}{$B_i, state$} \Comment{Returns L-hashes/L-block}
     \State $t \gets$ \Call{BlockTimestamp}{$B_i$}
     \State $C \gets$ \Call{ChainOf}{$B_i$, $state$}
     \State $r \gets$ \Call{RootTokenRatioOnChainAt}{$C$, $t$, $state$} \Comment{Proportion of all RTs on $C$ at $t$}
-    \State $f \gets$ \Call{BlockFrequencyOfChain}{$C$, $state$} \Comment{Block production Hz of $C$}
+    \State $C_f \gets$ \Call{BlockFrequencyOfChain}{$C$, $state$} \Comment{Block production Hz of $C$}
+    \State $L_f \gets$ \Call{LocalBlockFrequency}{$state$}
     \State $I \gets$ \Call{NetworkInflation}{$state$} \Comment{coins/s created over the entire network}
-    \State \Return{$r \cdot I \cdot f^{-1}$}
+    \State $C_r \gets r \cdot I \cdot C_f^{-1}$ \Comment{See \autoref{eq:srt-reward}}
+    \State $L_r \gets$ \Call{LocalBlockRewardAt}{$t$, $state$}
+    \State $L_d \gets$ \Call{LocalBlockDifficultyAt}{$t$, $state$}
+    \State \Return{$C_r \cdot (C_f \div L_f) \cdot (L_d \div L_r)$}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}

@@ -44,7 +44,7 @@ T_1 = k_1
 
 The complexity order of the network is given by $O(T_1) = O(k_1) = O(c)$ as expected.
 
-Care should be taken to account for protocol extensions like *Segregated Witness* that effectively reduce the size of transactions by $\nicefrac{1}{4}$.
+Care should be taken to account for protocol extensions like *Segregated Witness* that effectively reduce the size of transactions (in SegWit's case, by $\sim \nicefrac{1}{4}$).
 
 For Bitcoin -- given $k_1 \approx 1700$ B/s, and transaction size $\text{Tx}_{\text{avg}} = 500 \cdot \nicefrac{3}{4}$ B -- the maximum TPS is given by:
 \begin{equation*}
@@ -66,7 +66,7 @@ Suppose the root-chain has a throughput of $k_1$ B/s and it can support up to $N
   In the case of \emph{Polkadot}, it is \href{https://github.com/AmarooHQ/polkadot-effective-dh/blob/5cd0f0d21ff1cd3c57d1c2af70aaf6d8ee19dc11/main.js}{measurable} that a minimum of 819 B is used in the \texttt{paraInclusion.candidateBacked} extrinsic (i.e., transaction).
   So, a lower-bound on the effective header size of a parachain is 819 B (this does not include \emph{bitfields}\footnotemark).
   \par
-  In those situations, with regards to these complexity derivations, one can use the \emph{effective} header size as a replacement for the \emph{raw} header size.
+  In those situations, with regards to these capacity derivations, one can use the \emph{effective} header size as a replacement for the \emph{raw} header size.
 }
 
 \addtocounter{footnote}{-1}
@@ -147,8 +147,8 @@ Since each simplex-chain reserves $k_{1,tx}$ B/s for transactions, the total thr
 T_1 & = N_1 \cdot k_{1,tx} \label{eq:reflection-t1-start} \\
 & = N_1(k_1 - N_1 \cdot B_f \cdot B_h) \notag \\
 %% & = N_1(k_1 - (N_1 - 1) \cdot B_f \cdot B_h) \notag \\
-& = N_1 \cdot k_1 - N_1^2 \cdot B_f \cdot B_h \label{eq:reflection-t1-in-terms-of-n1}
-%% & = N_1 \cdot k_1 - N_1^2 \cdot B_f \cdot B_h + N_1 \cdot B_f \cdot B_h \label{eq:reflection-t1-in-terms-of-n1}
+& = N_1 \cdot k_1 - {N_1}^2 \cdot B_f \cdot B_h \label{eq:reflection-t1-in-terms-of-n1}
+%% & = N_1 \cdot k_1 - {N_1}^2 \cdot B_f \cdot B_h + N_1 \cdot B_f \cdot B_h \label{eq:reflection-t1-in-terms-of-n1}
 \end{align}
 
 The optimal number of simplex-chains will maximize throughput. We can find that maxima via:
@@ -177,18 +177,18 @@ From \autoref{eq:reflection-t1-in-terms-of-n1} and substituting $N_1$ from \auto
 \begin{equation}
 \label{eq:simplex-T1}
 \begin{split}
-T_1 & = k_1 \cdot \frac{k_1}{2 \cdot B_f \cdot B_h} - B_f \cdot B_h \cdot \frac{k_1^2}{4 \cdot B_f^2 \cdot B_h^2} \\
-& = \frac{2 k_1^2}{4 \cdot B_f \cdot B_h} - \frac{k_1^2}{4 \cdot B_f \cdot B_h} \\
-& = \frac{k_1^2}{4 \cdot B_f \cdot B_h}
+T_1 & = k_1 \cdot \frac{k_1}{2 \cdot B_f \cdot B_h} - B_f \cdot B_h \cdot \frac{{k_1}^2}{4 \cdot {B_f}^2 \cdot {B_h}^2} \\
+& = \frac{2 {k_1}^2}{4 \cdot B_f \cdot B_h} - \frac{{k_1}^2}{4 \cdot B_f \cdot B_h} \\
+& = \frac{{k_1}^2}{4 \cdot B_f \cdot B_h}
 \end{split}
 \end{equation}
 
-Thus $O(T_1) = O(k_1^2) = O(c^2)$.
+Thus $O(T_1) = O({k_1}^2) = O(c^2)$.
 
 What are $k_{1,B}$ and $k_{1,tx}$ in terms of $k_1$? From \autoref{eq:reflection-t1-start} and \autoref{eq:simplex-T1}:
 \begin{equation*}
 \begin{split}
-N_1 \cdot k_{1,tx} & = \frac{k_1^2}{4 \cdot B_f \cdot B_h}
+N_1 \cdot k_{1,tx} & = \frac{{k_1}^2}{4 \cdot B_f \cdot B_h}
 \end{split}
 \end{equation*}
 
@@ -196,7 +196,7 @@ Substituting $N_1$ from \autoref{eq:simplex-N1} gives:
 \begin{equation*}
 \begin{split}
 \label{eq:k-tx-optimal}
-\frac{k_1 \cdot k_{1,tx}}{2 \cdot B_f \cdot B_h} & = \frac{k_1^2}{4 \cdot B_f \cdot B_h} \\
+\frac{k_1 \cdot k_{1,tx}}{2 \cdot B_f \cdot B_h} & = \frac{{k_1}^2}{4 \cdot B_f \cdot B_h} \\
 k_{1,tx} & = \frac{k_1}{2}
 \end{split}
 \end{equation*}
@@ -236,8 +236,8 @@ Starting with \autoref{eq:simplex-T1} and building on \autoref{eq:throughput-ite
 \begin{equation}
 \begin{split}
 \label{eq:throughput-c-3}
-T_1 & = \frac{k_1^2}{4 \cdot B_f \cdot B_h} \\
-\therefore T_2 & = \frac{k_1^2 \cdot k_2}{4 \cdot B_f \cdot B_h \cdot D_f \cdot D_h}
+T_1 & = \frac{{k_1}^2}{4 \cdot B_f \cdot B_h} \\
+\therefore T_2 & = \frac{{k_1}^2 \cdot k_2}{4 \cdot B_f \cdot B_h \cdot D_f \cdot D_h}
 \end{split}
 \end{equation}
 
@@ -247,9 +247,11 @@ The maximum number of dapp-chains is given by:
 \begin{equation*}
 \begin{split}
 N_2 & = \frac{T_2}{k_2} \\
-& = \frac{k_1^2}{4 \cdot B_f \cdot B_h \cdot D_f \cdot D_h}
+& = \frac{{k_1}^2}{4 \cdot B_f \cdot B_h \cdot D_f \cdot D_h}
 \end{split}
 \end{equation*}
+
+When $D_h = B_h$ and $D_f = B_f$, note that $N_2 = {N_1}^2$.
 
 #### UT with Dapp-Dapp-Chains ($\UT{3}$)
 
@@ -258,7 +260,7 @@ If we say each dapp-chain hosts shards or more dapp-chains (e.g., as a dapp-chai
 \label{eq:throughput-c-4}
 \begin{split}
 T_3 & = \frac{T_2}{D_f \cdot D_h} \cdot k_3 \\
-& = \frac{k_1^2 \cdot k_2 \cdot k_3}{4 \cdot B_f \cdot B_h \cdot D_f^2 \cdot D_h^2}
+& = \frac{{k_1}^2 \cdot k_2 \cdot k_3}{4 \cdot B_f \cdot B_h \cdot {D_f}^2 \cdot {D_h}^2}
 \end{split}
 \end{equation}
 
@@ -270,7 +272,7 @@ Via \autoref{eq:simple-scaling} and \autoref{eq:throughput-c-4}:
 \begin{equation*}
 \begin{split}
 N_3 & = \frac{T_3}{k_3} \\
-& = \frac{k_1^2 \cdot k_2}{4 \cdot B_f \cdot B_h \cdot D_h^2 \cdot D_f^2}
+& = \frac{{k_1}^2 \cdot k_2}{4 \cdot B_f \cdot B_h \cdot {D_h}^2 \cdot {D_f}^2}
 \end{split}
 \end{equation*}
 
@@ -347,7 +349,7 @@ The amount of network bandwidth, $\Delta S$, required to download all blocks (as
 \begin{equation}
 \begin{split}
 \Delta S & = N_1 \cdot k_1 \\
-& = \frac{k_1^2}{2 \cdot B_f \cdot B_h}
+& = \frac{{k_1}^2}{2 \cdot B_f \cdot B_h}
 \label{eq:bandwidth-req}
 \end{split}
 \end{equation}
