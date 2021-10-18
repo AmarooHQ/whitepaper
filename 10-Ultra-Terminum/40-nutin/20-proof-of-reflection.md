@@ -761,11 +761,11 @@ Thus, \emph{any} common units, which are linearly convertible both from a reflec
 
 What blockchain contexts can facilitate the conversion of block-weight?
 
-Of course, we need to figure out a way to get the exchange rate that is \emph{at least as secure} as the consensus algorithms (otherwise we'd be introducing a new weakest-link).
+Whatever contexts we find, we will need to figure out a way to get the exchange rate that is \emph{at least as secure} as the consensus algorithms (otherwise we'd be introducing a new weakest-link).
 That can't be too hard, right?
 
 Can we \emph{avoid} that exchange rate, though?
-Well, there is a context where $r=1$: \textbf{when L-coins $\equiv$ R-coins}, i.e., both chains use the same root token.
+Well, there is a context where $X_{R\rightarrow L}=1$: \textbf{when L-coins $\equiv$ R-coins}, i.e., both chains use the same root token.
 In that case, $\nicefrac{L_d}{L_r} \cdot \nicefrac{R_r}{R_d}$ gives us L-hashes/R-hash directly.
 
 #### A Single Root Token Across Multiple Chains
