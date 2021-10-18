@@ -5,19 +5,17 @@
 \begin{algorithmic}
 \Procedure{WeightOf}{$B_i$, $state$} \Comment{Convert reflecting weight to local via a DEX}
     \State $t \gets$ \Call{BlockTimestamp}{$B_i$}
-    \State $C \gets$ \Call{ChainOf}{$B_i$, $state$}
-    \State $C_r \gets$ \Call{BlockRewardOfChainAt}{$C$, $t$, $state$} \Comment{Block reward of $C$ at $t$}
-    \State $C_f \gets$ \Call{BlockFrequencyOfChainAt}{$C$, $t$, $state$}
-    \State $L_d \gets$ \Call{DifficultyOfLocalAt}{$t$, $state$}
-    \State $L_f \gets$ \Call{BlockFrequencyOfLocalAt}{$t$, $state$}
+    \State $R \gets$ \Call{ChainOf}{$B_i$, $state$}
+    \State $R_r \gets$ \Call{BlockRewardOfChainAt}{$R$, $t$, $state$} \Comment{Block reward of $R$ at $t$}
     \State $L_r \gets$ \Call{BlockRewardOfLocalAt}{$t$, $state$}
-    \State $X_{C\rightarrow L} \gets$ \Call{GetLocalDexRateFromAt}{$C$, $t$, $state$}
+    \State $L_d \gets$ \Call{DifficultyOfLocalAt}{$t$, $state$}
+    \State $X_{R\rightarrow L} \gets$ \Call{GetLocalDexRateFromAt}{$R$, $t$, $state$}
     % \State $w \gets$ \Call{$\text{ConvDEX}_{R\rightarrow L}$}{$L_d$, $L_f$, $L_r$, $C_f$, $C_r$, $X_{C\rightarrow L}$}
-    \State \Return{\Call{$\text{ConvDEX}_{R\rightarrow L}$}{$L_d$, $L_f$, $L_r$, $C_f$, $C_r$, $X_{C\rightarrow L}$}}
+    \State \Return{\Call{$\text{ConvDEX}_{R\rightarrow L}$}{$L_d$, $L_r$, $R_r$, $X_{R\rightarrow L}$}}
 \EndProcedure
 \\
-\Procedure{$\text{ConvDEX}_{R\rightarrow L}$}{$L_d$, $L_f$, $L_r$, $R_f$, $R_r$, $X_{R\rightarrow L}$} \Comment{Returns L-hashes/L-block}
-    \State \Return{$(L_d \div L_r) \cdot X_{R\rightarrow L} \cdot R_r \cdot (R_f \div L_f)$} \Comment{See \autoref{eq:por-conv-dex}}
+\Procedure{$\text{ConvDEX}_{R\rightarrow L}$}{$L_d$, $L_r$, $R_r$, $X_{R\rightarrow L}$} \Comment{Returns L-hashes for 1 R-block}
+    \State \Return{$(L_d \div L_r) \cdot X_{R\rightarrow L} \cdot R_r$} \Comment{See \autoref{eq:por-conv-dex}}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}

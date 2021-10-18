@@ -565,7 +565,7 @@ Bitcoin, for example, adjusts it's difficulty every 2016 blocks.\footnote{
   Note: in Bitcoin, a difficulty of 1 corresponds to $2^{32}$ hashes.
 }
 A ratio is found by multiplying the previous difficulty ($D_\text{prev}$) by the actual duration ($\Delta t_\text{actual}$) of the last 2016 blocks and dividing by the target duration ($\Delta t_\text{target}$) for 2016 blocks.\footnote{
-  Note: in practiced the ratio is clamped between $\nicefrac{1}{4}$ and $4$. See Bitcoin's \href{https://github.com/bitcoin/bitcoin/blob/7fcf53f7b4524572d1d0c9a5fdc388e87eb02416/src/pow.cpp\#L49-L72}{\texttt{src/pow.cpp}} for the implementation.
+  Note: in practice the ratio is clamped between $\nicefrac{1}{4}$ and $4$. See Bitcoin's \href{https://github.com/bitcoin/bitcoin/blob/7fcf53f7b4524572d1d0c9a5fdc388e87eb02416/src/pow.cpp\#L49-L72}{\texttt{src/pow.cpp}} for the implementation.
 }
 Note that the units of $\Delta t_\text{actual}$ are B-seconds/(2016 B-blocks), and the units of $\Delta t_\text{target}$ are seconds/(2016 blocks).
 
@@ -594,6 +594,8 @@ We will use the subscript $W\rightarrow B$ to denote the idea of converting betw
 \end{align}
 
 When a DAA adds context, it converts blocks $\rightarrow$ B-blocks, and seconds $\rightarrow$ B-seconds.
+(Alternatively, it could \emph{strip} context; the only thing that matters is that $\text{ConversionConst}_{W\rightarrow B}$ is unitless.
+Either way works because the DAA acts as a boundary of the convertible context in both cases.)
 \begin{align}
   \text{With context:}
     & & \text{NextWork}_{W\rightarrow B}(D_\text{prev})
@@ -628,7 +630,7 @@ The general case of a DAA's relationships (flows of \emph{information} and \emph
 \label{fig:daa-conversion}
 \end{figure}
 
-How do we know that \emph{both} block and seconds become context laden via a DAA, though?
+How do we know that \emph{both} blocks and seconds become context laden via a DAA, though?
 
 \begin{align}
   \text{No context:} & & \frac{L_f}{R_f}
@@ -678,7 +680,7 @@ Since network context is respected, we can use an exchange rate to build a meani
 \centering
 \includegraphics[max width=\linewidth]{diff_adjustment_alg_times_2_sag}
 \caption{
-  How are the implicit contexts of two different networks related?
+  How are the convertible contexts of two different networks related?
   Without the market context, there's no conversion path that allows for the conversion of work.
   These are the same conversions that miners use to determine which network is most profitable for them.
   Double-lined arrows indicate \emph{market context}.
