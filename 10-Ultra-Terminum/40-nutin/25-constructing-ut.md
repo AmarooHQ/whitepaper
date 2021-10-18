@@ -183,7 +183,7 @@ The general case (where a reflecting chain contributes far more chain-work than 
 Consider the limited context of a DEX with only one required trading pair (between the dapp-chain's root token and the ROO), combined with the security-contribution differential between a simplex-chain and a dapp-chain.
 Note that a conservative implementation of a DEX between this pair *only relies on local state* -- that of the host simplex-chain and the dapp-chain, all of which is accessible to dapp-chain full nodes.
 The simplest method of preventing market manipulation (that might allow for some attack on the dapp-chain) is to calculate PoR weight via an *old* exchange rate (e.g., from 24 hours ago), or to use an *average* over some period of time.
-Both of these ensure that *competition between blocks* (at any given time) is not dependant on the *current* DEX execution.
+Both of these ensure that *competition between blocks* (at any given time) is not dependent on the *current* DEX execution.
 With regards to dapp-chains using Proof of Reflection, this is sufficient.
 
 Given a DEX, the dapp-chain can use this to automatically convert some of the mining reward to the root token of the host simplex-chain.

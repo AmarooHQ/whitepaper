@@ -91,7 +91,7 @@ Term & Definition & Reference \\
 
 \listoffigures
 
-\newpage
+%%\newpage
 
 \listoftables
 

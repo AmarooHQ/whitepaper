@@ -54,7 +54,8 @@ module.exports = {
                 "2B_h", "EOS", "Solana", "Ittay", "Eyal", "Emin", "Sirer", "Trustless",
                 "Petersburg", "SegWit", "s2", "TOC", "Incentivization",
                 "ReflectedBlockWeight", "Ouroboros", "s10",
-                "ConvReward", "ConvBlocks"
+                "ConvReward", "ConvBlocks", "NextWork", "DAA", "RAA",
+                "20201016_NODA", "m1", "m2"
             ],
         },
         "en-max-word-count": {
@@ -96,6 +97,10 @@ module.exports = {
                 ["\\being{", "\\begin{"],
                 ["re-write", "rewrite"],
                 ["[a-zA-Z]+_[a-zA-Z0-9,]+\^"], // probs won't work, but it's regex for x_y^z in latex that should probs be {x_y}^z
+                ["diagramed", "diagrammed"],
+                ["lated", "laden"],
+                ["rashes", "hashes"],
+                ["dependant", "dependent"],
             ]
         }
     }

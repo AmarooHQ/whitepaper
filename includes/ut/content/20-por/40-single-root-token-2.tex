@@ -1,5 +1,5 @@
 
-The first example is \emph{one network split over two chains}.
+The first example context is \emph{one network split over two chains}.
 Both chains use the same \emph{root token}.
 There are, naturally, questions to answer,
     like \emph{How are block rewards managed?}
@@ -7,40 +7,41 @@ There are, naturally, questions to answer,
 
 Let's consider the following \emph{restricted case} first: the chains (L and R) both have a two-way peg between, ensuring that no coins are ever created or destroyed.
 
-\todo{fix this}
+\todo{fix this section (wrt conversion)}
 
 In this case, \autoref{eq:por-conv-work} collapses to
 \begin{align}
-    \text{ConvWork}_{R\rightarrow L}(w) = \; & \frac{L_d}{L_r} \cdot \cancelto{1}{X_{R\rightarrow L}} \cdot \frac{R_r}{R_d} \cdot w
-    \\
-    \text{ConvReward}_{R\rightarrow L}(R_r)
-        &= \cancelto{1}{\frac{R_f}{L_f}} \cdot R_r \cdot \cancelto{1}{X_{R\rightarrow L}} \\
-        &= R_r
+    \text{ConvWork}_{R\rightarrow L}(w) = \; & \frac{L_d}{L_r} \cdot \frac{R_r}{R_d} \cdot w % \cdot \cancelto{1}{X_{R\rightarrow L}}
+        & & % \text{R-hashes }\rightarrow\text{ L-hashes}
+        & & \text{Since }X_{R\rightarrow L}=1
+        \nonumber
+        \\[0.5em]
+    \implies \text{ConvWork}_{R\rightarrow L}(R_d) = \; & \frac{L_d}{L_r} \cdot R_r
+        & & \text{L-hashes}
+        & & \text{R-blocks weigh } w = R_d \cdot 1 \text{ R-hashes}
+        \nonumber
+        \\[0.5em]
+    \implies \text{ConvWork}_{R\rightarrow L}(R_d) \cdot \frac{L_r}{L_d} = \; & R_r
+        & & \text{L-coins}
+        & & \text{Weight of an R-block in L-coins}
+        \label{eq:por-conv-work-srt}
+    % \therefore \text{ConvReward}_{R\rightarrow L}(w) = \; & \frac{R_r}{R_d} \cdot w
+    %     & & \text{R-hashes -> L-coins}
+    %     & & \text{The weight of an } \text{R-block in L-coins}
+    %     \label{eq:por-conv-work-srt}
 \end{align}
 
-After this, we need to convert the result (L-coins/L-block) to hashes.
-It's worth remembering that block-weight is \emph{the number of hashes it takes to make one block}.
-It just so happens that we're measuring the number of hashes for \emph{a single block}, so the \emph{per block} part of the resulting units \emph{cancels out}.
-\begin{align}
-& \frac{L_d}{L_r}
-    & & \frac{\text{L-hashes}}{\text{L-coin}}
-    & & \text{A constant of conversion} \nonumber
-    \\[0.5em]
-\implies \; & \frac{L_d}{L_r} \cdot \text{ConvReward}_{R\rightarrow L}(R_r)
-    & & \frac{\text{L-hashes}}{\text{L-block}}
-    & & \text{Convert to local weight} \label{eq:conv-reward-to-hashes}
-\end{align}
+If we convert like this (treating 1 R-block as worth $R_r \cdot 1$ L-coins) then we'll we need to convert the result to hashes \emph{eventually} -- but we can sum this up if we had multiple reflections to process (since $\nicefrac{L_r}{L_d}$ is a constant for some given moment in time).
+It's worth remembering that block-weight is measured \emph{per block}.
+Since we're only converting a single block's weight at a time, the \emph{per block} part of the resulting units \emph{cancels out}.
 
-Let's use this method to write our first \textsc{WeightOf} function: \autoref{alg:weightof-1}.
+Let's use this method to write our first \textsc{WeightOf} function: \autoref{alg:weightof-1} (we'll still sum hashes, though).
 
 \aside{
     Note: the algorithms we define here will be general -- they'll work for \emph{both} the local and any reflecting chains.
 }
 
 \input{includes/ut/algorithms/weightof-basic.tex}
-
-If block frequencies aren't equal, we should multiply the result (any of them) by $\nicefrac{R_f}{L_f}$ to get the correct conversion.
-Since that's a simple fix, let's drop our assumptions about equal block frequencies going forward.
 
 But where do we get the reflecting chain's block reward?
 To start with, we can't let each chain \emph{set} its own reward, that would break the two-way peg.
@@ -51,7 +52,7 @@ Right now, we don't have enough \emph{context} to know what to do; \emph{what co
 
 What \emph{purpose} does a block reward fulfil?
 It must be something about \emph{security}, because that's how miners are motivated to mine.
-If we have multiple chains, why should one chain be more secure than another?
+If we have multiple chains (with the same root token), why should one chain be more secure than another?
 One reason is because \emph{more commerce happens there;} i.e., more of the network relies on \emph{that} chain compared to the other one.
 
 What would make sense, given the context of a commerce-imbalance, to base the block reward on?
@@ -71,20 +72,30 @@ Let: $I$ be the network-wide inflation rate (coins/s); $G_t$ be the network-wide
         & & \text{As set above}
         \nonumber
         \\[0.5em]
-    C_r & = \frac{C_t \cdot I}{G_t \cdot C_f}
+    \implies C_r & = \frac{C_t \cdot I}{G_t \cdot C_f}
         & & \frac{\text{C-coins}}{\text{C-block}}
         & & \label{eq:srt-reward}
         \\[0.5em]
-    \therefore \frac{R_r}{L_r}=& \; \frac{R_t \cdot I}{G_t \cdot R_f} \cdot \frac{G_t \cdot L_f}{L_t \cdot I}
+    \therefore \frac{R_r}{L_r} =& \; \frac{R_t \cdot I}{G_t \cdot R_f} \cdot \frac{G_t \cdot L_f}{L_t \cdot I}
         & & \frac{\text{L-blocks}}{\text{R-block}}
-        & & \text{\autoref{eq:srt-reward}}
+        & & \text{Via \autoref{eq:srt-reward}}
         \nonumber
         \\[0.0em]
-    =& \; \cancelto{1}{\frac{G_t \cdot I}{G_t \cdot I}} \cdot \frac{R_t \cdot L_f}{L_t \cdot R_f}
+    \frac{R_r}{L_r} =& \; \frac{R_t \cdot L_f}{L_t \cdot R_f} \cdot \cancelto{1}{\frac{G_t \cdot I}{G_t \cdot I}}
         & & \frac{\text{L-blocks}}{\text{R-block}}
         & & \text{by \emph{definition}}
         \label{eq:srt-block-ratios}
 \end{align}
+
+Hold up!
+Didn't we just go over -- in great detail -- why we can't use block frequencies ($L_f$ and $R_f$) in conversions?
+Why is it okay to use them now?
+
+- introduce RAA
+- outputs (each chain's block reward) become *context laden* with a common meaning of ``seconds''.
+- we added a *definition* of $C_r$ that *requires* certain relationships w/ $C_f$ hold.
+- thus, $L_f$ and $R_f$ now have *contextual meaning* -- they're *context laden*.
+
 
 \todo{write about the fig}
 
@@ -94,26 +105,16 @@ Let: $I$ be the network-wide inflation rate (coins/s); $G_t$ be the network-wide
     \includegraphics[max width=\linewidth]{diff_adjustment_alg_times_3_sag}
     \caption{
       How does implicit context change when considering networks of a single root token?
-      By \emph{definition}, $L_f$ and $L_r$ are convertible via \autoref{eq:srt-block-ratios}.
+      In this case, because we set a network-wide inflation rate (\autoref{eq:srt-reward}), by \emph{definition}, $L_f$ and $R_f$ have meaning in the convertible context.
       In essence: both L and R have convertible factors that are dependant on the same meaning of ``seconds''.
     }
     \label{fig:daa-raa-conversion}
 \end{figure}
 
 
-Let's combine this with \autoref{eq:conv-reward-to-hashes} to create our next \textsc{WeightOf} algorithm:
+Let's use \autoref{eq:srt-block-ratios} to create our next \textsc{WeightOf} algorithm:
 \begin{align}
-    & \; \frac{L_d}{L_r} \cdot \frac{R_r}{R_d} \cdot \cancelto{1}{X_{R\rightarrow L}}
-        & & \frac{\text{L-hashes}}{\text{R-hash}}
-        & & \text{\autoref{eq:por-conversion-const-1}}
-        \nonumber
-        \\[0.5em]
-    \implies & \; \frac{R_r}{L_r} \cdot L_d
-        & & \frac{\text{L-hashes}}{\text{R-block}}
-        & & \text{Multiply by } R_d
-        \nonumber
-        \\[0.5em]
-    = & \; \frac{R_t \cdot L_f}{L_t \cdot R_f} \cdot L_d
+    & \; \frac{R_t \cdot L_f}{L_t \cdot R_f} \cdot L_d
         & & \frac{\text{L-hashes}}{\text{R-block}}
         & & \text{\autoref{eq:srt-block-ratios}}
         \nonumber

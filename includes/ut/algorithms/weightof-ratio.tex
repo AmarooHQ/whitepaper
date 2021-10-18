@@ -10,7 +10,7 @@
     \State $L_t \gets$ \Call{LocalRootTokens}{$t$, $state$}
     \State $L_f \gets$ \Call{LocalBlockBlockFrequency}{$t$, $state$}
     \State $L_d \gets$ \Call{LocalBlockDifficultyAt}{$t$, $state$}
-    \State \Return{$R_t \cdot L_f \cdot L_d \div L_r \div R_f$} \Comment{See \autoref{eq:conv-srt}}
+    \State \Return{$R_t \cdot L_f \cdot L_d \div L_t \div R_f$} \Comment{See \autoref{eq:conv-srt}}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}

@@ -257,7 +257,7 @@ The final step in this progression is *mutual reflection* -- where both chains i
 \label{fig:por-step5}
 \end{figure}
 
-When two chains (Chain L and Chain R) mutually reflect each-other, detecting attacks becomes easier. The security of both Chain L and R are partially dependant on each others' histories (along with their own, of course). If one chain is attacked, where some alternate chain-segment is published, then that chain's nodes will know that those blocks have not been reflected - potentially indicating that the recently-published chain-segment was constructed in private or constructed after the fact.
+When two chains (Chain L and Chain R) mutually reflect each-other, detecting attacks becomes easier. The security of both Chain L and R are partially dependent on each others' histories (along with their own, of course). If one chain is attacked, where some alternate chain-segment is published, then that chain's nodes will know that those blocks have not been reflected - potentially indicating that the recently-published chain-segment was constructed in private or constructed after the fact.
 
 There are several details that still require discussion, though, such as: *how exactly is weight contributed by a reflecting chain converted to weight in the local chain?* (discussed in \autoref{sec:comparing-chain-work}); and *how can proofs of reflection be calculated without the requirement that miners are full nodes of both chains?* (discussed in \autoref{sec:practical-considerations}).
 This last question is particularly important for moving beyond mutual reflection between only two chains.
@@ -302,7 +302,9 @@ Now, let's add that exchange rate: $X_{R\rightarrow L}$ (L-coins/R-coin).
 And some variables for Chain R which correspond to Chain L's above: $R_f$, $R_r$, and $R_d$.
 There's a symmetry between chains L and R, so we already know that $\nicefrac{R_d}{R_r}$ gives us R-hashes/R-coin.
 
-##### Converting Block-Weights
+In theory, can an exchange rate help us convert between R-hashes/R-coin and L-hashes/L-coin?
+
+#### Converting Block-Weights
 
 Can we find some function, $\text{ConvWork}_{R\rightarrow L}(w)$, that converts R-hashes to L-hashes?
 \begin{align}
@@ -401,23 +403,19 @@ Thus, we can say that a miner's revenue is \emph{equal} regardless of which chai
     & & \text{Divide by }h
     \nonumber
     \\[0.5em]
-  \frac{1}{L_d} & = 7 \cdot \frac{R_r}{L_r \cdot R_d} \cdot X_{R\rightarrow L}
-    & & \frac{\text{L-blocks}}{\text{L-hash}}
-    & & \text{Divide by }L_r
-    \nonumber
-    \\[0.5em]
   \frac{R_d}{L_d} & = 7 \cdot \frac{R_r}{L_r} \cdot X_{R\rightarrow L}
     & & \frac{\text{R-hashes }\cdot\text{ L-blocks}}{\text{L-hash }\cdot\text{ R-block}}
-    & & \text{Multiply by }R_d
+    & & \text{Multiply by }\frac{R_d}{L_r}
     \nonumber
     \\[0.5em]
     \frac{R_d}{L_d} & = (7 \cdot 3)
     & & \frac{\text{R-hashes }\cdot\text{ L-blocks}}{\text{L-hash }\cdot\text{ R-block}}
     & & \text{Sub }X_{R\rightarrow L}\text{, }R_r\text{, and }L_r
+    \label{eq:rev-diff-ratio-raw}
     \\[0.5em]
     R_d & = 21 L_d
     & & \frac{\text{R-hashes}}{\text{R-block}}
-    & & \text{Rearrange}
+    & & \text{Multiply by }L_d
     \label{eq:rev-diff-ratio}
 \end{align}
 
@@ -431,12 +429,14 @@ This is only possible because we began \emph{calculating} numerical values.
 We said earlier that L and R have -- numerically -- identical block rewards, so it must be that $\nicefrac{R_r}{L_r}=1$ \emph{in this case.}
 
 \begin{comment}
+<!--
 Does this make sense?
 A miner can do $7\times$ the hashes on R (compared to L), but only produces $\nicefrac{7h}{R_d}$ R-blocks.
 Those will give a return of $7h \cdot \nicefrac{R_r}{R_d}$ R-coins.
 Alternatively, the miner could do $h$ hashes on L to produce $\nicefrac{h}{L_d}$ L-blocks.
 That provides a return of $h \cdot \nicefrac{L_r}{L_d}$ L-coins.
 The exchange rate is 3 L-coins/R-coin, so naturally a miner needs to make more L-coins ....
+-->
 \end{comment}
 
 Let's consider \autoref{eq:por-conv-work} in light of the above.
@@ -447,12 +447,12 @@ Let's consider \autoref{eq:por-conv-work} in light of the above.
     & &\text{\autoref{eq:por-conv-work}}
     \nonumber
     \\[0.5em]
-  = \: & \frac{1}{21} \cdot \frac{R_r}{L_r} \cdot X_{R\rightarrow L} \cdot w
+  = \; & \frac{1}{21} \cdot \frac{R_r}{L_r} \cdot X_{R\rightarrow L} \cdot w
     & &\text{L-hashes}
     & &\text{Sub }\nicefrac{L_d}{R_d}\text{ from \autoref{eq:rev-diff-ratio}}
     \nonumber
     \\[0.5em]
-  = \: & \frac{3}{21} \cdot w \; = \; \frac{w}{7}
+  = \; & \frac{3}{21} \cdot w = \frac{w}{7}
     & &\text{L-hashes}
     & &\text{Sub }\frac{R_r}{L_r} \cdot X_{R\rightarrow L}\text{ as before}
     \nonumber
@@ -463,25 +463,35 @@ We said this was true earlier -- 1 L-hash is worth 7 R-hashes. Thus far, we have
 There is, however, an inconsistency lurking.
 Consider:
 \begin{align}
-  & \frac{R_r}{L_r} \cdot X_{R\rightarrow L}
+  & & & \frac{R_r}{L_r} \cdot X_{R\rightarrow L}
     & &\frac{\text{L-blocks}}{\text{R-block}}
     \nonumber
     \\[0.5em]
-  & \frac{L_f}{R_f}
+  & & & \frac{L_f}{R_f}
+    & &\frac{\text{L-blocks}}{\text{R-block}}
+    \nonumber
+    \\[0.5em]
+  \text{But!} & & \frac{L_f}{R_f} \ne \; & \frac{R_r}{L_r} \cdot X_{R\rightarrow L}
     & &\frac{\text{L-blocks}}{\text{R-block}}
     \nonumber
 \end{align}
 
 These two values are \textbf{not} equal (or comparable), and nothing we've said implies that they should be!
-On the one hand, we have a ratio of the value of block creation; and on the other, we have something like *relative block frequencies.*
+On the one hand, we have \emph{a ratio of the value of block creation}; and on the other, we have something like *relative block frequencies.*
 But they have the same units!
 What's going on?
+How do we know whether a constant of conversion \emph{works} for our purposes?
 
-##### Hold Up! We Need to Talk About $\nicefrac{L_f}{R_f}$ and $\nicefrac{R_r}{L_r} \cdot X_{R\rightarrow L}$
+#### Hold Up! We Need to Talk About $\nicefrac{L_f}{R_f}$ and $\nicefrac{R_r}{L_r} \cdot X_{R\rightarrow L}$
 
-\todo{hold up}
+\aside{
+  This section regards some subtle ideas about when conversions work (i.e., give meaningful results), and when they won't.
+  It's worth spending some time on these ideas because \emph{when and how} you can convert between properties is not always obvious.
+  But, we \emph{must} understand this to construct a meaningful way to convert block-weight -- which PoR \emph{requires}.
+}
 
-Let's consider some units with \emph{real-world} interpretations -- not abstract algebra.
+Let's consider some units with \emph{real-world} interpretations.
+What can L-blocks/R-block \emph{mean?}
 
 * \emph{Relative block frequencies} --- This has real-world meaning: Ethereum 1 produces approximately 40 Ethereum-blocks in the same world-time that Bitcoin produces 1 Bitcoin-block.
 * \emph{Relative block weights} --- This has real-world meaning: how much harder is it to generate a block on one network vs another network?
@@ -493,8 +503,20 @@ Let's consider some units with \emph{real-world} interpretations -- not abstract
   How many confirmations are needed on R so that $\text{P}_L(\text{attack success}) = \text{P}_R(\text{attack success})$?
 }
 
-Naively, \emph{relative block frequencies} seems to be in the same units as the other two: L-blocks/R-blocks; but they \emph{cannot} be the in the same units as they \emph{mean different things}.
-Consider -- if we do not cancel *seconds*:
+Intuitively, \emph{relative block weights} and \emph{relative confirmations} sound related.
+If blocks on L are $5\times$ heavier than blocks on R, then:
+we'd have a constant of conversion of $\nicefrac{1}{5}$ L-blocks/R-block;
+and a chain of 5 R-blocks would be \emph{roughly} as hard to create as a chain of 1 L-block, so $\nicefrac{1}{5}$ seems like a reasonable estimate for \emph{relative confirmations}, too.\footnote{
+  Due to the dynamics of confirmations, we can't directly compare chain-segments like this -- the point of mentioning it here is to give you an intuition.
+  The reason we can't directly compare in this way is that simply \emph{having more confirmations} is worth something in and of itself.
+  The relationship is not linear.
+  See \href{https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{Analysis of hashrate-based double-spending} for more.
+}
+
+Naively, \emph{relative block frequencies} seems to be in the same units as the other two: L-blocks/R-blocks; but they \emph{cannot} be the in the same units as \emph{the values mean different things}.
+Let's consider \emph{relative confirmation rates} particularly.
+Let's say that the units of confirmation rate are L-blocks/L-second (or R-blocks/R-second).
+Crucially, we can \emph{not} cancel \emph{seconds}:
 \begin{align}
   ? & = \frac{L_f}{R_f}
     & & \frac{\text{L-blocks} \cdot \text{R-seconds}}{\text{L-second} \cdot \text{R-block}}
@@ -520,63 +542,166 @@ Consider -- if we do not cancel *seconds*:
     \label{eq:rel-block-weight}
 \end{align}
 
-If seconds are not \emph{context laden}, then $\nicefrac{L_f}{R_f}$ gives us \emph{relative block frequencies} -- the value's meaning is about \emph{block-events} and has lost any implicit context given by the DAA.
+We can see that \autoref{eq:rel-conf-hz} and \autoref{eq:rel-block-weight} are now obviously not comparable.
+Moreover, it's easy to see why relative confirmations is not as simple as relative block production frequencies.
 
-\begin{figure}[H]
+The reason that $\nicefrac{L_f}{R_f}$ did not make sense before is that we \emph{were not including all necessary \textbf{context}!}
+There is \emph{implicit context} in some properties of blockchains -- \emph{participation}.
+Values like $\nicefrac{L_f}{R_f}$ -- when used to measure the \emph{target block frequency} -- \emph{do not factor in participation}; the target block time is usually a \emph{constant}, so it can hold no \emph{network-specific context}.
+
+Where does this network-specific context come from?
+How is it separated from \`\`world'' context -- like target block frequencies?
+How is the network-specific context maintained over time?
+The answer to all three questions is effectively the same: the \textbf{Difficulty Adjustment Algorithm} (DAA).
+
+\defineTerm{Difficulty Adjustment Algorithm (DAA)}{
+  An algorithm which updates its chain's difficulty as valid blocks are produced.
+  The \emph{output} of a DAA is \emph{context laden} -- units take on \emph{additional context}
+}
+
+DAA's typically work like this: calculate a \emph{ratio} by which to adjust (multiply) the prior difficulty, based on a \emph{target} block production rate and the \emph{measured} block production rate.
+
+Bitcoin, for example, adjusts it's difficulty every 2016 blocks.\footnote{
+  Note: in Bitcoin, a difficulty of 1 corresponds to $2^{32}$ hashes.
+}
+A ratio is found by multiplying the previous difficulty ($D_\text{prev}$) by the actual duration ($\Delta t_\text{actual}$) of the last 2016 blocks and dividing by the target duration ($\Delta t_\text{target}$) for 2016 blocks.\footnote{
+  Note: in practiced the ratio is clamped between $\nicefrac{1}{4}$ and $4$. See Bitcoin's \href{https://github.com/bitcoin/bitcoin/blob/7fcf53f7b4524572d1d0c9a5fdc388e87eb02416/src/pow.cpp\#L49-L72}{\texttt{src/pow.cpp}} for the implementation.
+}
+Note that the units of $\Delta t_\text{actual}$ are B-seconds/(2016 B-blocks), and the units of $\Delta t_\text{target}$ are seconds/(2016 blocks).
+
+DAA's are special.
+They are the means by which \emph{context} is added.
+DAA's don't explicitly deal with this context though --- it's not mentioned in algorithm itself.
+The key to a DAA's success is that it operates \emph{relative to a past state that is \textbf{already} context laden.}
+So DAA's don't need to have any special awareness of context, just that multiplying the past difficulty by a \emph{particular ratio} will adjust the \emph{confirmation rate} to align with the \emph{target block frequency}.
+It's an \emph{incremental and ongoing process}.
+Since DAA's don't have initial conditions, there's no bootstrapping concern.
+To function, a DAA only needs to say how the difficulty should \emph{change}; it doesn't need to know what it actually \emph{is}.
+We will use the subscript $W\rightarrow B$ to denote the idea of converting between some \emph{world} context, and the \emph{network context} (of Bitcoin).
+<!-- By adding this special context (which is via the implicit conversion of ) -->
+\begin{align}
+  \text{Note that:}
+    & & \text{ConversionConst}_{W\rightarrow B}
+    & = \frac{\Delta t_\text{actual}}{\Delta t_\text{target}}
+    & & \frac{\text{B-seconds } \cdot \text{ blocks}}{\text{B-block } \cdot \text{ second}}
+    \nonumber
+    \\[0.5em]
+  \text{Bitcoin's DAA:}
+    & & \text{NextWork}_{W\rightarrow B}(D_\text{prev})
+    & = \frac{\Delta t_\text{actual}}{\Delta t_\text{target}} \cdot D_\text{prev}
+    & & \frac{\text{B-hashes } \cdot \text{B-seconds} \cdot \text{ blocks}}{\text{B-block}^2 \; \cdot \text{ second}}
+    \nonumber
+\end{align}
+
+When a DAA adds context, it converts blocks $\rightarrow$ B-blocks, and seconds $\rightarrow$ B-seconds.
+\begin{align}
+  \text{With context:}
+    & & \text{NextWork}_{W\rightarrow B}(D_\text{prev})
+    & = \frac{\Delta t_\text{actual}}{\Delta t_\text{target}} \cdot D_\text{prev}
+    & & \frac{\text{B-hashes}}{\text{B-block}}
+    \label{eq:bitcoin-daa}
+    \\[0.5em]
+  \text{}
+    & & \implies \text{ConversionConst}_{W\rightarrow B}
+    & = \frac{\Delta t_\text{actual}}{\Delta t_\text{target}}
+    & & \text{(unitless)}
+    \nonumber
+\end{align}
+
+<!-- \autoref{eq:bitcoin-daa} -->
+
+The general case of a DAA's relationships (flows of \emph{information} and \emph{context}) are diagrammed in \autoref{fig:daa-conversion}.
+
+\begin{figure}[p]
 \centering
 \includegraphics[max width=\linewidth]{diff_adjustment_alg_sag}
 \caption{
   The difficulty adjustment algorithm governs the relationship between the inputs: the previous difficulty, the target block frequency, and network participation (chain history); and the output: the network difficulty.
-  The difficulty is how \emph{confirmations} and \emph{coins} become \textbf{laden} with \emph{implicit context}.
+  The DAA is how \emph{confirmations} and \emph{coins} become \textbf{laden} with \emph{implicit context}.
   If we don't account for this \emph{implicit context} then our conversions will be nonsensical.
-  The implicit context is \emph{network participation} -- thus, those values which are \emph{context laden} have their units prefixed with \texttt{N-}, for ``network''.
+  The implicit context is \emph{network participation} -- thus, \texttt{N-} prefixes the units which are \emph{context laden}.
+  Solid arrows show the flow of \emph{information}, with thick arrows indicating \emph{network context}.
+  Dashed arrows show the flow of \emph{context}.
+  Two-way arrows ($\longleftrightarrow$) link two values that are \emph{convertible}.
+  Values can only be converted when there is a direct two-way path between them.
 }
 \label{fig:daa-conversion}
 \end{figure}
 
-\begin{figure}[H]
+How do we know that \emph{both} block and seconds become context laden via a DAA, though?
+
+\begin{align}
+  \text{No context:} & & \frac{L_f}{R_f}
+    & & \text{(unitless)}
+    & & \text{works}
+    \label{eq:conv-both-no-ctx}
+    \\[0.5em]
+  \text{Context laden blocks:} & & \frac{L_f}{R_f}
+    & & \frac{\text{L-blocks}}{\text{R-block}}
+    & & \text{fails}
+    \label{eq:conv-both-ctx-blocks}
+    \\[0.5em]
+  \text{Context laden seconds:} & & \frac{L_f}{R_f}
+    & & \frac{\text{R-seconds}}{\text{L-second}}
+    & & \text{fails}
+    \label{eq:conv-both-ctx-seconds}
+    \\[0.5em]
+  \text{Both context laden:} & & \frac{L_f}{R_f}
+    & & \frac{\text{L-blocks } \cdot \text{ R-seconds}}{\text{L-second } \cdot \text{ R-block}}
+    & & \text{??}
+    \label{eq:conv-both-ctx-laden}
+\end{align}
+
+We've seen \autoref{eq:conv-both-no-ctx} and \autoref{eq:conv-both-ctx-blocks} before.
+The first represents the ratio of block frequencies (unitless) -- that's straightforward and works.
+The second has units L-blocks/R-block, which sounds like it should be the ratio of block \emph{weights} -- but it's clear that it \emph{isn't} that.
+(So this conversion method fails.)
+
+\autoref{eq:conv-both-ctx-seconds} has weird units, though.
+R-seconds/L-second means something like: the relative participation of each network compared with a recent past state; i.e., the ratio of each network's \emph{actual} block production compared to it's \emph{target} block production.
+(This conversion method also fails.)
+
+\autoref{eq:conv-both-ctx-laden} measures something like \emph{relative weighted confirmation rates}.
+It's not clear if is useful or not, but we \emph{do} know that \emph{no other} value we have access to has context laden seconds as a unit.
+How can we use it to convert between anything meaningful if context laden seconds can't be canceled via some conversion?
+(Do we even \emph{need} to ever use those units, anyway?)
+
+In general, it seems like the safe option is \emph{not to use $L_f$ or $R_f$ when converting work} --- unless we have some \emph{specific, context-driven} explanation for why it's okay in that case.
+
+How do these ideas of context laden values work when converting values \emph{between} these network-contexts? This is diagrammed in \autoref{fig:daa-conversion-2}.
+
+In essence, an exchange rate provides meaningful conversion between L-coins and R-coins.
+Converting in this way \emph{does not drop context}.
+Since network context is respected, we can use an exchange rate to build a meaningful constant of conversion \emph{across networks}.
+
+\begin{figure}[p]
 \centering
 \includegraphics[max width=\linewidth]{diff_adjustment_alg_times_2_sag}
 \caption{
   How are the implicit contexts of two different networks related?
   Without the market context, there's no conversion path that allows for the conversion of work.
   These are the same conversions that miners use to determine which network is most profitable for them.
+  Double-lined arrows indicate \emph{market context}.
+  Thin single-lined dashed arrows indicate \emph{world context}.
+  Notice that the convertible properties which we are interested in (such as $L_d$ and $R_d$) use \emph{thick, doubled, and dashed} two-way arrows, indicating that we are using network context \emph{and} market context to convert block-weight.
 }
 \label{fig:daa-conversion-2}
 \end{figure}
 
 
-re block freq and conf rate: everything about them is the same except their nature
+<!-- re block freq and conf rate: everything about them is the same except their nature -->
 
-you need more than the target frequency to know why B_d => conf/sec -- it includes participation, and the implication only holds *because* participation is included.
+<!-- can't divide conf rate (blocks/n-second) by block freq (blocks/s) to get (s/n-seconds) either -- so blocks must be diff units too. -->
 
-ratio of targets => relative block production frequencies
+<!-- ~~DAA is a constant of conversion -- in effect.~~ no -- it does more.
+information is *lost* through the DAA. -->
 
-ratio of confirmations => relative block-weight
+\aside{
+  With regards to DAAs, it should be noted that Bitcoin's was the first and the method has some undesirable properties.
+  I quite like the algorithm named \textsc{DAA-2} in \href{https://cloudflare-ipfs.com/ipfs/Qmd8BE6xYCH58LNipE1zZ7BCftemN8hQWnfZJSJYq5XUE8}{An Economic Analysis of Difficulty Adjustment Algorithms in Proof-of-Work Blockchain Systems} \href{https://web.archive.org/web/20211018042402/https://econ.hkbu.edu.hk/eng/Doc/20201016_NODA.pdf}{[m1]} \href{https://web.archive.org/web/20211018043918/https://cloudflare-ipfs.com/ipfs/Qmd8BE6xYCH58LNipE1zZ7BCftemN8hQWnfZJSJYq5XUE8}{[m2]} (which is used by Bitcoin Cash), and it seems to work well with \autoref{sec:dos-and-dags}.
+}
 
-different units:
-
-- 'network seconds'
-- and or 'blocks' vs 'R-blocks' (i.e. blocks vs confirmations)
-- mb need both?
-
-$\frac{L_f}{R_f}$ implies that those units (L-blocks/R-block) are different from ratio of confirmation rates.
-frequency of confirmations => just same as last time
-seconds must be different
-network seconds
-
-can't divide conf rate (blocks/n-second) by block freq (blocks/s) to get (s/n-seconds) either -- so blocks must be diff units too.
-
-~~DAA is a constant of conversion -- in effect.~~ no -- it does more.
-information is *lost* through the DAA.
-
-(w-blocks/w-second) and (hashes/n-second) -> (hashes/r-block, r-blocks/r-second)
-
-only thing objective is the number of hashes
-
-
-
-##### Conversions and Sums
+#### Conversions and Sums
 
 Okay, so far so good.
 Are there any \emph{other} values which we can sum up, though?
@@ -612,33 +737,33 @@ Thus, \emph{any} common units, which are linearly convertible both from a reflec
 \aside{
   Before we move on, let's consider:
   \begin{align}
-    & R_r
-      & &\frac{\text{R-coins}}{\text{R-block}}
-      & & \text{R's block reward} \nonumber
-      \\[0.5em]
-    \implies \; & \frac{R_r}{R_d}
-      & &\frac{\text{R-coins}}{\text{R-hash}}
+    & \frac{L_d}{L_r} \cdot X_{R\rightarrow L}
+      & &\frac{\text{L-hashes}}{\text{R-coin}}
       & & \text{} \nonumber
       \\[0.5em]
-    \implies \; & \frac{R_r}{R_d} \cdot X_{R\rightarrow L}
+    & \frac{R_r}{R_d} \cdot X_{R\rightarrow L}
       & &\frac{\text{L-coins}}{\text{R-hash}}
-      & & \nonumber
+      & & \text{Similarly} \nonumber
       \\[0.5em]
     \therefore \text{ConvReward}_{R\rightarrow L}(w) = \; & \frac{R_r}{R_d} \cdot X_{R\rightarrow L} \cdot w
       & & \text{R-hashes} \rightarrow \text{L-coins}
       & & \label{eq:por-conv-reward}
   \end{align}
 
-  Is it possible that we can convert chain-work \emph{by summing block rewards?}
+  Is it possible that we can convert chain-work \emph{via summing block rewards?}
 }
 
 \todoDraftOnly{Add new vars to nomenclature table}
+
+### Conversion Contexts
+
+What blockchain contexts can facilitate the conversion of block-weight?
 
 Of course, we need to figure out a way to get the exchange rate that is \emph{at least as secure} as the consensus algorithms (otherwise we'd be introducing a new weakest-link).
 That can't be too hard, right?
 
 Can we \emph{avoid} that exchange rate, though?
-Well, there is a case where $r=1$: \textbf{when L-coins $\equiv$ R-coins}, i.e., both chains use the same root token.
+Well, there is a context where $r=1$: \textbf{when L-coins $\equiv$ R-coins}, i.e., both chains use the same root token.
 In that case, $\nicefrac{L_d}{L_r} \cdot \nicefrac{R_r}{R_d}$ gives us L-hashes/R-hash directly.
 
 #### A Single Root Token Across Multiple Chains
