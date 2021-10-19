@@ -262,7 +262,7 @@ docker-build:
 
 # set DOCKER_CMD to run something other than the default `make`. e.g., `make docker DOCKER_CMD=./build.sh`
 docker:
-	docker run --rm -it -u `id -u ${USER}`:`id -g ${USER}` -e 'TERM=xterm-color' -v `pwd`:/work whitepaper-build:latest ${DOCKER_CMD}
+	docker run --rm -t -u `id -u ${USER}`:`id -g ${USER}` -e 'TERM=xterm-color' -v `pwd`:/work whitepaper-build:latest ${DOCKER_CMD}
 
 docker-bash:
 	docker run --rm -it -u `id -u ${USER}`:`id -g ${USER}` -v `pwd`:/work whitepaper-build:latest /bin/bash
