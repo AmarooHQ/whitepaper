@@ -244,7 +244,7 @@
                     \textsc{STATE} \\
                     Headers: $\AbbrChainA_{0 \cdots i+\x}$
                 }
-                \ifnum 1=\xintifboolexpr{\DrawPoRInState = 1 && \DrawPoRForChainB = 1}{1}{0}
+                \ifnum 1=\xintifboolexpr{\DrawPoRInState == 1 && \DrawPoRForChainB == 1}{1}{0}
                     \def\StateContents{\InitStateContents \\
                         Latest PoR: $\AbbrChainB_{j+\ethLastEnd}$\\
                         %% $\Sigma$ Weight: $\Sigma^{j+\ethLastEnd}_{k=0} \text{W}(\AbbrChainB_{k})$
@@ -267,7 +267,7 @@
                 \fi
 
                 \def\porLabel{}
-                \ifnum 1=\xintifboolexpr{\DrawPoRInState = 1 && \DrawPoRForChainB = 1 && 0 = \UseNewPoR}{1}{0}
+                \ifnum 1=\xintifboolexpr{\DrawPoRInState == 1 && \DrawPoRForChainB == 1 && 0 == \UseNewPoR}{1}{0}
                     \def\porLabel{\scriptsize{and PoR}}
                 \fi
 
