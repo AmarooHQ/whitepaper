@@ -5,7 +5,6 @@ WPFILE=$(WPNOEXT).markdown
 WPHTML=$(WPNOEXT).html
 WPTEX=$(WPNOEXT).tex
 
-
 LP_DIR=includes/ut/lp
 LP_TABLES=$(LP_DIR)/tables.tex
 LP_TABLES_OUT=$(OUTDIR)/tables.tex
@@ -62,7 +61,8 @@ entropy:
 # https://tex.stackexchange.com/questions/45/how-to-speed-up-latex-compilation-with-several-tikz-pictures
 TIME     = /usr/bin/time -p
 # LATEXMK  = latexmk -silent -f -g -ps
-PDFLATEX = latexmk -pdf -shell-escape -interaction=batchmode
+#PDFLATEX = latexmk -pdf -shell-escape -interaction=batchmode
+PDFLATEX = $(PWD)/latexrun --color always --latex-args "-shell-escape -interaction=batchmode"
 PSLATEX = latexmk -ps -shell-escape -interaction=batchmode
 PDFCROP  = pdfcrop
 RM       = /bin/rm
@@ -73,7 +73,6 @@ PSGraphics = $(patsubst %_sag.tex,%_sag.ps,$(StandAloneGraphicsTeXFiles))
 DVIGraphics = $(patsubst %_sag.tex,%_sag.dvi,$(StandAloneGraphicsTeXFiles))
 PNGGraphics = $(patsubst %_sag.pdf,%_sag.png,$(PDFGraphics))
 InputTeXFiles = $(wildcard *_input.tex)
-PWD = $(pwd)
 
 watch:
 	bin/onchange.sh ./10-Ultra-Terminum ./includes/ut/content ./includes/ut/algorithms "make"
@@ -159,11 +158,11 @@ preprocess-build:
 
 mk-latex-pdf: preprocess-build
 	#TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
-	TZ='Australia/Sydney' ./latexrun $(WPTEX) --color always -O $(OUTDIR) --latex-args "-shell-escape -interaction=batchmode"
+	TZ='Australia/Sydney' ./latexrun --color always --latex-args "-shell-escape -interaction=batchmode" $(WPTEX) -O $(OUTDIR)
 	#-rm $(WPNOEXT).gl*
 	(cd $(OUTDIR) && makeglossaries $(WPFILENAME))
 	# TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
-	TZ='Australia/Sydney' ./latexrun $(WPTEX) --color always -O $(OUTDIR) --latex-args "-shell-escape -interaction=batchmode"
+	TZ='Australia/Sydney' ./latexrun --color always --latex-args "-shell-escape -interaction=batchmode" $(WPTEX) -O $(OUTDIR)
 	cp $(WPNOEXT).pdf $(OUTPUT_PDF)
 	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE).pdf
 	cp $(WPNOEXT).pdf $(WPFILENAME)-$(PP_MODE).pdf
