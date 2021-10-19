@@ -39,6 +39,7 @@ release: entropy
 release: PP_MODE=release
 release: textlint
 release: whitepaper
+release: pdflint
 release:
 	# No matches for \todo{ should be found
 	grep -qzv '\\todo{' output/whitepaper.tex || (grep '\\todo{' output/whitepaper.tex | wc -l; bash bin/msg_error.sh 'Detected `\\\\todo{` in output/whitepaper.tex during release build.'; exit 1)
@@ -176,6 +177,9 @@ finished-msg:
 
 textlint:
 	npm run lint
+
+pdflint:
+	bash bin/pdfLint.sh output/whitepaper.pdf
 
 %.md:
 	echo 'skipping task for .md files'

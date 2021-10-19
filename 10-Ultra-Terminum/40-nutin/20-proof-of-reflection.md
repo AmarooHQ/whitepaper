@@ -657,7 +657,7 @@ How do we know that \emph{both} blocks and seconds become context laden via a DA
     \\[0.5em]
   \text{Both context laden:} & & \frac{L_f}{R_f}
     & & \frac{\text{L-blocks } \cdot \text{ R-seconds}}{\text{L-second } \cdot \text{ R-block}}
-    & & \text{??}
+    & & \text{?}
     \label{eq:conv-both-ctx-laden}
 \end{align}
 

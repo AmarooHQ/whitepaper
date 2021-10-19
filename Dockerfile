@@ -17,7 +17,7 @@ RUN pip3 install -U numpy scipy click
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs npm expect && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs npm expect pdfgrep && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /work

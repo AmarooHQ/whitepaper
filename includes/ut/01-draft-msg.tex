@@ -3,15 +3,19 @@
 {\Large{\textbf{Draft Status}}}
 \par
 
-Currently this paper sits at the ``Draft 2-pre-RC'' stage; some sections are incomplete (where the ``todos'' are). Particularly the parts that talk about PoS/PoA and dapp-chains are incomplete.
+Currently this paper sits at the ``Draft 2-RC'' stage; some sections are incomplete (where the ``todos'' are).
 
-{\Large{Draft 2-pre-RC: Changes}}
+{\Large{Draft 2-RC: Changes from Draft 1}}
 
 \begin{itemize}
+    \item Update PoR diagrams to be consistent with LP.
+    \item Rewrite conversion sections and build out theory.
+    \item Refactor conversion algorithms for consistency of notation and with new conversion stuff.
+    \item Update DAG sections with theory and diagrams.
     \item Re-implemented table generation -- fixed some minor errors in calculations and improved structural epist. of code.
     \item (InProg) Building out dapp-chain security \autoref{sec:dapp-chain-security}
     \item (InProg) +HOT optimization + Exploiting segmented state section: \autoref{sec:exploiting-seg-state} -- with the HOT optimization $\UT{1}$ (with no nesting) out-performs the theoretical max of a $O(c^2)$ sharded (nested) chain. The HOT optimization only works in $\UT{}$.
-    \item (InProg) Change UT nomenclature: ``$O(c^2)$ configuration'' becomes ``$\UT{1}$'', etc.
+    \item Change UT nomenclature: ``$O(c^2)$ configuration'' becomes ``$\UT{1}$'', etc.
     \item Dapp-chains section: \autoref{sec:dapp-chains}
     \item Comparisons to the ``big 4'' in \autoref{sec:conclusions}
     \item Sketched out intuitive approach to tiling security \& polished tiling sections

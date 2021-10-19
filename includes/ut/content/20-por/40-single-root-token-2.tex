@@ -1,4 +1,3 @@
-
 The first example context is \emph{one network split over two chains}.
 Both chains use the same \emph{root token}.
 There are, naturally, questions to answer,
@@ -6,8 +5,6 @@ There are, naturally, questions to answer,
     and \emph{How can the root token be on two blockchains at once?}
 
 Let's consider the following \emph{restricted case} first: the chains (L and R) both have a two-way peg between, ensuring that no coins are ever created or destroyed.
-
-\todo{fix this section (wrt conversion)}
 
 In this case, \autoref{eq:por-conv-work} collapses to
 \begin{align}
@@ -91,14 +88,19 @@ Hold up!
 Didn't we just go over -- in great detail -- why we can't use block frequencies ($L_f$ and $R_f$) in conversions?
 Why is it okay to use them now?
 
-To answer this, let's consider \emph{how} block rewards could be consistently set network-wide.
+To answer this, let's consider \emph{how} block rewards could be set network-wide so that they're consistent across all chains.
 Unlike a chain's difficulty, the block reward needs to be consistent with some global inflation rate.
-\autoref{eq:srt-block-ratios} implies that $R_r \cdot R_f \cdot L_t = L_r \cdot L_f \cdot R_t$, so in some cases \emph{we don't need to know the global state, just that this relationship is enforced for local state.}
-That said, if $I$ is known across the network (i.e., it is constant or a well known function) then calculating $G_t$ is trivial: $G_t = I * l + G_{t_0}$, where $l$ is the lifetime of the network (in seconds), and $G_{t_0}$ is any initial root token supply that was not created via inflation (e.g., via some token generation event).
+\autoref{eq:srt-block-ratios} implies that $R_r \cdot R_f \cdot L_t = L_r \cdot L_f \cdot R_t$, so in some cases \emph{we don't need to know the global state, just that the relationship is enforced.}
+That said, if $I$ is known across the network (i.e., it is constant or a well known function) then calculating $G_t$ is trivial: $G_t = I \cdot l + G_{t_0}$, where $l$ is the lifetime of the network (in seconds), and $G_{t_0}$ is any initial root token supply that was not created via inflation (e.g., via some token generation event).
 
 Could we maintain consistency across chains via something like a \textbf{Reward Adjustment Algorithm} (RAA)?
 If each chain commits to the input values (e.g., via the inclusion of $C_t$ in their block-headers), then an RAA could be evaluated using only the header-chain (similar to the DAA).
 This way, if a miner (or a chain) tries to subvert or attack the RAA, it's trivially detectable by reflecting chains.
+
+\defineTermTex{Reward Adjustment Algorithm (RAA)}{
+  An algorithm which updates the block reward of each chain in a \emph{network} of chains that share a root token.
+  Similar to a DAA, the \emph{output} of an RAA is \emph{context laden}
+}
 
 If we introduced something like an RAA, then the RAA \emph{output} could become \emph{context laden} (depending on the RAA's input parameters).
 In the case of a global inflation rate, \emph{this means that chains would rely on a common meaning of ``seconds''!}
@@ -111,7 +113,26 @@ The reason we can find a scaling factor \emph{here} (but not generally) is that 
 
 This new situation and context are diagrammed in \autoref{fig:daa-raa-conversion}.
 
-\begin{figure}[h]
+Let's use \autoref{eq:srt-block-ratios} to create our next \textsc{WeightOf} algorithm: \autoref{alg:weightof-ratio}.
+\begin{align}
+    & \; \frac{R_t \cdot L_f}{L_t \cdot R_f} \cdot L_d
+        & & \frac{\text{L-hashes}}{\text{R-block}}
+        & & \text{Via \autoref{eq:srt-block-ratios}}
+        \nonumber
+        \\[0.5em]
+    \therefore \text{ConvSRT}_{R\rightarrow L}(b) = & \; \frac{R_t \cdot L_f}{L_t \cdot R_f} \cdot L_d \cdot b
+        & & \text{R-blocks } \rightarrow \text{ L-hashes}
+        & &
+        \label{eq:conv-srt}
+\end{align}
+
+\aside{
+    Note: the result of passing a local block to these \textsc{WeightOf}s matches the expected result.
+}
+
+\input{includes/ut/algorithms/weightof-ratio.tex}
+
+\begin{figure}[p]
     \centering
     \includegraphics[max width=\linewidth]{diff_adjustment_alg_times_3_sag}
     \caption{
@@ -124,23 +145,3 @@ This new situation and context are diagrammed in \autoref{fig:daa-raa-conversion
     }
     \label{fig:daa-raa-conversion}
 \end{figure}
-
-
-Let's use \autoref{eq:srt-block-ratios} to create our next \textsc{WeightOf} algorithm: \autoref{alg:weightof-ratio}.
-\begin{align}
-    & \; \frac{R_t \cdot L_f}{L_t \cdot R_f} \cdot L_d
-        & & \frac{\text{L-hashes}}{\text{R-block}}
-        & & \text{\autoref{eq:srt-block-ratios}}
-        \nonumber
-        \\[0.5em]
-    \therefore \text{ConvSRT}_{R\rightarrow L}(b) = & \; \frac{R_t \cdot L_f}{L_t \cdot R_f} \cdot L_d \cdot b
-        & & \text{R-blocks } \rightarrow \text{ L-hashes}
-        & &
-        \label{eq:conv-srt}
-\end{align}
-
-\input{includes/ut/algorithms/weightof-ratio.tex}
-
-\aside{
-    Note: the result of passing a local block to these \textsc{WeightOf}s matches the expected result.
-}

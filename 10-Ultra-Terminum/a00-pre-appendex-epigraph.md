@@ -18,9 +18,13 @@
 
 \clearpage
 
+\begin{comment}
 \newgeometry{top=3cm, bottom=3cm, left=2.5cm, right=2.5cm}
 \printglossaries
 \restoregeometry
+\end{comment}
+
+\printglossaries
 
 \newpage
 

@@ -1,12 +1,12 @@
-\begin{algorithm}
+\begin{algorithm}[p]
 \caption{A \textsc{WeightOf} function for networks of a single root token based on the ratio of root tokens that it hosts}
 \label{alg:weightof-ratio}
 \begin{algorithmic}
-\Procedure{WeightOf}{$B_i, state$} \Comment{Returns L-hashes}
-    \State $t \gets$ \Call{BlockTimestamp}{$B_i$}
-    \State $C \gets$ \Call{ChainOf}{$B_i$, $state$}
-    \State $C_t \gets$ \Call{RootTokensOnChainAt}{$C$, $t$, $state$} \Comment{Number of root tokenson $C$ at $t$}
-    \State $C_f \gets$ \Call{BlockFrequencyOfChain}{$C$, $state$} \Comment{Block production Hz of $C$}
+\Procedure{WeightOf}{$R_i, state$} \Comment{Returns L-hashes}
+    \State $t \gets$ \Call{BlockTimestamp}{$R_i$}
+    \State $R \gets$ \Call{ChainOf}{$R_i$, $state$}
+    \State $R_t \gets$ \Call{RootTokensOnChainAt}{$R$, $t$, $state$} \Comment{Number of root tokenson $R$ at $t$}
+    \State $R_f \gets$ \Call{BlockFrequencyOfChain}{$R$, $state$} \Comment{Block production Hz of $R$}
     \State $L_t \gets$ \Call{LocalRootTokens}{$t$, $state$}
     \State $L_f \gets$ \Call{LocalBlockBlockFrequency}{$t$, $state$}
     \State $L_d \gets$ \Call{LocalBlockDifficultyAt}{$t$, $state$}
