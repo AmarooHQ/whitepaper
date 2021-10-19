@@ -5,8 +5,8 @@ set -x
 bash ./bin/msg_good.sh "Starting build -- graphics"
 
 NCPUS=$(lscpu | egrep '^CPU\(s\)' | awk '{ print $2 }')
-#make -j ${NCPUS:-4} wp-graphics-standalone
-make wp-graphics-standalone
+make -j ${NCPUS:-4} wp-graphics-standalone
+# make wp-graphics-standalone
 
 bash ./bin/msg_good.sh "Built graphics"
 
