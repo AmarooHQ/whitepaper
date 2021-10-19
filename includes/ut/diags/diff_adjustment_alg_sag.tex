@@ -1,0 +1,17 @@
+\documentclass[]{standalone}
+\usepackage[T1]{fontenc}\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usepackage{xintexpr}
+\usetikzlibrary{arrows, arrows.meta, shapes.geometric, calc, positioning, decorations.pathreplacing}
+
+\makeatletter
+\def\input@path{{./includes/}{./includes/ut/diags/}}
+\makeatother
+
+\input{daa_macro}
+
+\begin{document}
+\begin{tikzpicture}[node distance=7em]
+  \DrawTikzDaaMacro
+\end{tikzpicture}
+\end{document}

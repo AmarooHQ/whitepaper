@@ -14,6 +14,7 @@ import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Main (getCaption, insertReplacement, replaceTable, toBeforeTableAfter)
 import Test.Amaroo.WP.Calcs (auxStatsSpec, tradSpec, utSpec)
+import Test.Amaroo.WP.Conversion (convQuickChecks)
 import Test.Amaroo.WP.Formatter (fmtSpec)
 import Test.Amaroo.WP.Tables (utNamesSpec)
 import Test.Amaroo.WP.Tables.Booktabs (booktabsSpec)
@@ -39,17 +40,8 @@ sample1 = """
 """
 res1Expected = "\n\n" <> sampleAsdf2 <> "\n\n"
 
-main :: Effect Unit
-main = do
-  launchAff_ $ runSpec [consoleReporter] do
-    tradSpec
-    utSpec
-    auxStatsSpec
-    utNamesSpec
-    fmtSpec
-    utilSpecs
-    booktabsSpec
 
+replaceTableSpec = do
     describe "replaceTable" do
       it "insertReplace works" do
         insertReplacement undefined {before: ["1"], mid: Nothing, after: ["2"]} `shouldEqual` ["1", "2"]
@@ -72,3 +64,17 @@ main = do
           (Tuple l1 l2) <- pairs
           pure $ shouldEqual l1 l2
         res1 `shouldEqual` res1Expected
+
+
+main :: Effect Unit
+main = do
+  launchAff_ $ runSpec [consoleReporter] do
+    tradSpec
+    utSpec
+    auxStatsSpec
+    utNamesSpec
+    fmtSpec
+    utilSpecs
+    booktabsSpec
+    replaceTableSpec
+    convQuickChecks

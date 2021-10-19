@@ -249,7 +249,7 @@ Using smaller block frequencies also decreases the data-overhead of multiple par
 
 Some basic block-dag segments are shown in \autoref{fig:dag-simple-segments}.
 
-\begin{figure}[H]
+\begin{figure}[h]
     \begin{subfigure}[t]{.31\linewidth}
         \vskip 0pt
         \centering
@@ -403,6 +403,7 @@ This can be repeated to allow for arbitrarily many parents.
         \caption{And finally we order the last remaining blocks. (We could remove virtual blocks too).}
         \label{fig:dag-ex1-order-70}
     \end{subfigure}
+    %$\text{Note: caption at top.}$
 \end{figure}
 
 We should expect that conflicting transactions (which might otherwise be attempted doublespends) arise during this process.

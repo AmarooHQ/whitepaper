@@ -1,0 +1,36 @@
+\documentclass[]{standalone}
+\usepackage[T1]{fontenc}\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usepackage{xintexpr}
+\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
+
+\makeatletter
+\def\input@path{{./includes/}{./includes/ut/diags/}}
+\makeatother
+
+\input{./tikz-styles}
+
+\providecommand\CtxLineXShift{2em}
+\providecommand\CtxLineYShift{0.5em}
+\providecommand\CtxLineHeight{6em}
+
+\begin{document}
+\begin{tikzpicture}[node distance=0.8cm]
+
+    \node (ctxLineLT) [] {};
+    \node (ctxLineLB) [below of = ctxLineLT, yshift=-\CtxLineHeight] {};
+    \draw [-, dashed] (ctxLineLT) -- (ctxLineLB);
+
+    \providecommand\ctxLineXDist{10}
+
+    \node (ctxLineRT) [xshift=\ctxLineXDist em] at (ctxLineLT) {};
+    \node (ctxLineRB) [below of = ctxLineRT, yshift=-\CtxLineHeight] {};
+    \draw [-, dashed] (ctxLineRT) -- (ctxLineRB);
+
+    \coordinate (ctxMid) at ($(ctxLineLT)!.5!(ctxLineRT)$);
+    \node (workCtx) [yshift=-\CtxLineYShift] at (ctxMid) {L Context};
+
+    \node (worldCtxL) [left of = ctxLineLT, xshift=-\CtxLineXShift, yshift=-\CtxLineYShift] {Global Context};
+    \node (worldCtxR) [right of = ctxLineRT, xshift=\CtxLineXShift, yshift=-\CtxLineYShift] {Global Context};
+\end{tikzpicture}
+\end{document}

@@ -5,7 +5,7 @@
 \providecommand\DrawPoRLabel{0}%
 \providecommand\DrawHeaderLabel{0}%
 \providecommand\DrawPoRInState{0}%
-\providecommand\DrawPoRForChainB{1}%
+\providecommand\DrawPoRForChainB{0}%
 \providecommand\DrawEthLT{3}%
 \providecommand\DrawBtcLT{4}%
 \providecommand\NameChainA{Bitcoin}%
@@ -21,7 +21,7 @@
 \providecommand\StopPoRArrowsAt{3}
 \providecommand\DrawPoRMirrors{1}
 \input{tikz-styles}%
-\usetikzlibrary{snakes, arrows.meta}
+\usetikzlibrary{arrows.meta}
 
 % https://tex.stackexchange.com/questions/233246/create-angle-bisectors-in-tikz
 \newcommand{\bissectDraw}[6][]{%
@@ -144,15 +144,20 @@
                 \fi
 
                 \def\btcHeaders{}
-                \ifnum 1=\xinteval{\DrawHeaderLabel * (\DrawHeaderLabel + \UseNewPoR)}
+                \ifnum 1=\DrawHeaderLabel
                     \def\btcHeaders{\scriptsize{include \ethPorHeaders}}
+                \fi
+
+                \tikzstyle{btcInclHeader} = [above];
+                \ifnum 1=\xinteval{\UseNewPoR * \DrawHeaderLabel * (1 - \DrawPoRForChainB)}
+                    \tikzstyle{btcInclHeader} = [below];
                 \fi
 
                 % reflection arrow, only on nodes 2 and beyond
                 \ifnum 1=\DrawBtcRefl
                     \ifnum 1<\x
                         \draw [arrowReflL] (btc\x) --
-                        node [anchor=center, above, sloped] {\btcHeaders}
+                        node [anchor=center, btcInclHeader, sloped] {\btcHeaders}
                         node [anchor=center, below, sloped] {\porLabel}
                         (\ethAll\r);
 
@@ -239,7 +244,7 @@
                     \textsc{STATE} \\
                     Headers: $\AbbrChainA_{0 \cdots i+\x}$
                 }
-                \ifnum 1=\xintifboolexpr{\DrawPoRInState = 1 && \DrawPoRForChainB = 1}{1}{0}
+                \ifnum 1=\xintifboolexpr{\DrawPoRInState == 1 && \DrawPoRForChainB == 1}{1}{0}
                     \def\StateContents{\InitStateContents \\
                         Latest PoR: $\AbbrChainB_{j+\ethLastEnd}$\\
                         %% $\Sigma$ Weight: $\Sigma^{j+\ethLastEnd}_{k=0} \text{W}(\AbbrChainB_{k})$
@@ -262,12 +267,12 @@
                 \fi
 
                 \def\porLabel{}
-                \ifnum 1=\xintifboolexpr{\DrawPoRInState = 1 && \DrawPoRForChainB = 1 && 0 = \UseNewPoR}{1}{0}
+                \ifnum 1=\xintifboolexpr{\DrawPoRInState == 1 && \DrawPoRForChainB == 1 && 0 == \UseNewPoR}{1}{0}
                     \def\porLabel{\scriptsize{and PoR}}
                 \fi
 
                 \def\ethHeaders{}
-                \ifnum 1=\xinteval{\DrawHeaderLabel * (\DrawHeaderLabel + \UseNewPoR)}
+                \ifnum 1=\xinteval{\DrawHeaderLabel * (1 - \DrawPoRForChainB)}
                     \def\ethHeaders{\scriptsize{include header}}
                 \fi
 

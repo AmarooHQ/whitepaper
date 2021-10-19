@@ -1,0 +1,115 @@
+\documentclass[]{standalone}
+\usepackage[T1]{fontenc}\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usepackage{xintexpr}
+\usepackage{nicefrac}
+\usetikzlibrary{arrows, arrows.meta, shapes.geometric, calc, positioning, decorations.pathreplacing, decorations.text}
+
+\makeatletter
+\def\input@path{{./includes/}{./includes/ut/diags/}}
+\makeatother
+
+
+\providecommand\DaaInitialNodePlacement{0,0}
+\providecommand\MinerRevenueArrowStyle{bothCtxArrowLR}
+\providecommand\SwapDifficultyAndRevenue{0}
+\providecommand\SwapConfirmationRateAndRevenue{1}
+\providecommand\MirrorVertical{1}
+\providecommand\ConfRateGeneral{1}
+\providecommand\CoinsGeneral{0}
+\providecommand\HideChainHistUnits{1}
+
+\tikzstyle{dec} = [decoration={
+      text along path,
+      text align={center},
+      raise=0.5em,
+      text={introduced context},
+      reverse path
+    }, decorate]
+\tikzstyle{dec2} = [decoration={
+      text along path,
+      text align={center},
+      raise=-1.0em,
+      text={via pegged inflation},
+      reverse path
+    }, decorate]
+
+
+\input{daa_macro}
+
+\begin{document}
+\begin{tikzpicture}[node distance=7em]
+  \node (daa1Init) [] at (\DaaInitialNodePlacement) {};
+  \renewcommand\DaaInitialNodePlacement{daa1Init}
+  \renewcommand\TikzNodePrefix{L}
+  \renewcommand\UnitPrefix{L-}
+  \DrawTikzDaaMacro
+  \node (daa2Init) [yshift=-9em] at (daa1Init) {};
+  \renewcommand\DaaInitialNodePlacement{daa2Init}
+  \renewcommand\MirrorVertical{0}
+  \renewcommand\TikzNodePrefix{R}
+  \renewcommand\UnitPrefix{R-}
+  \DrawTikzDaaMacro
+
+  \node (coinsMid) [xshift=2.0em] at ($(LdaaCtxMid)!0.5!(RdaaCtxMid)$) {};
+
+%   \draw [marketCtxArrow, daaArrowsLR={scale=0.9}, rounded corners=2.9em] (RdaaCtxMid) -- (coinsMid |- RdaaCtxBR.east) --
+%       node [ctxLabel, diffCrArrow, yshift=1pt] {$X_{R\rightarrow L}$}
+%       % node [ctxLabel] {market context}
+%       (coinsMid |- LdaaCtxBR.east) -- (LdaaCtxMid);
+%   \draw [rounded corners=2.8em, dec]
+%     (RdaaCtxMid) -- (coinsMid |- RdaaCtxBR.east) -- (coinsMid |- LdaaCtxBR.east) -- (LdaaCtxMid);
+
+  % \path [decoration={
+  %   text along path,
+  %   text align={center},
+  %   raise=-0.2cm,
+  %   text={market context},
+  %   reverse path
+  %   }, decorate] (RdaaCtxMid) arc (coinsMid) arc (LdaaCtxMid);
+
+  \draw [bothCtxArrowLR, rounded corners=3.2em] (LdaaCtxMid)
+    % -- (coinsMid |- LdaaCtxTR.east) -- (coinsMid |- RdaaCtxTR.east)
+    -- (RdaaCtxMid);
+  \draw [rounded corners=3.2em, dec]
+    (RdaaCtxMid)
+    % -- (coinsMid |- RdaaCtxTR.east) -- (coinsMid |- LdaaCtxTR.east)
+    -- (LdaaCtxMid);
+  \draw [rounded corners=3.2em, dec2]
+    (RdaaCtxMid)
+    % -- (coinsMid |- RdaaCtxTR.east) -- (coinsMid |- LdaaCtxTR.east)
+    -- (LdaaCtxMid);
+
+  \node (diffMid) [] at ($(LdaaCtxBR)!0.5!(RdaaCtxBR)$) {};
+
+  \draw [bothCtxArrowLR] (LdaaCtxTR) -- (RdaaCtxTR);
+
+  \node (freqMid) [xshift=-2.5em] at ($(LtargetBF)!0.5!(RtargetBF)$) {};
+
+%   \draw [daaArrowsLR={scale=1.4}, dashed] (freqMid |- LtargetBF.south) --
+%       node [ctxLabel] {``world'' context}
+%       node [ctxLabelAlt] {$\nicefrac{L_f}{R_f}$}
+%       (freqMid |- RtargetBF.north);
+
+  % RAA
+
+  % \xdef\raaInner{{\text{\normalsize{Reward Adjustment}}} \atop {\text{\normalsize{Algorithm}}}}
+  \xdef\raaInner{\text{ Reward Adjustment Algorithm }}
+
+  \node (raa) [chainName, double, align=center] at ($(Rdaa)!0.5!(Ldaa)$) {$\; \rightarrow \raaInner \rightarrow \;$};
+
+  \node (targetInflation) [align=center, xshift=3.1em] at (freqMid) {Target Inflation Rate \\ (coins/second)};
+  \node (targetInfTo) [xshift=-3.1em, align=center] at (targetInflation) { \\ \\ };
+
+  \draw [marketCtxArrowLR] (freqMid |- LtargetBF.south) -- (targetInfTo);
+  \draw [marketCtxArrowLR] (freqMid |- RtargetBF.north) -- (targetInfTo);
+
+  \draw [bothCtxArrow, solid, shorten <= 2pt] (raa.east |- raa.north) -- (LdaaCtxTR);
+  \draw [bothCtxArrow, solid, shorten <= 2pt] (raa.east |- raa.south) -- (RdaaCtxTR);
+
+  \draw [daaArrowsR={scale=0.85}, double, thin, shorten >= 3pt] (targetInflation) -- (raa.west);
+
+  \draw [daaArrowsR, thick, shorten >= 2pt] (LchainHist) -- (raa.west |- raa.north);
+  \draw [daaArrowsR, thick, shorten >= 2pt] (RchainHist) -- (raa.west |- raa.south);
+\end{tikzpicture}
+\end{document}

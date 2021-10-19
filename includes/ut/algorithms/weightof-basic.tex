@@ -1,19 +1,20 @@
 \begin{algorithm}
-\caption{A simplistic \textsc{WeightOf} for networks of a single root token with equal block frequencies}
+\caption{A \textsc{WeightOf} for networks of a single root token}
 \label{alg:weightof-1}
 \begin{algorithmic}
-\Procedure{WeightOf}{$B_i, state$} \Comment{The weight of a block in hashes; \autoref{eq:conv-reward-to-hashes}}
+\Procedure{WeightOf}{$B_i, state$} \Comment{The weight of a reflecting block in L-hashes}
     \State $t \gets$ \Call{BlockTimestamp}{$B_i$}
-    \State $C_r \gets$ \Call{RewardWeightOfAt}{$B_i$, $t$, $state$} \Comment{Converted block reward, defined below}
+    \State $R \gets$ \Call{ChainOf}{$B_i$, $state$} \Comment{Either the local or a reflecting chain}
+    \State $R_r \gets$ \Call{BlockRewardOfAt}{$R$, $t$, $state$} \Comment{L-coins/R-block --- by definition}
     \State $L_r \gets$ \Call{LocalBlockRewardAt}{$t$, $state$}
     \State $L_d \gets$ \Call{LocalBlockDifficultyAt}{$t$, $state$}
-    \State \Return{$C_r \cdot (L_d \div L_r)$} \Comment{$\nicefrac{L_d}{L_r}$ converts reward $\rightarrow$ hashes}
+    \State \Return{$R_r \cdot (L_d \div L_r)$} \Comment{See \autoref{eq:por-conv-work-srt} (Note: $R_d$ cancels out)}
 \EndProcedure
-\\
-\Procedure{RewardWeightOfAt}{$B_i, t, state$} \Comment{Returns (L-coins/L-block)}
-    \State $C \gets$ \Call{ChainOf}{$B_i$, $state$} \Comment{Either the local or a reflecting chain}
-    \State $C_r \gets$ \Call{BlockRewardOfChainAt}{$C$, $t$, $state$} \Comment{Block reward of $C$ at $t$}
-    \State \Return{$C_r$} \Comment{See \autoref{eq:por-conv-same-rt-and-bf}}
-\EndProcedure
+% \\
+% \Procedure{RewardWeightOfAt}{$B_i, t, state$} \Comment{Returns (L-coins/L-block)}
+%     \State $C \gets$ \Call{ChainOf}{$B_i$, $state$} \Comment{Either the local or a reflecting chain}
+%     \State $C_r \gets$ \Call{BlockRewardOfChainAt}{$C$, $t$, $state$} \Comment{Block reward of $C$ at $t$}
+%     \State \Return{$C_r$} \Comment{See \autoref{eq:por-conv-same-rt-and-bf}}
+% \EndProcedure
 \end{algorithmic}
 \end{algorithm}

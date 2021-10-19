@@ -1,0 +1,134 @@
+\input{./tikz-styles}
+
+\providecommand\DaaHeight{2em}
+\providecommand\XShiftTargetBf{3.9em}
+\providecommand\MirrorVertical{0}
+\providecommand\UnitPrefix{N-}
+\providecommand\TikzNodePrefix{}
+\providecommand\DaaInitialNodePlacement{0,0}
+\providecommand\MinerRevenueArrowStyle{networkCtxArrowLR}
+\providecommand\SwapDifficultyAndRevenue{0}
+\providecommand\SwapConfirmationRateAndRevenue{0}
+\providecommand\ConfRateGeneral{0}
+\providecommand\HideChainHistUnits{0}
+\providecommand\CoinsGeneral{0}
+
+\providecommand\n[1]{}
+\providecommand\vMod{-}
+\providecommand\vNorth{north}
+\providecommand\vSouth{south}
+
+\tikzstyle{daaArrowsR} = [-{Straight Barb[#1]}]
+\tikzstyle{daaArrowsLR} = [{Straight Barb[#1]}-{Straight Barb[#1]}]
+\tikzstyle{ctxDash} = [dash pattern=on 0.5em off 0.15em]
+
+\tikzstyle{networkCtxArrow} = [daaArrowsR, thick, ctxDash]
+\tikzstyle{networkCtxArrowLR} = [daaArrowsLR, thick, ctxDash]
+\tikzstyle{marketCtxArrow} = [daaArrowsR={scale=0.85}, double, ctxDash]
+\tikzstyle{marketCtxArrowLR} = [daaArrowsLR={scale=0.85}, double, ctxDash]
+\tikzstyle{bothCtxArrow} = [daaArrowsR={scale=0.7}, thick, double, ctxDash]
+\tikzstyle{bothCtxArrowLR} = [daaArrowsLR={scale=0.7}, thick, double, ctxDash]
+\tikzstyle{revCtxArrow} = [\MinerRevenueArrowStyle]
+
+\newcommand\DrawTikzDaaMacro{
+    \tikzstyle{ctxLabelAll} = [anchor=center, sloped, align=center]
+    \tikzstyle{diffCrArrow} = []
+    \tikzstyle{diffCrArrowAlt} = []
+    \ifnum 1=\MirrorVertical
+      \tikzstyle{aboveOf} = [below of = ##1]
+      \tikzstyle{belowOf} = [above of = ##1]
+      \tikzstyle{ctxLabel} = [ctxLabelAll, below]
+      \tikzstyle{ctxLabelAlt} = [ctxLabelAll, above]
+      \tikzstyle{diffCrArrow} = [rotate=-180, above]
+      \tikzstyle{diffCrArrowAlt} = [rotate=-180, below]
+      \renewcommand\vMod{}
+      \renewcommand\vNorth{south}
+      \renewcommand\vSouth{north}
+    \else
+      \tikzstyle{aboveOf} = [above of = ##1]
+      \tikzstyle{belowOf} = [below of = ##1]
+      \tikzstyle{ctxLabel} = [ctxLabelAll, above]
+      \tikzstyle{ctxLabelAlt} = [ctxLabelAll, below]
+      \renewcommand\vMod{-}
+      \renewcommand\vNorth{north}
+      \renewcommand\vSouth{south}
+    \fi
+    \renewcommand\n[1]{\TikzNodePrefix##1}
+
+    \xdef\chainHistText{Chain History \\ (\UnitPrefix{}blocks/\UnitPrefix{}second)}
+    \ifnum 1=\HideChainHistUnits
+        \xdef\chainHistText{Chain History}
+    \fi
+
+    \node (\n{chainHist}) [align=center] at (\DaaInitialNodePlacement) {\chainHistText};
+    \node (\n{previousDifficulty}) [yshift=\vMod\DaaHeight, belowOf={\n{chainHist}}, align=center] {Previous difficulty \\ (\UnitPrefix{}hashes/\UnitPrefix{}block)};
+
+    % \node (\n{daaCtxBR}) [yshift=\vMod\DaaHeight, belowOf={\n{daaCtxTR}}, align=center] {Miner Revenue \\ (\UnitPrefix{}coins/\UnitPrefix{}block)};
+    % \node (\n{daaCtxMid}) [align=center, xshift=4.0em] at ($(\n{daaCtxTR})!0.5!(\n{daaCtxBR})$) {Difficulty \\ (\UnitPrefix{}hashes/\UnitPrefix{}block)};
+    \xdef\confUnits{\UnitPrefix{}second}
+    \ifnum 1=\ConfRateGeneral
+        \xdef\confUnits{second}
+    \fi
+
+    \xdef\coinsUnits{\UnitPrefix{}coins}
+    \ifnum 1=\CoinsGeneral
+        \xdef\coinsUnits{coins}
+    \fi
+
+    \xdef\trNode{Confirmation rate \\ (\UnitPrefix{}blocks/\confUnits)}
+    \xdef\brNode{Difficulty \\ (\UnitPrefix{}hashes/\UnitPrefix{}block)}
+    \xdef\midNode{Miner Revenue \\ (\coinsUnits/\UnitPrefix{}block)}
+    \xdef\daaOutTo{\n{daaCtxBR}}
+    \xdef\daaOutFrom{\n{daa}.east |- \n{daa}.\vSouth}
+    \ifnum 1=\SwapDifficultyAndRevenue
+        \xdef\brTemp{\midNode}
+        \xdef\midNode{\brNode}
+        \xdef\brNode{\brTemp}
+        \xdef\daaOutTo{\n{daaCtxMid}}
+        \xdef\daaOutFrom{\n{daa}.east}
+    \fi
+    \ifnum 1=\SwapConfirmationRateAndRevenue
+        \xdef\trTemp{\midNode}
+        \xdef\midNode{\trNode}
+        \xdef\trNode{\trTemp}
+    \fi
+
+    \node (\n{daaCtxTR}) [right of = \n{chainHist}, xshift=20em, align=center] {\trNode};
+    \node (\n{daaCtxBR}) [yshift=\vMod\DaaHeight, belowOf={\n{daaCtxTR}}, align=center] {\brNode};
+    \node (\n{daaCtxMid}) [align=center, xshift=6.0em] at ($(\n{daaCtxTR})!0.5!(\n{daaCtxBR})$) {\midNode};
+
+
+
+    \node (\n{targetBF}) [align=center, xshift=-\XShiftTargetBf] at ($(\n{chainHist})!0.5!(\n{previousDifficulty})$) {Target Block Freq. \\ (blocks/second)};
+
+    % DAA NODE
+
+    \coordinate (\n{topmid}) at ($(\n{chainHist})!0.5!(\n{daaCtxTR})$);
+    \coordinate (\n{botmid}) at ($(\n{previousDifficulty})!0.5!(\n{daaCtxBR})$);
+    \coordinate (\n{midmid}) at ($(\n{topmid})!0.5!(\n{botmid})$);
+
+    \node (\n{daa}) [chainName, double] at (\n{midmid}) {$\; \rightarrow$ Difficulty Adjustment Algorithm $\rightarrow \;$};
+
+    % ARROWS
+
+    % DAA
+
+    \draw (\n{chainHist}) [daaArrowsR, thick, shorten >= 2pt] -- (\n{daa}.west |- \n{daa}.\vNorth);
+    \draw (\n{targetBF}) [daaArrowsR={scale=1.4}, shorten >= 3pt] -- (\n{daa}.west);
+    \draw (\n{previousDifficulty}) [daaArrowsR, thick, shorten >= 2pt] -- (\n{daa}.west |- \n{daa}.\vSouth);
+    %  |- \n{daa}.\vSouth
+    % \draw (\n{daa}.east) [daaArrowsR, thick, shorten <= 2pt] -- (\n{daaCtxMid});
+    \draw (\daaOutFrom) [daaArrowsR, thick, shorten <= 2pt] -- (\daaOutTo);
+
+    % CTX
+
+    % \draw [networkCtxArrow] (\n{daaCtxBR}) -- node [ctxLabel, diffCrArrow] {\UnitPrefix{}network} (\n{daaCtxTR});
+    % \draw [networkCtxArrow] (\n{daaCtxBR}) -- node [ctxLabelAlt, diffCrArrow] {context} (\n{daaCtxTR});
+    \draw [revCtxArrow] (\n{daaCtxBR}) -- node [ctxLabel, diffCrArrow] {} (\n{daaCtxTR});
+    % \draw [networkCtxArrow] (\n{daaCtxBR}) -- node [ctxLabelAlt, diffCrArrow] {} (\n{daaCtxTR});
+    % \draw [networkCtxArrow] (\n{daaCtxBR}) -- node [ctxLabel] {} (\n{daaCtxMid});
+    \draw [revCtxArrow] (\n{daaCtxMid}) -- node [ctxLabel] {} (\n{daaCtxTR});
+    \draw [revCtxArrow] (\n{daaCtxMid}) -- node [ctxLabel] {} (\n{daaCtxBR});
+    \draw [networkCtxArrow] (\n{previousDifficulty}) -- node [ctxLabel] {implicit \UnitPrefix{}network context} (\n{daaCtxBR});
+    \draw [networkCtxArrow] (\n{daaCtxTR}) -- node [ctxLabelAlt] {\UnitPrefix{}network context feedback} (\n{chainHist});
+}

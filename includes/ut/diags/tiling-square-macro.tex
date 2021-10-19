@@ -66,8 +66,8 @@
                 \pgfmathtruncatemacro\yeven{abs(mod(\y, 2))}
                 \pgfmathtruncatemacro\yodd{1-abs(mod(\y, 2))}
                 \xdef\yispos{\xintifboolexpr{\y > 0}{1}{0}}
-                \xdef\brickUpDown{\xintifboolexpr{(\y > 0 && \xeven = \yodd) || (\y < 0 && \xeven = \yeven)}{1}{0}}
-                \xdef\dontDrawBrick{\xintifboolexpr{\TilingSqBrickPattern = 1 && \absy > 0 && \x = 0 && \d = \TilingDepth && \brickUpDown = 0}{1}{0}}
+                \xdef\brickUpDown{\xintifboolexpr{(\y > 0 && \xeven == \yodd) || (\y < 0 && \xeven == \yeven)}{1}{0}}
+                \xdef\dontDrawBrick{\xintifboolexpr{\TilingSqBrickPattern == 1 && \absy > 0 && \x == 0 && \d == \TilingDepth && \brickUpDown == 0}{1}{0}}
 
                 % calculate polar coords
                 \pgfmathsetmacro\sDist{sqrt(\x*\x + \y*\y) * 2.3*\TilingInitSize}
@@ -103,7 +103,7 @@
                 \xdef\nodesToReflect{\x/\y}
 
                 \ifnum \d>\absx  % always do up/down (with square, do 1/2 of them with brick)
-                    \ifnum 0<\xintifboolexpr{(0 < \absy && 0 = \TilingSqBrickPattern) || (1 = \TilingSqBrickPattern && 1 == \brickUpDown)}{1}{0}
+                    \ifnum 0<\xintifboolexpr{(0 < \absy && 0 == \TilingSqBrickPattern) || (1 == \TilingSqBrickPattern && 1 == \brickUpDown)}{1}{0}
                     % \ifnum 0<\absy
                         \pgfmathtruncatemacro\ry{(-1*sign(\y) + \y)}
                         \xdef\nodesToReflect{ \x/\ry, \nodesToReflect }
