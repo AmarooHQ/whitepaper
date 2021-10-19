@@ -883,7 +883,7 @@ If we want to convert confirmations, then we'll need to abstract away from the i
   %  & & \nonumber
 \end{align}
 
-So the $1\times$ an R confirmation is worth $\frac{R_r}{L_r} \cdot X_{R\rightarrow L}$ L confirmations.
+So $1\times$ R confirmations is worth $\big(\frac{R_r}{L_r} \cdot X_{R\rightarrow L}\big)$ L confirmations.
 Nice and simple.
 
 <!-- Notice that L-coins are easily converted to blocks via the conversion constant $\nicefrac{1}{L_r}$, and hashes via the conversion constant $\nicefrac{L_d}{L_r}$. -->
@@ -895,12 +895,12 @@ Note that this doesn't necessarily have real-world meaning.
 One example where it does is \autoref{sec:conversion-single-root-token}.
 Let's consider measuring block-weight in coins, starting with the conversion used in \autoref{eq:srt-block-ratios}.
 \begin{align}
-  & L_r \cdot \frac{C_t}{L_t} \cdot \frac{L_f}{C_f}
+  C_r = \; & L_r \cdot \frac{C_t}{L_t} \cdot \frac{L_f}{C_f}
     & & \frac{\text{L-coins}}{\text{C-block}}
     & & \text{Via \autoref{eq:srt-block-ratios}}
     \nonumber
     \\[0.5em]
-  \implies \; & L_r \cdot \frac{C_t}{L_t}
+  C_r \cdot \frac{C_f}{L_f} = \; & L_r \cdot \frac{C_t}{L_t}
     & & \frac{\text{L-coins}}{\text{L-block}}
     & & \text{}
     \nonumber
@@ -910,8 +910,6 @@ Let's consider measuring block-weight in coins, starting with the conversion use
     & &\text{Sum coins (as a proxy for weight)}
     \label{eq:chain-coin-weight}
     \\[0.5em]
-%\end{align}
-%\begin{align}
   L_r \cdot \frac{C_t}{L_t} = \; & \frac{L_t \cdot I}{G_t \cdot L_f} \cdot \frac{C_t}{L_t}
     & & \frac{\text{L-coins}}{\text{L-block}}
     & & \text{Via \autoref{eq:srt-reward}}
