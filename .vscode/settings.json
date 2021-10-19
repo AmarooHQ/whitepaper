@@ -173,7 +173,8 @@
         "\\\\(autoref|begin|end|label){([:a-z0-9\\-]*)}",
         "\\[\\^([a-z0-9\\-]*)\\]",
         "\\\\bquote{([a-zA-Z0-9`'\\- \\.;\\(\\)\\n]*)}",
-        "it heavily relys on a symmetry"
+        "it heavily relys on a symmetry",
+        "online, nothing at stake is",
     ],
     "python.pythonPath": "/home/xertrov/.pyenv/versions/3.10.0b1/bin/python",
     "[rust]": {

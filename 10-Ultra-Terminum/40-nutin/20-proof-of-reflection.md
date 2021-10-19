@@ -332,7 +332,7 @@ We start out by observing $\nicefrac{L_d}{L_r}$ gives us a value in units of $\f
 This is a constant of conversion from L-coins to L-hashes for a given moment -- if some miner earned $x$ L-coins today, then $x \cdot \frac{L_d}{L_r}$ would tell you roughly how many hashes were done to earn that reward.
 Next, we multiply by the exchange rate to find the constant of conversion for $\frac{\text{L-hashes}}{\text{R-coin}}$.
 Then, we divide by $\nicefrac{R_d}{R_r}$ to find the constant of conversion for $\frac{\text{L-hashes}}{\text{R-hash}}$.
-This is the constant of conversion for R-hashes to L-hashes.
+If we multiply this constant of conversion by a value of R-hashes, then we'll end up with a value of L-hashes.
 It tells us \emph{the relative weight} contributed to each network by each hash performed.
 Finally, we can deduce the function $\text{ConvWork}_{R\rightarrow L}(w)$ which takes a value of R-hashes and returns a value of L-hashes.
 
@@ -473,7 +473,7 @@ Consider:
     \\[0.5em]
   \text{But!} & & \frac{L_f}{R_f} \ne \; & \frac{R_r}{L_r} \cdot X_{R\rightarrow L}
     & &\frac{\text{L-blocks}}{\text{R-block}}
-    \nonumber
+    \label{eq:lfrf-ne-rrlr}
 \end{align}
 
 These two values are \textbf{not} equal (or comparable), and nothing we've said implies that they should be!
@@ -520,7 +520,7 @@ Crucially, we can \emph{not} cancel \emph{seconds}:
 \begin{align}
   ? & = \frac{L_f}{R_f}
     & & \frac{\text{L-blocks} \cdot \text{R-seconds}}{\text{L-second} \cdot \text{R-block}}
-    & & \text{Relative frequencies (or confirmations)}
+    & & \text{Relative confirmation rates}
     \label{eq:rel-conf-hz}
     \\[0.5em]
   %  ? & = \frac{R_r}{L_r} \cdot X_{R\rightarrow L}
@@ -612,6 +612,11 @@ Either way works because the DAA acts as a boundary of the convertible context i
 
 <!-- \autoref{eq:bitcoin-daa} -->
 
+\defineTerm{Convertible Context}{
+  The boundary of a group of values that are mutually convertible.
+  Within a convertible context, all values must be of the same \emph{scale} or have known exact scaling factors
+}
+
 The general case of a DAA's relationships (flows of \emph{information} and \emph{context}) are diagrammed in \autoref{fig:daa-conversion}.
 
 \begin{figure}[p]
@@ -622,9 +627,11 @@ The general case of a DAA's relationships (flows of \emph{information} and \emph
   The DAA is how \emph{confirmations} and \emph{coins} become \textbf{laden} with \emph{implicit context}.
   If we don't account for this \emph{implicit context} then our conversions will be nonsensical.
   The implicit context is \emph{network participation} -- thus, \texttt{N-} prefixes the units which are \emph{context laden}.
-  Solid arrows show the flow of \emph{information}, with thick arrows indicating \emph{network context}.
-  Dashed arrows show the flow of \emph{context}.
+  Thick arrows indicate \emph{network context}, and thin arrows indicate \emph{world context}.
+  Solid arrows show the \emph{flow} of \emph{information}.
+  Dashed arrows show the \emph{flow} of \emph{context}.
   Two-way arrows ($\longleftrightarrow$) link two values that are \emph{convertible}.
+  The collection of values mutually linked by two-way arrows define the \emph{convertible context}.
   Values can only be converted when there is a direct two-way path between them.
 }
 \label{fig:daa-conversion}
@@ -790,7 +797,7 @@ So far, we've considered PoW chains only.
 Conversion of chain-weight between PoW chains can work \emph{if and only if} we can convert between \emph{work} (i.e., hashes) done on each chain -- given an appropriate context.
 For a given PoW block, the network knows exactly how much work is implied by that block -- the expected number of hashes to produce it.
 Thus, for PoW chains, there is an exact conversion between \emph{work and confirmations} (for some context at some point in time).
-Over short time-scales, this conversion ratio is approximately constant (in general it's a function that accepts a timestamp as input).
+Over short time-scales, this conversion ratio is approximately constant (in general it's a function that takes a timestamp as an input parameter).
 Thus, \emph{chain-weight} (as represented in figures via $\Sigma_w$, e.g. \autoref{fig:dag-ex1-full}) can be represented either in something like \emph{hashes} or \emph{difficulty} \textbf{or} chain-weight can simply be in terms of \emph{confirmations}.
 
 \aside{
@@ -846,69 +853,91 @@ For non-PoW chains, we'll need conversion methods that have non-arbitrary answer
 In general, my intuition is that we can almost always use PoR with networks that fit the \emph{traditional} idea of blockchains. (And when we can't, a protocol change could fix that.)
 
 Now, \textbf{converting confirmations,} how do we actually do it?
-Consider the \emph{excess capacity} in our methods of conversion that we covered in \autoref{sec:comparing-weight-dex}.
+<!-- Consider the \emph{excess capacity} in our methods of conversion that we covered in \autoref{sec:comparing-weight-dex}. -->
 If we want to convert confirmations, then we'll need to abstract away from the idea of \emph{difficulty} in our conversion method.
-Thus, \emph{there is no $R_d$ for us to rely on.}
-Instead, we'll need to use the other values at our disposal ($R_f$ and $R_r$).
+<!-- Thus, \emph{there is no $R_d$ for us to rely on.} -->
 \begin{align}
-  \text{Consider: } & \frac{R_d}{L_d}
-    & &\frac{\text{R-hashes }\cdot\text{ L-blocks}}{\text{R-block }\cdot\text{ L-hash}}
-    & & \nonumber
-    \\[0.5em]
-  \implies \; & \frac{R_d}{L_d} \cdot \left( \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot \frac{R_r}{R_d} \right)
+  % \text{Consider: } & \frac{R_d}{L_d}
+  %   & &\frac{\text{R-hashes }\cdot\text{ L-blocks}}{\text{R-block }\cdot\text{ L-hash}}
+  %   & & \nonumber
+  %   \\[0.5em]
+  % \implies \; & \frac{R_d}{L_d} \cdot \left( \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot \frac{R_r}{R_d} \right)
+  %   & &\frac{\text{L-blocks}}{\text{R-block}}
+  %   & &\text{From \autoref{eq:por-conversion-const-1}} \nonumber
+  %   \\[0.5em]
+  \text{Consider: } \;\;\; & \frac{R_r}{L_r} \cdot X_{R\rightarrow L}
     & &\frac{\text{L-blocks}}{\text{R-block}}
-    & &\text{From \autoref{eq:por-conversion-const-1}} \nonumber
-    \\[0.5em]
-  = \; & \frac{R_r}{L_r} \cdot X_{R\rightarrow L}
-    & &\frac{\text{L-blocks}}{\text{R-block}}
-    & & \text{Reduce} \nonumber
+    & & \text{} \nonumber
+    % & & \text{Reduce} \nonumber
     \\[0.5em]
   \therefore \text{ConvBlocks}_{R\rightarrow L}(b) = \; & \frac{R_r}{L_r} \cdot X_{R\rightarrow L} \cdot b
     & &\text{R-blocks }\rightarrow\text{ L-blocks}
     & & \label{eq:por-conv-blocks}
-    \\[0.5em]
-  \therefore \text{ConvBToCoins}_{R\rightarrow L}(b) = \; & R_r \cdot X_{R\rightarrow L} \cdot b
-    & &\text{R-blocks }\rightarrow\text{ L-coins}
-    & & \nonumber
+  %  \\[0.5em]
+  %\therefore \text{ConvBToCoins}_{R\rightarrow L}(b) = \; & R_r \cdot X_{R\rightarrow L} \cdot b
+  %  & &\text{R-blocks }\rightarrow\text{ L-coins}
+  %  & & \nonumber
 \end{align}
 
-Notice that L-coins are easily converted to blocks via the conversion constant $\nicefrac{1}{L_r}$, and hashes via the conversion constant $\nicefrac{L_d}{L_r}$.
+So the $1\times$ an R confirmation is worth $\frac{R_r}{L_r} \cdot X_{R\rightarrow L}$ L confirmations.
+Nice and simple.
+
+<!-- Notice that L-coins are easily converted to blocks via the conversion constant $\nicefrac{1}{L_r}$, and hashes via the conversion constant $\nicefrac{L_d}{L_r}$. -->
 
 #### Coins per Confirmation
 
 In practice, given a cross-chain network, it seems very elegant to measure block-weight in coins.
 Note that this doesn't necessarily have real-world meaning.
 One example where it does is \autoref{sec:conversion-single-root-token}.
-Let's consider measuring block-weight in coins, starting with the conversion used in \autoref{alg:weightof-ratio}.
+Let's consider measuring block-weight in coins, starting with the conversion used in \autoref{eq:srt-block-ratios}.
 \begin{align}
-  & C_r \cdot \frac{C_f}{L_f} \cdot \frac{L_d}{L_r}
-    & & \frac{\text{L-hashes}}{\text{L-block}}
-    & & \text{See \autoref{alg:weightof-ratio}}
+  & L_r \cdot \frac{C_t}{L_t} \cdot \frac{L_f}{C_f}
+    & & \frac{\text{L-coins}}{\text{C-block}}
+    & & \text{Via \autoref{eq:srt-block-ratios}}
     \nonumber
     \\[0.5em]
-  \implies \; & C_r \cdot \frac{C_f}{L_f}
-    & &\frac{\text{L-coins}}{\text{L-block}}
-    & &\text{Divide by } \nicefrac{L_d}{L_r}
+  \implies \; & L_r \cdot \frac{C_t}{L_t}
+    & & \frac{\text{L-coins}}{\text{L-block}}
+    & & \text{}
     \nonumber
     \\[0.5em]
-  = \; & \frac{{C_r}^\prime}{L_f}
-    & &\frac{\text{L-coins}}{\text{L-block}}
-    & &\text{Group } {C_r}^\prime
-    \nonumber
-    \\[0.5em]
-  \sum\limits_{C \in \{L, R\}} \frac{{C_r}^\prime}{L_f} = \; & \frac{{L_r}^\prime + {R_r}^\prime}{L_f}
+  \therefore \sum\limits_{C \in \{L, R\}} L_r \cdot \frac{C_t}{L_t} = \; & L_r \cdot \frac{L_t + R_t}{L_t}
     & &\frac{\text{L-coins}}{\text{L-block}}
     & &\text{Sum coins (as a proxy for weight)}
     \label{eq:chain-coin-weight}
+    \\[0.5em]
+%\end{align}
+%\begin{align}
+  L_r \cdot \frac{C_t}{L_t} = \; & \frac{L_t \cdot I}{G_t \cdot L_f} \cdot \frac{C_t}{L_t}
+    & & \frac{\text{L-coins}}{\text{L-block}}
+    & & \text{Via \autoref{eq:srt-reward}}
+    \nonumber
+    \\[0.5em]
+  = \; & \frac{C_t \cdot I}{G_t \cdot L_f}
+    & & \frac{\text{L-coins}}{\text{L-block}}
+    & & \text{}
+    \nonumber
+    \\[0.5em]
+  \therefore \sum\limits_{C \in \{L, R\}} \frac{C_t \cdot I}{G_t \cdot L_f} = \; & \frac{L_t + R_t}{G_t} \cdot \frac{I}{L_f}
+    & &\frac{\text{L-coins}}{\text{L-block}}
+    & &\text{Sum coins (as a proxy for weight)}
+    \label{eq:chain-coin-weight2}
 \end{align}
 
 What does \autoref{eq:chain-coin-weight} imply if L and R are the only two chains in a context like \autoref{sec:conversion-single-root-token}?
-Notice that, in this case, ${L_r}^\prime + {R_r}^\prime = I$, the network-wide inflation rate.
+Notice that, in this case, $L_t + R_t = G_t$, the network-wide currency supply.
 One implication is that weight (measured in coins) effectively counts \emph{how much of the full network} is contributing to Chain L's security -- represented via the coins that were minted in those contributing blocks.
+It's easier to see in \autoref{eq:chain-coin-weight2} as the sum collapses to $\nicefrac{I}{L_f}$.
 
 If the network is functioning well, we should expect that summing these values \emph{over the full history of the chain} should be close to the sum of all coins minted through block rewards.
 Of course, this is only useful over \emph{multiple} chains.
-If a single, traditional blockchain tried to do this, then all chain-weights would be identical!
+\textbf{If a single, traditional blockchain tried to do this, then all chain-weights would be identical!}\footnote{
+  This may be a new criticism of PoS.
+  In essence: a blockchain needs something like a DAA to factor-in participation, and \emph{coins} will never provide a way to determine which chain has higher participation.
+  Moreover, \emph{coins} is actually a very \emph{bad} way to measure participation, because the \emph{most valuable future network} is one where coins are being used for \emph{actual trade}, and this necessitates negative pressure on the number of coins dedicated for staking.
+  Thus, PoS chains \emph{can only ever have objectively secure fork-rules} when other factors are included in their conversion contexts (like using PoR with a PoW chain).
+  One thing PoS chains could try is: measuring weight \emph{in another chain's hashes}.
+}
 This happens because the conversion methods we're covering \emph{don't try to convert work done at different times.}
 PoR only every converts \emph{near-simultaneous work.}
 
@@ -974,7 +1003,10 @@ Given the right set-up, a PoW chain gains an *incredible* security advantage fro
 
 What about the PoS chain, though; what benefits does it gain from this relationship?
 The answer here is simple: by using mutual PoR with a PoW chain, the PoS chain gains *thermodynamic security*; the PoS chain's history is *thermodynamically secured* by the PoW chain.
-\textbf{This solves the \emph{Nothing at Stake} problem for any well constructed PoS scheme.}
+\textbf{This solves the \emph{Nothing at Stake} problem for any well constructed PoS scheme.}\footnote{
+  I consider the \emph{Nothing at Stake} problem and \emph{long range} attacks to be two sides of the same coin.
+  Maybe it's worth explicitly mentioning that it solves long-range attacks, too.
+}
 Furthermore, it is possible for error-correction methods like \emph{slashing} to be implemented *on the PoW chain*, not the PoS chain.
 Moving the staking and error correction methods to a different chain will require subtle and precise protocol design, but such changes are *in principle* possible with tolerable overhead.
 
@@ -982,7 +1014,7 @@ There are some (as yet) unsolved problems that arise through this design, such a
 Given that solutions to this problem likely depend on the specific details of the relevant PoS systems, this problem is not addressed here.
 Note: conversion methods for reflected weight, like \autoref{alg:por-reflected-block-weight}, will work provided a well defined \textsc{WeightOf} function exists.
 
-There are some other conjectured solutions to the *Nothing at Stake* problem. The two examples that follow solve the problem via mechanisms that are *external* to the protocol itself, i.e., hard-coded checkpoints and the requirement that nodes are online ``frequently''. The solution provided by mutual reflection with a PoW blockchain -- i.e., thermodynamic security -- is provided *by the protocol itself* and can only *increase* the security of PoS mechanisms. Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
+There are some other conjectured solutions to the *Nothing at Stake* problem.
 
 \bquote{
   %% cspell: disable-next-line
@@ -992,6 +1024,11 @@ There are some other conjectured solutions to the *Nothing at Stake* problem. Th
 \bquote{
   Provided that stakeholders are frequently online, nothing at stake is taken care of by our analysis of forkable strings (even if the adversary brute-forces all possible strategies to fork the evolving blockchain in the near future, there is none that is viable), and our chain selection rule that instructs players to ignore very deep forks that deviate from the block they received the last time they were online.
 }{\href{https://cloudflare-ipfs.com/ipfs/QmWCAHyi35SeXH2E4e8jRVk7yNse2x6D14uPfABnhagbvN}{Ouroboros: A Provably Secure Proof-of-Stake Blockchain Protocol, s10}}
+
+These two examples solve the \emph{Nothing at Stake} problem via mechanisms that are *external* to the protocol itself, i.e., hard-coded checkpoints and the requirement that nodes are online ``frequently''.
+
+The solution provided by mutual reflection with a PoW blockchain -- i.e., thermodynamic security -- is provided *by the protocol itself* and can only *increase* the security of PoS mechanisms.
+Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
 
 
 %% END ### RELEASE

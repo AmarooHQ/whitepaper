@@ -59,15 +59,16 @@ module.exports = {
             ],
         },
         "en-max-word-count": {
-            "max" : 40,
+            "max" : 45,
             "severity": "warning"
         },
         "sentence-length": {
-            "max": 250,
+            "max": 350,
             "severity": "warning"
         },
         "stop-words": {  // https://github.com/sapegin/textlint-rule-stop-words
             "defaultWords": false,
+            "skip": ["Blockquote"],
             "words": [
                 ["dappchain", "dapp-chain"],
                 ["dappchains", "dapp-chains"],

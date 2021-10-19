@@ -217,7 +217,7 @@ Though I think that the idea of time-stamping a hash (e.g., via an \textsc{OP\_R
 #### PoS Dapp-chains
 
 If the headers of dapp-chains are encoded as simplex-transactions, then techniques like *slashing* are first-class operations within the *hybrid PoW* context provided by the simplex.
-This solves the *nothing at stake* problem for PoS dapp-chains, provided the necessary PoS primitives can be encoded in a simplex-transaction.
+This solves the *Nothing at Stake* problem for PoS dapp-chains, provided the necessary PoS primitives can be encoded in a simplex-transaction.
 
 The abstraction layer between simplex-chains and dapp-chains brings practical benefits, too.
 For example: existing (open-source) PoS blockchain schemes can be easily integrated as dapp-chains.

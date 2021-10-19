@@ -91,14 +91,25 @@ Hold up!
 Didn't we just go over -- in great detail -- why we can't use block frequencies ($L_f$ and $R_f$) in conversions?
 Why is it okay to use them now?
 
-- introduce RAA
-- outputs (each chain's block reward) become *context laden* with a common meaning of ``seconds''.
-- we added a *definition* of $C_r$ that *requires* certain relationships w/ $C_f$ hold.
-- thus, $L_f$ and $R_f$ now have *contextual meaning* -- they're *context laden*.
+To answer this, let's consider \emph{how} block rewards could be consistently set network-wide.
+Unlike a chain's difficulty, the block reward needs to be consistent with some global inflation rate.
+\autoref{eq:srt-block-ratios} implies that $R_r \cdot R_f \cdot L_t = L_r \cdot L_f \cdot R_t$, so in some cases \emph{we don't need to know the global state, just that this relationship is enforced for local state.}
+That said, if $I$ is known across the network (i.e., it is constant or a well known function) then calculating $G_t$ is trivial: $G_t = I * l + G_{t_0}$, where $l$ is the lifetime of the network (in seconds), and $G_{t_0}$ is any initial root token supply that was not created via inflation (e.g., via some token generation event).
 
+Could we maintain consistency across chains via something like a \textbf{Reward Adjustment Algorithm} (RAA)?
+If each chain commits to the input values (e.g., via the inclusion of $C_t$ in their block-headers), then an RAA could be evaluated using only the header-chain (similar to the DAA).
+This way, if a miner (or a chain) tries to subvert or attack the RAA, it's trivially detectable by reflecting chains.
 
-\todo{write about the fig}
+If we introduced something like an RAA, then the RAA \emph{output} could become \emph{context laden} (depending on the RAA's input parameters).
+In the case of a global inflation rate, \emph{this means that chains would rely on a common meaning of ``seconds''!}
+So it is by \emph{construction and definition} that the block frequencies introduced in \autoref{eq:srt-reward} becomes part of the convertible context.
+Thus, we can \emph{now} include them when we couldn't before.
 
+Note that we also \emph{prove} \autoref{eq:lfrf-ne-rrlr} for this case.
+We know that -- when $L_f$ and $R_f$ are in the convertible context -- there is a \emph{scaling factor} that typically $\ne 1$.
+The reason we can find a scaling factor \emph{here} (but not generally) is that we \emph{included it in a protocol-level relationship} (\autoref{eq:srt-reward}).
+
+This new situation and context are diagrammed in \autoref{fig:daa-raa-conversion}.
 
 \begin{figure}[h]
     \centering
@@ -107,12 +118,15 @@ Why is it okay to use them now?
       How does implicit context change when considering networks of a single root token?
       In this case, because we set a network-wide inflation rate (\autoref{eq:srt-reward}), by \emph{definition}, $L_f$ and $R_f$ have meaning in the convertible context.
       In essence: both L and R have convertible factors that are dependant on the same meaning of ``seconds''.
+      The collection of values mutually linked by two-way arrows ($\longleftrightarrow$) define the \emph{convertible context}.
+      Double arrows indicate the \emph{new} context used in the RAA (which is related to the world context).
+      Thick double arrows indicate the new hybrid context which allows for conversion (for multi-chain networks of a single root token).
     }
     \label{fig:daa-raa-conversion}
 \end{figure}
 
 
-Let's use \autoref{eq:srt-block-ratios} to create our next \textsc{WeightOf} algorithm:
+Let's use \autoref{eq:srt-block-ratios} to create our next \textsc{WeightOf} algorithm: \autoref{alg:weightof-ratio}.
 \begin{align}
     & \; \frac{R_t \cdot L_f}{L_t \cdot R_f} \cdot L_d
         & & \frac{\text{L-hashes}}{\text{R-block}}

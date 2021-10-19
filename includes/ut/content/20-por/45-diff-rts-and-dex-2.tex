@@ -14,14 +14,14 @@ Surely \emph{any} conversion to L-hashes will work, right?
 
 Let's see:
 \begin{align}
-    & \frac{L_d}{L_r}
-        & & \frac{\text{L-hashes}}{\text{L-coin}}
-        \nonumber
-        \\[0.5em]
-    & \frac{L_d}{L_r} \cdot X_{R\rightarrow L}
-        & & \frac{\text{L-hashes}}{\text{R-coin}}
-        \nonumber
-        \\[0.5em]
+    % & \frac{L_d}{L_r}
+    %     & & \frac{\text{L-hashes}}{\text{L-coin}}
+    %     \nonumber
+    %     \\[0.5em]
+    % & \frac{L_d}{L_r} \cdot X_{R\rightarrow L}
+    %     & & \frac{\text{L-hashes}}{\text{R-coin}}
+    %     \nonumber
+    %     \\[0.5em]
     & \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot R_r
         & & \frac{\text{L-hashes}}{\text{R-block}}
         \nonumber
@@ -40,9 +40,9 @@ Let's see:
     %       \label{eq:por-conv-dex}
 \end{align}
 
-Okay, so we \emph{can} convert to L's block-weight \emph{without knowing R's difficulty}.
+Okay, so we \emph{can} convert to L's block-weight (L-hashes) \emph{without knowing R's difficulty}.
 It's good to know that we have \emph{options} there -- there's \emph{excess capacity} in the values we can convert between.
-If one value is not available, then we can substitute a combination of other values.
+If one value is not available, then we might not even need it.
 (This is relevant for \autoref{sec:converting-confirmations}.)
 
 \todoDraftOnly{This (above) is one of the properties that we should quickcheck}

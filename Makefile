@@ -75,7 +75,7 @@ InputTeXFiles = $(wildcard *_input.tex)
 PWD = $(pwd)
 
 watch:
-	bin/onchange.sh 10-Ultra-Terminum "make"
+	bin/onchange.sh ./10-Ultra-Terminum ./includes/ut/content ./includes/ut/algorithms "make"
 
 wp-graphics-standalone: $(PDFGraphics)
 wp-graphics-ps: $(PSGraphics)
@@ -114,6 +114,8 @@ build-whitepaper: %.md
 	done
 	# replace tables placeholder with actual tables
 	node ./includes/ut/complexity/populateWPTables.js --populate-wp-md
+	# this fixes texcount (since import-paths don't need to be searched).
+	sed -r -i 's/input\{20-por/input\{includes\/ut\/content\/20-por/' $(WPFILE)
 # if you need to build the above: cd includes/ut/complexity/ut-complexity-gen-purs && npm i && npm run bundle-for-wp
 
 
@@ -146,6 +148,8 @@ wc:
 	(find . -iname '*.md' -or -iname '*.tex' | grep -v node_mod | grep -v spago | grep -v output | grep -v diags | xargs wc && \
 	  wc $(WPFILE)) > wc-$(PP_MODE).log
 	wc $(WPFILE)
+	bash bin/msg_good.sh "Wordcount via wc: $$(wc -w output/whitepaper.markdown)"
+	bash bin/msg_good.sh "Wordcount via texcount: $$(texcount output/whitepaper.tex -merge -sum -0)"
 
 # preprocess tex for draft/release/lint
 preprocess-build:
@@ -153,10 +157,12 @@ preprocess-build:
 	bash bin/msg_good.sh "Finished preprocessing of $(WPTEX) in mode $(PP_MODE)"
 
 mk-latex-pdf: preprocess-build
-	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
+	#TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
+	TZ='Australia/Sydney' ./latexrun $(WPTEX) --color always -O $(OUTDIR) --latex-args "-shell-escape -interaction=batchmode"
 	#-rm $(WPNOEXT).gl*
 	(cd $(OUTDIR) && makeglossaries $(WPFILENAME))
-	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
+	# TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
+	TZ='Australia/Sydney' ./latexrun $(WPTEX) --color always -O $(OUTDIR) --latex-args "-shell-escape -interaction=batchmode"
 	cp $(WPNOEXT).pdf $(OUTPUT_PDF)
 	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE).pdf
 	cp $(WPNOEXT).pdf $(WPFILENAME)-$(PP_MODE).pdf
