@@ -22,13 +22,13 @@
 \EndProcedure \Comment{This is an inefficient method and would not be used in production.}
 \\
 \Procedure{CapWorkOf}{$R$, $n$, $state$} \Comment{A simplistic method for capping work}
-  \If {$n \le 0$} \Comment{Avoid division by 0}
-    \State \Return{0} \Comment{If $n=0$ then the weight $=0$ anyway}
-  \EndIf
+  % \If {$n \le 0$} \Comment{Avoid division by 0}
+  %   \State \Return{0} \Comment{If $n=0$ then the weight $=0$ anyway}
+  % \EndIf
   \State $L_f \gets $ \Call{BlockFrequencySelf}{$state$}
   \State $R_f \gets $ \Call{BlockFrequencyOfChain}{$R$, $state$}
   \State $e \gets R_f \div L_f$ \Comment{Expected blocks from $R$ per $L$ block}
-  \State \Return{min(1, $e \div n$)} \Comment{This caps the contribution of $R_\text{blocks}$ per $L$ block}
+  \State \Return{$\text{min}(1, e \div \text{max}(1, n))$} \Comment{Cap the contribution of $R_\text{blocks}$ per $L$ block}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
