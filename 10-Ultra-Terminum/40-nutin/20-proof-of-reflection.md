@@ -306,6 +306,8 @@ In theory, can an exchange rate help us convert between R-hashes/R-coin and L-ha
 
 #### Converting Block-Weights
 
+\label{sec:converting-block-weights}
+
 Can we find some function, $\text{ConvWork}_{R\rightarrow L}(w)$, that converts R-hashes to L-hashes?
 \begin{align}
   & \frac{L_d}{L_r}
@@ -326,6 +328,11 @@ Can we find some function, $\text{ConvWork}_{R\rightarrow L}(w)$, that converts 
 \end{align}
 
 With \autoref{eq:por-conversion-const-1}, \textbf{we have just found our first constant of conversion for \textbf{block-weight.}}
+
+\aside{
+  \autoref{eq:por-conversion-const-1} has a natural symmetry.
+  It's worth noting, but there isn't much to analyze yet.
+}
 
 What's going on here?
 We start out by observing $\nicefrac{L_d}{L_r}$ gives us a value in units of $\frac{\text{L-hashes}}{\text{L-coin}}$.
@@ -447,7 +454,7 @@ Let's consider \autoref{eq:por-conv-work} in light of the above.
     \\[0.5em]
   = \; & \frac{1}{21} \cdot \frac{R_r}{L_r} \cdot X_{R\rightarrow L} \cdot w
     & &\text{L-hashes}
-    & &\text{Sub }\nicefrac{L_d}{R_d}\text{ from \autoref{eq:rev-diff-ratio}}
+    & &\text{Sub }\nicefrac{L_d}{R_d}\text{ from \autoref{eq:rev-diff-ratio-raw}}
     \nonumber
     \\[0.5em]
   = \; & \frac{3}{21} \cdot w = \frac{w}{7}
@@ -483,9 +490,9 @@ How do we know whether a constant of conversion \emph{works} for our purposes?
 #### Hold Up! We Need to Talk About $\nicefrac{L_f}{R_f}$ and $\nicefrac{R_r}{L_r} \cdot X_{R\rightarrow L}$
 
 \aside{
-  This section regards some subtle ideas about when conversions work (i.e., give meaningful results), and when they won't.
-  It's worth spending some time on these ideas because \emph{when and how} you can convert between properties is not always obvious.
-  But, we \emph{must} understand this to construct a meaningful way to convert block-weight -- which PoR \emph{requires}.
+  This section regards some subtle ideas about when conversions work (i.e., give meaningful results), and when conversions don't.
+  It's worth spending some time on these ideas because \emph{when and how} you can convert is not always obvious.
+  But, we \emph{must} understand this to construct a meaningful method of converting block-weight -- which PoR \emph{requires}.
 }
 
 Let's consider some units with \emph{real-world} interpretations.
@@ -685,8 +692,8 @@ Since network context is respected, we can use an exchange rate to build a meani
 \includegraphics[max width=\linewidth]{diff_adjustment_alg_times_2_sag}
 \caption{
   How are the convertible contexts of two different networks related?
-  Without the market context, there's no conversion path that allows for the conversion of work.
-  These are the same conversions that miners use to determine which network is most profitable for them.
+  Without the market context, there's no conversion path that allows for the conversion of work -- the conversion path between difficulties is a \emph{consequence} of $X_{R\rightarrow L}$ (the exchange rate).
+  This is the same convertible context that miners use to determine which network is most profitable for them.
   Double-lined arrows indicate \emph{market context}.
   Thin single-lined dashed arrows indicate \emph{world context}.
   Notice that the convertible properties which we are interested in (such as $L_d$ and $R_d$) use \emph{thick, doubled, and dashed} two-way arrows, indicating that we are using network context \emph{and} market context to convert block-weight.
@@ -1025,6 +1032,10 @@ These two examples solve the \emph{Nothing at Stake} problem via mechanisms that
 
 The solution provided by mutual reflection with a PoW blockchain -- i.e., thermodynamic security -- is provided *by the protocol itself* and can only *increase* the security of PoS mechanisms.
 Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
+
+<!-- \aside{
+  \autoref{sec:converting-block-weights} mentions a \emph{natural symmetry} --
+} -->
 
 
 %% END ### RELEASE
