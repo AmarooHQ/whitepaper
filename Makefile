@@ -61,8 +61,8 @@ entropy:
 # https://tex.stackexchange.com/questions/45/how-to-speed-up-latex-compilation-with-several-tikz-pictures
 TIME     = /usr/bin/time -p
 # LATEXMK  = latexmk -silent -f -g -ps
-#PDFLATEX = latexmk -pdf -shell-escape -interaction=batchmode
-PDFLATEX = python3 $(PWD)/latexrun --color always --latex-args "-shell-escape -interaction=batchmode"
+PDFLATEX = latexmk -pdf -shell-escape -interaction=batchmode
+# PDFLATEX = python3 $(PWD)/latexrun --color always --latex-args "-shell-escape -interaction=batchmode"
 PSLATEX = latexmk -ps -shell-escape -interaction=batchmode
 PDFCROP  = pdfcrop
 RM       = /bin/rm
