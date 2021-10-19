@@ -376,7 +376,6 @@ In turn, we expect each chain's difficulty to change, reflecting that change in 
 If some miners (on the whole) moved from L to R, then we'd expect L's difficulty to decrease and R's difficulty to increase proportionate to how many miners moved.
 Since this is an \emph{arbitrage opportunity} (for miners), we expect that any profitability gap will quickly be closed.
 Thus, we can say that a miner's revenue is \emph{equal} regardless of which chain they're mining: $\text{Revenue}_L = \text{Revenue}_R$ when measured in the same units.
-
 \begin{align}
   \text{Revenue}_L & = h \cdot \frac{L_r}{L_d}
     & & \text{L-coins}
@@ -440,7 +439,6 @@ The exchange rate is 3 L-coins/R-coin, so naturally a miner needs to make more L
 \end{comment}
 
 Let's consider \autoref{eq:por-conv-work} in light of the above.
-
 \begin{align}
   \text{ConvWork}_{R\rightarrow L}(w) = \; & \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot \frac{R_r}{R_d} \cdot w
     & &\text{R-hashes }\rightarrow\text{ L-hashes}
@@ -638,7 +636,6 @@ The general case of a DAA's relationships (flows of \emph{information} and \emph
 \end{figure}
 
 How do we know that \emph{both} blocks and seconds become context laden via a DAA, though?
-
 \begin{align}
   \text{No context:} & & \frac{L_f}{R_f}
     & & \text{(unitless)}
@@ -985,7 +982,6 @@ If the two chains have equal block production frequencies, then (using \autoref{
 Consider an attack on the PoW chain and presume that the difficulty on the PoW chain is constant over the attack, i.e., the PoW chain's difficulty doesn't adjust quickly enough to react to the attack. Additionally, assume the attacker has *not* been contributing to the network before the attack, i.e., their hash-rate is not accounted for in the PoW chain's difficulty. Given the two chains are mutually reflecting, half of the network's security is provided by the PoS chain (and thus immune to the attacker in this case). Therefore, a successful attacker -- *using the traditional method of mining a competing chain-segment in private* -- must generate more blocks than both chains combined. That means the attacker needs *twice* the honest hash-rate for a guaranteed successful attack.
 
 However, consider the case that *the security contribution of the PoW chain is \textbf{capped} at 50%* -- i.e., capped at the proportion of root tokens hosted on that chain. For our purposes, this situation is approximately equivalent to that where the PoW chain has a *perfect* difficulty adjustment algorithm, i.e., the network instantly adapts to keep the block production frequency constant. For the sake of this demonstration, assume that these chains *retroactively* adjust block weightings to ensure this cap holds. Let $p > 0$ be the honest miners' contribution to *overall* network security, and $q > 0$ be the attacker's contribution. As the PoW contribution to overall security is capped at 50%, the equality $p + q = 0.5$ is enforced. In this case, the attacker will have a maximum chain-weight contribution rate of $\frac{1}{2} \cdot \frac{q}{q + p}$ and the honest chain-segments will have a maximum contribution rate of $\frac{1}{2} \cdot \frac{p}{q + p} + \frac{1}{2}$. The condition for a successful attack is shown in \autoref{eq:refl-pow-pos-1}, and the inequality has no solutions.
-
 \begin{align}
 && \frac{1}{2} \cdot \frac{q}{q + p} & > \frac{1}{2} \cdot \frac{p}{q + p} + \frac{1}{2} \notag \\
 && q & > p + (q + p) \notag \\
@@ -1005,7 +1001,7 @@ What about the PoS chain, though; what benefits does it gain from this relations
 The answer here is simple: by using mutual PoR with a PoW chain, the PoS chain gains *thermodynamic security*; the PoS chain's history is *thermodynamically secured* by the PoW chain.
 \textbf{This solves the \emph{Nothing at Stake} problem for any well constructed PoS scheme.}\footnote{
   I consider the \emph{Nothing at Stake} problem and \emph{long range} attacks to be two sides of the same coin.
-  Maybe it's worth explicitly mentioning that it solves long-range attacks, too.
+  Maybe it's worth explicitly mentioning that mutual PoR solves long-range attacks, too.
 }
 Furthermore, it is possible for error-correction methods like \emph{slashing} to be implemented *on the PoW chain*, not the PoS chain.
 Moving the staking and error correction methods to a different chain will require subtle and precise protocol design, but such changes are *in principle* possible with tolerable overhead.
