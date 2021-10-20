@@ -7,8 +7,8 @@
     \State $t \gets$ \Call{BlockTimestamp}{$B_i$}
     \State $R \gets$ \Call{ChainOf}{$B_i$, $state$}
     \State $R_r \gets$ \Call{BlockRewardOfChainAt}{$R$, $t$, $state$} \Comment{Block reward of $R$ at $t$}
-    \State $L_r \gets$ \Call{BlockRewardOfLocalAt}{$t$, $state$}
     \State $L_d \gets$ \Call{DifficultyOfLocalAt}{$t$, $state$}
+    \State $L_r \gets$ \Call{BlockRewardOfLocalAt}{$t$, $state$}
     \State $X_{R\rightarrow L} \gets$ \Call{GetLocalDexRateFromAt}{$R$, $t$, $state$}
     % \State $w \gets$ \Call{$\text{ConvDEX}_{R\rightarrow L}$}{$L_d$, $L_f$, $L_r$, $C_f$, $C_r$, $X_{C\rightarrow L}$}
     \State \Return{\Call{$\text{ConvDEX}_{R\rightarrow L}$}{$L_d$, $L_r$, $R_r$, $X_{R\rightarrow L}$}}
