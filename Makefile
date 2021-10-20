@@ -158,12 +158,14 @@ preprocess-build:
 	python3 bin/preprocessModes.py process-tex $(WPTEX) --mode $(PP_MODE) --allow-in-place $(PP_LINT_FLAG)
 	bash bin/msg_good.sh "Finished preprocessing of $(WPTEX) in mode $(PP_MODE)"
 
+# run latexmk once so that gitinfo2 runs, then use latexrun
 mk-latex-pdf: preprocess-build
-	#TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
-	TZ='Australia/Sydney' python3 ./latexrun --color always --latex-args "-shell-escape -interaction=batchmode" $(WPTEX) -O $(OUTDIR)
+	bash bin/msg_good.sh "Running latexmk to update gitinfo"
+	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX) > _latexmk.log
+	bash bin/msg_good.sh "Update glossaries (run \`make glossary-fix-1 && make && make\` to fix glossaries if something breaks)"
 	#-rm $(WPNOEXT).gl*
 	(cd $(OUTDIR) && makeglossaries $(WPFILENAME))
-	# TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
+	bash bin/msg_good.sh "./latexrun to build paper proper"
 	TZ='Australia/Sydney' python3 ./latexrun --color always --latex-args "-shell-escape -interaction=batchmode" $(WPTEX) -O $(OUTDIR)
 	cp $(WPNOEXT).pdf $(OUTPUT_PDF)
 	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE).pdf
