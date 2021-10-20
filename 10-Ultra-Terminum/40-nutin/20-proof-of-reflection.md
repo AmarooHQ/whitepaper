@@ -936,7 +936,7 @@ Of course, this is only useful over \emph{multiple} chains.
 \textbf{If a single, traditional blockchain tried to do this, then all chain-weights would be identical!}\footnote{
   This may be a new criticism of PoS.
   In essence: a blockchain needs something like a DAA to factor-in participation, and \emph{coins} will never provide a way to determine which chain has higher participation.
-  Moreover, \emph{coins} is actually a very \emph{bad} way to measure participation, because the \emph{most valuable future network} is one where coins are being used for \emph{actual trade}, and this necessitates negative pressure on the number of coins dedicated for staking.
+  Moreover, \emph{coins} is actually a very \emph{bad} way to measure participation (for a standalone PoS chain), because the \emph{most valuable future network} is one where coins are being used for \emph{actual trade}, and this necessitates downward pressure on the number of coins dedicated for staking.
   Thus, PoS chains \emph{can only ever have objectively secure fork-rules} when other factors are included in their conversion contexts (like using PoR with a PoW chain).
   One thing PoS chains could try is: measuring weight \emph{in another chain's hashes}.
 }
