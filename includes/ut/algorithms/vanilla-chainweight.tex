@@ -1,15 +1,15 @@
 \begin{algorithm}
-\caption{Vanilla Chain Weight Algorithm}\label{alg:vanilla-bw}
+\caption{Vanilla chain-weight algorithm (typical of traditional blockchains).}\label{alg:vanilla-bw}
 \begin{algorithmic}
-\Procedure{WeighChain}{$blocks$}\Comment{The weight of a chain}
+\Procedure{ChainWeight}{$blocks$, $state$}\Comment{The weight of a chain}
   \If {length($blocks$) == 0}
     \State \Return{0}
   \EndIf
-  \State \Return{\Call{WeighBlock}{head($blocks$)} + \Call{WeighChain}{tail($blocks$)}}
+  \State \Return{\Call{BlockWeight}{head($blocks$), $state$} + \Call{ChainWeight}{tail($blocks$), $state$}}
 \EndProcedure
 \\
-\Procedure{WeighBlock}{$block$} \Comment{The weight of an individual block}
-  \State \Return{\Call{LocalBlockWeight}{$block$}} \Comment{NB: defined by the consensus method}
+\Procedure{BlockWeight}{$block$, $state$} \Comment{The weight of an individual block}
+  \State \Return{\Call{LocalBlockWeight}{$block$, $state$}} \Comment{NB: defined by the consensus method}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}

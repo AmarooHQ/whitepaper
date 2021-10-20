@@ -67,7 +67,7 @@ def cut_out(tag: str, contents: str, extra_line_nums=0):
     boundaries = list(filter(lambda a: a[0][1] == tag.upper() or tag == TAG_ALL, boundaries_all))
     zipped_bounds_all = list(zip(boundaries[:-1], boundaries[1:]))
 
-    print("\n".join(map(str, zipped_bounds_all)))
+    # print("\n".join(map(str, zipped_bounds_all)))
 
     for (i, (((be, tag_), li1, l1), ((be2, tag2_), li2, l2))) in enumerate(zipped_bounds_all):
         if be == be2 or (tag_ != tag2_ and i % 2 == 0):

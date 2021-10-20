@@ -1,14 +1,37 @@
 \begin{algorithm}
-\caption{A \textsc{WeightOf} function for PoR between chains with a different root token and equal block frequencies}
+\caption{A \textsc{WeightOf} function for one-way PoR between chains with different root tokens.}
+\label{alg:weightof-dex-one-way}
 \label{alg:weightof-dex}
 \begin{algorithmic}
-\Procedure{WeightOf}{$B_i, state$} \Comment{The weight of a block normalized to coins}
+\Procedure{WeightOf}{$B_i$, $state$} \Comment{Convert reflecting weight to local via a DEX}
     \State $t \gets$ \Call{BlockTimestamp}{$B_i$}
-    \State $C \gets$ \Call{ChainOf}{$B_i$, $state$}
-    \State $C_r \gets$ \Call{BlockRewardOfChainAt}{$C$, $t$, $state$} \Comment{Block reward of $C$ at $t$}
-    % \State $C_f \gets$ \Call{BlockFrequencyOfChain}{$C$} \Comment{Block production Hz of $C$}
-    \State $X_{C\rightarrow L} \gets$ \Call{ExchangeRateOfCoinToLocalAt}{$C$, $t$, $state$}
-    \State \Return{$C_r \cdot X_{C\rightarrow L}$}
+    \State $R \gets$ \Call{ChainOf}{$B_i$, $state$}
+    \State $R_r \gets$ \Call{BlockRewardOfChainAt}{$R$, $t$, $state$} \Comment{Block reward of $R$ at $t$}
+    \State $L_d \gets$ \Call{DifficultyOfLocalAt}{$t$, $state$}
+    \State $L_r \gets$ \Call{BlockRewardOfLocalAt}{$t$, $state$}
+    \State $X_{R\rightarrow L} \gets$ \Call{GetLocalDexRateFromAt}{$R$, $t$, $state$}
+    % \State $w \gets$ \Call{$\text{ConvDEX}_{R\rightarrow L}$}{$L_d$, $L_f$, $L_r$, $C_f$, $C_r$, $X_{C\rightarrow L}$}
+    \State \Return{\Call{$\text{ConvDEX}_{R\rightarrow L}$}{$L_d$, $L_r$, $R_r$, $X_{R\rightarrow L}$}}
+\EndProcedure
+\\
+\Procedure{$\text{ConvDEX}_{R\rightarrow L}$}{$L_d$, $L_r$, $R_r$, $X_{R\rightarrow L}$} \Comment{Returns L-hashes for 1 R-block}
+    \State \Return{$(L_d \div L_r) \cdot X_{R\rightarrow L} \cdot R_r$} \Comment{See \autoref{eq:por-conv-dex}}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
+
+
+% \begin{algorithm}
+% \caption{A \textsc{WeightOf} function for PoR between chains with a different root token and equal block frequencies}
+% \label{alg:weightof-dex}
+% \begin{algorithmic}
+% \Procedure{WeightOf}{$B_i, state$} \Comment{The weight of a block normalized to coins}
+%     \State $t \gets$ \Call{BlockTimestamp}{$B_i$}
+%     \State $C \gets$ \Call{ChainOf}{$B_i$, $state$}
+%     \State $C_r \gets$ \Call{BlockRewardOfChainAt}{$C$, $t$, $state$} \Comment{Block reward of $C$ at $t$}
+%     % \State $C_f \gets$ \Call{BlockFrequencyOfChain}{$C$} \Comment{Block production Hz of $C$}
+%     \State $X_{C\rightarrow L} \gets$ \Call{ExchangeRateOfCoinToLocalAt}{$C$, $t$, $state$}
+%     \State \Return{$C_r \cdot X_{C\rightarrow L}$}
+% \EndProcedure
+% \end{algorithmic}
+% \end{algorithm}

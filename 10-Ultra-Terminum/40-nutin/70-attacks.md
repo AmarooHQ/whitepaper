@@ -8,7 +8,7 @@
 - Selfish mining, see \autoref{sec:confirmation-times}
 - Reflection without publication, see \autoref{sec:availability-of-blocks}
 - Empty block DoS and censorship, see \autoref{sec:dos-and-dags}
-- Nothing at stake / long-range, see \autoref{sec:reflection-pow-and-pos} and \autoref{sec:dapp-chains}
+- \emph{Nothing at Stake} and \emph{long range} attacks, see \autoref{sec:reflection-pow-and-pos} and \autoref{sec:dapp-chains}
 
 ### Dialog: Attacks and Mitigation
 

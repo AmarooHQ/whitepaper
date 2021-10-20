@@ -1,31 +1,31 @@
 
 \begin{algorithm}
-\caption{Modified Chain Weight Algorithm}
+\caption{Modified chain-weight algorithm to factor in reflections.}
 \label{alg:refl-1-bw}
 \begin{algorithmic}
-\Procedure{WeighChain}{$blocks, state$} \Comment{The weight of a blockchain}
+\Procedure{ChainWeight}{$blocks$, $state$} \Comment{The weight of a blockchain}
   \If {length($blocks$) == 0}
     \State \Return{0}
   \EndIf
-  \State \Return{\Call{WeighBlock}{head($blocks$), $state$} + \Call{WeighChain}{tail($blocks$), $state$}}
+  \State \Return{\Call{BlockWeight}{head($blocks$), $state$} + \Call{ChainWeight}{tail($blocks$), $state$}}
 \EndProcedure
 \\
-\Procedure{WeighBlock}{$block, state$}
+\Procedure{BlockWeight}{$block$, $state$}
   \State $W_l \gets$ \Call{LocalBlockWeight}{$block$} \Comment{Weight due to work done producing $block$}
-  \State $W_r \gets$ \Call{ReflectedBlockWeight}{$block, state$} \Comment{Weight added via reflection}
+  \State $W_r \gets$ \Call{ReflectedBlockWeight}{$block$, $state$} \Comment{Weight added via reflection}
   \State \Return{$W_l + W_r$}
 \EndProcedure
 \\
-\Procedure{ReflectedBlockWeight}{$block, state$}
-  \State $s\gets 0$ \Comment{Sum of weights}
-  \State $Blocks_{R} \gets$ \Call{ReflectingRBlocks}{$state$} \Comment{Chain R blocks that reflect the local chain}
-  \For{$B_r$ in $Blocks_{R}$}
-    \State RCHs $\gets$ \Call{ReflectedChainHeads}{$B_r$, $state$} \Comment{Local blocks reflected by $B_r$}
-    \If {$block$ in RCHs}
-      \State $s\gets s\;+$ \Call{WeightOf}{$B_r$, $state$} \Comment{NB: network specific, e.g., \autoref{alg:weightof-1}}
+\Procedure{ReflectedBlockWeight}{$L_i$, $state$}
+  \State $w\gets 0$ \Comment{Sum of weights}
+  \State $R_{\text{blocks}} \gets$ \Call{ReflectingRBlocks}{$state$} \Comment{Chain R blocks that reflect the local chain}
+  \For{$R_i$ in $R_{\text{blocks}}$}
+    \State RCHs $\gets$ \Call{ReflectedChainHeads}{$R_i$, $state$} \Comment{Local blocks reflected by $R_i$}
+    \If {$L_i$ in RCHs}
+      \State $w \gets w\;+$ \Call{WeightOf}{$R_i$, $state$} \Comment{NB: network specific, e.g., \autoref{alg:weightof-1}}
     \EndIf
   \EndFor
-  \State \Return{s}
+  \State \Return{w}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}

@@ -5,7 +5,6 @@ WPFILE=$(WPNOEXT).markdown
 WPHTML=$(WPNOEXT).html
 WPTEX=$(WPNOEXT).tex
 
-
 LP_DIR=includes/ut/lp
 LP_TABLES=$(LP_DIR)/tables.tex
 LP_TABLES_OUT=$(OUTDIR)/tables.tex
@@ -33,11 +32,13 @@ endif
 
 
 default: whitepaper
+draft: default
 
 release: entropy
 release: PP_MODE=release
 release: textlint
 release: whitepaper
+release: pdflint
 release:
 	# No matches for \todo{ should be found
 	grep -qzv '\\todo{' output/whitepaper.tex || (grep '\\todo{' output/whitepaper.tex | wc -l; bash bin/msg_error.sh 'Detected `\\\\todo{` in output/whitepaper.tex during release build.'; exit 1)
@@ -60,7 +61,10 @@ entropy:
 # https://tex.stackexchange.com/questions/45/how-to-speed-up-latex-compilation-with-several-tikz-pictures
 TIME     = /usr/bin/time -p
 # LATEXMK  = latexmk -silent -f -g -ps
+# PDFLATEX = latexmk -pdf -shell-escape -interaction=nonstopmode
 PDFLATEX = latexmk -pdf -shell-escape -interaction=batchmode
+# PDFLATEX = latexmk -pdf -shell-escape -interaction=batchmode
+# PDFLATEX = python3 $(PWD)/latexrun --color always --latex-args "-shell-escape -interaction=batchmode"
 PSLATEX = latexmk -ps -shell-escape -interaction=batchmode
 PDFCROP  = pdfcrop
 RM       = /bin/rm
@@ -71,10 +75,9 @@ PSGraphics = $(patsubst %_sag.tex,%_sag.ps,$(StandAloneGraphicsTeXFiles))
 DVIGraphics = $(patsubst %_sag.tex,%_sag.dvi,$(StandAloneGraphicsTeXFiles))
 PNGGraphics = $(patsubst %_sag.pdf,%_sag.png,$(PDFGraphics))
 InputTeXFiles = $(wildcard *_input.tex)
-PWD = $(pwd)
 
 watch:
-	bin/onchange.sh 10-Ultra-Terminum "make"
+	bin/onchange.sh ./10-Ultra-Terminum ./includes/ut/content ./includes/ut/algorithms "make"
 
 wp-graphics-standalone: $(PDFGraphics)
 wp-graphics-ps: $(PSGraphics)
@@ -113,6 +116,8 @@ build-whitepaper: %.md
 	done
 	# replace tables placeholder with actual tables
 	node ./includes/ut/complexity/populateWPTables.js --populate-wp-md
+	# this fixes texcount (since import-paths don't need to be searched).
+	sed -r -i 's/input\{20-por/input\{includes\/ut\/content\/20-por/' $(WPFILE)
 # if you need to build the above: cd includes/ut/complexity/ut-complexity-gen-purs && npm i && npm run bundle-for-wp
 
 
@@ -130,7 +135,7 @@ wp-pandoc:
 	sed -i 's/\\%\\%/%/g' $(WPTEX)
 
 pandoc-stdin:
-	pandoc -s --numbered-sections -f markdown -t latex
+	pandoc -s --number-sections -f markdown -t latex
 
 # added to make testing quote boxes easier I think
 wp-just-quotes: clean-wp-md
@@ -145,17 +150,23 @@ wc:
 	(find . -iname '*.md' -or -iname '*.tex' | grep -v node_mod | grep -v spago | grep -v output | grep -v diags | xargs wc && \
 	  wc $(WPFILE)) > wc-$(PP_MODE).log
 	wc $(WPFILE)
+	bash bin/msg_good.sh "Wordcount via wc: $$(wc -w output/whitepaper.markdown)"
+	bash bin/msg_good.sh "Wordcount via texcount: $$(texcount output/whitepaper.tex -merge -sum -0)"
 
 # preprocess tex for draft/release/lint
 preprocess-build:
 	python3 bin/preprocessModes.py process-tex $(WPTEX) --mode $(PP_MODE) --allow-in-place $(PP_LINT_FLAG)
 	bash bin/msg_good.sh "Finished preprocessing of $(WPTEX) in mode $(PP_MODE)"
 
+# run latexmk once so that gitinfo2 runs, then use latexrun
 mk-latex-pdf: preprocess-build
-	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
+	bash bin/msg_good.sh "Running latexmk to update gitinfo"
+	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX) > _latexmk.log
+	bash bin/msg_good.sh "Update glossaries (run \`make glossary-fix-1 && make && make\` to fix glossaries if something breaks)"
 	#-rm $(WPNOEXT).gl*
 	(cd $(OUTDIR) && makeglossaries $(WPFILENAME))
-	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX)
+	bash bin/msg_good.sh "./latexrun to build paper proper"
+	TZ='Australia/Sydney' python3 ./latexrun --color always --latex-args "-shell-escape -interaction=batchmode" $(WPTEX) -O $(OUTDIR)
 	cp $(WPNOEXT).pdf $(OUTPUT_PDF)
 	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE).pdf
 	cp $(WPNOEXT).pdf $(WPFILENAME)-$(PP_MODE).pdf
@@ -169,6 +180,9 @@ finished-msg:
 
 textlint:
 	npm run lint
+
+pdflint:
+	bash bin/pdfLint.sh output/whitepaper.pdf
 
 %.md:
 	echo 'skipping task for .md files'
@@ -252,7 +266,7 @@ docker-build:
 
 # set DOCKER_CMD to run something other than the default `make`. e.g., `make docker DOCKER_CMD=./build.sh`
 docker:
-	docker run --rm -u `id -u ${USER}`:`id -g ${USER}` -e 'TERM=xterm-color' -v `pwd`:/work whitepaper-build:latest ${DOCKER_CMD}
+	docker run --rm -t -u `id -u ${USER}`:`id -g ${USER}` -e 'TERM=xterm-color' -v `pwd`:/work whitepaper-build:latest ${DOCKER_CMD}
 
 docker-bash:
 	docker run --rm -it -u `id -u ${USER}`:`id -g ${USER}` -v `pwd`:/work whitepaper-build:latest /bin/bash

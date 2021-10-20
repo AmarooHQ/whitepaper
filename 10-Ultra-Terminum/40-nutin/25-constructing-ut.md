@@ -38,13 +38,7 @@ Note that \autoref{alg:por-reflected-block-weight} integrates the cap on weight 
 
 \input{includes/ut/headings/25-the-simplex.tex}
 
-\label{sec:the-simplex}
-
-\defineTerm{Simplex}{The single coherent structure that emerges from a collection of blockchains that mutually reflect each-other}
-
-When two or more blockchains *mutually reflect* each-other, they form a *simplex*[^simplex-maths]. For the sake of brevity: all *reflections* within a simplex are *mutual reflections*, and I will omit *mutual* from now on when discussing them. Examples of simplexes are shown in \autoref{fig:simplexes}.
-
-\begin{figure}
+\begin{figure}[H]
     \begin{subfigure}{.31\linewidth}
         \vskip 0pt
         \centering
@@ -71,6 +65,12 @@ When two or more blockchains *mutually reflect* each-other, they form a *simplex
     \caption{Simplexes of increasing capacity. Vertices are simplex-chains. Edges are the reflections between simplex-chains.}
     \label{fig:simplexes}
 \end{figure}
+
+\label{sec:the-simplex}
+
+\defineTerm{Simplex}{The single coherent structure that emerges from a collection of blockchains that mutually reflect each-other}
+
+When two or more blockchains *mutually reflect* each-other, they form a *simplex*[^simplex-maths]. For the sake of brevity: all *reflections* within a simplex are *mutual reflections*, and I will omit *mutual* from now on when discussing them. Examples of simplexes are shown in \autoref{fig:simplexes}.
 
 When a blockchain is part of a simplex, it is called a *simplex-chain* (as distinct from *dapp-chains*).
 
@@ -177,32 +177,18 @@ Example use-case: an existing blockchain migrates to become an *Amaroo* dapp-cha
 
 ##### Method 2: Pay the simplex miner via a native DEX
 
-When a dapp-chain hosts a native DEX, it can use that DEX for PoR. However:
+When a dapp-chain hosts a native DEX, it can use that DEX for PoR.
+The general case (where a reflecting chain contributes far more chain-work than the reflected chain) was discussed in \autoref{sec:comparing-weight-dex}.
 
-\bquote{
-  [Regarding possible attacks when converting work via a DEX] \convertingWeightDexNotImportant
-}{\autoref{sec:comparing-weight-dex}}
-
-The limited context of a DEX with only one trading pair (between the dapp-chain's root token and the ROO) makes this problem reasonably tractable.
+Consider the limited context of a DEX with only one required trading pair (between the dapp-chain's root token and the ROO), combined with the security-contribution differential between a simplex-chain and a dapp-chain.
 Note that a conservative implementation of a DEX between this pair *only relies on local state* -- that of the host simplex-chain and the dapp-chain, all of which is accessible to dapp-chain full nodes.
 The simplest method of preventing market manipulation (that might allow for some attack on the dapp-chain) is to calculate PoR weight via an *old* exchange rate (e.g., from 24 hours ago), or to use an *average* over some period of time.
-Both of these ensure that *competition between blocks* (at any given time) is not dependant on the *current* DEX execution.
+Both of these ensure that *competition between blocks* (at any given time) is not dependent on the *current* DEX execution.
 With regards to dapp-chains using Proof of Reflection, this is sufficient.
-
-\begin{comment}
-Furthermore, *manipulating the DEX* (in an attempt to manipulate consensus) is self-defeating.
-If an attacker manipulates the price of the dapp-chain's root token *down*, then the attackers blocks weigh less.
-If an attacker manipulates the price of the dapp-chain's root token *up*, ...
-\end{comment}
 
 Given a DEX, the dapp-chain can use this to automatically convert some of the mining reward to the root token of the host simplex-chain.
 These rewards could accrue over time and be bundled into far fewer transactions than would otherwise be necessary and automatically managed by the DEX.
-
-\todoDraftOnly{Pay the simplex miner via a native DEX.
-dex is on dapp-chain
-and dex only used for root token <-> roo
-and dex executed on dapp-chain
-no risk, and only local data, so okay for PoR}
+Unlike the previous method, this method doesn't require the simplex-chain miner to ever interact with dapp-chains (besides including their header-transactions); however, the protocol is more complex.
 
 Example use-case: a greenfield dapp-chain uses an Amaroo-compatible DEX (which requires no development effort) so that simplex-miners have lower operating costs; thus incenting simplex-miners to include their headers over those of others.
 
@@ -231,7 +217,7 @@ Though I think that the idea of time-stamping a hash (e.g., via an \textsc{OP\_R
 #### PoS Dapp-chains
 
 If the headers of dapp-chains are encoded as simplex-transactions, then techniques like *slashing* are first-class operations within the *hybrid PoW* context provided by the simplex.
-This solves the *nothing at stake* problem for PoS dapp-chains, provided the necessary PoS primitives can be encoded in a simplex-transaction.
+This solves the *Nothing at Stake* problem for PoS dapp-chains, provided the necessary PoS primitives can be encoded in a simplex-transaction.
 
 The abstraction layer between simplex-chains and dapp-chains brings practical benefits, too.
 For example: existing (open-source) PoS blockchain schemes can be easily integrated as dapp-chains.

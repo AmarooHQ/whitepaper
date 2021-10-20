@@ -18,17 +18,21 @@
 
 \clearpage
 
+\begin{comment}
 \newgeometry{top=3cm, bottom=3cm, left=2.5cm, right=2.5cm}
 \printglossaries
 \restoregeometry
+\end{comment}
+
+\printglossaries
 
 \newpage
 
 \section*{Notation}
-\addcontentsline{toc}{section}{Notation and Nomenclature}
+\addcontentsline{toc}{section}{Notation, Nomenclature, and Lists of Figures and Tables}
 \fancypagestyle{notation}{%
     \fancyhead[L]{}
-    \fancyhead[R]{Notation \& Nomenclature}
+    \fancyhead[R]{\emph{Notation, Nomenclature, Figures, \& Tables}}
 }
 
 \thispagestyle{notation}
@@ -88,6 +92,17 @@ Term & Definition & Reference \\
 \end{table}
 
 \newpage
+
+\listoffigures
+
+%%\newpage
+
+\listoftables
+
+%%\listofalgorithms
+
+\newpage
+
 \appendix
 
 %% END ### RELEASE

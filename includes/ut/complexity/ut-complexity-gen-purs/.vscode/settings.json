@@ -6,7 +6,7 @@
         "**/.spago/**": true
     },
     "purescript.formatter": "purty",
-    "editor.formatOnSave": true,
+    "editor.formatOnSave": false,
     "editor.trimAutoWhitespace": true,
     "files.autoSave": "onFocusChange",
     // "purescript.autocompleteAddImport": true,

@@ -2,18 +2,33 @@
 
 \makeglossaries
 
+% This one is usable from pandoc (.md files)
 \newcommand\defineTerm[2]{
+    \newglossaryentry{#1}
+    {
+        name={#1},
+        description={#2},
+    }
     \makeatletter
+    \begin{tcolorbox}[]
+        \textbf{\Gls{#1}}: \trim@post@space{#2}.
+    \end{tcolorbox}
+    \makeatother
+}
+
+% This one is usable from tex files (.tex files)
+\makeatletter
+\newcommand\defineTermTex[2]{
     \newglossaryentry{#1}
     {
         name={#1},
         description={#2},
     }
     \begin{tcolorbox}[]
-    \textbf{\Gls{#1}}: \trim@post@space{#2}.
+        \textbf{\Gls{#1}}: \trim@post@space{#2}.
     \end{tcolorbox}
-    \makeatother
 }
+\makeatother
 
 % \newglossaryentry{ROO}
 % {

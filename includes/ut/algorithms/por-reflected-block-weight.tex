@@ -1,29 +1,34 @@
-\begin{algorithm}
-\caption{Many-chain ReflectedBlockWeight}
+\begin{algorithm}[htb]
+\caption{Implementation of \textsc{ReflectedBlockWeight} to support an arbitrary number of reflecting chains.}
 \label{alg:por-reflected-block-weight}
 \begin{algorithmic}
-\Procedure{ReflectedBlockWeight}{$block, state$}
-  \State $s\gets 0$ \Comment{Sum of weights}
-  \For{$C_i$ in \Call{AllReflectingChains}{$state$}}
-    \State $s_C \gets 0$ \Comment{Sum of weights for this chain}
-    \State $n \gets 0$
-    \State $Blocks_{i} \gets$ \Call{ReflectingBlocks}{$C_i$, $state$} \Comment{Reflecting blocks from $C_i$}
-    \For{$B_{i,j}$ in $Blocks_{i}$}
-      \State RCHs $\gets$ \Call{ReflectedChainHeads}{$B_{i,j}$, $state$} \Comment{Local blocks reflected by $B_{i,j}$}
-      \If {$block$ in RCHs}
-        \State $n \gets n + 1$
-        \State $s_C\gets s_C \; +$ \Call{WeightOf}{$B_{i,j}$, $state$}
+\Procedure{ReflectedBlockWeight}{$L_i, state$}
+  \State $w\gets 0$ \Comment{Sum of weights}
+  \For{$R$ in \Call{AllReflectingChains}{$state$}}
+    \State $w_R \gets 0$ \Comment{Sum of converted weights for this $R$}
+    \State $n_R \gets 0$ \Comment{Count of reflecting blocks}
+    \State $R_\text{blocks} \gets$ \Call{ChainHeadsOfVia}{$R$, $L_i$, $state$} \Comment{$R$ chain-heads known to $L_i$}
+    \For{$R_i$ in $R_\text{blocks}$}
+      \State RCHs $\gets$ \Call{ReflectedChainHeads}{$R_i$, $state$} \Comment{Local blocks reflected by $R_i$}
+      \If {$L_i$ in RCHs}
+        \State $n_R \gets n_R + 1$
+        \State $w_R \gets w_R \; +$ \Call{WeightOf}{$R_i$, $state$} \Comment{Convert weight of $R_i$}
       \EndIf
     \EndFor
-    \State $B_f \gets $ \Call{BlockFrequencySelf}{$state$}
-    \State $C_f \gets $ \Call{BlockFrequencyOfChain}{$C_i$, $state$}
-    \State $e \gets C_f \div B_f$ \Comment{Expected blocks from $C_i$}
-    \If {$n > 0$}
-      \State weightMod $\gets$ min(1, $e \div n$) \Comment{This caps the contribution of $C_i$ per block}
-      \State $s \gets s_C\;\cdot$ weightMod $+\; s$
-    \EndIf
+    \State $\text{weightMod} \gets $ \Call{CapWorkOf}{$R$, $n$, $state$}
+    \State $w \gets w + w_R \cdot \text{weightMod}$ % \Comment{$w_R \cdot \text{weightMod}$ always $\le$ the expected maximum}
   \EndFor
   \State \Return{$s$}
 \EndProcedure \Comment{This is an inefficient method and would not be used in production.}
+\\
+\Procedure{CapWorkOf}{$R$, $n$, $state$} \Comment{A simplistic method for capping work}
+  % \If {$n \le 0$} \Comment{Avoid division by 0}
+  %   \State \Return{0} \Comment{If $n=0$ then the weight $=0$ anyway}
+  % \EndIf
+  \State $L_f \gets $ \Call{BlockFrequencySelf}{$state$}
+  \State $R_f \gets $ \Call{BlockFrequencyOfChain}{$R$, $state$}
+  \State $e \gets R_f \div L_f$ \Comment{Expected blocks from $R$ per $L$ block}
+  \State \Return{$\text{min}(1, e \div \text{max}(1, n))$} \Comment{Cap the contribution of $R_\text{blocks}$ per $L$ block}
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}

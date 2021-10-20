@@ -1,18 +1,20 @@
-\begin{algorithm}
-\caption{A \textsc{WeightOf} function for networks of a single root token based on the ratio of root tokens that it hosts}
+\begin{algorithm}[p]
+\caption{A \textsc{WeightOf} function for networks of a single root token based on the ratio of root tokens that it hosts.}
 \label{alg:weightof-ratio}
 \begin{algorithmic}
-\Procedure{WeightOf}{$B_i, state$} \Comment{Returns L-hashes/L-block}
-    \State $t \gets$ \Call{BlockTimestamp}{$B_i$}
-    \State $C \gets$ \Call{ChainOf}{$B_i$, $state$}
-    \State $r \gets$ \Call{RootTokenRatioOnChainAt}{$C$, $t$, $state$} \Comment{Proportion of all RTs on $C$ at $t$}
-    \State $C_f \gets$ \Call{BlockFrequencyOfChain}{$C$, $state$} \Comment{Block production Hz of $C$}
-    \State $L_f \gets$ \Call{LocalBlockFrequency}{$state$}
-    \State $I \gets$ \Call{NetworkInflation}{$state$} \Comment{coins/s created over the entire network}
-    \State $C_r \gets r \cdot I \cdot C_f^{-1}$ \Comment{See \autoref{eq:srt-reward}}
-    \State $L_r \gets$ \Call{LocalBlockRewardAt}{$t$, $state$}
+\Procedure{WeightOf}{$R_i, state$} \Comment{Returns L-hashes}
+    \State $t \gets$ \Call{BlockTimestamp}{$R_i$}
+    \State $R \gets$ \Call{ChainOf}{$R_i$, $state$}
+    \State $R_f \gets$ \Call{BlockFrequencyOfChain}{$R$, $state$} \Comment{Block production Hz of $R$}
+    \State $R_t \gets$ \Call{RootTokensOnChainAt}{$R$, $t$, $state$} \Comment{Number of root tokenson $R$ at $t$}
     \State $L_d \gets$ \Call{LocalBlockDifficultyAt}{$t$, $state$}
-    \State \Return{$C_r \cdot (C_f \div L_f) \cdot (L_d \div L_r)$}
+    \State $L_f \gets$ \Call{LocalBlockBlockFrequency}{$t$, $state$}
+    \State $L_t \gets$ \Call{LocalRootTokens}{$t$, $state$}
+    \State \Return{\Call{$\text{ConvSRT}_{R\rightarrow L}$}{$L_d$, $L_f$, $L_t$, $R_f$, $R_t$}}
+\EndProcedure
+\\
+\Procedure{$\text{ConvSRT}_{R\rightarrow L}$}{$L_d$, $L_f$, $L_t$, $R_f$, $R_t$} \Comment{Returns L-hashes for 1 R-block}
+    \State \Return{$R_t \cdot L_f \cdot L_d \div L_t \div R_f$} \Comment{See \autoref{eq:conv-srt}}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
