@@ -330,7 +330,7 @@ This can be repeated to allow for arbitrarily many parents.
 \autoref{fig:dag-ex1-full} is an example of this algorithm for a moderately complex chain-segment ($B_i\cdots B_{i+3}$ which is 7 blocks total), and each step is enumerated and explained.
 
 \begin{figure}[p]
-    \caption{Example: sorting a moderately complex block-DAG; note that the left parent is always the best parent, so will have priority. Each block is annotated with its \emph{chain-weight} ($\Sigma_w$). \label{fig:dag-ex1-full}}
+    \caption[Example: sorting a moderately complex block-DAG]{Example: sorting a moderately complex block-DAG; note that the left parent is always the best parent, so will have priority. Each block is annotated with its \emph{chain-weight} ($\Sigma_w$). \label{fig:dag-ex1-full}}
     \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
         \centering
@@ -426,7 +426,7 @@ Consider the situation where an attacker is attempting to deny service via the p
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{dag_dos1_sag}
-    \caption{An attempted DoS attack on a block-DAG. The attacker's blocks, $A_j$, contain no transactions. Each block is annotated with its \emph{chain-weight} ($\Sigma_w$). Even though the attacker produces $2\times$ as many blocks as the honest network, the attack inevitably fails after a short while. NB: $H_i$ is defined to have $\Sigma_w = 0$ for illustrative convenience.}
+    \caption[An attempted DoS attack on a block-DAG.]{An attempted DoS attack on a block-DAG. The attacker's blocks, $A_j$, contain no transactions. Each block is annotated with its \emph{chain-weight} ($\Sigma_w$). Even though the attacker produces $2\times$ as many blocks as the honest network, the attack inevitably fails after a short while. NB: $H_i$ is defined to have $\Sigma_w = 0$ for illustrative convenience.}
     \label{fig:dag-dos-1}
 \end{figure}
 
