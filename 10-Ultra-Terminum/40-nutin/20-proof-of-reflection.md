@@ -45,7 +45,7 @@ Let's add such a contract to Ethereum and describe the relevant data and events 
 \begin{figure}[]
 \centering
 \includegraphics[max width=\linewidth, height=0.35\textheight]{pow_refl_btc_eth_step1_sag}
-\caption{Bitcoin headers, as they are produced, are included in Ethereum's state (via user made transactions). This is roughly how \textit{BTC Relay} works.}
+\caption[Bitcoin headers included in Ethereum's state]{Bitcoin headers, as they are produced, are included in Ethereum's state (via user made transactions). This is roughly how \textit{BTC Relay} works.}
 \label{fig:pr-btc-eth-step1}
 \end{figure}
 
@@ -162,7 +162,7 @@ Segments of Chain L and R (events and data) are shown in the following table and
 \begin{figure}[p]
 \centering
 \includegraphics[max width=\linewidth, max height=0.4\textheight]{pow_refl_step3_sag}
-\caption{Step 3: Chain L includes \textit{proofs of reflection} (PoRs) along with headers. Proofs of Reflection allow Chain L to know which of its own blocks are known to Chain R.}
+\caption[Step 3: Chain L includes \textit{proofs of reclection} (PoRs) along with headers]{Step 3: Chain L includes \textit{proofs of reflection} (PoRs) along with headers. Proofs of Reflection allow Chain L to know which of its own blocks are known to Chain R.}
 \label{fig:por-step3}
 \end{figure}
 
@@ -626,7 +626,7 @@ The general case of a DAA's relationships (flows of \emph{information} and \emph
 \begin{figure}[p]
 \centering
 \includegraphics[max width=\linewidth]{diff_adjustment_alg_sag}
-\caption{
+\caption[The difficulty adjustment algorithm]{
   The difficulty adjustment algorithm governs the relationship between the inputs: the previous difficulty, the target block frequency, and network participation (chain history); and the output: the network difficulty.
   The DAA is how \emph{confirmations} and \emph{coins} become \textbf{laden} with \emph{implicit context}.
   If we don't account for this \emph{implicit context} then our conversions will be nonsensical.
@@ -690,7 +690,7 @@ Since network context is respected, we can use an exchange rate to build a meani
 \begin{figure}[p]
 \centering
 \includegraphics[max width=\linewidth]{diff_adjustment_alg_times_2_sag}
-\caption{
+\caption[How are the convertible contexts of two different networks related?]{
   How are the convertible contexts of two different networks related?
   Without the market context, there's no conversion path that allows for the conversion of work -- the conversion path between difficulties is a \emph{consequence} of $X_{R\rightarrow L}$ (the exchange rate).
   This is the same convertible context that miners use to determine which network is most profitable for them.
