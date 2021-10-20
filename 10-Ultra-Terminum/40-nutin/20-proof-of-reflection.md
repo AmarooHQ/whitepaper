@@ -943,7 +943,7 @@ Of course, this is only useful over \emph{multiple} chains.
   One thing PoS chains could try is: measuring weight \emph{in another chain's hashes}.
 }
 This happens because the conversion methods we're covering \emph{don't try to convert work done at different times.}
-PoR only every converts \emph{near-simultaneous work.}
+PoR only ever converts \emph{near-simultaneous work.}
 
 While measuring weight in coins (in this case, at least) seems to have some meaning, we probably shouldn't \emph{leave} chain-weight in those units.
 The difficulty of a PoW network converts network size (participation) into hashes, and it is adjusted regularly.
