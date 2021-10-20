@@ -37,13 +37,6 @@
 
   \node (coinsMid) [xshift=0.5em] at ($(LdaaCtxMid)!0.5!(RdaaCtxMid)$) {};
 
-%   \draw [marketCtxArrow, daaArrowsLR={scale=0.9}, rounded corners=2.9em] (RdaaCtxMid) -- (coinsMid |- RdaaCtxBR.east) --
-%       node [ctxLabel, diffCrArrow, yshift=1pt] {$X_{R\rightarrow L}$}
-%       % node [ctxLabel] {market context}
-%       (coinsMid |- LdaaCtxBR.east) -- (LdaaCtxMid);
-%   \draw [rounded corners=2.8em, dec]
-%     (RdaaCtxMid) -- (coinsMid |- RdaaCtxBR.east) -- (coinsMid |- LdaaCtxBR.east) -- (LdaaCtxMid);
-
   \draw [bothCtxArrowLR, rounded corners=0.8em] (LdaaCtxTR)
     -- (coinsMid |- LdaaCtxTR.east)
     -- node [align=center, ctxLabel] {introduced context \\ via peg \& inflation}
@@ -52,14 +45,7 @@
 
   \node (diffMid) [] at ($(LdaaCtxBR)!0.5!(RdaaCtxBR)$) {};
 
-  % \draw [bothCtxArrowLR] (LdaaCtxTR) -- (RdaaCtxTR);
-
   \node (freqMid) [xshift=-2.5em] at ($(LtargetBF)!0.5!(RtargetBF)$) {};
-
-%   \draw [daaArrowsLR={scale=1.4}, dashed] (freqMid |- LtargetBF.south) --
-%       node [ctxLabel] {``world'' context}
-%       node [ctxLabelAlt] {$\nicefrac{L_f}{R_f}$}
-%       (freqMid |- RtargetBF.north);
 
   % RAA
 
