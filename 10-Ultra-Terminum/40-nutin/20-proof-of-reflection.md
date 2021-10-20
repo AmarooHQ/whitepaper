@@ -162,7 +162,7 @@ Segments of Chain L and R (events and data) are shown in the following table and
 \begin{figure}[p]
 \centering
 \includegraphics[max width=\linewidth, max height=0.4\textheight]{pow_refl_step3_sag}
-\caption[Step 3: Chain L includes \textit{proofs of reclection} (PoRs) along with headers]{Step 3: Chain L includes \textit{proofs of reflection} (PoRs) along with headers. Proofs of Reflection allow Chain L to know which of its own blocks are known to Chain R.}
+\caption[Step 3: Chain L includes \textit{proofs of reflection} (PoRs) along with headers]{Step 3: Chain L includes \textit{proofs of reflection} (PoRs) along with headers. Proofs of Reflection allow Chain L to know which of its own blocks are known to Chain R.}
 \label{fig:por-step3}
 \end{figure}
 
