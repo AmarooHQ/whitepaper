@@ -19,22 +19,6 @@
 \providecommand\CoinsGeneral{0}
 \providecommand\HideChainHistUnits{1}
 
-\tikzstyle{dec} = [decoration={
-      text along path,
-      text align={center},
-      raise=0.5em,
-      text={introduced context},
-      reverse path
-    }, decorate]
-\tikzstyle{dec2} = [decoration={
-      text along path,
-      text align={center},
-      raise=-1.0em,
-      text={via pegged inflation},
-      reverse path
-    }, decorate]
-
-
 \input{daa_macro}
 
 \begin{document}
@@ -60,27 +44,11 @@
 %   \draw [rounded corners=2.8em, dec]
 %     (RdaaCtxMid) -- (coinsMid |- RdaaCtxBR.east) -- (coinsMid |- LdaaCtxBR.east) -- (LdaaCtxMid);
 
-  % \path [decoration={
-  %   text along path,
-  %   text align={center},
-  %   raise=-0.2cm,
-  %   text={market context},
-  %   reverse path
-  %   }, decorate] (RdaaCtxMid) arc (coinsMid) arc (LdaaCtxMid);
-
   \draw [bothCtxArrowLR, rounded corners=0.8em] (LdaaCtxTR)
     -- (coinsMid |- LdaaCtxTR.east)
     -- node [align=center, ctxLabel] {introduced context \\ via peg \& inflation}
       (coinsMid |- RdaaCtxTR.east)
     -- (RdaaCtxTR);
-  % \draw [rounded corners=0.8em, dec]
-  %   (RdaaCtxTR)
-  %   -- (coinsMid |- RdaaCtxTR.east) -- (coinsMid |- LdaaCtxTR.east)
-  %   -- (LdaaCtxTR);
-  % \draw [rounded corners=0.8em, dec2]
-  %   (RdaaCtxTR)
-  %   -- (coinsMid |- RdaaCtxTR.east) -- (coinsMid |- LdaaCtxTR.east)
-  %   -- (LdaaCtxTR);
 
   \node (diffMid) [] at ($(LdaaCtxBR)!0.5!(RdaaCtxBR)$) {};
 
