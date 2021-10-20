@@ -642,7 +642,7 @@ The general case of a DAA's relationships (flows of \emph{information} and \emph
 \end{figure}
 
 How do we know that \emph{both} blocks and seconds become context laden via a DAA, though?
-Let's consider the possible combinations of context laden values and note whether the meaning works for conversion or not (i.e., whether using it \emph{appropriately} as a constant of conversion will produce sensible results).
+Let's consider the possible combinations of context laden values and note whether the meaning works for conversion or not (i.e., whether using it \emph{appropriately} as a constant of conversion, or scaling factor, will produce sensible results).
 \begin{align}
   \text{No context:} & & \frac{L_f}{R_f}
     & & \text{(unitless)}
