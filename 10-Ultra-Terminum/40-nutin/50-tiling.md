@@ -322,7 +322,12 @@ Additionally, a model of tilings of similar capacity -- i.e., similar $N_{tiles}
         \caption{Tree of valence 4.}
     \end{subfigure}%%
     \hspace{0.03\textwidth}
-    \caption[Distances between randomly selected tiles for two tiling methods]{Shown are the distances between randomly selected tiles for two tiling methods -- the tree method (which this section primarily concerns) and a simple square tessellating method. Valence and depth parameters were chosen so that the number of tiles are comparable.}
+    \caption[
+        Distances between randomly selected tiles for the tree method of tiling vs a simple square tessellating method.
+    ]{
+        Shown are the distances between randomly selected tiles for two tiling methods -- the tree method (which this section primarily concerns) and a simple square tessellating method.
+        Valence and depth parameters were chosen so that the number of tiles are comparable.
+    }
     \label{fig:tiling-avg-dist-comparison}
 \end{figure}
 

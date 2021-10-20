@@ -182,7 +182,11 @@ This mitigates the selfish mining[^selfish-mining] attack.
 Up to this point, simplex-chains have been treated like traditional blockchains, where each block has only one parent.
 Since the vast majority of a simplex-chain's security is provided by other simplex-chains (and only a small proportion comes from that chain's foundational consensus method), are attacks like an empty-block Denial of Service[^empty-dos] (DoS) possible?
 If a simplex-chain were to use PoW, then it might be (relatively) trivial for an attacker to perform such an attack.
-This is because -- in traditional blockchains -- controlling more than 50% of the blocks produced provides *exclusive* control over *which candidate child blocks win* (i.e., are accepted into the canonical chain).
+This is because -- in traditional blockchains -- controlling more than 50% of the blocks produced provides *exclusive* control over *which candidate child blocks win* (i.e., are accepted into the canonical chain).\footnote{
+    Exclusive control of this nature also allows for protocol changes via soft-forks.
+    Additionally, because these soft-forks can be undetectable (when done well) and don't necessarily affect the income of a miner substantially, bribery (of miners) is theoretically inexpensive.
+    WRT UT, this problem is resolved in \autoref{sec:preventing-dos-attacks}.
+}
 Is there a way that we can mitigate this risk?
 If blocks were permitted *more* than a single parent, can this *exclusivity* be denied?
 
@@ -330,7 +334,10 @@ This can be repeated to allow for arbitrarily many parents.
 \autoref{fig:dag-ex1-full} is an example of this algorithm for a moderately complex chain-segment ($B_i\cdots B_{i+3}$ which is 7 blocks total), and each step is enumerated and explained.
 
 \begin{figure}[p]
-    \caption[Example: sorting a moderately complex block-DAG]{Example: sorting a moderately complex block-DAG; note that the left parent is always the best parent, so will have priority. Each block is annotated with its \emph{chain-weight} ($\Sigma_w$). \label{fig:dag-ex1-full}}
+    \caption[
+        Example: sorting a moderately complex block-DAG.
+    ]{
+        Example: sorting a moderately complex block-DAG; note that the left parent is always the best parent, so will have priority. Each block is annotated with its \emph{chain-weight} ($\Sigma_w$). \label{fig:dag-ex1-full}}
     \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
         \centering
@@ -426,7 +433,15 @@ Consider the situation where an attacker is attempting to deny service via the p
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{dag_dos1_sag}
-    \caption[An attempted DoS attack on a block-DAG.]{An attempted DoS attack on a block-DAG. The attacker's blocks, $A_j$, contain no transactions. Each block is annotated with its \emph{chain-weight} ($\Sigma_w$). Even though the attacker produces $2\times$ as many blocks as the honest network, the attack inevitably fails after a short while. NB: $H_i$ is defined to have $\Sigma_w = 0$ for illustrative convenience.}
+    \caption[
+        An attempted DoS attack on a block-DAG.
+    ]{
+        An attempted DoS attack on a block-DAG.
+        The attacker's blocks, $A_j$, contain no transactions.
+        Each block is annotated with its \emph{chain-weight} ($\Sigma_w$).
+        Even though the attacker produces $2\times$ as many blocks as the honest network, the attack inevitably fails after a short while.
+        NB: $H_i$ is defined to have $\Sigma_w = 0$ for illustrative convenience.
+    }
     \label{fig:dag-dos-1}
 \end{figure}
 
