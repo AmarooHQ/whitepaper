@@ -574,8 +574,7 @@ A ratio is found by multiplying the previous difficulty ($D_\text{prev}$) by the
 }
 Note that the units of $\Delta t_\text{actual}$ are B-seconds/(2016 B-blocks), and the units of $\Delta t_\text{target}$ are seconds/(2016 blocks).
 
-DAA's are special.
-They are the means by which \emph{context} is added.
+DAA's are special: they are the means by which \emph{context} is added.
 DAA's don't explicitly deal with this context though --- it's not mentioned in algorithm itself.
 The key to a DAA's success is that it operates \emph{relative to a past state that is \textbf{already} context laden.}
 So DAA's don't need to have any special awareness of context, just that multiplying the past difficulty by a \emph{particular ratio} will adjust the \emph{confirmation rate} to align with the \emph{target block frequency}.

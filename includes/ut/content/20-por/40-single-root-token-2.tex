@@ -4,7 +4,7 @@ There are, naturally, questions to answer,
     like \emph{How are block rewards managed?}
     and \emph{How can the root token be on two blockchains at once?}
 
-Let's consider the following \emph{restricted case} first: the chains (L and R) both have a two-way peg between, ensuring that no coins are ever created or destroyed.
+Let's consider the following \emph{restricted case} first: the chains (L and R) have a two-way peg between them, ensuring that no coins are ever wrongly created or destroyed.
 
 In this case, \autoref{eq:por-conv-work} collapses to
 \begin{align}
@@ -15,24 +15,21 @@ In this case, \autoref{eq:por-conv-work} collapses to
         \\[0.5em]
     \implies \text{ConvWork}_{R\rightarrow L}(R_d) = \; & \frac{L_d}{L_r} \cdot R_r
         & & \text{L-hashes}
-        & & \text{R-blocks weigh } w = (R_d \cdot 1) \text{ R-hashes}
-        \nonumber
+        & & w = (R_d \cdot 1) \text{ R-hashes}
+        \label{eq:por-conv-work-srt}
         \\[0.5em]
     \implies \text{ConvWork}_{R\rightarrow L}(R_d) \cdot \frac{L_r}{L_d} = \; & R_r
         & & \text{L-coins}
         & & \text{Weight of an R-block in L-coins}
-        \label{eq:por-conv-work-srt}
-    % \therefore \text{ConvReward}_{R\rightarrow L}(w) = \; & \frac{R_r}{R_d} \cdot w
-    %     & & \text{R-hashes -> L-coins}
-    %     & & \text{The weight of an } \text{R-block in L-coins}
-    %     \label{eq:por-conv-work-srt}
+        % \label{eq:por-conv-work-to-coins-srt}
+        \nonumber
 \end{align}
 
 If we convert like this (treating 1 R-block as worth $R_r \cdot 1$ L-coins) then we'll we need to convert the result to L-hashes \emph{eventually} -- but we can sum this up if we had multiple reflections to process (since $\nicefrac{L_r}{L_d}$ is a constant for some given moment in time).
 It's worth remembering that block-weight is measured \emph{per block}.
 Since we're only converting a single block's weight at a time, the \emph{per block} part of the resulting units \emph{cancels out}.
 
-Let's use this method to write our first \textsc{WeightOf} function: \autoref{alg:weightof-1} (we'll still sum hashes, though).
+Let's use this method to write our first \textsc{WeightOf} function: \autoref{alg:weightof-1} (we'll still return work in L-hashes, though, not L-coins).
 
 \aside{
     Note: the algorithms we define here will be general -- they'll work for \emph{both} the local and any reflecting chains.
