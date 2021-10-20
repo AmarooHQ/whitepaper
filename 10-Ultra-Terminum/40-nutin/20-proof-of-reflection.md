@@ -518,7 +518,7 @@ and a chain of 5 R-blocks would be \emph{roughly} as hard to create as a chain o
   See \href{https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{Analysis of hashrate-based double-spending} for more.
 }
 
-Naively, \emph{relative block frequencies} seems to be in the same units as the other two: L-blocks/R-blocks; but they \emph{cannot} be the in the same units as \emph{the values mean different things}.
+Naively, \emph{relative block frequencies} seems to be in the same units as the other two: L-blocks/R-blocks; but they \emph{cannot} be in the same units as \emph{the values mean different things}.
 Let's consider \emph{relative confirmation rates} particularly.
 Let's say that the units of confirmation rate are L-blocks/L-second (or R-blocks/R-second).
 Crucially, we can \emph{not} cancel \emph{seconds}:
@@ -566,7 +566,7 @@ The answer to all three questions is effectively the same: the \textbf{Difficult
 
 DAA's typically work like this: calculate a \emph{ratio} by which to adjust (multiply) the prior difficulty, based on a \emph{target} block production rate and the \emph{measured} block production rate.
 
-Bitcoin, for example, adjusts it's difficulty every 2016 blocks.\footnote{
+Bitcoin, for example, adjusts its difficulty every 2016 blocks.\footnote{
   Note: in Bitcoin, a difficulty of 1 corresponds to $2^{32}$ hashes.
 }
 A ratio is found by multiplying the previous difficulty ($D_\text{prev}$) by the actual duration ($\Delta t_\text{actual}$) of the last 2016 blocks and dividing by the target duration ($\Delta t_\text{target}$) for 2016 blocks.\footnote{
