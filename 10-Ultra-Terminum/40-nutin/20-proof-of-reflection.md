@@ -575,7 +575,7 @@ A ratio is found by multiplying the previous difficulty ($D_\text{prev}$) by the
 Note that the units of $\Delta t_\text{actual}$ are B-seconds/(2016 B-blocks), and the units of $\Delta t_\text{target}$ are seconds/(2016 blocks).
 
 DAA's are special: they are the means by which \emph{context} is added.
-DAA's don't explicitly deal with this context though --- it's not mentioned in algorithm itself.
+DAA's don't explicitly deal with this context though --- it's not mentioned in the algorithm itself.
 The key to a DAA's success is that it operates \emph{relative to a past state that is \textbf{already} context laden.}
 So DAA's don't need to have any special awareness of context, just that multiplying the past difficulty by a \emph{particular ratio} will adjust the \emph{confirmation rate} to align with the \emph{target block frequency}.
 It's an \emph{incremental and ongoing process}.
@@ -642,6 +642,7 @@ The general case of a DAA's relationships (flows of \emph{information} and \emph
 \end{figure}
 
 How do we know that \emph{both} blocks and seconds become context laden via a DAA, though?
+Let's consider the possible combinations of context laden values and note whether the meaning works for conversion or not (i.e., whether using it \emph{appropriately} as a constant of conversion will produce sensible results).
 \begin{align}
   \text{No context:} & & \frac{L_f}{R_f}
     & & \text{(unitless)}
