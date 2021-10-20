@@ -642,7 +642,7 @@ The general case of a DAA's relationships (flows of \emph{information} and \emph
 \end{figure}
 
 How do we know that \emph{both} blocks and seconds become context laden via a DAA, though?
-Let's consider the possible combinations of context laden values and note whether the meaning works for conversion or not (i.e., whether using it \emph{appropriately} as a constant of conversion, or scaling factor, will produce sensible results).
+Let's consider what $\nicefrac{L_f}{R_f}$ means for the possible combinations of context laden values and note whether the meaning works for conversion or not (i.e., whether using it \emph{appropriately} as a constant of conversion, or scaling factor, will produce sensible results).
 \begin{align}
   \text{No context:} & & \frac{L_f}{R_f}
     & & \text{(unitless)}
@@ -829,6 +829,8 @@ For confirmations (not work), this is true even when converting confirmations \e
 For example, we can say that the single confirmation provided by Bitcoin block 704610 is \emph{equivalent} to approximately 19,893,045,000,000 genesis-confirmations.\footnote{A genesis-confirmation is relative to the Bitcoin genesis block -- which had a difficulty of exactly 1.}
 The conversion-ratio is equal to the difficulty of block 704610.
 That is, it would take a chain of $\sim$ 20 trillion blocks, each with 1 genesis-confirmation worth of work, to match the weight of block 704610.
+
+\todoDraftOnly{Move discussion of other networks to a more relevant section -- probably not really suitable for converting confirmations}
 
 When will conversion methods fail for converting confirmations?
 

@@ -102,7 +102,7 @@ However, this isn't \emph{always} relevant: if Chain R is \emph{much} more secur
 Say that Chain R contributes $\sim 100\times$ as much chain-weight as L does.
 For an attacker targeting Chain L, reducing the exchange rate \emph{by half} means that the weight of reflecting blocks is halved.
 So the attacker would need to add $\sim 50\times$ the \emph{current} hash-rate of L to compete against the reflections from R.
-If the attacker was mining in \emph{public}, that would increase the local difficulty by $\sim 50\times$, which \emph{increases} the weight of reflecting blocks by $\sim 50\times$, too.
+If the attacker was mining in \emph{public}, that would increase the local difficulty by $\sim 50\times$, which \emph{increases} the weight of reflecting blocks by $\sim 50\times$, too (so an attacker mining in public is self-defeating).
 Of course, the attacker \emph{could} still mine in private,\footnote{
     For the purpose of UT and Amaroo, this turns out to be a non-issue.
     See \autoref{sec:the-simplex}, \autoref{sec:dapp-chain-security}, \autoref{sec:dos-and-dags}, and \autoref{sec:miner-resonance}.
