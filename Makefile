@@ -11,6 +11,8 @@ LP_TABLES_OUT=$(OUTDIR)/tables.tex
 
 PURS_GEN_DIR=includes/ut/complexity/ut-complexity-gen-purs
 
+GIT_SHORTHASH=$(shell git rev-parse --short HEAD)
+
 # preprocessor defualt
 PP_MODE=draft
 PP_LINT_FLAG=
@@ -28,6 +30,11 @@ geometry=left=3cm,right=3cm,top=3cm,bottom=3cm
 OUTPUT_PDF_DEFAULT=$(WPFILENAME)-latest.pdf
 ifndef OUTPUT_PDF
 override OUTPUT_PDF = $(OUTPUT_PDF_DEFAULT)
+endif
+
+PREPROC_ARG_PF=
+ifdef PREPARE_FOR
+override PREPROC_ARG_PF=--prepare-for '$(PREPARE_FOR)'
 endif
 
 
@@ -55,7 +62,7 @@ wp-no-lint: whitepaper
 
 entropy:
 	git update-index --assume-unchanged includes/refl_entropy
-	python3 bin/preprocessModes.py set-entropy --git $(shell git rev-parse --short HEAD)
+	python3 bin/preprocessModes.py set-entropy --git $(GIT_SHORTHASH) $(PREPROC_ARG_PF)
 	-rm includes/ut/diags/pow_refl_btc_eth_step1_sag.pdf
 
 # https://tex.stackexchange.com/questions/45/how-to-speed-up-latex-compilation-with-several-tikz-pictures
@@ -155,7 +162,7 @@ wc:
 
 # preprocess tex for draft/release/lint
 preprocess-build:
-	python3 bin/preprocessModes.py process-tex $(WPTEX) --mode $(PP_MODE) --allow-in-place $(PP_LINT_FLAG)
+	python3 bin/preprocessModes.py process-tex $(WPTEX) --mode $(PP_MODE) --allow-in-place $(PP_LINT_FLAG) $(PREPROC_ARG_PF)
 	bash bin/msg_good.sh "Finished preprocessing of $(WPTEX) in mode $(PP_MODE)"
 
 # run latexmk once so that gitinfo2 runs, then use latexrun
@@ -171,6 +178,7 @@ mk-latex-pdf: preprocess-build
 	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE).pdf
 	cp $(WPNOEXT).pdf $(WPFILENAME)-$(PP_MODE).pdf
 	bash bin/msg_good.sh "Copied build to\n  - $(OUTPUT_PDF)\n  - $(WPNOEXT)-$(PP_MODE).pdf\n  - $(WPFILENAME)-$(PP_MODE).pdf"
+	python3 bin/preprocessModes.py copy-prepared-for $(WPNOEXT).pdf $(PREPROC_ARG_PF) --git $(GIT_SHORTHASH)
 
 glossary-fix-1:
 	rm -v $(WPNOEXT).gl*

@@ -10,14 +10,14 @@ RUN wget https://github.com/jgm/pandoc/releases/download/2.5/pandoc-2.5-1-amd64.
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y python3 python3-pip texlive-science texlive-extra-utils texlive-latex-extra && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y python3 python3-pip texlive-science texlive-extra-utils texlive-latex-extra nodejs npm expect && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install -U numpy scipy click
+RUN pip3 install -U numpy scipy click blessings
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs npm expect pdfgrep && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y pdfgrep && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /work
