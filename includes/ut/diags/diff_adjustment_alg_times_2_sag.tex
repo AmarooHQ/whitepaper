@@ -31,7 +31,7 @@
   \renewcommand\TikzNodePrefix{L}
   \renewcommand\UnitPrefix{L-}
   \DrawTikzDaaMacro
-  \node (daa2Init) [yshift=-24em] at (daa1Init) {};
+  \node (daa2Init) [yshift=-26em] at (daa1Init) {};
   \renewcommand\DaaInitialNodePlacement{daa2Init}
   \renewcommand\MirrorVertical{1}
   \renewcommand\TikzNodePrefix{R}
@@ -62,7 +62,10 @@
 
   \node (diffMid) [] at ($(LdaaCtxBR)!0.5!(RdaaCtxBR)$) {};
 
-  \draw [bothCtxArrowLR] (LdaaCtxBR) -- (RdaaCtxBR);
+  \draw [bothCtxArrowLR] (LdaaCtxBR) --
+    node [ctxLabelAlt] {via}
+    node [ctxLabel] {$X_{R\rightarrow L}$}
+    (RdaaCtxBR);
 
   \node (freqMid) [xshift=-2.5em] at ($(LtargetBF)!0.5!(RtargetBF)$) {};
 

@@ -51,7 +51,7 @@
   \renewcommand\UnitPrefix{R-}
   \DrawTikzDaaMacro
 
-  \node (coinsMid) [xshift=2.0em] at ($(LdaaCtxMid)!0.5!(RdaaCtxMid)$) {};
+  \node (coinsMid) [xshift=0.5em] at ($(LdaaCtxMid)!0.5!(RdaaCtxMid)$) {};
 
 %   \draw [marketCtxArrow, daaArrowsLR={scale=0.9}, rounded corners=2.9em] (RdaaCtxMid) -- (coinsMid |- RdaaCtxBR.east) --
 %       node [ctxLabel, diffCrArrow, yshift=1pt] {$X_{R\rightarrow L}$}
@@ -68,21 +68,23 @@
   %   reverse path
   %   }, decorate] (RdaaCtxMid) arc (coinsMid) arc (LdaaCtxMid);
 
-  \draw [bothCtxArrowLR, rounded corners=3.2em] (LdaaCtxMid)
-    % -- (coinsMid |- LdaaCtxTR.east) -- (coinsMid |- RdaaCtxTR.east)
-    -- (RdaaCtxMid);
-  \draw [rounded corners=3.2em, dec]
-    (RdaaCtxMid)
-    % -- (coinsMid |- RdaaCtxTR.east) -- (coinsMid |- LdaaCtxTR.east)
-    -- (LdaaCtxMid);
-  \draw [rounded corners=3.2em, dec2]
-    (RdaaCtxMid)
-    % -- (coinsMid |- RdaaCtxTR.east) -- (coinsMid |- LdaaCtxTR.east)
-    -- (LdaaCtxMid);
+  \draw [bothCtxArrowLR, rounded corners=0.8em] (LdaaCtxTR)
+    -- (coinsMid |- LdaaCtxTR.east)
+    -- node [align=center, ctxLabel] {introduced context \\ via peg \& inflation}
+      (coinsMid |- RdaaCtxTR.east)
+    -- (RdaaCtxTR);
+  % \draw [rounded corners=0.8em, dec]
+  %   (RdaaCtxTR)
+  %   -- (coinsMid |- RdaaCtxTR.east) -- (coinsMid |- LdaaCtxTR.east)
+  %   -- (LdaaCtxTR);
+  % \draw [rounded corners=0.8em, dec2]
+  %   (RdaaCtxTR)
+  %   -- (coinsMid |- RdaaCtxTR.east) -- (coinsMid |- LdaaCtxTR.east)
+  %   -- (LdaaCtxTR);
 
   \node (diffMid) [] at ($(LdaaCtxBR)!0.5!(RdaaCtxBR)$) {};
 
-  \draw [bothCtxArrowLR] (LdaaCtxTR) -- (RdaaCtxTR);
+  % \draw [bothCtxArrowLR] (LdaaCtxTR) -- (RdaaCtxTR);
 
   \node (freqMid) [xshift=-2.5em] at ($(LtargetBF)!0.5!(RtargetBF)$) {};
 

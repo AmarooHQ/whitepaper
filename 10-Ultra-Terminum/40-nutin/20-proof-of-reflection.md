@@ -696,7 +696,7 @@ Since network context is respected, we can use an exchange rate to build a meani
   This is the same convertible context that miners use to determine which network is most profitable for them.
   Double-lined arrows indicate \emph{market context}.
   Thin single-lined dashed arrows indicate \emph{world context}.
-  Notice that the convertible properties which we are interested in (such as $L_d$ and $R_d$) use \emph{thick, doubled, and dashed} two-way arrows, indicating that we are using network context \emph{and} market context to convert block-weight.
+  Notice that the convertible properties which we are interested in (such as $L_d$ and $R_d$) use \emph{thick, double-lined, and dashed} two-way arrows, indicating that we are using network context \emph{and} market context to convert block-weight.
 }
 \label{fig:daa-conversion-2}
 \end{figure}
