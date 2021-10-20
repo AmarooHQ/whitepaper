@@ -410,12 +410,12 @@ Thus, we can say that a miner's revenue is \emph{equal} regardless of which chai
     \nonumber
     \\[0.5em]
   \frac{R_d}{L_d} & = 7 \cdot \frac{R_r}{L_r} \cdot X_{R\rightarrow L}
-    & & \frac{\text{R-hashes }\cdot\text{ L-blocks}}{\text{L-hash }\cdot\text{ R-block}}
+    & & \frac{\text{R-hashes}\cdot\text{L-blocks}}{\text{L-hash}\cdot\text{R-block}}
     & & \text{Multiply by }\frac{R_d}{L_r}
     \nonumber
     \\[0.5em]
     \frac{R_d}{L_d} & = (7 \cdot 3)
-    & & \frac{\text{R-hashes }\cdot\text{ L-blocks}}{\text{L-hash }\cdot\text{ R-block}}
+    & & \frac{\text{R-hashes}\cdot\text{L-blocks}}{\text{L-hash}\cdot\text{R-block}}
     & & \text{Sub }X_{R\rightarrow L}\text{, }R_r\text{, and }L_r
     \label{eq:rev-diff-ratio-raw}
     \\[0.5em]
@@ -588,13 +588,13 @@ We will use the subscript $W\rightarrow B$ to denote the idea of converting betw
   \text{Note that:}
     & & \text{ConversionConst}_{W\rightarrow B}
     & = \frac{\Delta t_\text{actual}}{\Delta t_\text{target}}
-    & & \frac{\text{B-seconds } \cdot \text{ blocks}}{\text{B-block } \cdot \text{ second}}
+    & & \frac{\text{B-seconds} \cdot \text{blocks}}{\text{B-block} \cdot \text{second}}
     \nonumber
     \\[0.5em]
   \text{Bitcoin's DAA:}
     & & \text{NextWork}_{W\rightarrow B}(D_\text{prev})
     & = \frac{\Delta t_\text{actual}}{\Delta t_\text{target}} \cdot D_\text{prev}
-    & & \frac{\text{B-hashes } \cdot \text{B-seconds} \cdot \text{ blocks}}{\text{B-block}^2 \; \cdot \text{ second}}
+    & & \frac{\text{B-hashes} \cdot \text{B-seconds} \cdot \text{blocks}}{\text{B-block}^2 \cdot \text{second}}
     \nonumber
 \end{align}
 
@@ -660,7 +660,7 @@ How do we know that \emph{both} blocks and seconds become context laden via a DA
     \label{eq:conv-both-ctx-seconds}
     \\[0.5em]
   \text{Both context laden:} & & \frac{L_f}{R_f}
-    & & \frac{\text{L-blocks } \cdot \text{ R-seconds}}{\text{L-second } \cdot \text{ R-block}}
+    & & \frac{\text{L-blocks} \cdot \text{R-seconds}}{\text{L-second} \cdot \text{R-block}}
     & & \text{?}
     \label{eq:conv-both-ctx-laden}
 \end{align}
@@ -671,7 +671,7 @@ The second has units L-blocks/R-block, which sounds like it should be the ratio 
 (So this conversion method fails.)
 
 \autoref{eq:conv-both-ctx-seconds} has weird units, though.
-R-seconds/L-second means something like: the relative participation of each network compared with a recent past state; i.e., the ratio of each network's \emph{actual} block production compared to it's \emph{target} block production.
+R-seconds/L-second means something like: the relative participation of each network compared with a recent past state; i.e., the ratio of the ratios of each network's \emph{actual} block production compared to it's \emph{target} block production.
 (This conversion method also fails.)
 
 \autoref{eq:conv-both-ctx-laden} measures something like \emph{relative weighted confirmation rates}.
@@ -743,7 +743,7 @@ Let's sum multiple conversions, e.g., as done in \autoref{alg:refl-1-bw}:
 Thus, \emph{any} common units, which are linearly convertible both from a reflecting chain's block and to local chain-work, can be used during summation.
 
 <!-- & \frac{R_r}{L_r}
-  & &\frac{\text{R-coins }\cdot\text{ L-blocks}}{\text{R-block }\cdot\text{ L-coin}}
+  & &\frac{\text{R-coins}\cdot\text{L-blocks}}{\text{R-block}\cdot\text{L-coin}}
   & & \nonumber
   \\ -->
 
@@ -862,7 +862,7 @@ If we want to convert confirmations, then we'll need to abstract away from the i
 <!-- Thus, \emph{there is no $R_d$ for us to rely on.} -->
 \begin{align}
   % \text{Consider: } & \frac{R_d}{L_d}
-  %   & &\frac{\text{R-hashes }\cdot\text{ L-blocks}}{\text{R-block }\cdot\text{ L-hash}}
+  %   & &\frac{\text{R-hashes}\cdot\text{L-blocks}}{\text{R-block}\cdot\text{L-hash}}
   %   & & \nonumber
   %   \\[0.5em]
   % \implies \; & \frac{R_d}{L_d} \cdot \left( \frac{L_d}{L_r} \cdot X_{R\rightarrow L} \cdot \frac{R_r}{R_d} \right)
