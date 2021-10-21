@@ -490,7 +490,8 @@ Consider:
 \end{align}
 
 These two values are \textbf{not} equal (or comparable), and nothing we've said implies that they should be!
-On the one hand, we have \emph{a ratio of the value of block creation}; and on the other, we have something like *relative block frequencies.*
+There are \emph{qualitative differences} between the two that is not represented in the current units.
+On the one hand, we have something like *relative block frequencies,* and on the other we have something like \emph{a ratio of the \emph{weight or value} of block creation}.
 But they have the same units!
 What's going on?
 How do we know whether a constant of conversion \emph{works} for our purposes?
