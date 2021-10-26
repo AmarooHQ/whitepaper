@@ -102,6 +102,7 @@ module.exports = {
                 ["lated", "laden"],
                 ["rashes", "hashes"],
                 ["dependant", "dependent"],
+                ["hash rate", "hash-rate"],
             ]
         }
     }
