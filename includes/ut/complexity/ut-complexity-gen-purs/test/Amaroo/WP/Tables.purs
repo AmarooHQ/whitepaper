@@ -77,20 +77,27 @@ utNamesSpec = describe "tables" do
           S.length aligns.texTabular `shouldEqual` (length aligns.md)
           shouldSatisfy ls allTheSame
 
-    it "should have sensible 1m tps params" do
+    describe "should have sensible 1m tps params" do
       let btc = _head utVsOther1M
           ada = _head $ A.drop 1 utVsOther1M
           btcP = mkSimplePs _BTC_1M_K {bh: 80.0, bf: 1.0/600.0} 250.0
           adaP = mkSimplePs _BTC_1M_K {bh: 1070.0, bf: 1.0/20.0} 250.0
+          btcUt2Equiv = utChainCalc btcP {headerOmission: false, explicitPoRs: false, hashTruncation: true}
           adaUt2Equiv = utChainCalc adaP {headerOmission: false, explicitPoRs: false, hashTruncation: true}
           bf = 1.0 / 20.0
           bh = 1070.0
-          k = _BTC_1M_K
-          n1 = k / 2.0 / bh / bf
-          t1 = n1 * k / 2.0
-          n2 = t1 / bh / bf
-          t2 = n2 * k
-          adaUt2EquivTps = t2 / 250.0
-      {net: Bitcoin, p: btcP} `shouldEqual` btc
-      {net: Cardano, p: adaP} `shouldEqual` ada
-      adaUt2EquivTps `shouldBeCloseTo` adaUt2Equiv.d2.tps
+          calcT2 bf bh = t2
+            where
+              k = _BTC_1M_K
+              n1 = k / 2.0 / bh / bf
+              t1 = n1 * k / 2.0
+              n2 = t1 / bh / bf
+              t2 = n2 * k
+          adaUt2EquivTps = (calcT2 bf bh) / 250.0
+          btcUt2EquivTps = (calcT2 (1.0/600.0) 80.0)
+      it "works for btc" do
+        {net: Bitcoin, p: btcP} `shouldEqual` btc
+        btcUt2EquivTps `shouldBeCloseTo` btcUt2Equiv.d2.tps
+      it "works for cardano" do
+        {net: Cardano, p: adaP} `shouldEqual` ada
+        adaUt2EquivTps `shouldBeCloseTo` adaUt2Equiv.d2.tps
