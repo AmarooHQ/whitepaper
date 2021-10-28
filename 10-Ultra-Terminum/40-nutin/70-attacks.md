@@ -12,6 +12,13 @@
 
 ### Dialog: Attacks and Mitigation
 
+\aside{
+  This is a fictional dialog between a malicious actor (EMalo) and myself.
+  The factors in play -- like the number and types of simplex-chains, the PoW algorithms used, the ROO distribution, etc -- were chosen to represent a young UT network.
+  The \emph{real} Amaroo network, when it goes live, will be different.
+  The point of this dialog is to give you an \emph{intuition} for the effect of these factors; it's intended to help answer the question \emph{Why is attacking UT harder and more complex than attacking traditional consensus methods?}
+}
+
 \newcommand{\nefName}{EMalo}
 \newcommand{\cMax}[1]{\ChatR{title={Max:},colback=Cerulean!20}{#1}}
 \newcommand{\cNef}[1]{\ChatL{title={\nefName:},colback=BrickRed!20}{#1}}
