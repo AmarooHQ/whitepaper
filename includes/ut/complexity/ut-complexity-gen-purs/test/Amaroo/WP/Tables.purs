@@ -88,10 +88,13 @@ utNamesSpec = describe "tables" do
           ut2Ut2Equiv = utChainCalc ut2P {headerOmission: false, explicitPoRs: false, hashTruncation: true}
           bf = 1.0 / 20.0
           bh = 1070.0
-          calcT2 k bf bh = t2
+          calcT1 k bf bh = t1
             where
               n1 = k / 2.0 / bh / bf
               t1 = n1 * k / 2.0
+          calcT2 k bf bh = t2
+            where
+              t1 = calcT1 k bf bh
               n2 = t1 / bh / bf
               t2 = n2 * k
           adaUt2EquivTps = (calcT2 _BTC_1M_K bf bh) / 250.0
@@ -105,3 +108,11 @@ utNamesSpec = describe "tables" do
         adaUt2EquivTps `shouldBeCloseTo` adaUt2Equiv.d2.tps
       it "works for ut2" do
         ut2Ut2EquivTps `shouldBeCloseTo` ut2Ut2Equiv.d2.tps
+      it "bitcoin 1m sanity" do
+        (_BTC_1M_K / 250.0) `shouldBeCloseTo` 1_000_000.0
+        -- subtract 16B for +T (lerp set so that bh=80B -> 16B discount; bh>=112B -> 32B discount)
+        calcT1 _BTC_1M_K (1.0/600.0) (80.0 - 16.0) `shouldBeCloseTo` btcUt2Equiv.d1.t
+      it "cardano 1m sanity" do
+        (_BTC_1M_K / 250.0) `shouldBeCloseTo` 1_000_000.0
+        -- subtract 32B for +T
+        calcT1 _BTC_1M_K (1.0/20.0) (1070.0 - 32.0) `shouldBeCloseTo` adaUt2Equiv.d1.t
