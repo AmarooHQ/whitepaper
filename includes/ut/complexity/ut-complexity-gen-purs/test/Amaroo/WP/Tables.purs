@@ -82,22 +82,26 @@ utNamesSpec = describe "tables" do
           ada = _head $ A.drop 1 utVsOther1M
           btcP = mkSimplePs _BTC_1M_K {bh: 80.0, bf: 1.0/600.0} 250.0
           adaP = mkSimplePs _BTC_1M_K {bh: 1070.0, bf: 1.0/20.0} 250.0
+          ut2P = mkSimplePs _UT2T_1M_K {bh: 84.0, bf: 1.0/15.0} 250.0
           btcUt2Equiv = utChainCalc btcP {headerOmission: false, explicitPoRs: false, hashTruncation: true}
           adaUt2Equiv = utChainCalc adaP {headerOmission: false, explicitPoRs: false, hashTruncation: true}
+          ut2Ut2Equiv = utChainCalc ut2P {headerOmission: false, explicitPoRs: false, hashTruncation: true}
           bf = 1.0 / 20.0
           bh = 1070.0
-          calcT2 bf bh = t2
+          calcT2 k bf bh = t2
             where
-              k = _BTC_1M_K
               n1 = k / 2.0 / bh / bf
               t1 = n1 * k / 2.0
               n2 = t1 / bh / bf
               t2 = n2 * k
-          adaUt2EquivTps = (calcT2 bf bh) / 250.0
-          btcUt2EquivTps = (calcT2 (1.0/600.0) 80.0)
+          adaUt2EquivTps = (calcT2 _BTC_1M_K bf bh) / 250.0
+          btcUt2EquivTps = (calcT2 _BTC_1M_K (1.0/600.0) 80.0) / 250.0
+          ut2Ut2EquivTps = (calcT2 _UT2T_1M_K (1.0/15.0) 66.0) / 250.0
       it "works for btc" do
         {net: Bitcoin, p: btcP} `shouldEqual` btc
         btcUt2EquivTps `shouldBeCloseTo` btcUt2Equiv.d2.tps
       it "works for cardano" do
         {net: Cardano, p: adaP} `shouldEqual` ada
         adaUt2EquivTps `shouldBeCloseTo` adaUt2Equiv.d2.tps
+      it "works for ut2" do
+        ut2Ut2EquivTps `shouldBeCloseTo` ut2Ut2Equiv.d2.tps
