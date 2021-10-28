@@ -469,7 +469,8 @@ genCompare1MRow {net, p} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdStdMixe
   where
     ut2K = ut2TpsToK (netToTps net cs) p.txSize pf.hf.bf pf.hf.bh pf.hf.bh
     pf = pToPF p
-    ut2 = utChainCalc p (allUtChainCalcsF id).t
+    -- ut2 = utChainCalc p (allUtChainCalcsF id).t
+    ut2 = netToChainStats (UT (T 2)) p
     cs = netToChainStats net p
     tpsPerN1 = netToTps net cs / cs.d1.n
     n2 = netToN2 net cs
