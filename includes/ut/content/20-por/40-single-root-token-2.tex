@@ -45,20 +45,20 @@ We could retrieve it from state (if it's already calculated), but for the sake o
 Right now, we don't have enough \emph{context} to know what to do; \emph{what contexts would be useful?}
 
 What \emph{purpose} does a block reward fulfil?
-It must be something about \emph{security}, because that's how miners are motivated to mine.
+It must be something about \emph{security}, because that's \emph{why} miners are motivated to mine (the \emph{how} is via the \emph{block reward}).
 If we have multiple chains (with the same root token), why should one chain be more secure than another?
 One reason is because \emph{more commerce happens there;} i.e., more of the network relies on \emph{that} chain compared to the other one.
 
 What would make sense, given the context of a commerce-imbalance, to base the block reward on?
 A straightforward answer (which can be globally known, too) is \emph{the ratio of root tokens on each chain.}
-We can have a \emph{network wide} rule that there is some \emph{network wide inflation rate}, and each chain's block reward is the product of the \emph{ratio} of coins on that chain with the entire supply.
-This way, the global inflation rate is predictable, even though the coins produced \emph{on each chain} (via block rewards) are variable.
-Moreover, we should expect that the \emph{value to the community} of each chain roughly matches the \emph{distribution of the community's activities}, and the \emph{distribution of security}, too.
+We can have a \emph{network wide} rule that there is some \emph{network wide inflation rate}, and each chain's block reward is the product of the \emph{ratio} of coins on that chain relative to the entire supply.
+This way, the global inflation rate is predictable, even though the number of coins produced \emph{on each chain} (via block rewards) is variable.
+Moreover, with this method we should expect that the \emph{value to the community} of each chain roughly matches the \emph{distribution of the community's activities}, and the \emph{distribution of security}, too.
 This method is also consistent with the idea of \emph{equal work for equal reward}.
 We can rely on that idea because \emph{equality of work} is a result of the market (for block rewards) formed by participating miners.
 
 If the network uses this rule to determine block reward, then, for either chain $C$, what can we say?
-Let: $I$ be the network-wide inflation rate (coins/s); $G_t$ be the network-wide root token supply (coins); and $C_t$ be the number of root tokens on chain $C$ (coins). $C_f$ is the frequency of chain $C$ (blocks/s).
+Let: $I$ (coins/s) be the network-wide inflation rate; $G_t$ (coins) be the network-wide root token supply; and $C_t$ (coins) be the number of root tokens on chain $C$. $C_f$ (blocks/s) is the block production frequency of chain $C$.
 
 \begin{align}
     C_r \cdot C_f & = \frac{C_t}{G_t} \cdot I
