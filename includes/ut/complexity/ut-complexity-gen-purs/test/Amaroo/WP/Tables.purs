@@ -13,6 +13,7 @@ import Data.String as S
 import Data.Traversable (and, sequence, sequence_)
 import Data.Tuple (Tuple(..))
 import Main (allTables, lpTables)
+import Math as M
 import Partial.Unsafe (unsafePartial)
 import Test.Amaroo.WP.Calcs (shouldBeCloseTo, shouldBeWithin)
 import Test.Spec (Spec, describe, it)
@@ -87,7 +88,7 @@ utNamesSpec = describe "tables" do
           adaUt2Equiv = utChainCalc adaP {headerOmission: false, explicitPoRs: false, hashTruncation: true}
           ut2Ut2Equiv = utChainCalc ut2P {headerOmission: false, explicitPoRs: false, hashTruncation: true}
           bf = 1.0 / 20.0
-          bh = 1070.0
+          bh = 1070.0 - 32.0
           calcT1 k bf bh = t1
             where
               n1 = k / 2.0 / bh / bf
@@ -97,15 +98,20 @@ utNamesSpec = describe "tables" do
               t1 = calcT1 k bf bh
               n2 = t1 / bh / bf
               t2 = n2 * k
+          btcBh = 64.0
           adaUt2EquivTps = (calcT2 _BTC_1M_K bf bh) / 250.0
-          btcUt2EquivTps = (calcT2 _BTC_1M_K (1.0/600.0) 80.0) / 250.0
+          btcUt2EquivTps = (calcT2 _BTC_1M_K (1.0/600.0) btcBh) / 250.0
           ut2Ut2EquivTps = (calcT2 _UT2T_1M_K (1.0/15.0) 66.0) / 250.0
-      it "works for btc" do
+      it "btc uses hashTrunc" do
+        btcBh `shouldBeCloseTo` 64.0
+      it "equiv HOPoRs is around right order of mag" do
+        utCalcHOPoRs btcP {hashTruncation: true} `shouldSatisfy` (\cs -> cs.d2.tps > M.pow 10.0 22.0)
+      it ("works for btc " <> show btcUt2EquivTps) do
         {net: Bitcoin, p: btcP} `shouldEqual` btc
         btcUt2EquivTps `shouldBeCloseTo` btcUt2Equiv.d2.tps
-      it "works for cardano" do
+      it ("works for cardano " <> show adaUt2EquivTps) do
         {net: Cardano, p: adaP} `shouldEqual` ada
-        adaUt2EquivTps `shouldBeCloseTo` adaUt2Equiv.d2.tps
+        adaUt2EquivTps `shouldBeWithin (0.000000001 * adaUt2EquivTps)` adaUt2Equiv.d2.tps
       it "works for ut2" do
         ut2Ut2EquivTps `shouldBeCloseTo` ut2Ut2Equiv.d2.tps
       it "bitcoin 1m sanity" do
@@ -116,3 +122,9 @@ utNamesSpec = describe "tables" do
         (_BTC_1M_K / 250.0) `shouldBeCloseTo` 1_000_000.0
         -- subtract 32B for +T
         calcT1 _BTC_1M_K (1.0/20.0) (1070.0 - 32.0) `shouldBeCloseTo` adaUt2Equiv.d1.t
+      -- Chris' tests
+      it "btc effective header" do
+        -- effective header should match
+        64.0 `shouldBeCloseTo` btcUt2Equiv.effBh
+      it "manual calc for btc equiv" do
+        btcUt2Equiv.d2.tps `shouldBeCloseTo` ((calcT2 _BTC_1M_K (1.0/600.0) (64.0))/ 250.0)

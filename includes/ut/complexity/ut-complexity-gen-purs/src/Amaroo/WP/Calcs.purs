@@ -143,7 +143,7 @@ calcNextNestingLevel' {maxN} ps nsPrev = {n, t, tps, p: pToPF ps}
     k = head ps.ks
 
 calcNextNestingLevel :: Params -> NestingStats -> NestingStats
-calcNextNestingLevel = calcNextNestingLevel' {maxN: pow 10.0 12.0}
+calcNextNestingLevel = calcNextNestingLevel' {maxN: pow 10.0 30.0}
 
 data TradVar = Trad | TradEth2 | TradPolkadot
 
