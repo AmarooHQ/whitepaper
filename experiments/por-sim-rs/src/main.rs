@@ -50,10 +50,10 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
     clap_app!(sim =>
         (about: "Blockchain PoW + PoR simulator")
         (version: "0.1.0")
-        (@arg attacker_ratio: -r --ratio +takes_value default_value("0.45") #{0, 1} "Proportion of hash rate belonging to attackers.")
+        (@arg attacker_ratio: -r --ratio +takes_value default_value("0.45") #{0, 1} "Proportion of hash-rate belonging to attackers.")
         (@arg start_attack_at_t: -s --start_attack_tick +takes_value default_value("1000") "Tick at which to start the attack.")
         (@arg end_simulation_at_t: -e --end_tick +takes_value "Maximum number of ticks for the simulation. Defaults to 3*start_attack_tick")
-        (@arg hash_rate: -H --hash_rate +takes_value default_value("1000") "Network hash rate per tick.")
+        (@arg hash_rate: -H --hash_rate +takes_value default_value("1000") "Network hash-rate per tick.")
         (@arg block_target: -b --block_target_time +takes_value default_value("10") "Target time (in ticks) between blocks.")
         (@arg crypto_system: -S --crypto_system +takes_value default_value("WeightedDag") possible_values(&CryptoSystemArg::variants()) "Name of the cryptosystem template to use.")
         (@arg relay_strategy: -R --relay_strategy +takes_value default_value("DoubleSpend") possible_values(&RelayStrategyArg::variants()) "Name of the relay strategy to use")

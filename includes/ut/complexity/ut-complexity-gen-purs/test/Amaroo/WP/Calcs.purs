@@ -3,7 +3,7 @@ module Test.Amaroo.WP.Calcs where
 import Amaroo.WP.Calcs
 import Prel
 
-import Amaroo.WP.Tables (btToF)
+import Amaroo.WP.Tables (_ETH2_1M_K, btToF)
 import Data.Array (intercalate, zip)
 import Data.Array as A
 import Data.Either (Either(..), fromLeft, isLeft)
@@ -20,7 +20,6 @@ import Math (abs, ceil, floor, pow, round)
 import Node.Encoding (Encoding(..))
 import Node.FS.Sync (writeTextFile)
 import Partial.Unsafe (unsafePartial)
-import Prelude (identity)
 import Test.QuickCheck (Result(..), (<?>))
 import Test.QuickCheck.Gen (Gen, choose, chooseInt)
 import Test.Spec (Spec, describe, it)
@@ -249,6 +248,14 @@ utSpec = describe "ut" do
         ut2.std.d2.p.hf.bh `shouldEqual` 20.0
         ut2.std.d1.p.hf.bf `shouldEqual` 0.11
         ut2.std.d2.p.hf.bf `shouldEqual` 0.22
+
+    describe "calcNextNestingLevel and maxN" do
+      it "eth2 limited to 1024 shards" do
+        let eth2Ps = basicTestPs { ks = NEL.singleton _ETH2_1M_K }
+            eth2 = tradChainCalcEth2 eth2Ps
+            notEth2 = tradChainCalc eth2Ps
+        eth2.d2.n `shouldEqual` 1024.0
+        notEth2.d2.n `shouldNotEqual` 1024.0
 
     describe "ut comparison test vecs" do
       -- note that k=1000

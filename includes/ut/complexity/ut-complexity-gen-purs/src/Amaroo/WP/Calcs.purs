@@ -130,12 +130,13 @@ tradInitNS :: Params -> NestingStats
 tradInitNS ps = {n: 1.0, t: t, tps: t / ps.txSize, p: pToPF ps}
   where t = head ps.ks
 
-type NestingCap = {maxN :: Number}
+type NestingCap = {maxN :: Maybe Number}
 
 calcNextNestingLevel' :: NestingCap -> Params -> NestingStats -> NestingStats
 calcNextNestingLevel' {maxN} ps nsPrev = {n, t, tps, p: pToPF ps}
   where
-    n = min maxN $ nsPrev.t / bfbh
+    limitN = fromMaybe (\x -> x) $ min <$> maxN
+    n = limitN $ nsPrev.t / bfbh
     t = n * k
     tps = t / ps.txSize
     h = head ps.hfs
@@ -143,7 +144,7 @@ calcNextNestingLevel' {maxN} ps nsPrev = {n, t, tps, p: pToPF ps}
     k = head ps.ks
 
 calcNextNestingLevel :: Params -> NestingStats -> NestingStats
-calcNextNestingLevel = calcNextNestingLevel' {maxN: pow 10.0 12.0}
+calcNextNestingLevel = calcNextNestingLevel' {maxN: Nothing}
 
 data TradVar = Trad | TradEth2 | TradPolkadot
 
@@ -182,7 +183,7 @@ tradChainCalc' ps var = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts, sigm
     effBh = bhMod hf.bh
     effDh = dhMod hf2.bh
     d2Calc = case var of
-      TradEth2 -> calcNextNestingLevel' {maxN: 1024.0}
+      TradEth2 -> calcNextNestingLevel' {maxN: Just 1024.0}
       _ -> calcNextNestingLevel
     d2 = d2Calc (ps2 { hfs = singleton {bf: hf2.bf, bh: effDh} }) d1
     d3 = calcNextNestingLevel ps3 d2
