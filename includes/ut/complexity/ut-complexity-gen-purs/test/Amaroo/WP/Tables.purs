@@ -4,7 +4,7 @@ import Amaroo.WP.Tables
 import Amaroo.WP.Tables.Types
 import Prel
 
-import Amaroo.WP.Calcs (mkNestedPs, mkSimplePs, tradChainCalcEth2, tradChainCalcPolkadot, utCalcHOPoRs)
+import Amaroo.WP.Calcs (mkNestedPs, mkSimplePs, tradChainCalcEth2, tradChainCalcPolkadot, utCalcHOPoRs, utChainCalc)
 import Data.Array (length)
 import Data.Array as A
 import Data.Array.Partial as AP
@@ -13,8 +13,9 @@ import Data.String as S
 import Data.Traversable (and, sequence, sequence_)
 import Data.Tuple (Tuple(..))
 import Main (allTables, lpTables)
+import Math as M
 import Partial.Unsafe (unsafePartial)
-import Test.Amaroo.WP.Calcs (shouldBeWithin)
+import Test.Amaroo.WP.Calcs (shouldBeCloseTo, shouldBeWithin)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual, shouldSatisfy)
 
@@ -76,3 +77,54 @@ utNamesSpec = describe "tables" do
         pure $ do
           S.length aligns.texTabular `shouldEqual` (length aligns.md)
           shouldSatisfy ls allTheSame
+
+    describe "should have sensible 1m tps params" do
+      let btc = _head utVsOther1M
+          ada = _head $ A.drop 1 utVsOther1M
+          btcP = mkSimplePs _BTC_1M_K {bh: 80.0, bf: 1.0/600.0} 250.0
+          adaP = mkSimplePs _BTC_1M_K {bh: 1070.0, bf: 1.0/20.0} 250.0
+          ut2P = mkSimplePs _UT2T_1M_K {bh: 84.0, bf: 1.0/15.0} 250.0
+          btcUt2Equiv = utChainCalc btcP {headerOmission: false, explicitPoRs: false, hashTruncation: true}
+          adaUt2Equiv = utChainCalc adaP {headerOmission: false, explicitPoRs: false, hashTruncation: true}
+          ut2Ut2Equiv = utChainCalc ut2P {headerOmission: false, explicitPoRs: false, hashTruncation: true}
+          bf = 1.0 / 20.0
+          bh = 1070.0 - 32.0
+          calcT1 k bf bh = t1
+            where
+              n1 = k / 2.0 / bh / bf
+              t1 = n1 * k / 2.0
+          calcT2 k bf bh = t2
+            where
+              t1 = calcT1 k bf bh
+              n2 = t1 / bh / bf
+              t2 = n2 * k
+          btcBh = 64.0
+          adaUt2EquivTps = (calcT2 _BTC_1M_K bf bh) / 250.0
+          btcUt2EquivTps = (calcT2 _BTC_1M_K (1.0/600.0) btcBh) / 250.0
+          ut2Ut2EquivTps = (calcT2 _UT2T_1M_K (1.0/15.0) 66.0) / 250.0
+      it "btc uses hashTrunc" do
+        btcBh `shouldBeCloseTo` 64.0
+      it "equiv HOPoRs is around right order of mag" do
+        utCalcHOPoRs btcP {hashTruncation: true} `shouldSatisfy` (\cs -> cs.d2.tps > M.pow 10.0 22.0)
+      it ("works for btc " <> show btcUt2EquivTps) do
+        {net: Bitcoin, p: btcP} `shouldEqual` btc
+        btcUt2EquivTps `shouldBeCloseTo` btcUt2Equiv.d2.tps
+      it ("works for cardano " <> show adaUt2EquivTps) do
+        {net: Cardano, p: adaP} `shouldEqual` ada
+        adaUt2EquivTps `shouldBeWithin (0.000000001 * adaUt2EquivTps)` adaUt2Equiv.d2.tps
+      it "works for ut2" do
+        ut2Ut2EquivTps `shouldBeCloseTo` ut2Ut2Equiv.d2.tps
+      it "bitcoin 1m sanity" do
+        (_BTC_1M_K / 250.0) `shouldBeCloseTo` 1_000_000.0
+        -- subtract 16B for +T (lerp set so that bh=80B -> 16B discount; bh>=112B -> 32B discount)
+        calcT1 _BTC_1M_K (1.0/600.0) (80.0 - 16.0) `shouldBeCloseTo` btcUt2Equiv.d1.t
+      it "cardano 1m sanity" do
+        (_BTC_1M_K / 250.0) `shouldBeCloseTo` 1_000_000.0
+        -- subtract 32B for +T
+        calcT1 _BTC_1M_K (1.0/20.0) (1070.0 - 32.0) `shouldBeCloseTo` adaUt2Equiv.d1.t
+      -- Chris' tests
+      it "btc effective header" do
+        -- effective header should match
+        64.0 `shouldBeCloseTo` btcUt2Equiv.effBh
+      it "manual calc for btc equiv" do
+        btcUt2Equiv.d2.tps `shouldBeCloseTo` ((calcT2 _BTC_1M_K (1.0/600.0) (64.0))/ 250.0)
