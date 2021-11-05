@@ -5,7 +5,7 @@ whitepaper.*
 output/*
 .ipynb_checkpoints
 *.sage.py
-*.ipynb
+./*.ipynb
 includes/ut/tiling/*.png
 includes/ut/tiling/*.svg
 *.7z
