@@ -15,7 +15,7 @@ t = Terminal()
 this_repo = repo.Repo()
 
 
-def get_curr_tag() -> TagReference | None:
+def get_curr_tag() -> Optional[TagReference]:
     latest = this_repo.tags[-1]
     curr = this_repo.commit()
     return None if latest.commit.hexsha != curr.hexsha else latest
