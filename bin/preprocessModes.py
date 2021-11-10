@@ -16,8 +16,10 @@ this_repo = repo.Repo()
 
 
 def get_curr_tag() -> Optional[TagReference]:
-    latest = this_repo.tags[-1]
+    latest = None if len(this_repo.tags) < 1 else this_repo.tags[-1]
     curr = this_repo.commit()
+    if latest is None or curr is None:
+        return None
     return None if latest.commit.hexsha != curr.hexsha else latest
 
 
