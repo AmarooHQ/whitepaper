@@ -147,6 +147,27 @@ This UT protocol variant is +HOPoRs, the combination of *header omission* (+HO) 
     Each protocol variant thus far has a corresponding +T variant, e.g., +PoRs and +PoRTs, +HO and +HOT, etc.
 }
 
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
+
+%%
+
+\begin{equation*}
+\xymatrix@R=14pt@C=-10pt@M=4pt{
+    \text{Conservative} \ar@*{[deepskyblue]}[d] \\
+    \text{UT}_{+\text{PoRs}} \ar@*{[gold]}[dr] \ar[rr] \ar[dd] & & \text{UT}_{+\text{OP}} \ar'[d][dd] \ar[dr] & \\
+    & \text{UT}_{+\text{PoRTs}} \ar[dd] \ar@*{[gold]}[rr] & & \text{UT}_{+\text{OPT}} \ar@*{[gold]}[dd] \\
+    \text{UT}_{+\text{HOPoRs}} \ar[dr] \ar'[r][rr] & & \text{UT}_{+\text{HO}} \ar[dr] & \\
+    & \text{UT}_{+\text{HOPoRTs}} \ar[rr] & & \text{UT}_{+\text{HOT}} \\
+    & & & \text{Maximal TPS} \ar@*{[darkorange]}[u]
+}
+\end{equation*}
+
+%% END ### DRAFT
+
+%% BEGIN ### RELEASE
+
 ### Confirmation Times
 
 \label{sec:confirmation-times}

@@ -55,7 +55,7 @@ module.exports = {
                 "Petersburg", "SegWit", "s2", "TOC", "Incentivization",
                 "ReflectedBlockWeight", "Ouroboros", "s10",
                 "ConvReward", "ConvBlocks", "NextWork", "DAA", "RAA",
-                "20201016_NODA", "m1", "m2"
+                "20201016_NODA", "m1", "m2", "2r",
             ],
         },
         "en-max-word-count": {

@@ -366,13 +366,37 @@ Additionally, a model of tilings of similar capacity -- i.e., similar $N_{tiles}
 
 ### Tiling Security Principles
 
-\begin{equation*}
-\xymatrix@C=2pc@R=2pc{
-    M & c\ar[dr]\ar[drr] & L\\
-    E\ar[u] & M\ar[l] & A & N
-}
-\end{equation*}
+\begin{align*}
+    2 \cdot \; & \text{Sec}(\text{tile.child}) \\
+    & < 2 \cdot \text{Sec}(\text{tile}) \\
+    & < \text{Sec}(\text{tile}) \\
+    & \; \; \; + \; \text{Sec}(\text{tile.parent})
+\end{align*}
 
+\begin{align*}
+& \; \text{Sec}(\text{tile.grandparent}) \\
++ & \; \text{Sec}(\text{tile.parent}) \\
++ & \; 2 \cdot \text{Sec}(\text{tile})
+\end{align*}
+
+\begin{align*}
+& \; \text{Sec}(\text{tile.parent}) \\
++ & \; \text{Sec}(\text{tile}) \\
++ & \; 2 \cdot \text{Sec}(\text{tile.child})
+\end{align*}
+
+\begin{align*}
+    \text{let} \; S &= \sum_{i=0}^n (3 \cdot 2^{i-1}) \cdot r^i \\
+    \implies 2r \cdot S &= \sum_{i=0}^n (3 \cdot 2^i) \cdot r^{i+1} \\
+    &= \sum_{i=1}^{n+1} (3 \cdot 2^{i-1}) \cdot r^i \\
+    \therefore S - 2r\cdot S &= r^0 + r = 1 + r \\
+    \implies S &= \frac{1 + r}{1 - 2r}
+\end{align*}
+
+\begin{align*}
+    1 - 2r &> 0 \\
+    r &< \frac{1}{2}
+\end{align*}
 
 ### Worst Case Tiling
 
