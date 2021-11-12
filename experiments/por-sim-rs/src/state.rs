@@ -69,7 +69,7 @@ impl PoRStateIM {
                     .other_chains
                     .get(&chain_id)
                     .map(|c| c.clone())
-                    .unwrap_or_else(|| LightChainIM::new(&block_id));
+                    .unwrap_or_else(|| LightChainIM::new(block_id));
                 // update other_chains with updated light chain
                 let other_chains = pre_state
                     .other_chains
@@ -103,13 +103,13 @@ impl PoRStateIM {
 }
 
 impl LightChainIM {
-    fn new(block: &S::B) -> Self {
+    fn new(block: HashID) -> Self {
         let reflection_map: HashMapIdPassthrough<_> = Default::default();
         LightChainIM {
-            blocks: OrdSet::unit(block.clone()),
-            heads: OrdSet::unit(block.clone()),
+            blocks: OrdSet::unit(block),
+            heads: OrdSet::unit(block),
             block_frequency: 10,
-            reflection_map: reflection_map.update(block.get_hash(), OrdSet::new()),
+            reflection_map: reflection_map.update(block, OrdSet::new()),
         }
     }
 }

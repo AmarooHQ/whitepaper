@@ -26,7 +26,7 @@ mod hash;
 mod message_manager;
 mod msg;
 mod node;
-// mod state;
+mod state;
 mod strategies;
 mod types;
 
