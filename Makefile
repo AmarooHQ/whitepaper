@@ -167,7 +167,7 @@ preprocess-build:
 
 # run latexmk once so that gitinfo2 runs, then use latexrun
 mk-latex-pdf: preprocess-build
-	bash bin/msg_good.sh "Running latexmk to update gitinfo"
+	bash bin/msg_good.sh "Running latexmk to update gitinfo, build glossaries"
 	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX) > _latexmk.log
 	bash bin/msg_good.sh "Update glossaries (run \`make glossary-fix-1 && make && make\` to fix glossaries if something breaks)"
 	#-rm $(WPNOEXT).gl*

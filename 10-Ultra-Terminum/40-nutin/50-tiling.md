@@ -364,6 +364,16 @@ Additionally, a model of tilings of similar capacity -- i.e., similar $N_{tiles}
 
 %% BEGIN ### DRAFT
 
+### Tiling Security Principles
+
+\begin{equation*}
+\xymatrix@C=2pc@R=2pc{
+    M & c\ar[dr]\ar[drr] & L\\
+    E\ar[u] & M\ar[l] & A & N
+}
+\end{equation*}
+
+
 ### Worst Case Tiling
 
 \todo{write this section properly}
