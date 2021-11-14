@@ -310,7 +310,7 @@ $D_h = B_h$: dapp-chain block header size (bytes) \newline
 $Tx_{avg}$: average tx size (bytes)
 \end{comment}
 
-NB: For the purposes of \autoref{table:tps}, the average transaction size is taken to be 250 bytes.
+NB: For the purposes of \autoref{table:tps} and on, the average transaction size is taken to be 250 bytes.
 \begin{comment}
 Additionally, the discrepancy in header size (between $B_h$ and $D_h$) is due to the overhead of PoS mechanisms.
 \end{comment}
@@ -360,7 +360,7 @@ While $O(c^2)$ bandwidth scaling is not ideal, it's clear that -- especially in 
 
 %% INSERT ### TABLE: dapp-chains
 
-: UT's capacity and bandwidth requirements: $N_1, N_2, N_3, \text{and}\;\Delta S$ for various parameters.
+: Chain-capacity and bandwidth requirements for $\UT{\text{+OP}}$: $N_1, N_2, N_3, \Delta S$, and $\mathbb{C}^\prime$ for various parameters.
 
 ### The Impact of Header Size
 

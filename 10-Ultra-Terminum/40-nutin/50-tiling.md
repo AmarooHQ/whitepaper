@@ -110,7 +110,7 @@ Two elements of complexity will be analyzed: the size of SPV proofs between simp
 If our tiling is balanced (in the sense that a binary tree can be balanced) then the root tile has 3 children, each of which is the root node of a balanced binary tree.
 If those trees have a height of $h-1$, then each have $2^{h} - 1$ total nodes.
 The height of the trees is set to $h-1$ so that the full tiling has a height of $h$.
-There are three such trees, plus the root tile.
+There are 3 such trees, plus the root tile.
 The number of tiles in the full tiling is thus:
 \begin{equation}
 \begin{split}
@@ -121,21 +121,26 @@ N_{\text{tiles}} & = 3 \cdot (2^{h} - 1) + 1 \\
 
 and in general, for some valence, $v \ge 3$:
 \begin{equation}
-N_{\text{tiles}} = v \cdot \frac{(v-1)^h - 1}{v - 2} + 1
+\begin{split}
+N_{\text{tiles}} &= v \cdot \frac{(v-1)^h - 1}{v - 2} + 1 \\
+\therefore O(N_{\text{tiles}}) &= O((v-1)^h)
 \label{eq:n-tiles-general}
+\end{split}
 \end{equation}
 
-From \autoref{eq:n-tiles-general}, the number of tiles at height $i \ge 1$ (denoted $N_{\text{tiles}|i}$) is:
+From \autoref{eq:n-tiles-general}, the number of tiles at height $h \ge 1$ (denoted $N_{\text{tiles}|h}$) is:
 \begin{align}
-    N_{\text{tiles}|i} &= v \cdot \frac{(v-1)^i - 1}{v - 2} + 1 - (v \cdot \frac{(v-1)^{i-1} - 1}{v - 2} + 1)
+    N_{\text{tiles}|h} &= v \cdot \frac{(v-1)^h - 1}{v - 2} + 1 - (v \cdot \frac{(v-1)^{h-1} - 1}{v - 2} + 1)
     \nonumber \\
-    %%&= v\Big( \frac{(v-1)^i - (v-1)^{i-1}}{v - 2}\Big)
+    %%&= v\Big( \frac{(v-1)^h - (v-1)^{h-1}}{v - 2}\Big)
     %%\nonumber \\
-    &= v \cdot (v-1)^{i-1} \\
-    \text{Thus } O(N_{\text{tiles}|i}) = O(v^i)
+    &= v \cdot (v-1)^{h-1}
+    \label{eq:n-tiles-at-h-def} \\
+    \therefore O(N_{\text{tiles}|h}) &= O((v-1)^h)
 \end{align}
 
-Since we defined the height of each binary tree as $h-1$, the maximal distance between leaf tiles is $2h$, which is also the maximal number of SPV proofs required to prove state between any two simplex-chains. Given \autoref{eq:n-tiles}:
+Since we defined the height of each binary tree as $h-1$ (and the root tile adds 2 hops), the maximal distance between leaf tiles is $2h$.
+This is also the maximal number of SPV proofs required to prove state between any two simplex-chains. Given \autoref{eq:n-tiles}:
 \begin{equation}
 \begin{split}
 N_{\text{tiles}} & = 3 \cdot 2^h - 2 \\
@@ -145,11 +150,19 @@ N_{\text{tiles}} & = 3 \cdot 2^h - 2 \\
 
 Thus, the maximal distance between leaf tiles is $2 \cdot \log_{2}(\frac{N_{\text{tiles}} + 2}{3})$, and thus the number of SPV proofs required (across simplex-chains) scales with $O(\log_2 N_{\text{tiles}})$.
 
-Since tiles can be added in an ad-hoc fashion depending on current capacity requirements, and each tile has capacity in $O(c^j); j \in \{2,3,4\}$, if tiles are fully utilized then it must be that
+\aside{
+    We'll now derive $O(N_\text{tiles})$ differently to \autoref{eq:n-tiles-general}.
+    Also, note that we'll make some simplifications for the moment, and we'll add some rigor in \autoref{sec:tiling-cap-complexity}.
+    That we can derive $O(N_\text{tiles})$ in multiple ways (which facilitate different analysis) implies some level of \emph{convertibility} between the methods.
+    Since we're talking about complexities, we might not have precise relationships, but we should at least have some idea of \emph{how the boundaries of success interact}.
+}
+
+Since tiles can be added in an ad-hoc fashion depending on current capacity requirements, and each tile has capacity in $O(c^j); j \in \{2,3,4\}$, if tiles are fully utilized then it must be that:
 \begin{equation}
 \begin{split}
     N_{\text{tiles}} &\approx \frac{n}{c^j} \\
-    \text{Thus } O(N_{\text{tiles}}) &= O(\frac{n}{c^j})
+    \therefore O(N_{\text{tiles}}) &= O(\frac{n}{c^j})
+    \label{eq:o-n-tiles-in-terms-of-c}
 \end{split}
 \end{equation}
 
@@ -164,6 +177,8 @@ O(\log_2 c + \log_2 N_{\text{tiles}}) & = O(\log_2 c + \log_2 \frac{n}{c^j}) \\
 \end{equation}
 
 #### Network Capacity Complexity
+
+\label{sec:tiling-cap-complexity}
 
 Since $O(N_{\text{tiles}}) = O(\frac{n}{c^j})$, and each tile has order $O(c^j)$, the complexity of the network overall is given by the product of a tile's order by the number of tiles:
 \begin{equation}
@@ -184,24 +199,23 @@ That is: tiles introduced at each iteration are $r\times$ the capacity of their 
 
 Let $t$ refer to the root tile's $T_1$ (capacity). For a small tilings, we can say:
 \begin{align*}
-  h = 1 & \implies \Sigma T_1 = 1tr^0 \\
-  h = 2 & \implies \Sigma T_1 = 1tr^0 + 3tr^1 \\
-  h = 3 & \implies \Sigma T_1 = 1tr^0 + 3tr^1 + 6tr^2
+  \text{max } h = 0 & \implies \Sigma T_1 = 1tr^0 \\
+  \text{max } h = 1 & \implies \Sigma T_1 = 1tr^0 + 3tr^1 \\
+  \text{max } h = 2 & \implies \Sigma T_1 = 1tr^0 + 3tr^1 + 6tr^2
 \end{align*}
 
-In general:
+In general (via \autoref{eq:n-tiles-at-h-def}):
 \begin{align}
-    %% \Sigma T_1 = 1r^0t + 3r^1t + 6r^2
-    \Sigma T_1 &= t\Big( 1 + \sum_{i=1}^h N_{\text{tiles}|h=i} \cdot r^i \Big)
+    \Sigma T_1 &= t\Big( 1 + \sum_{h=1}^h N_{\text{tiles}|h} \cdot r^h \Big)
     \nonumber \\
-    &= t\Big( 1 + \sum_{i=1}^h v(v-1)^{i-1} \cdot r^i \Big)
+    &= t\Big( 1 + \sum_{h=1}^h v(v-1)^{h-1} \cdot r^h \Big)
 \end{align}
 
 Let us find the bounds under which this sum converges as $h \rightarrow \infty$:
 \begin{align}
-    \Sigma T_1 &= t\Big( 1 + \sum_{i=1} v(v-1)^{i-1} \cdot r^i \Big)
+    \Sigma T_1 &= t\Big( 1 + \sum_{h=1} v(v-1)^{h-1} \cdot r^h \Big)
     \nonumber \\
-    r (v-1) \Sigma T_1 &= t\Big( r(v-1) + \sum_{i=1} v(v-1)^{i} \cdot r^{i+1} \Big)
+    r (v-1) \Sigma T_1 &= t\Big( r(v-1) + \sum_{h=1} v(v-1)^{h} \cdot r^{h+1} \Big)
     \nonumber \\
     \therefore \Sigma T_1 - r (v-1) \Sigma T_1 &= \; t \cdot ( 1 + vr + vr^2(v-1) + vr^3(v-1)^2 \cdots
     \nonumber \\
@@ -224,19 +238,24 @@ Let us consider when the sum diverges:
     \label{eq:tiling-capacity-constraint}
 \end{align}
 
-Thus $\Sigma T_1$ \emph{does not converge} when $r > (v-1)^{-1}$.
+Thus, $\Sigma T_1$ \emph{does not converge} when $r > (v-1)^{-1}$.
 In other words, $\Sigma T_1$ converges when $r < (v-1)^{-1}$.
 
-It is thus a \emph{requirement} for \emph{unbounded} tiling that the ratio of a child-tile's capacity to that of their parent is $> (v-1)^{-1}$.
+A \emph{requirement} for \emph{unbounded} tiling (via the tree method) is that the ratio of a child-tile's capacity to that of their parent is $r > (v-1)^{-1}$.
 
-There are practical issues that come with $r \sim (v-1)^{-1}$, like that there are minimum requirements for the capacity of a blockchain.
+There are practical issues that come with $r \sim (v-1)^{-1}$, like that there are minimum requirements for the capacity of a blockchain (e.g., none can run with $k < 1$ B/s).
 To avoid practical issues: $r \gg (v-1)^{-1}$.
-$\Sigma T_1$ diverging implies $O(n)$ scalability if the lower bound on the capacity of a tile at height $h$ is $O(c \cdot r^h)$.
-The essence of $\Sigma T_1$ diverging (with regards to scalability) is that \emph{there is always meaningful capacity to add}.
 
-Ideally, $r \approx 1$. This is possible, and discussed in \autoref{sec:tiling-sec-cap-asymmetry}.
+$\Sigma T_1$ diverging implies $O(n)$ scalability \emph{if} the lower bound on the capacity of a tile at height $h$ is at least $O(c \cdot (v-1)^{-h})$.
+The essence of $\Sigma T_1$ diverging is that \emph{there is always meaningful capacity to add} when the network requires it.
 
-How can it be possible for an organization of blockchains to have $O(n)$ capacity, and $O(n)$ security, without breaking $O(c)$ constrains on full nodes? It is because of a \emph{new} asymmetry between \emph{capacity} and \emph{security}.
+Ideally, $r \approx 1$ (ensuring $O(c)$ constraints are respected).
+This is possible, and is discussed in \autoref{sec:tiling-sec-cap-asymmetry}.
+
+With regards to \autoref{eq:o-n-tiles-in-terms-of-c} and \autoref{eq:tiled-spv-complexity}:
+\todo{this bit}
+
+How can it be possible for an organization of blockchains to have $O(n)$ capacity, and $O(n)$ security, without breaking $O(c)$ constrains on full nodes? It is because of a \emph{new asymmetry} between \emph{capacity} and \emph{security}.
 
 ### A New Asymmetry Between Capacity and Security
 
@@ -249,6 +268,7 @@ How can it be possible for an organization of blockchains to have $O(n)$ capacit
 }
 
 Before we analyze the security of tree tilings,
+\todo{this bit}
 
 %% END ### RELEASE
 
@@ -286,8 +306,9 @@ Similarly, another alternate tiling starts with three tiles.
 To preserve valencies, each tile at height 0 has only 1 child.
 Otherwise, the iteration algorithm is the same.
 This tiling is shown in \autoref{fig:alt-tri-tiling} and has $N_{\text{tiles}} = 3 \cdot 2^{h}$.
+One advantage of this variant is that the tiling algorithm can begin when a single original simplex reaches $75\%$ capacity (at which point must be split into the trio of root-tiles).
 
-\begin{figure}
+\begin{figure}[p]
     \centering
     \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
@@ -316,12 +337,12 @@ This tiling is shown in \autoref{fig:alt-tri-tiling} and has $N_{\text{tiles}} =
     \label{fig:alt-tiling}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[p]
     \centering
     \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
         \centering
-        \includegraphics[height=.95\linewidth]{tiling_a3_v3_s5_d2_sag}
+        \includegraphics[height=.95\linewidth]{tiling_a3_v3_s5_d1_sag}
         \caption{1st iteration. 6 tiles.}
         \label{fig:tiled-simplex-alt3-d2}
     \end{subfigure}%%
@@ -329,7 +350,7 @@ This tiling is shown in \autoref{fig:alt-tri-tiling} and has $N_{\text{tiles}} =
     \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
         \centering
-        \includegraphics[height=.95\linewidth]{tiling_a3_v3_s5_d3_sag}
+        \includegraphics[height=.95\linewidth]{tiling_a3_v3_s5_d2_sag}
         \caption{2nd iteration. 12 tiles.}
         \label{fig:tiled-simplex-alt3-d3}
     \end{subfigure}%%
@@ -337,7 +358,7 @@ This tiling is shown in \autoref{fig:alt-tri-tiling} and has $N_{\text{tiles}} =
     \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
         \centering
-        \includegraphics[height=.95\linewidth]{tiling_a3_v3_s5_d4_sag}
+        \includegraphics[height=.95\linewidth]{tiling_a3_v3_s5_d3_sag}
         \caption{3rd iteration. 24 tiles.}
         \label{fig:tiled-simplex-alt3-d4}
     \end{subfigure}%%
@@ -351,7 +372,7 @@ A 3-simplex (which has 4 chains) is the least populous simplex that may be tiled
 The result of this is shown in \autoref{fig:tiled-3-simplexes} and is equivalent to a tiling of individual blockchains (a single-chain tiling).
 This configuration still has $O(n)$ scalability.
 
-\begin{figure}
+\begin{figure}[p]
 \centering
     \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
