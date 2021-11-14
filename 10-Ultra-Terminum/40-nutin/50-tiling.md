@@ -131,7 +131,8 @@ From \autoref{eq:n-tiles-general}, the number of tiles at height $i \ge 1$ (deno
     \nonumber \\
     %%&= v\Big( \frac{(v-1)^i - (v-1)^{i-1}}{v - 2}\Big)
     %%\nonumber \\
-    &= v \cdot (v-1)^{i-1}
+    &= v \cdot (v-1)^{i-1} \\
+    \text{Thus } O(N_{\text{tiles}|i}) = O(v^i)
 \end{align}
 
 Since we defined the height of each binary tree as $h-1$, the maximal distance between leaf tiles is $2h$, which is also the maximal number of SPV proofs required to prove state between any two simplex-chains. Given \autoref{eq:n-tiles}:
@@ -164,10 +165,22 @@ O(\log_2 c + \log_2 N_{\text{tiles}}) & = O(\log_2 c + \log_2 \frac{n}{c^j}) \\
 
 #### Network Capacity Complexity
 
+Since $O(N_{\text{tiles}}) = O(\frac{n}{c^j})$, and each tile has order $O(c^j)$, the complexity of the network overall is given by the product of a tile's order by the number of tiles:
+\begin{equation}
+\begin{split}
+O(c^j \cdot N_{\text{tiles}}) & = O(c^j \cdot \frac{n}{c^j}) \\
+& = O(n)
+\label{eq:simplex-tiling-complexity}
+\end{split}
+\end{equation}
+
+For all practical purposes, simplex-tiling provides unbounded capacity.
+
+The above assumes that tiles have equal capacities; what if they do not?
 The total capacity of $O(c)$ base-chains in a tree tiling ($\Sigma T_1$) is the sum of their capacities.
 There are several ways for a simplex-tile to increase or decrease in capacity: e.g., that tile might increase $k_{1,tx}$ for all simplex-chains, or contain fewer simplex-chains.
 For the sake of analysis, let's ignore the \emph{details} of differing capacity, and assume there is a consistent *ratio* ($0 < r \le 1$) between a tile's child's capacity and that tile's capacity.
-That is: tiles introduced at each iteration $r\times$ the capacity of their parent.
+That is: tiles introduced at each iteration are $r\times$ the capacity of their parent.
 
 Let $t$ refer to the root tile's $T_1$ (capacity). For a small tilings, we can say:
 \begin{align*}
@@ -202,37 +215,38 @@ Let us find the bounds under which this sum converges as $h \rightarrow \infty$:
     \label{eq:sigma-t1-conv}
 \end{align}
 
-The denominator of \autoref{eq:sigma-t1-conv} ($1 + r - rv$). For the sum to converge, the denominator must be positive:
+For the sum to converge, the denominator of \autoref{eq:sigma-t1-conv} ($1 + r - rv$) must be positive; the sum diverges when the denominator is negative.
+Let us consider when the sum diverges:
 \begin{align}
-    0 &< 1 + r - rv \nonumber \\
-    r(v-1) &< 1 \nonumber \\
-    r &< (v-1)^{-1}
+    0 &> 1 + r - rv \nonumber \\
+    r(v-1) &> 1 \nonumber \\
+    r &> (v-1)^{-1}
     \label{eq:tiling-capacity-constraint}
 \end{align}
 
-Thus $\Sigma T_1$ converges when $r < (v-1)^{-1}$.
-In other words, $\Sigma T_1$ \emph{does not converge} when $r > (v-1)^{-1}$.
+Thus $\Sigma T_1$ \emph{does not converge} when $r > (v-1)^{-1}$.
+In other words, $\Sigma T_1$ converges when $r < (v-1)^{-1}$.
 
-It is thus a \emph{requirement} for unbounded tiling that the ratio of a child-tile's capacity to that of their parent is $> (v-1)^{-1}$.
+It is thus a \emph{requirement} for \emph{unbounded} tiling that the ratio of a child-tile's capacity to that of their parent is $> (v-1)^{-1}$.
 
-Ideally, $r=1$. This is possible, and discussed in \autoref{sec:tiling-sec-cap-asymmetry}.
+There are practical issues that come with $r \sim (v-1)^{-1}$, like that there are minimum requirements for the capacity of a blockchain.
+To avoid practical issues: $r \gg (v-1)^{-1}$.
+$\Sigma T_1$ diverging implies $O(n)$ scalability if the lower bound on the capacity of a tile at height $h$ is $O(c \cdot r^h)$.
+The essence of $\Sigma T_1$ diverging (with regards to scalability) is that \emph{there is always meaningful capacity to add}.
 
-Since $O(N_{\text{tiles}}) = O(\frac{n}{c^j})$, and each tile has order $O(c^j)$, the complexity of the network overall is given by the product of a tile's order by the number of tiles:
-\begin{equation}
-\begin{split}
-O(c^j \cdot N_{\text{tiles}}) & = O(c^j \cdot \frac{n}{c^j}) \\
-& = O(n)
-\label{eq:simplex-tiling-complexity}
-\end{split}
-\end{equation}
-
-For all practical purposes, simplex-tiling provides unbounded capacity.
+Ideally, $r \approx 1$. This is possible, and discussed in \autoref{sec:tiling-sec-cap-asymmetry}.
 
 How can it be possible for an organization of blockchains to have $O(n)$ capacity, and $O(n)$ security, without breaking $O(c)$ constrains on full nodes? It is because of a \emph{new} asymmetry between \emph{capacity} and \emph{security}.
 
 ### A New Asymmetry Between Capacity and Security
 
 \label{sec:tiling-sec-cap-asymmetry}
+
+\bquote{
+    Decoupling the underlying consensus from the state-transition has been informally proposed in private for at least two years---Max Kaye was a proponent of such a strategy during the very early days of Ethereum.
+}{
+    Dr. Gavin Wood; \href{https://cloudflare-ipfs.com/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Polkadot Whitepaper, s2.2}
+}
 
 Before we analyze the security of tree tilings,
 
