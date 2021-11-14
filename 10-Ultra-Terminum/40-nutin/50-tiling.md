@@ -171,9 +171,15 @@ main idea: if you want to attack a simplex tile in the middle of the graph, then
 
 ### Tiling Variants
 
-#### Alternate and Equivalent Tiling
+#### Alternate and Equivalent Tilings
 
-There exists an alternate tiling that begins with two tiles instead of one, though the iteration algorithm is the same. It is shown in \autoref{fig:alt-tiling}. It has $N_{\text{tiles}} = 2^{h+2} - 2$.
+There exists an alternate tiling that begins with two tiles instead of one, though the iteration algorithm is the same.
+It is shown in \autoref{fig:alt-tiling}. It has $N_{\text{tiles}} = 2^{h+2} - 2$.
+
+Similarly, another alternate tiling starts with three tiles.
+To preserve valencies, each tile at depth 0 has only 1 child.
+Otherwise, the iteration algorithm is the same.
+This tiling is shown in \autoref{fig:alt-tri-tiling} and has $N_{\text{tiles}} = 3 \cdot 2^{h}$.
 
 \begin{figure}
     \centering
@@ -200,8 +206,37 @@ There exists an alternate tiling that begins with two tiles instead of one, thou
         \caption{3rd iteration. 30 tiles.}
         \label{fig:tiled-simplex-alt-d4}
     \end{subfigure}%%
-    \caption{An alternate tiling that is equivalent in terms of complexity, security, etc.}
+    \caption{An alternate tiling, starting with 2 tiles, that is equivalent in terms of complexity, security, etc.}
     \label{fig:alt-tiling}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_a3_v3_s5_d2_sag}
+        \caption{1st iteration. 6 tiles.}
+        \label{fig:tiled-simplex-alt3-d2}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_a3_v3_s5_d3_sag}
+        \caption{2nd iteration. 12 tiles.}
+        \label{fig:tiled-simplex-alt3-d3}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_a3_v3_s5_d4_sag}
+        \caption{3rd iteration. 24 tiles.}
+        \label{fig:tiled-simplex-alt3-d4}
+    \end{subfigure}%%
+    \caption{An alternate tiling, starting with 3 tiles, that is equivalent in terms of complexity, security, etc.}
+    \label{fig:alt-tri-tiling}
 \end{figure}
 
 #### Tiling With Individual Blockchains

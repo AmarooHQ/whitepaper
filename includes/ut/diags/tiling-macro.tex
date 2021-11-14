@@ -12,6 +12,7 @@
 \providecommand\TilingDrawAllReflections{1}%
 \providecommand\TilingDrawGroups{0}%
 \providecommand\TilingAltPattern{0}%
+\providecommand\TilingAltTriPattern{0}%
 \providecommand\TilingLineColor{black}%
 \providecommand\TilingOnlyTopHalf{0}%
 \input{simplex-macro}%
@@ -36,9 +37,14 @@
     \xdef\createChildren{\TilingValence}
     \ifnum 1=\TilingAltPattern
         \xdef\createCurrent{2}
+        \pgfmathsetmacro\newCreateChildren{(\TilingValence-1)*\createCurrent}
+        \ifnum 1=\TilingAltTriPattern
+            \xdef\createCurrent{3}
+            % create 1 less child at this point, account for this during end of depth-iter loop
+            \pgfmathsetmacro\newCreateChildren{(\TilingValence-2)*\createCurrent}
+        \fi
         \pgfmathsetmacro\newCreateDistance{\tilingCurrSize*1.5}
         \xdef\createDistance{\newCreateDistance}
-        \pgfmathsetmacro\newCreateChildren{(\TilingValence-1)*2}
         \xdef\createChildren{\newCreateChildren}
     \fi
     \xdef\prevCreateDist{0}
@@ -67,7 +73,11 @@
                         \def\parentSimplex{\nodeNameRoot/0/1}
                         \pgfmathsetmacro\parentId{0}
                         \ifnum 1=\xintifboolexpr{1 < \d || \TilingAltPattern == 1}{1}{0}
-                            \pgfmathsetmacro\parentId{int(\s/\newChildren + (1-1/\newChildren))}
+                            \xdef\newChildrenSub{\xintifboolexpr{1 == \d && 1 == \TilingAltTriPattern}{1}{0}}
+                            % how many children we're actually creating. Note, this is to calc the parentId,
+                            % so it regards the current tile.
+                            \pgfmathsetmacro\newKidsActual{\newChildren - \newChildrenSub}
+                            \pgfmathsetmacro\parentId{int(\s/\newKidsActual + (1-1/\newKidsActual))}
                             \def\parentSimplex{\nodeNameRoot/\lastD/\parentId}
                         \fi
                         \xdef\tileName{\nodeNameRoot/\d/\s}
@@ -78,6 +88,7 @@
                         \else
                             \pgfmathsetmacro\parentSxAngle{mod(360/(\createCurrent/2)*\parentId-\lastAngleOffset, 360)}
                         \fi
+                        % angle from parent
                         \renewcommand\SimplexOffsetAngle{\sxAngle}
 
                         \ifnum 0=\TilingMonoColor
@@ -148,11 +159,19 @@
                             \begin{pgfonlayer}{reflections}
                                 % draw refl lines to parent
                                 \ifnum 1=\TilingDrawAllReflections
-                                \foreach \sn in {1,...,\SimplexChains} {
+                                    \foreach \sn in {1,...,\SimplexChains} {
                                         \foreach \pn in {1,...,\SimplexChains} {
                                                 \draw [thin, draw=\TilingLineColor] (\parentSimplex//\pn) -- (\SimplexNodeName//\sn);
                                             }
                                     }
+                                    % if using TilingAltTri pattern then last tile at d=0 needs extra refls
+                                    \ifnum 1=\xintifboolexpr{0 == \d && \s == \createCurrent && 1 == \TilingAltTriPattern}{1}{0}
+                                        \foreach \sn in {1,...,\SimplexChains} {
+                                            \foreach \pn in {1,...,\SimplexChains} {
+                                                    \draw [thin, draw=\TilingLineColor] (\nodeNameRoot/\lastD/1//\pn) -- (\SimplexNodeName//\sn);
+                                                }
+                                        }
+                                    \fi
                                 \else
                                     \draw [ultra thick, draw=\TilingLineColor, style=double, double distance=2pt, line width=2pt] (\parentSimplex/group) -- (\tileName/group);
                                 \fi
@@ -167,7 +186,10 @@
                 \xdef\tilingCurrSize{\tilingCurrSize/\TilingScaleConst}
                 \xdef\createDistance{\newCreateDist}
                 \xdef\createCurrent{\createChildren}
-                \pgfmathsetmacro\newCreateChildren{\createChildren*\newChildren}
+                \pgfmathsetmacro\newCreateChildren{(\createChildren)*\newChildren}
+                % \ifnum 1=\xintifboolexpr{\d == 1 && \TilingAltTriPattern == 1}{1}{0}
+                %     \pgfmathsetmacro\newCreateChildren{(1 + \createChildren)*\newChildren}
+                % \fi
                 \xdef\createChildren{\newCreateChildren}
                 \xdef\lastD{\d}
             \fi
