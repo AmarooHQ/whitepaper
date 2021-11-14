@@ -67,6 +67,9 @@ https://web.archive.org/web/20210831185445/https://docs.solana.com/running-valid
 
 -}
 
+_B_PER_S_TO_GB_PER_YR :: Number
+_B_PER_S_TO_GB_PER_YR = 86400.0 * 365.25 / 1024.0 / 1024.0 / 1024.0
+
 confRateTex = "\\mathbb{C}^\\prime"
 
 sigmaTps :: Maybe Int -> String
@@ -176,6 +179,8 @@ _OPT_SHARD_1M_K = oc2TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING
 _UT_INIT_CONFIG = mkSimplePs 3000.0 _UT_HF 250.0
 
 _COMPARE_20K = 20_000.0
+_UT_20K_CONFIG = mkSimplePs _COMPARE_20K _UT_HF 250.0
+
 
 utComplexityParams :: Array Params
 utComplexityParams = do
@@ -543,7 +548,8 @@ optimizationProps2 :: Array OProps
 optimizationProps2 =
   [ {s: "$\\Delta s$ (B/s)", f: \cs -> fmtDyn fdStdZero cs.deltaSmallS}
   , {s: "$\\text{TTS}_{5yrs}$ (days)", f: \cs -> fmtDyn fdStdTwo cs.tts}
-  , {s: "Chain-GB/yr", f: \cs -> fmtDyn fdStdTwo (cs.deltaSmallS * 86400.0 * 365.25 / 1024.0 / 1024.0 / 1024.0)}
+  -- , {s: "Chain-GB/yr", f: \cs -> intercalate " +" $ (fmtDyn fdStd <<< (_ * _B_PER_S_TO_GB_PER_YR)) <$> [cs.k1, cs.deltaSmallS - cs.k1]}
+  , {s: "Chain-GB/yr", f: \cs -> fmtDyn fdStd <<< (_ * _B_PER_S_TO_GB_PER_YR) $ cs.deltaSmallS}
   , {s: "$\\Delta S$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.deltaBigS}
   , {s: "$\\Sigma$ $\\text{TTS}_{5yrs}$ (days)", f: \cs -> fmtDyn fdStdTwo cs.sigmaTts}
   -- , {s: "$\\nicefrac{\\Sigma\\;\\text{TPS}}{\\Delta s}$ (Tx/B)", f: \cs -> fmtDyn fdStdTwo (cs.d1.tps / cs.deltaSmallS)}
@@ -561,26 +567,49 @@ compareUtOptimizationsFlipped = Table
     ut = allUtChainCalcs _UT_INIT_CONFIG
     variants = [PoRs 1, PoRTs 1, HOPoRs 1, HOPoRTs 1, Std 1, T 1, HO 1, HOT 1]
 
-compareUtOptimizations :: Table
-compareUtOptimizations = Table
+
+compareUtOptimizations_ :: Params -> Array OProps -> Table
+compareUtOptimizations_ ps oProps = Table
     ([""] <> (oProps <#> (\{s} -> s)))
     {md: mkSpacer <$> A.replicate (l+1) 3, texTabular: "l" <> repeatSafe l "r"}
     (genCompareUtRow ut oProps <$> variants)
   where
-    ut = allUtChainCalcs _UT_INIT_CONFIG
+    ut = allUtChainCalcs ps
     variants = [PoRs 0, PoRTs 0, HOPoRs 0, HOPoRTs 0, Std 0, T 0, HO 0, HOT 0]
-    oProps = optimizationProps1
     l = A.length oProps
 
-compareUtOptimizations2 :: Table
-compareUtOptimizations2 = Table
-    ([""] <> (oProps <#> (\{s} -> s)))
-    {md: mkSpacer <$> A.replicate 6 3, texTabular: "l" <> repeatSafe 5 "r"}
-    (genCompareUtRow ut oProps <$> variants)
-  where
-    ut = allUtChainCalcs _UT_INIT_CONFIG
-    variants = [PoRs 0, PoRTs 0, HOPoRs 0, HOPoRTs 0, Std 0, T 0, HO 0, HOT 0]
-    oProps = optimizationProps2
+
+compareUtOptimizationsA :: Table
+compareUtOptimizationsA = compareUtOptimizations_ _UT_INIT_CONFIG optimizationProps1
+
+compareUtOptimizationsA20k :: Table
+compareUtOptimizationsA20k = compareUtOptimizations_ _UT_20K_CONFIG optimizationProps1
+
+-- compareUtOptimizations = Table
+--     ([""] <> (oProps <#> (\{s} -> s)))
+--     {md: mkSpacer <$> A.replicate (l+1) 3, texTabular: "l" <> repeatSafe l "r"}
+--     (genCompareUtRow ut oProps <$> variants)
+--   where
+--     ut = allUtChainCalcs _UT_INIT_CONFIG
+--     variants = [PoRs 0, PoRTs 0, HOPoRs 0, HOPoRTs 0, Std 0, T 0, HO 0, HOT 0]
+--     oProps = optimizationProps1
+--     l = A.length oProps
+
+compareUtOptimizationsB :: Table
+compareUtOptimizationsB = compareUtOptimizations_ _UT_INIT_CONFIG optimizationProps2
+
+compareUtOptimizationsB20k :: Table
+compareUtOptimizationsB20k = compareUtOptimizations_ _UT_20K_CONFIG optimizationProps2
+
+-- compareUtOptimizations2 = Table
+--     ([""] <> (oProps <#> (\{s} -> s)))
+--     {md: mkSpacer <$> A.replicate (l+1) 3, texTabular: "l" <> repeatSafe l "r"}
+--     (genCompareUtRow ut oProps <$> variants)
+--   where
+--     ut = allUtChainCalcs _UT_INIT_CONFIG
+--     variants = [PoRs 0, PoRTs 0, HOPoRs 0, HOPoRTs 0, Std 0, T 0, HO 0, HOT 0]
+--     oProps = optimizationProps2
+--     l = A.length oProps
 
 
 mkCompareUtOptimizations :: Array OProps -> Table

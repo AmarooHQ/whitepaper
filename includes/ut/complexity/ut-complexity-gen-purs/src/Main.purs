@@ -3,13 +3,13 @@ module Main where
 import Prel
 
 import Amaroo.WP.Formatter (wrap)
-import Amaroo.WP.Tables (compareNets1mTps, compareNets1mTpsAll, compareNets20k, compareNets3k, compareUtOptimizations, compareUtOptimizations2, dappChains, dappChainsHot, lpCompareNetworks, lpCompareUt1Eth2, lpCompareUt1OptShard, lpCompareUt2OptShard, lpCompareUt2OptShard20k, lpCompareUtOptimizations1, showHtmlTable, showLatexTable, showMdTable, tableTps, tableTpsHot, tpsPor, tpsPort)
+import Amaroo.WP.Tables (compareNets1mTps, compareNets1mTpsAll, compareNets20k, compareNets3k, compareUtOptimizationsA, compareUtOptimizationsA20k, compareUtOptimizationsB, compareUtOptimizationsB20k, dappChains, dappChainsHot, lpCompareNetworks, lpCompareUt1Eth2, lpCompareUt1OptShard, lpCompareUt2OptShard, lpCompareUt2OptShard20k, lpCompareUtOptimizations1, showHtmlTable, showLatexTable, showMdTable, tableTps, tableTpsHot, tpsPor, tpsPort)
 import Amaroo.WP.Tables.Booktabs (renderBooktabs)
 import Amaroo.WP.Tables.Types (LatexTablePos(..), TPositioning(..), TableDesc(..))
 import Control.Alt ((<|>))
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.State (State, modify_, runState)
-import Data.Array (drop, dropWhile, elem, filter, head, intercalate, take, takeWhile)
+import Data.Array (drop, dropWhile, elem, filter, head, intercalate, length, take, takeWhile)
 import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Data.String (Pattern(..), contains)
 import Data.String as S
@@ -62,8 +62,10 @@ wpTables =
     , TD "dapp-chains_optimized" dappChainsHot defaultPositioning
     , TD "tps_por" tpsPor defaultPositioning
     , TD "tps_port" tpsPort defaultPositioning
-    , TD "compare_optimizations" compareUtOptimizations defaultPositioning
-    , TD "compare_optimizations2" compareUtOptimizations2 defaultPositioning
+    , TD "compare_optimizations_a" compareUtOptimizationsA defaultPositioning
+    , TD "compare_optimizations_b" compareUtOptimizationsB defaultPositioning
+    , TD "compare_optimizations_a_20k" compareUtOptimizationsA20k defaultPositioning
+    , TD "compare_optimizations_b_20k" compareUtOptimizationsB20k defaultPositioning
     , TD "compare_nets_3k" compareNets3k hereish
     , TD "compare_nets_20k" compareNets20k hereish
     , TD "comparison_1m_tps" compareNets1mTps hereish
@@ -101,24 +103,31 @@ readWhitepaperMd = do
 renderTable :: TableDesc -> Maybe String -> String
 renderTable (TD tn table pos) caption = renderBooktabs (TPositioning pos) {label: Just tn, caption} table
 
-insertReplacement :: TableDesc -> {before :: Array String, mid :: _, after :: Array String} -> Array String
-insertReplacement td {before, mid: Just caption, after} = before <> [renderTable td caption] <> after
-insertReplacement _ {before, mid: Nothing, after} = before <> after
+insertReplacement :: TableDesc -> {before :: Array String, mid :: Maybe String, after :: Array String} -> Array String
+insertReplacement td {before, mid, after} = before <> [renderTable td mid] <> after
+-- insertReplacement _ {before, mid: Nothing, after} = before <> after
 
 toBeforeTableAfter tn ls = {before: takeWhile (_ /= toReplace) ls, mid, after}
   where
     midPre = dropWhile (_ /= toReplace) ls
-    mid = (\_ -> getCaption $ take 3 midPre) <$> head midPre
+    -- capRes = (\_ -> getCaption $ take 2 midPre <> takeWhile (_ /= "") (drop 2 midPre)) =<< head midPre
+    capRes = getCaption $ take 2 midPre <> (takeWhile (_ /= "") <<< drop 2) midPre
+    toDrop = capRes <#> (\{capLines} -> length capLines + 2) |> fromMaybe 0
     after = drop toDrop midPre
-    toDrop = (mid <#> (\caption -> if isJust caption then 3 else 1) |> fromMaybe 0)
+    -- toDrop = (capRes <#> (\caption -> if isJust caption then 3 else 1) |> fromMaybe 0)
+    mid = (capRes <#> (\{cap} -> cap)) :: Maybe String
     toReplace = genStrToReplace tn
 
-getCaption [_, blank, caption] = if S.length blank == 0
-    then S.stripPrefix (Pattern ": ") trimmedCaption <|> S.stripPrefix (Pattern "Table: ") trimmedCaption
-    else Nothing
+getCaption :: Array String -> Maybe {cap :: String, capLines :: Array String}
+getCaption lines = do
+    _ <- shouldBeBlank
+    cap <- S.stripPrefix (Pattern ": ") trimmedCaption <|> S.stripPrefix (Pattern "Table: ") trimmedCaption
+    pure { cap, capLines }
   where
-    trimmedCaption = S.trim caption
-getCaption _ = unsafeThrowException $ error "getCaption recieved an array with length /= 3"
+    trimmedCaption = S.trim $ intercalate "\n" capLines
+    capLines = drop 2 lines
+    shouldBeBlank = (\l -> if l == "" then Just "" else Nothing) <=< head $ drop 1 $ take 2 lines
+-- getCaption _ = unsafeThrowException $ error "getCaption recieved an array with length /= 3"
 
 replaceTable :: TableDesc -> State String Unit
 replaceTable td@(TD tn _ _) = modify_ $ lines >>> toBeforeTableAfter tn >>> insertReplacement td >>> intercalate "\n"
