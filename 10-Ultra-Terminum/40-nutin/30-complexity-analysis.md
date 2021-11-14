@@ -404,14 +404,28 @@ Practically, this effect means that a decrease to the size of headers has *incre
 
 ### Comparison of UT Variants
 
-\autoref{table:compare_optimizations} and \autoref{table:compare_optimizations2} show a comparison between UT variants. Note that the +PoRs variants are covered in \autoref{sec:por-with-proofs}.
+\autoref{table:compare_optimizations_a} and \autoref{table:compare_optimizations_b} show a comparison between UT variants.
+Note that the +PoRs variants are covered in \autoref{sec:por-with-proofs}.
 
-%% INSERT ### TABLE: compare_optimizations
+%% INSERT ### TABLE: compare_optimizations_a
 
-: Comparison of UT variants. Parameters are: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions. ``E. $B_h$'' means the \emph{effective} header-size.
+: Comparison of UT variants.
+Parameters are: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions.
+``E. $B_h$'' means the \emph{effective} header-size.
 
-%% INSERT ### TABLE: compare_optimizations2
+%% INSERT ### TABLE: compare_optimizations_a_20k
 
-: Comparison of UT variants. Parameters are: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions. The time to sync 5 years of a simplex-chain's history, including verifying PoRs ($\text{TTS}_{5yrs}$) is measured against a fully utilized 10 MB/s network connection and assumes no software bottlenecks. The equivalent for \emph{all} simplex-chains and PoRs being verified ($\Sigma$ $\text{TTS}_{5yrs}$) is also shown.
+: Comparison of UT variants; as in \autoref{table:compare_optimizations_a} with $k = 20000$ B/s.
+
+%% INSERT ### TABLE: compare_optimizations_b
+
+: Comparison of UT variants.
+Parameters are: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions.
+The time to sync 5 years of a simplex-chain's history, including verifying PoRs ($\text{TTS}_{5yrs}$) is measured against a fully utilized 10 MB/s network connection and assumes no software bottlenecks.
+The equivalent for \emph{all} simplex-chains and PoRs being verified ($\Sigma$ $\text{TTS}_{5yrs}$) is also shown.
+
+%% INSERT ### TABLE: compare_optimizations_b_20k
+
+: Comparison of UT variants; as in \autoref{table:compare_optimizations_b} with $k = 20000$ B/s.
 
 %% END ### RELEASE

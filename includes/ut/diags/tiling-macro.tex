@@ -24,6 +24,7 @@
 \pgfdeclarelayer{tiles}%
 \pgfsetlayers{reflections,groups,main,tiles}%
 \newcommand\TikzSimplexTiling{
+    % \xdef\tilingCurrSize{\TilingInitSize}
     \renewcommand\SimplexOutlineColor{\TilingLineColor}
     \pgfmathsetmacro\nNodesTotal{3*(2^(\TilingDepth)-1)+1}
     \xdef\initNodeR{\TilingInitSize*\TilingSizeToNodeRRatio}
@@ -38,12 +39,13 @@
     \ifnum 1=\TilingAltPattern
         \xdef\createCurrent{2}
         \pgfmathsetmacro\newCreateChildren{(\TilingValence-1)*\createCurrent}
+        \pgfmathsetmacro\newCreateDistance{\tilingCurrSize*\TilingScaleConst}
         \ifnum 1=\TilingAltTriPattern
             \xdef\createCurrent{3}
             % create 1 less child at this point, account for this during end of depth-iter loop
             \pgfmathsetmacro\newCreateChildren{(\TilingValence-2)*\createCurrent}
+            % \xdef\tilingCurrSize{\TilingInitSize/\TilingScaleConst}
         \fi
-        \pgfmathsetmacro\newCreateDistance{\tilingCurrSize*1.5}
         \xdef\createDistance{\newCreateDistance}
         \xdef\createChildren{\newCreateChildren}
     \fi
@@ -55,13 +57,22 @@
     \foreach \d in {0,...,\TilingDepth} {
             \ifnum 0<\createCurrent
                 \renewcommand\SimplexRadius{\tilingCurrSize}
+                \ifnum 1=\xintifboolexpr{1 == \TilingAltTriPattern}{1}{0}
+                    \renewcommand\SimplexRadius{\tilingCurrSize/\TilingScaleConst}
+                \fi
+                \ifnum 1=\xintifboolexpr{1 == \TilingAltTriPattern && 0 == \d}{1}{0}
+                    \renewcommand\SimplexRadius{\tilingCurrSize/\TilingScaleConst/\TilingScaleConst}
+                \fi
                 \renewcommand\SimplexOffsetR{\createDistance}
+                % normally 180, 540 only for tilingAlt but not tilingAltTri
+                \xdef\autoRotAngle{\xintifboolexpr{0 == \TilingAltPattern || 1 == \TilingAltTriPattern}{180}{540}}
                 \ifnum 1=\TilingAutoRotate
-                    \ifnum 0=\TilingAltPattern
-                        \pgfmathsetmacro\sxAngleOffset{mod(360/\createCurrent/2+(180/\TilingValence)*(\TilingValence-2)/2, 360)}
-                    \else
-                        \pgfmathsetmacro\sxAngleOffset{mod(360/\createCurrent/2+(540/\TilingValence)*(\TilingValence-2)/2, 360)}
-                    \fi
+                    \pgfmathsetmacro\sxAngleOffset{mod(360/\createCurrent/2+(\autoRotAngle/\TilingValence)*(\TilingValence-2)/2, 360)}
+                    % \ifnum 0=\TilingAltPattern
+                    %     \pgfmathsetmacro\sxAngleOffset{mod(360/\createCurrent/2+(180/\TilingValence)*(\TilingValence-2)/2, 360)}
+                    % \else
+                    %     \pgfmathsetmacro\sxAngleOffset{mod(360/\createCurrent/2+(540/\TilingValence)*(\TilingValence-2)/2, 360)}
+                    % \fi
                 \else
                     \pgfmathsetmacro\sxAngleOffset{mod(360/\createCurrent/2, 360)}
                 \fi

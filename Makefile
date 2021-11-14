@@ -167,13 +167,18 @@ preprocess-build:
 
 # run latexmk once so that gitinfo2 runs, then use latexrun
 mk-latex-pdf: preprocess-build
+	TZ='Australia/Sydney' python3 ./latexrun --color always --latex-args "-shell-escape -interaction=batchmode" $(WPTEX) -O $(OUTDIR)
+
 	bash bin/msg_good.sh "Running latexmk to update gitinfo, build glossaries"
 	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX) | tee _latexmk.log
+
 	bash bin/msg_good.sh "Update glossaries (run \`make glossary-fix-1 && make && make\` to fix glossaries if something breaks)"
 	#-rm $(WPNOEXT).gl*
 	(cd $(OUTDIR) && makeglossaries $(WPFILENAME))
+
 	bash bin/msg_good.sh "./latexrun to build paper proper"
 	TZ='Australia/Sydney' python3 ./latexrun --color always --latex-args "-shell-escape -interaction=batchmode" $(WPTEX) -O $(OUTDIR)
+
 	cp $(WPNOEXT).pdf $(OUTPUT_PDF)
 	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE).pdf
 	cp $(WPNOEXT).pdf $(WPFILENAME)-$(PP_MODE).pdf
@@ -282,3 +287,9 @@ docker-bash:
 # run a little python3 server from output dir
 serve:
 	cd $(OUTDIR) && python3 -m http.server 3131
+
+view:
+	wslview output/whitepaper.pdf
+
+viewweb:
+	wslview http://localhost:3131/whitepaper.pdf
