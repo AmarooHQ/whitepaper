@@ -4,11 +4,15 @@
 
 \label{sec:tiling}
 
-\defineTerm{Maximal Simplex}{A simplex with the maximum number of simplex-chains under $O(c)$ constraints}
+\defineTerm{Maximal Simplex}{
+    A simplex with the maximum number of simplex-chains under $O(c)$ constraints
+}
 
 Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes are tiled, I call the result a *simplex tiling*.
 
-\defineTerm{Simplex Tile}{Like a simplex, but $75\%$ of the PoR capacity is reserved for reflections with \emph{neighboring} tiles; a quadrifurcated maximal simplex}
+\defineTerm{Simplex Tile}{
+    Like a simplex, but $>75\%$ of the PoR capacity is reserved for reflections with \emph{neighboring} tiles; typically a quadrifurcated maximal simplex
+}
 
 \todoDraftOnly{terms and edit / refactor this section}
 
@@ -28,7 +32,7 @@ That is: it is a simplex that deliberately reserves only $\nicefrac{1}{4}$ of it
 
 \label{sec:tile-valence}
 
-Tiles *must* have a valance of $\ge 3$ for $O(n)$ scaling. If tiles had a valence of 0, then no additional tiles can be added. If tiles had a valence of 1, then only a single additional tile could be added (for a total of 2) but no more. If tiles had a valance of 2, then the 'shape' that the tiles created would be a linear chain; a tile-chain. For a tile-chain of length $n$, proving state on the far end of the chain would take $n$ SPV proofs, which is untenable.
+Tiles *must* have a valance, $v$, of $v \ge 3$ for $O(n)$ scaling. If tiles had a valence of 0, then no additional tiles can be added. If tiles had a valence of 1, then only a single additional tile could be added (for a total of 2) but no more. If tiles had a valance of 2, then the 'shape' that the tiles created would be a linear chain; a tile-chain. For a tile-chain of length $n$, proving state on the far end of the chain would take $n$ SPV proofs, which is untenable.
 
 However, if tiles have a valance of $3$, then each tile has up to 3 neighbors. For all tiles but the first, this is equivalent to being a node in a binary tree (where each non-root, non-leaf node has 1 parent and 2 children: 3 neighbors). In essence, this method of tiling simplexes results in 3 distinct binary trees as children of a single root tile -- this can be seen in \autoref{fig:tiled-simplex-5-d4}.
 
@@ -36,7 +40,13 @@ Increasing the valence beyond 3 does not make sense, though. There are two reaso
 
 [^log-complexity]: Complexity orders involving logarithms are sensitive to changes in the base *if* the logarithms are part of an exponent. e.g., $O(3^{\log_2 n}) > O(3^{\log_4 n})$. These considerations aren't relevant here, though.
 
-### The First Tile
+### Tree Tiling
+
+As shown in \autoref{sec:tessellating-tiles-efficiency}, there are different ways to arrange a tiling.
+We will focus on a tiling method that exploits the exponential growth of \emph{trees}.
+Particularly, trees of branching factor $v - 1$ (so $v=3$ corresponds to binary trees, $v=4$ corresponds to ternary trees, etc).
+
+#### The First Tile
 
 \begin{figure}
 \centering
@@ -45,26 +55,26 @@ Increasing the valence beyond 3 does not make sense, though. There are two reaso
 \label{fig:tiled-simplex-5-d1}
 \end{figure}
 
-\autoref{fig:tiled-simplex-5-d1} assumes an $O(c)$ node has capacity for tracking $4 \cdot n$ simplex-chains, with $n = 5$. In reality, an $O(c)$ node has capacity to track between $100$ to $10,000$ simplex-chains. Simplexes and simplex-tilings of that magnitude are impractical to illustrate.
+\autoref{fig:tiled-simplex-5-d1} assumes an $O(c)$ node has capacity for tracking $4 \cdot n$ simplex-chains, with $n = 5$. In reality, an $O(c)$ node has capacity to track between $100$ to $10,000$ simplex-chains (this implies $25$ to $2,500$ simplex-chains per tile). Simplexes and simplex-tilings of that magnitude are impractical to illustrate.
 
-### Adding Tiles
+#### Adding Tiles
 
 A tiling 'iteration' is the process by which new tiles are added. For the sake of simplicity and demonstration, each iteration will add *all possible new tiles* as children of all 'leaf' tiles -- though in reality there's no requirement that new tiles be added at the same time, or that tiles are added in a balanced fashion.
 
 We start from the foundation that each tile has a maximum of $\frac{N_1}{4}$ simplex-chains, where $N_1$ is the maximum capacity of a maximal simplex. That is: if one computer (based on $O(c)$ reasoning) could be a full node[^simplex-full-validation] for a simplex-chain in a 4000-simplex, then each tile will have, at most, 1000 simplex-chains. Since a tile is adjacent to $\le 3$ other tiles, a tiled simplex-chain will have, at most, $N_1$ reflections (since a tile and its neighbors have, at most, $\frac{N_1}{4}$ simplex-chains, and all of those simplex-chains are reflected).
 
-[^simplex-full-validation]: A full node for a simplex-chain does not need to fully validate any other simplex-chains, or dapp-chains on that simplex-chain. Header-only validation is fine.
+[^simplex-full-validation]: A full node for a simplex-chain does not need to fully validate any other simplex-chains, or dapp-chains on that simplex-chain.
 
 Our starting point is a $\frac{N_1}{4}$-simplex which constitutes a single tile. This is shown in \autoref{fig:tiled-simplex-5-d1}.
 
-The next iteration is to add $3$ adjacent tiles, since our initial tile has a valence of 3. Each of these new tiles has one pre-existing neighbor (the root tile), so each new tile has capacity for 2 more neighbors. Thus, the next iteration will add twice the number of tiles as the preceding iteration -- in this case, $6$ new tiles. This pattern -- adding twice the number of tiles as the previous iteration -- continues indefinitely.
+The next iteration is to add $3$ adjacent tiles, since tiling has a valence of 3. Each of these new tiles has one pre-existing neighbor (the root tile), so each new tile has capacity for 2 more neighbors. Thus, the next iteration will add twice the number of tiles as the preceding iteration -- in this case, $6$ new tiles. This pattern -- adding twice the number of tiles as the previous iteration -- continues indefinitely.
 
 \begin{comment}
 side by side figures: https://tex.stackexchange.com/questions/37581/latex-figures-side-by-side
 \end{comment}
 
 \begin{figure}
-    \begin{subfigure}[t]{.31\textwidth}
+    \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
         \centering
         \includegraphics[height=.95\linewidth]{tiling_s5_d2_sag}
@@ -72,7 +82,7 @@ side by side figures: https://tex.stackexchange.com/questions/37581/latex-figure
         \label{fig:tiled-simplex-5-d2}
     \end{subfigure}%%
     \hfill
-    \begin{subfigure}[t]{.31\textwidth}
+    \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
         \centering
         \includegraphics[height=.95\linewidth]{tiling_s5_d3_sag}
@@ -80,7 +90,7 @@ side by side figures: https://tex.stackexchange.com/questions/37581/latex-figure
         \label{fig:tiled-simplex-5-d3}
     \end{subfigure}%%
     \hfill
-    \begin{subfigure}[t]{.31\textwidth}
+    \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
         \centering
         \includegraphics[height=.95\linewidth]{tiling_s5_d4_sag}
@@ -93,11 +103,15 @@ side by side figures: https://tex.stackexchange.com/questions/37581/latex-figure
 
 ### Complexity Analysis
 
-Two elements of complexity will be analyzed: the size of SPV proofs between simplex-chains, and the network overall.
+Two elements of complexity will be analyzed: the size of SPV proofs between simplex-chains, and the network capacity overall.
 
 #### Tiling Complexity
 
-If our tiling is balanced (in the sense that a binary tree can be balanced) then the root tile has 3 children, each of which is the root node of a balanced binary tree. If those trees have a height of $h-1$, then each have $2^{h} - 1$ total nodes. The height of the trees is set to $h-1$ so that the full tiling has a height of $h$. The number of tiles in the full tiling is thus:
+If our tiling is balanced (in the sense that a binary tree can be balanced) then the root tile has 3 children, each of which is the root node of a balanced binary tree.
+If those trees have a height of $h-1$, then each have $2^{h} - 1$ total nodes.
+The height of the trees is set to $h-1$ so that the full tiling has a height of $h$.
+There are three such trees, plus the root tile.
+The number of tiles in the full tiling is thus:
 \begin{equation}
 \begin{split}
 N_{\text{tiles}} & = 3 \cdot (2^{h} - 1) + 1 \\
@@ -108,9 +122,19 @@ N_{\text{tiles}} & = 3 \cdot (2^{h} - 1) + 1 \\
 and in general, for some valence, $v \ge 3$:
 \begin{equation}
 N_{\text{tiles}} = v \cdot \frac{(v-1)^h - 1}{v - 2} + 1
+\label{eq:n-tiles-general}
 \end{equation}
 
-Since we defined the height of each tree as $h-1$, the maximal distance between leaf tiles is $2h$, which is also the maximal number of SPV proofs required to prove state between any two simplex-chains. Given \autoref{eq:n-tiles}:
+From \autoref{eq:n-tiles-general}, the number of tiles at height $i \ge 1$ (denoted $N_{\text{tiles}|i}$) is:
+\begin{align}
+    N_{\text{tiles}|i} &= v \cdot \frac{(v-1)^i - 1}{v - 2} + 1 - (v \cdot \frac{(v-1)^{i-1} - 1}{v - 2} + 1)
+    \nonumber \\
+    %%&= v\Big( \frac{(v-1)^i - (v-1)^{i-1}}{v - 2}\Big)
+    %%\nonumber \\
+    &= v \cdot (v-1)^{i-1}
+\end{align}
+
+Since we defined the height of each binary tree as $h-1$, the maximal distance between leaf tiles is $2h$, which is also the maximal number of SPV proofs required to prove state between any two simplex-chains. Given \autoref{eq:n-tiles}:
 \begin{equation}
 \begin{split}
 N_{\text{tiles}} & = 3 \cdot 2^h - 2 \\
@@ -118,31 +142,99 @@ N_{\text{tiles}} & = 3 \cdot 2^h - 2 \\
 \end{split}
 \end{equation}
 
-Thus, the maximal distance between leaf tiles is $2 \cdot \log_{2}(\frac{N_{\text{tiles}} + 2}{3})$, and thus the number of SPV proofs required (across simplex-chains) scales with $O(\log_2 N_{tiles})$.
+Thus, the maximal distance between leaf tiles is $2 \cdot \log_{2}(\frac{N_{\text{tiles}} + 2}{3})$, and thus the number of SPV proofs required (across simplex-chains) scales with $O(\log_2 N_{\text{tiles}})$.
 
-Since tiles can be added in an ad-hoc fashion depending on current capacity, and each tile has capacity in $O(c^j); j \in \{2,3,4\}$, it must be that $N_{\text{tiles}} \approx \frac{n}{c^j}$. Thus $O(N_{tiles}) = O(\frac{n}{c^j})$.
+Since tiles can be added in an ad-hoc fashion depending on current capacity requirements, and each tile has capacity in $O(c^j); j \in \{2,3,4\}$, if tiles are fully utilized then it must be that
+\begin{equation}
+\begin{split}
+    N_{\text{tiles}} &\approx \frac{n}{c^j} \\
+    \text{Thus } O(N_{\text{tiles}}) &= O(\frac{n}{c^j})
+\end{split}
+\end{equation}
 
 Given \autoref{eq:spv-complexity}, dapp-chain inter-tile SPV proofs have order:
 \begin{equation}
 \begin{split}
-O(\log_2 c + \log_2 N_{tiles}) & = O(\log_2 c + \log_2 \frac{n}{c^j}) \\
+O(\log_2 c + \log_2 N_{\text{tiles}}) & = O(\log_2 c + \log_2 \frac{n}{c^j}) \\
 & = O(\log_2 c + \log_2 n - j \cdot \log_2 c) \\
 & = O(\log_2 c + \log_2 n - \log_2 c) \\
 & = O(\log_2 n) \label{eq:tiled-spv-complexity}
 \end{split}
 \end{equation}
 
-#### Network Complexity
+#### Network Capacity Complexity
 
-Since $O(N_{tiles}) = O(\frac{n}{c^j})$, and each tile has order $O(c^j)$, the complexity of the network overall is given by the product of a tile's order by the number of tiles:
+The total capacity of $O(c)$ base-chains in a tree tiling ($\Sigma T_1$) is the sum of their capacities.
+There are several ways for a simplex-tile to increase or decrease in capacity: e.g., that tile might increase $k_{1,tx}$ for all simplex-chains, or contain fewer simplex-chains.
+For the sake of analysis, let's ignore the \emph{details} of differing capacity, and assume there is a consistent *ratio* ($0 < r \le 1$) between a tile's child's capacity and that tile's capacity.
+That is: tiles introduced at each iteration $r\times$ the capacity of their parent.
+
+Let $t$ refer to the root tile's $T_1$ (capacity). For a small tilings, we can say:
+\begin{align*}
+  h = 1 & \implies \Sigma T_1 = 1tr^0 \\
+  h = 2 & \implies \Sigma T_1 = 1tr^0 + 3tr^1 \\
+  h = 3 & \implies \Sigma T_1 = 1tr^0 + 3tr^1 + 6tr^2
+\end{align*}
+
+In general:
+\begin{align}
+    %% \Sigma T_1 = 1r^0t + 3r^1t + 6r^2
+    \Sigma T_1 &= t\Big( 1 + \sum_{i=1}^h N_{\text{tiles}|h=i} \cdot r^i \Big)
+    \nonumber \\
+    &= t\Big( 1 + \sum_{i=1}^h v(v-1)^{i-1} \cdot r^i \Big)
+\end{align}
+
+Let us find the bounds under which this sum converges as $h \rightarrow \infty$:
+\begin{align}
+    \Sigma T_1 &= t\Big( 1 + \sum_{i=1} v(v-1)^{i-1} \cdot r^i \Big)
+    \nonumber \\
+    r (v-1) \Sigma T_1 &= t\Big( r(v-1) + \sum_{i=1} v(v-1)^{i} \cdot r^{i+1} \Big)
+    \nonumber \\
+    \therefore \Sigma T_1 - r (v-1) \Sigma T_1 &= \; t \cdot ( 1 + vr + vr^2(v-1) + vr^3(v-1)^2 \cdots
+    \nonumber \\
+    & \;\;\;\; - r(v-1) - vr^2(v-1) - vr^3(v-1)^2 \cdots )
+    \nonumber \\
+    (1 - r(v-1)) \cdot \Sigma T_1 &= t(1 + vr - r(v-1))
+    \nonumber \\
+    &= t(1 + r)
+    \nonumber \\
+    \therefore \Sigma T_1 &= t \cdot \frac{1 + r}{1 + r - rv}
+    \label{eq:sigma-t1-conv}
+\end{align}
+
+The denominator of \autoref{eq:sigma-t1-conv} ($1 + r - rv$). For the sum to converge, the denominator must be positive:
+\begin{align}
+    0 &< 1 + r - rv \nonumber \\
+    r(v-1) &< 1 \nonumber \\
+    r &< (v-1)^{-1}
+    \label{eq:tiling-capacity-constraint}
+\end{align}
+
+Thus $\Sigma T_1$ converges when $r < (v-1)^{-1}$.
+In other words, $\Sigma T_1$ \emph{does not converge} when $r > (v-1)^{-1}$.
+
+It is thus a \emph{requirement} for unbounded tiling that the ratio of a child-tile's capacity to that of their parent is $> (v-1)^{-1}$.
+
+Ideally, $r=1$. This is possible, and discussed in \autoref{sec:tiling-sec-cap-asymmetry}.
+
+Since $O(N_{\text{tiles}}) = O(\frac{n}{c^j})$, and each tile has order $O(c^j)$, the complexity of the network overall is given by the product of a tile's order by the number of tiles:
 \begin{equation}
 \begin{split}
-O(c^j \cdot N_{tiles}) & = O(c^j \cdot \frac{n}{c^j}) \\
-& = O(n) \label{eq:simplex-tiling-complexity}
+O(c^j \cdot N_{\text{tiles}}) & = O(c^j \cdot \frac{n}{c^j}) \\
+& = O(n)
+\label{eq:simplex-tiling-complexity}
 \end{split}
 \end{equation}
 
 For all practical purposes, simplex-tiling provides unbounded capacity.
+
+How can it be possible for an organization of blockchains to have $O(n)$ capacity, and $O(n)$ security, without breaking $O(c)$ constrains on full-nodes? It is because of a \emph{new} asymmetry between \emph{capacity} and \emph{security}.
+
+### A New Asymmetry Between Capacity and Security
+
+\label{sec:tiling-sec-cap-asymmetry}
+
+Before we analyze the security of tree tilings,
 
 %% END ### RELEASE
 
@@ -177,7 +269,7 @@ There exists an alternate tiling that begins with two tiles instead of one, thou
 It is shown in \autoref{fig:alt-tiling}. It has $N_{\text{tiles}} = 2^{h+2} - 2$.
 
 Similarly, another alternate tiling starts with three tiles.
-To preserve valencies, each tile at depth 0 has only 1 child.
+To preserve valencies, each tile at height 0 has only 1 child.
 Otherwise, the iteration algorithm is the same.
 This tiling is shown in \autoref{fig:alt-tri-tiling} and has $N_{\text{tiles}} = 3 \cdot 2^{h}$.
 
@@ -206,7 +298,7 @@ This tiling is shown in \autoref{fig:alt-tri-tiling} and has $N_{\text{tiles}} =
         \caption{3rd iteration. 30 tiles.}
         \label{fig:tiled-simplex-alt-d4}
     \end{subfigure}%%
-    \caption{An alternate tiling, starting with 2 tiles, that is equivalent in terms of complexity, security, etc.}
+    \caption{An alternate tree tiling, starting with 2 tiles, that is equivalent in terms of complexity, security, etc.}
     \label{fig:alt-tiling}
 \end{figure}
 
@@ -235,30 +327,39 @@ This tiling is shown in \autoref{fig:alt-tri-tiling} and has $N_{\text{tiles}} =
         \caption{3rd iteration. 24 tiles.}
         \label{fig:tiled-simplex-alt3-d4}
     \end{subfigure}%%
-    \caption{An alternate tiling, starting with 3 tiles, that is equivalent in terms of complexity, security, etc.}
+    \caption{An alternate tree tiling, starting with 3 tiles, that is equivalent in terms of complexity, security, etc.}
     \label{fig:alt-tri-tiling}
 \end{figure}
 
 #### Tiling With Individual Blockchains
 
-A 3-simplex (which has 4 chains) is the least populous simplex that may be tiled with a valence of 3. The result of this is shown in \autoref{fig:tiled-3-simplexes} and is equivalent to a tiling of individual blockchains (a single-chain tiling). This configuration still has $O(n)$ scalability.
+A 3-simplex (which has 4 chains) is the least populous simplex that may be tiled with a valence of 3.
+The result of this is shown in \autoref{fig:tiled-3-simplexes} and is equivalent to a tiling of individual blockchains (a single-chain tiling).
+This configuration still has $O(n)$ scalability.
 
 \begin{figure}
 \centering
-    \begin{subfigure}[t]{.33\textwidth}
+    \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
         \centering
         \includegraphics[height=.95\linewidth]{tiling_s1_d6_sag}
         \label{fig:tiled-3-simplexes-main}
-    \end{subfigure}%%
-    \hspace{0.1\textwidth}
-    \begin{subfigure}[t]{.33\textwidth}
+    \end{subfigure}%% \hspace{0.1\textwidth}
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
         \centering
         \includegraphics[height=.95\linewidth]{tiling_alt_s1_d6_sag}
         \label{fig:tiled-3-simplexes-alt}
     \end{subfigure}%%
-    \caption{Both tilings where each tile has only external reflections, i.e., there is only 1 single blockchain per tile.}
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{tiling_a3_s1_d6_sag}
+        \label{fig:tiled-3-simplexes-a3}
+    \end{subfigure}%%
+    \caption{Tree tilings ($v=3$) where each tile has only external reflections, i.e., there is only 1 single blockchain per tile.}
     \label{fig:tiled-3-simplexes}
 \end{figure}
 
@@ -332,13 +433,15 @@ The tree-method of tiling (which we've just covered) works for valencies higher 
 
 #### Tessellating tiles are less efficient
 
+\label{sec:tessellating-tiles-efficiency}
+
 Because $O(\log_2 n) < O(\sqrt{n})$.
 
 In a tessellating set of tiles, we can approximate the *maximum* distance between tiles via a geometric interpretation: for a set of $n$ tessellating tiles, each tile having a constant area, then the full area is $\propto {n}$. Thus, the maximal distance between tiles is $\propto \sqrt{n}$.
 
 However, using the tree method (with $v=3$), the *maximal* distance between any 2 of $n$ tiles, is $\sim \log_2 n$. So it's (maybe counterintuitively) more efficient to use non-tessellating tiles.
 
-Additionally, a model of tilings of similar capacity -- i.e., similar $N_{tiles}$ -- shows that the *average* distance between tiles is lower for tree-based tilings. \autoref{fig:tiling-avg-dist-comparison} shows a comparison of the average distance between tiles given different tiling methods. The square tessellating method produces the tiling shown in \autoref{fig:tiling-square}.
+Additionally, a model of tilings of similar capacity -- i.e., similar $N_{\text{tiles}}$ -- shows that the *average* distance between tiles is lower for tree-based tilings. \autoref{fig:tiling-avg-dist-comparison} shows a comparison of the average distance between tiles given different tiling methods. The square tessellating method produces the tiling shown in \autoref{fig:tiling-square}.
 
 \begin{figure}
 \centering
