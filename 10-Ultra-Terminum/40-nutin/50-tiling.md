@@ -228,7 +228,7 @@ O(c^j \cdot N_{\text{tiles}}) & = O(c^j \cdot \frac{n}{c^j}) \\
 
 For all practical purposes, simplex-tiling provides unbounded capacity.
 
-How can it be possible for an organization of blockchains to have $O(n)$ capacity, and $O(n)$ security, without breaking $O(c)$ constrains on full-nodes? It is because of a \emph{new} asymmetry between \emph{capacity} and \emph{security}.
+How can it be possible for an organization of blockchains to have $O(n)$ capacity, and $O(n)$ security, without breaking $O(c)$ constrains on full nodes? It is because of a \emph{new} asymmetry between \emph{capacity} and \emph{security}.
 
 ### A New Asymmetry Between Capacity and Security
 
