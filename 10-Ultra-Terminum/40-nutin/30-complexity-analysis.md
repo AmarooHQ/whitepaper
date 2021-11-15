@@ -118,7 +118,11 @@ Thus $O(T_2) = O(c^2)$ as expected.
 
 ### Complexity of $\UT{1}$
 
-There is no single root-chain for a collection of mutually reflecting blockchains (i.e., a simplex), so $N_1 \neq 1$. What is $N_1$ then? In a simplex, each chain has $k_1$ B/s capacity, but this is split between reflections and transactions. At this foundational level (where there is no nesting yet), headers are $B_h$ bytes with a frequency of $B_f$ Hz. There are $N_1$ simplex chains.
+There is no single root-chain for a collection of mutually reflecting blockchains (i.e., a simplex), so $N_1 \neq 1$.
+What is $N_1$ then?
+In a simplex, each chain has $k_1$ B/s capacity, but this is split between reflections and transactions.
+At this foundational level (where there is no nesting yet), headers are $B_h$ bytes with a frequency of $B_f$ Hz.
+There are $N_1$ simplex-chains.
 
 For the purpose of \autoref{sec:ut-complexity} we will generally *not* consider the impact of *explicitly* including PoRs along with block headers (i.e., the +PoRs UT variants).
 The methods we use here are easily generalized to account for those variants, and associated analysis can be found in \autoref{sec:por-with-proofs}.

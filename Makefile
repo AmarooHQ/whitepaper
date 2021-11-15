@@ -191,6 +191,8 @@ glossary-fix-1:
 finished-msg:
 	bash bin/msg_good.sh 'Finished build for mode=$(PP_MODE)'
 
+lint: textlint pdflint
+
 textlint:
 	npm run lint
 

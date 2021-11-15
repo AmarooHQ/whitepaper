@@ -29,7 +29,7 @@ This would mean that the chain L block (which includes $H_{R,1a}$) is *invalid* 
 If such a method is feasible, then the malicious chain L miner has greater opportunity cost to produce a block reflecting $H_{R,1a}$.
 Moreover, this method prevents chain L (and its miners) from contributing to a potential attack on chain R.
 
-For this to work, though, miners must verify that blocks *exist* for all reflected headers. Is this practical if there are $10^3$ or $10^4$ reflected chains in a simplex? The miners are only required to do very small amounts of computation on these other blocks, so their computational capacity won't be a bottleneck here. Furthermore, they don't need to keep these other blocks indefinitely, just long enough to be confident that they reflect only headers with existent blocks. So they won't need much extra disk space, either -- after a few years, the history of a simplex chain will be larger than, say, the last 12 hours of all simplex-chains' histories combined. What miners will need is *bandwidth*.
+For this to work, though, miners must verify that blocks *exist* for all reflected headers. Is this practical if there are $10^3$ or $10^4$ reflected chains in a simplex? The miners are only required to do very small amounts of computation on these other blocks, so their computational capacity won't be a bottleneck here. Furthermore, they don't need to keep these other blocks indefinitely, just long enough to be confident that they reflect only headers with existent blocks. So they won't need much extra disk space, either -- after a few years, the history of a simplex-chain will be larger than, say, the last 12 hours of all simplex-chains' histories combined. What miners will need is *bandwidth*.
 
 The complexity and impact of this strategy is discussed in \autoref{sec:bandwidth-complexity}.
 
@@ -581,7 +581,8 @@ We should thus expect that this configuration of chains actually *synchronizes* 
 
 One reason that we can predict that transactions will build up in this fashion (with those fees and in a predictable way) is that most of the transactions that are included in simplex blocks will be dapp-chain-header-transactions.
 
-The average hash-rate on each simplex chain, as described above, is always the same regardless of which of the two miner strategies are used. However, the variance of block production on each of these chains won't be that of a chain with 60s block times, it'll be closer to that of a chain with 6s block times.
+The average hash-rate on each simplex-chain, as described above, is always the same regardless of which of the two miner strategies are used.
+However, the variance of block production on each of these chains won't be that of a chain with 60s block times, it'll be closer to that of a chain with 6s block times.
 
 %% END ### RELEASE
 

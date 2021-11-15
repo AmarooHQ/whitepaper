@@ -101,11 +101,9 @@ side by side figures: https://tex.stackexchange.com/questions/37581/latex-figure
     \label{fig:simplex-tiling}
 \end{figure}
 
-### Complexity Analysis
+### Tiling Complexity
 
 Two elements of complexity will be analyzed: the size of SPV proofs between simplex-chains, and the network capacity overall.
-
-#### Tiling Complexity
 
 If our tiling is balanced (in the sense that a binary tree can be balanced) then the root tile has 3 children, each of which is the root node of a balanced binary tree.
 If those trees have a height of $h-1$, then each have $2^{h} - 1$ total nodes.
@@ -150,17 +148,9 @@ N_{\text{tiles}} & = 3 \cdot 2^h - 2 \\
 
 Thus, the maximal distance between leaf tiles is $2 \cdot \log_{2}(\frac{N_{\text{tiles}} + 2}{3})$, and thus the number of SPV proofs required (across simplex-chains) scales with $O(\log_2 N_{\text{tiles}})$.
 
-\aside{
-    We'll now derive $O(N_\text{tiles})$ via a different method than \autoref{eq:n-tiles-general}.
-    Also, note that we'll make some simplifications for the moment, and we'll add some rigor in \autoref{sec:tiling-cap-complexity}.
-
-    That we can derive $O(N_\text{tiles})$ in multiple ways implies some level of \emph{convertibility} between the methods.
-    Since we're talking about complexities, we might not have precise relationships, but we should at least have some idea of \emph{how the boundaries of success interact}.
-}
-
 Consider that tiles can be added in an ad-hoc fashion depending on current capacity requirements, and each tile has capacity in $O(c^j); j \in \{2,3,4\}$.
 Since we can always add tiles, we can always ensure there is \emph{excess capacity}.
-Provided we do this, then the number of tiles required is roughly the capacity used by the network ($n$) divided by the capacity of each tile ($c^j$), and we should always have a bit extra as buffer.
+Provided we do this, then the number of tiles required is roughly the capacity used by the network ($n$) divided by the capacity of each tile ($c^j$).
 Thus, successful $O(n)$ scaling depends upon our ability to maintain this relationship:
 \begin{equation}
 \begin{split}
@@ -191,12 +181,8 @@ O(\log c + \log N_{\text{tiles}}) &\ge O(\log c + \log n) \\
 \end{split}
 \end{equation}
 
-In an efficient network, we should ensure $O(N_{\text{tiles}}) = O(\frac{n}{c^j}) \iff O(h) = O(\log n)$.
+If it's possible that $O(N_{\text{tiles}}) \ge O(\frac{n}{c^j})$ then we can limit it to $O(N_{\text{tiles}}) = O(\frac{n}{c^j}) \iff O(h) = O(\log n)$.
 This will limit inter-tile SPV proofs to order $O(\log n)$.
-
-#### Network Capacity Complexity
-
-\label{sec:tiling-cap-complexity}
 
 In \autoref{eq:o-n-tiles-in-terms-of-c} we assume that $O(N_{\text{tiles}}) \ge O(\frac{n}{c^j})$ is possible.
 On this assumption, given that each tile has order $O(c^j)$, the complexity of the network overall is given by the product of a tile's order and the number of tiles:
@@ -209,6 +195,10 @@ O(c^j \cdot N_{\text{tiles}}) & = O(c^j \cdot \frac{n}{c^j}) \\
 \end{equation}
 
 For all practical purposes, if we can grow the tiling fast enough, $\UTinf{}$ provides unbounded capacity.
+
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
 
 The above assumes that tiles have equal capacities; what if they do not?
 The total capacity of $O(c)$ base-chains in a tree tiling ($\Sigma T_1$) is the sum of their capacities.
@@ -298,29 +288,116 @@ Let's discuss \autoref{eq:o-n-tiles-in-terms-of-c} and \autoref{eq:tiled-spv-com
 It's plain to see that, if $r \approx 1$, then child tiles have the same capacity as their parent, so each tile has $O(c^j)$ capacity.
 Given \autoref{eq:n-tiles-general}, the capacity of a tiling with $r \approx 1$ and height $h$ is in $O(c^j \cdot (v-1)^h)$.
 For the $O(n)$ claim in \autoref{eq:simplex-tiling-complexity} to hold, we need $O(n) < O(c^j \cdot (v-1)^h)$.
-Since $h$ is a free variable, the network can increase it \emph{as required}.
-Additionally, since $h$ is the exponent of $(v-1)$, we have (at worst) some kind of exponential complexity.
-Another way to look at this is: provided $O(\frac{n}{c^j}) < O((v-1)^h)$, then
+This matches what we said earlier.
 \todo{this bit}
 
-How can it be possible for an organization of blockchains to have $O(n)$ capacity, and $O(n)$ security, without breaking $O(c)$ constrains on full nodes? It is because of a \emph{new asymmetry} between \emph{capacity} and \emph{security}.
+%% END ### DRAFT
 
-### A New Asymmetry Between Capacity and Security
+%% BEGIN ### RELEASE
+
+How can it be possible for a network of blockchains to have $O(n)$ capacity, and $O(n)$ security, without breaking $O(c)$ constrains on full nodes?
+It is because of a \emph{new asymmetry} between \emph{capacity} and \emph{security}.
+
+### Tiling Security
+
+#### A New Asymmetry Between Capacity and Security
 
 \label{sec:tiling-sec-cap-asymmetry}
 
-\bquote{
-    Decoupling the underlying consensus from the state-transition has been informally proposed in private for at least two years---Max Kaye was a proponent of such a strategy during the very early days of Ethereum.
-}{
-    Dr. Gavin Wood; \href{https://cloudflare-ipfs.com/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Polkadot Whitepaper, s2.2}
-}
+If there is a \emph{symmetry} between capacity and security, that means they're \emph{coupled} somehow; i.e., a change in one results in a change to the other.
+In this case, they're inversely related -- this is essentially a restatement of Buterin's trilemma!
+In traditional blockchain designs that have a maximum block size, the tradeoffs described in \autoref{sec:core-conflict} are describing the symmetry: increasing capacity negatively effects security, and vice versa.
 
-Before we analyze the security of tree tilings,
-\todo{this bit}
+To claim that the trilemma is broken is to claim that this symmetry has been broken.
+
+Traditional PoW already provides for practically unbounded security.
+Currently\footnote{
+    Bitcoin block 709793 has difficulty 22,674,148,233,453.11, corresponding to an expected $\sim 2^{76.366}$ hashes per block.
+}, Bitcoin blocks require a $\sim 76.4$ zero-bit prefix (which is the proof of work).
+So, for half of a Bitcoin PoW hash to be half-zeros (i.e., have a 128 zero-bit prefix), $\sim 51.6$ doublings in hash-rate need to happen.
+To date, only $\sim 44.4$ such doublings have occurred; i.e., current blocks require $\sim 2^{44.4}\times$ as many hashes as early Bitcoin blocks required.
+Clearly, PoW has excess capacity in the potential security it provides.
+However, traditional PoW networks don't scale horizontally.
+
+With regards to $\UTinf{}$, let's take stock.
+We've already taken care of the \emph{decentralization} criterion by setting the upper computational complexity to $O(c)$ (via $k$ in \autoref{sec:ut-complexity}).
+We've also seen that tiling is a method for unbounded \emph{capacity}, but only if it's secure (which we haven't yet seen).
+We know that there's excess capacity in PoW itself, so the only remaining thing to show is that tiling is secure.
+If tiling is secure, then the asymmetry is real.
+If tiling is secure, then the core conflict of the trilemma is broken.
+
+So, that's the question: *is performing a doublespend in a tiling as difficult as attacking 51% of the network?*
+
+#### Tiling Security: $h=0$
+
+At $h=0$, the tiling is equivalent to a standalone simplex: all simplex-chains reflect all other simplex-chains.
+(This is also true for tiling variants mentioned in \autoref{sec:tiling-variants}.)
+
+#### Tiling Security: $h=1$
+
+\providecommand\sec[1]{\text{Sec}(#1)}
+
+What are the requirements for 51% attacking the root tile?
+In this case, since all chains in the root tile mutually reflect all chains in the tiling, we can say that a network-wide 51% attack is required; the root tile is secure.
+
+Assuming $v=3$, what are the requirements for 51% attacking one of 3 leaf tiles?
+In this case, we need to define some terms first; particularly, we need to be able to compare a tile's security with that of their parent and children.
+
+Let's gives tiles an identifier that lets us easily determine how to find a tile in a tiling -- the tiles \emph{location}.
+The root tile is easy, we can just give it the identifier $1$, since there's only one.\footnote{
+    Regarding tilings in \autoref{sec:alt-equiv-tilings}: this is easily generalized by giving additional tiles identifiers of 2 and 3.
+}
+We can refer to a tile's child by appending its parent's identifier with $|1$, $|2$, $|3$, etc.
+(For a valence of 3, $|3$ is only used for direct children of the root tile; all other tiles will always have the suffix $|1$ or $|2$).
+So the \emph{location} of a tile might be $1|3|1|1|2$: the root tile's 3rd child's 1st child's 1st child's 2nd child.
+If a tile has the location $l$, then $l|1|2$ is the tile at $l$'s 1st child's 2nd child.
+Since there's a one-to-one correspondence between a tile and its location, we can address tiles directly via this identifier; i.e., the tile at location $1|2|1$ \emph{is} tile $1|2|1$.
+
+Let's also say that $w_l$ is the total \emph{chain-work} produced by all simplex-chains that are part of tile $l$.
+So, $w_1$ is the chain-work produced by the root tile, and it's children's chain-works are $w_{1|1}$, $w_{1|2}$, and $w_{1|3}$ respectively.
+
+Let's define a function, $\text{Sec}(l)$ that returns the \emph{total} chain-work contributing to tile $l$'s security.
+For the root tile, this is easy, and agrees with our earlier conclusion that the root tile is as secure as the whole tiling:
+\begin{equation}
+    \sec{1} = w_1 + w_{1|1} + w_{1|2} + w_{1|3}
+\end{equation}
+In general, it's the work contributed by the tile, tile's parent, and tile's children.
+For some tile $p|i$ (i.e., the $i^{th}$ child of a parent tile $p$) in a tiling of valence $v$:
+\begin{equation}
+\begin{split}
+    \sec{1} &= w_1 + w_{1|1} + w_{1|2} + \cdots + w_{1|v} \\
+    \sec{p|i} &= w_p + w_{p|i} + w_{p|i|1} + \cdots + w_{p|i|v-1}
+    \label{eq:tiling-sec-function}
+\end{split}
+\end{equation}
+When a tile $p|i$ has no children, $w_{p|i|1}, w_{p|i|2}, \cdots = 0$.
+
+Returning to the case at hand ($h=1$): when are the 3 leaf tiles secure?
+They are \emph{definitely} secure when $w_{1|i} < w_{1}$ and thus $\sec{1|i} < \sec{1}$ -- i.e., the total chain-work securing each of the root tile's children is less than that of the root tile.
+That's because -- in that context -- it's impossible to 51% attack a child-tile without attacking the root tile, and attacking the root tile is as difficult as attacking the entire tiling.
+We can back this up with \autoref{eq:tiling-sec-function}, too.
+Assuming $v=3$:
+\begin{align*}
+    LHS &= \sec{1|i} & & & RHS &= \sec{1} \\
+    &= w_1 + w_{1|i} & & & &= w_1 + w_{1|1} + w_{1|2} + w_{1|3} \\
+    & & \therefore LHS &< RHS \blacksquare & &
+\end{align*}
+
+
+
 
 %% END ### RELEASE
 
 %% BEGIN ### DRAFT
+
+#### blah
+
+There is at least one obvious example of this asymmetry: existing blockchains.
+How is it that Bitcoin is more secure than Litecoin, but Litecoin has $4\times$ the capacity?
+
+
+Before we analyze the security of tree tilings,
+\todo{this bit}
 
 #### Security Implications
 
@@ -345,7 +422,11 @@ main idea: if you want to attack a simplex tile in the middle of the graph, then
 
 ### Tiling Variants
 
+\label{sec:tiling-variants}
+
 #### Alternate and Equivalent Tilings
+
+\label{sec:alt-equiv-tilings}
 
 There exists an alternate tiling that begins with two tiles instead of one, though the iteration algorithm is the same.
 It is shown in \autoref{fig:alt-tiling}. It has $N_{\text{tiles}} = 2^{h+2} - 2$.
