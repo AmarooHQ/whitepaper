@@ -55,6 +55,7 @@ class ChainsPerLayerRes:
     k: float | int
     simplex_n1: float | int
     root_n1: float | int
+    last_i: int
     factor_more_chains: float | int
 
 
@@ -68,20 +69,24 @@ def n_chains_per_layer(d: int, v=3, r=0.5, k=3000, bf=1/15, bh=84):
     hist: list[float|int] = [root_n1]
     s_hist: list[float|int] = [root_n1]
     layer_n1 = layer_tile_n1
+    last_i = 0
     for i in range(1, d+1):
         layer_tile_n1 *= r
-        layer_tile_n1 = floor(layer_tile_n1)
+        if layer_tile_n1 < root_n1 / 4:
+        # if layer_tile_n1 < v * 4:
         # if layer_tile_n1 < 1:
-        #     layer_tile_n1 = 0
+            layer_tile_n1 = 0
+        # layer_tile_n1 = floor(layer_tile_n1)
         hist.append(floor(layer_tile_n1))
         n_tiles = tiles_at_d(i, v=v)
         layer_n1 = floor(n_tiles * layer_tile_n1)
         sigma_n1 += layer_n1
         s_hist.append(floor(layer_n1))
+        last_i = i
         if layer_tile_n1 == 0:
             break
     return ChainsPerLayerRes(layer_tile_n1=layer_tile_n1, n_tiles=n_tiles, layer_n1=layer_n1, sigma_n1=sigma_n1, hist=hist,
-                s_hist=s_hist, r=r, k=k, simplex_n1=simplex_n1, root_n1=root_n1,
+                s_hist=s_hist, r=r, k=k, simplex_n1=simplex_n1, root_n1=root_n1, last_i=last_i,
                 factor_more_chains=(sigma_n1 / simplex_n1))
 
 
@@ -98,7 +103,7 @@ def ys_to_yss(ys: Ys) -> Yss:
 
 
 def gen_k_vs_sigma_n1():
-    xs: list[float|int] = list(k * 1000 for k in range(1, 101))
+    xs: list[float|int] = list(k * 1000 for k in range(3, 101))
     ys = make_ys()
     for r in frange(0.29, 0.891, 0.1):
         label = f"ΣN₁ (r={r:.2f})"
@@ -121,6 +126,24 @@ def gen_k_vs_sigma_n1_div_k():
         do_plot(xs, ys_to_yss(ys), f'{_p}th root of n1 div k vs k', 'k', 'ΣN₁', ylog=True, xlog=True)
 
 
+def base_chain_k_vs_sigma_t1():
+    xs: list[float|int] = list(k * 1000 for k in range(1, 101))
+    ys = make_ys()
+    for r in frange(0.28, 0.999, 0.05):
+        res_u_limit = n_chains_per_layer(999, r=r, k=max(xs))
+        res_l_limit = n_chains_per_layer(999, r=r, k=min(xs))
+        label = f"r={r:.2f} u,l: {res_u_limit.last_i},{res_l_limit.last_i}"
+        for k in xs:
+            k_tx = k / 2
+            res = n_chains_per_layer(999, r=r, k=k)
+            if res.hist[-1] != 0 and k < 0.999:
+                raise Exception(f"expected res.hist[-1] == 0")
+            ys[label].append((res.sigma_n1 / res.simplex_n1))
+    do_plot(xs, ys_to_yss(ys), f'SigmaT1 vs k loglog', 'k', 'ΣT₁', ylog=True, xlog=True)
+    do_plot(xs, ys_to_yss(ys), f'SigmaT1 vs k', 'k', 'ΣT₁', ylog=True, xlog=False)
+
+
 if __name__ == "__main__":
-    gen_k_vs_sigma_n1()
-    gen_k_vs_sigma_n1_div_k()
+    base_chain_k_vs_sigma_t1()
+    # gen_k_vs_sigma_n1()
+    # gen_k_vs_sigma_n1_div_k()

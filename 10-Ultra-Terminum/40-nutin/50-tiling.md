@@ -151,36 +151,55 @@ N_{\text{tiles}} & = 3 \cdot 2^h - 2 \\
 Thus, the maximal distance between leaf tiles is $2 \cdot \log_{2}(\frac{N_{\text{tiles}} + 2}{3})$, and thus the number of SPV proofs required (across simplex-chains) scales with $O(\log_2 N_{\text{tiles}})$.
 
 \aside{
-    We'll now derive $O(N_\text{tiles})$ differently to \autoref{eq:n-tiles-general}.
+    We'll now derive $O(N_\text{tiles})$ via a different method than \autoref{eq:n-tiles-general}.
     Also, note that we'll make some simplifications for the moment, and we'll add some rigor in \autoref{sec:tiling-cap-complexity}.
-    That we can derive $O(N_\text{tiles})$ in multiple ways (which facilitate different analysis) implies some level of \emph{convertibility} between the methods.
+
+    That we can derive $O(N_\text{tiles})$ in multiple ways implies some level of \emph{convertibility} between the methods.
     Since we're talking about complexities, we might not have precise relationships, but we should at least have some idea of \emph{how the boundaries of success interact}.
 }
 
-Since tiles can be added in an ad-hoc fashion depending on current capacity requirements, and each tile has capacity in $O(c^j); j \in \{2,3,4\}$, if tiles are fully utilized then it must be that:
+Consider that tiles can be added in an ad-hoc fashion depending on current capacity requirements, and each tile has capacity in $O(c^j); j \in \{2,3,4\}$.
+Since we can always add tiles, we can always ensure there is \emph{excess capacity}.
+Provided we do this, then the number of tiles required is roughly the capacity used by the network ($n$) divided by the capacity of each tile ($c^j$), and we should always have a bit extra as buffer.
+Thus, successful $O(n)$ scaling depends upon our ability to maintain this relationship:
 \begin{equation}
 \begin{split}
-    N_{\text{tiles}} &\approx \frac{n}{c^j} \\
-    \therefore O(N_{\text{tiles}}) &= O(\frac{n}{c^j})
+    O(N_{\text{tiles}}) &\ge O(\frac{n}{c^j}) \\
+    \implies O((v-1)^h) &\ge O(\frac{n}{c^j}) \\
+    \implies O(h) &\ge O(\log \frac{n}{c^j}) \\
+    &\ge O(\log n - \log c) \\
+    &\ge O(\log n)
     \label{eq:o-n-tiles-in-terms-of-c}
 \end{split}
 \end{equation}
 
+\begin{comment}
+\begin{equation}
+\begin{split}
+    O(N_{\text{tiles}} \cdot c^j &> n \\
+    \therefore O(N_{\text{tiles}} \cdot c^j) &> O(n)
+    %%\label{eq:o-n-tiles-in-terms-of-c}
+\end{split}
+\end{equation}
+\end{comment}
+
 Given \autoref{eq:spv-complexity}, dapp-chain inter-tile SPV proofs have order:
 \begin{equation}
 \begin{split}
-O(\log_2 c + \log_2 N_{\text{tiles}}) & = O(\log_2 c + \log_2 \frac{n}{c^j}) \\
-& = O(\log_2 c + \log_2 n - j \cdot \log_2 c) \\
-& = O(\log_2 c + \log_2 n - \log_2 c) \\
-& = O(\log_2 n) \label{eq:tiled-spv-complexity}
+O(\log c + \log N_{\text{tiles}}) &\ge O(\log c + \log n) \\
+&\ge O(\log n) \label{eq:tiled-spv-complexity}
 \end{split}
 \end{equation}
+
+In an efficient network, we should ensure $O(N_{\text{tiles}}) = O(\frac{n}{c^j}) \iff O(h) = O(\log n)$.
+This will limit inter-tile SPV proofs to order $O(\log n)$.
 
 #### Network Capacity Complexity
 
 \label{sec:tiling-cap-complexity}
 
-Since $O(N_{\text{tiles}}) = O(\frac{n}{c^j})$, and each tile has order $O(c^j)$, the complexity of the network overall is given by the product of a tile's order by the number of tiles:
+In \autoref{eq:o-n-tiles-in-terms-of-c} we assume that $O(N_{\text{tiles}}) \ge O(\frac{n}{c^j})$ is possible.
+On this assumption, given that each tile has order $O(c^j)$, the complexity of the network overall is given by the product of a tile's order and the number of tiles:
 \begin{equation}
 \begin{split}
 O(c^j \cdot N_{\text{tiles}}) & = O(c^j \cdot \frac{n}{c^j}) \\
@@ -189,7 +208,7 @@ O(c^j \cdot N_{\text{tiles}}) & = O(c^j \cdot \frac{n}{c^j}) \\
 \end{split}
 \end{equation}
 
-For all practical purposes, simplex-tiling provides unbounded capacity.
+For all practical purposes, if we can grow the tiling fast enough, $\UTinf{}$ provides unbounded capacity.
 
 The above assumes that tiles have equal capacities; what if they do not?
 The total capacity of $O(c)$ base-chains in a tree tiling ($\Sigma T_1$) is the sum of their capacities.
@@ -238,6 +257,30 @@ Let us consider when the sum diverges:
     \label{eq:tiling-capacity-constraint}
 \end{align}
 
+
+\begin{comment}
+\begin{align}
+    \\
+    \intertext{When sum is greater than valence $\implies$ 'worth it' compared to no tiling. note, should be v+1 on RHS below}
+    \frac{1 + r}{1 + r - rv} > v \\
+    1 + r > v + rv - rv^2 \\
+    rv^2 - rv - v + 1 + r > 0 \\
+    rv^2 - v(r + 1) + r + 1 > 0 \\
+    \intertext{zeros at:}
+    v = \frac{r + 1}{2r} \pm \frac{\sqrt{(r+1)^2 - 4r(r + 1)}}{2r} \\
+    v = \frac{r + 1}{2r} \pm \frac{\sqrt{r^2 + 2r +1 - 4r^2 - 4r}}{2r} \\
+    v = \frac{r + 1}{2r} \pm \frac{\sqrt{-3r^2 - 2r + 1}}{2r} \\
+    -3r^2 - 2r + 1 > 0 \\
+    1 > 2r + 3r^2 \cdots \\
+    \intertext{back to orig}
+    \frac{1 + r}{1 + r - rv} > v + 1 \\
+    1 + r > 1 + r - rv + v + rv - rv^2 \\
+    0 > v - rv^2 \\
+    rv^2 > v \\
+    r > v^{-1}
+\end{align}
+\end{comment}
+
 Thus, $\Sigma T_1$ \emph{does not converge} when $r > (v-1)^{-1}$.
 In other words, $\Sigma T_1$ converges when $r < (v-1)^{-1}$.
 
@@ -245,14 +288,19 @@ A \emph{requirement} for \emph{unbounded} tiling (via the tree method) is that t
 
 There are practical issues that come with $r \sim (v-1)^{-1}$, like that there are minimum requirements for the capacity of a blockchain (e.g., none can run with $k < 1$ B/s).
 To avoid practical issues: $r \gg (v-1)^{-1}$.
-
-$\Sigma T_1$ diverging implies $O(n)$ scalability \emph{if} the lower bound on the capacity of a tile at height $h$ is at least $O(c \cdot (v-1)^{-h})$.
-The essence of $\Sigma T_1$ diverging is that \emph{there is always meaningful capacity to add} when the network requires it.
-
-Ideally, $r \approx 1$ (ensuring $O(c)$ constraints are respected).
+Ideally, $r \approx 1$ (ensuring $O(c)$ limits on nodes are respected).
 This is possible, and is discussed in \autoref{sec:tiling-sec-cap-asymmetry}.
 
-With regards to \autoref{eq:o-n-tiles-in-terms-of-c} and \autoref{eq:tiled-spv-complexity}:
+$\Sigma T_1$ diverging implies $O(n)$ scalability \emph{if} the lower bound on the capacity of a tile at height $h$ is $O(c^j \cdot r^h) > O(c^j \cdot (v-1)^{-h})$.
+The essence of $\Sigma T_1$ diverging is that \emph{there is always meaningful capacity to add} when the network requires it.
+
+Let's discuss \autoref{eq:o-n-tiles-in-terms-of-c} and \autoref{eq:tiled-spv-complexity}.
+It's plain to see that, if $r \approx 1$, then child tiles have the same capacity as their parent, so each tile has $O(c^j)$ capacity.
+Given \autoref{eq:n-tiles-general}, the capacity of a tiling with $r \approx 1$ and height $h$ is in $O(c^j \cdot (v-1)^h)$.
+For the $O(n)$ claim in \autoref{eq:simplex-tiling-complexity} to hold, we need $O(n) < O(c^j \cdot (v-1)^h)$.
+Since $h$ is a free variable, the network can increase it \emph{as required}.
+Additionally, since $h$ is the exponent of $(v-1)$, we have (at worst) some kind of exponential complexity.
+Another way to look at this is: provided $O(\frac{n}{c^j}) < O((v-1)^h)$, then
 \todo{this bit}
 
 How can it be possible for an organization of blockchains to have $O(n)$ capacity, and $O(n)$ security, without breaking $O(c)$ constrains on full nodes? It is because of a \emph{new asymmetry} between \emph{capacity} and \emph{security}.
