@@ -18,7 +18,15 @@ Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes
 
 A simplex tile, on its own, is very similar to a standalone simplex. If a standalone simplex (of a given capacity) could host $1600$ simplex-chains, then an equivalent simplex tile will host $400$ (or maybe less); only $25\%$ of the PoR capacity is reserved for *internal* reflections -- i.e., reflections within that simplex tile. The other $75\%$ is reserved for *external* reflections to simplex-chains in *neighboring* tiles.
 
-That is: it is a simplex that deliberately reserves only $\nicefrac{1}{4}$ of its otherwise maximum PoR capacity for internal reflections. By definition, the maximum PoR capacity of a tile is $\nicefrac{1}{4}$ the maximum PoR capacity of an equivalent maximal simplex. Why quadrifurcate capacity like this? In a maximal simplex, all reflections are between simplex-chains within that simplex, i.e., all reflections are internal. However, if a simplex reserves $\nicefrac{3}{4}$ of a its maximum capacity, that simplex (which thus becomes the root tile) can reflect every simplex-chain in 3 adjacent tiles (at least 2 of which are 'child' tiles). Those child tiles do not reflect their siblings, though; initially, their only external reflections are with simplex-chains in the parent tile. Each child tile, at this stage, has only reserved 50% of its full PoR capacity -- 25% for externally reflecting its parent's simplex-chains, and 25% for internally reflecting its own simplex-chains. Thus, each tile is able to reflect all simplex-chains of the parent tile *and* two additional child tiles. Child tiles can be instantiated in an ad-hoc basis, i.e., as a simplex-tiling (or an individual tile) approaches maximum capacity.
+That is: it is a simplex that deliberately reserves only $\nicefrac{1}{4}$ of its otherwise maximum PoR capacity for internal reflections.
+By definition, the maximum PoR capacity of a tile is $\nicefrac{1}{4}$ the maximum PoR capacity of an equivalent maximal simplex.
+Why quadrifurcate capacity like this?
+In a maximal simplex, all reflections are between simplex-chains within that simplex, i.e., all reflections are internal.
+However, if a simplex reserves $\nicefrac{3}{4}$ of a its maximum capacity, that simplex (which thus becomes the root tile) can reflect every simplex-chain in 3 adjacent tiles (at least 2 of which are 'child' tiles).
+Those child tiles do not reflect their siblings, though; initially, their only external reflections are with simplex-chains in the parent tile.
+Each child tile, at this stage, has only reserved 50% of its full PoR capacity -- 25% for externally reflecting its parent's simplex-chains, and 25% for internally reflecting its own simplex-chains.
+Thus, each tile is able to reflect all simplex-chains of the parent tile *and* two additional child tiles.
+Child tiles can be instantiated in an ad-hoc basis, i.e., as a simplex-tiling (or an individual tile) approaches maximum capacity.
 
 \defineTerm{Simplex Tiling}{An interconnected graph of mutually reflecting simplexes. This graph grows in a scalable manner when simplex tiles have a valence $\ge 3$}
 
@@ -32,7 +40,11 @@ That is: it is a simplex that deliberately reserves only $\nicefrac{1}{4}$ of it
 
 \label{sec:tile-valence}
 
-Tiles *must* have a valance, $v$, of $v \ge 3$ for $O(n)$ scaling. If tiles had a valence of 0, then no additional tiles can be added. If tiles had a valence of 1, then only a single additional tile could be added (for a total of 2) but no more. If tiles had a valance of 2, then the 'shape' that the tiles created would be a linear chain; a tile-chain. For a tile-chain of length $n$, proving state on the far end of the chain would take $n$ SPV proofs, which is untenable.
+Tiles *must* have a valance, $v$, of $v \ge 3$ for $O(n)$ scaling.
+If tiles had a valence of 0, then no additional tiles can be added.
+If tiles had a valence of 1, then only a single additional tile could be added (for a total of 2) but no more.
+If tiles had a valance of 2, then the 'shape' that the tiles created would be a linear chain; a tile-chain.
+For a tile-chain of length $n$, proving state on the far end of the chain would take $n$ SPV proofs, which is untenable.
 
 However, if tiles have a valance of $3$, then each tile has up to 3 neighbors.
 For all tiles but the first, this is equivalent to being a node in a binary tree (where each non-root, non-leaf node has 1 parent and 2 children: 3 neighbors).
@@ -423,11 +435,17 @@ What are the implications of tiled simplexes compared to a standalone simplex?
 
 \todo{tiling security implications -- tiling weaker than maximal simplex?}
 
-e.g., The leaf tiles in \autoref{fig:tiled-simplex-5-d1} have simplex-chains that are weaker than an equiv 20-chain simplex. The root tile has equiv security, though. This is true even though both systems have 20 simplex-chains total.
+e.g., The leaf tiles in \autoref{fig:tiled-simplex-5-d1} have simplex-chains that are weaker than an equiv 20-chain simplex.
+The root tile has equiv security, though.
+This is true even though both systems have 20 simplex-chains total.
 
-this only happens when leaf tiles + their children have $==$ weight to their direct parent, tho. that is: if the parent has $\ge$ simplex-chains, then isolated attacks on the the descendant tiles always fail b/c the parent tile has $>$ weight.
+this only happens when leaf tiles + their children have $==$ weight to their direct parent, tho.
+that is: if the parent has $\ge$ simplex-chains, then isolated attacks on the the descendant tiles always fail b/c the parent tile has $>$ weight.
 
-main idea: if you want to attack a simplex tile in the middle of the graph, then you *must* attack its peers -- b/c that's where *most* of the security contribution comes from (75% at max cap). on the edges mb things are different. my intuition is that, if sensible precautionary parameters are maintained, then it can be done securely. but there are failure modes when the sec contribs from adjacent tiles are out of wack.
+main idea: if you want to attack a simplex tile in the middle of the graph, then you *must* attack its peers -- b/c that's where *most* of the security contribution comes from (75% at max cap).
+on the edges mb things are different.
+my intuition is that, if sensible precautionary parameters are maintained, then it can be done securely.
+but there are failure modes when the sec contribs from adjacent tiles are out of wack.
 
 %% END ### DRAFT
 
