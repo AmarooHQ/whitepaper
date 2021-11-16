@@ -137,7 +137,7 @@ utSpec = describe "ut" do
         std = utvs.std
     describe "ut.std" do
       let p_n1 = pToPF basicTestPs
-          lKB = p_n1.k * basicN1Limit
+          lKB = p_n1.k * basicN1Limit / 2.0
           lKTx = p_n1.k - lKB
           {bf, bh} = p_n1.hf
           limitedD1 = {n: lKB / bf / bh, t: lKTx * lKB / bf / bh, tps: lKTx * lKB / bf / bh / 500.0}

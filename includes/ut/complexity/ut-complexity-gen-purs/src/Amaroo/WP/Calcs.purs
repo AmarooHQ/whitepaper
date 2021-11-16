@@ -330,7 +330,7 @@ utCalcMonolithic ps varParams@{explicitPoRs, headerOmission, hashTruncation} =
     effDh = d2.p.hf.bh  -- Note: don't take into account porBytes2 -- if explicitPoRs then d2.p.hf.bh + porBytes2 else d2.p.hf.bh
     d3 = calcNextNestingLevel ps3 d2
 
-utCalcHOPoRs :: Params -> _ -> ChainStats
+utCalcHOPoRs :: Params -> {hashTruncation :: Boolean} -> ChainStats
 utCalcHOPoRs ps {hashTruncation} = {d1, d2, d3, confRate, tts, sigmaTts, deltaBigS, deltaSmallS, porBytes, porBytes2, effBh, effDh, kTx, kB, k1}
   where
     hashSize = if hashTruncation then 16.0 else 32.0
@@ -338,7 +338,8 @@ utCalcHOPoRs ps {hashTruncation} = {d1, d2, d3, confRate, tts, sigmaTts, deltaBi
     htModBh bh = if hashTruncation then applyTDiscountToBH bh else bh
     fixBH2 r@{bh} = r {bh = htModBh bh}
     ps1 = ps -- {hfs = (fixBH1 (head ps.hfs) `cons'` tail ps.hfs)}
-    n1 = findMaxHOPoRsN1 ps1 hashSize
+    -- limit N1 if specified
+    n1 = (fromMaybe 1.0 ps1.limitN1Ratio) * findMaxHOPoRsN1 ps1 hashSize
     porBytes = porLen hashSize n1
     effBh = porBytes
     k1 = head ps1.ks
