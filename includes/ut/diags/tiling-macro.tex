@@ -15,6 +15,13 @@
 \providecommand\TilingAltTriPattern{0}%
 \providecommand\TilingLineColor{black}%
 \providecommand\TilingOnlyTopHalf{0}%
+\providecommand\DoTilingHexagon{0}%
+\providecommand\SetNewChildren[1]{
+    % \xdef\ncInput{}
+    \pgfmathsetmacro\newChildren{\xintifboolexpr{\DoTilingHexagon == 1}{
+        \xintifboolexpr{#1 == 0}{3}{\xintifboolexpr{#1 == 1}{4}{\xintifboolexpr{#1 == 2}{1}{2}}}
+    }{\TilingValence - \xintifboolexpr{ #1 < 1 }{0}{1}}}
+}
 \input{simplex-macro}%
 % \makeatletter%
 % \def\fillRGB#1#2#3{\pgfsys@color@rgb@fill{#1}{#2}{#3}}%
@@ -24,7 +31,6 @@
 \pgfdeclarelayer{tiles}%
 \pgfsetlayers{reflections,groups,main,tiles}%
 \newcommand\TikzSimplexTiling{
-    % \xdef\tilingCurrSize{\TilingInitSize}
     \renewcommand\SimplexOutlineColor{\TilingLineColor}
     \pgfmathsetmacro\nNodesTotal{3*(2^(\TilingDepth)-1)+1}
     \xdef\initNodeR{\TilingInitSize*\TilingSizeToNodeRRatio}
@@ -188,19 +194,48 @@
                                 \fi
                             \end{pgfonlayer}
                         \fi
+
+
+                        \ifnum 1=\xintifboolexpr{1 == \d && 1 < \s && 1 == \DoTilingHexagon && 2 < \createCurrentMbTrimmed}{1}{0}
+                            \pgfmathtruncatemacro\prevSib{\s - 1}
+                            \foreach \pn in {1,...,\SimplexChains} {
+                                \foreach \sn in {1,...,\SimplexChains} {
+                                    \draw [thin, draw=\TilingLineColor] (\nodeNameRoot/\d/\prevSib//\pn) -- (\SimplexNodeName//\sn);
+                                    \ifnum 1=\xintifboolexpr{\s == \createCurrentMbTrimmed}{1}{0}
+                                        \draw [thin, draw=\TilingLineColor] (\nodeNameRoot/\d/1//\pn) -- (\SimplexNodeName//\sn);
+                                    \fi
+                                }
+                            }
+                        \fi
                     }
+
 
                 \xdef\lastAngleOffset{\sxAngleOffset}
                 \def\tmpAngleOffset{\sxAngleOffset}
                 \xdef\prevCreateDist{\createDistance}
                 \pgfmathsetmacro\newCreateDist{\createDistance + \tilingCurrSize * 2}
+                \xintifboolexpr{1 == \DoTilingHexagon && 0 == \d}{
+                    \pgfmathsetmacro\newCreateDist{\createDistance + \tilingCurrSize * 2.5}
+                }{}
                 \xdef\tilingCurrSize{\tilingCurrSize/\TilingScaleConst}
                 \xdef\createDistance{\newCreateDist}
                 \xdef\createCurrent{\createChildren}
                 \pgfmathsetmacro\newCreateChildren{(\createChildren)*\newChildren}
-                % \ifnum 1=\xintifboolexpr{\d == 1 && \TilingAltTriPattern == 1}{1}{0}
-                %     \pgfmathsetmacro\newCreateChildren{(1 + \createChildren)*\newChildren}
-                % \fi
+                \ifnum 1=\DoTilingHexagon
+                    \xintifboolexpr{1 == \DoTilingHexagon && \d == 0}{
+                        \xdef\createCurrent{6}
+                        \xdef\newChildren{1}
+                    }{}
+                    \xintifboolexpr{1 == \DoTilingHexagon && \d == 1}{
+                        \xdef\createCurrent{6}
+                        \xdef\newChildren{1}
+                    }{}
+                    \xintifboolexpr{1 == \DoTilingHexagon && \d == 2}{
+                        \xdef\createCurrent{12}
+                        \xdef\newChildren{2}
+                    }{}
+                    \pgfmathtruncatemacro\newCreateChildren{\createCurrent * \newChildren}
+                \fi
                 \xdef\createChildren{\newCreateChildren}
                 \xdef\lastD{\d}
             \fi
