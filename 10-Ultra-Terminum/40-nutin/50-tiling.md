@@ -352,25 +352,26 @@ So, that's the question: *is performing a doublespend in a tiling as difficult a
 
 #### Tiling Security: $h=0$
 
-At $h=0$, the tiling is equivalent to a standalone simplex: all simplex-chains reflect all other simplex-chains.
+At $h=0$, all tilings are equivalent to a standalone simplex: all simplex-chains reflect all other simplex-chains.
 (This is also true for tiling variants mentioned in \autoref{sec:tiling-variants}.)
-Thus, this trivial tiling is secure if standalone simplexes are secure.
+Thus, trivial tilings (those with $h=0$) are secure if standalone simplexes are secure.
 
 #### Tiling Security: $h=1$
 
 \providecommand\sec[1]{\text{Sec}(#1)}
 
-This configuration corresponds to \autoref{}.
+This configuration corresponds to \autoref{fig:tiled-simplex-5-d1}.
 
 What are the requirements for 51% attacking the root tile?
-In this case, since all chains in the root tile mutually reflect all chains in the tiling (like a normal simplex), we can say that a network-wide 51% attack is required; the root tile is secure.
+In this case, since all chains in the root tile mutually reflect all chains in the tiling (like a normal simplex), an attacker would need at least 51% the resources of the network.
+So, a network-wide 51% attack is required; the root tile is secure.
 
 Assuming $v=3$, what are the requirements for 51% attacking one of 3 leaf tiles?
 In this case, we need to define some terms first; particularly, we need to be able to compare a tile's security with that of their parent and children.
 
 Let's gives tiles an identifier that lets us easily determine how to find a tile in a tiling -- the tiles \emph{location}.
 The root tile is easy, we can just give it the identifier $1$, since there's only one.\footnote{
-    Regarding tilings in \autoref{sec:alt-equiv-tilings}: this is easily generalized by giving additional tiles identifiers of 2 and 3.
+    Regarding tilings in \autoref{sec:alt-equiv-tilings}: this is easily generalized by giving additional root tiles the identifiers 2 and 3.
 }
 We can refer to a tile's child by appending its parent's identifier with $|1$, $|2$, $|3$, etc.
 (For a valence of 3, $|3$ is only used for direct children of the root tile; all other tiles will always have the suffix $|1$ or $|2$).
@@ -397,19 +398,106 @@ For some tile $p|i$ (i.e., the $i^{th}$ child of a parent tile $p$) in a tiling 
 \end{equation}
 When a tile $p|i$ has no children, $w_{p|i|1}, w_{p|i|2}, \cdots = 0$.
 
+\aside{
+    Note: it's always the case that $\sec{1|i} < \sec{1}$, which implies that the root tile is (for $h=1$) as difficult to attack as the whole tiling.
+}
+
 Returning to the case at hand ($h=1$): when are the 3 leaf tiles secure?
-If the attack is \emph{distributed across tiles}, then leaf tiles are \emph{definitely} secure when $w_{1|i} < w_{1} \implies \sec{1|i} < \sec{1}$ -- i.e., the total chain-work securing each of the root tile's children is less than that of the root tile.
+
+First, if $w_{1|i} > w_1$, then it's possible for an attacker who's already mining the leaf tile to attack it.
+Let's calculate the minimum ratio, $q$, of tile $1|i$'s hash-rate that an attacker would need to do this (the honest hash-rate of $1|i$ has ratio $p$; $q + p = 1$):
+\begin{align}
+    qw_{1|i} &= pw_{1|i} + w_{1}
+    \nonumber \\
+    &= (1 - q)w_{1|i} + w_{1}
+    \nonumber \\
+    2qw_{1|i} &= w_{1|i} + w_{1}
+    \nonumber \\
+    q &= \frac{w_{1|i} + w_{1}}{2w_{1|i}}
+    \label{eq:tiling-child-unsafe}
+    \\
+    \intertext{Since $w_{1|i} > w_1$:}
+    2w_{1|i} &> w_{1|i} + w_1
+    \nonumber \\
+    \therefore 1 &> \frac{w_{1|i} + w_1}{2w_{1|i}}
+    \nonumber \\
+    \therefore q &< 1
+    \label{eq:tiling-child-unsafe-q}
+\end{align}
+\autoref{eq:tiling-child-unsafe-q} implies that some fraction of a leaf tile's hash-rate could attack that tile.
+If that happened, then compromising the leaf tile would not necessarily compromise the root tile (since it has multiple children).
+This would mean that the histories of the leaf tile and root tile would diverge -- the leaf tile would be effectively \emph{severed} from the network.
+Thus, $h=1$ is insecure if $w_{1|i} > w_1$.
+
+ <!-- -- i.e., the total chain-work securing each of the root tile's children is less than that of the root tile -->
+
+So what about $w_{1|i} < w_{1}$?
+Let's consider two cases: whether the attacking hash-rate \emph{already factored in} to the relevant chain's difficulties, or not.
+If the hash-rate \emph{is} factored in, then no change in distribution of hash-rate occurs when the attack happens.
+
+If the attacking hash-rate \textbf{is} \emph{already factored in}, then leaf tiles are \emph{definitely} secure when $w_{1|i} < w_{1}$.
 That's because -- in that context -- it's impossible to 51% attack a child-tile without attacking the root tile, and attacking the root tile is as difficult as attacking the entire tiling.
-We can back this up with \autoref{eq:tiling-sec-function}; assuming $v=3$:
+If the attack were possible, then the attacker would need to create private chain-segments for many of the simplex-chains in the root tile and tile $1|i$.
+But, the attacker cannot convince tile $1|i$ nodes of a reorganization on the root tile (which would require attacking the root tile) -- the attacker's chain-segments are not better than the honest ones.
+Thus, the attacker cannot undo reflections from the root tile, which provide more chain-weight than local reflections.
+In essence: a reorg on tile $1|i$ won't stick because honest $1|i$ nodes can tell that the attackers blocks arrived later.
+We can show this with \autoref{eq:tiling-sec-function}, too; assuming $v=3$:
 \begin{align*}
     LHS &= \sec{1|i} & & & RHS &= \sec{1} \\
     &= w_1 + w_{1|i} & & & &= w_1 + w_{1|1} + w_{1|2} + w_{1|3} \\
-    & & \therefore LHS &< RHS \blacksquare & &
+    & & \therefore LHS &< RHS \;\; \blacksquare & &
 \end{align*}
+So, this case is secure.
+
+If the attacking hash-rate \textbf{isn't} \emph{already factored in}, then \emph{normally} $w_{1|i} < w_{1}$, but it might not be true \emph{during the attack}.
+In other words, significantly more blocks are produced for tile $1|i$ simplex-chains than expected.
+Isn't this the same problem discussed (and solved) in \autoref{sec:reflection-pow-and-pos}?
+If the weight of chain-work contribution (via PoR) is \emph{already} capped, then it's not possible for the attacker to substantially increase the weight of their chain-segments beyond $w_{1|i}$!
+We don't need to change anything -- we guard against this already.
+So, in this case, the attacker needs to attack the root tile, too -- this case is secure.
+
+#### Tiling Security: $h \ge 2$
+
+\aside{
+    We'll presume $v=3$ here.
+}
+
+$w_{p|i} < w_{p}$
+
+$w_{p|i|1} + w_{p|i|2} < w_{p|i} + w_{p}$
+
+This is implied by $w_{p|i} < w_{p}$!
+Since $p$ has a parent, we can expand $p$ to $g|1$ (or ${g|2}$ -- which doesn't matter).
+\begin{align}
+    w_{p|i} &< w_{p}
+    \nonumber \\
+    \implies w_{g|1|i} &< w_{g|1}
+    \nonumber \\
+    2w_{g|1|i} \approx w_{g|1|1} + w_{g|1|2} &< 2w_{g|1} < w_{g|1} + w_{g}
+    \nonumber \\
+    w_{g|1|1} + w_{g|1|2} &< w_{g|1} + w_{g}
+    \label{eq:child-lt-parent-implied}
+\end{align}
+
+$w_{p|i} < rw_{p}$
+
+\begin{align}
+3w_{p|i|j} &< rw_{p|i} + rrw_{p} \nonumber \\
+0 &< rrw_{p} + rw_{p|i} - 3w_{p|i|j} \nonumber \\
+\implies r &> \frac{1}{2}(\sqrt{4v-3}-1) \label{eq:tilingsec-r-gt-v-expr} \\
+\intertext{We expect that:}
+r^2 + r &> v - 1 \nonumber \\
+\intertext{Via \autoref{eq:tilingsec-r-gt-v-expr}, observe that:}
+\Big( \frac{1}{2}(\sqrt{4v-3}-1) \Big)^2 + \frac{1}{2}(\sqrt{4v-3}-1)
+    &= \frac{1}{4}(4v-2\sqrt{4v-3}-2) + \frac{1}{2}(\sqrt{4v-3}-1) \nonumber \\
+    &= \frac{1}{2}(2v - \sqrt{4v-3} - 1 + \sqrt{4v-3} - 1) \nonumber \\
+    &= v - 1 \nonumber \\
+\therefore r &> \frac{1}{2}(\sqrt{4v-3}-1)
+\end{align}
 
 
 
-
+then
 
 %% END ### RELEASE
 
