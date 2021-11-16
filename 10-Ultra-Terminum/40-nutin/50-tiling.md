@@ -456,7 +456,94 @@ If the weight of chain-work contribution (via PoR) is \emph{already} capped, the
 We don't need to change anything -- we guard against this already.
 So, in this case, the attacker needs to attack the root tile, too -- this case is secure.
 
-#### Tiling Security: $h \ge 2$
+#### Tiling Security: $h = 2$
+
+<!-- \begin{equation*}
+    %%\xymatrix@M=4pt@C=-4pt@R=10pt{
+    %%    & & & 1 \ar[dll] \ar[drr] \\
+    %%    & 1|1 \ar[dl] \ar[dr] & & & & 1|2 \ar[dl] \ar[dr] \\
+    %%    1|1|1 & & 1|1|2 & & 1|2|1 & & 1|2|2 \\
+    %%} \\
+    \xymatrix@M=4pt@C=-4pt@R=10pt{
+        & & & & & 1 \ar[dllll] \ar[d] \ar[drrrr] \\
+        & 1|1 \ar[dl] \ar[dr] & & & & 1|2 \ar[dl] \ar[dr] & & & & 1|3 \ar[dl] \ar[dr] \\
+        1|1|1 & & 1|1|2 & & 1|2|1 & & 1|2|2 & & 1|3|1 & & 1|3|2 \\
+    }
+\end{equation*}
+\begin{equation*}
+    \xymatrix@M=4pt@C=-4pt@R=10pt{
+        & 1 \ar[d] \\
+        & 1|i \ar[dl] \ar[dr] \\
+        1|i|1 & & 1|i|2
+    }
+\end{equation*} -->
+
+
+
+\begin{figure}[H]
+    \centering
+    \hfill
+    \begin{subfigure}[t]{.6\textwidth}
+        \vskip 0pt
+        \centering
+        \begin{equation*}
+            %%\xymatrix@M=4pt@C=-4pt@R=10pt{
+            %%    & & & 1 \ar[dll] \ar[drr] \\
+            %%    & 1|1 \ar[dl] \ar[dr] & & & & 1|2 \ar[dl] \ar[dr] \\
+            %%    1|1|1 & & 1|1|2 & & 1|2|1 & & 1|2|2 \\
+            %%} \\
+            \xymatrix@M=4pt@C=-4pt@R=10pt{
+                & & & & & 1 \ar[dllll] \ar[d] \ar[drrrr] \\
+                & 1|1 \ar[dl] \ar[dr] & & & & 1|2 \ar[dl] \ar[dr] & & & & 1|3 \ar[dl] \ar[dr] \\
+                1|1|1 & & 1|1|2 & & 1|2|1 & & 1|2|2 & & 1|3|1 & & 1|3|2 \\
+            }
+        \end{equation*}
+        \caption{The complete tile tree for $h=2$.}
+        \label{fig:asdfd2}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.35\textwidth}
+        \vskip 0pt
+        \centering
+        \begin{equation*}
+            \xymatrix@M=4pt@C=-4pt@R=10pt{
+                & 1 \ar[d] \\
+                & 1|i \ar[dl] \ar[dr] \\
+                1|i|1 & & 1|i|2
+            }
+        \end{equation*}
+        \caption{The branch around $1|i$.}
+        \label{fig:asdf1}
+    \end{subfigure}%%
+    \hfill
+    \caption{Tile trees for $h=2$, $v=3$.}
+    \label{fig:asdf}
+\end{figure}
+
+
+
+
+root tile
+
+\begin{align*}
+    \sec{1} = w_1 + vw_{1|i} \\
+    \intertext{To be secure, before the next iteration:}
+    w_{1|i} < w_1 < vw_{1|i}
+\end{align*}
+
+that way, control of the root tile requires control of some children.
+
+root's children
+
+\begin{align*}
+    \sec{1|i} = w_1 + w_{1|i} + w_{1|i|j}(v-1) \\
+    \intertext{To be secure, before the next iteration:}
+    w_{1|i|j} < w_{1|i} < w_1
+\end{align*}
+
+
+
+#### Tiling Security: $h \ge 3$
 
 \aside{
     We'll presume $v=3$ here.
@@ -479,6 +566,14 @@ Since $p$ has a parent, we can expand $p$ to $g|1$ (or ${g|2}$ -- which doesn't 
     \label{eq:child-lt-parent-implied}
 \end{align}
 
+Case: leaf tile. $w_{g|i|1} < w_{g|i} + w_{g}$ $\implies$ secure.
+
+Case: 2 leaf tiles. $w_{g|i|1} + w_{g|i|2} < w_{g|i} + w_{g}$ $\implies$ secure.
+
+Case: 2 children + tile. $w_{g|i} < w_{g} + w_{g|..}$ $\implies$ secure. (leaf tiles don't help w/ attacking $g$, just being able to attack $g|i$ in the first place.)
+
+\textbf{general case:}
+
 $w_{p|i} < rw_{p}$
 
 \begin{align}
@@ -497,7 +592,7 @@ r^2 + r &> v - 1 \nonumber \\
 
 
 
-then
+\todo{this section}
 
 %% END ### RELEASE
 
