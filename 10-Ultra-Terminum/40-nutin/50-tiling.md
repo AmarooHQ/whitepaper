@@ -399,7 +399,7 @@ For some tile $p|i$ (i.e., the $i^{th}$ child of a parent tile $p$) in a tiling 
 When a tile $p|i$ has no children, $w_{p|i|1}, w_{p|i|2}, \cdots = 0$.
 
 \aside{
-    Note: it's always the case that $\sec{1|i} < \sec{1}$, which implies that the root tile is (for $h=1$) as difficult to attack as the whole tiling.
+    Note: for $h=1$, it's always the case that $\sec{1|i} < \sec{1}$, which implies that the root tile is as difficult to attack as the whole tiling.
 }
 
 Returning to the case at hand ($h=1$): when are the 3 leaf tiles secure?
@@ -478,7 +478,7 @@ So, in this case, the attacker needs to attack the root tile, too -- this case i
     }
 \end{equation*} -->
 
-
+Let's illustrate the tree structure of the tiling at $h=2$ in \autoref{fig:tiling-sec-tile-tree-h2}.
 
 \begin{figure}[H]
     \centering
@@ -487,11 +487,6 @@ So, in this case, the attacker needs to attack the root tile, too -- this case i
         \vskip 0pt
         \centering
         \begin{equation*}
-            %%\xymatrix@M=4pt@C=-4pt@R=10pt{
-            %%    & & & 1 \ar[dll] \ar[drr] \\
-            %%    & 1|1 \ar[dl] \ar[dr] & & & & 1|2 \ar[dl] \ar[dr] \\
-            %%    1|1|1 & & 1|1|2 & & 1|2|1 & & 1|2|2 \\
-            %%} \\
             \xymatrix@M=4pt@C=-4pt@R=10pt{
                 & & & & & 1 \ar[dllll] \ar[d] \ar[drrrr] \\
                 & 1|1 \ar[dl] \ar[dr] & & & & 1|2 \ar[dl] \ar[dr] & & & & 1|3 \ar[dl] \ar[dr] \\
@@ -499,7 +494,7 @@ So, in this case, the attacker needs to attack the root tile, too -- this case i
             }
         \end{equation*}
         \caption{The complete tile tree for $h=2$.}
-        \label{fig:asdfd2}
+        \label{fig:tiling-sec-tile-tree-h2-complete}
     \end{subfigure}%%
     \hfill
     \begin{subfigure}[t]{.35\textwidth}
@@ -513,15 +508,59 @@ So, in this case, the attacker needs to attack the root tile, too -- this case i
             }
         \end{equation*}
         \caption{The branch around $1|i$.}
-        \label{fig:asdf1}
+        \label{fig:tiling-sec-tile-tree-h2-branch}
     \end{subfigure}%%
     \hfill
     \caption{Tile trees for $h=2$, $v=3$.}
-    \label{fig:asdf}
+    \label{fig:tiling-sec-tile-tree-h2}
 \end{figure}
 
+<!-- fig:tiling-sec-tile-tree-h2-complete
+fig:tiling-sec-tile-tree-h2-branch
+fig:tiling-sec-tile-tree-h2 -->
 
+There are three things we need to establish: that leaf tiles are secure, that those leaf tiles' parents (which are children of the root tile) are secure, and that the root tile is secure.
 
+Leaf tiles are secure if $w_{1|i|j} < w_{1|i}$ -- attacking the leaf tile requires attacking its parent.
+
+What about the parent tile ${1|i}$?
+If \emph{both} leaf tiles (under $1|i$) are attacked, then the attacker has coopted, at most, $2w_{1|i|j}$ of the chain-work contributing to $1|i$.
+\begin{equation}
+\begin{split}
+    \text{Assume:  } w_{1|i} &< w_{1} \\
+    \text{Assume:  } w_{1|i|j} &< w_{1|i} \\
+    \therefore 2w_{1|i|j} &< 2w_{1|i} \\
+        &< w_{1|i} + w_1
+\end{split}
+\end{equation}
+So the parent tile is secure even when an attacker could 51% attack both leaf tiles under $1|i$.
+
+If $1|i$ \textbf{and} both leaf tiles ($1|i|j$) are attacked, what then?
+Well, since the attacker can 51% attack those 3 tiles, the attack on tile $1|i$ is sort of 'supported' by the leaves.
+However, that chain-work isn't considered by the root tile -- $\sec{1}$ does not include $w_{1|i|j}$.
+So we know, at least, that the root tile is still secure.
+
+Can $1|i$ be \emph{severed} from the tiling, though?
+To do that, the attacker needs at least 51% of $\sec{1|i}$.
+Let's use $q$ to represent the attackers proportion of hash-power (in total over $w_{1|i|j}$ and $w_{1|i}$).
+When is the tiling secure?
+\begin{align*}
+    \sec{1|i} &= 2w_{1|i|j} + w_{1|i} + w_{1} \\
+    q(2w_{1|i|j} + w_{1|i}) &< p(2w_{1|i|j} + w_{1|i}) + w_1 \\
+    (q - p)(2w_{1|i|j} + w_{1|i}) &< w_1 \\
+    \intertext{assume that $w_{l|i}$ is only slightly less than $w_{l}$ (worst case), so that $w_{l|i} \approx w_{l}$:}
+    \implies (q - p)(3w_{1|i|j}) &< w_{1|i} \\
+    \implies (q - p)(3w_{1|i|j}) &< w_{1|i|j} \\
+    q - p &< \nicefrac{1}{3} \\
+    q &< p + \nicefrac{1}{3} \\
+    1 - p &< p + \nicefrac{1}{3} \\
+    \nicefrac{2}{3} &< 2p \\
+    \nicefrac{1}{3} &< p \\
+\end{align*}
+
+<!-- note: something about tiles essentially being yes/no (all or nothing) -->
+
+Since $2w_{1|i|j} < w_{1|i} + w_{1}$, we can say that
 
 root tile
 
@@ -649,7 +688,7 @@ Similarly, another alternate tiling starts with three tiles.
 To preserve valencies, each tile at height 0 has only 1 child.
 Otherwise, the iteration algorithm is the same.
 This tiling is shown in \autoref{fig:alt-tri-tiling} and has $N_{\text{tiles}} = 3 \cdot 2^{h}$.
-One advantage of this variant is that the tiling algorithm can begin when a single original simplex reaches $75\%$ capacity (at which point must be split into the trio of root-tiles).
+One advantage of this variant is that the tiling algorithm can begin when a single original simplex reaches $75\%$ capacity (at which point, it must be split into the trio of root-tiles).
 
 \begin{figure}[p]
     \centering
