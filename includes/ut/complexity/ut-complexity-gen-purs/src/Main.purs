@@ -3,7 +3,7 @@ module Main where
 import Prel
 
 import Amaroo.WP.Formatter (wrap)
-import Amaroo.WP.Tables (compareNets1mTps, compareNets1mTpsAll, compareNets20k, compareNets3k, compareUtOptimizationsA, compareUtOptimizationsA20k, compareUtOptimizationsB, compareUtOptimizationsB20k, dappChains, dappChainsHot, lpCompareNetworks, lpCompareUt1Eth2, lpCompareUt1OptShard, lpCompareUt2OptShard, lpCompareUt2OptShard20k, lpCompareUtOptimizations1, showHtmlTable, showLatexTable, showMdTable, tableTps, tableTpsHot, tpsPor, tpsPort)
+import Amaroo.WP.Tables (compareNets1mTps, compareNets1mTpsAll, compareNets20k, compareNets3k, compareUtLimOptimizationsA, compareUtOptimizationsA, compareUtOptimizationsA20k, compareUtOptimizationsB, compareUtOptimizationsB20k, dappChains, dappChainsHot, lpCompareNetworks, lpCompareUt1Eth2, lpCompareUt1LimitedOptShard, lpCompareUt1OptShard, lpCompareUt2OptShard, lpCompareUt2OptShard20k, lpCompareUtOptimizations1, showHtmlTable, showLatexTable, showMdTable, tableTps, tableTpsHot, tpsPor, tpsPort)
 import Amaroo.WP.Tables.Booktabs (renderBooktabs)
 import Amaroo.WP.Tables.Types (LatexTablePos(..), TPositioning(..), TableDesc(..))
 import Control.Alt ((<|>))
@@ -85,10 +85,20 @@ lpTables =
     -- , TD "lp_compare_optimizations3" lpCompareUtOptimizations3 defaultPositioning
     ]
 
+
+devTables =
+    [ TD "lp_compare_ut1_to_optshard" lpCompareUt1OptShard defaultPositioning
+    , TD "lp_compare_ut1_lim_to_optshard" lpCompareUt1LimitedOptShard defaultPositioning
+    , TD "compare_optimizations_a" compareUtOptimizationsA defaultPositioning
+    , TD "compare_lim_optimizations_a" compareUtLimOptimizationsA defaultPositioning
+    ]
+
+
 allTables :: Array TableDesc
-allTables = if elem "--lp-tables" argv
-  then lpTables
-  else wpTables
+allTables
+  | elem "--lp-tables" argv = lpTables
+  | elem "--dev-tables" argv = devTables
+  | otherwise = wpTables
 
 readWhitepaperMd :: Effect String
 readWhitepaperMd = do

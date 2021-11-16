@@ -585,6 +585,9 @@ compareUtOptimizationsA = compareUtOptimizations_ _UT_INIT_CONFIG optimizationPr
 compareUtOptimizationsA20k :: Table
 compareUtOptimizationsA20k = compareUtOptimizations_ _UT_20K_CONFIG optimizationProps1
 
+compareUtLimOptimizationsA :: Table
+compareUtLimOptimizationsA = compareUtOptimizations_ (_UT_INIT_CONFIG {limitN1Ratio = Just 0.667}) optimizationProps1
+
 -- compareUtOptimizations = Table
 --     ([""] <> (oProps <#> (\{s} -> s)))
 --     {md: mkSpacer <$> A.replicate (l+1) 3, texTabular: "l" <> repeatSafe l "r"}
@@ -632,15 +635,18 @@ lpCompareUtOptimizations1 = mkCompareUtOptimizations
     , {s: "$N_2$ (chains)", f: \cs -> _fmtStd cs.d2.n}
     ]
 
-genLpCompareRow k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdStdMixed <$> [effBh, tps])
+genLpCompareRow' lim k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdStdMixed <$> [effBh, tps])
   where
-    p = o.p k
+    p = (o.p k) {limitN1Ratio = lim}
     cs = netToChainStats net p
     effBh = case net of
       Eth2 -> cs.effDh
       OptShard -> cs.effDh
       _ -> cs.effBh
     tps = if isAleph net then infinity else netToTps net cs
+
+genLpCompareRow = genLpCompareRow' Nothing
+genLpCompareLimitedRow = genLpCompareRow'
 
 genLpCompare2Row k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdStdNoSiMixed <$> [cs.effBh, cs.effDh, tps])
   where
@@ -667,6 +673,9 @@ lpCompareUt2OptShard = lpCompare2TH $ (genLpCompare2Row 3000.0) <$> (filterUtVsO
 
 lpCompareUt2OptShard20k :: Table
 lpCompareUt2OptShard20k = lpCompare2TH $ (genLpCompare2Row _COMPARE_20K) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), Eth2, UT (T 1), UT (HOT 1), OptShard, UT (PoRTs 2), UT(T 2), UT (HOT 2)])
+
+lpCompareUt1LimitedOptShard :: Table
+lpCompareUt1LimitedOptShard = lpCompareTH $ (genLpCompareLimitedRow (Just 0.667) 3000.0) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), Eth2, UT (T 1), UT (HOT 1), OptShard])
 
 
 fixRow2 :: Array String -> Array String
