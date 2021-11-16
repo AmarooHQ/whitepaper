@@ -3,14 +3,14 @@ module Test.Amaroo.WP.Calcs where
 import Amaroo.WP.Calcs
 import Prel
 
-import Amaroo.WP.Tables (_ETH2_1M_K, btToF)
+import Amaroo.WP.Tables (_ETH2_1M_K, btToF, getTps)
 import Data.Array (intercalate, zip)
 import Data.Array as A
 import Data.Either (Either(..), fromLeft, isLeft)
 import Data.Int (toNumber)
 import Data.Int as I
 import Data.List.NonEmpty as NEL
-import Data.Maybe (fromJust)
+import Data.Maybe (Maybe(..), fromJust)
 import Data.Traversable (sequence_)
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
@@ -27,7 +27,7 @@ import Test.Spec.Assertions (fail, shouldEqual, shouldNotEqual, shouldSatisfy)
 import Test.Spec.QuickCheck (quickCheck)
 
 
-basicTestPs :: _
+basicTestPs :: Params
 basicTestPs = mkSimplePs 1000.0 {bf: 1.0/10.0, bh: 100.0} 500.0
 
 genParams :: _ Params
@@ -38,12 +38,18 @@ genParams =
 
 basicSample = genSample basicTestPs
 
+basicKbRLimit = 0.25
+basicLimitKbRSample = genSample $ basicTestPs {limitKbR = Just basicKbRLimit}
+
 genSample :: _
 genSample = runChainCalcFor
 
 expectTrue x = x `shouldEqual` true
 
 isWithin d x y = (x - y) |> abs |> (d - _) |> (_ > 0.0)
+
+shouldBeLessThan x y = x < y |> not |> when $ fail $ show x <> " >= " <> show y <> " (should be less than instead)"
+shouldBeMoreThan x y = x > y |> not |> when $ fail $ show x <> " <= " <> show y <> " (should be more than instead)"
 
 shouldBeWithin d x y = isWithin d x y |> not |> when $
   fail $ show x <> " /= " <> show y <> " (must be within " <> show d <> ")"
@@ -69,6 +75,7 @@ tradSpec = describe "trad chains" do
           samples = genSample <$> pss
       it "should calc trad.d1 correctly" do
         basicSample.trad.d1 `dNShouldEqual` {n: 1.0, t: 1000.0, tps: 2.0}
+        basicSample.tradEth2.d1 `dNShouldEqual` {n: 1.0, t: 1000.0, tps: 2.0}
       it "should calc trad.d2 correctly" do
         basicSample.trad.d2 `dNShouldEqual` {n: 100.0, t: 100000.0, tps: 200.0}
       it "should calc trad.d3 correctly" do
@@ -78,6 +85,16 @@ tradSpec = describe "trad chains" do
         basicSample.trad.deltaBigS `shouldEqual` 1000.0
         basicSample.trad.deltaSmallS `shouldEqual` 1000.0
         basicSample.trad.tts `shouldBeCloseTo` 0.18262499999999998
+        basicSample.tradEth2.confRate `shouldEqual` 0.1
+        basicSample.tradEth2.deltaBigS `shouldEqual` 1000.0
+        basicSample.tradEth2.deltaSmallS `shouldEqual` 1000.0
+        basicSample.tradEth2.tts `shouldBeCloseTo` 0.18262499999999998
+      it "shouldn't depend on limitKbR" do
+        basicLimitKbRSample.trad.kB `shouldEqual` 0.0
+        basicLimitKbRSample.tradEth2.kB `shouldEqual` 0.0
+        basicLimitKbRSample.trad.kTx `shouldEqual` basicLimitKbRSample.trad.k1
+        basicLimitKbRSample.tradEth2.kTx `shouldEqual` basicLimitKbRSample.tradEth2.k1
+
 
 auxStatsSpec :: Spec Unit
 auxStatsSpec = describe "Aux Stats" do
@@ -113,8 +130,14 @@ utSpec = describe "ut" do
     let utvs = basicSample.ut
         std = utvs.std
     describe "ut.std" do
+      let p_n1 = pToPF basicTestPs
+          lKB = p_n1.k * basicKbRLimit
+          lKTx = p_n1.k - lKB
+          {bf, bh} = p_n1.hf
+          limitedD1 = {n: lKB / bf / bh, t: lKTx * lKB / bf / bh, tps: lKTx * lKB / bf / bh / 500.0}
       it "d1" do
         basicSample.ut.std.d1 `dNShouldEqual` {n: 50.0, t: 500.0 * 50.0, tps: 50.0}
+        basicLimitKbRSample.ut.std.d1 `dNShouldEqual` limitedD1
       it "d2" do
         basicSample.ut.std.d2 `dNShouldEqual` {n: 50.0 `pow` 2.0, t: 2500000.0, tps: 5000.0}
       it "d3" do
@@ -191,6 +214,39 @@ utSpec = describe "ut" do
       -- it "other" do
       --   ut.tts `shouldEqual`
 
+    describe "limited k_b" do
+      sequence_ $ do
+        Tuple utVName getUtVar <-
+          [ Tuple "pors"    $ \ut -> ut.pors
+          , Tuple "ports"   $ \ut -> ut.ports
+          , Tuple "hopors"  $ \ut -> ut.hopors
+          , Tuple "hoports" $ \ut -> ut.hoports
+          , Tuple "std"     $ \ut -> ut.std
+          , Tuple "t"       $ \ut -> ut.t
+          , Tuple "ho"      $ \ut -> ut.ho
+          , Tuple "hot"     $ \ut -> ut.hot
+          ]
+        pure $ describe utVName do
+          sequence_ do
+            Tuple propName getProp <-
+              [ Tuple "d1.n" $ \cs -> cs.d1.n
+              , Tuple "d1.t" $ \cs -> cs.d1.t
+              , Tuple "d2.n" $ \cs -> cs.d2.n
+              , Tuple "d2.t" $ \cs -> cs.d2.t
+              , Tuple "d3.n" $ \cs -> cs.d3.n
+              , Tuple "d3.t" $ \cs -> cs.d3.t
+              ]
+            pure $ it propName do
+              getProp (getUtVar basicLimitKbRSample.ut) `shouldBeLessThan` getProp (getUtVar basicSample.ut)
+        --       basicLimitKbRSample.ut.hoports.d1.n `shouldSatisfy (<=)` basicSample.ut.hoports.d1.n
+        -- basicLimitKbRSample.ut.hopors.d1.n `shouldSatisfy (<=)` basicSample.ut.hopors.d1.n
+        -- basicLimitKbRSample.ut.std.d1.n `shouldSatisfy (<=)` basicSample.ut.std.d1.n
+        -- basicLimitKbRSample.ut.t.d1.n `shouldSatisfy (<=)` basicSample.ut.t.d1.n
+        -- basicLimitKbRSample.ut.ho.d1.n `shouldSatisfy (<=)` basicSample.ut.ho.d1.n
+        -- basicLimitKbRSample.ut.hot.d1.n `shouldSatisfy (<=)` basicSample.ut.hot.d1.n
+        -- basicLimitKbRSample.ut.pors.d1.n `shouldSatisfy (<=)` basicSample.ut.pors.d1.n
+        -- basicLimitKbRSample.ut.ports.d1.n `shouldSatisfy (<=)` basicSample.ut.ports.d1.n
+
     describe "UT variant effective header size" do
       let getHF1 v = v.d1.p.hf
           getHF2 v = v.d2.p.hf
@@ -221,6 +277,7 @@ utSpec = describe "ut" do
         let ps = { hfs: NEL.fromFoldable [{bf: 0.11, bh: 10.0}, {bf: 0.22, bh: 20.0}] |> unsafePartial fromJust
                  , ks: NEL.cons 1111.0 $ NEL.singleton 2222.0
                  , txSize: 500.0
+                 , limitKbR: Nothing
                  }
             trad = tradChainCalc ps
             ut = allUtChainCalcs ps

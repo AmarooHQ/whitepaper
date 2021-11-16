@@ -34,25 +34,26 @@ type ParamsL l
   = { ks :: l Number
     , hfs :: l ChainNestingParams -- | List of {header,frequency} pairs
     , txSize :: Number
+    , limitKbR :: Maybe Number
     }
 type Params = ParamsL NonEmptyList
 
-type ParamsF = {k :: Number, hf :: ChainNestingParams, txSize :: Number}
+type ParamsF = {k :: Number, hf :: ChainNestingParams, txSize :: Number, limitKbR :: Maybe Number}
 
 pToPF :: Params -> ParamsF
-pToPF p = {k: head p.ks, hf: head p.hfs, txSize: p.txSize}
+pToPF p = {k: head p.ks, hf: head p.hfs, txSize: p.txSize, limitKbR: p.limitKbR}
 
 showableParams :: Params -> ParamsL Array
-showableParams p = {ks: NEL.toUnfoldable p.ks, hfs: NEL.toUnfoldable p.hfs, txSize: p.txSize}
+showableParams p = {ks: NEL.toUnfoldable p.ks, hfs: NEL.toUnfoldable p.hfs, txSize: p.txSize, limitKbR: p.limitKbR}
 
 -- instance showParams :: Show Params where
 --   show {ks, hfs, txSize} = show {ks: NEL.toList ks, hfs: NEL.toList hfs, txSize}
 
 mkSimplePs :: Number -> ChainNestingParams -> Number -> Params
-mkSimplePs k hf txSize = {ks: singleton k, hfs: singleton hf, txSize}
+mkSimplePs k hf txSize = {ks: singleton k, hfs: singleton hf, txSize, limitKbR: Nothing}
 
 mkNestedPs :: Number -> ChainNestingParams -> ChainNestingParams -> Number -> Params
-mkNestedPs k hf hf2 txSize = {ks: singleton k, hfs: hf `NEL.cons` singleton hf2, txSize}
+mkNestedPs k hf hf2 txSize = {ks: singleton k, hfs: hf `NEL.cons` singleton hf2, txSize, limitKbR: Nothing}
 
 type UtVariants a
   = { pors :: a
@@ -120,7 +121,7 @@ type ChainComplexities
 
 -- | Return a set of parameters sutiable to use for the next nesting level
 paramsForNextNS :: Params -> Params
-paramsForNextNS ps@{txSize} = {ks, hfs, txSize}
+paramsForNextNS ps@{txSize} = {ks, hfs, txSize, limitKbR: Nothing}
   where
     -- Take the tale of the list, or if that is empty, use the existing list as default (which must only have 1 entry)
     ks = tail ps.ks |> fromList |> fromMaybe ps.ks
