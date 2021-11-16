@@ -38,8 +38,8 @@ genParams =
 
 basicSample = genSample basicTestPs
 
-basicKbRLimit = 0.25
-basicLimitKbRSample = genSample $ basicTestPs {limitKbR = Just basicKbRLimit}
+basicN1Limit = 0.5
+basicLimitKbRSample = genSample $ basicTestPs {limitN1Ratio = Just basicN1Limit}
 
 genSample :: _
 genSample = runChainCalcFor
@@ -47,14 +47,20 @@ genSample = runChainCalcFor
 expectTrue x = x `shouldEqual` true
 
 isWithin d x y = (x - y) |> abs |> (d - _) |> (_ > 0.0)
+isWithinR r x y = abs (x - y) / y < r
 
 shouldBeLessThan x y = x < y |> not |> when $ fail $ show x <> " >= " <> show y <> " (should be less than instead)"
 shouldBeMoreThan x y = x > y |> not |> when $ fail $ show x <> " <= " <> show y <> " (should be more than instead)"
 
 shouldBeWithin d x y = isWithin d x y |> not |> when $
-  fail $ show x <> " /= " <> show y <> " (must be within " <> show d <> ")"
+  fail $ show x <> " /= " <> show y <> " (difference should be less than" <> show d <> ")"
 
 shouldBeCloseTo = shouldBeWithin 0.00001
+
+shouldBeWithinR r x y = isWithinR r x y |> not |> when $
+  fail $ show x <> " /= " <> show y <> " (values be within ratio: " <> show r <> ")"
+
+shouldBasiallyEqual = shouldBeWithinR 0.00000001
 
 dNShouldEqual actual@{n, t, tps} expected = {n, t, tps} `shouldEqual` expected
 
@@ -89,7 +95,7 @@ tradSpec = describe "trad chains" do
         basicSample.tradEth2.deltaBigS `shouldEqual` 1000.0
         basicSample.tradEth2.deltaSmallS `shouldEqual` 1000.0
         basicSample.tradEth2.tts `shouldBeCloseTo` 0.18262499999999998
-      it "shouldn't depend on limitKbR" do
+      it "shouldn't depend on limitN1Ratio" do
         basicLimitKbRSample.trad.kB `shouldEqual` 0.0
         basicLimitKbRSample.tradEth2.kB `shouldEqual` 0.0
         basicLimitKbRSample.trad.kTx `shouldEqual` basicLimitKbRSample.trad.k1
@@ -131,7 +137,7 @@ utSpec = describe "ut" do
         std = utvs.std
     describe "ut.std" do
       let p_n1 = pToPF basicTestPs
-          lKB = p_n1.k * basicKbRLimit
+          lKB = p_n1.k * basicN1Limit
           lKTx = p_n1.k - lKB
           {bf, bh} = p_n1.hf
           limitedD1 = {n: lKB / bf / bh, t: lKTx * lKB / bf / bh, tps: lKTx * lKB / bf / bh / 500.0}
@@ -214,7 +220,7 @@ utSpec = describe "ut" do
       -- it "other" do
       --   ut.tts `shouldEqual`
 
-    describe "limited k_b" do
+    describe "limited N1" do
       sequence_ $ do
         Tuple utVName getUtVar <-
           [ Tuple "pors"    $ \ut -> ut.pors
@@ -277,7 +283,7 @@ utSpec = describe "ut" do
         let ps = { hfs: NEL.fromFoldable [{bf: 0.11, bh: 10.0}, {bf: 0.22, bh: 20.0}] |> unsafePartial fromJust
                  , ks: NEL.cons 1111.0 $ NEL.singleton 2222.0
                  , txSize: 500.0
-                 , limitKbR: Nothing
+                 , limitN1Ratio: Nothing
                  }
             trad = tradChainCalc ps
             ut = allUtChainCalcs ps

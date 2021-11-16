@@ -15,7 +15,7 @@ import Data.Tuple (Tuple(..))
 import Main (allTables, lpTables)
 import Math as M
 import Partial.Unsafe (unsafePartial)
-import Test.Amaroo.WP.Calcs (shouldBeCloseTo, shouldBeWithin)
+import Test.Amaroo.WP.Calcs (shouldBasiallyEqual, shouldBeCloseTo, shouldBeWithin)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual, shouldSatisfy)
 
@@ -108,7 +108,7 @@ utNamesSpec = describe "tables" do
         utCalcHOPoRs btcP {hashTruncation: true} `shouldSatisfy` (\cs -> cs.d2.tps > M.pow 10.0 22.0)
       it ("works for btc " <> show btcUt2EquivTps) do
         {net: Bitcoin, p: btcP} `shouldEqual` btc
-        btcUt2EquivTps `shouldBeCloseTo` btcUt2Equiv.d2.tps
+        btcUt2EquivTps `shouldBasiallyEqual` btcUt2Equiv.d2.tps
       it ("works for cardano " <> show adaUt2EquivTps) do
         {net: Cardano, p: adaP} `shouldEqual` ada
         adaUt2EquivTps `shouldBeWithin (0.000000001 * adaUt2EquivTps)` adaUt2Equiv.d2.tps
@@ -117,7 +117,7 @@ utNamesSpec = describe "tables" do
       it "bitcoin 1m sanity" do
         (_BTC_1M_K / 250.0) `shouldBeCloseTo` 1_000_000.0
         -- subtract 16B for +T (lerp set so that bh=80B -> 16B discount; bh>=112B -> 32B discount)
-        calcT1 _BTC_1M_K (1.0/600.0) (80.0 - 16.0) `shouldBeCloseTo` btcUt2Equiv.d1.t
+        calcT1 _BTC_1M_K (1.0/600.0) (80.0 - 16.0) `shouldBasiallyEqual` btcUt2Equiv.d1.t
       it "cardano 1m sanity" do
         (_BTC_1M_K / 250.0) `shouldBeCloseTo` 1_000_000.0
         -- subtract 32B for +T
@@ -127,4 +127,4 @@ utNamesSpec = describe "tables" do
         -- effective header should match
         64.0 `shouldBeCloseTo` btcUt2Equiv.effBh
       it "manual calc for btc equiv" do
-        btcUt2Equiv.d2.tps `shouldBeCloseTo` ((calcT2 _BTC_1M_K (1.0/600.0) (64.0))/ 250.0)
+        btcUt2Equiv.d2.tps `shouldBasiallyEqual` ((calcT2 _BTC_1M_K (1.0/600.0) (64.0))/ 250.0)
