@@ -1,0 +1,235 @@
+\providecommand\TilingDepth{5}%
+\providecommand\TilingInitSize{5}%
+\providecommand\TilingScaleConst{1.5}%
+\providecommand\TilingValence{3}%
+\providecommand\SimplexChains{5}%
+\providecommand\RainbowColors{1}%
+\providecommand\TilingMonoColor{0}%
+\providecommand\TilingNodeColor{pink}%
+\providecommand\TilingSizeToNodeRRatio{3}%
+\providecommand\TilingAutoRotate{1}%
+\providecommand\TilingRotateDebug{0}%
+\providecommand\TilingDrawAllReflections{1}%
+\providecommand\TilingDrawGroups{0}%
+\providecommand\TilingAltPattern{0}%
+\providecommand\TilingAltTriPattern{0}%
+\providecommand\TilingLineColor{black}%
+\providecommand\TilingOnlyTopHalf{0}%
+\providecommand\DoTilingHexagon{0}%
+\providecommand\SetNewChildren[1]{
+    % \xdef\ncInput{}
+    \pgfmathsetmacro\newChildren{\xintifboolexpr{\DoTilingHexagon == 1}{
+        \xintifboolexpr{#1 == 0}{3}{\xintifboolexpr{#1 == 1}{4}{\xintifboolexpr{#1 == 2}{1}{2}}}
+    }{\TilingValence - \xintifboolexpr{ #1 < 1 }{0}{1}}}
+}
+\input{simplex-macro}%
+% \makeatletter%
+% \def\fillRGB#1#2#3{\pgfsys@color@rgb@fill{#1}{#2}{#3}}%
+% \makeatother%
+\pgfdeclarelayer{reflections}%
+\pgfdeclarelayer{groups}%
+\pgfdeclarelayer{tiles}%
+\pgfsetlayers{reflections,groups,main,tiles}%
+\newcommand\TikzSimplexTiling{
+    \renewcommand\SimplexOutlineColor{\TilingLineColor}
+    \pgfmathsetmacro\nNodesTotal{3*(2^(\TilingDepth)-1)+1}
+    \xdef\initNodeR{\TilingInitSize*\TilingSizeToNodeRRatio}
+    \xdef\nodeR{\initNodeR}
+    \pgfmathsetmacro\newChildren{6}
+    \xdef\lastTilesTotal{0}
+    \def\nodeNameRoot{r}
+    \xdef\tilingCurrSize{\TilingInitSize}
+    \xdef\createCurrent{1}
+    \xdef\createDistance{0}
+    \xdef\createChildren{6}
+    % \ifnum 1=\TilingAltPattern
+    %     \xdef\createCurrent{2}
+    %     \pgfmathsetmacro\newCreateChildren{(\TilingValence-1)*\createCurrent}
+    %     \pgfmathsetmacro\newCreateDistance{\tilingCurrSize*\TilingScaleConst}
+    %     \ifnum 1=\TilingAltTriPattern
+    %         \xdef\createCurrent{3}
+    %         % create 1 less child at this point, account for this during end of depth-iter loop
+    %         \pgfmathsetmacro\newCreateChildren{(\TilingValence-2)*\createCurrent}
+    %         % \xdef\tilingCurrSize{\TilingInitSize/\TilingScaleConst}
+    %     \fi
+    %     \xdef\createDistance{\newCreateDistance}
+    %     \xdef\createChildren{\newCreateChildren}
+    % \fi
+    \xdef\prevCreateDist{0}
+    \xdef\lastD{0}
+    \xdef\timesRun{0}
+    \xdef\lastAngleOffset{0}
+    \xdef\tileName{init-unset-name}
+    \foreach \d in {0,...,\TilingDepth} {
+            \ifnum 0<\createCurrent
+                \renewcommand\SimplexRadius{\tilingCurrSize}
+                % \ifnum 1=\xintifboolexpr{1 == \TilingAltTriPattern}{1}{0}
+                %     \renewcommand\SimplexRadius{\tilingCurrSize/\TilingScaleConst}
+                % \fi
+                % \ifnum 1=\xintifboolexpr{1 == \TilingAltTriPattern && 0 == \d}{1}{0}
+                %     \renewcommand\SimplexRadius{\tilingCurrSize/\TilingScaleConst/\TilingScaleConst}
+                % \fi
+                \renewcommand\SimplexOffsetR{\createDistance}
+                % normally 180, 540 only for tilingAlt but not tilingAltTri
+                \xdef\autoRotAngle{180}
+                \ifnum 1=\TilingAutoRotate
+                    \pgfmathsetmacro\sxAngleOffset{mod(360/\createCurrent/2+(\autoRotAngle/\TilingValence)*(\TilingValence-2)/2, 360)}
+                \else
+                    \pgfmathsetmacro\sxAngleOffset{mod(360/\createCurrent/2, 360)}
+                \fi
+                \pgfmathsetmacro\newSxNodeR{\nodeR/sqrt(\TilingScaleConst)}
+                \xdef\nodeR{\newSxNodeR}
+                \renewcommand\SimplexNodeRadius{\nodeR}
+                \pgfmathsetmacro\createCurrentMbTrimmed{\createCurrent * (1 - 0.5 * \TilingOnlyTopHalf * max(0, min(1, \d - 1)))}
+                \foreach \s in {1,...,\createCurrentMbTrimmed} {
+                        \def\parentSimplex{\nodeNameRoot/0/1}
+                        \pgfmathsetmacro\parentId{0}
+                        \ifnum 1=\xintifboolexpr{1 < \d || \TilingAltPattern == 1}{1}{0}
+                            \xdef\newChildrenSub{\xintifboolexpr{1 == \d && 1 == \TilingAltTriPattern}{1}{0}}
+                            % how many children we're actually creating. Note, this is to calc the parentId,
+                            % so it regards the current tile.
+                            \pgfmathsetmacro\newKidsActual{\newChildren - \newChildrenSub}
+                            \pgfmathsetmacro\parentId{int(\s/\newKidsActual + (1-1/\newKidsActual))}
+                            \def\parentSimplex{\nodeNameRoot/\lastD/\parentId}
+                        \fi
+                        \xdef\tileName{\nodeNameRoot/\d/\s}
+                        \renewcommand\SimplexNodeName{\tileName}
+                        \pgfmathsetmacro\sxAngle{mod(360/\createCurrent*\s-\sxAngleOffset, 360)}
+                        \ifnum 1=\xintifboolexpr{1 == \d && \TilingAltPattern == 0}{1}{0}
+                            \pgfmathsetmacro\parentSxAngle{0}
+                        \else
+                            \pgfmathsetmacro\parentSxAngle{mod(360/(\createCurrent/2)*\parentId-\lastAngleOffset, 360)}
+                        \fi
+                        % angle from parent
+                        \renewcommand\SimplexOffsetAngle{\sxAngle}
+
+                        \ifnum 0=\TilingMonoColor
+                            \ifnum 1=\RainbowColors
+                                \pgfmathsetmacro\cr{cos(mod(\timesRun*23, 360))*0.5 + 0.5}
+                                \pgfmathsetmacro\cg{cos(mod(\timesRun*23 + 240, 360))*0.5 + 0.5}
+                                \pgfmathsetmacro\cb{cos(mod(\timesRun*23 + 120, 360))*0.5 + 0.5}
+                            \else
+                                \pgfmathsetmacro\cr{cos(mod(\timesRun/2.57, 360))*0.4 + 0.6}
+                                \pgfmathsetmacro\cg{cos(mod(\timesRun/1.91 - 90, 360))*0.4 + 0.6}
+                                % \pgfmathsetmacro\cb{cos(mod(\timesRun/2.0 + 180, 360))*0.2 + 0.4}
+                                \pgfmathsetmacro\cb{-1}
+                            \fi
+                            \definecolor{tilingColor}{rgb}{\cr,\cg,\cb}
+                            \renewcommand\SimplexNodeColor{tilingColor}
+                        \else
+                            \renewcommand\SimplexNodeColor{\TilingNodeColor}
+                        \fi
+                        % \ifnum 1=\d
+                        % \renewcommand\SimplexRotationMod{180/\createCurrent*(\s-ceil(\createCurrent/2))}
+                        % \fi
+                        \ifnum 1=\xintifboolexpr{0 < \d || \TilingAltPattern == 1}{1}{0}
+                            \pgfmathsetmacro\angleDiff{mod(\sxAngle - \parentSxAngle, 360)}
+                            \ifnum 1=\xintifboolexpr{(1 == \d && \TilingAltPattern == 0) || (0 == \d && \TilingAltPattern == 1)}{1}{0}
+                                % defaults for 1=\d
+                                \pgfmathsetmacro\distToParent{\createDistance}
+                                \pgfmathsetmacro\angleToParent{\sxAngle}
+                                \pgfmathsetmacro\finalRotation{90-\sxAngle}
+                            \else
+                                \pgfmathsetmacro\distToParent{sqrt(\createDistance^2 + \prevCreateDist^2 - 2*\createDistance*\prevCreateDist*cos(\angleDiff))}
+                                \pgfmathsetmacro\angleToParent{asin(\prevCreateDist * sin(\angleDiff) / \distToParent)}
+                                \pgfmathsetmacro\finalRotation{\sxAngle+90-\angleToParent}
+                            \fi
+                            % \pgfmathsetmacro\finalRotation{\parentSxAngle + (90 - abs(\angleToParent)) * (abs(\angleToParent)/\angleToParent)}
+                            \renewcommand\SimplexRotationMod{\finalRotation}
+                        \fi
+
+                        \pgfmathparse{\timesRun+1}
+                        \xdef\timesRun{\pgfmathresult}
+
+                        \TikzSimplex
+                        \ifnum 1=\TilingDrawGroups
+                            \begin{pgfonlayer}{groups}
+                                \node (\tileName/group)
+                                    [inner sep=\tilingCurrSize*0.75cm,
+                                        shape=circle, fill=tilingColor!30,
+                                        fill opacity=0.75
+                                        ]
+                                    at (\sxAngle: \createDistance) {};
+                            \end{pgfonlayer}
+                        \fi
+                        % \node () [yshift=30pt] at (\SimplexNodeName//1) {$\nNodesTotal$};
+                        % \node () [yshift=20pt] at (\SimplexNodeName//1) {\parentSimplex};
+
+                        \ifnum 0>\d
+                            % don't draw debug info for these depths
+                        \else
+                            \ifnum 1=\TilingRotateDebug
+                            \node (\tileName-d1) [above of=\SimplexNodeName//1] {\SimplexNodeName//1};
+                            \node (\tileName-d2) [above of=\SimplexNodeName//2] {parentDist: \distToParent, dist: \createDistance};
+                            \node (\tileName-d3) [yshift=10pt, above of=\SimplexNodeName//2] {self: \s, parent: \parentId};
+                            \node (\tileName-d4) [yshift=20pt, above of=\SimplexNodeName//2] {sxAngle: \sxAngle};
+                            \node (\tileName-d5) [yshift=30pt, above of=\SimplexNodeName//2] {parentSx: \parentSxAngle};
+                            \node (\tileName-d6) [yshift=40pt, above of=\SimplexNodeName//2] {theta: \angleDiff};
+                            \node (\tileName-d7) [yshift=50pt, above of=\SimplexNodeName//2] {alpha: \angleToParent};
+                            \node (\tileName-d8) [yshift=60pt, above of=\SimplexNodeName//2] {final: \finalRotation};
+                            \fi
+                            \begin{pgfonlayer}{reflections}
+                                % draw refl lines to parent
+                                \ifnum 1=\TilingDrawAllReflections
+                                    \foreach \sn in {1,...,\SimplexChains} {
+                                        \foreach \pn in {1,...,\SimplexChains} {
+                                                \draw [thin, draw=\TilingLineColor] (\parentSimplex//\pn) -- (\SimplexNodeName//\sn);
+                                            }
+                                    }
+                                \else
+                                    \draw [ultra thick, draw=\TilingLineColor, style=double, double distance=2pt, line width=2pt] (\parentSimplex/group) -- (\tileName/group);
+                                \fi
+                            \end{pgfonlayer}
+                        \fi
+
+
+                        \ifnum 1=\xintifboolexpr{1 == \d && 1 < \s && 2 < \createCurrentMbTrimmed}{1}{0}
+                            \pgfmathtruncatemacro\prevSib{\s - 1}
+                            \foreach \pn in {1,...,\SimplexChains} {
+                                \foreach \sn in {1,...,\SimplexChains} {
+                                    \draw [thin, draw=\TilingLineColor] (\nodeNameRoot/\d/\prevSib//\pn) -- (\SimplexNodeName//\sn);
+                                    \ifnum 1=\xintifboolexpr{\s == \createCurrentMbTrimmed}{1}{0}
+                                        \draw [thin, draw=\TilingLineColor] (\nodeNameRoot/\d/1//\pn) -- (\SimplexNodeName//\sn);
+                                    \fi
+                                }
+                            }
+                        \fi
+                    }
+
+
+                \xdef\lastAngleOffset{\sxAngleOffset}
+                \def\tmpAngleOffset{\sxAngleOffset}
+                \xdef\prevCreateDist{\createDistance}
+                \pgfmathsetmacro\newCreateDist{\createDistance + \tilingCurrSize * (2 + 0.5*(1 - mod(\d, 2)))}
+                % set \newChildren for depth: \d+1
+                \xintifboolexpr{\d == 0}{
+                    \pgfmathtruncatemacro\ncRes{1}
+                }{
+                    \pgfmathtruncatemacro\ncRes{(1-mod(\d, 2)) + 1}
+                }
+                \xdef\newChildren{\ncRes}
+                % \xdef\createChildren
+                \xdef\tilingCurrSize{\tilingCurrSize/\TilingScaleConst}
+                \xdef\createDistance{\newCreateDist}
+                \xdef\createCurrent{\createChildren}
+                \pgfmathsetmacro\newCreateChildren{(\createChildren)*\newChildren}
+                \ifnum 1=\DoTilingHexagon
+                    \xintifboolexpr{1 == \DoTilingHexagon && \d == 0}{
+                        \xdef\createCurrent{6}
+                        \xdef\newChildren{1}
+                    }{}
+                    \xintifboolexpr{1 == \DoTilingHexagon && \d == 1}{
+                        \xdef\createCurrent{6}
+                        \xdef\newChildren{1}
+                    }{}
+                    \xintifboolexpr{1 == \DoTilingHexagon && \d == 2}{
+                        \xdef\createCurrent{12}
+                        \xdef\newChildren{2}
+                    }{}
+                    \pgfmathtruncatemacro\newCreateChildren{\createCurrent * \newChildren}
+                \fi
+                \xdef\createChildren{\newCreateChildren}
+                \xdef\lastD{\d}
+            \fi
+        }%
+}%
