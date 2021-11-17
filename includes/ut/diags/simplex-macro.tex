@@ -8,9 +8,12 @@
 \providecommand\SimplexOffsetR{0}%
 \providecommand\SimplexRotationMod{0}%
 \providecommand\SimplexOutlineColor{black}%
+\providecommand\SimplexLineScale{1}%
 %
-\tikzstyle{refl} = [line width=2pt, draw=\SimplexOutlineColor, shorten >= 0pt, shorten <= 0pt]
-\tikzstyle{splxNode} = [draw=\SimplexOutlineColor, ultra thick, shape=circle]
+% ultra thick = 1.6pt
+\pgfmathtruncatemacro\nodeLineThickness{1.6 * \SimplexLineScale}
+\tikzstyle{refl} = [line width=\nodeLineThickness pt, draw=\SimplexOutlineColor, shorten >= 0pt, shorten <= 0pt]
+\tikzstyle{splxNode} = [draw=\SimplexOutlineColor, line width=\nodeLineThickness pt, shape=circle]
 %
 \newcommand\TikzSimplex{
     \pgfmathsetmacro\rOffset{(360/\SimplexChains)+90+\SimplexRotationMod}
