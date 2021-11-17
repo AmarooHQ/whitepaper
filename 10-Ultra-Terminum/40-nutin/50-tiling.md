@@ -533,7 +533,7 @@ If \emph{both} leaf tiles (under $1|i$) are attacked, then the attacker has coop
         &< w_{1|i} + w_1
 \end{split}
 \end{equation}
-So the parent tile is secure even when an attacker could 51% attack both leaf tiles under $1|i$.
+So tile $1|i$ is secure even when an attacker could 51% attack both leaf tiles under $1|i$.
 
 If $1|i$ \textbf{and} both leaf tiles ($1|i|j$) are attacked, what then?
 Well, since the attacker can 51% attack those 3 tiles, the attack on tile $1|i$ is sort of 'supported' by the leaves.
@@ -558,9 +558,104 @@ When is the tiling secure?
     \nicefrac{1}{3} &< p \\
 \end{align*}
 
-<!-- note: something about tiles essentially being yes/no (all or nothing) -->
+test:
+\begin{align*}
+    \text{if:  } (q - p)(3w_{1|i|j}) &< rw_{1|i|j} \\
+    q - p &< \nicefrac{r}{3} \\
+    q &< p + \nicefrac{r}{3} \\
+    2q &< 1 + \nicefrac{r}{3} \\
+    q &< \frac{1}{2} + \frac{r}{6} \\
+    \intertext{secure if $q>1$:}
+    1 &< \frac{1}{2} + \frac{r}{6} \\
+    2 &< 1 + \frac{r}{3} \\
+    1 &< \frac{r}{3} \\
+    3 &< r \\
+\end{align*}
 
-Since $2w_{1|i|j} < w_{1|i} + w_{1}$, we can say that
+test2 -- for some $r$ find safe threshold:
+\begin{align*}
+    \text{Assume:  } w_{1|i} &< rw_{1} \\
+    \text{Assume:  } w_{1|i|j} &< rw_{1|i} \\
+    \intertext{threshhold condition: $w_{l|i} \approx rw_{l}$:}
+    \sec{1|i} &> 2 w_{1|i|j} + r w_{1|i|j} + r^2 w_{1|i|j} \\
+    \intertext{attacker's ratio of tile+children $q$ must be less than honest ratio of tile+children $p$ plus $w_1$}
+    q(2w_{1|i|j} + rw_{1|i|j}) &< p(2w_{1|i|j} + rw_{1|i|j}) + r^2 w_{1|i|j} \\
+    (q-p)(2w_{1|i|j} + rw_{1|i|j}) &< r^2 w_{1|i|j} \\
+    (2q-1)(2 + r)w_{1|i|j} &< r^2 w_{1|i|j} \\
+    2q &< \frac{r^2}{2 + r} + 1 \\
+    2q &< \frac{r^2 + r + 2}{r + 2} \\
+    \intertext{the attack is impossible when $q > 1$:}
+    2 &< \frac{r^2 + r + 2}{r + 2} \\
+    2(r + 2) &< r^2 + r + 2 \\
+    0 &< r^2 + r - 2r + 2 - 4 \\
+    0 &< r^2 - r - 2 \\
+    0 &< (r + 1)(r - 2) \\
+    \therefore r &> 2
+\end{align*}
+
+test3 -- for some $r$ and $v$ find safe threshold:
+\begin{align}
+    \text{Assume:  } w_{1|i} &< rw_{1}
+    \nonumber \\
+    \text{Assume:  } w_{1|i|j} &< rw_{1|i}
+    \nonumber \\
+    \intertext{assume threshhold condition: $w_{l|i} \approx rw_{l}$:}
+    \sec{1|i} &> (v-1) w_{1|i|j} + r w_{1|i|j} + r^2 w_{1|i|j}
+    \nonumber \\
+    &= (v + r - 1) w_{1|i|j} + r^2 w_{1|i|j}
+    \nonumber \\
+    \intertext{attacker's ratio of tile+children $q$ must be less than honest ratio of tile+children $p$ plus $w_1$}
+    \therefore q(v + r - 1)w_{1|i|j} &< p(v + r - 1)w_{1|i|j} + r^2 w_{1|i|j}
+    \nonumber \\
+    \implies q(v + r - 1) &< p(v + r - 1) + r^2
+    \nonumber \\
+    (q-p)(v + r - 1) &< r^2
+    \nonumber \\
+    (2q-1)(v + r - 1) &< r^2
+    \nonumber \\
+    2q &< \frac{r^2}{v + r - 1} + 1
+    \nonumber \\
+    2q &< \frac{r^2 + r + v - 1}{r + v - 1}
+    \nonumber \\
+    \intertext{the attack is impossible when $q > 1$:}
+    2 &< \frac{r^2 + r + v - 1}{r + v - 1}
+    \nonumber \\
+    2r + 2v - 2 &< r^2 + r + v - 1
+    \nonumber \\
+    0 &< r^2 - r - v + 1
+    \nonumber \\
+    \therefore r &> \frac{1}{2}(\sqrt{4v-3} + 1)
+    \label{eq:r-lt-for-security}
+\end{align}
+
+For $v=3$: $\frac{1}{2}(\sqrt{4v-3} + 1) = 2$.
+
+\begin{align*}
+    \intertext{consider root token:}
+    \sec{1} &= w_1 + v w_{1|i} \\
+    \intertext{given:}
+    w_1 &> r w_{1|i} \\
+    \implies \sec{1} &> (r + v) w_{1|i} \\
+    \intertext{non-severance criteria (root tile work < root's childrens' work):}
+    r w_{1|i} &< v w_{1|i} \\
+    \therefore r &< v \\
+    \intertext{but also (via \autoref{eq:r-lt-for-security}):}
+    r &> \frac{1}{2}(\sqrt{4v-3} + 1) \\
+    \therefore v &> \frac{1}{2}(\sqrt{4v-3} + 1) \\
+    2v &> \sqrt{4v-3} + 1 \\
+    (2v-1)^2 &> 4v-3 \\
+    4v^2 - 4v + 1 &> 4v-3 \\
+    4v^2 - 8v + 4 &> 0 \\
+    v^2 - 2v + 1 &> 0 \\
+    (v - 1)^2 &> 0 \\
+    v - 1 &> 0 \\
+    v &> 1 \\
+    \intertext{As $v$ is an integer, this means our security criterion works when:}
+    v &\ge 2 \\
+    \therefore \text{Tiling } &\text{is secure.  } \blacksquare
+\end{align*}
+
+<!-- note: something about tiles essentially being yes/no (all or nothing) -->
 
 root tile
 

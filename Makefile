@@ -174,6 +174,9 @@ mk-latex-pdf: preprocess-build
 	bash bin/msg_good.sh "Running latexmk to update gitinfo, build glossaries"
 	TZ='Australia/Sydney' latexmk -pdf -interaction=batchmode --enable-write18 -output-directory=$(OUTDIR) $(WPTEX) > _latexmk.log
 
+	bash bin/msg_good.sh "Tiny sleep for pdf autoreload"
+	sleep 0.1
+
 	bash bin/msg_good.sh "Update glossaries (run \`make glossary-fix-1 && make && make\` to fix glossaries if something breaks)"
 	#-rm $(WPNOEXT).gl*
 	(cd $(OUTDIR) && makeglossaries $(WPFILENAME))
