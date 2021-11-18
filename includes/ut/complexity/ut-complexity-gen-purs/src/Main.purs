@@ -2,6 +2,7 @@ module Main where
 
 import Prel
 
+import Amaroo.WP.Calcs.Tiling (tree_tiling_v4_table)
 import Amaroo.WP.Formatter (wrap)
 import Amaroo.WP.Tables (compareNets1mTps, compareNets1mTpsAll, compareNets20k, compareNets3k, compareUtLimOptimizationsA, compareUtOptimizationsA, compareUtOptimizationsA20k, compareUtOptimizationsB, compareUtOptimizationsB20k, dappChains, dappChainsHot, lpCompareNetworks, lpCompareUt1Eth2, lpCompareUt1LimitedOptShard, lpCompareUt1OptShard, lpCompareUt2OptShard, lpCompareUt2OptShard20k, lpCompareUtOptimizations1, showHtmlTable, showLatexTable, showMdTable, tableTps, tableTpsHot, tpsPor, tpsPort)
 import Amaroo.WP.Tables.Booktabs (renderBooktabs)
@@ -69,6 +70,7 @@ wpTables =
     , TD "compare_nets_3k" compareNets3k hereish
     , TD "compare_nets_20k" compareNets20k hereish
     , TD "comparison_1m_tps" compareNets1mTps hereish
+    , TD "tree_tiling_v4_table" tree_tiling_v4_table defaultPositioning
     ]
 
 lpTables :: Array TableDesc
@@ -91,6 +93,7 @@ devTables =
     , TD "lp_compare_ut1_lim_to_optshard" lpCompareUt1LimitedOptShard defaultPositioning
     , TD "compare_optimizations_a" compareUtOptimizationsA defaultPositioning
     , TD "compare_lim_optimizations_a" compareUtLimOptimizationsA defaultPositioning
+    , TD "tree_tiling_v4_table" tree_tiling_v4_table defaultPositioning
     ]
 
 

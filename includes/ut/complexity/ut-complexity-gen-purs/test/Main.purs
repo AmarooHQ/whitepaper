@@ -14,6 +14,7 @@ import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Main (getCaption, insertReplacement, replaceTable, toBeforeTableAfter)
 import Test.Amaroo.WP.Calcs (auxStatsSpec, tradSpec, utSpec)
+import Test.Amaroo.WP.Calcs.Tiling (tilingSpec)
 import Test.Amaroo.WP.Conversion (convQuickChecks)
 import Test.Amaroo.WP.Formatter (fmtSpec)
 import Test.Amaroo.WP.Tables (utNamesSpec)
@@ -79,3 +80,4 @@ main = do
     booktabsSpec
     replaceTableSpec
     convQuickChecks
+    tilingSpec
