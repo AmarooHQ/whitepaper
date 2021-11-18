@@ -15,6 +15,7 @@
 \providecommand\TilingAltTriPattern{0}%
 \providecommand\TilingLineColor{black}%
 \providecommand\TilingOnlyTopHalf{0}%
+\providecommand\TilingRootChildren{6}%
 \input{simplex-macro}%
 % \makeatletter%
 % \def\fillRGB#1#2#3{\pgfsys@color@rgb@fill{#1}{#2}{#3}}%
@@ -28,13 +29,13 @@
     \pgfmathsetmacro\nNodesTotal{3*(2^(\TilingDepth)-1)+1}
     \xdef\initNodeR{\TilingInitSize*\TilingSizeToNodeRRatio}
     \xdef\nodeR{\initNodeR}
-    \xdef\newChildren{6}
+    \xdef\newChildren{\TilingRootChildren}
     \xdef\lastTilesTotal{0}
     \def\nodeNameRoot{r}
     \xdef\tilingCurrSize{\TilingInitSize}
     \xdef\createCurrent{1}
     \xdef\createDistance{0}
-    \xdef\createChildren{6}
+    \xdef\createChildren{\TilingRootChildren}
     % \ifnum 1=\TilingAltPattern
     %     \xdef\createCurrent{2}
     %     \pgfmathsetmacro\newCreateChildren{(\TilingValence-1)*\createCurrent}

@@ -22,6 +22,7 @@
 \providecommand\TilingDrawReflections{1}
 \providecommand\TilingDrawAllReflections{1}
 \providecommand\SimplexLineScale{0.8}
+\providecommand\TilingRootChildren{3}
 \input{tiling-hex-macro}%
 
 \begin{figure}
@@ -33,11 +34,24 @@
 \hspace{1cm}
 \renewcommand\SimplexChains{2}
 \renewcommand\TilingDepth{1}
+\renewcommand\TilingRootChildren{3}
 \begin{tikzpicture}[scale=0.25, every node/.style={transform shape}]
     \TikzSimplexTiling
 \end{tikzpicture}
 \hspace{1cm}
-\renewcommand\SimplexChains{3}
+\renewcommand\SimplexChains{2}
+\renewcommand\TilingDepth{1}
+\renewcommand\TilingRootChildren{5}
+\begin{tikzpicture}[scale=0.25, every node/.style={transform shape}]
+    \TikzSimplexTiling
+\end{tikzpicture}
+\hspace{1cm}
+\renewcommand\TilingRootChildren{4}
+\begin{tikzpicture}[scale=0.25, every node/.style={transform shape}]
+    \TikzSimplexTiling
+\end{tikzpicture}
+\hspace{1cm}
+\renewcommand\SimplexChains{2}
 \renewcommand\TilingDepth{2}
 \begin{tikzpicture}[scale=0.25, every node/.style={transform shape}]
     \TikzSimplexTiling
@@ -51,7 +65,8 @@
 \end{figure}
 \vspace{2cm}
 
-\renewcommand\SimplexChains{1}
+\renewcommand\TilingRootChildren{4}
+\renewcommand\SimplexChains{2}
 \begin{figure}
     \hspace{1cm}
 \renewcommand\TilingDepth{4}
@@ -74,7 +89,7 @@
 \renewcommand\SimplexChains{1}
 \providecommand\SimplexLineScale{0.6}
 \begin{figure}
-\hspace{1cm}
+    \hspace{1cm}
 \renewcommand\TilingDepth{9}
 \begin{tikzpicture}[scale=0.2, every node/.style={transform shape}]
     \TikzSimplexTiling
