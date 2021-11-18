@@ -169,6 +169,7 @@ preprocess-build:
 
 # latexrun first for error msgs, then run run latexmk once for gitinfo2/glossary, then use latexrun
 mk-latex-pdf: preprocess-build
+	bash bin/msg_good.sh "Run ./latexrun to get good error msgs"
 	$(LATEXRUN) $(WPTEX) -O $(OUTDIR)
 
 	bash bin/msg_good.sh "Running latexmk to update gitinfo, build glossaries"

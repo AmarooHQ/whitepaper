@@ -69,3 +69,18 @@
     #1
     \end{easide}
 }
+
+\newenvironment{easide*}{
+    \begin{tcolorbox}[
+        colback=gray!15,colbacktitle=gray!15,
+        parbox=false,
+        tile]
+}{
+    \end{tcolorbox}
+}
+
+\newcommand{\asideNB}[1]{
+    \begin{easide*}
+    #1
+    \end{easide*}
+}

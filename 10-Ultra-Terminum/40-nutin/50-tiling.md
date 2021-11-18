@@ -5,7 +5,7 @@
 \label{sec:tiling}
 
 \defineTerm{Maximal Simplex}{
-    A simplex with the maximum number of simplex-chains under $O(c)$ constraints
+    A simplex with the maximum TPS under given $O(c)$ constraints
 }
 
 Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes are tiled, I call the result a *simplex tiling*.
@@ -681,7 +681,6 @@ $q (w_{g|i}) < p w_{g|i} + (v - 1) w_{g|i|j}$
 \end{align}
 
 q: if $v-1 > r$ and $r > \frac{1}{2}(\sqrt{4v-3} + 1)$ -- is there an intersection?
-
 \begin{align}
     v-1 &> \frac{1}{2}(\sqrt{4v-3} + 1) \nonumber \\
     2v-2 &> \sqrt{4v-3} + 1 \nonumber \\
@@ -691,8 +690,18 @@ q: if $v-1 > r$ and $r > \frac{1}{2}(\sqrt{4v-3} + 1)$ -- is there an intersecti
     4v^2 - 16v + 12 &> 0 \nonumber \\
     v^2 - 4v + 3 &> 0 \nonumber \\
     (v - 3)(v - 1) &> 0 \nonumber \\
-    \therefore v &> 1 \;\; \blacksquare \label{eq:nonsev-when-possible-v}
+    \therefore v &> 3 \;\; \blacksquare \label{eq:nonsev-when-possible-v}
 \end{align}
+Huh. So $v>3$. Not $v \ge 3$. I guess we should use $v=4$ then.
+
+\asideNB{
+    I was legitimately surprised by this.
+    I thought that there must be \emph{excess capacity} there, somewhere, but I didn't expect $v=3$ to be \emph{literally borderline.}
+    Borderline is not good enough -- we need \emph{excess capacity} so that there's \emph{buffer.}
+    Without buffer, UT will -- eventually and inevitably -- fail.
+    (This is, of course, true for all things; not only UT.
+    Perhaps a goal that all thinking minds share is this: \emph{developing excap.})
+}
 
 #### Tiling: Proof of $O(n)$ Security
 
@@ -967,9 +976,9 @@ r^2 + r &> v - 1 \nonumber \\
 \therefore r &> \frac{1}{2}(\sqrt{4v-3}-1)
 \end{align}
 
+\textbf{finish or cut this}
 
-
-\todo{this section}
+\todo{this section or cut}
 
 %% END ### RELEASE
 
