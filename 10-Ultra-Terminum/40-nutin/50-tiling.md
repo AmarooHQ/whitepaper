@@ -222,6 +222,11 @@ For all practical purposes, if we can grow the tiling fast enough, $\UTinf{}$ pr
 
 %% BEGIN ### DRAFT
 
+\todo{
+    \emph{this} particular draft has some useful info but isn't necessary for the WP.
+    It'll most likely remain as a draft, but I don't want to delete it b/c it's still useful.
+}
+
 The above assumes that tiles have equal capacities; what if they do not?
 The total capacity of $O(c)$ base-chains in a tree tiling ($\Sigma T_1$) is the sum of their capacities.
 There are several ways for a simplex-tile to increase or decrease in capacity: e.g., that tile might increase $k_{1,tx}$ for all simplex-chains, or contain fewer simplex-chains.
@@ -311,36 +316,44 @@ It's plain to see that, if $r \approx 1$, then child tiles have the same capacit
 Given \autoref{eq:n-tiles-general}, the capacity of a tiling with $r \approx 1$ and height $h$ is in $O(c^j \cdot (v-1)^h)$.
 For the $O(n)$ claim in \autoref{eq:simplex-tiling-complexity} to hold, we need $O(n) < O(c^j \cdot (v-1)^h)$.
 This matches what we said earlier.
-\todo{this bit}
+
+\todo{
+    finish this bit if it'll ever be used.
+    (might just cut it)
+}
 
 %% END ### DRAFT
 
 %% BEGIN ### RELEASE
 
-How can it be possible for a network of blockchains to have $O(n)$ capacity, and $O(n)$ security, without breaking $O(c)$ constrains on full nodes?
-It is because of a \emph{new asymmetry} between \emph{capacity} and \emph{security}.
-
 ### Tiling Security
 
 \label{sec:tiling-security}
+
+How can it be possible for a network of blockchains to have $O(n)$ capacity, and $O(n)$ security, without breaking $O(c)$ constrains on full nodes?
+It is because of a \emph{new asymmetry} between \emph{capacity} and \emph{security}.
 
 #### A New Asymmetry Between Capacity and Security
 
 \label{sec:tiling-sec-cap-asymmetry}
 
 If there is a \emph{symmetry} between capacity and security, that means they're \emph{coupled} somehow; i.e., a change in one results in a change to the other.
-In this case, they're inversely related -- this is essentially a restatement of Buterin's trilemma!
-In traditional blockchain designs that have a maximum block size, the tradeoffs described in \autoref{sec:core-conflict} are describing the symmetry: increasing capacity negatively effects security, and vice versa.
+In this case, they're inversely related -- so the claim of \emph{\textbf{symmetry}} is essentially a restatement of Buterin's trilemma!
+In traditional blockchain designs that have a maximum block size, the tradeoffs described in \autoref{sec:core-conflict} are describing\footnote{
+    When considering a traditional blockchain, the tradeoffs are discrete and granular.
+    In this case (simplex tiling), the tradeoffs could have a much finer resolution.
+    Let's investigate.
+} the symmetry: increasing capacity means decreasing security, and vice versa.
 
-To claim that the trilemma is broken is to claim that this symmetry has been broken.
+To claim that \emph{the conflict of the trilemma} is broken is to claim that \emph{this symmetry} is broken.
 
 Traditional PoW already provides for practically unbounded security.
 Currently\footnote{
     Bitcoin block 709793 has difficulty 22,674,148,233,453.11, corresponding to an expected $\sim 2^{76.366}$ hashes per block.
 }, Bitcoin blocks require a $\sim 76.4$ zero-bit prefix (which is the proof of work).
-So, for half of a Bitcoin PoW hash to be half-zeros (i.e., have a 128 zero-bit prefix), $\sim 51.6$ doublings in hash-rate need to happen.
+So, for the first half of a Bitcoin PoW hash to be zeros (i.e., have a 128 zero-bit prefix), $\sim 51.6$ \textbf{additional} doublings in Bitcoin's hash-rate need to happen.
 To date, only $\sim 44.4$ such doublings have occurred; i.e., current blocks require $\sim 2^{44.4}\times$ as many hashes as early Bitcoin blocks required.
-Clearly, PoW has excess capacity in the potential security it provides.
+Clearly, PoW has excess capacity in its ability to provide security.
 However, traditional PoW networks don't scale horizontally.
 
 With regards to $\UTinf{}$, let's take stock.
@@ -350,7 +363,12 @@ We know that there's excess capacity in PoW itself, so the only remaining thing 
 If tiling is secure, then the asymmetry is real.
 If tiling is secure, then the core conflict of the trilemma is broken.
 
-So, that's the question: *is performing a doublespend in a tiling as difficult as attacking 51% of the network?*
+So, that's the question: is \emph{performing a doublespend in a simplex tiling} at least as difficult as \emph{attacking 51% of the network?}
+
+<!-- \aside{
+    We'll talk about \emph{51% attacking} a tile soon.
+    This is short-hand for \emph{performing a doublespend}, rather than a a more specific
+} -->
 
 #### Tiling Security: $h=0$
 
@@ -364,16 +382,16 @@ Thus, trivial tilings (those with $h=0$) are secure if standalone simplexes are 
 
 This configuration corresponds to \autoref{fig:tiled-simplex-5-d1}.
 
-What are the requirements for 51% attacking the root tile?
+What are the requirements for a doublespend attack against the root tile?
 In this case, since all chains in the root tile mutually reflect all chains in the tiling (like a normal simplex), an attacker would need at least 51% the resources of the network.
 So, a network-wide 51% attack is required; the root tile is secure.
 
-Assuming $v=3$, what are the requirements for 51% attacking one of 3 leaf tiles?
+Assuming $v=3$, what are the requirements for a doublespend against one of 3 leaf tiles?
 In this case, we need to define some terms first; particularly, we need to be able to compare a tile's security with that of their parent and children.
 
-Let's gives tiles an identifier that lets us easily determine how to find a tile in a tiling -- the tiles \emph{location}.
+Let's gives tiles an identifier that lets us determine how to find a tile in a tiling -- the tiles \emph{location}.
 The root tile is easy, we can just give it the identifier $1$, since there's only one.\footnote{
-    Regarding tilings in \autoref{sec:alt-equiv-tilings}: this is easily generalized by giving additional root tiles the identifiers 2 and 3.
+    Regarding tilings in \autoref{sec:alt-equiv-tilings}: this is generalized by giving additional root tiles the identifiers 2 and 3.
 }
 We can refer to a tile's child by appending its parent's identifier with $|1$, $|2$, $|3$, etc.
 (For a valence of 3, $|3$ is only used for direct children of the root tile; all other tiles will always have the suffix $|1$ or $|2$).
@@ -426,7 +444,7 @@ Let's calculate the minimum ratio, $q$, of tile $1|i$'s hash-rate that an attack
     \therefore q &< 1
     \label{eq:tiling-child-unsafe-q}
 \end{align}
-\autoref{eq:tiling-child-unsafe-q} implies that some fraction of a leaf tile's hash-rate could attack that tile.
+\autoref{eq:tiling-child-unsafe-q} implies that, \textbf{if $w_{1|i} > w_1$,} then some fraction of a leaf tile's hash-rate could attack that tile.
 If that happened, then compromising the leaf tile would not necessarily compromise the root tile (since it has multiple children).
 This would mean that the histories of the leaf tile and root tile would diverge -- the leaf tile would be effectively \emph{severed} from the network.
 Thus, $h=1$ is insecure if $w_{1|i} > w_1$.
@@ -455,7 +473,8 @@ So, this case is secure.
 If the attacking hash-rate \textbf{isn't} \emph{already factored in}, then \emph{normally} $w_{1|i} < w_{1}$, but it might not be true \emph{during the attack}.
 In other words, significantly more blocks are produced for tile $1|i$ simplex-chains than expected.
 Isn't this the same problem discussed (and solved) in \autoref{sec:reflection-pow-and-pos}?
-If the weight of chain-work contribution (via PoR) is \emph{already} capped, then it's not possible for the attacker to substantially increase the weight of their chain-segments beyond $w_{1|i}$!
+The solution was to cap work contributed via PoR.
+If the weight of chain-work contributed via PoR is \emph{already} capped, then it's not possible for the attacker to substantially increase the weight of their chain-segments beyond $w_{1|i}$!
 We don't need to change anything -- we guard against this already.
 So, in this case, the attacker needs to attack the root tile, too -- this case is secure.
 
@@ -472,7 +491,7 @@ Conversely, if tiles can \emph{only} be severed via a 51% attack on the \emph{en
 Let's call this the \emph{criterion of non-severance} -- i.e., it's something that our tiling must adhere to.
 
 There are two cases that we need to address: the root tile (or any parent tile) should not be able to sever child tiles without attacking the network; and child tiles should not be able to self-sever.
-In essence: if there is one honest miner for each simplex chain in a tile, then an attacker cannot permanently partition the network on any of that tile's borders (with other tiles).
+In essence: if there is one honest miner for each simplex-chain in a tile, then an attacker cannot permanently partition the network on any of that tile's borders (with other tiles).
 
 As in \autoref{eq:tiling-child-unsafe} (and for the rest of \autoref{sec:tiling-security}) let us use $p$ and $q$ to represent some proportion of hash-rate controlled by the honest and attacking miners, respectively.
 As before $p + q = 1$; note that: $q - p = 2q - 1$.
@@ -594,9 +613,9 @@ Let's consider the situation where $g|i$ is supported by its $(v - 2)$ other chi
         \centering
         \begin{equation*}
             \xymatrix@M=4pt@C=-4pt@R=10pt{
-                & & g \ar[d] \\
-                & & g|i \ar@{~}[dll] \ar[dr] \\
-                g|i|j \ar[d] & & & (v-2)\times g|i|j \\
+                & g \ar[d] \\
+                & g|i \ar@{~}[dl] \ar[dr] \\
+                g|i|j \ar[d] & & (v-2)\times g|i|j \\
                 (v-1) \times g|i|j|k \\
             }
         \end{equation*}
@@ -604,7 +623,9 @@ Let's consider the situation where $g|i$ is supported by its $(v - 2)$ other chi
         %%\label{fig:tiling-sec-tile-tree-parent-sev-child-a}
     \end{subfigure}%%
     \hfill
-    \caption{A diagram of a non-root parent tile attempting to sever a child. This diagram covers the relevant partial segment of the tiling.}
+    \caption{A diagram of a non-root parent tile attempting to sever a child.
+    This diagram covers the relevant partial segment of the tiling.
+    The link that the attacker is attempting to cut is shown with a squiggly line.}
     \label{fig:tiling-sec-tile-tree-parent-sev-child}
 \end{figure}
 
@@ -633,7 +654,50 @@ Let's consider the situation where $g|i$ is supported by its $(v - 2)$ other chi
 \end{align}
 Thus, if we are secure against self-severance (\autoref{sec:tiling-sec-self-sev}) then we are \emph{automatically} secure in this case.
 
-<!-- eq:nonsev-parent-r-def -->
+##### Upstream
+
+case: $g$ + $g|i$ attacking $g|i|j$'s:
+$q (w_{g|i}) < p w_{g|i} + (v - 1) w_{g|i|j}$
+
+\begin{align}
+    q (w_{g|i}) &< p w_{g|i} + (v - 1) w_{g|i|j}
+    \nonumber \\
+    \intertext{Via the boundary condition of \autoref{eq:nonsev-parent-r-def}:}
+    q r w_{g|i|j} &< p r w_{g|i|j} + (v - 1) w_{g|i|j}
+    \nonumber \\
+    q r &< p r + (v - 1)
+    \nonumber \\
+    r(q - p) &< v - 1
+    \nonumber \\
+    2q - 1 &< \frac{v - 1}{r}
+    \nonumber \\
+    2q &< \frac{r + v - 1}{r}
+    \nonumber \\
+    \intertext{Boundary:}
+    2r &< r + v - 1
+    \nonumber \\
+    r &< v - 1
+    \nonumber
+\end{align}
+
+q: if $v-1 > r$ and $r > \frac{1}{2}(\sqrt{4v-3} + 1)$ -- is there an intersection?
+
+\begin{align}
+    v-1 &> \frac{1}{2}(\sqrt{4v-3} + 1) \nonumber \\
+    2v-2 &> \sqrt{4v-3} + 1 \nonumber \\
+    2v-3 &> \sqrt{4v-3} \nonumber \\
+    (2v-3)^2 &> 4v-3 \nonumber \\
+    4v^2 - 12v + 9 &> 4v-3 \nonumber \\
+    4v^2 - 16v + 12 &> 0 \nonumber \\
+    v^2 - 4v + 3 &> 0 \nonumber \\
+    (v - 3)(v - 1) &> 0 \nonumber \\
+    \therefore v &> 1 \;\; \blacksquare \label{eq:nonsev-when-possible-v}
+\end{align}
+
+#### Tiling: Proof of $O(n)$ Security
+
+
+
 
 #### Tiling Security: $h = 2$
 
