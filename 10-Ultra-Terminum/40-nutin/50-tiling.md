@@ -322,6 +322,8 @@ It is because of a \emph{new asymmetry} between \emph{capacity} and \emph{securi
 
 ### Tiling Security
 
+\label{sec:tiling-security}
+
 #### A New Asymmetry Between Capacity and Security
 
 \label{sec:tiling-sec-cap-asymmetry}
@@ -428,6 +430,7 @@ Let's calculate the minimum ratio, $q$, of tile $1|i$'s hash-rate that an attack
 If that happened, then compromising the leaf tile would not necessarily compromise the root tile (since it has multiple children).
 This would mean that the histories of the leaf tile and root tile would diverge -- the leaf tile would be effectively \emph{severed} from the network.
 Thus, $h=1$ is insecure if $w_{1|i} > w_1$.
+This is okay and should match intuition.
 
  <!-- -- i.e., the total chain-work securing each of the root tile's children is less than that of the root tile -->
 
@@ -440,7 +443,7 @@ That's because -- in that context -- it's impossible to 51% attack a child-tile 
 If the attack were possible, then the attacker would need to create private chain-segments for many of the simplex-chains in the root tile and tile $1|i$.
 But, the attacker cannot convince tile $1|i$ nodes of a reorganization on the root tile (which would require attacking the root tile) -- the attacker's chain-segments are not better than the honest ones.
 Thus, the attacker cannot undo reflections from the root tile, which provide more chain-weight than local reflections.
-In essence: a reorg on tile $1|i$ won't stick because honest $1|i$ nodes can tell that the attackers blocks arrived later.
+In essence: a reorg on tile $1|i$ won't stick because honest $1|i$ nodes can tell that the attacker's blocks arrived later.
 We can show this with \autoref{eq:tiling-sec-function}, too; assuming $v=3$:
 \begin{align*}
     LHS &= \sec{1|i} & & & RHS &= \sec{1} \\
@@ -455,6 +458,182 @@ Isn't this the same problem discussed (and solved) in \autoref{sec:reflection-po
 If the weight of chain-work contribution (via PoR) is \emph{already} capped, then it's not possible for the attacker to substantially increase the weight of their chain-segments beyond $w_{1|i}$!
 We don't need to change anything -- we guard against this already.
 So, in this case, the attacker needs to attack the root tile, too -- this case is secure.
+
+#### Tiling Security: Non-Severance Property
+
+The integrity of a tiling is dependent on reliable and consistent reflection between tiles.
+If tiles are \emph{severed} then it means the canonical history has \emph{diverged} from the main tiling and this divergent history is \emph{stable} (i.e., there is no impending reorg\footnote{
+    I expect that short term attacks might sometimes be possible.
+    For example: a doublespend that -- from a tile's perspective -- succeeds, but \emph{will be} undone (via a reorganization) after a short while (within $(B_f \cdot h)^{-1}$ seconds).
+}).
+If it is possible to \emph{sever} some tiles -- without attacking the whole tiling -- then the tiling \textbf{is not} secure.
+Conversely, if tiles can \emph{only} be severed via a 51% attack on the \emph{entire} tiling, then the tiling \textbf{is} secure.
+
+Let's call this the \emph{criterion of non-severance} -- i.e., it's something that our tiling must adhere to.
+
+There are two cases that we need to address: the root tile (or any parent tile) should not be able to sever child tiles without attacking the network; and child tiles should not be able to self-sever.
+In essence: if there is one honest miner for each simplex chain in a tile, then an attacker cannot permanently partition the network on any of that tile's borders (with other tiles).
+
+As in \autoref{eq:tiling-child-unsafe} (and for the rest of \autoref{sec:tiling-security}) let us use $p$ and $q$ to represent some proportion of hash-rate controlled by the honest and attacking miners, respectively.
+As before $p + q = 1$; note that: $q - p = 2q - 1$.
+
+<!-- q - p
+= 1 - 2p
+= 1 - 2(1 - q)
+= 1 - 2 + 2q
+= 2q - 1 -->
+
+##### Non-Severance: Root Tile
+
+Let us say that, for some $r \ge 1$\footnote{
+    We've already shown in \autoref{eq:tiling-child-unsafe-q} that $r < 1$ is insecure.
+}:
+\begin{equation}
+    w_{1} \ge r w_{1|i}
+    \label{eq:nonsev-root-r-defn}
+\end{equation}
+That is: all children of the root tile \emph{always} have less chain-work (than the root tile) by a factor of $r$.
+We are particularly interested in the \emph{boundary} of when attacks are possible, so our boundary condition is:
+\begin{equation}
+    w_{1} = r w_{1|i}
+    \label{eq:nonsev-root-r-boundary}
+\end{equation}
+
+If the root tile, alone, \textbf{cannot} sever a child tile, then it must be that $q w_1 < p w_1 + v w_{1|i}$ -- some proportion $q$ of the root tile's chain-work is \emph{never} sufficient to overcome the combined weight of reflections from child tiles.
+\begin{align}
+    q w_1 &< p w_1 + v w_{1|i}
+    \nonumber \\
+    (q - p) w_1 &< v w_{1|i}
+    \nonumber \\
+    \intertext{Given the boundary condition in \autoref{eq:nonsev-root-r-boundary}:}
+    (q - p) r w_{1|i} &< v w_{1|i}
+    \nonumber \\
+    q - p &< \frac{v}{r}
+    \nonumber \\
+    2q - 1 &< \frac{v}{r}
+    \nonumber \\
+    2q &< \frac{v + r}{r}
+    \nonumber \\
+    \intertext{The attack is impossible if $q > 1$, so the threshold (at $q = 1$) is given by:}
+    2 &< \frac{v + r}{r}
+    \nonumber \\
+    2r &< v + r
+    \nonumber \\
+    r &< v
+    \label{eq:nonsev-root-r-safe}
+\end{align}
+
+Thus, the root tile cannot sever child-tiles if $r < v$.
+This means (via \autoref{eq:nonsev-root-r-defn}) that the root tile cannot be allowed to provide \emph{more} than the combined contributions of its children.
+
+##### Non-Severance: Leaf Tiles
+
+A leaf tile can self-sever if $w_{g|i} > w_g$ for some location $g$ (the parent of the leaf tile).
+So we want to limit leaf tiles to -- at most -- $w_g$ chain-work.
+(As we'll see in a moment, it's convenient to limit leaf tiles more than this, though.)
+
+##### Non-Severance: Non-root Parent Tile Self-Severance
+
+\label{sec:tiling-sec-self-sev}
+
+Let us, once again, set a limit on the ratio of chain-work between a tile ($g$) and its children:
+\begin{equation}
+    w_{g} \ge r w_{g|i}
+    \label{eq:nonsev-parent-r-def}
+\end{equation}
+
+What if some tile $g|i$ has both a parent (tile $g$) and $(v-1)$ children (tiles $g|i|j$)?
+Particularly, what if an attacker is already mining on $g|i$ and all $g|i|j$?
+In that case, the safe threshold (where self-severance is not possible) in terms of $p$ and $q$ is:
+\begin{align}
+    q (w_{g|i} + (v-1) w_{g|i|j}) &< p (w_{g|i} + ((v-1)-1) w_{g|i|j}) + w_g
+    \nonumber \\
+    \intertext{Using the boundary condition of \autoref{eq:nonsev-parent-r-def} for $w_g$:}
+    q (w_{g|i} + (v-1) w_{g|i|j}) &< p (w_{g|i} + (v-1) w_{g|i|j}) + r w_{g|i}
+    \nonumber \\
+    \intertext{Using the boundary condition of \autoref{eq:nonsev-parent-r-def} for $w_{g|i}$:}
+    q (r w_{g|i|j} + (v-1) w_{g|i|j}) &< p (r w_{g|i|j} + (v-1) w_{g|i|j}) + r^2 w_{g|i|j}
+    \nonumber \\
+    (q - p) (r + v - 1) \cdot w_{g|i|j} &< r^2 w_{g|i|j}
+    \nonumber \\
+    (2q - 1) (r + v - 1) &< r^2
+    \nonumber \\
+    2q(r + v - 1) &< r^2 + r + v - 1
+    \nonumber \\
+    \intertext{The attack is impossible if $q > 1$, so the threshold (at $q = 1$) is given by:}
+    2(r + v - 1) &< r^2 + r + v - 1
+    \nonumber \\
+    2r + 2v - 2 &< r^2 + r + v - 1 \nonumber \\
+    0 &< r^2 - r - v + 1 \nonumber \\
+    %%\intertext{Solving the quadratic and discarding the negative root:}
+    \therefore r &> \frac{1}{2}(\sqrt{4v - 3} + 1)
+    \label{eq:nonsev-parent-r-safe}
+\end{align}
+
+\autoref{eq:nonsev-parent-r-safe} is the inequality that defines when $g|i$ cannot self-sever (even with support from all $g|i|j$).
+If the inequality is false, then it \textbf{is} possible for $g|i$ to self-sever from its parent when supported by all $g|i|j$ tiles.
+
+Note: $v = 3 \implies r > 2 \implies w_g > 2 w_{g|i}$.
+
+##### Non-Severance: Non-root Parent Tile Child-Severance
+
+We also don't want $g|i$ to be able to sever $g|i|j$.
+Let's consider the situation where $g|i$ is supported by its $(v - 2)$ other children, but not by $g$.
+
+<!--
+                & & & & & g \ar[dllll] \ar[d] \ar[drrrr] \\
+                & g|1 \ar[dl] \ar[dr] & & & & g|2 \ar[dl] \ar[dr] & & & & g|3 \ar[dl] \ar[dr] \\
+                1|1|1 & & 1|1|2 & & 1|2|1 & & 1|2|2 & & 1|3|1 & & 1|3|2 \\
+                 -->
+
+\begin{figure}[H]
+    \centering
+    \hfill
+    \begin{subfigure}[t]{1\textwidth}
+        \vskip 0pt
+        \centering
+        \begin{equation*}
+            \xymatrix@M=4pt@C=-4pt@R=10pt{
+                & & g \ar[d] \\
+                & & g|i \ar@{~}[dll] \ar[dr] \\
+                g|i|j \ar[d] & & & (v-2)\times g|i|j \\
+                (v-1) \times g|i|j|k \\
+            }
+        \end{equation*}
+        %%\caption{.}
+        %%\label{fig:tiling-sec-tile-tree-parent-sev-child-a}
+    \end{subfigure}%%
+    \hfill
+    \caption{A diagram of a non-root parent tile attempting to sever a child. This diagram covers the relevant partial segment of the tiling.}
+    \label{fig:tiling-sec-tile-tree-parent-sev-child}
+\end{figure}
+
+\begin{align}
+    q (w_{g|i} + (v-2) w_{g|i|j}) &< p (w_{g|i} + (v-2) w_{g|i|j}) + w_{g} + w_{g|i|j}
+    \nonumber \\
+    \intertext{Via the boundary condition of \autoref{eq:nonsev-parent-r-def}:}
+    q (r w_{g|i|j} + (v-2) w_{g|i|j}) &< p (r w_{g|i|j} + (v-2) w_{g|i|j}) + r^2 w_{g|i|j} + w_{g|i|j}
+    \nonumber \\
+    (q - p) (r + v - 2) w_{g|i|j} &< w_{g|i|j} + r^2 w_{g|i|j}
+    \nonumber \\
+    (2q - 1) (r + v - 2) &< 1 + r^2
+    \nonumber \\
+    \intertext{Via the boundary condition of attack success at $q = 1$:}
+    1 + r + v - 2 &< 1 + r^2
+    \nonumber \\
+    r + v - 2 &< r^2
+    \nonumber \\
+    0 &< r^2 - r - v + 2
+    \nonumber \\
+    \therefore r &> \frac{1}{2}(\sqrt{4v-7} + 1)
+    \label{eq:nonsev-parent-sev-child-r-safe} \\
+    \intertext{With regards to the bounds around self-severance (\autoref{eq:nonsev-parent-r-safe}), consider:}
+    \frac{1}{2}(\sqrt{4v-7} + 1) &< \frac{1}{2}(\sqrt{4v-3} + 1)
+    \nonumber
+\end{align}
+Thus, if we are secure against self-severance (\autoref{sec:tiling-sec-self-sev}) then we are \emph{automatically} secure in this case.
+
+<!-- eq:nonsev-parent-r-def -->
 
 #### Tiling Security: $h = 2$
 
