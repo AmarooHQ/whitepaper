@@ -614,7 +614,7 @@ Let's consider the situation where $g|i$ is supported by its $(v - 2)$ other chi
         \begin{equation*}
             \xymatrix@M=4pt@C=-4pt@R=10pt{
                 & g \ar[d] \\
-                & g|i \ar@{~}[dl] \ar[dr] \\
+                & g|i \ar@{~>}[dl] \ar[dr] \\
                 g|i|j \ar[d] & & (v-2)\times g|i|j \\
                 (v-1) \times g|i|j|k \\
             }
@@ -706,6 +706,12 @@ Huh. So $v>3$. Not $v \ge 3$. I guess we should use $v=4$ then.
 #### Tiling: Proof of $O(n)$ Security
 
 
+#### Tiling: Performance
+
+
+%% INSERT ### TABLE: tree_tiling_v4_table
+
+: Tree Tiling with $v=4$ -- values for $N_1$ and $N_2$ and a comparison to equivalent $\UT{1\text{+OPT}}$ values.
 
 
 #### Tiling Security: $h = 2$
