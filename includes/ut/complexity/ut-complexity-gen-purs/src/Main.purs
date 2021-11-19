@@ -70,7 +70,7 @@ wpTables =
     , TD "compare_nets_3k" compareNets3k hereish
     , TD "compare_nets_20k" compareNets20k hereish
     , TD "comparison_1m_tps" compareNets1mTps hereish
-    , TD "tree_tiling_v4_table" tree_tiling_v4_table defaultPositioning
+    , TD "tree_tiling_v4_table" tree_tiling_v4_table hereish
     ]
 
 lpTables :: Array TableDesc

@@ -708,10 +708,12 @@ Huh. So $v>3$. Not $v \ge 3$. I guess we should use $v=4$ then.
 
 #### Tiling: Performance
 
-
 %% INSERT ### TABLE: tree_tiling_v4_table
 
-: Tree Tiling with $v=4$ -- values for $N_1$ and $N_2$ and a comparison to equivalent $\UT{1\text{+OPT}}$ values.
+: Tree Tiling performance with $v=4$.
+Values for $N_1$ and $N_2$ and a comparison between $\UTinf{\text{+OPT}}$ and $\UT{\text{+OPT}}$ with equivalent values.
+
+<!-- $\UTinf{\text{+OPT}}$ and $\UT{\text{+OPT}}$ with equivalent values. -->
 
 
 #### Tiling Security: $h = 2$

@@ -27,7 +27,7 @@ import Test.Spec.Runner (runSpec)
 
 pos = [Hereish, Bottom, TablePage, Override]
 sampleAsdf1 = "\\begin{table}[hbp!]\n\\centering\n\\label{table:tn1}\n\\begin{tabular}{asdf1}\n\\toprule\n \\\\\n\\midrule\n\\bottomrule\n\\end{tabular}\n\\end{table}"
-sampleAsdf2 = "\\begin{table}[hbp!]\n\\centering\n\\caption{Test caption.\nMultiline.} \\label{table:tn1}\n\\begin{tabular}{asdf2}\n\\toprule\n \\\\\n\\midrule\n\\bottomrule\n\\end{tabular}\n\\end{table}"
+sampleAsdf2 = "\\begin{table}[hbp!]\n\\centering\n\\caption[Test caption.]{Test caption.\nMultiline.} \\label{table:tn1}\n\\begin{tabular}{asdf2}\n\\toprule\n \\\\\n\\midrule\n\\bottomrule\n\\end{tabular}\n\\end{table}"
 tableAsdf1 = (Table [] {md: [], texTabular: "asdf1"} [])
 tableAsdf2 = (Table [] {md: [], texTabular: "asdf2"} [])
 
