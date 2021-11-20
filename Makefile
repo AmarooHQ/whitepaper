@@ -69,7 +69,8 @@ entropy:
 TIME     = /usr/bin/time -p
 # LATEXMK  = latexmk -silent -f -g -ps
 # PDFLATEX = latexmk -pdf -shell-escape -interaction=nonstopmode
-LATEXRUN = TZ='Australia/Sydney' python3 ./latexrun --color always --latex-args "-shell-escape -interaction=batchmode"
+# LATEXRUN = TZ='Australia/Sydney' python3 ./latexrun --color always --latex-args "-shell-escape -interaction=batchmode"
+LATEXRUN = python3 ./latexrun --color always --latex-args "-shell-escape -interaction=batchmode"
 PDFLATEX = latexmk -pdf -shell-escape -interaction=batchmode
 # PDFLATEX = latexmk -pdf -shell-escape -interaction=batchmode
 # PDFLATEX = python3 $(PWD)/latexrun --color always --latex-args "-shell-escape -interaction=batchmode"
@@ -173,7 +174,7 @@ mk-latex-pdf: preprocess-build
 	$(LATEXRUN) $(WPTEX) -O $(OUTDIR)
 
 	bash bin/msg_good.sh "Running latexmk to update gitinfo, build glossaries"
-	TZ='Australia/Sydney' latexmk -pdf -interaction=batchmode --enable-write18 -output-directory=$(OUTDIR) $(WPTEX) > _latexmk.log
+	latexmk -pdf -interaction=batchmode --enable-write18 -output-directory=$(OUTDIR) $(WPTEX) > _latexmk.log
 
 	bash bin/msg_good.sh "Update glossaries (run \`make glossary-fix-1 && make && make\` to fix glossaries if something breaks)"
 	#-rm $(WPNOEXT).gl*

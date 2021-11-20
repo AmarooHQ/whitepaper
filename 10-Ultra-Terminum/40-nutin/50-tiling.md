@@ -656,11 +656,15 @@ Thus, if we are secure against self-severance (\autoref{sec:tiling-sec-self-sev}
 
 ##### Upstream
 
-case: $g$ + $g|i$ attacking $g|i|j$'s:
+\label{sec:tiling-upstream}
+
+case: $g$ + $g|i$ attacking $g|i|j$s:
 $q (w_{g|i}) < p w_{g|i} + (v - 1) w_{g|i|j}$
 
+note: $w_g$ isn't included because $g|i|j$ tiles don't take $w_g$ into account (PoRs aren't validated beyond 1 step).
+
 \begin{align}
-    q (w_{g|i}) &< p w_{g|i} + (v - 1) w_{g|i|j}
+    q w_{g|i} &< p w_{g|i} + (v - 1) w_{g|i|j}
     \nonumber \\
     \intertext{Via the boundary condition of \autoref{eq:nonsev-parent-r-def}:}
     q r w_{g|i|j} &< p r w_{g|i|j} + (v - 1) w_{g|i|j}
@@ -708,12 +712,69 @@ Huh. So $v>3$. Not $v \ge 3$. I guess we should use $v=4$ then.
 
 #### Tiling: Performance
 
-%% INSERT ### TABLE: tree_tiling_v4_table
+%% INSERT ### TABLE: tree_tiling_3k_v4_table
 
-: Tree Tiling performance with $v=4$.
+: Tree Tiling performance with $v=4$ and $k=3000$.
 Values for $N_1$ and $N_2$ and a comparison between $\UTinf{\text{+OPT}}$ and $\UT{\text{+OPT}}$ with equivalent values.
 
+<!--
+
+%% INS-ERT ### TABLE: tree_tiling_3k_v3_table
+
+: Tree Tiling performance with $v=3$ and $k=3000$.
+Values for $N_1$ and $N_2$ and a comparison between $\UTinf{\text{+OPT}}$ and $\UT{\text{+OPT}}$ with equivalent values.
+
+%% INS-ERT ### TABLE: tree_tiling_3k_v5_table
+
+: Tree Tiling performance with $v=5$ and $k=3000$.
+Values for $N_1$ and $N_2$ and a comparison between $\UTinf{\text{+OPT}}$ and $\UT{\text{+OPT}}$ with equivalent values.
+
+%% INS-ERT ### TABLE: tree_tiling_20k_v3_table
+
+: Tree Tiling performance with $v=3$ and $k=20000$.
+Values for $N_1$ and $N_2$ and a comparison between $\UTinf{\text{+OPT}}$ and $\UT{\text{+OPT}}$ with equivalent values.
+
+%% INS-ERT ### TABLE: tree_tiling_20k_v4_table
+
+: Tree Tiling performance with $v=4$ and $k=20000$.
+Values for $N_1$ and $N_2$ and a comparison between $\UTinf{\text{+OPT}}$ and $\UT{\text{+OPT}}$ with equivalent values.
+
+%% INS-ERT ### TABLE: tree_tiling_20k_v5_table
+
+: Tree Tiling performance with $v=5$ and $k=20000$.
+Values for $N_1$ and $N_2$ and a comparison between $\UTinf{\text{+OPT}}$ and $\UT{\text{+OPT}}$ with equivalent values.
+
+-->
+
+
 <!-- $\UTinf{\text{+OPT}}$ and $\UT{\text{+OPT}}$ with equivalent values. -->
+
+#### Tiling Security: Limits
+
+In \autoref{sec:tiling-sec-cap-asymmetry} we discussed \emph{excess capacity} in PoW -- what limits does that capacity imply?
+PoW requires some zero-bit prefix\footnote{
+    The prefix doesn't \emph{need} to be all zeros -- it just needs to be deterministic (the trivial method is for it to be predetermined).
+}, and Bitcoin chose a minimum of 32 zero-bits.
+Let's take 32 as a safe lower limit, and 128 as a safe upper limit (presuming we're using a 256 bit hash).
+This corresponds to a span of $2^{96}$  (96 orders of magnitude in base 2).
+We'll take this as the maximum capacity of PoW -- spanning the least-secure to the most-secure chain.
+
+If we maintain some parent-child chain-work ratio $r$ (such that $v - 1 > r > \frac{1}{2}(\sqrt{4v-3}+1)$) then this is, in essence, the \emph{base} that we'll consume PoW \emph{excess capacity} in.
+For each layer of tiling, we'll need $r\times$ the capacity of PoW (so that all PoWs on all chains remain above the minimum limit).
+
+We can thus estimate the limits of tiling via $r^h < 2^{96}$.
+What is $r$?
+Let's take it as the average of the upper and lower limit (that seems reasonable).
+\begin{align*}
+    r &= \frac{1}{2}\big( (v-1) + \frac{1}{2}(\sqrt{4v - 3} + 1) \big) \\
+    r &= \frac{1}{4}\big(2v-1 + \sqrt{4v - 3} \big) \\
+\intertext{Noting that $r \approx 2.65$ when $v=4$:}
+    2.65^{h} &< 2^{96} \\
+    h &< \frac{96}{\log_2{2.65}} \\
+    h &\lesssim 68.28
+\end{align*}
+So, at maximum capacity (in terms of PoW's potential security) we have a tiling of $h \le 68$.
+Note that $\frac{44.4}{\log_2{2.65}} \approx 31.58$. So, even with a network as small as Bitcoin's, there is room for a tiling of $h \le 31$.
 
 
 #### Tiling Security: $h = 2$

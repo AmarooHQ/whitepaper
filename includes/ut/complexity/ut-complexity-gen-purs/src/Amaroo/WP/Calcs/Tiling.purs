@@ -27,18 +27,17 @@ tree_tiling =
 
 
 
-params3k = mkSimplePs 3000.0 {bf: _UT_BF, bh: _UT_BH} 250.0
+params_tt k = mkSimplePs k {bf: _UT_BF, bh: _UT_BH} 250.0
 ut_params = {explicitPoRs: false, headerOmission: false, hashTruncation: true}
 
-tree_tiling_v4_table :: Table
-tree_tiling_v4_table = Table
+tree_tiling_table :: Int -> {k :: Number} -> Table
+tree_tiling_table v {k} = Table
     headings
     ({md: mkSpacer <$> A.replicate (l) 3, texTabular: "l" <> repeatSafe (l-1) "r"})
-    (mkRow <$> A.range 0 6)
+    $ (mkRow <$> A.range 0 6) <> [mkRow 10] -- , mkRow 15]
   where
-    v = 4
     headings =
-      [ "Depth"
+      [ "$h$"
       , "$N_{\\text{tiles}|h}$", "$N_{\\text{tiles}}$"
       , "$\\Sigma N_1$"
       , "$\\Sigma N_2$"
@@ -66,7 +65,7 @@ tree_tiling_v4_table = Table
         sx_to_tile_ratio = 1.0 / (toNumber $ v + 1)
         n_tiles = toNumber $ tree_tiling.sigma_tiles {v, d}
         n_tiles_h = toNumber $ tree_tiling.tiles_at {v, d}
-        ut_cs = utChainCalc params3k ut_params
+        ut_cs = utChainCalc (params_tt k) ut_params
         ut_n1 = ut_cs.d1.n
         ut_n2 = ut_cs.d2.n
         tile_n1 = ut_n1 / (toNumber $ v + 1)
@@ -84,3 +83,21 @@ tree_tiling_v4_table = Table
         s_n2 = n_tiles * tile_n2
         x_ut_n2 = s_n2 / ut_n2
         conf_rate = ut_cs.confRate * sx_to_tile_ratio
+
+tree_tiling_3k_v4_table :: Table
+tree_tiling_3k_v4_table = tree_tiling_table 4 {k: 3000.0}
+
+tree_tiling_3k_v3_table :: Table
+tree_tiling_3k_v3_table = tree_tiling_table 3 {k: 3000.0}
+
+tree_tiling_3k_v5_table :: Table
+tree_tiling_3k_v5_table = tree_tiling_table 5 {k: 3000.0}
+
+tree_tiling_20k_v4_table :: Table
+tree_tiling_20k_v4_table = tree_tiling_table 4 {k: 20000.0}
+
+tree_tiling_20k_v3_table :: Table
+tree_tiling_20k_v3_table = tree_tiling_table 3 {k: 20000.0}
+
+tree_tiling_20k_v5_table :: Table
+tree_tiling_20k_v5_table = tree_tiling_table 5 {k: 20000.0}
