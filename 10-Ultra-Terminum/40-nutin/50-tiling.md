@@ -776,6 +776,9 @@ Let's take it as the average of the upper and lower limit (that seems reasonable
 So, at maximum capacity (in terms of PoW's potential security) we have a tiling of $h \le 68$.
 Note that $\frac{44.4}{\log_2{2.65}} \approx 31.58$. So, even with a network as small as Bitcoin's, there is room for a tiling of $h \le 31$.
 
+\todo{assuming SRT}
+\todo{include tiling limits in weightof alg}
+\todo{tiling confirmation delay}
 
 #### Tiling Security: $h = 2$
 
