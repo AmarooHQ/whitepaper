@@ -169,7 +169,7 @@
     ],
     "cSpell.minWordLength": 2,
     "cSpell.flagWords": [
-        "hte", "DOS", "teh", "\\being{"
+        "hte", "DOS", "teh", "\\being{", "itertext",
     ],
     "cSpell.ignoreRegExpList": [
         "\\usepackage{([a-z,]*)}",

@@ -502,7 +502,103 @@ As before $p + q = 1$; note that: $q - p = 2q - 1$.
 = 1 - 2 + 2q
 = 2q - 1 -->
 
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
+
+\begin{figure}[H]
+    \centering
+    \hfill
+    \begin{subfigure}[t]{.2\textwidth}
+        \vskip 0pt
+        \centering
+        \begin{equation*}
+            \xymatrix@M=4pt@C=-4pt@R=10pt{
+                & & 1 \ar@{~>}[dll] \ar[dr] \\
+                1|i & & & (v-1)\times 1|i
+            }
+        \end{equation*}
+        \caption{a.}
+        %%\label{fig:tiling-sec-tile-tree-parent-sev-child-afffffff}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.35\textwidth}
+        \vskip 0pt
+        \centering
+        \begin{equation*}
+            \xymatrix@M=4pt@C=-4pt@R=10pt{
+                & & 1 \ar@{~>}[dll] \ar[dr] \\
+                1|i \ar[d] & & & (v-1)\times 1|i \\
+                (v-1)\times 1|i|j
+            }
+        \end{equation*}
+        \caption{a.}
+        %%\label{fig:tiling-sec-tile-tree-parent-sev-child-afffffff}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.35\textwidth}
+        \vskip 0pt
+        \centering
+        \begin{equation*}
+            \xymatrix@M=4pt@C=-4pt@R=10pt{
+                & & {\vdots} \ar[d] \\
+                & & g \ar@{~>}[dll] \ar[dr] \\
+                g|i \ar[d] & & & (v-2)\times g|i \\
+                (v-1)\times g|i|j
+            }
+        \end{equation*}
+        \caption{a.}
+        %%\label{fig:tiling-sec-tile-tree-parent-sev-child-afffffff}
+    \end{subfigure}%%
+    \hfill
+    \caption{\textbf{TODO} A diagram of the root tile attempting to sever a child.
+    This diagram covers the relevant partial segment of the tiling.
+    The link that the attacker is attempting to cut is shown with a squiggly line.}
+    %%\label{fig:tiling-sec-tile-tree-parent-sev-childfffffff}
+\end{figure}
+
+
+\begin{figure}[H]
+    \centering
+    \hfill
+    \begin{subfigure}[t]{.6\textwidth}
+        \vskip 0pt
+        \centering
+        \begin{equation*}
+            \xymatrix@M=4pt@C=-4pt@R=10pt{
+                & & & & & 1 \ar[dllll] \ar[d] \ar[drrrr] \\
+                & 1|1 \ar[dl] \ar[dr] & & & & 1|2 \ar[dl] \ar[dr] & & & & 1|3 \ar[dl] \ar[dr] \\
+                1|1|1 & & 1|1|2 & & 1|2|1 & & 1|2|2 & & 1|3|1 & & 1|3|2 \\
+            }
+        \end{equation*}
+        \caption{The complete tile tree for $h=2$.}
+        \label{fig:tiling-sec-tile-tree-h2-complete}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.35\textwidth}
+        \vskip 0pt
+        \centering
+        \begin{equation*}
+            \xymatrix@M=4pt@C=-4pt@R=10pt{
+                & 1 \ar[d] \\
+                & 1|i \ar[dl] \ar[dr] \\
+                1|i|1 & & 1|i|2
+            }
+        \end{equation*}
+        \caption{The branch around $1|i$.}
+        \label{fig:tiling-sec-tile-tree-h2-branch}
+    \end{subfigure}%%
+    \hfill
+    \caption{Tile trees for $h=2$, $v=3$.}
+    \label{fig:tiling-sec-tile-tree-h2}
+\end{figure}
+
+%% END ### DRAFT
+
+%% BEGIN ### RELEASE
+
 ##### Non-Severance: Root Tile
+
 
 Let us say that, for some $r \ge 1$\footnote{
     We've already shown in \autoref{eq:tiling-child-unsafe-q} that $r < 1$ is insecure.
@@ -517,6 +613,31 @@ We are particularly interested in the \emph{boundary} of when attacks are possib
     w_{1} = r w_{1|i}
     \label{eq:nonsev-root-r-boundary}
 \end{equation}
+
+
+\begin{figure}[H]
+    \centering
+    \hfill
+    \begin{subfigure}[t]{1\textwidth}
+        \vskip 0pt
+        \centering
+        \begin{equation*}
+            \xymatrix@M=4pt@C=-4pt@R=10pt{
+                & & & 1 \ar@{~>}[dll] \ar[dr] \\
+                & 1|i & & & (v-1)\times 1|i \\
+                %%g|i|j & & (v-2)\times g|i|j \\
+                %%(v-1) \times g|i|j|k \\
+            }
+        \end{equation*}
+        %%\caption{.}
+        %%\label{fig:tiling-sec-tile-tree-parent-sev-child-afffffff}
+    \end{subfigure}%%
+    \hfill
+    \caption{\textbf{TODO} A diagram of the root tile attempting to sever a child.
+    This diagram covers the relevant partial segment of the tiling.
+    The link that the attacker is attempting to cut is shown with a squiggly line.}
+    \label{fig:tiling-sec-tile-tree-parent-sev-childfffffff}
+\end{figure}
 
 If the root tile, alone, \textbf{cannot} sever a child tile, then it must be that $q w_1 < p w_1 + v w_{1|i}$ -- some proportion $q$ of the root tile's chain-work is \emph{never} sufficient to overcome the combined weight of reflections from child tiles.
 \begin{align}
@@ -544,6 +665,43 @@ If the root tile, alone, \textbf{cannot} sever a child tile, then it must be tha
 
 Thus, the root tile cannot sever child-tiles if $r < v$.
 This means (via \autoref{eq:nonsev-root-r-defn}) that the root tile cannot be allowed to provide \emph{more} than the combined contributions of its children.
+
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
+
+If an attacker is mining both the root tile and a child (and the maximum height is $1$), then, instead of the above, we have:
+\begin{align}
+  q (w_1 + w_{1|i}) &< p (w_1 + w_{1|i}) + (v-1) w_{1|i}
+  \nonumber \\
+  w_1 + w_{1|i} &< (v-1) w_{1|i}
+  \nonumber \\
+  r w_{1|i} + w_{1|i} &< (v-1) w_{1|i}
+  \nonumber \\
+  r + 1 &< v - 1
+  \nonumber \\
+  r &< v - 2
+  \\
+  \intertext{finding q:}
+  q (w_1 + w_{1|i}) &< p (w_1 + w_{1|i}) + (v-1) w_{1|i} \nonumber \\
+  q (r + 1) &< p (r + 1) + (v - 1) \nonumber \\
+  q (r + 1) &< (1 - q) (r + 1) + (v - 1) \nonumber \\
+  q r + q &< r + 1 - q r - q  + v - 1 \nonumber \\
+  2 q r + 2 q &< r + v \nonumber \\
+  \therefore q &< \frac{r + v}{2 r + 2} \nonumber \\
+  2 q r + 2 q &< r + v \nonumber \\
+  r (2q - 1) &< v - 2q \nonumber \\
+  r &< \frac{v - 1 + 1 - 2q}{2q - 1} \nonumber \\
+  r &< \frac{v - 1}{2q - 1} - 1 \nonumber \\
+  \intertext{when is root + child > 1/2 network?}
+  r w + w &> 0.5 (r + v) w \\
+  2r + 2 &> r + v \\
+  r &> v - 2 \\
+\end{align}
+
+%% END ### DRAFT
+
+%% BEGIN ### RELEASE
 
 ##### Non-Severance: Leaf Tiles
 
@@ -658,10 +816,38 @@ Thus, if we are secure against self-severance (\autoref{sec:tiling-sec-self-sev}
 
 \label{sec:tiling-upstream}
 
+
+\begin{figure}[H]
+    \centering
+    \hfill
+    \begin{subfigure}[t]{1\textwidth}
+        \vskip 0pt
+        \centering
+        \begin{equation*}
+            \xymatrix@M=4pt@C=-4pt@R=10pt{
+                & g \ar[d] \\
+                & g|i \ar@{~>}[dl] \ar@{~>}[dr] \\
+                g|i|j & & (v-2)\times g|i|j \\
+                %%(v-1) \times g|i|j|k \\
+            }
+        \end{equation*}
+        %%\caption{.}
+        %%\label{fig:tiling-sec-tile-tree-parent-sev-child-afffffff}
+    \end{subfigure}%%
+    \hfill
+    \caption{\textbf{TODO} A diagram of a non-root parent tile attempting to sever a child.
+    This diagram covers the relevant partial segment of the tiling.
+    The link that the attacker is attempting to cut is shown with a squiggly line.}
+    \label{fig:tiling-sec-tile-tree-parent-sev-childfffffff}
+\end{figure}
+
+
 case: $g$ + $g|i$ attacking $g|i|j$s:
 $q (w_{g|i}) < p w_{g|i} + (v - 1) w_{g|i|j}$
 
 note: $w_g$ isn't included because $g|i|j$ tiles don't take $w_g$ into account (PoRs aren't validated beyond 1 step).
+
+
 
 \begin{align}
     q w_{g|i} &< p w_{g|i} + (v - 1) w_{g|i|j}
@@ -706,6 +892,75 @@ Huh. So $v>3$. Not $v \ge 3$. I guess we should use $v=4$ then.
     (This is, of course, true for all things; not only UT.
     Perhaps a goal that all thinking minds share is this: \emph{developing excap.})
 }
+
+
+##### alt
+
+\begin{align*}
+q (w_g + w_{g|i}) &< p (w_g + w_{g|i}) + (v - 1) w_{g|i|j} \\
+q (r^2 w_{g|i|j} + r w_{g|i|j}) &< p (r^2 w_{g|i|j} + r w_{g|i|j}) + (v - 1) w_{g|i|j} \\
+\intertext{Via boundary condition:}
+r^2 w_{g|i|j} + r w_{g|i|j} &< (v - 1) w_{g|i|j} \\
+r^2 + r - v + 1 &< 0 \\
+\therefore r &< \frac{1}{2}(\sqrt{4v-3} - 1)
+%% ((4. * x - 3.).sqrt() - 1.) / 2.;
+\end{align*}
+
+
+\begin{comment}
+    x2 + x - 3 =
+\end{comment}
+
+
+#### Notes: tiling reqs
+
+* anti-severance
+* indistinguishability of network wide 51%
+  * if it looks like a 51% attack, how can a child tell the diff
+  * mb sets limits on root->child tiles?
+  * e.g. attacking the root tile needs to be as hard as attacking 51%?
+    * mb upper limit
+
+potench attack: drive out miners from a tile (run at a loss) then stop mining
+
+- poa soln? like provided that something keeps happening, that'll still gain reflections
+- honest miners also work, but will any stay? can't rely on RAA to adjust necessarily
+
+
+##### indistinguishability
+
+say a child tile is being attacked from the top.
+if the parent *and* grandparent are attacked, then it's not rly possible to tell this apart from a 51% attack -- but then there's limits on parent:child ratio.
+but in a 51% attack then the parent would fall and stay fallen
+
+\begin{align*}
+  \intertext{consider child of root:}
+  \sec{1|i} &= w_1 + w_{1|i} + w_{1|i|1} + \cdots + w_{1|i|v} \\
+  \intertext{consider root:}
+  \sec{1} &= w_1 + w_{1|1} + \cdots + w_{1|v} \\
+  \intertext{attacking the root must be as hard as $51\%$ing:}
+  q (w_1 + w_{1|1} + \cdots + w_{1|v}) &> 0.5 \cdot \text{(whole network)}
+\end{align*}
+
+idea: infinite sum of attacker's hashrate proportion at each depth
+
+$q_1$ at $d=1$, $q_2$ at $d=2$, etc.
+
+the constraint as that each layer deeper implies some necessary extra thing to attack.
+
+if the attacker doesn't finish the job, then 'tile confirmations' kick in (guess)
+
+\begin{align*}
+  \intertext{for a depth $d$, the attacker needs:}
+  \frac{1}{2} \cdot \sum_{i=0}^d r^{d-i} v^i w &< \sum_{i=0}^d q_i r^{d-i} v^i w \\
+  \intertext{divide by $r^d w$}
+  \frac{1}{2} \cdot \sum_{i=0}^d r^{-i} v^i &< \sum_{i=0}^d q_i r^{-i} v^i \\
+  \implies \frac{1}{2} \cdot \sum_{i=0}^d \Big( \frac{v}{r} \Big)^{i} &< \sum_{i=0}^d q_i \Big( \frac{v}{r} \Big)^{i} \\
+  \implies \sum_{i=0}^d (1 - 2 q_i) \Big( \frac{v}{r} \Big)^{i} &< 0 \\
+\end{align*}
+as $i \to d$ (since $v > r$), $(\frac{v}{r})^i$ becomes more and more significant.
+therefore, as $i \to d$, $q_i$ becomes more significant.
+so attacker needs good $q_d$ but not necessarily good $q_1$. (??)
 
 #### Tiling: Proof of $O(n)$ Security
 
