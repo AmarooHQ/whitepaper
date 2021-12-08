@@ -299,3 +299,6 @@ view:
 
 viewweb:
 	wslview http://localhost:3131/whitepaper.pdf
+
+cloc:
+	cloc --exclude-dir=node_modules,bin,target,.spago,output --exclude_ext=svg,pdf,js,json,toml ./10-Ultra-Terminum ./bin ./experiments ./includes
