@@ -2,7 +2,7 @@ module Main where
 
 import Prel
 
-import Amaroo.WP.Calcs.Tiling (tree_tiling_20k_v3_table, tree_tiling_20k_v4_table, tree_tiling_20k_v5_table, tree_tiling_3k_v3_table, tree_tiling_3k_v4_table, tree_tiling_3k_v5_table)
+import Amaroo.WP.Calcs.Tiling (tree_tiling_20k_v3_table, tree_tiling_20k_v4_table, tree_tiling_20k_v5_table, tree_tiling_3k_v3_table, tree_tiling_3k_v3_table_lp, tree_tiling_3k_v4_table, tree_tiling_3k_v5_table)
 import Amaroo.WP.Formatter (wrap)
 import Amaroo.WP.Tables (compareNets1mTps, compareNets1mTpsAll, compareNets20k, compareNets3k, compareUtLimOptimizationsA, compareUtOptimizationsA, compareUtOptimizationsA20k, compareUtOptimizationsB, compareUtOptimizationsB20k, dappChains, dappChainsHot, lpCompareNetworks, lpCompareUt1Eth2, lpCompareUt1LimitedOptShard, lpCompareUt1OptShard, lpCompareUt2OptShard, lpCompareUt2OptShard20k, lpCompareUtOptimizations1, showHtmlTable, showLatexTable, showMdTable, tableTps, tableTpsHot, tpsPor, tpsPort)
 import Amaroo.WP.Tables.Booktabs (renderBooktabs)
@@ -90,6 +90,7 @@ lpTables =
     , TD "lp_compare_ut2_to_optshard_20k" lpCompareUt2OptShard20k defaultPositioning
     -- , TD "lp_compare_optimizations2" lpCompareUtOptimizations2 defaultPositioning
     -- , TD "lp_compare_optimizations3" lpCompareUtOptimizations3 defaultPositioning
+    , TD "tree_tiling_3k_v3_table" tree_tiling_3k_v3_table_lp hereish
     ]
 
 
