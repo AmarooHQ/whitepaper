@@ -246,7 +246,8 @@ findMaxPoRsN1 ps g = (loopFindMaxPoRsN1F utPorsT1 ps g {i: 1, t: 0.0}).i |> toNu
 findMaxHOPoRsN1 :: Params -> Number -> Number
 findMaxHOPoRsN1 ps g = (loopFindMaxPoRsN1F utHOPorsT1 ps g {i: 1, t: 0.0}).i |> toNumber
 
--- | This will *efficiently* calculate the best N_1s for some array of parameters, provided N_1 will monotonically increase (which it does for increasing k)
+-- | This will *efficiently* calculate the best N_1s for some array of parameters, provided N_1 will monotonically increase (which it does for increasing k).
+-- | utT1F should be a function that returns T_1 for given parameters
 findMaxPoRsN1ForRanges' :: _ -> {g :: Number, r :: Array Params} -> Array (Tuple Params LoopFindMax)
 findMaxPoRsN1ForRanges' utT1F {g, r} = (inner {last: Nothing, next: A.head r, rest: A.tail r, outs: []}).outs
   where

@@ -11,6 +11,7 @@ import Data.Int (toNumber)
 import Data.Int as I
 import Data.List.NonEmpty as NEL
 import Data.Maybe (Maybe(..), fromJust)
+import Data.Number.Format (toString)
 import Data.Traversable (sequence_)
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
@@ -410,6 +411,17 @@ utSpec = describe "ut" do
         liftEffect $ writeHOPoRTableToCsv {r: rPors, g: 32.0, fn: "hopors-k-vs-n-to-k-eq-100000.csv"}
         liftEffect $ writeHOPoRTableToCsv {r: rPorts, g: 16.0, fn: "hoports-k-vs-n-to-k-eq-100000.csv"}
 
+    describe "comparative k graph" do
+      it "writes csv for comparative k graph" do
+        let ks = kRange {from: 100.0, to: 30_000.0, step: 100.0}
+            ps = ks <#> (\k -> mkSimplePs k {bf: btToF 15, bh: 84.0} 250.0)
+            stats_rows = (allUtChainCalcs <$> ps) :: Array (UtVariants ChainStats)
+            heading_row = ["$k$ (B/s)", "PoRs TPS2", "PoRTs TPS2", "HOPoRs TPS2", "HOPoRTs TPS2", "OP TPS2", "OPT TPS2", "HO TPS2", "HOT TPS2"]
+            rows = [heading_row] <> ((chain_stats_to_row >>> map toString) <$> stats_rows)
+            rows' = map (intercalate ",") rows
+            contents = intercalate "\n" rows'
+        liftEffect $ writeTextFile UTF8 "comparative-k.csv" contents
+
     describe "+PoRs vs large headers checks" do
       it "large headers approx (w/in ~33%) of +PoRs" do
         let tx = 250.0
@@ -509,3 +521,9 @@ doUtChecks p uts = if A.length filteredRes == 0
       -- , false <? "well that didn't work"
       -- , true <? "but this did"
       ]
+
+
+chain_stats_to_row :: UtVariants ChainStats -> Array _
+chain_stats_to_row utcs = [utcs.std.k1] <> (rowval <$> [utcs.pors, utcs.ports, utcs.hopors, utcs.hoports, utcs.std, utcs.t, utcs.ho, utcs.hot])
+  where
+    rowval cs = (cs :: ChainStats).d2.tps
