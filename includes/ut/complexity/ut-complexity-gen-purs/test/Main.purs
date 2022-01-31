@@ -20,6 +20,7 @@ import Test.Amaroo.WP.Formatter (fmtSpec)
 import Test.Amaroo.WP.Tables (utNamesSpec)
 import Test.Amaroo.WP.Tables.Booktabs (booktabsSpec)
 import Test.Amaroo.WP.Utils (utilSpecs)
+import Test.Amaroo.WP.VLMT.Main (allMerkleTreesSpec)
 import Test.Spec (describe, it)
 import Test.Spec.Assertions (shouldEqual)
 import Test.Spec.Reporter.Console (consoleReporter)
@@ -81,3 +82,4 @@ main = do
     replaceTableSpec
     convQuickChecks
     tilingSpec
+    allMerkleTreesSpec
