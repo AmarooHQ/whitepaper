@@ -245,7 +245,26 @@ It's worth noting that there are still potential attacks on Chain L. For example
 
 [^hr-footnote]: In \href{https://bitcoin.org/bitcoin.pdf}{Satoshi's original paper} the parameters $p$ and $q$ represent the probability that the next block will be found by an honest node or the attacker, respectively. This convention has been continued in subsequent analysis, e.g., Rosenfeld's \href{https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{\emph{Analysis of hash-rate-based double-spending}}, and is continued here, also.
 
-How can we prevent this sort of attack? The attack is predicated on Chain R *not* accounting for the added weight from reflections. Chain R can easily account for that weight, though, with some protocol changes. First: the total chain-weight[^total-vs-rel-chain-weight], *including reflections*, can be committed to via a field in the header. Based on this field, a headers-only version of the chain can be constructed correctly. Full nodes of Chain L can now also validate the claimed weight against the verifiable weight, and a mismatch invalidates the block. Second: When such a block is found (where the claimed chain-weight violates the protocol), full nodes can construct a fraud proof. Chain R should then confirm the fraud proof (i.e., record it on-chain) and thus prevent the attackers blocks from taking priority and/or gaining reflections. Third: Chain R already knows its own headers, and so it only requires the necessary merkle branches to verify the reflections between Chain L and Chain R. This third method provides an additional means of detecting blocks that are invalid due to fraudulent chain-weight claims in the header.
+How can we prevent this sort of attack?
+The attack is predicated on Chain R *not* accounting for the added weight from reflections.
+Chain R can easily account for that weight, though, with some protocol changes.
+First: the total chain-weight[^total-vs-rel-chain-weight], *including reflections*, can be committed to via a field in the header.
+Based on this field, a headers-only version of the chain can be constructed correctly.
+Full nodes of Chain L can now also validate the claimed weight against the verifiable weight, and a mismatch invalidates the block.
+Second: When an invalid block is found (where the claimed chain-weight violates the protocol), full nodes can construct a fraud proof.\footnote{
+  Since an invalid block's parent is known, such a fraud proof only needs to show that the difference (between the parent and block's chain-weight) is not possible.
+  If we use a VLMT (see \autoref{sec:vlmt}) to store reflections, then the merkle branches used for PoR will contain, for each subtree, the contributed chain-weight.
+  This means a complete and valid VLMT (with forged total chain-weight) is impossible, which in turn makes fraud proofs easy to generate.
+}
+Chain R should then confirm the fraud proof (i.e., record it on-chain) and thus prevent the attackers blocks from taking priority and/or gaining reflections.
+Chain R can ensure things go well if its protocol requires more proofs (of chain-weight) for blocks that cause reorganizations.
+\todo{reword above ``things go well''. also: reword this third option below -- doesn't make sense / flow with the paragraph.}
+Third: Chain R already knows its own headers, and so it only requires the missing merkle branches to verify reflections between Chain L and Chain R.
+This third method provides an additional means of detecting blocks that are invalid due to fraudulent chain-weight claims in the header.
+
+\aside{
+  We'll cover preventing these sorts of attacks in \autoref{sec:por-fraud-proofs}, which details fraud proofs for PoR in detail.
+}
 
 In the worst case, we would need to *recursively* verify proofs of reflection (those of our own chain, and reflecting chains).
 This overhead is discussed in \autoref{sec:proving-reflection} and \autoref{sec:exploiting-seg-state}, and analyzed in \autoref{sec:bandwidth-complexity}.
