@@ -1,4 +1,4 @@
--- | Original code from: https://github.com/alpacaaa/purescript-merkle-tree/blob/master/src/Crypto/Hash/VLMerkleTree.purs
+-- | Original code from: https://github.com/alpacaaa/purescript-merkle-tree/blob/master/src/Crypto/Hash/MerkleTree.purs
 -- | (Original code distributed under MIT license)
 {-
 
@@ -230,17 +230,22 @@ mkVLRootHash config (VLMerkleRoot (Tuple lk l)) (VLMerkleRoot (Tuple rk r)) =
   Note: we need to ensure we construct the VLMT so that the order constraint is always met.
   Practically, that means we want `LT == compare left right` *always*.
   This is trivial for a balanced tree (i.e., with size == a power of 2).
+  For other sizes, we want to divide the list in two:
+    - the right side with larger aux values
+    - the left side with smaller aux values
+    - if the size is odd, then the right side should have 1 more element than the left
 |-}
 mkVLMerkleTree :: forall k. (Hashable k) => VLMTConfig k String -> k -> List (Tuple k String) -> VLMerkleTree k String
 mkVLMerkleTree _ defaultK Nil = VLMerkleEmpty defaultK
-mkVLMerkleTree config _ ls   = VLMerkleTree lsLen (go lsLen ls)
+mkVLMerkleTree config _ ls'   = VLMerkleTree lsLen (go lsLen ls)
   where
-    asdf = List.sortBy
+    ls = List.sortBy config.order ls'
     lsLen              = List.length ls
-    go _  (Tuple k' x : Nil) = mkLeaf k' x
+    go _ (Tuple k' x : Nil) = mkLeaf k' x
+    go _ (Tuple k1 x1 : Tuple k2 x2 : Nil) = mkBranch config (mkLeaf k1 x1) (mkLeaf k2 x2)
     go len xs = mkBranch config (go i l) (go (len - i) r)
       where
-        i = powerOfTwo len
+        i = len / 2  -- length of left side; **note**, assumes integer division
         {l, r} = { l: List.take i xs, r: List.drop i xs }
 
 -------------------------------------------------------------------------------
