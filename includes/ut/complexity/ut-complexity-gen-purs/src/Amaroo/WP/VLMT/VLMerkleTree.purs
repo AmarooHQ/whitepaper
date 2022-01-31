@@ -60,14 +60,10 @@ import Data.Foldable as Foldable
 import Data.Generic.Rep (class Generic)
 import Data.Int (even)
 import Data.Int.Bits ((.&.), shl, shr)
-import Data.List (List(..), zip, (:), intercalate)
+import Data.List (List(..), (:), intercalate)
 import Data.List as List
-import Data.List as List
-import Data.Show.Generic (genericShow)
 import Data.Tuple (Tuple(..), snd)
-import Data.Tuple as Tuple
-import Debug as Debug
-import Prelude (Ordering(..))
+-- import Debug as Debug
 
 
 hash = Crypto.hash Crypto.SHA256 >>> Crypto.toString
@@ -356,5 +352,5 @@ testVLMerkleProofN size leaf =
   in
   validateVLMerkleProof vlmtIntConfig proof (mtRoot mtree) randLeaf
   && combinedK == sum input
-  && Debug.spy ("\n\nSize:" <> show size <> " | root: " <> show root <> " | leaf: " <> show randLeaf) true
-  && Debug.spy (show proof) true
+  -- && Debug.spy ("\n\nSize:" <> show size <> " | root: " <> show root <> " | leaf: " <> show randLeaf) true
+  -- && Debug.spy (show proof) true
