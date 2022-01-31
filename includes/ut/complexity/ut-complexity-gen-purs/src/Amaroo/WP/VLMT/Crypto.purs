@@ -2,6 +2,7 @@ module Amaroo.WP.VLMT.Crypto where
 
 import Prel
 
+import Data.Int (decimal, toStringAs)
 import Effect.Unsafe (unsafePerformEffect)
 import Node.Buffer (freeze, thaw)
 import Node.Buffer.Immutable as Buffer
@@ -10,7 +11,7 @@ import Node.Encoding (Encoding(..))
 
 data Hash = SHA256 | FastHash
 
-class Hashable h where
+class Eq h <= Hashable h where
   hash :: Hash -> h -> Buffer.ImmutableBuffer
 
 instance hashBuf :: Hashable Buffer.ImmutableBuffer where
@@ -25,6 +26,8 @@ instance hashBuf :: Hashable Buffer.ImmutableBuffer where
 instance hashStr :: Hashable String where
   hash hType s = hash hType (Buffer.fromString s UTF8)
 
+instance hashInt :: Hashable Int where
+  hash ht i = hash ht $ toStringAs decimal i
 -- hashBuf :: Hash -> Buffer.ImmutableBuffer -> Buffer.ImmutableBuffer
 
 

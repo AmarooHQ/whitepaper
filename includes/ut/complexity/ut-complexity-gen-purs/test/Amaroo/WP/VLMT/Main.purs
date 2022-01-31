@@ -5,6 +5,7 @@ import Prel
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Test.Amaroo.WP.VLMT.MerkleTree (testMerkleTreeQuickcheck)
+import Test.Amaroo.WP.VLMT.VLMerkleTree (testVLMerkleTreeQuickcheck)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Reporter (consoleReporter)
 import Test.Spec.Runner (runSpec)
@@ -15,7 +16,8 @@ allMerkleTreesSpec = describe "Merkle Trees (All)" do
     it "quickcheck proofs" do
       testMerkleTreeQuickcheck
   describe "Value-Laden Merkle Tree" do
-    pure unit
+    it "quickcheck proofs" do
+      testVLMerkleTreeQuickcheck
 
 
 main :: Effect Unit

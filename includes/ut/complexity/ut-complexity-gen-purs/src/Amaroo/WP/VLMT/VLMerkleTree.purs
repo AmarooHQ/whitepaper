@@ -29,99 +29,115 @@ SOFTWARE.
 -}
 module Amaroo.WP.VLMT.VLMerkleTree
   ( Side(..)
-  , VLMerkleNode(..)
   , VLMerkleProof(..)
   , VLMerkleRoot(..)
   , VLMerkleTree(..)
   , VLProofElem(..)
   , VLProofList(..)
+  , VLMerkleNode
   , merkleProof
   , mkLeafRootHash
-  , mkVLRootHash
   , mkVLMerkleTree
+  , mkVLRootHash
   , mtHash
   , mtHeight
   , mtRoot
   , mtSize
-  , vlNodeRoot
   , testVLMerkleProofN
   , validateVLMerkleProof
   , vlEmptyHash
+  , vlNodeRoot
   )
   where
 
 
 import Prel
 
-import Data.Foldable (class Foldable)
-import Data.Foldable as Foldable
+import Amaroo.WP.VLMT.Crypto (class Hashable)
 import Amaroo.WP.VLMT.Crypto as Crypto
+import Data.Foldable (class Foldable, sum)
+import Data.Foldable as Foldable
 import Data.Int (even)
 import Data.Int.Bits ((.&.), shl, shr)
-import Data.List (List(..), (:))
+import Data.List (List(..), zip, (:))
 import Data.List as List
+import Data.Tuple (Tuple(..), snd)
 
-newtype VLMerkleRoot :: forall k. k -> Type
-newtype VLMerkleRoot a = VLMerkleRoot String
 
-derive instance eqVLMerkleRoot :: Eq (VLMerkleRoot a)
+hash = Crypto.hash Crypto.SHA256 >>> Crypto.toString
 
-data VLMerkleTree a
-  = VLMerkleEmpty
-  | VLMerkleTree Int (VLMerkleNode a)
 
-data VLMerkleNode a
-  = MerkleBranch {
-      mRoot  :: VLMerkleRoot a
-    , mLeft  :: VLMerkleNode a
-    , mRight :: VLMerkleNode a
+-- class VLMTDefault k where
+--   vlDefault :: k
+
+-- instance vldInt :: VLMTDefault Int where
+--   vlDefault = 0
+
+
+-- instance vldNumber :: VLMTDefault Number where
+--   vlDefault = 0.0
+
+
+newtype VLMerkleRoot k v = VLMerkleRoot (Tuple k String)
+
+
+derive instance eqVLMerkleRoot :: Eq k => Eq (VLMerkleRoot k v)
+
+data VLMerkleTree k v
+  = VLMerkleEmpty k
+  | VLMerkleTree Int (VLMerkleNode k v)
+
+data VLMerkleNode k v
+  = VLMerkleBranch {
+      mRoot  :: VLMerkleRoot k v
+    , mLeft  :: VLMerkleNode k v
+    , mRight :: VLMerkleNode k v
   }
-  | MerkleLeaf {
-      mRoot :: VLMerkleRoot a
-    , mVal  :: a
+  | VLMerkleLeaf {
+      mRoot :: VLMerkleRoot k v
+    , mVal  :: Tuple k v
   }
 
-instance foldableVLMerkleTree :: Foldable VLMerkleTree where
+instance foldableVLMerkleTree :: Foldable (VLMerkleTree k) where
   foldr f a b = Foldable.foldrDefault f a b
   foldl f a b = Foldable.foldlDefault f a b
-  foldMap _ VLMerkleEmpty      = mempty
+  foldMap _ (VLMerkleEmpty _)  = mempty
   foldMap f (VLMerkleTree _ n) = Foldable.foldMap f n
 
-instance foldableVLMerkleNode :: Foldable VLMerkleNode where
+instance foldableVLMerkleNode :: Foldable (VLMerkleNode k) where
   foldr f a b = Foldable.foldrDefault f a b
   foldl f a b = Foldable.foldlDefault f a b
   foldMap f x = case x of
-    MerkleLeaf   { mVal }            -> f mVal
-    MerkleBranch { mLeft, mRight }   ->
+    VLMerkleLeaf   { mVal }            -> f $ snd mVal
+    VLMerkleBranch { mLeft, mRight }   ->
       Foldable.foldMap f mLeft `append` Foldable.foldMap f mRight
 
 
 
 -- | Returns root of merkle tree.
-mtRoot :: forall a. VLMerkleTree a -> VLMerkleRoot a
-mtRoot VLMerkleEmpty         = vlEmptyHash
+mtRoot :: forall k v. VLMerkleTree k v -> VLMerkleRoot k v
+mtRoot (VLMerkleEmpty k)     = vlEmptyHash k
 mtRoot (VLMerkleTree _ node) = vlNodeRoot node
 
 
 -- | Returns root of merkle tree root hashed.
 
-mtHash :: forall a. VLMerkleTree a -> String
-mtHash VLMerkleEmpty      = vlMerkleHash ""
+mtHash :: forall k v. VLMerkleTree k v -> String
+mtHash (VLMerkleEmpty k)  = vlMerkleHash $ Tuple k ""
 mtHash (VLMerkleTree _ x) = vlMerkleHash value
   where
     (VLMerkleRoot value) = vlNodeRoot x
 
-mtSize :: forall a. VLMerkleTree a -> Int
-mtSize VLMerkleEmpty      = 0
+mtSize :: forall k v. VLMerkleTree k v -> Int
+mtSize (VLMerkleEmpty _)  = 0
 mtSize (VLMerkleTree s _) = s
 
-vlEmptyHash :: forall a. VLMerkleRoot a
-vlEmptyHash = VLMerkleRoot (vlMerkleHash "")
+vlEmptyHash :: forall k v. k -> VLMerkleRoot k v
+vlEmptyHash k = VLMerkleRoot $ Tuple k $ vlMerkleHash $ Tuple k ""
 
 
-vlMerkleHash :: String -> String
-vlMerkleHash value = Crypto.hash Crypto.SHA256 value
-                 # Crypto.toString
+vlMerkleHash :: Tuple _ String -> String
+vlMerkleHash (Tuple _ value) = hash value
 
 
 -- | Merkle tree height
@@ -151,39 +167,42 @@ powerOfTwo n
 -- Constructors
 -------------------------------------------------------------------------------
 
-mkLeaf :: String -> VLMerkleNode String
-mkLeaf a =
-  MerkleLeaf
-    { mRoot: mkLeafRootHash a
-    , mVal : a
+mkLeaf :: forall k. (Hashable k) => k -> String -> VLMerkleNode k String
+mkLeaf k v =
+  VLMerkleLeaf
+    { mRoot: mkLeafRootHash $ Tuple k v
+    , mVal : Tuple k v
     }
 
-mkLeafRootHash :: String -> VLMerkleRoot String
-mkLeafRootHash a = VLMerkleRoot $ vlMerkleHash ("0" <> a)
+mkLeafRootHash :: forall k. (Hashable k) => (Tuple k String) -> VLMerkleRoot k String
+mkLeafRootHash (Tuple k v) = VLMerkleRoot $ Tuple k $ vlMerkleHash (Tuple k $ "0" <> hash k <> v)
 
-vlNodeRoot :: forall a. VLMerkleNode a -> VLMerkleRoot a
-vlNodeRoot (MerkleBranch { mRoot }) = mRoot
-vlNodeRoot (MerkleLeaf { mRoot })   = mRoot
+vlNodeRoot :: forall k v. VLMerkleNode k v -> VLMerkleRoot k v
+vlNodeRoot (VLMerkleBranch { mRoot }) = mRoot
+vlNodeRoot (VLMerkleLeaf { mRoot })   = mRoot
 
-mkBranch :: forall a. VLMerkleNode a -> VLMerkleNode a -> VLMerkleNode a
-mkBranch a b =
-  MerkleBranch
+mkBranch :: forall k v. (Crypto.Hashable k) => (k -> k -> k) -> VLMerkleNode k v -> VLMerkleNode k v -> VLMerkleNode k v
+mkBranch combine a b =
+  VLMerkleBranch
     { mLeft : a
     , mRight: b
-    , mRoot : mkVLRootHash (vlNodeRoot a) (vlNodeRoot b)
+    , mRoot : mkVLRootHash combine (vlNodeRoot a) (vlNodeRoot b)
     }
 
-mkVLRootHash :: forall a. VLMerkleRoot a -> VLMerkleRoot a -> VLMerkleRoot a
-mkVLRootHash (VLMerkleRoot l) (VLMerkleRoot r) = VLMerkleRoot $ vlMerkleHash $ ("1" <> l <> r)
+mkVLRootHash :: forall k v. (Crypto.Hashable k) => (k -> k -> k) -> VLMerkleRoot k v -> VLMerkleRoot k v -> VLMerkleRoot k v
+mkVLRootHash combine (VLMerkleRoot (Tuple lk l)) (VLMerkleRoot (Tuple rk r)) =
+    VLMerkleRoot $ Tuple k $ vlMerkleHash $ Tuple k ("1" <> hash lk <> l <> hash rk <> r)
+  where
+    k = combine lk rk
 
 -- | Smart constructor for 'VLMerkleTree'.
-mkVLMerkleTree :: List String -> VLMerkleTree String
-mkVLMerkleTree Nil = VLMerkleEmpty
-mkVLMerkleTree ls  = VLMerkleTree lsLen (go lsLen ls)
+mkVLMerkleTree :: forall k. (Hashable k) => (k -> k -> k) -> k -> List (Tuple k String) -> VLMerkleTree k String
+mkVLMerkleTree _ defaultK Nil = VLMerkleEmpty defaultK
+mkVLMerkleTree combine _ ls   = VLMerkleTree lsLen (go lsLen ls)
   where
     lsLen              = List.length ls
-    go _  (x : Nil) = mkLeaf x
-    go len xs = mkBranch (go i l) (go (len - i) r)
+    go _  (Tuple k' x : Nil) = mkLeaf k' x
+    go len xs = mkBranch combine (go i l) (go (len - i) r)
       where
         i = powerOfTwo len
         {l, r} = { l: List.take i xs, r: List.drop i xs }
@@ -192,17 +211,14 @@ mkVLMerkleTree ls  = VLMerkleTree lsLen (go lsLen ls)
 -- Merkle Proofs
 -------------------------------------------------------------------------------
 
-type VLProofList :: forall k. k -> Type
-type VLProofList a = List (VLProofElem a)
+type VLProofList k v = List (VLProofElem k v)
 
-newtype VLMerkleProof :: forall k. k -> Type
-newtype VLMerkleProof a = VLMerkleProof (VLProofList a)
+newtype VLMerkleProof k v = VLMerkleProof (VLProofList k v)
 
-data VLProofElem :: forall k. k -> Type
 
-data VLProofElem a = VLProofElem
-  { vlNodeRoot    :: VLMerkleRoot a
-  , siblingRoot :: VLMerkleRoot a
+data VLProofElem k v = VLProofElem
+  { vlNodeRoot    :: VLMerkleRoot k v
+  , siblingRoot :: VLMerkleRoot k v
   , nodeSide    :: Side
   }
 
@@ -215,17 +231,17 @@ data Side = L | R
 -- the order in which to hash each proof element root and it's sibling root).
 -- The list is ordered such that the for each element, the next element in
 -- the list is the proof element corresponding to the node's parent node.
-merkleProof :: forall a. VLMerkleTree a -> VLMerkleRoot a -> VLMerkleProof a
-merkleProof VLMerkleEmpty _ =
+merkleProof :: forall k v. (Eq k) => VLMerkleTree k v -> VLMerkleRoot k v -> VLMerkleProof k v
+merkleProof (VLMerkleEmpty k) _ =
   VLMerkleProof Nil
 merkleProof (VLMerkleTree _ rootNode) leafRoot =
   VLMerkleProof $ constructPath Nil rootNode
   where
-    constructPath :: (VLProofList a) -> VLMerkleNode a -> (VLProofList a)
-    constructPath pElems (MerkleLeaf leaf)
+    constructPath :: (VLProofList k v) -> VLMerkleNode k v -> (VLProofList k v)
+    constructPath pElems (VLMerkleLeaf leaf)
       | leafRoot == leaf.mRoot = pElems
       | otherwise              = Nil
-    constructPath pElems (MerkleBranch branch) = lPath <> rPath
+    constructPath pElems (VLMerkleBranch branch) = lPath <> rPath
       where
         bRoot = branch.mRoot
         ln    = branch.mLeft
@@ -239,11 +255,11 @@ merkleProof (VLMerkleTree _ rootNode) leafRoot =
         rPath = constructPath (rVLProofElem:pElems) rn
 
 -- | Validate a merkle tree proof of inclusion
-validateVLMerkleProof :: forall a. VLMerkleProof a ->  VLMerkleRoot a -> VLMerkleRoot a -> Boolean
-validateVLMerkleProof (VLMerkleProof proofElems) treeRoot leafRoot =
+validateVLMerkleProof :: forall k v. (Hashable k) => (k -> k -> k) -> VLMerkleProof k v ->  VLMerkleRoot k v -> VLMerkleRoot k v -> Boolean
+validateVLMerkleProof combine (VLMerkleProof proofElems) treeRoot leafRoot =
   validate proofElems leafRoot
   where
-    validate :: VLProofList a -> VLMerkleRoot a -> Boolean
+    validate :: VLProofList k v -> VLMerkleRoot k v -> Boolean
     validate Nil proofRoot = proofRoot == treeRoot
     validate (pElem : pElems) proofRoot =
       let
@@ -253,19 +269,24 @@ validateVLMerkleProof (VLMerkleProof proofElems) treeRoot leafRoot =
         then false
         else validate pElems (hashVLProofElem pElem)
 
-    hashVLProofElem :: VLProofElem a -> VLMerkleRoot a
+    hashVLProofElem :: VLProofElem k v -> VLMerkleRoot k v
     hashVLProofElem (VLProofElem proof) =
       case proof.nodeSide of
-        L -> mkVLRootHash proof.vlNodeRoot proof.siblingRoot
-        R -> mkVLRootHash proof.siblingRoot proof.vlNodeRoot
+        L -> mkVLRootHash combine proof.vlNodeRoot proof.siblingRoot
+        R -> mkVLRootHash combine proof.siblingRoot proof.vlNodeRoot
 
 
 testVLMerkleProofN :: Int -> Int -> Boolean
 testVLMerkleProofN size leaf =
   let
       input = List.range 1 size
-      mtree = mkVLMerkleTree $ map show input
-      randLeaf = mkLeafRootHash $ show leaf
+      mtree = mkVLMerkleTree (+) 0 $ List.zip input $ map show input
+      randLeaf = mkLeafRootHash $ Tuple leaf $ show leaf
       proof = merkleProof mtree randLeaf
+      combinedK = case mtree of
+        (VLMerkleTree _ (VLMerkleBranch {mRoot: VLMerkleRoot (Tuple k _)})) -> k
+        _ -> 0
+
   in
-  validateVLMerkleProof proof (mtRoot mtree) randLeaf
+  validateVLMerkleProof (+) proof (mtRoot mtree) randLeaf
+  && combinedK == sum input
