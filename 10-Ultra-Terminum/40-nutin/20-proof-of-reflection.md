@@ -273,6 +273,8 @@ This overhead is discussed in \autoref{sec:proving-reflection} and \autoref{sec:
 
 \todoDraftOnly{develop ideas around fraud proofs -- or omit}
 
+\todo{WRT Recursive verification of PoR -- need to separate this idea from multi-depth recursion like $A \rightarrow B \to C \to B \to A$}
+
 #### Step 5. Mutual Reflection
 
 The final step in this progression is *mutual reflection* -- where both chains image one-another and include the necessary PoRs and modifications to their chain-weight algorithms. This is shown in \autoref{fig:por-step5}.
