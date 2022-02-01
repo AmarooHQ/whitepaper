@@ -200,7 +200,7 @@ The idea that blocks in a chain can have multiple parents -- i.e., the chain for
 
 In the two years after GHOST was published, a number of DAG-based blockchain designs were developed that facilitated merging histories from multiple parent blocks.
 
-In mid-2014 I created a prototyped DAG-based blockchain called Quanta[^quanta-2014] with a novel method of linearization that converged to a complete and stable ordering of blocks.
+In mid-2014 I created a prototype DAG-based blockchain called Quanta[^quanta-2014] with a novel method of linearization that converged to a complete and stable ordering of blocks.
 This method was independently rediscovered[^redisc] in mid-2015 by Lewenberg, Sompolinsky, and Zohar[^inclusive-july-2015] -- who also further developed and analyzed the method, which they named *the inclusive protocol*.
 Additionally, in 2016 Paul Firth further developed Quanta in his *Trustless Eventual Total Order* draft[^teto-2016].
 
@@ -248,8 +248,8 @@ UT's simplex-chains must be block-DAGs to remain functional and avoid such DoS a
 Since block-DAGs can reference multiple previous blocks, the stale-rate can approach (or reach) 0.
 Increasing the block frequency is counter-productive in UT, though, since UT is sensitive to the size and number of headers that are produced (see \autoref{sec:impact-of-header-size}).
 In UT, the purpose of using block-DAGs is to thwart certain attacks, not to increase the block frequency.
-The intention is for UT simplex-chains to use fairly typical block frequencies -- possibly decreasing those frequencies over time to increase capacity.
-Using smaller block frequencies also decreases the data-overhead of multiple parents (this overhead typically increases the header size by 32 bytes per parent).
+The intention is for UT simplex-chains to use fairly typical block frequencies (e.g., 15s) -- possibly decreasing those frequencies over time to increase capacity.
+Slower block frequencies also decrease incidence of multiple parents (each parent typically increases the header size by 32 bytes).
 
 Some basic block-dag segments are shown in \autoref{fig:dag-simple-segments}.
 
