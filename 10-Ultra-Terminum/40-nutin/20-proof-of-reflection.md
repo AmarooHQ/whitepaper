@@ -467,8 +467,7 @@ With \autoref{eq:por-conversion-const-1}, \textbf{we have just found our first c
 
 \aside{
   \autoref{eq:por-conversion-const-1} has a natural symmetry.
-  It's worth noting.
-  Later, we'll look into breaking it.
+  It's worth noting for later.
 }
 
 What's going on here?
@@ -977,9 +976,10 @@ Second, it \emph{simplifies thinking}.
 The purpose of converting chain-weight is clearer and easier to reason about.
 Finally, it makes explicit the requirement that \emph{we can only compare to a grounded context}.
 
-There is no way to \emph{universally} say \emph{X work on L is worth Y work on R} without adding necessary context like \emph{when} that conversion is happening.
-Confirmations (like work) require that grounding.
-For confirmations (not work), this is true even when converting confirmations \emph{from the same chain}.
+There is no way to say \emph{X work on L is worth Y work on R} without adding necessary context like \emph{when} that conversion is happening.
+Confirmations (like work) require that grounding, since they need to be scaled when converting between different chains.
+What about confirmations from the same chain?
+Unlike work (which can be summed directly), confirmations always require conversion to a \emph{known standard} -- even when they're \emph{from the same chain}.
 For example, we can say that the single confirmation provided by Bitcoin block 704610 is \emph{equivalent} to approximately 19,893,045,000,000 genesis-confirmations.\footnote{A genesis-confirmation is relative to the Bitcoin genesis block -- which had a difficulty of exactly 1.}
 The conversion-ratio is equal to the difficulty of block 704610.
 That is, it would take a chain of $\sim$ 20 trillion blocks, each with 1 genesis-confirmation worth of work, to match the weight of block 704610.
@@ -1018,10 +1018,11 @@ Nice and simple.
 
 #### Coins per Confirmation
 
-In practice, given a cross-chain network, it seems very elegant to measure block-weight in coins.
-Note that this doesn't necessarily have real-world meaning.
-One example where it does is \autoref{sec:conversion-single-root-token}.
-Let's consider measuring block-weight in coins, starting with the conversion used in \autoref{eq:srt-block-ratios}.
+Given a multi-chain network, could we measure measure block-weight in coins?
+It seems promising and elegant if it works, but does it have any real-world meaning?
+
+One example where measuring chain-weight in coins does have some meaning is \autoref{sec:conversion-single-root-token} (the SRT context).
+Let's consider this, starting with the conversion used in \autoref{eq:srt-block-ratios}.
 \begin{align}
   C_r = \; & L_r \cdot \frac{C_t}{L_t} \cdot \frac{L_f}{C_f}
     & & \frac{\text{L-coins}}{\text{C-block}}
@@ -1059,16 +1060,17 @@ Notice that, in this case, $L_t + R_t = G_t$, the network-wide currency supply.
 One implication is that weight (measured in coins) effectively counts \emph{how much of the full network} is contributing to Chain L's security -- represented via the coins that were minted in those contributing blocks.
 It's easier to see in \autoref{eq:chain-coin-weight2} as the sum collapses to $\nicefrac{I}{L_f}$.
 
-If the network is functioning well, we should expect that summing these values \emph{over the full history of the chain} should be close to the sum of all coins minted through block rewards.
+If the all chains in the network are functioning well, we should expect that summing a chain's weight in coins \emph{over the full history of the chain} should be close to the sum of all coins minted through block rewards.
 Of course, this is only useful over \emph{multiple} chains.
-\textbf{If a single, traditional blockchain tried to do this, then all chain-weights would be identical!}\footnote{
+\textbf{If a single, traditional blockchain tried to do this, then all chain-weights would be basically identical!}\footnote{
   This may be a new criticism of PoS.
-  In essence: a blockchain needs something like a DAA to factor-in participation, and \emph{coins} will never provide a way to determine which chain has higher participation.
-  Moreover, \emph{coins} is actually a very \emph{bad} way to measure participation (for a standalone PoS chain), because the \emph{most valuable future network} is one where coins are being used for \emph{actual trade}, and this necessitates downward pressure on the number of coins dedicated for staking.
+  In essence: a blockchain needs something like a DAA to factor-in participation.
+  PoS chains use \emph{coins} instead of \emph{hashes}, but \emph{coins} will never provide a way to determine which chain has higher participation.
+  Moreover, \emph{coins} is actually a very \emph{bad} way to measure participation (for a standalone PoS chain), because the \emph{most valuable future network} is one where coins are being used for \emph{actual trade}, and this must happen at the expense of the number of coins dedicated for staking.
   Thus, PoS chains \emph{can only ever have objectively secure fork-rules} when other factors are included in their conversion contexts (like using PoR with a PoW chain).
   One thing PoS chains could try is: measuring weight \emph{in another chain's hashes}.
 }
-This happens because the conversion methods we're covering \emph{don't try to convert work done at different times.}
+This happens because these conversion methods \emph{don't try to convert work done at different times.}
 PoR only ever converts \emph{near-simultaneous work.}
 
 While measuring weight in coins (in this case, at least) seems to have some meaning, we probably shouldn't \emph{leave} chain-weight in those units.

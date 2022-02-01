@@ -36,6 +36,8 @@ Note that \autoref{alg:por-reflected-block-weight} integrates the cap on weight 
 
 %% --- %%
 
+%% SIMPLEX
+
 \input{includes/ut/headings/25-the-simplex.tex}
 
 \begin{figure}[H]
@@ -82,6 +84,12 @@ To maintain consistency with the geometric usage of the term *simplex*: a simple
 
 [^simplex-approx]: \textbf{NB:} I will ignore this distinction for $k \gg 1$.
 
+#### Simplex Security
+
+\label{sec:simplex-security}
+
+\todo{Attacking a simplex-chain is as difficult as attacking the whole simplex}
+
 %% --- %%
 
 \input{includes/ut/headings/25-dapp-chains.tex}
@@ -102,14 +110,14 @@ To maintain consistency with the geometric usage of the term *simplex*: a simple
 
 Dapp-chains are not restricted to any particular foundational consensus method.
 They might use PoW, or PoS, or PoA, or something else.
-This means dapp-chains can have \emph{their own} token (and use that for mining rewards, etc).
-However, dapp-chains are also able to use *Proof of Reflection* with their host simplex-chain.
-With a suitable foundational consensus method, PoR enables dapp-chains to be as secure as their host simplex-chain with no appreciable overhead.
+However, dapp-chains also use *Proof of Reflection* with their host simplex-chain.
+With a suitable foundational consensus method, PoR enables dapp-chains to be as secure as their host simplex-chain with little overhead.
+Note that, since dapp-chains can use whichever foundational consensus method, they can optionally have \emph{their own} root token (and use that for mining rewards, transaction fees, etc).
 
 It's preferable that a simplex-chain validate the headers of its dapp-chains (similar to a light client), though this is not required.
 For some consensus methods that dapp-chains might choose (such as PoS), there might be special primitives that a host simplex-chain must support.
 However, only that host simplex-chain requires those primitives; other simplex-chains do not.
-This means that simplex-chains can *specialize* in hosting *particular types* of dapp-chains, providing a rich and efficient environments (for nodes of simplex-chains *and* dapp-chains).
+This means that simplex-chains can *specialize* in hosting *particular types* of dapp-chains, providing rich and efficient environments (for nodes of both simplex-chains *and* dapp-chains).
 
 Validating dapp-chain headers, on-chain, can be done via the following simple, clean, and extensible method: \emph{encode dapp-chain headers as simplex-level transactions}.
 This means that supporting new dapp-chain consensus methods is about as difficult as introducing new transaction types (or opcodes), and different simplex-chains have a great deal of freedom in choosing which dapp-chain consensus methods to support.
@@ -118,11 +126,15 @@ This means that supporting new dapp-chain consensus methods is about as difficul
   Dapp-chain headers that are encoded as simplex-level transactions; i.e., they are processed by a simplex-chain as a transaction, but they also function as the header for a dapp-chain block
 }
 
-Practically speaking, a simple input-output transaction system with scripting capabilities (like that of Bitcoin) can be created to facilitate the necessary primitives. Additionally, different simplex-chains can implement different scripting systems, effectively facilitating *any* practical consensus mechanism. There is not much (if any) overhead to using an input-output system like this: a header's parent hash is equivalent to a transaction input, the *output* can be omitted[^scriptpk], and other particulars of the header can be treated as an input script to the transaction[^scriptsig].
+Practically speaking, a simple input-output transaction system with scripting capabilities (like that of Bitcoin) can be created to facilitate the necessary primitives.
+Additionally, different simplex-chains can implement different scripting systems, effectively facilitating *any* practical consensus mechanism.
+There is not much (if any) overhead to using an input-output system like this: a header's parent hash is equivalent to a transaction input, the *output* can be omitted[^scriptpk], and other particulars of the header can be treated as an input script to the transaction[^scriptsig].
 
 [^scriptpk]: A header-transaction's output script can be generic (or templated) as it is the same for all header-transactions for that dapp-chain. In practice this can be as simple as a single opcode that validates that header. In Bitcoin, an output script is known as the `scriptPubKey`.
 
 [^scriptsig]: In Bitcoin, the input script to a transaction is called the `scriptSig`; see \url{https://en.bitcoin.it/wiki/Transaction}.
+
+
 
 #### Dapp-chain Security
 
@@ -130,30 +142,39 @@ Practically speaking, a simple input-output transaction system with scripting ca
 
 If the headers of dapp-chains are simplex-level transactions, what can we say about the security of dapp-chains?
 
-First, notice that there is no substantive difference between standalone headers and header-transactions. That means that *zero-confirmation* header-transactions are *exactly* as secure as a standalone counterparts (and at least as secure as zero-confirmation transactions).
+First, notice that there is no substantive difference between standalone headers and header-transactions.
+That means that *zero-confirmation* header-transactions are *exactly* as secure as a standalone counterparts (and at least as secure as zero-confirmation transactions).
+This is not very secure in the case of a PoW dapp-chain, but it means that a PoS dapp-chain's zero-confirmation header-transactions are just as secure as blocks from an equivalent standalone PoS blockchain.
+(It also means that the PoS dapp-chain is much more secure after header-transactions are confirmed, compared to the standalone equivalent.)
 
 When a header-transaction is confirmed by the simplex, the corresponding dapp-chain can efficiently use one-way PoR to inherit the security (and security properties) of the host simplex-chain[^dc-por]. Similar to mutual PoR, this can provide a *security context* where otherwise-insecure methods of consensus can be done securely.
 
 [^dc-por]: Note: PoW dapp-chains will have a much lower difficulty than the host simplex-chain. Although a simplex-chain could do mutual PoR with dapp-chains, this is unnecessary and inefficient -- provided that this difficulty asymmetry exists. Although there is no fundamental reason that PoW dapp-chains must have a much lower difficulty, we should take care to use incentive structures that lead to this sort of outcome provided such a policy increases security of the simplex.
 
-With regards to doublespends, one-way PoR means that the reflected chain is *at least* as difficult to attack as the reflecting chain (as we covered in \autoref{sec:por-step4}). Since the parent simplex-chain is as difficult to attack as the complete simplex, each dapp-chain must therefore *also* be that difficult to attack.
+With regards to doublespends, one-way PoR means that the reflected chain is *at least* as difficult to attack as the reflecting chain (as we covered in \autoref{sec:por-step4}).
+Since the parent simplex-chain is as difficult to attack as the complete simplex, each dapp-chain must therefore *also* be that difficult to attack.
+Attacking a dapp-chain is as difficult as attacking the entire network.
 
-Note that parent-chains (generally) need to record their child-chains' headers *anyway*, so one-way PoR in this situation -- where a simplex-chain reflects child dapp-chains -- effectively has zero overhead.
+Note that parent-chains (generally) need to record their child-chains' headers *anyway*, so this use of one-way PoR -- where a simplex-chain reflects child dapp-chains -- has near-zero overhead for both the simplex-chain and the dapp-chain.
 
-The only major, generic concern for dapp-chains -- that I can see -- is \emph{preventing DoS attacks}. This is one reason to favor PoS (or PoA) dapp-chains over PoW dapp-chains. Though perhaps we should wait for \autoref{sec:preventing-dos-attacks}.
+The only major, generic concern for dapp-chains -- that I can see -- is \emph{preventing DoS attacks}.
+This is one reason to favor PoS (or PoA) dapp-chains over PoW dapp-chains.
+Though perhaps we should wait for \autoref{sec:preventing-dos-attacks}.
 
 #### Three General Incentive Models for Dapp-chain Reflection
 
-If dapp-chain headers are included along-side transactions in simplex-blocks, is it not the case that both must be provide some kind of *transaction fee*? If not, how are simplex-miners to prioritize what to include in their blocks? Even if such a fee is *not always necessary*, the *ability* to provide a fee has decisive advantages -- like creating asymmetry between an attacker and honest miners.
+If dapp-chain headers are included along-side transactions in simplex-blocks, is it not the case that both must pay some kind of *transaction fee*?
+If not, how are simplex-chain miners to prioritize what to include in their blocks?
+Even if such a fee is *not always necessary*, the *ability* to provide a fee has decisive advantages -- like creating asymmetry between an attacker and honest miners.
 
 If it is possible to implement dapp-chains (or any system of child-chains) such that those chains have \emph{freedom of protocol} and \emph{freedom of incentivization} whilst inheriting the parent-chain's security, then we should strive to achieve that.
 
 \defineTerm{Freedom of Incentivization}{
-  The property whereby child-chains are not restricted with regards to a choice of incentive-system (i.e., the nature and dynamics of their root token)
+  The property whereby child-chains have free choice of incentive-system (i.e., the nature and dynamics of their root token, or lack thereof)
 }
 
 \defineTerm{Freedom of Protocol}{
-  The property whereby child-chains are not restricted with regards to a choice of protocol (include scripting, accounting methods, block structures, etc)
+  The property whereby child-chains have free choice of protocol (including consensus mechanism, scripting, accounting methods, block structures, etc)
 }
 
 \autoref{sec:comparing-weight-dex} details a conversion method whereby PoR is possible between chains using different root tokens via a DEX. Could dapp-chains use a \emph{protocol-level} DEX to abstract their protocol and incentive-method away from those of its parent-chain? Yes.
