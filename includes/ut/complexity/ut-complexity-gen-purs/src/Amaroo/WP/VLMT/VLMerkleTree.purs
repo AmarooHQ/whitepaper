@@ -35,6 +35,7 @@ module Amaroo.WP.VLMT.VLMerkleTree
   , VLProofElem(..)
   , VLProofList(..)
   , VLMerkleNode
+  , VLMTProofError(..)
   , merkleProof
   , mkLeafRootHash
   , mkVLMerkleTree
@@ -44,6 +45,7 @@ module Amaroo.WP.VLMT.VLMerkleTree
   , mtRoot
   , mtSize
   , testVLMerkleProofN
+  , testVLMTConfigDefault
   , validateVLMerkleProof
   , vlEmptyHash
   , vlNodeRoot
@@ -55,6 +57,8 @@ import Prel
 
 import Amaroo.WP.VLMT.Crypto (class Hashable)
 import Amaroo.WP.VLMT.Crypto as Crypto
+import Control.Alt ((<|>))
+import Data.Either (Either(..))
 import Data.Foldable (class Foldable, sum)
 import Data.Foldable as Foldable
 import Data.Generic.Rep (class Generic)
@@ -62,7 +66,11 @@ import Data.Int (even)
 import Data.Int.Bits ((.&.), shl, shr)
 import Data.List (List(..), (:), intercalate)
 import Data.List as List
-import Data.Tuple (Tuple(..), snd)
+import Data.Show.Generic (genericShow)
+import Data.Tuple (Tuple(..), fst, snd)
+import Test.QuickCheck (Result(..))
+import Test.QuickCheck as QC
+
 -- import Debug as Debug
 
 
@@ -307,29 +315,54 @@ merkleProof (VLMerkleTree _ rootNode) leafRoot =
         lPath = constructPath (lVLProofElem:pElems) ln
         rPath = constructPath (rVLProofElem:pElems) rn
 
+{-|
+  Possible errors encountered while validating a VLMT proof.
+
+  Note: we basically never hit BadCombination because changing aux values in proof will
+  cause the hash to mismatch. The implementation of validateVLMerkleProof means we'd need to
+  use a malicious combination function to test for that error condition.
+-}
+data VLMTProofError
+  = HashMismatch
+  | BadOrder
+  | BadCombination
+
+derive instance genericVLMTProofErr :: Generic VLMTProofError _
+instance showVLMTProofEr :: Show VLMTProofError where
+  show = genericShow
+
 -- | Validate a merkle tree proof of inclusion
-validateVLMerkleProof :: forall k v. (Hashable k) => VLMTConfig k v -> VLMerkleProof k v ->  VLMerkleRoot k v -> VLMerkleRoot k v -> Boolean
+validateVLMerkleProof :: forall k v. (Hashable k) => VLMTConfig k v -> VLMerkleProof k v ->  VLMerkleRoot k v -> VLMerkleRoot k v -> Either VLMTProofError Unit
 validateVLMerkleProof config (VLMerkleProof proofElems) treeRoot leafRoot =
-  validate proofElems leafRoot
+  flipEither $ validate proofElems leafRoot
   where
-    validate :: VLProofList k v -> VLMerkleRoot k v -> Boolean
-    validate Nil proofRoot = proofRoot == treeRoot
+    validate :: VLProofList k v -> VLMerkleRoot k v -> Either Unit VLMTProofError
+    validate Nil proofRoot = (proofRoot == treeRoot) `elseError` HashMismatch
     validate (pElem : pElems) proofRoot =
       let
         (VLProofElem proof) = pElem
+        nextLeafRoot = hashVLProofElem pElem
       in
-      if proofRoot /= proof.vlNodeRoot || orderIsBad proof
-        then false
-        else validate pElems (hashVLProofElem pElem)
+      vlmtChecks proof nextLeafRoot
+      <|> elseError (proofRoot == proof.vlNodeRoot) HashMismatch
+      <|> validate pElems nextLeafRoot
 
     getLR proof = case proof.nodeSide of
       L -> Tuple proof.vlNodeRoot proof.siblingRoot
       R -> Tuple proof.siblingRoot proof.vlNodeRoot
 
-    orderIsBad proof = let
+    vlmtChecks proof (VLMerkleRoot (Tuple expK _)) = let
         Tuple (VLMerkleRoot ln) (VLMerkleRoot rn) = getLR proof
       in
-      config.order ln rn /= LT
+      elseError (config.order ln rn == LT) BadOrder
+      <|> elseError (config.combine (fst ln) (fst rn) == expK) BadCombination
+
+    flipEither :: forall a b. Either a b -> Either b a
+    flipEither (Left a) = Right a
+    flipEither (Right b) = Left b
+
+    elseError :: Boolean -> VLMTProofError -> Either Unit VLMTProofError
+    elseError tf er = if tf then Left unit else Right er
 
     hashVLProofElem :: VLProofElem k v -> VLMerkleRoot k v
     hashVLProofElem (VLProofElem proof) =
@@ -337,20 +370,38 @@ validateVLMerkleProof config (VLMerkleProof proofElems) treeRoot leafRoot =
         L -> mkVLRootHash config proof.vlNodeRoot proof.siblingRoot
         R -> mkVLRootHash config proof.siblingRoot proof.vlNodeRoot
 
+type TestVLMTConfig :: forall v1. Type -> v1 -> Type
+type TestVLMTConfig k v =
+    { modifyProof :: VLMerkleProof k v -> VLMerkleProof k v
+    , expectValid :: Boolean
+    }
 
-testVLMerkleProofN :: Int -> Int -> Boolean
-testVLMerkleProofN size leaf =
-  let
+testVLMTConfigDefault :: forall k v. TestVLMTConfig k v
+testVLMTConfigDefault = {modifyProof: identity, expectValid: true}
+
+testVLMerkleProofN :: Int -> Int -> TestVLMTConfig Int String -> QC.Result
+testVLMerkleProofN size leaf testConf = testResult
+  where
       input = List.range 1 size
       mtree = mkVLMerkleTree vlmtIntConfig 0 $ List.zip input $ map show input
       randLeaf = mkLeafRootHash $ Tuple leaf $ show leaf
-      proof = merkleProof mtree randLeaf
+      proof = testConf.modifyProof $ merkleProof mtree randLeaf
       combinedK = case mtree of
         (VLMerkleTree _ (VLMerkleBranch {mRoot: VLMerkleRoot (Tuple k _)})) -> k
         _ -> 0
       root = mtRoot mtree
-  in
-  validateVLMerkleProof vlmtIntConfig proof (mtRoot mtree) randLeaf
-  && combinedK == sum input
-  -- && Debug.spy ("\n\nSize:" <> show size <> " | root: " <> show root <> " | leaf: " <> show randLeaf) true
-  -- && Debug.spy (show proof) true
+      validityResult = validateVLMerkleProof vlmtIntConfig proof (mtRoot mtree) randLeaf
+
+      eToResult (Left er) = Failed (show er)
+      eToResult (Right _) = Success
+
+      testResult = if testConf.expectValid
+          then if combinedK /= sum input
+              then Failed "combined keys do not match expected."
+              else eToResult validityResult
+          else case validityResult of
+              Right _ -> Failed "expected proof to be invalid but it was valid."
+              -- Left er -> Failed $ show er  -- uncomment this to always fail and show the error in tests
+              Left _ -> Success
+    -- && Debug.spy ("\n\nSize:" <> show size <> " | root: " <> show root <> " | leaf: " <> show randLeaf) true
+    -- && Debug.spy (show proof) true
