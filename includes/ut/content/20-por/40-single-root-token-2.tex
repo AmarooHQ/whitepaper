@@ -6,7 +6,7 @@ There are, naturally, questions to answer,
 
 Let's consider the following \emph{restricted case} first: the chains (L and R) have a two-way peg between them, ensuring that no coins are ever wrongly created or destroyed.
 
-In this case, \autoref{eq:por-conv-work} collapses to
+In this case, for a single R-block, \autoref{eq:por-conv-work} collapses to
 \begin{align}
     \text{ConvWork}_{R\rightarrow L}(w) = \; & \frac{L_d}{L_r} \cdot \frac{R_r}{R_d} \cdot w % \cdot \cancelto{1}{X_{R\rightarrow L}}
         & & % \text{R-hashes }\rightarrow\text{ L-hashes}
@@ -27,9 +27,9 @@ In this case, \autoref{eq:por-conv-work} collapses to
 
 If we convert like this (treating 1 R-block as worth $R_r \cdot 1$ L-coins) then we'll we need to convert the result to L-hashes \emph{eventually} -- but we can sum this up if we had multiple reflections to process (since $\nicefrac{L_r}{L_d}$ is a constant for some given moment in time).
 It's worth remembering that block-weight is measured \emph{per block}.
-Since we're only converting a single block's weight at a time, the \emph{per block} part of the resulting units \emph{cancels out}.
+Since we're only converting with respect to \emph{a single block} at any one time, the \emph{per block} part of the resulting units \emph{cancels out}.
 
-Let's use this method to write our first \textsc{WeightOf} function: \autoref{alg:weightof-1} (we'll still return work in L-hashes, though, not L-coins).
+Let's use this context to write our first \textsc{WeightOf} function: \autoref{alg:weightof-1} (we'll still return work in L-hashes, though, not L-coins).
 
 \aside{
     Note: the algorithms we define here will be general -- they'll work for \emph{both} the local and any reflecting chains.
@@ -45,13 +45,13 @@ We could retrieve it from state (if it's already calculated), but for the sake o
 Right now, we don't have enough \emph{context} to know what to do; \emph{what contexts would be useful?}
 
 What \emph{purpose} does a block reward fulfil?
-It must be something about \emph{security}, because that's \emph{why} miners are motivated to mine (the \emph{how} is via the \emph{block reward}).
+It must be something about \emph{security}, because that's \emph{why} miners are given an incentive to mine (the \emph{how} is via the \emph{block reward}).
 If we have multiple chains (with the same root token), why should one chain be more secure than another?
 One reason is because \emph{more commerce happens there;} i.e., more of the network relies on \emph{that} chain compared to the other one.
 
 What would make sense, given the context of a commerce-imbalance, to base the block reward on?
 A straightforward answer (which can be globally known, too) is \emph{the ratio of root tokens on each chain.}
-We can have a \emph{network wide} rule that there is some \emph{network wide inflation rate}, and each chain's block reward is the product of the \emph{ratio} of coins on that chain relative to the entire supply.
+We can have a \emph{network wide} rule that there is some \emph{network wide inflation rate}, and each chain's block reward is proportional to the \emph{ratio} of coins on that chain relative to the entire supply.
 This way, the global inflation rate is predictable, even though the number of coins produced \emph{on each chain} (via block rewards) is variable.
 Moreover, with this method we should expect that the \emph{value to the community} of each chain roughly matches the \emph{distribution of the community's activities}, and the \emph{distribution of security}, too.
 This method is also consistent with the idea of \emph{equal work for equal reward}.
@@ -99,14 +99,14 @@ This way, if a miner (or a chain) tries to subvert or attack the RAA, it's trivi
   Similar to a DAA, the \emph{output} of an RAA is \emph{context laden}
 }
 
-If we introduced something like an RAA, then the RAA \emph{output} could become \emph{context laden} (depending on the RAA's input parameters).
+If we use an RAA, then the RAA \emph{output} could become \emph{context laden} (depending on the RAA's input parameters).
 In the case of a global inflation rate, \emph{this means that chains would rely on a common meaning of ``seconds''!}
 So it is by \emph{construction and definition} that the block frequency introduced in \autoref{eq:srt-reward} becomes part of the convertible context.
 Thus, we can \emph{now} include $L_f$ and $R_f$, though we couldn't before.
 
 Note that we also \emph{prove} \autoref{eq:lfrf-ne-rrlr} for this case.
-We know that -- when $L_f$ and $R_f$ are in the convertible context -- there is a \emph{scaling factor} that typically $\ne 1$.
-The reason we can find a scaling factor \emph{here} (but not generally) is that we \emph{included it in a protocol-level relationship} (\autoref{eq:srt-reward}).
+We know that -- when $L_f$ and $R_f$ are in the convertible context -- we can use them via a \emph{scaling factor} that typically $\ne 1$. For example: to convert $\nicefrac{L_f}{R_f}$ to units of L-blocks/R-block, it must be scaled by $\nicefrac{R_t}{L_t}$ (which is contextual and unitless).
+We can find a scaling factor \emph{here} (but not generally) because we \emph{included it in a protocol-level relationship} (\autoref{eq:srt-reward}).
 
 This new situation and context are diagrammed in \autoref{fig:daa-raa-conversion}.
 
@@ -124,7 +124,8 @@ Let's use \autoref{eq:srt-block-ratios} to create our next \textsc{WeightOf} alg
 \end{align}
 
 \aside{
-    Note: the result of passing a local block to these \textsc{WeightOf}s matches the expected result.
+    These and the following conversions all collapse nicely if we set $R \equiv L$.
+    This is due to the symmetry mentioned at the start of \autoref{sec:converting-block-weights}.
 }
 
 \input{includes/ut/algorithms/weightof-ratio.tex}

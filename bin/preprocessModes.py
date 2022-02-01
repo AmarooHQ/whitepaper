@@ -8,8 +8,20 @@ import click
 from blessings import Terminal
 from hashlib import sha256
 import shutil
+from git import repo
+from git.refs.tag import TagReference
 
 t = Terminal()
+this_repo = repo.Repo()
+
+
+def get_curr_tag() -> Optional[TagReference]:
+    latest = None if len(this_repo.tags) < 1 else this_repo.tags[-1]
+    curr = this_repo.commit()
+    if latest is None or curr is None:
+        return None
+    return None if latest.commit.hexsha != curr.hexsha else latest
+
 
 def get_hash_lsb(xs: str) -> int:
     return int.from_bytes(sha256(xs.encode("UTF8")).digest()[-3:], 'little')
@@ -28,6 +40,9 @@ def cli():
 
 
 def release_label(d: Union[datetime, Callable[[], datetime]] = datetime.now):
+    curr_tag = get_curr_tag()
+    if curr_tag and curr_tag.name.startswith('release-'):
+        return curr_tag.name.removeprefix('release-')
     now = d if isinstance(d, datetime) else d()
     year, week, dow = now.isocalendar()
     week += 1  # weeks (1,2) // 2 -> 1 this way -- aligns to schedule
