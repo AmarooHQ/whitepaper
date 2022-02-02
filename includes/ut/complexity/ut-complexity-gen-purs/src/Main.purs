@@ -105,6 +105,7 @@ devTables =
     [ TD "compareUtOptimizationsA" compareUtOptimizationsA defaultPositioning
     , TD "compare_optimizations_a_20k" compareUtOptimizationsA20k defaultPositioning
     , TD "tree_tiling_3k_v4_table" tree_tiling_3k_v4_table hereish
+    , TD "comparison_1m_tps" compareNets1mTps hereish
     ]
 
 
