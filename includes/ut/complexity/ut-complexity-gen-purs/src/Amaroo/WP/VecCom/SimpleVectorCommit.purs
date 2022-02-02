@@ -28,7 +28,14 @@ This is just a test impl w/ boring regular numbers (so not cryptographically sec
 https://dankradfeist.de/ethereum/2020/06/16/kate-polynomial-commitments.html
 
 Note: we don't care about the operations (like division) that are possible for numbers but not for EC points.
-e.g., secret key p with generator G corresponds to public key P = pG. P and G are public, but p is safe b/c P/G is not feasible.
+e.g., secret key p with generator G corresponds to public key P = pG.
+P and G are public, but p is safe b/c P/G is not feasible.
+
+Note: we need some secret value `s` for this to work.
+In the implementation we'll use it directly, but this isn't necessary when using EC points.
+(see section below: secrecy of s)
+
+---
 
 ## construct polynomial
 
@@ -50,6 +57,8 @@ C = P(s)
 
 ---
 
+## proofs
+
 we can prove multiple things using a special polynomial (I) that shares some points with P.
 the points that are shared correspond to the points that we want to prove are in vs'.
 
@@ -69,6 +78,42 @@ Q(x) = ----------------------------------
 the proof is:
 
 pi = Q(s)
+
+---
+
+## verification
+
+verifyProof = 0 == (C - I(s)) / Z(s) - pi
+
+---
+
+## secrecy of s
+
+in Kate (kah-tay) polynomial commitments there is a crucial thing that we can't replicate here.
+
+for an EC point s, it is defined that:
+
+[s] = sG
+
+while s is kept secret, [s] is not.
+additionally, all [s^i] for i in 0..(n-1) are computed and distributed to ppl (they're public and well known).
+and this is done for two different EC groups which must be paired.
+
+notice that:
+
+c * [s^i] = c * s^i * G = [c * s^i]
+
+[a] + [b] = aG + bG = (a + b)G = [a + b]
+
+so, for a polynomial p:
+
+[p(s)] = [p_0 * s^0 + p_1 * s^1 + ... + p_{n-1} * s^{n-1}]
+       = [p_0 * s^0] + [p_1 * s^1] + ...
+       = p_0 * [s^0] + p_1 * [s^1] + ...
+
+so we can calculate [p(s)] without knowing `s`
+
+and we can use that trick for all the polynomials we use, so we never need to know the value of s.
 
 -}
 
