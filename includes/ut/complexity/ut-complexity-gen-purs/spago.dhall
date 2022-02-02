@@ -33,6 +33,7 @@ to generate this file without the comments in this block.
   , "prelude"
   , "psci-support"
   , "quickcheck"
+  , "random"
   , "spec"
   , "spec-quickcheck"
   , "strings"
