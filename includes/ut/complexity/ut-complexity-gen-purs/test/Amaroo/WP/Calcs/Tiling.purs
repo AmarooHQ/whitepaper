@@ -13,11 +13,11 @@ tilingSpec :: Spec Unit
 tilingSpec = describe "tiling spec" do
     describe "tree_tiling" do
       it "tiles_at v=3" do
-        tree_tiling.tiles_at {v: 3, d: 0} `shouldEqual` 1
-        tree_tiling.tiles_at {v: 3, d: 1} `shouldEqual` 3
-        tree_tiling.tiles_at {v: 3, d: 2} `shouldEqual` 6
-        tree_tiling.tiles_at {v: 3, d: 3} `shouldEqual` 12
-        tree_tiling.tiles_at {v: 3, d: 4} `shouldEqual` 24
+        tree_tiling.tiles_at {v: 3, d: 0} `shouldEqual` 1.0
+        tree_tiling.tiles_at {v: 3, d: 1} `shouldEqual` 3.0
+        tree_tiling.tiles_at {v: 3, d: 2} `shouldEqual` 6.0
+        tree_tiling.tiles_at {v: 3, d: 3} `shouldEqual` 12.0
+        tree_tiling.tiles_at {v: 3, d: 4} `shouldEqual` 24.0
       it "sigma_tiles v=3" do
         tree_tiling.sigma_tiles {v: 3, d: 0} `shouldEqual` 1.0
         tree_tiling.sigma_tiles {v: 3, d: 1} `shouldEqual` 4.0
@@ -26,11 +26,11 @@ tilingSpec = describe "tiling spec" do
         tree_tiling.sigma_tiles {v: 3, d: 4} `shouldEqual` 46.0
       it "tiles_at v=4" do
         let v = 4
-        tree_tiling.tiles_at {v, d: 0} `shouldEqual` 1
-        tree_tiling.tiles_at {v, d: 1} `shouldEqual` 4
-        tree_tiling.tiles_at {v, d: 2} `shouldEqual` 12
-        tree_tiling.tiles_at {v, d: 3} `shouldEqual` 36
-        tree_tiling.tiles_at {v, d: 4} `shouldEqual` (36*3)
+        tree_tiling.tiles_at {v, d: 0} `shouldEqual` 1.0
+        tree_tiling.tiles_at {v, d: 1} `shouldEqual` 4.0
+        tree_tiling.tiles_at {v, d: 2} `shouldEqual` 12.0
+        tree_tiling.tiles_at {v, d: 3} `shouldEqual` 36.0
+        tree_tiling.tiles_at {v, d: 4} `shouldEqual` (36.0*3.0)
       it "simga_tiles v=4" do
         let v = 4
         tree_tiling.sigma_tiles {v, d: 0} `shouldEqual` 1.0

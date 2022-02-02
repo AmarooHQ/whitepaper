@@ -15,7 +15,7 @@ import Partial.Unsafe (unsafePartial)
 
 type Tiling i =
   { sigma_tiles :: i -> Number
-  , tiles_at :: i -> Int
+  , tiles_at :: i -> Number
   , sec_ratio :: i -> Number
   }
 
@@ -23,7 +23,7 @@ type Tiling i =
 tree_tiling :: Tiling {v :: Int, d :: Int}
 tree_tiling =
     { sigma_tiles: \{v,d} -> (toNumber v) * M.floor (M.pow (toNumber $ v - 1) (toNumber d) - 1.0) / (toNumber $ v - 2) + 1.0
-    , tiles_at: \{v,d} -> if d == 0 then 1 else v * floor (M.pow (toNumber $ v-1) (toNumber $ d - 1))
+    , tiles_at: \{v,d} -> if d == 0 then 1.0 else toNumber v * M.floor (M.pow (toNumber $ v-1) (toNumber $ d - 1))
     , sec_ratio: \{v} -> (M.sqrt (toNumber $ 4 * v - 3) + 1.0) / 2.0
     }
 
@@ -33,7 +33,8 @@ params_tt k = mkSimplePs k {bf: _UT_BF, bh: _UT_BH} 250.0
 ut_params = {explicitPoRs: false, headerOmission: false, hashTruncation: true}
 
 trim_for_lp :: Array String -> Array String
-trim_for_lp [e1, e2, e3, e4, e5, e6, e7, e8, e9] = [e1, e3, e4, e5, e6, e7, e9]
+-- trim_for_lp [e1, e2, e3, e4, e5, e6, e7, e8, e9] = [e1, e3, e4, e5, e6, e7, e9]
+trim_for_lp [e1, e3, e4, e5, e6, e7, e8, e9] = [e1, e3, e4, e5, e6, e7, e9]
 trim_for_lp _row = unsafePartial $ crashWith $ "trim_for_lp: bad sized row: " <> show _row
 
 tree_tiling_table :: Int -> {k :: Number, lp :: Boolean} -> Table
@@ -44,7 +45,8 @@ tree_tiling_table v {k, lp} = Table
   where
     headings = (if lp then trim_for_lp else id)
       [ "$h$"
-      , "$N_{\\text{tiles}|h}$", "$N_{\\text{tiles}}$"
+      -- , "$N_{\\text{tiles}|h}$"
+      , "$N_{\\text{tiles}}$"
       , "$\\Sigma N_1$"
       , "$\\Sigma N_2$"
       , "$\\Sigma \\text{TPS}_1$"
@@ -57,7 +59,8 @@ tree_tiling_table v {k, lp} = Table
     mkRow d = (if lp then trim_for_lp else id) $
         (fmtDyn fdStdMixed <$>
           [toNumber d
-          , n_tiles_h, n_tiles
+          -- , n_tiles_h
+          , n_tiles
           , s_n1
           , s_n2
           , s_tps1
@@ -71,7 +74,7 @@ tree_tiling_table v {k, lp} = Table
       where
         sx_to_tile_ratio = 1.0 / (toNumber $ v + 1)
         n_tiles = tree_tiling.sigma_tiles {v, d}
-        n_tiles_h = toNumber $ tree_tiling.tiles_at {v, d}
+        n_tiles_h = tree_tiling.tiles_at {v, d}
         ut_cs = utChainCalc (params_tt k) ut_params
         ut_n1 = ut_cs.d1.n
         ut_n2 = ut_cs.d2.n
