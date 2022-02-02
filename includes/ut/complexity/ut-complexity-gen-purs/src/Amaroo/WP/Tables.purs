@@ -3,11 +3,11 @@ module Amaroo.WP.Tables where
 import Amaroo.WP.Tables.Types
 import Prel
 
-import Amaroo.WP.Calcs (Params, UtVariants, ChainStats, allUtChainCalcs, allUtChainCalcsF, applyTDiscountToBH, auxStats, mkNestedPs, mkSimplePs, pToPF, runChainCalcFor, tradChainCalc, tradChainCalcEth2, tradChainCalcPolkadot, utChainCalc)
+import Amaroo.WP.Calcs (ChainStats, Params, UtVariants, allUtChainCalcs, allUtChainCalcsF, applyTDiscountToBH, auxStats, mkNestedPs, mkSimplePs, pToPF, runChainCalcFor, tradChainCalc, tradChainCalcEth2, tradChainCalcPolkadot, utChainCalc)
 import Amaroo.WP.Formatter (fdPlain, fdPlainMixed, fdPlainZero, fdStd, fdStdMixed, fdStdNoSiMixed, fdStdTwo, fdStdZero, fmt1GbpsPs, fmtDyn, fmtPsKBfBh, fmtPsKBfBhDh, wrap, wrapXml, wrapXmlWAttr)
 import Amaroo.WP.Tables.Booktabs (renderBooktabs)
 import Amaroo.WP.Tables.Types (LatexTablePos(..), TPositioning(..))
-import Amaroo.WP.Utils (diagonalApply, ui)
+import Amaroo.WP.Utils (binarySearch, diagonalApply, ui)
 import Data.Array (drop, filter, intercalate, take)
 import Data.Array as A
 import Data.Int (decimal, toNumber)
@@ -20,6 +20,7 @@ import Data.Traversable (sequence)
 import Effect.Exception (error)
 import Effect.Exception.Unsafe (unsafeThrowException)
 import Math (pow)
+import Math as M
 import Partial.Unsafe (unsafePartial)
 
 {-|
@@ -129,6 +130,14 @@ ut1TpsToK tps txSize bf bh = pow (tps * txSize * 4.0 * bf * bh) 0.5
 ut2TpsToK tps txSize bf bh dh = pow (tps * txSize * 4.0 * bf * bf * bh * dh) (1.0 / 3.0)
 oc2TpsToK tps txSize bf bh = pow (tps * txSize * bf * bh) 0.5
 
+
+findKFor1MTps ∷ Network → Number
+findKFor1MTps utNet = M.ceil $ binarySearch {epsilon: 100.0, target: 1_000_000.0, f}
+  where
+    f k = netToTps utNet $ netToChainStats utNet $ mkSimplePs k _UT_HF _TX_SIZE
+
+_TX_SIZE = 250.0
+
 _1M = 1_000_000.0
 
 _BTC_BH = 80.0
@@ -156,31 +165,31 @@ _UT_BH_FOR_SHARDING = applyTDiscountToBH _UT_BH
 _UT_HF = {bh: _UT_BH, bf: _UT_BF}
 
 -- _UT1PORS_1M_K = 177000.0  -- manual binary search
-_UT1PORS_1M_K = 177000.0  -- manual binary search
-_UT1PORTS_1M_K = 93_050.0  -- manual binary search
-_UT1HOPORS_1M_K = 160_000.0  -- manual search
-_UT1HOPORTS_1M_K = 73_365.0  -- manual search
-_UT1_1M_K = ut1TpsToK _1M 250.0 _UT_BF _UT_BH
-_UT1T_1M_K = ut1TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING
-_UT1HO_1M_K = ut1TpsToK _1M 250.0 _UT_BF 32.0
-_UT1HOT_1M_K = ut1TpsToK _1M 250.0 _UT_BF 16.0
+_UT1PORS_1M_K = findKFor1MTps (UT (PoRs 1))
+_UT1PORTS_1M_K = findKFor1MTps (UT (PoRTs 1))
+_UT1HOPORS_1M_K = findKFor1MTps (UT (HOPoRs 1))
+_UT1HOPORTS_1M_K = findKFor1MTps (UT (HOPoRTs 1))
+_UT1_1M_K = ut1TpsToK _1M _TX_SIZE _UT_BF _UT_BH
+_UT1T_1M_K = ut1TpsToK _1M _TX_SIZE _UT_BF _UT_BH_FOR_SHARDING
+_UT1HO_1M_K = ut1TpsToK _1M _TX_SIZE _UT_BF 32.0
+_UT1HOT_1M_K = ut1TpsToK _1M _TX_SIZE _UT_BF 16.0
 
-_UT2PORS_1M_K = 4870.0  -- manual binary search
-_UT2PORTS_1M_K = 3064.0  -- manual binary search
-_UT2HOPORS_1M_K = 4400.0  -- manual search
-_UT2HOPORTS_1M_K = 2513.0  -- manual search
-_UT2_1M_K = ut2TpsToK _1M 250.0 _UT_BF _UT_BH _UT_BH
-_UT2T_1M_K = ut2TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING _UT_BH_FOR_SHARDING
-_UT2HO_1M_K = ut2TpsToK _1M 250.0 _UT_BF 32.0 _UT_BH
-_UT2HOT_1M_K = ut2TpsToK _1M 250.0 _UT_BF 16.0 _UT_BH_FOR_SHARDING
+_UT2PORS_1M_K = findKFor1MTps (UT (PoRs 2))
+_UT2PORTS_1M_K = findKFor1MTps (UT (PoRTs 2))
+_UT2HOPORS_1M_K = findKFor1MTps (UT (HOPoRs 2))
+_UT2HOPORTS_1M_K = findKFor1MTps (UT (HOPoRTs 2))
+_UT2_1M_K = ut2TpsToK _1M _TX_SIZE _UT_BF _UT_BH _UT_BH
+_UT2T_1M_K = ut2TpsToK _1M _TX_SIZE _UT_BF _UT_BH_FOR_SHARDING _UT_BH_FOR_SHARDING
+_UT2HO_1M_K = ut2TpsToK _1M _TX_SIZE _UT_BF 32.0 _UT_BH
+_UT2HOT_1M_K = ut2TpsToK _1M _TX_SIZE _UT_BF 16.0 _UT_BH_FOR_SHARDING
 
-_OPT_SHARD_1M_K = oc2TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING
+_OPT_SHARD_1M_K = oc2TpsToK _1M _TX_SIZE _UT_BF _UT_BH_FOR_SHARDING
 
 
-_UT_INIT_CONFIG = mkSimplePs 3000.0 _UT_HF 250.0
+_UT_INIT_CONFIG = mkSimplePs 3000.0 _UT_HF _TX_SIZE
 
 _COMPARE_20K = 20_000.0
-_UT_20K_CONFIG = mkSimplePs _COMPARE_20K _UT_HF 250.0
+_UT_20K_CONFIG = mkSimplePs _COMPARE_20K _UT_HF _TX_SIZE
 
 
 utComplexityParams :: Array Params
@@ -188,10 +197,10 @@ utComplexityParams = do
       k <- [3000.0, _COMPARE_20K]
       bf <- [1.0 / 7.5, 1.0 / 15.0, 1.0 / 30.0, 1.0 / 60.0]
       bh <- [112.0, 84.0]
-      txSize <- [250.0]
+      txSize <- [_TX_SIZE]
       pure $ mkSimplePs k {bf, bh} txSize
-    <> [ mkSimplePs _POLKADOT_1M_K {bf: btToF 15, bh: 84.0} 250.0
-       , mkSimplePs _ETH2_1M_K {bf: btToF 15, bh: 84.0} 250.0 ]
+    <> [ mkSimplePs _POLKADOT_1M_K {bf: btToF 15, bh: 84.0} _TX_SIZE
+       , mkSimplePs _ETH2_1M_K {bf: btToF 15, bh: 84.0} _TX_SIZE ]
 
 utComplexityData = runChainCalcFor <$> utComplexityParams
 
@@ -420,7 +429,8 @@ porTableSpacer = mkSpacer <$> [6, 2, 5, 4, 5, 3, 3] -- , 4]
 
 porTpsHeader :: (Int -> UtName) -> _ -> Table
 porTpsHeader utv = Table
-    ["$k$, $B_f$, $B_h$", "$N_1$", (utName_ $ utv 1) <> " TPS", "$N_2$", (utName_ $ utv 2) <> " TPS", "PoR (B)", confRateTh] -- , "$\\nicefrac{N_1}{k}$"]
+    -- ["$k$, $B_f$, $B_h$", "$N_1$", (utName_ $ utv 1) <> " TPS", "$N_2$", (utName_ $ utv 2) <> " TPS", "PoR (B)", confRateTh] -- , "$\\nicefrac{N_1}{k}$"]
+    ["$k$, $B_f$, $B_h$", "$N_1$", sigmaTps1, "$N_2$", sigmaTps2, "PoR (B)", confRateTh] -- , "$\\nicefrac{N_1}{k}$"]
     {md: porTableSpacer, texTabular: "lrrrrrr"}
 
 tpsPor :: Table
@@ -428,6 +438,12 @@ tpsPor = porTpsHeader PoRs (genPoRRow (\cd -> cd.ut.pors) <$> utComplexityData)
 
 tpsPort :: Table
 tpsPort = porTpsHeader PoRTs (genPoRRow (\cd -> cd.ut.ports) <$> utComplexityData)
+
+tpsHOPoRs :: Table
+tpsHOPoRs = porTpsHeader HOPoRs (genPoRRow (\cd -> cd.ut.hopors) <$> utComplexityData)
+
+tpsHOPoRTs :: Table
+tpsHOPoRTs = porTpsHeader HOPoRTs (genPoRRow (\cd -> cd.ut.hoports) <$> utComplexityData)
 
 -- todo: fix fmtDyn fdPlain
 genCompareRow k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdPlainMixed <$> [cs.effBh, cs.effDh]) <> ([fmtDyn fdStdZero scalingFactor, fmtDyn fdStdMixed n2]) <> (fmtDyn fdStdMixed <$> [tps])
@@ -544,13 +560,16 @@ genCompareUtRow uts props v = [utName_ v] <> (propGens <@> (getCS v))
 
 type OProps = {s :: String, f :: (ChainStats -> String)}
 
+sigmaTps1 = "$\\Sigma\\;\\text{TPS}_{1}$"
+sigmaTps2 = "$\\Sigma\\;\\text{TPS}_{2}$"
+
 optimizationProps1 :: Array OProps
 optimizationProps1 =
   [ {s: "$N_1$", f: \cs -> fmtDyn fdStdMixed cs.d1.n}
   -- , {s: "$T_1$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.d1.t}
-  , {s: "$\\Sigma\\;\\text{TPS}_{1}$", f: \cs -> fmtDyn fdStdMixed cs.d1.tps}
+  , {s: sigmaTps1, f: \cs -> fmtDyn fdStdMixed cs.d1.tps}
   , {s: "$N_2$", f: \cs -> fmtDyn fdStdMixed cs.d2.n}
-  , {s: "$\\Sigma\\;\\text{TPS}_{2}$", f: \cs -> fmtDyn fdStdMixed cs.d2.tps}
+  , {s: sigmaTps2, f: \cs -> fmtDyn fdStdMixed cs.d2.tps}
   -- , {s: "$T_2$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.d2.t}
   -- , {s: "$T_3$ (B/s)", f: \cs -> fmtDyn fdPlainZero cs.d3.t}
   -- , {s: "$N_3$", f: \cs -> fmtDyn fdPlainZero cs.d3.n}
@@ -644,10 +663,10 @@ _fmtStd = fmtDyn fdStdMixed
 
 lpCompareUtOptimizations1 :: Table
 lpCompareUtOptimizations1 = mkCompareUtOptimizations
-    [ {s: "$\\Sigma\\;\\text{TPS}_{1}$ (tx/s)", f: \cs -> _fmtStd cs.d1.tps}
+    [ {s: sigmaTps1 <> " (tx/s)", f: \cs -> _fmtStd cs.d1.tps}
     , {s: "$N_1$ (chains)", f: \cs -> _fmtStd cs.d1.n}
     , {s: confRateTh, f: \cs -> fmtDyn fdStd cs.confRate}
-    , {s: "$\\Sigma\\;\\text{TPS}_{2}$ (tx/s)", f: \cs -> _fmtStd cs.d2.tps}
+    , {s: sigmaTps2 <> " (tx/s)", f: \cs -> _fmtStd cs.d2.tps}
     , {s: "$N_2$ (chains)", f: \cs -> _fmtStd cs.d2.n}
     ]
 

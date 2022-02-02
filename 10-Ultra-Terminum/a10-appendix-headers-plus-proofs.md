@@ -1,6 +1,8 @@
 %% BEGIN ### RELEASE
 
-# The Simplex with Explicit PoRs
+# UT Variants
+
+## +PoRs: Explicit PoRs
 
 \label{sec:por-with-proofs}
 
@@ -48,17 +50,15 @@ From \autoref{eq:simplex-N1-with-PoR}, we have $N_1$ that is of the form $N_1 = 
 
 %% INSERT ### TABLE: tps_por
 
-: The results of including Proofs of Reflection alongside headers (+PoRs).
+: $\UT{\text{+PoRs}}$ capacity given different parameters.
 
-## PoRs with +T
+### +PoRs with +T
 
 \label{sec:ext-ports}
 
 %% END ### RELEASE
 
 %% BEGIN ### DRAFT
-
-Since PoRs are merkle branches, and the leaves of that tree are headers (which have PoW attached), +T works for the hashes comprising explicit PoRs.
 
 %% END ### DRAFT
 
@@ -68,8 +68,18 @@ In effect, this protocol extension is a way to halve the overhead of +PoRs. It i
 
 %% INSERT ### TABLE: tps_port
 
-: The results of including Proofs of Reflection, with +T, alongside headers (+PoRTs).
+: $\UT{\text{+PoRTs}}$ capacity given different parameters.
+
+## +HOPoRs
 
 \todo{add +HOPoRs and +HOPoRTs}
+
+%% INSERT ### TABLE: tps_hopors
+
+: $\UT{\text{+HOPoRs}}$ capacity given different parameters.
+
+%% INSERT ### TABLE: tps_hoports
+
+: $\UT{\text{+HOPoRTs}}$ capacity given different parameters.
 
 %% END ### RELEASE

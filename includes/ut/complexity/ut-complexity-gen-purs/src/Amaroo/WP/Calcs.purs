@@ -16,6 +16,7 @@ import Effect.Exception (error, throwException)
 import Effect.Exception.Unsafe (unsafeThrowException)
 import Effect.Unsafe (unsafePerformEffect)
 import Math (abs, ceil, floor, ln2, log, pow, (%))
+import Math as M
 
 {-|
 
@@ -275,10 +276,10 @@ loopFindMaxPoRsN1F utT1F ps g initM = inner ({i: initM.i, t: initM.t, bestI: ini
     utPorsDT1byDN1 n1 = (k1 * ln2 - bf * n1 * (g + bh * log 4.0) - 2.0 * bf * g * n1 * log n1) / ln2
 
 findMaxPoRsN1 :: Params -> Number -> Number
-findMaxPoRsN1 ps g = (loopFindMaxPoRsN1F utPorsT1 ps g {i: 1, t: 0.0}).i |> toNumber
+findMaxPoRsN1 ps g = (loopFindMaxPoRsN1F utPorsT1 ps g {i: 1, t: 0.0}).i |> toNumber >>> M.floor
 
 findMaxHOPoRsN1 :: Params -> Number -> Number
-findMaxHOPoRsN1 ps g = (loopFindMaxPoRsN1F utHOPorsT1 ps g {i: 1, t: 0.0}).i |> toNumber
+findMaxHOPoRsN1 ps g = (loopFindMaxPoRsN1F utHOPorsT1 ps g {i: 1, t: 0.0}).i |> toNumber >>> M.floor
 
 -- | This will *efficiently* calculate the best N_1s for some array of parameters, provided N_1 will monotonically increase (which it does for increasing k).
 -- | utT1F should be a function that returns T_1 for given parameters

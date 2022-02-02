@@ -15,6 +15,7 @@ import Data.Number.Format (toString)
 import Data.Traversable (sequence_)
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
+import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console as C
 import Math (abs, ceil, floor, pow, round)
@@ -26,6 +27,13 @@ import Test.QuickCheck.Gen (Gen, choose, chooseInt)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (fail, shouldEqual, shouldNotEqual, shouldSatisfy)
 import Test.Spec.QuickCheck (quickCheck)
+import Test.Spec.Reporter (consoleReporter)
+import Test.Spec.Runner (runSpec)
+
+
+main = do
+  launchAff_ $ runSpec [consoleReporter] do
+    utSpec
 
 
 basicTestPs :: Params
@@ -159,7 +167,7 @@ utSpec = describe "ut" do
       let n1 = 50.0
           k = 1000.0
           -- note, don't add bh (because we don't omit headers in std) and don't add hash(bh) b/c it's the last element in the PoR branch
-          dss = k + 0.1 * n1 * (32.0 * log2c n1)  -- k + bf * N1 proofs * (proof_size)
+          dss = k + 0.1 * n1 * (porLen 32.0 n1)  -- k + bf * N1 proofs * (proof_size)
           dS = k * n1
           tts = 5.0 * 365.25 * dss / 10_000_000.0
           stts = 5.0 * 365.25 * dS / 10_000_000.0
@@ -270,7 +278,8 @@ utSpec = describe "ut" do
         (getHF2 utvs.hot).bh `shouldEqual` tDiscount 100.0
         (getHF3 utvs.hot).bh `shouldEqual` 100.0  -- at nesting-l-3, truncation is not something we can realiably predict
       it "truncation should shorten headers and PoRs" do
-        utvs.t.porBytes `shouldSatisfy` ((>) utvs.std.porBytes)
+        -- note: with vector commits we'll often hit the lower limit of 32 bytes
+        utvs.t.porBytes `shouldSatisfy` ((>=) utvs.std.porBytes)
         (getHF1 utvs.t).bh `shouldEqual` tDiscount 100.0
         (getHF2 utvs.t).bh `shouldEqual` tDiscount 100.0
         (getHF3 utvs.t).bh `shouldEqual` 100.0
@@ -329,8 +338,8 @@ utSpec = describe "ut" do
           confRates = [5.00, 15.625, 31.25]
           -- TTS isn't an exact match, but p close. Definitely *looks* mostly right WRT numbers coming out.
           -- ttss = [0.44, 0.94, 1.03]  -- from python gen
-          ttss = [0.358, 1.198, 1.427]  -- these are the new TTS figures; keeping them here to make sure we know if they change
-          dss = [1960, 6562, 7812]  -- these are the new TTS figures; keeping them here to make sure we know if they change
+          ttss = [0.212, 0.559, 0.821]  -- these are the new TTS figures; keeping them here to make sure we know if they change
+          dss = [1160, 3062, 4496]  -- these are the new TTS figures; keeping them here to make sure we know if they change
           s = basicSample.ut
           -- exclude +T variant b/c py script doesn't get it
           variants = [s.std, s.ho, s.hot]
@@ -351,20 +360,20 @@ utSpec = describe "ut" do
       it "numbers from tables (or otherwise calculated)" do
         let getN1PoRs k = flip findMaxPoRsN1 32.0 $ mkSimplePs k {bf: btToF 15, bh: 84.0} 250.0
             getN1PoRTs k = flip findMaxPoRsN1 16.0 $ mkSimplePs k {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0
-        getN1PoRs 3000.0 `shouldEqual` 64.0
-        getN1PoRTs 3000.0 `shouldEqual` 126.0
-        findMaxPoRsN1 (mkSimplePs 3000.0 {bf: btToF 60, bh: 112.0} 250.0) 32.0 `shouldEqual` 245.0
-        -- from
-        getN1PoRTs 100000.0 `shouldEqual` 2907.0
-        getN1PoRTs 200000.0 `shouldEqual` 5474.0
-        getN1PoRTs 300000.0 `shouldEqual` 8192.0
-        getN1PoRTs 400000.0 `shouldEqual` 10345.0
-        getN1PoRTs 500000.0 `shouldEqual` 12931.0
-        getN1PoRTs 600000.0 `shouldEqual` 15517.0
-        getN1PoRTs 700000.0 `shouldEqual` 16384.0
-        getN1PoRTs 800000.0 `shouldEqual` 16384.0
-        getN1PoRTs 900000.0 `shouldEqual` 22059.0
-        getN1PoRTs 1000000.0 `shouldEqual` 24510.0
+        getN1PoRs 3000.0 `shouldEqual` 194.0
+        getN1PoRTs 3000.0 `shouldEqual` 230.0
+        findMaxPoRsN1 (mkSimplePs 3000.0 {bf: btToF 60, bh: 112.0} 250.0) 32.0 `shouldEqual` 511.0
+        let _scale = 5375.0 / 2907.0
+        getN1PoRTs 100000.0 `shouldEqual` 5375.0
+        getN1PoRTs 200000.0 `shouldEqual` 10495.0
+        getN1PoRTs 300000.0 `shouldEqual` 15615.0
+        getN1PoRTs 400000.0 `shouldEqual` 20735.0
+        getN1PoRTs 500000.0 `shouldEqual` 25855.0
+        getN1PoRTs 600000.0 `shouldEqual` 30975.0
+        getN1PoRTs 700000.0 `shouldEqual` 36095.0
+        getN1PoRTs 800000.0 `shouldEqual` 41215.0
+        getN1PoRTs 900000.0 `shouldEqual` 46335.0
+        getN1PoRTs 1000000.0 `shouldEqual` 51455.0
 
     -- Note: probs best to leave this as `false` b/c it is slooooow
     let record_k_vs_n1_forPoRs_csv = false
@@ -425,20 +434,20 @@ utSpec = describe "ut" do
     describe "+PoRs vs large headers checks" do
       it "large headers approx (w/in ~33%) of +PoRs" do
         let tx = 250.0
-            utL = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 276.0} tx) {explicitPoRs: false, hashTruncation: false, headerOmission: false}
+            utL = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 115.0} tx) {explicitPoRs: false, hashTruncation: false, headerOmission: false}
             utP = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 84.0} tx) {explicitPoRs: true, hashTruncation: false, headerOmission: false}
         -- +PoRs and std
-        utP.d1.tps `shouldBeWithin 0.5` 467.0
-        utP.d1.n `shouldBeWithin 0.5` 64.0
+        utP.d1.tps `shouldBeWithin 0.5` 1164.0
+        utP.d1.n `shouldBeWithin 0.5` 194.0
         utL.d1.tps `shouldBeWithin 30.0` utP.d1.tps  -- 489 vs 467
         utL.d1.n `shouldBeWithin 20.0` utP.d1.n  -- 82 vs 64
       it "large headers approx (w/in ~33%) of +PoRTs" do
         let tx = 250.0
-            utLT = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 178.0} tx) {explicitPoRs: false, hashTruncation: false, headerOmission: false}
+            utLT = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 98.0} tx) {explicitPoRs: false, hashTruncation: false, headerOmission: false}
             utPT = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 84.0} tx) {explicitPoRs: true, hashTruncation: true, headerOmission: false}
         -- +T
-        utPT.d1.tps `shouldBeWithin 0.5` 758.0
-        utPT.d1.n `shouldBeWithin 0.5` 126.0
+        utPT.d1.tps `shouldBeWithin 0.5` 1378.0
+        utPT.d1.n `shouldBeWithin 0.5` 230.0
         utLT.d1.tps `shouldBeWithin 2.0` utPT.d1.tps  -- 758.4269 vs 758.4191  -- suspiciously close?
         utLT.d1.n `shouldBeWithin 1.0` utPT.d1.n  -- 126.4 vs 126  -- !!! also super close
 

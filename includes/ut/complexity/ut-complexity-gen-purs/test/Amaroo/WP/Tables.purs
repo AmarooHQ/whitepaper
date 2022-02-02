@@ -5,6 +5,7 @@ import Amaroo.WP.Tables.Types
 import Prel
 
 import Amaroo.WP.Calcs (mkNestedPs, mkSimplePs, tradChainCalcEth2, tradChainCalcPolkadot, utCalcHOPoRs, utChainCalc)
+import Amaroo.WP.Utils (binarySearch)
 import Data.Array (length)
 import Data.Array as A
 import Data.Array.Partial as AP
@@ -12,12 +13,21 @@ import Data.Int (decimal, toNumber, toStringAs)
 import Data.String as S
 import Data.Traversable (and, sequence, sequence_)
 import Data.Tuple (Tuple(..))
+import Effect.Aff (launchAff_)
 import Main (allTables, lpTables)
 import Math as M
 import Partial.Unsafe (unsafePartial)
 import Test.Amaroo.WP.Calcs (shouldBasiallyEqual, shouldBeCloseTo, shouldBeWithin)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual, shouldSatisfy)
+import Test.Spec.Reporter (consoleReporter)
+import Test.Spec.Runner (runSpec)
+
+
+main = do
+  launchAff_ $ runSpec [consoleReporter] do
+    utNamesSpec
+
 
 mkUtTestName s i = "$\\UT{" <> toStringAs decimal i <> "+\\text{" <> s <> "}}$"
 mkUtTestNameStd i = "$\\UT{" <> toStringAs decimal i <> "}$"
@@ -60,12 +70,13 @@ utNamesSpec = describe "tables" do
 
     describe "1m compare has tps == 1m as much as possible" do
       _ <- sequence $ do
-        -- note: filter out HOPoRs1 here b/c there is no k that produces 1m TPS
-        {net, p} <- A.filter (\{net} -> net /= UT (HOPoRs 1)) utVsOther1MAll
+        -- -- note: filter out HOPoRs1 here b/c there is no k that produces 1m TPS
+        -- {net, p} <- A.filter (\{net} -> net /= UT (HOPoRs 1)) utVsOther1MAll
+        {net, p} <- utVsOther1MAll
         let cs = netToChainStats net p
         pure $ do
           -- C.log $ show net
-          it (show net <> "(current: " <> show (netToTps net cs) <> ")") do
+          it (show net <> "(k=" <> show cs.k1 <> ", current: " <> show (netToTps net cs) <> ")") do
             shouldBeWithin 10_000.0 (netToTps net cs) 1_000_000.0
             shouldSatisfy (netToTps net cs) (_ >= 999_999.0)
       pure unit
@@ -128,3 +139,6 @@ utNamesSpec = describe "tables" do
         64.0 `shouldBeCloseTo` btcUt2Equiv.effBh
       it "manual calc for btc equiv" do
         btcUt2Equiv.d2.tps `shouldBasiallyEqual` ((calcT2 _BTC_1M_K (1.0/600.0) (64.0))/ 250.0)
+      it "binary search" do
+        -- binarySearch {f: \x -> x * x - x * 3.0 - 2.0, target: 10.0, epsilon: 5.0} `shouldBasiallyEqual` 4.0
+        binarySearch {f: identity, target: 10.0, epsilon: 0.000000009} `shouldBasiallyEqual` 10.0
