@@ -4,7 +4,7 @@ import Prel
 
 import Amaroo.WP.Calcs.Tiling (tree_tiling_20k_v3_table, tree_tiling_20k_v4_table, tree_tiling_20k_v5_table, tree_tiling_3k_v3_table, tree_tiling_3k_v3_table_lp, tree_tiling_3k_v4_table, tree_tiling_3k_v5_table)
 import Amaroo.WP.Formatter (wrap)
-import Amaroo.WP.Tables (compareNets1mTps, compareNets1mTpsAll, compareNets20k, compareNets3k, compareUtLimOptimizationsA, compareUtOptimizationsA, compareUtOptimizationsA20k, compareUtOptimizationsB, compareUtOptimizationsB20k, dappChains, dappChainsHot, lpCompareNetworks, lpCompareUt1Eth2, lpCompareUt1LimitedOptShard, lpCompareUt1OptShard, lpCompareUt2OptShard, lpCompareUt2OptShard20k, lpCompareUtOptimizations1, showHtmlTable, showLatexTable, showMdTable, tableTps, tableTpsHot, tpsPor, tpsPort)
+import Amaroo.WP.Tables (compareNets1mTps, compareNets1mTpsAll, compareNets20k, compareNets3k, compareUtLimOptimizationsA, compareUtOptimizationsA, compareUtOptimizationsA20k, compareUtOptimizationsB, compareUtOptimizationsB20k, dappChains, dappChainsHOPoRs, dappChainsHot, lpCompareNetworks, lpCompareUt1Eth2, lpCompareUt1LimitedOptShard, lpCompareUt1OptShard, lpCompareUt2OptShard, lpCompareUt2OptShard20k, lpCompareUtOptimizations1, showHtmlTable, showLatexTable, showMdTable, tableTps, tableTpsHOPoRs, tableTpsHot, tpsPor, tpsPort)
 import Amaroo.WP.Tables.Booktabs (renderBooktabs)
 import Amaroo.WP.Tables.Types (LatexTablePos(..), TPositioning(..), TableDesc(..))
 import Control.Alt ((<|>))
@@ -59,8 +59,10 @@ wpTables :: Array TableDesc
 wpTables =
     [ TD "tps" tableTps defaultPositioning
     , TD "tps_optimized" tableTpsHot defaultPositioning
+    , TD "tps_hopors" tableTpsHOPoRs defaultPositioning
     , TD "dapp-chains" dappChains defaultPositioning
     , TD "dapp-chains_optimized" dappChainsHot defaultPositioning
+    , TD "dapp-chains_hopors" dappChainsHOPoRs defaultPositioning
     , TD "tps_por" tpsPor defaultPositioning
     , TD "tps_port" tpsPort defaultPositioning
     , TD "compare_optimizations_a" compareUtOptimizationsA defaultPositioning
@@ -95,11 +97,14 @@ lpTables =
 
 
 devTables =
-    [ TD "lp_compare_ut1_to_optshard" lpCompareUt1OptShard defaultPositioning
-    , TD "lp_compare_ut1_lim_to_optshard" lpCompareUt1LimitedOptShard defaultPositioning
-    , TD "compare_optimizations_a" compareUtOptimizationsA defaultPositioning
-    , TD "compare_lim_optimizations_a" compareUtLimOptimizationsA defaultPositioning
-    , TD "tree_tiling_3k_v4_table" tree_tiling_3k_v4_table defaultPositioning
+    -- [ TD "lp_compare_ut1_to_optshard" lpCompareUt1OptShard defaultPositioning
+    -- , TD "lp_compare_ut1_lim_to_optshard" lpCompareUt1LimitedOptShard defaultPositioning
+    -- , TD "compare_optimizations_a" compareUtOptimizationsA defaultPositioning
+    -- , TD "compare_lim_optimizations_a" compareUtLimOptimizationsA defaultPositioning
+    -- , TD "tree_tiling_3k_v4_table" tree_tiling_3k_v4_table defaultPositioning
+    [ TD "compareUtOptimizationsA" compareUtOptimizationsA defaultPositioning
+    , TD "compare_optimizations_a_20k" compareUtOptimizationsA20k defaultPositioning
+    , TD "tree_tiling_3k_v4_table" tree_tiling_3k_v4_table hereish
     ]
 
 

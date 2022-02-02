@@ -386,6 +386,8 @@ Practically, this effect means that a decrease to the size of headers has *incre
 
 \todoDraftOnly{present TPS and $N_x$ numbers using header-omission and hash-compression optimizations as mentioned in \autoref{sec:exploiting-seg-state}}
 
+#### $\UT{\text{+HOT}}$
+
 %% INSERT ### TABLE: tps_optimized
 
 : TPS when using +HOT simplex optimizations (Header Omission and +T).
@@ -393,6 +395,16 @@ Practically, this effect means that a decrease to the size of headers has *incre
 %% INSERT ### TABLE: dapp-chains_optimized
 
 : Values of $N_i$, $\mathbb{C}^\prime$, and $\Delta S$ for a simplex using +HOT simplex optimizations.
+
+#### $\UT{\text{+HOPoRs}}$
+
+%% INSERT ### TABLE: tps_hopors
+
+: TPS when using +HOPoRs simplex configuration (Header Omission with explicit PoRs).
+
+%% INSERT ### TABLE: dapp-chains_hopors
+
+: Values of $N_i$, $\mathbb{C}^\prime$, and $\Delta S$ for a simplex using +HOPoRs simplex configuration.
 
 %% END ### RELEASE
 

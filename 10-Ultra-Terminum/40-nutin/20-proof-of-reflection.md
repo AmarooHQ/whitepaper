@@ -112,7 +112,14 @@ Say that the protocol of Chain L is extended to support a projection of Chain R.
 
 #### Step 3. Chain L's *reflection* in Chain R
 
-Can we use a projection of a chain for a different purpose? What happens if Chain L tracks whether Chain L's history is confirmed within Chain R? This can be done via merkle branches that prove the particular states of Chain R which contain this information. In essence, Chain L uses its projection of Chain R to prove that its *own history* matches that of its *projection* in Chain R. Chain L proves that it is *reflected* in Chain R.
+Can we use a projection of a chain for a different purpose?
+What happens if Chain L tracks whether Chain L's history is confirmed within Chain R?
+This can be done via merkle branches\footnote{
+  Vector commitments (or verkle branches) can be used, too.
+  See \autoref{sec:verkle-proofs}.
+} that prove the particular states of Chain R which contain this information.
+In essence, Chain L uses its projection of Chain R to prove that its *own history* matches that of its *projection* in Chain R.
+Chain L proves that it is *reflected* in Chain R.
 
 What does this proof look like? The following progression is shown in \autoref{fig:por-step3-parts}.
 First, Chain L must prove that its history is reflected, so we first find the most recently reflected header, $L_{i+1}$ (ideally, this is the previous L block).

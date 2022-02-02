@@ -70,4 +70,6 @@ In effect, this protocol extension is a way to halve the overhead of +PoRs. It i
 
 : The results of including Proofs of Reflection, with +T, alongside headers (+PoRTs).
 
+\todo{add +HOPoRs and +HOPoRTs}
+
 %% END ### RELEASE

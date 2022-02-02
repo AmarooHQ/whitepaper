@@ -205,14 +205,48 @@ tradChainCalcEth2 ps = tradChainCalc' ps TradEth2
 tradChainCalcPolkadot :: Params -> ChainStats
 tradChainCalcPolkadot ps = tradChainCalc' ps TradPolkadot
 
-porLen :: Number -> Number -> Number
-porLen hashSize n = hashSize * log2c n
+vcBranchingF ∷ Number
+vcBranchingF = 256.0
+-- vcBranchingF = 64.0
+
+vcCommitSize ∷ Number
+vcCommitSize = 32.0
+-- vcCommitSize = 48.0
+
+-- ethereum numbers add 0.66 to branch length (I think to account for sparseness)
+-- and we use the average not the ceil
+vcSparseExtra ∷ Number
+-- vcSparseExtra = 0.66
+vcSparseExtra = 0.0
+
+porVCLen2 ∷ Number → Number
+porVCLen2 n = if n <= vcBranchingF
+    then 1.0
+    else if l2Groups > vcBranchingF
+      then 1.0 + porVCLen2 (n / vcBranchingF)
+      else avgDepth
+  where
+    l2Groups = floor $ n / vcBranchingF
+    l1Nodes = (min n vcBranchingF) - l2Groups
+    l2Nodes = n - l1Nodes
+    avgDepth = (1.0 * l1Nodes + 2.0 * l2Nodes) / n
+
+porVCLen :: Number -> Number
+porVCLen n = max 1.0 $ (log n / log vcBranchingF + vcSparseExtra)
+
+-- | Length (in bytes) of a merkle proof
+-- | deprecated in favor of porVCLen2
+porMPLen :: Number -> Number -> Number
+porMPLen hashSize n = hashSize * log2c n
+
+porLen ∷ Number → Number → Number
+porLen g n = min (porMPLen g n) (vcCommitSize * porVCLen2 n)
 
 utPorsT1 :: Number -> Number -> Number -> Number -> Number -> Number
 utPorsT1 n1 k1 bf bh g = n1 * (k1 - bf * n1 * (bh + porLen g n1))
 
 utHOPorsT1 :: Number -> Number -> Number -> _ -> Number -> Number
-utHOPorsT1 n1 k1 bf _ g = n1 * (k1 - bf * n1 * porLen g n1)
+utHOPorsT1 n1 k1 bf _ g = n1 * (k1 - bf * n1 * (g + porLen g n1))
 
 type LoopFindMax = {i :: Int, t :: Number}
 
@@ -342,12 +376,13 @@ utCalcHOPoRs ps {hashTruncation} = {d1, d2, d3, confRate, tts, sigmaTts, deltaBi
     -- limit N1 if specified
     n1 = (fromMaybe 1.0 ps1.limitN1Ratio) * findMaxHOPoRsN1 ps1 hashSize
     porBytes = porLen hashSize n1
-    effBh = porBytes
+    -- since we're omitting headers, we need to include the header's hash still if using VCs
+    effBh = hashSize + porBytes
     k1 = head ps1.ks
     hf = (head ps1.hfs)
     confRate = hf.bf * n1
-    explicitPorsK = confRate * porBytes
-    kTx = k1 - explicitPorsK
+    explicitHOPorsK = confRate * effBh
+    kTx = k1 - explicitHOPorsK
     kB = k1 - kTx
     t1 = kTx * n1
     d1 = {n: n1, t: t1, tps: t1 / ps.txSize, p: pToPF ps1}

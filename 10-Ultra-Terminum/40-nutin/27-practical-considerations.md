@@ -71,6 +71,15 @@ Given \autoref{sec:availability-of-blocks}, this is possible without significant
 
 A practical method for treating proofs of reflection as witnesses that may be excluded/pruned is discussed in \autoref{sec:segmented-state}.
 
+#### Verkle Trees and Shorter PoRs
+
+\label{sec:verkle-proofs}
+
+\emph{Verkle trees} are a new alternative to merkle trees.
+Similar to merkle trees, they allow efficient proofs of membership against a cryptographically secure root.
+
+\todo{probs remove -- not worth explaining here.}
+
 ### Segmented State
 
 \label{sec:segmented-state}

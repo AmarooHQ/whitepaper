@@ -369,17 +369,26 @@ getTps ns = ns.tps
 
 genTpsRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> getTps <$> [cd.trad.d1, cd.trad.d2, (utF cd).d1, (utF cd).d2, (utF cd).d3])
 
+tpsHeaderCommon = ["$k$, $B_f$, $B_h$", "$O(c)$", "Sharded $O(c^2)$"]
+tpsAlignments = {md: mkSpacer <$> [6, 2, 5, 4, 4, 4], texTabular: "lrrrrr"}
+
 tableTps :: Table
 tableTps = Table
-    (["$k$, $B_f$, $B_h$", "$O(c)$", "Sharded $O(c^2)$"] <> utNames [Std 1, Std 2, Std 3])  -- , sigmaTps 1, sigmaTps 2, sigmaTps 3]
-    {md: mkSpacer <$> [6, 2, 5, 4, 4, 4], texTabular: "lrrrrr"}
+    (tpsHeaderCommon <> utNames [Std 1, Std 2, Std 3])  -- , sigmaTps 1, sigmaTps 2, sigmaTps 3]
+    tpsAlignments
     (genTpsRow (\cd -> cd.ut.std) <$> utComplexityData)
 
 tableTpsHot :: Table
 tableTpsHot = Table
-    (["$k$, $B_f$, $B_h$", "$O(c)$", "Sharded $O(c^2)$"] <> utNames [HOT 1, HOT 2, HOT 3])
-    {md: mkSpacer <$> [6, 2, 5, 4, 4, 4], texTabular: "lrrrrr"}
+    (tpsHeaderCommon <> utNames [HOT 1, HOT 2, HOT 3])
+    tpsAlignments
     (genTpsRow (\cd -> cd.ut.hot) <$> utComplexityData)
+
+tableTpsHOPoRs :: Table
+tableTpsHOPoRs = Table
+    (tpsHeaderCommon <> utNames [HOPoRs 1, HOPoRs 2, HOPoRs 3])
+    tpsAlignments
+    (genTpsRow (\cd -> cd.ut.hopors) <$> utComplexityData)
 
 genDappChainsRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> [(utF cd).d1.n, (utF cd).d2.n, (utF cd).d3.n, (utF cd).deltaBigS]) <> [fmtDyn fdStd (utF cd).confRate]
 
@@ -394,6 +403,12 @@ dappChainsHot = Table
     ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", confRateTh]
     {md: mkSpacer <$> [6, 4, 5, 5, 5, 4], texTabular: "lrrrrr"}
     (genDappChainsRow (\cd -> cd.ut.hot) <$> utComplexityData)
+
+dappChainsHOPoRs :: Table
+dappChainsHOPoRs = Table
+    ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", confRateTh]
+    {md: mkSpacer <$> [6, 4, 5, 5, 5, 4], texTabular: "lrrrrr"}
+    (genDappChainsRow (\cd -> cd.ut.hopors) <$> utComplexityData)
 
 -- TODO: replace `fmtDyn fdPlain`
 genPoRRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> [ut.d1.n, ut.d1.tps, ut.d2.n, ut.d2.tps, ut.porBytes]) <> [fmtDyn fdStd ut.confRate] -- <> (fmtDyn fdStdTwo <$> [ut.d1.n / ut.d1.p.k])

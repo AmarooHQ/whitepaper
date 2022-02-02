@@ -50,7 +50,8 @@ these points will define a polynomial P (of degree n) that we'll use.
 
 P(x) = <<lagrange interpolation>>
 
-we then need the output of P(s) for some unknown value (s) -- this is effectively the commitment.
+we then need the output of P(s) for some unknown value (s)
+P(s) is effectively the commitment.
 note: w/ EC points the commitment is C = P(s)G
 
 C = P(s)
@@ -65,9 +66,11 @@ the points that are shared correspond to the points that we want to prove are in
 zs = the elements of vs' that we want to prove
 k = len(zs)
 
-crucially: P(x) - I(x) = 0 at all points we want to prove (and these are unique roots of P - I)
+crucially: P(x) - I(x) = 0 at all points we want to prove (and these are unique roots of P-I)
 
 since this polynomial (P - I) is zero at all those points, we can divide this polynomial like so:
+
+Z(x) = (x - z_0)(x - z_1)...(x - z_{k-1})
 
 ```
                  P(x) - I(x)
@@ -83,6 +86,8 @@ pi = Q(s)
 
 ## verification
 
+pi * Z(s) = C - I(s)
+
 verifyProof = 0 == (C - I(s)) / Z(s) - pi
 
 ---
@@ -94,6 +99,9 @@ in Kate (kah-tay) polynomial commitments there is a crucial thing that we can't 
 for an EC point s, it is defined that:
 
 [s] = sG
+
+[s]_1 = s G
+[s]_2 = s H
 
 while s is kept secret, [s] is not.
 additionally, all [s^i] for i in 0..(n-1) are computed and distributed to ppl (they're public and well known).
@@ -136,7 +144,7 @@ lagrangePolynomial n_ j x =
 
 genPolyP :: List Int -> Int -> Number
 genPolyP vs x = sum $
-  flip List.mapWithIndex vs $ \i v -> toNumber v * lagrangePolynomial n i x
+  flip List.mapWithIndex vs $ \j v -> toNumber v * lagrangePolynomial n j x
 
 genZeroPoly :: List Int -> Int -> Number
 genZeroPoly zs x = toNumber $ product $ (x - _) <$> zs
@@ -166,7 +174,9 @@ main = do
       badPolyI = genPolyP vsToProve
       badVerify = (commitment - badPolyI s) / badPolyZ s
 
-  log $ show badVerify
+  log $ show vs
+  -- log $ show badVerify
   log $ show proof
-  log $ show $ badVerify - proof
+  log $ show commitment
+  -- log $ show $ badVerify - proof
   log $ show verifyProof
