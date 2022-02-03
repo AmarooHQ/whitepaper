@@ -447,6 +447,10 @@ utSpec = describe "ut" do
       it "passes" do
         quickCheck (utChecks <$> paramsGen)
 
+      it "porVCLen" do
+        quickCheck $ abs >>> \n ->
+          porVCLen n == porVCLen2 n
+
 writePoRTableToCsv :: {fn :: String, g :: Number, r :: Array Params} -> Effect Unit
 writePoRTableToCsv {fn, g, r} = writeTextFile UTF8 fn $ intercalate "\n" $
           findMaxPoRsN1ForRanges {g, r} <#> (\(Tuple ps {i}) -> intercalate "," $ show <$> [(pToPF ps).k, toNumber i, (utNoExplicitPoRsN1 (pToPF ps))])

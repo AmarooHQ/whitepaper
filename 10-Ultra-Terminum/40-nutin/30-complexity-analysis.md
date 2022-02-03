@@ -327,11 +327,18 @@ Additionally, the discrepancy in header size (between $B_h$ and $D_h$) is due to
 
 \label{sec:bandwidth-complexity}
 
-What data must a full node download? A full node must be able to *completely validate* a *single chain*. Thus, a full node of a simplex-chain needs to download all blocks for that simplex-chain, and all auxiliary data to verify PoRs. Provided that the PoRs and corresponding headers remain available (which they always do[^alwaysdo]), the total depends on which UT protocol variant is used (some already include that auxiliary data).
+What data must a full node download?
+A full node must be able to *completely validate* a *single chain*.
+For a simplex-chain, provided that the PoRs and corresponding headers remain available (which they always do[^alwaysdo]), this means it must download: all blocks for that simplex-chain, and all auxiliary data to verify PoRs.
+Note that bandwidth requirements depend on which UT protocol variant is used.
 
 [^alwaysdo]: The necessary PoRs are, at the very least, part of other simplex-chains, so "always do" assumes that simplex-chains themselves remain available, excluding planned shutdown. Since all blockchain networks *depend* on the availability of their chains, this is a safe assumption.
 
-The data a full node requires are: each block, the headers of all reflecting chains, and the missing branches for all PoRs. Network-wide, headers consume $N_1 \cdot B_f \cdot B_h$ B/s, and PoRs (only for that specific chain) use $N_1 \cdot B_f \cdot g \cdot \ceil{\log_2 N_1}$ B/s. Let's denote the total bandwidth required $\Delta s$. In the worst case, where both headers and PoRs must be downloaded:
+For $\UT{\text{+OP}}$, the data a full node requires are: each block, the headers of all reflecting chains, and the missing branches for all PoRs.
+Network-wide, headers consume $N_1 \cdot B_f \cdot B_h$ B/s.
+For a single chain, PoRs use $N_1 \cdot B_f \cdot g \cdot \ceil{\log_2 N_1}$ B/s -- $g$ is the digest size of the hash used for merkle trees (usually 32 bytes).
+Let's denote the total bandwidth required $\Delta s$.
+In the worst case, where both headers and PoRs must be downloaded:
 \begin{equation}
 \begin{split}
 \Delta s & = k_1 + (N_1 \cdot B_f \cdot B_h) + (N_1 \cdot B_f \cdot g \cdot \ceil{\log_2 N_1}) \\
@@ -345,11 +352,21 @@ However, with *explicit PoRs* (variants including +PoRs), $\Delta s \le k_1 + N_
 
 \todoDraftOnly{in effect: we get to choose the aspect that the $\log c$ influences -- this matters b/c of \emph{a principle of scaling} section. we get to choose based on *worst case* so basically scalability isn't affected by that term b/c we can always put it in the non-bottleneck component.}
 
+\aside{
+  The term $g \cdot \ceil{\log_2 N_1}$ in these equations is the size of a merkle branch for a PoR.
+  What if verkle trees are used instead?
+  With a branching factor of 256, 32 byte commitments and proofs, and 1 byte location specifiers, this term should be replaced with
+  $(1+32) \cdot \max(1, \log_{256} N_1)$.
+  The complexity of these two terms is the same, but in practice verkle PoRs are less than half the size of merkle PoRs.
+  For this reason, the calculations in this paper assume that the UT implementation uses verkle trees.
+}
+
 That is for a full node. What about the bandwidth required to verify *the entire simplex*?
 
 If miners temporarily keep the blocks of every simplex-chain (so that they can verify that reflected headers correspond to existent blocks) then what is the complexity and burden of this? Each simplex-chain has a raw throughput of $k_1$ bytes/s. From \autoref{eq:simplex-N1} we know that $N_1 = \frac{k_1}{2 \cdot B_f \cdot B_h}$.
 
 The amount of network bandwidth, $\Delta S$, required to download all blocks (as they are produced) across all simplex-chains is equal to the product of: the number of simplex-chains -- $N_1$, and the raw throughput of each chain -- $k_1$.
+Any auxiliary data can be deterministically regenerated, so doesn't need to be downloaded.
 \begin{equation}
 \begin{split}
 \Delta S & = N_1 \cdot k_1 \\

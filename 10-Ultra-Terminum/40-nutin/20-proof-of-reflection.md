@@ -115,9 +115,9 @@ Say that the protocol of Chain L is extended to support a projection of Chain R.
 Can we use a projection of a chain for a different purpose?
 What happens if Chain L tracks whether Chain L's history is confirmed within Chain R?
 This can be done via merkle branches\footnote{
-  Vector commitments (or verkle branches) can be used, too.
-  See \autoref{sec:verkle-proofs}.
-} that prove the particular states of Chain R which contain this information.
+  Vector commitments (or verkle branches) can be used, too (this applies to most usages of merkle tress / branches in this paper).
+  For the sake of convenience and simplicity, verkle trees won't be explicitly mentioned as an alternative unless there is a specific purpose.
+} that prove Chain R's relevant state.
 In essence, Chain L uses its projection of Chain R to prove that its *own history* matches that of its *projection* in Chain R.
 Chain L proves that it is *reflected* in Chain R.
 

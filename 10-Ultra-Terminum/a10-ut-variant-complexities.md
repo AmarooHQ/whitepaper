@@ -1,12 +1,12 @@
 %% BEGIN ### RELEASE
 
-# UT Variants
+# UT Variant Complexities
 
 ## +PoRs: Explicit PoRs
 
 \label{sec:por-with-proofs}
 
-What does a simplex look like if simplex-chains include explicit proofs of reflection (as merkle branches)?
+What is the throughput of simplex if simplex-chains include explicit proofs of reflection (as merkle branches)?
 This extension to UT is called +PoRs.
 
 Let $g$ be the length of the digest in bytes, i.e., the size of the hashes used in our merkle trees.
@@ -27,9 +27,10 @@ N_1 & = \frac{k_1 \cdot \ln 2}{2 \cdot B_f \cdot g \cdot W_0(\frac{1}{B_f \cdot 
 
 Note: $W_0(z)$ is the Lambert W function, aka the product logarithm.
 
-Given that we can avoid including proofs of reflection (see \autoref{sec:proving-reflection}), I'm only going to roughly estimate the complexity here. Note that -- for configurations exclusive of proofs of reflection -- \autoref{eq:simplex-N1} shows that $O(N_1) = O(c)$, and \autoref{eq:simplex-T1} shows that $O(T_1) = O(c^2)$.
-
-From \autoref{eq:simplex-N1-with-PoR}, we have $N_1$ that is of the form $N_1 = O(1) \cdot \frac{k_1}{W_0(O(1) \cdot k_1)}$. \autoref{fig:x-over-lambert} shows that $f(x) = \frac{x}{W_0(x)}$ looks similar to a straight line for values of $x$ that we care about. So lets approximate: $O(\frac{k}{W_0(k)}) = O(k)$. Thus I guess that, even if simplex-chains include proofs of reflection along with reflected headers, the result is still $O(N_1) = O(c)$ and $O(T_1) = O(c^2)$.
+\autoref{eq:simplex-N1-with-PoR} gives an $N_1$ that is of the form $N_1 = O(1) \cdot \frac{k_1}{W_0(O(1) \cdot k_1)}$.
+\autoref{fig:x-over-lambert} graphs $f(x) = \frac{x}{W_0(x)}$ for values of $x$ that we care about; $f(x) = 0.0638x$ is included for comparison.
+Regarding this specific case, is it reasonable to approximate $O(\frac{k}{W_0(k)}) = O(k)$?
+If it is, then we still have $O(N_1) = O(c)$ and $O(T_1) = O(c^2)$.
 
 \begin{figure}
     \begin{subfigure}[t]{.48\linewidth}
@@ -49,7 +50,11 @@ From \autoref{eq:simplex-N1-with-PoR}, we have $N_1$ that is of the form $N_1 = 
     \label{fig:x-over-lambert}
 \end{figure}
 
-\todo{update to include discussion of verkle trees}
+If we use verkle PoRs instead of merkle PoRs, then we'll have a different $k_{1,b}$. Assuming that vector commitments and proofs are $g$ bytes:
+\begin{equation}
+    k_{1,b} = B_f \cdot N_1 \cdot (B_h + (1 + g) \cdot \ceil{\log_{256} N_1})
+\end{equation}
+Other than this change, the logic that is used in \autoref{eq:simplex-N1-with-PoR} still works, and the resulting complexities will be the same.
 
 %% INSERT ### TABLE: tps_por
 
