@@ -6,7 +6,8 @@
 
 \label{sec:por-with-proofs}
 
-What does a simplex look like if simplex-chains include explicit proofs of reflection (as merkle branches)? This extension to UT is called +PoRs.
+What does a simplex look like if simplex-chains include explicit proofs of reflection (as merkle branches)?
+This extension to UT is called +PoRs.
 
 Let $g$ be the length of the digest in bytes, i.e., the size of the hashes used in our merkle trees.
 \begin{equation}
@@ -48,6 +49,8 @@ From \autoref{eq:simplex-N1-with-PoR}, we have $N_1$ that is of the form $N_1 = 
     \label{fig:x-over-lambert}
 \end{figure}
 
+\todo{update to include discussion of verkle trees}
+
 %% INSERT ### TABLE: tps_por
 
 : $\UT{\text{+PoRs}}$ capacity given different parameters.
@@ -55,16 +58,6 @@ From \autoref{eq:simplex-N1-with-PoR}, we have $N_1$ that is of the form $N_1 = 
 ### +PoRs with +T
 
 \label{sec:ext-ports}
-
-%% END ### RELEASE
-
-%% BEGIN ### DRAFT
-
-%% END ### DRAFT
-
-%% BEGIN ### RELEASE
-
-In effect, this protocol extension is a way to halve the overhead of +PoRs. It is called +PoRTs.
 
 %% INSERT ### TABLE: tps_port
 

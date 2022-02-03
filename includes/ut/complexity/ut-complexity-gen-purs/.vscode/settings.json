@@ -24,4 +24,7 @@
     "cSpell.enableFiletypes": [
         "purescript"
     ],
+    "cSpell.words": [
+        "verkle"
+    ],
 }

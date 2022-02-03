@@ -214,12 +214,7 @@ vcCommitSize ∷ Number
 vcCommitSize = 32.0
 -- vcCommitSize = 48.0
 
--- ethereum numbers add 0.66 to branch length (I think to account for sparseness)
--- and we use the average not the ceil
-vcSparseExtra ∷ Number
--- vcSparseExtra = 0.66
-vcSparseExtra = 0.0
-
+-- | estimate PoR len via average depth in a verkle tree
 porVCLen2 ∷ Number → Number
 porVCLen2 n = if n <= vcBranchingF
     then 1.0
@@ -232,16 +227,22 @@ porVCLen2 n = if n <= vcBranchingF
     l2Nodes = n - l1Nodes
     avgDepth = (1.0 * l1Nodes + 2.0 * l2Nodes) / n
 
+-- ethereum numbers add 0.66 to branch length (I think to account for sparseness)
+-- and we use the average not the ceil
+vcSparseExtra ∷ Number
+-- vcSparseExtra = 0.66
+vcSparseExtra = 0.0
+
 porVCLen :: Number -> Number
 porVCLen n = max 1.0 $ (log n / log vcBranchingF + vcSparseExtra)
 
 -- | Length (in bytes) of a merkle proof
 -- | deprecated in favor of porVCLen2
-porMPLen :: Number -> Number -> Number
-porMPLen hashSize n = hashSize * log2c n
+porMPLen :: Number -> Number
+porMPLen = log2c
 
 porLen ∷ Number → Number → Number
-porLen g n = min (porMPLen g n) (vcCommitSize * porVCLen2 n)
+porLen g n = min (g * porMPLen n) (vcCommitSize * porVCLen2 n)
 
 utPorsT1 :: Number -> Number -> Number -> Number -> Number -> Number
 utPorsT1 n1 k1 bf bh g = n1 * (k1 - bf * n1 * (bh + porLen g n1))
@@ -254,7 +255,8 @@ type LoopFindMax = {i :: Int, t :: Number}
 loopFindMaxPoRsN1F :: _ -> Params -> Number -> LoopFindMax -> LoopFindMax
 loopFindMaxPoRsN1F utT1F ps g initM = inner ({i: initM.i, t: initM.t, bestI: initM.i }) |> \{bestI,t} -> {i: bestI,t}
   where
-    inner m@{i, t} = if i >= wontBeMoreThan || t1 < 0.0 || t1 < t * 0.96 || (t1 < t && (abs $ log2 bestN) % 1.0 > 0.01)
+    -- drop this condition:  i >= wontBeMoreThan ||
+    inner m@{i, t} = if t1 < 0.0 || t1 < t * 0.96 || (t1 < t && (abs $ log2 bestN) % 1.0 > 0.01)
         then m
         else inner (
           if t1 > t
@@ -270,7 +272,7 @@ loopFindMaxPoRsN1F utT1F ps g initM = inner ({i: initM.i, t: initM.t, bestI: ini
     bf = hf.bf
     bh = hf.bh
     hf = head ps.hfs
-    wontBeMoreThan = I.ceil $ k1 / bf / bh  -- N1 without explicit PoRs * 2.0
+    -- wontBeMoreThan = I.ceil $ k1 / bf / bh  -- N1 without explicit PoRs * 2.0
     -- from WP, useful for some things.
     -- | \frac{\d{T_1}}{\d{N_1}}
     utPorsDT1byDN1 n1 = (k1 * ln2 - bf * n1 * (g + bh * log 4.0) - 2.0 * bf * g * n1 * log n1) / ln2

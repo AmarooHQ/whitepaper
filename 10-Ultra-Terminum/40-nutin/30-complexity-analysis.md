@@ -396,6 +396,8 @@ Practically, this effect means that a decrease to the size of headers has *incre
 
 : Values of $N_i$, $\mathbb{C}^\prime$, and $\Delta S$ for a simplex using +HOT simplex optimizations.
 
+\begin{comment}
+
 #### $\UT{\text{+HOPoRs}}$
 
 %% INSERT ### TABLE: tps_hopors
@@ -405,6 +407,8 @@ Practically, this effect means that a decrease to the size of headers has *incre
 %% INSERT ### TABLE: dapp-chains_hopors
 
 : Values of $N_i$, $\mathbb{C}^\prime$, and $\Delta S$ for a simplex using +HOPoRs simplex configuration.
+
+\end{comment}
 
 %% END ### RELEASE
 
@@ -425,23 +429,24 @@ Note that the +PoRs variants are covered in \autoref{sec:por-with-proofs}.
 
 %% INSERT ### TABLE: compare_optimizations_a
 
-: Comparison of UT variants.
-Parameters are: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions.
+: Comparison of UT variants' capacities with parameters: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions.
 ``E. $B_h$'' means the \emph{effective} header-size.
 
 %% INSERT ### TABLE: compare_optimizations_a_20k
 
-: Comparison of UT variants; as in \autoref{table:compare_optimizations_a} with $k = 20000$ B/s.
+: Comparison of UT variants' capacities; as in \autoref{table:compare_optimizations_a} with $k = 20000$ B/s.
 
 %% INSERT ### TABLE: compare_optimizations_b
 
-: Comparison of UT variants.
-Parameters are: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions.
-The time to sync 5 years of a simplex-chain's history, including verifying PoRs ($\text{TTS}_{5yrs}$) is measured against a fully utilized 10 MB/s network connection and assumes no software bottlenecks.
-The equivalent for \emph{all} simplex-chains and PoRs being verified ($\Sigma$ $\text{TTS}_{5yrs}$) is also shown.
+: Comparison of UT variants' network and storage requirements with parameters: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions.
+$\text{TTS}_{5yrs}$: The time to sync 5 years of a simplex-chain's history, including PoRs, with a fully utilized 10 MB/s network connection.
+
+\begin{comment}
+$\Sigma$ $\text{TTS}_{5yrs}$: The time to sync 5 years for all simplex-chains.
+\end{comment}
 
 %% INSERT ### TABLE: compare_optimizations_b_20k
 
-: Comparison of UT variants; as in \autoref{table:compare_optimizations_b} with $k = 20000$ B/s.
+: Comparison of UT variants' network and storage requirements; as in \autoref{table:compare_optimizations_b} with $k = 20000$ B/s.
 
 %% END ### RELEASE
