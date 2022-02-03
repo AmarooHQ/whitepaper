@@ -191,9 +191,9 @@ utSpec = describe "ut" do
           it "should not increase throughput to add more chains" do
             t1 `shouldSatisfy` (_ > (n1 + 1.0) * (1000.0 - ((n1 + 1.0) * porSize)))
           it "kTx matches" do
-            ut.kTx `shouldEqual` kTx
+            ut.kTx `shouldBasiallyEqual` kTx
           it "d1" do
-            ut.d1 `dNShouldEqual` {n: n1, t: t1, tps: t1 / 500.0}
+            ut.d1 `dNShouldBeVClose` {n: n1, t: t1, tps: t1 / 500.0}
           it "d2" do
             let n2 = n1 * (kTx / 0.1 / bh)
                 t2 = n2 * 1000.0
@@ -338,8 +338,8 @@ utSpec = describe "ut" do
           confRates = [5.00, 15.625, 31.25]
           -- TTS isn't an exact match, but p close. Definitely *looks* mostly right WRT numbers coming out.
           -- ttss = [0.44, 0.94, 1.03]  -- from python gen
-          ttss = [0.212, 0.559, 0.821]  -- these are the new TTS figures; keeping them here to make sure we know if they change
-          dss = [1160, 3062, 4496]  -- these are the new TTS figures; keeping them here to make sure we know if they change
+          ttss = [0.212, 0.559, 0.828]  -- these are the new TTS figures; keeping them here to make sure we know if they change
+          dss = [1165, 3078, 4533]  -- these are the new TTS figures; keeping them here to make sure we know if they change
           s = basicSample.ut
           -- exclude +T variant b/c py script doesn't get it
           variants = [s.std, s.ho, s.hot]
@@ -360,20 +360,12 @@ utSpec = describe "ut" do
       it "numbers from tables (or otherwise calculated)" do
         let getN1PoRs k = flip findMaxPoRsN1 32.0 $ mkSimplePs k {bf: btToF 15, bh: 84.0} 250.0
             getN1PoRTs k = flip findMaxPoRsN1 16.0 $ mkSimplePs k {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0
-        getN1PoRs 3000.0 `shouldEqual` 194.0
-        getN1PoRTs 3000.0 `shouldEqual` 230.0
+        getN1PoRs 3000.0 `shouldEqual` 192.0
+        getN1PoRTs 3000.0 `shouldEqual` 227.0
         findMaxPoRsN1 (mkSimplePs 3000.0 {bf: btToF 60, bh: 112.0} 250.0) 32.0 `shouldEqual` 511.0
-        let _scale = 5375.0 / 2907.0
-        getN1PoRTs 100000.0 `shouldEqual` 5375.0
-        getN1PoRTs 200000.0 `shouldEqual` 10495.0
-        getN1PoRTs 300000.0 `shouldEqual` 15615.0
-        getN1PoRTs 400000.0 `shouldEqual` 20735.0
-        getN1PoRTs 500000.0 `shouldEqual` 25855.0
-        getN1PoRTs 600000.0 `shouldEqual` 30975.0
-        getN1PoRTs 700000.0 `shouldEqual` 36095.0
-        getN1PoRTs 800000.0 `shouldEqual` 41215.0
-        getN1PoRTs 900000.0 `shouldEqual` 46335.0
-        getN1PoRTs 1000000.0 `shouldEqual` 51455.0
+        let expected = [5119.0, 10239.0, 15359.0, 20223.0, 25343.0, 30463.0, 35583.0, 40447.0, 45567.0, 50687.0]
+            actual = getN1PoRTs <$> [100000.0, 200000.0, 300000.0, 400000.0, 500000.0, 600000.0, 700000.0, 800000.0, 900000.0, 1000000.0]
+        actual `shouldEqual` expected
 
     -- Note: probs best to leave this as `false` b/c it is slooooow
     let record_k_vs_n1_forPoRs_csv = false
@@ -437,19 +429,19 @@ utSpec = describe "ut" do
             utL = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 115.0} tx) {explicitPoRs: false, hashTruncation: false, headerOmission: false}
             utP = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 84.0} tx) {explicitPoRs: true, hashTruncation: false, headerOmission: false}
         -- +PoRs and std
-        utP.d1.tps `shouldBeWithin 0.5` 1164.0
-        utP.d1.n `shouldBeWithin 0.5` 194.0
+        utP.d1.tps `shouldBeWithin 0.5` 1154.0
+        utP.d1.n `shouldBeWithin 0.5` 192.0
         utL.d1.tps `shouldBeWithin 30.0` utP.d1.tps  -- 489 vs 467
         utL.d1.n `shouldBeWithin 20.0` utP.d1.n  -- 82 vs 64
       it "large headers approx (w/in ~33%) of +PoRTs" do
         let tx = 250.0
-            utLT = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 98.0} tx) {explicitPoRs: false, hashTruncation: false, headerOmission: false}
+            utLT = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 99.0} tx) {explicitPoRs: false, hashTruncation: false, headerOmission: false}
             utPT = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 84.0} tx) {explicitPoRs: true, hashTruncation: true, headerOmission: false}
         -- +T
-        utPT.d1.tps `shouldBeWithin 0.5` 1378.0
-        utPT.d1.n `shouldBeWithin 0.5` 230.0
-        utLT.d1.tps `shouldBeWithin 2.0` utPT.d1.tps  -- 758.4269 vs 758.4191  -- suspiciously close?
-        utLT.d1.n `shouldBeWithin 1.0` utPT.d1.n  -- 126.4 vs 126  -- !!! also super close
+        utPT.d1.tps `shouldBeWithin 0.5` 1364.0
+        utPT.d1.n `shouldBeWithin 0.5` 227.0
+        utLT.d1.tps `shouldBeWithin 2.0` utPT.d1.tps
+        utLT.d1.n `shouldBeWithin 1.0` utPT.d1.n
 
     describe "quickchecks" do
       it "passes" do

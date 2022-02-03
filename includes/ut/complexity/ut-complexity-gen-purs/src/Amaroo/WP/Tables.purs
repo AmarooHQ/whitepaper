@@ -132,9 +132,11 @@ oc2TpsToK tps txSize bf bh = pow (tps * txSize * bf * bh) 0.5
 
 
 findKFor1MTps ∷ Network → Number
-findKFor1MTps utNet = M.ceil $ binarySearch {epsilon: 100.0, target: 1_000_000.0, f}
+findKFor1MTps utNet = bump answer
   where
     f k = netToTps utNet $ netToChainStats utNet $ mkSimplePs k _UT_HF _TX_SIZE
+    answer = M.ceil $ binarySearch {epsilon: 100.0, target: _1M, f}
+    bump _k = if f _k > _1M then _k else bump (_k + 1.0)
 
 _TX_SIZE = 250.0
 
@@ -586,7 +588,7 @@ optimizationProps2 =
   -- , {s: "Chain-GB/yr", f: \cs -> intercalate " +" $ (fmtDyn fdStd <<< (_ * _B_PER_S_TO_GB_PER_YR)) <$> [cs.k1, cs.deltaSmallS - cs.k1]}
   , {s: "Chain-GB/yr", f: \cs -> fmtDyn fdStd <<< (_ * _B_PER_S_TO_GB_PER_YR) $ cs.deltaSmallS}
   , {s: "$\\Delta S$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.deltaBigS}
-  , {s: "$\\Sigma$ $\\text{TTS}_{5yrs}$ (days)", f: \cs -> fmtDyn fdStdTwo cs.sigmaTts}
+  , {s: "$\\Sigma$ $\\text{TTS}_{5yrs}$ (days)", f: \cs -> fmtDyn fdStdMixed cs.sigmaTts}
   -- , {s: "$\\nicefrac{\\Sigma\\;\\text{TPS}}{\\Delta s}$ (Tx/B)", f: \cs -> fmtDyn fdStdTwo (cs.d1.tps / cs.deltaSmallS)}
   -- , {s: "Scale $\\times$", f: \cs -> fmtDyn fdStd (auxStats cs).scalingFactors.nesting}
   ]

@@ -233,6 +233,7 @@ vcSparseExtra ∷ Number
 -- vcSparseExtra = 0.66
 vcSparseExtra = 0.0
 
+-- | deprecated
 porVCLen :: Number -> Number
 porVCLen n = max 1.0 $ (log n / log vcBranchingF + vcSparseExtra)
 
@@ -242,7 +243,11 @@ porMPLen :: Number -> Number
 porMPLen = log2c
 
 porLen ∷ Number → Number → Number
-porLen g n = min (g * porMPLen n) (vcCommitSize * porVCLen2 n)
+porLen g n = min porBytesMerkle porBytesVerkle
+  where
+    -- add 1.0 to each verkle layer to account for location data -- 256 children implies 8 bits (1 B) for required per node
+    porBytesVerkle = (1.0 + vcCommitSize) * porVCLen2 n
+    porBytesMerkle = g * porMPLen n
 
 utPorsT1 :: Number -> Number -> Number -> Number -> Number -> Number
 utPorsT1 n1 k1 bf bh g = n1 * (k1 - bf * n1 * (bh + porLen g n1))
@@ -258,8 +263,7 @@ loopFindMaxPoRsN1F utT1F ps g initM = inner ({i: initM.i, t: initM.t, bestI: ini
     -- drop this condition:  i >= wontBeMoreThan ||
     inner m@{i, t} = if t1 < 0.0 || t1 < t * 0.96 || (t1 < t && (abs $ log2 bestN) % 1.0 > 0.01)
         then m
-        else inner (
-          if t1 > t
+        else inner (if t1 > t
             then {i: i + 1, bestI: i, t: t1}
             else {i: i + 1, bestI: m.bestI, t: m.t})
       where
@@ -273,9 +277,10 @@ loopFindMaxPoRsN1F utT1F ps g initM = inner ({i: initM.i, t: initM.t, bestI: ini
     bh = hf.bh
     hf = head ps.hfs
     -- wontBeMoreThan = I.ceil $ k1 / bf / bh  -- N1 without explicit PoRs * 2.0
+
     -- from WP, useful for some things.
     -- | \frac{\d{T_1}}{\d{N_1}}
-    utPorsDT1byDN1 n1 = (k1 * ln2 - bf * n1 * (g + bh * log 4.0) - 2.0 * bf * g * n1 * log n1) / ln2
+    -- utPorsDT1byDN1 n1 = (k1 * ln2 - bf * n1 * (g + bh * log 4.0) - 2.0 * bf * g * n1 * log n1) / ln2
 
 findMaxPoRsN1 :: Params -> Number -> Number
 findMaxPoRsN1 ps g = (loopFindMaxPoRsN1F utPorsT1 ps g {i: 1, t: 0.0}).i |> toNumber >>> M.floor
