@@ -315,13 +315,13 @@ $Tx_{avg}$: average tx size (bytes)
 \end{comment}
 
 NB: For the purposes of \autoref{table:tps} and on, the average transaction size is taken to be 250 bytes.
-\begin{comment}
-Additionally, the discrepancy in header size (between $B_h$ and $D_h$) is due to the overhead of PoS mechanisms.
-\end{comment}
 
 %% INSERT ### TABLE: tps
 
-: A comparison of the maximum transaction throughput (transactions per second) given different scaling configurations. Note that the \emph{Sharded $O(c^2)$} column is optimal if all headers are recorded in the base-chain.
+: A comparison of the maximum transaction throughput (transactions per second; TPS) given different $\UT{\text{+OP}}$ scaling configurations.
+Note that the \emph{Sharded $O(c^2)$} column is theoretically optimal for sharding systems where all headers are recorded in the base-chain.
+
+More detailed comparison tables can be found in \autoref{sec:ut-variant-complexities}.
 
 ### Bandwidth Complexity
 
@@ -358,12 +358,14 @@ However, with *explicit PoRs* (variants including +PoRs), $\Delta s \le k_1 + N_
   With a branching factor of 256, 32 byte commitments and proofs, and 1 byte location specifiers, this term should be replaced with
   $(1+32) \cdot \max(1, \log_{256} N_1)$.
   The complexity of these two terms is the same, but in practice verkle PoRs are less than half the size of merkle PoRs.
-  For this reason, the calculations in this paper assume that the UT implementation uses verkle trees.
+  For this reason, the numerical calculations in this paper assume that the UT implementation uses verkle trees.
 }
 
 That is for a full node. What about the bandwidth required to verify *the entire simplex*?
 
-If miners temporarily keep the blocks of every simplex-chain (so that they can verify that reflected headers correspond to existent blocks) then what is the complexity and burden of this? Each simplex-chain has a raw throughput of $k_1$ bytes/s. From \autoref{eq:simplex-N1} we know that $N_1 = \frac{k_1}{2 \cdot B_f \cdot B_h}$.
+If miners temporarily keep the blocks of every simplex-chain (so that they can regenerate PoRs and verify that reflected headers correspond to existent blocks) then what is the complexity and burden of this?
+Each simplex-chain has a raw throughput of $k_1$ bytes/s.
+From \autoref{eq:simplex-N1} we know that $N_1 = \frac{k_1}{2 \cdot B_f \cdot B_h}$.
 
 The amount of network bandwidth, $\Delta S$, required to download all blocks (as they are produced) across all simplex-chains is equal to the product of: the number of simplex-chains -- $N_1$, and the raw throughput of each chain -- $k_1$.
 Any auxiliary data can be deterministically regenerated, so doesn't need to be downloaded.
@@ -375,7 +377,10 @@ Any auxiliary data can be deterministically regenerated, so doesn't need to be d
 \end{split}
 \end{equation}
 
-It is clear that $\Delta S$ has order $O(c^2)$, but how bad is this? For $k_1 = 3000$, $B_f = \frac{1}{60}$, and $B_h = 112$: $\Delta S \approx 2.4$ MB/s. With those figures: $N_1 \approx 800$ simplex-chains, $N_2 \approx 645,000$ dapp-chains, and maximum tps of $\sim 7.7\times 10^{6}$. Decreasing block times to 15s correspondingly decrease the bandwidth requirements to 0.6 MB/s for a simplex with $\sim 200$ chains, $\sim 40,000$ dapp-chains, and $\sim 484,000$ max tps.
+It is clear that $\Delta S$ has order $O(c^2)$, but how bad is this?
+For $k_1 = 3000$, $B_f = \frac{1}{60}$, and $B_h = 112$: $\Delta S \approx 2.4$ MB/s.
+With those figures: $N_1 \approx 800$ simplex-chains, $N_2 \approx 645,000$ dapp-chains, and maximum tps of $\sim 7.7\times 10^{6}$.
+Decreasing block times to 15s correspondingly decrease the bandwidth requirements to 0.6 MB/s for a simplex with $\sim 200$ chains, $\sim 40,000$ dapp-chains, and $\sim 484,000$ max tps.
 
 While $O(c^2)$ bandwidth scaling is not ideal, it's clear that -- especially in the early days of a UT simplex when there are fewer simplex-chains -- there are tolerable configurations available; i.e., there is *excess capacity*.
 
@@ -399,45 +404,9 @@ This effect is not unique to UT, though. In general, any system of sharding is a
 
 Practically, this effect means that a decrease to the size of headers has *increasing* marginal benefit. Compared to $O(c)$ blockchains (e.g., Bitcoin), efficient header schemes are far more important for UT and sharded blockchain networks.
 
-### Optimizations
+\todo{some discussion to replace +HOT stuff.}
 
-\todoDraftOnly{present TPS and $N_x$ numbers using header-omission and hash-compression optimizations as mentioned in \autoref{sec:exploiting-seg-state}}
-
-#### $\UT{\text{+HOT}}$
-
-%% INSERT ### TABLE: tps_optimized
-
-: TPS when using +HOT simplex optimizations (Header Omission and +T).
-
-%% INSERT ### TABLE: dapp-chains_optimized
-
-: Values of $N_i$, $\mathbb{C}^\prime$, and $\Delta S$ for a simplex using +HOT simplex optimizations.
-
-\begin{comment}
-
-#### $\UT{\text{+HOPoRs}}$
-
-%% INSERT ### TABLE: tps_hopors
-
-: TPS when using +HOPoRs simplex configuration (Header Omission with explicit PoRs).
-
-%% INSERT ### TABLE: dapp-chains_hopors
-
-: Values of $N_i$, $\mathbb{C}^\prime$, and $\Delta S$ for a simplex using +HOPoRs simplex configuration.
-
-\end{comment}
-
-%% END ### RELEASE
-
-%% BEGIN ### DRAFT
-
-#### Impact on the Impact of Header Size
-
-\todo{headers at base layer don't matter now -- only for nesting -- so PoS chains (even with big headers) might be okay at base layer without impacting scalability}
-
-%% END ### DRAFT
-
-%% BEGIN ### RELEASE
+For comparisons of each UT variant's capacity given , see \autoref{sec:ut-variant-complexities}.
 
 ### Comparison of UT Variants
 

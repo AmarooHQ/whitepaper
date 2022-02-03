@@ -4041,7 +4041,7 @@ var PS = {};
               $copy_v = v.value0;
               return;
           };
-          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 272, column 1 - line 272, column 30): " + [ v.constructor.name ]);
+          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 286, column 1 - line 286, column 30): " + [ v.constructor.name ]);
       };
       while (!$tco_done) {
           $tco_result = $tco_loop($copy_v);
@@ -4178,8 +4178,8 @@ var PS = {};
       })(table);
   };
   var sToExt = function (s) {
-      var $96 = Data_String_CodePoints.length(s) > 0;
-      if ($96) {
+      var $97 = Data_String_CodePoints.length(s) > 0;
+      if ($97) {
           return "+\\text{" + (s + "}");
       };
       return "+\\emptyset";
@@ -4207,8 +4207,8 @@ var PS = {};
               return Data_Number.nan;
           };
           if (v instanceof UT) {
-              var $108 = utNestingLvl(v.value0) >= 2;
-              if ($108) {
+              var $109 = utNestingLvl(v.value0) >= 2;
+              if ($109) {
                   return v1.d2.n;
               };
               return Data_Number.nan;
@@ -4239,28 +4239,28 @@ var PS = {};
       texTabular: "llrrr"
   });
   var latexToMathjax = (function () {
-      var $259 = Data_String_Common.replaceAll("\\nicefrac")("\\frac");
-      var $260 = Data_String_Common.replaceAll("\\UT")("\\text{UT}_");
-      var $261 = Data_String_Common.replaceAll("\\UTinf{")("\\text{UT}_{\\aleph ");
-      return function ($262) {
-          return $259($260($261($262)));
+      var $260 = Data_String_Common.replaceAll("\\nicefrac")("\\frac");
+      var $261 = Data_String_Common.replaceAll("\\UT")("\\text{UT}_");
+      var $262 = Data_String_Common.replaceAll("\\UTinf{")("\\text{UT}_{\\aleph ");
+      return function ($263) {
+          return $260($261($262($263)));
       };
   })();
   var showHtmlTable = function (_id) {
       return function (v) {
           var wXmlWNs = function (tag) {
-              var $263 = Data_Semigroup.append(Data_Semigroup.semigroupString)("\x0a");
-              var $264 = Amaroo_WP_Formatter.wrapXml(tag);
-              return function ($265) {
-                  return $263($264($265));
+              var $264 = Data_Semigroup.append(Data_Semigroup.semigroupString)("\x0a");
+              var $265 = Amaroo_WP_Formatter.wrapXml(tag);
+              return function ($266) {
+                  return $264($265($266));
               };
           };
           var join = Data_Array.intercalate(Data_Monoid.monoidString)("");
           return latexToMathjax(Amaroo_WP_Formatter.wrapXmlWAttr("table")("id=\"" + (_id + "\""))(Data_Function.flip(Data_Semigroup.append(Data_Semigroup.semigroupString))("\x0a")(wXmlWNs("tr")(join(Data_Functor.map(Data_Functor.functorArray)(Amaroo_WP_Formatter.wrapXml("th"))(v.value0))) + join(Data_Functor.map(Data_Functor.functorArray)((function () {
-              var $266 = wXmlWNs("tr");
-              var $267 = Data_Functor.map(Data_Functor.functorArray)(Amaroo_WP_Formatter.wrapXml("td"));
-              return function ($268) {
-                  return $266(join($267($268)));
+              var $267 = wXmlWNs("tr");
+              var $268 = Data_Functor.map(Data_Functor.functorArray)(Amaroo_WP_Formatter.wrapXml("td"));
+              return function ($269) {
+                  return $267(join($268($269)));
               };
           })())(v.value2)))));
       };
@@ -4339,8 +4339,8 @@ var PS = {};
       return function (i) {
           return function (e) {
               return f((function () {
-                  var $146 = i <= 0;
-                  if ($146) {
+                  var $147 = i <= 0;
+                  if ($147) {
                       return "";
                   };
                   return iToS(i);
@@ -4355,9 +4355,9 @@ var PS = {};
       return utNameInner(utBaseN)(utNameI(v))(utNameE(v));
   };
   var utName_ = (function () {
-      var $269 = Amaroo_WP_Formatter.wrap("$");
-      return function ($270) {
-          return $269(utName($270));
+      var $270 = Amaroo_WP_Formatter.wrap("$");
+      return function ($271) {
+          return $270(utName($271));
       };
   })();
   var netToScalingFactor = function (v) {
@@ -4390,7 +4390,7 @@ var PS = {};
               };
               return Effect_Exception_Unsafe.unsafeThrowException(Effect_Exception.error("[netToScalingFactor] got bad level of nesting in UT network: " + utName_(v.value0)));
           };
-          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 309, column 1 - line 309, column 45): " + [ v.constructor.name, aux.constructor.name ]);
+          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 323, column 1 - line 323, column 45): " + [ v.constructor.name, aux.constructor.name ]);
       };
   };
   var netToTps = function (v) {
@@ -4423,7 +4423,7 @@ var PS = {};
               };
               return Effect_Exception_Unsafe.unsafeThrowException(Effect_Exception.error("[netToTps] got bad level of nesting in UT network: " + utName_(v.value0)));
           };
-          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 327, column 1 - line 327, column 44): " + [ v.constructor.name, cd.constructor.name ]);
+          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 341, column 1 - line 341, column 44): " + [ v.constructor.name, cd.constructor.name ]);
       };
   };
   var showNetwork = {
@@ -4446,7 +4446,7 @@ var PS = {};
           if (v instanceof UT) {
               return utName_(v.value0);
           };
-          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 216, column 1 - line 222, column 28): " + [ v.constructor.name ]);
+          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 230, column 1 - line 236, column 28): " + [ v.constructor.name ]);
       }
   };
   var netLookupChainStats = function ($copy_v) {
@@ -4502,6 +4502,11 @@ var PS = {};
       };
   };
   var utNames = Data_Functor.map(Data_Functor.functorArray)(utName_);
+  var utNamesWTPS = function (ns) {
+      return Data_Functor.mapFlipped(Data_Functor.functorArray)(utNames(ns))(function (v) {
+          return v + " TPS";
+      });
+  };
   var getTps = function (ns) {
       return ns.tps;
   };
@@ -4539,8 +4544,8 @@ var PS = {};
                   return cs.effBh;
               })();
               var tps = (function () {
-                  var $183 = isAleph(v.net);
-                  if ($183) {
+                  var $184 = isAleph(v.net);
+                  if ($184) {
                       return Data_Number.infinity;
                   };
                   return netToTps(v.net)(cs);
@@ -4555,8 +4560,8 @@ var PS = {};
           var p = v.p(k);
           var cs = netToChainStats(v.net)(p);
           var tps = (function () {
-              var $187 = isAleph(v.net);
-              if ($187) {
+              var $188 = isAleph(v.net);
+              if ($188) {
                   return Data_Number.infinity;
               };
               return netToTps(v.net)(cs);
@@ -4587,15 +4592,15 @@ var PS = {};
           var p = v.p(k);
           var cs = netToChainStats(v.net)(p);
           var n2 = (function () {
-              var $193 = isAleph(v.net);
-              if ($193) {
+              var $194 = isAleph(v.net);
+              if ($194) {
                   return Data_Number.infinity;
               };
               return netToN2(v.net)(cs);
           })();
           var tps = (function () {
-              var $194 = isAleph(v.net);
-              if ($194) {
+              var $195 = isAleph(v.net);
+              if ($195) {
                   return Data_Number.infinity;
               };
               return netToTps(v.net)(cs);
@@ -4620,11 +4625,11 @@ var PS = {};
   };
   var showMdTable = function (v) {
       return Data_Array.intercalate(Data_Monoid.monoidString)("\x0a")(fixRow2(Data_Functor.map(Data_Functor.functorArray)((function () {
-          var $272 = Amaroo_WP_Formatter.wrap("|");
-          var $273 = Amaroo_WP_Formatter.wrap(" ");
-          var $274 = Data_Array.intercalate(Data_Monoid.monoidString)(" | ");
-          return function ($275) {
-              return $272($273($274($275)));
+          var $273 = Amaroo_WP_Formatter.wrap("|");
+          var $274 = Amaroo_WP_Formatter.wrap(" ");
+          var $275 = Data_Array.intercalate(Data_Monoid.monoidString)(" | ");
+          return function ($276) {
+              return $273($274($275($276)));
           };
       })())(Data_Semigroup.append(Data_Semigroup.semigroupArray)([ v.value0, v.value1.md ])(v.value2))));
   };
@@ -4813,7 +4818,29 @@ var PS = {};
       f: function (cs) {
           return _fmtStd(cs.d2.n);
       }
-  } ]);                    
+  } ]);
+  var utShortComplexityParams = Control_Bind.bind(Control_Bind.bindArray)([ 3000.0 ])(function (k) {
+      return Control_Bind.bind(Control_Bind.bindArray)([ 1.0 / 15.0, 1.0 / 30.0, 1.0 / 60.0 ])(function (bf) {
+          return Control_Bind.bind(Control_Bind.bindArray)([ 112.0, 84.0 ])(function (bh) {
+              return Control_Bind.bind(Control_Bind.bindArray)([ _TX_SIZE ])(function (txSize) {
+                  return Control_Applicative.pure(Control_Applicative.applicativeArray)(Amaroo_WP_Calcs.mkSimplePs(k)({
+                      bf: bf,
+                      bh: bh
+                  })(txSize));
+              });
+          });
+      });
+  });
+  var utShortComplexityData = Data_Functor.map(Data_Functor.functorArray)(Amaroo_WP_Calcs.runChainCalcFor)(utShortComplexityParams);
+  var dappChains = new Amaroo_WP_Tables_Types.Table([ "$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", confRateTh ], {
+      md: Data_Functor.map(Data_Functor.functorArray)(mkSpacer)([ 6, 4, 5, 5, 5, 4 ]),
+      texTabular: "lrrrrr"
+  }, Data_Functor.map(Data_Functor.functorArray)(genDappChainsRow(function (cd) {
+      return cd.ut.std;
+  }))(utShortComplexityData));
+  var tableTps = new Amaroo_WP_Tables_Types.Table(Data_Semigroup.append(Data_Semigroup.semigroupArray)(tpsHeaderCommon)(utNamesWTPS([ new Std(1), new Std(2), new Std(3) ])), tpsAlignments, Data_Functor.map(Data_Functor.functorArray)(genTpsRow(function (cd) {
+      return cd.ut.std;
+  }))(utShortComplexityData));
   var _POLKADOT_BH = 288.0;
   var _POLKADOT_BF = btToF(6);
   var _POLKADOT_1M_K = 184800.0;
@@ -4821,6 +4848,13 @@ var PS = {};
   var _ETH2_BH = 200.0;
   var _ETH2_BF = btToF(12);
   var _ETH2_1M_K = 244200.0;
+  var utComparativeComplexityParams = [ Amaroo_WP_Calcs.mkSimplePs(_POLKADOT_1M_K)({
+      bf: btToF(15),
+      bh: 112.0
+  })(_TX_SIZE), Amaroo_WP_Calcs.mkSimplePs(_ETH2_1M_K)({
+      bf: btToF(15),
+      bh: 112.0
+  })(_TX_SIZE) ];
   var _COMPARE_20K = 20000.0;
   var _UT_20K_CONFIG = Amaroo_WP_Calcs.mkSimplePs(_COMPARE_20K)(_UT_HF)(_TX_SIZE);
   var compareUtOptimizationsA20k = compareUtOptimizations_(_UT_20K_CONFIG)(optimizationProps1);
@@ -4835,46 +4869,25 @@ var PS = {};
               });
           });
       });
-  }))([ Amaroo_WP_Calcs.mkSimplePs(_POLKADOT_1M_K)({
-      bf: btToF(15),
-      bh: 84.0
-  })(_TX_SIZE), Amaroo_WP_Calcs.mkSimplePs(_ETH2_1M_K)({
-      bf: btToF(15),
-      bh: 84.0
-  })(_TX_SIZE) ]);
+  }))(utComparativeComplexityParams);
   var utComplexityData = Data_Functor.map(Data_Functor.functorArray)(Amaroo_WP_Calcs.runChainCalcFor)(utComplexityParams);
-  var dappChains = new Amaroo_WP_Tables_Types.Table([ "$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", confRateTh ], {
-      md: Data_Functor.map(Data_Functor.functorArray)(mkSpacer)([ 6, 4, 5, 5, 5, 4 ]),
-      texTabular: "lrrrrr"
-  }, Data_Functor.map(Data_Functor.functorArray)(genDappChainsRow(function (cd) {
-      return cd.ut.std;
-  }))(utComplexityData));
-  var dappChainsHOPoRs = new Amaroo_WP_Tables_Types.Table([ "$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", confRateTh ], {
-      md: Data_Functor.map(Data_Functor.functorArray)(mkSpacer)([ 6, 4, 5, 5, 5, 4 ]),
-      texTabular: "lrrrrr"
-  }, Data_Functor.map(Data_Functor.functorArray)(genDappChainsRow(function (cd) {
-      return cd.ut.hopors;
-  }))(utComplexityData));
-  var dappChainsHot = new Amaroo_WP_Tables_Types.Table([ "$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", confRateTh ], {
-      md: Data_Functor.map(Data_Functor.functorArray)(mkSpacer)([ 6, 4, 5, 5, 5, 4 ]),
-      texTabular: "lrrrrr"
-  }, Data_Functor.map(Data_Functor.functorArray)(genDappChainsRow(function (cd) {
-      return cd.ut.hot;
-  }))(utComplexityData));
-  var tableTps = new Amaroo_WP_Tables_Types.Table(Data_Semigroup.append(Data_Semigroup.semigroupArray)(tpsHeaderCommon)(utNames([ new Std(1), new Std(2), new Std(3) ])), tpsAlignments, Data_Functor.map(Data_Functor.functorArray)(genTpsRow(function (cd) {
-      return cd.ut.std;
-  }))(utComplexityData));
-  var tableTpsHOPoRs = new Amaroo_WP_Tables_Types.Table(Data_Semigroup.append(Data_Semigroup.semigroupArray)(tpsHeaderCommon)(utNames([ new HOPoRs(1), new HOPoRs(2), new HOPoRs(3) ])), tpsAlignments, Data_Functor.map(Data_Functor.functorArray)(genTpsRow(function (cd) {
-      return cd.ut.hopors;
-  }))(utComplexityData));
-  var tableTpsHot = new Amaroo_WP_Tables_Types.Table(Data_Semigroup.append(Data_Semigroup.semigroupArray)(tpsHeaderCommon)(utNames([ new HOT(1), new HOT(2), new HOT(3) ])), tpsAlignments, Data_Functor.map(Data_Functor.functorArray)(genTpsRow(function (cd) {
-      return cd.ut.hot;
+  var tpsHO = porTpsHeader(HO.create)(Data_Functor.map(Data_Functor.functorArray)(genPoRRow(function (cd) {
+      return cd.ut.ho;
   }))(utComplexityData));
   var tpsHOPoRTs = porTpsHeader(HOPoRTs.create)(Data_Functor.map(Data_Functor.functorArray)(genPoRRow(function (cd) {
       return cd.ut.hoports;
   }))(utComplexityData));
   var tpsHOPoRs = porTpsHeader(HOPoRs.create)(Data_Functor.map(Data_Functor.functorArray)(genPoRRow(function (cd) {
       return cd.ut.hopors;
+  }))(utComplexityData));
+  var tpsHOT = porTpsHeader(HOT.create)(Data_Functor.map(Data_Functor.functorArray)(genPoRRow(function (cd) {
+      return cd.ut.hot;
+  }))(utComplexityData));
+  var tpsOP = porTpsHeader(Std.create)(Data_Functor.map(Data_Functor.functorArray)(genPoRRow(function (cd) {
+      return cd.ut.std;
+  }))(utComplexityData));
+  var tpsOPT = porTpsHeader(T.create)(Data_Functor.map(Data_Functor.functorArray)(genPoRRow(function (cd) {
+      return cd.ut.t;
   }))(utComplexityData));
   var tpsPor = porTpsHeader(PoRs.create)(Data_Functor.map(Data_Functor.functorArray)(genPoRRow(function (cd) {
       return cd.ut.pors;
@@ -4934,8 +4947,8 @@ var PS = {};
           var $tco_done = false;
           var $tco_result;
           function $tco_loop(_k) {
-              var $242 = f(_k) > _1M;
-              if ($242) {
+              var $243 = f(_k) > _1M;
+              if ($243) {
                   $tco_done = true;
                   return _k;
               };
@@ -5134,7 +5147,7 @@ var PS = {};
           if (v.oneMTps instanceof Data_Maybe.Nothing) {
               return Data_Maybe.Nothing.value;
           };
-          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 359, column 32 - line 361, column 25): " + [ v.oneMTps.constructor.name ]);
+          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 373, column 32 - line 375, column 25): " + [ v.oneMTps.constructor.name ]);
       };
       return Data_Maybe.fromJust()(Data_Traversable.sequence(Data_Traversable.traversableArray)(Data_Maybe.applicativeMaybe)(Data_Functor.map(Data_Functor.functorArray)(calc1M)(Data_Array.filter(function (v) {
           return Data_Maybe.isJust(v.oneMTps);
@@ -5150,9 +5163,9 @@ var PS = {};
   var lpCompareUt2OptShard20k = lpCompare2TH(Data_Functor.map(Data_Functor.functorArray)(genLpCompare2Row(_COMPARE_20K))(filterUtVsOther([ Bitcoin.value, new UT(new PoRTs(1)), Eth2.value, new UT(new T(1)), new UT(new HOT(1)), OptShard.value, new UT(new PoRTs(2)), new UT(new T(2)), new UT(new HOT(2)) ])));
   var lpCompareNetworks = (function () {
       var t = Data_Functor.map(Data_Functor.functorArray)((function () {
-          var $276 = genCompareRow(3000.0);
-          return function ($277) {
-              return makeCompareRowConcise($276($277));
+          var $277 = genCompareRow(3000.0);
+          return function ($278) {
+              return makeCompareRowConcise($277($278));
           };
       })())(utVsOther);
       return compareNetsConciseTH(t);
@@ -5168,7 +5181,7 @@ var PS = {};
           if (v.oneMTps instanceof Data_Maybe.Nothing) {
               return Data_Maybe.Nothing.value;
           };
-          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 366, column 32 - line 368, column 25): " + [ v.oneMTps.constructor.name ]);
+          throw new Error("Failed pattern match at Amaroo.WP.Tables (line 380, column 32 - line 382, column 25): " + [ v.oneMTps.constructor.name ]);
       };
       return Data_Maybe.fromJust()(Data_Traversable.sequence(Data_Traversable.traversableArray)(Data_Maybe.applicativeMaybe)(Data_Functor.map(Data_Functor.functorArray)(calc1M)(Data_Array.filter(function (v) {
           return Data_Maybe.isJust(v.oneMTps);
@@ -5184,15 +5197,15 @@ var PS = {};
   exports["repeatSafe"] = repeatSafe;
   exports["mkSpacer"] = mkSpacer;
   exports["tableTps"] = tableTps;
-  exports["tableTpsHot"] = tableTpsHot;
-  exports["tableTpsHOPoRs"] = tableTpsHOPoRs;
   exports["dappChains"] = dappChains;
-  exports["dappChainsHot"] = dappChainsHot;
-  exports["dappChainsHOPoRs"] = dappChainsHOPoRs;
   exports["tpsPor"] = tpsPor;
   exports["tpsPort"] = tpsPort;
   exports["tpsHOPoRs"] = tpsHOPoRs;
   exports["tpsHOPoRTs"] = tpsHOPoRTs;
+  exports["tpsHO"] = tpsHO;
+  exports["tpsHOT"] = tpsHOT;
+  exports["tpsOP"] = tpsOP;
+  exports["tpsOPT"] = tpsOPT;
   exports["compareNets3k"] = compareNets3k;
   exports["compareNets20k"] = compareNets20k;
   exports["lpCompareNetworks"] = lpCompareNetworks;
@@ -6484,7 +6497,7 @@ var PS = {};
               if (format instanceof HTML) {
                   return Amaroo_WP_Tables.showHtmlTable(v.value0);
               };
-              throw new Error("Failed pattern match at Main (line 188, column 16 - line 191, column 31): " + [ format.constructor.name ]);
+              throw new Error("Failed pattern match at Main (line 192, column 16 - line 195, column 31): " + [ format.constructor.name ]);
           })();
           return function __do() {
               Effect_Console.log(wnltn(v.value0))();
@@ -6568,7 +6581,7 @@ var PS = {};
   var defaultPositioning = [ Amaroo_WP_Tables_Types.Hereish.value, Amaroo_WP_Tables_Types.Top.value, Amaroo_WP_Tables_Types.Bottom.value, Amaroo_WP_Tables_Types.Override.value ];
   var devTables = [ new Amaroo_WP_Tables_Types.TD("compareUtOptimizationsA", Amaroo_WP_Tables.compareUtOptimizationsA, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations_a_20k", Amaroo_WP_Tables.compareUtOptimizationsA20k, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tree_tiling_3k_v4_table", Amaroo_WP_Calcs_Tiling.tree_tiling_3k_v4_table, hereish), new Amaroo_WP_Tables_Types.TD("comparison_1m_tps", Amaroo_WP_Tables.compareNets1mTps, hereish) ];
   var lpTables = [ new Amaroo_WP_Tables_Types.TD("lp_compare_networks", Amaroo_WP_Tables.lpCompareNetworks, defaultPositioning), new Amaroo_WP_Tables_Types.TD("comparison_1m_tps", Amaroo_WP_Tables.compareNets1mTps, tablePageOnly), new Amaroo_WP_Tables_Types.TD("comparison_1m_tps_all", Amaroo_WP_Tables.compareNets1mTpsAll, tablePageOnly), new Amaroo_WP_Tables_Types.TD("lp_compare_optimizations_1", Amaroo_WP_Tables.lpCompareUtOptimizations1, defaultPositioning), new Amaroo_WP_Tables_Types.TD("lp_compare_ut1_to_eth2", Amaroo_WP_Tables.lpCompareUt1Eth2, defaultPositioning), new Amaroo_WP_Tables_Types.TD("lp_compare_ut1_to_optshard", Amaroo_WP_Tables.lpCompareUt1OptShard, defaultPositioning), new Amaroo_WP_Tables_Types.TD("lp_compare_ut2_to_optshard", Amaroo_WP_Tables.lpCompareUt2OptShard, defaultPositioning), new Amaroo_WP_Tables_Types.TD("lp_compare_ut2_to_optshard_20k", Amaroo_WP_Tables.lpCompareUt2OptShard20k, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tree_tiling_3k_v3_table", Amaroo_WP_Calcs_Tiling.tree_tiling_3k_v3_table_lp, hereish) ];
-  var wpTables = [ new Amaroo_WP_Tables_Types.TD("tps", Amaroo_WP_Tables.tableTps, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_optimized", Amaroo_WP_Tables.tableTpsHot, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_hopors", Amaroo_WP_Tables.tableTpsHOPoRs, defaultPositioning), new Amaroo_WP_Tables_Types.TD("dapp-chains", Amaroo_WP_Tables.dappChains, defaultPositioning), new Amaroo_WP_Tables_Types.TD("dapp-chains_optimized", Amaroo_WP_Tables.dappChainsHot, defaultPositioning), new Amaroo_WP_Tables_Types.TD("dapp-chains_hopors", Amaroo_WP_Tables.dappChainsHOPoRs, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_por", Amaroo_WP_Tables.tpsPor, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_port", Amaroo_WP_Tables.tpsPort, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_hopors", Amaroo_WP_Tables.tpsHOPoRs, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_hoports", Amaroo_WP_Tables.tpsHOPoRTs, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations_a", Amaroo_WP_Tables.compareUtOptimizationsA, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations_b", Amaroo_WP_Tables.compareUtOptimizationsB, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations_a_20k", Amaroo_WP_Tables.compareUtOptimizationsA20k, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations_b_20k", Amaroo_WP_Tables.compareUtOptimizationsB20k, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_nets_3k", Amaroo_WP_Tables.compareNets3k, hereish), new Amaroo_WP_Tables_Types.TD("compare_nets_20k", Amaroo_WP_Tables.compareNets20k, hereish), new Amaroo_WP_Tables_Types.TD("comparison_1m_tps", Amaroo_WP_Tables.compareNets1mTps, hereish), new Amaroo_WP_Tables_Types.TD("tree_tiling_3k_v4_table", Amaroo_WP_Calcs_Tiling.tree_tiling_3k_v4_table, hereish) ];
+  var wpTables = [ new Amaroo_WP_Tables_Types.TD("tps", Amaroo_WP_Tables.tableTps, defaultPositioning), new Amaroo_WP_Tables_Types.TD("dapp-chains", Amaroo_WP_Tables.dappChains, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_por", Amaroo_WP_Tables.tpsPor, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_port", Amaroo_WP_Tables.tpsPort, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_hopors", Amaroo_WP_Tables.tpsHOPoRs, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_hoports", Amaroo_WP_Tables.tpsHOPoRTs, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_ho", Amaroo_WP_Tables.tpsHO, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_hot", Amaroo_WP_Tables.tpsHOT, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_op", Amaroo_WP_Tables.tpsOP, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_opt", Amaroo_WP_Tables.tpsOPT, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations_a", Amaroo_WP_Tables.compareUtOptimizationsA, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations_b", Amaroo_WP_Tables.compareUtOptimizationsB, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations_a_20k", Amaroo_WP_Tables.compareUtOptimizationsA20k, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations_b_20k", Amaroo_WP_Tables.compareUtOptimizationsB20k, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_nets_3k", Amaroo_WP_Tables.compareNets3k, hereish), new Amaroo_WP_Tables_Types.TD("compare_nets_20k", Amaroo_WP_Tables.compareNets20k, hereish), new Amaroo_WP_Tables_Types.TD("comparison_1m_tps", Amaroo_WP_Tables.compareNets1mTps, hereish), new Amaroo_WP_Tables_Types.TD("tree_tiling_3k_v4_table", Amaroo_WP_Calcs_Tiling.tree_tiling_3k_v4_table, hereish) ];
   var allTables = (function () {
       if (Data_Array.elem(Data_Eq.eqString)("--lp-tables")($foreign.argv)) {
           return lpTables;
@@ -6579,7 +6592,7 @@ var PS = {};
       if (Data_Boolean.otherwise) {
           return wpTables;
       };
-      throw new Error("Failed pattern match at Main (line 114, column 1 - line 114, column 29): " + [  ]);
+      throw new Error("Failed pattern match at Main (line 118, column 1 - line 118, column 29): " + [  ]);
   })();
   var logAllTables = function (format) {
       return function __do() {

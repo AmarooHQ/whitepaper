@@ -1,16 +1,24 @@
-\emph{Amaroo's} consensus mechanism: \emph{Ultra Terminum}. \emph{Ultra Terminum} (UT) is a proof-agnostic cross-chain consensus strategy providing multiple scaling configurations: $\UT{1}\;(O(c^2))$, $\UT{2}\;(O(c^3))$, $\UT{3}\;(O(c^4))$, and $\UTinf{}\;(O(n))$. UT remains secure against an attacker with up to $O(n)$ resources. UT addresses the core conflict of the \emph{Scalability Trilemma} (herein called \emph{Buterin's Trilemma}).
+\emph{Amaroo's} consensus mechanism: \emph{Ultra Terminum}.
+\emph{Ultra Terminum} (UT) is a proof-agnostic cross-chain consensus strategy providing multiple scaling configurations: $\UT{1}\;(O(c^2))$, $\UT{2}\;(O(c^3))$, $\UT{3}\;(O(c^4))$, and $\UTinf{}\;(O(n))$.
+UT remains secure against an attacker with up to $O(n)$ resources.
+UT addresses the core conflict of the \emph{Scalability Trilemma} (herein called \emph{Buterin's Trilemma}).
 \par
-With reasonable parameters (i.e., a per-chain load comparable to Bitcoin, $k = 3000$ B/s; 15s block times; and one level of nested dapp-chains) \emph{Amaroo's} predicted capacity -- using $\UT{2}$ -- exceeds $800,000$ TPS without \emph{layer 2} scaling methods. This is Amaroo's \emph{initial configuration}.
+With reasonable parameters (i.e., a per-chain load comparable to Bitcoin, $k = 3000$ B/s; 15s block times; and one level of nested dapp-chains) \emph{Amaroo's} predicted capacity -- using $\UT{2}$ -- exceeds $1,000,000$ TPS without \emph{layer 2} scaling methods.
+This is Amaroo's \emph{initial configuration}.
 % In the $\UT{2}$ configuration, doubling the block time quadruples TPS.
 \par
-Capacity of $\UTinf{}$ is \emph{independent} of parameters and is \emph{unbounded} -- i.e., practically infinite. It has variants $\UTinf{1}$, $\UTinf{2}$, and $\UTinf{3}$; corresponding to $\UT{1}$, $\UT{2}$, and $\UT{3}$, respectively.
+Capacity of $\UTinf{}$ is \emph{independent} of parameters and is \emph{unbounded} -- i.e., practically infinite.
+It has variants $\UTinf{1}$, $\UTinf{2}$, and $\UTinf{3}$; corresponding to $\UT{1}$, $\UT{2}$, and $\UT{3}$, respectively.
 \par
 % Confirmation times within UT are $\frac{1}{O(c)}$, i.e., confirmation rate is $O(c)$.
 Confirmation times within UT are $O(c^{-1})$, i.e., confirmation rate is $O(c)$.
-The initial configuration will have an \emph{maximum} confirmation frequency of $\sim 13$ Hz.
+The initial configuration will have an \emph{maximum} confirmation frequency of $\sim 20$ Hz.
 Typically, sharded blockchains have a confirmation frequency $< 0.2$ Hz.
 \par
-Some existing sharded (or otherwise $O(c^2)$) blockchain designs claim to be capable of $10^6$ TPS. For comparison's sake, $\UT{2}$ configurations -- with \emph{equivalent} parameters -- have a maximum capacity exceeding $10^{10}$ TPS. Such a configuration would have a system-wide maximum throughput exceeding 2000 GB/s of raw transactions, and a confirmation frequency exceeding 500 Hz. It is reasonable to say that UT out-scales each of the architectures of Cardano, Eth2, and Polkadot by multiple orders of magnitude.
+Some existing sharded (or otherwise $O(c^2)$) blockchain designs claim to be capable of $10^6$ TPS.
+For comparison's sake, $\UT{2}$ configurations -- with \emph{equivalent} parameters -- have a maximum capacity exceeding $10^{10}$ TPS.
+Such a configuration would have a system-wide maximum throughput exceeding 2000 GB/s of raw transactions, and a confirmation frequency exceeding 500 Hz.
+It is reasonable to say that UT out-scales each of the architectures of Cardano, Eth2, and Polkadot by multiple orders of magnitude.
 \par
 \ifthenelse{\equal{\BuildMode}{draft}}{
     \textbf{NOTE -- PRERELEASE -- DO NOT SHARE OR DISTRIBUTE!}

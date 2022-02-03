@@ -193,6 +193,10 @@ _UT_INIT_CONFIG = mkSimplePs 3000.0 _UT_HF _TX_SIZE
 _COMPARE_20K = 20_000.0
 _UT_20K_CONFIG = mkSimplePs _COMPARE_20K _UT_HF _TX_SIZE
 
+utComparativeComplexityParams :: Array Params
+utComparativeComplexityParams =
+      [ mkSimplePs _POLKADOT_1M_K {bf: btToF 15, bh: 112.0} _TX_SIZE
+      , mkSimplePs _ETH2_1M_K {bf: btToF 15, bh: 112.0} _TX_SIZE ]
 
 utComplexityParams :: Array Params
 utComplexityParams = do
@@ -201,10 +205,20 @@ utComplexityParams = do
       bh <- [112.0, 84.0]
       txSize <- [_TX_SIZE]
       pure $ mkSimplePs k {bf, bh} txSize
-    <> [ mkSimplePs _POLKADOT_1M_K {bf: btToF 15, bh: 84.0} _TX_SIZE
-       , mkSimplePs _ETH2_1M_K {bf: btToF 15, bh: 84.0} _TX_SIZE ]
+    <> utComparativeComplexityParams
+
+utShortComplexityParams :: Array Params
+utShortComplexityParams = do
+      k <- [3000.0]
+      bf <- [1.0 / 15.0, 1.0 / 30.0, 1.0 / 60.0]
+      bh <- [112.0, 84.0]
+      txSize <- [_TX_SIZE]
+      pure $ mkSimplePs k {bf, bh} txSize
+    -- <> utComparativeComplexityParams
+
 
 utComplexityData = runChainCalcFor <$> utComplexityParams
+utShortComplexityData = runChainCalcFor <$> utShortComplexityParams
 
 btToF :: Int -> Number
 btToF t = 1.0 / (toNumber t)
@@ -384,23 +398,27 @@ genTpsRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> getTps <
 tpsHeaderCommon = ["$k$, $B_f$, $B_h$", "$O(c)$", "Sharded $O(c^2)$"]
 tpsAlignments = {md: mkSpacer <$> [6, 2, 5, 4, 4, 4], texTabular: "lrrrrr"}
 
+utNamesWTPS ns = utNames ns <#> (_ <> " TPS")
+
 tableTps :: Table
 tableTps = Table
-    (tpsHeaderCommon <> utNames [Std 1, Std 2, Std 3])  -- , sigmaTps 1, sigmaTps 2, sigmaTps 3]
+    (tpsHeaderCommon <> utNamesWTPS [Std 1, Std 2, Std 3])  -- , sigmaTps 1, sigmaTps 2, sigmaTps 3]
     tpsAlignments
-    (genTpsRow (\cd -> cd.ut.std) <$> utComplexityData)
+    (genTpsRow (\cd -> cd.ut.std) <$> utShortComplexityData)
 
+-- not in use
 tableTpsHot :: Table
 tableTpsHot = Table
     (tpsHeaderCommon <> utNames [HOT 1, HOT 2, HOT 3])
     tpsAlignments
-    (genTpsRow (\cd -> cd.ut.hot) <$> utComplexityData)
+    (genTpsRow (\cd -> cd.ut.hot) <$> utShortComplexityData)
 
+-- not in use
 tableTpsHOPoRs :: Table
 tableTpsHOPoRs = Table
     (tpsHeaderCommon <> utNames [HOPoRs 1, HOPoRs 2, HOPoRs 3])
     tpsAlignments
-    (genTpsRow (\cd -> cd.ut.hopors) <$> utComplexityData)
+    (genTpsRow (\cd -> cd.ut.hopors) <$> utShortComplexityData)
 
 genDappChainsRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> [(utF cd).d1.n, (utF cd).d2.n, (utF cd).d3.n, (utF cd).deltaBigS]) <> [fmtDyn fdStd (utF cd).confRate]
 
@@ -408,19 +426,21 @@ dappChains :: Table
 dappChains = Table
     ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", confRateTh]
     {md: mkSpacer <$> [6, 4, 5, 5, 5, 4], texTabular: "lrrrrr"}
-    (genDappChainsRow (\cd -> cd.ut.std) <$> utComplexityData)
+    (genDappChainsRow (\cd -> cd.ut.std) <$> utShortComplexityData)
 
+-- not in use
 dappChainsHot :: Table
 dappChainsHot = Table
     ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", confRateTh]
     {md: mkSpacer <$> [6, 4, 5, 5, 5, 4], texTabular: "lrrrrr"}
-    (genDappChainsRow (\cd -> cd.ut.hot) <$> utComplexityData)
+    (genDappChainsRow (\cd -> cd.ut.hot) <$> utShortComplexityData)
 
+-- not in use
 dappChainsHOPoRs :: Table
 dappChainsHOPoRs = Table
     ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", confRateTh]
     {md: mkSpacer <$> [6, 4, 5, 5, 5, 4], texTabular: "lrrrrr"}
-    (genDappChainsRow (\cd -> cd.ut.hopors) <$> utComplexityData)
+    (genDappChainsRow (\cd -> cd.ut.hopors) <$> utShortComplexityData)
 
 -- TODO: replace `fmtDyn fdPlain`
 genPoRRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> [ut.d1.n, ut.d1.tps, ut.d2.n, ut.d2.tps, ut.porBytes]) <> [fmtDyn fdStd ut.confRate] -- <> (fmtDyn fdStdTwo <$> [ut.d1.n / ut.d1.p.k])
@@ -446,6 +466,18 @@ tpsHOPoRs = porTpsHeader HOPoRs (genPoRRow (\cd -> cd.ut.hopors) <$> utComplexit
 
 tpsHOPoRTs :: Table
 tpsHOPoRTs = porTpsHeader HOPoRTs (genPoRRow (\cd -> cd.ut.hoports) <$> utComplexityData)
+
+tpsHO :: Table
+tpsHO = porTpsHeader HO (genPoRRow (\cd -> cd.ut.ho) <$> utComplexityData)
+
+tpsHOT :: Table
+tpsHOT = porTpsHeader HOT (genPoRRow (\cd -> cd.ut.hot) <$> utComplexityData)
+
+tpsOP :: Table
+tpsOP = porTpsHeader Std (genPoRRow (\cd -> cd.ut.std) <$> utComplexityData)
+
+tpsOPT :: Table
+tpsOPT = porTpsHeader T (genPoRRow (\cd -> cd.ut.t) <$> utComplexityData)
 
 -- todo: fix fmtDyn fdPlain
 genCompareRow k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdPlainMixed <$> [cs.effBh, cs.effDh]) <> ([fmtDyn fdStdZero scalingFactor, fmtDyn fdStdMixed n2]) <> (fmtDyn fdStdMixed <$> [tps])

@@ -58,15 +58,19 @@ here = [Here]
 wpTables :: Array TableDesc
 wpTables =
     [ TD "tps" tableTps defaultPositioning
-    , TD "tps_optimized" tableTpsHot defaultPositioning
-    , TD "tps_hopors" tableTpsHOPoRs defaultPositioning
+    -- , TD "tps_optimized" tableTpsHot defaultPositioning
+    -- , TD "tps_hopors" tableTpsHOPoRs defaultPositioning
     , TD "dapp-chains" dappChains defaultPositioning
-    , TD "dapp-chains_optimized" dappChainsHot defaultPositioning
-    , TD "dapp-chains_hopors" dappChainsHOPoRs defaultPositioning
+    -- , TD "dapp-chains_optimized" dappChainsHot defaultPositioning
+    -- , TD "dapp-chains_hopors" dappChainsHOPoRs defaultPositioning
     , TD "tps_por" tpsPor defaultPositioning
     , TD "tps_port" tpsPort defaultPositioning
     , TD "tps_hopors" tpsHOPoRs defaultPositioning
     , TD "tps_hoports" tpsHOPoRTs defaultPositioning
+    , TD "tps_ho" tpsHO defaultPositioning
+    , TD "tps_hot" tpsHOT defaultPositioning
+    , TD "tps_op" tpsOP defaultPositioning
+    , TD "tps_opt" tpsOPT defaultPositioning
     , TD "compare_optimizations_a" compareUtOptimizationsA defaultPositioning
     , TD "compare_optimizations_b" compareUtOptimizationsB defaultPositioning
     , TD "compare_optimizations_a_20k" compareUtOptimizationsA20k defaultPositioning
