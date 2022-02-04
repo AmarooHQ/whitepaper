@@ -388,29 +388,32 @@ utSpec = describe "ut" do
               <#> (\(Tuple k n) -> show k <> "," <> show n)
       else pure unit
 
-    describe "por exp 2" do
-      it "quickchecks" do
-        quickCheck porsForRangesQC
-      it "test findMaxPoRsN1ForRanges" do
-        let r10MPors = kRange {from: 10_000.0, to: 10_000_000.0, step: 10_000.0}
-                  <#> (\k -> mkSimplePs k {bf: btToF 15, bh: 84.0} 250.0)
-            r10MPorts = kRange {from: 10_000.0, to: 10_000_000.0, step: 10_000.0}
-                  <#> (\k -> mkSimplePs k {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0)
-            rPors = kRange {from: 100.0, to: 100_000.0, step: 33.33333333333}
-                  <#> round <#> (\k -> mkSimplePs k {bf: btToF 15, bh: 84.0} 250.0)
-            rPorts = kRange {from: 100.0, to: 100_000.0, step: 33.33333333333}
-                  <#> round <#> (\k -> mkSimplePs k {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0)
-        -- -- liftEffect $ C.log $ "testing new pors for ranges"
-        -- liftEffect $ writeTextFile UTF8 "ports-k-vs-n1-to10MBs.csv" $ intercalate "\n" $
-        --   findMaxPoRsN1ForRanges {g: 16.0, r} <#> (\(Tuple ps {i}) -> show (pToPF ps).k <> "," <> show i)
-        liftEffect $ writePoRTableToCsv {r: r10MPors, g: 32.0, fn: "pors-k-vs-n-to-k-eq-10M.csv"}
-        liftEffect $ writePoRTableToCsv {r: r10MPorts, g: 16.0, fn: "ports-k-vs-n-to-k-eq-10M.csv"}
-        liftEffect $ writePoRTableToCsv {r: rPors, g: 32.0, fn: "pors-k-vs-n-to-k-eq-100000.csv"}
-        liftEffect $ writePoRTableToCsv {r: rPorts, g: 16.0, fn: "ports-k-vs-n-to-k-eq-100000.csv"}
-        liftEffect $ writeHOPoRTableToCsv {r: r10MPors, g: 32.0, fn: "hopors-k-vs-n-to-k-eq-10M.csv"}
-        liftEffect $ writeHOPoRTableToCsv {r: r10MPorts, g: 16.0, fn: "hoports-k-vs-n-to-k-eq-10M.csv"}
-        liftEffect $ writeHOPoRTableToCsv {r: rPors, g: 32.0, fn: "hopors-k-vs-n-to-k-eq-100000.csv"}
-        liftEffect $ writeHOPoRTableToCsv {r: rPorts, g: 16.0, fn: "hoports-k-vs-n-to-k-eq-100000.csv"}
+    let doPoRExp2 = false
+    if not doPoRExp2
+      then pure unit
+      else describe "por exp 2" do
+        it "quickchecks" do
+          quickCheck porsForRangesQC
+        it "test findMaxPoRsN1ForRanges" do
+          let r10MPors = kRange {from: 10_000.0, to: 10_000_000.0, step: 10_000.0}
+                    <#> (\k -> mkSimplePs k {bf: btToF 15, bh: 84.0} 250.0)
+              r10MPorts = kRange {from: 10_000.0, to: 10_000_000.0, step: 10_000.0}
+                    <#> (\k -> mkSimplePs k {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0)
+              rPors = kRange {from: 100.0, to: 100_000.0, step: 33.33333333333}
+                    <#> round <#> (\k -> mkSimplePs k {bf: btToF 15, bh: 84.0} 250.0)
+              rPorts = kRange {from: 100.0, to: 100_000.0, step: 33.33333333333}
+                    <#> round <#> (\k -> mkSimplePs k {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0)
+          -- -- liftEffect $ C.log $ "testing new pors for ranges"
+          -- liftEffect $ writeTextFile UTF8 "ports-k-vs-n1-to10MBs.csv" $ intercalate "\n" $
+          --   findMaxPoRsN1ForRanges {g: 16.0, r} <#> (\(Tuple ps {i}) -> show (pToPF ps).k <> "," <> show i)
+          liftEffect $ writePoRTableToCsv {r: r10MPors, g: 32.0, fn: "pors-k-vs-n-to-k-eq-10M.csv"}
+          liftEffect $ writePoRTableToCsv {r: r10MPorts, g: 16.0, fn: "ports-k-vs-n-to-k-eq-10M.csv"}
+          liftEffect $ writePoRTableToCsv {r: rPors, g: 32.0, fn: "pors-k-vs-n-to-k-eq-100000.csv"}
+          liftEffect $ writePoRTableToCsv {r: rPorts, g: 16.0, fn: "ports-k-vs-n-to-k-eq-100000.csv"}
+          liftEffect $ writeHOPoRTableToCsv {r: r10MPors, g: 32.0, fn: "hopors-k-vs-n-to-k-eq-10M.csv"}
+          liftEffect $ writeHOPoRTableToCsv {r: r10MPorts, g: 16.0, fn: "hoports-k-vs-n-to-k-eq-10M.csv"}
+          liftEffect $ writeHOPoRTableToCsv {r: rPors, g: 32.0, fn: "hopors-k-vs-n-to-k-eq-100000.csv"}
+          liftEffect $ writeHOPoRTableToCsv {r: rPorts, g: 16.0, fn: "hoports-k-vs-n-to-k-eq-100000.csv"}
 
     describe "comparative k graph" do
       it "writes csv for comparative k graph" do
