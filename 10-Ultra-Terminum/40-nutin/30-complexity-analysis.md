@@ -4,9 +4,15 @@
 
 \label{sec:ut-complexity}
 
-UT has two primary methods of scaling: reflection and dapp-chains. Reflection is novel. Dapp-chains are similar to many of the sharding and pseudo-sharding ideas proposed for other networks (Polkadot, Eth2, etc), though there are fewer restrictions on dapp-chains in UT compared to other designs. Additionally, dapp-chains in UT are hosted by the simplex. In the case of PoS dapp-chains, this provides \emph{additional} security compared to 'naked' PoS chains -- and without compromising on any other associated developments (e.g., finality). Hosting dapp-chains on simplex-chains also provides greater maximum capacity than a single base-chain.
+UT has two primary methods of scaling: horizontally via mutual PoR (simplex-chains), and vertically via one-way PoR (dapp-chains).
+Horizontal scaling via PoR is novel.
+Dapp-chains are similar to many of the sharding and pseudo-sharding ideas proposed for other networks (Polkadot, Eth2, etc), though there are fewer restrictions on dapp-chains in UT compared to other designs.
+Additionally, dapp-chains in UT are secured by the entire simplex.
+In the case of PoS dapp-chains, this provides \emph{additional} security compared to 'naked' PoS chains.
+Hosting dapp-chains on many simplex-chains also provides greater system-wide maximum capacity than a network built upon a single base-chain.
 
-A common method of sharding is to *nest* blockchains. For example, Ethereum 2 has *The Beacon Chain* -- its root-chain (the single base-chain of a network).
+A common method of sharding is to *nest* blockchains.
+For example, Ethereum 2 has *The Beacon Chain* -- its root-chain (the single base-chain of a network).
 
 \bquote{
     The Beacon Chain will conduct or coordinate the expanded network of shards and stakers. But it won't be like the Ethereum mainnet of today. It can't handle accounts or smart contracts.
@@ -15,18 +21,41 @@ A common method of sharding is to *nest* blockchains. For example, Ethereum 2 ha
 This type of configuration, where a base-chain facilitates child-chains, is referred to as *nesting* in the context of discussing UT's architecture and complexity.
 Base-chains are at the first level of nesting.
 The shards of Ethereum 2 are *a level of nesting* above the Beacon Chain, i.e., nesting level 2.
+UT's dapp-chains are also at nesting level 2.
 
 \defineTerm{Base-chain}{A chain that has no parent-chains; i.e., is at the base nesting level}
 
-Sometimes (but not always) people use terms like *layer 2* to describe this sort of nesting, though such usage of *layer 2* is ambiguous and potentially misleading. It easily confuses nesting with off-chain scaling methods (such as payment channels or ephemeral 'child' blockchains, e.g., Plasma), and it potentially misleads readers about the security properties of nested blockchains. Nested blockchains *can* faithfully inherit the security properties of their parent-chains, which is not the case for layer 2 solutions.
+Sometimes (but not always) people use terms like *layer 2* to describe this sort of nesting, though such usage of *layer 2* is ambiguous and potentially misleading.
+It easily confuses nesting with off-chain scaling methods (such as payment channels, rollups, or ephemeral 'child' blockchains, e.g., Plasma), and it potentially misleads readers about the security properties of nested blockchains.
+Nested blockchains *can* faithfully inherit the security properties of their parent-chains, which is not the case for layer 2 solutions prior to finalization.
 
-Furthermore, terms like *layer x* cannot accurately describe UT's design. Consider a PoS dapp-chain on UT. Would that dapp-chain be *layer 1* or *layer 2*? It would be misleading to call them *layer 2* whilst comparable chains (like Ethereum 2, Polkadot, or Cardano) are called *layer 1*. Such UT dapp-chains have all the security qualities equivalent to stand-alone PoS chains, *and more*. If they were called *layer 1* chains, then what is the simplex -- *layer 0*? It is clear that the common idea behind *layer 1/2* scaling does not have sufficient capacity to accurately describe UT's simplex- and dapp-chains; it is inadequate.
+Furthermore, terms like *layer x* cannot accurately describe UT's design.
+Consider a PoS dapp-chain on UT.
+Would that dapp-chain be *layer 1* or *layer 2*?
+It would be misleading to call it *layer 2* whilst \emph{directly comparable} chains (like Ethereum 2, Polkadot, or Cardano) are called *layer 1*.
+Such PoS UT dapp-chains have \emph{all} the security qualities of an equivalent stand-alone PoS chains, *and more*.
+If they were called *layer 1* chains, then what is the simplex -- *layer 0*?
+It is clear that the common idea behind *layer 1/2* scaling does not have sufficient capacity to accurately describe UT's simplex- and dapp-chains; it is inadequate.
 
-The following derivations focus on *throughput* of particular blockchain designs and scaling configurations. Raw throughput of a network, $T_i$, is measured in bytes/sec (B/s) for some level of nesting, $i$. Note that $T_i$ directly corresponds to a design's maximum transactions per second (TPS) via $\text{Tx}_{i} = \nicefrac{T_i}{\text{Tx}_{\text{avg}}}$, where $\text{Tx}_{\text{avg}}$ is the average size of a transaction. The raw B/s throughput of a chain at the $i^{\text{th}}$ level of nesting is denoted by $k_i$. Note that $T_i$ is a *calculated* value, but $k_i$ is a *parameter* that may be chosen. An increase to $k_i$ is equivalent or similar to an increase in maximum block size.
+#### Analysis Methodology
 
-Shown below are relationships between the maximum number of chains at a level of nesting, $N_i$, and the maximum network throughput at that level of nesting, $T_i$. For most existing blockchain designs, note that $N_1 = 1$.
+The following derivations focus on *throughput* of particular blockchain designs and scaling configurations.
+These derivations will let us evaluate the complexity of each design.
+
+Raw throughput of a network, $T_i$, is measured in bytes/sec (B/s) for some level of nesting, $i$.
+Note that $T_i$ directly corresponds to a design's maximum transactions per second ($\text{TPS}_i$), where $\text{Tx}_{\text{avg}}$ is the average size of a transaction, via:
+\begin{equation*}
+  \text{TPS}_{i} = \nicefrac{T_i}{\text{Tx}_{\text{avg}}}
+\end{equation*}
+The raw B/s throughput of a chain at the $i^{\text{th}}$ level of nesting is denoted by $k_i$.
+Note that $T_i$ is a *calculated* value, but $k_i$ is a *parameter* that may be chosen.
+An increase to $k_i$ is effectively an increase in maximum block size.
+
+We will also derive relationships between the maximum number of chains at a level of nesting, $N_i$, and the maximum network throughput at that level of nesting, $T_i$.
+For most existing blockchain designs, $N_1 = 1$.
 
 Additionally, $O(k_i)$ is \emph{defined} as $O(k_i) \equiv O(c)$.
+This is reasonable provided there are no $O(c)$ bottlenecks, e.g., network bandwidth, CPU throughput, memory requirements, etc (\autoref{sec:a-principle-of-scaling}).
 
 ### Complexity of $O(c)$ Chains
 
@@ -63,20 +92,25 @@ Suppose the root-chain has a throughput of $k_1$ B/s and it can support up to $N
   It's typical, though, that the headers of nested chains, alone, are not sufficient: additional data is required.
   For example, in an \emph{Ethereum 2} beacon block, each shard has a header size of 280 B, but there is additional overhead, and a reasonable lower-bound is that each header uses a minimum of 312 B per beacon block.\footnotemark
   \par
-  In the case of \emph{Polkadot}, it is \href{https://github.com/AmarooHQ/polkadot-effective-dh/blob/5cd0f0d21ff1cd3c57d1c2af70aaf6d8ee19dc11/main.js}{measurable} that a minimum of 819 B is used in the \texttt{paraInclusion.candidateBacked} extrinsic (i.e., transaction).
+  In the case of \emph{Polkadot}, it is \href{https://github.com/AmarooHQ/polkadot-effective-dh/blob/5cd0f0d21ff1cd3c57d1c2af70aaf6d8ee19dc11/main.js}{measurable}\footnotemark{} that a typical minimum of 819 B is used in the \texttt{paraInclusion.candidateBacked} extrinsic (i.e., transaction).
   So, a lower-bound on the effective header size of a parachain is 819 B (this does not include \emph{bitfields}\footnotemark).
   \par
   In those situations, with regards to these capacity derivations, one can use the \emph{effective} header size as a replacement for the \emph{raw} header size.
 }
 
-\addtocounter{footnote}{-1}
+\addtocounter{footnote}{-2}
 \footnotetext{
-  The \emph{current} Ethereum 2 \href{https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/sharding/beacon-chain.md\#beaconblockbody}{sharding spec} has capacity for 2:1 attestations to shards per block (with 64 shards), but only 32 B of each attestation is dedicated to sharding.
+  As of late September 2021, the Ethereum 2 \href{https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/sharding/beacon-chain.md\#beaconblockbody}{sharding spec} has capacity for 2:1 attestations to shards per block (with 64 shards), but only 32 B of each attestation is dedicated to sharding.
   The spec also has capacity for 4:1 shard headers to shards per block.
   It seems reasonable that capacity which exists will be used within reason.
   Thus a reasonable lower-bound for the effective header-size of shards is taken via: $1\times$ headers per shard per block, $1\times$ attestations per shard per block (which do not count towards effective header-size), and $1\times$ 32 B per attestation per block.
   Shards have headers of 280 B, so the minimum effective header size is taken to be 312 B.
   (note: a required dependency of the current sharding spec is the \href{https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/merge/beacon-chain.md\#beaconblockbody}{current merge spec} and \href{https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/phase0/beacon-chain.md}{current phase0 spec}.)
+}
+\footnotetext{
+  Whilst some parachain headers exist that are smaller than 819 B, it's not really significant for this analysis (a reduction of 10% wouldn't change much).
+  We're already ignoring bitfields, and 819 B seems optimistic if we're interested in the \emph{average} parachain header size.
+  All-in-all, I guess that 819 B is a bit generous, and (ideally) all claims about existing chains in this paper err on the side of generosity.
 }
 \footnotetext{
   Bitfields is a Polkadot term -- it's a list of hundreds of signatures, totalling $> 14$ KB per block on the current Kusama testnet (October $3^{\text{rd}}$ 2021).
@@ -406,12 +440,11 @@ Practically, this effect means that a decrease to the size of headers has *incre
 
 \todo{some discussion to replace +HOT stuff.}
 
-For comparisons of each UT variant's capacity given , see \autoref{sec:ut-variant-complexities}.
 
 ### Comparison of UT Variants
 
 \autoref{table:compare_optimizations_a} and \autoref{table:compare_optimizations_b} show a comparison between UT variants.
-Note that the +PoRs variants are covered in \autoref{sec:por-with-proofs}.
+For comparisons over a range of parameters, see \autoref{sec:ut-variant-complexities}.
 
 %% INSERT ### TABLE: compare_optimizations_a
 

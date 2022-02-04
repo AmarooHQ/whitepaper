@@ -1025,6 +1025,8 @@ Nice and simple.
 
 #### Coins per Confirmation
 
+\label{sec:coins-per-confirmation}
+
 Given a multi-chain network, could we measure measure block-weight in coins?
 It seems promising and elegant if it works, but does it have any real-world meaning?
 
@@ -1078,7 +1080,7 @@ Of course, this is only useful over \emph{multiple} chains.
   One thing PoS chains could try is: measuring weight \emph{in another chain's hashes}.
 }
 This happens because these conversion methods \emph{don't try to convert work done at different times.}
-PoR only ever converts \emph{near-simultaneous work.}
+PoR only ever converts \emph{near-simultaneous work}, i.e., if the coin-weights of reflecting blocks are summed, that is always converted to local work \emph{with respect to some specific moment in time.}
 
 While measuring weight in coins (in this case, at least) seems to have some meaning, we probably shouldn't \emph{leave} chain-weight in those units.
 The difficulty of a PoW network converts network size (participation) into hashes, and it is adjusted regularly.
