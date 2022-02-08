@@ -17,6 +17,8 @@ That would mean that chain L contains a header, $H_{R,1a}$, for chain R for whic
 This does not break chain R, but it could mean that other blocks on chain R temporarily have a harder time competing, or waste the resources of chain R nodes as they go looking for that block, $B_{R,1a}$.
 Furthermore, it risks chain R miners doing SPV mining, which is bad.
 
+\todo{i think the below is wrong. should probs rewrite section}
+
 After $H_{R,1a}$ is reflected, chain R miners shouldn't build on that header without validating the block (so they should not mine on top of it).
 Before long they'd produce an alternate valid block, $B_{R,1b}$.
 But $B_{R,1b}$ (and its header, $H_{R,1b}$) wouldn't be reflected yet.
@@ -71,6 +73,10 @@ Given \autoref{sec:availability-of-blocks}, this is possible without significant
 
 A practical method for treating proofs of reflection as witnesses that may be excluded/pruned is discussed in \autoref{sec:segmented-state}.
 
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
+
 #### Verkle Trees and Shorter PoRs
 
 \label{sec:verkle-proofs}
@@ -79,6 +85,10 @@ A practical method for treating proofs of reflection as witnesses that may be ex
 Similar to merkle trees, they allow efficient proofs of membership against a cryptographically secure root.
 
 \todo{probs remove -- not worth explaining here.}
+
+%% END ### DRAFT
+
+%% BEGIN ### RELEASE
 
 ### Segmented State
 
@@ -160,8 +170,7 @@ This UT protocol variant is +HOPoRs, the combination of *header omission* (+HO) 
 
 %% BEGIN ### DRAFT
 
-%%
-
+\begin{figure}[H]
 \begin{equation*}
 \xymatrix@R=14pt@C=-10pt@M=4pt{
     \text{Conservative} \ar@*{[deepskyblue]}[d] \\
@@ -172,6 +181,10 @@ This UT protocol variant is +HOPoRs, the combination of *header omission* (+HO) 
     & & & \text{Maximal TPS} \ar@*{[darkorange]}[u]
 }
 \end{equation*}
+\caption{
+    Possible upgrade paths between UT variants, starting at $\UT{\text{+PoRs}}$ -- the most conservative variant.
+}
+\end{figure}
 
 %% END ### DRAFT
 
@@ -522,38 +535,6 @@ If there were, it'd be possible to temporarily limit the attacker to $<50\%$ of 
 \todoDraftOnly{Dynamic average block-size for simplex-chains based on dapp-chain headers having some PoW}
 
 %% END ### RELEASE
-
-%% BEGIN ### DRAFT
-
-### Qualities of Different Security Methods
-
-\label{sec:quality-groups-unused}
-
-\todo{This is draft now -- either rewrite or cut.}
-
-Consider these 3 categories of methods of securing a blockchain:
-
-* PoW with ASICs
-* PoW without ASICs (e.g., GPUs/CPUs; aka \`\`ASIC resistant'')
-* PoS
-
-PoW+ASICs means the miner-base is inflexible; they don't have many choices for where to point their ASICs. It's super high hash-rate, though, and has near-optimal thermodynamic security given the state of ASIC manufacturing (e.g., 5nm chips).
-
-PoW+GPUs means the miner-base is super flexible; there are lots of choices for profitable chains to mine. They can pick and choose and have low overhead to doing so. They aren't near the limit for thermodynamic security, though. If relevant ASICs come along they'll always out-compete GPUs.
-
-PoS has an inflexible miner base too -- most PoS schemes (e.g., DPoS, etc) require the miners to stake coins and that happens over a period of time. However, there is a sense where the thermodynamic security of PoS is high (provided ECDSAs and relevant crypto keeps working). There's another sense where the thermodynamic security of PoS is low: miners control their private keys and have near zero energy cost per signature. The former is irrelevant as long as the latter is true. That's the reason that PoS systems include mechanics like *slashing*.
-
-\todoDraftOnly{Polish different qualities section + check questions are answered.}
-
-So these methods of doing blockchain security all have different qualities. What does it mean for Amaroo, and how should the UT simplex be divided between these groups? Note: this assumes that there is a secure way to do PoS consensus.
-
-UT's consensus is emergent from an *additive and collaborative* process. Adding more simplex-chains increases security incrementally, but if one simplex-chain fails (or is attacked) then it doesn't have magnified negative effects for the rest of the network (e.g., by causing a network-wide DoS). This means we can potentially add lots of different types of blockchain security, with different qualities, to create a platform where dapp-authors can *choose the desired qualities*.
-
-Do they want a highly secure base-chain, but variance in block times isn't a problem? Then they should go with an ASIC-chain[^asic-variance]. Do they want a moderately secure base-chain, but with *low* variance in block times? Then go with a GPU-chain. Do they want a moderate-to-low security base-chain, but with regular (near-zero-variance) block times? Then go with a PoS/PoA-chain (at the simplex level).
-
-[^asic-variance]: Note that simplex-chains with PoW algorithms for which there are ASICs can have lower variance, too, if there are multiple simplex-chains with that same algorithm.
-
-%% END ### DRAFT
 
 %% BEGIN ### RELEASE
 

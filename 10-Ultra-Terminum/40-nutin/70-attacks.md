@@ -1,5 +1,7 @@
 %% BEGIN ### RELEASE
 
+\newpage
+
 ## Attacks
 
 *Ultra Terminum* -- with appropriate configuration -- is resistant to the following attacks; see the linked section for discussion:

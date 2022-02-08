@@ -23,7 +23,7 @@ At the core of *Ultra Terminum* is a new method for sharing security: *Proof of 
 As UT is primarily a method of *structuring* a blockchain network, the scalability configurations mentioned herein *do not include **layer 2** methods*.
 That means that *layer 2* techniques (e.g., state/payment channels, ZK/optimistic rollups) can be implemented *on top* of UT.
 
-UT's novel structure means that confirmation times within UT are of order $\frac{1}{O(c)}$ (i.e., the confirmation rate is $O(c)$).
+UT's novel structure means that confirmation times within UT are of order $O(c^{-1})$ (i.e., the confirmation rate is $O(c)$).
 This means that, as computers get more powerful, confirmation times in UT will approach 0.
 This is a improvement over existing architectures, which are (ideally) of order $O(1)$.
 

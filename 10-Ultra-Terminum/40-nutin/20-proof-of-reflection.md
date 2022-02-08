@@ -190,7 +190,7 @@ There's no data-availability concern here since Chain L nodes *know* that they h
 \aside{
   \textbf{Important:} Soon, these confirmations will have real and useful meaning.
   Under the right conditions, an appropriate configuration of \emph{Proof of Reflection} results in an increase in the \emph{rate} that confirmations are acquired.
-  This is the first hint of $\frac{1}{O(c)}$ confirmation time.
+  This is the first hint of $O(c^{-1})$ confirmation time.
 }
 
 At this point, if an attacker was to publish an alternate, better Chain L history, then Chain L nodes would reorganize around the *new* history published by the attacker, and the attacker's block headers would end up being recorded in Chain R and causing a reorganization there, too. Currently, this configuration does not add any security to Chain L.

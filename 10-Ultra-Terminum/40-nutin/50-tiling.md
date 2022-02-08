@@ -4,10 +4,6 @@
 
 \label{sec:tiling}
 
-\defineTerm{Maximal Simplex}{
-    A simplex with the maximum TPS under given $O(c)$ constraints
-}
-
 Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes are tiled, I call the result a *simplex tiling*.
 
 \defineTerm{Simplex Tile}{

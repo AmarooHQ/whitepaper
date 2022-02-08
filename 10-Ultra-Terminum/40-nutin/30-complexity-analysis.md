@@ -18,7 +18,7 @@ For example, Ethereum 2 has *The Beacon Chain* -- its root-chain (the single bas
     The Beacon Chain will conduct or coordinate the expanded network of shards and stakers. But it won't be like the Ethereum mainnet of today. It can't handle accounts or smart contracts.
 }{\url{https://ethereum.org/en/eth2/beacon-chain/}}
 
-This type of configuration, where a base-chain facilitates child-chains, is referred to as *nesting* in the context of discussing UT's architecture and complexity.
+This type of configuration, where a base-chain facilitates child-chains, is referred to as *nesting* in this section and in the context of UT's architecture and complexity.
 Base-chains are at the first level of nesting.
 The shards of Ethereum 2 are *a level of nesting* above the Beacon Chain, i.e., nesting level 2.
 UT's dapp-chains are also at nesting level 2.
@@ -43,7 +43,7 @@ The following derivations focus on *throughput* of particular blockchain designs
 These derivations will let us evaluate the complexity of each design.
 
 Raw throughput of a network, $T_i$, is measured in bytes/sec (B/s) for some level of nesting, $i$.
-Note that $T_i$ directly corresponds to a design's maximum transactions per second ($\text{TPS}_i$), where $\text{Tx}_{\text{avg}}$ is the average size of a transaction, via:
+$T_i$ directly corresponds to a design's maximum transactions per second ($\text{TPS}_i$), where $\text{Tx}_{\text{avg}}$ is the average size of a transaction, via:
 \begin{equation*}
   \text{TPS}_{i} = \nicefrac{T_i}{\text{Tx}_{\text{avg}}}
 \end{equation*}
@@ -53,6 +53,12 @@ An increase to $k_i$ is effectively an increase in maximum block size.
 
 We will also derive relationships between the maximum number of chains at a level of nesting, $N_i$, and the maximum network throughput at that level of nesting, $T_i$.
 For most existing blockchain designs, $N_1 = 1$.
+
+With regards to simplexes, we are particularly concerned with the complexity of a \emph{maximal} simplex -- i.e., the simplex with the highest TPS possible.
+
+\defineTerm{Maximal Simplex}{
+    A simplex with the maximum TPS under given $O(c)$ constraints
+}
 
 Additionally, $O(k_i)$ is \emph{defined} as $O(k_i) \equiv O(c)$.
 This is reasonable provided there are no $O(c)$ bottlenecks, e.g., network bandwidth, CPU throughput, memory requirements, etc (\autoref{sec:a-principle-of-scaling}).
@@ -88,49 +94,6 @@ Examples: Ethereum 2, Polkadot.
 
 Suppose the root-chain has a throughput of $k_1$ B/s and it can support up to $N_2$ nested chains. Those nested chains have headers of $D_h$ bytes that are produced at a frequency of $D_f$ ($s^{-1}$). If \emph{all} headers of nested chains are recorded in the host chain, then each nested chain consumes \emph{at least} $D_f \cdot D_h$ B/s of the root-chain's capacity.
 
-\aside{
-  It's typical, though, that the headers of nested chains, alone, are not sufficient: additional data is required.
-  For example, in an \emph{Ethereum 2} beacon block, each shard has a header size of 280 B, but there is additional overhead, and a reasonable lower-bound is that each header uses a minimum of 312 B per beacon block.\footnotemark
-  \par
-  In the case of \emph{Polkadot}, it is \href{https://github.com/AmarooHQ/polkadot-effective-dh/blob/5cd0f0d21ff1cd3c57d1c2af70aaf6d8ee19dc11/main.js}{measurable}\footnotemark{} that a typical minimum of 819 B is used in the \texttt{paraInclusion.candidateBacked} extrinsic (i.e., transaction).
-  So, a lower-bound on the effective header size of a parachain is 819 B (this does not include \emph{bitfields}\footnotemark).
-  \par
-  In those situations, with regards to these capacity derivations, one can use the \emph{effective} header size as a replacement for the \emph{raw} header size.
-}
-
-\addtocounter{footnote}{-2}
-\footnotetext{
-  As of late September 2021, the Ethereum 2 \href{https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/sharding/beacon-chain.md\#beaconblockbody}{sharding spec} has capacity for 2:1 attestations to shards per block (with 64 shards), but only 32 B of each attestation is dedicated to sharding.
-  The spec also has capacity for 4:1 shard headers to shards per block.
-  It seems reasonable that capacity which exists will be used within reason.
-  Thus a reasonable lower-bound for the effective header-size of shards is taken via: $1\times$ headers per shard per block, $1\times$ attestations per shard per block (which do not count towards effective header-size), and $1\times$ 32 B per attestation per block.
-  Shards have headers of 280 B, so the minimum effective header size is taken to be 312 B.
-  (note: a required dependency of the current sharding spec is the \href{https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/merge/beacon-chain.md\#beaconblockbody}{current merge spec} and \href{https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/phase0/beacon-chain.md}{current phase0 spec}.)
-}
-\footnotetext{
-  Whilst some parachain headers exist that are smaller than 819 B, it's not really significant for this analysis (a reduction of 10% wouldn't change much).
-  We're already ignoring bitfields, and 819 B seems optimistic if we're interested in the \emph{average} parachain header size.
-  All-in-all, I guess that 819 B is a bit generous, and (ideally) all claims about existing chains in this paper err on the side of generosity.
-}
-\footnotetext{
-  Bitfields is a Polkadot term -- it's a list of hundreds of signatures, totalling $> 14$ KB per block on the current Kusama testnet (October $3^{\text{rd}}$ 2021).
-}
-
-\begin{comment}
-<!-- I think Eth2 sharding (wrt headers) has a larger effective Dh than we calculated before:
-
-* attestations: 8 + 8 + 32 + 2*(8 + 32) + 32 + 96 = 256
-  * https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md#attestationdata
-* SignedShardBlobHeader: 96 + (8 * 4 + (48 + 8 + 48 + 32 + 8*2)) = 280
-  * https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md#shard-work-status
-
-Both are included in the BeaconBlockBody: https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md#beaconblockbody  (inherits from https://github.com/ethereum/consensus-specs/blob/dev/specs/merge/beacon-chain.md#beaconblockbody).
-The sharding spec for BeaconBlockBody has: shard_headers: List[SignedShardBlobHeader, MAX_SHARDS * MAX_SHARD_HEADERS_PER_SHARD] which seems to indicate that headers would be included every block (for every shard).
-note: MAX_SHARD_HEADERS_PER_SHARD=4.
-
-There's enough capacity for attestations (128 each block for 64 shards) that they could be done each block. That doesn't include any committee stuff. -->
-\end{comment}
-
 Thus, $N_2$ is given by:
 \begin{equation}
 \label{eq:n2-for-c2-traditional}
@@ -149,6 +112,54 @@ T_2 & = \frac{k_1 \cdot k_2}{D_f \cdot D_h} \\
 \end{equation}
 
 Thus $O(T_2) = O(c^2)$ as expected.
+
+#### Effective Header Size
+
+It's typical, though, that the headers of nested chains, alone, are not sufficient: additional data is required.
+When such data is required to be recorded on-chain (i.e., it cannot be deterministically regenerated), then the \emph{effective} header size is the size of the raw header, plus the size of any auxiliary data.
+
+For example, in an \emph{Ethereum 2} beacon block, each shard has a header size of 280 B, but there is additional overhead.
+A reasonable lower-bound is that each header has an \emph{effective} minimum header size of 312 B.\footnote{
+  As of late September 2021, the Ethereum 2 \href{https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/sharding/beacon-chain.md\#beaconblockbody}{sharding spec} has capacity for 2:1 attestations to shards per block (with 64 shards), but only 32 B of each attestation is dedicated to sharding.
+  The spec also has capacity for 4:1 shard headers to shards per block.
+  It seems reasonable that capacity which exists will be used within reason.
+  Thus a reasonable lower-bound for the effective header-size of shards is taken via: $1\times$ headers per shard per block, $1\times$ attestations per shard per block (which do not count towards effective header-size), and $1\times$ 32 B per attestation per block.
+  Shards have headers of 280 B, so the minimum effective header size is taken to be 312 B.
+  (note: a required dependency of the current sharding spec is the \href{https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/merge/beacon-chain.md\#beaconblockbody}{current merge spec} and \href{https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/phase0/beacon-chain.md}{current phase0 spec}.)
+}
+
+In the case of \emph{Polkadot}, it is \href{https://github.com/AmarooHQ/polkadot-effective-dh/blob/5cd0f0d21ff1cd3c57d1c2af70aaf6d8ee19dc11/main.js}{measurable}\footnote{
+  Whilst some parachain headers exist that are smaller than 819 B, it's not really significant for this analysis (a reduction of 10\% wouldn't change much).
+  We're already ignoring bitfields, and 819 B seems optimistic if we're interested in the \emph{average} parachain header size, since many are larger.
+  All-in-all, I guess that 819 B is a bit generous, and (ideally) all claims about existing chains in this paper err on the side of generosity.
+} that a typical minimum of 819 B is used in the \texttt{paraInclusion.candidateBacked} extrinsic (i.e., the transaction type that records parachain headers).
+So, a lower-bound on the effective header size of a parachain is 819 B (this does not include \emph{bitfields}\footnote{
+  Bitfields is a Polkadot term -- it's a list of hundreds of signatures, totalling $> 14$ KB per block on the current Kusama testnet (October $3^{\text{rd}}$ 2021).
+}).
+
+In those situations, with regards to these capacity derivations, one can use the \emph{effective} header size as a replacement for the \emph{raw} header size.
+
+%%\addtocounter{footnote}{-2}
+
+%%\addtocounter{footnote}{1}
+
+%%\addtocounter{footnote}{1}
+
+
+\begin{comment}
+<!-- I think Eth2 sharding (wrt headers) has a larger effective Dh than we calculated before:
+
+* attestations: 8 + 8 + 32 + 2*(8 + 32) + 32 + 96 = 256
+  * https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md#attestationdata
+* SignedShardBlobHeader: 96 + (8 * 4 + (48 + 8 + 48 + 32 + 8*2)) = 280
+  * https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md#shard-work-status
+
+Both are included in the BeaconBlockBody: https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md#beaconblockbody  (inherits from https://github.com/ethereum/consensus-specs/blob/dev/specs/merge/beacon-chain.md#beaconblockbody).
+The sharding spec for BeaconBlockBody has: shard_headers: List[SignedShardBlobHeader, MAX_SHARDS * MAX_SHARD_HEADERS_PER_SHARD] which seems to indicate that headers would be included every block (for every shard).
+note: MAX_SHARD_HEADERS_PER_SHARD=4.
+
+There's enough capacity for attestations (128 each block for 64 shards) that they could be done each block. That doesn't include any committee stuff. -->
+\end{comment}
 
 ### Complexity of $\UT{1}$
 
@@ -391,7 +402,7 @@ However, with *explicit PoRs* (variants including +PoRs), $\Delta s \le k_1 + N_
   What if verkle trees are used instead?
   With a branching factor of 256, 32 byte commitments and proofs, and 1 byte location specifiers, this term should be replaced with
   $(1+32) \cdot \max(1, \log_{256} N_1)$.
-  The complexity of these two terms is the same, but in practice verkle PoRs are less than half the size of merkle PoRs.
+  The complexity of these two terms is the same -- $O(\log c)$ -- but in practice verkle PoRs are less than half the size of merkle PoRs.
   For this reason, the numerical calculations in this paper assume that the UT implementation uses verkle trees.
 }
 

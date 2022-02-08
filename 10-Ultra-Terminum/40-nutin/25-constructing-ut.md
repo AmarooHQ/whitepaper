@@ -111,8 +111,6 @@ Let $r$ be the network-wide rate-of-work (hash-rate).
 Over some attack duration $d$, we expect the attacker's chain-segment to weigh $qrd$, and the honest chain-segment to weigh $prd$.
 Thus, for the attacker's chain-segment to win, it must be that $qrd > prd \implies q > p$.
 
-QED.
-
 %% --- %%
 
 \input{includes/ut/headings/25-dapp-chains.tex}
