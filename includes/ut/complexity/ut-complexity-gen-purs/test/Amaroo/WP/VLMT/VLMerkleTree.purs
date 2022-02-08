@@ -9,6 +9,7 @@ import Data.Int (pow)
 import Data.List (List(..), (:))
 import Data.Show.Generic (genericShow)
 import Data.Tuple (Tuple(..))
+import Test.Amaroo.WP.VLMT.Consts (_MERKLE_TREE_SIZE)
 import Test.QuickCheck.Arbitrary (class Arbitrary)
 import Test.QuickCheck.Gen (chooseInt)
 import Test.Spec (describe, it)
@@ -35,7 +36,7 @@ instance arbitraryVLBalancedMerkleTest :: Arbitrary VLBalancedMerkleTest where
 instance arbitraryVLMerkleTest :: Arbitrary VLMerkleTest where
   arbitrary = do
     -- binary
-    size <- chooseInt 100 10_000
+    size <- chooseInt 100 _MERKLE_TREE_SIZE
     leaf <- chooseInt 100 size
     pure $ VLMerkleTest { size, leaf }
 

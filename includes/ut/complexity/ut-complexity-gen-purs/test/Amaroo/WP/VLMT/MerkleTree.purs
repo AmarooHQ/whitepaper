@@ -5,6 +5,7 @@ import Prel
 import Amaroo.WP.VLMT.MerkleTree as MerkleTree
 import Data.Generic.Rep (class Generic)
 import Data.Show.Generic (genericShow)
+import Test.Amaroo.WP.VLMT.Consts (_MERKLE_TREE_SIZE)
 import Test.Spec.QuickCheck (quickCheck)
 import Test.QuickCheck.Arbitrary (class Arbitrary)
 import Test.QuickCheck.Gen (chooseInt)
@@ -18,7 +19,7 @@ instance showMerkleTest :: Show a => Show MerkleTest where
 
 instance arbitraryMerkleTest :: Arbitrary MerkleTest where
   arbitrary = do
-    size <- chooseInt 100 10000
+    size <- chooseInt 100 _MERKLE_TREE_SIZE
     leaf <- chooseInt 100 size
     pure $ MerkleTest { size, leaf }
 
