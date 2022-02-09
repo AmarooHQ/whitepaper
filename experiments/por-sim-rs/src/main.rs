@@ -62,6 +62,9 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
         // doublspend params
         (@arg win_threshold: --ds_win_threshold +takes_value default_value("20") "[DoubleSpend] Minimum number of confirmations before the double-spending private chain is published.")
         // selfish mining params
+        // <none>
+        // PoR params
+        (@arg por_n_chains: -P --por_n_chains +takes_value default_value("1") #{1, 999} "Number of chains to use PoR between (only matters if >1)")
     )
     .get_matches()
 }
@@ -84,9 +87,10 @@ pub fn main() -> Result<(), String> {
     let block_target = value_t_or_exit!(args.value_of("block_target"), u16);
     let crypto_system =
         value_t!(args, "crypto_system", CryptoSystemArg).unwrap_or_else(|e| e.exit());
-    let honest_hr = (hash_rate * (1. - attacker_ratio)).to_u16().unwrap();
-    let attacker_hr = (hash_rate * attacker_ratio).to_u16().unwrap();
+    let honest_hr = (hash_rate * (1. - attacker_ratio)).to_u16().unwrap() as u32;
+    let attacker_hr = (hash_rate * attacker_ratio).to_u16().unwrap() as u32;
     let attack_starts_at = attack_at_h as Difficulty;
+    let por_chains = value_t_or_exit!(args.value_of("por_n_chains"), u16);
 
     let atk_args = AttackArgs {
         honest_hr,
@@ -95,7 +99,7 @@ pub fn main() -> Result<(), String> {
         end_simulation_at_t,
         attacker_instant_propagation,
     };
-    let network_args = NetworkArgs::new(block_target);
+    let network_args = NetworkArgs::new_por(block_target, por_chains);
 
     let start_atk = SystemTime::now();
 
@@ -149,11 +153,18 @@ fn mk_run_atk<'a, S: CSystemT<'a>>(
         warn!("PLEASE NOTE: --attacker_instant_prop sometimes causes SelfishMining to fail for an unknown reason");
     }
 
+    // let n_chains_range = 0..network_args.por_chains;
+    let n_chains_range = 0..1;
     match relay_strat {
         RelayStrategyArg::DoubleSpend => {
             let win_thresh = value_t_or_exit!(cli_args, "win_threshold", Height);
-            let params = DoubleSpendParams::new(args.attack_starts_at, win_thresh);
-            MM::<'_, S, DoubleSpendStrat>::new(args.clone(), params, network_args).run_attack()
+            let mut mms = n_chains_range
+                .map(|_i| {
+                    let params = DoubleSpendParams::new(args.attack_starts_at, win_thresh);
+                    MM::<'_, S, DoubleSpendStrat>::new(args.clone(), params, network_args.clone())
+                })
+                .collect::<Vec<_>>();
+            mms[0].run_attack()
         }
         RelayStrategyArg::SelfishMining => {
             let chain_type = match cs_arg {
@@ -161,12 +172,16 @@ fn mk_run_atk<'a, S: CSystemT<'a>>(
                 CryptoSystemArg::WeightedChain => SmChainType::WeightedChain,
                 CryptoSystemArg::SimpleChain => SmChainType::LongestChain,
             };
-            MM::<'_, S, SelfishMining<S>>::new(
-                args.clone(),
-                SelfishMiningParams { chain_type },
-                network_args,
-            )
-            .run_attack()
+            let mut mms = n_chains_range
+                .map(|_i| {
+                    MM::<'_, S, SelfishMining<S>>::new(
+                        args.clone(),
+                        SelfishMiningParams { chain_type },
+                        network_args.clone(),
+                    )
+                })
+                .collect::<Vec<_>>();
+            mms[0].run_attack()
         }
     }
 }

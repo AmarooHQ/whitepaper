@@ -1,6 +1,9 @@
 {
     "cSpell.words": [
         "Hasher",
+        "rdcw",
+        "reflectable",
+        "refls",
         "verkel"
     ],
     "[rust]": {

@@ -624,6 +624,12 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
                                 (p2.0.get_hash(), p2.1.chain_weight),
                             ));
                         }
+                        if p1.1.local_chain_weight < p2.1.local_chain_weight {
+                            return Err(BadParentOrder(
+                                (p1.0.get_hash(), p1.1.local_chain_weight),
+                                (p2.0.get_hash(), p2.1.local_chain_weight),
+                            ));
+                        }
                     }
                     (_, Some(_)) => {
                         return Err(BlockRefsUnkParent(b.get_hash(), p1_id.clone(), is_private))
@@ -647,6 +653,8 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         }
         // todo: check each reflection tx has correct weight
         // todo!("implement reflected weight stuff in block validation");
+        // - reflected block not seen
+        // - reflected header PoW/difficulty mismatch
         // todo: validate txs in general
 
         let lca_r = self.find_lca_and_intermediates(&b.all_prev()).unwrap();
@@ -670,18 +678,29 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             lca_chain_weight = lca_md.chain_weight;
             lca_local_chain_weight = lca_md.local_chain_weight;
             let lca_height = lca_md.height;
-            delta_chain_weight = lca_r
-                .1
-                .iter()
-                .filter(|(&k, _v)| k != lca_height) // make sure we don't count the LCA in delta CW
-                .map::<Difficulty, _>(|(_k, v)| v.iter().map(|info| info.weight).sum())
-                .sum();
-            reflected_delta_chain_weight = lca_r
-                .1
-                .iter()
-                .filter(|(&k, _v)| k != lca_height)
-                .map::<Difficulty, _>(|(_, v)| v.iter().map(|i| i.reflected_weight).sum())
-                .sum();
+            let [dcw, rdcw] = [|i: &BInfo| i.weight, |i: &BInfo| i.reflected_weight].map(|f| {
+                lca_r
+                    .1
+                    .iter()
+                    .filter(|(&k, _v)| k != lca_height) // make sure we don't count the LCA in delta CW
+                    .map::<Difficulty, _>(|(_k, v)| v.iter().map(f).sum())
+                    .sum()
+            });
+            delta_chain_weight = dcw;
+            reflected_delta_chain_weight = rdcw;
+            // todo: remove below if/when above works properly
+            // delta_chain_weight = lca_r
+            //     .1
+            //     .iter()
+            //     .filter(|(&k, _v)| k != lca_height) // make sure we don't count the LCA in delta CW
+            //     .map::<Difficulty, _>(|(_k, v)| v.iter().map(|info| info.weight).sum())
+            //     .sum();
+            // reflected_delta_chain_weight = lca_r
+            //     .1
+            //     .iter()
+            //     .filter(|(&k, _v)| k != lca_height)
+            //     .map::<Difficulty, _>(|(_, v)| v.iter().map(|i| i.reflected_weight).sum())
+            //     .sum();
         }
 
         /* SECOND VERSION OF THE CODE
@@ -804,7 +823,7 @@ mod tests {
     }
 
     #[test]
-    fn update_best_block_w_refl() -> Result<(), String> {
+    fn update_best_block() -> Result<(), String> {
         let (genesis, _g_md, mut chain) = _setup_chain::<Block, LongestChain<Block>>(None);
         assert_eq!(genesis.get_height(), 0, "genesis height should be 0");
         let b = _mk_draft_block(&mut chain, 10, false);

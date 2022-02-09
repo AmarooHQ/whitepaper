@@ -8,6 +8,12 @@ use crate::strategies::relay::*;
 use crate::types::*;
 use log::*;
 use num::ToPrimitive;
+use rand::prelude::*;
+
+struct ExtraChainNodes<'a, S: CSystemT<'a>> {
+    honest: Node<'a, S>,
+    attacker: Node<'a, S>,
+}
 
 pub struct MM<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> {
     honest_node: Node<'a, S>,
@@ -16,12 +22,13 @@ pub struct MM<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> {
     strategy: Option<R>,
     atk_params: R::Params,
     atk_start_h: Option<Height>,
+    extra_chain_nodes: Vec<ExtraChainNodes<'a, S>>,
 }
 
 #[derive(Debug, Clone)]
 pub struct AttackArgs {
-    pub honest_hr: u16,
-    pub attacker_hr: u16,
+    pub honest_hr: u32,
+    pub attacker_hr: u32,
     pub attack_starts_at: Timestamp,
     pub end_simulation_at_t: Timestamp,
     pub attacker_instant_propagation: bool,
@@ -29,7 +36,7 @@ pub struct AttackArgs {
 
 impl AttackArgs {
     #[cfg(test)]
-    fn new(honest_hr: u16, attacker_hr: u16, attack_starts_at: Timestamp) -> Self {
+    fn new(honest_hr: u32, attacker_hr: u32, attack_starts_at: Timestamp) -> Self {
         AttackArgs {
             honest_hr,
             attacker_hr,
@@ -46,6 +53,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             "Creating new simulation with {} honest HR and {} attacking HR. Attack starts at T={}. InstantProp={}",
             args.honest_hr, args.attacker_hr, args.attack_starts_at, args.attacker_instant_propagation
         );
+        let extra_chain_nodes = Self::mk_extra_chain_nodes(&args, &net_args);
         let genesis = S::B::genesis(0);
         let chain = S::C::new(
             genesis.clone(),
@@ -65,7 +73,102 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             args: args.clone(),
             atk_params,
             atk_start_h: None,
+            extra_chain_nodes,
         }
+    }
+
+    /// Make extra chains + nodes
+    fn mk_extra_chain_nodes(
+        args: &AttackArgs,
+        net_args: &NetworkArgs,
+    ) -> Vec<ExtraChainNodes<'a, S>> {
+        if net_args.por_chains <= 1 {
+            return vec![];
+        }
+
+        // todo: randomize hash-rates a bit. need to figure out how to do this sensibly so that the maths works out. nbd yet
+
+        // k = net_args.por_chains - 1
+        // target chain (not generated here) should have 1/(k+1) of network hash-rate.
+        // so other chains have, in total, have total HR: k * (args.honest_hr + args.attacker_hr)
+        // we don't want this to be perfectly even though, so let's randomize a bit.
+        let avg_hr_per_chain = args.attacker_hr + args.honest_hr;
+        let avg_honest_hr_ratio: f32 = (args.honest_hr as f32) / (avg_hr_per_chain as f32);
+
+        // // vec of *honest* hash ratios per chain (between 0.3 and 0.7)
+        // // -- we want these to average out to be in proportion to args.honest_hr vs args.attacker_hr
+        // let honest_hr_ratios: Vec<f32> = (1..net_args.por_chains)
+        //     .map(|_| thread_rng().gen::<f32>() * 0.4 + 0.3)
+        //     .collect();
+        // let hr_ratio_avg: f32 =
+        //     honest_hr_ratios.iter().sum::<f32>() / (honest_hr_ratios.len() as f32);
+        // let hr_ratio_scale = avg_honest_hr_ratio / hr_ratio_avg;
+        // let honest_hr_ratios: Vec<f32> = honest_hr_ratios
+        //     .iter()
+        //     .map(|hr| hr * hr_ratio_scale)
+        //     .collect();
+
+        let honest_hr_ratios: Vec<f32> = (1..net_args.por_chains)
+            .map(|_| avg_honest_hr_ratio)
+            .collect();
+        println!("{:?}", honest_hr_ratios);
+        // no ratios <0.05 or >0.95
+        debug_assert_eq!(
+            honest_hr_ratios
+                .iter()
+                .filter(|&&r| r < 0.0 || 1.0 < r)
+                .count(),
+            0
+        );
+        debug_assert_eq!(honest_hr_ratios.len() + 1, net_args.por_chains as usize);
+
+        // // vec of ratio of chain-weights (on avg)
+        // let cw_relative: Vec<f32> = (1..net_args.por_chains)
+        //     .map(|_| thread_rng().gen::<f32>() + 0.5)
+        //     .collect();
+        let cw_relative: Vec<f32> = vec![1.0; honest_hr_ratios.len()];
+        // vec of tuples: (honest_hr, attacker_hr)
+        let cw_hash_rates: Vec<(u32, u32)> = cw_relative
+            .iter()
+            // absolute hashes per tick
+            .map(|cwr| (cwr * avg_hr_per_chain as f32) as u32)
+            .zip(honest_hr_ratios)
+            .map(|(hpt, honest_hr_ratio)| {
+                let honest_hr = (hpt as f32 * honest_hr_ratio) as u32;
+                let attacker_hr = (hpt as f32 * (1.0 - honest_hr_ratio)) as u32;
+                (honest_hr, attacker_hr)
+            })
+            .collect();
+
+        debug_assert_eq!(
+            avg_hr_per_chain * net_args.por_chains as u32,
+            avg_hr_per_chain + cw_hash_rates.iter().map(|&(h, a)| h + a).sum::<u32>()
+        );
+
+        cw_hash_rates
+            .iter()
+            .enumerate()
+            .map(|(i, &(honest_hr, attacker_hr))| {
+                let genesis = S::B::genesis(0);
+                let chain = S::C::new(
+                    genesis.clone(),
+                    BlockMD::mk_genesis_md(
+                        &genesis.clone(),
+                        net_args.daa2_n_blocks.to_usize().unwrap(),
+                    ),
+                    net_args.clone(),
+                );
+                let honest = Node::new(i * 1_000, chain.clone(), false, honest_hr, false);
+                let attacker = Node::new(
+                    i * 1_000 + 1,
+                    chain.clone(),
+                    true,
+                    attacker_hr,
+                    args.attacker_instant_propagation,
+                );
+                ExtraChainNodes { honest, attacker }
+            })
+            .collect()
     }
 
     #[cfg(test)]
@@ -221,6 +324,14 @@ mod tests {
         )
     }
 
+    fn create_mm_multichain_no_priv<'a, S: CSystemT<'a>>() -> MM<'a, S, DoubleSpendStrat> {
+        MM::<'a, S, DoubleSpendStrat>::new(
+            AttackArgs::new(1000, 0, 100),
+            DoubleSpendParams::new(100, 20),
+            NetworkArgs::new_por(10, 100),
+        )
+    }
+
     fn ensure_chain_progress<'a, S: CSystemT<'a>>(mm: &MM<'a, S, DoubleSpendStrat>) {
         let hs = mm.chain().get_fork_measure_pub_priv();
 
@@ -331,5 +442,11 @@ mod tests {
         assert_eq!(bb.1.height, 2);
         assert_ne!(bb.0.parents.len(), 0);
         assert_ne!(bb.0.parents.len(), 1);
+    }
+
+    #[test]
+    fn mm_init_with_multiple_chains() {
+        // this triggers debug_assert in `mk_extra_chain_nodes`
+        let mm = create_mm_multichain_no_priv::<'_, DagCS>();
     }
 }

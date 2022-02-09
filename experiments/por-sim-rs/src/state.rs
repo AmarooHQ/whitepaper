@@ -145,8 +145,14 @@ impl LightChainIM {
  * - [ ] Transactions get processed when blocks do
  * - [ ] Transactions get applied to state to create new state
  * - [ ] Transactions have multiple types
- * - [ ] State needs to be accessible to consensus mechanism (which it sorta is anyway)
- * - [ ] fork rule includes reflected weight
- *
+ * - [x] ~~State needs to be accessible to consensus mechanism (which it sorta is anyway)~~ (not needed: all info in header; get's validated w/ block)
+ * - [x] fork rule includes reflected weight
+ * - [ ] fork rule + reflected weight tests
+ * - [ ] validate PoR transactions
+ * - [ ] validate transactions in block generally
+ * - [x] message manager creates multiple chains
+ * - [ ] message manager randomizes chain-work and honest/attacker balance over diff chains (ideally we want a chain where attacker has >51% of HR locally but not globally)
+ * - [ ] message manager notifies other chains of reflectable blocks
+ * - [ ] chains integrate reflectable blocks
  *
  * */

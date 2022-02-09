@@ -34,4 +34,12 @@ impl NetworkArgs {
             por_chains: 0,
         }
     }
+
+    pub fn new_por(block_target: u16, por_chains: u16) -> Self {
+        NetworkArgs {
+            block_target,
+            daa2_n_blocks: 100,
+            por_chains,
+        }
+    }
 }

@@ -10,20 +10,20 @@ use log::*;
 
 #[derive(Debug)]
 pub struct Node<'a, /*R: RelayStrategyT,*/ S: CSystemT<'a>> {
-    id: u16,
+    id: usize,
     pub chain: S::C,
     is_attacker: bool,
-    mining_attempts_per_tick: u16,
+    mining_attempts_per_tick: u32,
     curr_draft_block: Option<S::B>,
     add_mined_block_instant: bool,
 }
 
 impl<'a, S: CSystemT<'a>> Node<'a, S> {
     pub fn new(
-        id: u16,
+        id: usize,
         chain: S::C,
         is_attacker: bool,
-        mining_attempts_per_tick: u16,
+        mining_attempts_per_tick: u32,
         add_mined_block_instant: bool,
     ) -> Node<'a, S> {
         Node {
@@ -76,7 +76,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         }
 
         // try to mine
-        for b in self.attempt_mining(ts, self.mining_attempts_per_tick, attack_started) {
+        for b in self.attempt_mining(ts, self.mining_attempts_per_tick as u16, attack_started) {
             out_msgs.push(
                 // if we're an attacker and past when the attack starts,
                 // then relay private blocks. otherwise it's a normal block.

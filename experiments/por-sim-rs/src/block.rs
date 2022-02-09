@@ -157,7 +157,7 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
     fn set_cached_block(b: (Self, BlockMD<Self>));
 
     // transaction support
-    fn get_transactions(&self) -> Vec<TxId>;
+    fn get_transactions(&self) -> &Vec<TxId>;
     fn add_transaction(&mut self, id: TxId);
 
     /// Claimed reflected weight
@@ -346,8 +346,8 @@ impl BlockT for Block {
         BLOCK_CACHE.lock().unwrap().insert(b_id, b_arc.clone());
     }
 
-    fn get_transactions(&self) -> Vec<TxId> {
-        self.txs.clone()
+    fn get_transactions(&self) -> &Vec<TxId> {
+        &self.txs
     }
 
     fn add_transaction(&mut self, id: TxId) {
@@ -493,8 +493,8 @@ impl BlockT for DagBlock {
         DAGBLOCK_CACHE.lock().unwrap().insert(b_id, b_arc.clone());
     }
 
-    fn get_transactions(&self) -> Vec<TxId> {
-        self.txs.clone()
+    fn get_transactions(&self) -> &Vec<TxId> {
+        &self.txs
     }
 
     fn add_transaction(&mut self, id: TxId) {
@@ -514,6 +514,7 @@ impl BlockT for DagBlock {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::transactions::ReflectionData;
 
     #[test]
     fn hash_sha3() -> Result<(), String> {
@@ -521,5 +522,27 @@ mod tests {
         // let _h = b.hash_sha3();
         // DagBlock::genesis(0).hash_sha3();
         Ok(())
+    }
+
+    #[test]
+    fn adding_por_transaction_updates_header_deets() {
+        let tx = Transaction::ReflectAndProve(ReflectionData {
+            chain: 0,
+            block: 0,
+            weight: 222,
+            proving_ancestor_id: 0,
+        });
+        Transaction::set_cached_tx(tx.clone());
+        let mut _b = Block::genesis(0);
+        _b.d = 111;
+        let w1 = _b.get_difficulty();
+        let rw1 = _b.get_reflected_weight();
+        assert_eq!(w1, 111);
+        assert_eq!(rw1, 0);
+        _b.add_transaction(tx.get_hash());
+        let w2 = _b.get_difficulty();
+        let rw2 = _b.get_reflected_weight();
+        assert_eq!(w2, 111);
+        assert_eq!(rw2, 222);
     }
 }
