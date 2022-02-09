@@ -13,3 +13,7 @@ Trials: 100 -- Successes: 19; Failures: 81 (-s 10000 -e 30000 -r 0.45 -S Weighte
 Trials: 100 -- Successes: 21; Failures: 79 (-s 10000 -e 30000 -r 0.45 -S WeightedDag -b 100 -P 6)
 Trials: 100 -- Successes: 15; Failures: 85 (-s 10000 -e 30000 -r 0.45 -S WeightedDag -b 100 -P 6)
 Trials: 100 -- Successes: 21; Failures: 79 (-s 10000 -e 30000 -r 0.45 -S WeightedDag -b 100 -P 6)
+Trials: 100 -- Successes: 15; Failures: 85 (-s 10000 -e 30000 -r 0.45 -S WeightedDag -b 100 -P 7)
+Trials: 100 -- Successes: 25; Failures: 75 (-s 10000 -e 30000 -r 0.45 -S WeightedDag -b 100 -P 7)
+Trials: 100 -- Successes: 13; Failures: 87 (-s 10000 -e 30000 -r 0.45 -S WeightedDag -b 100 -P 7)
+Trials: 100 -- Successes: 21; Failures: 79 (-s 10000 -e 30000 -r 0.45 -S WeightedDag -b 100 -P 8)
