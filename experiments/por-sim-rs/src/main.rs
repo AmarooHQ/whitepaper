@@ -28,6 +28,7 @@ mod msg;
 mod node;
 mod state;
 mod strategies;
+mod transactions;
 mod types;
 
 arg_enum! {

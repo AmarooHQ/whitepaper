@@ -1,5 +1,7 @@
 use crate::block_metadata::BlockMD;
 use crate::hash::*;
+use crate::transactions::Transaction::ReflectAndProve;
+use crate::transactions::{Transaction, TxId};
 use crate::types::*;
 use getrandom::getrandom;
 use itertools::{sorted, Itertools};
@@ -35,11 +37,10 @@ impl<B: BlockT> Iterator for PrevBlockIter<B> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let p_id = self.curr_block.prev();
-        let p = B::get_cached_block(&p_id);
         if p_id == self.curr_block.get_hash() {
             None
         } else {
-            match p {
+            match B::get_cached_block(&p_id) {
                 None => None,
                 Some(p) => {
                     self.curr_block = p.0.clone();
@@ -154,6 +155,35 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
     fn get_cached_block(id: &HashID) -> Option<Arc<(Self, BlockMD<Self>)>>;
     // fn get_cached_blocks(ids: &[HashID]) -> Option<Box<[Arc<(Self, BlockMD<Self>)>]>>;
     fn set_cached_block(b: (Self, BlockMD<Self>));
+
+    // transaction support
+    fn get_transactions(&self) -> Vec<TxId>;
+    fn add_transaction(&mut self, id: TxId);
+
+    /// Claimed reflected weight
+    fn get_reflected_weight(&self) -> Difficulty;
+
+    /// Weight reflected by this block (calculated from txs).
+    /// Note: this does not do conversion to local weight since the hashing algs are the same
+    /// Todo: (in future) account for conversion of weight
+    fn calc_reflected_weight(&self) -> Difficulty {
+        self.get_transactions()
+            .iter()
+            .map(|&tx_id| {
+                if let Some(tx) = Transaction::get_cached_tx(tx_id) {
+                    // match tx.get_reflection_data() {
+                    //     Some(r) => Self::get_cached_block(&r.block)
+                    //         .map(|md| md.1.difficulty)
+                    //         .unwrap_or(0),
+                    //     _ => 0,
+                    // }
+                    tx.get_reflected_weight()
+                } else {
+                    0
+                }
+            })
+            .sum()
+    }
 }
 
 pub trait SingleParentBlockT: BlockT {}
@@ -172,7 +202,9 @@ pub struct Block {
     pub parent: HashID,
     pub timestamp: u32,
     pub d: Difficulty,
+    pub refl_weight: Difficulty,
     pub h: Height,
+    pub txs: Vec<TxId>,
 }
 
 impl Display for Block {
@@ -220,6 +252,8 @@ impl BlockT for Block {
             parent,
             d,
             h,
+            refl_weight: 0,
+            txs: vec![],
         }
     }
 
@@ -311,6 +345,23 @@ impl BlockT for Block {
         BLOCK_LRU.lock().unwrap().put(b_id, b_arc.clone());
         BLOCK_CACHE.lock().unwrap().insert(b_id, b_arc.clone());
     }
+
+    fn get_transactions(&self) -> Vec<TxId> {
+        self.txs.clone()
+    }
+
+    fn add_transaction(&mut self, id: TxId) {
+        self.txs.push(id);
+        self.refl_weight += Transaction::get_cached_tx(id)
+            .map(|tx| tx.get_reflected_weight())
+            .unwrap_or(0);
+        // simulate change of hash when txs added
+        self.increment_nonce();
+    }
+
+    fn get_reflected_weight(&self) -> Difficulty {
+        self.refl_weight
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -319,7 +370,9 @@ pub struct DagBlock {
     pub parents: Vec<HashID>,
     pub timestamp: u32,
     d: Difficulty,
+    refl_weight: Difficulty,
     h: Height,
+    txs: Vec<TxId>,
 }
 
 impl Display for DagBlock {
@@ -349,6 +402,8 @@ impl ManyParentsBlockT for DagBlock {
             parents,
             d,
             h,
+            refl_weight: 0,
+            txs: vec![],
         }
     }
 }
@@ -436,6 +491,23 @@ impl BlockT for DagBlock {
         let b_arc = Arc::new(b);
         DAGBLOCK_LRU.lock().unwrap().put(b_id, b_arc.clone());
         DAGBLOCK_CACHE.lock().unwrap().insert(b_id, b_arc.clone());
+    }
+
+    fn get_transactions(&self) -> Vec<TxId> {
+        self.txs.clone()
+    }
+
+    fn add_transaction(&mut self, id: TxId) {
+        self.txs.push(id);
+        self.refl_weight += Transaction::get_cached_tx(id)
+            .map(|tx| tx.get_reflected_weight())
+            .unwrap_or(0);
+        // simulate change of hash when txs added
+        self.increment_nonce();
+    }
+
+    fn get_reflected_weight(&self) -> Difficulty {
+        self.refl_weight
     }
 }
 

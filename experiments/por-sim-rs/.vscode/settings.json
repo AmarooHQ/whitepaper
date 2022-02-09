@@ -1,0 +1,9 @@
+{
+    "cSpell.words": [
+        "Hasher",
+        "verkel"
+    ],
+    "[rust]": {
+        "editor.formatOnSave": true
+    }
+}

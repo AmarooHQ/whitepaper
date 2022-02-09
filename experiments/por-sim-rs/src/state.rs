@@ -4,11 +4,13 @@
 
 use crate::block::BlockT;
 use crate::cryptosystem::CSystemT;
+use crate::transactions::*;
 use crate::types::*;
 use hashers::null::PassThroughHasher;
 use im_rc::{vector, HashMap, OrdSet, Vector};
 use lazy_static::lazy_static;
 use lru::LruCache;
+use std::collections::LinkedList;
 use std::hash::BuildHasherDefault;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -24,6 +26,27 @@ lazy_static! {
     //     Mutex::new(LruCache::new(1024));
 }
 type HashMapIdPassthrough<V> = HashMap<HashID, V, BuildHasherDefault<PassThroughHasher>>;
+
+#[derive(Clone, Hash, Default)]
+pub struct ChainStateDelta {
+    block_id: HashID,
+    valid_txs: Vec<TxId>,
+    invalid_txs: Vec<TxId>,
+    hellos: Vec<u64>,
+    balances: HashMapIdPassthrough<u64>,
+    // reflections[chain_id] = [... r_block_ids]
+    reflections: HashMapIdPassthrough<Vec<HashID>>,
+}
+
+#[derive(Clone, Default)]
+pub struct ChainState {
+    valid_txs: FxHashSet<TxId>,
+    invalid_txs: FxHashSet<TxId>,
+    hellos: Vec<TxId>,
+    balances: HashMapIdPassthrough<u64>,
+    // reflections[r_chain_id] = {... r_block_ids}
+    reflections: HashMapIdPassthrough<FxHashSet<HashID>>,
+}
 
 #[derive(Clone)]
 struct PoRStateIM {
@@ -113,3 +136,17 @@ impl LightChainIM {
         }
     }
 }
+
+/*
+ * # State for simulator
+ *
+ * - [x] Blocks need to support transactions
+ * - [x] Tx types
+ * - [ ] Transactions get processed when blocks do
+ * - [ ] Transactions get applied to state to create new state
+ * - [ ] Transactions have multiple types
+ * - [ ] State needs to be accessible to consensus mechanism (which it sorta is anyway)
+ * - [ ] fork rule includes reflected weight
+ *
+ *
+ * */

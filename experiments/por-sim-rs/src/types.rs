@@ -23,6 +23,7 @@ pub type SeenBlocks = FxHashSet<HashID>;
 pub struct NetworkArgs {
     pub block_target: u16,
     pub daa2_n_blocks: usize,
+    pub por_chains: u16,
 }
 
 impl NetworkArgs {
@@ -30,6 +31,7 @@ impl NetworkArgs {
         NetworkArgs {
             block_target,
             daa2_n_blocks: 100,
+            por_chains: 0,
         }
     }
 }

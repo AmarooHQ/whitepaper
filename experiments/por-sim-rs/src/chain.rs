@@ -1,6 +1,7 @@
 use crate::block::*;
 use crate::block_metadata::*;
 use crate::chain::fork_rules::*;
+use crate::transactions::*;
 use crate::types::*;
 use crate::ForkResult::BestBlock;
 use lazy_static::lazy_static;
@@ -25,6 +26,7 @@ pub enum ChainErr {
     BlockRefsUnkParent(HashID, HashID, bool),
     BadParentOrder((HashID, ChainWeight), (HashID, ChainWeight)),
     BadDifficulty,
+    BadReflWeightInBlock,
     TsBeforeParent,
     BlockHeightInvalid,
 }
@@ -55,7 +57,9 @@ pub struct BInfo {
     // _p: PhantomData<B>,
     id: HashID,
     weight: Difficulty,
+    reflected_weight: Difficulty,
     chain_weight: Difficulty,
+    local_chain_weight: Difficulty,
     // b: &'a B,
     // b_md: &'a BlockMD<B>,
 }
@@ -70,6 +74,7 @@ pub struct Daa2Info {
 
 #[derive(Clone)]
 pub struct Chain<B: BlockT, F: ForkRules<B> = LongestChain<B>> {
+    chain_id: HashID,
     pub best_blocks: FxHashSet<HashID>,
     pub_chain_heads: ChainHeads,
     best_priv_blocks: FxHashSet<HashID>,
@@ -97,6 +102,8 @@ lazy_static! {
 
 pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
     fn new(genesis: B, genesis_meta: BlockMD<B>, net_args: NetworkArgs) -> Self;
+
+    fn get_chain_id(&self) -> HashID;
 
     // fn save_block(&mut self, b_id: HashID, b: (B, BlockMD<B>));
     // fn get_block(&self, b: HashID) -> Option<&(B, BlockMD<B>)>;
@@ -318,7 +325,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
     fn find_lca_and_intermediates(
         &self,
         bs: &Vec<HashID>,
-    ) -> Option<Arc<(HashID, BTreeMap<u32, BTreeSet<BInfo>>)>> {
+    ) -> Option<Arc<(HashID, BTreeMap<Height, BTreeSet<BInfo>>)>> {
         if let Some(r) = LCAS_CACHE
             .lock()
             .ok()
@@ -338,7 +345,9 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
                     // _p: PhantomData,
                     id: h,
                     weight: b.1.weight,
+                    reflected_weight: b.1.reflected_weight,
                     chain_weight: b.1.chain_weight,
+                    local_chain_weight: b.1.local_chain_weight,
                     // b,
                     // b.1,
                 }]);
@@ -396,7 +405,9 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
                     // _p: PhantomData,
                     id,
                     weight: b.1.weight,
+                    reflected_weight: b.1.reflected_weight,
                     chain_weight: b.1.chain_weight,
+                    local_chain_weight: b.1.local_chain_weight,
                     // b,
                     // b.1,
                 });
@@ -427,7 +438,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
         };
         let p = Self::get_cached_block(&*daa2_bs.last().unwrap()).unwrap();
         let block_time_sum: u32 = b.get_ts() - p.0.get_ts();
-        let win_rate_sum: Difficulty = b_meta.chain_weight - p.1.chain_weight;
+        let win_rate_sum: Difficulty = b_meta.local_chain_weight - p.1.local_chain_weight;
         Difficulty::from(self.net_args.block_target) * win_rate_sum
             / max(Difficulty::from(block_time_sum), 1)
     }
@@ -464,6 +475,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         Self::set_cached_block((genesis, genesis_meta));
         Chain {
             // blocks,
+            chain_id: g_hash,
             best_blocks: [g_hash].iter().cloned().collect(),
             best_priv_blocks: [g_hash].iter().cloned().collect(),
             seen_pub_blocks: [g_hash].iter().cloned().collect(),
@@ -475,6 +487,10 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             _phantom_b: PhantomData,
             _phantom_f: PhantomData,
         }
+    }
+
+    fn get_chain_id(&self) -> HashID {
+        self.chain_id
     }
 
     fn get_best_blocks(&self, is_private: bool) -> &FxHashSet<HashID> {
@@ -626,6 +642,13 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             return Err(BadDifficulty);
         }
 
+        if pm.0.get_reflected_weight() != pm.0.calc_reflected_weight() {
+            return Err(BadReflWeightInBlock);
+        }
+        // todo: check each reflection tx has correct weight
+        // todo!("implement reflected weight stuff in block validation");
+        // todo: validate txs in general
+
         let lca_r = self.find_lca_and_intermediates(&b.all_prev()).unwrap();
 
         /* FIRST VERSION OF THE CODE
@@ -634,19 +657,30 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
          *
          */
         let delta_chain_weight;
+        let reflected_delta_chain_weight;
         let lca_chain_weight;
+        let lca_local_chain_weight;
         if lca_r.0 == pm.0.get_hash() {
             delta_chain_weight = 0;
+            reflected_delta_chain_weight = 0;
             lca_chain_weight = pm.1.chain_weight;
+            lca_local_chain_weight = pm.1.local_chain_weight;
         } else {
             let lca_md = &Self::get_cached_block(&lca_r.0).unwrap().clone().1;
             lca_chain_weight = lca_md.chain_weight;
+            lca_local_chain_weight = lca_md.local_chain_weight;
             let lca_height = lca_md.height;
             delta_chain_weight = lca_r
                 .1
                 .iter()
                 .filter(|(&k, _v)| k != lca_height) // make sure we don't count the LCA in delta CW
                 .map::<Difficulty, _>(|(_k, v)| v.iter().map(|info| info.weight).sum())
+                .sum();
+            reflected_delta_chain_weight = lca_r
+                .1
+                .iter()
+                .filter(|(&k, _v)| k != lca_height)
+                .map::<Difficulty, _>(|(_, v)| v.iter().map(|i| i.reflected_weight).sum())
                 .sum();
         }
 
@@ -682,11 +716,18 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             }
         }
 
+        let reflected_weight = b.get_reflected_weight();
+        let all_delta_local_w = delta_chain_weight + d;
+        let all_delta_refl_w = reflected_delta_chain_weight + reflected_weight;
+        let local_chain_weight = lca_local_chain_weight + all_delta_local_w;
+        let chain_weight = lca_chain_weight + all_delta_local_w + all_delta_refl_w;
         Ok(BlockMD {
             difficulty: d,
             height: pm.1.height + 1,
             weight: d,
-            chain_weight: lca_chain_weight + delta_chain_weight + d,
+            local_chain_weight,
+            reflected_weight,
+            chain_weight,
             // daa2_blocks,
             _phantom_b: PhantomData,
         })
@@ -718,7 +759,18 @@ mod tests {
         ts: u32,
         is_private: bool,
     ) -> B {
-        chain.draft_block(ts, is_private).test_set_work_bits(24)
+        _mk_draft_block_w_txs(chain, ts, is_private, vec![])
+    }
+
+    fn _mk_draft_block_w_txs<'a, B: BlockT, F: ForkRules<B>, C: ChainT<'a, B, F>>(
+        chain: &C,
+        ts: u32,
+        is_private: bool,
+        txs: Vec<TxId>,
+    ) -> B {
+        let mut b = chain.draft_block(ts, is_private);
+        txs.iter().for_each(|&tx_id| b.add_transaction(tx_id));
+        b.test_set_work_bits(24)
     }
 
     #[test]
@@ -752,7 +804,7 @@ mod tests {
     }
 
     #[test]
-    fn update_best_block() -> Result<(), String> {
+    fn update_best_block_w_refl() -> Result<(), String> {
         let (genesis, _g_md, mut chain) = _setup_chain::<Block, LongestChain<Block>>(None);
         assert_eq!(genesis.get_height(), 0, "genesis height should be 0");
         let b = _mk_draft_block(&mut chain, 10, false);
@@ -778,10 +830,55 @@ mod tests {
         let (genesis, _g_md, mut chain) = _setup_chain::<Block, HeaviestChain<Block>>(None);
         let b = _mk_draft_block(&mut chain, 10, false);
 
+        assert_eq!(b.get_reflected_weight(), 0);
+
         assert_eq!(chain.select_best_block(false), genesis.get_hash());
         assert_eq!(chain.select_best_block(true), genesis.get_hash());
 
         chain.add_block(b.clone(), false)?;
+
+        assert_eq!(chain.select_best_block(false), b.get_hash());
+        assert_eq!(chain.select_best_block(true), genesis.get_hash());
+
+        chain.add_block(b.clone(), true)?;
+
+        assert_eq!(chain.select_best_block(false), b.get_hash());
+        assert_eq!(chain.select_best_block(true), b.get_hash());
+
+        Ok(())
+    }
+
+    #[test]
+    fn update_best_heaviest_block_w_refls() -> Result<(), String> {
+        let (genesis, _g_md, mut chain) = _setup_chain::<Block, HeaviestChain<Block>>(None);
+        /// a test block to add as a reflecting block
+        /// todo: should be on a diff chain
+        let b_refl = _mk_draft_block(&mut chain, 10, false);
+
+        let refl_tx = Transaction::ReflectAndProve(ReflectionData {
+            chain: chain.get_chain_id(),
+            block: b_refl.get_hash(),
+            weight: b_refl.d,
+            proving_ancestor_id: genesis.get_hash(),
+        });
+        Transaction::set_cached_tx(refl_tx.clone());
+
+        let b = _mk_draft_block_w_txs(&mut chain, 10, false, vec![refl_tx.id()]);
+
+        // reflecting block is at the same diff as `b`
+        assert_eq!(b.get_difficulty(), b.get_reflected_weight());
+
+        assert_eq!(chain.select_best_block(false), genesis.get_hash());
+        assert_eq!(chain.select_best_block(true), genesis.get_hash());
+
+        chain.add_block(b.clone(), false)?;
+
+        let b_md = &Block::get_cached_block(&b.get_hash()).unwrap().1;
+        assert_ne!(b_md.chain_weight, b_md.local_chain_weight);
+        assert_eq!(
+            b_md.chain_weight,
+            b_md.local_chain_weight + b.get_reflected_weight()
+        );
 
         assert_eq!(chain.select_best_block(false), b.get_hash());
         assert_eq!(chain.select_best_block(true), genesis.get_hash());

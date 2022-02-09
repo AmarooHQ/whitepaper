@@ -16,7 +16,13 @@ lazy_static! {
 pub struct BlockMD<B> {
     pub difficulty: Difficulty,
     pub height: u32,
+    /// weight of this block only
     pub weight: Difficulty,
+    /// total reflected weight added with this block
+    pub reflected_weight: Difficulty,
+    /// chain_weight excluding reflected weight (required for DAA)
+    pub local_chain_weight: Difficulty,
+    /// chain_weight including reflected weight
     pub chain_weight: Difficulty,
     // pub daa2_blocks: Vec<HashID>,
     // pub daa2_blocks: Vec<Daa2Info>,
@@ -44,7 +50,9 @@ impl<B: BlockT> BlockMD<B> {
             difficulty,
             height: 0,
             weight: 0,
+            reflected_weight: 0,
             chain_weight: 0,
+            local_chain_weight: 0,
             // daa2_blocks: vec![(genesis.clone(), difficulty); daa2_n_blocks],
             // daa2_blocks: vec![genesis.get_hash(); daa2_n_blocks],
             _phantom_b: PhantomData,
