@@ -29,11 +29,12 @@ pub mod fork_rules;
 pub enum ChainErr {
     BadPoW(HashID, HashID),
     BlockRefsUnkParent(HashID, HashID, bool),
-    BadParentOrder((HashID, ChainWeight), (HashID, ChainWeight)),
+    BadParentOrder(String, (HashID, ChainWeight), (HashID, ChainWeight)),
     BadDifficulty,
     BadReflWeightInBlock,
     TsBeforeParent,
     BlockHeightInvalid,
+    ApplyErr(ChainApplyErr),
 }
 
 impl fmt::Display for ChainErr {
@@ -45,6 +46,12 @@ impl fmt::Display for ChainErr {
 impl From<ChainErr> for String {
     fn from(ce: ChainErr) -> Self {
         ce.to_string()
+    }
+}
+
+impl From<ChainApplyErr> for ChainErr {
+    fn from(ce: ChainApplyErr) -> Self {
+        ApplyErr(ce)
     }
 }
 
@@ -64,6 +71,24 @@ impl fmt::Display for ChainTxErr {
 
 impl From<ChainTxErr> for String {
     fn from(ce: ChainTxErr) -> Self {
+        ce.to_string()
+    }
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum ChainApplyErr {
+    // AlreadySeen(HashID),
+    Conflicting { new_id: HashID, existing_id: HashID },
+}
+
+impl fmt::Display for ChainApplyErr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Debug::fmt(self, f)
+    }
+}
+
+impl From<ChainApplyErr> for String {
+    fn from(ce: ChainApplyErr) -> Self {
         ce.to_string()
     }
 }
@@ -189,11 +214,26 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
                 b_c = Self::get_cached_block(&b_id).unwrap();
             }
         };
-        // self.apply_block(&b_c.0, is_private)?;
+        // todo: diff between curr blocks and future blocks
+        // todo cont: zip/unzip (or wind/unwind) like bitcoin
+        // bitcoin alg (roughly):
+        // - find most recent common ancestor (LCA)
+        // - find all blocks from current head to LCA
+        // - apply those blocks in reverse (add txs to mempool)
+        // - find blocks from LCA to new head
+        // - apply those blocks in order
+        // ! note: state should be calculated in `validate_block_local` -- that way we know that it's always accessible at this point. creating and keeping extra state (if blocks are invalid) is not a problem in this simulator.
+        self.apply_block(&b_c.0, is_private)?;
         self.update_best_block(&b_c.0, &b_c.1, is_private);
         self.update_chain_heads(&b_c.0, &b_c.1, is_private);
         self.update_seen_blocks(b_id, is_private);
         // self.save_block(b.get_hash(), (b, b_meta));
+        Ok(())
+    }
+
+    fn apply_block(&mut self, b: &B, is_private: bool) -> Result<(), ChainApplyErr> {
+        self.remove_mempool_tx_ids(b.get_transactions(), is_private);
+        // todo: make new state
         Ok(())
     }
 
@@ -359,6 +399,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
             .collect()
     }
 
+    /// find most recent common ancestor (technically LCA; the furthest common ancestor should always be the genesis block)
     fn find_lca_and_intermediates(
         &self,
         bs: &Vec<HashID>,
@@ -686,16 +727,19 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
                     (Some(p1), Some(p2)) => {
                         if p1.1.chain_weight < p2.1.chain_weight {
                             return Err(BadParentOrder(
+                                "total".to_string(),
                                 (p1.0.get_hash(), p1.1.chain_weight),
                                 (p2.0.get_hash(), p2.1.chain_weight),
                             ));
                         }
-                        if p1.1.local_chain_weight < p2.1.local_chain_weight {
-                            return Err(BadParentOrder(
-                                (p1.0.get_hash(), p1.1.local_chain_weight),
-                                (p2.0.get_hash(), p2.1.local_chain_weight),
-                            ));
-                        }
+                        // todo: local_chain_weight isn't a violation of rules under PoR ((sanity) check this later)
+                        // if p1.1.local_chain_weight < p2.1.local_chain_weight {
+                        //     return Err(BadParentOrder(
+                        //         "local".to_string(),
+                        //         (p1.0.get_hash(), p1.1.local_chain_weight),
+                        //         (p2.0.get_hash(), p2.1.local_chain_weight),
+                        //     ));
+                        // }
                     }
                     (_, Some(_)) => {
                         return Err(BlockRefsUnkParent(b.get_hash(), p1_id.clone(), is_private))

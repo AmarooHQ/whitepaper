@@ -324,6 +324,9 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
     fn print_atk_summary(&self, success: bool, last_ts: Timestamp, chain: &S::C) {
         let hs = chain.get_heights_pub_priv();
         let fms = chain.get_fork_measure_pub_priv();
+        if fms.public >= 4_000_000_000 || fms.private >= 4_000_000_000 {
+            panic!("Reflection stuff going wrong -- chain_weight over 4b (which is impossible in reasonable time given this simulation -- 2022/02/09)");
+        }
         let atk_success_fail = if success {
             "ATTACK SUCCESS!"
         } else {
@@ -522,6 +525,7 @@ mod tests {
     fn mm_multichain_blocks_get_reflected() {
         let mut mm = create_mm_multichain_no_priv::<'_, DagCS>();
         mm.tick_many(30).unwrap();
+        // todo: do this for every chain (not just the target chain)
         let bb = mm.chain().get_any_best_block(false);
         let mut txs: Vec<TxId> = vec![];
         for b in bb.0.all_prev_iter_excluding(&Default::default()) {
@@ -537,5 +541,20 @@ mod tests {
             })
             .count();
         assert_ne!(n_refl_txs, 0);
+    }
+
+    #[test]
+    fn mm_multichain_por_added_to_chain_weight() {
+        let mut mm = create_mm_multichain_no_priv::<'_, DagCS>();
+        mm.tick_many(30).unwrap();
+        let bb = mm.chain().get_any_best_block(false);
+        assert_ne!(
+            bb.1.chain_weight, bb.1.local_chain_weight,
+            "PoR should mean chain_weight and local_chain_weight are different"
+        );
+        println!(
+            "cw: {}, lcw: {}",
+            bb.1.chain_weight, bb.1.local_chain_weight
+        );
     }
 }
