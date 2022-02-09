@@ -9,6 +9,7 @@ use crate::types::*;
 use log::*;
 use num::ToPrimitive;
 use rand::prelude::*;
+use std::iter::Chain;
 
 struct ExtraChainNodes<'a, S: CSystemT<'a>> {
     honest: Node<'a, S>,
@@ -111,7 +112,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
         let honest_hr_ratios: Vec<f32> = (1..net_args.por_chains)
             .map(|_| avg_honest_hr_ratio)
             .collect();
-        println!("{:?}", honest_hr_ratios);
+        // println!("honest node HR ratios: {:?}", honest_hr_ratios);
         // no ratios <0.05 or >0.95
         debug_assert_eq!(
             honest_hr_ratios
@@ -176,15 +177,23 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
         return &self.honest_node.chain;
     }
 
+    #[cfg(test)]
+    pub fn chains(&self) -> Vec<&S::C> {
+        self.extra_chain_nodes
+            .iter()
+            .map(|ecn| &ecn.honest.chain)
+            .collect()
+    }
+
     fn msgs_from_into_to(&mut self, msgs_from: Vec<Msg<S::B>>) -> Vec<MsgToNode<S::B>> {
         let mut msgs_to: Vec<_> = Default::default();
         for msg in msgs_from {
             match msg {
-                Msg::MsgBlock(b) => {
-                    msgs_to.push(MsgToNode::MsgBlock(b, false));
+                Msg::MsgBlock(c_id, b) => {
+                    msgs_to.push(MsgToNode::MsgBlock(c_id, b, false));
                 }
-                Msg::MsgPrivBlock(b) => {
-                    msgs_to.push(MsgToNode::MsgBlock(b, true));
+                Msg::MsgPrivBlock(c_id, b) => {
+                    msgs_to.push(MsgToNode::MsgBlock(c_id, b, true));
                 }
             }
         }
@@ -224,11 +233,34 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
                 .concat();
             msgs_to = [msgs_to, attacker_msgs_to].concat();
         }
-        let output_msgs = vec![
+        // let other_nodes = .iter().map(
+        //     |ExtraChainNodes {
+        //          mut honest,
+        //          mut attacker,
+        //      }| (honest, attacker),
+        // );
+        let mut output_msgs = vec![
             self.honest_node.step(ts, &msgs_to, atk_started).unwrap(),
             self.attacker_node.step(ts, &msgs_to, atk_started).unwrap(),
         ]
         .concat();
+        for extra_ns in (&mut self.extra_chain_nodes).into_iter() {
+            output_msgs.extend(extra_ns.honest.step(ts, &msgs_to, atk_started).unwrap());
+            output_msgs.extend(extra_ns.attacker.step(ts, &msgs_to, atk_started).unwrap());
+        }
+        // let all_nodes = vec![(&mut self.honest_node, &mut self.attacker_node)]
+        //     .into_iter()
+        //     .chain(other_nodes);
+        // let output_msgs = all_nodes
+        //     .map(|(mut h, mut a)| {
+        //         vec![
+        //             h.step(ts, &msgs_to, atk_started).unwrap(),
+        //             a.step(ts, &msgs_to, atk_started).unwrap(),
+        //         ]
+        //         .concat()
+        //     })
+        //     .collect::<Vec<_>>()
+        //     .concat();
         Ok(Vec::from(output_msgs))
     }
 
@@ -350,6 +382,27 @@ mod tests {
         }
     }
 
+    fn ensure_chains_progress<'a, S: CSystemT<'a>>(mm: &MM<'a, S, DoubleSpendStrat>) {
+        mm.extra_chain_nodes.iter().for_each(|ecn| {
+            let c = &ecn.honest.chain;
+            let hs = c.get_fork_measure_pub_priv();
+
+            assert_ne!(hs.public, 0);
+            assert_eq!(hs.private, 0);
+
+            for node in vec![&ecn.honest, &ecn.attacker] {
+                println!(
+                    "baseline: {:?}, this node: {:?}, {:?}, {:?}",
+                    hs,
+                    node.chain.get_fork_measure_pub_priv(),
+                    node.chain.get_fork_measure_pub_priv(),
+                    node.chain.get_fork_measure_pub_priv(),
+                );
+                assert_eq!(node.chain.get_fork_measure_pub_priv().public, hs.public);
+            }
+        })
+    }
+
     #[test]
     fn blocks_propagate() {
         let mut mm = create_mm_no_priv::<'_, SimpleCS>();
@@ -389,6 +442,7 @@ mod tests {
             DoubleSpendParams::new(100, 20),
             NetworkArgs::new(10),
         );
+        let chain_id = mm.chain().get_chain_id();
 
         // set ts far in future to avoid issues with difficulty alg
         let t1_ts = 1000;
@@ -398,7 +452,10 @@ mod tests {
         // create 2 dagblocks
         let b_h1_1 = mm.chain().draft_block(t1_ts, false).test_set_work_bits(24);
         let b_h1_2 = mm.chain().draft_block(t1_ts, false).test_set_work_bits(24);
-        msgs.extend(vec![Msg::MsgBlock(b_h1_1), Msg::MsgBlock(b_h1_2)]);
+        msgs.extend(vec![
+            Msg::MsgBlock(chain_id, b_h1_1),
+            Msg::MsgBlock(chain_id, b_h1_2),
+        ]);
 
         // we made at least 2 blocks
         assert_eq!(
@@ -423,7 +480,7 @@ mod tests {
         if msgs.len() == 0 {
             let mut b = mm.chain().draft_block(t2_ts, false);
             b.id >>= 30;
-            msgs.push(Msg::MsgBlock(b));
+            msgs.push(Msg::MsgBlock(chain_id, b));
         }
 
         // lets add blocks from the last tick.
@@ -448,5 +505,14 @@ mod tests {
     fn mm_init_with_multiple_chains() {
         // this triggers debug_assert in `mk_extra_chain_nodes`
         let mm = create_mm_multichain_no_priv::<'_, DagCS>();
+    }
+
+    #[test]
+    fn mm_multichain_progress() {
+        // this triggers debug_assert in `mk_extra_chain_nodes`
+        let mut mm = create_mm_multichain_no_priv::<'_, DagCS>();
+        mm.tick_many(30).unwrap();
+        ensure_chain_progress(&mm);
+        ensure_chains_progress(&mm);
     }
 }

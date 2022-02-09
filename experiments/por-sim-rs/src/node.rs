@@ -53,11 +53,12 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         attack_started: bool,
     ) -> Result<Vec<Msg<S::B>>, String> {
         let mut out_msgs = vec![];
+        let chain_id = self.chain.get_chain_id();
 
         // process incoming messages
         for in_msg in msgs {
             match in_msg {
-                MsgToNode::MsgBlock(b, is_private) => {
+                MsgToNode::MsgBlock(c_id, b, is_private) if *c_id == chain_id => {
                     self.curr_draft_block = None;
                     match (is_private, self.is_attacker) {
                         (false, _) => {
@@ -72,6 +73,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
                         (true, false) => {}
                     }
                 }
+                _ => {}
             }
         }
 
@@ -81,9 +83,9 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
                 // if we're an attacker and past when the attack starts,
                 // then relay private blocks. otherwise it's a normal block.
                 if self.is_attacker && attack_started {
-                    MsgPrivBlock(b)
+                    MsgPrivBlock(self.chain.get_chain_id(), b)
                 } else {
-                    MsgBlock(b)
+                    MsgBlock(self.chain.get_chain_id(), b)
                 },
             );
         }
@@ -159,6 +161,7 @@ mod tests {
             BlockMD::mk_genesis_md(&genesis, net_args.daa2_n_blocks),
             net_args,
         );
+        let chain_id = c.get_chain_id();
         let mut n: Node<SimpleCS> = Node::new(1337, c, false, 100, false);
 
         // just so we make sure we can get a valid block via mining
@@ -180,7 +183,11 @@ mod tests {
         // public block
         let b2 = n.chain.draft_block(19, false).test_set_work_bits(16);
         // process it after the attack has started
-        n.step(20, &vec![MsgToNode::MsgBlock(b2.clone(), false)], true)?;
+        n.step(
+            20,
+            &vec![MsgToNode::MsgBlock(chain_id, b2.clone(), false)],
+            true,
+        )?;
         assert_eq!(
             n.chain.get_best_blocks(false).contains(&b2.get_hash()),
             true,
