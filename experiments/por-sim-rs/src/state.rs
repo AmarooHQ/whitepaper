@@ -152,7 +152,11 @@ impl LightChainIM {
  * - [ ] validate transactions in block generally
  * - [x] message manager creates multiple chains
  * - [ ] message manager randomizes chain-work and honest/attacker balance over diff chains (ideally we want a chain where attacker has >51% of HR locally but not globally)
- * - [ ] message manager notifies other chains of reflectable blocks
- * - [ ] chains integrate reflectable blocks
+ * - [x] message manager notifies other chains of reflectable blocks
+ * - [ ] relay strats know what to do with reflectable blocks
+ * - [x] reflectable blocks have txs that are included in blocks
+ * - [ ] chains integrate reflectable blocks w/ consensus
+ * - [ ] reflection txs correctly identify why ancestor is being reflected
+ * - [ ] reflection txs reflected ancestor is validated
  *
  * */

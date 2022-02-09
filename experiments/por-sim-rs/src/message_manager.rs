@@ -347,6 +347,8 @@ mod tests {
     use super::*;
     use crate::block::*;
     use crate::cryptosystem::*;
+    use crate::transactions::Transaction;
+    use crate::transactions::TxId;
 
     fn create_mm_no_priv<'a, S: CSystemT<'a>>() -> MM<'a, S, DoubleSpendStrat> {
         MM::<'a, S, DoubleSpendStrat>::new(
@@ -514,5 +516,26 @@ mod tests {
         mm.tick_many(30).unwrap();
         ensure_chain_progress(&mm);
         ensure_chains_progress(&mm);
+    }
+
+    #[test]
+    fn mm_multichain_blocks_get_reflected() {
+        let mut mm = create_mm_multichain_no_priv::<'_, DagCS>();
+        mm.tick_many(30).unwrap();
+        let bb = mm.chain().get_any_best_block(false);
+        let mut txs: Vec<TxId> = vec![];
+        for b in bb.0.all_prev_iter_excluding(&Default::default()) {
+            txs.extend(b.get_transactions());
+        }
+        let n_refl_txs = txs
+            .iter()
+            .cloned()
+            .filter(|&id| {
+                Transaction::get_cached_tx(id)
+                    .unwrap()
+                    .is_reflect_and_prove()
+            })
+            .count();
+        assert_ne!(n_refl_txs, 0);
     }
 }

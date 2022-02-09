@@ -92,6 +92,13 @@ impl Transaction {
     pub fn get_reflected_weight(&self) -> Difficulty {
         self.get_reflection_data().map(|r| r.weight).unwrap_or(0)
     }
+
+    pub fn is_reflect_and_prove(&self) -> bool {
+        match self {
+            Transaction::ReflectAndProve(_) => true,
+            _ => false,
+        }
+    }
 }
 
 #[cfg(test)]

@@ -51,15 +51,15 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         is_private: bool,
     ) -> Result<(), ChainTxErr> {
         debug_assert_ne!(self.chain.get_chain_id(), c_id);
-        self.chain.add_tx_to_mempool(
-            &Transaction::ReflectAndProve(ReflectionData {
-                chain: c_id,
-                block: b.get_hash(),
-                weight: b.get_difficulty(),
-                proving_ancestor_id: 0,
-            }),
-            is_private,
-        )
+        let tx = Transaction::ReflectAndProve(ReflectionData {
+            chain: c_id,
+            block: b.get_hash(),
+            weight: b.get_difficulty(),
+            proving_ancestor_id: 0,
+        });
+        let tx_id = tx.get_hash();
+        Transaction::set_cached_tx(tx);
+        self.chain.add_tx_to_mempool(tx_id, is_private)
     }
 
     #[cfg(test)]
