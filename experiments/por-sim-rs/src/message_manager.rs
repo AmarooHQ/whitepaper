@@ -360,7 +360,7 @@ mod tests {
         MM::<'a, S, DoubleSpendStrat>::new(
             AttackArgs::new(1000, 0, 100),
             DoubleSpendParams::new(100, 20),
-            NetworkArgs::new_por(10, 100),
+            NetworkArgs::new_por(10, 10),
         )
     }
 
@@ -504,7 +504,7 @@ mod tests {
     #[test]
     fn mm_init_with_multiple_chains() {
         // this triggers debug_assert in `mk_extra_chain_nodes`
-        let mm = create_mm_multichain_no_priv::<'_, DagCS>();
+        let _mm = create_mm_multichain_no_priv::<'_, DagCS>();
     }
 
     #[test]

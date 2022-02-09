@@ -159,6 +159,7 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
     // transaction support
     fn get_transactions(&self) -> &Vec<TxId>;
     fn add_transaction(&mut self, id: TxId);
+    fn add_transactions(&mut self, ids: Vec<TxId>);
 
     /// Claimed reflected weight
     fn get_reflected_weight(&self) -> Difficulty;
@@ -351,10 +352,16 @@ impl BlockT for Block {
     }
 
     fn add_transaction(&mut self, id: TxId) {
-        self.txs.push(id);
-        self.refl_weight += Transaction::get_cached_tx(id)
-            .map(|tx| tx.get_reflected_weight())
-            .unwrap_or(0);
+        self.add_transactions(vec![id]);
+    }
+
+    fn add_transactions(&mut self, ids: Vec<TxId>) {
+        for &id in ids.iter() {
+            self.txs.push(id);
+            self.refl_weight += Transaction::get_cached_tx(id)
+                .map(|tx| tx.get_reflected_weight())
+                .unwrap_or(0);
+        }
         // simulate change of hash when txs added
         self.increment_nonce();
     }
@@ -498,10 +505,16 @@ impl BlockT for DagBlock {
     }
 
     fn add_transaction(&mut self, id: TxId) {
-        self.txs.push(id);
-        self.refl_weight += Transaction::get_cached_tx(id)
-            .map(|tx| tx.get_reflected_weight())
-            .unwrap_or(0);
+        self.add_transactions(vec![id]);
+    }
+
+    fn add_transactions(&mut self, ids: Vec<TxId>) {
+        for &id in ids.iter() {
+            self.txs.push(id);
+            self.refl_weight += Transaction::get_cached_tx(id)
+                .map(|tx| tx.get_reflected_weight())
+                .unwrap_or(0);
+        }
         // simulate change of hash when txs added
         self.increment_nonce();
     }

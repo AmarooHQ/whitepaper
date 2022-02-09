@@ -1,10 +1,13 @@
 use crate::block::BlockT;
 use crate::chain::ChainErr;
 use crate::chain::ChainT;
+use crate::chain::ChainTxErr;
 use crate::cryptosystem::CSystemT;
 use crate::msg::Msg;
 use crate::msg::Msg::*;
 use crate::msg::MsgToNode;
+use crate::transactions::ReflectionData;
+use crate::transactions::Transaction;
 use crate::types::*;
 use log::*;
 
@@ -41,6 +44,24 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         self.chain.add_block(b.clone(), is_private)
     }
 
+    fn got_reflectable(
+        &mut self,
+        c_id: HashID,
+        b: &S::B,
+        is_private: bool,
+    ) -> Result<(), ChainTxErr> {
+        debug_assert_ne!(self.chain.get_chain_id(), c_id);
+        self.chain.add_tx_to_mempool(
+            &Transaction::ReflectAndProve(ReflectionData {
+                chain: c_id,
+                block: b.get_hash(),
+                weight: b.get_difficulty(),
+                proving_ancestor_id: 0,
+            }),
+            is_private,
+        )
+    }
+
     #[cfg(test)]
     fn notify_of_block(&mut self, id: HashID, p: bool) -> Result<(), ChainErr> {
         self.chain.notify_block(id, p)
@@ -58,19 +79,36 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         // process incoming messages
         for in_msg in msgs {
             match in_msg {
-                MsgToNode::MsgBlock(c_id, b, is_private) if *c_id == chain_id => {
-                    self.curr_draft_block = None;
-                    match (is_private, self.is_attacker) {
-                        (false, _) => {
-                            self.got_block(b, false)?;
-                            // before the attack has started, treat all blocks
-                            // like they were also private blocks
-                            if self.is_attacker && !attack_started {
-                                self.got_block(b, true)?;
+                MsgToNode::MsgBlock(c_id, b, is_private) => {
+                    // todo: is it possible to do some higher-order function stuff here to make this code nicer? is it worth bothering?
+                    if *c_id == chain_id {
+                        // wipe draft block b/c we'll have found a better one
+                        self.curr_draft_block = None;
+                        match (is_private, self.is_attacker) {
+                            (false, _) => {
+                                self.got_block(b, false)?;
+                                // before the attack has started, treat all blocks
+                                // like they were also private blocks
+                                if self.is_attacker && !attack_started {
+                                    self.got_block(b, true)?;
+                                }
                             }
+                            (true, true) => self.got_block(b, true)?,
+                            (true, false) => {}
                         }
-                        (true, true) => self.got_block(b, true)?,
-                        (true, false) => {}
+                    } else {
+                        // this is a block on another chain -- worth considering for reflection
+                        // (in practice we always want to reflect b/c it incents miners of R chains to reflect back)
+                        match (is_private, self.is_attacker) {
+                            (false, _) => {
+                                self.got_reflectable(*c_id, b, false)?;
+                                if self.is_attacker && !attack_started {
+                                    self.got_reflectable(*c_id, b, true)?;
+                                }
+                            }
+                            (true, true) => self.got_reflectable(*c_id, b, true)?,
+                            _ => {}
+                        }
                     }
                 }
                 _ => {}

@@ -20,6 +20,11 @@ use std::sync::Mutex;
 
 pub mod fork_rules;
 
+/**
+ * - [ ] apply_block -- actually run txs through state
+ * - [ ] remove txs from mempool when applying new block
+ */
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum ChainErr {
     BadPoW(HashID, HashID),
@@ -44,6 +49,24 @@ impl From<ChainErr> for String {
 }
 
 use ChainErr::*;
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum ChainTxErr {
+    // AlreadySeen(HashID),
+    Conflicting { new_id: HashID, existing_id: HashID },
+}
+
+impl fmt::Display for ChainTxErr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Debug::fmt(self, f)
+    }
+}
+
+impl From<ChainTxErr> for String {
+    fn from(ce: ChainTxErr) -> Self {
+        ce.to_string()
+    }
+}
 
 #[derive(Debug)]
 pub struct Heights {
@@ -81,6 +104,8 @@ pub struct Chain<B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     priv_chain_heads: ChainHeads,
     seen_pub_blocks: SeenBlocks,
     seen_priv_blocks: SeenBlocks,
+    pub_mempool: FxHashSet<HashID>,
+    priv_mempool: FxHashSet<HashID>,
     net_args: NetworkArgs,
     _phantom_f: PhantomData<F>,
     _phantom_b: PhantomData<B>,
@@ -134,6 +159,10 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
     fn get_fork_measure_pub_priv(&self) -> Heights;
     fn get_heights_pub_priv(&self) -> Heights;
 
+    fn add_tx_to_mempool(&mut self, tx: &Transaction, is_private: bool) -> Result<(), ChainTxErr>;
+    fn get_mempool_tx_ids(&self, is_private: bool) -> &FxHashSet<HashID>;
+    fn remove_mempool_tx_ids(&mut self, tx_ids: &Vec<HashID>, is_private: bool);
+
     fn get_chain_weight_at(&self, b: HashID) -> Difficulty {
         Self::get_cached_block(&b).unwrap().1.chain_weight
     }
@@ -147,6 +176,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
     fn add_block(&mut self, b: B, is_private: bool) -> Result<(), ChainErr> {
         let b_id = b.get_hash();
         let b_c;
+        // will error on invalid blocks
         self.validate_block_local(&b, is_private)?;
         // note, it *is* faster to check than just insert
         match Self::get_cached_block(&b_id) {
@@ -159,6 +189,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
                 b_c = Self::get_cached_block(&b_id).unwrap();
             }
         };
+        // self.apply_block(&b_c.0, is_private)?;
         self.update_best_block(&b_c.0, &b_c.1, is_private);
         self.update_chain_heads(&b_c.0, &b_c.1, is_private);
         self.update_seen_blocks(b_id, is_private);
@@ -213,6 +244,12 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
         );
         let p = Self::get_cached_block(&b.prev()).unwrap();
         b.set_difficulty(self.next_difficulty(&p.0, &p.1));
+        b.add_transactions(
+            self.get_mempool_tx_ids(is_private)
+                .iter()
+                .cloned()
+                .collect(),
+        );
         b
     }
 
@@ -462,6 +499,14 @@ impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
             })
             .unwrap();
     }
+
+    fn _mempool(&mut self, is_private: bool) -> &mut FxHashSet<HashID> {
+        if is_private {
+            &mut self.priv_mempool
+        } else {
+            &mut self.pub_mempool
+        }
+    }
 }
 
 impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
@@ -482,6 +527,8 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             seen_priv_blocks: [g_hash].iter().cloned().collect(),
             priv_chain_heads: [(g_hash, g_diff)].iter().cloned().collect(),
             pub_chain_heads: [(g_hash, g_diff)].iter().cloned().collect(),
+            pub_mempool: Default::default(),
+            priv_mempool: Default::default(),
             net_args,
             // fork_rules: LongestChain::<B>::new(),
             _phantom_b: PhantomData,
@@ -568,6 +615,25 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
                     .1
                     .height,
             ),
+        }
+    }
+
+    fn add_tx_to_mempool(&mut self, tx: &Transaction, is_private: bool) -> Result<(), ChainTxErr> {
+        self._mempool(is_private).insert(tx.id());
+        Ok(())
+    }
+
+    fn get_mempool_tx_ids(&self, is_private: bool) -> &FxHashSet<HashID> {
+        if is_private {
+            &self.priv_mempool
+        } else {
+            &self.pub_mempool
+        }
+    }
+
+    fn remove_mempool_tx_ids(&mut self, tx_ids: &Vec<HashID>, is_private: bool) {
+        for tx_id in tx_ids.iter() {
+            self._mempool(is_private).remove(tx_id);
         }
     }
 

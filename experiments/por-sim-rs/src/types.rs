@@ -31,7 +31,7 @@ impl NetworkArgs {
         NetworkArgs {
             block_target,
             daa2_n_blocks: 100,
-            por_chains: 0,
+            por_chains: 1,
         }
     }
 
