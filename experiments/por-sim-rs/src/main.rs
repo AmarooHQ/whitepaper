@@ -4,7 +4,9 @@ use crate::message_manager::*;
 use crate::strategies::relay::*;
 use crate::types::*;
 use clap::{value_t_or_exit, ArgMatches};
+use core::fmt::Display;
 use log::LevelFilter;
+use num::Num;
 use num::ToPrimitive;
 use std::time::SystemTime;
 
@@ -47,11 +49,40 @@ arg_enum! {
     }
 }
 
+fn num_is_between<T: PartialOrd + Display>(n: T, min: T, max: T) -> Result<(), String> {
+    if min <= n && n <= max {
+        return Ok(());
+    }
+    Err(format!("{} is outside range ({}, {}).", n, min, max))
+}
+
+fn validate_ratio(v: String) -> Result<(), String> {
+    v.parse::<f32>()
+        .map_err(|e| e.to_string())
+        .and_then(|r| num_is_between(r, 0.0, 1.0))
+}
+
+fn validate_n_chains(s: String) -> Result<(), String> {
+    s.parse::<u16>()
+        .map_err(|e| e.to_string())
+        .and_then(|v| num_is_between(v, 1, 999))
+}
+
+fn validate_daa2_n_blocks(s: String) -> Result<(), String> {
+    s.parse::<u16>()
+        .map_err(|e| e.to_string())
+        .and_then(|v| num_is_between(v, 5, 2_000))
+}
+
+// fn validate_n_between<T: PartialOrd, F: Fn(String) -> Result<(), String>>(min: T, max: T) -> F {
+//     return |s: String| s.parse::<T>().map_err(|e| e.to_string());
+// }
+
 fn get_arg_matches<'a>() -> ArgMatches<'a> {
     clap_app!(sim =>
         (about: "Blockchain PoW + PoR simulator")
         (version: "0.1.0")
-        (@arg attacker_ratio: -r --ratio +takes_value default_value("0.45") #{0, 1} "Proportion of hash-rate belonging to attackers.")
+        (@arg attacker_ratio: -r --ratio +takes_value default_value("0.45") {validate_ratio} "Proportion of hash-rate belonging to attackers.")
         (@arg start_attack_at_t: -s --start_attack_tick +takes_value default_value("1000") "Tick at which to start the attack.")
         (@arg end_simulation_at_t: -e --end_tick +takes_value "Maximum number of ticks for the simulation. Defaults to 3*start_attack_tick")
         (@arg hash_rate: -H --hash_rate +takes_value default_value("1000") "Network hash-rate per tick.")
@@ -64,7 +95,9 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
         // selfish mining params
         // <none>
         // PoR params
-        (@arg por_n_chains: -P --por_n_chains +takes_value default_value("1") #{1, 999} "Number of chains to use PoR between (only matters if >1)")
+        (@arg por_n_chains: -P --por_n_chains +takes_value default_value("1") {validate_n_chains} "Number of chains to use PoR between (only matters if >1)")
+        // DAA params
+        (@arg daa2_n_blocks: --daa2_n_blocks +takes_value default_value("100") {validate_daa2_n_blocks} "Number of blocks to use to recalculate difficulty")
     )
     .get_matches()
 }
@@ -79,10 +112,10 @@ pub fn main() -> Result<(), String> {
     //     .unwrap();
     let args = get_arg_matches();
 
-    let attacker_ratio = value_t_or_exit!(args.value_of("attacker_ratio"), f64);
+    let attacker_ratio = value_t_or_exit!(args.value_of("attacker_ratio"), f32);
     let attack_at_h = value_t_or_exit!(args.value_of("start_attack_at_t"), u32);
     let end_simulation_at_t = value_t!(args, "end_simulation_at_t", u32).unwrap_or(3 * attack_at_h);
-    let hash_rate = value_t_or_exit!(args.value_of("hash_rate"), f64);
+    let hash_rate = value_t_or_exit!(args.value_of("hash_rate"), f32);
     let attacker_instant_propagation = args.is_present("attacker_instant_propagation");
     let block_target = value_t_or_exit!(args.value_of("block_target"), u16);
     let crypto_system =
@@ -91,15 +124,21 @@ pub fn main() -> Result<(), String> {
     let attacker_hr = (hash_rate * attacker_ratio).to_u16().unwrap() as u32;
     let attack_starts_at = attack_at_h as Difficulty;
     let por_chains = value_t_or_exit!(args.value_of("por_n_chains"), u16);
+    let daa2_n_blocks = value_t_or_exit!(args.value_of("daa2_n_blocks"), usize);
 
     let atk_args = AttackArgs {
+        q: attacker_ratio,
         honest_hr,
         attacker_hr,
         attack_starts_at,
         end_simulation_at_t,
         attacker_instant_propagation,
     };
-    let network_args = NetworkArgs::new_por(block_target, por_chains);
+    let network_args = NetworkArgs {
+        block_target,
+        por_chains,
+        daa2_n_blocks,
+    };
 
     let start_atk = SystemTime::now();
 

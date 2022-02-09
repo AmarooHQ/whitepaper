@@ -6,18 +6,21 @@ use crate::CSystemT;
 use conv::prelude::*;
 use itertools::any;
 use num::pow;
+use std::fmt;
 use std::fmt::Debug;
+use std::fmt::Display;
 use std::marker::PhantomData;
 
 /// a strategy that runs at a network level based on incoming msgs
 pub trait RelayStrategyT<'a, S: CSystemT<'a>> {
     type ResultsTy: Debug;
-    type Params: Clone + Copy;
+    type Params: Clone + Copy + Debug;
     fn init(c: &S::C, atk_start_h: Height, p: Self::Params) -> Self;
     /// Additional msgs that can be provided by attackers when certain conditions are met (e.g., selfish mining requires releasing withheld blocks if the honest network releases one)
     fn on_msg(&mut self, m: &MsgToNode<S::B>, chain: &S::C) -> Vec<MsgToNode<S::B>>;
     fn get_results(&self, c: &S::C) -> Option<(Self::ResultsTy, bool)>;
     fn should_stop_simulation(&self, ts: Timestamp, c: &S::C) -> bool;
+    fn params_as_csv(&self) -> String;
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -71,6 +74,12 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
             fms.public < fms.private && hs.public > self.atk_start_h + self.params.win_thres
         }
     }
+    fn params_as_csv(&self) -> String {
+        format!(
+            "{}, {}",
+            self.params.attack_starts_at, self.params.win_thres
+        )
+    }
 }
 
 #[derive(Debug, Default)]
@@ -122,6 +131,20 @@ pub enum SmChainType {
     LongestChain,
     WeightedChain,
     WeightedDag,
+}
+
+impl Display for SmChainType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                SmChainType::LongestChain => "LongestChain",
+                SmChainType::WeightedChain => "WeightedChain",
+                SmChainType::WeightedDag => "WeightedDag",
+            }
+        )
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -488,6 +511,9 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
     fn should_stop_simulation(&self, _ts: Timestamp, _c: &S::C) -> bool {
         // never stop selfish mining
         false
+    }
+    fn params_as_csv(&self) -> String {
+        format!("{}", self.params.chain_type)
     }
 }
 

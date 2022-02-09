@@ -10,6 +10,8 @@ use log::*;
 use num::ToPrimitive;
 use rand::prelude::*;
 use std::iter::Chain;
+use std::time::Duration;
+use std::time::SystemTime;
 
 struct ExtraChainNodes<'a, S: CSystemT<'a>> {
     honest: Node<'a, S>,
@@ -24,10 +26,12 @@ pub struct MM<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> {
     atk_params: R::Params,
     atk_start_h: Option<Height>,
     extra_chain_nodes: Vec<ExtraChainNodes<'a, S>>,
+    net_args: NetworkArgs,
 }
 
 #[derive(Debug, Clone)]
 pub struct AttackArgs {
+    pub q: f32,
     pub honest_hr: u32,
     pub attacker_hr: u32,
     pub attack_starts_at: Timestamp,
@@ -38,7 +42,9 @@ pub struct AttackArgs {
 impl AttackArgs {
     #[cfg(test)]
     fn new(honest_hr: u32, attacker_hr: u32, attack_starts_at: Timestamp) -> Self {
+        let q = (honest_hr as f32) / ((honest_hr + attacker_hr) as f32);
         AttackArgs {
+            q,
             honest_hr,
             attacker_hr,
             attack_starts_at,
@@ -59,7 +65,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
         let chain = S::C::new(
             genesis.clone(),
             BlockMD::mk_genesis_md(&genesis.clone(), net_args.daa2_n_blocks.to_usize().unwrap()),
-            net_args,
+            net_args.clone(),
         );
         MM {
             honest_node: Node::new(0, chain.clone(), false, args.honest_hr, false),
@@ -75,6 +81,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             atk_params,
             atk_start_h: None,
             extra_chain_nodes,
+            net_args,
         }
     }
 
@@ -286,6 +293,8 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
         let mut msgs_from = Vec::new();
         let ts_limit = self.args.end_simulation_at_t;
 
+        let run_atk_start = SystemTime::now();
+
         let mut last_ts = 0;
         for ts in 1..(ts_limit + 1) {
             last_ts = ts;
@@ -307,21 +316,27 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             }
         }
 
+        let run_atk_end = SystemTime::now();
+        let atk_duration_ms = run_atk_end
+            .duration_since(run_atk_start)
+            .unwrap_or(Duration::new(0, 0))
+            .as_millis();
+
         let chain = &self.attacker_node.chain;
         match self.strategy.as_ref().and_then(|s| s.get_results(chain)) {
             None => {
-                self.print_atk_summary(false, last_ts, chain);
+                self.print_atk_summary(false, last_ts, chain, atk_duration_ms);
                 Ok(false)
             }
             Some((r, success)) => {
-                self.print_atk_summary(success, last_ts, chain);
+                self.print_atk_summary(success, last_ts, chain, atk_duration_ms);
                 warn!("Attack Results: {:?}", r);
                 Ok(true)
             }
         }
     }
 
-    fn print_atk_summary(&self, success: bool, last_ts: Timestamp, chain: &S::C) {
+    fn print_atk_summary(&self, success: bool, last_ts: Timestamp, chain: &S::C, ms_elapsed: u128) {
         let hs = chain.get_heights_pub_priv();
         let fms = chain.get_fork_measure_pub_priv();
         if fms.public >= 4_000_000_000 || fms.private >= 4_000_000_000 {
@@ -341,6 +356,24 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             hs.private,
             fms.public,
             fms.private
+        );
+        let win = if success { 1 } else { 0 };
+        // win, ticks_elapsed, atk_start_h, pub_h, priv_h, pub_cw, priv_cw, atk_q, block_target, daa2_n_blocks, n_chains, ms_elapsed, ...atk_strategy_cols
+        println!(
+            "RESULT:{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}",
+            win,
+            last_ts,
+            self.atk_start_h.unwrap_or(0),
+            hs.public,
+            hs.private,
+            fms.public,
+            fms.private,
+            self.args.q,
+            self.net_args.block_target,
+            self.net_args.daa2_n_blocks,
+            self.net_args.por_chains,
+            ms_elapsed,
+            self.strategy.as_ref().unwrap().params_as_csv(),
         );
     }
 }
