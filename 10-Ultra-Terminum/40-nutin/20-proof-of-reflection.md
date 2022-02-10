@@ -279,14 +279,15 @@ At this point the attacker can publish their blocks even though the honest chain
 Chain L nodes would *not* reorganize around this new chain-segment, so why would an attacker do this?
 If the projection of Chain L in Chain R *does not account for reflections*, then the attacker's chain-segment will appear (to Chain R) to have more work than the honest chain-segment.
 Thus the *projection* of L in R will reorganize to favor the attacker's chain-segment.
-If the attacker has more hash power than the honest miners (i.e., $q > p$[^hr-footnote]) then they might\footnotemark{} be able to use this reorganization as a foothold -- either to launch a traditional 51% attack against L, or to attack SPV verification and light clients.
+If the attacker has more hash power than the honest miners (i.e., $q > p$\footnote{
+  In \href{https://bitcoin.org/bitcoin.pdf}{Satoshi's original paper} the parameters $p$ and $q$ represent the probability that the next block will be found by an honest node or the attacker, respectively.
+  This convention has been continued in subsequent analysis, e.g., Rosenfeld's \href{https://web.archive.org/web/20220209100515/https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{\emph{Analysis of hash-rate-based double-spending}}, and is continued here, also.
+}) then they might\footnotemark{} be able to use this reorganization as a foothold -- either to launch a traditional 51% attack against L, or to attack SPV verification and light clients.
 
 \footnotetext{
   In a limited case like this, where there are only two chains, there are many options for preventing these sorts of attacks on full nodes.
   However, in a more general case, where there might be many reflecting chains, we need to deal with the \emph{root cause} of the vulnerability.
 }
-
-[^hr-footnote]: In \href{https://bitcoin.org/bitcoin.pdf}{Satoshi's original paper} the parameters $p$ and $q$ represent the probability that the next block will be found by an honest node or the attacker, respectively. This convention has been continued in subsequent analysis, e.g., Rosenfeld's \href{https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{\emph{Analysis of hash-rate-based double-spending}}, and is continued here, also.
 
 \aside{
   Note: Chain R is not \emph{required} to actually evaluate Chain L's tip.
@@ -662,7 +663,7 @@ So $\nicefrac{1}{5}$ seems like a reasonable estimate for \emph{relative confirm
   Due to the dynamics of confirmations, we can't directly compare chain-segments like this -- this example is here to help give you an intuition.
   The reason we can't directly compare in this way is that simply \emph{having more confirmations} is worth something in and of itself.
   The relationship is not linear.
-  See \href{https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{Analysis of hashrate-based double-spending} for more.
+  See \href{https://web.archive.org/web/20220209100515/https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{Analysis of hashrate-based double-spending} for more.
 }
 
 Naively, \emph{relative block frequencies} seems to be in the same units as the other two: L-blocks/R-blocks; but they \emph{cannot} be in the same units as \emph{the values mean different things}.
