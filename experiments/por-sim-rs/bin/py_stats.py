@@ -68,24 +68,25 @@ def read_csv_data(fname='./exp-3.csv'):
     # s4 = pd.Series(ys, index=[x**(2/3) for x in xs[:max_ix]])
     ms_elapsed = d.reset_index().groupby('n_chains')['ms_elapsed'].mean()
     nts = list(n for x,n in row_counter.items())
-    n_trials = int(numpy.array(nts).mean())
+    n_trials = int(numpy.array(nts).min())
     return n_trials, max_ix, only_target, q, series, ms_elapsed
 
 
-def plot_chart():
+def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
     plt.figure()
     _max_ix = 0
     qs = set()
-    for fname in CSV_FILES:
+    kwargs = plot_kwargs or dict()
+    for fname in csv_files:
         n_trials, max_ix, block_target, _q, csv_data, ms_elapsed = read_csv_data(fname=fname)
-        csv_data.plot(label=f"PoR $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; n={n_trials}")
+        csv_data.plot(label=f"PoR $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $n \\geq {n_trials}$", **kwargs)
         # ms_elapsed.plot(label=f"$\\bar{{d}}$ (ms); $B_f^{{-1}} = {block_target}$", secondary_y=True)
         _max_ix = max(_max_ix, max_ix)
         qs.add(_q)
     _qs = list(qs)
     _qs.sort()
     for q in _qs:
-        multipliers = list(range(1, 20)) + list(range(20, _max_ix+1, 10))
+        multipliers = list(range(1, min(_max_ix+1,20))) + list(range(20, _max_ix+1, 10))
         theoretical_data = ds_theoretical_series(multipliers, q=q)#, max_multiplier=_max_ix)
         theoretical_data.plot(label=f"Theoretical $q={q:.2f}$ (confs = $20x$)")
     # d2.plot(label="PoR - $x/2$")
@@ -103,4 +104,4 @@ def plot_chart():
 
 
 if __name__ == "__main__":
-    plot_chart()
+    plot_chart(csv_files=['exp-4a-wPoRFix.csv'], plot_kwargs=dict(logy=False))

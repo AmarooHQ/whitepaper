@@ -2,22 +2,21 @@
 
 # this is expected to be run in dir w/ Cargo.toml & Makefile
 SIM_BIN=./target/release/por-sim-rs
-cargo build --release
 
 # compared to exp3, how does B_PERIOD change things?
-# 4a variant: nchains goes up to 100 w/ step of 10
+# 4b variant: nchains seq + trials + q=0.4
 
-export OUT_FILE=exp-4a.csv
+export OUT_FILE=exp-4b.csv
 
-export B_PERIOD=25
-export ATK_RATIO=0.44
-export N_TRIALS_PER=200
+export B_PERIOD=50
+export ATK_RATIO=0.4
+export N_TRIALS_PER=1000
 
 if [[ ! -f $OUT_FILE ]]; then
   cp result-columns.csv $OUT_FILE
 fi
 
-for nchains in 1 10 20 30 40 50 60 70 80 90 100; do
+for nchains in `seq 1 20` 25 30 35 40 50 60; do
   for ntrials in `seq 1 ${N_TRIALS_PER}`; do
     (
       export N_CHAINS=${nchains};

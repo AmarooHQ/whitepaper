@@ -50,16 +50,37 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         b: &S::B,
         is_private: bool,
     ) -> Result<(), ChainTxErr> {
-        debug_assert_ne!(self.chain.get_chain_id(), c_id);
-        let tx = Transaction::ReflectAndProve(ReflectionData {
-            chain: c_id,
-            block: b.get_hash(),
-            weight: b.get_difficulty(),
-            proving_ancestor_id: 0,
-        });
-        let tx_id = tx.get_hash();
-        Transaction::set_cached_tx(tx);
-        self.chain.add_tx_to_mempool(tx_id, is_private)
+        let my_chain_id = self.chain.get_chain_id();
+        debug_assert_ne!(my_chain_id, c_id);
+
+        let txs = b.get_txs();
+        let mut refl_ancestors: Vec<_> = txs
+            .into_iter()
+            .map(|tx| tx.reflecting_ancestor_of_chain(my_chain_id))
+            .filter(|mb| mb.is_some())
+            .map(|mb| mb.unwrap())
+            .filter(|&b| self.chain.block_is_in_best_chain(b, is_private))
+            .collect();
+        if refl_ancestors.len() == 0 {
+            refl_ancestors.push(0);
+        }
+        for proving_ancestor_id in refl_ancestors {
+            let count_weight = proving_ancestor_id != 0;
+            let weight = if count_weight { b.get_difficulty() } else { 0 };
+            let tx = Transaction::ReflectAndProve(ReflectionData {
+                chain: c_id,
+                block: b.get_hash(),
+                weight,
+                proving_ancestor_id,
+            });
+            let tx_id = tx.get_hash();
+            Transaction::set_cached_tx(tx);
+            let res = self.chain.add_tx_to_mempool(tx_id, is_private);
+            if res.is_err() {
+                return res;
+            }
+        }
+        Ok(())
     }
 
     #[cfg(test)]

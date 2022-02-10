@@ -89,14 +89,36 @@ impl Transaction {
         }
     }
 
-    pub fn get_reflected_weight(&self) -> Difficulty {
-        self.get_reflection_data().map(|r| r.weight).unwrap_or(0)
+    pub fn get_reflected_weight(&self, chain_id: HashID) -> Difficulty {
+        // todo: the chain== check here broke stuff, I don't think it'd every be true.
+        self.get_reflection_data()
+            // .map(|r| if r.chain == chain_id { r.weight } else { 0 })
+            .map(|r| r.weight)
+            .unwrap_or(0)
     }
 
     pub fn is_reflect_and_prove(&self) -> bool {
         match self {
             Transaction::ReflectAndProve(_) => true,
             _ => false,
+        }
+    }
+
+    pub fn is_reflecting(&self, b: HashID, chain_id: HashID) -> bool {
+        match self {
+            Transaction::ReflectAndProve(ReflectionData { block, chain, .. }) => {
+                b == *block && *chain == chain_id
+            }
+            _ => false,
+        }
+    }
+
+    pub fn reflecting_ancestor_of_chain(&self, c_id: HashID) -> Option<HashID> {
+        match self {
+            Transaction::ReflectAndProve(ReflectionData { chain, block, .. }) if *chain == c_id => {
+                Some(*block)
+            }
+            _ => None,
         }
     }
 }

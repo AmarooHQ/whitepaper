@@ -6,6 +6,7 @@ use crate::cryptosystem::CSystemT;
 use crate::msg::*;
 use crate::strategies::relay::*;
 use crate::types::*;
+use itertools::Itertools;
 use log::*;
 use num::ToPrimitive;
 use rand::prelude::*;
@@ -396,7 +397,7 @@ mod tests {
 
     fn create_mm_multichain_no_priv<'a, S: CSystemT<'a>>() -> MM<'a, S, DoubleSpendStrat> {
         MM::<'a, S, DoubleSpendStrat>::new(
-            AttackArgs::new(1000, 0, 100),
+            AttackArgs::new(1000, 0, 10000),
             DoubleSpendParams::new(100, 20),
             NetworkArgs::new_por(10, 10),
         )
@@ -579,8 +580,69 @@ mod tests {
     #[test]
     fn mm_multichain_por_added_to_chain_weight() {
         let mut mm = create_mm_multichain_no_priv::<'_, DagCS>();
-        mm.tick_many(30).unwrap();
+        let chain_id = mm.chain().get_chain_id();
+
+        mm.tick_many(100).unwrap();
+
+        let chain = mm.chain();
         let bb = mm.chain().get_any_best_block(false);
+        let chain_remote = &mm.extra_chain_nodes.first().as_ref().unwrap().honest.chain;
+        let bb_remote = chain_remote.get_any_best_block(false);
+
+        let b_id_at_h2 = chain
+            .find_lca_and_intermediates(&vec![bb.0.get_hash(), chain_id])
+            .unwrap()
+            .1
+            .get(&3)
+            .unwrap()
+            .iter()
+            .cloned()
+            .next()
+            .unwrap()
+            .id;
+
+        let mut txs_remote: Vec<_> = vec![];
+        for b in bb_remote.0.all_prev_iter_excluding(&Default::default()) {
+            txs_remote.extend(b.get_txs());
+        }
+
+        let n_refl_txs = txs_remote
+            .iter()
+            .unique()
+            .filter(|tx| tx.is_reflecting(b_id_at_h2, chain_id))
+            .map(|tx| {
+                println!(
+                    "remote tx: {:?}, {} \nrefl L-block: {}, {:?}",
+                    tx,
+                    tx.get_reflected_weight(chain_id),
+                    b_id_at_h2,
+                    DagBlock::get_cached_block(&b_id_at_h2)
+                );
+                tx
+            })
+            .count();
+        assert_ne!(
+            n_refl_txs, 0,
+            "should have some other chains reflecting b_id_at_h2"
+        );
+        // this assert is wrong: we're only looking at txs from 1 other chain so there should be like 1 or 2 of them.
+        // assert_eq!(
+        //     n_refl_txs,
+        //     mm.extra_chain_nodes.len(),
+        //     "should have N_1 other chains reflecting b_id_at_h2"
+        // );
+
+        let mut txs: Vec<_> = vec![];
+        for b in bb.0.all_prev_iter_excluding(&Default::default()) {
+            txs.extend(b.get_txs());
+        }
+
+        let total_rw: u32 = txs_remote
+            .iter()
+            .map(|tx| tx.get_reflected_weight(chain_id))
+            .sum();
+        assert_ne!(total_rw, 0);
+
         assert_ne!(
             bb.1.chain_weight, bb.1.local_chain_weight,
             "PoR should mean chain_weight and local_chain_weight are different"

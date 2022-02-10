@@ -103,7 +103,7 @@ pub struct Heights {
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Debug)]
 pub struct BInfo {
     // _p: PhantomData<B>,
-    id: HashID,
+    pub id: HashID,
     weight: Difficulty,
     reflected_weight: Difficulty,
     chain_weight: Difficulty,
@@ -281,6 +281,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
             self.get_best_blocks(is_private).iter().cloned(),
             &self.get_chain_heads(is_private),
             0,
+            self.get_chain_id(),
         );
         let p = Self::get_cached_block(&b.prev()).unwrap();
         b.set_difficulty(self.next_difficulty(&p.0, &p.1));
@@ -346,6 +347,19 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
             None => false,
             Some(lca_r) => lca_r.0 == ancestor,
         }
+    }
+
+    fn block_is_in_best_chain(&self, ancestor: HashID, is_private: bool) -> bool {
+        let bbs = self.get_best_blocks(is_private);
+        if bbs.contains(&ancestor) {
+            return true;
+        }
+        for &bb in bbs.iter() {
+            if self.block_is_ancestor_of(ancestor, bb) {
+                return true;
+            }
+        }
+        false
     }
 
     /// Return priv blocks that are one better than known public blocks
@@ -760,6 +774,16 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
 
         if pm.0.get_reflected_weight() != pm.0.calc_reflected_weight() {
             return Err(BadReflWeightInBlock);
+        }
+
+        // check reflections are in our past
+        if pm.0.get_reflected_weight() > 0 {
+            pm.0.get_txs()
+                .into_iter()
+                .map(|tx| tx.reflecting_ancestor_of_chain(self.get_chain_id()))
+                .filter(|mb| mb.is_some())
+                .map(|mb| mb.unwrap())
+                .filter(|&b| self.block_is_in_best_chain(b, is_private));
         }
         // todo: check each reflection tx has correct weight
         // todo!("implement reflected weight stuff in block validation");
