@@ -16,6 +16,9 @@ SIMULATOR_ARGS ?= -s $(ATK_START_TICK) -e $(ATK_END_TICK) -r $(ATK_RATIO) -S Wei
 test:
 	cargo test
 
+stats:
+	./bin/py_stats.py
+
 run-dag-doublespend:
 	RUST_LOG=warn,por_sim_rs::strategies::relay=info cargo r --release -- -s 10000 -e 30000 -r 0.45 -S WeightedDag -b 100 2>&1 | tail -n 100
 

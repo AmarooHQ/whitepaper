@@ -37,7 +37,6 @@ def ds_theoretical_series(multipliers, q=0.44, after_n_confs=20):
     xs = []
     ys = []
     for n_por_chains in multipliers:
-        print(n_por_chains)
         n = after_n_confs * n_por_chains
         r = p_ds_success_theoretical(q, n)
         xs.append(n_por_chains)
@@ -77,6 +76,7 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
     _max_ix = 0
     qs = set()
     kwargs = plot_kwargs or dict()
+    print(f"Tabulating CSVs.")
     for fname in csv_files:
         n_trials, max_ix, block_target, _q, csv_data, ms_elapsed = read_csv_data(fname=fname)
         csv_data.plot(label=f"PoR $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $n \\geq {n_trials}$", **kwargs)
@@ -85,6 +85,7 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
         qs.add(_q)
     _qs = list(qs)
     _qs.sort()
+    print(f"Calculating theoretical probabilities.")
     for q in _qs:
         multipliers = list(range(1, min(_max_ix+1,20))) + list(range(20, _max_ix+1, 10))
         theoretical_data = ds_theoretical_series(multipliers, q=q)#, max_multiplier=_max_ix)
@@ -92,6 +93,7 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
     # d2.plot(label="PoR - $x/2$")
     # d3.plot(label="PoR - $\sqrt{x}$")
     # d4.plot(label="PoR - $x^{2/3}$")
+    print(f"Done. Now drawing.")
     plt.title("\n".join([
         f"P(atk success) PoR vs Traditional Chain",
         "(more confirmations w/ trad chain vs more chains w/ PoR)",
@@ -104,4 +106,5 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
 
 
 if __name__ == "__main__":
-    plot_chart(csv_files=['exp-4a-wPoRFix.csv'], plot_kwargs=dict(logy=False))
+    # plot_chart(csv_files=['exp-4a-wPoRFix.csv'], plot_kwargs=dict(logy=False))
+    plot_chart(csv_files=['exp-4b.csv'], plot_kwargs=dict(logy=False))

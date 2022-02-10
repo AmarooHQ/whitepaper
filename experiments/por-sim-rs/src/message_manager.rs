@@ -193,21 +193,6 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             .collect()
     }
 
-    fn msgs_from_into_to(&mut self, msgs_from: Vec<Msg<S::B>>) -> Vec<MsgToNode<S::B>> {
-        let mut msgs_to: Vec<_> = Default::default();
-        for msg in msgs_from {
-            match msg {
-                Msg::MsgBlock(c_id, b) => {
-                    msgs_to.push(MsgToNode::MsgBlock(c_id, b, false));
-                }
-                Msg::MsgPrivBlock(c_id, b) => {
-                    msgs_to.push(MsgToNode::MsgBlock(c_id, b, true));
-                }
-            }
-        }
-        msgs_to
-    }
-
     pub fn attack_started(&self, ts: Timestamp) -> bool {
         ts >= self.args.attack_starts_at
     }
@@ -221,7 +206,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
     }
 
     pub fn tick(&mut self, ts: u32, msgs: Vec<Msg<S::B>>) -> Result<Vec<Msg<S::B>>, String> {
-        let mut msgs_to = self.msgs_from_into_to(msgs);
+        let mut msgs_to = msgs_from_into_to(&msgs);
         let atk_started = self.attack_started(ts);
         if atk_started && self.strategy.is_none() {
             // let atk_start_height = atk_node.chain.get_heights_pub_priv().public;
@@ -377,6 +362,21 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             self.strategy.as_ref().unwrap().params_as_csv(),
         );
     }
+}
+
+pub fn msgs_from_into_to<B: BlockT>(msgs_from: &Vec<Msg<B>>) -> Vec<MsgToNode<B>> {
+    let mut msgs_to: Vec<_> = Default::default();
+    for msg in msgs_from {
+        match msg {
+            Msg::MsgBlock(c_id, b) => {
+                msgs_to.push(MsgToNode::MsgBlock(*c_id, b.clone(), false));
+            }
+            Msg::MsgPrivBlock(c_id, b) => {
+                msgs_to.push(MsgToNode::MsgBlock(*c_id, b.clone(), true));
+            }
+        }
+    }
+    msgs_to
 }
 
 #[cfg(test)]
@@ -587,6 +587,7 @@ mod tests {
         let chain = mm.chain();
         let bb = mm.chain().get_any_best_block(false);
         let chain_remote = &mm.extra_chain_nodes.first().as_ref().unwrap().honest.chain;
+        let chain_remote_id = chain_remote.get_chain_id();
         let bb_remote = chain_remote.get_any_best_block(false);
 
         let b_id_at_h2 = chain
@@ -614,7 +615,7 @@ mod tests {
                 println!(
                     "remote tx: {:?}, {} \nrefl L-block: {}, {:?}",
                     tx,
-                    tx.get_reflected_weight(chain_id),
+                    tx.get_reflected_weight(chain_remote_id, chain_id),
                     b_id_at_h2,
                     DagBlock::get_cached_block(&b_id_at_h2)
                 );
@@ -639,7 +640,7 @@ mod tests {
 
         let total_rw: u32 = txs_remote
             .iter()
-            .map(|tx| tx.get_reflected_weight(chain_id))
+            .map(|tx| tx.get_reflected_weight2(chain_remote_id))
             .sum();
         assert_ne!(total_rw, 0);
 

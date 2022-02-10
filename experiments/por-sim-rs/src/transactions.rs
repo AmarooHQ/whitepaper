@@ -33,8 +33,8 @@ lazy_static! {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ReflectionData {
-    pub chain: HashID,
-    pub block: HashID,
+    pub r_chain: HashID,
+    pub r_block: HashID,
     pub weight: Difficulty,
     pub proving_ancestor_id: HashID,
 }
@@ -89,12 +89,32 @@ impl Transaction {
         }
     }
 
-    pub fn get_reflected_weight(&self, chain_id: HashID) -> Difficulty {
-        // todo: the chain== check here broke stuff, I don't think it'd every be true.
+    pub fn get_reflected_weight(&self, l_chain_id: HashID, r_chain_id: HashID) -> Difficulty {
+        // the remote chain should match the chain_id in the refl tx.
+        // the proving_ancestor_id should be one of the local chain's ancestors
+        debug_assert_eq!(
+            r_chain_id,
+            self.get_reflection_data().map(|r| r.r_chain).unwrap_or(0)
+        );
         self.get_reflection_data()
-            // .map(|r| if r.chain == chain_id { r.weight } else { 0 })
-            .map(|r| r.weight)
+            .map(|r| if r.r_chain == r_chain_id { r.weight } else { 0 })
+            // .map(|r| r.weight)
             .unwrap_or(0)
+    }
+
+    /// For reflection txs; recorded in L chain.
+    /// tx.chain == R chain ID.
+    /// tx.proving_ancestor_id is a block in L chain's history
+    pub fn get_reflected_weight2(&self, l_chain_id: HashID) -> Difficulty {
+        let (r_chain_id, weight) = self
+            .get_reflection_data()
+            .map(|r| (r.r_chain, r.weight))
+            .unwrap_or((0, 0));
+        if l_chain_id == r_chain_id {
+            0
+        } else {
+            weight
+        }
     }
 
     pub fn is_reflect_and_prove(&self) -> bool {
@@ -104,20 +124,21 @@ impl Transaction {
         }
     }
 
-    pub fn is_reflecting(&self, b: HashID, chain_id: HashID) -> bool {
+    pub fn is_reflecting(&self, r_b: HashID, r_chain_id: HashID) -> bool {
         match self {
-            Transaction::ReflectAndProve(ReflectionData { block, chain, .. }) => {
-                b == *block && *chain == chain_id
-            }
+            Transaction::ReflectAndProve(ReflectionData {
+                r_block, r_chain, ..
+            }) => r_b == *r_block && *r_chain == r_chain_id,
             _ => false,
         }
     }
 
-    pub fn reflecting_ancestor_of_chain(&self, c_id: HashID) -> Option<HashID> {
+    /// the block doing the reflecting on R-chain
+    pub fn reflecting_ancestor_of_chain(&self, r_c_id: HashID) -> Option<HashID> {
         match self {
-            Transaction::ReflectAndProve(ReflectionData { chain, block, .. }) if *chain == c_id => {
-                Some(*block)
-            }
+            Transaction::ReflectAndProve(ReflectionData {
+                r_block, r_chain, ..
+            }) if *r_chain == r_c_id => Some(*r_block),
             _ => None,
         }
     }

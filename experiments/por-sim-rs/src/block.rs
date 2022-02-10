@@ -182,7 +182,7 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
                     //         .unwrap_or(0),
                     //     _ => 0,
                     // }
-                    tx.get_reflected_weight(self.get_chain_id())
+                    tx.get_reflected_weight2(self.get_chain_id())
                 } else {
                     0
                 }
@@ -382,7 +382,7 @@ impl BlockT for Block {
             if !self.txs.contains(&id) {
                 self.txs.push(id);
                 self.refl_weight += Transaction::get_cached_tx(id)
-                    .map(|tx| tx.get_reflected_weight(self.get_chain_id()))
+                    .map(|tx| tx.get_reflected_weight2(self.get_chain_id()))
                     .unwrap_or(0);
             }
         }
@@ -545,7 +545,7 @@ impl BlockT for DagBlock {
         for &id in ids.iter() {
             self.txs.push(id);
             self.refl_weight += Transaction::get_cached_tx(id)
-                .map(|tx| tx.get_reflected_weight(self.get_chain_id()))
+                .map(|tx| tx.get_reflected_weight2(self.get_chain_id()))
                 .unwrap_or(0);
         }
         // simulate change of hash when txs added
@@ -574,8 +574,8 @@ mod tests {
     fn adding_por_transaction_updates_header_deets() {
         let mut _b = Block::genesis(0);
         let tx = Transaction::ReflectAndProve(ReflectionData {
-            chain: _b.get_hash(),
-            block: 0,
+            r_chain: _b.get_hash() + 1,
+            r_block: 0,
             weight: 222,
             proving_ancestor_id: _b.get_hash(),
         });

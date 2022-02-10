@@ -1009,8 +1009,8 @@ mod tests {
         let b_refl = _mk_draft_block(&mut chain, 10, false);
 
         let refl_tx = Transaction::ReflectAndProve(ReflectionData {
-            chain: chain.get_chain_id(),
-            block: b_refl.get_hash(),
+            r_chain: 1234, // chain.get_chain_id(),
+            r_block: b_refl.get_hash(),
             weight: b_refl.d,
             proving_ancestor_id: genesis.get_hash(),
         });

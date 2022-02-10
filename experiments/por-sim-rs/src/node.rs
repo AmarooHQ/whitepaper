@@ -68,8 +68,8 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
             let count_weight = proving_ancestor_id != 0;
             let weight = if count_weight { b.get_difficulty() } else { 0 };
             let tx = Transaction::ReflectAndProve(ReflectionData {
-                chain: c_id,
-                block: b.get_hash(),
+                r_chain: c_id,
+                r_block: b.get_hash(),
                 weight,
                 proving_ancestor_id,
             });
@@ -207,9 +207,11 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::block::DagBlock;
     use crate::block_metadata::*;
     use crate::chain::*;
     use crate::cryptosystem::*;
+    use crate::message_manager::*;
 
     #[test]
     fn block_is_added_to_chain() -> Result<(), String> {
@@ -284,5 +286,118 @@ mod tests {
         assert_eq!(n.chain.get_fork_measure_pub_priv().public, prev_height + 1);
 
         Ok(())
+    }
+
+    #[test]
+    fn test_por_trivial_case() {
+        let mut chains = vec![];
+        let mut nodes = vec![];
+        for i in 0..2 {
+            let g = <DagCS as CSystemT>::B::genesis(0);
+            let na = NetworkArgs::new(1);
+            let g_md = BlockMD::mk_genesis_md(&g, na.daa2_n_blocks);
+            let c = Chain::new(g, g_md, na);
+            let n: Node<DagCS> = Node::new(i, c.clone(), false, 100, false);
+            chains.push(c);
+            nodes.push(n);
+        }
+
+        let c1 = &chains[0];
+        let c2 = &chains[1];
+        let c1_id = c1.get_chain_id();
+        let c2_id = c2.get_chain_id();
+
+        let mut msgs_out = vec![];
+        let mut msgs_to = vec![];
+        let mut msgs_to_new = vec![];
+
+        let mut ts = 1;
+
+        // get msgs out from node 1 -- mine a block
+        while msgs_out.len() == 0 {
+            msgs_out.extend(nodes[0].step(ts, &msgs_to, false).unwrap());
+            ts += 1;
+        }
+
+        // we must have a block in msgs_out now
+        let n_blocks_1: u32 = msgs_out
+            .iter()
+            .map(|msg| match msg {
+                Msg::MsgBlock(_, _) => 1,
+                _ => 0,
+            })
+            .sum();
+        assert_ne!(n_blocks_1, 0);
+
+        // process msgs for next chain
+        for msg in msgs_out.clone() {
+            match msg {
+                Msg::MsgBlock(c, b) => msgs_to.push(MsgToNode::MsgBlock(c, b, false)),
+                _ => (),
+            };
+        }
+        msgs_out.clear();
+
+        // mine a block on node 2
+        while msgs_out.len() == 0 {
+            msgs_out.extend(nodes[1].step(ts, &msgs_to, false).unwrap());
+            ts += 1;
+        }
+
+        // chain 2 made a block that imaged the recent chain 1 block
+        for msg in msgs_out.clone() {
+            match msg {
+                Msg::MsgBlock(c, b) => {
+                    assert_eq!(b.get_txs()[0].is_reflect_and_prove(), true);
+                    assert_eq!(b.get_txs()[0].get_reflected_weight(c2_id, c1_id), 0);
+                }
+                _ => (),
+            }
+        }
+        msgs_to_new = msgs_from_into_to(&msgs_out);
+        msgs_to.extend(msgs_to_new.iter().cloned());
+        msgs_out.clear();
+
+        // mine a block on node 1
+        while msgs_out.len() == 0 {
+            msgs_out.extend(nodes[0].step(ts, &msgs_to, false).unwrap());
+            ts += 1;
+        }
+        msgs_to.clear();
+        msgs_to.append(&mut msgs_to_new);
+        msgs_to_new.append(&mut msgs_from_into_to(&msgs_out));
+        msgs_to.extend(msgs_to_new.iter().cloned());
+
+        // chain 1 made a block that imaged the recent chain 2 block
+        for msg in msgs_out.clone() {
+            match msg {
+                Msg::MsgBlock(c, b) => {
+                    assert_eq!(b.get_txs()[0].is_reflect_and_prove(), true);
+                    assert_ne!(b.get_txs()[0].get_reflected_weight(c1_id, c2_id), 0);
+                    assert_ne!(b.get_reflected_weight(), 0);
+                }
+                _ => (),
+            }
+        }
+
+        // add block to chain 1
+        let _msgs_out = nodes[0].step(ts, &msgs_to, false);
+        // get block out of msg so we can get it from the cache
+        let b = match &msgs_out[0] {
+            Msg::MsgBlock(c, b) => Some(b),
+            _ => None,
+        }
+        .unwrap();
+
+        let b_bmd = DagBlock::get_cached_block(&b.get_hash()).unwrap();
+        assert_ne!(b_bmd.1.chain_weight, b_bmd.1.local_chain_weight);
+        assert_eq!(b_bmd.1.weight, b_bmd.1.reflected_weight);
+        println!(
+            "LCW: {} /= CW: {}\nW: {} == RW: {}",
+            b_bmd.1.chain_weight,
+            b_bmd.1.local_chain_weight,
+            b_bmd.1.weight,
+            b_bmd.1.reflected_weight
+        )
     }
 }
