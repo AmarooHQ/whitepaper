@@ -3,11 +3,16 @@
 # this is expected to be run in dir w/ Cargo.toml & Makefile
 SIM_BIN=./target/release/por-sim-rs
 
-export B_PERIOD=50;
-export ATK_RATIO=0.44;
+export B_PERIOD=50
+export ATK_RATIO=0.44
+export N_TRIALS_PER=2000
+
+if [[ ! -f exp-3.csv ]]; then
+  cp result-columns.csv exp-3.csv
+fi
 
 for nchains in `seq 1 40`; do
-  for ntrials in `seq 1 500`; do
+  for ntrials in `seq 1 ${N_TRIALS_PER}`; do
     (
       export N_CHAINS=${nchains};
       export SIM_ARGS=$(make print-sim-args);
