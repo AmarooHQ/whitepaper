@@ -308,8 +308,7 @@ impl BlockT for Block {
 
     #[inline(always)]
     fn increment_nonce(&mut self) {
-        // self.id = hash_u128(self.id);
-        self.id = hash_u64(self.id);
+        self.id = hash_u64(self.id + 1337);
     }
 
     fn get_difficulty(&self) -> Difficulty {

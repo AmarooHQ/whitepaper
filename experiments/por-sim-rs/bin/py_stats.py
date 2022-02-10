@@ -2,12 +2,17 @@
 
 from collections import defaultdict
 import math
+import sys
+import numpy
 import pandas as pd
 import matplotlib.pyplot as plt
 from decimal import Decimal
 
 
 MAX_N_CHAINS = 41
+
+CSV_FILES = ['exp-3.csv', 'exp-4.csv', 'exp-4a.csv'] \
+    + list(f"exp-5-q{q}-target{t}.csv" for q in ['0.25', '0.4'] for t in ['25', '50', '100'])
 
 
 # n! / (k! * (n - k)!)
@@ -28,10 +33,11 @@ def p_ds_success_theoretical(q, n=20):
     return 1.0 - float(sum(to_sum))
 
 
-def ds_theoretical_series(q=0.44, after_n_confs=20):
+def ds_theoretical_series(multipliers, q=0.44, after_n_confs=20):
     xs = []
     ys = []
-    for n_por_chains in range(1, MAX_N_CHAINS):
+    for n_por_chains in multipliers:
+        print(n_por_chains)
         n = after_n_confs * n_por_chains
         r = p_ds_success_theoretical(q, n)
         xs.append(n_por_chains)
@@ -40,41 +46,61 @@ def ds_theoretical_series(q=0.44, after_n_confs=20):
     return data
 
 
-def read_csv_data():
-    d: pd.DataFrame = pd.read_csv('./exp-3.csv')
-    xs = list(range(1, MAX_N_CHAINS))
+def read_csv_data(fname='./exp-3.csv'):
+    d: pd.DataFrame = pd.read_csv(fname)
+    only_target = d['block_target'][1]
+    q = d['atk_q'][1]
+    xs = d['n_chains'].unique()
+    # xs = list(range(1, MAX_N_CHAINS))
     win_counter = defaultdict(lambda: 0)
     row_counter = defaultdict(lambda: 0)
-    for row in d.itertuples():
+    d_to_count = d[d['block_target'] == only_target]
+    for row in d_to_count.itertuples():
         x = row.n_chains
         row_counter[x] += 1
         if row.win > 0:
             win_counter[x] += 1
     ys = list(win_counter[x] / row_counter[x] for x in xs if row_counter[x] > 0)
-    series = pd.Series(ys, index=xs[:len(ys)])
-    series2 = pd.Series(ys, index=[x / 2 for x in xs[:len(ys)]])
-    s3 = pd.Series(ys, index=[math.sqrt(x) for x in xs[:len(ys)]])
-    s4 = pd.Series(ys, index=[x**(2/3) for x in xs[:len(ys)]])
-    # err_bars = list(())
-    n_trials = row_counter[1]
-    return n_trials, series, series2, s3, s4
+    max_ix = max(xs)
+    series = pd.Series(ys, index=[x for x in xs if x <= max_ix])
+    # series2 = pd.Series(ys, index=[x / 2 for x in xs[:max_ix]])
+    # s3 = pd.Series(ys, index=[math.sqrt(x) for x in xs[:max_ix]])
+    # s4 = pd.Series(ys, index=[x**(2/3) for x in xs[:max_ix]])
+    ms_elapsed = d.reset_index().groupby('n_chains')['ms_elapsed'].mean()
+    nts = list(n for x,n in row_counter.items())
+    n_trials = int(numpy.array(nts).mean())
+    return n_trials, max_ix, only_target, q, series, ms_elapsed
 
 
-def plot_chart(theoretical_data, q=0.44):
-    n_trials, csv_data, d2, d3, d4 = read_csv_data()
+def plot_chart():
     plt.figure()
-    theoretical_data.plot(label=f"Theoretical")
-    csv_data.plot(label=f"PoR")
-    d2.plot(label="PoR - $x/2$")
-    d3.plot(label="PoR - $\sqrt{x}$")
-    d4.plot(label="PoR - $x^{2/3}$")
-    plt.title(f"P(atk success) PoR vs Traditional Chain\n(more confirmations w/ trad chain vs more chains w/ PoR)\nTrials={n_trials}")
-    plt.xlabel("Confirmation Multiplier / # Chains")
-    plt.ylabel(f"P(atk success; q={q})")
+    _max_ix = 0
+    qs = set()
+    for fname in CSV_FILES:
+        n_trials, max_ix, block_target, _q, csv_data, ms_elapsed = read_csv_data(fname=fname)
+        csv_data.plot(label=f"PoR $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; n={n_trials}")
+        # ms_elapsed.plot(label=f"$\\bar{{d}}$ (ms); $B_f^{{-1}} = {block_target}$", secondary_y=True)
+        _max_ix = max(_max_ix, max_ix)
+        qs.add(_q)
+    _qs = list(qs)
+    _qs.sort()
+    for q in _qs:
+        multipliers = list(range(1, 20)) + list(range(20, _max_ix+1, 10))
+        theoretical_data = ds_theoretical_series(multipliers, q=q)#, max_multiplier=_max_ix)
+        theoretical_data.plot(label=f"Theoretical $q={q:.2f}$ (confs = $20x$)")
+    # d2.plot(label="PoR - $x/2$")
+    # d3.plot(label="PoR - $\sqrt{x}$")
+    # d4.plot(label="PoR - $x^{2/3}$")
+    plt.title("\n".join([
+        f"P(atk success) PoR vs Traditional Chain",
+        "(more confirmations w/ trad chain vs more chains w/ PoR)",
+        # f"Trials={n_trials}"
+        ]))
+    plt.xlabel("x = Confirmation Multiplier / # Chains")
+    plt.ylabel(f"P(atk success)")
     plt.legend()
     plt.show()
 
 
 if __name__ == "__main__":
-    t_data = ds_theoretical_series()
-    plot_chart(t_data)
+    plot_chart()
