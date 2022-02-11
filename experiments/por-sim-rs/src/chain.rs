@@ -4,6 +4,7 @@ use crate::chain::fork_rules::*;
 use crate::transactions::*;
 use crate::types::*;
 use crate::ForkResult::BestBlock;
+use itertools::Itertools;
 use lazy_static::lazy_static;
 use log::*;
 use lru::LruCache;
@@ -34,6 +35,7 @@ pub enum ChainErr {
     BadReflWeightInBlock,
     TsBeforeParent,
     BlockHeightInvalid,
+    TxInParent { b: HashID, txid: HashID },
     ApplyErr(ChainApplyErr),
 }
 
@@ -324,6 +326,14 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
         self.find_missing_blocks_in(false)
     }
 
+    fn get_all_txs_in_history_of(&self, tip: &B) -> Vec<TxId> {
+        let mut prev_txids: Vec<TxId> = vec![];
+        for b in tip.all_prev_iter_excluding(&Default::default()) {
+            prev_txids.extend(b.get_transactions());
+        }
+        prev_txids.into_iter().unique().collect()
+    }
+
     /// Return all blocks from one chain (priv or pub) that are needed to update the other
     /// chain (pub or priv) so that both chains have the same history.
     fn find_missing_blocks_in(&self, is_private: bool) -> Vec<B> {
@@ -354,12 +364,16 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
         if bbs.contains(&ancestor) {
             return true;
         }
-        for &bb in bbs.iter() {
-            if self.block_is_ancestor_of(ancestor, bb) {
-                return true;
-            }
-        }
-        false
+        bbs.iter()
+            .any(|&bb| self.block_is_ancestor_of(ancestor, bb))
+    }
+
+    /// is this ancestor block one of the parents or in the history of these parents?
+    fn block_is_in_history_of(&self, ancestor: HashID, parents: &Vec<HashID>) -> bool {
+        parents.contains(&ancestor)
+            || self
+                .find_lca_and_intermediates(&vec![vec![ancestor], parents.clone()].concat())
+                .is_some()
     }
 
     /// Return priv blocks that are one better than known public blocks
@@ -455,7 +469,11 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
         let mut heights = Vec::new();
 
         for &id in bs {
-            let b_md = &Self::get_cached_block(&id).unwrap().1;
+            let cache_resp = Self::get_cached_block(&id);
+            if cache_resp.is_none() {
+                return None;
+            }
+            let b_md = &cache_resp.unwrap().1;
 
             heights.push(b_md.height);
 
@@ -732,6 +750,19 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             if b.get_ts() < pm_b.get_ts() {
                 return Err(TsBeforeParent);
             }
+            let p_txids = pm_b.get_transactions();
+            let txs_in_blocks_history = self.get_all_txs_in_history_of(pm_b);
+            let txids_in_parent: Vec<_> = b
+                .get_transactions()
+                .iter()
+                .filter(|txid| txs_in_blocks_history.contains(txid))
+                .collect();
+            if txids_in_parent.len() > 0 {
+                return Err(TxInParent {
+                    b: b.get_hash(),
+                    txid: *txids_in_parent[0],
+                });
+            }
         }
         if pms.len() > 1 {
             let n_ps = pms.len();
@@ -778,12 +809,25 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
 
         // check reflections are in our past
         if pm.0.get_reflected_weight() > 0 {
-            pm.0.get_txs()
-                .into_iter()
-                .map(|tx| tx.reflecting_ancestor_of_chain(self.get_chain_id()))
-                .filter(|mb| mb.is_some())
-                .map(|mb| mb.unwrap())
-                .filter(|&b| self.block_is_in_best_chain(b, is_private));
+            let total_refl_weight_expected: Difficulty =
+                pm.0.get_txs()
+                    .into_iter()
+                    .map(|tx| (tx.clone(), tx.get_reflected_l_block()))
+                    .filter(|(_, mpb)| mpb.is_some())
+                    .map(|(tx, mpb)| (tx, mpb.unwrap()))
+                    .filter(|(_, pb)| self.block_is_in_history_of(*pb, &b.all_prev()))
+                    .map(|(tx, _)| tx.get_reflected_weight2(self.chain_id))
+                    // .map(|pb| B::get_cached_block(&pb).unwrap())
+                    // .map(|pb_bmd| pb_bmd.1.weight)
+                    .sum();
+            if total_refl_weight_expected != pm.0.get_reflected_weight() {
+                warn!(
+                    "RW exp vs real: {} /= {}",
+                    total_refl_weight_expected,
+                    pm.0.get_reflected_weight()
+                );
+                return Err(BadReflWeightInBlock);
+            }
         }
         // todo: check each reflection tx has correct weight
         // todo!("implement reflected weight stuff in block validation");

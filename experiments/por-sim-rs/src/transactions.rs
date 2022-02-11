@@ -110,6 +110,7 @@ impl Transaction {
             .get_reflection_data()
             .map(|r| (r.r_chain, r.weight))
             .unwrap_or((0, 0));
+        debug_assert_ne!(l_chain_id, r_chain_id);
         if l_chain_id == r_chain_id {
             0
         } else {
@@ -133,12 +134,30 @@ impl Transaction {
         }
     }
 
+    pub fn has_r_chain_id(&self, r_chain_id: HashID) -> bool {
+        match self {
+            Transaction::ReflectAndProve(ReflectionData { r_chain, .. }) => *r_chain == r_chain_id,
+            _ => false,
+        }
+    }
+
     /// the block doing the reflecting on R-chain
-    pub fn reflecting_ancestor_of_chain(&self, r_c_id: HashID) -> Option<HashID> {
+    pub fn get_reflecting_r_block(&self, r_c_id: HashID) -> Option<HashID> {
         match self {
             Transaction::ReflectAndProve(ReflectionData {
                 r_block, r_chain, ..
             }) if *r_chain == r_c_id => Some(*r_block),
+            _ => None,
+        }
+    }
+
+    /// the block being reflected (on L-chain)
+    pub fn get_reflected_l_block(&self) -> Option<HashID> {
+        match self {
+            Transaction::ReflectAndProve(ReflectionData {
+                proving_ancestor_id,
+                ..
+            }) => Some(*proving_ancestor_id),
             _ => None,
         }
     }

@@ -398,7 +398,7 @@ mod tests {
     fn create_mm_multichain_no_priv<'a, S: CSystemT<'a>>() -> MM<'a, S, DoubleSpendStrat> {
         MM::<'a, S, DoubleSpendStrat>::new(
             AttackArgs::new(1000, 0, 10000),
-            DoubleSpendParams::new(100, 20),
+            DoubleSpendParams::new(10000, 20),
             NetworkArgs::new_por(10, 10),
         )
     }
@@ -582,7 +582,7 @@ mod tests {
         let mut mm = create_mm_multichain_no_priv::<'_, DagCS>();
         let chain_id = mm.chain().get_chain_id();
 
-        mm.tick_many(100).unwrap();
+        mm.tick_many(150).unwrap();
 
         let chain = mm.chain();
         let bb = mm.chain().get_any_best_block(false);
@@ -590,7 +590,7 @@ mod tests {
         let chain_remote_id = chain_remote.get_chain_id();
         let bb_remote = chain_remote.get_any_best_block(false);
 
-        let b_id_at_h2 = chain
+        let b_id_at_h3 = chain
             .find_lca_and_intermediates(&vec![bb.0.get_hash(), chain_id])
             .unwrap()
             .1
@@ -601,36 +601,82 @@ mod tests {
             .next()
             .unwrap()
             .id;
+        let b_at_h3 = DagBlock::get_cached_block(&b_id_at_h3).unwrap();
+
+        let bb_height = bb.0.get_height();
+        assert!(bb_height > 3);
+        assert!(bb_height > 6, "should have many blocks above this one");
+        println!("bb height: {}", bb_height);
+        println!("bb: {:?}\n\n", bb.0);
 
         let mut txs_remote: Vec<_> = vec![];
+        let mut remote_txid_to_r_blocks: PassThruHashMap<TxId, Vec<HashID>> = Default::default();
         for b in bb_remote.0.all_prev_iter_excluding(&Default::default()) {
-            txs_remote.extend(b.get_txs());
+            let txs = b.get_txs();
+            for tx in &txs {
+                let txid = tx.get_hash();
+                if !remote_txid_to_r_blocks.contains_key(&txid) {
+                    remote_txid_to_r_blocks.insert(txid, vec![]);
+                }
+                let r_blocks = remote_txid_to_r_blocks.get_mut(&txid).unwrap();
+                r_blocks.push(b.get_hash());
+            }
+            txs_remote.extend(txs);
         }
+        assert_ne!(txs_remote.len(), 0);
+        println!("n remote txs: {}", txs_remote.len());
+        let n_uniq_txs = txs_remote.iter().unique().count();
+        println!("n remote txs unique: {}", n_uniq_txs);
+        // assert_eq!(n_uniq_txs, txs_remote.len());  // this won't work w/ dags b/c txs can be duplicated
 
         let n_refl_txs = txs_remote
             .iter()
             .unique()
-            .filter(|tx| tx.is_reflecting(b_id_at_h2, chain_id))
+            .filter(|tx| tx.is_reflecting(b_id_at_h3, chain_id))
+            // .filter(|tx| tx.has_r_chain_id(chain_id))
             .map(|tx| {
                 println!(
-                    "remote tx: {:?}, {} \nrefl L-block: {}, {:?}",
+                    "\n\nremote tx: {:?}, {}\n\nrefl L-block: {}, {:?}",
                     tx,
-                    tx.get_reflected_weight(chain_remote_id, chain_id),
-                    b_id_at_h2,
-                    DagBlock::get_cached_block(&b_id_at_h2)
+                    tx.get_reflected_weight2(chain_remote_id),
+                    b_id_at_h3,
+                    DagBlock::get_cached_block(&b_id_at_h3)
                 );
                 tx
             })
             .count();
+        // inspect block, txs, and ancestors
+        println!("\n{:?}\n", b_at_h3.0);
+        println!(
+            "{:?}\n",
+            b_at_h3
+                .0
+                .all_prev_iter()
+                .map(|b| b.get_hash())
+                .collect::<Vec<_>>()
+        );
+        println!("{:?}\n\n", b_at_h3.0.get_txs());
+        println!(
+            "is block {} on chain {} in this list?\n{:?}",
+            b_id_at_h3, chain_id, txs_remote
+        );
+        let a_refl_tx = txs_remote
+            .iter()
+            .unique()
+            .filter(|tx| tx.is_reflect_and_prove())
+            .next()
+            .unwrap();
+        let blocks_including = remote_txid_to_r_blocks.get(&a_refl_tx.get_hash());
+        println!("\n\nincluded in blocks: {:?}", blocks_including);
         assert_ne!(
             n_refl_txs, 0,
-            "should have some other chains reflecting b_id_at_h2"
+            "should have some other chains reflecting b_id_at_h3"
         );
         // this assert is wrong: we're only looking at txs from 1 other chain so there should be like 1 or 2 of them.
         // assert_eq!(
         //     n_refl_txs,
         //     mm.extra_chain_nodes.len(),
-        //     "should have N_1 other chains reflecting b_id_at_h2"
+        //     "should have N_1 other chains reflecting b_id_at_h3"
         // );
 
         let mut txs: Vec<_> = vec![];
@@ -651,6 +697,17 @@ mod tests {
         println!(
             "cw: {}, lcw: {}",
             bb.1.chain_weight, bb.1.local_chain_weight
+        );
+
+        let lcw =
+            bb.0.all_prev_iter_excluding(&Default::default())
+                .map(|b| b.get_difficulty())
+                .sum::<Difficulty>();
+        assert_eq!(lcw, bb.1.local_chain_weight);
+
+        assert!(
+            bb.1.chain_weight > 5 * bb.1.local_chain_weight,
+            "reflected weight should be at least 5x (expected 10x long-term)"
         );
     }
 }

@@ -56,7 +56,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         let txs = b.get_txs();
         let mut refl_ancestors: Vec<_> = txs
             .into_iter()
-            .map(|tx| tx.reflecting_ancestor_of_chain(my_chain_id))
+            .map(|tx| tx.get_reflecting_r_block(my_chain_id))
             .filter(|mb| mb.is_some())
             .map(|mb| mb.unwrap())
             .filter(|&b| self.chain.block_is_in_best_chain(b, is_private))
@@ -95,14 +95,14 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         attack_started: bool,
     ) -> Result<Vec<Msg<S::B>>, String> {
         let mut out_msgs = vec![];
-        let chain_id = self.chain.get_chain_id();
+        let l_chain_id = self.chain.get_chain_id();
 
         // process incoming messages
         for in_msg in msgs {
             match in_msg {
                 MsgToNode::MsgBlock(c_id, b, is_private) => {
                     // todo: is it possible to do some higher-order function stuff here to make this code nicer? is it worth bothering?
-                    if *c_id == chain_id {
+                    if *c_id == l_chain_id {
                         // wipe draft block b/c we'll have found a better one
                         self.curr_draft_block = None;
                         match (is_private, self.is_attacker) {
@@ -390,8 +390,10 @@ mod tests {
         .unwrap();
 
         let b_bmd = DagBlock::get_cached_block(&b.get_hash()).unwrap();
+        let n_refls = b_bmd.0.get_txs().len() as u32;
+        assert_ne!(n_refls, 0);
+        assert_eq!(b_bmd.1.weight * n_refls, b_bmd.1.reflected_weight);
         assert_ne!(b_bmd.1.chain_weight, b_bmd.1.local_chain_weight);
-        assert_eq!(b_bmd.1.weight, b_bmd.1.reflected_weight);
         println!(
             "LCW: {} /= CW: {}\nW: {} == RW: {}",
             b_bmd.1.chain_weight,

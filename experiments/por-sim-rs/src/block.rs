@@ -1,8 +1,8 @@
 use crate::block_metadata::BlockMD;
 use crate::hash::*;
-use crate::transactions::Transaction::ReflectAndProve;
 use crate::transactions::{Transaction, TxId};
 use crate::types::*;
+use array_tool::vec::Uniq;
 use getrandom::getrandom;
 use itertools::{sorted, Itertools};
 use lazy_static::lazy_static;
@@ -27,6 +27,7 @@ lazy_static! {
         Mutex::new(Default::default());
     static ref DAGBLOCK_LRU: Mutex<LruCache<u64, Arc<(DagBlock, BlockMD<DagBlock>)>>> =
         Mutex::new(LruCache::new(1024));
+    static ref empty_hash_id_set: FxHashSet<HashID> = Default::default();
 }
 
 pub struct PrevBlockIter<B: BlockT> {
@@ -69,6 +70,10 @@ impl<'a, B: BlockT> FilteredAllPrevBlockIter<'a, B> {
             exclude_blocks,
             seen_blocks: Default::default(),
         }
+    }
+
+    fn new_all(start_block: &B) -> Self {
+        Self::new(start_block, &empty_hash_id_set)
     }
 }
 
@@ -122,6 +127,10 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
         }
     }
 
+    fn all_prev_iter(&self) -> FilteredAllPrevBlockIter<Self> {
+        FilteredAllPrevBlockIter::new(self, &empty_hash_id_set)
+    }
+
     fn all_prev_iter_excluding<'a>(
         &self,
         exclude_blocks: &'a SeenBlocks,
@@ -162,8 +171,13 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
 
     // transaction support
     fn get_transactions(&self) -> &Vec<TxId>;
-    fn add_transaction(&mut self, id: TxId);
-    fn add_transactions(&mut self, ids: Vec<TxId>);
+    // fn add_transaction(&mut self, id: TxId);
+    // fn add_transactions(&mut self, ids: Vec<TxId>);
+    fn _push_tx(&mut self, id: TxId);
+    fn get_reflected_ancestors(&self) -> &Vec<(HashID, HashID)>;
+    /// Record that an ancestor of this block was reflected by R chain
+    fn add_reflected_ancestor(&mut self, l_b_id: HashID, r_chain_id: HashID);
+    fn add_refl_weight(&mut self, w: Difficulty);
 
     /// Claimed reflected weight
     fn get_reflected_weight(&self) -> Difficulty;
@@ -190,8 +204,6 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
             .sum()
     }
 
-    // where
-    //     F: Fn(Arc<Transaction>) -> R,
     fn get_txs(&self) -> Vec<Arc<Transaction>> {
         self.get_transactions()
             .iter()
@@ -199,6 +211,35 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
             .filter(|tx| tx.is_some())
             .map(|tx| tx.unwrap())
             .collect()
+    }
+
+    fn add_transaction(&mut self, id: TxId) {
+        self.add_transactions(vec![id]);
+    }
+
+    fn add_transactions(&mut self, ids: Vec<TxId>) {
+        for &id in ids.iter().unique() {
+            if !self.get_transactions().contains(&id) {
+                if let Some(tx) = Transaction::get_cached_tx(id) {
+                    if let Some(ancestor) = tx.get_reflected_l_block() {
+                        let r = tx.get_reflection_data().unwrap();
+                        if ancestor != 0 {
+                            if self
+                                .get_reflected_ancestors()
+                                .contains(&(ancestor, r.r_chain))
+                            {
+                                continue;
+                            }
+                            self.add_reflected_ancestor(ancestor, r.r_chain);
+                            self.add_refl_weight(tx.get_reflected_weight2(self.get_chain_id()));
+                        }
+                    }
+                }
+                self._push_tx(id);
+            }
+        }
+        // simulate change of hash when txs added
+        self.increment_nonce();
     }
 }
 
@@ -223,6 +264,7 @@ pub struct Block {
     pub h: Height,
     pub txs: Vec<TxId>,
     pub chain_id: HashID,
+    pub reflected_ancestors: Vec<(HashID, HashID)>,
 }
 
 impl Display for Block {
@@ -261,9 +303,9 @@ impl BlockT for Block {
         // getrandom(&mut e).unwrap();
         // let id = u128::from_be_bytes(e) as HashID;
         let id = Self::get_rand_id();
-        let h = Self::get_cached_block(&parent)
-            .map(|b| b.0.h + 1)
-            .unwrap_or(0);
+        let (h, reflected_ancestors) = Self::get_cached_block(&parent)
+            .map(|b| (b.0.h + 1, b.0.reflected_ancestors.clone()))
+            .unwrap_or((0, vec![]));
         Self {
             id,
             timestamp: ts,
@@ -273,6 +315,7 @@ impl BlockT for Block {
             refl_weight: 0,
             txs: vec![],
             chain_id,
+            reflected_ancestors,
         }
     }
 
@@ -373,25 +416,24 @@ impl BlockT for Block {
         &self.txs
     }
 
-    fn add_transaction(&mut self, id: TxId) {
-        self.add_transactions(vec![id]);
-    }
-
-    fn add_transactions(&mut self, ids: Vec<TxId>) {
-        for &id in ids.iter().unique() {
-            if !self.txs.contains(&id) {
-                self.txs.push(id);
-                self.refl_weight += Transaction::get_cached_tx(id)
-                    .map(|tx| tx.get_reflected_weight2(self.get_chain_id()))
-                    .unwrap_or(0);
-            }
-        }
-        // simulate change of hash when txs added
-        self.increment_nonce();
-    }
-
     fn get_reflected_weight(&self) -> Difficulty {
         self.refl_weight
+    }
+
+    fn _push_tx(&mut self, id: TxId) {
+        self.txs.push(id)
+    }
+
+    fn get_reflected_ancestors(&self) -> &Vec<(HashID, HashID)> {
+        &self.reflected_ancestors
+    }
+
+    fn add_reflected_ancestor(&mut self, b_id: HashID, r_chain_id: HashID) {
+        self.reflected_ancestors.push((b_id, r_chain_id))
+    }
+
+    fn add_refl_weight(&mut self, w: Difficulty) {
+        self.refl_weight += w;
     }
 }
 
@@ -405,6 +447,7 @@ pub struct DagBlock {
     h: Height,
     txs: Vec<TxId>,
     chain_id: HashID,
+    pub reflected_ancestors: Vec<(HashID, HashID)>,
 }
 
 impl Display for DagBlock {
@@ -427,8 +470,17 @@ impl ManyParentsBlockT for DagBlock {
     ) -> Self {
         let parents = Vec::from_iter(parents);
         let p1 = Self::get_cached_block(&parents[0]);
-        // let chain_id = p1.as_ref().unwrap().0.get_chain_id();
         let h = p1.map(|b| b.0.h + 1).unwrap_or(0);
+        let reflected_ancestors = parents
+            .iter()
+            .map(Self::get_cached_block)
+            .map(|mb| {
+                mb.map(|b| b.0.reflected_ancestors.clone())
+                    .unwrap_or(vec![])
+            })
+            .collect::<Vec<_>>()
+            .concat()
+            .unique();
         DagBlock {
             timestamp,
             id: Self::get_rand_id(),
@@ -438,6 +490,7 @@ impl ManyParentsBlockT for DagBlock {
             refl_weight: 0,
             txs: vec![],
             chain_id,
+            reflected_ancestors,
         }
     }
 }
@@ -466,8 +519,8 @@ impl BlockT for DagBlock {
     }
     fn genesis(ts: u32) -> Self {
         let mut g = Self::new(ts, 0, 0, 0);
-        g.parents = vec![g.id];
         g.id >>= 10;
+        g.parents = vec![g.id];
         g.chain_id = g.id;
         g
     }
@@ -537,23 +590,24 @@ impl BlockT for DagBlock {
         &self.txs
     }
 
-    fn add_transaction(&mut self, id: TxId) {
-        self.add_transactions(vec![id]);
-    }
-
-    fn add_transactions(&mut self, ids: Vec<TxId>) {
-        for &id in ids.iter() {
-            self.txs.push(id);
-            self.refl_weight += Transaction::get_cached_tx(id)
-                .map(|tx| tx.get_reflected_weight2(self.get_chain_id()))
-                .unwrap_or(0);
-        }
-        // simulate change of hash when txs added
-        self.increment_nonce();
-    }
-
     fn get_reflected_weight(&self) -> Difficulty {
         self.refl_weight
+    }
+
+    fn _push_tx(&mut self, id: TxId) {
+        self.txs.push(id)
+    }
+
+    fn get_reflected_ancestors(&self) -> &Vec<(HashID, HashID)> {
+        &self.reflected_ancestors
+    }
+
+    fn add_reflected_ancestor(&mut self, b_id: HashID, r_chain_id: HashID) {
+        self.reflected_ancestors.push((b_id, r_chain_id))
+    }
+
+    fn add_refl_weight(&mut self, w: Difficulty) {
+        self.refl_weight += w;
     }
 }
 
@@ -572,23 +626,63 @@ mod tests {
 
     #[test]
     fn adding_por_transaction_updates_header_deets() {
-        let mut _b = Block::genesis(0);
-        let tx = Transaction::ReflectAndProve(ReflectionData {
-            r_chain: _b.get_hash() + 1,
-            r_block: 0,
-            weight: 222,
-            proving_ancestor_id: _b.get_hash(),
-        });
-        Transaction::set_cached_tx(tx.clone());
-        _b.d = 111;
-        let w1 = _b.get_difficulty();
-        let rw1 = _b.get_reflected_weight();
-        assert_eq!(w1, 111);
-        assert_eq!(rw1, 0);
-        _b.add_transaction(tx.get_hash());
-        let w2 = _b.get_difficulty();
-        let rw2 = _b.get_reflected_weight();
-        assert_eq!(w2, 111);
-        assert_eq!(rw2, 222);
+        fn check_block<B: BlockT>(mut _b: B) {
+            let orig_id = _b.get_hash();
+            let tx = Transaction::ReflectAndProve(ReflectionData {
+                r_chain: orig_id + 1,
+                r_block: 0,
+                weight: 222,
+                proving_ancestor_id: orig_id,
+            });
+            Transaction::set_cached_tx(tx.clone());
+            _b.set_difficulty(111);
+            let w1 = _b.get_difficulty();
+            let rw1 = _b.get_reflected_weight();
+            assert_eq!(w1, 111);
+            assert_eq!(rw1, 0);
+            assert_eq!(_b.get_reflected_ancestors().len(), 0);
+
+            _b.add_transaction(tx.get_hash());
+            let w2 = _b.get_difficulty();
+            let rw2 = _b.get_reflected_weight();
+            assert_eq!(w2, 111);
+            assert_eq!(rw2, 222);
+            // todo: do we need to check that the proving_ancestor_id block is actually in our history?
+            assert_eq!(_b.get_reflected_ancestors().len(), 1);
+
+            // need block to be available in cache -- NB: we don't care about BlockMD in this test
+            B::set_cached_block((_b.clone(), BlockMD::mk_genesis_md(&_b.clone(), 10)));
+
+            let mut b2 = B::new(10, _b.get_hash(), _b.get_difficulty(), _b.get_chain_id());
+            assert_eq!(b2.get_reflected_ancestors().len(), 1);
+            assert_eq!(b2.get_reflected_weight(), 0);
+            let tx2 = Transaction::ReflectAndProve(ReflectionData {
+                r_chain: orig_id + 1,
+                r_block: 0,
+                weight: 333,
+                proving_ancestor_id: orig_id,
+            });
+            Transaction::set_cached_tx(tx2.clone());
+            b2.add_transaction(tx2.get_hash());
+            // no changes here b/c proving_ancestor_id is already in list of prev reflected blocks
+            // println!("{:?}", b2.get_reflected_ancestors());
+            assert_eq!(b2.get_reflected_ancestors().len(), 1);
+            assert_eq!(b2.get_reflected_weight(), 0);
+
+            let tx3 = Transaction::ReflectAndProve(ReflectionData {
+                r_chain: orig_id + 1,
+                r_block: 0,
+                weight: 333,
+                proving_ancestor_id: _b.get_hash(),
+            });
+            Transaction::set_cached_tx(tx3.clone());
+            b2.add_transaction(tx3.get_hash());
+            // changes now b/c hash of _b changed when we added a transaction
+            assert_eq!(b2.get_reflected_ancestors().len(), 2);
+            assert_eq!(b2.get_reflected_weight(), 333);
+        }
+        // let mut _b = Block::genesis(0);
+        check_block(Block::genesis(0));
+        check_block(DagBlock::genesis(0));
     }
 }
