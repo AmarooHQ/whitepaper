@@ -370,10 +370,15 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
 
     /// is this ancestor block one of the parents or in the history of these parents?
     fn block_is_in_history_of(&self, ancestor: HashID, parents: &Vec<HashID>) -> bool {
-        parents.contains(&ancestor)
-            || self
-                .find_lca_and_intermediates(&vec![vec![ancestor], parents.clone()].concat())
-                .is_some()
+        if parents.contains(&ancestor) {
+            return true;
+        }
+        for p_id in parents {
+            if self.block_is_ancestor_of(ancestor, *p_id) {
+                return true;
+            }
+        }
+        false
     }
 
     /// Return priv blocks that are one better than known public blocks
