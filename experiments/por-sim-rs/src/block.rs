@@ -221,9 +221,9 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
         for &id in ids.iter().unique() {
             if !self.get_transactions().contains(&id) {
                 if let Some(tx) = Transaction::get_cached_tx(id) {
-                    if let Some(ancestor) = tx.get_reflected_l_block() {
+                    if let Some(ancestors) = tx.get_reflected_l_blocks() {
                         let r = tx.get_reflection_data().unwrap();
-                        if ancestor != 0 {
+                        for &ancestor in ancestors {
                             if self
                                 .get_reflected_ancestors()
                                 .contains(&(ancestor, r.r_chain))
@@ -231,8 +231,8 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
                                 continue;
                             }
                             self.add_reflected_ancestor(ancestor, r.r_chain);
-                            self.add_refl_weight(tx.get_reflected_weight2(self.get_chain_id()));
                         }
+                        self.add_refl_weight(tx.get_reflected_weight2(self.get_chain_id()));
                     }
                 }
                 self._push_tx(id);
@@ -632,7 +632,7 @@ mod tests {
                 r_chain: orig_id + 1,
                 r_block: 0,
                 weight: 222,
-                proving_ancestor_id: orig_id,
+                l_headers: vec![orig_id],
             });
             Transaction::set_cached_tx(tx.clone());
             _b.set_difficulty(111);
@@ -660,26 +660,28 @@ mod tests {
                 r_chain: orig_id + 1,
                 r_block: 0,
                 weight: 333,
-                proving_ancestor_id: orig_id,
+                l_headers: vec![orig_id],
             });
             Transaction::set_cached_tx(tx2.clone());
             b2.add_transaction(tx2.get_hash());
             // no changes here b/c proving_ancestor_id is already in list of prev reflected blocks
             // println!("{:?}", b2.get_reflected_ancestors());
             assert_eq!(b2.get_reflected_ancestors().len(), 1);
-            assert_eq!(b2.get_reflected_weight(), 0);
+            // assert_eq!(b2.get_reflected_weight(), 0);
+            assert_eq!(b2.get_reflected_weight(), 333);
 
             let tx3 = Transaction::ReflectAndProve(ReflectionData {
                 r_chain: orig_id + 1,
                 r_block: 0,
                 weight: 333,
-                proving_ancestor_id: _b.get_hash(),
+                l_headers: vec![_b.get_hash()],
             });
             Transaction::set_cached_tx(tx3.clone());
             b2.add_transaction(tx3.get_hash());
             // changes now b/c hash of _b changed when we added a transaction
             assert_eq!(b2.get_reflected_ancestors().len(), 2);
-            assert_eq!(b2.get_reflected_weight(), 333);
+            // assert_eq!(b2.get_reflected_weight(), 333);
+            assert_eq!(b2.get_reflected_weight(), 666);
         }
         // let mut _b = Block::genesis(0);
         check_block(Block::genesis(0));

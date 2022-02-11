@@ -32,7 +32,7 @@ pub enum ChainErr {
     BlockRefsUnkParent(HashID, HashID, bool),
     BadParentOrder(String, (HashID, ChainWeight), (HashID, ChainWeight)),
     BadDifficulty,
-    BadReflWeightInBlock,
+    BadReflWeightInBlock(Difficulty, Difficulty),
     TsBeforeParent,
     BlockHeightInvalid,
     TxInParent { b: HashID, txid: HashID },
@@ -812,31 +812,44 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         }
 
         if pm.0.get_reflected_weight() != pm.0.calc_reflected_weight() {
-            return Err(BadReflWeightInBlock);
+            return Err(BadReflWeightInBlock(
+                pm.0.get_reflected_weight(),
+                pm.0.calc_reflected_weight(),
+            ));
         }
 
-        // check reflections are in our past
-        if pm.0.get_reflected_weight() > 0 {
-            let total_refl_weight_expected: Difficulty =
-                pm.0.get_txs()
-                    .into_iter()
-                    .map(|tx| (tx.clone(), tx.get_reflected_l_block()))
-                    .filter(|(_, mpb)| mpb.is_some())
-                    .map(|(tx, mpb)| (tx, mpb.unwrap()))
-                    .filter(|(_, pb)| self.block_is_in_history_of(*pb, &b.all_parents()))
-                    .map(|(tx, _)| tx.get_reflected_weight2(self.chain_id))
-                    // .map(|pb| B::get_cached_block(&pb).unwrap())
-                    // .map(|pb_bmd| pb_bmd.1.weight)
-                    .sum();
-            if total_refl_weight_expected != pm.0.get_reflected_weight() {
-                panic!(
-                    "RW exp vs real: {} /= {}",
-                    total_refl_weight_expected,
-                    pm.0.get_reflected_weight()
-                );
-                return Err(BadReflWeightInBlock);
-            }
-        }
+        // ? this block of code does not correctly account for reflections
+        // // check reflections are in our past
+        // if pm.0.get_reflected_weight() > 0 {
+        //     let total_refl_weight_expected: Difficulty =
+        //         pm.0.get_txs()
+        //             .into_iter()
+        //             .map(|tx| {
+        //                 (
+        //                     tx.clone(),
+        //                     tx.get_reflected_l_blocks().cloned().unwrap_or(vec![]),
+        //                 )
+        //             })
+        //             // .filter(|(_, mpbs)| mpbs.is_some())
+        //             // .map(|(tx, mpbs)| (tx, mpbs.unwrap()))
+        //             .filter(|(_, pbs)| {
+        //                 pbs.iter()
+        //                     .any(|pb| self.block_is_in_history_of(*pb, &b.all_parents()))
+        //             })
+        //             .map(|(tx, _)| tx.get_reflected_weight2(self.chain_id))
+        //             // .map(|pb| B::get_cached_block(&pb).unwrap())
+        //             // .map(|pb_bmd| pb_bmd.1.weight)
+        //             .sum();
+        //     if total_refl_weight_expected != pm.0.get_reflected_weight() {
+        //         panic!(
+        //             "RW exp vs real: {} /= {}",
+        //             total_refl_weight_expected,
+        //             pm.0.get_reflected_weight()
+        //         );
+        //         return Err(BadReflWeightInBlock);
+        //     }
+        // }
+
         // todo: check each reflection tx has correct weight
         // todo!("implement reflected weight stuff in block validation");
         // - reflected block not seen
@@ -1064,7 +1077,7 @@ mod tests {
             r_chain: 1234, // chain.get_chain_id(),
             r_block: b_refl.get_hash(),
             weight: b_refl.d,
-            proving_ancestor_id: genesis.get_hash(),
+            l_headers: vec![genesis.get_hash()],
         });
         Transaction::set_cached_tx(refl_tx.clone());
 

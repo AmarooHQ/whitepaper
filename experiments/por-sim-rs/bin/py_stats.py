@@ -62,13 +62,13 @@ def read_csv_data(fname='./exp-3.csv'):
     ys = list(win_counter[x] / row_counter[x] for x in xs if row_counter[x] > 0)
     max_ix = max(xs)
     series = pd.Series(ys, index=[x for x in xs if x <= max_ix])
-    # series2 = pd.Series(ys, index=[x / 2 for x in xs[:max_ix]])
+    series2 = pd.Series(ys, index=[(x-1) / 2 + 1 for x in xs[:max_ix]])
     # s3 = pd.Series(ys, index=[math.sqrt(x) for x in xs[:max_ix]])
     # s4 = pd.Series(ys, index=[x**(2/3) for x in xs[:max_ix]])
     ms_elapsed = d.reset_index().groupby('n_chains')['ms_elapsed'].mean()
     nts = list(n for x,n in row_counter.items())
     n_trials = int(numpy.array(nts).min())
-    return n_trials, max_ix, only_target, q, series, ms_elapsed
+    return n_trials, max_ix, only_target, q, series, ms_elapsed, series2
 
 
 def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
@@ -78,9 +78,10 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
     kwargs = plot_kwargs or dict()
     print(f"Tabulating CSVs.")
     for fname in csv_files:
-        n_trials, max_ix, block_target, _q, csv_data, ms_elapsed = read_csv_data(fname=fname)
+        n_trials, max_ix, block_target, _q, csv_data, ms_elapsed, d2 = read_csv_data(fname=fname)
         csv_data.plot(label=f"PoR $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $n \\geq {n_trials}$", **kwargs)
         # ms_elapsed.plot(label=f"$\\bar{{d}}$ (ms); $B_f^{{-1}} = {block_target}$", secondary_y=True)
+        d2.plot(label="PoR - $\\frac{x+1}{2}$")
         _max_ix = max(_max_ix, max_ix)
         qs.add(_q)
     _qs = list(qs)
@@ -90,7 +91,6 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
         multipliers = list(range(1, min(_max_ix+1,20))) + list(range(20, _max_ix+1, 10))
         theoretical_data = ds_theoretical_series(multipliers, q=q)#, max_multiplier=_max_ix)
         theoretical_data.plot(label=f"Theoretical $q={q:.2f}$ (confs = $20x$)")
-    # d2.plot(label="PoR - $x/2$")
     # d3.plot(label="PoR - $\sqrt{x}$")
     # d4.plot(label="PoR - $x^{2/3}$")
     print(f"Done. Now drawing.")

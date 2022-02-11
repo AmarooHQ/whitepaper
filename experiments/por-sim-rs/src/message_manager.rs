@@ -399,7 +399,11 @@ mod tests {
         MM::<'a, S, DoubleSpendStrat>::new(
             AttackArgs::new(1000, 0, 10000),
             DoubleSpendParams::new(10000, 20),
-            NetworkArgs::new_por(10, 10),
+            NetworkArgs {
+                block_target: 3,
+                daa2_n_blocks: 100,
+                por_chains: 10,
+            },
         )
     }
 
@@ -589,6 +593,13 @@ mod tests {
         let chain_remote = &mm.extra_chain_nodes.first().as_ref().unwrap().honest.chain;
         let chain_remote_id = chain_remote.get_chain_id();
         let bb_remote = chain_remote.get_any_best_block(false);
+
+        println!("{:?}", bb);
+        println!("{:?}", chain.get_best_blocks(false));
+        println!("{:?}", chain.draft_block(bb.0.timestamp + 10, false));
+        // println!("{:?}", bb_remote);
+
+        // chain.next_difficulty()
 
         let b_id_at_h3 = chain
             .find_lca_and_intermediates(&vec![bb.0.get_hash(), chain_id])

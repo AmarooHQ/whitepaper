@@ -36,7 +36,7 @@ pub struct ReflectionData {
     pub r_chain: HashID,
     pub r_block: HashID,
     pub weight: Difficulty,
-    pub proving_ancestor_id: HashID,
+    pub l_headers: Vec<HashID>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -152,12 +152,9 @@ impl Transaction {
     }
 
     /// the block being reflected (on L-chain)
-    pub fn get_reflected_l_block(&self) -> Option<HashID> {
+    pub fn get_reflected_l_blocks(&self) -> Option<&Vec<HashID>> {
         match self {
-            Transaction::ReflectAndProve(ReflectionData {
-                proving_ancestor_id,
-                ..
-            }) => Some(*proving_ancestor_id),
+            Transaction::ReflectAndProve(ReflectionData { l_headers, .. }) => Some(l_headers),
             _ => None,
         }
     }
