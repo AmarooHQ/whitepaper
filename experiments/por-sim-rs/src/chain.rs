@@ -267,7 +267,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
 
     fn update_chain_heads(&mut self, _b: &B, _b_meta: &BlockMD<B>, is_private: bool) {
         let chs = self.get_chain_heads_mut(is_private);
-        for p_id in _b.all_prev() {
+        for p_id in _b.all_parents() {
             chs.remove(&p_id);
         }
         chs.insert(_b.get_hash(), _b_meta.chain_weight);
@@ -353,10 +353,12 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
     }
 
     fn block_is_ancestor_of(&self, ancestor: HashID, descendant: HashID) -> bool {
-        match self.find_lca_and_intermediates(&vec![ancestor, descendant]) {
-            None => false,
-            Some(lca_r) => lca_r.0 == ancestor,
+        if let Some(b_d) = Self::get_cached_block(&descendant) {
+            if b_d.0.all_prev_iter().any(|b| b.get_hash() == ancestor) {
+                return true;
+            }
         }
+        false
     }
 
     fn block_is_in_best_chain(&self, ancestor: HashID, is_private: bool) -> bool {
@@ -404,7 +406,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
                     continue;
                 }
                 let mut add_to_edge: FxHashSet<HashID> = Default::default();
-                for p_id in b.0.all_prev() {
+                for p_id in b.0.all_parents() {
                     // if b has a parent in best_pub_blocks then b satisfies the condition
                     if best_pub_blocks.contains(&p_id) {
                         blocks_to_ret.insert(b.0.get_hash());
@@ -432,7 +434,8 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
             .collect()
     }
 
-    /// find most recent common ancestor (technically LCA; the furthest common ancestor should always be the genesis block)
+    /// find most recent common DIRECT ancestor -- on the pivot chain / main chain
+    /// (technically LCA; the furthest common ancestor should always be the genesis block)
     fn find_lca_and_intermediates(
         &self,
         bs: &Vec<HashID>,
@@ -502,11 +505,11 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
                 let e = intermediates.entry(b.1.height);
                 let v = e.or_insert(Default::default());
 
-                // this part adds all_prev() of the current block to the intermediate_q.
+                // this part adds all_parents() of the current block to the intermediate_q.
                 // we only want to do this if we haven't yet reached the min_h OR we have
                 // multiple blocks at this height (and thus haven't found the LCA yet).
                 if h > min_h || at_h.len() > 1 {
-                    for p in b.0.all_prev() {
+                    for p in b.0.all_parents() {
                         let p_md = &Self::get_cached_block(&p).unwrap().1;
                         let iq_e = intermediate_q.entry(p_md.height);
                         iq_e.or_insert(Default::default()).insert(p);
@@ -721,7 +724,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
     // }
 
     fn validate_block_local(&self, b: &B, is_private: bool) -> Result<(), ChainErr> {
-        for p_id in b.all_prev() {
+        for p_id in b.all_parents() {
             if !self.get_seen_blocks(is_private).contains(&p_id) {
                 return Err(BlockRefsUnkParent(b.get_hash(), p_id, is_private));
             }
@@ -742,7 +745,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             return Err(BlockHeightInvalid);
         }
 
-        let all_parents = b.all_prev();
+        let all_parents = b.all_parents();
         let pms: Vec<_> = all_parents
             .iter()
             .map(|id| (id, Self::get_cached_block(id)))
@@ -820,13 +823,13 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
                     .map(|tx| (tx.clone(), tx.get_reflected_l_block()))
                     .filter(|(_, mpb)| mpb.is_some())
                     .map(|(tx, mpb)| (tx, mpb.unwrap()))
-                    .filter(|(_, pb)| self.block_is_in_history_of(*pb, &b.all_prev()))
+                    .filter(|(_, pb)| self.block_is_in_history_of(*pb, &b.all_parents()))
                     .map(|(tx, _)| tx.get_reflected_weight2(self.chain_id))
                     // .map(|pb| B::get_cached_block(&pb).unwrap())
                     // .map(|pb_bmd| pb_bmd.1.weight)
                     .sum();
             if total_refl_weight_expected != pm.0.get_reflected_weight() {
-                warn!(
+                panic!(
                     "RW exp vs real: {} /= {}",
                     total_refl_weight_expected,
                     pm.0.get_reflected_weight()
@@ -840,7 +843,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         // - reflected header PoW/difficulty mismatch
         // todo: validate txs in general
 
-        let lca_r = self.find_lca_and_intermediates(&b.all_prev()).unwrap();
+        let lca_r = self.find_lca_and_intermediates(&b.all_parents()).unwrap();
 
         /* FIRST VERSION OF THE CODE
          * This was wrong. ~~SOMEHOW the difference in speed between this version of the code, and
@@ -1098,12 +1101,14 @@ mod tests {
         type B = DagBlock;
 
         let (genesis, _g_md, mut chain) = _setup_chain::<DagBlock, HeaviestChain<DagBlock>>(None);
+        let g_hash = genesis.get_hash();
         let b = _mk_draft_block(&mut chain, 10, false);
         let b2 = _mk_draft_block(&mut chain, 10, false);
         let b3 = _mk_draft_block(&mut chain, 10, false);
 
         assert_eq!(chain.select_best_block(false), genesis.get_hash());
         assert_eq!(chain.select_best_block(true), genesis.get_hash());
+        assert!(chain.block_is_ancestor_of(g_hash, g_hash));
 
         chain.add_block(b.clone(), false)?;
 
@@ -1118,8 +1123,8 @@ mod tests {
             chain.get_chain_heads(true)[&genesis.get_hash()],
             chain.get_chain_weight_at(genesis.get_hash())
         );
-
         chain.add_block(b.clone(), true)?;
+        assert!(chain.block_is_ancestor_of(g_hash, b.get_hash()));
 
         assert_eq!(chain.select_best_block(false), b.get_hash());
         assert_eq!(chain.select_best_block(true), b.get_hash());
@@ -1130,6 +1135,9 @@ mod tests {
 
         chain.add_block(b2.clone(), false)?;
         chain.add_block(b3.clone(), false)?;
+        assert!(chain.block_is_ancestor_of(g_hash, b2.get_hash()));
+        assert!(chain.block_is_ancestor_of(g_hash, b3.get_hash()));
+        // assert!(!chain.block_is_ancestor_of(b2.get_hash(), b3.get_hash()));
 
         assert_eq!(chain.get_chain_weight_at(b2.get_hash()), 1000);
         assert_eq!(chain.get_chain_weight_at(b3.get_hash()), 1000);
@@ -1141,6 +1149,12 @@ mod tests {
         assert_eq!(b4_md.height, 2, "b4_md has correct height");
         assert_eq!(b4_md.weight, 1000, "b4_md has correct weight");
         assert_eq!(b4_md.chain_weight, 4000, "b4_md has correct Σ weight");
+        assert_eq!(b4.all_parents().len(), 3);
+        assert!(chain.block_is_ancestor_of(g_hash, b4.get_hash()));
+        assert!(b4.all_parents().contains(&b.get_hash()));
+        assert!(chain.block_is_ancestor_of(b.get_hash(), b4.get_hash()));
+        assert!(chain.block_is_ancestor_of(b2.get_hash(), b4.get_hash()));
+        assert!(chain.block_is_ancestor_of(b3.get_hash(), b4.get_hash()));
 
         for &b in chain.get_best_blocks(false) {
             assert_eq!(B::get_cached_block(&b).unwrap().1.height, 2);
@@ -1159,7 +1173,7 @@ mod tests {
         let b130_md = &B::get_cached_block(&b130.get_hash()).unwrap().1;
         let b140_md = &B::get_cached_block(&b140.get_hash()).unwrap().1;
 
-        assert_eq!(b130.all_prev().len(), 1);
+        assert_eq!(b130.all_parents().len(), 1);
         assert_eq!(
             b140_md.chain_weight,
             b140.get_difficulty() + b130_md.chain_weight

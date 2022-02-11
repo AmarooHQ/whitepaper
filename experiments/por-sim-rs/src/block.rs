@@ -94,7 +94,7 @@ impl<'a, B: BlockT> Iterator for FilteredAllPrevBlockIter<'a, B> {
             match p {
                 None => None,
                 Some(p) => {
-                    self.edge_blocks.extend(p.0.all_prev());
+                    self.edge_blocks.extend(p.0.all_parents());
                     self.last_block = Some(p.0.clone());
                     Some(p.0.clone())
                 }
@@ -119,7 +119,7 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
     fn get_hash(&self) -> HashID;
     // fn hash_sha3(&self) -> HashID;
     fn prev(&self) -> HashID;
-    fn all_prev(&self) -> Vec<HashID>;
+    fn all_parents(&self) -> Vec<HashID>;
 
     fn prev_iter(&self) -> PrevBlockIter<Self> {
         PrevBlockIter {
@@ -354,7 +354,7 @@ impl BlockT for Block {
         self.parent
     }
 
-    fn all_prev(&self) -> Vec<HashID> {
+    fn all_parents(&self) -> Vec<HashID> {
         vec![self.parent]
     }
 
@@ -537,7 +537,7 @@ impl BlockT for DagBlock {
     fn prev(&self) -> HashID {
         self.parents[0]
     }
-    fn all_prev(&self) -> Vec<HashID> {
+    fn all_parents(&self) -> Vec<HashID> {
         self.parents.clone()
     }
     fn get_ts(&self) -> u32 {

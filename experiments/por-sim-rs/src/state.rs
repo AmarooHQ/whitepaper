@@ -114,7 +114,7 @@ impl PoRStateIM {
 
     fn update_light_chain(&self, lc: &LightChainIM, block: HashID) -> LightChainIM {
         let mut heads = lc.heads.clone();
-        // for p_id in block.all_prev() {
+        // for p_id in block.all_parents() {
         //     heads = heads.without(&S::B::get_cached_block(&p_id).unwrap().0);
         // }
         LightChainIM {

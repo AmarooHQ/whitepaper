@@ -424,7 +424,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
                     _chain_other_weight += b.1.weight.value_as::<f64>().unwrap();
                 }
                 new_heads = new_heads
-                    .union(&b.0.all_prev().into_iter().collect())
+                    .union(&b.0.all_parents().into_iter().collect())
                     .cloned()
                     .collect();
             }
