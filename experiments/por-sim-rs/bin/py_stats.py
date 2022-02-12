@@ -81,7 +81,7 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
         n_trials, max_ix, block_target, _q, csv_data, ms_elapsed, d2 = read_csv_data(fname=fname)
         csv_data.plot(label=f"PoR $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $n \\geq {n_trials}$", **kwargs)
         # ms_elapsed.plot(label=f"$\\bar{{d}}$ (ms); $B_f^{{-1}} = {block_target}$", secondary_y=True)
-        d2.plot(label="PoR - $\\frac{x+1}{2}$")
+        # d2.plot(label="PoR - $\\frac{x+1}{2}$")
         _max_ix = max(_max_ix, max_ix)
         qs.add(_q)
     _qs = list(qs)
@@ -106,5 +106,5 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
 
 
 if __name__ == "__main__":
-    plot_chart(csv_files=['exp-4a-wPoRFix.csv'], plot_kwargs=dict(logy=False))
+    plot_chart(csv_files=['exp-4a-wPoRFix.csv', 'exp-4a-wPoRFix-2.csv', 'exp-4a-wPoRFix-3.csv'], plot_kwargs=dict(logy=False))
     # plot_chart(csv_files=['exp-4b.csv'], plot_kwargs=dict(logy=False))

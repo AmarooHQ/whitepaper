@@ -594,6 +594,23 @@ mod tests {
         let chain_remote_id = chain_remote.get_chain_id();
         let bb_remote = chain_remote.get_any_best_block(false);
 
+        let refl_counts: Vec<usize> =
+            bb.0.all_prev_iter()
+                .map(|b| {
+                    b.get_txs()
+                        .iter()
+                        .map(|tx| {
+                            tx.get_reflected_l_blocks()
+                                .map(|rlbs| rlbs.len())
+                                .unwrap_or(0)
+                        })
+                        .sum()
+                })
+                .collect();
+        let refl_avg: f32 = refl_counts.iter().sum::<usize>() as f32 / refl_counts.len() as f32;
+        assert!(refl_avg > 2.0);
+        assert!(refl_avg < 20.0);
+
         println!("{:?}", bb);
         println!("{:?}", chain.get_best_blocks(false));
         println!("{:?}", chain.draft_block(bb.0.timestamp + 10, false));

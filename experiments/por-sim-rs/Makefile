@@ -9,9 +9,12 @@ ATK_END_TICK ?= $(shell echo $(ATK_DS_CONFS)\*$(B_PERIOD)\*5+$(ATK_START_TICK) |
 ATK_RATIO ?= 0.44
 HR_PER_CHAIN ?= 1000
 
+# CRYPTO_SYSTEM ?= WeightedDag
+CRYPTO_SYSTEM ?= WeightedChain
+
 RUN_BIN = target/release/por-sim-rs
 
-SIMULATOR_ARGS ?= -s $(ATK_START_TICK) -e $(ATK_END_TICK) -r $(ATK_RATIO) -S WeightedDag -b $(B_PERIOD) -P $(N_CHAINS) -H $(HR_PER_CHAIN) --ds_win_threshold $(ATK_DS_CONFS)
+SIMULATOR_ARGS ?= -s $(ATK_START_TICK) -e $(ATK_END_TICK) -r $(ATK_RATIO) -S $(CRYPTO_SYSTEM) -b $(B_PERIOD) -P $(N_CHAINS) -H $(HR_PER_CHAIN) --ds_win_threshold $(ATK_DS_CONFS)
 
 test:
 	cargo test
