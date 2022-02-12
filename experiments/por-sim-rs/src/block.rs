@@ -28,7 +28,7 @@ lazy_static! {
         Mutex::new(Default::default());
     static ref DAGBLOCK_LRU: Mutex<LruCache<u64, Arc<(DagBlock, BlockMD<DagBlock>)>>> =
         Mutex::new(LruCache::new(1024));
-    static ref empty_hash_id_set: FxHashSet<HashID> = Default::default();
+    static ref EMPTY_HASH_ID_SET: FxHashSet<HashID> = Default::default();
 }
 
 pub struct PrevBlockIter<B: BlockT> {
@@ -74,7 +74,7 @@ impl<'a, B: BlockT> FilteredAllPrevBlockIter<'a, B> {
     }
 
     fn new_all(start_block: &B) -> Self {
-        Self::new(start_block, &empty_hash_id_set)
+        Self::new(start_block, &EMPTY_HASH_ID_SET)
     }
 }
 
@@ -130,7 +130,7 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
     }
 
     fn all_prev_iter(&self) -> FilteredAllPrevBlockIter<Self> {
-        FilteredAllPrevBlockIter::new(self, &empty_hash_id_set)
+        FilteredAllPrevBlockIter::new(self, &EMPTY_HASH_ID_SET)
     }
 
     fn all_prev_iter_excluding<'a>(
@@ -152,12 +152,12 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
     fn get_rand_id() -> HashID {
         // Self::get_urand_id()
         thread_rng().gen::<u64>()
-        // ^ sha256_hash_u64(
-        //     SystemTime::now()
-        //         .duration_since(SystemTime::UNIX_EPOCH)
-        //         .unwrap()
-        //         .as_nanos() as u64,
-        // )
+            ^ sha256_hash_u64(
+                SystemTime::now()
+                    .duration_since(SystemTime::UNIX_EPOCH)
+                    .unwrap()
+                    .as_nanos() as u64,
+            )
     }
 
     fn get_urand_id() -> HashID {
@@ -394,7 +394,9 @@ impl BlockT for Block {
 
     #[inline(always)]
     fn increment_nonce(&mut self) {
-        self.id = hash_u64(self.id + 1337);
+        // self.id = hash_u64(self.id + 1337);
+        // self.id = sha256_hash_u64(self.id + 1337);
+        self.id = xx_rev_hash_u64(self.id + 1337);
     }
 
     fn get_difficulty(&self) -> Difficulty {
@@ -594,7 +596,9 @@ impl BlockT for DagBlock {
     }
     #[inline(always)]
     fn increment_nonce(&mut self) {
-        self.id = hash_u64(self.id);
+        // self.id = hash_u64(self.id + 1337);
+        // self.id = sha256_hash_u64(self.id + 1337);
+        self.id = xx_rev_hash_u64(self.id + 1337);
     }
     fn get_difficulty(&self) -> Difficulty {
         self.d

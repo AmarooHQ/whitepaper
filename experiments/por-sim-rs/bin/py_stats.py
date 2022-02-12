@@ -3,6 +3,7 @@
 from collections import defaultdict
 import math
 import sys
+from typing import Literal
 import numpy
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -45,17 +46,26 @@ def ds_theoretical_series(multipliers, q=0.44, after_n_confs=20):
     return data
 
 
-def read_csv_data(fname='./exp-3.csv'):
+def read_csv_data(fname, chain_ty: Literal['por'] | Literal['trad']):
     d: pd.DataFrame = pd.read_csv(fname)
     only_target = d['block_target'][1]
+    ds_target = d['doublespend_after_n_confs'][1]
     q = d['atk_q'][1]
-    xs = d['n_chains'].unique()
+    if chain_ty == 'por':
+        xs = d['n_chains'].unique()
+    elif chain_ty == 'trad':
+        xs = list(x // ds_target for x in d['doublespend_after_n_confs'].unique())
+    def get_x_from_row(row):
+        if chain_ty == 'por':
+            return row.n_chains
+        elif chain_ty == 'trad':
+            return row.doublespend_after_n_confs // ds_target
     # xs = list(range(1, MAX_N_CHAINS))
     win_counter = defaultdict(lambda: 0)
     row_counter = defaultdict(lambda: 0)
     d_to_count = d[d['block_target'] == only_target]
     for row in d_to_count.itertuples():
-        x = row.n_chains
+        x = get_x_from_row(row)
         row_counter[x] += 1
         if row.win > 0:
             win_counter[x] += 1
@@ -77,9 +87,9 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
     qs = set()
     kwargs = plot_kwargs or dict()
     print(f"Tabulating CSVs.")
-    for fname in csv_files:
-        n_trials, max_ix, block_target, _q, csv_data, ms_elapsed, d2 = read_csv_data(fname=fname)
-        csv_data.plot(label=f"PoR $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $n \\geq {n_trials}$", **kwargs)
+    for (fname, chain_ty, label_extra) in csv_files:
+        n_trials, max_ix, block_target, _q, csv_data, ms_elapsed, d2 = read_csv_data(fname, chain_ty)
+        csv_data.plot(label=f"PoR $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $n \\geq {n_trials}$ {label_extra or ''}", **kwargs)
         # ms_elapsed.plot(label=f"$\\bar{{d}}$ (ms); $B_f^{{-1}} = {block_target}$", secondary_y=True)
         # d2.plot(label="PoR - $\\frac{x+1}{2}$")
         _max_ix = max(_max_ix, max_ix)
@@ -107,8 +117,12 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
 
 if __name__ == "__main__":
     csv_files = \
-        [ 'exp-4c-rng1.csv'
-        , 'exp-4c-rng-hash.csv'
+        [ ('exp-4c-rng1.csv', 'por', '(rng,xx)')
+        , ('exp-4c-rng-hash.csv', 'por', '(rng+hash,xx)')
+        , ('exp-4c-hash-hash.csv', 'por', '(rng+hash,hash)')
+        , ('exp-4c-hash-xxrev.csv', 'por', '(rng+hash,xxrev)')
+        # , ('exp-aux1.csv', 'trad', '(1 chain)')  # this one compares a simulated traditional doublespend at various numbers of confirmations with n_chains=1
+        , ('exp-aux1-q0.40.csv', 'trad', '(1 chain)')  # this one compares a simulated traditional doublespend at various numbers of confirmations with n_chains=1
         ]
     plot_chart(csv_files, plot_kwargs=dict(logy=False))
     # plot_chart(csv_files=['exp-4a-wPoRFix.csv', 'exp-4a-wPoRFix-2.csv', 'exp-4a-wPoRFix-3.csv'], plot_kwargs=dict(logy=False))

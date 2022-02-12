@@ -6,7 +6,7 @@ cargo b --release
 
 # for experimenting w/ reflected weight stuff
 
-export OUT_FILE=exp-4c-rng-hash.csv
+export OUT_FILE=exp-4c-hash-xxrev.csv
 
 export B_PERIOD=20
 export ATK_RATIO=0.4

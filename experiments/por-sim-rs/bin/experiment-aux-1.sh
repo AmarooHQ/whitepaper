@@ -6,11 +6,11 @@ cargo b --release
 
 # Single chain doublespend vs theoretical.
 
-export OUT_FILE=exp-aux1.csv
-
-export B_PERIOD=50
-export ATK_RATIO=0.44
+export B_PERIOD=20
+export ATK_RATIO=0.40
 export N_TRIALS_PER=1000
+
+export OUT_FILE=exp-aux1-q${ATK_RATIO}.csv
 
 if [[ ! -f $OUT_FILE ]]; then
   cp result-columns.csv $OUT_FILE

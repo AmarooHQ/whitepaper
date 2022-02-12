@@ -20,8 +20,13 @@ pub fn hash_u64(data: u64) -> u64 {
 
 #[inline(always)]
 pub fn xx_hash_u64(data: u64) -> u64 {
-    // for u64
     twox_hash::xxh3::hash64(&data.to_be_bytes()[..])
+}
+
+#[inline(always)]
+pub fn xx_rev_hash_u64(data: u64) -> u64 {
+    let r = twox_hash::xxh3::hash64(&data.to_be_bytes()[..]);
+    r.swap_bytes()
 }
 
 #[inline(always)]

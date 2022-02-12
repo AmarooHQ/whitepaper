@@ -824,18 +824,21 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             if b.get_ts() < pm_b.get_ts() {
                 return Err(TsBeforeParent);
             }
-            let p_txids = pm_b.get_transactions();
-            let txs_in_blocks_history = self.get_all_txs_in_history_of(pm_b);
-            let txids_in_parent: Vec<_> = b
-                .get_transactions()
-                .iter()
-                .filter(|txid| txs_in_blocks_history.contains(txid))
-                .collect();
-            if txids_in_parent.len() > 0 {
-                return Err(TxInParent {
-                    b: b.get_hash(),
-                    txid: *txids_in_parent[0],
-                });
+            /* this is slow and doesn't get triggered anyway */
+            if false {
+                let p_txids = pm_b.get_transactions();
+                let txs_in_blocks_history = self.get_all_txs_in_history_of(pm_b);
+                let txids_in_parent: Vec<_> = b
+                    .get_transactions()
+                    .iter()
+                    .filter(|txid| txs_in_blocks_history.contains(txid))
+                    .collect();
+                if txids_in_parent.len() > 0 {
+                    return Err(TxInParent {
+                        b: b.get_hash(),
+                        txid: *txids_in_parent[0],
+                    });
+                }
             }
         }
         if pms.len() > 1 {
