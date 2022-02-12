@@ -4,6 +4,7 @@ use getrandom::getrandom;
 use itertools::{sorted, Itertools};
 use lazy_static::lazy_static;
 use lru::LruCache;
+use non_empty_vec::NonEmpty;
 use rand::prelude::*;
 use rand::seq::IteratorRandom;
 use std::cmp::Ordering;
@@ -33,10 +34,18 @@ lazy_static! {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ReflectionData {
+    /// the reflecting chain
     pub r_chain: HashID,
+    /// the reflecting block
     pub r_block: HashID,
+    /// the chain_work of the R block
+    pub r_cw: Difficulty,
+    /// the weight of the reflection
     pub weight: Difficulty,
+    /// L headers being reflected
     pub l_headers: Vec<HashID>,
+    /// highest reflected l blocks
+    pub l_cw: (Difficulty, NonEmpty<HashID>),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

@@ -54,21 +54,32 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         debug_assert_ne!(my_chain_id, c_id);
 
         let txs = b.get_txs();
-        let mut refl_ancestors: Vec<_> = txs
+        let refl_ancestors: Vec<_> = txs
             .into_iter()
             .map(|tx| tx.get_reflecting_r_block(my_chain_id))
             .filter(|mb| mb.is_some())
             .map(|mb| mb.unwrap())
             .filter(|&b| self.chain.block_is_in_best_chain(b, is_private))
             .collect();
+        // todo -- track best reflected CW so that non-reflecting R blocks count to
+        // todo --  reflections of the most recently reflected L blocks (by R)
+        // let prev_best_l_cw = S::B::get_cached_block(&b.prev())
+        let l_cw = refl_ancestors
+            .iter()
+            .filter_map(S::B::get_cached_block)
+            .map(|b| (b.1.chain_weight, ne_vec![b.0.get_hash()]))
+            .max()
+            .unwrap_or((0, ne_vec![my_chain_id]));
         // let count_weight = proving_ancestor_id != 0;
         // let weight = if count_weight { b.get_difficulty() } else { 0 };
         let weight = b.get_difficulty();
         let tx = Transaction::ReflectAndProve(ReflectionData {
             r_chain: c_id,
             r_block: b.get_hash(),
+            r_cw: b.get_height(),
             weight,
             l_headers: refl_ancestors,
+            l_cw,
         });
         let tx_id = tx.get_hash();
         Transaction::set_cached_tx(tx);

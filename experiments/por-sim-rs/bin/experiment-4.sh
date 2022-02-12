@@ -2,6 +2,7 @@
 
 # this is expected to be run in dir w/ Cargo.toml & Makefile
 SIM_BIN=./target/release/por-sim-rs
+cargo b --release
 
 # compared to exp3, how does B_PERIOD change things?
 

@@ -16,6 +16,7 @@ use std::hash::Hash;
 use std::iter::Map;
 use std::iter::{FromIterator, IntoIterator};
 use std::sync::{Arc, Mutex};
+use std::time::SystemTime;
 use std::{fmt, fmt::Display};
 
 lazy_static! {
@@ -107,13 +108,14 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
     // note: this doesn't work b/c lazy_static inits those things as a Struct apparently.
     // const MY_CACHE: Mutex<PassThruHashMap<u64, Arc<(Self, BlockMD<Self>)>>>;
 
-    fn new(ts: u32, parent: HashID, d: Difficulty, chain_id: HashID) -> Self;
+    fn new(ts: u32, parent: HashID, d: Difficulty, chain_id: HashID, cw: Difficulty) -> Self;
     fn new_from(
         ts: u32,
         parent_opts: impl IntoIterator<Item = HashID>,
         chain_heads: &ChainHeads,
         d: Difficulty,
         chain_id: HashID,
+        cw: Difficulty,
     ) -> Self;
     fn genesis(ts: u32) -> Self;
     fn get_hash(&self) -> HashID;
@@ -149,7 +151,13 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
 
     fn get_rand_id() -> HashID {
         // Self::get_urand_id()
-        thread_rng().gen()
+        thread_rng().gen::<u64>()
+        // ^ sha256_hash_u64(
+        //     SystemTime::now()
+        //         .duration_since(SystemTime::UNIX_EPOCH)
+        //         .unwrap()
+        //         .as_nanos() as u64,
+        // )
     }
 
     fn get_urand_id() -> HashID {
@@ -181,6 +189,13 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
 
     /// Claimed reflected weight
     fn get_reflected_weight(&self) -> Difficulty;
+
+    fn get_chain_weight(&self) -> Difficulty;
+    fn set_chain_weight(&mut self, cw: Difficulty);
+
+    fn get_total_weight(&self) -> Difficulty {
+        self.get_reflected_weight() + self.get_difficulty()
+    }
 
     /// Weight reflected by this block (calculated from txs).
     /// Note: this does not do conversion to local weight since the hashing algs are the same
@@ -251,6 +266,7 @@ pub trait ManyParentsBlockT: BlockT {
         parents: impl IntoIterator<Item = HashID>,
         d: Difficulty,
         chain_id: HashID,
+        cw: Difficulty,
     ) -> Self;
 }
 
@@ -264,6 +280,7 @@ pub struct Block {
     pub h: Height,
     pub txs: Vec<TxId>,
     pub chain_id: HashID,
+    cw: Difficulty,
     // pub reflected_ancestors: Vec<(HashID, HashID)>,
     // pub best_refl_ancestors:
 }
@@ -299,7 +316,7 @@ impl Ord for Block {
 impl SingleParentBlockT for Block {}
 
 impl BlockT for Block {
-    fn new(ts: u32, parent: HashID, d: Difficulty, chain_id: HashID) -> Self {
+    fn new(ts: u32, parent: HashID, d: Difficulty, chain_id: HashID, cw: Difficulty) -> Self {
         // let mut e: [u8; 16] = [0; 16];
         // getrandom(&mut e).unwrap();
         // let id = u128::from_be_bytes(e) as HashID;
@@ -307,9 +324,9 @@ impl BlockT for Block {
         // let (h, reflected_ancestors) = Self::get_cached_block(&parent)
         //     .map(|b| (b.0.h + 1, b.0.reflected_ancestors.clone()))
         //     .unwrap_or((0, vec![]));
-        let h = Self::get_cached_block(&parent)
-            .map(|b| b.0.h + 1)
-            .unwrap_or(0);
+        let p_bmd = Self::get_cached_block(&parent);
+        let h = p_bmd.map(|b| b.0.h + 1).unwrap_or(0);
+        // let cw = d + p_bmd.map(|b| b.1.chain_weight).unwrap_or(0);
         Self {
             id,
             timestamp: ts,
@@ -319,6 +336,7 @@ impl BlockT for Block {
             refl_weight: 0,
             txs: vec![],
             chain_id,
+            cw,
             // reflected_ancestors,
         }
     }
@@ -329,12 +347,13 @@ impl BlockT for Block {
         _chain_heads: &ChainHeads,
         d: Difficulty,
         chain_id: HashID,
+        cw: Difficulty,
     ) -> Self {
-        Self::new(ts, Self::select_parent_from(parent_opts), d, chain_id)
+        Self::new(ts, Self::select_parent_from(parent_opts), d, chain_id, cw)
     }
 
     fn genesis(ts: u32) -> Self {
-        let mut g = Self::new(ts, 0, 0, 0);
+        let mut g = Self::new(ts, 0, 0, 0, 0);
         g.id >>= 10;
         g.parent = g.id;
         g.chain_id = g.id;
@@ -424,6 +443,14 @@ impl BlockT for Block {
         self.refl_weight
     }
 
+    fn get_chain_weight(&self) -> Difficulty {
+        self.cw
+    }
+
+    fn set_chain_weight(&mut self, cw: Difficulty) {
+        self.cw = cw
+    }
+
     fn _push_tx(&mut self, id: TxId) {
         self.txs.push(id)
     }
@@ -439,6 +466,7 @@ impl BlockT for Block {
 
     fn add_refl_weight(&mut self, w: Difficulty) {
         self.refl_weight += w;
+        self.cw += w;
     }
 }
 
@@ -449,6 +477,7 @@ pub struct DagBlock {
     pub timestamp: u32,
     d: Difficulty,
     refl_weight: Difficulty,
+    cw: Difficulty,
     h: Height,
     txs: Vec<TxId>,
     chain_id: HashID,
@@ -472,6 +501,7 @@ impl ManyParentsBlockT for DagBlock {
         parents: impl IntoIterator<Item = HashID>,
         d: Difficulty,
         chain_id: HashID,
+        cw: Difficulty,
     ) -> Self {
         let parents = Vec::from_iter(parents);
         let p1 = Self::get_cached_block(&parents[0]);
@@ -495,14 +525,21 @@ impl ManyParentsBlockT for DagBlock {
             refl_weight: 0,
             txs: vec![],
             chain_id,
+            cw,
             // reflected_ancestors,
         }
     }
 }
 
 impl BlockT for DagBlock {
-    fn new(timestamp: u32, parent: HashID, d: Difficulty, chain_id: HashID) -> Self {
-        Self::new_multi_parent(timestamp, vec![parent], d, chain_id)
+    fn new(
+        timestamp: u32,
+        parent: HashID,
+        d: Difficulty,
+        chain_id: HashID,
+        cw: Difficulty,
+    ) -> Self {
+        Self::new_multi_parent(timestamp, vec![parent], d, chain_id, cw)
     }
     fn new_from(
         ts: u32,
@@ -510,6 +547,7 @@ impl BlockT for DagBlock {
         chain_heads: &ChainHeads,
         d: Difficulty,
         chain_id: HashID,
+        cw: Difficulty,
     ) -> Self {
         let parents = parent_opts
             .into_iter()
@@ -520,10 +558,10 @@ impl BlockT for DagBlock {
                     .cloned(),
             )
             .unique();
-        Self::new_multi_parent(ts, parents, d, chain_id)
+        Self::new_multi_parent(ts, parents, d, chain_id, cw)
     }
     fn genesis(ts: u32) -> Self {
-        let mut g = Self::new(ts, 0, 0, 0);
+        let mut g = Self::new(ts, 0, 0, 0, 0);
         g.id >>= 10;
         g.parents = vec![g.id];
         g.chain_id = g.id;
@@ -599,6 +637,14 @@ impl BlockT for DagBlock {
         self.refl_weight
     }
 
+    fn get_chain_weight(&self) -> Difficulty {
+        self.cw
+    }
+
+    fn set_chain_weight(&mut self, cw: Difficulty) {
+        self.cw = cw
+    }
+
     fn _push_tx(&mut self, id: TxId) {
         self.txs.push(id)
     }
@@ -614,6 +660,7 @@ impl BlockT for DagBlock {
 
     fn add_refl_weight(&mut self, w: Difficulty) {
         self.refl_weight += w;
+        self.cw += w;
     }
 }
 
@@ -637,8 +684,10 @@ mod tests {
             let tx = Transaction::ReflectAndProve(ReflectionData {
                 r_chain: orig_id + 1,
                 r_block: 0,
+                r_cw: 0,
                 weight: 222,
                 l_headers: vec![orig_id],
+                l_cw: (_b.get_chain_weight(), ne_vec![orig_id]),
             });
             Transaction::set_cached_tx(tx.clone());
             _b.set_difficulty(111);
@@ -659,14 +708,22 @@ mod tests {
             // need block to be available in cache -- NB: we don't care about BlockMD in this test
             B::set_cached_block((_b.clone(), BlockMD::mk_genesis_md(&_b.clone(), 10)));
 
-            let mut b2 = B::new(10, _b.get_hash(), _b.get_difficulty(), _b.get_chain_id());
+            let mut b2 = B::new(
+                10,
+                _b.get_hash(),
+                _b.get_difficulty(),
+                _b.get_chain_id(),
+                _b.get_chain_weight() + _b.get_difficulty(),
+            );
             // assert_eq!(b2.get_reflected_ancestors().len(), 1);
             assert_eq!(b2.get_reflected_weight(), 0);
             let tx2 = Transaction::ReflectAndProve(ReflectionData {
                 r_chain: orig_id + 1,
                 r_block: 0,
+                r_cw: 0,
                 weight: 333,
                 l_headers: vec![orig_id],
+                l_cw: (_b.get_chain_weight(), ne_vec![orig_id]),
             });
             Transaction::set_cached_tx(tx2.clone());
             b2.add_transaction(tx2.get_hash());
@@ -679,8 +736,10 @@ mod tests {
             let tx3 = Transaction::ReflectAndProve(ReflectionData {
                 r_chain: orig_id + 1,
                 r_block: 0,
+                r_cw: 0,
                 weight: 333,
                 l_headers: vec![_b.get_hash()],
+                l_cw: (_b.get_chain_weight(), ne_vec![_b.get_hash()]),
             });
             Transaction::set_cached_tx(tx3.clone());
             b2.add_transaction(tx3.get_hash());

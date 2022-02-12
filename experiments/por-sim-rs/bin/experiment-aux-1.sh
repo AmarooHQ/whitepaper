@@ -2,6 +2,7 @@
 
 # this is expected to be run in dir w/ Cargo.toml & Makefile
 SIM_BIN=./target/release/por-sim-rs
+cargo b --release
 
 # Single chain doublespend vs theoretical.
 

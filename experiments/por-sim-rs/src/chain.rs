@@ -32,6 +32,7 @@ pub enum ChainErr {
     BlockRefsUnkParent(HashID, HashID, bool),
     BadParentOrder(String, (HashID, ChainWeight), (HashID, ChainWeight)),
     BadDifficulty,
+    BadChainWeight,
     BadReflWeightInBlock(Difficulty, Difficulty),
     TsBeforeParent,
     BlockHeightInvalid,
@@ -120,6 +121,19 @@ pub struct Daa2Info {
     // id: HashID,
     ts: u32,
     d: Difficulty,
+}
+
+/// all necessary chain-weight calculation results
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Debug, Hash)]
+pub struct DeltaChainWeights {
+    delta_chain_weight: Difficulty,
+    reflected_delta_chain_weight: Difficulty,
+    lca_chain_weight: Difficulty,
+    lca_local_chain_weight: Difficulty,
+    weight: Difficulty,
+    reflected_weight: Difficulty,
+    local_chain_weight: Difficulty,
+    chain_weight: Difficulty,
 }
 
 #[derive(Clone)]
@@ -284,9 +298,11 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
             &self.get_chain_heads(is_private),
             0,
             self.get_chain_id(),
+            0,
         );
         let p = Self::get_cached_block(&b.prev()).unwrap();
         b.set_difficulty(self.next_difficulty(&p.0, &p.1));
+        b.set_chain_weight(self.calculate_delta_chain_weights(&b).chain_weight);
         b.add_transactions(
             self.get_mempool_tx_ids(is_private)
                 .iter()
@@ -539,6 +555,56 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
             }
         }
         None
+    }
+
+    fn calculate_delta_chain_weights(&self, b: &B) -> DeltaChainWeights {
+        let lca_r = self.find_lca_and_intermediates(&b.all_parents()).unwrap();
+
+        let pm = Self::get_cached_block(&b.prev()).unwrap();
+
+        let delta_chain_weight;
+        let reflected_delta_chain_weight;
+        let lca_chain_weight;
+        let lca_local_chain_weight;
+        // case for a single prev-block (trivial)
+        if lca_r.0 == pm.0.get_hash() {
+            delta_chain_weight = 0;
+            reflected_delta_chain_weight = 0;
+            lca_chain_weight = pm.1.chain_weight;
+            lca_local_chain_weight = pm.1.local_chain_weight;
+        } else {
+            let lca_md = &Self::get_cached_block(&lca_r.0).unwrap().1;
+            lca_chain_weight = lca_md.chain_weight;
+            lca_local_chain_weight = lca_md.local_chain_weight;
+            let lca_height = lca_md.height;
+            let [dcw, rdcw] = [|i: &BInfo| i.weight, |i: &BInfo| i.reflected_weight].map(|f| {
+                lca_r
+                    .1
+                    .iter()
+                    .filter(|(&k, _v)| k != lca_height) // make sure we don't count the LCA in delta CW
+                    .map::<Difficulty, _>(|(_k, v)| v.iter().map(f).sum())
+                    .sum()
+            });
+            delta_chain_weight = dcw;
+            reflected_delta_chain_weight = rdcw;
+        }
+
+        let weight = b.get_difficulty();
+        let reflected_weight = b.get_reflected_weight();
+        let all_delta_local_w = delta_chain_weight + weight;
+        let all_delta_refl_w = reflected_delta_chain_weight + reflected_weight;
+        let local_chain_weight = lca_local_chain_weight + all_delta_local_w;
+        let chain_weight = lca_chain_weight + all_delta_local_w + all_delta_refl_w;
+        DeltaChainWeights {
+            delta_chain_weight,
+            reflected_delta_chain_weight,
+            lca_chain_weight,
+            lca_local_chain_weight,
+            weight,
+            reflected_weight,
+            local_chain_weight,
+            chain_weight,
+        }
     }
 }
 
@@ -863,57 +929,20 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
          * the version below is like 10x (worse for this one). Wtf?!~~
          *
          */
-        let delta_chain_weight;
-        let reflected_delta_chain_weight;
-        let lca_chain_weight;
-        let lca_local_chain_weight;
-        if lca_r.0 == pm.0.get_hash() {
-            delta_chain_weight = 0;
-            reflected_delta_chain_weight = 0;
-            lca_chain_weight = pm.1.chain_weight;
-            lca_local_chain_weight = pm.1.local_chain_weight;
-        } else {
-            let lca_md = &Self::get_cached_block(&lca_r.0).unwrap().clone().1;
-            lca_chain_weight = lca_md.chain_weight;
-            lca_local_chain_weight = lca_md.local_chain_weight;
-            let lca_height = lca_md.height;
-            let [dcw, rdcw] = [|i: &BInfo| i.weight, |i: &BInfo| i.reflected_weight].map(|f| {
-                lca_r
-                    .1
-                    .iter()
-                    .filter(|(&k, _v)| k != lca_height) // make sure we don't count the LCA in delta CW
-                    .map::<Difficulty, _>(|(_k, v)| v.iter().map(f).sum())
-                    .sum()
-            });
-            delta_chain_weight = dcw;
-            reflected_delta_chain_weight = rdcw;
-            // todo: remove below if/when above works properly
-            // delta_chain_weight = lca_r
-            //     .1
-            //     .iter()
-            //     .filter(|(&k, _v)| k != lca_height) // make sure we don't count the LCA in delta CW
-            //     .map::<Difficulty, _>(|(_k, v)| v.iter().map(|info| info.weight).sum())
-            //     .sum();
-            // reflected_delta_chain_weight = lca_r
-            //     .1
-            //     .iter()
-            //     .filter(|(&k, _v)| k != lca_height)
-            //     .map::<Difficulty, _>(|(_, v)| v.iter().map(|i| i.reflected_weight).sum())
-            //     .sum();
+        let DeltaChainWeights {
+            // delta_chain_weight,
+            // reflected_delta_chain_weight,
+            // lca_chain_weight,
+            // lca_local_chain_weight,
+            reflected_weight,
+            local_chain_weight,
+            chain_weight,
+            ..
+        } = self.calculate_delta_chain_weights(b);
+
+        if chain_weight != b.get_chain_weight() {
+            return Err(BadChainWeight);
         }
-
-        /* SECOND VERSION OF THE CODE
-         */
-        // let lca_md = Self::get_cached_block(&lca_r.0).unwrap().1.clone();
-        // let delta_chain_weight: Difficulty = lca_r
-        //     .1
-        //     .iter()
-        //     .filter(|(&k, _v)| k != lca_md.height) // make sure we don't count the LCA in delta CW
-        //     .map::<Difficulty, _>(|(_k, v)| v.iter().map(|info| info.weight).sum())
-        //     .sum();
-        // let lca_chain_weight = lca_md.chain_weight;
-
-        /* END DIFF VERSIONS */
 
         // // TODO: Add all parents recursively for daa2_blocks
         // let to_add = vec![Daa2Info {
@@ -934,17 +963,12 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             }
         }
 
-        let reflected_weight = b.get_reflected_weight();
-        let all_delta_local_w = delta_chain_weight + d;
-        let all_delta_refl_w = reflected_delta_chain_weight + reflected_weight;
-        let local_chain_weight = lca_local_chain_weight + all_delta_local_w;
-        let chain_weight = lca_chain_weight + all_delta_local_w + all_delta_refl_w;
         Ok(BlockMD {
             difficulty: d,
             height: pm.1.height + 1,
             weight: d,
-            local_chain_weight,
             reflected_weight,
+            local_chain_weight,
             chain_weight,
             // daa2_blocks,
             _phantom_b: PhantomData,
@@ -1076,8 +1100,10 @@ mod tests {
         let refl_tx = Transaction::ReflectAndProve(ReflectionData {
             r_chain: 1234, // chain.get_chain_id(),
             r_block: b_refl.get_hash(),
+            r_cw: b_refl.get_chain_weight(),
             weight: b_refl.d,
             l_headers: vec![genesis.get_hash()],
+            l_cw: (0, ne_vec![genesis.get_hash()]),
         });
         Transaction::set_cached_tx(refl_tx.clone());
 

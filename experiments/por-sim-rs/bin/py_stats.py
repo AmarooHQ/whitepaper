@@ -106,5 +106,10 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
 
 
 if __name__ == "__main__":
-    plot_chart(csv_files=['exp-4a-wPoRFix.csv', 'exp-4a-wPoRFix-2.csv', 'exp-4a-wPoRFix-3.csv'], plot_kwargs=dict(logy=False))
+    csv_files = \
+        [ 'exp-4c-rng1.csv'
+        , 'exp-4c-rng-hash.csv'
+        ]
+    plot_chart(csv_files, plot_kwargs=dict(logy=False))
+    # plot_chart(csv_files=['exp-4a-wPoRFix.csv', 'exp-4a-wPoRFix-2.csv', 'exp-4a-wPoRFix-3.csv'], plot_kwargs=dict(logy=False))
     # plot_chart(csv_files=['exp-4b.csv'], plot_kwargs=dict(logy=False))

@@ -18,6 +18,8 @@ extern crate derive_new;
 extern crate log;
 extern crate env_logger;
 extern crate intmap;
+#[macro_use]
+extern crate non_empty_vec;
 
 mod block;
 mod block_metadata;
