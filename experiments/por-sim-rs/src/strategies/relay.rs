@@ -154,27 +154,35 @@ pub struct SelfishMiningParams {
 
 impl<'a, S: CSystemT<'a>> SelfishMining<S> {
     fn sync_pub_to_priv(b: &S::B, atk_chain: &S::C, include_latest: bool) -> Vec<MsgToNode<S::B>> {
-        let mut pre_ret = atk_chain.find_pub_blocks_not_in_priv();
-        if include_latest {
-            pre_ret.push(S::B::get_cached_block(&b.get_hash()).unwrap());
-        }
-        let ret_blocks = pre_ret
+        let pre_ret = atk_chain.find_pub_blocks_not_in_priv();
+        let mut ret_blocks: Vec<_> = pre_ret
             .into_iter()
             .map(|b1| MsgToNode::MsgBlock(atk_chain.get_chain_id(), b1.0.clone(), true))
             .collect();
+        if include_latest {
+            ret_blocks.push(MsgToNode::MsgBlock(
+                atk_chain.get_chain_id(),
+                b.clone(),
+                true,
+            ));
+        }
         info!("[SM] sync pub->priv, returning: {:?}", ret_blocks);
         ret_blocks
     }
 
     fn sync_priv_to_pub(b: &S::B, atk_chain: &S::C, include_latest: bool) -> Vec<MsgToNode<S::B>> {
-        let mut pre_ret = atk_chain.find_priv_blocks_not_in_pub();
-        if include_latest {
-            pre_ret.push(S::B::get_cached_block(&b.get_hash()).unwrap());
-        }
-        let ret_blocks = pre_ret
+        let pre_ret = atk_chain.find_priv_blocks_not_in_pub();
+        let mut ret_blocks: Vec<_> = pre_ret
             .into_iter()
             .map(|b1| MsgToNode::MsgBlock(atk_chain.get_chain_id(), b1.0.clone(), false))
             .collect();
+        if include_latest {
+            ret_blocks.push(MsgToNode::MsgBlock(
+                atk_chain.get_chain_id(),
+                b.clone(),
+                false,
+            ));
+        }
         info!("[SM] sync priv->pub, returning: {:?}", ret_blocks);
         ret_blocks
     }
