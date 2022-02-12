@@ -21,7 +21,8 @@ use std::time::SystemTime;
 use std::{fmt, fmt::Display};
 
 // static block_hash_f: fn(u64) -> u64 = xx_rev_hash_u64;
-static block_hash_f: fn(u64) -> u64 = sha256_hash_u64;
+static block_hash_f: fn(u64) -> u64 = blake3_hash_u64;
+// static block_hash_f: fn(u64) -> u64 = sha256_hash_u64;
 
 lazy_static! {
     static ref BLOCK_CACHE: Mutex<PassThruHashMap<u64, Arc<(Block, BlockMD<Block>)>>> =

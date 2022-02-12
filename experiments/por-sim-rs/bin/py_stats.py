@@ -38,7 +38,7 @@ def ds_theoretical_series(multipliers, q=0.44, after_n_confs=20):
     xs = []
     ys = []
     for n_por_chains in multipliers:
-        n = after_n_confs * n_por_chains
+        n = int(after_n_confs * n_por_chains)
         r = p_ds_success_theoretical(q, n)
         xs.append(n_por_chains)
         ys.append(r)
@@ -72,7 +72,7 @@ def read_csv_data(fname, chain_ty: Literal['por'] | Literal['trad']):
     ys = list(win_counter[x] / row_counter[x] for x in xs if row_counter[x] > 0)
     max_ix = max(xs)
     series = pd.Series(ys, index=[x for x in xs if x <= max_ix])
-    series2 = pd.Series(ys, index=[(x-1) / 2 + 1 for x in xs[:max_ix]])
+    series2 = pd.Series([y**0.7 for y in ys], index=[x for x in xs[:max_ix]])
     # s3 = pd.Series(ys, index=[math.sqrt(x) for x in xs[:max_ix]])
     # s4 = pd.Series(ys, index=[x**(2/3) for x in xs[:max_ix]])
     ms_elapsed = d.reset_index().groupby('n_chains')['ms_elapsed'].mean()
@@ -92,7 +92,7 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
         n_trials, max_ix, block_target, _q, ds_target, csv_data, ms_elapsed, d2 = read_csv_data(fname, chain_ty)
         csv_data.plot(label=f"PoR $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $n \\geq {n_trials}$; ds_win={ds_target} {label_extra or ''}", **kwargs)
         # ms_elapsed.plot(label=f"$\\bar{{d}}$ (ms); $B_f^{{-1}} = {block_target}$", secondary_y=True)
-        # d2.plot(label="PoR - $\\frac{x+1}{2}$")
+        # d2.plot(label="PoR - $y^{0.7}$")
         _max_ix = max(_max_ix, max_ix)
         qs.add(_q)
         ds_targets.add(ds_target)
@@ -101,7 +101,7 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
     print(f"Calculating theoretical probabilities.")
     for q in _qs:
         for ds_target in ds_targets:
-            multipliers = list(range(1, min(_max_ix+1,20))) + list(range(20, _max_ix+1, 10))
+            multipliers = list(range(1, min(_max_ix+1,20))) + list(range(20, _max_ix+1, 1))
             theoretical_data = ds_theoretical_series(multipliers, q=q, after_n_confs=ds_target)
             theoretical_data.plot(label=f"Theoretical $q={q:.2f}$ (confs = ${ds_target}x$)")
     # d3.plot(label="PoR - $\sqrt{x}$")
@@ -145,6 +145,21 @@ if __name__ == "__main__":
     csv_files = [
         ('exp-aux1-q0.44-sha256.csv', 'trad', '(trad; N_1=1)'),
         ('exp-7-q0.44-t20-sha256.csv', 'por', None),
+        ]
+    csv_files = [
+        # ('exp-aux1-q0.44-sha256.csv', 'trad', '(trad; N_1=1)'),
+        # ('exp-8-q0.40-t10-blake3.csv', 'por', None),
+        # ('exp-8-q0.40-t10-p40-blake3.csv', 'por', None),
+        # ('exp-8-q0.40-t10-p100-blake3.csv', 'por', None),
+        # ('exp-8-q0.44-t10-p200-blake3.csv', 'por', None),
+        # ('exp-8-q0.44-t5-p200-blake3.csv', 'por', None),
+        # ('exp-8-q0.40-t10-p200-H25-blake3.csv', 'por', None),
+        # ('exp-8-q0.40-t5-p200-H25-blake3.csv', 'por', None),
+        # ('exp-8-q0.44-t10-p200-H25-blake3.csv', 'por', None),
+        # ('exp-8-q0.44-t5-p200-H25-blake3.csv', 'por', None),
+        ('exp-8-q0.40-t10-p100-H100-blake3.csv', 'por', None),
+        ('exp-8-q0.44-t5-p100-H100-blake3.csv', 'por', None),
+        # ('exp-8-q0.40-t5-p200-blake3.csv', 'por', None),
         ]
 
     plot_chart(csv_files, plot_kwargs=dict(logy=False))

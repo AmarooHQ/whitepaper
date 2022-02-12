@@ -1,5 +1,6 @@
 // use fnv;
 // use std::hash::Hasher;
+use blake3;
 use crypto_hash::{digest, Algorithm};
 use std::convert::TryInto;
 
@@ -33,6 +34,15 @@ pub fn xx_rev_hash_u64(data: u64) -> u64 {
 pub fn sha256_hash_u64(data: u64) -> u64 {
     let r = digest(Algorithm::SHA256, &data.to_be_bytes());
     u64::from_be_bytes(r[..8].try_into().unwrap())
+}
+
+#[inline(always)]
+pub fn blake3_hash_u64(data: u64) -> u64 {
+    u64::from_be_bytes(
+        blake3::hash(&data.to_be_bytes()[..]).as_bytes()[..8]
+            .try_into()
+            .unwrap(),
+    )
 }
 
 // md5: 6.82s user 0.36s system 99% cpu 7.179 total
