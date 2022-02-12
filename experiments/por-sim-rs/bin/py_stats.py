@@ -49,7 +49,7 @@ def ds_theoretical_series(multipliers, q=0.44, after_n_confs=20):
 def read_csv_data(fname, chain_ty: Literal['por'] | Literal['trad']):
     d: pd.DataFrame = pd.read_csv(fname)
     only_target = d['block_target'][1]
-    ds_target = d['doublespend_after_n_confs'][1]
+    ds_target = int(d['doublespend_after_n_confs'][1])
     q = d['atk_q'][1]
     if chain_ty == 'por':
         xs = d['n_chains'].unique()
@@ -78,29 +78,32 @@ def read_csv_data(fname, chain_ty: Literal['por'] | Literal['trad']):
     ms_elapsed = d.reset_index().groupby('n_chains')['ms_elapsed'].mean()
     nts = list(n for x,n in row_counter.items())
     n_trials = int(numpy.array(nts).min())
-    return n_trials, max_ix, only_target, q, series, ms_elapsed, series2
+    return n_trials, max_ix, only_target, q, ds_target, series, ms_elapsed, series2
 
 
 def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
     plt.figure()
     _max_ix = 0
     qs = set()
+    ds_targets = set()
     kwargs = plot_kwargs or dict()
     print(f"Tabulating CSVs.")
     for (fname, chain_ty, label_extra) in csv_files:
-        n_trials, max_ix, block_target, _q, csv_data, ms_elapsed, d2 = read_csv_data(fname, chain_ty)
-        csv_data.plot(label=f"PoR $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $n \\geq {n_trials}$ {label_extra or ''}", **kwargs)
+        n_trials, max_ix, block_target, _q, ds_target, csv_data, ms_elapsed, d2 = read_csv_data(fname, chain_ty)
+        csv_data.plot(label=f"PoR $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $n \\geq {n_trials}$; ds_win={ds_target} {label_extra or ''}", **kwargs)
         # ms_elapsed.plot(label=f"$\\bar{{d}}$ (ms); $B_f^{{-1}} = {block_target}$", secondary_y=True)
         # d2.plot(label="PoR - $\\frac{x+1}{2}$")
         _max_ix = max(_max_ix, max_ix)
         qs.add(_q)
+        ds_targets.add(ds_target)
     _qs = list(qs)
     _qs.sort()
     print(f"Calculating theoretical probabilities.")
     for q in _qs:
-        multipliers = list(range(1, min(_max_ix+1,20))) + list(range(20, _max_ix+1, 10))
-        theoretical_data = ds_theoretical_series(multipliers, q=q)#, max_multiplier=_max_ix)
-        theoretical_data.plot(label=f"Theoretical $q={q:.2f}$ (confs = $20x$)")
+        for ds_target in ds_targets:
+            multipliers = list(range(1, min(_max_ix+1,20))) + list(range(20, _max_ix+1, 10))
+            theoretical_data = ds_theoretical_series(multipliers, q=q, after_n_confs=ds_target)
+            theoretical_data.plot(label=f"Theoretical $q={q:.2f}$ (confs = ${ds_target}x$)")
     # d3.plot(label="PoR - $\sqrt{x}$")
     # d4.plot(label="PoR - $x^{2/3}$")
     print(f"Done. Now drawing.")
@@ -117,13 +120,33 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
 
 if __name__ == "__main__":
     csv_files = \
-        [ ('exp-4c-rng1.csv', 'por', '(rng,xx)')
-        , ('exp-4c-rng-hash.csv', 'por', '(rng+hash,xx)')
-        , ('exp-4c-hash-hash.csv', 'por', '(rng+hash,hash)')
-        , ('exp-4c-hash-xxrev.csv', 'por', '(rng+hash,xxrev)')
-        # , ('exp-aux1.csv', 'trad', '(1 chain)')  # this one compares a simulated traditional doublespend at various numbers of confirmations with n_chains=1
-        , ('exp-aux1-q0.40.csv', 'trad', '(1 chain)')  # this one compares a simulated traditional doublespend at various numbers of confirmations with n_chains=1
+        [
+            # ('exp-6-p5.csv', 'por', ''),
+            # ('exp-6-p10.csv', 'por', ''),
+            # ('exp-6-p20.csv', 'por', ''),
+            # ('exp-6-p100.csv', 'por', ''),
+            ('exp-6-p5-q0.42.csv', 'por', ''),
+            ('exp-6-p10-q0.42.csv', 'por', ''),
+            ('exp-6-p20-q0.42.csv', 'por', ''),
+            ('exp-6-p100-q0.42.csv', 'por', ''),
         ]
+        # [ ('exp-4c-rng1.csv', 'por', '(rng,xx)')
+        # , ('exp-4c-rng-hash.csv', 'por', '(rng+hash,xx)')
+        # , ('exp-4c-hash-hash.csv', 'por', '(rng+hash,hash)')
+        # , ('exp-4c-hash-xxrev.csv', 'por', '(rng+hash,xxrev)')
+        # # , ('exp-aux1.csv', 'trad', '(1 chain)')  # this one compares a simulated traditional doublespend at various numbers of confirmations with n_chains=1
+        # , ('exp-aux1-q0.40.csv', 'trad', '(1 chain)')  # this one compares a simulated traditional doublespend at various numbers of confirmations with n_chains=1
+        # ]
+
+    # csv_files = list((f"exp-6m-q{q}.csv", 'por', None) for q in ['0.36', '0.4', '0.42', '0.44', '0.46', '0.48'])
+    # csv_files = list((f"exp-6n-q{q}.csv", 'por', None) for q in ['0.40'])
+    # csv_files = list((f"exp-6o-q{q}-t{t}.csv", 'por', None) for q in ['0.40'] for t in ['10', '20', '30'])
+
+    csv_files = [
+        ('exp-aux1-q0.44-sha256.csv', 'trad', '(trad; N_1=1)'),
+        ('exp-7-q0.44-t20-sha256.csv', 'por', None),
+        ]
+
     plot_chart(csv_files, plot_kwargs=dict(logy=False))
     # plot_chart(csv_files=['exp-4a-wPoRFix.csv', 'exp-4a-wPoRFix-2.csv', 'exp-4a-wPoRFix-3.csv'], plot_kwargs=dict(logy=False))
     # plot_chart(csv_files=['exp-4b.csv'], plot_kwargs=dict(logy=False))

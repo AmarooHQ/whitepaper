@@ -369,9 +369,13 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
     }
 
     fn block_is_ancestor_of(&self, ancestor: HashID, descendant: HashID) -> bool {
+        // let b_anc = Self::get_cached_block(&ancestor).unwrap();
         if let Some(b_d) = Self::get_cached_block(&descendant) {
-            if b_d.0.all_prev_iter().any(|b| b.0.get_hash() == ancestor) {
-                return true;
+            for bmd in b_d.0.all_prev_iter() {
+                // todo: if using WeightedChain then we can terminate early once bmd.0.height < ancestor.height
+                if bmd.0.get_hash() == ancestor {
+                    return true;
+                }
             }
         }
         false

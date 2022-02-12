@@ -13,21 +13,25 @@ use std::cmp::Ordering;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::hash::Hash;
+use std::iter::FilterMap;
 use std::iter::Map;
 use std::iter::{FromIterator, IntoIterator};
 use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
 use std::{fmt, fmt::Display};
 
+// static block_hash_f: fn(u64) -> u64 = xx_rev_hash_u64;
+static block_hash_f: fn(u64) -> u64 = sha256_hash_u64;
+
 lazy_static! {
     static ref BLOCK_CACHE: Mutex<PassThruHashMap<u64, Arc<(Block, BlockMD<Block>)>>> =
         Mutex::new(Default::default());
     static ref BLOCK_LRU: Mutex<LruCache<u64, Arc<(Block, BlockMD<Block>)>>> =
-        Mutex::new(LruCache::new(1024));
+        Mutex::new(LruCache::new(1024 * 16));
     static ref DAGBLOCK_CACHE: Mutex<PassThruHashMap<u64, Arc<(DagBlock, BlockMD<DagBlock>)>>> =
         Mutex::new(Default::default());
     static ref DAGBLOCK_LRU: Mutex<LruCache<u64, Arc<(DagBlock, BlockMD<DagBlock>)>>> =
-        Mutex::new(LruCache::new(1024));
+        Mutex::new(LruCache::new(1024 * 16));
     static ref EMPTY_HASH_ID_SET: FxHashSet<HashID> = Default::default();
 }
 
@@ -228,9 +232,7 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
     fn get_txs(&self) -> Vec<Arc<Transaction>> {
         self.get_transactions()
             .iter()
-            .map(|&tx_id| Transaction::get_cached_tx(tx_id))
-            .filter(|tx| tx.is_some())
-            .map(|tx| tx.unwrap())
+            .filter_map(|&tx_id| Transaction::get_cached_tx(tx_id))
             .collect()
     }
 
@@ -402,7 +404,8 @@ impl BlockT for Block {
     fn increment_nonce(&mut self) {
         // self.id = hash_u64(self.id + 1337);
         // self.id = sha256_hash_u64(self.id + 1337);
-        self.id = xx_rev_hash_u64(self.id + 1337);
+        // self.id = xx_rev_hash_u64(self.id + 1337);
+        self.id = block_hash_f(self.id + 1337)
     }
 
     fn get_difficulty(&self) -> Difficulty {
@@ -604,7 +607,8 @@ impl BlockT for DagBlock {
     fn increment_nonce(&mut self) {
         // self.id = hash_u64(self.id + 1337);
         // self.id = sha256_hash_u64(self.id + 1337);
-        self.id = xx_rev_hash_u64(self.id + 1337);
+        // self.id = xx_rev_hash_u64(self.id + 1337);
+        self.id = block_hash_f(self.id + 1337)
     }
     fn get_difficulty(&self) -> Difficulty {
         self.d

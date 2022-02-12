@@ -54,12 +54,13 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         debug_assert_ne!(my_chain_id, c_id);
 
         let txs = b.get_txs();
+        // the local chain is recorded in these txs as the r-chain (b/c the block is from a diff chain)
         let refl_ancestors: Vec<_> = txs
             .into_iter()
-            .map(|tx| tx.get_reflecting_r_block(my_chain_id))
-            .filter(|mb| mb.is_some())
-            .map(|mb| mb.unwrap())
-            .filter(|&b| self.chain.block_is_in_best_chain(b, is_private))
+            .filter_map(|tx| tx.get_reflecting_r_block(my_chain_id).map(|b| (b, tx)))
+            .map(|(b, tx)| b)
+            // ! do we care (for this simulator) about the block being in the main chain?
+            // .filter(|&b| self.chain.block_is_in_best_chain(b, is_private))
             .collect();
         // todo -- track best reflected CW so that non-reflecting R blocks count to
         // todo --  reflections of the most recently reflected L blocks (by R)

@@ -24,7 +24,7 @@ lazy_static! {
     static ref TX_CACHE: Mutex<PassThruHashMap<TxId, Arc<TxInCache>>> =
         Mutex::new(Default::default());
     static ref TX_LRU: Mutex<LruCache<TxId, Arc<TxInCache>>> =
-        Mutex::new(LruCache::new(1024));
+        Mutex::new(LruCache::new(1024*16));
     // static ref DAGBLOCK_CACHE: Mutex<PassThruHashMap<u64, Arc<(DagBlock, BlockMD<DagBlock>)>>> =
     //     Mutex::new(Default::default());
     // static ref DAGBLOCK_LRU: Mutex<LruCache<u64, Arc<(DagBlock, BlockMD<DagBlock>)>>> =
