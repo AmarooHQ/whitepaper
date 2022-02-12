@@ -567,7 +567,7 @@ mod tests {
         let bb = mm.chain().get_any_best_block(false);
         let mut txs: Vec<TxId> = vec![];
         for b in bb.0.all_prev_iter_excluding(&Default::default()) {
-            txs.extend(b.get_transactions());
+            txs.extend(b.0.get_transactions());
         }
         let n_refl_txs = txs
             .iter()
@@ -597,7 +597,7 @@ mod tests {
         let refl_counts: Vec<usize> =
             bb.0.all_prev_iter()
                 .map(|b| {
-                    b.get_txs()
+                    b.0.get_txs()
                         .iter()
                         .map(|tx| {
                             tx.get_reflected_l_blocks()
@@ -640,14 +640,14 @@ mod tests {
         let mut txs_remote: Vec<_> = vec![];
         let mut remote_txid_to_r_blocks: PassThruHashMap<TxId, Vec<HashID>> = Default::default();
         for b in bb_remote.0.all_prev_iter_excluding(&Default::default()) {
-            let txs = b.get_txs();
+            let txs = b.0.get_txs();
             for tx in &txs {
                 let txid = tx.get_hash();
                 if !remote_txid_to_r_blocks.contains_key(&txid) {
                     remote_txid_to_r_blocks.insert(txid, vec![]);
                 }
                 let r_blocks = remote_txid_to_r_blocks.get_mut(&txid).unwrap();
-                r_blocks.push(b.get_hash());
+                r_blocks.push(b.0.get_hash());
             }
             txs_remote.extend(txs);
         }
@@ -680,7 +680,7 @@ mod tests {
             b_at_h3
                 .0
                 .all_prev_iter()
-                .map(|b| b.get_hash())
+                .map(|b| b.0.get_hash())
                 .collect::<Vec<_>>()
         );
         println!("{:?}\n\n", b_at_h3.0.get_txs());
@@ -709,7 +709,7 @@ mod tests {
 
         let mut txs: Vec<_> = vec![];
         for b in bb.0.all_prev_iter_excluding(&Default::default()) {
-            txs.extend(b.get_txs());
+            txs.extend(b.0.get_txs());
         }
 
         let total_rw: u32 = txs_remote
@@ -729,7 +729,7 @@ mod tests {
 
         let lcw =
             bb.0.all_prev_iter_excluding(&Default::default())
-                .map(|b| b.get_difficulty())
+                .map(|b| b.0.get_difficulty())
                 .sum::<Difficulty>();
         assert_eq!(lcw, bb.1.local_chain_weight);
 

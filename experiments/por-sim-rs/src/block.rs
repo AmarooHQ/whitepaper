@@ -32,22 +32,22 @@ lazy_static! {
 }
 
 pub struct PrevBlockIter<B: BlockT> {
-    curr_block: B,
+    curr_block: Arc<(B, BlockMD<B>)>,
 }
 
 impl<B: BlockT> Iterator for PrevBlockIter<B> {
-    type Item = B;
+    type Item = Arc<(B, BlockMD<B>)>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let p_id = self.curr_block.prev();
-        if p_id == self.curr_block.get_hash() {
+        let p_id = self.curr_block.0.prev();
+        if p_id == self.curr_block.0.get_hash() {
             None
         } else {
             match B::get_cached_block(&p_id) {
                 None => None,
                 Some(p) => {
-                    self.curr_block = p.0.clone();
-                    Some(p.0.clone())
+                    self.curr_block = p.clone();
+                    Some(p)
                 }
             }
         }
@@ -55,7 +55,7 @@ impl<B: BlockT> Iterator for PrevBlockIter<B> {
 }
 
 pub struct FilteredAllPrevBlockIter<'a, B: BlockT> {
-    last_block: Option<B>,
+    last_block: Option<Arc<(B, BlockMD<B>)>>,
     edge_blocks: VecDeque<HashID>,
     exclude_blocks: &'a SeenBlocks,
     seen_blocks: SeenBlocks,
@@ -79,7 +79,7 @@ impl<'a, B: BlockT> FilteredAllPrevBlockIter<'a, B> {
 }
 
 impl<'a, B: BlockT> Iterator for FilteredAllPrevBlockIter<'a, B> {
-    type Item = B;
+    type Item = Arc<(B, BlockMD<B>)>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let p_id = self.edge_blocks.pop_front()?;
@@ -89,15 +89,21 @@ impl<'a, B: BlockT> Iterator for FilteredAllPrevBlockIter<'a, B> {
         self.seen_blocks.insert(p_id);
         let p = B::get_cached_block(&p_id);
         // genesis condition
-        if p_id == self.last_block.as_ref().map(|b| b.get_hash()).unwrap_or(0) {
+        if p_id
+            == self
+                .last_block
+                .as_ref()
+                .map(|b| b.0.get_hash())
+                .unwrap_or(0)
+        {
             None
         } else {
             match p {
                 None => None,
                 Some(p) => {
                     self.edge_blocks.extend(p.0.all_parents());
-                    self.last_block = Some(p.0.clone());
-                    Some(p.0.clone())
+                    self.last_block = Some(p.clone());
+                    Some(p)
                 }
             }
         }
@@ -125,7 +131,7 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
 
     fn prev_iter(&self) -> PrevBlockIter<Self> {
         PrevBlockIter {
-            curr_block: self.clone(),
+            curr_block: Self::get_cached_block(&self.get_hash()).unwrap(),
         }
     }
 

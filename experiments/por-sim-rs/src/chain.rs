@@ -334,25 +334,25 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
         u64::MAX / u64::from(d)
     }
 
-    fn find_priv_blocks_not_in_pub(&self) -> Vec<B> {
+    fn find_priv_blocks_not_in_pub(&self) -> Vec<Arc<(B, BlockMD<B>)>> {
         self.find_missing_blocks_in(true)
     }
 
-    fn find_pub_blocks_not_in_priv(&self) -> Vec<B> {
+    fn find_pub_blocks_not_in_priv(&self) -> Vec<Arc<(B, BlockMD<B>)>> {
         self.find_missing_blocks_in(false)
     }
 
     fn get_all_txs_in_history_of(&self, tip: &B) -> Vec<TxId> {
         let mut prev_txids: Vec<TxId> = vec![];
         for b in tip.all_prev_iter_excluding(&Default::default()) {
-            prev_txids.extend(b.get_transactions());
+            prev_txids.extend(b.0.get_transactions());
         }
         prev_txids.into_iter().unique().collect()
     }
 
     /// Return all blocks from one chain (priv or pub) that are needed to update the other
     /// chain (pub or priv) so that both chains have the same history.
-    fn find_missing_blocks_in(&self, is_private: bool) -> Vec<B> {
+    fn find_missing_blocks_in(&self, is_private: bool) -> Vec<Arc<(B, BlockMD<B>)>> {
         // if is_private==true then we are looking for private blocks that aren't in pub
         let sync_from_best = self.get_chain_heads(is_private).keys();
         let mut exclude_blocks: SeenBlocks = self.get_seen_blocks(!is_private).clone();
@@ -360,17 +360,17 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
         for id in sync_from_best {
             let b = Self::get_cached_block(id).unwrap().0.clone();
             let bs = Vec::from_iter(b.all_prev_iter_excluding(&exclude_blocks));
-            exclude_blocks.extend(bs.iter().map(|b| b.get_hash()));
+            exclude_blocks.extend(bs.iter().map(|b| b.0.get_hash()));
             missing_blocks.extend(bs);
         }
         // make sure that the blocks we return are from lease recent to most recent.
-        missing_blocks.sort_by_key(|b| (b.get_ts(), b.get_height()));
+        missing_blocks.sort_by_key(|b| (b.0.get_ts(), b.0.get_height()));
         missing_blocks
     }
 
     fn block_is_ancestor_of(&self, ancestor: HashID, descendant: HashID) -> bool {
         if let Some(b_d) = Self::get_cached_block(&descendant) {
-            if b_d.0.all_prev_iter().any(|b| b.get_hash() == ancestor) {
+            if b_d.0.all_prev_iter().any(|b| b.0.get_hash() == ancestor) {
                 return true;
             }
         }
