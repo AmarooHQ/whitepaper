@@ -46,6 +46,34 @@ def ds_theoretical_series(multipliers, q=0.44, after_n_confs=20):
     return data
 
 
+def lerp(a, b, t):
+    assert b >= a
+    return (1-t) * a + b * t
+
+def inv_lerp(a, b, v):
+    assert b >= a
+    return (v-a)/(b-a)
+
+
+# assumes monotonically decreasing function
+def estimate_inverse(data: pd.Series, y_val):
+    x1 = data.idxmax()  # idx of max value
+    xn = data.idxmin()  # idx of min value
+    if y_val > data[x1]:
+        # can't estimate left of start
+        return x1
+    if y_val < data[xn]:
+        return xn
+    # otherwise, it's between these two
+    for ((xa, ya), (xb, yb)) in zip(data.iteritems(), data[1:].iteritems()):
+        # print(xa, xb, xa<xb, ya, yb, ya>yb)
+        if ya >= y_val >= yb:
+            # then we linearly interpolate x coord
+            t = inv_lerp(yb, ya, y_val)
+            return lerp(xa, xb, t)
+    raise Exception("we should never reach this point")
+
+
 def read_csv_data(fname, chain_ty: Literal['por'] | Literal['trad']):
     d: pd.DataFrame = pd.read_csv(fname)
     only_target = d['block_target'][1]
@@ -88,8 +116,10 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
     ds_targets = set()
     kwargs = plot_kwargs or dict()
     print(f"Tabulating CSVs.")
+    csv_series = []
     for (fname, chain_ty, label_extra) in csv_files:
         n_trials, max_ix, block_target, _q, ds_target, csv_data, ms_elapsed, d2 = read_csv_data(fname, chain_ty)
+        csv_series.append(csv_data)
         csv_data.plot(label=f"PoR $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $n \\geq {n_trials}$; ds_win={ds_target} {label_extra or ''}", **kwargs)
         # ms_elapsed.plot(label=f"$\\bar{{d}}$ (ms); $B_f^{{-1}} = {block_target}$", secondary_y=True)
         # d2.plot(label="PoR - $y^{0.7}$")
@@ -99,13 +129,33 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
     _qs = list(qs)
     _qs.sort()
     print(f"Calculating theoretical probabilities.")
+    t_series = []
     for q in _qs:
         for ds_target in ds_targets:
             multipliers = list(range(1, min(_max_ix+1,20))) + list(range(20, _max_ix+1, 1))
             theoretical_data = ds_theoretical_series(multipliers, q=q, after_n_confs=ds_target)
+            t_series.append(theoretical_data)
             theoretical_data.plot(label=f"Theoretical $q={q:.2f}$ (confs = ${ds_target}x$)")
     # d3.plot(label="PoR - $\sqrt{x}$")
     # d4.plot(label="PoR - $x^{2/3}$")
+    if len(csv_series) == len(t_series) == 1:
+        print(f"Calculating experimental / theoretical")
+        exp_d = csv_series[0]
+        thr_d = t_series[0]
+        max_t_prob = thr_d[1]
+        xs = []
+        ys = []
+        ys_alt = []
+        for (x,y) in exp_d.iteritems():
+            equiv_x = estimate_inverse(thr_d, y)
+            xs.append(x)
+            ys.append(x / equiv_x)
+            ys_alt.append(equiv_x)
+            print(x, '->', equiv_x)
+        # ratio_series = pd.Series(ys, index=xs)
+        # ratio_series.plot(label=f"Ratio of x coords w/ equiv y values")
+        alt_series = pd.Series(ys_alt, index=xs)
+        alt_series.plot(label=f"Theoretical x coord w/ equiv y values")
     print(f"Done. Now drawing.")
     plt.title("\n".join([
         f"P(atk success) PoR vs Traditional Chain",
@@ -157,9 +207,13 @@ if __name__ == "__main__":
         # ('exp-8-q0.40-t5-p200-H25-blake3.csv', 'por', None),
         # ('exp-8-q0.44-t10-p200-H25-blake3.csv', 'por', None),
         # ('exp-8-q0.44-t5-p200-H25-blake3.csv', 'por', None),
-        ('exp-8-q0.40-t10-p100-H100-blake3.csv', 'por', None),
-        ('exp-8-q0.44-t5-p100-H100-blake3.csv', 'por', None),
         # ('exp-8-q0.40-t5-p200-blake3.csv', 'por', None),
+        # ('exp-8-q0.40-t5-p100-H100-blake3.csv', 'por', None),
+        # ('exp-8-q0.44-t5-p100-H100-blake3.csv', 'por', None),
+        # ('exp-8-q0.40-t10-p100-H100-blake3.csv', 'por', None),
+        # ('exp-8-q0.44-t10-p100-H100-blake3.csv', 'por', None),
+        # ('exp-8-q0.40-t20-p100-H100-blake3.csv', 'por', None),
+        ('exp-8-q0.44-t20-p100-H100-blake3.csv', 'por', None),
         ]
 
     plot_chart(csv_files, plot_kwargs=dict(logy=False))
