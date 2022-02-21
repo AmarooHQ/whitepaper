@@ -28,6 +28,7 @@ pub struct MM<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> {
     atk_start_h: Option<Height>,
     extra_chain_nodes: Vec<ExtraChainNodes<'a, S>>,
     net_args: NetworkArgs,
+    stop_simulation_at: Option<Timestamp>,
 }
 
 #[derive(Debug, Clone)]
@@ -38,6 +39,7 @@ pub struct AttackArgs {
     pub attack_starts_at: Timestamp,
     pub end_simulation_at_t: Timestamp,
     pub attacker_instant_propagation: bool,
+    pub atk_end_delay_ticks: Timestamp,
 }
 
 impl AttackArgs {
@@ -51,6 +53,7 @@ impl AttackArgs {
             attack_starts_at,
             end_simulation_at_t: attack_starts_at * 3,
             attacker_instant_propagation: false,
+            atk_end_delay_ticks: 0,
         }
     }
 }
@@ -83,6 +86,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             atk_start_h: None,
             extra_chain_nodes,
             net_args,
+            stop_simulation_at: None,
         }
     }
 
@@ -292,13 +296,19 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             msgs_from = self.tick(ts, msgs_from)?;
 
             // condition for stopping based on RelayStrategy
-            if self
-                .strategy
-                .as_ref()
-                .map(|s| s.should_stop_simulation(ts, &self.attacker_node.chain))
-                .unwrap_or(false)
+            if self.stop_simulation_at.is_some()
+                || self
+                    .strategy
+                    .as_ref()
+                    .map(|s| s.should_stop_simulation(ts, &self.attacker_node.chain))
+                    .unwrap_or(false)
             {
-                break;
+                if self.stop_simulation_at.is_none() {
+                    self.stop_simulation_at = Some(ts + self.args.atk_end_delay_ticks);
+                }
+                if self.stop_simulation_at.map(|at| ts >= at).unwrap_or(false) {
+                    break;
+                }
             }
         }
 

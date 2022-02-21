@@ -34,6 +34,15 @@ def p_ds_success_theoretical(q, n=20):
     return 1.0 - float(sum(to_sum))
 
 
+def p_ds_success_theoretical_combin(q, n=20):
+    # assume this is broken -- experimental
+    q = Decimal(q)
+    p = 1 - q
+    if q >= p: return 1
+    to_sum = list(n_choose_k(m+n-1, m) * (Decimal(m/n) * pow(p,n) * pow(q,m) - Decimal(n/m) * pow(p,m) * pow(q,n)) for m in range(n + 1))
+    return 1.0 - float(sum(to_sum))
+
+
 def tri_numbers_decreasing(i_start, iter_limit):
     '''
     first col of height i_start, at most iter_limit cols
@@ -85,6 +94,7 @@ assert exp_numbers_decreasing(4, 7) == 12
 def ds_theoretical_series(multipliers, q=0.44, after_n_confs=20,
         discount_after_first_mult=False, triangular_mult_discount=False,
         exp_tri_mult_discount=False, exp_mult_discount=False,
+        use_experimental_combin=False
         ):
     xs = []
     ys = []
@@ -99,7 +109,11 @@ def ds_theoretical_series(multipliers, q=0.44, after_n_confs=20,
             n = int(exp_numbers_decreasing(after_n_confs, n_por_chains))
         else:
             n = int(after_n_confs * n_por_chains)
-        r = p_ds_success_theoretical(q, n)
+
+        if use_experimental_combin:
+            r = p_ds_success_theoretical_combin(q, n)
+        else:
+            r = p_ds_success_theoretical(q, n)
         xs.append(n_por_chains)
         ys.append(r)
     data = pd.Series(ys, index=xs)
@@ -170,7 +184,7 @@ def read_csv_data(fname, chain_ty: Literal['por'] | Literal['trad']):
 
 
 def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=False):
-    plt.figure()
+    plt.figure(figsize=(10, 7), tight_layout=True)
     _max_ix = 0
     qs = set()
     ds_targets = set()
@@ -229,7 +243,9 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=Fa
         ]))
     plt.xlabel("x = Confirmation Multiplier / # Chains")
     plt.ylabel(f"P(atk success)")
+    plt.grid(True)
     plt.legend()
+
     plt.show()
 
 
@@ -300,7 +316,39 @@ if __name__ == "__main__":
         ('exp-8-q0.40-t5-p100-H100-blake3.csv', 'por', '(DS+WC)'),
     ]
 
-    csv_files = csv_files_compare_DSW_t20
+    csv_files_just_trad = [
+        # ('exp_aux1_q=0.40_dsconf-base=20.old.csv', 'trad', '(trad; $N_1=1$)'),
+        # ('exp_aux1_q=0.40_dsconf-base=5.csv', 'trad', '(trad; $N_1=1$)'),
+        # ('exp_aux1_q=0.40_dsconf-base=10.csv', 'trad', '(trad; $N_1=1$)'),
+        # ('exp_aux1_q=0.40_dsconf-base=20.csv', 'trad', '(trad; $N_1=1$)'),
+    ]
+
+    csv_exp_10 = [
+        ('exp-10-RDoubleSpend-q0.40-t5-p100-H100-DAA1000-WeightedChain-blake3.csv', 'por', 'e10 (DS+WC+DAA1000)'),
+        ('exp-9-RDoubleSpendWork-q0.40-t5-p100-H100-WeightedChain-blake3.csv', 'por', 'e9 (DSW+WC)'),
+        ('exp-9-RDoubleSpendWork-q0.40-t5-p100-H100-WeightedDag-blake3.csv', 'por', 'e9 (DSW+WD)'),
+        ('exp-8-q0.40-t5-p100-H100-blake3.csv', 'por', 'e8 (DS+WC)'),
+    ]
+
+    csv_exp_11 = [
+            ('exp-11-RDoubleSpend-q0.40-t5-p100-H50-DAA100-delay25-WeightedChain-blake3.csv', 'por', 'e11 (DS+WC + Delay 0.25 blocks)'),
+            ('exp-11-RDoubleSpend-q0.40-t5-p100-H50-DAA100-delay50-WeightedChain-blake3.csv', 'por', 'e11 (DS+WC + Delay 0.50 blocks)'),
+            ('exp-11-RDoubleSpend-q0.40-t5-p100-H50-DAA100-delay100-WeightedChain-blake3.csv', 'por', 'e11 (DS+WC + Delay 1 blocks)'),
+            ('exp-11-RDoubleSpend-q0.40-t5-p100-H50-DAA100-delay200-WeightedChain-blake3.csv', 'por', 'e11 (DS+WC + Delay 2 blocks)'),
+            ('exp-8-q0.40-t5-p100-H100-blake3.csv', 'por', 'e8 (DS+WC) Best prior'),
+            ('exp-11-RDoubleSpend-q0.40-t5-p100-H50-DAA100-delay0-WeightedChain-blake3.csv', 'por', 'e11 (DS+WC + Draft Refl Considered)'),
+        ]
+
+    csv_exp_11_vs_aux = [
+            ('exp-11-RDoubleSpend-q0.40-t5-p100-H50-DAA100-delay0-WeightedChain-blake3.csv', 'por', 'e11 (DS+WC + Draft Refl Considered)'),
+            ('exp-11-RDoubleSpendWork-q0.40-t5-p100-H50-DAA100-delay0-WeightedDag-blake3.csv', 'por', 'e11 (DSW+WD + Draft Refl Considered)'),
+            ('exp_aux1_q=0.40_dsconf-base=5.csv', 'trad', '(trad; $N_1=1$)'),
+        ]
+
+    csv_files = csv_files_compare_DSW_t5
+    csv_files = csv_exp_11
+    csv_files = csv_exp_11_vs_aux
+    # csv_files = csv_files_just_trad
 
 
     plot_chart(csv_files, plot_kwargs=dict(logy=False), graph_theory_discounted=False)

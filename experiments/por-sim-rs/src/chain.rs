@@ -97,7 +97,7 @@ impl From<ChainApplyErr> for String {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Heights {
     pub public: Difficulty,
     pub private: Difficulty,

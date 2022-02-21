@@ -93,6 +93,7 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
         (@arg crypto_system: -S --crypto_system +takes_value default_value("WeightedDag") possible_values(&CryptoSystemArg::variants()) "Name of the cryptosystem template to use.")
         (@arg relay_strategy: -R --relay_strategy +takes_value default_value("DoubleSpend") possible_values(&RelayStrategyArg::variants()) "Name of the relay strategy to use")
         (@arg attacker_instant_propagation: --attacker_instant_prop !takes_value "Attacker's blocks instantly propagate to attackers (no wasted mining)")
+        (@arg atk_end_delay_ticks: --atk_end_delay_ticks +takes_value default_value("0") "Number of ticks to delay ending the simulation if the attacker gets ahead")
         // doublspend params
         (@arg win_threshold: --ds_win_threshold +takes_value default_value("20") "[DoubleSpend] Minimum number of confirmations before the double-spending private chain is published.")
         // selfish mining params
@@ -128,6 +129,7 @@ pub fn main() -> Result<(), String> {
     let attack_starts_at = attack_at_h as Difficulty;
     let por_chains = value_t_or_exit!(args.value_of("por_n_chains"), u16);
     let daa2_n_blocks = value_t_or_exit!(args.value_of("daa2_n_blocks"), usize);
+    let atk_end_delay_ticks = value_t_or_exit!(args.value_of("atk_end_delay_ticks"), Timestamp);
 
     let atk_args = AttackArgs {
         q: attacker_ratio,
@@ -136,6 +138,7 @@ pub fn main() -> Result<(), String> {
         attack_starts_at,
         end_simulation_at_t,
         attacker_instant_propagation,
+        atk_end_delay_ticks,
     };
     let network_args = NetworkArgs {
         block_target,

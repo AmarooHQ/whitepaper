@@ -44,6 +44,13 @@ pub struct DoubleSpendStrat {
     atk_start_h: Height,
 }
 
+impl DoubleSpendStrat {
+    fn _atk_won(&self, fms: &Heights, hs: &Heights, public_draft_refl_work: Difficulty) -> bool {
+        fms.public + public_draft_refl_work < fms.private
+            && hs.public >= self.atk_start_h + self.params.win_thres
+    }
+}
+
 impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
     type ResultsTy = bool;
     type Params = DoubleSpendParams;
@@ -59,7 +66,8 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
     fn get_results(&self, c: &S::C) -> Option<(Self::ResultsTy, bool)> {
         let hs = c.get_heights_pub_priv();
         let fms = c.get_fork_measure_pub_priv();
-        if fms.public < fms.private && hs.public >= self.atk_start_h + self.params.win_thres {
+        let draft_refl_work = c.draft_block(0, false).get_reflected_weight();
+        if self._atk_won(&fms, &hs, draft_refl_work) {
             Some((true, true))
         } else {
             None
@@ -71,7 +79,8 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
         } else {
             let hs = c.get_heights_pub_priv();
             let fms = c.get_fork_measure_pub_priv();
-            fms.public < fms.private && hs.public > self.atk_start_h + self.params.win_thres
+            let draft_refl_work = c.draft_block(0, false).get_reflected_weight();
+            self._atk_won(&fms, &hs, draft_refl_work)
         }
     }
     fn params_as_csv(&self) -> String {
@@ -107,6 +116,13 @@ pub struct DoubleSpendWorkStrat {
     win_work_thresh: Difficulty,
 }
 
+impl DoubleSpendWorkStrat {
+    fn _atk_won(&self, fms: &Heights, public_draft_refl_work: Difficulty) -> bool {
+        (fms.public + public_draft_refl_work) < fms.private
+            && fms.public >= self.atk_start_work + self.win_work_thresh
+    }
+}
+
 impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
     type ResultsTy = bool;
     type Params = DoubleSpendWorkParams;
@@ -125,7 +141,8 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
     }
     fn get_results(&self, c: &S::C) -> Option<(Self::ResultsTy, bool)> {
         let fms = c.get_fork_measure_pub_priv();
-        if fms.public < fms.private && fms.public >= self.atk_start_work + self.win_work_thresh {
+        let draft_refl_work = c.draft_block(0, false).get_reflected_weight();
+        if self._atk_won(&fms, draft_refl_work) {
             Some((true, true))
         } else {
             None
@@ -136,7 +153,8 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
             false
         } else {
             let fms = c.get_fork_measure_pub_priv();
-            fms.public < fms.private && fms.public >= self.atk_start_work + self.win_work_thresh
+            let draft_refl_work = c.draft_block(0, false).get_reflected_weight();
+            self._atk_won(&fms, draft_refl_work)
         }
     }
     fn params_as_csv(&self) -> String {
@@ -148,12 +166,6 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
             //self.params.n_por_chains
         )
     }
-}
-
-#[derive(Debug, Default)]
-struct Heights {
-    private: Height,
-    public: Height,
 }
 
 #[derive(Debug)]
