@@ -24,7 +24,7 @@ lazy_static! {
     static ref TX_CACHE: Mutex<PassThruHashMap<TxId, Arc<TxInCache>>> =
         Mutex::new(Default::default());
     static ref TX_LRU: Mutex<LruCache<TxId, Arc<TxInCache>>> =
-        Mutex::new(LruCache::new(1024*16));
+        Mutex::new(LruCache::new(1024*4));
     // static ref DAGBLOCK_CACHE: Mutex<PassThruHashMap<u64, Arc<(DagBlock, BlockMD<DagBlock>)>>> =
     //     Mutex::new(Default::default());
     // static ref DAGBLOCK_LRU: Mutex<LruCache<u64, Arc<(DagBlock, BlockMD<DagBlock>)>>> =
@@ -74,14 +74,19 @@ impl Transaction {
     }
 
     pub fn get_cached_tx(id: TxId) -> Option<Arc<TxInCache>> {
-        TX_LRU.lock().ok().and_then(|mut c| {
-            c.get(&id).map(|tx| tx.clone()).or_else(|| {
-                TX_CACHE
-                    .lock()
-                    .ok()
-                    .and_then(|c| c.get(&id).map(|tx| tx.clone()))
-            })
-        })
+        // faster without TX_LRU
+        TX_CACHE
+            .lock()
+            .ok()
+            .and_then(|c| c.get(&id).map(|tx| tx.clone()))
+        // TX_LRU.lock().ok().and_then(|mut c| {
+        //     c.get(&id).map(|tx| tx.clone()).or_else(|| {
+        //         TX_CACHE
+        //             .lock()
+        //             .ok()
+        //             .and_then(|c| c.get(&id).map(|tx| tx.clone()))
+        //     })
+        // })
     }
 
     pub fn set_cached_tx(tx: TxInCache) {

@@ -20,8 +20,9 @@ use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
 use std::{fmt, fmt::Display};
 
+static block_hash_f: fn(u64) -> u64 = xx_hash_u64;
 // static block_hash_f: fn(u64) -> u64 = xx_rev_hash_u64;
-static block_hash_f: fn(u64) -> u64 = blake3_hash_u64;
+// static block_hash_f: fn(u64) -> u64 = blake3_hash_u64;
 // static block_hash_f: fn(u64) -> u64 = sha256_hash_u64;
 
 lazy_static! {
@@ -403,9 +404,6 @@ impl BlockT for Block {
 
     #[inline(always)]
     fn increment_nonce(&mut self) {
-        // self.id = hash_u64(self.id + 1337);
-        // self.id = sha256_hash_u64(self.id + 1337);
-        // self.id = xx_rev_hash_u64(self.id + 1337);
         self.id = block_hash_f(self.id + 1337)
     }
 
@@ -606,9 +604,6 @@ impl BlockT for DagBlock {
     }
     #[inline(always)]
     fn increment_nonce(&mut self) {
-        // self.id = hash_u64(self.id + 1337);
-        // self.id = sha256_hash_u64(self.id + 1337);
-        // self.id = xx_rev_hash_u64(self.id + 1337);
         self.id = block_hash_f(self.id + 1337)
     }
     fn get_difficulty(&self) -> Difficulty {

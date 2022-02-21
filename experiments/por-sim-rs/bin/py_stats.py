@@ -345,9 +345,32 @@ if __name__ == "__main__":
             ('exp_aux1_q=0.40_dsconf-base=5.csv', 'trad', '(trad; $N_1=1$)'),
         ]
 
+    csv_exp_12 = [
+        ('exp-12-repeat-8-RDoubleSpendWork-q0.40-t10-p50-H50-WeightedDag-blake3.csv', 'por', None),
+        ('exp-12-repeat-8-RDoubleSpendWork-q0.40-t20-p50-H50-WeightedDag-blake3.csv', 'por', None),
+        ('exp-12-repeat-8-RDoubleSpendWork-q0.40-t5-p50-H50-WeightedDag-blake3.csv', 'por', None),
+        ('exp-12-repeat-8-RDoubleSpendWork-q0.44-t10-p50-H50-WeightedDag-blake3.csv', 'por', None),
+        ('exp-12-repeat-8-RDoubleSpendWork-q0.44-t20-p50-H50-WeightedDag-blake3.csv', 'por', None),
+        ('exp-12-repeat-8-RDoubleSpendWork-q0.44-t5-p50-H50-WeightedDag-blake3.csv', 'por', None),
+        ('exp-12-repeat-8-RDoubleSpendWork-q0.48-t10-p50-H50-WeightedDag-blake3.csv', 'por', None),
+        ('exp-12-repeat-8-RDoubleSpendWork-q0.48-t20-p50-H50-WeightedDag-blake3.csv', 'por', None),
+        ('exp-12-repeat-8-RDoubleSpendWork-q0.48-t5-p50-H50-WeightedDag-blake3.csv', 'por', None),
+    ]
+
+    csv_exp_12_q40 = list(filter(lambda t: 'q0.40' in t[0], csv_exp_12))
+    csv_exp_12_q44 = list(filter(lambda t: 'q0.44' in t[0], csv_exp_12))
+    csv_exp_12_q48 = list(filter(lambda t: 'q0.48' in t[0], csv_exp_12))
+
+    csv_exp_12_q40_xx = [
+        ('exp-12-repeat-8-RDoubleSpend-q0.40-t5-p50-H50-WeightedChain-xxh3.csv', 'por', None),
+        ('exp-12-repeat-8-RDoubleSpend-q0.44-t5-p50-H50-WeightedChain-xxh3.csv', 'por', None),
+        ('exp-12-repeat-8-RDoubleSpend-q0.48-t5-p50-H50-WeightedChain-xxh3.csv', 'por', None),
+    ]
+
     csv_files = csv_files_compare_DSW_t5
-    csv_files = csv_exp_11
     csv_files = csv_exp_11_vs_aux
+    csv_files = csv_exp_12_q40
+    csv_files = csv_exp_12_q40_xx
     # csv_files = csv_files_just_trad
 
 

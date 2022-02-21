@@ -10,14 +10,18 @@ export N_TRIALS_PER=100
 export REPEAT_TIMES=30
 # export HR_PER_CHAIN=100
 export HR_PER_CHAIN=50  # okay provided we have atk_q divisible by 0.02
-export B_PERIOD=100
-export CRYPTO_SYSTEM=WeightedDag
-# export CRYPTO_SYSTEM=WeightedChain
-export ATK_STRATEGY=DoubleSpendWork
-# export ATK_STRATEGY=DoubleSpend
+export B_PERIOD=50
+# export CRYPTO_SYSTEM=WeightedDag
+export CRYPTO_SYSTEM=WeightedChain
+# export ATK_STRATEGY=DoubleSpendWork
+export ATK_STRATEGY=DoubleSpend
 export ATK_DS_CONFS=5
 
 export DAA2_N_BLOCKS=100
+
+# updated manually if hash changes in code
+# export HASH_ALG=blake3
+export HASH_ALG=xxh3
 
 # export ATK_END_DELAY_TICKS=$(echo ${B_PERIOD}\*2 | bc)
 
@@ -35,7 +39,7 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
     for atk_q in 0.40; do
       for ds_confs in 5; do
         export ATK_RATIO=${atk_q}
-        export OUT_FILE=exp-11-R${ATK_STRATEGY}-q${ATK_RATIO}-t${ATK_DS_CONFS}-p${B_PERIOD}-H${HR_PER_CHAIN}-DAA${DAA2_N_BLOCKS}-delay${ATK_END_DELAY_TICKS}-${CRYPTO_SYSTEM}-blake3.csv
+        export OUT_FILE=exp-11-R${ATK_STRATEGY}-q${ATK_RATIO}-t${ATK_DS_CONFS}-p${B_PERIOD}-H${HR_PER_CHAIN}-DAA${DAA2_N_BLOCKS}-delay${ATK_END_DELAY_TICKS}-${CRYPTO_SYSTEM}-${HASH_ALG}.csv
         if [[ ! -f $OUT_FILE ]]; then
           cp result-columns.csv $OUT_FILE
         fi
