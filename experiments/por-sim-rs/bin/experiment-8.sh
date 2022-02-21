@@ -10,7 +10,7 @@ export N_TRIALS_PER=100
 export REPEAT_TIMES=30
 export HR_PER_CHAIN=100
 export B_PERIOD=100
-export CRYPTO_SYSTEM=WeightedDag
+# export CRYPTO_SYSTEM=WeightedDag
 export CRYPTO_SYSTEM=WeightedChain
 
 # loop a few times so we incrementally generate data over the whole x-axis
@@ -20,7 +20,7 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
     for ds_confs in 5 10 20; do
       export ATK_RATIO=${atk_q}
       export ATK_DS_CONFS=${ds_confs}
-      export OUT_FILE=exp-8-q${ATK_RATIO}-t${ATK_DS_CONFS}-p${B_PERIOD}-H${HR_PER_CHAIN}-blake3.csv
+      export OUT_FILE=exp-8-q${ATK_RATIO}-t${ATK_DS_CONFS}-p${B_PERIOD}-H${HR_PER_CHAIN}-${CRYPTO_SYSTEM}-blake3.csv
       if [[ ! -f $OUT_FILE ]]; then
         cp result-columns.csv $OUT_FILE
       fi

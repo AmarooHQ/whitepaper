@@ -34,6 +34,7 @@ pub enum ChainErr {
     BadDifficulty,
     BadChainWeight,
     BadReflWeightInBlock(Difficulty, Difficulty),
+    BadReflAncestor { b: HashID, ancestor: HashID },
     TsBeforeParent,
     BlockHeightInvalid,
     TxInParent { b: HashID, txid: HashID },
@@ -845,6 +846,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
                 }
             }
         }
+        /* validate order of parents */
         if pms.len() > 1 {
             let n_ps = pms.len();
             let zipped = pms[..(n_ps - 1)].iter().zip(pms[1..].iter());
@@ -884,11 +886,41 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             return Err(BadDifficulty);
         }
 
-        if pm.0.get_reflected_weight() != pm.0.calc_reflected_weight() {
+        // // this is for the parent, not the block...
+        // if pm.0.get_reflected_weight() != pm.0.calc_reflected_weight() {
+        //     return Err(BadReflWeightInBlock(
+        //         pm.0.get_reflected_weight(),
+        //         pm.0.calc_reflected_weight(),
+        //     ));
+        // }
+
+        // check block calcs reflected weight correctly
+        if b.get_reflected_weight() != b.calc_reflected_weight() {
             return Err(BadReflWeightInBlock(
-                pm.0.get_reflected_weight(),
-                pm.0.calc_reflected_weight(),
+                b.get_reflected_weight(),
+                b.calc_reflected_weight(),
             ));
+        }
+
+        let seen = self.get_seen_blocks(is_private);
+        let unseen_reflected_blocks: Vec<HashID> = b
+            .get_txs()
+            .into_iter()
+            .filter(|tx| tx.is_reflect_and_prove())
+            .filter_map(|tx| tx.get_reflected_l_blocks().cloned())
+            .flat_map(|past_b_ids| {
+                past_b_ids
+                    .iter()
+                    .cloned()
+                    .filter(|bid| !seen.contains(bid))
+                    .collect::<Vec<HashID>>()
+            })
+            .collect();
+        if unseen_reflected_blocks.len() > 0 {
+            return Err(BadReflAncestor {
+                b: b.get_hash(),
+                ancestor: unseen_reflected_blocks[0],
+            });
         }
 
         // ? this block of code does not correctly account for reflections
@@ -925,8 +957,8 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
 
         // todo: check each reflection tx has correct weight
         // todo!("implement reflected weight stuff in block validation");
-        // - reflected block not seen
-        // - reflected header PoW/difficulty mismatch
+        // - [x] reflected block not seen
+        // - [ ] reflected header PoW/difficulty mismatch (not necessary for sim)
         // todo: validate txs in general
 
         let lca_r = self.find_lca_and_intermediates(&b.all_parents()).unwrap();

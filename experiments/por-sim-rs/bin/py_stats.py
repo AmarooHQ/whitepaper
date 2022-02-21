@@ -34,11 +34,71 @@ def p_ds_success_theoretical(q, n=20):
     return 1.0 - float(sum(to_sum))
 
 
-def ds_theoretical_series(multipliers, q=0.44, after_n_confs=20):
+def tri_numbers_decreasing(i_start, iter_limit):
+    '''
+    first col of height i_start, at most iter_limit cols
+    i_start=4, iter_limit=3
+    x
+    xx
+    xxx
+    xxx
+    = 9
+    '''
+    if i_start <= 0 or iter_limit <= 0:
+        return 0
+    return i_start + tri_numbers_decreasing(i_start-1, iter_limit-1)
+
+
+assert tri_numbers_decreasing(4, 3) == 9
+
+
+def exp_tri_numbers_decreasing(i_start, iter_limit, n_cols=1):
+    '''
+    x
+    xxx
+    xxxxxxx
+    xxxxxxxxxxxxxxx
+    '''
+    if i_start <= 0 or iter_limit <= 0:
+        return 0
+    return i_start * min(n_cols, iter_limit) \
+        + exp_tri_numbers_decreasing(i_start-1, iter_limit-n_cols, n_cols=n_cols*2)
+
+assert exp_tri_numbers_decreasing(4, 3) == 10
+assert exp_tri_numbers_decreasing(4, 99) == 26
+
+def exp_numbers_decreasing(i_start, iter_limit, n_cols=1):
+    '''
+    x
+    x
+    xxx
+    xxxxxxx
+    '''
+    if i_start <= 0 or iter_limit <= 0:
+        return 0
+    return i_start * min(n_cols, iter_limit) \
+        + exp_numbers_decreasing(math.ceil(i_start / 2), iter_limit-n_cols, n_cols=n_cols*2)
+
+assert exp_numbers_decreasing(4, 3) == 8
+assert exp_numbers_decreasing(4, 7) == 12
+
+def ds_theoretical_series(multipliers, q=0.44, after_n_confs=20,
+        discount_after_first_mult=False, triangular_mult_discount=False,
+        exp_tri_mult_discount=False, exp_mult_discount=False,
+        ):
     xs = []
     ys = []
     for n_por_chains in multipliers:
-        n = int(after_n_confs * n_por_chains)
+        if discount_after_first_mult:
+            n = int(after_n_confs + ((after_n_confs - 1) * (n_por_chains - 1)))
+        elif triangular_mult_discount:
+            n = int(tri_numbers_decreasing(after_n_confs, n_por_chains))
+        elif exp_tri_mult_discount:
+            n = int(exp_tri_numbers_decreasing(after_n_confs, n_por_chains))
+        elif exp_mult_discount:
+            n = int(exp_numbers_decreasing(after_n_confs, n_por_chains))
+        else:
+            n = int(after_n_confs * n_por_chains)
         r = p_ds_success_theoretical(q, n)
         xs.append(n_por_chains)
         ys.append(r)
@@ -109,7 +169,7 @@ def read_csv_data(fname, chain_ty: Literal['por'] | Literal['trad']):
     return n_trials, max_ix, only_target, q, ds_target, series, ms_elapsed, series2
 
 
-def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
+def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=False):
     plt.figure()
     _max_ix = 0
     qs = set()
@@ -130,15 +190,20 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None):
     _qs.sort()
     print(f"Calculating theoretical probabilities.")
     t_series = []
+    multipliers = list(range(1, min(_max_ix+1,20))) + list(range(20, _max_ix+1, 1))
     for q in _qs:
         for ds_target in ds_targets:
-            multipliers = list(range(1, min(_max_ix+1,20))) + list(range(20, _max_ix+1, 1))
             theoretical_data = ds_theoretical_series(multipliers, q=q, after_n_confs=ds_target)
             t_series.append(theoretical_data)
             theoretical_data.plot(label=f"Theoretical $q={q:.2f}$ (confs = ${ds_target}x$)")
+        # if graph_theory_discounted:
+        #     for ds_target in ds_targets:
+        #         theoretical_data = ds_theoretical_series(multipliers, q=q, after_n_confs=ds_target, something_here)
+        #         t_series.append(theoretical_data)
+        #         theoretical_data.plot(label=f"Theoretical $q={q:.2f}$ (confs = ExpDec(${ds_target}$))")
     # d3.plot(label="PoR - $\sqrt{x}$")
     # d4.plot(label="PoR - $x^{2/3}$")
-    if len(csv_series) == len(t_series) == 1:
+    if False and len(csv_series) == len(t_series) == 1:
         print(f"Calculating experimental / theoretical")
         exp_d = csv_series[0]
         thr_d = t_series[0]
@@ -212,10 +277,32 @@ if __name__ == "__main__":
         # ('exp-8-q0.44-t5-p100-H100-blake3.csv', 'por', None),
         # ('exp-8-q0.40-t10-p100-H100-blake3.csv', 'por', None),
         # ('exp-8-q0.44-t10-p100-H100-blake3.csv', 'por', None),
-        # ('exp-8-q0.40-t20-p100-H100-blake3.csv', 'por', None),
-        ('exp-8-q0.44-t20-p100-H100-blake3.csv', 'por', None),
+        ('exp-8-q0.40-t20-p100-H100-blake3.csv', 'por', None),
+        # ('exp-8-q0.44-t20-p100-H100-blake3.csv', 'por', None),
+        # ('exp-9-RDoubleSpendWork-q0.40-t5-p100-H100-WeightedChain-blake3.csv', 'por', None),
+        # ('exp-9-RDoubleSpendWork-q0.40-t10-p100-H100-WeightedChain-blake3.csv', 'por', None),
+        ('exp-9-RDoubleSpendWork-q0.40-t20-p100-H100-WeightedChain-blake3.csv', 'por', None),
         ]
 
-    plot_chart(csv_files, plot_kwargs=dict(logy=False))
+    csv_files_compare_DSW_t20 = [
+        ('exp-9-RDoubleSpendWork-q0.40-t20-p100-H100-WeightedChain-blake3.csv', 'por', '(DSW+WC)'),
+        ('exp-9-RDoubleSpendWork-q0.40-t20-p100-H100-WeightedDag-blake3.csv', 'por', '(DSW+WD)'),
+        ('exp-8-q0.40-t20-p100-H100-blake3.csv', 'por', '(DS+WC)'),
+    ]
+    csv_files_compare_DSW_t10 = [
+        ('exp-9-RDoubleSpendWork-q0.40-t10-p100-H100-WeightedChain-blake3.csv', 'por', '(DSW+WC)'),
+        ('exp-9-RDoubleSpendWork-q0.40-t10-p100-H100-WeightedDag-blake3.csv', 'por', '(DSW+WD)'),
+        ('exp-8-q0.40-t10-p100-H100-blake3.csv', 'por', '(DS+WC)'),
+    ]
+    csv_files_compare_DSW_t5 = [
+        ('exp-9-RDoubleSpendWork-q0.40-t5-p100-H100-WeightedChain-blake3.csv', 'por', '(DSW+WC)'),
+        ('exp-9-RDoubleSpendWork-q0.40-t5-p100-H100-WeightedDag-blake3.csv', 'por', '(DSW+WD)'),
+        ('exp-8-q0.40-t5-p100-H100-blake3.csv', 'por', '(DS+WC)'),
+    ]
+
+    csv_files = csv_files_compare_DSW_t20
+
+
+    plot_chart(csv_files, plot_kwargs=dict(logy=False), graph_theory_discounted=False)
     # plot_chart(csv_files=['exp-4a-wPoRFix.csv', 'exp-4a-wPoRFix-2.csv', 'exp-4a-wPoRFix-3.csv'], plot_kwargs=dict(logy=False))
     # plot_chart(csv_files=['exp-4b.csv'], plot_kwargs=dict(logy=False))

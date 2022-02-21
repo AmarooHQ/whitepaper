@@ -47,7 +47,8 @@ arg_enum! {
     #[derive(Debug, PartialEq)]
     pub enum RelayStrategyArg {
         DoubleSpend,
-        SelfishMining
+        DoubleSpendWork,
+        SelfishMining,
     }
 }
 
@@ -203,6 +204,24 @@ fn mk_run_atk<'a, S: CSystemT<'a>>(
                 .map(|_i| {
                     let params = DoubleSpendParams::new(args.attack_starts_at, win_thresh);
                     MM::<'_, S, DoubleSpendStrat>::new(args.clone(), params, network_args.clone())
+                })
+                .collect::<Vec<_>>();
+            mms[0].run_attack()
+        }
+        RelayStrategyArg::DoubleSpendWork => {
+            let win_thresh = value_t_or_exit!(cli_args, "win_threshold", Height);
+            let mut mms = n_chains_range
+                .map(|_i| {
+                    let params = DoubleSpendWorkParams::new(
+                        args.attack_starts_at,
+                        win_thresh,
+                        network_args.por_chains,
+                    );
+                    MM::<'_, S, DoubleSpendWorkStrat>::new(
+                        args.clone(),
+                        params,
+                        network_args.clone(),
+                    )
                 })
                 .collect::<Vec<_>>();
             mms[0].run_attack()

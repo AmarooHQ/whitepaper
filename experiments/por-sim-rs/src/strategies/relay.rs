@@ -25,7 +25,7 @@ pub trait RelayStrategyT<'a, S: CSystemT<'a>> {
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct DoubleSpendParams {
-    attack_starts_at: Height,
+    attack_starts_at: Timestamp,
     win_thres: Height,
 }
 
@@ -78,6 +78,74 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
         format!(
             "{}, {}",
             self.params.attack_starts_at, self.params.win_thres
+        )
+    }
+}
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct DoubleSpendWorkParams {
+    attack_starts_at: Timestamp,
+    win_thres: Height,
+    n_por_chains: u16,
+}
+
+impl DoubleSpendWorkParams {
+    pub fn new(attack_starts_at: Height, win_thres: Height, n_por_chains: u16) -> Self {
+        DoubleSpendWorkParams {
+            attack_starts_at,
+            win_thres,
+            n_por_chains,
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub struct DoubleSpendWorkStrat {
+    params: DoubleSpendWorkParams,
+    atk_start_h: Height,
+    atk_start_work: Difficulty,
+    win_work_thresh: Difficulty,
+}
+
+impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
+    type ResultsTy = bool;
+    type Params = DoubleSpendWorkParams;
+    fn init(chain: &S::C, atk_start_h: Height, params: Self::Params) -> Self {
+        DoubleSpendWorkStrat {
+            params,
+            atk_start_h,
+            atk_start_work: chain.get_fork_measure_pub_priv().public,
+            win_work_thresh: params.win_thres
+                * (params.n_por_chains as u32)
+                * chain.get_any_best_block(false).0.get_difficulty(),
+        }
+    }
+    fn on_msg(&mut self, _msg_from: &MsgToNode<S::B>, _chain: &S::C) -> Vec<MsgToNode<S::B>> {
+        vec![]
+    }
+    fn get_results(&self, c: &S::C) -> Option<(Self::ResultsTy, bool)> {
+        let fms = c.get_fork_measure_pub_priv();
+        if fms.public < fms.private && fms.public >= self.atk_start_work + self.win_work_thresh {
+            Some((true, true))
+        } else {
+            None
+        }
+    }
+    fn should_stop_simulation(&self, ts: Timestamp, c: &S::C) -> bool {
+        if ts < self.params.attack_starts_at {
+            false
+        } else {
+            let fms = c.get_fork_measure_pub_priv();
+            fms.public < fms.private && fms.public >= self.atk_start_work + self.win_work_thresh
+        }
+    }
+    fn params_as_csv(&self) -> String {
+        format!(
+            "{}, {}",
+            // omit n_por_chains b/c it's recorded elsewhere in the csv
+            self.params.attack_starts_at,
+            self.params.win_thres,
+            //self.params.n_por_chains
         )
     }
 }
