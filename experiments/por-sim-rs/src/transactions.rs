@@ -23,8 +23,9 @@ pub type TxInCache = Transaction;
 lazy_static! {
     static ref TX_CACHE: Mutex<PassThruHashMap<TxId, Arc<TxInCache>>> =
         Mutex::new(Default::default());
-    static ref TX_LRU: Mutex<LruCache<TxId, Arc<TxInCache>>> =
-        Mutex::new(LruCache::new(1024*4));
+    // LRU doesn't seem to speed things up
+    // static ref TX_LRU: Mutex<LruCache<TxId, Arc<TxInCache>>> =
+    //     Mutex::new(LruCache::new(1024*4));
     // static ref DAGBLOCK_CACHE: Mutex<PassThruHashMap<u64, Arc<(DagBlock, BlockMD<DagBlock>)>>> =
     //     Mutex::new(Default::default());
     // static ref DAGBLOCK_LRU: Mutex<LruCache<u64, Arc<(DagBlock, BlockMD<DagBlock>)>>> =
@@ -32,7 +33,7 @@ lazy_static! {
     // static ref HASHER: twox_hash::Xxh3Hash64 = Default::default();
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]
 pub struct ReflectionData {
     /// the reflecting chain
     pub r_chain: HashID,
@@ -48,7 +49,7 @@ pub struct ReflectionData {
     pub l_cw: (Difficulty, NonEmpty<HashID>),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]
 pub enum Transaction {
     /// Trivial transaction (for testing)
     HelloWorld(u64),
@@ -92,8 +93,8 @@ impl Transaction {
     pub fn set_cached_tx(tx: TxInCache) {
         let tx_id = tx.get_hash();
         let tx_arc = Arc::new(tx);
-        TX_LRU.lock().unwrap().put(tx_id, tx_arc.clone());
-        TX_CACHE.lock().unwrap().insert(tx_id, tx_arc.clone());
+        // TX_LRU.lock().unwrap().put(tx_id, tx_arc.clone());
+        TX_CACHE.lock().unwrap().insert(tx_id, tx_arc);
     }
 
     pub fn get_reflection_data(&self) -> Option<&ReflectionData> {

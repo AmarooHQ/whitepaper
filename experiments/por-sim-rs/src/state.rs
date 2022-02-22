@@ -40,12 +40,12 @@ pub struct ChainStateDelta {
 
 #[derive(Clone, Default)]
 pub struct ChainState {
-    valid_txs: FxHashSet<TxId>,
-    invalid_txs: FxHashSet<TxId>,
+    valid_txs: PassThruHashSet<TxId>,
+    invalid_txs: PassThruHashSet<TxId>,
     hellos: Vec<TxId>,
     balances: HashMapIdPassthrough<u64>,
     // reflections[r_chain_id] = {... r_block_ids}
-    reflections: HashMapIdPassthrough<FxHashSet<HashID>>,
+    reflections: HashMapIdPassthrough<PassThruHashSet<HashID>>,
 }
 
 #[derive(Clone)]

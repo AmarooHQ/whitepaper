@@ -140,14 +140,14 @@ pub struct DeltaChainWeights {
 #[derive(Clone)]
 pub struct Chain<B: BlockT, F: ForkRules<B> = LongestChain<B>> {
     chain_id: HashID,
-    pub best_blocks: FxHashSet<HashID>,
+    pub best_blocks: PassThruHashSet<HashID>,
     pub_chain_heads: ChainHeads,
-    best_priv_blocks: FxHashSet<HashID>,
+    best_priv_blocks: PassThruHashSet<HashID>,
     priv_chain_heads: ChainHeads,
     seen_pub_blocks: SeenBlocks,
     seen_priv_blocks: SeenBlocks,
-    pub_mempool: FxHashSet<HashID>,
-    priv_mempool: FxHashSet<HashID>,
+    pub_mempool: PassThruHashSet<HashID>,
+    priv_mempool: PassThruHashSet<HashID>,
     net_args: NetworkArgs,
     _phantom_f: PhantomData<F>,
     _phantom_b: PhantomData<B>,
@@ -188,8 +188,8 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
         B::set_cached_block(b)
     }
 
-    fn get_best_blocks(&self, is_private: bool) -> &FxHashSet<HashID>;
-    fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut FxHashSet<HashID>;
+    fn get_best_blocks(&self, is_private: bool) -> &PassThruHashSet<HashID>;
+    fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut PassThruHashSet<HashID>;
     fn get_seen_blocks(&self, is_private: bool) -> &SeenBlocks;
     fn get_seen_blocks_mut(&mut self, is_private: bool) -> &mut SeenBlocks;
     fn get_chain_heads(&self, is_private: bool) -> &ChainHeads;
@@ -202,7 +202,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
     fn get_heights_pub_priv(&self) -> Heights;
 
     fn add_tx_to_mempool(&mut self, tx_id: TxId, is_private: bool) -> Result<(), ChainTxErr>;
-    fn get_mempool_tx_ids(&self, is_private: bool) -> &FxHashSet<HashID>;
+    fn get_mempool_tx_ids(&self, is_private: bool) -> &PassThruHashSet<HashID>;
     fn remove_mempool_tx_ids(&mut self, tx_ids: &Vec<HashID>, is_private: bool);
 
     fn get_chain_weight_at(&self, b: HashID) -> Difficulty {
@@ -414,7 +414,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
         let best_pub_blocks = self.get_best_blocks(false);
 
         let mut next_edge = priv_blocks_tmp.clone();
-        let mut blocks_to_ret: FxHashSet<HashID> = Default::default();
+        let mut blocks_to_ret: PassThruHashSet<HashID> = Default::default();
         while next_edge.len() > 0 {
             let curr_edge = next_edge.clone();
             next_edge = Default::default();
@@ -426,7 +426,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
                 if b.1.chain_weight <= fm.public {
                     continue;
                 }
-                let mut add_to_edge: FxHashSet<HashID> = Default::default();
+                let mut add_to_edge: PassThruHashSet<HashID> = Default::default();
                 for p_id in b.0.all_parents() {
                     // if b has a parent in best_pub_blocks then b satisfies the condition
                     if best_pub_blocks.contains(&p_id) {
@@ -493,8 +493,8 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
             _ => {}
         }
 
-        let mut intermediates = BTreeMap::<u32, BTreeSet<BInfo>>::new();
-        let mut intermediate_q = BTreeMap::<u32, FxHashSet<HashID>>::new();
+        let mut intermediates = BTreeMap::<Height, BTreeSet<BInfo>>::new();
+        let mut intermediate_q = BTreeMap::<Height, PassThruHashSet<HashID>>::new();
         let mut heights = Vec::new();
 
         for &id in bs {
@@ -652,7 +652,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
             .unwrap();
     }
 
-    fn _mempool(&mut self, is_private: bool) -> &mut FxHashSet<HashID> {
+    fn _mempool(&mut self, is_private: bool) -> &mut PassThruHashSet<HashID> {
         if is_private {
             &mut self.priv_mempool
         } else {
@@ -692,7 +692,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         self.chain_id
     }
 
-    fn get_best_blocks(&self, is_private: bool) -> &FxHashSet<HashID> {
+    fn get_best_blocks(&self, is_private: bool) -> &PassThruHashSet<HashID> {
         if is_private {
             &self.best_priv_blocks
         } else {
@@ -700,7 +700,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         }
     }
 
-    fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut FxHashSet<HashID> {
+    fn get_best_blocks_mut(&mut self, is_private: bool) -> &mut PassThruHashSet<HashID> {
         if is_private {
             &mut self.best_priv_blocks
         } else {
@@ -775,7 +775,7 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         Ok(())
     }
 
-    fn get_mempool_tx_ids(&self, is_private: bool) -> &FxHashSet<HashID> {
+    fn get_mempool_tx_ids(&self, is_private: bool) -> &PassThruHashSet<HashID> {
         if is_private {
             &self.priv_mempool
         } else {

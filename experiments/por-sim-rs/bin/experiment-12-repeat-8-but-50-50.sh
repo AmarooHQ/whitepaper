@@ -6,16 +6,18 @@ cargo b --release
 
 # for experimenting w/ reflected weight stuff
 
-export OUT_F_PREFIX=csv/exp-12-repeat-8
+# export OUT_F_PREFIX=exp-12-fiftyfifty-8
+# export OUT_F_PREFIX=exp-12-point495
+export OUT_F_PREFIX=exp-12-point490
 
 export N_TRIALS_PER=100
 export REPEAT_TIMES=30
-export HR_PER_CHAIN=50
+export HR_PER_CHAIN=100
 export B_PERIOD=50
-export CRYPTO_SYSTEM=WeightedDag
-# export CRYPTO_SYSTEM=WeightedChain
-export ATK_STRATEGY=DoubleSpendWork
-# export ATK_STRATEGY=DoubleSpend
+# export CRYPTO_SYSTEM=WeightedDag
+export CRYPTO_SYSTEM=WeightedChain
+# export ATK_STRATEGY=DoubleSpendWork
+export ATK_STRATEGY=DoubleSpend
 
 # updated manually if hash changes in code
 # export HASH_ALG=blake3
@@ -27,17 +29,16 @@ echo $N_CPUS
 # loop a few times so we incrementally generate data over the whole x-axis
 for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
   # for atk_q in 0.36 0.4 0.42 0.44 0.46 0.48; do
-  for atk_q in 0.40 0.44 0.48; do
-    for ds_confs in 5 10 20; do
+  for atk_q in 0.490; do # 0.495 0.5
+    for ds_confs in 5; do
       export ATK_RATIO=${atk_q}
       export ATK_DS_CONFS=${ds_confs}
       export OUT_FILE=${OUT_F_PREFIX}-R${ATK_STRATEGY}-q${ATK_RATIO}-t${ATK_DS_CONFS}-p${B_PERIOD}-H${HR_PER_CHAIN}-${CRYPTO_SYSTEM}-${HASH_ALG}.csv
       if [[ ! -f $OUT_FILE ]]; then
         cp result-columns.csv $OUT_FILE
       fi
-      echo "$OUT_FILE"
 
-      for nchains in `seq 1 6` `seq 7 2 15` 19 23 30 45; do
+      for nchains in `seq 1 6` `seq 7 2 15` 19 23 30 45 100; do
         for ntrials in `seq 1 ${N_TRIALS_PER}`; do
           (
             export N_CHAINS=${nchains};

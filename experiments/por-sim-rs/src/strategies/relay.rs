@@ -176,8 +176,8 @@ pub struct SelfishMining<S> {
     /// for selfish mining ethereum -- https://arxiv.org/pdf/1901.04620.pdf
     l_s: u32,
     l_h: u32,
-    blocks_from_private: FxHashSet<HashID>,
-    blocks_from_public: FxHashSet<HashID>,
+    blocks_from_private: PassThruHashSet<HashID>,
+    blocks_from_public: PassThruHashSet<HashID>,
     best_processed_h: Heights,
     atk_start_h: Height,
     _s: PhantomData<S>,
@@ -721,7 +721,7 @@ mod tests {
 
         assert_eq!(
             c.get_best_blocks(false),
-            &FxHashSet::from_iter([b5a.get_hash()].iter().cloned()),
+            &PassThruHashSet::from_iter([b5a.get_hash()].iter().cloned()),
             "previously private block is exclusively winning on public chain"
         );
 
@@ -806,7 +806,7 @@ mod tests {
 
         assert_eq!(
             c.get_best_blocks(false),
-            &FxHashSet::from_iter([b3.get_hash()].iter().cloned()),
+            &PassThruHashSet::from_iter([b3.get_hash()].iter().cloned()),
             "previously private block is exclusively winning on public chain"
         );
 
@@ -881,7 +881,7 @@ mod tests {
 
         assert_eq!(
             c.get_best_blocks(true),
-            &FxHashSet::from_iter([b3a.get_hash()].iter().cloned()),
+            &PassThruHashSet::from_iter([b3a.get_hash()].iter().cloned()),
             "pub block is exclusively"
         );
 

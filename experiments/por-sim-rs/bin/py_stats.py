@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 
 from collections import defaultdict
+from dataclasses import dataclass
+from functools import lru_cache
 import math
+import os
+from pathlib import Path
 import sys
-from typing import Literal
+from typing import Any, Literal, Optional
 import numpy
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -26,6 +30,7 @@ def pow(b: Decimal, i) -> Decimal:
     return b ** Decimal(i)
 
 
+@lru_cache
 def p_ds_success_theoretical(q, n=20):
     q = Decimal(q)
     p = 1 - q
@@ -148,7 +153,9 @@ def estimate_inverse(data: pd.Series, y_val):
     raise Exception("we should never reach this point")
 
 
-def read_csv_data(fname, chain_ty: Literal['por'] | Literal['trad']):
+def read_csv_data(fname, chain_ty: Literal['por', 'trad']):
+    if not os.path.exists(fname):
+        fname = f"csv" / Path(fname)
     d: pd.DataFrame = pd.read_csv(fname)
     only_target = d['block_target'][1]
     ds_target = int(d['doublespend_after_n_confs'][1])
@@ -183,7 +190,13 @@ def read_csv_data(fname, chain_ty: Literal['por'] | Literal['trad']):
     return n_trials, max_ix, only_target, q, ds_target, series, ms_elapsed, series2
 
 
-def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=False):
+line_markers = ['.', 's', '*', 'h', '+', 'o', 'x', 'D'] * 10
+
+
+def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=False,
+        title=None, x_label=None, y_label=None,
+        save_png=False, png_filename=None,
+        ):
     plt.figure(figsize=(10, 7), tight_layout=True)
     _max_ix = 0
     qs = set()
@@ -191,10 +204,13 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=Fa
     kwargs = plot_kwargs or dict()
     print(f"Tabulating CSVs.")
     csv_series = []
-    for (fname, chain_ty, label_extra) in csv_files:
+    for csv_i, (fname, chain_ty, label_extra) in enumerate(csv_files):
         n_trials, max_ix, block_target, _q, ds_target, csv_data, ms_elapsed, d2 = read_csv_data(fname, chain_ty)
         csv_series.append(csv_data)
-        csv_data.plot(label=f"PoR $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $n \\geq {n_trials}$; ds_win={ds_target} {label_extra or ''}", **kwargs)
+        csv_data.plot(
+            label=f"PoR: $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $n \\geq {n_trials}$; ds_win={ds_target}; {label_extra or ''}",
+            marker=line_markers[csv_i],
+            **kwargs)
         # ms_elapsed.plot(label=f"$\\bar{{d}}$ (ms); $B_f^{{-1}} = {block_target}$", secondary_y=True)
         # d2.plot(label="PoR - $y^{0.7}$")
         _max_ix = max(_max_ix, max_ix)
@@ -209,7 +225,7 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=Fa
         for ds_target in ds_targets:
             theoretical_data = ds_theoretical_series(multipliers, q=q, after_n_confs=ds_target)
             t_series.append(theoretical_data)
-            theoretical_data.plot(label=f"Theoretical $q={q:.2f}$ (confs = ${ds_target}x$)")
+            theoretical_data.plot(label=f"Theoretical Trad: $q={q:.2f}$ (confs = ${ds_target}x$)")
         # if graph_theory_discounted:
         #     for ds_target in ds_targets:
         #         theoretical_data = ds_theoretical_series(multipliers, q=q, after_n_confs=ds_target, something_here)
@@ -236,17 +252,35 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=Fa
         alt_series = pd.Series(ys_alt, index=xs)
         alt_series.plot(label=f"Theoretical x coord w/ equiv y values")
     print(f"Done. Now drawing.")
-    plt.title("\n".join([
+    default_title = "\n".join([
         f"P(atk success) PoR vs Traditional Chain",
         "(more confirmations w/ trad chain vs more chains w/ PoR)",
         # f"Trials={n_trials}"
-        ]))
-    plt.xlabel("x = Confirmation Multiplier / # Chains")
-    plt.ylabel(f"P(atk success)")
+        ])
+    plt.title(title or default_title)
+    plt.xlabel(x_label or "x = Confirmation Multiplier / # Chains")
+    plt.ylabel(y_label or "P(atk success)")
     plt.grid(True)
     plt.legend()
 
-    plt.show()
+    if save_png:
+        plt.savefig(png_filename)
+        print(f"Saved figure out: {png_filename}")
+    else:
+        plt.show()
+
+
+@dataclass
+class SavePlot:
+    csv_files: list[tuple[str, Literal['por', 'trad'], Optional[str]]]
+    title: str
+    filename: str
+    kwargs: Optional[dict[str, Any]] = None
+    x_label: Optional[str] = None
+    y_label: Optional[str] = None
+
+    def run(self):
+        plot_chart(j.csv_files, save_png=True, png_filename=self.filename, title=j.title, x_label=self.x_label, y_label=self.y_label)
 
 
 if __name__ == "__main__":
@@ -362,18 +396,59 @@ if __name__ == "__main__":
     csv_exp_12_q48 = list(filter(lambda t: 'q0.48' in t[0], csv_exp_12))
 
     csv_exp_12_q40_xx = [
-        ('exp-12-repeat-8-RDoubleSpend-q0.40-t5-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-        ('exp-12-repeat-8-RDoubleSpend-q0.44-t5-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-        ('exp-12-repeat-8-RDoubleSpend-q0.48-t5-p50-H50-WeightedChain-xxh3.csv', 'por', None),
+        # ('exp-12-repeat-8-RDoubleSpend-q0.40-t5-p50-H50-WeightedChain-xxh3.csv', 'por', None),
+        # ('exp-12-repeat-8-RDoubleSpend-q0.40-t10-p50-H50-WeightedChain-xxh3.csv', 'por', None),
+        # ('exp-12-repeat-8-RDoubleSpend-q0.40-t20-p50-H50-WeightedChain-xxh3.csv', 'por', None),
+        # ('exp-12-repeat-8-RDoubleSpend-q0.44-t5-p50-H50-WeightedChain-xxh3.csv', 'por', None),
+        # ('exp-12-repeat-8-RDoubleSpend-q0.44-t10-p50-H50-WeightedChain-xxh3.csv', 'por', None),
+        # ('exp-12-repeat-8-RDoubleSpend-q0.44-t20-p50-H50-WeightedChain-xxh3.csv', 'por', None),
+        # ('exp-12-repeat-8-RDoubleSpend-q0.48-t5-p50-H50-WeightedChain-xxh3.csv', 'por', None),
+        # ('exp-12-repeat-8-RDoubleSpend-q0.48-t10-p50-H50-WeightedChain-xxh3.csv', 'por', None),
+        ('exp-12-repeat-8-RDoubleSpend-q0.48-t20-p50-H50-WeightedChain-xxh3.csv', 'por', None),
     ]
 
+    csv_exp_12_5050 = [
+        # actual 50/50 is just high variance noise -- 0.5 < P() < 1 (whereas theoretical is == 1; but we cut off length of attack)
+        # ('exp-12-fiftyfifty-8-RDoubleSpend-q0.5-t5-p50-H50-WeightedChain-xxh3.csv', 'por', None),
+        # ('exp-12-point495-RDoubleSpend-q0.495-t5-p50-H200-WeightedChain-xxh3.csv', 'por', None),
+        ('exp-12-point490-RDoubleSpend-q0.490-t5-p50-H100-WeightedChain-xxh3.csv', 'por', None),
+    ]
+
+    csv_compare_aux = [
+        ('exp_aux1_q=0.40_dsconf-base=5.csv', 'trad', 'Trad; DS+WC'),
+        ('exp_aux2_q=0.40_dsconf-base=5_DoubleSpendWork_WeightedDag.csv', 'trad', 'Trad; DSW+WD'),
+        ('exp_aux2_q=0.40_dsconf-base=5_DoubleSpend_LongestChain.csv', 'trad', 'Trad; DS+LC'),
+    ]
+
+    # csv_files = csv_files_just_trad
     csv_files = csv_files_compare_DSW_t5
     csv_files = csv_exp_11_vs_aux
     csv_files = csv_exp_12_q40
+    csv_files = csv_exp_12_5050
     csv_files = csv_exp_12_q40_xx
-    # csv_files = csv_files_just_trad
+    csv_files = csv_compare_aux
 
+    # plot_chart(csv_files, plot_kwargs=dict(logy=False))
 
-    plot_chart(csv_files, plot_kwargs=dict(logy=False), graph_theory_discounted=False)
-    # plot_chart(csv_files=['exp-4a-wPoRFix.csv', 'exp-4a-wPoRFix-2.csv', 'exp-4a-wPoRFix-3.csv'], plot_kwargs=dict(logy=False))
-    # plot_chart(csv_files=['exp-4b.csv'], plot_kwargs=dict(logy=False))
+    jobs_to_save: list[SavePlot] = [
+        SavePlot(
+            csv_compare_aux,
+            "Traditional Doublspend Comparison: $N_1=1$\nTheoretical vs DS+LC vs DS+WC vs DSW+WD",
+            "png/trad_doublespend_comparison.png",
+            x_label="x = Confirmations / 5"
+            ),
+    ] + [SavePlot(
+            [
+                (f'exp-12-repeat-8-RDoubleSpend-q{q}-t{t}-p50-H50-WeightedChain-xxh3.csv', 'por', 'DS+WC'),
+                (f'exp-12-repeat-8-RDoubleSpend-q{q}-t{t}-p50-H50-WeightedDag-xxh3.csv', 'por', 'DS+WD'),
+                (f'exp-12-repeat-8-RDoubleSpendWork-q{q}-t{t}-p50-H50-WeightedChain-xxh3.csv', 'por', 'DSW+WC'),
+                (f'exp-12-repeat-8-RDoubleSpendWork-q{q}-t{t}-p50-H50-WeightedDag-xxh3.csv', 'por', 'DSW+WD'),
+            ],
+            "PoR Equivalency Hypothesis | $q={q}$ | DoubleSpend Target: ${t} \\cdot x$",
+            f"png/por_equiv_q={q}_t{t}_DS+WC.png",
+            x_label="PoR: $x = N_1$; Trad: $x = Confirmations / 5$"
+            ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
+        ]
+
+    for j in jobs_to_save:
+        j.run()

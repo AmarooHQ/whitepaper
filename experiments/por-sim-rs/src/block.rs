@@ -34,7 +34,7 @@ lazy_static! {
         Mutex::new(Default::default());
     static ref DAGBLOCK_LRU: Mutex<LruCache<u64, Arc<(DagBlock, BlockMD<DagBlock>)>>> =
         Mutex::new(LruCache::new(1024 * 16));
-    static ref EMPTY_HASH_ID_SET: FxHashSet<HashID> = Default::default();
+    static ref EMPTY_HASH_ID_SET: PassThruHashSet<HashID> = Default::default();
 }
 
 pub struct PrevBlockIter<B: BlockT> {
@@ -116,7 +116,7 @@ impl<'a, B: BlockT> Iterator for FilteredAllPrevBlockIter<'a, B> {
     }
 }
 
-pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + Hash {
+pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Hash {
     // note: this doesn't work b/c lazy_static inits those things as a Struct apparently.
     // const MY_CACHE: Mutex<PassThruHashMap<u64, Arc<(Self, BlockMD<Self>)>>>;
 
@@ -231,11 +231,24 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
             .sum()
     }
 
+    fn get_cached_txs(&self) -> Option<Vec<Arc<Transaction>>>;
+    fn put_cached_txs(&mut self, txs: Vec<Arc<Transaction>>);
+    fn wipe_cached_txs(&mut self);
+
     fn get_txs(&self) -> Vec<Arc<Transaction>> {
-        self.get_transactions()
-            .iter()
-            .filter_map(|&tx_id| Transaction::get_cached_tx(tx_id))
-            .collect()
+        match self.get_cached_txs() {
+            None => {
+                let txs: Vec<_> = self
+                    .get_transactions()
+                    .iter()
+                    .filter_map(|&tx_id| Transaction::get_cached_tx(tx_id))
+                    .collect();
+                // we want to access this from Arc<Block>, so we can't mutate
+                // self.put_cached_txs(txs.clone());
+                txs
+            }
+            Some(txs) => txs,
+        }
     }
 
     fn add_transaction(&mut self, id: TxId) {
@@ -249,12 +262,6 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
                     if let Some(ancestors) = tx.get_reflected_l_blocks() {
                         let r = tx.get_reflection_data().unwrap();
                         for &ancestor in ancestors {
-                            // if self
-                            //     .get_reflected_ancestors()
-                            //     .contains(&(ancestor, r.r_chain))
-                            // {
-                            //     continue;
-                            // }
                             self.add_reflected_ancestor(ancestor, r.r_chain);
                         }
                         self.add_refl_weight(tx.get_reflected_weight2(self.get_chain_id()));
@@ -263,6 +270,9 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Ord + 
                 self._push_tx(id);
             }
         }
+        // clear tx cache and then update it
+        self.wipe_cached_txs();
+        self.put_cached_txs(self.get_txs());
         // simulate change of hash when txs added
         self.increment_nonce();
     }
@@ -293,6 +303,7 @@ pub struct Block {
     cw: Difficulty,
     // pub reflected_ancestors: Vec<(HashID, HashID)>,
     // pub best_refl_ancestors:
+    pub cached_txs: Option<Vec<Arc<Transaction>>>,
 }
 
 impl Display for Block {
@@ -347,7 +358,7 @@ impl BlockT for Block {
             txs: vec![],
             chain_id,
             cw,
-            // reflected_ancestors,
+            cached_txs: None,
         }
     }
 
@@ -465,6 +476,18 @@ impl BlockT for Block {
         self.txs.push(id)
     }
 
+    fn get_cached_txs(&self) -> Option<Vec<Arc<Transaction>>> {
+        self.cached_txs.clone()
+    }
+
+    fn put_cached_txs(&mut self, txs: Vec<Arc<Transaction>>) {
+        self.cached_txs = Some(txs);
+    }
+
+    fn wipe_cached_txs(&mut self) {
+        self.cached_txs = None;
+    }
+
     fn get_reflected_ancestors(&self) -> Option<&Vec<(HashID, HashID)>> {
         // &self.reflected_ancestors
         None
@@ -480,7 +503,7 @@ impl BlockT for Block {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]
 pub struct DagBlock {
     pub id: HashID,
     pub parents: Vec<HashID>,
@@ -491,6 +514,7 @@ pub struct DagBlock {
     h: Height,
     txs: Vec<TxId>,
     chain_id: HashID,
+    cached_txs: Option<Vec<Arc<Transaction>>>,
     // pub reflected_ancestors: Vec<(HashID, HashID)>,
 }
 
@@ -536,7 +560,7 @@ impl ManyParentsBlockT for DagBlock {
             txs: vec![],
             chain_id,
             cw,
-            // reflected_ancestors,
+            cached_txs: None,
         }
     }
 }
@@ -657,6 +681,18 @@ impl BlockT for DagBlock {
 
     fn _push_tx(&mut self, id: TxId) {
         self.txs.push(id)
+    }
+
+    fn get_cached_txs(&self) -> Option<Vec<Arc<Transaction>>> {
+        self.cached_txs.clone()
+    }
+
+    fn put_cached_txs(&mut self, txs: Vec<Arc<Transaction>>) {
+        self.cached_txs = Some(txs);
+    }
+
+    fn wipe_cached_txs(&mut self) {
+        self.cached_txs = None;
     }
 
     fn get_reflected_ancestors(&self) -> Option<&Vec<(HashID, HashID)>> {

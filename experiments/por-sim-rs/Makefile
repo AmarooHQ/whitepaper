@@ -8,6 +8,7 @@ ATK_START_TICK ?= $(shell echo $(B_PERIOD)\*$(DAA2_N_BLOCKS) | bc)
 ATK_END_TICK ?= $(shell echo $(ATK_DS_CONFS)\*$(B_PERIOD)\*7+$(ATK_START_TICK) | bc)
 ATK_RATIO ?= 0.44
 HR_PER_CHAIN ?= 100
+# ATK_STRATEGY ?= DoubleSpendWork
 ATK_STRATEGY ?= DoubleSpend
 ATK_END_DELAY_TICKS ?= 0
 

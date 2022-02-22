@@ -25,7 +25,7 @@ mod block;
 mod block_metadata;
 mod chain;
 mod cryptosystem;
-mod extrinsics;
+// mod extrinsics;
 mod hash;
 mod message_manager;
 mod msg;
@@ -38,7 +38,7 @@ mod types;
 arg_enum! {
     #[derive(Debug)]
     pub enum CryptoSystemArg {
-        SimpleChain,
+        LongestChain,
         WeightedChain,
         WeightedDag,
     }
@@ -163,8 +163,8 @@ pub fn main() -> Result<(), String> {
             network_args,
             args,
         ),
-        CryptoSystemArg::SimpleChain => mk_run_atk(
-            CryptoSystemArg::SimpleChain,
+        CryptoSystemArg::LongestChain => mk_run_atk(
+            CryptoSystemArg::LongestChain,
             SimpleCS {},
             atk_args,
             network_args,
@@ -233,7 +233,7 @@ fn mk_run_atk<'a, S: CSystemT<'a>>(
             let chain_type = match cs_arg {
                 CryptoSystemArg::WeightedDag => SmChainType::WeightedDag,
                 CryptoSystemArg::WeightedChain => SmChainType::WeightedChain,
-                CryptoSystemArg::SimpleChain => SmChainType::LongestChain,
+                CryptoSystemArg::LongestChain => SmChainType::LongestChain,
             };
             let mut mms = n_chains_range
                 .map(|_i| {
