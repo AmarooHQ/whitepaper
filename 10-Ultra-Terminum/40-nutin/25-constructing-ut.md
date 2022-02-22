@@ -78,38 +78,15 @@ When a blockchain is part of a simplex, it is called a *simplex-chain* (as disti
 
 \defineTerm{Simplex-chain}{A blockchain that is part of a \emph{simplex}; it mutually reflects all other simplex-chains in that simplex}
 
-To maintain consistency with the geometric usage of the term *simplex*: a simplex with $k+1$ chains is called a $k$-simplex or a $(k+1)$-chain simplex[^simplex-approx]. In a $k$-simplex, each simplex-chain has $k$ reflections (one reflection for each of the other simplex-chains). A $k$-simplex has, in total, ${k+1} \choose 2$ reflections.
+To maintain consistency with the geometric usage of the term *simplex*: a simplex with $k+1$ chains is called a $k$-simplex or a $(k+1)$-chain simplex[^simplex-approx].
+In a $k$-simplex, each simplex-chain has $k$ reflections (one reflection for each of the other simplex-chains).
+A $k$-simplex has, in total, ${k+1} \choose 2$ reflections.
 
 [^simplex-maths]: The name is taken from geometry (particularly: the higher-dimensional kind). A simplex, for a given dimensionality, is the uniquely simplest polytope; e.g., a line in 1D space, a triangle in 2D space, a tetrahedron in 3D space, etc. A $k$-dimensional simplex is known as a $k$-simplex. As shown in \autoref{fig:simplexes}, a particular 2D projection of a $k$-simplex is identical to a diagram of all possible mutual reflections between $k+1$ blockchains, where each chain is represented by a vertex and each mutual reflection is represented by an edge.
 
 [^simplex-approx]: \textbf{NB:} I will ignore this distinction for $k \gg 1$.
 
-#### Simplex Security
-
-\label{sec:simplex-security}
-
-Simplexes are secure if attacking a single simplex-chain is as difficult as attacking the whole simplex (the network).
-
-Say the attacker controls $q$ proportion of the network's work-generation capacity (e.g., hash-rate for PoW chains), and honest nodes control $p$ proportion, such that $p+q=1$.
-The attacker should only be able to perform a doublespend if $q > p$.
-
-Successfully attacking a single blockchain requires an attacker to publish an alternate chain-segment that the fork rule considers heavier than the corresponding public chain-segment.
-Those two segments will have a common ancestor, so the weight of the attacker's segment must be greater than the weight of the public chain-segment (from that common ancestor on).
-
-Simplex-chains evaluate block-weight as the sum of work done on that block, plus work done on reflecting blocks.
-So effecting a doublespend on one simplex-chain requires generating a chain-segment with more total block-weight (including reflections) than the public chain-segment.
-
-It is not viable for the attacker to mine the attacking chain-segment in public (see \autoref{sec:dos-and-dags}), so they must mine it in private.
-Blocks mined in private will not gain reflections from honest miners on other simplex-chains, so any reflections contributing to the doublespend must be created by the attacker.
-The attacker's reflecting blocks (which reflect the attacking chain-segment) on other simplex-chains can be public or private.
-There is no viable way for the attacker to prevent honest miners from reflecting the honest chain-segment, including new blocks that extend it, nor to prevent the honest chain-segment from reflecting blocks from other simplex-chains (again, see \autoref{sec:dos-and-dags}).
-
-The honest chain-segment, on the targeted simplex-chain, will not be reflected by the attacker (since that would be self-defeating).
-Similarly, the attacker's chain-segment will not be reflected by the honest network, since it's being mined in private.
-
-Let $r$ be the network-wide rate-of-work (hash-rate).
-Over some attack duration $d$, we expect the attacker's chain-segment to weigh $qrd$, and the honest chain-segment to weigh $prd$.
-Thus, for the attacker's chain-segment to win, it must be that $qrd > prd \implies q > p$.
+The security of simplexes is discussed in \autoref{sec:simplex-security}.
 
 %% --- %%
 

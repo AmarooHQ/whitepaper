@@ -589,3 +589,173 @@ However, the variance of block production on each of these chains won't be that 
 Does a miner ever benefit from withholding reflections?
 
 %% END ### DRAFT
+
+%% BEGIN ### RELEASE
+
+### Simplex Security and the Confirmation Equivalence Conjecture
+
+#### Simplex Security
+
+\label{sec:simplex-security}
+
+Simplexes are secure if attacking a single simplex-chain is as difficult as attacking the whole simplex (the network).
+
+Say the attacker controls $q$ proportion of the network's work-generation capacity (e.g., hash-rate for PoW chains), and honest nodes control $p$ proportion, such that $p+q=1$.
+The attacker should only be able to perform a doublespend if $q > p$.
+
+Successfully attacking a single blockchain requires an attacker to publish an alternate chain-segment that the fork rule considers heavier than the corresponding public chain-segment.
+Those two segments will have a common ancestor, so the weight of the attacker's segment must be greater than the weight of the public chain-segment (from that common ancestor on).
+
+Simplex-chains evaluate block-weight as the sum of work done on that block, plus work done on reflecting blocks.
+So effecting a doublespend on one simplex-chain requires generating a chain-segment with more total block-weight (including reflections) than the public chain-segment.
+
+It is not viable for the attacker to mine the attacking chain-segment in public (see \autoref{sec:dos-and-dags}), so they must mine it in private.
+Blocks mined in private will not gain reflections from honest miners on other simplex-chains, so any reflections contributing to the doublespend must be created by the attacker.
+The attacker's reflecting blocks (which reflect the attacking chain-segment) on other simplex-chains can be public, but the attacker's task is simpler and not detectable if the attacker mines reflecting blocks in private.\footnote{
+    Additionally, if reflecting chains maintain projections as headers-only chains, then it should be much harder for an attacker to mine reflections in public .
+}
+There is no viable way for the attacker to prevent honest miners from reflecting the honest chain-segment, including new blocks that extend it, nor to prevent the honest chain-segment from reflecting blocks from other simplex-chains (again, see \autoref{sec:dos-and-dags}).
+
+The honest chain-segment, on the targeted simplex-chain, will not be reflected by the attacker (since that would be self-defeating).
+Similarly, the attacker's chain-segment will not be reflected by the honest network, since it's being mined in private.
+
+Let $r$ be the network-wide rate-of-work (hash-rate).
+Over some attack duration $d$, we expect the attacker's chain-segment to weigh $qrd$, and the honest chain-segment to weigh $prd$.
+Thus, for the attacker's chain-segment to win, it must be that $qrd > prd \implies q > p$.
+$\blacksquare$
+
+#### Confirmation Equivalence Conjecture
+
+\defineTerm{Equivalency Hypothesis}{
+    The hypothesis that, when using PoR and appropriately converting work,
+    confirmations of reflecting chains are \emph{equivalent}
+    to local confirmations of the same weight (and are linearly convertible otherwise)
+}
+
+\defineTerm{Confirmation Equivalence Conjecture (CEC)}{
+    The conjecture that, when using PoR and appropriately converting work,
+    confirmations of reflecting chains
+    can be treated as \emph{equivalent} to local confirmations of the same weight
+}
+
+The Confirmation Equivalence Conjecture is why PoR works.
+If it were false, then PoR could not work, and neither would simplexes.
+Additionally, this is the root of UT's $O(c)$ confirmation rate -- the conjecture implies that confirmation rate is proportional to the number of mutually reflecting chains.
+
+Can we test it? If so, how?
+
+Consider a traditional PoW blockchain (e.g., Bitcoin, Eth1, etc).
+It's well known that the risk of a doublespend against a particular block is related to the number of \emph{confirmations} that block has.\footnote{
+    See \href{https://web.archive.org/web/20220209100515/https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{Analysis of hashrate-based double-spending}.
+}
+However, this is not a linear relationship; rather, it's similar to \emph{exponential decay}.
+After the first few confirmations, each additional confirmation reduces the risk of a doublespend by approximately the same factor.\footnote{
+    The exact factor depends on the attackers hash rate as a proportion of the network's (i.e., $q$).
+}
+So \emph{security takes \textbf{time}}, because confirmations take time.
+
+Now, consider a simplex: the equivalence conjecture says that it doesn't matter whether confirmations come from the \emph{local} chain, or if they come from a \emph{reflecting} chain.
+So, a simplex-chain in a 2-chain simplex (wherein each simplex-chain has $\mathbb{C}^\prime = 2 \times B_f$) \emph{should}, after $C$ confirmations, be as secure as a standalone blockchain with $2C$ confirmations.
+Or, more generally, a simplex-chain in an $N$-chain simplex will, after $C$ \emph{local} confirmations, be as secure as a standalone blockchain after $NC$ confirmations.
+
+This is something we can test!
+(See \autoref{sec:por-simulation-results} for that.)
+
+As blockchain architects, if the CEC is true, then UT allows us to maintain security by trading \emph{waiting time} for \emph{more simplex-chains!}
+
+\aside{
+    If you were looking for an essence of how UT breaks the core conflict of Buterin's Trilemma\dots
+}
+
+#### Generalizing Doublespends
+
+With a traditional blockchain, the network has no "memory" of work (hashes) that have been done but are not accounted for in the main chain.
+Specifically, the network gains no knowledge of how much work has been done \emph{between} block.
+This is almost self-evident: each block is the \emph{sole} way that work can be \emph{added} to the chain.
+Naturally, there is no smaller unit of contributed work than an individual block -- so there's no "memory".\footnote{
+    We're not concerned with things like \emph{weak blocks} or super-block hybrid designs; though it's possible that doublespend methodology for those designs has some overlap with this section.
+}
+
+When an attacker publishes a heavier chain-segment which causes a reorganization, it is \emph{immediately} in the interests of miners to begin building on the attacker's best block.
+A heavier chain-segment is \emph{decisively better} in all cases.
+That may seem so obvious that it isn't worth mentioning, but it's actually a \emph{specific case} that only works for traditional blockchains.
+If there were some "memory", it might be worth miners \emph{continuing} mining their \emph{existing} block, \emph{instead} of reorganizing and building on the attacker's best block.
+
+What kind of "memory" could there be?
+Are \emph{Proofs of Reflection} a "memory"?
+
+As it turns out: yes.
+
+Let the total chain-weight of the attacker's best block be called $W_A$, and the total chain-weight of the honest network's best block be called $W_H$.
+
+Consider a miner of a simplex-chain (chain $L$) who is working on a \emph{draft block} during an active attack (though, of course, the miner does not know that).
+Specifically, let's consider \emph{just before} the attacker publishes their chain-segment.
+In the memory pool\footnote{
+  The \emph{memory pool} is where unconfirmed transactions (and other things) are stored before they are included in a block.
+  Each node has their own memory pool -- this must be the case because securely synchronizing memory pools between untrusted parties is as difficult as running a whole blockchain.
+  A miner typically decides a block's contents by choosing the combination of transactions from their memory pool that results in the largest reward (i.e., transactions with the largest fees).
+} of that miner, there will be PoRs, and those PoRs are \emph{only} valid for the \emph{honest} chain-segment (most likely they are for the best known honest block, but don't need to be).
+Each $L$ block, in and of itself, only adds $\sim w$ weight to the $L$ chain.
+However, if that \emph{draft block} contains $\sim n$ pending PoRs, and each PoR provides $\sim w$ weight on average, then a valid block (created from that draft) will contribute, via PoRs, $\sim nw$ weight to the \emph{honest chain-segment}.
+Thus, the miner has this choice: reorganize to the attacker's chain-segment and mine on top of a chain with weight $W_A$, \emph{or} continue mining on the honest chain-segment that weighs $W_H + nw$.
+
+The $nw$ term is that "memory", and it makes all the difference.
+Only when $W_A > W_H + nw$ is it safe for an attacker to publish their chain-segment -- then it is \emph{decisively better} than the honest chain-segment.
+If, however, the attacker publishes their chain-segment when $W_H < W_A < W_H + nw$: the best chain-segment for honest miners to mine is \emph{still} the honest chain-segment, not the attacker's!
+
+Miners don't actually have to change their behavior at all: their choice is the same, whether they are mining a simplex-chain \emph{or} a traditional chain.
+That choice is: \emph{of all possible blocks to mine, which results in the greatest reward?}
+If they build on the honest chain-segment, does their resulting block have more total chain-weight than if they were to build on the attacker's chain-segment?
+
+\aside{
+    There are some subtleties to consider if chains are DAGs or use GHOST: both chain-segments can be included as ancestors, but which should take priority?
+    If the weight of PoRs is not taken into account (or applied after evaluating the order of parents), then the attacker's chain-segment takes priority when $W_A > W_H$.
+    This rule conflicts with what we discussed above, so it must be that parents are ordered based on their chain-weights \emph{including} any PoRs in that block -- the honest network should take priority when $W_A < W_H + nw$.
+    Also, note that this is why the weight of PoRs is attributed to the \emph{reflected} block (usually a block's parent), not the actual block that contains them.
+}
+
+#### Testing the Confirmation Equivalence Conjecture
+
+\label{sec:por-simulation-results}
+
+Let's test the Confirmation Equivalence Conjecture.
+
+##### Hypothesis
+
+The hypothesis is that: doublespends against an \emph{individual simplex-chain} in an $N$-chain simplex after $C$ \emph{local} confirmations are \emph{as hard} as doublespends against a traditional blockchain after $N\cdot C$ confirmations.
+
+Define $P(N_1 = N; c = C; q = Q)$ (for some given $N$, $C$, and $Q$) to be the probability of an attack succeeding after $c$ confirmations against a simplex with $N_1$ simplex-chains, given an attacker with $q$ proportion of the network hash rate.
+
+Note that a simplex of 1 chain (the 0-simplex) \emph{is} a traditional blockchain.
+So we can take Bitcoin for example: the probability of an attack succeeding after 6 confirmations is given by $P(N_1 = 1; c = 6; q = Q)$ -- of course, we still need to know the attackers hash rate to calculate this.
+
+Thus, the hypothesis is that:
+\begin{equation}
+    P(N_1 = N; c = C; q = Q) \approx P(N_1 = 1; c = NC; q = Q)
+    \label{eq:por-sim-hypothesis}
+\end{equation}
+
+##### Method
+
+I have implemented a model blockchain network with attack simulations wherein each chain uses PoW and has a fully functioning fork rule.
+This design is modular, such that it supports different fork rules, different block data structures and ordering algorithms (including multiple parents), different attack strategies.
+The program also
+
+The source code for this model blockchain network is contained in the `/experiments/por-sim-rs/` folder of this repository.
+
+##### Scope and Constraints
+
+This experiment is not intended to be comprehensive -- many significant real-world factors are basically ignored: e.g., block propagation latency, transaction processing overhead, geographic latency, bandwidth constraints, etc.
+
+The scope is \emph{only} intended to cover PoR as a consensus mechanism -- particularly with respect to doublespends.
+
+This constraint means there are many ways to simplify implementation -- for example, reflected blocks are not checked against the history of a blockchain.
+These simplifications would render a \emph{production} blockchain insecure.
+However, the simplifications are okay in this case since we \emph{expect} near-identical behavior from well functioning networks, and the simplifications are otherwise independent of what we are testing -- the consensus mechanism.
+In essence, we want to simulate a \emph{specific} attack, so the implementation doesn't need to be hardened because we know that the attacker will \emph{only} attack in the specific way we care about.
+
+So, while it is \emph{possible} that a poor implementation of a simplex could compromise its security, we'll assume these kinds of design flaws are \emph{in principle} avoidable.
+
+\todoDraftOnly{Test chains of different hash rates + anything else to cover bases re CEC}
+
+%% END ### RELEASE

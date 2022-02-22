@@ -45,4 +45,9 @@
 		"body": "%% END ### DRAFT\n\n",
 		"description": "end a draft section"
 	},
+	"define term": {
+		"prefix": "\\defineTerm",
+		"body": "\\defineTerm{$1}{\n    $2\n}\n",
+		"description": "define a term"
+	}
 }
