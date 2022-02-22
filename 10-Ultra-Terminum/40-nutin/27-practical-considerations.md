@@ -739,9 +739,13 @@ Thus, the hypothesis is that:
 
 I have implemented a model blockchain network with attack simulations wherein each chain uses PoW and has a fully functioning fork rule.
 This design is modular, such that it supports different fork rules, different block data structures and ordering algorithms (including multiple parents), different attack strategies.
-The program also
+The program also accepts a variety of parameters -- both for the simulation itself, the individual chains, and for each attack strategy.
 
-The source code for this model blockchain network is contained in the `/experiments/por-sim-rs/` folder of this repository.
+The source code for this model blockchain network is contained in the `/experiments/por-sim-rs/` folder of \href{https://github.com/AmarooHQ/whitepaper}{this paper's repository}.
+
+As we can optimize this model, we can simulate many attacks quickly; so we can efficiently make statistically significant measurements.
+
+
 
 ##### Scope and Constraints
 
