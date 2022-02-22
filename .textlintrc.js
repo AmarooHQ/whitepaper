@@ -107,6 +107,7 @@ module.exports = {
                 ["rashes", "hashes"],
                 ["dependant", "dependent"],
                 ["hash rate", "hash-rate"],
+                ["the attackers"],
             ]
         }
     }

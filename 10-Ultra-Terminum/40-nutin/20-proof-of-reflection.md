@@ -507,7 +507,7 @@ Here are the key assumptions:
 * There's no comparative advantage between GPU makes/models -- i.e., a miner can't increase their revenue by cleverly organizing which GPUs mine which networks.
 * The cost of running both L and R nodes is negligible.
 * L and R have perfect difficulty adjustment algorithms.
-* The miner(s) used in this thought experiment are small relative to the total population of miners -- their choices don't meaningfully impact network hash rates or difficulty adjustments.
+* The miner(s) used in this thought experiment are small relative to the total population of miners -- their choices don't meaningfully impact network hash-rates or difficulty adjustments.
 
 What should we expect regarding the conversion of work?
 To start with, let's note that GPU miners could work on either chain -- good hardware for one chain is good hardware for the other, too.

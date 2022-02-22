@@ -469,7 +469,7 @@ Further reading: [*Inclusive Block Chain Protocols*](https://cloudflare-ipfs.com
 
 Consider the situation where an attacker is attempting to deny service via the production of empty blocks, and that the attacker can create blocks faster than the honest network. Such a situation is illustrated in \autoref{fig:dag-dos-1}. Since the goal of the attack is to prevent transactions from occurring, the attacker must[^nb-must] produce empty blocks[^empty-nb]. Furthermore, if the attacker links back to any honest blocks then the honest blocks' histories will be merged with the canonical history; thus the attack would fail. The attacker's only available strategy is to produce a single chain of empty blocks.
 
-[^nb-must]: The attacker could also fill the blocks with spam transactions. That's more work for the attacker, but also more work for the honest network (calculating and storing that state, maybe indefinitely). It's preferable that the attacker has minimal transactions in their blocks. It's tempting to think of ideas like: \emph{since the attackers blocks are empty, we can let honest nodes make larger blocks via some kind of weighted average block size calculation plus some flexibility in the size of blocks produced}. The problem with this is that it incents the attacker to fill their blocks with spam transactions, which is counterproductive.
+[^nb-must]: The attacker could also fill the blocks with spam transactions. That's more work for the attacker, but also more work for the honest network (calculating and storing that state, maybe indefinitely). It's preferable that the attacker has minimal transactions in their blocks. It's tempting to think of ideas like: \emph{since the attacker's blocks are empty, we can let honest nodes make larger blocks via some kind of weighted average block size calculation plus some flexibility in the size of blocks produced}. The problem with this is that it incents the attacker to fill their blocks with spam transactions, which is counterproductive.
 
 [^empty-nb]: Note that the attacker should still be reflecting other simplex-chains so as to maximize the total weight of the attacker's chain-segment. Given this, the attacker's blocks will contain reflected simplex-chain headers but no transactions.
 
@@ -504,10 +504,10 @@ All that sounds okay so far (maybe not that last bit), but this thought experime
 
 Consider an attacker producing 2 blocks for every 1 honest block.
 What happens most of the time?
-Well the attackers blocks get reflected first, so those blocks have an appreciable advantage over the honest blocks.
-The honest blocks will get reflected, too, but most of the time the attackers blocks will get the advantage from earlier reflections.
+Well the attacker's blocks get reflected first, so those blocks have an appreciable advantage over the honest blocks.
+The honest blocks will get reflected, too, but most of the time the attacker's blocks will get the advantage from earlier reflections.
 \emph{Most} of the time.
-Occasionally, when an honest block is a bit lucky, an honest block will beat the attackers next block -- gaining reflections earlier.
+Occasionally, when an honest block is a bit lucky, an honest block will beat the attacker's next block -- gaining reflections earlier.
 At that point, the attacker has lost -- they need to outpace the \emph{difference} in the number of reflections between the honest block and attacking blocks.
 So, unlike a normal doublespend (where the attacker wins if they \emph{ever} get ahead), now the honest network wins (ends the DoS) if it \emph{ever} gets ahead of the attacker -- after that point, there's no viable strategy for the attacker besides to build on the honest blocks.
 \emph{The asymmetry has flipped!}
@@ -642,18 +642,14 @@ There is no viable way for the attacker to prevent honest miners from reflecting
 The honest chain-segment, on the targeted simplex-chain, will not be reflected by the attacker (since that would be self-defeating).
 Similarly, the attacker's chain-segment will not be reflected by the honest network, since it's being mined in private.
 
+\todo{need to add some stuff in here -- a bit more explanation and linking, particularly consider editing 'it is not viable' paragraph}
+
 Let $r$ be the network-wide rate-of-work (hash-rate).
 Over some attack duration $d$, we expect the attacker's chain-segment to weigh $qrd$, and the honest chain-segment to weigh $prd$.
 Thus, for the attacker's chain-segment to win, it must be that $qrd > prd \implies q > p$.
 $\blacksquare$
 
 #### Confirmation Equivalence Conjecture
-
-\defineTerm{Equivalency Hypothesis}{
-    The hypothesis that, when using PoR and appropriately converting work,
-    confirmations of reflecting chains are \emph{equivalent}
-    to local confirmations of the same weight (and are linearly convertible otherwise)
-}
 
 \defineTerm{Confirmation Equivalence Conjecture (CEC)}{
     The conjecture that, when using PoR and appropriately converting work,
@@ -673,7 +669,7 @@ It's well known that the risk of a doublespend against a particular block is rel
 }
 However, this is not a linear relationship; rather, it's similar to \emph{exponential decay}.
 After the first few confirmations, each additional confirmation reduces the risk of a doublespend by approximately the same factor.\footnote{
-    The exact factor depends on the attackers hash rate as a proportion of the network's (i.e., $q$).
+    The exact factor depends on the attacker's hash-rate as a proportion of the network's (i.e., $q$).
 }
 So \emph{security takes \textbf{time}}, because confirmations take time.
 
@@ -732,8 +728,8 @@ If they build on the honest chain-segment, does their resulting block have more 
 
 There are some subtleties to consider if chains are DAGs or use GHOST: both chain-segments can be included as ancestors, but which should take priority?
 If the weight of PoRs is not taken into account (or applied after evaluating the order of parents), then the attacker's chain-segment takes priority when $W_A > W_H$.
-This rule conflicts with what we discussed above, so it must be that parents are ordered based on their chain-weights \emph{including} any PoRs in that block -- the honest network should take priority when $W_A < W_H + nw$.
-Also, note that this is why the weight of PoRs is attributed to the \emph{reflected} block (usually a block's parent), not the actual block that contains them.
+This rule conflicts with what we discussed above, so it must be that parents are ordered based on their chain-weights \emph{including} any PoRs in that block -- the honest chain-segment should take priority when $W_A < W_H + nw$.
+Also, note that this is why the weight of PoRs is attributed to the \emph{reflected} block (usually a parent) rather than the block that contains the PoRs.
 In essence, the inclusion of this "memory" requires that the fork rule take \emph{context} into account -- particularly the context of the descendant block.
 This is not a paradox because the fork rule is \emph{only} used to choose the priority chain in the context of some descendant block (even if that block is an invalid draft).
 
@@ -747,10 +743,10 @@ Let's test the Confirmation Equivalence Conjecture.
 
 The hypothesis is that: doublespends against an \emph{individual simplex-chain} in an $N$-chain simplex after $C$ \emph{local} confirmations are \emph{as hard} as doublespends against a traditional blockchain after $N\cdot C$ confirmations.
 
-Define $P(N_1 = N; c = C; q = Q)$ (for some given $N$, $C$, and $Q$) to be the probability of an attack succeeding after $c$ confirmations against a simplex with $N_1$ simplex-chains, given an attacker with $q$ proportion of the network hash rate.
+Define $P(N_1 = N; c = C; q = Q)$ (for some given $N$, $C$, and $Q$) to be the probability of an attack succeeding after $c$ confirmations against a simplex with $N_1$ simplex-chains, given an attacker with $q$ proportion of the network hash-rate.
 
 Note that a simplex of 1 chain (the 0-simplex) \emph{is} a traditional blockchain.
-So we can take Bitcoin for example: the probability of an attack succeeding after 6 confirmations is given by $P(N_1 = 1; c = 6; q = Q)$ -- of course, we still need to know the attackers hash rate to calculate this.
+So we can take Bitcoin for example: the probability of an attack succeeding after 6 confirmations is given by $P(N_1 = 1; c = 6; q = Q)$ -- of course, we still need to know the attacker's hash-rate to calculate this.
 
 Thus, the hypothesis is that:
 \begin{equation}
@@ -783,7 +779,7 @@ In essence, we want to simulate a \emph{specific} attack, so the implementation 
 
 So, while it is \emph{possible} that a poor implementation of a simplex could compromise its security, we'll assume these kinds of design flaws are \emph{in principle} avoidable.
 
-\todoDraftOnly{Test chains of different hash rates + anything else to cover bases re CEC}
+\todoDraftOnly{Test chains of different hash-rates + anything else to cover bases re CEC}
 
 ##### Interpreting the Results
 
