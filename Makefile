@@ -302,3 +302,15 @@ viewweb:
 
 cloc:
 	cloc --exclude-dir=node_modules,bin,target,.spago,output --exclude_ext=svg,pdf,js,json,toml ./10-Ultra-Terminum ./bin ./experiments ./includes
+
+GIT_WC_DEPTH ?= 1
+GIT_WC_REMOVED = $(shell git diff HEAD~$(GIT_WC_DEPTH) --word-diff=porcelain | grep -e '^-[^-]' | wc -w)
+GIT_WC_ADDED = $(shell git diff HEAD~$(GIT_WC_DEPTH) --word-diff=porcelain | grep -e '^+[^+]' | wc -w)
+
+count-words-git-help:
+	@echo "!! note the parameter: GIT_WC_DEPTH env var"
+
+count-words-diff: count-words-git-help
+	@echo "Words added: $(GIT_WC_ADDED)"
+	@echo "Words removed: $(GIT_WC_REMOVED)"
+	@echo "Words diff: `echo $(GIT_WC_ADDED)-$(GIT_WC_REMOVED) | bc`"

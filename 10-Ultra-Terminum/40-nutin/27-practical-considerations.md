@@ -592,7 +592,30 @@ Does a miner ever benefit from withholding reflections?
 
 %% BEGIN ### RELEASE
 
-### Simplex Security and the Confirmation Equivalence Conjecture
+### The Crux: Simplex Security and the Confirmation Equivalence Conjecture
+
+\aside{
+    Don't you think it's time for an epigraph?
+}
+
+\wideepigraph
+
+\epigraph{
+    Nobody stays in this valley except by a full, conscious choice based on a full, conscious knowledge of every fact involved in his decision. Nobody stays here by faking reality in any manner whatever.
+}{Ayn Rand (Atlas Shrugged)}
+
+\aside{
+    Or, perhaps you might prefer something from Karl Popper?
+    Very well:
+}
+
+\epigraph{
+    On the level of scientific discovery two new aspects emerge. The most important one is that scientific theories can be formulated linguistically, and that they can even be published. Thus they become objects outside of ourselves: objects open to investigation. As a consequence, they are now open to \emph{criticism}. Thus we can get rid of a badly fitting theory before the adoption of the theory makes us unfit to survive. \emph{By criticizing our theories we can let our theories die in our stead.} This is of course immensely important.
+}{Karl Popper (The Myth of the Framework)}
+
+\aside{
+    Let's proceed.
+}
 
 #### Simplex Security
 
@@ -612,7 +635,7 @@ So effecting a doublespend on one simplex-chain requires generating a chain-segm
 It is not viable for the attacker to mine the attacking chain-segment in public (see \autoref{sec:dos-and-dags}), so they must mine it in private.
 Blocks mined in private will not gain reflections from honest miners on other simplex-chains, so any reflections contributing to the doublespend must be created by the attacker.
 The attacker's reflecting blocks (which reflect the attacking chain-segment) on other simplex-chains can be public, but the attacker's task is simpler and not detectable if the attacker mines reflecting blocks in private.\footnote{
-    Additionally, if reflecting chains maintain projections as headers-only chains, then it should be much harder for an attacker to mine reflections in public .
+    Additionally, if reflecting chains maintain projections as headers-only chains (i.e., construct a main chain via SPV rules), then it should be much harder for an attacker to succeed if reflections are mined in public.
 }
 There is no viable way for the attacker to prevent honest miners from reflecting the honest chain-segment, including new blocks that extend it, nor to prevent the honest chain-segment from reflecting blocks from other simplex-chains (again, see \autoref{sec:dos-and-dags}).
 
@@ -707,12 +730,12 @@ Miners don't actually have to change their behavior at all: their choice is the 
 That choice is: \emph{of all possible blocks to mine, which results in the greatest reward?}
 If they build on the honest chain-segment, does their resulting block have more total chain-weight than if they were to build on the attacker's chain-segment?
 
-\aside{
-    There are some subtleties to consider if chains are DAGs or use GHOST: both chain-segments can be included as ancestors, but which should take priority?
-    If the weight of PoRs is not taken into account (or applied after evaluating the order of parents), then the attacker's chain-segment takes priority when $W_A > W_H$.
-    This rule conflicts with what we discussed above, so it must be that parents are ordered based on their chain-weights \emph{including} any PoRs in that block -- the honest network should take priority when $W_A < W_H + nw$.
-    Also, note that this is why the weight of PoRs is attributed to the \emph{reflected} block (usually a block's parent), not the actual block that contains them.
-}
+There are some subtleties to consider if chains are DAGs or use GHOST: both chain-segments can be included as ancestors, but which should take priority?
+If the weight of PoRs is not taken into account (or applied after evaluating the order of parents), then the attacker's chain-segment takes priority when $W_A > W_H$.
+This rule conflicts with what we discussed above, so it must be that parents are ordered based on their chain-weights \emph{including} any PoRs in that block -- the honest network should take priority when $W_A < W_H + nw$.
+Also, note that this is why the weight of PoRs is attributed to the \emph{reflected} block (usually a block's parent), not the actual block that contains them.
+In essence, the inclusion of this "memory" requires that the fork rule take \emph{context} into account -- particularly the context of the descendant block.
+This is not a paradox because the fork rule is \emph{only} used to choose the priority chain in the context of some descendant block (even if that block is an invalid draft).
 
 #### Testing the Confirmation Equivalence Conjecture
 
@@ -741,11 +764,11 @@ I have implemented a model blockchain network with attack simulations wherein ea
 This design is modular, such that it supports different fork rules, different block data structures and ordering algorithms (including multiple parents), different attack strategies.
 The program also accepts a variety of parameters -- both for the simulation itself, the individual chains, and for each attack strategy.
 
-The source code for this model blockchain network is contained in the `/experiments/por-sim-rs/` folder of \href{https://github.com/AmarooHQ/whitepaper}{this paper's repository}.
+The source code for this model blockchain network is contained in the \href{https://github.com/AmarooHQ/whitepaper/tree/master/experiments/por-sim-rs}{\texttt{/experiments/por-sim-rs/}} folder of \href{https://github.com/AmarooHQ/whitepaper}{this paper's repository}.
 
 As we can optimize this model, we can simulate many attacks quickly; so we can efficiently make statistically significant measurements.
 
-
+\todo{asdf - continue method}
 
 ##### Scope and Constraints
 
@@ -761,5 +784,29 @@ In essence, we want to simulate a \emph{specific} attack, so the implementation 
 So, while it is \emph{possible} that a poor implementation of a simplex could compromise its security, we'll assume these kinds of design flaws are \emph{in principle} avoidable.
 
 \todoDraftOnly{Test chains of different hash rates + anything else to cover bases re CEC}
+
+##### Interpreting the Results
+
+\todo{por sim - Interpreting the Results}
+
+##### Results
+
+\todo{por sim results}
+
+##### Discussion
+
+\todo{por sim discussion}
+
+##### Experimental Limitations
+
+\todo{por sim - limits}
+
+* could be insecure for reasons we didn't test for
+* those ignored factors could be decisive
+* insufficient breadth of attack parameters
+* didn't come up with a good strategy (mb there's a better one than mining in private)
+* confirmation bias in implementation -- might have missed something
+* does it work for simplexes that have PoS/PoA chains? not tested for
+
 
 %% END ### RELEASE
