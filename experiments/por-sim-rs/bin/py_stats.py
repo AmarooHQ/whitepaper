@@ -7,7 +7,7 @@ import math
 import os
 from pathlib import Path
 import sys
-from typing import Any, Literal, Optional
+from typing import Any, Callable, Literal, Optional
 import numpy
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -17,10 +17,27 @@ import multiprocessing.pool as mpp
 import multiprocessing as mp
 
 
-MAX_N_CHAINS = 41
+@dataclass
+class PorPlotOpts:
+    _trans_x: Optional[Callable[[float], float]] = None
+    _label_extra: Optional[str] = None
+    cec_scaled: Optional[float] = None
 
-CSV_FILES = ['exp-3.csv', 'exp-4.csv', 'exp-4a.csv'] \
-    + list(f"exp-5-q{q}-target{t}.csv" for q in ['0.25', '0.4'] for t in ['25', '50', '100'])
+    def trans_x(self, x):
+        if self._trans_x:
+            return self._trans_x(x)
+
+    @property
+    def label_extra(self):
+        r = self._label_extra or ''
+        if self.cec_scaled:
+            r += f" | Scaled: $x \\to {self.cec_scaled} x$"
+        return r
+
+    def should_scale(self):
+        return self.cec_scaled is not None
+
+CsvFileToPlot = tuple[str, Literal['por', 'trad'], Optional[str | PorPlotOpts]]
 
 
 # n! / (k! * (n - k)!)
@@ -235,7 +252,7 @@ class Comment:
         }
 
 
-def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=False,
+def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_discounted=False,
         title=None, x_label=None, y_label=None, comment: Optional[Comment] = None,
         save_png=False, png_filename=None,
         figsize=(10, 7), dpi=100, x_range=None,
@@ -253,6 +270,11 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=Fa
     por_count = -1
     trad_count = -1
     for csv_i, (fname, chain_ty, label_extra) in enumerate(csv_files):
+        label_extra = label_extra or ''
+        por_plot_opts = None
+        if not isinstance(label_extra, str) and chain_ty == 'por':
+            por_plot_opts = label_extra
+            label_extra = por_plot_opts.label_extra
         n_trials, max_ix, block_target, _q, ds_target, csv_data, ms_elapsed, d2 = read_csv_data(fname, chain_ty)
         csv_series.append(csv_data)
         if chain_ty == 'por':
@@ -262,6 +284,12 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=Fa
             ty_str = 'Trad'
             trad_count += 1
         z_order = 2 + (.1 if chain_ty == 'por' else -.1)
+
+        log_ds_target = ds_target
+        if por_plot_opts and por_plot_opts.cec_scaled:
+            csv_data = pd.Series(csv_data.values, index=[x * por_plot_opts.cec_scaled for x in csv_data.index])
+            log_ds_target = int(ds_target / por_plot_opts.cec_scaled)
+
         csv_data.plot(
             label=f"{ty_str}: $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $n \\geq {n_trials}$; ds_win={ds_target}; {label_extra or ''}",
             marker=get_line_marker(chain_ty, por_count, trad_count),
@@ -271,7 +299,7 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=Fa
         # d2.plot(label="PoR - $y^{0.7}$")
         _max_ix = max(_max_ix, max_ix)
         qs.add(_q)
-        ds_targets.add(ds_target)
+        ds_targets.add(log_ds_target)
     _qs = list(qs)
     _qs.sort()
 
@@ -335,11 +363,10 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=Fa
         plt.show()
     plt.close()
 
-CsvFileToPlot = tuple[str, Literal['por', 'trad'], Optional[str]]
 
 @dataclass
 class SavePlot:
-    csv_files: list[tuple[str, Literal['por', 'trad'], Optional[str]]]
+    csv_files: list[CsvFileToPlot]
     title: str
     filename: str
     kwargs: Optional[dict[str, Any]] = None
@@ -560,6 +587,13 @@ def main(filter_fname: Optional[str], n_jobs: int):
             return csvs[3:]
         return csvs
 
+    # $P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$
+    def gen_por_cec_ext_test(q, t) -> list[CsvFileToPlot]:
+        return [
+            (exp_13_csv_name(q, t, strat="DoubleSpendWork", cs="WeightedDag"), 'por', None),
+            (exp_13_csv_name(q, f'{2*int(t):d}', strat="DoubleSpendWork", cs="WeightedDag"), 'por', PorPlotOpts(cec_scaled=2.0)),
+        ]
+
 
     jobs_to_save: list[SavePlot] = [
         SavePlot(
@@ -621,6 +655,15 @@ def main(filter_fname: Optional[str], n_jobs: int):
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
     ] + [
+        # $P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$
+        SavePlot(
+            gen_por_cec_ext_test(q, t),
+            f" PoR Confirmation Equivalence Conjecture (Extended) \n $q={q}$ | WD+DSW | random hash rate distribution \n $P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$",
+            f"png/por_equiv_orw_ext-cec_q={q}_t{t}.png",
+            x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
+            x_range=q_t_to_x_range[(q, t)],
+        ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10']
+    ] + [
         SavePlot(
             [
                 (f'exp-12-repeat-8-RDoubleSpend-q{q}-t{t}-p50-H50-WeightedChain-xxh3.csv', 'por', None),
@@ -648,7 +691,10 @@ def main(filter_fname: Optional[str], n_jobs: int):
 
     for j in jobs_to_save:
         if filter_fname is None or filter_fname in j.filename:
-            pool.apply_async(j.run)
+            if n_jobs > 1:
+                pool.apply_async(j.run)
+            else:
+                j.run()
             count += 1
 
     pool.close()
