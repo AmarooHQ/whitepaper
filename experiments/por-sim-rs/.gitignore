@@ -2,3 +2,8 @@ target/*
 flamegraph.svg
 perf.data*
 
+*.csv
+*.svg
+!**/csv/*.csv
+!**/png/*.png
+!**/png/*.svg
