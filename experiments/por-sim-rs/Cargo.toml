@@ -28,6 +28,7 @@ lru = "0.7.2"
 non-empty-vec = "0.2.3"
 num = "0.4.0"
 rand = "0.8.3"
+rstats = "1.0.12"
 sha3 = "0.10.0"
 twox-hash = "1.6.0"
 

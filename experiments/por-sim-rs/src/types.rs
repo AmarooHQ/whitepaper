@@ -26,6 +26,7 @@ pub struct NetworkArgs {
     pub block_target: u16,
     pub daa2_n_blocks: usize,
     pub por_chains: u16,
+    pub random_hr_distrib: bool,
 }
 
 impl NetworkArgs {
@@ -34,6 +35,7 @@ impl NetworkArgs {
             block_target,
             daa2_n_blocks: 100,
             por_chains: 1,
+            random_hr_distrib: false,
         }
     }
 
@@ -42,6 +44,7 @@ impl NetworkArgs {
             block_target,
             daa2_n_blocks: 100,
             por_chains,
+            random_hr_distrib: false,
         }
     }
 }

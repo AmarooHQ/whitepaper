@@ -32,6 +32,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.55"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "159bb86af3a200e19a068f4224eae4c8bb2d0fa054c7e5d1cacd5cef95e684cd"
+
+[[package]]
 name = "array_tool"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -363,6 +369,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "indxvec"
+version = "1.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c486b98b1fbe6cc77e66952b60d13e1f3931e37b0b9d50b1b310306e51f1b7eb"
+
+[[package]]
 name = "intmap"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -565,6 +577,7 @@ dependencies = [
  "non-empty-vec",
  "num",
  "rand",
+ "rstats",
  "sha3",
  "twox-hash",
 ]
@@ -664,6 +677,16 @@ name = "regex-syntax"
 version = "0.6.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f497285884f3fcff424ffc933e56d7cbca511def0c9831a7f9b5f6153e3cc89b"
+
+[[package]]
+name = "rstats"
+version = "1.0.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "add6984c6b56357d2fa712d9fbeefda73059008bc0cc978bdbb7a8ef7aca70bb"
+dependencies = [
+ "anyhow",
+ "indxvec",
+]
 
 [[package]]
 name = "sha3"

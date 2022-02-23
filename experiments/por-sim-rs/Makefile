@@ -12,12 +12,19 @@ HR_PER_CHAIN ?= 100
 ATK_STRATEGY ?= DoubleSpend
 ATK_END_DELAY_TICKS ?= 0
 
+# set this env var to `1` to do random hash-rate distrib
+RANDOMLY_DISTRIBUTE_HASHRATES ?=
+_RAND_HRS_ARG =
+ifeq ($(RANDOMLY_DISTRIBUTE_HASHRATES),1)
+	_RAND_HRS_ARG = --random_hr_distrib
+endif
+
 CRYPTO_SYSTEM ?= WeightedDag
 # CRYPTO_SYSTEM ?= WeightedChain
 
 RUN_BIN = target/release/por-sim-rs
 
-SIMULATOR_ARGS ?= -R $(ATK_STRATEGY) -s $(ATK_START_TICK) -e $(ATK_END_TICK) -r $(ATK_RATIO) -S $(CRYPTO_SYSTEM) -b $(B_PERIOD) -P $(N_CHAINS) -H $(HR_PER_CHAIN) --ds_win_threshold $(ATK_DS_CONFS) --daa2_n_blocks $(DAA2_N_BLOCKS) --atk_end_delay_ticks $(ATK_END_DELAY_TICKS)
+SIMULATOR_ARGS ?= -R $(ATK_STRATEGY) -s $(ATK_START_TICK) -e $(ATK_END_TICK) -r $(ATK_RATIO) -S $(CRYPTO_SYSTEM) -b $(B_PERIOD) -P $(N_CHAINS) -H $(HR_PER_CHAIN) --ds_win_threshold $(ATK_DS_CONFS) --daa2_n_blocks $(DAA2_N_BLOCKS) --atk_end_delay_ticks $(ATK_END_DELAY_TICKS) $(_RAND_HRS_ARG)
 
 test:
 	cargo test
@@ -25,8 +32,14 @@ test:
 release:
 	cargo build --release
 
+print-sim-args:
+	@echo '$(SIMULATOR_ARGS)'
+
 stats:
 	./bin/py_stats.py
+
+run-random-hr-distrib:
+	cargo r -- --random_hr_distrib --ds_win_threshold 5 -s 10000 -e 20000 -r 0.45 -S WeightedChain -b 50 -H 50 -P 11
 
 run-lc-20k-blocks:
 	cargo r --release -- -s 10000 -e 1000000 -r 0.0 -S WeightedChain -b 50 -H 50 -P 1
@@ -58,6 +71,3 @@ run-dag-doublespend-100:
 
 sudo-flamegraph:
 	bash ./bin/unsafe_flamegraph.sh
-
-print-sim-args:
-	@echo '$(SIMULATOR_ARGS)'

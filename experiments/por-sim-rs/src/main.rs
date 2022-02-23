@@ -96,7 +96,7 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
         (@arg atk_end_delay_ticks: --atk_end_delay_ticks +takes_value default_value("0") "Number of ticks to delay ending the simulation if the attacker gets ahead")
         // doublspend params
         (@arg win_threshold: --ds_win_threshold +takes_value default_value("20") "[DoubleSpend] Minimum number of confirmations before the double-spending private chain is published.")
-        (@arg random_hr_distrib: --random_hr_distrib !takes_value "If true, distribute the attackers hash-rate randomly over all chains.")
+        (@arg random_hr_distrib: --random_hr_distrib !takes_value "If true, distribute the attackers hash-rate randomly over all chains. (No effect with -P=1)")
         // selfish mining params
         // <none>
         // PoR params
@@ -131,6 +131,7 @@ pub fn main() -> Result<(), String> {
     let por_chains = value_t_or_exit!(args.value_of("por_n_chains"), u16);
     let daa2_n_blocks = value_t_or_exit!(args.value_of("daa2_n_blocks"), usize);
     let atk_end_delay_ticks = value_t_or_exit!(args.value_of("atk_end_delay_ticks"), Timestamp);
+    let random_hr_distrib = args.is_present("random_hr_distrib");
 
     let atk_args = AttackArgs {
         q: attacker_ratio,
@@ -145,6 +146,7 @@ pub fn main() -> Result<(), String> {
         block_target,
         por_chains,
         daa2_n_blocks,
+        random_hr_distrib,
     };
 
     let start_atk = SystemTime::now();
@@ -199,7 +201,8 @@ fn mk_run_atk<'a, S: CSystemT<'a>>(
         warn!("PLEASE NOTE: --attacker_instant_prop sometimes causes SelfishMining to fail for an unknown reason");
     }
 
-    // let n_chains_range = 0..network_args.por_chains;
+    // ~~let n_chains_range = 0..network_args.por_chains;~~
+    // this is legacy from before PoR was handled by MM
     let n_chains_range = 0..1;
     match relay_strat {
         RelayStrategyArg::DoubleSpend => {
