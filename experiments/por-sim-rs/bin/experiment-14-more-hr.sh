@@ -40,6 +40,8 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
             cp result-columns.csv $OUT_FILE
           fi
 
+          echo "$PROGRESS_STR"
+
           for nchains in `seq 1 6` `seq 7 2 21` 30; do
             export N_CHAINS=$nchains;
             export SIM_ARGS=$(make print-sim-args);

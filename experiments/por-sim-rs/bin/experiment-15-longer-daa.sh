@@ -14,6 +14,8 @@ export REPEAT_TIMES=30
 export HR_PER_CHAIN=50
 export DAA2_N_BLOCKS=500
 
+export ATK_START_TICK=$(echo $B_PERIOD\*$DAA2_N_BLOCKS\*3/2 | bc)
+
 export N_CPUS=$(echo $(grep -c ^processor /proc/cpuinfo)-1 | bc)
 # built in bash feature
 SECONDS=0
@@ -39,6 +41,8 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
           if [[ ! -f $OUT_FILE ]]; then
             cp result-columns.csv $OUT_FILE
           fi
+
+          echo "$PROGRESS_STR"
 
           for nchains in `seq 1 6` `seq 7 2 21` 30; do
             export N_CHAINS=$nchains;
