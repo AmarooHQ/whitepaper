@@ -528,9 +528,10 @@ if __name__ == "__main__":
                 (f'exp-12-repeat-8-RDoubleSpend-q{q}-t{t}-p50-H50-WeightedDag-xxh3.csv', 'por', 'DS+WD'),
                 (f'exp-12-repeat-8-RDoubleSpendWork-q{q}-t{t}-p50-H50-WeightedChain-xxh3.csv', 'por', 'DSW+WC'),
                 (f'exp-12-repeat-8-RDoubleSpendWork-q{q}-t{t}-p50-H50-WeightedDag-xxh3.csv', 'por', 'DSW+WD'),
+                (f'exp_aux3_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', 'DSW+WD'),
             ],
             f"PoR Equivalency Hypothesis | $q={q}$ | DoubleSpend Target: ${t} \\cdot x$",
-            f"png/por_equiv_q={q}_t{t}_DS+WC.png",
+            f"png/por_equiv_q={q}_t{t}.png",
             x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
             x_range=q_t_to_x_range.get((q, t), None)
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
@@ -541,7 +542,7 @@ if __name__ == "__main__":
                 (f'exp_aux2_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpend_WeightedChain_DAA100.csv', 'trad', None),
             ],
             f"PoR Equivalency Hypothesis | PoR vs Traditional vs Theoretical \n DS+WC | $q={q}$ | DoubleSpend Target: ${t} \\cdot x$ ",
-            f"png/por_eqiv_hyp_vs_trad_q={q}_t={t}_DSW+WD.png",
+            f"png/por_eqiv_hyp_vs_trad_q={q}_t={t}_DS+WC.png",
             x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44'] for t in ['5', '10', '20']

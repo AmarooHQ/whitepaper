@@ -84,7 +84,7 @@ fn validate_daa2_n_blocks(s: String) -> Result<(), String> {
 fn get_arg_matches<'a>() -> ArgMatches<'a> {
     clap_app!(sim =>
         (about: "Blockchain PoW + PoR simulator")
-        (version: "0.1.0")
+        (version: "0.2.0")
         (@arg attacker_ratio: -r --ratio +takes_value default_value("0.45") {validate_ratio} "Proportion of hash-rate belonging to attackers.")
         (@arg start_attack_at_t: -s --start_attack_tick +takes_value default_value("1000") "Tick at which to start the attack.")
         (@arg end_simulation_at_t: -e --end_tick +takes_value "Maximum number of ticks for the simulation. Defaults to 3*start_attack_tick")
@@ -96,6 +96,7 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
         (@arg atk_end_delay_ticks: --atk_end_delay_ticks +takes_value default_value("0") "Number of ticks to delay ending the simulation if the attacker gets ahead")
         // doublspend params
         (@arg win_threshold: --ds_win_threshold +takes_value default_value("20") "[DoubleSpend] Minimum number of confirmations before the double-spending private chain is published.")
+        (@arg random_hr_distrib: --random_hr_distrib !takes_value "If true, distribute the attackers hash-rate randomly over all chains.")
         // selfish mining params
         // <none>
         // PoR params
