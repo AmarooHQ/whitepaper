@@ -4,11 +4,13 @@
 
 use crate::block::BlockT;
 use crate::cryptosystem::CSystemT;
+use crate::transactions::*;
 use crate::types::*;
 use hashers::null::PassThroughHasher;
 use im_rc::{vector, HashMap, OrdSet, Vector};
 use lazy_static::lazy_static;
 use lru::LruCache;
+use std::collections::LinkedList;
 use std::hash::BuildHasherDefault;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -24,6 +26,27 @@ lazy_static! {
     //     Mutex::new(LruCache::new(1024));
 }
 type HashMapIdPassthrough<V> = HashMap<HashID, V, BuildHasherDefault<PassThroughHasher>>;
+
+#[derive(Clone, Hash, Default)]
+pub struct ChainStateDelta {
+    block_id: HashID,
+    valid_txs: Vec<TxId>,
+    invalid_txs: Vec<TxId>,
+    hellos: Vec<u64>,
+    balances: HashMapIdPassthrough<u64>,
+    // reflections[chain_id] = [... r_block_ids]
+    reflections: HashMapIdPassthrough<Vec<HashID>>,
+}
+
+#[derive(Clone, Default)]
+pub struct ChainState {
+    valid_txs: PassThruHashSet<TxId>,
+    invalid_txs: PassThruHashSet<TxId>,
+    hellos: Vec<TxId>,
+    balances: HashMapIdPassthrough<u64>,
+    // reflections[r_chain_id] = {... r_block_ids}
+    reflections: HashMapIdPassthrough<PassThruHashSet<HashID>>,
+}
 
 #[derive(Clone)]
 struct PoRStateIM {
@@ -91,7 +114,7 @@ impl PoRStateIM {
 
     fn update_light_chain(&self, lc: &LightChainIM, block: HashID) -> LightChainIM {
         let mut heads = lc.heads.clone();
-        // for p_id in block.all_prev() {
+        // for p_id in block.all_parents() {
         //     heads = heads.without(&S::B::get_cached_block(&p_id).unwrap().0);
         // }
         LightChainIM {
@@ -113,3 +136,27 @@ impl LightChainIM {
         }
     }
 }
+
+/*
+ * # State for simulator
+ *
+ * - [x] Blocks need to support transactions
+ * - [x] Tx types
+ * - [ ] Transactions get processed when blocks do
+ * - [ ] Transactions get applied to state to create new state
+ * - [ ] Transactions have multiple types
+ * - [x] ~~State needs to be accessible to consensus mechanism (which it sorta is anyway)~~ (not needed: all info in header; get's validated w/ block)
+ * - [x] fork rule includes reflected weight
+ * - [ ] fork rule + reflected weight tests
+ * - [ ] validate PoR transactions
+ * - [ ] validate transactions in block generally
+ * - [x] message manager creates multiple chains
+ * - [ ] message manager randomizes chain-work and honest/attacker balance over diff chains (ideally we want a chain where attacker has >51% of HR locally but not globally)
+ * - [x] message manager notifies other chains of reflectable blocks
+ * - [ ] relay strats know what to do with reflectable blocks
+ * - [x] reflectable blocks have txs that are included in blocks
+ * - [ ] chains integrate reflectable blocks w/ consensus
+ * - [ ] reflection txs correctly identify why ancestor is being reflected
+ * - [ ] reflection txs reflected ancestor is validated
+ *
+ * */

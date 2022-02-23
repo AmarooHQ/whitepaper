@@ -6,22 +6,26 @@ use crate::CSystemT;
 use conv::prelude::*;
 use itertools::any;
 use num::pow;
+use std::fmt;
 use std::fmt::Debug;
+use std::fmt::Display;
 use std::marker::PhantomData;
 
 /// a strategy that runs at a network level based on incoming msgs
 pub trait RelayStrategyT<'a, S: CSystemT<'a>> {
     type ResultsTy: Debug;
-    type Params: Clone + Copy;
+    type Params: Clone + Copy + Debug;
     fn init(c: &S::C, atk_start_h: Height, p: Self::Params) -> Self;
+    /// Additional msgs that can be provided by attackers when certain conditions are met (e.g., selfish mining requires releasing withheld blocks if the honest network releases one)
     fn on_msg(&mut self, m: &MsgToNode<S::B>, chain: &S::C) -> Vec<MsgToNode<S::B>>;
     fn get_results(&self, c: &S::C) -> Option<(Self::ResultsTy, bool)>;
     fn should_stop_simulation(&self, ts: Timestamp, c: &S::C) -> bool;
+    fn params_as_csv(&self) -> String;
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct DoubleSpendParams {
-    attack_starts_at: Height,
+    attack_starts_at: Timestamp,
     win_thres: Height,
 }
 
@@ -40,6 +44,13 @@ pub struct DoubleSpendStrat {
     atk_start_h: Height,
 }
 
+impl DoubleSpendStrat {
+    fn _atk_won(&self, fms: &Heights, hs: &Heights, public_draft_refl_work: Difficulty) -> bool {
+        fms.public + public_draft_refl_work < fms.private
+            && hs.public >= self.atk_start_h + self.params.win_thres
+    }
+}
+
 impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
     type ResultsTy = bool;
     type Params = DoubleSpendParams;
@@ -55,7 +66,8 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
     fn get_results(&self, c: &S::C) -> Option<(Self::ResultsTy, bool)> {
         let hs = c.get_heights_pub_priv();
         let fms = c.get_fork_measure_pub_priv();
-        if fms.public < fms.private && hs.public >= self.atk_start_h + self.params.win_thres {
+        let draft_refl_work = c.draft_block(0, false).get_reflected_weight();
+        if self._atk_won(&fms, &hs, draft_refl_work) {
             Some((true, true))
         } else {
             None
@@ -67,15 +79,93 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
         } else {
             let hs = c.get_heights_pub_priv();
             let fms = c.get_fork_measure_pub_priv();
-            fms.public < fms.private && hs.public > self.atk_start_h + self.params.win_thres
+            let draft_refl_work = c.draft_block(0, false).get_reflected_weight();
+            self._atk_won(&fms, &hs, draft_refl_work)
+        }
+    }
+    fn params_as_csv(&self) -> String {
+        format!(
+            "{}, {}",
+            self.params.attack_starts_at, self.params.win_thres
+        )
+    }
+}
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct DoubleSpendWorkParams {
+    attack_starts_at: Timestamp,
+    win_thres: Height,
+    n_por_chains: u16,
+}
+
+impl DoubleSpendWorkParams {
+    pub fn new(attack_starts_at: Height, win_thres: Height, n_por_chains: u16) -> Self {
+        DoubleSpendWorkParams {
+            attack_starts_at,
+            win_thres,
+            n_por_chains,
         }
     }
 }
 
-#[derive(Debug, Default)]
-struct Heights {
-    private: Height,
-    public: Height,
+#[derive(Debug, PartialEq)]
+pub struct DoubleSpendWorkStrat {
+    params: DoubleSpendWorkParams,
+    atk_start_h: Height,
+    atk_start_work: Difficulty,
+    win_work_thresh: Difficulty,
+}
+
+impl DoubleSpendWorkStrat {
+    fn _atk_won(&self, fms: &Heights, public_draft_refl_work: Difficulty) -> bool {
+        (fms.public + public_draft_refl_work) < fms.private
+            && fms.public >= self.atk_start_work + self.win_work_thresh
+    }
+}
+
+impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
+    type ResultsTy = bool;
+    type Params = DoubleSpendWorkParams;
+    fn init(chain: &S::C, atk_start_h: Height, params: Self::Params) -> Self {
+        DoubleSpendWorkStrat {
+            params,
+            atk_start_h,
+            atk_start_work: chain.get_fork_measure_pub_priv().public,
+            win_work_thresh: params.win_thres
+                * (params.n_por_chains as u32)
+                * chain.get_any_best_block(false).0.get_difficulty(),
+        }
+    }
+    fn on_msg(&mut self, _msg_from: &MsgToNode<S::B>, _chain: &S::C) -> Vec<MsgToNode<S::B>> {
+        vec![]
+    }
+    fn get_results(&self, c: &S::C) -> Option<(Self::ResultsTy, bool)> {
+        let fms = c.get_fork_measure_pub_priv();
+        let draft_refl_work = c.draft_block(0, false).get_reflected_weight();
+        if self._atk_won(&fms, draft_refl_work) {
+            Some((true, true))
+        } else {
+            None
+        }
+    }
+    fn should_stop_simulation(&self, ts: Timestamp, c: &S::C) -> bool {
+        if ts < self.params.attack_starts_at {
+            false
+        } else {
+            let fms = c.get_fork_measure_pub_priv();
+            let draft_refl_work = c.draft_block(0, false).get_reflected_weight();
+            self._atk_won(&fms, draft_refl_work)
+        }
+    }
+    fn params_as_csv(&self) -> String {
+        format!(
+            "{}, {}",
+            // omit n_por_chains b/c it's recorded elsewhere in the csv
+            self.params.attack_starts_at,
+            self.params.win_thres,
+            //self.params.n_por_chains
+        )
+    }
 }
 
 #[derive(Debug)]
@@ -86,8 +176,8 @@ pub struct SelfishMining<S> {
     /// for selfish mining ethereum -- https://arxiv.org/pdf/1901.04620.pdf
     l_s: u32,
     l_h: u32,
-    blocks_from_private: FxHashSet<HashID>,
-    blocks_from_public: FxHashSet<HashID>,
+    blocks_from_private: PassThruHashSet<HashID>,
+    blocks_from_public: PassThruHashSet<HashID>,
     best_processed_h: Heights,
     atk_start_h: Height,
     _s: PhantomData<S>,
@@ -123,6 +213,20 @@ pub enum SmChainType {
     WeightedDag,
 }
 
+impl Display for SmChainType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                SmChainType::LongestChain => "LongestChain",
+                SmChainType::WeightedChain => "WeightedChain",
+                SmChainType::WeightedDag => "WeightedDag",
+            }
+        )
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct SelfishMiningParams {
     pub chain_type: SmChainType,
@@ -130,27 +234,35 @@ pub struct SelfishMiningParams {
 
 impl<'a, S: CSystemT<'a>> SelfishMining<S> {
     fn sync_pub_to_priv(b: &S::B, atk_chain: &S::C, include_latest: bool) -> Vec<MsgToNode<S::B>> {
-        let mut pre_ret = atk_chain.find_pub_blocks_not_in_priv();
-        if include_latest {
-            pre_ret.push(b.clone());
-        }
-        let ret_blocks = pre_ret
+        let pre_ret = atk_chain.find_pub_blocks_not_in_priv();
+        let mut ret_blocks: Vec<_> = pre_ret
             .into_iter()
-            .map(|b1| MsgToNode::MsgBlock(b1, true))
+            .map(|b1| MsgToNode::MsgBlock(atk_chain.get_chain_id(), b1.0.clone(), true))
             .collect();
+        if include_latest {
+            ret_blocks.push(MsgToNode::MsgBlock(
+                atk_chain.get_chain_id(),
+                b.clone(),
+                true,
+            ));
+        }
         info!("[SM] sync pub->priv, returning: {:?}", ret_blocks);
         ret_blocks
     }
 
     fn sync_priv_to_pub(b: &S::B, atk_chain: &S::C, include_latest: bool) -> Vec<MsgToNode<S::B>> {
-        let mut pre_ret = atk_chain.find_priv_blocks_not_in_pub();
-        if include_latest {
-            pre_ret.push(b.clone());
-        }
-        let ret_blocks = pre_ret
+        let pre_ret = atk_chain.find_priv_blocks_not_in_pub();
+        let mut ret_blocks: Vec<_> = pre_ret
             .into_iter()
-            .map(|b1| MsgToNode::MsgBlock(b1, false))
+            .map(|b1| MsgToNode::MsgBlock(atk_chain.get_chain_id(), b1.0.clone(), false))
             .collect();
+        if include_latest {
+            ret_blocks.push(MsgToNode::MsgBlock(
+                atk_chain.get_chain_id(),
+                b.clone(),
+                false,
+            ));
+        }
         info!("[SM] sync priv->pub, returning: {:?}", ret_blocks);
         ret_blocks
     }
@@ -165,8 +277,9 @@ impl<'a, S: CSystemT<'a>> SelfishMining<S> {
         msg_from: &MsgToNode<S::B>,
         atk_chain: &S::C,
     ) -> Vec<MsgToNode<S::B>> {
+        let chain_id = atk_chain.get_chain_id();
         match msg_from {
-            MsgToNode::MsgBlock(b, true) => {
+            MsgToNode::MsgBlock(c_id, b, true) if *c_id == chain_id => {
                 info!("priv block mined: {}", b);
                 self.blocks_from_private.insert(b.get_hash());
                 if self.best_processed_h.private >= b.get_height() {
@@ -186,7 +299,7 @@ impl<'a, S: CSystemT<'a>> SelfishMining<S> {
                     vec![]
                 }
             }
-            MsgToNode::MsgBlock(b, false) => {
+            MsgToNode::MsgBlock(c_id, b, false) if *c_id == chain_id => {
                 info!("pub block mined: {}", b);
                 self.blocks_from_public.insert(b.get_hash());
                 if self.best_processed_h.public >= b.get_height() {
@@ -227,7 +340,7 @@ impl<'a, S: CSystemT<'a>> SelfishMining<S> {
                     Self::sync_priv_to_pub(&b, atk_chain, false)
                         .into_iter()
                         .filter(|m| match m {
-                            MsgToNode::MsgBlock(pb, _) => {
+                            MsgToNode::MsgBlock(chain_id, pb, _) => {
                                 // (pb.get_height() < b.get_height() + 2
                                 //     && pb.get_difficulty() <= b.get_difficulty())
                                 //     || (pb.get_difficulty() > b.get_difficulty()
@@ -238,6 +351,7 @@ impl<'a, S: CSystemT<'a>> SelfishMining<S> {
                         .collect()
                 }
             }
+            _ => vec![],
         }
     }
 
@@ -249,9 +363,10 @@ impl<'a, S: CSystemT<'a>> SelfishMining<S> {
         // delta_prev is always calculated before appending blocks to chains (i.e., before msgs are processed)
         let h = atk_chain.get_heights_pub_priv();
         let delta_prev = h.private - h.public;
+        let chain_id = atk_chain.get_chain_id();
 
         match msg_from {
-            MsgToNode::MsgBlock(b, is_private) => {
+            MsgToNode::MsgBlock(c_id, b, is_private) if *c_id == chain_id => {
                 match is_private {
                     false => {
                         self.blocks_from_public.insert(b.get_hash());
@@ -293,7 +408,7 @@ impl<'a, S: CSystemT<'a>> SelfishMining<S> {
                                 atk_chain
                                     .find_first_priv_blocks_better_than_public()
                                     .iter()
-                                    .map(|b| MsgToNode::MsgBlock(b.0.clone(), false))
+                                    .map(|b| MsgToNode::MsgBlock(chain_id, b.0.clone(), false))
                                     .collect()
                             }
                         };
@@ -320,6 +435,7 @@ impl<'a, S: CSystemT<'a>> SelfishMining<S> {
                     }
                 }
             }
+            _ => vec![],
         }
     }
 }
@@ -396,7 +512,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
                     _chain_other_weight += b.1.weight.value_as::<f64>().unwrap();
                 }
                 new_heads = new_heads
-                    .union(&b.0.all_prev().into_iter().collect())
+                    .union(&b.0.all_parents().into_iter().collect())
                     .cloned()
                     .collect();
             }
@@ -484,6 +600,9 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
         // never stop selfish mining
         false
     }
+    fn params_as_csv(&self) -> String {
+        format!("{}", self.params.chain_type)
+    }
 }
 
 #[cfg(test)]
@@ -516,24 +635,28 @@ mod tests {
     #[test]
     fn test_selfish_mining_pub_priv_priv_priv_pub_pub() -> Result<(), ChainErr> {
         let (mut sm, mut c) = create_sm::<SimpleCS>();
+        let chain_id = c.get_chain_id();
 
         // create a public block
         let b1 = c.draft_block(10, false).test_set_work_bits(16);
-        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b1.clone(), false), &c);
-        assert_eq!(sm_msgs, vec![MsgToNode::MsgBlock(b1.clone(), true)]);
+        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(chain_id, b1.clone(), false), &c);
+        assert_eq!(
+            sm_msgs,
+            vec![MsgToNode::MsgBlock(chain_id, b1.clone(), true)]
+        );
         // simulate the actions from msgs
         c.add_block(b1.clone(), false)?;
         c.add_block(b1.clone(), true)?;
 
         // create a private block (lead=1)
         let b2 = c.draft_block(20, true).test_set_work_bits(16);
-        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b2.clone(), true), &c);
+        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(chain_id, b2.clone(), true), &c);
         assert_eq!(sm_msgs, vec![]);
         c.add_block(b2.clone(), true)?;
 
         // another priv block (lead=2)
         let b3 = c.draft_block(30, true).test_set_work_bits(16);
-        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b3.clone(), true), &c);
+        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(chain_id, b3.clone(), true), &c);
         // -- NOTE, we should only see a msg on a private block when there are 2 valid heads (1 pub, 1 'priv')
         assert_eq!(
             sm_msgs,
@@ -544,7 +667,7 @@ mod tests {
 
         // another priv block (lead=3)
         let b4 = c.draft_block(40, true).test_set_work_bits(16);
-        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b4.clone(), true), &c);
+        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(chain_id, b4.clone(), true), &c);
         assert_eq!(
             sm_msgs,
             vec![],
@@ -554,11 +677,11 @@ mod tests {
 
         // add a public block (lead=2)
         let b5 = c.draft_block(41, false).test_set_work_bits(16);
-        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b5.clone(), false), &c);
+        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(chain_id, b5.clone(), false), &c);
         // since a public block was published we want to publish a competing priv block
         assert_eq!(
             sm_msgs,
-            vec![MsgToNode::MsgBlock(b2.clone(), false)],
+            vec![MsgToNode::MsgBlock(chain_id, b2.clone(), false)],
             "publish priv on new pub block"
         );
         c.add_block(b5.clone(), false)?;
@@ -566,26 +689,29 @@ mod tests {
 
         // add another priv block then pub block
         let b5a = c.draft_block(45, true).test_set_work_bits(16);
-        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b5a.clone(), true), &c);
+        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(chain_id, b5a.clone(), true), &c);
         assert_eq!(sm_msgs, vec![]);
         c.add_block(b5a.clone(), true)?;
 
         let b5b = c.draft_block(45, false).test_set_work_bits(16);
-        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b5b.clone(), false), &c);
-        assert_eq!(sm_msgs, vec![MsgToNode::MsgBlock(b3.clone(), false)]);
+        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(chain_id, b5b.clone(), false), &c);
+        assert_eq!(
+            sm_msgs,
+            vec![MsgToNode::MsgBlock(chain_id, b3.clone(), false)]
+        );
         c.add_block(b3.clone(), false)?;
         c.add_block(b5b.clone(), false)?;
 
         // add a public block (lead=1)
         let b6 = c.draft_block(51, false).test_set_work_bits(16);
-        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b6.clone(), false), &c);
+        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(chain_id, b6.clone(), false), &c);
         // since a public block was published we want to publish a competing priv block
         // todo!("see todo in pub/2 branch");
         assert_eq!(
             sm_msgs,
             vec![
-                MsgToNode::MsgBlock(b4.clone(), false),
-                MsgToNode::MsgBlock(b5a.clone(), false)
+                MsgToNode::MsgBlock(chain_id, b4.clone(), false),
+                MsgToNode::MsgBlock(chain_id, b5a.clone(), false)
             ],
             "publish ALL priv on new pub block with lead=1"
         );
@@ -595,7 +721,7 @@ mod tests {
 
         assert_eq!(
             c.get_best_blocks(false),
-            &FxHashSet::from_iter([b5a.get_hash()].iter().cloned()),
+            &PassThruHashSet::from_iter([b5a.get_hash()].iter().cloned()),
             "previously private block is exclusively winning on public chain"
         );
 
@@ -617,13 +743,14 @@ mod tests {
     #[test]
     fn test_selfish_mining_pub_priv_pub_priv() -> Result<(), ChainErr> {
         let (mut sm, mut c) = create_sm::<SimpleCS>();
+        let chain_id = c.get_chain_id();
 
         // create a public block
         let b1 = c.draft_block(10, false).test_set_work_bits(16);
-        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b1.clone(), false), &c);
+        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(chain_id, b1.clone(), false), &c);
         assert_eq!(
             sm_msgs,
-            vec![MsgToNode::MsgBlock(b1.clone(), true)],
+            vec![MsgToNode::MsgBlock(chain_id, b1.clone(), true)],
             "public block relayed to private chain"
         );
         // simulate the actions from msgs
@@ -633,17 +760,17 @@ mod tests {
 
         // create a private block (lead=1)
         let b2 = c.draft_block(20, true).test_set_work_bits(16);
-        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b2.clone(), true), &c);
+        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(chain_id, b2.clone(), true), &c);
         assert_eq!(sm_msgs, vec![], "no new msgs on this priv block");
         c.add_block(b2.clone(), true)?;
         println!("Added b2 to priv chain");
 
         // create a public block (lead=0, but fork)
         let b2a = c.draft_block(20, false).test_set_work_bits(16);
-        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b2a.clone(), false), &c);
+        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(chain_id, b2a.clone(), false), &c);
         assert_eq!(
             sm_msgs,
-            vec![MsgToNode::MsgBlock(b2.clone(), false)],
+            vec![MsgToNode::MsgBlock(chain_id, b2.clone(), false)],
             "publish priv block so that we have 2 competing heads"
         );
         c.add_block(b2a.clone(), false)?;
@@ -662,13 +789,13 @@ mod tests {
             b2.get_hash(),
             "this private block should build on the private chain only."
         );
-        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b3.clone(), true), &c);
+        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(chain_id, b3.clone(), true), &c);
         // -- NOTE, we should only see a msg on a private block when there are 2 valid heads (1 pub, 1 'priv')
         assert_eq!(
             sm_msgs,
             vec![
-                MsgToNode::MsgBlock(b2.clone(), false),
-                MsgToNode::MsgBlock(b3.clone(), false)
+                MsgToNode::MsgBlock(chain_id, b2.clone(), false),
+                MsgToNode::MsgBlock(chain_id, b3.clone(), false)
             ],
             "publish better priv block immediately to resolve fork"
         );
@@ -679,7 +806,7 @@ mod tests {
 
         assert_eq!(
             c.get_best_blocks(false),
-            &FxHashSet::from_iter([b3.get_hash()].iter().cloned()),
+            &PassThruHashSet::from_iter([b3.get_hash()].iter().cloned()),
             "previously private block is exclusively winning on public chain"
         );
 
@@ -701,20 +828,21 @@ mod tests {
     #[test]
     fn test_selfish_mining_priv_pub_pub() -> Result<(), ChainErr> {
         let (mut sm, mut c) = create_sm::<SimpleCS>();
+        let chain_id = c.get_chain_id();
 
         // create a private block
         let b2 = c.draft_block(20, true).test_set_work_bits(16);
-        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b2.clone(), true), &c);
+        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(chain_id, b2.clone(), true), &c);
         assert_eq!(sm_msgs, vec![], "no new msgs on this priv block");
         c.add_block(b2.clone(), true)?;
         println!("Added b2 to priv chain");
 
         // create a public block (lead=0, but fork)
         let b2a = c.draft_block(20, false).test_set_work_bits(16);
-        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b2a.clone(), false), &c);
+        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(chain_id, b2a.clone(), false), &c);
         assert_eq!(
             sm_msgs,
-            vec![MsgToNode::MsgBlock(b2.clone(), false)],
+            vec![MsgToNode::MsgBlock(chain_id, b2.clone(), false)],
             "publish priv block so that we have 2 competing heads"
         );
         c.add_block(b2a.clone(), false)?;
@@ -738,12 +866,12 @@ mod tests {
             b2a.get_hash(),
             "this pub block should build on the pub chain only."
         );
-        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(b3a.clone(), false), &c);
+        let sm_msgs = sm.on_msg(&MsgToNode::MsgBlock(chain_id, b3a.clone(), false), &c);
         assert_eq!(
             sm_msgs,
             vec![
-                MsgToNode::MsgBlock(b2a.clone(), true),
-                MsgToNode::MsgBlock(b3a.clone(), true)
+                MsgToNode::MsgBlock(chain_id, b2a.clone(), true),
+                MsgToNode::MsgBlock(chain_id, b3a.clone(), true)
             ],
             "publish pub blocks to priv chain b/c pub won"
         );
@@ -753,7 +881,7 @@ mod tests {
 
         assert_eq!(
             c.get_best_blocks(true),
-            &FxHashSet::from_iter([b3a.get_hash()].iter().cloned()),
+            &PassThruHashSet::from_iter([b3a.get_hash()].iter().cloned()),
             "pub block is exclusively"
         );
 
