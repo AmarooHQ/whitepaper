@@ -211,7 +211,7 @@ def read_csv_data(fname, chain_ty: Literal['por', 'trad']):
     return n_trials, max_ix, only_target, q, ds_target, series, ms_elapsed, series2
 
 
-por_line_markers = ['x','3','+','*','4'] * 10
+por_line_markers = ['x','*','3','+','4'] * 10
 trad_line_markers = ['s','o','P','D','X'] * 10
 
 line_markers = {
@@ -252,6 +252,15 @@ class Comment:
         }
 
 
+def gen_cec_prob_str(ds_target, is_trad=False, scaled=None):
+    extra_pad = '  ' if int(ds_target) < 10 else ''
+    # spacing at end is to help them line up in plot legend
+    cec_prob = f"$P(q; N_1 = x; c = {ds_target})$   "
+    cec_trad_prob = f"$P(q; N_1 = 1; c = {ds_target}x)$ "
+    cec_scaled_prob = f"$P(q; N_1 = x / {scaled}; c = {ds_target})$"
+    return (cec_trad_prob if is_trad else (cec_scaled_prob if scaled else cec_prob)) + extra_pad
+
+
 def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_discounted=False,
         title=None, x_label=None, y_label=None, comment: Optional[Comment] = None,
         save_png=False, png_filename=None,
@@ -270,6 +279,8 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
     por_count = -1
     trad_count = -1
     for csv_i, (fname, chain_ty, label_extra) in enumerate(csv_files):
+        is_por = chain_ty == 'por'
+        is_trad = not is_por
         label_extra = label_extra or ''
         por_plot_opts = None
         if not isinstance(label_extra, str) and chain_ty == 'por':
@@ -278,20 +289,26 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         n_trials, max_ix, block_target, _q, ds_target, csv_data, ms_elapsed, d2 = read_csv_data(fname, chain_ty)
         csv_series.append(csv_data)
         if chain_ty == 'por':
-            ty_str = 'PoR'
+            ty_str = 'PoR: '
             por_count += 1
         else:
-            ty_str = 'Trad'
+            ty_str = 'Trad:'
             trad_count += 1
         z_order = 2 + (.1 if chain_ty == 'por' else -.1)
+
+        cec_prob = f"$P(q; N_1 = x; c = {ds_target})$   "
+        cec_trad_prob = f"$P(q; N_1 = 1; c = {ds_target}x)$ "
 
         log_ds_target = ds_target
         if por_plot_opts and por_plot_opts.cec_scaled:
             csv_data = pd.Series(csv_data.values, index=[x * por_plot_opts.cec_scaled for x in csv_data.index])
             log_ds_target = int(ds_target / por_plot_opts.cec_scaled)
+            cec_prob = f"$P(q; N_1 = x / {por_plot_opts.cec_scaled}; c = {ds_target})$"
+
+        prob_math = gen_cec_prob_str(ds_target, is_trad=is_trad, scaled=por_plot_opts and por_plot_opts.cec_scaled)
 
         csv_data.plot(
-            label=f"{ty_str}: $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $n \\geq {n_trials}$; ds_win={ds_target}; {label_extra or ''}",
+            label=f"y = {prob_math} --- {ty_str} $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $n \\geq {n_trials}$; ds_win={ds_target}; {label_extra or ''}",
             marker=get_line_marker(chain_ty, por_count, trad_count),
             zorder=z_order,
             **kwargs)
@@ -322,7 +339,8 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
             theoretical_data = ds_theoretical_series(multipliers, q=q, after_n_confs=ds_target)
             t_series.append(theoretical_data)
             td_max_ys.append(theoretical_data.max())
-            theoretical_data.plot(label=f"Theoretical Trad: $q={q:.2f}$ (confs = ${ds_target}x$)", zorder=2, linestyle="dashed", linewidth=2.0)
+            prob_math = gen_cec_prob_str(ds_target, is_trad=True)
+            theoretical_data.plot(label=f"y = {prob_math} --- Theoretical Trad: $q={q:.2f}$", zorder=2, linestyle="dashed", linewidth=2.0)
     max_y = max(max(td_max_ys), max(s.max() for s in csv_series) if csv_series else 0)
     print(f"Done. Now drawing.")
 
@@ -561,6 +579,14 @@ def main(filter_fname: Optional[str], n_jobs: int):
         ('0.44', '20'): (0, 20),
     })
 
+    def compare_e12_e13_e15(q, t) -> list[CsvFileToPlot]:
+        return [
+            (f'exp-12-repeat-8-RDoubleSpendWork-q{q}-t{t}-p50-H50-WeightedDag-xxh3.csv', 'por', None),
+            (exp_13_csv_name(q, t, exp_num='13', strat="DoubleSpendWork", cs="WeightedDag"), 'por', None),
+            (exp_13_csv_name(q, t, exp_num='15', strat="DoubleSpendWork", cs="WeightedDag", daa=500), 'por', None),
+        ]
+
+
     def gen_por_equiv_csvs(q, t) -> list[CsvFileToPlot]:
         return [
             (f'exp-12-repeat-8-RDoubleSpend-q{q}-t{t}-p50-H50-WeightedChain-xxh3.csv', 'por', 'DS+WC'),
@@ -574,12 +600,12 @@ def main(filter_fname: Optional[str], n_jobs: int):
     def exp_13_csv_name(q, t, bt=50, hr=50, strat="DoubleSpend", cs="WeightedChain", daa=100, exp_num='13'):
         return f'exp_{exp_num}_RandHR_q={q}_dswin={t}_bt={bt}_hr={hr}_{strat}_{cs}_DAA{daa}.csv'
 
-    def gen_por_equiv_rand_hrs_csvs(q, t, bt=50, hr=50, only_real_world=False, exp_num='13', aux_num='3') -> list[CsvFileToPlot]:
+    def gen_por_equiv_rand_hrs_csvs(q, t, bt=50, hr=50, only_real_world=False, exp_num='13', aux_num='3', daa='100') -> list[CsvFileToPlot]:
         csvs = [
-            (exp_13_csv_name(q, t, bt, hr, exp_num=exp_num, strat="DoubleSpend", cs="WeightedChain"), 'por', 'DS+WC'),
-            (exp_13_csv_name(q, t, bt, hr, exp_num=exp_num, strat="DoubleSpend", cs="WeightedDag"), 'por', 'DS+WD'),
-            (exp_13_csv_name(q, t, bt, hr, exp_num=exp_num, strat="DoubleSpendWork", cs="WeightedChain"), 'por', 'DSW+WC'),
-            (exp_13_csv_name(q, t, bt, hr, exp_num=exp_num, strat="DoubleSpendWork", cs="WeightedDag"), 'por', 'DSW+WD'),
+            (exp_13_csv_name(q, t, bt, hr, exp_num=exp_num, daa=daa, strat="DoubleSpend", cs="WeightedChain"), 'por', 'DS+WC'),
+            (exp_13_csv_name(q, t, bt, hr, exp_num=exp_num, daa=daa, strat="DoubleSpend", cs="WeightedDag"), 'por', 'DS+WD'),
+            (exp_13_csv_name(q, t, bt, hr, exp_num=exp_num, daa=daa, strat="DoubleSpendWork", cs="WeightedChain"), 'por', 'DSW+WC'),
+            (exp_13_csv_name(q, t, bt, hr, exp_num=exp_num, daa=daa, strat="DoubleSpendWork", cs="WeightedDag"), 'por', 'DSW+WD'),
             # (f'exp_aux{aux_num}_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', 'DSW+WD (Best Trad)'),
             # (f'exp_aux{aux_num}_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpend_WeightedChain_DAA100.csv', 'trad', 'DS+WC (Worst Trad)'),
             (f'exp_aux{aux_num}_q={q}_dsconf-base={t}_bt={bt}_hr={hr}_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', 'DSW+WD (Best Trad)'),
@@ -590,11 +616,15 @@ def main(filter_fname: Optional[str], n_jobs: int):
         return csvs
 
     # $P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$
-    def gen_por_cec_ext_test(q, t) -> list[CsvFileToPlot]:
+    def gen_por_cec_ext_test(q, t, exp, aux, bt, hr, daa) -> list[CsvFileToPlot]:
         return [
-            (exp_13_csv_name(q, t, strat="DoubleSpendWork", cs="WeightedDag"), 'por', None),
-            (exp_13_csv_name(q, f'{2*int(t):d}', strat="DoubleSpendWork", cs="WeightedDag"), 'por', PorPlotOpts(cec_scaled=2.0)),
+            (exp_13_csv_name(q, t, bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag"), 'por', None),
+            (exp_13_csv_name(q, f'{2*int(t):d}', bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag"), 'por', PorPlotOpts(cec_scaled=2)),
         ]
+
+
+    CEC_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = 1; c = NC)$"
+    CEC_EXT_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$"
 
 
     jobs_to_save: list[SavePlot] = [
@@ -617,7 +647,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
     ] + [
         SavePlot(
             csv_compare_aux_3(q, t),
-            f"Traditional Doublespend Comparison\n$N_1=1$; $q={q}$; doublespend target: ${t}\cdot x$",
+            f"Traditional Doublespend Comparison\n$N_1=1$; $q={q}$; doublespend target: ${t} x$",
             f"png/trad_ds_comparison_q={q}_t={t}.png",
             x_label=f"x = Confirmations / {t}",
             x_range=q_t_to_x_range[(q, t)],
@@ -635,7 +665,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             #     (f'exp_aux3_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpend_WeightedChain_DAA100.csv', 'trad', 'DS+WC'),
             # ],
             gen_por_equiv_csvs(q, t),
-            f"PoR Confirmation Equivalence Conjecture | $q={q}$",
+            f"PoR Confirmation Equivalence Conjecture | $q={q}$\n{CEC_TITLE_STR}",
             f"png/por_equiv_q={q}_t{t}.png",
             x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
             x_range=q_t_to_x_range[(q, t)],
@@ -643,41 +673,53 @@ def main(filter_fname: Optional[str], n_jobs: int):
     ] + [
         SavePlot(
             gen_por_equiv_rand_hrs_csvs(q, t),
-            f" PoR Confirmation Equivalence Conjecture \n $q={q}$ | hash-rate randomly distributed ($q+p=1$ true network-wide)",
+            f" PoR Confirmation Equivalence Conjecture \n $q={q}$ | hash-rate randomly distributed ($q+p=1$ true network-wide) \n{CEC_TITLE_STR}",
             f"png/por_equiv_rand_hr_q={q}_t{t}.png",
             x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
     ] + [
         SavePlot(
-            gen_por_equiv_rand_hrs_csvs(q, t, bt, hr, only_real_world=True, exp_num=exp, aux_num=aux),
-            f" PoR Confirmation Equivalence Conjecture | WeightedDag + DoubleSpendWork \n $q={q}$ | hash-rate randomly distributed ($q+p=1$ true network-wide)",
-            f"png/por_equiv_onlyrealworld_rand_hr_q={q}_t{t}_bt={bt}_hr={hr}.png",
+            gen_por_equiv_rand_hrs_csvs(q, t, bt, hr, only_real_world=True, exp_num=exp, aux_num=aux, daa=daa),
+            f" PoR Confirmation Equivalence Conjecture | WeightedDag + DoubleSpendWork \n $q={q}$ | hash-rate randomly distributed ($q+p=1$ true network-wide)\n{CEC_TITLE_STR}",
+            f"png/por_equiv_onlyrealworld_rand_hr_e{exp}_a{aux}_q={q}_t{t}_bt={bt}_hr={hr}_daa={daa}.png",
             x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48']
             for t in ['5', '10', '20']
-            for (exp, aux, bt, hr) in [('13', '3', '50', '50'), ('14', '14', '100', '100')] # , ('15', '3', '50', '50')]
+            for (exp, aux, bt, hr, daa) in [('13', '3', '50', '50', '100'), ('14', '14', '100', '100', '100'), ('15', '3', '50', '50', '500')] # , ('15', '3', '50', '50')]
     ] + [
         # $P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$
         SavePlot(
-            gen_por_cec_ext_test(q, t),
-            f" PoR Confirmation Equivalence Conjecture (Extended) \n $q={q}$ | WD+DSW | random hash rate distribution \n $P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$",
-            f"png/por_equiv_orw_ext-cec_q={q}_t{t}.png",
+            gen_por_cec_ext_test(q, t, exp=exp, aux=aux, bt=bt, hr=hr, daa=daa),
+            f" PoR Confirmation Equivalence Conjecture (Extended) \n $q={q}$ | WD+DSW | random hash rate distribution \n{CEC_EXT_TITLE_STR}",
+            f"png/por_equiv_orw_ext-cec_e{exp}_q={q}_t{t}.png",
             x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10']
+            for (exp, aux, bt, hr, daa) in [('13', '3', '50', '50', '100'), ('14', '14', '100', '100', '100'), ('15', '3', '50', '50', '500')]
     ] + [
         SavePlot(
             [
                 (f'exp-12-repeat-8-RDoubleSpend-q{q}-t{t}-p50-H50-WeightedChain-xxh3.csv', 'por', None),
                 (f'exp_aux2_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpend_WeightedChain_DAA100.csv', 'trad', None),
             ],
-            f"Confirmation Equivalence Conjecture | PoR vs Traditional vs Theoretical \n DS+WC | $q={q}$ | DoubleSpend Target: ${t} \\cdot x$ ",
+            f"Confirmation Equivalence Conjecture | PoR vs Traditional vs Theoretical \n DS+WC | $q={q}$ | DoubleSpend Target: ${t} \\cdot x$ \n{CEC_TITLE_STR}",
             f"png/por_eqiv_hyp_vs_trad_q={q}_t={t}_DS+WC.png",
             x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44'] for t in ['5', '10', '20']  # , '0.48'
+    ] + [
+        # compare results from diff experiments
+        # note: experiment 12 has uniform HR distribution (all chains have same HR and attacker always has q proportion)
+        #       e13,e15 have random HR distributions
+        SavePlot(
+            compare_e12_e13_e15(q, t),
+            f"(Comparison of experiments 12,13,15)",
+            f"png/compare_e12-13-15_q={q}_t={t}.svg",
+            x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
+            x_range=q_t_to_x_range[(q, t)],
+        ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
     ] + [
         SavePlot([], f"Theoretical doublespend success rates given\n $q \\in \\{{{','.join(qs)}\\}}$ after ${t} \\cdot x$ confirmations. ",
             # f"png/theoretical_q={q}_t={t}.svg",
