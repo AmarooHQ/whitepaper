@@ -103,6 +103,8 @@ Term & Definition & Reference \\
 
 \newpage
 
+\todo{Move list of figs/tables to after appendix (they're basically an index of sorts -- pressing 'end' will get there immediately which is useful)}
+
 \appendix
 
 %% END ### RELEASE

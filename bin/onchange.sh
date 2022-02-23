@@ -24,6 +24,8 @@
 # Released to Public Domain. Use it as you like.
 #
 
+_BIN_DIR=$(dirname $0)
+
 #. _bash_colors.sh
 . $(dirname $0)/_ci_logs.sh
 
@@ -55,7 +57,7 @@ msg_good "Running \`$CMD_TO_RUN\` in 1s for first time"
 (sleep 1 && (cd $CURRENT_DIR && eval "$CMD_TO_RUN") || true)
 
 (
-  inotifywait -e "$EVENTS" -m -r --format '%:e %f' $DIRECTORY | (
+  inotifywait -e "$EVENTS" -m -r --format '%:e %f' $DIRECTORY | $_BIN_DIR/_stdin_filter_tex_files.py | (
     WAITING="";
     while true; do
         LINE="";

@@ -159,6 +159,28 @@ As we can optimize this model, we can simulate many attacks quickly; so we can e
 
 \todo{asdf - continue method}
 
+\begin{itemize}
+    \item Either uniform or random hash rate.
+    \item Multiple doublespend thresholds: 5, 10, 20.
+\end{itemize}
+
+Simultaneously graph:
+
+Graph 1:
+PoR: $P(q; N_1 = x; c = C)$ vs Traditional: $P(q; N_1 = 1; c = Cx)$
+
+Graph 2:
+Simplex A vs Simplex B
+\begin{align*}
+    \text{Simplex A} \to & & P(q; N_1 = x / 2; c = C) &\approx P(q; N_1 = x; c = 2C) & & \leftarrow \text{Simplex B} \\
+    & & P(q; N_1 = x; c = C) &\approx P(q; N_1 = 2x; c = 2C) & &
+\end{align*}
+
+Both graphs should be basically overlapping
+
+Also compare to theoretical probability based on \href{https://web.archive.org/web/20220209100515/https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{Analysis of hashrate-based double-spending}.
+
+
 \subsubsubsubsection{Scope and Constraints}
 
 This experiment is not intended to be comprehensive -- many significant real-world factors are basically ignored: e.g., block propagation latency, transaction processing overhead, geographic latency, bandwidth constraints, etc.
@@ -173,6 +195,17 @@ In essence, we want to simulate a \emph{specific} attack, so the implementation 
 So, while it is \emph{possible} that a poor implementation of a simplex could compromise its security, we'll assume these kinds of design flaws are \emph{in principle} avoidable.
 
 \todoDraftOnly{Test chains of different hash-rates + anything else to cover bases re CEC}
+
+\subsubsubsubsection{Validating the Model}
+
+\todo{
+    compare simulation of doublespend to theoretical results
+}
+
+\todo{
+    Details of the model -- WeightedDag, DoubleSpendWork, etc.
+}
+
 
 \subsubsubsubsection{Interpreting the Results}
 
