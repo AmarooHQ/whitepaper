@@ -25,18 +25,21 @@ export DAA2_N_BLOCKS=100
 # built in bash feature
 SECONDS=0
 
-for strat in DoubleSpendWork DoubleSpend; do
+for strat in DoubleSpend; do
   # loop a few times so we incrementally generate data over the whole x-axis
   for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
+    LAST_REPEAT_ELAPSED=$SECONDS
     export ATK_STRATEGY=$strat
-    for crypto_sys in WeightedChain WeightedDag; do #LongestChain; do
+    for crypto_sys in WeightedChain; do #LongestChain; do
       export CRYPTO_SYSTEM=$crypto_sys
       for atk_r in 0.40 0.44 0.48; do # 0.40 0.44 0.48 0.36; do
         export ATK_RATIO=$atk_r
         for ds_conf_base in 5 10 20; do
           export OUT_FILE=${OUT_F_PREFIX}_q=${ATK_RATIO}_dsconf-base=${ds_conf_base}_bt=${B_PERIOD}_hr=${HR_PER_CHAIN}_${ATK_STRATEGY}_${CRYPTO_SYSTEM}_DAA${DAA2_N_BLOCKS}.csv
+
           elapsed=$SECONDS
-          export PROGRESS_STR="[$repeat_i/$REPEAT_TIMES | $elapsed s] / rs:$strat / cs:$crypto_sys / q:$atk_r / ds:$ds_conf_base"
+          this_repeat=$(echo $elapsed-$LAST_REPEAT_ELAPSED | bc)
+          export PROGRESS_STR=">> [$repeat_i/$REPEAT_TIMES | $LAST_REPEAT_ELAPSED +$this_repeat s] / rs:$strat / cs:$crypto_sys / q:$atk_r / ds:$ds_conf_base"
 
           if [[ ! -f $OUT_FILE ]]; then
             cp result-columns.csv $OUT_FILE

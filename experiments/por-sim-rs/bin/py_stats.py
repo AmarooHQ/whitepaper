@@ -571,17 +571,19 @@ def main(filter_fname: Optional[str], n_jobs: int):
             (f'exp_aux3_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpend_WeightedChain_DAA100.csv', 'trad', 'DS+WC'),
         ]
 
-    def exp_13_csv_name(q, t, bt=50, hr=50, strat="DoubleSpend", cs="WeightedChain", daa=100):
-        return f'exp_13_RandHR_q={q}_dswin={t}_bt={bt}_hr={hr}_{strat}_{cs}_DAA{daa}.csv'
+    def exp_13_csv_name(q, t, bt=50, hr=50, strat="DoubleSpend", cs="WeightedChain", daa=100, exp_num='13'):
+        return f'exp_{exp_num}_RandHR_q={q}_dswin={t}_bt={bt}_hr={hr}_{strat}_{cs}_DAA{daa}.csv'
 
-    def gen_por_equiv_rand_hrs_csvs(q, t, only_real_world=False) -> list[CsvFileToPlot]:
+    def gen_por_equiv_rand_hrs_csvs(q, t, bt=50, hr=50, only_real_world=False, exp_num='13', aux_num='3') -> list[CsvFileToPlot]:
         csvs = [
-            (exp_13_csv_name(q, t, strat="DoubleSpend", cs="WeightedChain"), 'por', 'DS+WC'),
-            (exp_13_csv_name(q, t, strat="DoubleSpend", cs="WeightedDag"), 'por', 'DS+WD'),
-            (exp_13_csv_name(q, t, strat="DoubleSpendWork", cs="WeightedChain"), 'por', 'DSW+WC'),
-            (exp_13_csv_name(q, t, strat="DoubleSpendWork", cs="WeightedDag"), 'por', 'DSW+WD'),
-            (f'exp_aux3_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', 'DSW+WD (Best Trad)'),
-            (f'exp_aux3_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpend_WeightedChain_DAA100.csv', 'trad', 'DS+WC (Worst Trad)'),
+            (exp_13_csv_name(q, t, bt, hr, exp_num=exp_num, strat="DoubleSpend", cs="WeightedChain"), 'por', 'DS+WC'),
+            (exp_13_csv_name(q, t, bt, hr, exp_num=exp_num, strat="DoubleSpend", cs="WeightedDag"), 'por', 'DS+WD'),
+            (exp_13_csv_name(q, t, bt, hr, exp_num=exp_num, strat="DoubleSpendWork", cs="WeightedChain"), 'por', 'DSW+WC'),
+            (exp_13_csv_name(q, t, bt, hr, exp_num=exp_num, strat="DoubleSpendWork", cs="WeightedDag"), 'por', 'DSW+WD'),
+            (f'exp_aux{aux_num}_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', 'DSW+WD (Best Trad)'),
+            (f'exp_aux{aux_num}_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpend_WeightedChain_DAA100.csv', 'trad', 'DS+WC (Worst Trad)'),
+            # (f'exp_aux{aux_num}_q={q}_dsconf-base={t}_bt={bt}_hr={hr}_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', 'DSW+WD (Best Trad)'),
+            # (f'exp_aux{aux_num}_q={q}_dsconf-base={t}_bt={bt}_hr={hr}_DoubleSpend_WeightedChain_DAA100.csv', 'trad', 'DS+WC (Worst Trad)'),
         ]
         if only_real_world:
             return csvs[3:]
@@ -648,12 +650,14 @@ def main(filter_fname: Optional[str], n_jobs: int):
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
     ] + [
         SavePlot(
-            gen_por_equiv_rand_hrs_csvs(q, t, only_real_world=True),
+            gen_por_equiv_rand_hrs_csvs(q, t, bt, hr, only_real_world=True, exp_num=exp),
             f" PoR Confirmation Equivalence Conjecture | WeightedDag + DoubleSpendWork \n $q={q}$ | hash-rate randomly distributed ($q+p=1$ true network-wide)",
-            f"png/por_equiv_onlyrealworld_rand_hr_q={q}_t{t}.png",
+            f"png/por_equiv_onlyrealworld_rand_hr_q={q}_t{t}_bt={bt}_hr={hr}.png",
             x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
             x_range=q_t_to_x_range[(q, t)],
-        ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
+        ) for q in ['0.40', '0.44', '0.48']
+            for t in ['5', '10', '20']
+            for (exp, bt, hr) in [('13', '50', '50'), ('14', '100', '100')]
     ] + [
         # $P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$
         SavePlot(
