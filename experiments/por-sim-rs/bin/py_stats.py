@@ -597,10 +597,13 @@ def main(filter_fname: Optional[str], n_jobs: int):
             (f'exp_aux3_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpend_WeightedChain_DAA100.csv', 'trad', 'DS+WC'),
         ]
 
+    def exp_12_csv_name(q, t, bt=50, hr=50, strat="DoubleSpend", cs="WeightedChain", daa=None, exp_num=None):
+        return f'exp-12-repeat-8-R{strat}-q{q}-t{t}-p{bt}-H{hr}-{cs}-xxh3.csv'
+
     def exp_13_csv_name(q, t, bt=50, hr=50, strat="DoubleSpend", cs="WeightedChain", daa=100, exp_num='13'):
         return f'exp_{exp_num}_RandHR_q={q}_dswin={t}_bt={bt}_hr={hr}_{strat}_{cs}_DAA{daa}.csv'
 
-    def exp_16_csv_name(q, t, bt=50, hr=50, strat="DoubleSpendWork", cs="WeightedDag", daa=100, exp_num='16', hashname='blake'):
+    def exp_16_csv_name(q, t, bt=50, hr=50, strat="DoubleSpendWork", cs="WeightedDag", daa=100, exp_num='16', hashname='blake3'):
         return f'exp_{exp_num}_RandHR_{hashname}_q={q}_dswin={t}_bt={bt}_hr={hr}_{strat}_{cs}_DAA{daa}.csv'
 
     def gen_por_equiv_rand_hrs_csvs(q, t, bt=50, hr=50, only_real_world=False, exp_num='13', aux_num='3', daa='100') -> list[CsvFileToPlot]:
@@ -620,9 +623,14 @@ def main(filter_fname: Optional[str], n_jobs: int):
 
     # $P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$
     def gen_por_cec_ext_test(q, t, exp, aux, bt, hr, daa) -> list[CsvFileToPlot]:
+        _csv_name = exp_13_csv_name
+        if exp in ['16']:
+            _csv_name = exp_16_csv_name
+        if exp in ['12']:
+            _csv_name = exp_12_csv_name
         return [
-            (exp_13_csv_name(q, t, bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag"), 'por', None),
-            (exp_13_csv_name(q, f'{2*int(t):d}', bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag"), 'por', PorPlotOpts(cec_scaled=2)),
+            (_csv_name(q, t, bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag"), 'por', None),
+            (_csv_name(q, f'{2*int(t):d}', bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag"), 'por', PorPlotOpts(cec_scaled=2)),
         ]
 
     def gen_por_hash_comare(q, t) -> list[CsvFileToPlot]:
@@ -688,6 +696,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
     ] + [
+        # "real world" means WeightedDag + DoubleSpendWork b/c that's what's necessary in a production build
         SavePlot(
             gen_por_equiv_rand_hrs_csvs(q, t, bt, hr, only_real_world=True, exp_num=exp, aux_num=aux, daa=daa),
             f" PoR Confirmation Equivalence Conjecture | WeightedDag + DoubleSpendWork \n $q={q}$ | hash-rate randomly distributed ($q+p=1$ true network-wide)\n{CEC_TITLE_STR}",
@@ -696,7 +705,8 @@ def main(filter_fname: Optional[str], n_jobs: int):
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48']
             for t in ['5', '10', '20']
-            for (exp, aux, bt, hr, daa) in [('13', '3', '50', '50', '100'), ('14', '14', '100', '100', '100'), ('15', '3', '50', '50', '500')] # , ('15', '3', '50', '50')]
+            for (exp, aux, bt, hr, daa) in [
+                ('13', '3', '50', '50', '100'), ('14', '14', '100', '100', '100'), ('15', '3', '50', '50', '500')]
     ] + [
         # $P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$
         SavePlot(
@@ -706,7 +716,13 @@ def main(filter_fname: Optional[str], n_jobs: int):
             x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10']
-            for (exp, aux, bt, hr, daa) in [('13', '3', '50', '50', '100'), ('14', '14', '100', '100', '100'), ('15', '3', '50', '50', '500')]
+            for (exp, aux, bt, hr, daa) in [
+                    ('13', '3', '50', '50', '100'),
+                    ('14', '14', '100', '100', '100'),
+                    ('15', '3', '50', '50', '500'),
+                    ('16', '3', '50', '50', '100'),
+                    ('12', '3', '50', '50', '100'),
+                    ]
     ] + [
         SavePlot(
             [
