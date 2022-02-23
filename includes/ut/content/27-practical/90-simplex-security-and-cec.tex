@@ -62,7 +62,7 @@ So, a simplex-chain in a 2-chain simplex (wherein each simplex-chain has $\mathb
 Or, more generally, a simplex-chain in an $N$-chain simplex will, after $C$ \emph{local} confirmations, be as secure as a standalone blockchain after $NC$ confirmations.
 
 This is something we can test!
-(See \autoref{sec:por-simulation-results} for that.)
+(See \autoref{sec:por-simulation-experiment} for that.)
 
 As blockchain architects, if the CEC is true, then UT allows us to maintain security by trading \emph{waiting time} for \emph{more simplex-chains!}
 
@@ -72,20 +72,20 @@ As blockchain architects, if the CEC is true, then UT allows us to maintain secu
 
 \subsubsubsection{Generalizing Doublespends}
 
-With a traditional blockchain, the network has no "memory" of work (hashes) that have been done but are not accounted for in the main chain.
+With a traditional blockchain, the network has no ``memory'' of work (hashes) that have been done but are not accounted for in the main chain.
 Specifically, the network gains no knowledge of how much work has been done \emph{between} block.
 This is almost self-evident: each block is the \emph{sole} way that work can be \emph{added} to the chain.
-Naturally, there is no smaller unit of contributed work than an individual block -- so there's no "memory".\footnote{
+Naturally, there is no smaller unit of contributed work than an individual block -- so there's no ``memory''.\footnote{
     We're not concerned with things like \emph{weak blocks} or super-block hybrid designs; though it's possible that doublespend methodology for those designs has some overlap with this section.
 }
 
 When an attacker publishes a heavier chain-segment which causes a reorganization, it is \emph{immediately} in the interests of miners to begin building on the attacker's best block.
 A heavier chain-segment is \emph{decisively better} in all cases.
 That may seem so obvious that it isn't worth mentioning, but it's actually a \emph{specific case} that only works for traditional blockchains.
-If there were some "memory", it might be worth miners \emph{continuing} mining their \emph{existing} block, \emph{instead} of reorganizing and building on the attacker's best block.
+If there were some ``memory'', it might be worth miners \emph{continuing} mining their \emph{existing} block, \emph{instead} of reorganizing and building on the attacker's best block.
 
-What kind of "memory" could there be?
-Are \emph{Proofs of Reflection} a "memory"?
+What kind of ``memory'' could there be?
+Are \emph{Proofs of Reflection} a ``memory''?
 
 As it turns out: yes.
 
@@ -102,7 +102,7 @@ Each $L$ block, in and of itself, only adds $\sim w$ weight to the $L$ chain.
 However, if that \emph{draft block} contains $\sim n$ pending PoRs, and each PoR provides $\sim w$ weight on average, then a valid block (created from that draft) will contribute, via PoRs, $\sim nw$ weight to the \emph{honest chain-segment}.
 Thus, the miner has this choice: reorganize to the attacker's chain-segment and mine on top of a chain with weight $W_A$, \emph{or} continue mining on the honest chain-segment that weighs $W_H + nw$.
 
-The $nw$ term is that "memory", and it makes all the difference.
+The $nw$ term is that ``memory'', and it makes all the difference.
 Only when $W_A > W_H + nw$ is it safe for an attacker to publish their chain-segment -- then it is \emph{decisively better} than the honest chain-segment.
 If, however, the attacker publishes their chain-segment when $W_H < W_A < W_H + nw$: the best chain-segment for honest miners to mine is \emph{still} the honest chain-segment, not the attacker's!
 
@@ -114,12 +114,12 @@ There are some subtleties to consider if chains are DAGs or use GHOST: both chai
 If the weight of PoRs is not taken into account (or applied after evaluating the order of parents), then the attacker's chain-segment takes priority when $W_A > W_H$.
 This rule conflicts with what we discussed above, so it must be that parents are ordered based on their chain-weights \emph{including} any PoRs in that block -- the honest chain-segment should take priority when $W_A < W_H + nw$.
 Also, note that this is why the weight of PoRs is attributed to the \emph{reflected} block (usually a parent) rather than the block that contains the PoRs.
-In essence, the inclusion of this "memory" requires that the fork rule take \emph{context} into account -- particularly the context of the descendant block.
+In essence, the inclusion of this ``memory'' requires that the fork rule take \emph{context} into account -- particularly the context of the descendant block.
 This is not a paradox because the fork rule is \emph{only} used to choose the priority chain in the context of some descendant block (even if that block is an invalid draft).
 
 \subsubsubsection{Testing the Confirmation Equivalence Conjecture}
 
-\label{sec:por-simulation-results}
+\label{sec:por-simulation-experiment}
 
 Let's test the Confirmation Equivalence Conjecture.
 
@@ -127,15 +127,24 @@ Let's test the Confirmation Equivalence Conjecture.
 
 The hypothesis is that: doublespends against an \emph{individual simplex-chain} in an $N$-chain simplex after $C$ \emph{local} confirmations are \emph{as hard} as doublespends against a traditional blockchain after $N\cdot C$ confirmations.
 
-Define $P(N_1 = N; c = C; q = Q)$ (for some given $N$, $C$, and $Q$) to be the probability of an attack succeeding after $c$ confirmations against a simplex with $N_1$ simplex-chains, given an attacker with $q$ proportion of the network hash-rate.
+Define $P(q; N_1 = N; c = C)$ (for some given $N$ and $C$) to be the probability of an attack succeeding after $c$ confirmations against a simplex with $N_1$ simplex-chains, given an attacker with $q$ proportion of the network hash-rate.
 
 Note that a simplex of 1 chain (the 0-simplex) \emph{is} a traditional blockchain.
-So we can take Bitcoin for example: the probability of an attack succeeding after 6 confirmations is given by $P(N_1 = 1; c = 6; q = Q)$ -- of course, we still need to know the attacker's hash-rate to calculate this.
+So we can take Bitcoin for example: the probability of an attack succeeding after 6 confirmations is given by $P(q; N_1 = 1; c = 6)$ -- of course, we still need to know the attacker's hash-rate, $q$, to calculate this.
 
 Thus, the hypothesis is that:
 \begin{equation}
-    P(N_1 = N; c = C; q = Q) \approx P(N_1 = 1; c = NC; q = Q)
+    P(q; N_1 = 1; c = NC) \approx P(q; N_1 = N; c = C)
     \label{eq:por-sim-hypothesis}
+\end{equation}
+
+In fact, we can take this further.
+% 1 \le x \le N; x \in \{a_i, b_i\}
+% , and $1 \le a_i \le N$, and $1 \le b_i \le N$
+For any $a,b \in \{1, 2, \dots, N\}$, the CEC implies:
+\begin{equation}
+    P\biggl(q; N_1 = a; c = \frac{NC}{a}\biggr) \approx P\biggl(q; N_1 = b; c = \frac{NC}{b}\biggr)
+    \label{eq:por-sim-hypothesis-extended}
 \end{equation}
 
 \subsubsubsubsection{Method}
