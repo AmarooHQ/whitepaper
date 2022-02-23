@@ -28,6 +28,24 @@ release:
 stats:
 	./bin/py_stats.py
 
+run-lc-20k-blocks:
+	cargo r --release -- -s 10000 -e 1000000 -r 0.0 -S WeightedChain -b 50 -H 50 -P 1
+
+run-lc-20k-blocks-10simplex:
+	cargo r --release -- -s 10000 -e 1000000 -r 0.0 -S WeightedChain -b 50 -H 50 -P 11
+
+run-lc-20k-blocks-20simplex:
+	cargo r --release -- -s 10000 -e 1000000 -r 0.0 -S WeightedChain -b 50 -H 50 -P 21
+
+run-lc-50k-blocks: release
+	$(RUN_BIN) -s 10000 -e 2500000 -r 0.0 -S WeightedChain -b 50 -H 50 -P 1
+
+run-lc-50k-blocks-10simplex: release
+	$(RUN_BIN) -s 10000 -e 2500000 -r 0.0 -S WeightedChain -b 50 -H 50 -P 11
+
+run-lc-50k-blocks-20simplex: release
+	$(RUN_BIN) -s 10000 -e 2500000 -r 0.0 -S WeightedChain -b 50 -H 50 -P 21
+
 run-dag-doublespend:
 	RUST_LOG=warn,por_sim_rs::strategies::relay=info cargo r --release -- -s 10000 -e 30000 -r 0.45 -S WeightedDag -b 100 2>&1 | tail -n 100
 

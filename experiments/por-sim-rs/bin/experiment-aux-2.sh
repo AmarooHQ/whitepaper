@@ -9,25 +9,26 @@ cargo b --release
 
 export OUT_F_PREFIX=exp_aux2
 
-export B_PERIOD=100
+export B_PERIOD=50
 export ATK_RATIO=0.40
+# export ATK_RATIO=0.44
 export N_TRIALS_PER=100
 export REPEAT_TIMES=30
-export HR_PER_CHAIN=100
-# export CRYPTO_SYSTEM=WeightedChain
-export CRYPTO_SYSTEM=WeightedDag
-export ATK_STRATEGY=DoubleSpendWork
-export N_CHAINS=1
-
-# run 2nd time for DS+LC
-export CRYPTO_SYSTEM=LongestChain
+export HR_PER_CHAIN=50
+export CRYPTO_SYSTEM=WeightedChain
+# export CRYPTO_SYSTEM=WeightedDag
 export ATK_STRATEGY=DoubleSpend
+export N_CHAINS=1
+export DAA2_N_BLOCKS=100
 
+# # run 2nd time for DS+LC
+# export CRYPTO_SYSTEM=LongestChain
+# export ATK_STRATEGY=DoubleSpend
 
 # loop a few times so we incrementally generate data over the whole x-axis
-for ds_conf_base in 5; do # 5 10 20; do
-  for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
-    export OUT_FILE=${OUT_F_PREFIX}_q=${ATK_RATIO}_dsconf-base=${ds_conf_base}_${ATK_STRATEGY}_${CRYPTO_SYSTEM}.csv
+for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
+  for ds_conf_base in 5 10 20; do # 5 10 20; do
+    export OUT_FILE=${OUT_F_PREFIX}_q=${ATK_RATIO}_dsconf-base=${ds_conf_base}_bt=${B_PERIOD}_hr=${HR_PER_CHAIN}_${ATK_STRATEGY}_${CRYPTO_SYSTEM}_DAA${DAA2_N_BLOCKS}.csv
     echo "$OUT_FILE"
     # exit 0
     if [[ ! -f $OUT_FILE ]]; then
@@ -44,6 +45,6 @@ for ds_conf_base in 5; do # 5 10 20; do
           echo "$SIM_ARGS"
         )
       done
-    done | xargs -P 24 -I{} sh -c "$SIM_BIN {} | grep 'RESULT:' | cut -d ':' -f 2- | tee -a $OUT_FILE"
+    done | xargs -P 36 -I{} sh -c "$SIM_BIN {} | grep 'RESULT:' | cut -d ':' -f 2- | tee -a $OUT_FILE"
   done
 done
