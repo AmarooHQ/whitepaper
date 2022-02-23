@@ -657,7 +657,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48']
             for t in ['5', '10', '20']
-            for (exp, bt, hr) in [('13', '50', '50'), ('14', '100', '100')]
+            for (exp, bt, hr) in [('13', '50', '50'), ('14', '100', '100'), ('15', '50', '50')]
     ] + [
         # $P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$
         SavePlot(
