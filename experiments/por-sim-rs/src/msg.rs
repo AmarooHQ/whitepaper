@@ -1,16 +1,18 @@
 use crate::block::BlockT;
+use crate::HashID;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Msg<B: Clone + BlockT> {
-    MsgBlock(B),
-    MsgPrivBlock(B),
-    // MsgEcho(String),
+    /// chain_id, block
+    MsgBlock(HashID, B),
+    /// chain_id, block
+    MsgPrivBlock(HashID, B),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-// pub enum MsgToNode<B: Clone + BlockT> {
+/// chain_id, block, is_private
 pub enum MsgToNode<B: BlockT> {
-    MsgBlock(B, bool),
+    MsgBlock(HashID, B, bool),
 }
 
 #[cfg(test)]
