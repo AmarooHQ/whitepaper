@@ -15,7 +15,7 @@ export B_PERIOD=50
 export N_TRIALS_PER=100
 export REPEAT_TIMES=30
 export HR_PER_CHAIN=50
-export DAA2_N_BLOCKS=500
+export DAA2_N_BLOCKS=100
 
 # export ATK_START_TICK=$(echo $B_PERIOD\*$DAA2_N_BLOCKS\*3/2 | bc)
 
@@ -61,4 +61,4 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
       done
     done
   done
-done
+done | tee $OUT_F_PREFIX.log
