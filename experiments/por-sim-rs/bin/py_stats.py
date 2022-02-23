@@ -600,6 +600,9 @@ def main(filter_fname: Optional[str], n_jobs: int):
     def exp_13_csv_name(q, t, bt=50, hr=50, strat="DoubleSpend", cs="WeightedChain", daa=100, exp_num='13'):
         return f'exp_{exp_num}_RandHR_q={q}_dswin={t}_bt={bt}_hr={hr}_{strat}_{cs}_DAA{daa}.csv'
 
+    def exp_16_csv_name(q, t, bt=50, hr=50, strat="DoubleSpendWork", cs="WeightedDag", daa=100, exp_num='16', hashname='blake'):
+        return f'exp_{exp_num}_RandHR_{hashname}_q={q}_dswin={t}_bt={bt}_hr={hr}_{strat}_{cs}_DAA{daa}.csv'
+
     def gen_por_equiv_rand_hrs_csvs(q, t, bt=50, hr=50, only_real_world=False, exp_num='13', aux_num='3', daa='100') -> list[CsvFileToPlot]:
         csvs = [
             (exp_13_csv_name(q, t, bt, hr, exp_num=exp_num, daa=daa, strat="DoubleSpend", cs="WeightedChain"), 'por', 'DS+WC'),
@@ -620,6 +623,12 @@ def main(filter_fname: Optional[str], n_jobs: int):
         return [
             (exp_13_csv_name(q, t, bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag"), 'por', None),
             (exp_13_csv_name(q, f'{2*int(t):d}', bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag"), 'por', PorPlotOpts(cec_scaled=2)),
+        ]
+
+    def gen_por_hash_comare(q, t) -> list[CsvFileToPlot]:
+        return [
+            (exp_13_csv_name(q, t, exp_num='13', strat="DoubleSpendWork", cs="WeightedDag"), 'por', 'hash:xxh3'),
+            (exp_16_csv_name(q, t, exp_num='16', strat="DoubleSpendWork", cs="WeightedDag", hashname="blake3"), 'por', 'hash:blake3'),
         ]
 
 
@@ -717,6 +726,15 @@ def main(filter_fname: Optional[str], n_jobs: int):
             compare_e12_e13_e15(q, t),
             f"(Comparison of experiments 12,13,15)",
             f"png/compare_e12-13-15_q={q}_t={t}.svg",
+            x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
+            x_range=q_t_to_x_range[(q, t)],
+        ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
+    ] + [
+        # compare e13 to e16 -- only differs by hash
+        SavePlot(
+            gen_por_hash_comare(q, t),
+            "\n".join([f"PoR Confirmation Equivalence Conjecture", f"$q={q}$ | random HR distribution", f"{CEC_TITLE_STR}"]),
+            f"png/e16_hash_comparison_q={q}_t={t}.png",
             x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
