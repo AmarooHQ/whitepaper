@@ -12,6 +12,9 @@ import numpy
 import pandas as pd
 import matplotlib.pyplot as plt
 from decimal import Decimal
+import click
+import multiprocessing.pool as mpp
+import multiprocessing as mp
 
 
 MAX_N_CHAINS = 41
@@ -191,8 +194,16 @@ def read_csv_data(fname, chain_ty: Literal['por', 'trad']):
     return n_trials, max_ix, only_target, q, ds_target, series, ms_elapsed, series2
 
 
-line_markers = ['s', 'h', '.', '*', '+', 'o', 'x', 'D'] * 10
+por_line_markers = ['x','3','+','*','4'] * 10
+trad_line_markers = ['s','o','P','D','X'] * 10
 
+line_markers = {
+    'por': por_line_markers,
+    'trad': trad_line_markers,
+}
+
+def get_line_marker(chain_ty: Literal['por', 'trad'], por_i, trad_i):
+    return line_markers[chain_ty][por_i if chain_ty == 'por' else trad_i]
 
 @dataclass
 class Comment:
@@ -230,6 +241,7 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=Fa
         figsize=(10, 7), dpi=100, x_range=None,
         seed_qs=None, seed_ds_targets=None,
         ):
+    print(f"\nPlotting chart: {png_filename or '<tmp-not-saved>'}")
     plt.figure(figsize=figsize, dpi=dpi)
     _x_range_max = x_range[1] if x_range else 20
     _max_ix = 0
@@ -238,13 +250,22 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=Fa
     kwargs = plot_kwargs or dict()
     print(f"Tabulating CSVs.")
     csv_series = []
+    por_count = -1
+    trad_count = -1
     for csv_i, (fname, chain_ty, label_extra) in enumerate(csv_files):
         n_trials, max_ix, block_target, _q, ds_target, csv_data, ms_elapsed, d2 = read_csv_data(fname, chain_ty)
         csv_series.append(csv_data)
-        ty_str = 'PoR' if chain_ty == 'por' else 'Trad'
+        if chain_ty == 'por':
+            ty_str = 'PoR'
+            por_count += 1
+        else:
+            ty_str = 'Trad'
+            trad_count += 1
+        z_order = 2 + (.1 if chain_ty == 'por' else -.1)
         csv_data.plot(
             label=f"{ty_str}: $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $n \\geq {n_trials}$; ds_win={ds_target}; {label_extra or ''}",
-            marker=line_markers[csv_i],
+            marker=get_line_marker(chain_ty, por_count, trad_count),
+            zorder=z_order,
             **kwargs)
         # ms_elapsed.plot(label=f"$\\bar{{d}}$ (ms); $B_f^{{-1}} = {block_target}$", secondary_y=True)
         # d2.plot(label="PoR - $y^{0.7}$")
@@ -253,6 +274,10 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=Fa
         ds_targets.add(ds_target)
     _qs = list(qs)
     _qs.sort()
+
+    # in case we are graphing only theoretical curves
+    if _max_ix == 0:
+        _max_ix = _x_range_max
 
     # if we don't have data then don't needlessly increase x_range
     _max_ix = min(_max_ix + 1, _x_range_max)
@@ -269,7 +294,7 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=Fa
             theoretical_data = ds_theoretical_series(multipliers, q=q, after_n_confs=ds_target)
             t_series.append(theoretical_data)
             td_max_ys.append(theoretical_data.max())
-            theoretical_data.plot(label=f"Theoretical Trad: $q={q:.2f}$ (confs = ${ds_target}x$)", zorder=-1, linestyle="dashed", linewidth=2.0)
+            theoretical_data.plot(label=f"Theoretical Trad: $q={q:.2f}$ (confs = ${ds_target}x$)", zorder=2, linestyle="dashed", linewidth=2.0)
     max_y = max(max(td_max_ys), max(s.max() for s in csv_series) if csv_series else 0)
     print(f"Done. Now drawing.")
 
@@ -288,6 +313,7 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=Fa
 
     if x_range:
         plt.xlim(x_range)
+    plt.ylim(bottom=0)
 
     plt.tight_layout()
 
@@ -336,7 +362,11 @@ class SavePlot:
         )
 
 
-if __name__ == "__main__":
+@click.command()
+@click.option('-F', '--filter-fname', default=None, help='If present, only generate those graphs with filenames contining the filter string.')
+@click.option('-j', '--n-jobs', default=max(1, mp.cpu_count() - 1), help='Number of chart-generation threads to run in parallel')
+def main(filter_fname: Optional[str], n_jobs: int):
+
     if "put the old code in a block to make it collapsable":
         csv_files = \
             [
@@ -517,15 +547,18 @@ if __name__ == "__main__":
     def exp_13_csv_name(q, t, bt=50, hr=50, strat="DoubleSpend", cs="WeightedChain", daa=100):
         return f'exp_13_RandHR_q={q}_dswin={t}_bt={bt}_hr={hr}_{strat}_{cs}_DAA{daa}.csv'
 
-    def gen_por_equiv_rand_hrs_csvs(q, t) -> list[CsvFileToPlot]:
-        return [
+    def gen_por_equiv_rand_hrs_csvs(q, t, only_real_world=False) -> list[CsvFileToPlot]:
+        csvs = [
             (exp_13_csv_name(q, t, strat="DoubleSpend", cs="WeightedChain"), 'por', 'DS+WC'),
             (exp_13_csv_name(q, t, strat="DoubleSpend", cs="WeightedDag"), 'por', 'DS+WD'),
             (exp_13_csv_name(q, t, strat="DoubleSpendWork", cs="WeightedChain"), 'por', 'DSW+WC'),
             (exp_13_csv_name(q, t, strat="DoubleSpendWork", cs="WeightedDag"), 'por', 'DSW+WD'),
-            (f'exp_aux3_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', 'DSW+WD'),
-            (f'exp_aux3_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpend_WeightedChain_DAA100.csv', 'trad', 'DS+WC'),
+            (f'exp_aux3_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', 'DSW+WD (Best Trad)'),
+            (f'exp_aux3_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpend_WeightedChain_DAA100.csv', 'trad', 'DS+WC (Worst Trad)'),
         ]
+        if only_real_world:
+            return csvs[3:]
+        return csvs
 
 
     jobs_to_save: list[SavePlot] = [
@@ -552,7 +585,7 @@ if __name__ == "__main__":
             f"png/trad_ds_comparison_q={q}_t={t}.png",
             x_label=f"x = Confirmations / {t}",
             x_range=q_t_to_x_range[(q, t)],
-        ) for q in ['0.40', '0.44'] for t in ['5', '10', '20']
+        ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
                 # (5, csv_compare_aux_3(5), 0.30, "png/trad_ds_comparison_q=0.44_t=5.png"),
                 # (10, csv_compare_aux_3(10), 0.30, "png/trad_ds_comparison_q=0.44_t=10.png"),
     ] + [
@@ -581,25 +614,47 @@ if __name__ == "__main__":
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
     ] + [
         SavePlot(
+            gen_por_equiv_rand_hrs_csvs(q, t, only_real_world=True),
+            f" PoR Confirmation Equivalence Conjecture | WeightedDag + DoubleSpendWork \n $q={q}$ | hash-rate randomly distributed ($q+p=1$ true network-wide)",
+            f"png/por_equiv_onlyrealworld_rand_hr_q={q}_t{t}.png",
+            x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
+            x_range=q_t_to_x_range[(q, t)],
+        ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
+    ] + [
+        SavePlot(
             [
                 (f'exp-12-repeat-8-RDoubleSpend-q{q}-t{t}-p50-H50-WeightedChain-xxh3.csv', 'por', None),
                 (f'exp_aux2_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpend_WeightedChain_DAA100.csv', 'trad', None),
             ],
-            f"PoR Equivalency Hypothesis | PoR vs Traditional vs Theoretical \n DS+WC | $q={q}$ | DoubleSpend Target: ${t} \\cdot x$ ",
+            f"Confirmation Equivalence Conjecture | PoR vs Traditional vs Theoretical \n DS+WC | $q={q}$ | DoubleSpend Target: ${t} \\cdot x$ ",
             f"png/por_eqiv_hyp_vs_trad_q={q}_t={t}_DS+WC.png",
             x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
             x_range=q_t_to_x_range[(q, t)],
-        ) for q in ['0.40', '0.44'] for t in ['5', '10', '20']
+        ) for q in ['0.40', '0.44'] for t in ['5', '10', '20']  # , '0.48'
     ] + [
-        SavePlot([], f"Theoretical doublespend success rates given\n $q={q}$ after ${t} \\cdot x$ confirmations. ",
-            f"png/theoretical_q={q}_t={t}.svg",
+        SavePlot([], f"Theoretical doublespend success rates given\n $q \\in \\{{{','.join(qs)}\\}}$ after ${t} \\cdot x$ confirmations. ",
+            # f"png/theoretical_q={q}_t={t}.svg",
+            f"png/theoretical_q={'-'.join(qs)}_t={t}.svg",
             x_label=f"$x = Confirmations / {t}$",
-            x_range=q_t_to_x_range[(q, t)],
-            seed_qs={float(q)}, seed_ds_targets={float(t)},
+            x_range=(0, 46),
+            # seed_qs={float(q)}, seed_ds_targets={float(t)},
+            seed_qs=set(map(float, qs)), seed_ds_targets={float(t)},
             )
-        for q in ['0.40', '0.44'] for t in ['5', '10', '20']
+        for qs in [['0.40', '0.44', '0.48']] for t in ['5', '10', '20']
     ]
 
+    pool = mpp.Pool(n_jobs)
+    count = 0
+
     for j in jobs_to_save:
-        if 'rand_hr' in j.filename or True:
-            j.run()
+        if filter_fname is None or filter_fname in j.filename:
+            pool.apply_async(j.run)
+            count += 1
+
+    pool.close()
+    pool.join()
+    print(f"should be all done generating {count} graphs via {n_jobs} threads")
+
+
+
+main()
