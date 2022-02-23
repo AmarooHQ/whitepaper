@@ -231,7 +231,8 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=Fa
         seed_qs=None, seed_ds_targets=None,
         ):
     plt.figure(figsize=figsize, dpi=dpi)
-    _max_ix = x_range[1] if x_range else 20
+    _x_range_max = x_range[1] if x_range else 20
+    _max_ix = 0
     qs = set(seed_qs or [])
     ds_targets = set(seed_ds_targets or [])
     kwargs = plot_kwargs or dict()
@@ -252,6 +253,12 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=Fa
         ds_targets.add(ds_target)
     _qs = list(qs)
     _qs.sort()
+
+    # if we don't have data then don't needlessly increase x_range
+    _max_ix = min(_max_ix + 1, _x_range_max)
+    if x_range:
+        x_range = (x_range[0], _max_ix)
+
     print(f"Calculating theoretical probabilities.")
     t_series = []
     multipliers = list(range(1, min(_max_ix+1,20))) + list(range(20, _max_ix+1, 1))
@@ -486,14 +493,16 @@ if __name__ == "__main__":
     csv_files = csv_compare_aux
     # plot_chart(csv_files, plot_kwargs=dict(logy=False))
 
-    q_t_to_x_range: dict[tuple[str, str], Optional[tuple[float, float]]] = {
+    largest_x_range = (0, 46)
+    q_t_to_x_range: dict[tuple[str, str], Optional[tuple[float, float]]] = defaultdict(
+        lambda: largest_x_range, {
         ('0.40', '5'): (0, 20),
         ('0.40', '10'): (0, 16),
         ('0.40', '20'): (0, 10),
         ('0.44', '5'): (0, 46),
         ('0.44', '10'): (0, 31),
         ('0.44', '20'): (0, 20),
-    }
+    })
 
     def gen_por_equiv_csvs(q, t) -> list[CsvFileToPlot]:
         return [
@@ -542,7 +551,7 @@ if __name__ == "__main__":
             f"Traditional Doublespend Comparison\n$N_1=1$; $q={q}$; doublespend target: ${t}\cdot x$",
             f"png/trad_ds_comparison_q={q}_t={t}.png",
             x_label=f"x = Confirmations / {t}",
-            x_range=q_t_to_x_range.get((q, t), None),
+            x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44'] for t in ['5', '10', '20']
                 # (5, csv_compare_aux_3(5), 0.30, "png/trad_ds_comparison_q=0.44_t=5.png"),
                 # (10, csv_compare_aux_3(10), 0.30, "png/trad_ds_comparison_q=0.44_t=10.png"),
@@ -560,7 +569,7 @@ if __name__ == "__main__":
             f"PoR Confirmation Equivalence Conjecture | $q={q}$",
             f"png/por_equiv_q={q}_t{t}.png",
             x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
-            x_range=q_t_to_x_range.get((q, t), None)
+            x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
     ] + [
         SavePlot(
@@ -568,7 +577,7 @@ if __name__ == "__main__":
             f" PoR Confirmation Equivalence Conjecture \n $q={q}$ | hash-rate randomly distributed ($q+p=1$ true network-wide)",
             f"png/por_equiv_rand_hr_q={q}_t{t}.png",
             x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
-            x_range=q_t_to_x_range.get((q, t), None)
+            x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
     ] + [
         SavePlot(
@@ -592,4 +601,5 @@ if __name__ == "__main__":
     ]
 
     for j in jobs_to_save:
-        j.run()
+        if 'rand_hr' in j.filename or True:
+            j.run()
