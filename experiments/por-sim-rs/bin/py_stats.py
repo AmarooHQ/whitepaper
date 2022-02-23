@@ -302,6 +302,7 @@ def plot_chart(csv_files=CSV_FILES, plot_kwargs=None, graph_theory_discounted=Fa
         plt.show()
     plt.close()
 
+CsvFileToPlot = tuple[str, Literal['por', 'trad'], Optional[str]]
 
 @dataclass
 class SavePlot:
@@ -494,6 +495,30 @@ if __name__ == "__main__":
         ('0.44', '20'): (0, 20),
     }
 
+    def gen_por_equiv_csvs(q, t) -> list[CsvFileToPlot]:
+        return [
+            (f'exp-12-repeat-8-RDoubleSpend-q{q}-t{t}-p50-H50-WeightedChain-xxh3.csv', 'por', 'DS+WC'),
+            (f'exp-12-repeat-8-RDoubleSpend-q{q}-t{t}-p50-H50-WeightedDag-xxh3.csv', 'por', 'DS+WD'),
+            (f'exp-12-repeat-8-RDoubleSpendWork-q{q}-t{t}-p50-H50-WeightedChain-xxh3.csv', 'por', 'DSW+WC'),
+            (f'exp-12-repeat-8-RDoubleSpendWork-q{q}-t{t}-p50-H50-WeightedDag-xxh3.csv', 'por', 'DSW+WD'),
+            (f'exp_aux3_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', 'DSW+WD'),
+            (f'exp_aux3_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpend_WeightedChain_DAA100.csv', 'trad', 'DS+WC'),
+        ]
+
+    def exp_13_csv_name(q, t, bt=50, hr=50, strat="DoubleSpend", cs="WeightedChain", daa=100):
+        return f'exp_13_RandHR_q={q}_dswin={t}_bt={bt}_hr={hr}_{strat}_{cs}_DAA{daa}.csv'
+
+    def gen_por_equiv_rand_hrs_csvs(q, t) -> list[CsvFileToPlot]:
+        return [
+            (exp_13_csv_name(q, t, strat="DoubleSpend", cs="WeightedChain"), 'por', 'DS+WC'),
+            (exp_13_csv_name(q, t, strat="DoubleSpend", cs="WeightedDag"), 'por', 'DS+WD'),
+            (exp_13_csv_name(q, t, strat="DoubleSpendWork", cs="WeightedChain"), 'por', 'DSW+WC'),
+            (exp_13_csv_name(q, t, strat="DoubleSpendWork", cs="WeightedDag"), 'por', 'DSW+WD'),
+            (f'exp_aux3_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', 'DSW+WD'),
+            (f'exp_aux3_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpend_WeightedChain_DAA100.csv', 'trad', 'DS+WC'),
+        ]
+
+
     jobs_to_save: list[SavePlot] = [
         SavePlot(
             csvs,
@@ -523,15 +548,25 @@ if __name__ == "__main__":
                 # (10, csv_compare_aux_3(10), 0.30, "png/trad_ds_comparison_q=0.44_t=10.png"),
     ] + [
         SavePlot(
-            [
-                (f'exp-12-repeat-8-RDoubleSpend-q{q}-t{t}-p50-H50-WeightedChain-xxh3.csv', 'por', 'DS+WC'),
-                (f'exp-12-repeat-8-RDoubleSpend-q{q}-t{t}-p50-H50-WeightedDag-xxh3.csv', 'por', 'DS+WD'),
-                (f'exp-12-repeat-8-RDoubleSpendWork-q{q}-t{t}-p50-H50-WeightedChain-xxh3.csv', 'por', 'DSW+WC'),
-                (f'exp-12-repeat-8-RDoubleSpendWork-q{q}-t{t}-p50-H50-WeightedDag-xxh3.csv', 'por', 'DSW+WD'),
-                (f'exp_aux3_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', 'DSW+WD'),
-            ],
-            f"PoR Equivalency Hypothesis | $q={q}$ | DoubleSpend Target: ${t} \\cdot x$",
+            # [
+            #     (f'exp-12-repeat-8-RDoubleSpend-q{q}-t{t}-p50-H50-WeightedChain-xxh3.csv', 'por', 'DS+WC'),
+            #     (f'exp-12-repeat-8-RDoubleSpend-q{q}-t{t}-p50-H50-WeightedDag-xxh3.csv', 'por', 'DS+WD'),
+            #     (f'exp-12-repeat-8-RDoubleSpendWork-q{q}-t{t}-p50-H50-WeightedChain-xxh3.csv', 'por', 'DSW+WC'),
+            #     (f'exp-12-repeat-8-RDoubleSpendWork-q{q}-t{t}-p50-H50-WeightedDag-xxh3.csv', 'por', 'DSW+WD'),
+            #     (f'exp_aux3_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', 'DSW+WD'),
+            #     (f'exp_aux3_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpend_WeightedChain_DAA100.csv', 'trad', 'DS+WC'),
+            # ],
+            gen_por_equiv_csvs(q, t),
+            f"PoR Confirmation Equivalence Conjecture | $q={q}$",
             f"png/por_equiv_q={q}_t{t}.png",
+            x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
+            x_range=q_t_to_x_range.get((q, t), None)
+        ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
+    ] + [
+        SavePlot(
+            gen_por_equiv_rand_hrs_csvs(q, t),
+            f" PoR Confirmation Equivalence Conjecture \n $q={q}$ | hash-rate randomly distributed ($q+p=1$ true network-wide)",
+            f"png/por_equiv_rand_hr_q={q}_t{t}.png",
             x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
             x_range=q_t_to_x_range.get((q, t), None)
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
