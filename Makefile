@@ -127,7 +127,7 @@ build-whitepaper: %.md
 	# replace tables placeholder with actual tables
 	node ./includes/ut/complexity/populateWPTables.js --populate-wp-md
 	# this fixes texcount (since import-paths don't need to be searched).
-	sed -r -i 's/input\{20-por/input\{includes\/ut\/content\/20-por/' $(WPFILE)
+	sed -r -i 's/input\{([0-9]+-[a-z]+)/input\{includes\/ut\/content\/\1/' $(WPFILE)
 # if you need to build the above: cd includes/ut/complexity/ut-complexity-gen-purs && npm i && npm run bundle-for-wp
 
 
