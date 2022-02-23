@@ -11,6 +11,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Install dependencies
+        shell: bash
+        run: |
+          sudo apt update && sudo apt install -y pkg-config
+
       - name: Install rust toolchain
         uses: actions-rs/toolchain@v1
         with:
