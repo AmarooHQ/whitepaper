@@ -686,9 +686,9 @@ mod tests {
         assert!(refl_avg > 2.0);
         assert!(refl_avg < 20.0);
 
-        println!("{:?}", bb);
-        println!("{:?}", chain.get_best_blocks(false));
-        println!("{:?}", chain.draft_block(bb.0.timestamp + 10, false));
+        // println!("{:?}", bb);
+        // println!("{:?}", chain.get_best_blocks(false));
+        // println!("{:?}", chain.draft_block(bb.0.timestamp + 10, false));
         // println!("{:?}", bb_remote);
 
         // chain.next_difficulty()
@@ -709,8 +709,8 @@ mod tests {
         let bb_height = bb.0.get_height();
         assert!(bb_height > 3);
         assert!(bb_height > 6, "should have many blocks above this one");
-        println!("bb height: {}", bb_height);
-        println!("bb: {:?}\n\n", bb.0);
+        // println!("bb height: {}", bb_height);
+        // println!("bb: {:?}\n\n", bb.0);
 
         let mut txs_remote: Vec<_> = vec![];
         let mut remote_txid_to_r_blocks: PassThruHashMap<TxId, Vec<HashID>> = Default::default();
@@ -727,28 +727,28 @@ mod tests {
             txs_remote.extend(txs);
         }
         assert_ne!(txs_remote.len(), 0);
-        println!("n remote txs: {}", txs_remote.len());
+        // println!("n remote txs: {}", txs_remote.len());
         let n_uniq_txs = txs_remote.iter().unique().count();
-        println!("n remote txs unique: {}", n_uniq_txs);
+        // println!("n remote txs unique: {}", n_uniq_txs);
         // assert_eq!(n_uniq_txs, txs_remote.len());  // this won't work w/ dags b/c txs can be duplicated
 
         let n_refl_txs = txs_remote
             .iter()
             .unique()
             .filter(|tx| tx.is_reflecting(b_id_at_h3, chain_id))
-            // .filter(|tx| tx.has_r_chain_id(chain_id))
-            .map(|tx| {
-                println!(
-                    "\n\nremote tx: {:?}, {}\n\nrefl L-block: {}, {:?}",
-                    tx,
-                    tx.get_reflected_weight2(chain_remote_id),
-                    b_id_at_h3,
-                    DagBlock::get_cached_block(&b_id_at_h3)
-                );
-                tx
-            })
+            // .map(|tx| {
+            //     println!(
+            //         "\n\nremote tx: {:?}, {}\n\nrefl L-block: {}, {:?}",
+            //         tx,
+            //         tx.get_reflected_weight2(chain_remote_id),
+            //         b_id_at_h3,
+            //         DagBlock::get_cached_block(&b_id_at_h3)
+            //     );
+            //     tx
+            // })
             .count();
         // inspect block, txs, and ancestors
+        /*
         println!("\n{:?}\n", b_at_h3.0);
         println!(
             "{:?}\n",
@@ -763,6 +763,7 @@ mod tests {
             "is block {} on chain {} in this list?\n{:?}",
             b_id_at_h3, chain_id, txs_remote
         );
+        */
         let a_refl_tx = txs_remote
             .iter()
             .unique()

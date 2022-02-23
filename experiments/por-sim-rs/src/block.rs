@@ -28,16 +28,19 @@ use std::{fmt, fmt::Display};
 
 lazy_static! {
     static ref BLOCK_HASH_F: fn(u64) -> u64 = match env::var("POR_SIM_HASH") {
-        Ok(h) => match h.as_str() {
-            "blake" => blake3_hash_u64,
-            "blake3" => blake3_hash_u64,
-            "xx" => xx_hash_u64,
-            "xxh3" => xx_hash_u64,
-            "xx_rev" => xx_rev_hash_u64,
-            "sha256" => sha256_hash_u64,
-            "sha1" => sha1_hash_u64,
-            "md5" => md5_hash_u64,
-            _ => panic!("Unknown hashing algorithm: {}", h),
+        Ok(h) => {
+            println!("\n(NOTE) Attempting to use hashing alg: {}\n", h);
+            match h.as_str() {
+                "blake" => blake3_hash_u64,
+                "blake3" => blake3_hash_u64,
+                "xx" => xx_hash_u64,
+                "xxh3" => xx_hash_u64,
+                "xx_rev" => xx_rev_hash_u64,
+                "sha256" => sha256_hash_u64,
+                "sha1" => sha1_hash_u64,
+                "md5" => md5_hash_u64,
+            _ => panic!("FATAL ERROR: Unknown hashing algorithm: {}", h),
+            }
         },
         // if env var isn't present, default to xx
         _ => xx_hash_u64,
