@@ -594,6 +594,14 @@ Does a miner ever benefit from withholding reflections?
 
 ### The Crux: Simplex Security and the Confirmation Equivalence Conjecture
 
+\label{sec:crux-simplex-security-cec}
+
+\input{27-practical/90-simplex-security-and-cec.tex}
+
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
+
 \aside{
     Don't you think it's time for an epigraph?
 }
@@ -804,5 +812,4 @@ So, while it is \emph{possible} that a poor implementation of a simplex could co
 * confirmation bias in implementation -- might have missed something
 * does it work for simplexes that have PoS/PoA chains? not tested for
 
-
-%% END ### RELEASE
+%% END ### DRAFT
