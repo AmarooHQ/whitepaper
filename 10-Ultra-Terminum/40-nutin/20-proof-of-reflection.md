@@ -1180,6 +1180,7 @@ Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
 
 %% BEGIN ### DRAFT
 
+\todo{new section mb: How to count work -- e.g., explain bitcoin <-> eth1 from first principles, exactly what gets counted when?}
 
 
 ### The Insecurity of Merged Mining in UT

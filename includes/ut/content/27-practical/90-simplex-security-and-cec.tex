@@ -223,9 +223,26 @@ So, while it is \emph{possible} that a poor implementation of a simplex could co
 
 \todo{por sim - limits}
 
-* could be insecure for reasons we didn't test for
-* those ignored factors could be decisive
-* insufficient breadth of attack parameters
-* didn't come up with a good strategy (mb there's a better one than mining in private)
-* confirmation bias in implementation -- might have missed something
-* does it work for simplexes that have PoS/PoA chains? not tested for
+\begin{itemize}
+    \item could be insecure for reasons we didn't test for
+    \item those ignored factors could be decisive
+    \item insufficient breadth of attack parameters
+    \item didn't come up with a good strategy (mb there's a better one than mining in private)
+    \item confirmation bias in implementation -- might have missed something
+    \item does it work for simplexes that have PoS/PoA chains? not tested for
+    \item some validation type things not done
+\end{itemize}
+
+sources of error
+
+\begin{itemize}
+    \item attacker q (e.g., 0.44) divisibility into B\_PERIOD and/or HR\_PER\_CHAIN
+    \item small HR\_PER\_CHAIN -- only 50-100 hashes every tick
+    \item small values $\to$ limits of accuracy mb? (in other ways, not just attacker q divisibility)
+    \item using xxh3 instead of a crypto secure hashing alg like blake3
+    \item not giving the attacker a 'bonus block' (i.e. they only start after having mined a block in private)
+    \item not waiting long enough for DSs to resolve (since we end before $t=\infty$ it is the case we cut off \emph{some} DSs that might be successful -- is it significant?)
+    \item error in implementation (note: mb should see discrepancies between diff crypto systems / attack strats if that were the case -- depends on the impl error)
+    \item theory/CEC wrong -- nonspecific problem but possible
+    \item allowing invalid blocks / txs / refls -- either b/c of simplifications or b/c of misunderstanding of reality
+\end{itemize}
