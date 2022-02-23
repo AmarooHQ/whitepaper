@@ -40,7 +40,8 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
 
           elapsed=$SECONDS
           this_repeat=$(echo $elapsed-$LAST_REPEAT_ELAPSED | bc)
-          export PROGRESS_STR=">> [$repeat_i/$REPEAT_TIMES | $LAST_REPEAT_ELAPSED +$this_repeat s] / rs:$strat / cs:$crypto_sys / q:$atk_r / ds:$ds_conf_base"
+          progress_msg=$(python3 $(dirname $0)/_exp_progress.py $repeat_i $REPEAT_TIMES $LAST_REPEAT_ELAPSED $this_repeat)
+          export PROGRESS_STR=">> [${progress_msg}] / rs:$strat / cs:$crypto_sys / q:$atk_r / ds:$ds_conf_base"
           export OUT_FILE=${OUT_F_PREFIX}_q=${ATK_RATIO}_dswin=${ATK_DS_CONFS}_bt=${B_PERIOD}_hr=${HR_PER_CHAIN}_${ATK_STRATEGY}_${CRYPTO_SYSTEM}_DAA${DAA2_N_BLOCKS}.csv
           # echo "$OUT_FILE" ; echo -e "$PROGRESS_STR" ; exit 0
 
