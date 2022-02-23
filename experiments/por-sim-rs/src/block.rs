@@ -11,6 +11,7 @@ use rand::prelude::*;
 use rand::seq::IteratorRandom;
 use std::cmp::Ordering;
 use std::collections::VecDeque;
+use std::env;
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::iter::FilterMap;
@@ -20,12 +21,27 @@ use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
 use std::{fmt, fmt::Display};
 
-static block_hash_f: fn(u64) -> u64 = xx_hash_u64;
-// static block_hash_f: fn(u64) -> u64 = xx_rev_hash_u64;
-// static block_hash_f: fn(u64) -> u64 = blake3_hash_u64;
-// static block_hash_f: fn(u64) -> u64 = sha256_hash_u64;
+// static BLOCK_HASH_F: fn(u64) -> u64 = xx_hash_u64;
+// static BLOCK_HASH_F: fn(u64) -> u64 = xx_rev_hash_u64;
+// static BLOCK_HASH_F: fn(u64) -> u64 = blake3_hash_u64;
+// static BLOCK_HASH_F: fn(u64) -> u64 = sha256_hash_u64;
 
 lazy_static! {
+    static ref BLOCK_HASH_F: fn(u64) -> u64 = match env::var("POR_SIM_HASH") {
+        Ok(h) => match h.as_str() {
+            "blake" => blake3_hash_u64,
+            "blake3" => blake3_hash_u64,
+            "xx" => xx_hash_u64,
+            "xxh3" => xx_hash_u64,
+            "xx_rev" => xx_rev_hash_u64,
+            "sha256" => sha256_hash_u64,
+            "sha1" => sha1_hash_u64,
+            "md5" => md5_hash_u64,
+            _ => panic!("Unknown hashing algorithm: {}", h),
+        },
+        // if env var isn't present, default to xx
+        _ => xx_hash_u64,
+    };
     static ref BLOCK_CACHE: Mutex<PassThruHashMap<u64, Arc<(Block, BlockMD<Block>)>>> =
         Mutex::new(Default::default());
     static ref BLOCK_LRU: Mutex<LruCache<u64, Arc<(Block, BlockMD<Block>)>>> =
@@ -415,7 +431,7 @@ impl BlockT for Block {
 
     #[inline(always)]
     fn increment_nonce(&mut self) {
-        self.id = block_hash_f(self.id + 1337)
+        self.id = BLOCK_HASH_F(self.id + 1337)
     }
 
     fn get_difficulty(&self) -> Difficulty {
@@ -628,7 +644,7 @@ impl BlockT for DagBlock {
     }
     #[inline(always)]
     fn increment_nonce(&mut self) {
-        self.id = block_hash_f(self.id + 1337)
+        self.id = BLOCK_HASH_F(self.id + 1337)
     }
     fn get_difficulty(&self) -> Difficulty {
         self.d
