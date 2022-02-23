@@ -21,9 +21,9 @@ SECONDS=0
 # loop a few times so we incrementally generate data over the whole x-axis
 for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
   LAST_REPEAT_ELAPSED=$SECONDS
-  for strat in DoubleSpend DoubleSpendWork; do
+  for strat in DoubleSpendWork; do # DoubleSpend
     export ATK_STRATEGY=$strat
-    for crypto_sys in WeightedChain WeightedDag; do #LongestChain; do
+    for crypto_sys in WeightedDag; do #WeightedChain, LongestChain; do
       export CRYPTO_SYSTEM=$crypto_sys
       for atk_r in 0.40 0.44 0.48; do # 0.40 0.44; do # 0.40 0.44 0.48 0.36; do
         export ATK_RATIO=$atk_r
