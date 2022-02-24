@@ -28,6 +28,9 @@ pub trait RelayStrategyT<'a, S: CSystemT<'a>> {
             Self::name()
         );
     }
+    fn ds_win_threshold(&self) -> Option<Height> {
+        None
+    }
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -103,6 +106,9 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
         // for a doublespend of C confirmations, if the attacker is trailing
         // the public chain by > max(C, 10) block periods worth of work, then terminate.
         fm.private + (self.params.win_thres.max(10) as u64) * work_per_period < fm.public
+    }
+    fn ds_win_threshold(&self) -> Option<Height> {
+        Some(self.params.win_thres)
     }
 }
 
@@ -184,9 +190,12 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
         )
     }
     fn dynamic_cutoff(&self, fm: Heights, work_per_period: Difficulty) -> bool {
-        // for a doublespend of C confirmations: if the attacker is trailing
+        // for a doublespend of C confirmations, if the attacker is trailing
         // the public chain by > max(C, 10) block periods worth of work, then terminate.
-        fm.private + self.params.win_thres.max(10) as u64 * work_per_period < fm.public
+        fm.private + (self.params.win_thres.max(10) as u64) * work_per_period < fm.public
+    }
+    fn ds_win_threshold(&self) -> Option<Height> {
+        Some(self.params.win_thres)
     }
 }
 

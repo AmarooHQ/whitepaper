@@ -131,26 +131,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             let rd_a = gen_random_hr_distribution(n_chains, hr_q, total_hr);
             cw_hash_rates = rd_h.into_iter().zip(rd_a.into_iter()).collect();
         } else {
-            // todo: randomize hash-rates a bit. need to figure out how to do this sensibly so that the maths works out. nbd yet
-
-            // k = net_args.por_chains - 1
-            // target chain (not generated here) should have 1/(k+1) of network hash-rate.
-            // so other chains have, in total, have total HR: k * (args.honest_hr + args.attacker_hr)
-            // we don't want this to be perfectly even though, so let's randomize a bit.
-
-            // // vec of *honest* hash ratios per chain (between 0.3 and 0.7)
-            // // -- we want these to average out to be in proportion to args.honest_hr vs args.attacker_hr
-            // let honest_hr_ratios: Vec<f32> = (1..net_args.por_chains)
-            //     .map(|_| thread_rng().gen::<f32>() * 0.4 + 0.3)
-            //     .collect();
-            // let hr_ratio_avg: f32 =
-            //     honest_hr_ratios.iter().sum::<f32>() / (honest_hr_ratios.len() as f32);
-            // let hr_ratio_scale = avg_honest_hr_ratio / hr_ratio_avg;
-            // let honest_hr_ratios: Vec<f32> = honest_hr_ratios
-            //     .iter()
-            //     .map(|hr| hr * hr_ratio_scale)
-            //     .collect();
-
+            // uniform hash rates over all chains
             let honest_hr_ratios: Vec<f32> = (1..net_args.por_chains)
                 .map(|_| avg_honest_hr_ratio)
                 .collect();
@@ -165,10 +146,6 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             );
             debug_assert_eq!(honest_hr_ratios.len() + 1, net_args.por_chains as usize);
 
-            // // vec of ratio of chain-weights (on avg)
-            // let cw_relative: Vec<f32> = (1..net_args.por_chains)
-            //     .map(|_| thread_rng().gen::<f32>() + 0.5)
-            //     .collect();
             let cw_relative: Vec<f32> = vec![1.0; honest_hr_ratios.len()];
             // vec of tuples: (honest_hr, attacker_hr)
             cw_hash_rates = cw_relative
@@ -325,7 +302,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
     pub fn run_attack(&mut self) -> Result<bool, String> {
         let mut msgs_from = Vec::new();
         let ts_limit = if self.args.use_dynamic_cutoff {
-            (self.args.attack_starts_at * 30).min(1_000_000)
+            (self.args.attack_starts_at + 100 * self.net_args.block_target as u32).min(1_000_000)
         } else {
             self.args.end_simulation_at_t
         };
@@ -478,6 +455,21 @@ pub fn gen_random_hr_distribution(n_chains: u32, q: f32, total_hr: Difficulty) -
     let actual_total: f64 = rd.iter().cloned().sum();
     debug_assert_eq!(exp_total, actual_total);
     rd.into_iter().map(|v| v as Difficulty).collect()
+}
+
+pub fn gen_paired_80_20_hr_distributions(
+    n_chains: u32,
+    q: f32,
+    total_hr: Difficulty,
+) -> Vec<(Difficulty, Difficulty)> {
+    let p = 1. - q;
+    let mut hr_a = gen_random_hr_distribution(n_chains, q, total_hr);
+    let mut hr_h = gen_random_hr_distribution(n_chains, p, total_hr);
+    // now, we want to ensure that for each pair, neither makes up less than 20% of the total (0.2 <= q <= 0.8 and same for p)
+    // this breaks at low q, so set lower bound to (q/2).min(p/2);
+    let l_bound = (q / 2.).min(p / 2.);
+    todo!();
+    vec![]
 }
 
 #[cfg(test)]

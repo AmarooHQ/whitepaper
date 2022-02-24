@@ -616,7 +616,9 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
 impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
     fn next_difficulty_daa2_raw(&self, b: &B, b_meta: &BlockMD<B>) -> Difficulty {
         if b_meta.height < 5 as u32 {
-            return 1000;
+            // realistically min hashes per chain per tick is 50
+            // this prevents high hash rates causing the DAA to get borked
+            return 1000.max(self.net_args.block_target as Difficulty * 50 / 2);
         }
         let daa2_bs = BlockMD::<B>::get_daa2_blocks(b.get_hash());
         let daa2_bs = match daa2_bs {
