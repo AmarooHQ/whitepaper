@@ -900,10 +900,11 @@ def main(filter_fname: Optional[str], n_jobs: int):
             [
                 (csv_name_f_from_exp(exp)(q, t, exp_num=exp, hashname=hn, **kw), 'por', extra)
                 for exp, hn, extra, kw in [
-                    # ('20', 'xxh3', 'no bonus', dict()),
-                    # ('19', 'xxh3', 'no bonus', dict()),
+                    ('20', 'xxh3', 'No Bonus', dict()),
+                    ('19', 'xxh3', 'No Bonus', dict()),
                     # ('22b', 'xxh3', 'bonus b', dict()),
-                    ('22c', 'xxh3', PorPlotOpts(_label_extra='+BonusBlock', _kwargs=dict(color='maroon', marker='+')), dict()),
+                    # _kwargs=dict(color=(0xf0/0xff, 0x19/0xff, 0x92/0xff, 1), marker='+')
+                    ('22c', 'xxh3', PorPlotOpts(_label_extra='Bonus Block'), dict()),
                 ]
             ],
             "\n".join([
@@ -921,8 +922,10 @@ def main(filter_fname: Optional[str], n_jobs: int):
             [
                 (csv_name_f_from_exp(exp)(q, t, exp_num=exp, hashname=hn, **kw), ty, extra)
                 for exp, hn, ty, extra, kw in [
-                    ('22c', 'xxh3', 'por', PorPlotOpts(_label_extra='+BonusBlock', _kwargs=dict(color='maroon', marker='+')), dict()),
-                    ('22aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='+BonusBlock', _kwargs=dict(color='orange', marker='o')), dict()),
+                    # _kwargs=dict(color=(0xf0/0xff, 0x19/0xff, 0x92/0xff, 1), marker='+')
+                    ('22c', 'xxh3', 'por', PorPlotOpts(_label_extra='Bonus Block'), dict()),
+                    # _kwargs=dict(color='orangered', marker='o')
+                    ('22aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='Bonus Block'), dict()),
                 ]
             ],
             "\n".join([

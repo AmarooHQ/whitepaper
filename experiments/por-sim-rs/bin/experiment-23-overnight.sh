@@ -23,8 +23,8 @@ export ATK_USE_DYN_END_TICK=1
 # => the total number of samples per x val is N_TRIALS_PER * REPEAT_TIMES
 # => this should be >= 3000 (picked b/c it's not too many but graphs are reasonably smooth)
 # status updates are more frequent with larger REPEAT_TIMES
-export N_TRIALS_PER=180
-export REPEAT_TIMES=50
+export N_TRIALS_PER=360
+export REPEAT_TIMES=25
 
 # note: the attackers q is multiplied by HR_PER_CHAIN and fractional components are dropped.
 # so HR_PER_CHAIN=50 means q can only go up/down in increments of 0.02
@@ -51,7 +51,9 @@ function write_progress () {
   elapsed=$SECONDS
   this_repeat=$(echo $elapsed-$LAST_REPEAT_ELAPSED | bc)
   progress_msg=$(python3 $_BIN_DIR/_exp_progress.py $repeat_i $REPEAT_TIMES $LAST_REPEAT_ELAPSED $this_repeat)
-  export PROGRESS_STR=">> [${progress_msg}]\n>> Loop: rs:$strat / cs:$crypto_sys / q:$atk_r / ds:$ds_conf_base"
+  # no point incliduing these if we're not looping thru them
+  # Loop: rs:$strat / cs:$crypto_sys /
+  export PROGRESS_STR=">> [${progress_msg}] >> q:$atk_r / ds:$ds_conf_base"
   echo -e "$PROGRESS_STR"
 }
 
@@ -81,8 +83,8 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
             for ntrials in `seq 1 ${N_TRIALS_PER}`; do
               echo "$SIM_ARGS"
             done
-          done | xargs -P $N_CPUS -I{} sh -c "$SIM_BIN {} | grep 'RESULT:' | cut -d ':' -f 2- | tee -a $OUT_FILE" | tail -n 2
-          write_progress $repeat_i $strat $crypto_sys $atk_r $ds_conf_base
+          done | xargs -P $N_CPUS -I{} sh -c "$SIM_BIN {} | grep 'RESULT:' | cut -d ':' -f 2- | tee -a $OUT_FILE" | tail -n 1
+          # write_progress $repeat_i $strat $crypto_sys $atk_r $ds_conf_base
         done
       done
     done
