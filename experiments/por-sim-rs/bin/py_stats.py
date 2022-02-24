@@ -603,16 +603,16 @@ def main(filter_fname: Optional[str], n_jobs: int):
             (f'exp_aux3_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpend_WeightedChain_DAA100.csv', 'trad', 'DS+WC'),
         ]
 
-    def exp_12_csv_name(q, t, bt=50, hr=50, strat="DoubleSpend", cs="WeightedChain", daa=None, exp_num=None):
+    def exp_12_csv_name(q, t, bt=50, hr=50, strat="DoubleSpend", cs="WeightedChain", daa=None, exp_num=None, hashname=None):
         return f'exp-12-repeat-8-R{strat}-q{q}-t{t}-p{bt}-H{hr}-{cs}-xxh3.csv'
 
-    def exp_13_csv_name(q, t, bt=50, hr=50, strat="DoubleSpend", cs="WeightedChain", daa=100, exp_num=None):
+    def exp_13_csv_name(q, t, bt=50, hr=50, strat="DoubleSpend", cs="WeightedChain", daa=100, exp_num=None, hashname=None):
         assert exp_num
         return f'exp_{exp_num}_RandHR_q={q}_dswin={t}_bt={bt}_hr={hr}_{strat}_{cs}_DAA{daa}.csv'
 
     def exp_16_csv_name(q, t, bt=50, hr=50, strat="DoubleSpendWork", cs="WeightedDag", daa=100, exp_num=None, hashname='blake3'):
         assert exp_num
-        rand_hr_dist = exp_num in ['16']
+        rand_hr_dist = exp_num in ['16', '18', '19']
         hr_dist = 'RandHR' if rand_hr_dist else 'UniHR'
         return f'exp_{exp_num}_{hr_dist}_{hashname}_q={q}_dswin={t}_bt={bt}_hr={hr}_{strat}_{cs}_DAA{daa}.csv'
 
@@ -628,6 +628,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             '16': exp_16_csv_name,
             '17': exp_16_csv_name,
             '18': exp_16_csv_name,
+            '19': exp_16_csv_name,
         }).get(exp_num, unknown_exp_num_name)
 
     def gen_por_equiv_rand_hrs_csvs(q, t, bt=50, hr=50, only_real_world=False, exp_num='13', aux_num='3', daa='100') -> list[CsvFileToPlot]:
@@ -807,7 +808,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
     ] + [
-        # compare e13 to e16 -- only differs by hash
+        # compare e13 to e16 -- only differs by hash (xx vs blake)
         SavePlot(
             gen_por_hash_comare(q, t),
             "\n".join([
@@ -829,9 +830,23 @@ def main(filter_fname: Optional[str], n_jobs: int):
             seed_qs=set(map(float, qs)), seed_ds_targets={float(t)},
             )
         for qs in [['0.40', '0.44', '0.48']] for t in ['5', '10', '20']
+    ] + [
+        # exp 18/19
+        SavePlot(
+            [
+                (csv_name_f_from_exp(exp)(q, t, exp_num=exp, hashname=hn), 'por', extra)
+                for exp,hn,extra in [('16', 'blake3', 'Default'), ('18', 'xxh3', 'Early Cutoff'), ('19', 'xxh3', 'Late Cutoff')]
+            ],
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture Auxiliary Graph",
+                f"Q: Do we cut failing doublespend attempts off too early?",
+            ]),
+            f"png/atk_length_comparison_q={q}_t={t}.png",
+            x_label=std_x_label(t),
+            x_range=q_t_to_x_range[(q, t)],
+        )
+        for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
     ]
-
-    # todo: exp18 -- low atk_end_tick
 
     pool = mpp.Pool(n_jobs)
     count = 0

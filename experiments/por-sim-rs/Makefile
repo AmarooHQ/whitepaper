@@ -19,12 +19,19 @@ ifeq ($(RANDOMLY_DISTRIBUTE_HASHRATES),1)
 	_RAND_HRS_ARG = --random_hr_distrib
 endif
 
+ATK_USE_DYN_END_TICK ?=
+_USE_DYN_END =
+ifeq ($(ATK_USE_DYN_END_TICK),1)
+	_USE_DYN_END = --use_dyn_end_tick
+endif
+
+
 CRYPTO_SYSTEM ?= WeightedDag
 # CRYPTO_SYSTEM ?= WeightedChain
 
 RUN_BIN = target/release/por-sim-rs
 
-SIMULATOR_ARGS ?= -R $(ATK_STRATEGY) -s $(ATK_START_TICK) -e $(ATK_END_TICK) -r $(ATK_RATIO) -S $(CRYPTO_SYSTEM) -b $(B_PERIOD) -P $(N_CHAINS) -H $(HR_PER_CHAIN) --ds_win_threshold $(ATK_DS_CONFS) --daa2_n_blocks $(DAA2_N_BLOCKS) --atk_end_delay_ticks $(ATK_END_DELAY_TICKS) $(_RAND_HRS_ARG)
+SIMULATOR_ARGS ?= -R $(ATK_STRATEGY) -s $(ATK_START_TICK) -e $(ATK_END_TICK) -r $(ATK_RATIO) -S $(CRYPTO_SYSTEM) -b $(B_PERIOD) -P $(N_CHAINS) -H $(HR_PER_CHAIN) --ds_win_threshold $(ATK_DS_CONFS) --daa2_n_blocks $(DAA2_N_BLOCKS) --atk_end_delay_ticks $(ATK_END_DELAY_TICKS) $(_RAND_HRS_ARG) $(_USE_DYN_END)
 
 test:
 	cargo test

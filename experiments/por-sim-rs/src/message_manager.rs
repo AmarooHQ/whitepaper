@@ -29,6 +29,7 @@ pub struct MM<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> {
     extra_chain_nodes: Vec<ExtraChainNodes<'a, S>>,
     net_args: NetworkArgs,
     stop_simulation_at: Option<Timestamp>,
+    avg_work_per_block_period: Difficulty,
 }
 
 #[derive(Debug, Clone)]
@@ -40,6 +41,7 @@ pub struct AttackArgs {
     pub end_simulation_at_t: Timestamp,
     pub attacker_instant_propagation: bool,
     pub atk_end_delay_ticks: Timestamp,
+    pub use_dynamic_cutoff: bool,
 }
 
 impl AttackArgs {
@@ -54,7 +56,12 @@ impl AttackArgs {
             end_simulation_at_t: attack_starts_at * 3,
             attacker_instant_propagation: false,
             atk_end_delay_ticks: 0,
+            use_dynamic_cutoff: false,
         }
+    }
+
+    fn total_hr(&self) -> u32 {
+        self.honest_hr + self.attacker_hr
     }
 }
 
@@ -71,6 +78,8 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             BlockMD::mk_genesis_md(&genesis.clone(), net_args.daa2_n_blocks.to_usize().unwrap()),
             net_args.clone(),
         );
+        let avg_work_per_block_period =
+            (net_args.por_chains as u32) * (net_args.block_target as u32) * args.total_hr();
         MM {
             honest_node: Node::new(0, chain.clone(), false, args.honest_hr, false),
             attacker_node: Node::new(
@@ -87,6 +96,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             extra_chain_nodes,
             net_args,
             stop_simulation_at: None,
+            avg_work_per_block_period,
         }
     }
 
@@ -235,6 +245,12 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             self.atk_start_h = Some(Height::from(
                 self.honest_node.chain.get_heights_pub_priv().public,
             ));
+            let bb = self.honest_node.chain.get_any_best_block(false);
+            let bb_id = bb.0.get_hash();
+            let daa2_bs = BlockMD::<S::B>::get_daa2_blocks(bb_id).unwrap();
+            let _ago = 10;
+            let past_b = S::C::get_cached_block(&daa2_bs[_ago as usize]).unwrap();
+            self.avg_work_per_block_period = (bb.1.chain_weight - past_b.1.chain_weight) / _ago;
         }
     }
 
@@ -310,7 +326,11 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
 
     pub fn run_attack(&mut self) -> Result<bool, String> {
         let mut msgs_from = Vec::new();
-        let ts_limit = self.args.end_simulation_at_t;
+        let ts_limit = if self.args.use_dynamic_cutoff {
+            (self.args.attack_starts_at * 30).min(1_000_000)
+        } else {
+            self.args.end_simulation_at_t
+        };
 
         let run_atk_start = SystemTime::now();
 
@@ -336,6 +356,19 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
                     self.stop_simulation_at = Some(ts + self.args.atk_end_delay_ticks);
                 }
                 if self.stop_simulation_at.map(|at| ts >= at).unwrap_or(false) {
+                    break;
+                }
+            }
+
+            // end when attack has started and attacker is behind honest chain by a lot
+            if self.args.use_dynamic_cutoff && ts > self.args.attack_starts_at {
+                let fm = self.attacker_node.chain.get_fork_measure_pub_priv();
+                if self
+                    .strategy
+                    .as_ref()
+                    .unwrap()
+                    .dynamic_cutoff(fm, self.avg_work_per_block_period)
+                {
                     break;
                 }
             }

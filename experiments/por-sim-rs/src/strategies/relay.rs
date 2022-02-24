@@ -16,11 +16,18 @@ pub trait RelayStrategyT<'a, S: CSystemT<'a>> {
     type ResultsTy: Debug;
     type Params: Clone + Copy + Debug;
     fn init(c: &S::C, atk_start_h: Height, p: Self::Params) -> Self;
+    fn name() -> String;
     /// Additional msgs that can be provided by attackers when certain conditions are met (e.g., selfish mining requires releasing withheld blocks if the honest network releases one)
     fn on_msg(&mut self, m: &MsgToNode<S::B>, chain: &S::C) -> Vec<MsgToNode<S::B>>;
     fn get_results(&self, c: &S::C) -> Option<(Self::ResultsTy, bool)>;
     fn should_stop_simulation(&self, ts: Timestamp, c: &S::C) -> bool;
     fn params_as_csv(&self) -> String;
+    fn dynamic_cutoff(&self, fm: Heights, work_per_period: Difficulty) -> bool {
+        panic!(
+            "Dynamic cutoff has not been implemented for: {}",
+            Self::name()
+        );
+    }
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -60,6 +67,9 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
             atk_start_h,
         }
     }
+    fn name() -> String {
+        "DoubleSpendStrat".to_string()
+    }
     fn on_msg(&mut self, _msg_from: &MsgToNode<S::B>, _chain: &S::C) -> Vec<MsgToNode<S::B>> {
         vec![]
     }
@@ -88,6 +98,11 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
             "{}, {}",
             self.params.attack_starts_at, self.params.win_thres
         )
+    }
+    fn dynamic_cutoff(&self, fm: Heights, work_per_period: Difficulty) -> bool {
+        // for a doublespend of C confirmations, if the attacker is trailing
+        // the public chain by >C confirmations worth of work, then terminate.
+        fm.private + self.params.win_thres * work_per_period < fm.public
     }
 }
 
@@ -136,6 +151,9 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
                 * chain.get_any_best_block(false).0.get_difficulty(),
         }
     }
+    fn name() -> String {
+        "DoubleSpendWorkStrat".to_string()
+    }
     fn on_msg(&mut self, _msg_from: &MsgToNode<S::B>, _chain: &S::C) -> Vec<MsgToNode<S::B>> {
         vec![]
     }
@@ -160,11 +178,16 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
     fn params_as_csv(&self) -> String {
         format!(
             "{}, {}",
-            // omit n_por_chains b/c it's recorded elsewhere in the csv
             self.params.attack_starts_at,
             self.params.win_thres,
+            // note: omit n_por_chains b/c it's recorded elsewhere in the csv
             //self.params.n_por_chains
         )
+    }
+    fn dynamic_cutoff(&self, fm: Heights, work_per_period: Difficulty) -> bool {
+        // for a doublespend of C confirmations: if the attacker is trailing
+        // the public chain by > C confirmations worth of work, then terminate.
+        fm.private + self.params.win_thres * work_per_period < fm.public
     }
 }
 
@@ -460,6 +483,9 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
             atk_start_h,
             _s: PhantomData,
         }
+    }
+    fn name() -> String {
+        "SelfishMining".to_string()
     }
 
     fn on_msg(&mut self, msg_from: &MsgToNode<S::B>, atk_chain: &S::C) -> Vec<MsgToNode<S::B>> {

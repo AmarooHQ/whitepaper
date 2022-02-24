@@ -87,7 +87,8 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
         (version: "0.2.0")
         (@arg attacker_ratio: -r --ratio +takes_value default_value("0.45") {validate_ratio} "Proportion of hash-rate belonging to attackers.")
         (@arg start_attack_at_t: -s --start_attack_tick +takes_value default_value("1000") "Tick at which to start the attack.")
-        (@arg end_simulation_at_t: -e --end_tick +takes_value "Maximum number of ticks for the simulation. Defaults to 3*start_attack_tick")
+        (@arg end_simulation_at_t: -e --end_tick +takes_value "Maximum number of ticks for the simulation. Defaults to 3*start_attack_tick.")
+        (@arg use_dynamic_cutoff: --use_dyn_end_tick !takes_value "Instead of ending the simulation at a fixed tick, end the simulation when the attacker is far behind.")
         (@arg hash_rate: -H --hash_rate +takes_value default_value("1000") "Network hash-rate per tick.")
         (@arg block_target: -b --block_target_time +takes_value default_value("10") "Target time (in ticks) between blocks.")
         (@arg crypto_system: -S --crypto_system +takes_value default_value("WeightedDag") possible_values(&CryptoSystemArg::variants()) "Name of the cryptosystem template to use.")
@@ -132,6 +133,7 @@ pub fn main() -> Result<(), String> {
     let daa2_n_blocks = value_t_or_exit!(args.value_of("daa2_n_blocks"), usize);
     let atk_end_delay_ticks = value_t_or_exit!(args.value_of("atk_end_delay_ticks"), Timestamp);
     let random_hr_distrib = args.is_present("random_hr_distrib");
+    let use_dynamic_cutoff = args.is_present("use_dynamic_cutoff");
 
     let atk_args = AttackArgs {
         q: attacker_ratio,
@@ -141,6 +143,7 @@ pub fn main() -> Result<(), String> {
         end_simulation_at_t,
         attacker_instant_propagation,
         atk_end_delay_ticks,
+        use_dynamic_cutoff,
     };
     let network_args = NetworkArgs {
         block_target,
