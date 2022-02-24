@@ -84,7 +84,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             honest_node: Node::new(
                 0,
                 chain.clone(),
-                false,
+                None,
                 args.honest_hr,
                 false,
                 net_args.por_chains,
@@ -92,7 +92,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             attacker_node: Node::new(
                 1,
                 chain.clone(),
-                true,
+                Some(NodeAtkParams { is_r_chain: false }),
                 args.attacker_hr,
                 args.attacker_instant_propagation,
                 net_args.por_chains,
@@ -198,7 +198,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
                 let honest = Node::new(
                     i * 1_000,
                     chain.clone(),
-                    false,
+                    None,
                     honest_hr,
                     false,
                     net_args.por_chains,
@@ -206,7 +206,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
                 let attacker = Node::new(
                     i * 1_000 + 1,
                     chain.clone(),
-                    true,
+                    Some(NodeAtkParams { is_r_chain: true }),
                     attacker_hr,
                     args.attacker_instant_propagation,
                     net_args.por_chains,
