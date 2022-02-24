@@ -891,9 +891,10 @@ def main(filter_fname: Optional[str], n_jobs: int):
             [
                 (csv_name_f_from_exp(exp)(q, t, exp_num=exp, hashname=hn, **kw), 'por', extra)
                 for exp, hn, extra, kw in [
-                    ('20', 'xxh3', 'HR=50, Dynamic Cutoff', dict()),
-                    ('19', 'xxh3', 'HR=50, Late Cutoff', dict()),
-                    ('22b', 'xxh3', 'HR=50, xxh3', dict(bt=50, hr=50)),
+                    ('20', 'xxh3', 'no bonus', dict()),
+                    ('19', 'xxh3', 'no bonus', dict()),
+                    ('22b', 'xxh3', 'bonus b', dict()),
+                    ('22c', 'xxh3', 'bonus c', dict()),
                 ]
             ],
             "\n".join([
@@ -909,9 +910,9 @@ def main(filter_fname: Optional[str], n_jobs: int):
             [
                 (csv_name_f_from_exp(exp)(q, t, exp_num=exp, hashname=hn, **kw), ty, extra)
                 for exp, hn, ty, extra, kw in [
-                    ('22b', 'xxh3', 'por', None, dict()),
-                    ('22c', 'xxh3', 'por', None, dict()),
-                    ('22aux', 'xxh3', 'trad', None, dict()),
+                    ('22b', 'xxh3', 'por', 'bonus b', dict()),
+                    ('22c', 'xxh3', 'por', 'bonus c', dict()),
+                    ('22aux', 'xxh3', 'trad', 'bonus', dict()),
                 ]
             ],
             "\n".join([
