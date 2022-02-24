@@ -635,6 +635,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             '21': exp_16_csv_name,
             '22': exp_16_csv_name,
             '22b': exp_16_csv_name,
+            '22aux': exp_16_csv_name,
             '23': exp_16_csv_name,
             '24': exp_16_csv_name,
             '25': exp_16_csv_name,
@@ -884,7 +885,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
         # this is expensive so not as many combos
         for q in ['0.40', '0.44', '0.48'] for t in ['5', '10']
     ] + [
-        # exp21: high res vs default
+        # exp22: bonus block
         SavePlot(
             [
                 (csv_name_f_from_exp(exp)(q, t, exp_num=exp, hashname=hn, **kw), 'por', extra)
@@ -900,7 +901,23 @@ def main(filter_fname: Optional[str], n_jobs: int):
             ]),
             f"png/bonusblock_2_vs_std_q={q}_t={t}.png"
         )
-        # this is expensive so not as many combos
+        for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
+    ] + [
+        # exp22aux: doublespends on trad with bonus block
+        SavePlot(
+            [
+                (csv_name_f_from_exp(exp)(q, t, exp_num=exp, hashname=hn, **kw), ty, extra)
+                for exp, hn, ty, extra, kw in [
+                    ('22b', 'xxh3', 'por', None, dict()),
+                    ('22aux', 'xxh3', 'trad', None, dict()),
+                ]
+            ],
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture Auxiliary Graph",
+                f"Q: Does giving the attacker a bonus block change trad doublespends?",
+            ]),
+            f"png/bonusblock_2_trad_q={q}_t={t}.png"
+        )
         for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
     ]
 

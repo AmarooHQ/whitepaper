@@ -19,6 +19,10 @@ export RANDOMLY_DISTRIBUTE_HASHRATES=1
 export HR_DISTRIB=$(if [[ ! -z "$RANDOMLY_DISTRIBUTE_HASHRATES" ]]; then echo 'RandHR'; else echo 'UniHR'; fi)
 export OUT_F_PREFIX=csv/exp_${EXP_NUM}_${HR_DISTRIB}_${POR_SIM_HASH}
 
+# exp num = 22: broken implementation -- bonus blocks given to all chains way too much
+# exp num = 22b: bonus blocks only given if n_por_chains == 1 (i.e., is trad/standalone)
+# exp num = 22c: R chains wait to see a priv block before making priv blocks -- L chain will always get a bonus block
+
 export ATK_USE_DYN_END_TICK=1
 
 # run REPEAT_TIMES total loops, where the simulator is run N_TRIALS_PER times for each set of params per loop.
