@@ -9,17 +9,14 @@ SIM_BIN=./target/release/por-sim-rs
 cargo b --release
 
 # Experiment 22: bonus block now occurs
-# NOTE: I think the current impl might be broken for PoR:
-# => bonus blocks are easy on a trad chain, but how does it play with pending reflections?
-# => particularly, what's the attacker's strat with when to fork?
-#    -- forking *between* blocks has meaning now potentially b/c of inprogress refls.
-export EXP_NUM=22
+export EXP_NUM=22aux
 export POR_SIM_HASH=xxh3
 export RANDOMLY_DISTRIBUTE_HASHRATES=1
 export HR_DISTRIB=$(if [[ ! -z "$RANDOMLY_DISTRIBUTE_HASHRATES" ]]; then echo 'RandHR'; else echo 'UniHR'; fi)
 export OUT_F_PREFIX=csv/exp_${EXP_NUM}_${HR_DISTRIB}_${POR_SIM_HASH}
 
 export ATK_USE_DYN_END_TICK=1
+export N_CHAINS=1
 
 # run REPEAT_TIMES total loops, where the simulator is run N_TRIALS_PER times for each set of params per loop.
 # => the total number of samples per x val is N_TRIALS_PER * REPEAT_TIMES
@@ -69,7 +66,6 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
         for ds_conf_base in 5 10 20; do
           export ATK_DS_CONFS=$ds_conf_base;
           export OUT_FILE=${OUT_F_PREFIX}_q=${ATK_RATIO}_dswin=${ATK_DS_CONFS}_bt=${B_PERIOD}_hr=${HR_PER_CHAIN}_${ATK_STRATEGY}_${CRYPTO_SYSTEM}_DAA${DAA2_N_BLOCKS}.csv
-          # echo "$OUT_FILE" ; exit 0
 
           if [[ ! -f $OUT_FILE ]]; then
             cp result-columns.csv $OUT_FILE
@@ -77,8 +73,10 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
 
           write_progress $repeat_i $strat $crypto_sys $atk_r $ds_conf_base
 
+          # called `nchains` to remain consistent with other experiments
           for nchains in 1 2 30 `seq 21 -2 7` `seq 6 -1 1`; do
-            export N_CHAINS=$nchains;
+            nconfs=$(echo $nchains\*$ds_conf_base | bc)
+            export ATK_DS_CONFS=$nconfs;
             export SIM_ARGS=$(make print-sim-args);
             for ntrials in `seq 1 ${N_TRIALS_PER}`; do
               echo "$SIM_ARGS"
