@@ -634,6 +634,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             '20': exp_16_csv_name,
             '21': exp_16_csv_name,
             '22': exp_16_csv_name,
+            '22b': exp_16_csv_name,
             '23': exp_16_csv_name,
             '24': exp_16_csv_name,
             '25': exp_16_csv_name,
@@ -890,14 +891,14 @@ def main(filter_fname: Optional[str], n_jobs: int):
                 for exp, hn, extra, kw in [
                     ('20', 'xxh3', 'HR=50, Dynamic Cutoff', dict()),
                     ('19', 'xxh3', 'HR=50, Late Cutoff', dict()),
-                    ('22', 'xxh3', 'HR=50, xxh3', dict(bt=50, hr=50)),
+                    ('22b', 'xxh3', 'HR=50, xxh3', dict(bt=50, hr=50)),
                 ]
             ],
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture Auxiliary Graph",
                 f"Q: Does giving the attacker a bonus block change things??",
             ]),
-            f"png/bonusblock_vs_std_q={q}_t={t}.png"
+            f"png/bonusblock_2_vs_std_q={q}_t={t}.png"
         )
         # this is expensive so not as many combos
         for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']

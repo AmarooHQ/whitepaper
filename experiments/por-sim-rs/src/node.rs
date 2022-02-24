@@ -19,6 +19,7 @@ pub struct Node<'a, /*R: RelayStrategyT,*/ S: CSystemT<'a>> {
     mining_attempts_per_tick: Difficulty,
     curr_draft_block: Option<S::B>,
     add_mined_block_instant: bool,
+    por_chains: u16,
 }
 
 impl<'a, S: CSystemT<'a>> Node<'a, S> {
@@ -28,6 +29,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         is_attacker: bool,
         mining_attempts_per_tick: Difficulty,
         add_mined_block_instant: bool,
+        por_chains: u16,
     ) -> Node<'a, S> {
         Node {
             id,
@@ -37,6 +39,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
             mining_attempts_per_tick,
             curr_draft_block: None,
             add_mined_block_instant,
+            por_chains,
         }
     }
 
@@ -112,8 +115,9 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
                         self.curr_draft_block = None;
                         match (is_private, self.is_attacker) {
                             (false, _) => {
+                                // we only care if the blockchain is standalone
                                 let atk_chain_synced_w_pub_chain: bool =
-                                    self.chain.pub_and_priv_chains_synced();
+                                    1 == self.por_chains && self.chain.pub_and_priv_chains_synced();
                                 self.got_block(b, false)?;
                                 // before the attack has started,
                                 // or if it has started but the attacker has not mined a block yet,
@@ -234,7 +238,7 @@ mod tests {
             net_args,
         );
         let chain_id = c.get_chain_id();
-        let mut n: Node<SimpleCS> = Node::new(1337, c, false, 100, false);
+        let mut n: Node<SimpleCS> = Node::new(1337, c, false, 100, false, 1);
 
         // just so we make sure we can get a valid block via mining
         let _bs = n.attempt_mining(10, 30000, false);
@@ -283,7 +287,7 @@ mod tests {
             BlockMD::mk_genesis_md(&genesis, net_args.daa2_n_blocks),
             net_args,
         );
-        let mut n: Node<SimpleCS> = Node::new(1337, c, false, 100, false);
+        let mut n: Node<SimpleCS> = Node::new(1337, c, false, 100, false, 1);
 
         let prev_height = n.chain.get_fork_measure_pub_priv().public;
 
@@ -308,7 +312,7 @@ mod tests {
             let na = NetworkArgs::new(1);
             let g_md = BlockMD::mk_genesis_md(&g, na.daa2_n_blocks);
             let c = Chain::new(g, g_md, na);
-            let n: Node<DagCS> = Node::new(i, c.clone(), false, 100, false);
+            let n: Node<DagCS> = Node::new(i, c.clone(), false, 100, false, 1);
             chains.push(c);
             nodes.push(n);
         }

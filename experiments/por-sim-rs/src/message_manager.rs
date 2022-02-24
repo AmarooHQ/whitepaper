@@ -81,13 +81,21 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
         let avg_work_per_block_period =
             (net_args.por_chains as u64) * (net_args.block_target as u64) * args.total_hr();
         MM {
-            honest_node: Node::new(0, chain.clone(), false, args.honest_hr, false),
+            honest_node: Node::new(
+                0,
+                chain.clone(),
+                false,
+                args.honest_hr,
+                false,
+                net_args.por_chains,
+            ),
             attacker_node: Node::new(
                 1,
                 chain.clone(),
                 true,
                 args.attacker_hr,
                 args.attacker_instant_propagation,
+                net_args.por_chains,
             ),
             strategy: None,
             args: args.clone(),
@@ -187,13 +195,21 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
                     ),
                     net_args.clone(),
                 );
-                let honest = Node::new(i * 1_000, chain.clone(), false, honest_hr, false);
+                let honest = Node::new(
+                    i * 1_000,
+                    chain.clone(),
+                    false,
+                    honest_hr,
+                    false,
+                    net_args.por_chains,
+                );
                 let attacker = Node::new(
                     i * 1_000 + 1,
                     chain.clone(),
                     true,
                     attacker_hr,
                     args.attacker_instant_propagation,
+                    net_args.por_chains,
                 );
                 ExtraChainNodes { honest, attacker }
             })

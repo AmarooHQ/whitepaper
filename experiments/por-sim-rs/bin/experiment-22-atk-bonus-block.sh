@@ -13,7 +13,7 @@ cargo b --release
 # => bonus blocks are easy on a trad chain, but how does it play with pending reflections?
 # => particularly, what's the attacker's strat with when to fork?
 #    -- forking *between* blocks has meaning now potentially b/c of inprogress refls.
-export EXP_NUM=22
+export EXP_NUM=22b
 export POR_SIM_HASH=xxh3
 export RANDOMLY_DISTRIBUTE_HASHRATES=1
 export HR_DISTRIB=$(if [[ ! -z "$RANDOMLY_DISTRIBUTE_HASHRATES" ]]; then echo 'RandHR'; else echo 'UniHR'; fi)
