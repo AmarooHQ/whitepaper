@@ -22,6 +22,7 @@ class PorPlotOpts:
     _trans_x: Optional[Callable[[float], float]] = None
     _label_extra: Optional[str] = None
     cec_scaled: Optional[float] = None
+    _kwargs: Optional[dict] = None
 
     def trans_x(self, x):
         if self._trans_x:
@@ -36,6 +37,11 @@ class PorPlotOpts:
 
     def should_scale(self):
         return self.cec_scaled is not None
+
+    @property
+    def kwargs(self):
+        return self._kwargs or dict()
+
 
 CsvFileToPlot = tuple[str, Literal['por', 'trad'], Optional[str | PorPlotOpts]]
 
@@ -272,7 +278,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         ):
     print(f"\nPlotting chart: {png_filename or '<tmp-not-saved>'}")
     plt.figure(figsize=figsize, dpi=dpi)
-    _x_range_max = x_range[1] if x_range else 20
+    _x_range_max = x_range[1] if x_range else 21
     _max_ix = 0
     qs = set(seed_qs or [])
     ds_targets = set(seed_ds_targets or [])
@@ -282,13 +288,17 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
     por_count = -1
     trad_count = -1
     for csv_i, (fname, chain_ty, label_extra) in enumerate(csv_files):
+        z_order = 2 + (.1 if chain_ty == 'por' else -.1)
+        _kwargs = dict(**kwargs)
+        _kwargs.update(marker=get_line_marker(chain_ty, por_count, trad_count), zorder=z_order)
         is_por = chain_ty == 'por'
         is_trad = not is_por
         label_extra = label_extra or ''
         por_plot_opts = None
-        if not isinstance(label_extra, str) and chain_ty == 'por':
+        if not isinstance(label_extra, str):
             por_plot_opts = label_extra
             label_extra = por_plot_opts.label_extra
+
         n_trials, max_ix, block_target, _q, ds_target, csv_data, ms_elapsed, d2 = read_csv_data(fname, chain_ty)
         csv_series.append(csv_data)
         if chain_ty == 'por':
@@ -297,24 +307,20 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         else:
             ty_str = 'Trad:'
             trad_count += 1
-        z_order = 2 + (.1 if chain_ty == 'por' else -.1)
-
-        cec_prob = f"$P(q; N_1 = x; c = {ds_target})$   "
-        cec_trad_prob = f"$P(q; N_1 = 1; c = {ds_target}x)$ "
 
         log_ds_target = ds_target
         if por_plot_opts and por_plot_opts.cec_scaled:
             csv_data = pd.Series(csv_data.values, index=[x * por_plot_opts.cec_scaled for x in csv_data.index])
             log_ds_target = int(ds_target / por_plot_opts.cec_scaled)
-            cec_prob = f"$P(q; N_1 = x / {por_plot_opts.cec_scaled}; c = {ds_target})$"
+
+        if por_plot_opts:
+            _kwargs.update(**por_plot_opts.kwargs)
 
         prob_math = gen_cec_prob_str(ds_target, is_trad=is_trad, scaled=por_plot_opts and por_plot_opts.cec_scaled)
+        if 'label' not in _kwargs:
+            _kwargs['label'] = f"y = {prob_math} --- {ty_str} $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $n \\geq {n_trials}$; ds_win={ds_target}; {label_extra or ''}"
 
-        csv_data.plot(
-            label=f"y = {prob_math} --- {ty_str} $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $n \\geq {n_trials}$; ds_win={ds_target}; {label_extra or ''}",
-            marker=get_line_marker(chain_ty, por_count, trad_count),
-            zorder=z_order,
-            **kwargs)
+        csv_data.plot(**_kwargs)
         # ms_elapsed.plot(label=f"$\\bar{{d}}$ (ms); $B_f^{{-1}} = {block_target}$", secondary_y=True)
         # d2.plot(label="PoR - $y^{0.7}$")
         _max_ix = max(_max_ix, max_ix)
@@ -333,7 +339,8 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
 
     print(f"Calculating theoretical probabilities.")
     t_series = []
-    multipliers = list(range(1, min(_max_ix+1,20))) + list(range(20, _max_ix+1, 1))
+    # multipliers = list(range(1, min(_max_ix+1,20))) + list(range(20, _max_ix+1, 1))
+    multipliers = list(range(1, _max_ix+1))
     largest_x = _max_ix
     td_max_ys = []
     for q in _qs:
@@ -881,7 +888,9 @@ def main(filter_fname: Optional[str], n_jobs: int):
                 f"PoR Confirmation Equivalence Conjecture Auxiliary Graph",
                 f"Q: Do we get different results w/ larger numbers?",
             ]),
-            f"png/highres_vs_std_q={q}_t={t}.png"
+            f"png/highres_vs_std_q={q}_t={t}.png",
+            x_label=std_x_label(t),
+            x_range=q_t_to_x_range[(q, t)],
         )
         # this is expensive so not as many combos
         for q in ['0.40', '0.44', '0.48'] for t in ['5', '10']
@@ -891,17 +900,19 @@ def main(filter_fname: Optional[str], n_jobs: int):
             [
                 (csv_name_f_from_exp(exp)(q, t, exp_num=exp, hashname=hn, **kw), 'por', extra)
                 for exp, hn, extra, kw in [
-                    ('20', 'xxh3', 'no bonus', dict()),
-                    ('19', 'xxh3', 'no bonus', dict()),
-                    ('22b', 'xxh3', 'bonus b', dict()),
-                    ('22c', 'xxh3', 'bonus c', dict()),
+                    # ('20', 'xxh3', 'no bonus', dict()),
+                    # ('19', 'xxh3', 'no bonus', dict()),
+                    # ('22b', 'xxh3', 'bonus b', dict()),
+                    ('22c', 'xxh3', PorPlotOpts(_label_extra='+BonusBlock', _kwargs=dict(color='maroon', marker='+')), dict()),
                 ]
             ],
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture Auxiliary Graph",
                 f"Q: Does giving the attacker a bonus block change things??",
             ]),
-            f"png/bonusblock_2_vs_std_q={q}_t={t}.png"
+            f"png/bonusblock_2_vs_std_q={q}_t={t}.png",
+            x_label=std_x_label(t),
+            x_range=q_t_to_x_range[(q, t)],
         )
         for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
     ] + [
@@ -910,16 +921,17 @@ def main(filter_fname: Optional[str], n_jobs: int):
             [
                 (csv_name_f_from_exp(exp)(q, t, exp_num=exp, hashname=hn, **kw), ty, extra)
                 for exp, hn, ty, extra, kw in [
-                    ('22b', 'xxh3', 'por', 'bonus b', dict()),
-                    ('22c', 'xxh3', 'por', 'bonus c', dict()),
-                    ('22aux', 'xxh3', 'trad', 'bonus', dict()),
+                    ('22c', 'xxh3', 'por', PorPlotOpts(_label_extra='+BonusBlock', _kwargs=dict(color='maroon', marker='+')), dict()),
+                    ('22aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='+BonusBlock', _kwargs=dict(color='orange', marker='o')), dict()),
                 ]
             ],
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture Auxiliary Graph",
                 f"Q: Does giving the attacker a bonus block change trad doublespends?",
             ]),
-            f"png/bonusblock_2_trad_q={q}_t={t}.png"
+            f"png/bonusblock_2_trad_q={q}_t={t}.png",
+            x_label=std_x_label(t),
+            x_range=q_t_to_x_range[(q, t)],
         )
         for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
     ]

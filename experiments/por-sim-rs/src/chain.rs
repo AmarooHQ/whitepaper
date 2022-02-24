@@ -206,6 +206,7 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
     fn add_tx_to_mempool(&mut self, tx_id: TxId, is_private: bool) -> Result<(), ChainTxErr>;
     fn get_mempool_tx_ids(&self, is_private: bool) -> &PassThruHashSet<HashID>;
     fn remove_mempool_tx_ids(&mut self, tx_ids: &Vec<HashID>, is_private: bool);
+    fn clear_mempool(&mut self, is_private: bool);
 
     fn get_chain_weight_at(&self, b: HashID) -> Difficulty {
         Self::get_cached_block(&b).unwrap().1.chain_weight
@@ -810,6 +811,10 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         for tx_id in tx_ids.iter() {
             self._mempool(is_private).remove(tx_id);
         }
+    }
+
+    fn clear_mempool(&mut self, is_private: bool) {
+        self._mempool(is_private).clear()
     }
 
     // fn validate_block_pure(&self, _b: &B) -> Result<Arc<(B, BlockMD<B>)>, ChainErr> {

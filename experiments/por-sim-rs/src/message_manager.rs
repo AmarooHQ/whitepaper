@@ -67,7 +67,7 @@ impl AttackArgs {
 
 impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
     pub fn new(args: AttackArgs, atk_params: R::Params, net_args: NetworkArgs) -> MM<'a, S, R> {
-        warn!(
+        info!(
             "Creating new simulation with {} honest HR and {} attacking HR. Attack starts at T={}. InstantProp={}",
             args.honest_hr, args.attacker_hr, args.attack_starts_at, args.attacker_instant_propagation
         );
@@ -379,7 +379,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             }
             Some((r, success)) => {
                 self.print_atk_summary(success, last_ts, chain, atk_duration_ms);
-                warn!("Attack Results: {:?}", r);
+                info!("Attack Results: {:?}", r);
                 Ok(true)
             }
         }
@@ -393,7 +393,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
         } else {
             "Attack Failed."
         };
-        warn!(
+        info!(
             "{} T={}, StartH={}, PubH={}, PrivH={}, PubFM={}, PrivFM={}",
             atk_success_fail,
             last_ts,

@@ -181,7 +181,7 @@ pub fn main() -> Result<(), String> {
 
     let end_main = SystemTime::now();
 
-    warn!(
+    info!(
         "Simulation took {} ms, total execution time {} ms",
         end_main.duration_since(start_atk).unwrap().as_millis(),
         end_main.duration_since(start_main).unwrap().as_millis(),

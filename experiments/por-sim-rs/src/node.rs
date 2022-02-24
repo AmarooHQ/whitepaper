@@ -107,6 +107,13 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         self.chain.notify_block(id, p)
     }
 
+    fn set_seen_main_atk_block(&mut self, has_seen: bool) {
+        if has_seen && !self.has_seen_main_atk_block {
+            self.has_seen_main_atk_block = has_seen;
+            self.chain.clear_mempool(true);
+        }
+    }
+
     /// if we get a public block, should we add it to the private chain, too?
     fn should_also_add_to_priv(&self, attack_started: bool) -> bool {
         match self.is_attacker.as_ref() {
@@ -168,12 +175,14 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
                                 }
                             }
                             (true, true) => {
-                                self.has_seen_main_atk_block = self.has_seen_main_atk_block
-                                    || self
-                                        .is_attacker
-                                        .as_ref()
-                                        .map(|a| a.is_r_chain)
-                                        .unwrap_or(false);
+                                if !self.has_seen_main_atk_block && self.is_attacker.is_some() {
+                                    self.set_seen_main_atk_block(
+                                        self.is_attacker
+                                            .as_ref()
+                                            .map(|a| a.is_r_chain)
+                                            .unwrap_or(false),
+                                    );
+                                }
                                 self.got_reflectable(*c_id, b, true)?
                             }
                             _ => {}
@@ -186,7 +195,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
 
         // try to mine
         for b in self.attempt_mining(ts, self.mining_attempts_per_tick as u16, attack_started) {
-            // todo: integrate has_seen_main_atk_block
+            // todo: integrate has_seen_main_atk_block -- done I think
             if attack_started
                 && self
                     .is_attacker
@@ -194,7 +203,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
                     .map(|a| !a.is_r_chain)
                     .unwrap_or(false)
             {
-                self.has_seen_main_atk_block = true;
+                self.set_seen_main_atk_block(true);
             }
             out_msgs.push(
                 // if we're an attacker and past when the attack starts,
