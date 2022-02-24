@@ -469,6 +469,10 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
             return Some(r.clone());
         };
 
+        if bs.len() == 0 {
+            panic!("zero length vec passed to find_lca_and_intermediates -- should never happen")
+        }
+
         match bs.len() {
             0 => {
                 return None;
@@ -563,6 +567,15 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
     }
 
     fn calculate_delta_chain_weights(&self, b: &B) -> DeltaChainWeights {
+        /*
+            very rarely (only recently during exp21 on 2022-02-24 after ~3pm)
+            this exception has come up:
+
+            > thread 'main' panicked at 'called `Option::unwrap()` on a `None` value', src/chain.rs:566:71
+
+            (this exception corresponds to the below line)
+            -- mb b/c it's all_parents() is empty? (it should never be, but could be)
+        */
         let lca_r = self.find_lca_and_intermediates(&b.all_parents()).unwrap();
 
         let pm = Self::get_cached_block(&b.prev()).unwrap();

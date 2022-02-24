@@ -11,10 +11,14 @@ use std::fmt::Debug;
 use std::fmt::Display;
 use std::marker::PhantomData;
 
+pub trait GetDS {
+    fn ds_win_threshold(&self) -> Option<Height>;
+}
+
 /// a strategy that runs at a network level based on incoming msgs
 pub trait RelayStrategyT<'a, S: CSystemT<'a>> {
     type ResultsTy: Debug;
-    type Params: Clone + Copy + Debug;
+    type Params: Clone + Copy + Debug + GetDS;
     fn init(c: &S::C, atk_start_h: Height, p: Self::Params) -> Self;
     fn name() -> String;
     /// Additional msgs that can be provided by attackers when certain conditions are met (e.g., selfish mining requires releasing withheld blocks if the honest network releases one)
@@ -45,6 +49,12 @@ impl DoubleSpendParams {
             attack_starts_at,
             win_thres,
         }
+    }
+}
+
+impl GetDS for DoubleSpendParams {
+    fn ds_win_threshold(&self) -> Option<Height> {
+        Some(self.win_thres)
     }
 }
 
@@ -117,6 +127,12 @@ pub struct DoubleSpendWorkParams {
     attack_starts_at: Timestamp,
     win_thres: Height,
     n_por_chains: u16,
+}
+
+impl GetDS for DoubleSpendWorkParams {
+    fn ds_win_threshold(&self) -> Option<Height> {
+        Some(self.win_thres)
+    }
 }
 
 impl DoubleSpendWorkParams {
@@ -261,6 +277,12 @@ impl Display for SmChainType {
 #[derive(Debug, Clone, Copy)]
 pub struct SelfishMiningParams {
     pub chain_type: SmChainType,
+}
+
+impl GetDS for SelfishMiningParams {
+    fn ds_win_threshold(&self) -> Option<Height> {
+        None
+    }
 }
 
 impl<'a, S: CSystemT<'a>> SelfishMining<S> {

@@ -302,7 +302,9 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
     pub fn run_attack(&mut self) -> Result<bool, String> {
         let mut msgs_from = Vec::new();
         let ts_limit = if self.args.use_dynamic_cutoff {
-            (self.args.attack_starts_at + 100 * self.net_args.block_target as u32).min(1_000_000)
+            100.max(self.atk_params.ds_win_threshold().unwrap_or(20).pow(2))
+                * self.net_args.block_target as u32
+                + self.args.attack_starts_at
         } else {
             self.args.end_simulation_at_t
         };
