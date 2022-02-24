@@ -629,6 +629,10 @@ def main(filter_fname: Optional[str], n_jobs: int):
         raise Exception(f'unknown exp_num: {exp_num}')
 
     def csv_name_f_from_exp(exp_num):
+        try:
+            exp_num = str(int(exp_num[:2]))
+        except:
+            pass
         return ({
             '12': exp_12_csv_name,
             '13': exp_13_csv_name,
@@ -945,7 +949,11 @@ def main(filter_fname: Optional[str], n_jobs: int):
                 (csv_name_f_from_exp(exp)(q, t, exp_num=exp, hashname=hn, **kw), ty, extra)
                 for exp, hn, ty, extra, kw in [
                     ('23', 'xxh3', 'por', PorPlotOpts(), dict(bt=75, hr=75)),
+                    ('23b', 'xxh3', 'por', PorPlotOpts(), dict(bt=75, hr=75)),
+                    ('24', 'xxh3', 'por', PorPlotOpts(), dict(bt=50, hr=50)),
                     ('23aux', 'xxh3', 'trad', PorPlotOpts(), dict(bt=75, hr=75)),
+                    ('23baux', 'xxh3', 'trad', PorPlotOpts(), dict(bt=75, hr=75)),
+                    ('24aux', 'xxh3', 'trad', PorPlotOpts(), dict(bt=50, hr=50)),
                 ]
             ],
             "\n".join([
