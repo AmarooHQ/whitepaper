@@ -66,6 +66,9 @@ run-lc-50k-blocks-10simplex: release
 run-lc-50k-blocks-20simplex: release
 	$(RUN_BIN) -s 10000 -e 2500000 -r 0.0 -S WeightedChain -b 50 -H 50 -P 21
 
+run-bonusblock-checker:
+	RUST_LOG=warn,por_sim_rs::message_manager=debug cargo r -- -s 10000 -e 13000 -r 0.46 -S WeightedDag -H 50 -b 50 --ds_win_threshold 5 -P 5 --random_hr_distrib --use_dyn_end_tick
+
 run-dag-doublespend:
 	RUST_LOG=warn,por_sim_rs::strategies::relay=info cargo r -- -s 10000 -e 20000 -r 0.45 -S WeightedDag -b 100
 

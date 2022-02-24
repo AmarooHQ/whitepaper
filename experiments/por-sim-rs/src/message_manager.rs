@@ -357,8 +357,8 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
                 if self
                     .strategy
                     .as_ref()
-                    .unwrap()
-                    .dynamic_cutoff(fm, self.avg_work_per_block_period)
+                    .map(|s| s.dynamic_cutoff(fm, self.avg_work_per_block_period))
+                    .unwrap_or(false)
                 {
                     break;
                 }
