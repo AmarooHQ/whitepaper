@@ -612,7 +612,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
 
     def exp_16_csv_name(q, t, bt=50, hr=50, strat="DoubleSpendWork", cs="WeightedDag", daa=100, exp_num=None, hashname='blake3'):
         assert exp_num
-        rand_hr_dist = exp_num in ['16', '18', '19']
+        rand_hr_dist = exp_num not in ['17'] # in ['16', '18', '19', '20']
         hr_dist = 'RandHR' if rand_hr_dist else 'UniHR'
         return f'exp_{exp_num}_{hr_dist}_{hashname}_q={q}_dswin={t}_bt={bt}_hr={hr}_{strat}_{cs}_DAA{daa}.csv'
 
@@ -629,6 +629,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             '17': exp_16_csv_name,
             '18': exp_16_csv_name,
             '19': exp_16_csv_name,
+            '20': exp_16_csv_name,
         }).get(exp_num, unknown_exp_num_name)
 
     def gen_por_equiv_rand_hrs_csvs(q, t, bt=50, hr=50, only_real_world=False, exp_num='13', aux_num='3', daa='100') -> list[CsvFileToPlot]:
@@ -835,7 +836,12 @@ def main(filter_fname: Optional[str], n_jobs: int):
         SavePlot(
             [
                 (csv_name_f_from_exp(exp)(q, t, exp_num=exp, hashname=hn), 'por', extra)
-                for exp,hn,extra in [('16', 'blake3', 'Default'), ('18', 'xxh3', 'Early Cutoff'), ('19', 'xxh3', 'Late Cutoff')]
+                for exp,hn,extra in [
+                    ('16', 'blake3', 'Default'),
+                    ('20', 'xxh3', 'Dynamic Cutoff'),
+                    ('18', 'xxh3', 'Early Cutoff'),
+                    ('19', 'xxh3', 'Late Cutoff'),
+                    ]
             ],
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture Auxiliary Graph",

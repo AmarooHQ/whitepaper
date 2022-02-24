@@ -101,8 +101,8 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
     }
     fn dynamic_cutoff(&self, fm: Heights, work_per_period: Difficulty) -> bool {
         // for a doublespend of C confirmations, if the attacker is trailing
-        // the public chain by >C confirmations worth of work, then terminate.
-        fm.private + self.params.win_thres * work_per_period < fm.public
+        // the public chain by > max(C, 10) block periods worth of work, then terminate.
+        fm.private + self.params.win_thres.max(10) * work_per_period < fm.public
     }
 }
 
@@ -186,8 +186,8 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
     }
     fn dynamic_cutoff(&self, fm: Heights, work_per_period: Difficulty) -> bool {
         // for a doublespend of C confirmations: if the attacker is trailing
-        // the public chain by > C confirmations worth of work, then terminate.
-        fm.private + self.params.win_thres * work_per_period < fm.public
+        // the public chain by > max(C, 10) block periods worth of work, then terminate.
+        fm.private + self.params.win_thres.max(10) * work_per_period < fm.public
     }
 }
 
