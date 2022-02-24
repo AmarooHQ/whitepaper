@@ -74,9 +74,6 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
           if [[ ! -f $OUT_FILE ]]; then
             cp result-columns.csv $OUT_FILE
           fi
-          if [[ ! -z "$DRY_RUN" ]]; then
-            continue;
-          fi
 
           write_progress $repeat_i $strat $crypto_sys $atk_r $ds_conf_base
 
