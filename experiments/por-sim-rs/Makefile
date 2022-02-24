@@ -67,10 +67,10 @@ run-lc-50k-blocks-20simplex: release
 	$(RUN_BIN) -s 10000 -e 2500000 -r 0.0 -S WeightedChain -b 50 -H 50 -P 21
 
 run-dag-doublespend:
-	RUST_LOG=warn,por_sim_rs::strategies::relay=info cargo r -- -s 10000 -e 20000 -r 0.45 -S WeightedDag -b 100 2>&1 | tail -n 100
+	RUST_LOG=warn,por_sim_rs::strategies::relay=info cargo r -- -s 10000 -e 20000 -r 0.45 -S WeightedDag -b 100
 
 run-dag-doublespend-por:
-	RUST_LOG=warn,por_sim_rs::strategies::relay=info cargo r -- -s 10000 -e 20000 -r 0.45 -S WeightedDag -b 100 -P 10 2>&1 | tail -n 100
+	RUST_LOG=warn,por_sim_rs::strategies::relay=info cargo r -- -s 10000 -e 20000 -r 0.45 -S WeightedDag -b 100 -P 10
 
 run-dag-doublespend-100:
 	# export SIMULATOR_ARGS="-s $(ATK_START_TICK) -e $(ATK_END_TICK) -r $(ATK_RATIO) -S WeightedDag -b $(B_PERIOD) -P $(N_CHAINS) -H $(HR_PER_CHAIN) --ds_win_threshold $(ATK_DS_CONFS)" ; \

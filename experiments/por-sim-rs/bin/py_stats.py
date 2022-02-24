@@ -635,6 +635,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             '21': exp_16_csv_name,
             '22': exp_16_csv_name,
             '22b': exp_16_csv_name,
+            '22c': exp_16_csv_name,
             '22aux': exp_16_csv_name,
             '23': exp_16_csv_name,
             '24': exp_16_csv_name,
@@ -909,6 +910,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
                 (csv_name_f_from_exp(exp)(q, t, exp_num=exp, hashname=hn, **kw), ty, extra)
                 for exp, hn, ty, extra, kw in [
                     ('22b', 'xxh3', 'por', None, dict()),
+                    ('22c', 'xxh3', 'por', None, dict()),
                     ('22aux', 'xxh3', 'trad', None, dict()),
                 ]
             ],

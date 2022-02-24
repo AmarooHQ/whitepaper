@@ -50,6 +50,10 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         }
     }
 
+    pub fn attack_has_started(&self) -> bool {
+        self.has_seen_main_atk_block
+    }
+
     fn got_block(&mut self, b: &S::B, is_private: bool) -> Result<(), ChainErr> {
         self.chain.add_block(b.clone(), is_private)
     }

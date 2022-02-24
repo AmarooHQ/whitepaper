@@ -78,6 +78,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             BlockMD::mk_genesis_md(&genesis.clone(), net_args.daa2_n_blocks.to_usize().unwrap()),
             net_args.clone(),
         );
+        // this later gets updated in self.check_and_set_atk_start_h
         let avg_work_per_block_period =
             (net_args.por_chains as u64) * (net_args.block_target as u64) * args.total_hr();
         MM {
@@ -235,11 +236,13 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
 
     pub fn check_and_set_atk_start_h(&mut self, ts: Timestamp) {
         if self.attack_started(ts) && self.atk_start_h.is_none() {
-            self.atk_start_h = Some(self.honest_node.chain.get_heights_pub_priv().public as Height);
+            let h = self.honest_node.chain.get_heights_pub_priv().public as Height;
+            self.atk_start_h = Some(h);
+            debug!("setting atk_start_h:{}", h);
             let bb = self.honest_node.chain.get_any_best_block(false);
             let bb_id = bb.0.get_hash();
             let daa2_bs = BlockMD::<S::B>::get_daa2_blocks(bb_id).unwrap();
-            let _ago = 10;
+            let _ago = daa2_bs.len() as Difficulty / 4;
             let past_b = S::C::get_cached_block(&daa2_bs[_ago as usize]).unwrap();
             self.avg_work_per_block_period = (bb.1.chain_weight - past_b.1.chain_weight) / _ago;
         }
@@ -248,14 +251,6 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
     pub fn tick(&mut self, ts: u32, msgs: Vec<Msg<S::B>>) -> Result<Vec<Msg<S::B>>, String> {
         let mut msgs_to = msgs_from_into_to(&msgs);
         let atk_started = self.attack_started(ts);
-        if atk_started && self.strategy.is_none() {
-            // let atk_start_height = atk_node.chain.get_heights_pub_priv().public;
-            self.strategy.get_or_insert(R::init(
-                &self.attacker_node.chain,
-                self.atk_start_h.unwrap(),
-                self.atk_params,
-            ));
-        }
         let atk_chain = &self.attacker_node.chain;
         if self.strategy.is_some() {
             let s = self.strategy.as_mut().unwrap();
@@ -281,19 +276,21 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             output_msgs.extend(extra_ns.honest.step(ts, &msgs_to, atk_started).unwrap());
             output_msgs.extend(extra_ns.attacker.step(ts, &msgs_to, atk_started).unwrap());
         }
-        // let all_nodes = vec![(&mut self.honest_node, &mut self.attacker_node)]
-        //     .into_iter()
-        //     .chain(other_nodes);
-        // let output_msgs = all_nodes
-        //     .map(|(mut h, mut a)| {
-        //         vec![
-        //             h.step(ts, &msgs_to, atk_started).unwrap(),
-        //             a.step(ts, &msgs_to, atk_started).unwrap(),
-        //         ]
-        //         .concat()
-        //     })
-        //     .collect::<Vec<_>>()
-        //     .concat();
+
+        if atk_started && self.strategy.is_none() && self.attacker_node.attack_has_started() {
+            // let atk_start_height = atk_node.chain.get_heights_pub_priv().public;
+            let h_pre = self.atk_start_h.unwrap_or(0);
+            let h = *self
+                .atk_start_h
+                .insert(self.attacker_node.chain.get_heights_pub_priv().public as Height);
+            if h != h_pre {
+                debug!("prev atk_start_h:{}, current:{}", h_pre, h);
+            }
+            // let h = &self.atk_start_h.unwrap_or(0);
+            self.strategy
+                .get_or_insert(R::init(&self.attacker_node.chain, h, self.atk_params));
+        }
+
         Ok(Vec::from(output_msgs))
     }
 
@@ -422,7 +419,10 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             self.net_args.daa2_n_blocks,
             self.net_args.por_chains,
             ms_elapsed,
-            self.strategy.as_ref().unwrap().params_as_csv(),
+            self.strategy
+                .as_ref()
+                .map(|s| s.params_as_csv())
+                .unwrap_or("_,_".to_string()),
         );
     }
 }
