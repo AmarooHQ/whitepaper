@@ -30,8 +30,8 @@ class PorPlotOpts:
     @property
     def label_extra(self):
         r = self._label_extra or ''
-        if self.cec_scaled:
-            r += f" | Scaled: $x \\to {self.cec_scaled} x$"
+        # if self.cec_scaled:
+            # r += f" | Scaled: $x \\to {self.cec_scaled} x$"
         return r
 
     def should_scale(self):
@@ -230,6 +230,7 @@ class Comment:
     _font: Optional[dict] = None
     _bbox: Optional[dict] = None
     wrap_line_width: int = 500
+    font_size: int = 10
 
     def scaled_line_width(self, dpi: int) -> int:
         return self.wrap_line_width * dpi // 100
@@ -237,8 +238,8 @@ class Comment:
     @property
     def font(self):
         return self._font or {
-            'size': 11,
-            'linespacing': 1.4,
+            'size': self.font_size,
+            'linespacing': 1.3,
         }
 
     @property
@@ -326,13 +327,12 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
 
     # if we don't have data then don't needlessly increase x_range
     _max_ix = min(_max_ix + 1, _x_range_max)
-    if x_range:
-        x_range = (x_range[0], _max_ix)
+    x_range = (0 if x_range is None else x_range[0], _max_ix)
 
     print(f"Calculating theoretical probabilities.")
     t_series = []
     multipliers = list(range(1, min(_max_ix+1,20))) + list(range(20, _max_ix+1, 1))
-    largest_x = max(multipliers)
+    largest_x = _max_ix
     td_max_ys = []
     for q in _qs:
         for ds_target in ds_targets:
@@ -349,13 +349,21 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         "(more confirmations w/ trad chain vs more chains w/ PoR)",
         # f"Trials={n_trials}"
         ])
-    plt.title(title or default_title)
+    plt.suptitle(title or default_title, fontdict=dict(linespacing=1.5))
+    plt.title('', fontdict=dict(fontsize=8))
     plt.xlabel(x_label or "x = Confirmation Multiplier / # Chains")
     plt.ylabel(y_label or "P(atk success)")
     plt.grid(True)
     plt.grid(True, which='minor', color=(0.9, 0.9, 0.9, 0.1))
     plt.minorticks_on()
     plt.legend()
+
+    if len(ds_targets) == 1:
+        ds_c = list(ds_targets)[0]
+        c2n = lambda c: c / ds_c
+        n2c = lambda n: n * ds_c
+        sec_x_axis = plt.gca().secondary_xaxis('top', functions=(n2c, c2n))
+        sec_x_axis.set_xlabel('Equivalent Traditional Confirmations')
 
     if x_range:
         plt.xlim(x_range)
@@ -364,10 +372,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
     plt.tight_layout()
 
     if comment:
-        x = comment.x or largest_x
-        y = comment.y
-        lb = (x/2, 0.0)
-        # bounding_rect = plt.Rectangle(lb, x/2, max_y, fill=False)
+        x = comment.x or x_range[1] - 0.5
         txt = plt.text(x, comment.y, comment.body,
             ha='right', va='center', wrap=True,
             fontdict=comment.font, bbox=comment.bbox)
@@ -584,6 +589,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             (f'exp-12-repeat-8-RDoubleSpendWork-q{q}-t{t}-p50-H50-WeightedDag-xxh3.csv', 'por', None),
             (exp_13_csv_name(q, t, exp_num='13', strat="DoubleSpendWork", cs="WeightedDag"), 'por', None),
             (exp_13_csv_name(q, t, exp_num='15', strat="DoubleSpendWork", cs="WeightedDag", daa=500), 'por', None),
+            (exp_16_csv_name(q, t, exp_num='17', strat="DoubleSpendWork", cs="WeightedDag"), 'por', None),
         ]
 
 
@@ -621,6 +627,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             '15': exp_13_csv_name,
             '16': exp_16_csv_name,
             '17': exp_16_csv_name,
+            '18': exp_16_csv_name,
         }).get(exp_num, unknown_exp_num_name)
 
     def gen_por_equiv_rand_hrs_csvs(q, t, bt=50, hr=50, only_real_world=False, exp_num='13', aux_num='3', daa='100') -> list[CsvFileToPlot]:
@@ -654,6 +661,11 @@ def main(filter_fname: Optional[str], n_jobs: int):
         ]
 
 
+    def std_x_label(t):
+        # return f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$"
+        return f"Simplex $N_1$ (or, for trad chains: $x = Confirmations / {t}$)"
+
+
     CEC_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = 1; c = NC)$"
     CEC_EXT_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$"
 
@@ -661,24 +673,37 @@ def main(filter_fname: Optional[str], n_jobs: int):
     jobs_to_save: list[SavePlot] = [
         SavePlot(
             csvs,
-            "Traditional Doublespend Comparison: $N_1=1$\nTheoretical vs DS+WC vs DSW+WD vs DS+LC (w/ DAA over {100,1000} blocks)",
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture Auxiliary Graph",
+                f"Q: Is the simulation of traditional doublespends consisted with theoretical results?",
+                f"Theoretical vs DS+WC vs DSW+WD vs DS+LC@DAA100 vs DS+LC@DAA1000"
+                # f"$N_1=1$; doublespend target: ${t} x$"
+                ]),
+            # "Traditional Doublespend Comparison: $N_1=1$\nTheoretical vs DS+WC vs DSW+WD vs DS+LC (w/ DAA over {100,1000} blocks)",
             fname,
             x_label=f"x = Confirmations / {t}",
             comment=Comment(' '.join([
-                "The LC (Longest Chain) configuration is only secure",
+                "Notice that the green line does not approach 0:",
+                "the LC (Longest Chain) fork rule is only secure",
                 "when the DAA adjustment period is $\\gg$ the number",
-                "of confirmations required. This makes sense because,",
+                "of confirmations required.",
+                "e.g., LC with a DAA range of 100 blocks is somewhat insecure after ~40 confirmations.",
+                "This makes sense because,",
                 "once the DAA has adjusted to the attacker's hashrate,",
                 "the attacker's chain-segment gains blocks at the same",
-                "rate as the honest chain."
-                ]), c_y, wrap_line_width=400),
+                "rate as the honest chain.",
+                "This is why fork rules should use chain $weight$ rather than $height$."
+                ]), c_y, wrap_line_width=425),
             ) for t, csvs, c_y, fname in [
                 (5, csv_compare_aux, 0.22, "png/trad_doublespend_comparison.png"),
             ]
     ] + [
         SavePlot(
             csv_compare_aux_3(q, t),
-            f"Traditional Doublespend Comparison\n$N_1=1$; $q={q}$; doublespend target: ${t} x$",
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture Auxiliary Graph",
+                f"Q: Is the simulation of traditional doublespends consisted with theoretical results?",
+                f"$N_1=1$; $q={q}$; doublespend target: ${t} x$"]),
             f"png/trad_ds_comparison_q={q}_t={t}.png",
             x_label=f"x = Confirmations / {t}",
             x_range=q_t_to_x_range[(q, t)],
@@ -696,26 +721,33 @@ def main(filter_fname: Optional[str], n_jobs: int):
             #     (f'exp_aux3_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpend_WeightedChain_DAA100.csv', 'trad', 'DS+WC'),
             # ],
             gen_por_equiv_csvs(q, t),
-            f"PoR Confirmation Equivalence Conjecture | $q={q}$\n{CEC_TITLE_STR}",
+            "\n".join([f"PoR Confirmation Equivalence Conjecture | $q={q}$", f"{CEC_TITLE_STR}"]),
             f"png/por_equiv_q={q}_t{t}.png",
-            x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
+            x_label=std_x_label(t),
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
     ] + [
         SavePlot(
-            gen_por_equiv_rand_hrs_csvs(q, t),
-            f" PoR Confirmation Equivalence Conjecture \n $q={q}$ | hash-rate randomly distributed ($q+p=1$ true network-wide) \n{CEC_TITLE_STR}",
+            gen_por_equiv_rand_hrs_csvs(q, t, exp_num='13'),
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture",
+                f"$q={q}$ | {'hash-rate randomly distributed ($q+p=1$ true network-wide)'}",
+                f"{CEC_TITLE_STR}"]),
+            # f" PoR Confirmation Equivalence Conjecture \n $q={q}$ | hash-rate randomly distributed ($q+p=1$ true network-wide) \n{CEC_TITLE_STR}",
             f"png/por_equiv_rand_hr_q={q}_t{t}.png",
-            x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
+            x_label=std_x_label(t),
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
     ] + [
         # "real world" means WeightedDag + DoubleSpendWork b/c that's what's necessary in a production build
         SavePlot(
             gen_por_equiv_rand_hrs_csvs(q, t, bt, hr, only_real_world=True, exp_num=exp, aux_num=aux, daa=daa),
-            f" PoR Confirmation Equivalence Conjecture | WeightedDag + DoubleSpendWork \n $q={q}$ | hash-rate randomly distributed ($q+p=1$ true network-wide)\n{CEC_TITLE_STR}",
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture | WeightedDag + DoubleSpendWork",
+                f"$q={q}$ | {'hash-rate randomly distributed ($q+p=1$ true network-wide)' if int(exp) < 17 else 'uniform hash rate distribution'}",
+                f"{CEC_TITLE_STR}"]),
             f"png/por_equiv_onlyrealworld_{'rand_hr' if int(exp) < 17 else 'uni_hr'}_e{exp}_a{aux}_q={q}_t{t}_bt={bt}_hr={hr}_daa={daa}.png",
-            x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
+            x_label=std_x_label(t),
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48']
             for t in ['5', '10', '20']
@@ -730,9 +762,13 @@ def main(filter_fname: Optional[str], n_jobs: int):
         # $P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$
         SavePlot(
             gen_por_cec_ext_test(q, t, exp=exp, aux=aux, bt=bt, hr=hr, daa=daa),
-            f" PoR Confirmation Equivalence Conjecture (Extended) \n $q={q}$ | WD+DSW | random hash rate distribution \n{CEC_EXT_TITLE_STR}",
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture (Extended)",
+                f"$q={q}$ | WD+DSW | {'random' if int(exp) < 17 else 'uniform'} hash rate distribution",
+                f"{CEC_EXT_TITLE_STR}"]),
+            # f" PoR Confirmation Equivalence Conjecture (Extended) \n $q={q}$ | WD+DSW | random hash rate distribution \n{CEC_EXT_TITLE_STR}",
             f"png/por_equiv_orw_ext-cec_e{exp}_q={q}_t{t}.png",
-            x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
+            x_label=std_x_label(t),
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10']
             for (exp, aux, bt, hr, daa) in [
@@ -751,7 +787,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             ],
             f"Confirmation Equivalence Conjecture | PoR vs Traditional vs Theoretical \n DS+WC | $q={q}$ | DoubleSpend Target: ${t} \\cdot x$ \n{CEC_TITLE_STR}",
             f"png/por_eqiv_hyp_vs_trad_q={q}_t={t}_DS+WC.png",
-            x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
+            x_label=std_x_label(t),
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44'] for t in ['5', '10', '20']  # , '0.48'
     ] + [
@@ -760,18 +796,27 @@ def main(filter_fname: Optional[str], n_jobs: int):
         #       e13,e15 have random HR distributions
         SavePlot(
             compare_e12_e13_e15(q, t),
-            f"(Comparison of experiments 12,13,15)",
-            f"png/compare_e12-13-15_q={q}_t={t}.svg",
-            x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture Auxiliary Graph",
+                f"Comparison of experiments 12,13,15,17 (12 and 17 have uniform HRs)",
+                # f"{CEC_TITLE_STR}"
+                ]),
+            # f"(Comparison of experiments 12,13,15)",
+            f"png/compare_e12-13-15-17_q={q}_t={t}.svg",
+            x_label=std_x_label(t),
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
     ] + [
         # compare e13 to e16 -- only differs by hash
         SavePlot(
             gen_por_hash_comare(q, t),
-            "\n".join([f"PoR Confirmation Equivalence Conjecture", f"$q={q}$ | random HR distribution", f"{CEC_TITLE_STR}"]),
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture Auxiliary Graph",
+                f"Q: is xxh3 good enough compared against blake3?",
+                # f"{CEC_TITLE_STR}"
+                ]),
             f"png/e16_hash_comparison_q={q}_t={t}.png",
-            x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
+            x_label=std_x_label(t),
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
     ] + [
@@ -785,6 +830,8 @@ def main(filter_fname: Optional[str], n_jobs: int):
             )
         for qs in [['0.40', '0.44', '0.48']] for t in ['5', '10', '20']
     ]
+
+    # todo: exp18 -- low atk_end_tick
 
     pool = mpp.Pool(n_jobs)
     count = 0
