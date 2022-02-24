@@ -185,6 +185,8 @@ def read_csv_data(fname, chain_ty: Literal['por', 'trad']):
         xs = d['n_chains'].unique()
     elif chain_ty == 'trad':
         xs = list(x // ds_target for x in d['doublespend_after_n_confs'].unique())
+    xs.sort()
+
     def get_x_from_row(row):
         if chain_ty == 'por':
             return row.n_chains
@@ -586,10 +588,10 @@ def main(filter_fname: Optional[str], n_jobs: int):
 
     def compare_e12_e13_e15(q, t) -> list[CsvFileToPlot]:
         return [
-            (f'exp-12-repeat-8-RDoubleSpendWork-q{q}-t{t}-p50-H50-WeightedDag-xxh3.csv', 'por', None),
-            (exp_13_csv_name(q, t, exp_num='13', strat="DoubleSpendWork", cs="WeightedDag"), 'por', None),
-            (exp_13_csv_name(q, t, exp_num='15', strat="DoubleSpendWork", cs="WeightedDag", daa=500), 'por', None),
-            (exp_16_csv_name(q, t, exp_num='17', strat="DoubleSpendWork", cs="WeightedDag"), 'por', None),
+            (f'exp-12-repeat-8-RDoubleSpendWork-q{q}-t{t}-p50-H50-WeightedDag-xxh3.csv', 'por', 'e12'),
+            (exp_13_csv_name(q, t, exp_num='13', strat="DoubleSpendWork", cs="WeightedDag"), 'por', 'e13'),
+            (exp_13_csv_name(q, t, exp_num='15', strat="DoubleSpendWork", cs="WeightedDag", daa=500), 'por', 'e15'),
+            (exp_16_csv_name(q, t, exp_num='17', strat="DoubleSpendWork", cs="WeightedDag"), 'por', 'e17'),
         ]
 
 
@@ -630,6 +632,15 @@ def main(filter_fname: Optional[str], n_jobs: int):
             '18': exp_16_csv_name,
             '19': exp_16_csv_name,
             '20': exp_16_csv_name,
+            '21': exp_16_csv_name,
+            '22': exp_16_csv_name,
+            '23': exp_16_csv_name,
+            '24': exp_16_csv_name,
+            '25': exp_16_csv_name,
+            '26': exp_16_csv_name,
+            '27': exp_16_csv_name,
+            '28': exp_16_csv_name,
+            '29': exp_16_csv_name,
         }).get(exp_num, unknown_exp_num_name)
 
     def gen_por_equiv_rand_hrs_csvs(q, t, bt=50, hr=50, only_real_world=False, exp_num='13', aux_num='3', daa='100') -> list[CsvFileToPlot]:
@@ -852,6 +863,25 @@ def main(filter_fname: Optional[str], n_jobs: int):
             x_range=q_t_to_x_range[(q, t)],
         )
         for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
+    ] + [
+        # exp21: high res vs default
+        SavePlot(
+            [
+                (csv_name_f_from_exp(exp)(q, t, exp_num=exp, hashname=hn, **kw), 'por', extra)
+                for exp, hn, extra, kw in [
+                    ('20', 'xxh3', ' HR= 50, Dynamic Cutoff', dict()),
+                    ('19', 'xxh3', ' HR= 50, Late Cutoff', dict()),
+                    ('21', 'blake3', 'HR=200, blake3', dict(bt=200, hr=200)),
+                    ]
+            ],
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture Auxiliary Graph",
+                f"Q: Do we get different results w/ larger numbers?",
+            ]),
+            f"png/highres_vs_std_q={q}_t={t}.png"
+        )
+        # this is expensive so not as many combos
+        for q in ['0.44'] for t in ['5']
     ]
 
     pool = mpp.Pool(n_jobs)
