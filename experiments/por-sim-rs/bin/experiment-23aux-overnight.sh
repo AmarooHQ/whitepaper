@@ -11,7 +11,7 @@ cargo b --release
 export RUST_LOG=warn
 
 # Experiment 23: long overnight run
-export EXP_NUM=23aux
+export EXP_NUM=23baux
 export POR_SIM_HASH=xxh3
 export RANDOMLY_DISTRIBUTE_HASHRATES=1
 export HR_DISTRIB=$(if [[ ! -z "$RANDOMLY_DISTRIBUTE_HASHRATES" ]]; then echo 'RandHR'; else echo 'UniHR'; fi)
@@ -24,8 +24,8 @@ export N_CHAINS=1
 # => the total number of samples per x val is N_TRIALS_PER * REPEAT_TIMES
 # => this should be >= 3000 (picked b/c it's not too many but graphs are reasonably smooth)
 # status updates are more frequent with larger REPEAT_TIMES
-export N_TRIALS_PER=360
-export REPEAT_TIMES=25
+export N_TRIALS_PER=90
+export REPEAT_TIMES=100
 
 # note: the attackers q is multiplied by HR_PER_CHAIN and fractional components are dropped.
 # so HR_PER_CHAIN=50 means q can only go up/down in increments of 0.02
@@ -73,6 +73,9 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
 
           if [[ ! -f $OUT_FILE ]]; then
             cp result-columns.csv $OUT_FILE
+          fi
+          if [[ ! -z "$DRY_RUN" ]]; then
+            continue;
           fi
 
           write_progress $repeat_i $strat $crypto_sys $atk_r $ds_conf_base

@@ -11,7 +11,7 @@ cargo b --release
 export RUST_LOG=warn
 
 # Experiment 23: long overnight run
-export EXP_NUM=23
+export EXP_NUM=23b
 export POR_SIM_HASH=xxh3
 export RANDOMLY_DISTRIBUTE_HASHRATES=0
 export HR_DISTRIB=$(if [[ ! -z "$RANDOMLY_DISTRIBUTE_HASHRATES" ]]; then echo 'RandHR'; else echo 'UniHR'; fi)

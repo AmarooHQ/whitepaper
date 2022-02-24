@@ -645,6 +645,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             '22c': exp_16_csv_name,
             '22aux': exp_16_csv_name,
             '23': exp_16_csv_name,
+            '23aux': exp_16_csv_name,
             '24': exp_16_csv_name,
             '25': exp_16_csv_name,
             '26': exp_16_csv_name,
@@ -933,6 +934,25 @@ def main(filter_fname: Optional[str], n_jobs: int):
                 f"Q: Does giving the attacker a bonus block change trad doublespends?",
             ]),
             f"png/bonusblock_2_trad_q={q}_t={t}.png",
+            x_label=std_x_label(t),
+            x_range=q_t_to_x_range[(q, t)],
+        )
+        for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
+    ] + [
+        # exp3: overnight runs
+        SavePlot(
+            [
+                (csv_name_f_from_exp(exp)(q, t, exp_num=exp, hashname=hn, **kw), ty, extra)
+                for exp, hn, ty, extra, kw in [
+                    ('23', 'xxh3', 'por', PorPlotOpts(), dict(bt=75, hr=75)),
+                    ('23aux', 'xxh3', 'trad', PorPlotOpts(), dict(bt=75, hr=75)),
+                ]
+            ],
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture",
+                f"{CEC_TITLE_STR}",
+            ]),
+            f"png/e23_nice={q}_t={t}.png",
             x_label=std_x_label(t),
             x_range=q_t_to_x_range[(q, t)],
         )
