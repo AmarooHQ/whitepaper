@@ -871,8 +871,8 @@ def main(filter_fname: Optional[str], n_jobs: int):
                 for exp, hn, extra, kw in [
                     ('20', 'xxh3', ' HR= 50, Dynamic Cutoff', dict()),
                     ('19', 'xxh3', ' HR= 50, Late Cutoff', dict()),
-                    ('21', 'blake3', 'HR=200, blake3', dict(bt=200, hr=200)),
-                    ]
+                    ('21', 'xxh3', 'HR=200, xxh3', dict(bt=200, hr=200)),
+                ] + ([] if (q,t) != ('0.44', '5') else [('21', 'blake3', 'HR=200, blake3', dict(bt=200, hr=200))])
             ],
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture Auxiliary Graph",
@@ -881,7 +881,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             f"png/highres_vs_std_q={q}_t={t}.png"
         )
         # this is expensive so not as many combos
-        for q in ['0.44'] for t in ['5']
+        for q in ['0.40', '0.44', '0.48'] for t in ['5', '10']
     ]
 
     pool = mpp.Pool(n_jobs)
