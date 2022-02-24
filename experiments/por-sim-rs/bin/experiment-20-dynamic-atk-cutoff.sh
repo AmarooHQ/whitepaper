@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # this is expected to be run in dir w/ Cargo.toml & Makefile
 SIM_BIN=./target/release/por-sim-rs
 cargo b --release
@@ -53,7 +55,7 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
             cp result-columns.csv $OUT_FILE
           fi
 
-          for nchains in `seq 1 6` `seq 7 2 21` 30; do
+          for nchains in 30 `seq 7 2 21 | tac` `seq 1 6 | tac`; do
             export N_CHAINS=$nchains;
             export SIM_ARGS=$(make print-sim-args);
             for ntrials in `seq 1 ${N_TRIALS_PER}`; do
