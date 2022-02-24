@@ -600,18 +600,36 @@ def main(filter_fname: Optional[str], n_jobs: int):
     def exp_12_csv_name(q, t, bt=50, hr=50, strat="DoubleSpend", cs="WeightedChain", daa=None, exp_num=None):
         return f'exp-12-repeat-8-R{strat}-q{q}-t{t}-p{bt}-H{hr}-{cs}-xxh3.csv'
 
-    def exp_13_csv_name(q, t, bt=50, hr=50, strat="DoubleSpend", cs="WeightedChain", daa=100, exp_num='13'):
+    def exp_13_csv_name(q, t, bt=50, hr=50, strat="DoubleSpend", cs="WeightedChain", daa=100, exp_num=None):
+        assert exp_num
         return f'exp_{exp_num}_RandHR_q={q}_dswin={t}_bt={bt}_hr={hr}_{strat}_{cs}_DAA{daa}.csv'
 
-    def exp_16_csv_name(q, t, bt=50, hr=50, strat="DoubleSpendWork", cs="WeightedDag", daa=100, exp_num='16', hashname='blake3'):
-        return f'exp_{exp_num}_RandHR_{hashname}_q={q}_dswin={t}_bt={bt}_hr={hr}_{strat}_{cs}_DAA{daa}.csv'
+    def exp_16_csv_name(q, t, bt=50, hr=50, strat="DoubleSpendWork", cs="WeightedDag", daa=100, exp_num=None, hashname='blake3'):
+        assert exp_num
+        rand_hr_dist = exp_num in ['16']
+        hr_dist = 'RandHR' if rand_hr_dist else 'UniHR'
+        return f'exp_{exp_num}_{hr_dist}_{hashname}_q={q}_dswin={t}_bt={bt}_hr={hr}_{strat}_{cs}_DAA{daa}.csv'
+
+    def unknown_exp_num_name(q, t, bt=50, hr=50, strat="DoubleSpendWork", cs="WeightedDag", daa=100, exp_num='16', hashname='blake3') -> str:
+        raise Exception(f'unknown exp_num: {exp_num}')
+
+    def csv_name_f_from_exp(exp_num):
+        return ({
+            '12': exp_12_csv_name,
+            '13': exp_13_csv_name,
+            '14': exp_13_csv_name,
+            '15': exp_13_csv_name,
+            '16': exp_16_csv_name,
+            '17': exp_16_csv_name,
+        }).get(exp_num, unknown_exp_num_name)
 
     def gen_por_equiv_rand_hrs_csvs(q, t, bt=50, hr=50, only_real_world=False, exp_num='13', aux_num='3', daa='100') -> list[CsvFileToPlot]:
+        csv_name_f = csv_name_f_from_exp(exp_num)
         csvs = [
-            (exp_13_csv_name(q, t, bt, hr, exp_num=exp_num, daa=daa, strat="DoubleSpend", cs="WeightedChain"), 'por', 'DS+WC'),
-            (exp_13_csv_name(q, t, bt, hr, exp_num=exp_num, daa=daa, strat="DoubleSpend", cs="WeightedDag"), 'por', 'DS+WD'),
-            (exp_13_csv_name(q, t, bt, hr, exp_num=exp_num, daa=daa, strat="DoubleSpendWork", cs="WeightedChain"), 'por', 'DSW+WC'),
-            (exp_13_csv_name(q, t, bt, hr, exp_num=exp_num, daa=daa, strat="DoubleSpendWork", cs="WeightedDag"), 'por', 'DSW+WD'),
+            (csv_name_f(q, t, bt, hr, exp_num=exp_num, daa=daa, strat="DoubleSpend", cs="WeightedChain"), 'por', 'DS+WC'),
+            (csv_name_f(q, t, bt, hr, exp_num=exp_num, daa=daa, strat="DoubleSpend", cs="WeightedDag"), 'por', 'DS+WD'),
+            (csv_name_f(q, t, bt, hr, exp_num=exp_num, daa=daa, strat="DoubleSpendWork", cs="WeightedChain"), 'por', 'DSW+WC'),
+            (csv_name_f(q, t, bt, hr, exp_num=exp_num, daa=daa, strat="DoubleSpendWork", cs="WeightedDag"), 'por', 'DSW+WD'),
             # (f'exp_aux{aux_num}_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', 'DSW+WD (Best Trad)'),
             # (f'exp_aux{aux_num}_q={q}_dsconf-base={t}_bt=50_hr=50_DoubleSpend_WeightedChain_DAA100.csv', 'trad', 'DS+WC (Worst Trad)'),
             (f'exp_aux{aux_num}_q={q}_dsconf-base={t}_bt={bt}_hr={hr}_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', 'DSW+WD (Best Trad)'),
@@ -623,14 +641,10 @@ def main(filter_fname: Optional[str], n_jobs: int):
 
     # $P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$
     def gen_por_cec_ext_test(q, t, exp, aux, bt, hr, daa) -> list[CsvFileToPlot]:
-        _csv_name = exp_13_csv_name
-        if exp in ['16']:
-            _csv_name = exp_16_csv_name
-        if exp in ['12']:
-            _csv_name = exp_12_csv_name
+        csv_name_f = csv_name_f_from_exp(exp)
         return [
-            (_csv_name(q, t, bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag"), 'por', None),
-            (_csv_name(q, f'{2*int(t):d}', bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag"), 'por', PorPlotOpts(cec_scaled=2)),
+            (csv_name_f(q, t, bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag"), 'por', None),
+            (csv_name_f(q, f'{2*int(t):d}', bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag"), 'por', PorPlotOpts(cec_scaled=2)),
         ]
 
     def gen_por_hash_comare(q, t) -> list[CsvFileToPlot]:
@@ -700,13 +714,18 @@ def main(filter_fname: Optional[str], n_jobs: int):
         SavePlot(
             gen_por_equiv_rand_hrs_csvs(q, t, bt, hr, only_real_world=True, exp_num=exp, aux_num=aux, daa=daa),
             f" PoR Confirmation Equivalence Conjecture | WeightedDag + DoubleSpendWork \n $q={q}$ | hash-rate randomly distributed ($q+p=1$ true network-wide)\n{CEC_TITLE_STR}",
-            f"png/por_equiv_onlyrealworld_rand_hr_e{exp}_a{aux}_q={q}_t{t}_bt={bt}_hr={hr}_daa={daa}.png",
+            f"png/por_equiv_onlyrealworld_{'rand_hr' if int(exp) < 17 else 'uni_hr'}_e{exp}_a{aux}_q={q}_t{t}_bt={bt}_hr={hr}_daa={daa}.png",
             x_label=f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$",
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48']
             for t in ['5', '10', '20']
             for (exp, aux, bt, hr, daa) in [
-                ('13', '3', '50', '50', '100'), ('14', '14', '100', '100', '100'), ('15', '3', '50', '50', '500')]
+                ('13', '3', '50', '50', '100'),
+                ('14', '14', '100', '100', '100'),
+                ('15', '3', '50', '50', '500'),
+                ('16', '3', '50', '50', '100'),
+                ('17', '3', '50', '50', '100'),
+            ]
     ] + [
         # $P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$
         SavePlot(
@@ -717,11 +736,12 @@ def main(filter_fname: Optional[str], n_jobs: int):
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10']
             for (exp, aux, bt, hr, daa) in [
+                    ('12', '3', '50', '50', '100'),
                     ('13', '3', '50', '50', '100'),
                     ('14', '14', '100', '100', '100'),
                     ('15', '3', '50', '50', '500'),
                     ('16', '3', '50', '50', '100'),
-                    ('12', '3', '50', '50', '100'),
+                    ('17', '3', '50', '50', '100'),
                     ]
     ] + [
         SavePlot(

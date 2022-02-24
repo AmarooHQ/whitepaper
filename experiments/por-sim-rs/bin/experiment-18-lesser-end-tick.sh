@@ -4,20 +4,33 @@
 SIM_BIN=./target/release/por-sim-rs
 cargo b --release
 
-# Experiment 17: Like exp 16 but using with uniform HR distribution (so like 12 with blake)
+# Experiment 18: Like exp 13 but with with ATK_END_TICK set lower (so less time for a DS to happen)
 # blake3 is fastest crypto-secure hash out of all those tested (sha256, sha1, md5)
 # but xx is still way faster (that's why it's used most of the time)
-export EXP_NUM=17
-export POR_SIM_HASH=blake3
-export OUT_F_PREFIX=csv/exp_${EXP_NUM}_UniHR_${POR_SIM_HASH}
+export EXP_NUM=18
+export POR_SIM_HASH=xxh3
+export RANDOMLY_DISTRIBUTE_HASHRATES=1
+export HR_DISTRIB=$(if [[ ! -z "$RANDOMLY_DISTRIBUTE_HASHRATES" ]]; then echo 'RandHR'; else echo 'UniHR'; fi)
+export OUT_F_PREFIX=csv/exp_${EXP_NUM}_${HR_DISTRIB}_${POR_SIM_HASH}
 
+# run REPEAT_TIMES total loops, where the simulator is run N_TRIALS_PER times for each set of params per loop.
+# => the total number of samples per x val is N_TRIALS_PER * REPEAT_TIMES
+# => this should be >= 3000 (picked b/c it's not too many but graphs are reasonably smooth)
+# status updates are more frequent with larger REPEAT_TIMES
+export N_TRIALS_PER=30
+export REPEAT_TIMES=100
+
+# note: the attackers q is multiplied by HR_PER_CHAIN and fractional components are dropped.
+# so HR_PER_CHAIN=50 means q can only go up/down in increments of 0.02
 export B_PERIOD=50
-export N_TRIALS_PER=100
-export REPEAT_TIMES=30
 export HR_PER_CHAIN=50
 export DAA2_N_BLOCKS=100
 
-# export ATK_START_TICK=$(echo $B_PERIOD\*$DAA2_N_BLOCKS\*3/2 | bc)
+export ATK_START_TICK=$(echo $B_PERIOD\*$DAA2_N_BLOCKS | bc)
+# default in makefile is: $(ATK_DS_CONFS)\*$(B_PERIOD)\*7+$(ATK_START_TICK)
+# set to a buffer of 3x instead of 7x
+# export ATK_END_TICK=$(echo $ATK_DS_CONFS\*$B_PERIOD\*3+$ATK_START_TICK | bc)
+# NOTE: this needs to be set after ATK_DS_CONFS has been set
 
 export N_CPUS=$(echo $(grep -c ^processor /proc/cpuinfo)-1 | bc)
 # built in bash feature
@@ -39,6 +52,7 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
         export ATK_RATIO=$atk_r
         for ds_conf_base in 5 10 20; do
           export ATK_DS_CONFS=$ds_conf_base;
+          export ATK_END_TICK=$(echo $ATK_DS_CONFS\*$B_PERIOD\*3+$ATK_START_TICK | bc)
           export OUT_FILE=${OUT_F_PREFIX}_q=${ATK_RATIO}_dswin=${ATK_DS_CONFS}_bt=${B_PERIOD}_hr=${HR_PER_CHAIN}_${ATK_STRATEGY}_${CRYPTO_SYSTEM}_DAA${DAA2_N_BLOCKS}.csv
           # echo "$OUT_FILE" ; echo -e "$PROGRESS_STR" ; exit 0
 
