@@ -112,10 +112,15 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
                         self.curr_draft_block = None;
                         match (is_private, self.is_attacker) {
                             (false, _) => {
+                                let atk_chain_synced_w_pub_chain: bool =
+                                    self.chain.pub_and_priv_chains_synced();
                                 self.got_block(b, false)?;
-                                // before the attack has started, treat all blocks
-                                // like they were also private blocks
-                                if self.is_attacker && !attack_started {
+                                // before the attack has started,
+                                // or if it has started but the attacker has not mined a block yet,
+                                // treat all blocks like they were also private blocks.
+                                let treat_block_as_priv =
+                                    atk_chain_synced_w_pub_chain || !attack_started;
+                                if self.is_attacker && treat_block_as_priv {
                                     self.got_block(b, true)?;
                                 }
                             }

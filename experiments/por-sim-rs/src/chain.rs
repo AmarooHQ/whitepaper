@@ -201,6 +201,8 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
     fn get_fork_measure_pub_priv(&self) -> Heights;
     fn get_heights_pub_priv(&self) -> Heights;
 
+    fn pub_and_priv_chains_synced(&self) -> bool;
+
     fn add_tx_to_mempool(&mut self, tx_id: TxId, is_private: bool) -> Result<(), ChainTxErr>;
     fn get_mempool_tx_ids(&self, is_private: bool) -> &PassThruHashSet<HashID>;
     fn remove_mempool_tx_ids(&mut self, tx_ids: &Vec<HashID>, is_private: bool);
@@ -766,6 +768,12 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
                     .1,
             ),
         }
+    }
+
+    fn pub_and_priv_chains_synced(&self) -> bool {
+        let pub_bbs = self.get_best_blocks(false);
+        let n_pub_bbs = pub_bbs.len();
+        n_pub_bbs == pub_bbs.intersection(self.get_best_blocks(true)).count()
     }
 
     fn get_heights_pub_priv(&self) -> Heights {
