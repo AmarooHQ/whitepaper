@@ -5,6 +5,7 @@ import sys
 repeat_i, repeat_times, start_to_last_r, this_r = map(int, sys.argv[1:])
 
 pct_total = 0
+pct_this_r = 0
 eta_min = 0
 total_min = 0
 
@@ -19,4 +20,4 @@ if repeat_i > 1:
     eta_min = r_to_go * s_per_r / 60
     total_min = repeat_times * s_per_r / 60
 
-print(f"{repeat_i}/{repeat_times} | {start_to_last_r} +{this_r} s | {pct_total:.1%} | ETA: {eta_min:.1f} min (total: {total_min:.1f} min)")
+print(f"{repeat_i}/{repeat_times} | {start_to_last_r} +{this_r} s | {pct_total:.1%} / {pct_this_r:.1%} | ETA: {eta_min:.1f} min (total: {total_min:.1f} min)")
