@@ -126,9 +126,9 @@ pub fn main() -> Result<(), String> {
     let block_target = value_t_or_exit!(args.value_of("block_target"), u16);
     let crypto_system =
         value_t!(args, "crypto_system", CryptoSystemArg).unwrap_or_else(|e| e.exit());
-    let honest_hr = (hash_rate * (1. - attacker_ratio)).to_u16().unwrap() as u32;
-    let attacker_hr = (hash_rate * attacker_ratio).to_u16().unwrap() as u32;
-    let attack_starts_at = attack_at_h as Difficulty;
+    let honest_hr = (hash_rate * (1. - attacker_ratio)).to_u16().unwrap() as Difficulty;
+    let attacker_hr = (hash_rate * attacker_ratio).to_u16().unwrap() as Difficulty;
+    let attack_starts_at = attack_at_h as Timestamp;
     let por_chains = value_t_or_exit!(args.value_of("por_n_chains"), u16);
     let daa2_n_blocks = value_t_or_exit!(args.value_of("daa2_n_blocks"), usize);
     let atk_end_delay_ticks = value_t_or_exit!(args.value_of("atk_end_delay_ticks"), Timestamp);

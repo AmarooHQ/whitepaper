@@ -54,7 +54,7 @@ pub struct DoubleSpendStrat {
 impl DoubleSpendStrat {
     fn _atk_won(&self, fms: &Heights, hs: &Heights, public_draft_refl_work: Difficulty) -> bool {
         fms.public + public_draft_refl_work < fms.private
-            && hs.public >= self.atk_start_h + self.params.win_thres
+            && hs.public >= (self.atk_start_h + self.params.win_thres) as u64
     }
 }
 
@@ -102,7 +102,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
     fn dynamic_cutoff(&self, fm: Heights, work_per_period: Difficulty) -> bool {
         // for a doublespend of C confirmations, if the attacker is trailing
         // the public chain by > max(C, 10) block periods worth of work, then terminate.
-        fm.private + self.params.win_thres.max(10) * work_per_period < fm.public
+        fm.private + (self.params.win_thres.max(10) as u64) * work_per_period < fm.public
     }
 }
 
@@ -146,8 +146,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
             params,
             atk_start_h,
             atk_start_work: chain.get_fork_measure_pub_priv().public,
-            win_work_thresh: params.win_thres
-                * (params.n_por_chains as u32)
+            win_work_thresh: (params.win_thres * (params.n_por_chains as u32)) as u64
                 * chain.get_any_best_block(false).0.get_difficulty(),
         }
     }
@@ -187,7 +186,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
     fn dynamic_cutoff(&self, fm: Heights, work_per_period: Difficulty) -> bool {
         // for a doublespend of C confirmations: if the attacker is trailing
         // the public chain by > max(C, 10) block periods worth of work, then terminate.
-        fm.private + self.params.win_thres.max(10) * work_per_period < fm.public
+        fm.private + self.params.win_thres.max(10) as u64 * work_per_period < fm.public
     }
 }
 
@@ -305,10 +304,10 @@ impl<'a, S: CSystemT<'a>> SelfishMining<S> {
             MsgToNode::MsgBlock(c_id, b, true) if *c_id == chain_id => {
                 info!("priv block mined: {}", b);
                 self.blocks_from_private.insert(b.get_hash());
-                if self.best_processed_h.private >= b.get_height() {
+                if self.best_processed_h.private >= b.get_height() as u64 {
                     // return vec![];
                 } else {
-                    self.best_processed_h.private = b.get_height();
+                    self.best_processed_h.private = b.get_height() as u64;
                     self.l_s += 1;
                 }
                 // selfish pool mines a new block
@@ -325,10 +324,10 @@ impl<'a, S: CSystemT<'a>> SelfishMining<S> {
             MsgToNode::MsgBlock(c_id, b, false) if *c_id == chain_id => {
                 info!("pub block mined: {}", b);
                 self.blocks_from_public.insert(b.get_hash());
-                if self.best_processed_h.public >= b.get_height() {
+                if self.best_processed_h.public >= b.get_height() as u64 {
                     // return vec![];
                 } else {
-                    self.best_processed_h.public = b.get_height();
+                    self.best_processed_h.public = b.get_height() as u64;
                     self.l_h += 1;
                 }
                 // public miner refs all unreferenced public uncles

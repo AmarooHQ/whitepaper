@@ -16,7 +16,7 @@ pub struct Node<'a, /*R: RelayStrategyT,*/ S: CSystemT<'a>> {
     id: usize,
     pub chain: S::C,
     is_attacker: bool,
-    mining_attempts_per_tick: u32,
+    mining_attempts_per_tick: Difficulty,
     curr_draft_block: Option<S::B>,
     add_mined_block_instant: bool,
 }
@@ -26,7 +26,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         id: usize,
         chain: S::C,
         is_attacker: bool,
-        mining_attempts_per_tick: u32,
+        mining_attempts_per_tick: Difficulty,
         add_mined_block_instant: bool,
     ) -> Node<'a, S> {
         Node {
@@ -77,7 +77,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         let tx = Transaction::ReflectAndProve(ReflectionData {
             r_chain: c_id,
             r_block: b.get_hash(),
-            r_cw: b.get_height(),
+            r_cw: b.get_chain_weight(),
             weight,
             l_headers: refl_ancestors,
             l_cw,
@@ -397,7 +397,7 @@ mod tests {
         .unwrap();
 
         let b_bmd = DagBlock::get_cached_block(&b.get_hash()).unwrap();
-        let n_refls = b_bmd.0.get_txs().len() as u32;
+        let n_refls = b_bmd.0.get_txs().len() as Difficulty;
         assert_ne!(n_refls, 0);
         assert_eq!(b_bmd.1.weight * n_refls, b_bmd.1.reflected_weight);
         assert_ne!(b_bmd.1.chain_weight, b_bmd.1.local_chain_weight);

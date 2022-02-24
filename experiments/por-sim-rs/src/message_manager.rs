@@ -35,8 +35,8 @@ pub struct MM<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> {
 #[derive(Debug, Clone)]
 pub struct AttackArgs {
     pub q: f32,
-    pub honest_hr: u32,
-    pub attacker_hr: u32,
+    pub honest_hr: Difficulty,
+    pub attacker_hr: Difficulty,
     pub attack_starts_at: Timestamp,
     pub end_simulation_at_t: Timestamp,
     pub attacker_instant_propagation: bool,
@@ -46,7 +46,7 @@ pub struct AttackArgs {
 
 impl AttackArgs {
     #[cfg(test)]
-    fn new(honest_hr: u32, attacker_hr: u32, attack_starts_at: Timestamp) -> Self {
+    fn new(honest_hr: Difficulty, attacker_hr: Difficulty, attack_starts_at: Timestamp) -> Self {
         let q = (honest_hr as f32) / ((honest_hr + attacker_hr) as f32);
         AttackArgs {
             q,
@@ -60,7 +60,7 @@ impl AttackArgs {
         }
     }
 
-    fn total_hr(&self) -> u32 {
+    fn total_hr(&self) -> Difficulty {
         self.honest_hr + self.attacker_hr
     }
 }
@@ -79,7 +79,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             net_args.clone(),
         );
         let avg_work_per_block_period =
-            (net_args.por_chains as u32) * (net_args.block_target as u32) * args.total_hr();
+            (net_args.por_chains as u64) * (net_args.block_target as u64) * args.total_hr();
         MM {
             honest_node: Node::new(0, chain.clone(), false, args.honest_hr, false),
             attacker_node: Node::new(
@@ -110,8 +110,8 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
         }
 
         let n_chains = net_args.por_chains as u32 - 1;
-        let total_hr = n_chains * (args.attacker_hr + args.honest_hr);
-        let avg_hr_per_chain = args.attacker_hr + args.honest_hr;
+        let avg_hr_per_chain = (args.attacker_hr + args.honest_hr) as u64;
+        let total_hr: Difficulty = n_chains as u64 * avg_hr_per_chain;
         let avg_honest_hr_ratio: f32 = (args.honest_hr as f32) / (avg_hr_per_chain as f32);
         let hr_p = avg_honest_hr_ratio;
         let hr_q = 1.0 - hr_p;
@@ -124,7 +124,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
         );
 
         // vec of tuples: (honest_hr, attacker_hr)
-        let cw_hash_rates: Vec<(u32, u32)>;
+        let cw_hash_rates: Vec<(Difficulty, Difficulty)>;
 
         if net_args.random_hr_distrib {
             let rd_h = gen_random_hr_distribution(n_chains, hr_p, total_hr);
@@ -177,20 +177,20 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
                 .map(|cwr| (cwr * avg_hr_per_chain as f32) as u32)
                 .zip(honest_hr_ratios)
                 .map(|(hpt, honest_hr_ratio)| {
-                    let honest_hr = (hpt as f32 * honest_hr_ratio) as u32;
-                    let attacker_hr = (hpt as f32 * (1.0 - honest_hr_ratio)) as u32;
+                    let honest_hr = (hpt as f32 * honest_hr_ratio) as u64;
+                    let attacker_hr = (hpt as f32 * (1.0 - honest_hr_ratio)) as u64;
                     (honest_hr, attacker_hr)
                 })
                 .collect();
         }
 
         debug_assert_eq!(
-            avg_hr_per_chain * net_args.por_chains as u32,
-            avg_hr_per_chain + cw_hash_rates.iter().map(|&(h, a)| h + a).sum::<u32>()
+            avg_hr_per_chain * net_args.por_chains as u64,
+            avg_hr_per_chain + cw_hash_rates.iter().map(|&(h, a)| h + a).sum::<u64>()
         );
         if args.attacker_hr < args.honest_hr {
-            let h_sum: u32 = cw_hash_rates.iter().cloned().map(|(h, _)| h).sum();
-            let atk_sum: u32 = cw_hash_rates.iter().cloned().map(|(_, a)| a).sum();
+            let h_sum: Difficulty = cw_hash_rates.iter().cloned().map(|(h, _)| h).sum();
+            let atk_sum: Difficulty = cw_hash_rates.iter().cloned().map(|(_, a)| a).sum();
             // println!("H:{}, ATK:{}", h_sum, atk_sum);
             debug_assert!(h_sum > atk_sum);
         }
@@ -242,9 +242,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
 
     pub fn check_and_set_atk_start_h(&mut self, ts: Timestamp) {
         if self.attack_started(ts) && self.atk_start_h.is_none() {
-            self.atk_start_h = Some(Height::from(
-                self.honest_node.chain.get_heights_pub_priv().public,
-            ));
+            self.atk_start_h = Some(self.honest_node.chain.get_heights_pub_priv().public as Height);
             let bb = self.honest_node.chain.get_any_best_block(false);
             let bb_id = bb.0.get_hash();
             let daa2_bs = BlockMD::<S::B>::get_daa2_blocks(bb_id).unwrap();
@@ -397,9 +395,6 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
     fn print_atk_summary(&self, success: bool, last_ts: Timestamp, chain: &S::C, ms_elapsed: u128) {
         let hs = chain.get_heights_pub_priv();
         let fms = chain.get_fork_measure_pub_priv();
-        if fms.public >= 4_000_000_000 || fms.private >= 4_000_000_000 {
-            panic!("Reflection stuff going wrong -- chain_weight over 4b (which is impossible in reasonable time given this simulation -- 2022/02/09)");
-        }
         let atk_success_fail = if success {
             "ATTACK SUCCESS!"
         } else {
@@ -482,7 +477,7 @@ pub fn gen_random_hr_distribution(n_chains: u32, q: f32, total_hr: Difficulty) -
     }
     let actual_total: f64 = rd.iter().cloned().sum();
     debug_assert_eq!(exp_total, actual_total);
-    rd.into_iter().map(|v| v as u32).collect()
+    rd.into_iter().map(|v| v as Difficulty).collect()
 }
 
 #[cfg(test)]
@@ -492,6 +487,7 @@ mod tests {
     use crate::cryptosystem::*;
     use crate::transactions::Transaction;
     use crate::transactions::TxId;
+    use conv::ConvUtil;
     use rstats::*;
 
     fn create_mm_no_priv<'a, S: CSystemT<'a>>() -> MM<'a, S, DoubleSpendStrat> {
@@ -821,7 +817,7 @@ mod tests {
             txs.extend(b.0.get_txs());
         }
 
-        let total_rw: u32 = txs_remote
+        let total_rw: Difficulty = txs_remote
             .iter()
             .map(|tx| tx.get_reflected_weight2(chain_remote_id))
             .sum();
@@ -853,10 +849,14 @@ mod tests {
         // 7 chains, q=0.4, total_hr=66*7
         for chain_hr in [66] {
             for n_chains in [7] {
-                let total_hr = chain_hr * n_chains;
+                let total_hr = (chain_hr * n_chains) as Difficulty;
                 for q in [0.4, 0.41, 0.11333, 0.6] {
                     let rd1 = gen_random_hr_distribution(n_chains, q, total_hr);
-                    let rd1_f64: Vec<f64> = rd1.iter().cloned().map(f64::from).collect();
+                    let rd1_f64: Vec<f64> = rd1
+                        .iter()
+                        .cloned()
+                        .map(|v| v.value_as::<f64>().unwrap())
+                        .collect();
 
                     let exp_avg_hr = (chain_hr as f32 * q).round() as f64;
                     let exp_total_hr = (total_hr) as f64 * q as f64;
@@ -877,14 +877,14 @@ mod tests {
                     // test honest + attacker distributions at once
                     let rd_h = gen_random_hr_distribution(n_chains, 1.0 - q, total_hr);
                     let rd_a = gen_random_hr_distribution(n_chains, q, total_hr);
-                    let actual_total: u32 =
-                        rd_h.iter().cloned().sum::<u32>() + rd_a.iter().cloned().sum::<u32>();
+                    let actual_total: Difficulty = rd_h.iter().cloned().sum::<Difficulty>()
+                        + rd_a.iter().cloned().sum::<Difficulty>();
                     assert_eq!(total_hr, actual_total);
                     let rd_comb: Vec<_> = rd_h
                         .iter()
                         .cloned()
                         .zip(rd_a.iter().cloned())
-                        .map(|(h, a)| h + a)
+                        .map(|(h, a)| (h + a) as u32)
                         .collect();
                     println!("Attacker: {:?}", rd_a);
                     println!("Honest:   {:?}", rd_h);
@@ -892,7 +892,7 @@ mod tests {
                     println!(
                         "Average:  {:?} == {:?}",
                         chain_hr,
-                        rd_comb.amean().unwrap() as u32
+                        rd_comb.amean().unwrap() as Difficulty
                     );
                 }
             }
