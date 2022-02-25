@@ -944,7 +944,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
         )
         for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
     ] + [
-        # exp3: overnight runs
+        # exp23: overnight runs
         # NOTE: csv/exp_23b_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv
         #       contains an instance of `_,_` in cols 12,13
         SavePlot(
@@ -962,7 +962,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
                     ('23baux', 'xxh3', 'trad', PorPlotOpts(_label_extra='23baux'), dict(bt=75, hr=75)),
                     # ('24aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='24aux'), dict(bt=50, hr=50)),
                     # ('25aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='25aux'), dict(bt=75, hr=75)),
-                    # ('26aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='26aux'), dict(bt=75, hr=75)),
+                    ('26aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='26aux'), dict(bt=75, hr=75)),
                 ]
             ],
             "\n".join([
@@ -970,6 +970,36 @@ def main(filter_fname: Optional[str], n_jobs: int):
                 f"{CEC_TITLE_STR}",
             ]),
             f"png/e23_nice={q}_t={t}.png",
+            x_label=std_x_label(t),
+            x_range=q_t_to_x_range[(q, t)],
+        )
+        for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
+    ] + [
+        # just e26
+        SavePlot(
+            [
+                (csv_name_f_from_exp(exp)(q, t, exp_num=exp, hashname=hn, **kw), ty, extra)
+                for exp, hn, ty, extra, kw in [
+                    # ('22c', 'xxh3', 'por', PorPlotOpts(_label_extra='22c: Bonus Block'), dict()),
+                    # ('23', 'xxh3', 'por', PorPlotOpts(_label_extra='23'), dict(bt=75, hr=75)),
+                    # ('23b', 'xxh3', 'por', PorPlotOpts(_label_extra='23b'), dict(bt=75, hr=75)),
+                    # ('24', 'xxh3', 'por', PorPlotOpts(_label_extra='24'), dict(bt=50, hr=50)),
+                    # ('25', 'xxh3', 'por', PorPlotOpts(_label_extra='25'), dict(bt=75, hr=75)),
+                    ('26', 'xxh3', 'por', PorPlotOpts(_label_extra='26'), dict(bt=75, hr=75)),
+                    # ('22aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='22aux: Bonus Block'), dict()),
+                    # ('23aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='23aux'), dict(bt=75, hr=75)),
+                    # ('23baux', 'xxh3', 'trad', PorPlotOpts(_label_extra='23baux'), dict(bt=75, hr=75)),
+                    # ('24aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='24aux'), dict(bt=50, hr=50)),
+                    # ('25aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='25aux'), dict(bt=75, hr=75)),
+                    ('26aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='26aux'), dict(bt=75, hr=75)),
+                ]
+            ],
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture",
+                f"Including attacker optimization: Bonus Block",
+                f"{CEC_TITLE_STR}",
+            ]),
+            f"png/_e26_9000_q={q}_t={t}.png",
             x_label=std_x_label(t),
             x_range=q_t_to_x_range[(q, t)],
         )

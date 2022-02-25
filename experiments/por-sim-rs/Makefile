@@ -49,6 +49,13 @@ release:
 print-sim-args:
 	@echo '$(SIMULATOR_ARGS)'
 
+stop-sim-clean:
+	@echo '>> Sim will stop after this iteration finishes. <<'
+	touch cleanly_stop_sim
+
+clear-stop-sim-file:
+	rm cleanly_stop_sim
+
 stats:
 	./bin/py_stats.py
 

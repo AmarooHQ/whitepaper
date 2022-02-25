@@ -31,7 +31,8 @@ export ATK_USE_DYN_END_TICK=1
 # status updates are more frequent with larger REPEAT_TIMES
 export N_TRIALS_PER=90
 # export REPEAT_TIMES=100
-export REPEAT_TIMES=10  # just generate 900 samples first
+# export REPEAT_TIMES=10  # just generate 900 samples first
+export REPEAT_TIMES=90  # 10 done, now do 90 more
 
 # note: the attackers q is multiplied by HR_PER_CHAIN and fractional components are dropped.
 # so HR_PER_CHAIN=50 means q can only go up/down in increments of 0.02
