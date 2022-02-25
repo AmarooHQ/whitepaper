@@ -237,13 +237,24 @@ So, while it is \emph{possible} that a poor implementation of a simplex could co
 sources of error
 
 \begin{itemize}
-    \item attacker q (e.g., 0.44) divisibility into B\_PERIOD and/or HR\_PER\_CHAIN
-    \item small HR\_PER\_CHAIN -- only 50-100 hashes every tick
-    \item small values $\to$ limits of accuracy mb? (in other ways, not just attacker q divisibility)
-    \item using xxh3 instead of a crypto secure hashing alg like blake3
+    \item attacker q (e.g., 0.44) divisibility into B\_PERIOD and/or HR\_PER\_CHAIN (should not be an issue w/ these tests, nor w/ random HR distribution) (exp21 -- high res: see \texttt{png/highres\_vs\_std*.png})
+
+    \item small HR\_PER\_CHAIN -- only 50-100 hashes every tick (exp14 -- more is better but results at HR=50 still consistent with HR=100; answered w exp21)
+
+    \item small values $\to$ limits of accuracy mb? (in other ways, not just attacker q divisibility). exp 14 indicates not really; also exp21
+
+    \item using xxh3 instead of a crypto secure hashing alg like blake3 (answered: exp16/17; not an issue; also exp21)
+
     \item not giving the attacker a 'bonus block' (i.e. they only start after having mined a block in private)
-    \item not waiting long enough for DSs to resolve (since we end before $t=\infty$ it is the case we cut off \emph{some} DSs that might be successful -- is it significant?)
-    \item error in implementation (note: mb should see discrepancies between diff crypto systems / attack strats if that were the case -- depends on the impl error)
-    \item theory/CEC wrong -- nonspecific crit but possible
-    \item allowing invalid blocks / txs / refls -- either b/c of simplifications or b/c of misunderstanding of reality
+
+    \item not waiting long enough for DSs to resolve -- since we end before $t=\infty$ it is the case we cut off \emph{some} DSs that might be successful -- is it significant? (answered: exp18/19/20; situation where it is significant: \texttt{png/atk\_length\_comparison\_q=0.48\_t=5.png}; not significant with $q \le 0.4$ or $C \ge 20$)
+
+    \item does weighted chain favor lower difficulty? if priv difficulty is 0.75 * pub difficulty, then is there an expectation that priv chain can find 2x PoWs a bit faster, so statistically there's usually a point where priv chain is ahead (more PoWs but worth less)?
+
+    \item WRT some bonus block simulations having P above theoretical (e.g., q=0.4 at C=5):
+            perhaps this is to do with number of ticks. particularly: there's mb a point where refls are arriving every few ticks -- does the attacker have an advantage when this happens? Like for N < 5 it's fine, and for N > 30 its fine
+
+    \item error in implementation? (note: mb should see discrepancies between diff crypto systems / attack strats if that were the case -- depends on the impl error)
+    \item theory/CEC wrong? -- nonspecific crit but possible
+    \item allowing invalid blocks / txs / refls -- either b/c of simplifications or b/c of misunderstanding of reality?
 \end{itemize}

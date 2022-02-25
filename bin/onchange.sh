@@ -57,9 +57,10 @@ msg_good "Running \`$CMD_TO_RUN\` in 1s for first time"
 (sleep 1 && (cd $CURRENT_DIR && eval "$CMD_TO_RUN") || true)
 
 (
-  inotifywait -e "$EVENTS" -m -r --format '%:e %f' $DIRECTORY | $_BIN_DIR/_stdin_filter_tex_files.py | (
+  inotifywait -e "$EVENTS" -m -r --format '%:e %f' $DIRECTORY | python3 $_BIN_DIR/_stdin_filter_tex_files.py | (
     WAITING="";
     while true; do
+        # echo "looping..." 1>&2
         LINE="";
         read -t 0.1 LINE;
         if test -z "$LINE"; then
@@ -74,7 +75,7 @@ msg_good "Running \`$CMD_TO_RUN\` in 1s for first time"
     done) | (
     while true; do
         read TMP;
-	while (read -t 0.01 TMP2); do true; done
+	    while (read -t 0.01 TMP2); do true; done
         msg_good "($TMP - $TMP2) Running in $CURRENT_DIR: $CMD_TO_RUN"
         (cd $CURRENT_DIR && eval "$CMD_TO_RUN")
     done
