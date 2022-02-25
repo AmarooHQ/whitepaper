@@ -11,6 +11,7 @@ cargo b --release
 export RUST_LOG=warn
 
 # Experiment 25: no dynamic end tick
+# maybe this is the reason for results being different?
 export EXP_NUM=25
 if [[ ! -z "$EXP_IS_AUX" ]]; then
   export EXP_NUM=${EXP_NUM}aux

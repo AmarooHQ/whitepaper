@@ -26,6 +26,14 @@ export ATK_USE_DYN_END_TICK=1
 export N_TRIALS_PER=90
 export REPEAT_TIMES=100
 
+# broke at:
+# >> [93/100 | 17446 +41 s | 92.2% / 21.6% | ETA: 24.6 min (total: 316.1 min)] >> q:0.44 / ds:10
+# Makefile:41: *** missing separator.  Stop.
+#
+# so we need 1 run from 0.44 10,20 + 0.48 5,10,20
+# and 7 runs for the rest; do 6 to be safe then do 1 then partial -- oops accidentally recompiled release
+export REPEAT_TIMES=6
+
 # note: the attackers q is multiplied by HR_PER_CHAIN and fractional components are dropped.
 # so HR_PER_CHAIN=50 means q can only go up/down in increments of 0.02
 export B_PERIOD=50

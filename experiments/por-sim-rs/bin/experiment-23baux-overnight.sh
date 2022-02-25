@@ -17,6 +17,8 @@ export RANDOMLY_DISTRIBUTE_HASHRATES=0
 export HR_DISTRIB=$(if [[ ! -z "$RANDOMLY_DISTRIBUTE_HASHRATES" ]]; then echo 'RandHR'; else echo 'UniHR'; fi)
 export OUT_F_PREFIX=csv/exp_${EXP_NUM}_${HR_DISTRIB}_${POR_SIM_HASH}
 
+# note: bug in RANDOMLY_DISTRIBUTE_HASHRATES if statement means these CSVs were wrongly named RandHR
+
 export ATK_USE_DYN_END_TICK=1
 export N_CHAINS=1
 

@@ -23,14 +23,15 @@ export HR_DISTRIB=$(if [[ "1" = "$RANDOMLY_DISTRIBUTE_HASHRATES" ]]; then echo '
 
 export OUT_F_PREFIX=csv/exp_${EXP_NUM}_${HR_DISTRIB}_${POR_SIM_HASH}
 
-export ATK_USE_DYN_END_TICK=0
+export ATK_USE_DYN_END_TICK=1
 
 # run REPEAT_TIMES total loops, where the simulator is run N_TRIALS_PER times for each set of params per loop.
 # => the total number of samples per x val is N_TRIALS_PER * REPEAT_TIMES
 # => this should be >= 3000 (picked b/c it's not too many but graphs are reasonably smooth)
 # status updates are more frequent with larger REPEAT_TIMES
 export N_TRIALS_PER=90
-export REPEAT_TIMES=100
+# export REPEAT_TIMES=100
+export REPEAT_TIMES=10  # just generate 900 samples first
 
 # note: the attackers q is multiplied by HR_PER_CHAIN and fractional components are dropped.
 # so HR_PER_CHAIN=50 means q can only go up/down in increments of 0.02
@@ -66,6 +67,15 @@ function write_progress () {
 # loop a few times so we incrementally generate data over the whole x-axis
 for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
   export LAST_REPEAT_ELAPSED=$SECONDS
+
+  if [[ -f "./cleanly_stop_sim" ]]; then
+    echo "Exiting due to file presence: ./cleanly_stop_sim (delete it to enable running again)"
+    date
+    echo "About to start: $repeat_i of ${REPEAT_TIMES}."
+    echo "Exiting..."
+    exit 0
+  fi
+
   for strat in DoubleSpendWork; do # DoubleSpend
     export ATK_STRATEGY=$strat
     for crypto_sys in WeightedDag; do #WeightedChain, LongestChain; do
@@ -105,4 +115,4 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
       done
     done
   done
-done | tee $OUT_F_PREFIX.log
+done | tee -a $OUT_F_PREFIX.log

@@ -37,6 +37,12 @@ SIMULATOR_ARGS ?= -R $(ATK_STRATEGY) -s $(ATK_START_TICK) -e $(ATK_END_TICK) -r 
 test:
 	cargo test
 
+lock-release:
+	chmod -w target/release/por-sim-rs
+
+unlock-release:
+	chmod u+w target/release/por-sim-rs
+
 release:
 	cargo build --release
 
