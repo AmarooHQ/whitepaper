@@ -276,6 +276,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         save_png=False, png_filename=None,
         figsize=(10, 7), dpi=100, x_range=None,
         seed_qs=None, seed_ds_targets=None,
+        as_scatter=False,
         ):
     print(f"\nPlotting chart: {png_filename or '<tmp-not-saved>'}")
     plt.figure(figsize=figsize, dpi=dpi)
@@ -283,7 +284,8 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
     _max_ix = 0
     qs = set(seed_qs or [])
     ds_targets = set(seed_ds_targets or [])
-    kwargs = plot_kwargs or dict()
+    kwargs = dict(style='.') if as_scatter else dict()
+    kwargs.update(plot_kwargs or dict())
     print(f"Tabulating CSVs.")
     csv_series = []
     por_count = -1
@@ -291,7 +293,9 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
     for csv_i, (fname, chain_ty, label_extra) in enumerate(csv_files):
         z_order = 2 + (.1 if chain_ty == 'por' else -.1)
         _kwargs = dict(**kwargs)
-        _kwargs.update(marker=get_line_marker(chain_ty, por_count, trad_count), zorder=z_order)
+        marker = get_line_marker(chain_ty, por_count, trad_count)
+        _kwargs.update(dict(style=marker) if as_scatter else dict(marker=marker))
+        _kwargs.update(zorder=z_order)
         is_por = chain_ty == 'por'
         is_trad = not is_por
         label_extra = label_extra or ''
@@ -692,13 +696,13 @@ def main(filter_fname: Optional[str], n_jobs: int):
         # todo: goes wrong b/c we're calibrating to 1st chain that is already squished -- need to reverse order of things that get drawn (ds_confs should be 20 not 5)
         csv_name_f = csv_name_f_from_exp(exp)
         csvs = [
-            (csv_name_f(q, t, bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', ),
+            (csv_name_f(q, t, bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', None),
             (csv_name_f(q, t, bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None),
-            (csv_name_f(q, f'{int(t)//2:d}', bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=2)),
+            (csv_name_f(q, f'{int(t)//2:d}', bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=0.5)),
         ]
         if int(t) == 20:
             # todo
-            csvs.append((csv_name_f(q, f'{int(t)//4:d}', bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=4)))
+            csvs.append((csv_name_f(q, f'{int(t)//4:d}', bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=0.25)))
         return csvs
 
     def gen_por_hash_comare(q, t) -> list[CsvFileToPlot]:
@@ -715,7 +719,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
 
     CEC_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = 1; c = NC)$"
     CEC_EXT_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$"
-    CEC_EXT2_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{a}}; c = Ca) \\approx P(q; N_1 = 1; c = NC)$"
+    CEC_EXT2_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{a}}; c = Ca) \\approx P(q; N_1 = 1; c = CN)$"
 
 
     jobs_to_save: list[SavePlot] = [
@@ -1051,7 +1055,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             x_label=std_x_label(t),
             x_range=q_t_to_x_range[(q, t)],
         )
-        for q in ['0.40', '0.44', '0.48'] for t in ['5', '10'] for daa in [100, 500]
+        for q in ['0.40', '0.44', '0.48'] for t in ['10', '20'] for daa in [100, 500]
     ]
 
     pool = mpp.Pool(n_jobs)
