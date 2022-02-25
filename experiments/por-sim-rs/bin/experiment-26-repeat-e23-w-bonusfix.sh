@@ -12,33 +12,35 @@ export RUST_LOG=warn
 
 # Experiment 26: repeat 23 with updates to bonus block
 # => fix: replace BadReflAncestor fix with something more intelligent
+# Second aux run: DAA=500 (test if reactivity of DAA is responsible for trad better-than-theoretical performance)
 export EXP_NUM=26
 if [[ ! -z "$EXP_IS_AUX" ]]; then
   export EXP_NUM=${EXP_NUM}aux
+  # limit which attacker ratios are simulated
+  export ATK_HR_ONLY="0.40" # todo: 1st for next PoR run
 fi
-
-export POR_SIM_HASH=xxh3
-export RANDOMLY_DISTRIBUTE_HASHRATES=1
-export HR_DISTRIB=$(if [[ "1" = "$RANDOMLY_DISTRIBUTE_HASHRATES" ]]; then echo 'RandHR'; else echo 'UniHR'; fi)
-
-export OUT_F_PREFIX=csv/exp_${EXP_NUM}_${HR_DISTRIB}_${POR_SIM_HASH}
-
-export ATK_USE_DYN_END_TICK=1
 
 # run REPEAT_TIMES total loops, where the simulator is run N_TRIALS_PER times for each set of params per loop.
 # => the total number of samples per x val is N_TRIALS_PER * REPEAT_TIMES
 # => this should be >= 3000 (picked b/c it's not too many but graphs are reasonably smooth)
 # status updates are more frequent with larger REPEAT_TIMES
 export N_TRIALS_PER=90
-# export REPEAT_TIMES=100
-# export REPEAT_TIMES=10  # just generate 900 samples first
-export REPEAT_TIMES=90  # 10 done, now do 90 more
+export REPEAT_TIMES=100
+
+export POR_SIM_HASH=xxh3
+export RANDOMLY_DISTRIBUTE_HASHRATES=1
+export ATK_USE_DYN_END_TICK=1
+
+export HR_DISTRIB=$(if [[ "1" = "$RANDOMLY_DISTRIBUTE_HASHRATES" ]]; then echo 'RandHR'; else echo 'UniHR'; fi)
+
+export OUT_F_PREFIX=csv/exp_${EXP_NUM}_${HR_DISTRIB}_${POR_SIM_HASH}
 
 # note: the attackers q is multiplied by HR_PER_CHAIN and fractional components are dropped.
 # so HR_PER_CHAIN=50 means q can only go up/down in increments of 0.02
 export B_PERIOD=75
 export HR_PER_CHAIN=75
-export DAA2_N_BLOCKS=100
+# export DAA2_N_BLOCKS=100
+export DAA2_N_BLOCKS=500
 
 export N_CPUS=$(echo $(grep -c ^processor /proc/cpuinfo)-1 | bc)
 # built in bash feature
@@ -89,6 +91,9 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
       export CRYPTO_SYSTEM=$crypto_sys
       for atk_r in 0.40 0.44 0.48; do
         export ATK_RATIO=$atk_r
+        if [[ ! -z "$ATK_HR_ONLY" ]] && [[ "$ATK_RATIO" != "$ATK_HR_ONLY" ]]; then
+          continue
+        fi
         for ds_conf_base in 5 10 20; do
           export ATK_DS_CONFS=$ds_conf_base;
           export OUT_FILE=${OUT_F_PREFIX}_q=${ATK_RATIO}_dswin=${ATK_DS_CONFS}_bt=${B_PERIOD}_hr=${HR_PER_CHAIN}_${ATK_STRATEGY}_${CRYPTO_SYSTEM}_DAA${DAA2_N_BLOCKS}.csv

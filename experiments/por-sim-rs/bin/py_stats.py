@@ -350,7 +350,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
             t_series.append(theoretical_data)
             td_max_ys.append(theoretical_data.max())
             prob_math = gen_cec_prob_str(ds_target, is_trad=True)
-            theoretical_data.plot(label=f"y = {prob_math} --- Analytically Derived Trad: $q={q:.2f}$ (Rosenfeld, 2012)", zorder=2, linestyle="dashed", linewidth=2.0)
+            theoretical_data.plot(label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytically Derived: Rosenfeld, 2012)", zorder=2, linestyle="dashed", linewidth=2.0)
     max_y = max(max(td_max_ys), max(s.max() for s in csv_series) if csv_series else 0)
     print(f"Done. Now drawing.")
 
@@ -681,6 +681,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
         csvs = [
             (csv_name_f(q, t, bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', None),
             (csv_name_f(q, t, bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None),
+            (csv_name_f(q, t, bt, hr, exp_num=f'{exp}{aux}', daa=500, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None),
             (csv_name_f(q, f'{2*int(t):d}', bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=2)),
         ]
         if int(t) == 5:
@@ -701,6 +702,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
 
     CEC_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = 1; c = NC)$"
     CEC_EXT_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$"
+    CEC_EXT2_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{a}}; c = Ca) \\approx P(q; N_1 = 1; c = NC)$"
 
 
     jobs_to_save: list[SavePlot] = [
@@ -996,6 +998,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
                     # ('24aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='24aux'), dict(bt=50, hr=50)),
                     # ('25aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='25aux'), dict(bt=75, hr=75)),
                     ('26aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='26aux'), dict(bt=75, hr=75)),
+                    ('26aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='26aux; DAA=500'), dict(bt=75, hr=75, daa=500)),
                 ]
             ],
             "\n".join([
@@ -1014,7 +1017,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             gen_por_cec_ext_test(q, t, exp='26', aux='aux', bt=75, hr=75, daa=100, hashname="xxh3"),
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture (Extended)",
-                f"{CEC_EXT_TITLE_STR}",
+                f"{CEC_EXT2_TITLE_STR}",
                 f"If the CEC is true, then these plots should all line up.",
             ]),
             f"png/_e26_ext_9000_q={q}_t={t}.png",
