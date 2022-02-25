@@ -719,7 +719,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
 
     CEC_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = 1; c = NC)$"
     CEC_EXT_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$"
-    CEC_EXT2_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{a}}; c = Ca) \\approx P(q; N_1 = 1; c = NC)$"
+    CEC_EXT2_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{a}}; c = Ca) \\approx P(q; N_1 = 1; c = CN)$"
 
 
     jobs_to_save: list[SavePlot] = [
