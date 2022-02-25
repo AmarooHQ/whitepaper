@@ -17,8 +17,8 @@ export EXP_NUM=26
 if [[ ! -z "$EXP_IS_AUX" ]]; then
   export EXP_NUM=${EXP_NUM}aux
   # limit which attacker ratios are simulated
-  export ATK_HR_ONLY="0.40" # run this on box 1
 fi
+export ATK_HR_ONLY=${ATK_HR_ONLY:-0.40} # run this on box 1, allow box 2 to change
 
 # run REPEAT_TIMES total loops, where the simulator is run N_TRIALS_PER times for each set of params per loop.
 # => the total number of samples per x val is N_TRIALS_PER * REPEAT_TIMES
@@ -26,7 +26,7 @@ fi
 # status updates are more frequent with larger REPEAT_TIMES
 export N_TRIALS_PER=90
 export REPEAT_TIMES=100
-export RESUME_FROM=24  # subtract (this-1) from REPEAT_TIMES
+export RESUME_FROM=25  # subtract (this-1) from REPEAT_TIMES
 export REPEAT_TIMES=$(echo "$REPEAT_TIMES-$RESUME_FROM+1" | bc)
 
 export POR_SIM_HASH=xxh3
@@ -81,7 +81,7 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
   if [[ -f "./cleanly_stop_sim" ]]; then
     echo "Exiting due to file presence: ./cleanly_stop_sim (delete it to enable running again)"
     date
-    echo "About to start: $repeat_i of ${REPEAT_TIMES}."
+    echo "About to start: $repeat_i of ${REPEAT_TIMES}. (Note: RESUME_FROM=$RESUME_FROM)"
     echo "Exiting..."
     exit 0
   fi
@@ -129,3 +129,22 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
     done
   done
 done | tee -a $OUT_F_PREFIX.log
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+echo ">> done <<"
