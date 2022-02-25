@@ -109,6 +109,7 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
 }
 
 pub fn main() -> Result<(), String> {
+    // return 1;
     let start_main = SystemTime::now();
     log::set_max_level(LevelFilter::Info);
     env_logger::init();

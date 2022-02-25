@@ -271,10 +271,10 @@ pub trait BlockT: Clone + Debug + Display + PartialEq + Eq + PartialOrd + Hash {
     }
 
     fn add_transaction(&mut self, id: TxId) {
-        self.add_transactions(vec![id]);
+        self.add_transactions(&vec![id]);
     }
 
-    fn add_transactions(&mut self, ids: Vec<TxId>) {
+    fn add_transactions(&mut self, ids: &Vec<TxId>) {
         for &id in ids.iter().unique() {
             if !self.get_transactions().contains(&id) {
                 if let Some(tx) = Transaction::get_cached_tx(id) {

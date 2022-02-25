@@ -204,6 +204,11 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
     fn pub_and_priv_chains_synced(&self) -> bool;
 
     fn add_tx_to_mempool(&mut self, tx_id: TxId, is_private: bool) -> Result<(), ChainTxErr>;
+    fn add_mempool_tx_ids(
+        &mut self,
+        tx_ids: &Vec<TxId>,
+        is_private: bool,
+    ) -> Result<(), ChainTxErr>;
     fn get_mempool_tx_ids(&self, is_private: bool) -> &PassThruHashSet<HashID>;
     fn remove_mempool_tx_ids(&mut self, tx_ids: &Vec<HashID>, is_private: bool);
     fn clear_mempool(&mut self, is_private: bool);
@@ -295,7 +300,36 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
         self.get_seen_blocks_mut(is_private).insert(b_id);
     }
 
-    fn draft_block(&self, ts: u32, is_private: bool) -> B {
+    fn get_pending_tx_refls(&self, is_private: bool) -> Vec<Arc<Transaction>> {
+        self.get_mempool_tx_ids(is_private)
+            .iter()
+            .cloned()
+            .filter_map(Transaction::get_cached_tx)
+            .filter(|tx| tx.is_reflect_and_prove())
+            .collect()
+        // let unseen_reflected_blocks: Vec<HashID> = b
+        //     .get_txs()
+        //     .into_iter()
+        //     .filter(|tx| tx.is_reflect_and_prove())
+        //     .filter_map(|tx| tx.get_reflected_l_blocks().cloned())
+        //     .flat_map(|past_b_ids| {
+        //         past_b_ids
+        //             .iter()
+        //             .cloned()
+        //             .filter(|bid| !seen.contains(bid))
+        //             .collect::<Vec<HashID>>()
+        //     })
+        //     .collect();
+    }
+
+    fn get_draft_reflected_weight(&self, is_private: bool) -> Difficulty {
+        self.get_pending_tx_refls(is_private)
+            .iter()
+            .map(|tx| tx.get_reflected_weight2(self.get_chain_id()))
+            .sum()
+    }
+
+    fn draft_block(&mut self, ts: u32, is_private: bool) -> B {
         let mut b = B::new_from(
             ts,
             self.get_best_blocks(is_private).iter().cloned(),
@@ -307,12 +341,51 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
         let p = Self::get_cached_block(&b.prev()).unwrap();
         b.set_difficulty(self.next_difficulty(&p.0, &p.1));
         b.set_chain_weight(self.calculate_delta_chain_weights(&b).chain_weight);
-        b.add_transactions(
-            self.get_mempool_tx_ids(is_private)
-                .iter()
-                .cloned()
-                .collect(),
-        );
+        let seen = self.get_seen_blocks(is_private);
+        // filter out mempool txs that reflect unknown ancestors
+        let mut txids_to_remove = vec![];
+        let mut txids_to_add_mp = vec![];
+        let txs_to_add = self
+            .get_mempool_tx_ids(is_private)
+            .iter()
+            .cloned()
+            .filter_map(Transaction::get_cached_tx)
+            .filter_map(|tx| {
+                // of the refl tx, make sure we have all the ancestors
+                tx.get_reflected_l_blocks().cloned().and_then(|anc_b_ids| {
+                    if anc_b_ids
+                        .iter()
+                        .cloned()
+                        .filter(|anc| !seen.contains(anc))
+                        .count()
+                        > 0
+                    {
+                        txids_to_remove.push(tx.get_hash());
+                        // create new tx based on good ancestors
+                        let good_ancs: Vec<_> = anc_b_ids
+                            .iter()
+                            .cloned()
+                            .filter(|anc| seen.contains(anc))
+                            .collect();
+                        if good_ancs.len() > 0 {
+                            let tx2 = Transaction::new_refl_and_prove(ReflectionData {
+                                l_headers: good_ancs,
+                                ..tx.get_reflection_data().cloned().unwrap()
+                            });
+                            txids_to_add_mp.push(tx2.get_hash());
+                            Some(tx2.get_hash())
+                        } else {
+                            None
+                        }
+                    } else {
+                        Some(tx.get_hash())
+                    }
+                })
+            })
+            .collect();
+        self.remove_mempool_tx_ids(&txids_to_remove, is_private);
+        self.add_mempool_tx_ids(&txids_to_add_mp, is_private);
+        b.add_transactions(&txs_to_add);
         b
     }
 
@@ -799,6 +872,15 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         Ok(())
     }
 
+    fn add_mempool_tx_ids(
+        &mut self,
+        tx_ids: &Vec<TxId>,
+        is_private: bool,
+    ) -> Result<(), ChainTxErr> {
+        self._mempool(is_private).extend(tx_ids);
+        Ok(())
+    }
+
     fn get_mempool_tx_ids(&self, is_private: bool) -> &PassThruHashSet<HashID> {
         if is_private {
             &self.priv_mempool
@@ -1064,7 +1146,7 @@ mod tests {
     #[cfg(debug_assertions)]
     /// make the id (PoW proxy) small so that it passes all difficulty checks.
     fn _mk_draft_block<'a, B: BlockT, F: ForkRules<B>, C: ChainT<'a, B, F>>(
-        chain: &C,
+        chain: &mut C,
         ts: u32,
         is_private: bool,
     ) -> B {
@@ -1072,7 +1154,7 @@ mod tests {
     }
 
     fn _mk_draft_block_w_txs<'a, B: BlockT, F: ForkRules<B>, C: ChainT<'a, B, F>>(
-        chain: &C,
+        chain: &mut C,
         ts: u32,
         is_private: bool,
         txs: Vec<TxId>,
@@ -1248,7 +1330,7 @@ mod tests {
         assert_eq!(chain.get_chain_weight_at(b2.get_hash()), 1000);
         assert_eq!(chain.get_chain_weight_at(b3.get_hash()), 1000);
 
-        let b4 = _mk_draft_block(&chain, 20, false);
+        let b4 = _mk_draft_block(&mut chain, 20, false);
         chain.add_block(b4.clone(), false)?;
         let b4_md = &B::get_cached_block(&b4.get_hash()).unwrap().1;
 
@@ -1267,13 +1349,13 @@ mod tests {
         }
 
         for i in 0..10 {
-            let tmp_b = _mk_draft_block(&chain, 30 + i * 10, false);
+            let tmp_b = _mk_draft_block(&mut chain, 30 + i * 10, false);
             chain.add_block(tmp_b, false)?;
         }
 
-        let b130 = _mk_draft_block(&chain, 130, false);
+        let b130 = _mk_draft_block(&mut chain, 130, false);
         chain.add_block(b130.clone(), false)?;
-        let b140 = _mk_draft_block(&chain, 140, false);
+        let b140 = _mk_draft_block(&mut chain, 140, false);
         chain.add_block(b140.clone(), false)?;
 
         let b130_md = &B::get_cached_block(&b130.get_hash()).unwrap().1;
@@ -1308,7 +1390,7 @@ mod tests {
         // assert_eq!(next_d, 1000);
         assert_eq!(next_d, 1000);
 
-        let b = _mk_draft_block(&chain, 10, false);
+        let b = _mk_draft_block(&mut chain, 10, false);
 
         chain.validate_block(&b, false)?;
         assert_eq!(
@@ -1348,8 +1430,8 @@ mod tests {
         // creates a single-parent chain
         let (g, _g_md, mut chain) = _setup_chain::<Block, LongestChain<Block>>(None);
 
-        let b1 = _mk_draft_block(&chain, 10, false);
-        let b2 = _mk_draft_block(&chain, 10, false);
+        let b1 = _mk_draft_block(&mut chain, 10, false);
+        let b2 = _mk_draft_block(&mut chain, 10, false);
 
         chain.add_block(b1.clone(), false)?;
         chain.add_block(b2.clone(), false)?;
@@ -1364,7 +1446,7 @@ mod tests {
         assert_eq!(lca_r.1[&0].len(), 1);
 
         // add a 3rd block, make sure it builds off b2
-        let mut b3 = _mk_draft_block(&chain, 20, false);
+        let mut b3 = _mk_draft_block(&mut chain, 20, false);
         b3.parent = b2.get_hash();
         chain.add_block(b3.clone(), false)?;
 
@@ -1404,8 +1486,8 @@ mod tests {
         // creates a multi-parent chain
         let (g, _g_md, mut chain) = _setup_chain::<DagBlock, HeaviestChain<DagBlock>>(None);
 
-        let b1 = _mk_draft_block(&chain, 10, false);
-        let b2 = _mk_draft_block(&chain, 10, false);
+        let b1 = _mk_draft_block(&mut chain, 10, false);
+        let b2 = _mk_draft_block(&mut chain, 10, false);
 
         chain.add_block(b1.clone(), false)?;
         chain.add_block(b2.clone(), false)?;
@@ -1420,8 +1502,8 @@ mod tests {
         assert_eq!(lca_r.1[&0].len(), 1);
 
         // add a 3rd block; should build of both h=1 blocks.
-        let b3 = _mk_draft_block(&chain, 20, false);
-        let b4 = _mk_draft_block(&chain, 20, false); // add this later
+        let b3 = _mk_draft_block(&mut chain, 20, false);
+        let b4 = _mk_draft_block(&mut chain, 20, false); // add this later
 
         chain.add_block(b3.clone(), false)?;
         // find chain-segment from b3 (at h=2) and genesis
@@ -1446,7 +1528,7 @@ mod tests {
         assert_eq!(lca_r.1[&1].len(), 2);
         assert_eq!(lca_r.1[&0].len(), 1);
 
-        let b5 = _mk_draft_block(&chain, 30, false);
+        let b5 = _mk_draft_block(&mut chain, 30, false);
         chain.add_block(b5.clone(), false)?;
         let lca_r = chain.find_lca_and_intermediates(&b5.parents).unwrap();
         assert_eq!(lca_r.0, g.get_hash());
@@ -1467,7 +1549,7 @@ mod tests {
     #[test]
     fn reject_child_older_than_parent() {
         let (_g, _g_md, mut chain) = _setup_chain::<DagBlock, HeaviestChain<DagBlock>>(Some(10));
-        let b = _mk_draft_block(&chain, 5, false);
+        let b = _mk_draft_block(&mut chain, 5, false);
         assert_eq!(_g.get_ts() > b.get_ts(), true, "timestamps: b < g");
         assert_eq!(chain.add_block(b, false), Err(ChainErr::TsBeforeParent));
     }
@@ -1475,13 +1557,13 @@ mod tests {
     #[test]
     fn test_find_first_priv_blocks_better_than_public_longest() -> Result<(), ChainErr> {
         let (_g, _g_md, mut chain) = _setup_chain::<Block, LongestChain<Block>>(None);
-        let b = _mk_draft_block(&chain, 10, false);
+        let b = _mk_draft_block(&mut chain, 10, false);
         chain.add_block(b.clone(), false)?;
         assert_eq!(chain.find_first_priv_blocks_better_than_public().len(), 0);
         chain.add_block(b, true)?;
         assert_eq!(chain.find_first_priv_blocks_better_than_public().len(), 0);
 
-        let b1 = _mk_draft_block(&chain, 20, true);
+        let b1 = _mk_draft_block(&mut chain, 20, true);
         let b1_id = b1.get_hash();
         chain.add_block(b1.clone(), true)?;
         let ps: Vec<_> = chain
@@ -1491,7 +1573,7 @@ mod tests {
             .collect();
         assert_eq!(ps, vec![b1_id]);
 
-        let b2 = _mk_draft_block(&chain, 30, true);
+        let b2 = _mk_draft_block(&mut chain, 30, true);
         let b2_id = b2.get_hash();
         chain.add_block(b2, true)?;
         let ps: Vec<_> = chain

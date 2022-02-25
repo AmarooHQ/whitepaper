@@ -219,7 +219,12 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
 
     #[cfg(test)]
     pub fn chain(&self) -> &S::C {
-        return &self.honest_node.chain;
+        &self.honest_node.chain
+    }
+
+    #[cfg(test)]
+    pub fn chain_mut(&mut self) -> &mut S::C {
+        &mut self.honest_node.chain
     }
 
     #[cfg(test)]
@@ -261,12 +266,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
                 .concat();
             msgs_to = [msgs_to, attacker_msgs_to].concat();
         }
-        // let other_nodes = .iter().map(
-        //     |ExtraChainNodes {
-        //          mut honest,
-        //          mut attacker,
-        //      }| (honest, attacker),
-        // );
+
         let mut output_msgs = vec![
             self.honest_node.step(ts, &msgs_to, atk_started).unwrap(),
             self.attacker_node.step(ts, &msgs_to, atk_started).unwrap(),
@@ -523,7 +523,7 @@ mod tests {
     }
 
     fn ensure_chain_progress<'a, S: CSystemT<'a>>(mm: &MM<'a, S, DoubleSpendStrat>) {
-        let hs = mm.chain().get_fork_measure_pub_priv();
+        let hs = mm.honest_node.chain.get_fork_measure_pub_priv();
 
         assert_ne!(hs.public, 0);
         assert_eq!(hs.private, 0);
@@ -608,8 +608,14 @@ mod tests {
         let mut msgs = mm.tick(t1_ts, vec![]).unwrap();
 
         // create 2 dagblocks
-        let b_h1_1 = mm.chain().draft_block(t1_ts, false).test_set_work_bits(24);
-        let b_h1_2 = mm.chain().draft_block(t1_ts, false).test_set_work_bits(24);
+        let b_h1_1 = mm
+            .chain_mut()
+            .draft_block(t1_ts, false)
+            .test_set_work_bits(24);
+        let b_h1_2 = mm
+            .chain_mut()
+            .draft_block(t1_ts, false)
+            .test_set_work_bits(24);
         msgs.extend(vec![
             Msg::MsgBlock(chain_id, b_h1_1),
             Msg::MsgBlock(chain_id, b_h1_2),
@@ -636,7 +642,7 @@ mod tests {
         mm.check_and_set_atk_start_h(t2_ts);
         let mut msgs = mm.tick(t2_ts, msgs).unwrap();
         if msgs.len() == 0 {
-            let mut b = mm.chain().draft_block(t2_ts, false);
+            let mut b = mm.chain_mut().draft_block(t2_ts, false);
             b.id >>= 30;
             msgs.push(Msg::MsgBlock(chain_id, b));
         }
@@ -699,15 +705,16 @@ mod tests {
     #[test]
     fn mm_multichain_por_added_to_chain_weight() {
         let mut mm = create_mm_multichain_no_priv::<'_, DagCS>();
-        let chain_id = mm.chain().get_chain_id();
 
         mm.tick_many(150).unwrap();
 
         let chain = mm.chain();
-        let bb = mm.chain().get_any_best_block(false);
+        let chain_id = chain.get_chain_id();
+
         let chain_remote = &mm.extra_chain_nodes.first().as_ref().unwrap().honest.chain;
         let chain_remote_id = chain_remote.get_chain_id();
         let bb_remote = chain_remote.get_any_best_block(false);
+        let bb = chain.get_any_best_block(false);
 
         let refl_counts: Vec<usize> =
             bb.0.all_prev_iter()

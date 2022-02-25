@@ -89,7 +89,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
     fn get_results(&self, c: &S::C) -> Option<(Self::ResultsTy, bool)> {
         let hs = c.get_heights_pub_priv();
         let fms = c.get_fork_measure_pub_priv();
-        let draft_refl_work = c.draft_block(0, false).get_reflected_weight();
+        let draft_refl_work = c.get_draft_reflected_weight(false);
         if self._atk_won(&fms, &hs, draft_refl_work) {
             Some((true, true))
         } else {
@@ -102,7 +102,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
         } else {
             let hs = c.get_heights_pub_priv();
             let fms = c.get_fork_measure_pub_priv();
-            let draft_refl_work = c.draft_block(0, false).get_reflected_weight();
+            let draft_refl_work = c.get_draft_reflected_weight(false);
             self._atk_won(&fms, &hs, draft_refl_work)
         }
     }
@@ -180,7 +180,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
     }
     fn get_results(&self, c: &S::C) -> Option<(Self::ResultsTy, bool)> {
         let fms = c.get_fork_measure_pub_priv();
-        let draft_refl_work = c.draft_block(0, false).get_reflected_weight();
+        let draft_refl_work = c.get_draft_reflected_weight(false);
         if self._atk_won(&fms, draft_refl_work) {
             Some((true, true))
         } else {
@@ -192,7 +192,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
             false
         } else {
             let fms = c.get_fork_measure_pub_priv();
-            let draft_refl_work = c.draft_block(0, false).get_reflected_weight();
+            let draft_refl_work = c.get_draft_reflected_weight(false);
             self._atk_won(&fms, draft_refl_work)
         }
     }

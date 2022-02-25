@@ -10,15 +10,16 @@ cargo b --release
 
 export RUST_LOG=warn
 
-# Experiment 25: no dynamic end tick
-export EXP_NUM=25
+# Experiment 26: repeat 23 with updates to bonus block
+# => fix: replace BadReflAncestor fix with something more intelligent
+export EXP_NUM=26
 if [[ ! -z "$EXP_IS_AUX" ]]; then
   export EXP_NUM=${EXP_NUM}aux
 fi
 
 export POR_SIM_HASH=xxh3
 export RANDOMLY_DISTRIBUTE_HASHRATES=1
-export HR_DISTRIB=$(if [[ ! -z "$RANDOMLY_DISTRIBUTE_HASHRATES" ]]; then echo 'RandHR'; else echo 'UniHR'; fi)
+export HR_DISTRIB=$(if [[ "1" = "$RANDOMLY_DISTRIBUTE_HASHRATES" ]]; then echo 'RandHR'; else echo 'UniHR'; fi)
 
 export OUT_F_PREFIX=csv/exp_${EXP_NUM}_${HR_DISTRIB}_${POR_SIM_HASH}
 

@@ -88,7 +88,7 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         // let count_weight = proving_ancestor_id != 0;
         // let weight = if count_weight { b.get_difficulty() } else { 0 };
         let weight = b.get_difficulty();
-        let tx = Transaction::ReflectAndProve(ReflectionData {
+        let tx = Transaction::new_refl_and_prove(ReflectionData {
             r_chain: c_id,
             r_block: b.get_hash(),
             r_cw: b.get_chain_weight(),
@@ -97,7 +97,6 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
             l_cw,
         });
         let tx_id = tx.get_hash();
-        Transaction::set_cached_tx(tx);
         let res = self.chain.add_tx_to_mempool(tx_id, is_private);
         res
     }
@@ -110,7 +109,8 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
     fn set_seen_main_atk_block(&mut self, has_seen: bool) {
         if has_seen && !self.has_seen_main_atk_block {
             self.has_seen_main_atk_block = has_seen;
-            self.chain.clear_mempool(true);
+
+            // self.chain.clear_mempool(true);
         }
     }
 
