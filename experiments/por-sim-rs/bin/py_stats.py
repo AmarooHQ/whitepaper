@@ -687,6 +687,20 @@ def main(filter_fname: Optional[str], n_jobs: int):
             csvs.append((csv_name_f(q, f'{4*int(t):d}', bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=4)))
         return csvs
 
+    # $P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$
+    def gen_por_cec_ext_reversed_test(q, t, exp, aux, bt, hr, daa, **kwargs) -> list[CsvFileToPlot]:
+        # todo: goes wrong b/c we're calibrating to 1st chain that is already squished -- need to reverse order of things that get drawn (ds_confs should be 20 not 5)
+        csv_name_f = csv_name_f_from_exp(exp)
+        csvs = [
+            (csv_name_f(q, t, bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', ),
+            (csv_name_f(q, t, bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None),
+            (csv_name_f(q, f'{int(t)//2:d}', bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=2)),
+        ]
+        if int(t) == 20:
+            # todo
+            csvs.append((csv_name_f(q, f'{int(t)//4:d}', bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=4)))
+        return csvs
+
     def gen_por_hash_comare(q, t) -> list[CsvFileToPlot]:
         return [
             (exp_13_csv_name(q, t, exp_num='13', strat="DoubleSpendWork", cs="WeightedDag"), 'por', 'hash:xxh3'),
@@ -1020,6 +1034,20 @@ def main(filter_fname: Optional[str], n_jobs: int):
                 f"If the CEC is true, then these plots should all line up.",
             ]),
             f"png/_e26_ext_9000_q={q}_t={t}_daa={daa}.png",
+            x_label=std_x_label(t),
+            x_range=q_t_to_x_range[(q, t)],
+        )
+        for q in ['0.40', '0.44', '0.48'] for t in ['5', '10'] for daa in [100, 500]
+    ] + [
+        # just e26 CEC EXT
+        SavePlot(
+            gen_por_cec_ext_reversed_test(q, t, exp='26', aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3"),
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture (Extended)",
+                f"{CEC_EXT2_TITLE_STR}",
+                f"If the CEC is true, then these plots should all line up.",
+            ]),
+            f"png/_e26_ext_rev_9000_q={q}_t={t}_daa={daa}.png",
             x_label=std_x_label(t),
             x_range=q_t_to_x_range[(q, t)],
         )
