@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 
 from dataclasses import dataclass
+from datetime import datetime
 import sys
+
+
+def curr_time() -> str:
+    d = datetime.now()
+    return f"{d.hour}:{d.minute}:{d.second}"
 
 
 @dataclass
@@ -10,6 +16,7 @@ class Progress:
     repeat_times: int
     start_to_last_r: int  # seconds
     this_r: int  # seconds
+    last_r_duration: int = 0
 
     @property
     def done_i(self):
@@ -48,25 +55,32 @@ class Progress:
         return self.repeat_times * self.s_per_r / 60
 
     def progress_string(self):
+        parts = [
+            f"{curr_time()}",
+            f"{self.repeat_i}/{self.repeat_times}",
+            f"{self.start_to_last_r} +{self.this_r} s",
+        ]
         if self.repeat_i <= 1:
-            return " | ".join([
-                f"{self.repeat_i}/{self.repeat_times}",
-                f"0 +{self.this_r} s",
+            parts.extend([
                 f"-% / -%",
                 f"ETA: ? min (total: ? min)",
             ])
+        else:
+            parts.extend([
+                f"{self.pct_total:.1%} / {self.pct_this_r:.1%}",
+                f"ETA: {self.eta_min:.1f} min (total: {self.total_min:.1f} min)",
+            ])
+        return  " | ".join(parts)
 
-        return " | ".join([
-            f"{self.repeat_i}/{self.repeat_times}",
-            f"{self.start_to_last_r} +{self.this_r} s",
-            f"{self.pct_total:.1%} / {self.pct_this_r:.1%}",
-            f"ETA: {self.eta_min:.1f} min (total: {self.total_min:.1f} min)",
-        ])
 
 def main():
-    repeat_i, repeat_times, start_to_last_r, this_r = map(int, sys.argv[1:])
-    this_prog = Progress(repeat_i, repeat_times, start_to_last_r, this_r)
+    repeat_i, repeat_times, start_to_last_r, this_r = map(int, sys.argv[1:5])
+    last_r_duration = 0
+    if len(sys.argv) > 5:
+        last_r_duration = int(sys.argv[5])
+    this_prog = Progress(repeat_i, repeat_times, start_to_last_r, this_r, last_r_duration=last_r_duration)
     print(this_prog.progress_string())
+
 
 if __name__ == "__main__":
     main()

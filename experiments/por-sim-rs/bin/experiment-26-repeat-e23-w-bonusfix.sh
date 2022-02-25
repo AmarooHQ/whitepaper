@@ -46,7 +46,12 @@ SECONDS=0
 # note: in reality a simplex needs to use WeightedDag and an attacker needs to win via the DoubleSpendWork strategy.
 # => no point calculating other combinations (those including WeightedChain or DoubleSpend strat)
 
+echo "Output Prefix: $OUT_F_PREFIX"
+read -p "Press enter to continue or ctrl-c to end."
 echo "Starting simulation loops..."
+
+export LAST_REPEAT_ELAPSED=0
+export LAST_REPEAT_DURATION=0
 
 function write_progress () {
   repeat_i=$1
@@ -57,7 +62,7 @@ function write_progress () {
 
   elapsed=$SECONDS
   this_repeat=$(echo $elapsed-$LAST_REPEAT_ELAPSED | bc)
-  progress_msg=$(python3 $_BIN_DIR/_exp_progress.py $repeat_i $REPEAT_TIMES $LAST_REPEAT_ELAPSED $this_repeat)
+  progress_msg=$(python3 $_BIN_DIR/_exp_progress.py $repeat_i $REPEAT_TIMES $LAST_REPEAT_ELAPSED $this_repeat $LAST_REPEAT_DURATION)
   # no point incliduing these if we're not looping thru them
   # Loop: rs:$strat / cs:$crypto_sys /
   export PROGRESS_STR=">> [${progress_msg}] >> q:$atk_r / ds:$ds_conf_base"
@@ -66,6 +71,7 @@ function write_progress () {
 
 # loop a few times so we incrementally generate data over the whole x-axis
 for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
+  export LAST_REPEAT_DURATION=$(echo $SECONDS-$LAST_REPEAT_ELAPSED | bc)
   export LAST_REPEAT_ELAPSED=$SECONDS
 
   if [[ -f "./cleanly_stop_sim" ]]; then
