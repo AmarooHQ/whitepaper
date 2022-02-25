@@ -681,7 +681,6 @@ def main(filter_fname: Optional[str], n_jobs: int):
         csvs = [
             (csv_name_f(q, t, bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', None),
             (csv_name_f(q, t, bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None),
-            (csv_name_f(q, t, bt, hr, exp_num=f'{exp}{aux}', daa=500, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None),
             (csv_name_f(q, f'{2*int(t):d}', bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=2)),
         ]
         if int(t) == 5:
@@ -1014,17 +1013,17 @@ def main(filter_fname: Optional[str], n_jobs: int):
     ] + [
         # just e26 CEC EXT
         SavePlot(
-            gen_por_cec_ext_test(q, t, exp='26', aux='aux', bt=75, hr=75, daa=100, hashname="xxh3"),
+            gen_por_cec_ext_test(q, t, exp='26', aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3"),
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture (Extended)",
                 f"{CEC_EXT2_TITLE_STR}",
                 f"If the CEC is true, then these plots should all line up.",
             ]),
-            f"png/_e26_ext_9000_q={q}_t={t}.png",
+            f"png/_e26_ext_9000_q={q}_t={t}_daa={daa}.png",
             x_label=std_x_label(t),
             x_range=q_t_to_x_range[(q, t)],
         )
-        for q in ['0.40', '0.44', '0.48'] for t in ['5', '10']
+        for q in ['0.40', '0.44', '0.48'] for t in ['5', '10'] for daa in [100, 500]
     ]
 
     pool = mpp.Pool(n_jobs)
