@@ -13,12 +13,14 @@ export RUST_LOG=warn
 # Experiment 26: repeat 23 with updates to bonus block
 # => fix: replace BadReflAncestor fix with something more intelligent
 # Second aux run: DAA=500 (test if reactivity of DAA is responsible for trad better-than-theoretical performance)
+# - generate some extra data for high n-chains
 export EXP_NUM=26
 if [[ ! -z "$EXP_IS_AUX" ]]; then
   export EXP_NUM=${EXP_NUM}aux
-  # limit which attacker ratios are simulated
 fi
-export ATK_HR_ONLY=${ATK_HR_ONLY:-0.40} # run this on box 1, allow box 2 to change
+# limit which attacker ratios are simulated
+export ATK_HR_ONLY=${ATK_HR_ONLY:-}  # set this env var to limit which atk_r (q) params to process
+export ATK_DS_CONF_ONLY=${ATK_DS_CONF_ONLY:-}
 
 # run REPEAT_TIMES total loops, where the simulator is run N_TRIALS_PER times for each set of params per loop.
 # => the total number of samples per x val is N_TRIALS_PER * REPEAT_TIMES
@@ -26,8 +28,11 @@ export ATK_HR_ONLY=${ATK_HR_ONLY:-0.40} # run this on box 1, allow box 2 to chan
 # status updates are more frequent with larger REPEAT_TIMES
 export N_TRIALS_PER=90
 export REPEAT_TIMES=100
-export RESUME_FROM=25  # subtract (this-1) from REPEAT_TIMES
+export RESUME_FROM=1  # subtract (this-1) from REPEAT_TIMES
 export REPEAT_TIMES=$(echo "$REPEAT_TIMES-$RESUME_FROM+1" | bc)
+if [[ ! -z "$DRY_RUN" ]]; then
+  export REPEAT_TIMES=1
+fi
 
 export POR_SIM_HASH=xxh3
 export RANDOMLY_DISTRIBUTE_HASHRATES=1
@@ -97,6 +102,10 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
         fi
         for ds_conf_base in 5 10 20; do
           export ATK_DS_CONFS=$ds_conf_base;
+          if [[ ! -z "$ATK_DS_CONF_ONLY" ]] && [[ "$ATK_DS_CONFS" != "$ATK_DS_CONF_ONLY" ]]; then
+            continue
+          fi
+
           export OUT_FILE=${OUT_F_PREFIX}_q=${ATK_RATIO}_dswin=${ATK_DS_CONFS}_bt=${B_PERIOD}_hr=${HR_PER_CHAIN}_${ATK_STRATEGY}_${CRYPTO_SYSTEM}_DAA${DAA2_N_BLOCKS}.csv
           # echo "$OUT_FILE" ; exit 0
 
@@ -105,12 +114,14 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
             echo "Initialized $OUT_FILE"
           fi
           if [[ ! -z "$DRY_RUN" ]]; then
+            echo "Dry run: would write to $OUT_FILE"
             continue;
           fi
 
           write_progress $repeat_i $strat $crypto_sys $atk_r $ds_conf_base
 
-          for nchains in 1 2 30 `seq 21 -2 7` `seq 6 -1 1`; do
+          # for nchains in 1 2 30 `seq 21 -2 7` `seq 6 -1 1`; do
+          for nchains in 45 60; do
             if [[ ! -z "$EXP_IS_AUX" ]]; then
               export N_CHAINS=1;
               nconfs=$(echo $nchains\*$ds_conf_base | bc)
