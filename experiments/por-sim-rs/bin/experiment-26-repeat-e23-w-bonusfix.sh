@@ -17,7 +17,7 @@ export EXP_NUM=26
 if [[ ! -z "$EXP_IS_AUX" ]]; then
   export EXP_NUM=${EXP_NUM}aux
   # limit which attacker ratios are simulated
-  export ATK_HR_ONLY="0.40" # todo: 1st for next PoR run
+  export ATK_HR_ONLY="0.40" # run this on box 1
 fi
 
 # run REPEAT_TIMES total loops, where the simulator is run N_TRIALS_PER times for each set of params per loop.
