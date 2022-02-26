@@ -1,0 +1,64 @@
+: 1645601796:0;./bin/experiment-14-more-hr.sh 
+: 1645602028:0;./bin/experiment-15-longer-daa.sh && git add csv && gc -m 'add exp 15 results'
+: 1645602365:0;./bin/experiment-15-longer-daa.sh && git add csv && gc -m 'add exp 15 results'
+: 1645606710:0;nnao bin/experiment-15-longer-daa.sh
+: 1645606713:0;nano bin/experiment-15-longer-daa.sh
+: 1645606746:0;./bin/experiment-15-longer-daa.sh && git add csv && gc -m 'add exp 15 results'
+: 1645656078:0;./bin/experiment-16-blake-hash.sh
+: 1645656266:0;cat bin/experiment-16-
+: 1645656268:0;cat bin/experiment-16-blake-hash.sh
+: 1645656277:0;./bin/experiment-16-blake-hash.sh
+: 1645665382:0;./bin/experiment-18-lesser-end-tick.sh && git add csv && git commit -m 'exp 18 results - started 1645665373'
+: 1645665643:0;./bin/experiment-18-lesser-end-tick.sh && git add csv && git commit -m 'exp 18 results - started 1645665638'
+: 1645668559:0;./bin/experiment-19-longer-end-tick.sh
+: 1645676362:0;nano ./bin/experiment-20-dynamic-atk-cutoff.sh
+: 1645676370:0;./bin/experiment-20-dynamic-atk-cutoff.sh
+: 1645676508:0;git add bin/experiment-20-dynamic-atk-cutoff.sh
+: 1645676605:0;nano ./bin/experiment-20-dynamic-atk-cutoff.sh
+: 1645676788:0;./bin/experiment-20-dynamic-atk-cutoff.sh
+: 1645676794:0;nano ./bin/experiment-20-dynamic-atk-cutoff.sh
+: 1645676925:0;./bin/experiment-20-dynamic-atk-cutoff.sh
+: 1645676937:0;nano ./bin/experiment-20-dynamic-atk-cutoff.sh
+: 1645676943:0;./bin/experiment-20-dynamic-atk-cutoff.sh
+: 1645676982:0;ga bin/experiment-20-dynamic-atk-cutoff.sh
+: 1645680020:0;cat bin/experiment-20-dynamic-atk-cutoff.sh
+: 1645684097:0;./bin/experiment-21b-super-high-res.sh
+: 1645685447:0;nano bin/experiment-21b-super-high-res.sh
+: 1645685535:0;./bin/experiment-21b-super-high-res.sh
+: 1645690941:0;bin/experiment-22aux-atk-bonus-block.sh && ga csv && gc -m 'exp 22aux results'
+: 1645695384:0;./bin/experiment-22-atk-bonus-block.sh
+: 1645698712:0;./bin/experiment-22-atk-bonus-block.sh
+: 1645703869:0;./bin/experiment-23-overnight.sh && ga csv && gc -m 'exp23 main results' && ./bin/experiment-23aux-overnight.sh && ga csv && gc-m 'exp23 aux results'
+: 1645704385:0;nano bin/experiment-23aux-overnight.sh
+: 1645704407:0;bin/experiment-23aux-overnight.sh
+: 1645704411:0;nano bin/experiment-23aux-overnight.sh
+: 1645706057:0;nano bin/experiment-23baux-overnight.sh 
+: 1645706076:0;./bin/experiment-23baux-overnight.sh 
+: 1645706082:0;nano bin/experiment-23b-overnight.sh 
+: 1645706096:0;bin/experiment-23b-overnight.sh 
+: 1645706099:0;nano bin/experiment-23b-overnight.sh 
+: 1645706107:0;nano bin/experiment-23baux-overnight.sh 
+: 1645706239:0;DRY_RUN=1 bin/experiment-23b-overnight.sh 
+: 1645706244:0;DRY_RUN=1 bin/experiment-23baux-overnight.sh 
+: 1645706296:0;DRY_RUN=1 bin/experiment-23baux-overnight.sh 
+: 1645706309:0;nano bin/experiment-23baux-overnight.sh 
+: 1645706374:0;DRY_RUN=1 bin/experiment-23baux-overnight.sh 
+: 1645706379:0;DRY_RUN=1 bin/experiment-23b-overnight.sh 
+: 1645706476:0;./bin/experiment-23baux-overnight.sh && ga csv && gc -m 'exp23b aux results' && ./bin/experiment-23b-overnight.sh && ga csv && gc -m 'exp23b main results'
+: 1645742291:0;DRY_RUN=1 ./bin/experiment-25-nodyn.sh
+: 1645742315:0;nano bin/experiment-25-nodyn.sh
+: 1645742327:0;DRY_RUN=1 ./bin/experiment-25-nodyn.sh
+: 1645742334:0;nano bin/experiment-25-nodyn.sh
+: 1645742343:0;EXP_IS_AUX=1 DRY_RUN=1 ./bin/experiment-25-nodyn.sh
+: 1645742406:0;./bin/experiment-25-nodyn.sh && git add csv && gc -m '25 main results'
+: 1645742461:0;(EXP_IS_AUX=1 ./bin/experiment-25-nodyn.sh) && git add csv && gc -m '25 aux results'
+: 1645755102:0;./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645755947:0;./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645776446:0;# ATK_HR_ONLY=0.48 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645776617:0;ATK_HR_ONLY=0.48 ./bin/experiment-26-repeat-e23-w-bonusfix.sh && ga csv && gc -m 'e26-q0.48-daa500 res' && ATK_HR_ONLY=0.44 ./bin/experiment-26-repeat-e23-w-bonusfix.sh && ga csv && gc -m 'e26-q0.44-daa500 res'
+: 1645776632:0;nano bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645832074:0;nano bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645832131:0;ATK_HR_ONLY=0.44 ATK_DS_CONF_ONLY=5 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645835028:0;ATK_HR_ONLY=0.40 ATK_DS_CONF_ONLY=5 ./bin/experiment-26-repeat-e23-w-bonusfix.sh && ATK_HR_ONLY=0.44 ATK_DS_CONF_ONLY=5 ./bin/experiment-26-repeat-e23-w-bonusfix.sh && ATK_HR_ONLY=0.48 ATK_DS_CONF_ONLY=5 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645835045:0;ATK_HR_ONLY=0.40 ATK_DS_CONF_ONLY=5 ./bin/experiment-26-repeat-e23-w-bonusfix.sh && ATK_HR_ONLY=0.44 ATK_DS_CONF_ONLY=5 ./bin/experiment-26-repeat-e23-w-bonusfix.sh && ATK_HR_ONLY=0.48 ATK_DS_CONF_ONLY=5 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645838621:0;less bin/experiment-26-repeat-e23-w-bonusfix.sh
