@@ -189,6 +189,7 @@ def read_csv_data(fname, chain_ty: Literal['por', 'trad']):
     # print(f"Reading: {fname}")
     d: pd.DataFrame = pd.read_csv(fname)
     only_target = d['block_target'][1]
+    daa = d['daa2_n_blocks'][1]
     ds_target = int(d['doublespend_after_n_confs'][1])
     q = d['atk_q'][1]
     if chain_ty == 'por':
@@ -214,13 +215,13 @@ def read_csv_data(fname, chain_ty: Literal['por', 'trad']):
     ys = list(win_counter[x] / row_counter[x] for x in xs if row_counter[x] > 0)
     max_ix = max(xs)
     series = pd.Series(ys, index=[x for x in xs if x <= max_ix])
-    series2 = pd.Series([y**0.7 for y in ys], index=[x for x in xs[:max_ix]])
+    # series2 = pd.Series([y**0.7 for y in ys], index=[x for x in xs[:max_ix]])
     # s3 = pd.Series(ys, index=[math.sqrt(x) for x in xs[:max_ix]])
     # s4 = pd.Series(ys, index=[x**(2/3) for x in xs[:max_ix]])
     ms_elapsed = d.reset_index().groupby('n_chains')['ms_elapsed'].mean()
     nts = list(n for x,n in row_counter.items())
     n_trials = int(numpy.array(nts).min())
-    return n_trials, max_ix, only_target, q, ds_target, series, ms_elapsed, series2
+    return n_trials, max_ix, only_target, q, ds_target, series, ms_elapsed, daa
 
 
 por_line_markers = ['x','*','3','+','4'] * 10
@@ -265,12 +266,17 @@ class Comment:
         }
 
 
+scaled_conv_lookup = {0.25: '4', 0.5: '2'}
+
+
 def gen_cec_prob_str(ds_target, is_trad=False, scaled=None):
     extra_pad = '  ' if int(ds_target) < 10 else ''
     # spacing at end is to help them line up in plot legend
     cec_prob = f"$P(q; N_1 = x; c = {ds_target})$   "
     cec_trad_prob = f"$P(q; N_1 = 1; c = {ds_target}x)$ "
     cec_scaled_prob = f"$P(q; N_1 = x / {scaled}; c = {ds_target})$"
+    if scaled and scaled < 1 and scaled_conv_lookup.get(scaled, None):
+        cec_scaled_prob = f"$P(q; N_1 = x · {scaled_conv_lookup[scaled]}; c = {ds_target})$"
     return (cec_trad_prob if is_trad else (cec_scaled_prob if scaled else cec_prob)) + extra_pad
 
 
@@ -307,7 +313,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
             por_plot_opts = label_extra
             label_extra = por_plot_opts.label_extra
 
-        n_trials, max_ix, block_target, _q, ds_target, csv_data, ms_elapsed, d2 = read_csv_data(fname, chain_ty)
+        n_trials, max_ix, block_target, _q, ds_target, csv_data, ms_elapsed, daa = read_csv_data(fname, chain_ty)
         csv_series.append(csv_data)
         if chain_ty == 'por':
             ty_str = 'PoR: '
@@ -326,7 +332,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
 
         prob_math = gen_cec_prob_str(ds_target, is_trad=is_trad, scaled=por_plot_opts and por_plot_opts.cec_scaled)
         if 'label' not in _kwargs:
-            _kwargs['label'] = f"y = {prob_math} --- {ty_str} $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $n \\geq {n_trials}$; ds_win={ds_target}; {label_extra or ''}"
+            _kwargs['label'] = f"y = {prob_math} --- {ty_str} $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $n \\geq {n_trials}$; $\\mathrm{{DAA}}_N = {daa}$; {label_extra or ''}"
 
         csv_data.plot(**_kwargs)
         # ms_elapsed.plot(label=f"$\\bar{{d}}$ (ms); $B_f^{{-1}} = {block_target}$", secondary_y=True)
@@ -380,7 +386,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         c2n = lambda c: c / ds_c
         n2c = lambda n: n * ds_c
         sec_x_axis = plt.gca().secondary_xaxis('top', functions=(n2c, c2n))
-        sec_x_axis.set_xlabel('Equivalent Traditional Confirmations')
+        sec_x_axis.set_xlabel('Traditional Confirmations (PoR Equivalent via CEC)')
 
     if x_range:
         plt.xlim(x_range)
@@ -729,13 +735,13 @@ def main(filter_fname: Optional[str], n_jobs: int):
 
 
     def std_x_label(t):
-        # return f"PoR: $x = N_1$; Trad: $x = Confirmations / {t}$"
-        return f"Simplex $N_1$ (or, for trad chains: $x = Confirmations / {t}$)"
+        return f"Simplex $N_1$"
 
 
     CEC_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = 1; c = NC)$"
     CEC_EXT_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$"
-    CEC_EXT2_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{a}}; c = Ca) \\approx P(q; N_1 = 1; c = CN)$"
+    CEC_EXT2_TITLE_STR = "$P(q; N_1 = N; c = C) \\; \\approx \\; P(q; N_1 = a; c = \\frac{{CN}}{{a}}) \\; \\approx \\; P(q; N_1 = 1; c = CN)$"
+    CEC_EXT3_TITLE_STR = "$P(q; N_1 = N; c = C) \\; \\approx \\; P(q; N_1 = \\frac{{N}}{{a}}; c = Ca) \\; \\approx \\; P(q; N_1 = 1; c = CN)$"
 
 
     jobs_to_save: list[SavePlot] = [
