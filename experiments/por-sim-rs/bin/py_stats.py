@@ -17,6 +17,9 @@ import multiprocessing.pool as mpp
 import multiprocessing as mp
 
 
+MIN_DS_CONF = 5
+MAX_DS_CONF = 20
+
 @dataclass
 class PorPlotOpts:
     _trans_x: Optional[Callable[[float], float]] = None
@@ -663,7 +666,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             '29': exp_16_csv_name,
         }).get(exp_num, unknown_exp_num_name)
 
-    def gen_por_equiv_rand_hrs_csvs(q, t, bt=50, hr=50, only_real_world=False, exp_num='13', aux_num='3', daa='100') -> list[CsvFileToPlot]:
+    def gen_por_equiv_rand_hrs_csvs(q, t, bt=50, hr=50, only_real_world=False, exp_num='13', aux_num='3', daa=100) -> list[CsvFileToPlot]:
         csv_name_f = csv_name_f_from_exp(exp_num)
         csvs = [
             (csv_name_f(q, t, bt, hr, exp_num=exp_num, daa=daa, strat="DoubleSpend", cs="WeightedChain"), 'por', 'DS+WC'),
@@ -703,6 +706,19 @@ def main(filter_fname: Optional[str], n_jobs: int):
         if int(t) == 20:
             # todo
             csvs.append((csv_name_f(q, f'{int(t)//4:d}', bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=0.25)))
+        return csvs
+
+    def f_is_whole(x):
+        return x//1 == x
+
+    def gen_por_cec_full_csvs(q: str, t: int, exp, aux, bt, hr, daa, max_c_oom_span=2, oom_base=2, **kwargs) -> list[CsvFileToPlot]:
+        csvs = []
+        csv_name_f = csv_name_f_from_exp(exp)
+        scaling_options = [(t*s, PorPlotOpts(cec_scaled=s) if s != 1 else None) for s in [oom_base**i for i in range(0-max_c_oom_span, max_c_oom_span+1)]]
+        for (_t, opts) in scaling_options:
+            if f_is_whole(_t) and MIN_DS_CONF <= _t <= MAX_DS_CONF:
+                csvs.append((csv_name_f(q, int(_t), bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', opts))
+        csvs.append((csv_name_f(q, t, bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None))
         return csvs
 
     def gen_por_hash_comare(q, t) -> list[CsvFileToPlot]:
@@ -1045,7 +1061,8 @@ def main(filter_fname: Optional[str], n_jobs: int):
     ] + [
         # just e26 CEC EXT
         SavePlot(
-            gen_por_cec_ext_reversed_test(q, t, exp='26', aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3"),
+            # gen_por_cec_ext_reversed_test(q, t, exp='26', aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3"),
+            gen_por_cec_full_csvs(q, int(t), exp='26', aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3"),
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture (Extended)",
                 f"{CEC_EXT2_TITLE_STR}",
@@ -1055,7 +1072,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             x_label=std_x_label(t),
             x_range=q_t_to_x_range[(q, t)],
         )
-        for q in ['0.40', '0.44', '0.48'] for t in ['10', '20'] for daa in [100, 500]
+        for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20'] for daa in [100, 500]
     ]
 
     pool = mpp.Pool(n_jobs)
