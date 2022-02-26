@@ -17,7 +17,7 @@ export RUST_LOG=warn
 # Second aux run: DAA=500 (test if reactivity of DAA is responsible for trad better-than-theoretical performance)
 # - generate some extra data for high n-chains
 export EXP_NUM=26
-if [[ ! -z "$EXP_IS_AUX" ]]; then
+if [[ "1" = "$EXP_IS_AUX" ]]; then
   export EXP_NUM=${EXP_NUM}aux
 fi
 # limit which attacker ratios are simulated
@@ -57,8 +57,8 @@ SECONDS=0
 
 # nchain_arr=( 1 2 30 `seq 21 -2 7` `seq 6 -1 1` )
 nchain_arr=( 1 2 60 42 30 `seq 21 -2 7` `seq 6 -1 1` )
-# ds_conf_arr=( 1.25 2.5 5 10 20 )
-ds_conf_arr=( 1.25 2.5 )
+# ds_conf_arr=( 1.25 2.5 )
+ds_conf_arr=( 1.25 2.5 5 10 20 )
 
 # note: in reality a simplex needs to use WeightedDag and an attacker needs to win via the DoubleSpendWork strategy.
 # => no point calculating other combinations (those including WeightedChain or DoubleSpend strat)
@@ -103,11 +103,13 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
     export ATK_STRATEGY=$strat
     for crypto_sys in WeightedDag; do #WeightedChain, LongestChain; do
       export CRYPTO_SYSTEM=$crypto_sys
+
       for atk_r in 0.40 0.44 0.48; do
         export ATK_RATIO=$atk_r
         if [[ ! -z "$ATK_HR_ONLY" ]] && [[ "$ATK_RATIO" != "$ATK_HR_ONLY" ]]; then
           continue
         fi
+
         for ds_conf_base in ${ds_conf_arr[@]}; do
           export ATK_DS_CONFS=$ds_conf_base;
           if [[ ! -z "$ATK_DS_CONF_ONLY" ]] && [[ "$ATK_DS_CONFS" != "$ATK_DS_CONF_ONLY" ]]; then
@@ -135,7 +137,7 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
               continue
             fi
 
-            if [[ ! -z "$EXP_IS_AUX" ]]; then
+            if [[ "1" = "$EXP_IS_AUX" ]]; then
               export N_CHAINS=1;
               nconfs=$(echo $nchains\*$ds_conf_base | bc)
               export ATK_DS_CONFS=$nconfs;

@@ -1,0 +1,228 @@
+: 1644403134:0;nano bin/experiment-2.sh
+: 1644403173:0;chmod +x bin/experiment-2.sh
+: 1644403188:0;git add bin/experiment-2.sh
+: 1644403264:0;./bin/experiment-2.sh && gcam 'experiment 2 results (note, simulations w n=11 seem to take 1.65 s or so)' && gp
+: 1644406149:0;./bin/experiment-2.sh && gcam 'experiment 2 results but started at n=16 (note, simulations w n=15 seem to take 2.2 s or so)' && gp
+: 1644443244:0;./bin/experiment-2.sh
+: 1644450815:0;git add bin/experiment-3.sh src/ bin/experiment-2.sh Makefile Cargo.* .gitignore
+: 1644454510:0;./bin/experiment-3.sh
+: 1644457657:0;bin/experiment-4.sh
+: 1644458309:0;git add bin/experiment-4.sh
+: 1644458509:0;cp bin/experiment-{4,5}.sh
+: 1644459157:0;bin/experiment-5.sh
+: 1644459193:0;cp bin/experiment-4{,a}.sh
+: 1644459298:0;bin/experiment-4a.sh
+: 1644461932:0;cp bin/experiment-4{a,b}.sh
+: 1644462095:0;bin/experiment-4b.sh
+: 1644464450:0;./bin/experiment-4a.sh
+: 1644468405:0;chmod +x bin/experiment-4a2.sh
+: 1644468422:0;bin/experiment-4a2.sh
+: 1644529823:0;rm exp-4a-wPoRFix.csv; ./bin/experiment-4a2.sh
+: 1644531983:0;rm exp-4a-wPoRFix.csv; RUST_LOG=warn ./bin/experiment-4a2.sh
+: 1644532004:0;rm exp-4a-wPoRFix.csv; RUST_LOG=warn ./bin/experiment-4a2.sh 2>&1 | head -n 100
+: 1644532008:0;rm exp-4a-wPoRFix.csv; RUST_LOG=warn ./bin/experiment-4a2.sh 2>&1 | head -n 1000
+: 1644533369:0;rm exp-4a-wPoRFix.csv; ./bin/experiment-4a2.sh
+: 1644541609:0;./bin/experiment-4a2.sh
+: 1644542480:0;rm testexp-4a-wPoRFix.csv; RUST_LOG=error ./bin/experiment-4a2.sh
+: 1644542485:0;rm testexp-4a-wPoRFix.csv; RUST_LOG=error sh ./bin/experiment-4a2.sh
+: 1644542502:0;rm testexp-4a-wPoRFix.csv; RUST_LOG=error vash ./bin/experiment-4a2.sh
+: 1644542505:0;rm testexp-4a-wPoRFix.csv; RUST_LOG=error bash ./bin/experiment-4a2.sh
+: 1644543028:0;rm testexp-4b.csv; RUST_LOG=error bash ./bin/experiment-4b.sh
+: 1644543128:0;rm testexp-4b.csv; RUST_LOG=error bash ./bin/experiment-4b.sh && bin/py_stats.py
+: 1644544374:0;make && (rm testexp-4b.csv || true) && RUST_LOG=error bash ./bin/experiment-4b.sh && bin/py_stats.py
+: 1644544835:0;gcam 'test q=0.4 and 0.44 with the same command\n\nmake && RUST_LOG=error bash ./bin/experiment-4b.sh && bin/py_stats.py'
+: 1644546313:0;RUST_LOG=error bash ./bin/experiment-4b.sh && bin/py_stats.py
+: 1644548566:0;make && RUST_LOG=error bash ./bin/experiment-4b.sh && bin/py_stats.py
+: 1644551608:0;rm exp-4a-wPoRFix.csv; RUST_LOG=error ./bin/experiment-4a2.sh
+: 1644553465:0;rm exp-4a-wPoRFix.csv; RUST_LOG=warn ./bin/experiment-4a2.sh
+: 1644555107:0;rm exp-4a-wPoRFix.csv; RUST_LOG=warn ./bin/experiment-4a2.sh; make stats
+: 1644556238:0;rm exp-4a-wPoRFix.csv; RUST_LOG=error ./bin/experiment-4a2.sh; make stats
+: 1644556990:0;chmod +x bin/experiment-aux-1.sh
+: 1644628257:0;git add bin/experiment-*
+: 1644631621:0;RUST_LOG=warn ./bin/experiment-4c.sh
+: 1644638226:0;./bin/experiment-4c.sh
+: 1644639512:0;cp bin/experiment-{4c,6}.sh
+: 1644640776:0;git add bin/experiment-6.sh
+: 1644641963:0;bin/experiment-6.sh
+: 1644648931:0;./bin/experiment-6.sh
+: 1644649482:0;cp bin/experiment-6.sh
+: 1644649488:0;cp bin/experiment-{6,7}.sh
+: 1644649711:0;git add bin/experiment-7.sh
+: 1644650083:0;./bin/experiment-7.sh
+: 1644652011:0;cp bin/experiment-{7,}.sh
+: 1644652018:0;mv bin/experiment-{,8}.sh
+: 1644652316:0;bin/experiment-8.sh
+: 1644671365:0;git add bin/experiment-8.sh
+: 1644706079:0;./bin/experiment-8.sh
+: 1645401717:0;cp bin/experiment-{8,9}.sh
+: 1645402865:0;git add bin/experiment-9.sh
+: 1645411835:0;./bin/experiment-9.sh
+: 1645419741:0;chmod +x bin/experiment-10.sh
+: 1645420403:0;./bin/experiment-10.sh
+: 1645422973:0;chmod +x ./bin/experiment-11.sh
+: 1645428102:0;./bin/experiment-aux-1.sh
+: 1645428108:0;./bin/experiment-11.sh
+: 1645428814:0;cp bin/experiment-8.sh bin/experiment-12-repeat-8.sh
+: 1645428819:0;code bin/experiment-12-repeat-8.sh
+: 1645437880:0;cp bin/experiment-12-repeat-{8,8-but-50-50}.sh
+: 1645437887:0;code bin/experiment-12-repeat-8-but-50-50.sh
+: 1645438371:0;./bin/experiment-12-repeat-8-but-50-50.sh
+: 1645482059:0;chmod +x ./bin/experiment-aux-2.sh
+: 1645492238:0;./bin/experiment-12-repeat-8.sh
+: 1645510326:0;./bin/experiment-aux-2.sh
+: 1645513349:0;cp bin/experiment-aux-{2,3}.sh
+: 1645513353:0;code bin/experiment-aux-3.sh
+: 1645576710:0;./bin/experiment-aux-3.sh
+: 1645583011:0;cp bin/experiment-aux-3.sh bin/experiment-13-rand-hr-dist.sh
+: 1645583552:0;./bin/experiment-13-rand-hr-dist.sh
+: 1645583605:0;./bin/experiment-13-rand-hr-dist.sh
+: 1645583705:0;./bin/experiment-13-rand-hr-dist.sh
+: 1645583821:0;./bin/experiment-13-rand-hr-dist.sh
+: 1645583897:0;./bin/experiment-13-rand-hr-dist.sh
+: 1645601012:0;cp bin/experiment-{13-rand-hr-dist,14-more-hr}.sh
+: 1645601020:0;cp bin/experiment-{13-rand-hr-dist,15-with-blake}.sh
+: 1645601026:0;code bin/experiment-14-more-hr.sh
+: 1645601141:0;git add bin/experiment-1*
+: 1645601158:0;code bin/experiment-16-plan.txt
+: 1645601475:0;./bin/experiment-15-longer-daa.sh
+: 1645601688:0;./bin/experiment-15-longer-daa.sh
+: 1645601720:0;./bin/experiment-15-longer-daa.sh
+: 1645601852:0;./bin/experiment-14-more-hr.sh
+: 1645602181:0;./bin/experiment-14-more-hr.sh
+: 1645602466:0;./bin/experiment-14-more-hr.sh && git add csv && gc -m 'add exp 14 results'
+: 1645607618:0;cp bin/experiment-aux-{3,14}.sh
+: 1645607622:0;code bin/experiment-aux-14.sh
+: 1645607799:0;./bin/experiment-aux-14.sh && git add csv && gc 'exp 14 results'
+: 1645613314:0;git add bin/experiment-aux-14.sh;  gc 'exp 14 results'
+: 1645613458:0;git add bin/experiment-aux-14.sh
+: 1645613485:0;./bin/experiment-aux-14.sh && git add ./bin/experiment-aux-14.sh && git add csv && gc 'exp 14 part 2 results'
+: 1645655726:0;cp bin/experiment-{15-longer-daa,16-blake-hash}.sh
+: 1645655733:0;code bin/experiment-16-blake-hash.sh
+: 1645656195:0;bin/experiment-16-blake-hash.sh
+: 1645657176:0;./bin/experiment-16-blake-hash.sh
+: 1645660692:0;cp bin/experiment-{16-blake-hash,17-blake-uniform-hr}.sh
+: 1645660698:0;code bin/experiment-17-blake-uniform-hr.sh
+: 1645660961:0;./bin/experiment-17-blake-uniform-hr.sh
+: 1645661027:0;./bin/experiment-17-blake-uniform-hr.sh
+: 1645661168:0;ga bin/experiment-17-blake-uniform-hr.sh
+: 1645661637:0;./bin/experiment-17-blake-uniform-hr.sh
+: 1645661905:0;./bin/experiment-17-blake-uniform-hr.sh
+: 1645662289:0;git add bin/experiment-17-blake-uniform-hr.sh
+: 1645662477:0;cp bin/experiment-{17-blake-uniform-hr,18-lesser-end-tick}.sh
+: 1645662639:0;./bin/experiment-18-lesser-end-tick.sh
+: 1645662769:0;git diff --staged bin/experiment-17-blake-uniform-hr.sh
+: 1645663371:0;./bin/experiment-18-lesser-end-tick.sh
+: 1645668337:0;cp bin/experiment-{18-lesser-end-tick,19-longer-end-tick}.sh
+: 1645668345:0;code bin/experiment-19-longer-end-tick.sh
+: 1645668515:0;git add bin/experiment-19-longer-end-tick.sh
+: 1645670117:0;cp bin/experiment-{19-longer-end-tick,20-dynamic-atk-cutoff}.sh
+: 1645670121:0;code bin/experiment-20-dynamic-atk-cutoff.sh
+: 1645672584:0;./bin/experiment-20-dynamic-atk-cutoff.sh
+: 1645678688:0;cp bin/experiment-{20-dynamic-atk-cutoff,21-super-high-res}.sh
+: 1645678695:0;code bin/experiment-21-super-high-res.sh
+: 1645679997:0;./bin/experiment-21-super-high-res.sh
+: 1645680090:0;./bin/experiment-21-super-high-res.sh
+: 1645680234:0;./bin/experiment-21-super-high-res.sh
+: 1645680346:0;./bin/experiment-21-super-high-res.sh
+: 1645680575:0;./bin/experiment-21-super-high-res.sh
+: 1645680627:0;git add bin/experiment-21-super-high-res.sh
+: 1645683714:0;gd bin/experiment-21-super-high-res.sh
+: 1645683766:0;cp bin/experiment-21{,b}-super-high-res.sh
+: 1645688083:0;./bin/experiment-21b-super-high-res.sh
+: 1645688351:0;./bin/experiment-22-atk-bonus-block.sh
+: 1645688354:0;chmod + x./bin/experiment-22-atk-bonus-block.sh
+: 1645688356:0;chmod +x ./bin/experiment-22-atk-bonus-block.sh
+: 1645688357:0;chmod + x./bin/experiment-22-atk-bonus-block.sh
+: 1645688358:0;./bin/experiment-22-atk-bonus-block.sh
+: 1645688570:0;./bin/experiment-22-atk-bonus-block.sh
+: 1645688920:0;cp bin/experiment-22{,aux}-atk-bonus-block.sh
+: 1645688925:0;code bin/experiment-22aux-atk-bonus-block.sh
+: 1645689102:0;ga bin/experiment-22aux-atk-bonus-block.sh
+: 1645689137:0;./bin/experiment-22aux-atk-bonus-block.sh
+: 1645690221:0;./bin/experiment-22b-atk-bonus-block.sh
+: 1645690228:0;./bin/experiment-22-atk-bonus-block.sh
+: 1645701744:0;cp bin/experiment-{22-atk-bonus-block,23-overnight}.sh
+: 1645701765:0;cp bin/experiment-{22aux-atk-bonus-block,23aux-overnight}.sh
+: 1645701953:0;ga bin/experiment-23*
+: 1645702021:0;./bin/experiment-23-overnight.sh
+: 1645702546:0;./bin/experiment-23aux-overnight.sh
+: 1645702656:0;./bin/experiment-23aux-overnight.sh
+: 1645703603:0;./bin/experiment-23-overnight.sh
+: 1645704853:0;./bin/experiment-23-overnight.sh
+: 1645705164:0;./bin/experiment-23aux-overnight.sh
+: 1645705226:0;./bin/experiment-23aux-overnight.sh
+: 1645705344:0;./bin/experiment-23-overnight.sh
+: 1645705949:0;cp bin/experiment-{23,23b}-overnight.sh
+: 1645705953:0;cp bin/experiment-{23,23b}aux-overnight.sh
+: 1645705964:0;code bin/experiment-23b*
+: 1645705997:0;git add bin/experiment-23b*
+: 1645706178:0;git add bin/experiment-23b*
+: 1645706197:0;DRY_RUN=1 ./bin/experiment-23b-overnight.sh
+: 1645706204:0;./bin/experiment-23b-overnight.sh
+: 1645706266:0;git add bin/experiment-23b*
+: 1645706621:0;git add bin/experiment-23aux-overnight.sh
+: 1645733665:0;cp bin/experiment-{23,24}-overnight.sh
+: 1645733669:0;code bin/experiment-24-overnight.sh
+: 1645733692:0;cp bin/experiment-{23,24}aux-overnight.sh
+: 1645733695:0;code bin/experiment-24aux-overnight.sh
+: 1645733764:0;./bin/experiment-24-overnight.sh
+: 1645733773:0;./bin/experiment-24aux-overnight.sh
+: 1645741779:0;cp bin/experiment-{24-overnight,25-nodyn}.sh
+: 1645742109:0;git diff bin/experiment-24-overnight.sh
+: 1645750938:0;cp bin/experiment-{25-nodyn,26-repeat-e23-w-bonusfix}.sh
+: 1645750949:0;code bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645751146:0;git add bin/experiment-26-repeat-e23-w-bonusfix.sh src
+: 1645751165:0;git add bin/experiment-25-nodyn.sh
+: 1645751689:0;./bin/experiment-24-overnight.sh
+: 1645751699:0;./bin/experiment-24-overnight.sh
+: 1645752690:0;DRY_RUN=1 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645752700:0;./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645753091:0;DRY_RUN=1 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645753100:0;DRY_RUN=1 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645754282:0;DRY_RUN=1 EXP_IS_AUX=1 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645755030:0;EXP_IS_AUX=1 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645755648:0;gd bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645755962:0;EXP_IS_AUX=1 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645760385:0;EXP_IS_AUX=1 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645761198:0;EXP_IS_AUX=1 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645761400:0;EXP_IS_AUX=1 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645761738:0;EXP_IS_AUX=1 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645762158:0;gd bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645763185:0;EXP_IS_AUX=1 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645763726:0;./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645763901:0;./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645775728:0;./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645775819:0;./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645775853:0;ga bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645775984:0;./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645776038:0;./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645776133:0;./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645776422:0;./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645776431:0;ATK_HR_ONLY=0.48 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645776473:0;./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645776654:0;./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645776664:0;./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645818017:0;ATK_HR_ONLY=0.4 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645818033:0;ATK_HR_ONLY=0.40 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645831676:0;gd bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645831869:0;DRY_RUN=1 ATK_DS_CONFS_ONLY=5 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645831912:0;DRY_RUN=1 ATK_DS_CONF_ONLY=5 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645831928:0;DRY_RUN=1 ATK_HR_ONLY=0.44 ATK_DS_CONF_ONLY=5 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645831991:0;gd bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645834705:0;DRY_RUN=1 ATK_HR_ONLY=0.40 ATK_DS_CONF_ONLY=5 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645834812:0;DRY_RUN=1 ATK_HR_ONLY=0.40 ATK_DS_CONF_ONLY=5 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645834885:0;DRY_RUN=1 ATK_HR_ONLY=0.40 ATK_DS_CONF_ONLY=5 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645834929:0;ATK_HR_ONLY=0.40 ATK_DS_CONF_ONLY=5 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645834935:0;DRY_RUN=1 ATK_HR_ONLY=0.40 ATK_DS_CONF_ONLY=5 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645834939:0;ATK_HR_ONLY=0.40 ATK_DS_CONF_ONLY=5 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645834975:0;git add bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645837840:0;gd bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645837849:0;DRY_RUN=1 ATK_HR_ONLY=0.40 ATK_DS_CONF_ONLY=5 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645842003:0;DRY_RUN=1 ATK_HR_ONLY=0.40 ATK_DS_CONF_ONLY=5 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645842015:0;DRY_RUN=1 ATK_HR_ONLY=0.40 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645842076:0;DRY_RUN=1 ATK_HR_ONLY=0.40 DAA2_N_BLOCKS=500 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645842103:0;DRY_RUN=1 ATK_HR_ONLY=0.40 DAA2_N_BLOCKS=500 EXP_IS_AUX=1 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645842840:0;DRY_RUN=1 ATK_DS_CONF_ONLY=1.24 DAA2_N_BLOCKS=500 EXP_IS_AUX=1 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645842847:0;DRY_RUN=1 ATK_DS_CONF_ONLY=1.25 DAA2_N_BLOCKS=500 EXP_IS_AUX=1 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645842873:0;DRY_RUN=1 ATK_DS_CONF_ONLY=1.25 DAA2_N_BLOCKS=100 EXP_IS_AUX=1 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+: 1645842883:0;DRY_RUN=1 ATK_DS_CONF_ONLY=1.25 DAA2_N_BLOCKS=100 EXP_IS_AUX=0 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
