@@ -48,7 +48,7 @@ export OUT_F_PREFIX=csv/exp_${EXP_NUM}_${HR_DISTRIB}_${POR_SIM_HASH}
 # so HR_PER_CHAIN=50 means q can only go up/down in increments of 0.02
 export B_PERIOD=75
 export HR_PER_CHAIN=75
-export DAA2_N_BLOCKS=100
+export DAA2_N_BLOCKS=${DAA2_N_BLOCKS:-100}
 # export DAA2_N_BLOCKS=500
 
 export N_CPUS=$(echo $(grep -c ^processor /proc/cpuinfo)-1 | bc)
@@ -130,7 +130,7 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
 
           # for nchains in 1 2 30 `seq 21 -2 7` `seq 6 -1 1`; do
           for nchains in ${nchain_arr[@]}; do
-            if [[ "$ATK_RATIO" = "0.48" ]] && [[ "$nchains" -gt 30 ]]; then
+            if [[ "$ATK_DS_CONFS" = "20" ]] && [[ "$nchains" -gt 30 ]]; then
               # skip b/c we're not interested in these datapoints (v expensive)
               continue
             fi
