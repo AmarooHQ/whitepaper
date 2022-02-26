@@ -7,7 +7,7 @@ import sys
 
 def curr_time() -> str:
     d = datetime.now()
-    return f"{d.hour}:{d.minute}:{d.second}"
+    return f"{d.hour:02d}:{d.minute:02d}:{d.second:02d}"
 
 
 @dataclass
@@ -58,8 +58,10 @@ class Progress:
         parts = [
             f"{curr_time()}",
             f"{self.repeat_i}/{self.repeat_times}",
-            f"{self.start_to_last_r} +{self.this_r} s",
+            f"{self.start_to_last_r}+{self.this_r}s",
         ]
+        if self.last_r_duration > 0:
+            parts.append(f"L:{self.last_r_duration}s")
         if self.repeat_i <= 1:
             parts.extend([
                 f"-% / -%",
@@ -68,7 +70,7 @@ class Progress:
         else:
             parts.extend([
                 f"{self.pct_total:.1%} / {self.pct_this_r:.1%}",
-                f"ETA: {self.eta_min:.1f} min (total: {self.total_min:.1f} min)",
+                f"ETA: {self.eta_min:.1f} min (T:{self.total_min:.1f}m)",
             ])
         return  " | ".join(parts)
 
