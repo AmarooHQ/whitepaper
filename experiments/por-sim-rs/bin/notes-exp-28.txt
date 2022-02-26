@@ -1,0 +1,4 @@
+what do we see with DAA_N=15? Does having a super short DAA worsen security?
+at what point?
+short DAA + many hashes p c p t
+short DAA + low hashes per chian per tick

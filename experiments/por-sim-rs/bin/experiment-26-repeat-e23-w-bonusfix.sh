@@ -64,7 +64,7 @@ ds_conf_arr=( 1.25 2.5 5 10 20 )
 # => no point calculating other combinations (those including WeightedChain or DoubleSpend strat)
 
 echo "Output: ${OUT_F_PREFIX}_(q)_(dswin)_bt=${B_PERIOD}_hr=${HR_PER_CHAIN}_(strat)_(chain)_DAA${DAA2_N_BLOCKS}.csv"
-read -p "Press enter to continue or ctrl-c to end."
+#read -p "Press enter to continue or ctrl-c to end."
 echo "Starting simulation loops..."
 
 export LAST_REPEAT_ELAPSED=0
