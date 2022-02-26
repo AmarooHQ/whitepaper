@@ -6,19 +6,22 @@ use crate::CSystemT;
 use conv::prelude::*;
 use itertools::any;
 use num::pow;
+use std::convert::TryInto;
 use std::fmt;
 use std::fmt::Debug;
 use std::fmt::Display;
 use std::marker::PhantomData;
 
-pub trait GetDS {
-    fn ds_win_threshold(&self) -> Option<Height>;
+pub trait GetDS<H = Height> {
+    fn ds_win_threshold(&self) -> Option<H>;
+    fn ds_win_as_f32(&self) -> Option<f32>;
 }
 
 /// a strategy that runs at a network level based on incoming msgs
 pub trait RelayStrategyT<'a, S: CSystemT<'a>> {
     type ResultsTy: Debug;
-    type Params: Clone + Copy + Debug + GetDS;
+    type DSMultType;
+    type Params: Clone + Copy + Debug + GetDS<Self::DSMultType>;
     fn init(c: &S::C, atk_start_h: Height, p: Self::Params) -> Self;
     fn name() -> String;
     /// Additional msgs that can be provided by attackers when certain conditions are met (e.g., selfish mining requires releasing withheld blocks if the honest network releases one)
@@ -32,9 +35,10 @@ pub trait RelayStrategyT<'a, S: CSystemT<'a>> {
             Self::name()
         );
     }
-    fn ds_win_threshold(&self) -> Option<Height> {
+    fn ds_win_threshold(&self) -> Option<Self::DSMultType> {
         None
     }
+    fn ds_win_as_f32(&self) -> Option<f32>;
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -56,6 +60,9 @@ impl GetDS for DoubleSpendParams {
     fn ds_win_threshold(&self) -> Option<Height> {
         Some(self.win_thres)
     }
+    fn ds_win_as_f32(&self) -> Option<f32> {
+        Some(self.win_thres as f32)
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -73,6 +80,7 @@ impl DoubleSpendStrat {
 
 impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
     type ResultsTy = bool;
+    type DSMultType = Height;
     type Params = DoubleSpendParams;
     fn init(_: &S::C, atk_start_h: Height, params: Self::Params) -> Self {
         DoubleSpendStrat {
@@ -120,23 +128,30 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
     fn ds_win_threshold(&self) -> Option<Height> {
         Some(self.params.win_thres)
     }
+    fn ds_win_as_f32(&self) -> Option<f32> {
+        Some(self.params.win_thres as f32)
+    }
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct DoubleSpendWorkParams {
     attack_starts_at: Timestamp,
-    win_thres: Height,
+    // multiplier of block confirmations
+    win_thres: f32,
     n_por_chains: u16,
 }
 
-impl GetDS for DoubleSpendWorkParams {
-    fn ds_win_threshold(&self) -> Option<Height> {
+impl GetDS<f32> for DoubleSpendWorkParams {
+    fn ds_win_threshold(&self) -> Option<f32> {
+        Some(self.win_thres)
+    }
+    fn ds_win_as_f32(&self) -> Option<f32> {
         Some(self.win_thres)
     }
 }
 
 impl DoubleSpendWorkParams {
-    pub fn new(attack_starts_at: Height, win_thres: Height, n_por_chains: u16) -> Self {
+    pub fn new(attack_starts_at: Height, win_thres: f32, n_por_chains: u16) -> Self {
         DoubleSpendWorkParams {
             attack_starts_at,
             win_thres,
@@ -162,14 +177,16 @@ impl DoubleSpendWorkStrat {
 
 impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
     type ResultsTy = bool;
+    type DSMultType = f32;
     type Params = DoubleSpendWorkParams;
     fn init(chain: &S::C, atk_start_h: Height, params: Self::Params) -> Self {
         DoubleSpendWorkStrat {
             params,
             atk_start_h,
             atk_start_work: chain.get_fork_measure_pub_priv().public,
-            win_work_thresh: (params.win_thres * (params.n_por_chains as u32)) as u64
-                * chain.get_any_best_block(false).0.get_difficulty(),
+            win_work_thresh: params.n_por_chains as Difficulty
+                * (params.win_thres * chain.get_any_best_block(false).0.get_difficulty() as f32)
+                    as Difficulty,
         }
     }
     fn name() -> String {
@@ -208,9 +225,13 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
     fn dynamic_cutoff(&self, fm: Heights, work_per_period: Difficulty) -> bool {
         // for a doublespend of C confirmations, if the attacker is trailing
         // the public chain by > max(C, 10) block periods worth of work, then terminate.
-        fm.private + (self.params.win_thres.max(10) as u64) * work_per_period < fm.public
+        (fm.private + (self.params.win_thres.max(10.0) * work_per_period as f32) as Difficulty)
+            < fm.public
     }
-    fn ds_win_threshold(&self) -> Option<Height> {
+    fn ds_win_threshold(&self) -> Option<Self::DSMultType> {
+        Some(self.params.win_thres)
+    }
+    fn ds_win_as_f32(&self) -> Option<f32> {
         Some(self.params.win_thres)
     }
 }
@@ -281,6 +302,9 @@ pub struct SelfishMiningParams {
 
 impl GetDS for SelfishMiningParams {
     fn ds_win_threshold(&self) -> Option<Height> {
+        None
+    }
+    fn ds_win_as_f32(&self) -> Option<f32> {
         None
     }
 }
@@ -495,6 +519,7 @@ impl<'a, S: CSystemT<'a>> SelfishMining<S> {
 
 impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
     type ResultsTy = SelfishMiningResult;
+    type DSMultType = Height;
     type Params = SelfishMiningParams;
     fn init(_chain: &S::C, atk_start_h: Height, params: Self::Params) -> Self {
         SelfishMining {
@@ -658,6 +683,9 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
     }
     fn params_as_csv(&self) -> String {
         format!("{}", self.params.chain_type)
+    }
+    fn ds_win_as_f32(&self) -> Option<f32> {
+        None
     }
 }
 

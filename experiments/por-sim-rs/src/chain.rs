@@ -384,7 +384,8 @@ pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
             })
             .collect();
         self.remove_mempool_tx_ids(&txids_to_remove, is_private);
-        self.add_mempool_tx_ids(&txids_to_add_mp, is_private);
+        self.add_mempool_tx_ids(&txids_to_add_mp, is_private)
+            .unwrap();
         b.add_transactions(&txs_to_add);
         b
     }
@@ -719,8 +720,11 @@ impl<'a, B: BlockT, F: ForkRules<B>> Chain<B, F> {
         let p = Self::get_cached_block(&*daa2_bs.last().unwrap()).unwrap();
         let block_time_sum: u32 = b.get_ts() - p.0.get_ts();
         let win_rate_sum: Difficulty = b_meta.local_chain_weight - p.1.local_chain_weight;
-        Difficulty::from(self.net_args.block_target) * win_rate_sum
-            / max(Difficulty::from(block_time_sum), 1)
+        let new_diff = Difficulty::from(self.net_args.block_target) * win_rate_sum
+            / max(Difficulty::from(block_time_sum), 1);
+        let min_new_diff = b.get_difficulty() / 2;
+        let max_new_diff = b.get_difficulty() * 2;
+        new_diff.max(min_new_diff).min(max_new_diff)
     }
 
     fn next_difficulty_daa2(&self, b: &B, b_meta: &BlockMD<B>) -> Difficulty {

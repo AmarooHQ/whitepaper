@@ -28,8 +28,8 @@ export ATK_DS_CONF_ONLY=${ATK_DS_CONF_ONLY:-}
 # => the total number of samples per x val is N_TRIALS_PER * REPEAT_TIMES
 # => this should be >= 3000 (picked b/c it's not too many but graphs are reasonably smooth)
 # status updates are more frequent with larger REPEAT_TIMES
-export N_TRIALS_PER=90
-export REPEAT_TIMES=100
+export N_TRIALS_PER=100
+export REPEAT_TIMES=90
 export RESUME_FROM=1  # subtract (this-1) from REPEAT_TIMES
 export REPEAT_TIMES=$(echo "$REPEAT_TIMES-$RESUME_FROM+1" | bc)
 if [[ ! -z "$DRY_RUN" ]]; then
@@ -56,7 +56,9 @@ export N_CPUS=$(echo $(grep -c ^processor /proc/cpuinfo)-1 | bc)
 SECONDS=0
 
 # nchain_arr=( 1 2 30 `seq 21 -2 7` `seq 6 -1 1` )
-nchain_arr=( 45 60 )
+nchain_arr=( 1 2 60 42 30 `seq 21 -2 7` `seq 6 -1 1` )
+# ds_conf_arr=( 1.25 2.5 5 10 20 )
+ds_conf_arr=( 1.25 2.5 )
 
 # note: in reality a simplex needs to use WeightedDag and an attacker needs to win via the DoubleSpendWork strategy.
 # => no point calculating other combinations (those including WeightedChain or DoubleSpend strat)
@@ -106,7 +108,7 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
         if [[ ! -z "$ATK_HR_ONLY" ]] && [[ "$ATK_RATIO" != "$ATK_HR_ONLY" ]]; then
           continue
         fi
-        for ds_conf_base in 5 10 20; do
+        for ds_conf_base in ${ds_conf_arr[@]}; do
           export ATK_DS_CONFS=$ds_conf_base;
           if [[ ! -z "$ATK_DS_CONF_ONLY" ]] && [[ "$ATK_DS_CONFS" != "$ATK_DS_CONF_ONLY" ]]; then
             continue
@@ -128,6 +130,11 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
 
           # for nchains in 1 2 30 `seq 21 -2 7` `seq 6 -1 1`; do
           for nchains in ${nchain_arr[@]}; do
+            if [[ "$ATK_RATIO" = "0.48" ]] && [[ "$nchains" -gt 30 ]]; then
+              # skip b/c we're not interested in these datapoints (v expensive)
+              continue
+            fi
+
             if [[ ! -z "$EXP_IS_AUX" ]]; then
               export N_CHAINS=1;
               nconfs=$(echo $nchains\*$ds_conf_base | bc)

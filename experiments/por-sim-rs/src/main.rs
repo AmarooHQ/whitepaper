@@ -96,7 +96,7 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
         (@arg attacker_instant_propagation: --attacker_instant_prop !takes_value "Attacker's blocks instantly propagate to attackers (no wasted mining)")
         (@arg atk_end_delay_ticks: --atk_end_delay_ticks +takes_value default_value("0") "Number of ticks to delay ending the simulation if the attacker gets ahead")
         // doublspend params
-        (@arg win_threshold: --ds_win_threshold +takes_value default_value("20") "[DoubleSpend] Minimum number of confirmations before the double-spending private chain is published.")
+        (@arg win_threshold: -C --ds_win_threshold +takes_value default_value("20") "[DoubleSpend] Minimum number of confirmations before the double-spending private chain is published.")
         (@arg random_hr_distrib: --random_hr_distrib !takes_value "If true, distribute the attackers hash-rate randomly over all chains. (No effect with -P=1)")
         // selfish mining params
         // <none>
@@ -220,7 +220,7 @@ fn mk_run_atk<'a, S: CSystemT<'a>>(
             mms[0].run_attack()
         }
         RelayStrategyArg::DoubleSpendWork => {
-            let win_thresh = value_t_or_exit!(cli_args, "win_threshold", Height);
+            let win_thresh = value_t_or_exit!(cli_args, "win_threshold", f32);
             let mut mms = n_chains_range
                 .map(|_i| {
                     let params = DoubleSpendWorkParams::new(

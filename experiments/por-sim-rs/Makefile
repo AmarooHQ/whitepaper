@@ -46,6 +46,9 @@ unlock-release:
 release:
 	cargo build --release
 
+build:
+	cargo build
+
 print-sim-args:
 	@echo '$(SIMULATOR_ARGS)'
 
@@ -81,13 +84,19 @@ run-lc-50k-blocks-20simplex: release
 	$(RUN_BIN) -s 10000 -e 2500000 -r 0.0 -S WeightedChain -b 50 -H 50 -P 21
 
 run-bonusblock-checker:
-	RUST_LOG=warn,por_sim_rs::message_manager=debug cargo r -- -s 10000 -e 13000 -r 0.46 -S WeightedDag -H 50 -b 50 --ds_win_threshold 5 -P 5 --random_hr_distrib --use_dyn_end_tick
+	RUST_LOG=warn,por_sim_rs::message_manager=debug cargo r -- -s 5000 -e 13000 -r 0.46 -R DoubleSpendWork -S WeightedDag -H 50 -b 50 --ds_win_threshold 5 -P 5 --random_hr_distrib --use_dyn_end_tick
+
+run-check-high-hr:
+	RUST_LOG=warn,por_sim_rs::message_manager=debug cargo r -- -s 10000 -e 3000 -r 0.36 -R DoubleSpendWork -S WeightedDag -H 50 -b 50 --daa2_n_blocks 1000 --ds_win_threshold 5 -P 5 --random_hr_distrib --use_dyn_end_tick
+
+run-check-fractional-dswin: build
+	RUST_LOG=warn,por_sim_rs::message_manager=debug ./target/debug/por-sim-rs -s 2500 -e 3000 -r 0.44 -R DoubleSpendWork -S WeightedDag -H 50 -b 50 --daa2_n_blocks 100 --ds_win_threshold 2.5 -P 5 --random_hr_distrib --use_dyn_end_tick
 
 run-dag-doublespend:
-	RUST_LOG=warn,por_sim_rs::strategies::relay=info cargo r -- -s 10000 -e 20000 -r 0.45 -S WeightedDag -b 100
+	RUST_LOG=warn,por_sim_rs::strategies::relay=info cargo r -- -s 10000 -e 20000 -r 0.45 -R DoubleSpendWork -S WeightedDag -b 100
 
 run-dag-doublespend-por:
-	RUST_LOG=warn,por_sim_rs::strategies::relay=info cargo r -- -s 10000 -e 20000 -r 0.45 -S WeightedDag -b 100 -P 10
+	RUST_LOG=warn,por_sim_rs::strategies::relay=info cargo r -- -s 10000 -e 20000 -r 0.45 -R DoubleSpendWork -S WeightedDag -b 100 -P 10
 
 run-dag-doublespend-100:
 	# export SIMULATOR_ARGS="-s $(ATK_START_TICK) -e $(ATK_END_TICK) -r $(ATK_RATIO) -S WeightedDag -b $(B_PERIOD) -P $(N_CHAINS) -H $(HR_PER_CHAIN) --ds_win_threshold $(ATK_DS_CONFS)" ; \
