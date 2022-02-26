@@ -17,7 +17,7 @@ import multiprocessing.pool as mpp
 import multiprocessing as mp
 
 
-MIN_DS_CONF = 5
+MIN_DS_CONF = 1.25
 MAX_DS_CONF = 20
 
 @dataclass
@@ -266,7 +266,7 @@ class Comment:
         }
 
 
-scaled_conv_lookup = {0.25: '4', 0.5: '2'}
+scaled_conv_lookup = {0.0625: '2^{4}', 0.125: '8', 0.25: '4', 0.5: '2'}
 
 
 def gen_cec_prob_str(ds_target, is_trad=False, scaled=None):
@@ -325,7 +325,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         log_ds_target = ds_target
         if por_plot_opts and por_plot_opts.cec_scaled:
             csv_data = pd.Series(csv_data.values, index=[x * por_plot_opts.cec_scaled for x in csv_data.index])
-            log_ds_target = int(ds_target / por_plot_opts.cec_scaled)
+            log_ds_target = ds_target / por_plot_opts.cec_scaled
 
         if por_plot_opts:
             _kwargs.update(**por_plot_opts.kwargs)
@@ -387,6 +387,10 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         n2c = lambda n: n * ds_c
         sec_x_axis = plt.gca().secondary_xaxis('top', functions=(n2c, c2n))
         sec_x_axis.set_xlabel('Traditional Confirmations (PoR Equivalent via CEC)')
+    else:
+        _id = lambda x: x
+        sec_x_axis = plt.gca().secondary_xaxis('top', functions=(_id, _id))
+        sec_x_axis.set_xlabel('WARNING: UNABLE TO SET TOP X AXIS!!!', color='red')
 
     if x_range:
         plt.xlim(x_range)
@@ -717,13 +721,13 @@ def main(filter_fname: Optional[str], n_jobs: int):
     def f_is_whole(x):
         return x//1 == x
 
-    def gen_por_cec_full_csvs(q: str, t: int, exp, aux, bt, hr, daa, max_c_oom_span=2, oom_base=2, **kwargs) -> list[CsvFileToPlot]:
+    def gen_por_cec_full_csvs(q: str, t: int, exp, aux, bt, hr, daa, max_c_oom_span=4, oom_base=2, **kwargs) -> list[CsvFileToPlot]:
         csvs = []
         csv_name_f = csv_name_f_from_exp(exp)
         scaling_options = [(t*s, PorPlotOpts(cec_scaled=s) if s != 1 else None) for s in [oom_base**i for i in range(0-max_c_oom_span, max_c_oom_span+1)]]
         for (_t, opts) in scaling_options:
-            if f_is_whole(_t) and MIN_DS_CONF <= _t <= MAX_DS_CONF:
-                csvs.append((csv_name_f(q, int(_t), bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', opts))
+            if MIN_DS_CONF <= _t <= MAX_DS_CONF:  # f_is_whole(_t) and
+                csvs.append((csv_name_f(q, int(_t) if f_is_whole(_t) else _t, bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', opts))
         csvs.append((csv_name_f(q, t, bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None))
         return csvs
 

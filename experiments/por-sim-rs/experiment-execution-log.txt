@@ -226,3 +226,6 @@
 : 1645842847:0;DRY_RUN=1 ATK_DS_CONF_ONLY=1.25 DAA2_N_BLOCKS=500 EXP_IS_AUX=1 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
 : 1645842873:0;DRY_RUN=1 ATK_DS_CONF_ONLY=1.25 DAA2_N_BLOCKS=100 EXP_IS_AUX=1 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
 : 1645842883:0;DRY_RUN=1 ATK_DS_CONF_ONLY=1.25 DAA2_N_BLOCKS=100 EXP_IS_AUX=0 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+
+ATK_DS_CONF_ONLY=1.25 DAA2_N_BLOCKS=100 EXP_IS_AUX=0 ./bin/experiment-26-repeat-e23-w-bonusfix.sh && ATK_DS_CONF_ONLY=1.25 DAA2_N_BLOCKS=500 EXP_IS_AUX=0 ./bin/experiment-26-repeat-e23-w-bonusfix.sh && ATK_DS_CONF_ONLY=1.25 DAA2_N_BLOCKS=100 EXP_IS_AUX=1 ./bin/experiment-26-repeat-e23-w-bonusfix.sh && ATK_DS_CONF_ONLY=1.25 DAA2_N_BLOCKS=500 EXP_IS_AUX=1 ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+
