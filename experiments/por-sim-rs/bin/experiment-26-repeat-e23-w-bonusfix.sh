@@ -32,6 +32,7 @@ export RESUME_FROM=1  # subtract (this-1) from REPEAT_TIMES
 export REPEAT_TIMES=$(echo "$REPEAT_TIMES-$RESUME_FROM+1" | bc)
 if [[ ! -z "$DRY_RUN" ]]; then
   export REPEAT_TIMES=1
+  echo "DRY RUN! Have set REPEAT_TIMES=1"
 fi
 
 export POR_SIM_HASH=xxh3
@@ -45,8 +46,8 @@ export OUT_F_PREFIX=csv/exp_${EXP_NUM}_${HR_DISTRIB}_${POR_SIM_HASH}
 # so HR_PER_CHAIN=50 means q can only go up/down in increments of 0.02
 export B_PERIOD=75
 export HR_PER_CHAIN=75
-# export DAA2_N_BLOCKS=100
-export DAA2_N_BLOCKS=500
+export DAA2_N_BLOCKS=100
+# export DAA2_N_BLOCKS=500
 
 export N_CPUS=$(echo $(grep -c ^processor /proc/cpuinfo)-1 | bc)
 # built in bash feature
@@ -55,7 +56,7 @@ SECONDS=0
 # note: in reality a simplex needs to use WeightedDag and an attacker needs to win via the DoubleSpendWork strategy.
 # => no point calculating other combinations (those including WeightedChain or DoubleSpend strat)
 
-echo "Output Prefix: $OUT_F_PREFIX"
+echo "Output: ${OUT_F_PREFIX}_(q)_(dswin)_bt=${B_PERIOD}_hr=${HR_PER_CHAIN}_(strat)_(chain)_DAA${DAA2_N_BLOCKS}.csv"
 read -p "Press enter to continue or ctrl-c to end."
 echo "Starting simulation loops..."
 
@@ -139,16 +140,41 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
       done
     done
   done
+
+  # some padding to help with in progress bash scripts reading the file later
+  # some padding to help with in progress bash scripts reading the file later
+  # some padding to help with in progress bash scripts reading the file later
+  # some padding to help with in progress bash scripts reading the file later
+  # some padding to help with in progress bash scripts reading the file later
+  # some padding to help with in progress bash scripts reading the file later
+  # some padding to help with in progress bash scripts reading the file later
+  # some padding to help with in progress bash scripts reading the file later
+  # some padding to help with in progress bash scripts reading the file later
+  # some padding to help with in progress bash scripts reading the file later
+
 done | tee -a $OUT_F_PREFIX.log
 
 
 
 
 
+strat_arr=( "DoubleSpendWork" )
+chain_arr=( "WeightedDag" )
+atk_ratios=( 0.40 0.44 0.48 )
+ds_conf_arr=( 5 10 20 )
+nchain_arr=( 1 2 30 `seq 21 -2 7` `seq 6 -1 1` )
 
-
-
-
+for strat in ${strat_arr[@]}; do
+  for crypto_sys in ${chain_arr[@]}; do
+    for atk_r in ${atk_ratios[@]}; do
+      for ds_conf_base in ${ds_conf_arr[@]}; do
+        for nchains in ${nchain_arr[@]}; do
+          echo ">> rs:$strat / cs:$crypto_sys / q:$atk_r / ds:$ds_conf_base / nchains:$nchains" > /dev/null
+        done
+      done
+    done
+  done
+done
 
 
 
