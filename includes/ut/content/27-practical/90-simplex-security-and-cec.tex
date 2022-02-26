@@ -206,6 +206,20 @@ So, while it is \emph{possible} that a poor implementation of a simplex could co
     Details of the model -- WeightedDag, DoubleSpendWork, etc.
 }
 
+\subsubsubsubsection{Error Correction Iteration}
+
+Following the initial implementation of PoR in the simulator, results were promising but did not align with the theoretical prediction (based on Rosenfeld's analytical derivation of $P(q; N_1 = 1; c = C)$).
+
+traditional chains were okay but not perfect -- a bit better than predicted tho.
+simplexes, however, were way worse for $N_1 > 5$ or so -- $P(\cdots)$ never dropped below $\sim 0.1$.
+
+\begin{enumerate}
+    \item Accounting for draft reflected work
+    \item Implementing the DoubleSpendWork attack strategy
+    \item Randomizing hash rate over simplex chains ($p + q = 1$ is globally maintained)
+    \item Implementing the attacker's ``Bonus Block''
+    \item Increasing the number of blocks over which the DAA operates ($\text{DAA}_N = 100 \to 500$)
+\end{enumerate}
 
 \subsubsubsubsection{Interpreting the Results}
 
