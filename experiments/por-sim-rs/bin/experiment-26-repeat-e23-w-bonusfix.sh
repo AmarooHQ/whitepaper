@@ -6,7 +6,9 @@ export _BIN_DIR=$(dirname $0)
 
 # this is expected to be run in dir w/ Cargo.toml & Makefile
 SIM_BIN=./target/release/por-sim-rs
-cargo b --release
+if [[ -z "$DRY_RUN" ]]; then
+  cargo b --release
+fi
 
 export RUST_LOG=warn
 
@@ -52,6 +54,9 @@ export DAA2_N_BLOCKS=100
 export N_CPUS=$(echo $(grep -c ^processor /proc/cpuinfo)-1 | bc)
 # built in bash feature
 SECONDS=0
+
+# nchain_arr=( 1 2 30 `seq 21 -2 7` `seq 6 -1 1` )
+nchain_arr=( 45 60 )
 
 # note: in reality a simplex needs to use WeightedDag and an attacker needs to win via the DoubleSpendWork strategy.
 # => no point calculating other combinations (those including WeightedChain or DoubleSpend strat)
@@ -122,7 +127,7 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
           write_progress $repeat_i $strat $crypto_sys $atk_r $ds_conf_base
 
           # for nchains in 1 2 30 `seq 21 -2 7` `seq 6 -1 1`; do
-          for nchains in 45 60; do
+          for nchains in ${nchain_arr[@]}; do
             if [[ ! -z "$EXP_IS_AUX" ]]; then
               export N_CHAINS=1;
               nconfs=$(echo $nchains\*$ds_conf_base | bc)
