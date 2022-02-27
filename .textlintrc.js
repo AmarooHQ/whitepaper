@@ -107,8 +107,11 @@ module.exports = {
                 ["rashes", "hashes"],
                 ["dependant", "dependent"],
                 ["hash rate", "hash-rate"],
-                ["the attackers"],
-                ["$DAA_N$", "$\\text{DAA}_N$"],
+                ["the attackers", "the attacker's"],
+                ['$DAA_N$', '\\text{DAA}_N'],
+                // ["Decreasing .* increases"]
+                // note: the below seems like it does not work :(
+                // ...flaggedWords.map(w => [w]),
             ]
         }
     }

@@ -195,10 +195,13 @@ glossary-fix-1:
 finished-msg:
 	bash bin/msg_good.sh 'Finished build for mode=$(PP_MODE)'
 
-lint: textlint pdflint
+lint: textlint texlint pdflint
 
 textlint:
 	npm run lint
+
+texlint:
+	bash bin/texLint.sh `find ./includes/ut/content -iname \*.tex`
 
 pdflint:
 	bash bin/pdfLint.sh output/whitepaper.pdf

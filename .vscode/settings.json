@@ -175,8 +175,8 @@
     ],
     "cSpell.minWordLength": 2,
     "cSpell.flagWords": [
-        "hte", "DOS", "teh", "\\being{", "itertext", "the attackers",
-        "$DAA_N$",
+        // add to .textlintrc.js too
+        "hte", "DOS", "teh", "\\being{", "itertext", "the attackers", "DAA_N",
     ],
     "cSpell.ignoreRegExpList": [
         "\\usepackage{([a-z,]*)}",
@@ -260,7 +260,6 @@
         ".textlintrc": "jsonc"
     },
     "cSpell.enableFiletypes": [
-        "tex",
-        //
+        "tex"
     ]
 }

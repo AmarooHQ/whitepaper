@@ -201,7 +201,7 @@ Particularly:
         $c$ (confirmations) & Yes & Work-equivalent of `$c$ local confirmations' waiting time. \\
         $N_1$ (chains) & Yes & The number simplex-chains ($N_1 = 1$ for traditional blockchains). \\
         $B_f^{-1}$ (ticks) & No & Analogue of `seconds' used by the DAA. \\
-        $DAA_N$ (blocks) & No & The number of blocks over which the DAA operates. \\
+        $\text{DAA}_N$ (blocks) & No & The number of blocks over which the DAA operates. \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -368,7 +368,7 @@ Additionally, the following observations are made:
 
 \begin{enumerate}
     \item An attacker whose hash rate is \emph{uniformly} distributed over a simplex is at a disadvantage compared to an attacker whose hash rate is \emph{randomly} distributed.
-    \item Decreasing $DAA_N$ increases the security of both simplexes and traditional blockchains -- except for ``Longest Chain'' fork rules.
+    \item Decreasing $\text{DAA}_N$ increases the security of both simplexes and traditional blockchains -- except for ``Longest Chain'' fork rules.
     \item An attacker that waits to generate a block on a target chain is at a decisive advantage compared to one that does not.
     \item Rosenfeld's closed form solution is consistent with empirical results.
 \end{enumerate}
