@@ -45,8 +45,19 @@ export ATK_HR_ONLY=0.44
 export SKIP_EXP_CONF_PROMPT=1
 export RESUME_FROM=71
 
-for only_ds_conf in 60 42; do
-  export ATK_DS_CONF_ONLY=$only_ds_conf;
+for only_n_chains in 60 42; do
+  export ATK_NCHAINS_ONLY=$only_n_chains;
   EXP_IS_AUX=1 ./bin/experiment-28-short-daa.sh
 done
+)
+
+---
+
+gen q=0.48 aux
+(
+export DAA2_N_BLOCKS=20
+export ATK_HR_ONLY=0.48
+export SKIP_EXP_CONF_PROMPT=1
+
+EXP_IS_AUX=1 ./bin/experiment-28-short-daa.sh
 )
