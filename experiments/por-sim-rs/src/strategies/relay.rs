@@ -6,21 +6,39 @@ use crate::CSystemT;
 use conv::prelude::*;
 use itertools::any;
 use num::pow;
+use std::convert::TryInto;
 use std::fmt;
 use std::fmt::Debug;
 use std::fmt::Display;
 use std::marker::PhantomData;
 
+pub trait GetDS<H = Height> {
+    fn ds_win_threshold(&self) -> Option<H>;
+    fn ds_win_as_f32(&self) -> Option<f32>;
+}
+
 /// a strategy that runs at a network level based on incoming msgs
 pub trait RelayStrategyT<'a, S: CSystemT<'a>> {
     type ResultsTy: Debug;
-    type Params: Clone + Copy + Debug;
+    type DSMultType;
+    type Params: Clone + Copy + Debug + GetDS<Self::DSMultType>;
     fn init(c: &S::C, atk_start_h: Height, p: Self::Params) -> Self;
+    fn name() -> String;
     /// Additional msgs that can be provided by attackers when certain conditions are met (e.g., selfish mining requires releasing withheld blocks if the honest network releases one)
     fn on_msg(&mut self, m: &MsgToNode<S::B>, chain: &S::C) -> Vec<MsgToNode<S::B>>;
     fn get_results(&self, c: &S::C) -> Option<(Self::ResultsTy, bool)>;
     fn should_stop_simulation(&self, ts: Timestamp, c: &S::C) -> bool;
     fn params_as_csv(&self) -> String;
+    fn dynamic_cutoff(&self, fm: Heights, work_per_period: Difficulty) -> bool {
+        panic!(
+            "Dynamic cutoff has not been implemented for: {}",
+            Self::name()
+        );
+    }
+    fn ds_win_threshold(&self) -> Option<Self::DSMultType> {
+        None
+    }
+    fn ds_win_as_f32(&self) -> Option<f32>;
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -38,6 +56,15 @@ impl DoubleSpendParams {
     }
 }
 
+impl GetDS for DoubleSpendParams {
+    fn ds_win_threshold(&self) -> Option<Height> {
+        Some(self.win_thres)
+    }
+    fn ds_win_as_f32(&self) -> Option<f32> {
+        Some(self.win_thres as f32)
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct DoubleSpendStrat {
     params: DoubleSpendParams,
@@ -47,12 +74,13 @@ pub struct DoubleSpendStrat {
 impl DoubleSpendStrat {
     fn _atk_won(&self, fms: &Heights, hs: &Heights, public_draft_refl_work: Difficulty) -> bool {
         fms.public + public_draft_refl_work < fms.private
-            && hs.public >= self.atk_start_h + self.params.win_thres
+            && hs.public >= (self.atk_start_h + self.params.win_thres) as u64
     }
 }
 
 impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
     type ResultsTy = bool;
+    type DSMultType = Height;
     type Params = DoubleSpendParams;
     fn init(_: &S::C, atk_start_h: Height, params: Self::Params) -> Self {
         DoubleSpendStrat {
@@ -60,13 +88,16 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
             atk_start_h,
         }
     }
+    fn name() -> String {
+        "DoubleSpendStrat".to_string()
+    }
     fn on_msg(&mut self, _msg_from: &MsgToNode<S::B>, _chain: &S::C) -> Vec<MsgToNode<S::B>> {
         vec![]
     }
     fn get_results(&self, c: &S::C) -> Option<(Self::ResultsTy, bool)> {
         let hs = c.get_heights_pub_priv();
         let fms = c.get_fork_measure_pub_priv();
-        let draft_refl_work = c.draft_block(0, false).get_reflected_weight();
+        let draft_refl_work = c.get_draft_reflected_weight(false);
         if self._atk_won(&fms, &hs, draft_refl_work) {
             Some((true, true))
         } else {
@@ -79,7 +110,7 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
         } else {
             let hs = c.get_heights_pub_priv();
             let fms = c.get_fork_measure_pub_priv();
-            let draft_refl_work = c.draft_block(0, false).get_reflected_weight();
+            let draft_refl_work = c.get_draft_reflected_weight(false);
             self._atk_won(&fms, &hs, draft_refl_work)
         }
     }
@@ -89,17 +120,38 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
             self.params.attack_starts_at, self.params.win_thres
         )
     }
+    fn dynamic_cutoff(&self, fm: Heights, work_per_period: Difficulty) -> bool {
+        // for a doublespend of C confirmations, if the attacker is trailing
+        // the public chain by > max(C, 10) block periods worth of work, then terminate.
+        fm.private + (self.params.win_thres.max(10) as u64) * work_per_period < fm.public
+    }
+    fn ds_win_threshold(&self) -> Option<Height> {
+        Some(self.params.win_thres)
+    }
+    fn ds_win_as_f32(&self) -> Option<f32> {
+        Some(self.params.win_thres as f32)
+    }
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct DoubleSpendWorkParams {
     attack_starts_at: Timestamp,
-    win_thres: Height,
+    // multiplier of block confirmations
+    win_thres: f32,
     n_por_chains: u16,
 }
 
+impl GetDS<f32> for DoubleSpendWorkParams {
+    fn ds_win_threshold(&self) -> Option<f32> {
+        Some(self.win_thres)
+    }
+    fn ds_win_as_f32(&self) -> Option<f32> {
+        Some(self.win_thres)
+    }
+}
+
 impl DoubleSpendWorkParams {
-    pub fn new(attack_starts_at: Height, win_thres: Height, n_por_chains: u16) -> Self {
+    pub fn new(attack_starts_at: Height, win_thres: f32, n_por_chains: u16) -> Self {
         DoubleSpendWorkParams {
             attack_starts_at,
             win_thres,
@@ -125,23 +177,27 @@ impl DoubleSpendWorkStrat {
 
 impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
     type ResultsTy = bool;
+    type DSMultType = f32;
     type Params = DoubleSpendWorkParams;
     fn init(chain: &S::C, atk_start_h: Height, params: Self::Params) -> Self {
         DoubleSpendWorkStrat {
             params,
             atk_start_h,
             atk_start_work: chain.get_fork_measure_pub_priv().public,
-            win_work_thresh: params.win_thres
-                * (params.n_por_chains as u32)
-                * chain.get_any_best_block(false).0.get_difficulty(),
+            win_work_thresh: params.n_por_chains as Difficulty
+                * (params.win_thres * chain.get_any_best_block(false).0.get_difficulty() as f32)
+                    as Difficulty,
         }
+    }
+    fn name() -> String {
+        "DoubleSpendWorkStrat".to_string()
     }
     fn on_msg(&mut self, _msg_from: &MsgToNode<S::B>, _chain: &S::C) -> Vec<MsgToNode<S::B>> {
         vec![]
     }
     fn get_results(&self, c: &S::C) -> Option<(Self::ResultsTy, bool)> {
         let fms = c.get_fork_measure_pub_priv();
-        let draft_refl_work = c.draft_block(0, false).get_reflected_weight();
+        let draft_refl_work = c.get_draft_reflected_weight(false);
         if self._atk_won(&fms, draft_refl_work) {
             Some((true, true))
         } else {
@@ -153,18 +209,30 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
             false
         } else {
             let fms = c.get_fork_measure_pub_priv();
-            let draft_refl_work = c.draft_block(0, false).get_reflected_weight();
+            let draft_refl_work = c.get_draft_reflected_weight(false);
             self._atk_won(&fms, draft_refl_work)
         }
     }
     fn params_as_csv(&self) -> String {
         format!(
             "{}, {}",
-            // omit n_por_chains b/c it's recorded elsewhere in the csv
             self.params.attack_starts_at,
             self.params.win_thres,
+            // note: omit n_por_chains b/c it's recorded elsewhere in the csv
             //self.params.n_por_chains
         )
+    }
+    fn dynamic_cutoff(&self, fm: Heights, work_per_period: Difficulty) -> bool {
+        // for a doublespend of C confirmations, if the attacker is trailing
+        // the public chain by > max(C, 10) block periods worth of work, then terminate.
+        (fm.private + (self.params.win_thres.max(10.0) * work_per_period as f32) as Difficulty)
+            < fm.public
+    }
+    fn ds_win_threshold(&self) -> Option<Self::DSMultType> {
+        Some(self.params.win_thres)
+    }
+    fn ds_win_as_f32(&self) -> Option<f32> {
+        Some(self.params.win_thres)
     }
 }
 
@@ -232,6 +300,15 @@ pub struct SelfishMiningParams {
     pub chain_type: SmChainType,
 }
 
+impl GetDS for SelfishMiningParams {
+    fn ds_win_threshold(&self) -> Option<Height> {
+        None
+    }
+    fn ds_win_as_f32(&self) -> Option<f32> {
+        None
+    }
+}
+
 impl<'a, S: CSystemT<'a>> SelfishMining<S> {
     fn sync_pub_to_priv(b: &S::B, atk_chain: &S::C, include_latest: bool) -> Vec<MsgToNode<S::B>> {
         let pre_ret = atk_chain.find_pub_blocks_not_in_priv();
@@ -282,10 +359,10 @@ impl<'a, S: CSystemT<'a>> SelfishMining<S> {
             MsgToNode::MsgBlock(c_id, b, true) if *c_id == chain_id => {
                 info!("priv block mined: {}", b);
                 self.blocks_from_private.insert(b.get_hash());
-                if self.best_processed_h.private >= b.get_height() {
+                if self.best_processed_h.private >= b.get_height() as u64 {
                     // return vec![];
                 } else {
-                    self.best_processed_h.private = b.get_height();
+                    self.best_processed_h.private = b.get_height() as u64;
                     self.l_s += 1;
                 }
                 // selfish pool mines a new block
@@ -302,10 +379,10 @@ impl<'a, S: CSystemT<'a>> SelfishMining<S> {
             MsgToNode::MsgBlock(c_id, b, false) if *c_id == chain_id => {
                 info!("pub block mined: {}", b);
                 self.blocks_from_public.insert(b.get_hash());
-                if self.best_processed_h.public >= b.get_height() {
+                if self.best_processed_h.public >= b.get_height() as u64 {
                     // return vec![];
                 } else {
-                    self.best_processed_h.public = b.get_height();
+                    self.best_processed_h.public = b.get_height() as u64;
                     self.l_h += 1;
                 }
                 // public miner refs all unreferenced public uncles
@@ -442,6 +519,7 @@ impl<'a, S: CSystemT<'a>> SelfishMining<S> {
 
 impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
     type ResultsTy = SelfishMiningResult;
+    type DSMultType = Height;
     type Params = SelfishMiningParams;
     fn init(_chain: &S::C, atk_start_h: Height, params: Self::Params) -> Self {
         SelfishMining {
@@ -460,6 +538,9 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
             atk_start_h,
             _s: PhantomData,
         }
+    }
+    fn name() -> String {
+        "SelfishMining".to_string()
     }
 
     fn on_msg(&mut self, msg_from: &MsgToNode<S::B>, atk_chain: &S::C) -> Vec<MsgToNode<S::B>> {
@@ -602,6 +683,9 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for SelfishMining<S> {
     }
     fn params_as_csv(&self) -> String {
         format!("{}", self.params.chain_type)
+    }
+    fn ds_win_as_f32(&self) -> Option<f32> {
+        None
     }
 }
 

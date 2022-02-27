@@ -12,22 +12,30 @@ use crate::types::*;
 use log::*;
 
 #[derive(Debug)]
+pub struct NodeAtkParams {
+    pub is_r_chain: bool,
+}
+
+#[derive(Debug)]
 pub struct Node<'a, /*R: RelayStrategyT,*/ S: CSystemT<'a>> {
     id: usize,
     pub chain: S::C,
-    is_attacker: bool,
-    mining_attempts_per_tick: u32,
+    is_attacker: Option<NodeAtkParams>,
+    mining_attempts_per_tick: Difficulty,
     curr_draft_block: Option<S::B>,
     add_mined_block_instant: bool,
+    por_chains: u16,
+    has_seen_main_atk_block: bool,
 }
 
 impl<'a, S: CSystemT<'a>> Node<'a, S> {
     pub fn new(
         id: usize,
         chain: S::C,
-        is_attacker: bool,
-        mining_attempts_per_tick: u32,
+        is_attacker: Option<NodeAtkParams>,
+        mining_attempts_per_tick: Difficulty,
         add_mined_block_instant: bool,
+        por_chains: u16,
     ) -> Node<'a, S> {
         Node {
             id,
@@ -37,7 +45,13 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
             mining_attempts_per_tick,
             curr_draft_block: None,
             add_mined_block_instant,
+            por_chains,
+            has_seen_main_atk_block: false,
         }
+    }
+
+    pub fn attack_has_started(&self) -> bool {
+        self.has_seen_main_atk_block
     }
 
     fn got_block(&mut self, b: &S::B, is_private: bool) -> Result<(), ChainErr> {
@@ -74,16 +88,15 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         // let count_weight = proving_ancestor_id != 0;
         // let weight = if count_weight { b.get_difficulty() } else { 0 };
         let weight = b.get_difficulty();
-        let tx = Transaction::ReflectAndProve(ReflectionData {
+        let tx = Transaction::new_refl_and_prove(ReflectionData {
             r_chain: c_id,
             r_block: b.get_hash(),
-            r_cw: b.get_height(),
+            r_cw: b.get_chain_weight(),
             weight,
             l_headers: refl_ancestors,
             l_cw,
         });
         let tx_id = tx.get_hash();
-        Transaction::set_cached_tx(tx);
         let res = self.chain.add_tx_to_mempool(tx_id, is_private);
         res
     }
@@ -91,6 +104,33 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
     #[cfg(test)]
     fn notify_of_block(&mut self, id: HashID, p: bool) -> Result<(), ChainErr> {
         self.chain.notify_block(id, p)
+    }
+
+    fn set_seen_main_atk_block(&mut self, has_seen: bool) {
+        if has_seen && !self.has_seen_main_atk_block {
+            self.has_seen_main_atk_block = has_seen;
+
+            // self.chain.clear_mempool(true);
+        }
+    }
+
+    /// if we get a public block, should we add it to the private chain, too?
+    fn should_also_add_to_priv(&self, attack_started: bool) -> bool {
+        match self.is_attacker.as_ref() {
+            // always false if we're not the attacker
+            None => false,
+            Some(node_atk_ps) => {
+                match attack_started {
+                    // always true if the attack has not started
+                    false => true,
+                    true =>
+                    // the attack has started, so only add to priv if we haven't seen the main atk block yet
+                    {
+                        !self.has_seen_main_atk_block
+                    }
+                }
+            }
+        }
     }
 
     pub fn step(
@@ -110,14 +150,16 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
                     if *c_id == l_chain_id {
                         // wipe draft block b/c we'll have found a better one
                         self.curr_draft_block = None;
-                        match (is_private, self.is_attacker) {
+                        match (is_private, self.is_attacker.is_some()) {
                             (false, _) => {
-                                self.got_block(b, false)?;
-                                // before the attack has started, treat all blocks
-                                // like they were also private blocks
-                                if self.is_attacker && !attack_started {
+                                // before the attack has started,
+                                // or if it has started but the attacker has not mined a block yet,
+                                // treat all blocks like they were also private blocks.
+                                if self.should_also_add_to_priv(true) {
                                     self.got_block(b, true)?;
                                 }
+                                // do priv first so self.should_also_add_to_priv can check self.chain if it wants
+                                self.got_block(b, false)?;
                             }
                             (true, true) => self.got_block(b, true)?,
                             (true, false) => {}
@@ -125,14 +167,24 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
                     } else {
                         // this is a block on another chain -- worth considering for reflection
                         // (in practice we always want to reflect b/c it incents miners of R chains to reflect back)
-                        match (is_private, self.is_attacker) {
+                        match (is_private, self.is_attacker.is_some()) {
                             (false, _) => {
                                 self.got_reflectable(*c_id, b, false)?;
-                                if self.is_attacker && !attack_started {
+                                if self.should_also_add_to_priv(attack_started) {
                                     self.got_reflectable(*c_id, b, true)?;
                                 }
                             }
-                            (true, true) => self.got_reflectable(*c_id, b, true)?,
+                            (true, true) => {
+                                if !self.has_seen_main_atk_block && self.is_attacker.is_some() {
+                                    self.set_seen_main_atk_block(
+                                        self.is_attacker
+                                            .as_ref()
+                                            .map(|a| a.is_r_chain)
+                                            .unwrap_or(false),
+                                    );
+                                }
+                                self.got_reflectable(*c_id, b, true)?
+                            }
                             _ => {}
                         }
                     }
@@ -143,10 +195,20 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
 
         // try to mine
         for b in self.attempt_mining(ts, self.mining_attempts_per_tick as u16, attack_started) {
+            // todo: integrate has_seen_main_atk_block -- done I think
+            if attack_started
+                && self
+                    .is_attacker
+                    .as_ref()
+                    .map(|a| !a.is_r_chain)
+                    .unwrap_or(false)
+            {
+                self.set_seen_main_atk_block(true);
+            }
             out_msgs.push(
                 // if we're an attacker and past when the attack starts,
                 // then relay private blocks. otherwise it's a normal block.
-                if self.is_attacker && attack_started {
+                if self.is_attacker.is_some() && attack_started && self.has_seen_main_atk_block {
                     MsgPrivBlock(self.chain.get_chain_id(), b)
                 } else {
                     MsgBlock(self.chain.get_chain_id(), b)
@@ -159,7 +221,13 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
     }
 
     fn attempt_mining(&mut self, ts: u32, max_attempts: u16, attack_started: bool) -> Vec<S::B> {
-        let mine_in_private = self.is_attacker && attack_started;
+        let mine_in_private = self
+            .is_attacker
+            .as_ref()
+            .map(|a| {
+                attack_started && ((a.is_r_chain && self.has_seen_main_atk_block) || !a.is_r_chain)
+            })
+            .unwrap_or(false);
 
         let mut b = if let Some(mut b) = self.curr_draft_block.take() {
             b.set_ts(ts);
@@ -229,7 +297,7 @@ mod tests {
             net_args,
         );
         let chain_id = c.get_chain_id();
-        let mut n: Node<SimpleCS> = Node::new(1337, c, false, 100, false);
+        let mut n: Node<SimpleCS> = Node::new(1337, c, None, 100, false, 1);
 
         // just so we make sure we can get a valid block via mining
         let _bs = n.attempt_mining(10, 30000, false);
@@ -278,7 +346,7 @@ mod tests {
             BlockMD::mk_genesis_md(&genesis, net_args.daa2_n_blocks),
             net_args,
         );
-        let mut n: Node<SimpleCS> = Node::new(1337, c, false, 100, false);
+        let mut n: Node<SimpleCS> = Node::new(1337, c, None, 100, false, 1);
 
         let prev_height = n.chain.get_fork_measure_pub_priv().public;
 
@@ -303,7 +371,7 @@ mod tests {
             let na = NetworkArgs::new(1);
             let g_md = BlockMD::mk_genesis_md(&g, na.daa2_n_blocks);
             let c = Chain::new(g, g_md, na);
-            let n: Node<DagCS> = Node::new(i, c.clone(), false, 100, false);
+            let n: Node<DagCS> = Node::new(i, c.clone(), None, 100, false, 1);
             chains.push(c);
             nodes.push(n);
         }
@@ -397,7 +465,7 @@ mod tests {
         .unwrap();
 
         let b_bmd = DagBlock::get_cached_block(&b.get_hash()).unwrap();
-        let n_refls = b_bmd.0.get_txs().len() as u32;
+        let n_refls = b_bmd.0.get_txs().len() as Difficulty;
         assert_ne!(n_refls, 0);
         assert_eq!(b_bmd.1.weight * n_refls, b_bmd.1.reflected_weight);
         assert_ne!(b_bmd.1.chain_weight, b_bmd.1.local_chain_weight);
