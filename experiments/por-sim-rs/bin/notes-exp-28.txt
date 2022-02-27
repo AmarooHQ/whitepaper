@@ -71,8 +71,17 @@ export DAA2_N_BLOCKS=20
 export ATK_HR_ONLY=0.48
 export SKIP_EXP_CONF_PROMPT=1
 export RESUME_FROM=90
+# we already have 100 samples
 export RESUME_FROM=2
 
+# we have 100 samples, only do 2900 more -- gen 3k before doing big
+export RESUME_FROM=82
+for only_ds in 10 20; do
+    export ATK_DS_CONF_ONLY="$only_ds"
+    EXP_IS_AUX=0 ./bin/experiment-28-short-daa.sh
+done
+
+export RESUME_FROM=71
 for only_ds in 10 20; do
     export ATK_DS_CONF_ONLY="$only_ds"
     EXP_IS_AUX=0 ./bin/experiment-28-short-daa.sh

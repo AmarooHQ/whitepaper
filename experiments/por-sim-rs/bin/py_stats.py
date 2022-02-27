@@ -256,7 +256,7 @@ def get_line_default_kwargs(chain_ty: Literal['por', 'trad'], ds_target, as_scat
     z_order = 2 + (.1 if is_por else -.1)
     # color = get_color(ds_target)
     color = plot_colors[chain_ty][ds_target]
-    kw: dict[str, Any] = dict(zorder=z_order, color=color)
+    kw: dict[str, Any] = dict(zorder=z_order, color=color, linewidth=1.5 if is_por else 2.5)
     marker_k: str = 'style' if as_scatter else 'marker'
     kw[marker_k] = line_markers[chain_ty][ds_target]
     return kw
