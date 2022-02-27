@@ -13,7 +13,7 @@ fi
 export RUST_LOG=warn
 
 # Experiment 28: Ultra short DAA
-export EXP_NUM=28
+export EXP_NUM=${EXP_NUM:-28}
 if [[ "1" = "$EXP_IS_AUX" ]]; then
   export EXP_NUM=${EXP_NUM}aux
 fi

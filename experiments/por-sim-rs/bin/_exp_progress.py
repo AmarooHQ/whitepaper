@@ -24,7 +24,7 @@ class Progress:
 
     @property
     def s_per_r(self):
-        return self.start_to_last_r / self.done_i
+        return max(1, self.start_to_last_r / self.done_i)
 
     @property
     def pct_this_r(self):
