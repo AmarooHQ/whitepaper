@@ -152,14 +152,59 @@ For any $a,b \in \{1, 2, \dots, N\}$, the CEC implies:
     \label{eq:por-sim-hypothesis-extended}
 \end{equation}
 
-Note that $P(q; N_1 = 1; c = C)$ is taken to be identical to Rosenfeld's analytical solution.
+If \autoref{eq:por-sim-hypothesis-extended} is correct, it indicates that there exists a \emph{generalization} of traditional blockchains (which have $N_1 = 1$);
+particularly, that there is \emph{another dimension} ($N_1$; the size of the simplex) which is geometrically related to the first dimension, $c$.
 
-\autoref{eq:por-sim-hypothesis-extended} is a \emph{generalization} of traditional blockchains (that have $N_1 = 1$).
-Particularly, there is \emph{another dimension} (the size of the simplex) and that is related to the other dimension $c$ (some number of confirmations to wait for). Particularly, the CEC says there is a \emph{geometric} relationship between the two.
+So, we don't need to know a closed form of $P(q, N_1, c)$: all cases \emph{that we can measure} are equivalent to some \emph{other} case, and we can convert between them.\footnote{
+    This is not strictly true: Rosenfeld's solution requires an integer value for $c$.
+    However, this is because the solution assumes a static difficulty; this works for Bitcoin, but not for chains that use faster-adjusting DAAs.
+    When using \emph{work} instead of \emph{height} as the measure of an attack's success, fractional values of $c$ have real meaning, especially with a reactive DAA and $N_1 \gg 1$.
+    This turns out not to be much of an issue for us, here, though.
+}
+This is the basis of the method.
+
+Note that $P(q; N_1 = 1; c = C)$ is taken to be identical to Rosenfeld's analytical solution. That is:
+
+\begin{equation}
+    \forall c \in \{1, 2, \dots\}: P(q; N_1 = 1; c) = \begin{cases}
+        1 - \sum_{m=0}^c \binom{m+c-1}{m}(p^c q^m - p^m q^c), & \text{if } q < p \\
+        1, & \text{otherwise}
+    \end{cases}
+\end{equation}
 
 \subsubsubsubsection{Method}
 
-I have implemented a model blockchain network with attack simulations wherein each chain uses PoW and has a fully functioning fork rule.
+I have implemented a simulation of a blockchain network that is suitable for this experiment.
+Particularly:
+
+\begin{itemize}
+    \item The implementation is modular. It supports multiple: attack strategies; blockchain data structures; hashing algorithms (for PoW); and fork rules.
+    \item An executable is produced that can run a single instance of a simulated attack, and takes a variety of parameters. (This is looped through via bash script to obtain CSVs of the results.)
+    \item The implementation supports both traditional blockchains ($N_1 = 1$) and PoR/simplexes.
+\end{itemize}
+
+\begin{table}[H]
+    \centering
+    \caption[
+        Table of parameters necessary to generate experimental results.
+    ]{
+        Table of parameters necessary to generate experimental results.
+        Some parameters as they are not directly relevant to this experiment.
+    }
+    \begin{tabular}{lp{0.7\linewidth}}
+        \toprule
+        Parameter & Significance \\
+        \midrule
+        $q$ (ratio) & Attacker's proportion of global hash rate. \\
+        $c$ (confirmations) & Local confirmations required before the attacker can succeed. \\
+        $B_f^{-1}$ (ticks) & Analogue of ``seconds'' used by the DAA. \\
+        $DAA_N$ (blocks) & The number of blocks over which the DAA operates. \\
+        $N_1$ (chains) & The number simplex-chains ($N_1 = 1$ for traditional blockchains). \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+with attack simulations wherein each chain uses PoW and has a fully functioning fork rule.
 This design is modular, such that it supports different fork rules, different block data structures and ordering algorithms (including multiple parents), different attack strategies.
 The program also accepts a variety of parameters -- both for the simulation itself, the individual chains, and for each attack strategy.
 
@@ -308,6 +353,15 @@ These results are, for the purpose of this paper, taken to indicate the followin
     % more stuff that's useful for UT's case?
 \end{enumerate}
 
+Additionally, the following observations are made:
+
+\begin{enumerate}
+    \item An attacker whose hash rate is \emph{uniformly} distributed over a simplex is at a disadvantage compared to an attacker whose hash rate is \emph{randomly} distributed.
+    \item Decreasing $DAA_N$ increases the security of both simplexes and traditional blockchains.
+    \item An attacker that waits to generate a block on a target chain is at a decisive advantage compared to one that does not.
+    \item Rosenfeld's closed form solution is consistent with empirical evidence.
+\end{enumerate}
+
 \subsubsubsubsection{Experimental Limitations}
 
 \todo{por sim - limits}
@@ -344,6 +398,15 @@ sources of error
             perhaps this is to do with number of ticks. particularly: there's mb a point where refls are arriving every few ticks -- does the attacker have an advantage when this happens? Like for N < 5 it's fine, and for N > 30 its fine
 
     \item error in implementation? (note: mb should see discrepancies between diff crypto systems / attack strats if that were the case -- depends on the impl error)
+
     \item theory/CEC wrong? -- nonspecific crit but possible
+
     \item allowing invalid blocks / txs / refls -- either b/c of simplifications or b/c of misunderstanding of reality?
 \end{itemize}
+
+\subsubsubsubsection{Remarks}
+
+\aside{
+    I estimate that my CPUs alone used $\sim 100$ million J to obtain the results for this experiment.
+    I estimate also estimate that, in that time, my body used $\sim 50$ million J (assuming 100 W per day at 50\% utilization for 12 days).
+}
