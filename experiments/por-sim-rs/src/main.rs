@@ -87,7 +87,8 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
         (version: "0.2.0")
         (@arg attacker_ratio: -r --ratio +takes_value default_value("0.45") {validate_ratio} "Proportion of hash-rate belonging to attackers.")
         (@arg start_attack_at_t: -s --start_attack_tick +takes_value default_value("1000") "Tick at which to start the attack.")
-        (@arg end_simulation_at_t: -e --end_tick +takes_value "Maximum number of ticks for the simulation. Defaults to 3*start_attack_tick")
+        (@arg end_simulation_at_t: -e --end_tick +takes_value "Maximum number of ticks for the simulation. Defaults to 3*start_attack_tick.")
+        (@arg use_dynamic_cutoff: --use_dyn_end_tick !takes_value "Instead of ending the simulation at a fixed tick, end the simulation when the attacker is far behind.")
         (@arg hash_rate: -H --hash_rate +takes_value default_value("1000") "Network hash-rate per tick.")
         (@arg block_target: -b --block_target_time +takes_value default_value("10") "Target time (in ticks) between blocks.")
         (@arg crypto_system: -S --crypto_system +takes_value default_value("WeightedDag") possible_values(&CryptoSystemArg::variants()) "Name of the cryptosystem template to use.")
@@ -95,7 +96,7 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
         (@arg attacker_instant_propagation: --attacker_instant_prop !takes_value "Attacker's blocks instantly propagate to attackers (no wasted mining)")
         (@arg atk_end_delay_ticks: --atk_end_delay_ticks +takes_value default_value("0") "Number of ticks to delay ending the simulation if the attacker gets ahead")
         // doublspend params
-        (@arg win_threshold: --ds_win_threshold +takes_value default_value("20") "[DoubleSpend] Minimum number of confirmations before the double-spending private chain is published.")
+        (@arg win_threshold: -C --ds_win_threshold +takes_value default_value("20") "[DoubleSpend] Minimum number of confirmations before the double-spending private chain is published.")
         (@arg random_hr_distrib: --random_hr_distrib !takes_value "If true, distribute the attackers hash-rate randomly over all chains. (No effect with -P=1)")
         // selfish mining params
         // <none>
@@ -108,6 +109,7 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
 }
 
 pub fn main() -> Result<(), String> {
+    // return 1;
     let start_main = SystemTime::now();
     log::set_max_level(LevelFilter::Info);
     env_logger::init();
@@ -125,13 +127,14 @@ pub fn main() -> Result<(), String> {
     let block_target = value_t_or_exit!(args.value_of("block_target"), u16);
     let crypto_system =
         value_t!(args, "crypto_system", CryptoSystemArg).unwrap_or_else(|e| e.exit());
-    let honest_hr = (hash_rate * (1. - attacker_ratio)).to_u16().unwrap() as u32;
-    let attacker_hr = (hash_rate * attacker_ratio).to_u16().unwrap() as u32;
-    let attack_starts_at = attack_at_h as Difficulty;
+    let honest_hr = (hash_rate * (1. - attacker_ratio)).to_u16().unwrap() as Difficulty;
+    let attacker_hr = (hash_rate * attacker_ratio).to_u16().unwrap() as Difficulty;
+    let attack_starts_at = attack_at_h as Timestamp;
     let por_chains = value_t_or_exit!(args.value_of("por_n_chains"), u16);
     let daa2_n_blocks = value_t_or_exit!(args.value_of("daa2_n_blocks"), usize);
     let atk_end_delay_ticks = value_t_or_exit!(args.value_of("atk_end_delay_ticks"), Timestamp);
     let random_hr_distrib = args.is_present("random_hr_distrib");
+    let use_dynamic_cutoff = args.is_present("use_dynamic_cutoff");
 
     let atk_args = AttackArgs {
         q: attacker_ratio,
@@ -141,6 +144,7 @@ pub fn main() -> Result<(), String> {
         end_simulation_at_t,
         attacker_instant_propagation,
         atk_end_delay_ticks,
+        use_dynamic_cutoff,
     };
     let network_args = NetworkArgs {
         block_target,
@@ -178,7 +182,7 @@ pub fn main() -> Result<(), String> {
 
     let end_main = SystemTime::now();
 
-    warn!(
+    info!(
         "Simulation took {} ms, total execution time {} ms",
         end_main.duration_since(start_atk).unwrap().as_millis(),
         end_main.duration_since(start_main).unwrap().as_millis(),
@@ -216,7 +220,7 @@ fn mk_run_atk<'a, S: CSystemT<'a>>(
             mms[0].run_attack()
         }
         RelayStrategyArg::DoubleSpendWork => {
-            let win_thresh = value_t_or_exit!(cli_args, "win_threshold", Height);
+            let win_thresh = value_t_or_exit!(cli_args, "win_threshold", f32);
             let mut mms = n_chains_range
                 .map(|_i| {
                     let params = DoubleSpendWorkParams::new(

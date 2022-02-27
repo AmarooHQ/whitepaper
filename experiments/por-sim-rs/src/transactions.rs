@@ -90,11 +90,17 @@ impl Transaction {
         // })
     }
 
-    pub fn set_cached_tx(tx: TxInCache) {
+    pub fn set_cached_tx(tx: TxInCache) -> Arc<TxInCache> {
         let tx_id = tx.get_hash();
         let tx_arc = Arc::new(tx);
         // TX_LRU.lock().unwrap().put(tx_id, tx_arc.clone());
-        TX_CACHE.lock().unwrap().insert(tx_id, tx_arc);
+        TX_CACHE.lock().unwrap().insert(tx_id, tx_arc.clone());
+        tx_arc
+    }
+
+    pub fn new_refl_and_prove(rd: ReflectionData) -> Arc<Self> {
+        let tx = Transaction::ReflectAndProve(rd);
+        Transaction::set_cached_tx(tx)
     }
 
     pub fn get_reflection_data(&self) -> Option<&ReflectionData> {

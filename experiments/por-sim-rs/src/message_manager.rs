@@ -29,22 +29,24 @@ pub struct MM<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> {
     extra_chain_nodes: Vec<ExtraChainNodes<'a, S>>,
     net_args: NetworkArgs,
     stop_simulation_at: Option<Timestamp>,
+    avg_work_per_block_period: Difficulty,
 }
 
 #[derive(Debug, Clone)]
 pub struct AttackArgs {
     pub q: f32,
-    pub honest_hr: u32,
-    pub attacker_hr: u32,
+    pub honest_hr: Difficulty,
+    pub attacker_hr: Difficulty,
     pub attack_starts_at: Timestamp,
     pub end_simulation_at_t: Timestamp,
     pub attacker_instant_propagation: bool,
     pub atk_end_delay_ticks: Timestamp,
+    pub use_dynamic_cutoff: bool,
 }
 
 impl AttackArgs {
     #[cfg(test)]
-    fn new(honest_hr: u32, attacker_hr: u32, attack_starts_at: Timestamp) -> Self {
+    fn new(honest_hr: Difficulty, attacker_hr: Difficulty, attack_starts_at: Timestamp) -> Self {
         let q = (honest_hr as f32) / ((honest_hr + attacker_hr) as f32);
         AttackArgs {
             q,
@@ -54,13 +56,18 @@ impl AttackArgs {
             end_simulation_at_t: attack_starts_at * 3,
             attacker_instant_propagation: false,
             atk_end_delay_ticks: 0,
+            use_dynamic_cutoff: false,
         }
+    }
+
+    fn total_hr(&self) -> Difficulty {
+        self.honest_hr + self.attacker_hr
     }
 }
 
 impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
     pub fn new(args: AttackArgs, atk_params: R::Params, net_args: NetworkArgs) -> MM<'a, S, R> {
-        warn!(
+        info!(
             "Creating new simulation with {} honest HR and {} attacking HR. Attack starts at T={}. InstantProp={}",
             args.honest_hr, args.attacker_hr, args.attack_starts_at, args.attacker_instant_propagation
         );
@@ -71,14 +78,25 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             BlockMD::mk_genesis_md(&genesis.clone(), net_args.daa2_n_blocks.to_usize().unwrap()),
             net_args.clone(),
         );
+        // this later gets updated in self.check_and_set_atk_start_h
+        let avg_work_per_block_period =
+            (net_args.por_chains as u64) * (net_args.block_target as u64) * args.total_hr();
         MM {
-            honest_node: Node::new(0, chain.clone(), false, args.honest_hr, false),
+            honest_node: Node::new(
+                0,
+                chain.clone(),
+                None,
+                args.honest_hr,
+                false,
+                net_args.por_chains,
+            ),
             attacker_node: Node::new(
                 1,
                 chain.clone(),
-                true,
+                Some(NodeAtkParams { is_r_chain: false }),
                 args.attacker_hr,
                 args.attacker_instant_propagation,
+                net_args.por_chains,
             ),
             strategy: None,
             args: args.clone(),
@@ -87,6 +105,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             extra_chain_nodes,
             net_args,
             stop_simulation_at: None,
+            avg_work_per_block_period,
         }
     }
 
@@ -100,8 +119,8 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
         }
 
         let n_chains = net_args.por_chains as u32 - 1;
-        let total_hr = n_chains * (args.attacker_hr + args.honest_hr);
-        let avg_hr_per_chain = args.attacker_hr + args.honest_hr;
+        let avg_hr_per_chain = (args.attacker_hr + args.honest_hr) as u64;
+        let total_hr: Difficulty = n_chains as u64 * avg_hr_per_chain;
         let avg_honest_hr_ratio: f32 = (args.honest_hr as f32) / (avg_hr_per_chain as f32);
         let hr_p = avg_honest_hr_ratio;
         let hr_q = 1.0 - hr_p;
@@ -114,33 +133,14 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
         );
 
         // vec of tuples: (honest_hr, attacker_hr)
-        let cw_hash_rates: Vec<(u32, u32)>;
+        let cw_hash_rates: Vec<(Difficulty, Difficulty)>;
 
         if net_args.random_hr_distrib {
             let rd_h = gen_random_hr_distribution(n_chains, hr_p, total_hr);
             let rd_a = gen_random_hr_distribution(n_chains, hr_q, total_hr);
             cw_hash_rates = rd_h.into_iter().zip(rd_a.into_iter()).collect();
         } else {
-            // todo: randomize hash-rates a bit. need to figure out how to do this sensibly so that the maths works out. nbd yet
-
-            // k = net_args.por_chains - 1
-            // target chain (not generated here) should have 1/(k+1) of network hash-rate.
-            // so other chains have, in total, have total HR: k * (args.honest_hr + args.attacker_hr)
-            // we don't want this to be perfectly even though, so let's randomize a bit.
-
-            // // vec of *honest* hash ratios per chain (between 0.3 and 0.7)
-            // // -- we want these to average out to be in proportion to args.honest_hr vs args.attacker_hr
-            // let honest_hr_ratios: Vec<f32> = (1..net_args.por_chains)
-            //     .map(|_| thread_rng().gen::<f32>() * 0.4 + 0.3)
-            //     .collect();
-            // let hr_ratio_avg: f32 =
-            //     honest_hr_ratios.iter().sum::<f32>() / (honest_hr_ratios.len() as f32);
-            // let hr_ratio_scale = avg_honest_hr_ratio / hr_ratio_avg;
-            // let honest_hr_ratios: Vec<f32> = honest_hr_ratios
-            //     .iter()
-            //     .map(|hr| hr * hr_ratio_scale)
-            //     .collect();
-
+            // uniform hash rates over all chains
             let honest_hr_ratios: Vec<f32> = (1..net_args.por_chains)
                 .map(|_| avg_honest_hr_ratio)
                 .collect();
@@ -155,10 +155,6 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             );
             debug_assert_eq!(honest_hr_ratios.len() + 1, net_args.por_chains as usize);
 
-            // // vec of ratio of chain-weights (on avg)
-            // let cw_relative: Vec<f32> = (1..net_args.por_chains)
-            //     .map(|_| thread_rng().gen::<f32>() + 0.5)
-            //     .collect();
             let cw_relative: Vec<f32> = vec![1.0; honest_hr_ratios.len()];
             // vec of tuples: (honest_hr, attacker_hr)
             cw_hash_rates = cw_relative
@@ -167,20 +163,20 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
                 .map(|cwr| (cwr * avg_hr_per_chain as f32) as u32)
                 .zip(honest_hr_ratios)
                 .map(|(hpt, honest_hr_ratio)| {
-                    let honest_hr = (hpt as f32 * honest_hr_ratio) as u32;
-                    let attacker_hr = (hpt as f32 * (1.0 - honest_hr_ratio)) as u32;
+                    let honest_hr = (hpt as f32 * honest_hr_ratio) as u64;
+                    let attacker_hr = (hpt as f32 * (1.0 - honest_hr_ratio)) as u64;
                     (honest_hr, attacker_hr)
                 })
                 .collect();
         }
 
         debug_assert_eq!(
-            avg_hr_per_chain * net_args.por_chains as u32,
-            avg_hr_per_chain + cw_hash_rates.iter().map(|&(h, a)| h + a).sum::<u32>()
+            avg_hr_per_chain * net_args.por_chains as u64,
+            avg_hr_per_chain + cw_hash_rates.iter().map(|&(h, a)| h + a).sum::<u64>()
         );
         if args.attacker_hr < args.honest_hr {
-            let h_sum: u32 = cw_hash_rates.iter().cloned().map(|(h, _)| h).sum();
-            let atk_sum: u32 = cw_hash_rates.iter().cloned().map(|(_, a)| a).sum();
+            let h_sum: Difficulty = cw_hash_rates.iter().cloned().map(|(h, _)| h).sum();
+            let atk_sum: Difficulty = cw_hash_rates.iter().cloned().map(|(_, a)| a).sum();
             // println!("H:{}, ATK:{}", h_sum, atk_sum);
             debug_assert!(h_sum > atk_sum);
         }
@@ -200,13 +196,21 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
                     ),
                     net_args.clone(),
                 );
-                let honest = Node::new(i * 1_000, chain.clone(), false, honest_hr, false);
+                let honest = Node::new(
+                    i * 1_000,
+                    chain.clone(),
+                    None,
+                    honest_hr,
+                    false,
+                    net_args.por_chains,
+                );
                 let attacker = Node::new(
                     i * 1_000 + 1,
                     chain.clone(),
-                    true,
+                    Some(NodeAtkParams { is_r_chain: true }),
                     attacker_hr,
                     args.attacker_instant_propagation,
+                    net_args.por_chains,
                 );
                 ExtraChainNodes { honest, attacker }
             })
@@ -215,7 +219,12 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
 
     #[cfg(test)]
     pub fn chain(&self) -> &S::C {
-        return &self.honest_node.chain;
+        &self.honest_node.chain
+    }
+
+    #[cfg(test)]
+    pub fn chain_mut(&mut self) -> &mut S::C {
+        &mut self.honest_node.chain
     }
 
     #[cfg(test)]
@@ -232,23 +241,21 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
 
     pub fn check_and_set_atk_start_h(&mut self, ts: Timestamp) {
         if self.attack_started(ts) && self.atk_start_h.is_none() {
-            self.atk_start_h = Some(Height::from(
-                self.honest_node.chain.get_heights_pub_priv().public,
-            ));
+            let h = self.honest_node.chain.get_heights_pub_priv().public as Height;
+            self.atk_start_h = Some(h);
+            debug!("setting atk_start_h:{}", h);
+            let bb = self.honest_node.chain.get_any_best_block(false);
+            let bb_id = bb.0.get_hash();
+            let daa2_bs = BlockMD::<S::B>::get_daa2_blocks(bb_id).unwrap();
+            let _ago = daa2_bs.len() as Difficulty / 4;
+            let past_b = S::C::get_cached_block(&daa2_bs[_ago as usize]).unwrap();
+            self.avg_work_per_block_period = (bb.1.chain_weight - past_b.1.chain_weight) / _ago;
         }
     }
 
     pub fn tick(&mut self, ts: u32, msgs: Vec<Msg<S::B>>) -> Result<Vec<Msg<S::B>>, String> {
         let mut msgs_to = msgs_from_into_to(&msgs);
         let atk_started = self.attack_started(ts);
-        if atk_started && self.strategy.is_none() {
-            // let atk_start_height = atk_node.chain.get_heights_pub_priv().public;
-            self.strategy.get_or_insert(R::init(
-                &self.attacker_node.chain,
-                self.atk_start_h.unwrap(),
-                self.atk_params,
-            ));
-        }
         let atk_chain = &self.attacker_node.chain;
         if self.strategy.is_some() {
             let s = self.strategy.as_mut().unwrap();
@@ -259,12 +266,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
                 .concat();
             msgs_to = [msgs_to, attacker_msgs_to].concat();
         }
-        // let other_nodes = .iter().map(
-        //     |ExtraChainNodes {
-        //          mut honest,
-        //          mut attacker,
-        //      }| (honest, attacker),
-        // );
+
         let mut output_msgs = vec![
             self.honest_node.step(ts, &msgs_to, atk_started).unwrap(),
             self.attacker_node.step(ts, &msgs_to, atk_started).unwrap(),
@@ -274,19 +276,21 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             output_msgs.extend(extra_ns.honest.step(ts, &msgs_to, atk_started).unwrap());
             output_msgs.extend(extra_ns.attacker.step(ts, &msgs_to, atk_started).unwrap());
         }
-        // let all_nodes = vec![(&mut self.honest_node, &mut self.attacker_node)]
-        //     .into_iter()
-        //     .chain(other_nodes);
-        // let output_msgs = all_nodes
-        //     .map(|(mut h, mut a)| {
-        //         vec![
-        //             h.step(ts, &msgs_to, atk_started).unwrap(),
-        //             a.step(ts, &msgs_to, atk_started).unwrap(),
-        //         ]
-        //         .concat()
-        //     })
-        //     .collect::<Vec<_>>()
-        //     .concat();
+
+        if atk_started && self.strategy.is_none() && self.attacker_node.attack_has_started() {
+            // let atk_start_height = atk_node.chain.get_heights_pub_priv().public;
+            let h_pre = self.atk_start_h.unwrap_or(0);
+            let h = *self
+                .atk_start_h
+                .insert(self.attacker_node.chain.get_heights_pub_priv().public as Height);
+            if h != h_pre {
+                debug!("prev atk_start_h:{}, current:{}", h_pre, h);
+            }
+            // let h = &self.atk_start_h.unwrap_or(0);
+            self.strategy
+                .get_or_insert(R::init(&self.attacker_node.chain, h, self.atk_params));
+        }
+
         Ok(Vec::from(output_msgs))
     }
 
@@ -310,7 +314,15 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
 
     pub fn run_attack(&mut self) -> Result<bool, String> {
         let mut msgs_from = Vec::new();
-        let ts_limit = self.args.end_simulation_at_t;
+        let ts_limit = if self.args.use_dynamic_cutoff {
+            ((100.0 as f32)
+                .max(self.atk_params.ds_win_as_f32().unwrap_or(20.0).powf(2.0))
+                .min(1000.0) as u32)
+                * self.net_args.block_target as u32
+                + self.args.attack_starts_at
+        } else {
+            self.args.end_simulation_at_t
+        };
 
         let run_atk_start = SystemTime::now();
 
@@ -339,6 +351,19 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
                     break;
                 }
             }
+
+            // end when attack has started and attacker is behind honest chain by a lot
+            if self.args.use_dynamic_cutoff && ts > self.args.attack_starts_at {
+                let fm = self.attacker_node.chain.get_fork_measure_pub_priv();
+                if self
+                    .strategy
+                    .as_ref()
+                    .map(|s| s.dynamic_cutoff(fm, self.avg_work_per_block_period))
+                    .unwrap_or(false)
+                {
+                    break;
+                }
+            }
         }
 
         let run_atk_end = SystemTime::now();
@@ -355,7 +380,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             }
             Some((r, success)) => {
                 self.print_atk_summary(success, last_ts, chain, atk_duration_ms);
-                warn!("Attack Results: {:?}", r);
+                info!("Attack Results: {:?}", r);
                 Ok(true)
             }
         }
@@ -364,15 +389,12 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
     fn print_atk_summary(&self, success: bool, last_ts: Timestamp, chain: &S::C, ms_elapsed: u128) {
         let hs = chain.get_heights_pub_priv();
         let fms = chain.get_fork_measure_pub_priv();
-        if fms.public >= 4_000_000_000 || fms.private >= 4_000_000_000 {
-            panic!("Reflection stuff going wrong -- chain_weight over 4b (which is impossible in reasonable time given this simulation -- 2022/02/09)");
-        }
         let atk_success_fail = if success {
             "ATTACK SUCCESS!"
         } else {
             "Attack Failed."
         };
-        warn!(
+        info!(
             "{} T={}, StartH={}, PubH={}, PrivH={}, PubFM={}, PrivFM={}",
             atk_success_fail,
             last_ts,
@@ -398,7 +420,10 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             self.net_args.daa2_n_blocks,
             self.net_args.por_chains,
             ms_elapsed,
-            self.strategy.as_ref().unwrap().params_as_csv(),
+            self.strategy
+                .as_ref()
+                .map(|s| s.params_as_csv())
+                .unwrap_or("_,_".to_string()),
         );
     }
 }
@@ -449,7 +474,22 @@ pub fn gen_random_hr_distribution(n_chains: u32, q: f32, total_hr: Difficulty) -
     }
     let actual_total: f64 = rd.iter().cloned().sum();
     debug_assert_eq!(exp_total, actual_total);
-    rd.into_iter().map(|v| v as u32).collect()
+    rd.into_iter().map(|v| v as Difficulty).collect()
+}
+
+pub fn gen_paired_80_20_hr_distributions(
+    n_chains: u32,
+    q: f32,
+    total_hr: Difficulty,
+) -> Vec<(Difficulty, Difficulty)> {
+    let p = 1. - q;
+    let mut hr_a = gen_random_hr_distribution(n_chains, q, total_hr);
+    let mut hr_h = gen_random_hr_distribution(n_chains, p, total_hr);
+    // now, we want to ensure that for each pair, neither makes up less than 20% of the total (0.2 <= q <= 0.8 and same for p)
+    // this breaks at low q, so set lower bound to (q/2).min(p/2);
+    let l_bound = (q / 2.).min(p / 2.);
+    todo!();
+    vec![]
 }
 
 #[cfg(test)]
@@ -459,6 +499,7 @@ mod tests {
     use crate::cryptosystem::*;
     use crate::transactions::Transaction;
     use crate::transactions::TxId;
+    use conv::ConvUtil;
     use rstats::*;
 
     fn create_mm_no_priv<'a, S: CSystemT<'a>>() -> MM<'a, S, DoubleSpendStrat> {
@@ -483,7 +524,7 @@ mod tests {
     }
 
     fn ensure_chain_progress<'a, S: CSystemT<'a>>(mm: &MM<'a, S, DoubleSpendStrat>) {
-        let hs = mm.chain().get_fork_measure_pub_priv();
+        let hs = mm.honest_node.chain.get_fork_measure_pub_priv();
 
         assert_ne!(hs.public, 0);
         assert_eq!(hs.private, 0);
@@ -568,8 +609,14 @@ mod tests {
         let mut msgs = mm.tick(t1_ts, vec![]).unwrap();
 
         // create 2 dagblocks
-        let b_h1_1 = mm.chain().draft_block(t1_ts, false).test_set_work_bits(24);
-        let b_h1_2 = mm.chain().draft_block(t1_ts, false).test_set_work_bits(24);
+        let b_h1_1 = mm
+            .chain_mut()
+            .draft_block(t1_ts, false)
+            .test_set_work_bits(24);
+        let b_h1_2 = mm
+            .chain_mut()
+            .draft_block(t1_ts, false)
+            .test_set_work_bits(24);
         msgs.extend(vec![
             Msg::MsgBlock(chain_id, b_h1_1),
             Msg::MsgBlock(chain_id, b_h1_2),
@@ -596,7 +643,7 @@ mod tests {
         mm.check_and_set_atk_start_h(t2_ts);
         let mut msgs = mm.tick(t2_ts, msgs).unwrap();
         if msgs.len() == 0 {
-            let mut b = mm.chain().draft_block(t2_ts, false);
+            let mut b = mm.chain_mut().draft_block(t2_ts, false);
             b.id >>= 30;
             msgs.push(Msg::MsgBlock(chain_id, b));
         }
@@ -659,15 +706,16 @@ mod tests {
     #[test]
     fn mm_multichain_por_added_to_chain_weight() {
         let mut mm = create_mm_multichain_no_priv::<'_, DagCS>();
-        let chain_id = mm.chain().get_chain_id();
 
         mm.tick_many(150).unwrap();
 
         let chain = mm.chain();
-        let bb = mm.chain().get_any_best_block(false);
+        let chain_id = chain.get_chain_id();
+
         let chain_remote = &mm.extra_chain_nodes.first().as_ref().unwrap().honest.chain;
         let chain_remote_id = chain_remote.get_chain_id();
         let bb_remote = chain_remote.get_any_best_block(false);
+        let bb = chain.get_any_best_block(false);
 
         let refl_counts: Vec<usize> =
             bb.0.all_prev_iter()
@@ -686,9 +734,9 @@ mod tests {
         assert!(refl_avg > 2.0);
         assert!(refl_avg < 20.0);
 
-        println!("{:?}", bb);
-        println!("{:?}", chain.get_best_blocks(false));
-        println!("{:?}", chain.draft_block(bb.0.timestamp + 10, false));
+        // println!("{:?}", bb);
+        // println!("{:?}", chain.get_best_blocks(false));
+        // println!("{:?}", chain.draft_block(bb.0.timestamp + 10, false));
         // println!("{:?}", bb_remote);
 
         // chain.next_difficulty()
@@ -709,8 +757,8 @@ mod tests {
         let bb_height = bb.0.get_height();
         assert!(bb_height > 3);
         assert!(bb_height > 6, "should have many blocks above this one");
-        println!("bb height: {}", bb_height);
-        println!("bb: {:?}\n\n", bb.0);
+        // println!("bb height: {}", bb_height);
+        // println!("bb: {:?}\n\n", bb.0);
 
         let mut txs_remote: Vec<_> = vec![];
         let mut remote_txid_to_r_blocks: PassThruHashMap<TxId, Vec<HashID>> = Default::default();
@@ -727,28 +775,28 @@ mod tests {
             txs_remote.extend(txs);
         }
         assert_ne!(txs_remote.len(), 0);
-        println!("n remote txs: {}", txs_remote.len());
+        // println!("n remote txs: {}", txs_remote.len());
         let n_uniq_txs = txs_remote.iter().unique().count();
-        println!("n remote txs unique: {}", n_uniq_txs);
+        // println!("n remote txs unique: {}", n_uniq_txs);
         // assert_eq!(n_uniq_txs, txs_remote.len());  // this won't work w/ dags b/c txs can be duplicated
 
         let n_refl_txs = txs_remote
             .iter()
             .unique()
             .filter(|tx| tx.is_reflecting(b_id_at_h3, chain_id))
-            // .filter(|tx| tx.has_r_chain_id(chain_id))
-            .map(|tx| {
-                println!(
-                    "\n\nremote tx: {:?}, {}\n\nrefl L-block: {}, {:?}",
-                    tx,
-                    tx.get_reflected_weight2(chain_remote_id),
-                    b_id_at_h3,
-                    DagBlock::get_cached_block(&b_id_at_h3)
-                );
-                tx
-            })
+            // .map(|tx| {
+            //     println!(
+            //         "\n\nremote tx: {:?}, {}\n\nrefl L-block: {}, {:?}",
+            //         tx,
+            //         tx.get_reflected_weight2(chain_remote_id),
+            //         b_id_at_h3,
+            //         DagBlock::get_cached_block(&b_id_at_h3)
+            //     );
+            //     tx
+            // })
             .count();
         // inspect block, txs, and ancestors
+        /*
         println!("\n{:?}\n", b_at_h3.0);
         println!(
             "{:?}\n",
@@ -763,6 +811,7 @@ mod tests {
             "is block {} on chain {} in this list?\n{:?}",
             b_id_at_h3, chain_id, txs_remote
         );
+        */
         let a_refl_tx = txs_remote
             .iter()
             .unique()
@@ -787,7 +836,7 @@ mod tests {
             txs.extend(b.0.get_txs());
         }
 
-        let total_rw: u32 = txs_remote
+        let total_rw: Difficulty = txs_remote
             .iter()
             .map(|tx| tx.get_reflected_weight2(chain_remote_id))
             .sum();
@@ -819,10 +868,14 @@ mod tests {
         // 7 chains, q=0.4, total_hr=66*7
         for chain_hr in [66] {
             for n_chains in [7] {
-                let total_hr = chain_hr * n_chains;
+                let total_hr = (chain_hr * n_chains) as Difficulty;
                 for q in [0.4, 0.41, 0.11333, 0.6] {
                     let rd1 = gen_random_hr_distribution(n_chains, q, total_hr);
-                    let rd1_f64: Vec<f64> = rd1.iter().cloned().map(f64::from).collect();
+                    let rd1_f64: Vec<f64> = rd1
+                        .iter()
+                        .cloned()
+                        .map(|v| v.value_as::<f64>().unwrap())
+                        .collect();
 
                     let exp_avg_hr = (chain_hr as f32 * q).round() as f64;
                     let exp_total_hr = (total_hr) as f64 * q as f64;
@@ -843,14 +896,14 @@ mod tests {
                     // test honest + attacker distributions at once
                     let rd_h = gen_random_hr_distribution(n_chains, 1.0 - q, total_hr);
                     let rd_a = gen_random_hr_distribution(n_chains, q, total_hr);
-                    let actual_total: u32 =
-                        rd_h.iter().cloned().sum::<u32>() + rd_a.iter().cloned().sum::<u32>();
+                    let actual_total: Difficulty = rd_h.iter().cloned().sum::<Difficulty>()
+                        + rd_a.iter().cloned().sum::<Difficulty>();
                     assert_eq!(total_hr, actual_total);
                     let rd_comb: Vec<_> = rd_h
                         .iter()
                         .cloned()
                         .zip(rd_a.iter().cloned())
-                        .map(|(h, a)| h + a)
+                        .map(|(h, a)| (h + a) as u32)
                         .collect();
                     println!("Attacker: {:?}", rd_a);
                     println!("Honest:   {:?}", rd_h);
@@ -858,7 +911,7 @@ mod tests {
                     println!(
                         "Average:  {:?} == {:?}",
                         chain_hr,
-                        rd_comb.amean().unwrap() as u32
+                        rd_comb.amean().unwrap() as Difficulty
                     );
                 }
             }
