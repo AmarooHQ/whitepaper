@@ -171,6 +171,15 @@ def estimate_inverse(data: pd.Series, y_val):
     raise Exception("we should never reach this point")
 
 
+def skip_csv_row(ds_target, x) -> bool:
+    ''' Skip csv rows with ds_target >= 20 && x > 30 or t >= 10 && x > 40 '''
+    return (ds_target >= 20 and x > 30) or (ds_target >= 10 and x > 40)
+    # (t, nc) = (row.doublespend_after_n_confs, row.n_chains)
+    # if chain_ty != 'por':
+    #     (t, nc) =
+    # return False
+
+
 def read_csv_data(fname, chain_ty: Literal['por', 'trad']):
     # ensure that csv used for generating graphs are in the csv folder
     fname = f"csv" / Path(fname)
@@ -184,6 +193,7 @@ def read_csv_data(fname, chain_ty: Literal['por', 'trad']):
         xs = d['n_chains'].unique()
     elif chain_ty == 'trad':
         xs = list(x / ds_target for x in d['doublespend_after_n_confs'].unique())
+    xs = [x for x in xs if not skip_csv_row(ds_target, x)]
     xs.sort()
 
     def get_x_from_row(row) -> float:
@@ -191,12 +201,15 @@ def read_csv_data(fname, chain_ty: Literal['por', 'trad']):
             return row.n_chains
         elif chain_ty == 'trad':
             return row.doublespend_after_n_confs / ds_target
+
     # xs = list(range(1, MAX_N_CHAINS))
     win_counter = defaultdict(lambda: 0)
     row_counter = defaultdict(lambda: 0)
     d_to_count = d[d['block_target'] == only_target]
     for row in d_to_count.itertuples():
         x = get_x_from_row(row)
+        if skip_csv_row(ds_target, x):
+            continue
         row_counter[x] += 1
         if row.win > 0:
             win_counter[x] += 1
@@ -1082,7 +1095,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
                 f"{CEC_EXT2_TITLE_STR}",
                 f"If the CEC is true, then these plots should all line up.",
             ]),
-            f"png/_e26_ext_rev_9000_q={q}_t={t}_daa={daa}{suffix}.png",
+            f"png/_e{exp}_ext_rev_9000_q={q}_t={t}_daa={daa}{suffix}.png",
             x_label=std_x_label(t),
             x_range=q_t_to_x_range[(q, t)],
         )

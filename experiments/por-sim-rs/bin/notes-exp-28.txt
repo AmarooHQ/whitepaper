@@ -3,7 +3,7 @@ at what point?
 short DAA + many hashes p c p t
 short DAA + low hashes per chian per tick
 
-# only do 900 samples to start with
+# only do 1000 samples to start with
 
 SKIP_EXP_CONF_PROMPT=1 DAA2_N_BLOCKS=20 ATK_HR_ONLY=0.40 EXP_IS_AUX=0 RESUME_FROM=81 ./bin/experiment-28-short-daa.sh &&
 SKIP_EXP_CONF_PROMPT=1 DAA2_N_BLOCKS=20 ATK_HR_ONLY=0.40 EXP_IS_AUX=1 RESUME_FROM=81 ./bin/experiment-28-short-daa.sh
