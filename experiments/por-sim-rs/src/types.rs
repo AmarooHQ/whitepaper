@@ -4,7 +4,7 @@ use hashers::null::PassThroughHasher;
 use hashbrown::{HashMap, HashSet};
 use std::hash::BuildHasherDefault;
 
-pub type Difficulty = u32;
+pub type Difficulty = u64;
 pub type HashID = u64;
 pub type Height = u32;
 pub type Timestamp = u32;
