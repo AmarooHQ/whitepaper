@@ -49,6 +49,20 @@ class PorPlotOpts:
 CsvFileToPlot = tuple[str, Literal['por', 'trad'], Optional[str | PorPlotOpts]]
 
 
+# Some utility functions WRT floats
+
+
+def f_is_whole(x):
+    return x//1 == x
+
+
+def render_conf_target(t: float):
+    return f'{int(t):d}' if f_is_whole(t) else f'{t:f}'.rstrip('0')
+
+
+# functions for decimal calcs to get accurate analytical results
+
+
 # n! / (k! * (n - k)!)
 def n_choose_k(n, k) -> Decimal:
     return Decimal(math.factorial(n) // (math.factorial(k) * math.factorial(n - k)))
@@ -65,15 +79,6 @@ def p_ds_success_theoretical(q, n=20):
     p = 1 - q
     if q >= p: return 1
     to_sum = list(n_choose_k(m+n-1, m) * (pow(p,n) * pow(q,m) - pow(p,m) * pow(q,n)) for m in range(n + 1))
-    return 1.0 - float(sum(to_sum))
-
-
-def p_ds_success_theoretical_combin(q, n=20):
-    # assume this is broken -- experimental
-    q = Decimal(q)
-    p = 1 - q
-    if q >= p: return 1
-    to_sum = list(n_choose_k(m+n-1, m) * (Decimal(m/n) * pow(p,n) * pow(q,m) - Decimal(n/m) * pow(p,m) * pow(q,n)) for m in range(n + 1))
     return 1.0 - float(sum(to_sum))
 
 
@@ -125,29 +130,12 @@ def exp_numbers_decreasing(i_start, iter_limit, n_cols=1):
 assert exp_numbers_decreasing(4, 3) == 8
 assert exp_numbers_decreasing(4, 7) == 12
 
-def ds_theoretical_series(multipliers, q=0.44, after_n_confs=20,
-        discount_after_first_mult=False, triangular_mult_discount=False,
-        exp_tri_mult_discount=False, exp_mult_discount=False,
-        use_experimental_combin=False
-        ):
+def ds_theoretical_series(multipliers, q=0.44, after_n_confs=20):
     xs = []
     ys = []
     for n_por_chains in multipliers:
-        if discount_after_first_mult:
-            n = int(after_n_confs + ((after_n_confs - 1) * (n_por_chains - 1)))
-        elif triangular_mult_discount:
-            n = int(tri_numbers_decreasing(after_n_confs, n_por_chains))
-        elif exp_tri_mult_discount:
-            n = int(exp_tri_numbers_decreasing(after_n_confs, n_por_chains))
-        elif exp_mult_discount:
-            n = int(exp_numbers_decreasing(after_n_confs, n_por_chains))
-        else:
-            n = int(after_n_confs * n_por_chains)
-
-        if use_experimental_combin:
-            r = p_ds_success_theoretical_combin(q, n)
-        else:
-            r = p_ds_success_theoretical(q, n)
+        n = int(after_n_confs * n_por_chains)
+        r = p_ds_success_theoretical(q, n)
         xs.append(n_por_chains)
         # ys.append(math.log(max(r, 0.0000000001))/n)
         ys.append(r)
@@ -190,19 +178,19 @@ def read_csv_data(fname, chain_ty: Literal['por', 'trad']):
     d: pd.DataFrame = pd.read_csv(fname)
     only_target = d['block_target'][1]
     daa = d['daa2_n_blocks'][1]
-    ds_target = int(d['doublespend_after_n_confs'][1])
+    ds_target: float = d['doublespend_after_n_confs'][1]
     q = d['atk_q'][1]
     if chain_ty == 'por':
         xs = d['n_chains'].unique()
     elif chain_ty == 'trad':
-        xs = list(x // ds_target for x in d['doublespend_after_n_confs'].unique())
+        xs = list(x / ds_target for x in d['doublespend_after_n_confs'].unique())
     xs.sort()
 
-    def get_x_from_row(row):
+    def get_x_from_row(row) -> float:
         if chain_ty == 'por':
             return row.n_chains
         elif chain_ty == 'trad':
-            return row.doublespend_after_n_confs // ds_target
+            return row.doublespend_after_n_confs / ds_target
     # xs = list(range(1, MAX_N_CHAINS))
     win_counter = defaultdict(lambda: 0)
     row_counter = defaultdict(lambda: 0)
@@ -266,18 +254,36 @@ class Comment:
         }
 
 
-scaled_conv_lookup = {0.0625: '2^{4}', 0.125: '8', 0.25: '4', 0.5: '2'}
+# '2^{4}'
+scaled_conv_lookup = {0.0625: '16', 0.125: '8', 0.25: '4', 0.5: '2'}
 
 
-def gen_cec_prob_str(ds_target, is_trad=False, scaled=None):
-    extra_pad = '  ' if int(ds_target) < 10 else ''
+scaled_target_lookup = {1.25: '\\frac{{5}}{{4}}', 2.5: '\\frac{{5}}{{2}}'}
+
+
+def gen_ds_target_tex(t: float, with_x=False) -> str:
+    c_str = scaled_target_lookup.get(t, f'{render_conf_target(t)}')
+    c_str += 'x' if with_x else ''
+    return c_str
+
+
+def gen_cec_prob_str(ds_target: float, is_trad=False, scaled=None):
+    if isinstance(ds_target, str):
+        print(f"don't store ds_target as str")
+        raise Exception('expected float but got string')
+
     # spacing at end is to help them line up in plot legend
-    cec_prob = f"$P(q; N_1 = x; c = {ds_target})$   "
-    cec_trad_prob = f"$P(q; N_1 = 1; c = {ds_target}x)$ "
-    cec_scaled_prob = f"$P(q; N_1 = x / {scaled}; c = {ds_target})$"
+    extra_pad = 2 if ds_target < 10 else 0
+    # extra_pad += 1 if ds_target < 5 and is_trad else 0
+    c_str = gen_ds_target_tex(ds_target)
+    cx_str = gen_ds_target_tex(ds_target, with_x=True)
+    cec_prob = f"$P(q; N_1 = x; c = {c_str})$   "
+    cec_trad_prob = f"$P(q; N_1 = 1; c = {cx_str})$ "
+    cec_scaled_prob = f"$P(q; N_1 = x / {scaled}; c = {c_str})$"
     if scaled and scaled < 1 and scaled_conv_lookup.get(scaled, None):
-        cec_scaled_prob = f"$P(q; N_1 = x · {scaled_conv_lookup[scaled]}; c = {ds_target})$"
-    return (cec_trad_prob if is_trad else (cec_scaled_prob if scaled else cec_prob)) + extra_pad
+        cec_scaled_prob = f"$P(q; N_1 = x · {scaled_conv_lookup[scaled]}; c = {c_str})$"
+        extra_pad += -2 if scaled <= 0.0625 else 0
+    return (cec_trad_prob if is_trad else (cec_scaled_prob if scaled else cec_prob)) + (' ' * extra_pad)
 
 
 def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_discounted=False,
@@ -363,7 +369,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
             t_series.append(theoretical_data)
             td_max_ys.append(theoretical_data.max())
             prob_math = gen_cec_prob_str(ds_target, is_trad=True)
-            theoretical_data.plot(label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytically Derived: Rosenfeld, 2012)", zorder=2, linestyle="dashed", linewidth=2.0)
+            theoretical_data.plot(label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)", zorder=2, linestyle="dashed", linewidth=2.0)
     max_y = max(max(td_max_ys), max(s.max() for s in csv_series) if csv_series else 0)
     print(f"Done. Now drawing.")
 
@@ -698,10 +704,10 @@ def main(filter_fname: Optional[str], n_jobs: int):
         csvs = [
             (csv_name_f(q, t, bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', None),
             (csv_name_f(q, t, bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None),
-            (csv_name_f(q, f'{2*int(t):d}', bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=2)),
+            (csv_name_f(q, render_conf_target(float(t) * 2), bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=2)),
         ]
-        if int(t) == 5:
-            csvs.append((csv_name_f(q, f'{4*int(t):d}', bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=4)))
+        if float(t) <= 5:
+            csvs.append((csv_name_f(q, render_conf_target(float(t) * 4), bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=4)))
         return csvs
 
     # $P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$
@@ -711,23 +717,22 @@ def main(filter_fname: Optional[str], n_jobs: int):
         csvs = [
             (csv_name_f(q, t, bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', None),
             (csv_name_f(q, t, bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None),
-            (csv_name_f(q, f'{int(t)//2:d}', bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=0.5)),
+            (csv_name_f(q, render_conf_target(float(t) / 2), bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=0.5)),
         ]
         if int(t) == 20:
             # todo
-            csvs.append((csv_name_f(q, f'{int(t)//4:d}', bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=0.25)))
+            csvs.append((csv_name_f(q, render_conf_target(float(t) / 4), bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=0.25)))
         return csvs
 
-    def f_is_whole(x):
-        return x//1 == x
-
-    def gen_por_cec_full_csvs(q: str, t: int, exp, aux, bt, hr, daa, max_c_oom_span=4, oom_base=2, **kwargs) -> list[CsvFileToPlot]:
+    def gen_por_cec_full_csvs(q: str, t: int, exp, aux, bt, hr, daa, max_c_oom_span=4, oom_base=2,
+                              min_ds_conf=MIN_DS_CONF, max_ds_conf=MAX_DS_CONF, **kwargs
+                              ) -> list[CsvFileToPlot]:
         csvs = []
         csv_name_f = csv_name_f_from_exp(exp)
         scaling_options = [(t*s, PorPlotOpts(cec_scaled=s) if s != 1 else None) for s in [oom_base**i for i in range(0-max_c_oom_span, max_c_oom_span+1)]]
         for (_t, opts) in scaling_options:
-            if MIN_DS_CONF <= _t <= MAX_DS_CONF:  # f_is_whole(_t) and
-                csvs.append((csv_name_f(q, int(_t) if f_is_whole(_t) else _t, bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', opts))
+            if min_ds_conf <= _t <= max_ds_conf:
+                csvs.append((csv_name_f(q, render_conf_target(_t), bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', opts))
         csvs.append((csv_name_f(q, t, bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None))
         return csvs
 
@@ -1034,14 +1039,14 @@ def main(filter_fname: Optional[str], n_jobs: int):
                     # ('23b', 'xxh3', 'por', PorPlotOpts(_label_extra='23b'), dict(bt=75, hr=75)),
                     # ('24', 'xxh3', 'por', PorPlotOpts(_label_extra='24'), dict(bt=50, hr=50)),
                     # ('25', 'xxh3', 'por', PorPlotOpts(_label_extra='25'), dict(bt=75, hr=75)),
-                    ('26', 'xxh3', 'por', PorPlotOpts(_label_extra='26'), dict(bt=75, hr=75)),
+                    ('26', 'xxh3', 'por', PorPlotOpts(), dict(bt=75, hr=75)),
                     # ('22aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='22aux: Bonus Block'), dict()),
                     # ('23aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='23aux'), dict(bt=75, hr=75)),
                     # ('23baux', 'xxh3', 'trad', PorPlotOpts(_label_extra='23baux'), dict(bt=75, hr=75)),
                     # ('24aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='24aux'), dict(bt=50, hr=50)),
                     # ('25aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='25aux'), dict(bt=75, hr=75)),
-                    ('26aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='26aux'), dict(bt=75, hr=75)),
-                    ('26aux', 'xxh3', 'trad', PorPlotOpts(_label_extra='26aux; DAA=500'), dict(bt=75, hr=75, daa=500)),
+                    ('26aux', 'xxh3', 'trad', PorPlotOpts(), dict(bt=75, hr=75)),
+                    ('26aux', 'xxh3', 'trad', PorPlotOpts(), dict(bt=75, hr=75, daa=500)),
                 ]
             ],
             "\n".join([
@@ -1053,7 +1058,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             x_label=std_x_label(t),
             x_range=q_t_to_x_range[(q, t)],
         )
-        for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
+        for q in ['0.40', '0.44', '0.48'] for t in ['1.25', '2.5', '5', '10', '20']
     ] + [
         # just e26 CEC EXT
         SavePlot(
@@ -1067,22 +1072,23 @@ def main(filter_fname: Optional[str], n_jobs: int):
             x_label=std_x_label(t),
             x_range=q_t_to_x_range[(q, t)],
         )
-        for q in ['0.40', '0.44', '0.48'] for t in ['5', '10'] for daa in [100, 500]
+        for q in ['0.40', '0.44', '0.48'] for t in ['1.25', '2.5', '5', '10'] for daa in [100, 500]
     ] + [
         # just e26 CEC EXT
         SavePlot(
             # gen_por_cec_ext_reversed_test(q, t, exp='26', aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3"),
-            gen_por_cec_full_csvs(q, int(t), exp='26', aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3"),
+            gen_por_cec_full_csvs(q, int(t), exp='26', aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3", **gen_csv_kwargs),
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture (Extended)",
                 f"{CEC_EXT2_TITLE_STR}",
                 f"If the CEC is true, then these plots should all line up.",
             ]),
-            f"png/_e26_ext_rev_9000_q={q}_t={t}_daa={daa}.png",
+            f"png/_e26_ext_rev_9000_q={q}_t={t}_daa={daa}{suffix}.png",
             x_label=std_x_label(t),
             x_range=q_t_to_x_range[(q, t)],
         )
         for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20'] for daa in [100, 500]
+        for suffix, gen_csv_kwargs in [('', dict()), ('_nofrac', dict(min_ds_conf=5))]
     ]
 
     pool = mpp.Pool(n_jobs)
