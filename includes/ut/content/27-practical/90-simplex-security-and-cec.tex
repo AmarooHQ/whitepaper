@@ -8,7 +8,7 @@
 Simplexes are secure if attacking a single simplex-chain is as difficult as attacking the whole simplex (the network).
 
 Say the attacker controls $q$ proportion of the network's work-generation capacity (e.g., hash-rate for PoW chains), and honest nodes control $p$ proportion, such that $p+q=1$.
-The attacker should only be able to perform a doublespend if $q > p$.
+The attacker should only be able to perform control the network's history if $q > p$.
 
 Successfully attacking a single blockchain requires an attacker to publish an alternate chain-segment that the fork rule considers heavier than the corresponding public chain-segment.
 Those two segments will have a common ancestor, so the weight of the attacker's segment must be greater than the weight of the public chain-segment (from that common ancestor on).
@@ -38,7 +38,11 @@ $\blacksquare$
 \defineTermTex{Confirmation Equivalence Conjecture (CEC)}{
     The conjecture that, when using PoR and appropriately converting work,
     confirmations of reflecting chains
-    can be treated as \emph{equivalent} to local confirmations of the same weight
+    can be treated as \emph{equivalent} to local confirmations of the same weight.
+    See \autoref{eq:por-sim-hypothesis-extended}
+    % Given $q$ and some integer $N$, the probability of
+    % an attack succeeding after $C$ confirmations is
+    % $\forall a \in \{1,2,\dots,N\}: P(q; N_1 = a; c = \frac{NC}{a})$
 }
 
 The Confirmation Equivalence Conjecture is why PoR works.
@@ -143,9 +147,15 @@ In fact, we can take this further.
 % , and $1 \le a_i \le N$, and $1 \le b_i \le N$
 For any $a,b \in \{1, 2, \dots, N\}$, the CEC implies:
 \begin{equation}
-    P\biggl(q; N_1 = a; c = \frac{NC}{a}\biggr) \approx P\biggl(q; N_1 = b; c = \frac{NC}{b}\biggr)
+    %P\biggl(q; N_1 = a; c = \frac{NC}{a}\biggr) \approx P\biggl(q; N_1 = b; c = \frac{NC}{b}\biggr)
+    \forall a \in \{x: 1 \le x \le N\}: P\biggl(q; N_1 = a; c = \frac{NC}{a}\biggr) \text{ is approximately constant}
     \label{eq:por-sim-hypothesis-extended}
 \end{equation}
+
+Note that $P(q; N_1 = 1; c = C)$ is taken to be identical to Rosenfeld's analytical solution.
+
+\autoref{eq:por-sim-hypothesis-extended} is a \emph{generalization} of traditional blockchains (that have $N_1 = 1$).
+Particularly, there is \emph{another dimension} (the size of the simplex) and that is related to the other dimension $c$ (some number of confirmations to wait for). Particularly, the CEC says there is a \emph{geometric} relationship between the two.
 
 \subsubsubsubsection{Method}
 
@@ -206,6 +216,23 @@ So, while it is \emph{possible} that a poor implementation of a simplex could co
     Details of the model -- WeightedDag, DoubleSpendWork, etc.
 }
 
+\begin{itemize}
+    \item Simulate traditional doublespend and compare to analytical solution. \autoref{fig:simulation-trad-only}
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[max width=\linewidth, max height=0.5\textheight]{simulation/_results_trad_validation_9000_t=5_daa=500.pdf}
+    \caption[
+        A comparison of the measured probability of a successful doublespend (for a traditional blockchain) compared with Rosenfeld's analytical solution.
+    ]{
+        A comparison of the measured probability of a successful doublespend (for a traditional blockchain) compared with Rosenfeld's analytical solution, for $q \in \{0.4, 0.44, 0.48\}$.
+    }
+    \label{fig:simulation-trad-only}
+\end{figure}
+
+
+
 \subsubsubsubsection{Error Correction Iteration}
 
 Following the initial implementation of PoR in the simulator, results were promising but did not align with the theoretical prediction (based on Rosenfeld's analytical derivation of $P(q; N_1 = 1; c = C)$).
@@ -213,9 +240,11 @@ Following the initial implementation of PoR in the simulator, results were promi
 traditional chains were okay but not perfect -- a bit better than predicted tho.
 simplexes, however, were way worse for $N_1 > 5$ or so -- $P(\cdots)$ never dropped below $\sim 0.1$.
 
+documented in \autoref{sec:appendix-experiment-ec}
+
 \begin{enumerate}
     \item Accounting for draft reflected work
-    \item Implementing the DoubleSpendWork attack strategy
+    \item Implementing the \texttt{DoubleSpendWork} attack strategy
     \item Randomizing hash rate over simplex chains ($p + q = 1$ is globally maintained)
     \item Implementing the attacker's ``Bonus Block''
     \item Increasing the number of blocks over which the DAA operates ($\text{DAA}_N = 100 \to 500$)
@@ -225,13 +254,59 @@ simplexes, however, were way worse for $N_1 > 5$ or so -- $P(\cdots)$ never drop
 
 \todo{por sim - Interpreting the Results}
 
+\begin{itemize}
+    \item benchmark against traditional blockchain analytical solution (Rosenfeld, 2012): $P(q; N_1 = 1; c = Cx)$
+    \item plot of measured $P(q; N_1 = 1; c = Cx)$
+    \item plot of measured $P(q; N_1 = x; c = C)$
+    \item plot of scaled measured $P(q; N_1 = x/a; c = Ca)$ for different values of $a$
+    \item According to the CEC, they should all line up.
+\end{itemize}
+
 \subsubsubsubsection{Results}
 
 \todo{por sim results}
 
+\autoref{fig:simulation-r1-single-simplex}
+
+\begin{figure}[]
+    \centering
+    \includegraphics[max width=\linewidth, max height=0.4\textheight]{simulation/_results_trad_vs_1simplex_9000_qs=0.40-0.44_t=5_daa=500.pdf}
+    \caption[]{
+        2 A comparison of the measured probabilities of a successful doublespend (for a traditional blockchain and for a simplex) compared with Rosenfeld's analytical solution, for $q \in \{0.4, 0.44\}$.
+    }
+    \label{fig:simulation-r1-single-simplex}
+\end{figure}
+
+\autoref{fig:simulation-r2-cec-ext}
+
+\begin{figure}[]
+    \centering
+    \includegraphics[max width=\linewidth, max height=0.4\textheight]{simulation/_results_cec_9000_qs=0.40-0.44_t=5_daa=500.pdf}
+    \caption[]{
+        3 A comparison of the measured probability of a successful doublespend compared with Rosenfeld's analytical solution, for $q \in \{0.4, 0.44\}$.
+    }
+    \label{fig:simulation-r2-cec-ext}
+\end{figure}
+
 \subsubsubsubsection{Discussion}
 
 \todo{por sim discussion}
+
+These results are, for the purpose of this paper, taken to indicate the following statements are true.\footnote{
+    Experimental results never prove that something is correct, however, they are criticisms of \emph{competing} explanations.
+    For example: the fact that these experimental results converge as expected is NOT evidence that UT is secure, or that PoR works, or that the CEC is right -- however, they are \emph{criticisms} of ideas like: \emph{PoR is broken}, or \emph{Simplexes aren't secure}, or \emph{Sharing security between blockchains is impossible}.
+    For any of those criticisms (of UT) to be correct, there must be some \emph{counter-refutation} of these results.
+    That could be an explanation of: the implementation was flawed, the methodology was flawed, or that UT cannot be effectively implemented as a production blockchain.
+    In the \emph{absence} of such criticisms, it is reasonable to work under the assumption that UT is secure, since that is currently the only viable explanation for these results.
+}
+
+\begin{enumerate}
+    \item Sharing security between blockchains is possible.
+    \item PoR \emph{works} as claimed when implemented correctly.
+    \item The \emph{Confirmation Equivalence Conjecture} is, \emph{generally and in principle}, true.
+    \item Simplexes are secure against a minority attacker and are thus $O(n)$ secure.
+    % more stuff that's useful for UT's case?
+\end{enumerate}
 
 \subsubsubsubsection{Experimental Limitations}
 

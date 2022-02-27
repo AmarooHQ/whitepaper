@@ -3,11 +3,13 @@
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import lru_cache
+from itertools import chain
 import math
 import os
 from pathlib import Path
 import sys
 from typing import Any, Callable, Literal, Optional
+from matplotlib.cbook import flatten
 import numpy
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -394,10 +396,10 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         _max_ix = _x_range_max
 
     # if we don't have data then don't needlessly increase x_range
-    _max_ix = min(_max_ix + 1, _x_range_max)
+    _max_ix = int(min(_max_ix + 1, _x_range_max))
     x_range = (0 if x_range is None else x_range[0], _max_ix)
 
-    print(f"Calculating theoretical probabilities.")
+    print(f"Calculating theoretical probabilities. (max_ix={_max_ix})")
     t_series = []
     # multipliers = list(range(1, min(_max_ix+1,20))) + list(range(20, _max_ix+1, 1))
     multipliers = list(range(1, _max_ix+1))
@@ -409,7 +411,8 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
             t_series.append(theoretical_data)
             td_max_ys.append(theoretical_data.max())
             prob_math = gen_cec_prob_str(ds_target, is_trad=True)
-            theoretical_data.plot(label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)", zorder=2, linestyle="dashed", linewidth=2.0, color=analytical_plot_color)
+            _kw = dict() if len(_qs) * len(ds_targets) > 1 else dict(color=analytical_plot_color)
+            theoretical_data.plot(label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)", zorder=2, linestyle="dashed", linewidth=2.0, **_kw)
     max_y = max(max(td_max_ys), max(s.max() for s in csv_series) if csv_series else 0)
     print(f"Done. Now drawing.")
 
@@ -421,7 +424,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
     plt.suptitle(title or default_title, fontdict=dict(linespacing=1.5))
     plt.title('', fontdict=dict(fontsize=8))
     plt.xlabel(x_label or "x = Confirmation Multiplier / # Chains")
-    plt.ylabel(y_label or "P(atk success)")
+    plt.ylabel(y_label or "Probability of a successful doublespend")
     plt.grid(True)
     plt.grid(True, which='minor', color=(0.9, 0.9, 0.9, 0.1))
     plt.minorticks_on()
@@ -792,6 +795,11 @@ def main(filter_fname: Optional[str], n_jobs: int):
     CEC_EXT_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$"
     CEC_EXT2_TITLE_STR = "$P(q; N_1 = N; c = C) \\; \\approx \\; P(q; N_1 = a; c = \\frac{{CN}}{{a}}) \\; \\approx \\; P(q; N_1 = 1; c = CN)$"
     CEC_EXT3_TITLE_STR = "$P(q; N_1 = N; c = C) \\; \\approx \\; P(q; N_1 = \\frac{{N}}{{a}}; c = Ca) \\; \\approx \\; P(q; N_1 = 1; c = CN)$"
+    CEC_EXT4_TITLE_STR = "$\\forall a \\in [1, N]: P(q; N_1 = a; c = \\frac{{CN}}{{a}})$ is approximately constant."
+
+    RESULTS_FIG_WIDTH=10
+    RESULTS_FIG_ASPECT=1/0.55
+    RESULTS_FIG_SIZE=(RESULTS_FIG_WIDTH, RESULTS_FIG_WIDTH / RESULTS_FIG_ASPECT)
 
 
     jobs_to_save: list[SavePlot] = [
@@ -1129,6 +1137,73 @@ def main(filter_fname: Optional[str], n_jobs: int):
         )
         for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20'] for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
         for suffix, gen_csv_kwargs in [('', dict()), ('_nofrac', dict(min_ds_conf=5))]
+    ] + [
+        # for results - just trad only
+        SavePlot(
+            # gen_por_cec_full_csvs(q, int(t), exp=exp, aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3", **gen_csv_kwargs),
+            [
+                (csv_name_f_from_exp(exp)(q, render_conf_target(float(t)), bt=75, hr=75, exp_num=exp+'aux', daa=daa, hashname="xxh3"), 'trad', None)
+                for q in qs
+            ],
+            "\n".join([
+                f"PoR Simulator Validation: Doublespend via Traditional Blockchain",
+                # f"{CEC_EXT2_TITLE_STR}",
+                # f"If the CEC is true, then these plots should all line up.",
+            ]),
+            f"png/_results_trad_validation_9000_t={t}_daa={daa}.pdf",
+            x_label=f"Confirmations$\\div {t}$",
+            x_range=(0, 31),
+            figsize=RESULTS_FIG_SIZE
+        )
+        for qs in [['0.40', '0.44', '0.48']] for t in ['5', '10', '20'] for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
+        # for suffix, gen_csv_kwargs in [('', dict()), ('_nofrac', dict(min_ds_conf=5))]
+    ] + [
+        # for results - just trad only + main simplex
+        SavePlot(
+            [(csv_name_f_from_exp(exp)(q, render_conf_target(float(t)), bt=75, hr=75, exp_num=exp, daa=daa, hashname="xxh3"), 'por', None)
+                for q in qs
+            ] + [(csv_name_f_from_exp(exp)(q, render_conf_target(float(t)), bt=75, hr=75, exp_num=exp+'aux', daa=daa, hashname="xxh3"), 'trad', None)
+                for q in qs
+            ], # type: ignore
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture",
+                f"{CEC_TITLE_STR}",
+                f"If the CEC is true, then the plots with equal $q$ should align.",
+            ]),
+            # f"png/_results_trad_vs_1simplex_9000_q={q}_t={t}_daa={daa}.pdf",
+            f"png/_results_trad_vs_1simplex_9000_qs={'-'.join(qs)}_t={t}_daa={daa}.pdf",
+            x_label=std_x_label(t),
+            # x_range=q_t_to_x_range[(q, t)],
+            x_range=(0,31),
+            figsize=RESULTS_FIG_SIZE
+        )
+        for qs in [['0.40', '0.44'], ['0.48']]  # , '0.48'
+        for t in ['5', '10', '20']
+        for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
+
+    ] + [
+        # for results - EXT CEC
+        SavePlot(
+            list(chain(*[
+                gen_por_cec_full_csvs(q, int(t), bt=75, hr=75, exp=exp, aux='aux', daa=daa, min_ds_conf=5, hashname="xxh3")
+                for q in qs
+            ])),
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture (Extended)",
+                f"{CEC_EXT4_TITLE_STR}",
+                f"If the CEC is true, then the plots with equal $q$ should align.",
+            ]),
+            # f"png/_results_cec_9000_q={q}_t={t}_daa={daa}.pdf",
+            f"png/_results_cec_9000_qs={'-'.join(qs)}_t={t}_daa={daa}.pdf",
+            x_label=std_x_label(t),
+            # x_range=q_t_to_x_range[(q, t)],
+            x_range=(0,31),
+            figsize=RESULTS_FIG_SIZE
+        )
+        for qs in [['0.40', '0.44'], ['0.48']]  # , '0.48'
+        for t in ['5']
+        for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
+
     ]
 
     pool = mpp.Pool(n_jobs)
