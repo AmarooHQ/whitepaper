@@ -329,12 +329,12 @@ def gen_cec_prob_str(ds_target: float, is_trad=False, scaled=None):
 
 def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_discounted=False,
         title=None, x_label=None, y_label=None, comment: Optional[Comment] = None,
-        save_png=False, png_filename=None,
+        save_png=False, out_filenames=None,
         figsize: tuple[float, float] = (10, 7), dpi=100, x_range=None,
         seed_qs=None, seed_ds_targets=None,
         as_scatter=False,
         ):
-    print(f"\nPlotting chart: {png_filename or '<tmp-not-saved>'}")
+    print(f"\nPlotting chart: {out_filenames or '<tmp-not-saved>'}")
     plt.figure(figsize=figsize, dpi=dpi)
     _x_range_max = x_range[1] if x_range else 21
     _max_ix = 0
@@ -413,7 +413,8 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
             prob_math = gen_cec_prob_str(ds_target, is_trad=True)
             _kw = dict() if len(_qs) * len(ds_targets) > 1 else dict(color=analytical_plot_color)
             theoretical_data.plot(label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)", zorder=2, linestyle="dashed", linewidth=2.0, **_kw)
-    max_y = max(max(td_max_ys), max(s.max() for s in csv_series) if csv_series else 0)
+
+    #max_y = max(max(td_max_ys), max(s.max() for s in csv_series) if csv_series else 0)
     print(f"Done. Now drawing.")
 
     default_title = "\n".join([
@@ -447,18 +448,29 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
 
     plt.tight_layout()
 
+    pre_save_cbs = []
     if comment:
         x = comment.x or x_range[1] - 0.5
         txt = plt.text(x, comment.y, comment.body,
             ha='right', va='center', wrap=True,
             fontdict=comment.font, bbox=comment.bbox)
-        # https://gist.github.com/dneuman/90af7551c258733954e3b1d1c17698fe
-        txt._get_wrap_line_width = lambda: comment.scaled_line_width(dpi)
+        def comment_pre_save_cb(fname: str):
+            if fname.endswith('.png'):
+                # https://gist.github.com/dneuman/90af7551c258733954e3b1d1c17698fe
+                txt._get_wrap_line_width = lambda: comment.scaled_line_width(dpi)
+            else:
+                txt._get_wrap_line_width = lambda: comment.scaled_line_width(72)
+        pre_save_cbs.append(comment_pre_save_cb)
 
-    if save_png:
-        plt.savefig(png_filename)
-        print(f"Saved figure out: {png_filename}")
+
+    if out_filenames:
+        for filename in out_filenames:
+            for pscb in pre_save_cbs:
+                pscb(filename)
+            plt.savefig(filename)
+        print(f"Saved figure out: {out_filenames}")
     else:
+        print(f"Showing figure (X11)")
         plt.show()
     plt.close()
 
@@ -467,7 +479,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
 class SavePlot:
     csv_files: list[CsvFileToPlot]
     title: str
-    filename: str
+    _filename: str
     kwargs: Optional[dict[str, Any]] = None
     x_label: Optional[str] = None
     y_label: Optional[str] = None
@@ -477,10 +489,19 @@ class SavePlot:
     dpi: int = 300
     seed_qs: Optional[set[float]] = None
     seed_ds_targets: Optional[set[float]] = None
+    save_as_file_exts: Optional[list[str]] = None
+
+    @property
+    def filenames(self):
+        # hacky check for whether a file extension was included (svg, png, pdf are the ones we care about)
+        if len(self._filename.rsplit('.', 1)[-1]) == 3:
+            return list(self._filename)
+        exts = self.save_as_file_exts or list('pdf')
+        return list(f'{self._filename}.{ext}' for ext in exts)
 
     def run(self):
         plot_chart(
-            self.csv_files, save_png=True, png_filename=self.filename,
+            self.csv_files, save_png=True, out_filenames=self.filenames,
             title=self.title, x_label=self.x_label, y_label=self.y_label,
             comment=self.comment, figsize=self.figsize, dpi=self.dpi,
             x_range=self.x_range,
@@ -675,6 +696,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
                 ]),
             # "Traditional Doublespend Comparison: $N_1=1$\nTheoretical vs DS+WC vs DSW+WD vs DS+LC (w/ DAA over {100,1000} blocks)",
             fname,
+            save_as_file_exts=['png', 'pdf', 'svg'],
             x_label=f"x = Confirmations / {t}",
             comment=Comment(' '.join([
                 "Notice that the green line does not approach 0:",
@@ -689,7 +711,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
                 "This is why fork rules should use chain $weight$ rather than $height$."
                 ]), c_y, wrap_line_width=425),
             ) for t, csvs, c_y, fname in [
-                (5, csv_compare_aux, 0.22, "png/trad_doublespend_comparison.png"),
+                (5, csv_compare_aux, 0.22, "png/trad_doublespend_comparison"),
             ]
     ] + [
         SavePlot(
@@ -699,6 +721,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
                 f"Q: Is the simulation of traditional doublespends consisted with theoretical results?",
                 f"$N_1=1$; $q={q}$; doublespend target: ${t} x$"]),
             f"png/trad_ds_comparison_q={q}_t={t}.png",
+            # save_as_file_exts=['png', 'pdf', 'svg'],
             x_label=f"x = Confirmations / {t}",
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
@@ -1072,7 +1095,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
     count = 0
 
     for j in jobs_to_save:
-        if filter_fname is None or filter_fname in j.filename:
+        if filter_fname is None or any(filter_fname in fn for fn in j.filenames):
             if n_jobs > 1:
                 pool.apply_async(j.run)
             else:
