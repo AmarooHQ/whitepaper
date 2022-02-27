@@ -20,6 +20,7 @@ fi
 # limit which attacker ratios are simulated
 export ATK_HR_ONLY=${ATK_HR_ONLY:-}  # set this env var to limit which atk_r (q) params to process
 export ATK_DS_CONF_ONLY=${ATK_DS_CONF_ONLY:-}
+export ATK_NCHAINS_ONLY=${ATK_NCHAINS_ONLY:-}
 
 # run REPEAT_TIMES total loops, where the simulator is run N_TRIALS_PER times for each set of params per loop.
 # => the total number of samples per x val is N_TRIALS_PER * REPEAT_TIMES
@@ -130,8 +131,11 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
 
           # for nchains in 1 2 30 `seq 21 -2 7` `seq 6 -1 1`; do
           for nchains in ${nchain_arr[@]}; do
-            if [[ ("$ds_conf_base" = "20" && "$nchains" -gt 30) || ("$ds_conf_base" = "10" && "$nchains" -gt 40) ]]; then
+            if [[ ("$ds_conf_base" = "20" && "$nchains" -gt 31) || ("$ds_conf_base" = "10" && "$nchains" -gt 40) ]]; then
               # skip b/c we're not interested in these datapoints (v expensive)
+              continue;
+            fi
+            if [[ ! -z "$ATK_NCHAINS_ONLY" && "$ATK_NCHAINS_ONLY" != "$nchains" ]]; then
               continue;
             fi
 

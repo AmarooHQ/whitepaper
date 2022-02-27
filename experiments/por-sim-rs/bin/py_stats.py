@@ -26,6 +26,8 @@ class PorPlotOpts:
     _label_extra: Optional[str] = None
     cec_scaled: Optional[float] = None
     _kwargs: Optional[dict] = None
+    # colors are consistent regardless of por plot order or number (based on ds_target)
+    use_consistent_color: bool = False
 
     def trans_x(self, x):
         if self._trans_x:
@@ -225,16 +227,40 @@ def read_csv_data(fname, chain_ty: Literal['por', 'trad']):
     return n_trials, max_ix, only_target, q, ds_target, series, ms_elapsed, daa
 
 
-por_line_markers = ['x','*','3','+','4'] * 10
+por_line_markers = ['x','+','*','3','4'] * 10
 trad_line_markers = ['s','o','P','D','X'] * 10
 
 line_markers = {
-    'por': por_line_markers,
-    'trad': trad_line_markers,
+    'por': {1.25: 'x', 2.5: '3', 5: '*', 10: '+', 20: '.'},
+    'trad': {1.25: 's', 2.5: 'o', 5: 'P', 10: 'D', 20: 'X'},
 }
 
-def get_line_marker(chain_ty: Literal['por', 'trad'], por_i, trad_i):
-    return line_markers[chain_ty][por_i if chain_ty == 'por' else trad_i]
+plot_colors = {
+    'por': {1.25: 'C8', 2.5: 'C5', 5: 'C0', 10: 'C1', 20: 'C2'},
+    'trad': {1.25: 'C3', 2.5: 'C3', 5: 'C3', 10: 'C3', 20: 'C3'},
+}
+# C4: purple
+analytical_plot_color = 'C9'
+
+'''color scale'''
+def get_color(ds_target):
+    min_ds_log, ds_t_log, max_ds_log = map(math.log2, (MIN_DS_CONF, ds_target, MAX_DS_CONF))
+    # t_pos should be between 0 and 1
+    t_pos = inv_lerp(min_ds_log - 1, max_ds_log, ds_t_log + 1)
+    cmap = plt.get_cmap('viridis')
+    return cmap(t_pos)
+
+
+def get_line_default_kwargs(chain_ty: Literal['por', 'trad'], ds_target, as_scatter: bool) -> dict:
+    is_por = chain_ty == 'por'
+    z_order = 2 + (.1 if is_por else -.1)
+    # color = get_color(ds_target)
+    color = plot_colors[chain_ty][ds_target]
+    kw: dict[str, Any] = dict(zorder=z_order, color=color)
+    marker_k: str = 'style' if as_scatter else 'marker'
+    kw[marker_k] = line_markers[chain_ty][ds_target]
+    return kw
+
 
 @dataclass
 class Comment:
@@ -302,7 +328,7 @@ def gen_cec_prob_str(ds_target: float, is_trad=False, scaled=None):
 def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_discounted=False,
         title=None, x_label=None, y_label=None, comment: Optional[Comment] = None,
         save_png=False, png_filename=None,
-        figsize=(10, 7), dpi=100, x_range=None,
+        figsize: tuple[float, float] = (10, 7), dpi=100, x_range=None,
         seed_qs=None, seed_ds_targets=None,
         as_scatter=False,
         ):
@@ -319,18 +345,14 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
     por_count = -1
     trad_count = -1
     for csv_i, (fname, chain_ty, label_extra) in enumerate(csv_files):
-        z_order = 2 + (.1 if chain_ty == 'por' else -.1)
-        _kwargs = dict(**kwargs)
-        marker = get_line_marker(chain_ty, por_count, trad_count)
-        _kwargs.update(dict(style=marker) if as_scatter else dict(marker=marker))
-        _kwargs.update(zorder=z_order)
         is_por = chain_ty == 'por'
         is_trad = not is_por
         label_extra = label_extra or ''
-        por_plot_opts = None
         if not isinstance(label_extra, str):
             por_plot_opts = label_extra
             label_extra = por_plot_opts.label_extra
+        else:
+            por_plot_opts = PorPlotOpts()
 
         n_trials, max_ix, block_target, _q, ds_target, csv_data, ms_elapsed, daa = read_csv_data(fname, chain_ty)
         csv_series.append(csv_data)
@@ -340,6 +362,11 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         else:
             ty_str = 'Trad:'
             trad_count += 1
+
+        _kwargs = dict(**kwargs)
+        _kwargs.update(get_line_default_kwargs(chain_ty, ds_target, as_scatter))
+        if trad_count > 1 or not por_plot_opts.use_consistent_color:
+            del _kwargs['color']
 
         log_ds_target = ds_target
         if por_plot_opts and por_plot_opts.cec_scaled:
@@ -382,7 +409,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
             t_series.append(theoretical_data)
             td_max_ys.append(theoretical_data.max())
             prob_math = gen_cec_prob_str(ds_target, is_trad=True)
-            theoretical_data.plot(label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)", zorder=2, linestyle="dashed", linewidth=2.0)
+            theoretical_data.plot(label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)", zorder=2, linestyle="dashed", linewidth=2.0, color=analytical_plot_color)
     max_y = max(max(td_max_ys), max(s.max() for s in csv_series) if csv_series else 0)
     print(f"Done. Now drawing.")
 
@@ -742,7 +769,8 @@ def main(filter_fname: Optional[str], n_jobs: int):
                               ) -> list[CsvFileToPlot]:
         csvs = []
         csv_name_f = csv_name_f_from_exp(exp)
-        scaling_options = [(t*s, PorPlotOpts(cec_scaled=s) if s != 1 else None) for s in [oom_base**i for i in range(0-max_c_oom_span, max_c_oom_span+1)]]
+        ppo_kw = dict(use_consistent_color=False)
+        scaling_options = [(t*s, PorPlotOpts(cec_scaled=s, **ppo_kw) if s != 1 else PorPlotOpts(**ppo_kw)) for s in [oom_base**i for i in range(0-max_c_oom_span, max_c_oom_span+1)]]
         for (_t, opts) in scaling_options:
             if min_ds_conf <= _t <= max_ds_conf:
                 csvs.append((csv_name_f(q, render_conf_target(_t), bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', opts))
