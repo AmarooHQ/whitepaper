@@ -8,7 +8,7 @@
 Simplexes are secure if attacking a single simplex-chain is as difficult as attacking the whole simplex (the network).
 
 Say the attacker controls $q$ proportion of the network's work-generation capacity (e.g., hash-rate for PoW chains), and honest nodes control $p$ proportion, such that $p+q=1$.
-The attacker should only be able to perform control the network's history if $q > p$.
+The attacker should only be able to control the network's history if $q > p$.
 
 Successfully attacking a single blockchain requires an attacker to publish an alternate chain-segment that the fork rule considers heavier than the corresponding public chain-segment.
 Those two segments will have a common ancestor, so the weight of the attacker's segment must be greater than the weight of the public chain-segment (from that common ancestor on).
@@ -158,9 +158,10 @@ particularly, that there is \emph{another dimension} ($N_1$; the size of the sim
 
 So, we don't need to know a closed form of $P(q, N_1, c)$: all cases \emph{that we can measure} are equivalent to some \emph{other} case, and we can convert between them.\footnote{
     This is not strictly true: Rosenfeld's solution requires an integer value for $c$.
-    However, this is because the solution assumes a static difficulty; this works for Bitcoin, but not for chains that use faster-adjusting DAAs.
-    When using \emph{work} instead of \emph{height} as the measure of an attack's success, fractional values of $c$ have real meaning, especially with a reactive DAA and $N_1 \gg 1$.
-    This turns out not to be much of an issue for us, here, though.
+    This is due to his solution assuming a static difficulty and the longest-chain fork rule; the \emph{construction} is consistent with Bitcoin (provided the difficulty doesn't adjust), but not with chains that recalculate difficulty every block.
+    Additionally, when using \emph{work} instead of \emph{height} as the measure of an attack's success, fractional values of $c$ have real meaning -- especially with a reactive DAA and $N_1 \gg 1$.
+    Both factors turn out to be unproblematic for us, though.
+    Rosenfeld's solution has reach beyond those assumptions and observed results converge with it.
 }
 This is the basis of the method used to test this hypothesis.
 
@@ -212,6 +213,8 @@ The program also accepts a variety of parameters -- both for the simulation itse
 The source code for this model blockchain network is contained in the \href{https://github.com/AmarooHQ/whitepaper/tree/master/experiments/por-sim-rs}{\texttt{/experiments/por-sim-rs/}} folder of \href{https://github.com/AmarooHQ/whitepaper}{this paper's repository}.
 
 As we can optimize this model, we can simulate many attacks quickly; so we can efficiently make statistically significant measurements.
+
+For each data-point, typically at least 9,000 samples were taken (this is indicated by ``$n \ge 9000$'' in these figures' legends).
 
 \todo{asdf - continue method}
 
@@ -344,10 +347,13 @@ documented in \autoref{sec:appendix-experiment-ec}
 
 These results are, for the purpose of this paper, taken to indicate the following statements are true.\footnote{
     Experimental results never prove that something is correct, however, they are criticisms of \emph{competing} explanations.
-    For example: the fact that these experimental results converge as expected is NOT evidence that UT is secure, or that PoR works, or that the CEC is right -- however, they are \emph{criticisms} of ideas like: \emph{PoR is broken}, or \emph{Simplexes aren't secure}, or \emph{Sharing security between blockchains is impossible}.
-    For any of those criticisms (of UT) to be correct, there must be some \emph{counter-refutation} of these results.
-    That could be an explanation of: the implementation was flawed, the methodology was flawed, or that UT cannot be effectively implemented as a production blockchain.
-    In the \emph{absence} of such criticisms, it is reasonable to work under the assumption that UT is secure, since that is currently the only viable explanation for these results.
+    For example: we see that these experimental results \emph{converge} as expected.
+    This fact is NOT evidence that UT is secure, or that PoR works, or that the CEC is right.
+    But, it is a \emph{pre-emptive criticism} of ideas like: \emph{PoR is broken}, or \emph{Simplexes aren't secure}, or \emph{Sharing security between blockchains is impossible}.
+    A decisive criticism of UT/PoR/CEC must therefore explain how these results are wrong -- the explanation needs to include a \emph{refutation} of these results.
+    Such a refutation could be an explanation of how: the implementation was flawed, the methodology was flawed, or that UT cannot be effectively implemented as a production blockchain.
+    No such explanations are currently known.
+    In the \emph{absence} of such criticisms, it is reasonable to work under the assumption that UT is secure, since PoR and the CEC are currently (to my knowledge) the only viable explanation for these results.
 }
 
 \begin{enumerate}
@@ -362,12 +368,17 @@ Additionally, the following observations are made:
 
 \begin{enumerate}
     \item An attacker whose hash rate is \emph{uniformly} distributed over a simplex is at a disadvantage compared to an attacker whose hash rate is \emph{randomly} distributed.
-    \item Decreasing $DAA_N$ increases the security of both simplexes and traditional blockchains.
+    \item Decreasing $DAA_N$ increases the security of both simplexes and traditional blockchains -- except for ``Longest Chain'' fork rules.
     \item An attacker that waits to generate a block on a target chain is at a decisive advantage compared to one that does not.
-    \item Rosenfeld's closed form solution is consistent with empirical evidence.
+    \item Rosenfeld's closed form solution is consistent with empirical results.
 \end{enumerate}
 
 \subsubsubsubsection{Experimental Limitations}
+
+\todo{
+    seems like simplexes might have trouble getting below 1\% probability of successful attack -- like large $N_1$ has $\sim$diminishing returns.
+    This effect disappears after more local confirmations tho.
+}
 
 \todo{por sim - limits}
 
@@ -395,7 +406,7 @@ sources of error
 
     \item not giving the attacker a 'bonus block' (i.e. they only start after having mined a block in private)
 
-    \item not waiting long enough for DSs to resolve -- since we end before $t=\infty$ it is the case we cut off \emph{some} DSs that might be successful -- is it significant? (answered: exp18/19/20; situation where it is significant: \texttt{png/atk\_length\_comparison\_q=0.48\_t=5.png}; not significant with $q \le 0.4$ or $C \ge 20$)
+    \item not waiting long enough for doublespends to resolve -- since we end before $t=\infty$ it is the case we cut off \emph{some} doublespends that might be successful -- is it significant? (answered: exp18/19/20; situation where it is significant: \texttt{png/atk\_length\_comparison\_q=0.48\_t=5.png}; not significant with $q \le 0.4$ or $C \ge 20$)
 
     \item does weighted chain favor lower difficulty? if priv difficulty is 0.75 * pub difficulty, then is there an expectation that priv chain can find 2x PoWs a bit faster, so statistically there's usually a point where priv chain is ahead (more PoWs but worth less)?
 

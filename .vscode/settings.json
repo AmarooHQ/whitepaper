@@ -16,6 +16,7 @@
         "Buterin's",
         "Cardano",
         "Cardano's",
+        "CEC",
         "cilint",
         "codebases",
         "Coiledcoin",
@@ -24,6 +25,7 @@
         "Conv",
         "counterintuitively",
         "CPUs",
+        "CSVs",
         "curr",
         "daa",
         "dapp-chain",
@@ -35,6 +37,7 @@
         "DLTs",
         "doublespend",
         "doublespends",
+        "Doublespends",
         "droppable",
         "ECDSAs",
         "EMalo",
@@ -167,11 +170,13 @@
         "papersize",
         "pandoc",
         "keepaspectratio",
-        "algs"
+        "algs",
+        "\\textsc{ChainWeight}",
     ],
     "cSpell.minWordLength": 2,
     "cSpell.flagWords": [
         "hte", "DOS", "teh", "\\being{", "itertext", "the attackers",
+        "$DAA_N$",
     ],
     "cSpell.ignoreRegExpList": [
         "\\usepackage{([a-z,]*)}",

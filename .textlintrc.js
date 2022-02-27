@@ -108,6 +108,7 @@ module.exports = {
                 ["dependant", "dependent"],
                 ["hash rate", "hash-rate"],
                 ["the attackers"],
+                ["$DAA_N$", "$\\text{DAA}_N$"],
             ]
         }
     }

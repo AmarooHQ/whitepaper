@@ -1117,7 +1117,7 @@ So we know, at least, that the root tile is still secure.
 
 Can $1|i$ be \emph{severed} from the tiling, though?
 To do that, the attacker needs at least 51% of $\sec{1|i}$.
-Let's use $q$ to represent the attackers proportion of hash-power (in total over $w_{1|i|j}$ and $w_{1|i}$).
+Let's use $q$ to represent the attacker's proportion of hash-power (in total over $w_{1|i|j}$ and $w_{1|i}$).
 When is the tiling secure?
 \begin{align*}
     \sec{1|i} &= 2w_{1|i|j} + w_{1|i} + w_{1} \\
