@@ -53,7 +53,6 @@ SECONDS=0
 
 # nchain_arr=( 1 2 30 `seq 21 -2 7` `seq 6 -1 1` )
 nchain_arr=( 1 2 60 42 30 `seq 21 -2 7` `seq 6 -1 1` )
-# ds_conf_arr=( 1.25 2.5 )
 ds_conf_arr=( 1.25 2.5 5 10 20 )
 
 # note: in reality a simplex needs to use WeightedDag and an attacker needs to win via the DoubleSpendWork strategy.
@@ -78,7 +77,11 @@ function write_progress () {
   elapsed=$SECONDS
   this_repeat=$(echo $elapsed-$LAST_REPEAT_ELAPSED | bc)
   progress_msg=$(python3 $_BIN_DIR/_exp_progress.py $repeat_i $REPEAT_TIMES $LAST_REPEAT_ELAPSED $this_repeat $LAST_REPEAT_DURATION)
-  export PROGRESS_STR=">> [${progress_msg}] >> q:$atk_r / ds:$ds_conf_base"
+  AUX_MSG=''
+  if [[ "$EXP_IS_AUX" = "1" ]]; then
+    AUX_MSG=' >> AUX'
+  fi
+  export PROGRESS_STR=">> [${progress_msg}]${AUX_MSG} >> q:$atk_r / ds:$ds_conf_base"
   echo -e "$PROGRESS_STR"
 }
 
@@ -127,11 +130,8 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
 
           # for nchains in 1 2 30 `seq 21 -2 7` `seq 6 -1 1`; do
           for nchains in ${nchain_arr[@]}; do
-            if [[ "$ATK_DS_CONFS" = "20" ]] && [[ "$nchains" -gt 30 ]]; then
+            if [[ ("$ds_conf_base" = "20" && "$nchains" -gt 30) || ("$ds_conf_base" = "10" && "$nchains" -gt 40) ]]; then
               # skip b/c we're not interested in these datapoints (v expensive)
-              continue
-            fi
-            if [[ "$ATK_DS_CONFS" = "10" ]] && [[ "$nchains" -gt 40 ]]; then
               continue;
             fi
 

@@ -5,8 +5,31 @@ short DAA + low hashes per chian per tick
 
 # only do 900 samples to start with
 
-DAA2_N_BLOCKS=20 ATK_HR_ONLY=0.40 EXP_IS_AUX=0 RESUME_FROM=81 ./bin/experiment-28-short-daa.sh &&
-DAA2_N_BLOCKS=20 ATK_HR_ONLY=0.40 EXP_IS_AUX=1 RESUME_FROM=81 ./bin/experiment-28-short-daa.sh
+SKIP_EXP_CONF_PROMPT=1 DAA2_N_BLOCKS=20 ATK_HR_ONLY=0.40 EXP_IS_AUX=0 RESUME_FROM=81 ./bin/experiment-28-short-daa.sh &&
+SKIP_EXP_CONF_PROMPT=1 DAA2_N_BLOCKS=20 ATK_HR_ONLY=0.40 EXP_IS_AUX=1 RESUME_FROM=81 ./bin/experiment-28-short-daa.sh
 
-DAA2_N_BLOCKS=20 ATK_HR_ONLY=0.44 EXP_IS_AUX=0 RESUME_FROM=81 ./bin/experiment-28-short-daa.sh &&
-DAA2_N_BLOCKS=20 ATK_HR_ONLY=0.44 EXP_IS_AUX=1 RESUME_FROM=81 ./bin/experiment-28-short-daa.sh
+SKIP_EXP_CONF_PROMPT=1 DAA2_N_BLOCKS=20 ATK_HR_ONLY=0.44 EXP_IS_AUX=0 RESUME_FROM=81 ./bin/experiment-28-short-daa.sh &&
+SKIP_EXP_CONF_PROMPT=1 DAA2_N_BLOCKS=20 ATK_HR_ONLY=0.44 EXP_IS_AUX=1 RESUME_FROM=81 ./bin/experiment-28-short-daa.sh &&
+SKIP_EXP_CONF_PROMPT=1 DAA2_N_BLOCKS=20 ATK_HR_ONLY=0.44 EXP_IS_AUX=1 RESUME_FROM=81 ./bin/experiment-28-short-daa.sh
+
+----
+
+(
+export DAA2_N_BLOCKS=20
+export ATK_HR_ONLY=0.40
+export SKIP_EXP_CONF_PROMPT=1
+
+EXP_IS_AUX=1 RESUME_FROM=11 ./bin/experiment-28-short-daa.sh &&
+EXP_IS_AUX=0 RESUME_FROM=11 ./bin/experiment-28-short-daa.sh
+)
+
+----
+
+(
+export DAA2_N_BLOCKS=20
+export ATK_HR_ONLY=0.44
+export SKIP_EXP_CONF_PROMPT=1
+
+EXP_IS_AUX=1 RESUME_FROM=21 ./bin/experiment-28-short-daa.sh &&
+EXP_IS_AUX=0 RESUME_FROM=11 ./bin/experiment-28-short-daa.sh
+)

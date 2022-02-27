@@ -1076,8 +1076,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
     ] + [
         # just e26 CEC EXT
         SavePlot(
-            # gen_por_cec_ext_reversed_test(q, t, exp='26', aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3"),
-            gen_por_cec_full_csvs(q, int(t), exp='26', aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3", **gen_csv_kwargs),
+            gen_por_cec_full_csvs(q, int(t), exp=exp, aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3", **gen_csv_kwargs),
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture (Extended)",
                 f"{CEC_EXT2_TITLE_STR}",
@@ -1087,7 +1086,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             x_label=std_x_label(t),
             x_range=q_t_to_x_range[(q, t)],
         )
-        for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20'] for daa in [100, 500]
+        for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20'] for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
         for suffix, gen_csv_kwargs in [('', dict()), ('_nofrac', dict(min_ds_conf=5))]
     ]
 
@@ -1105,7 +1104,6 @@ def main(filter_fname: Optional[str], n_jobs: int):
     pool.close()
     pool.join()
     print(f"should be all done generating {count} graphs via {n_jobs} threads")
-
 
 
 main()
