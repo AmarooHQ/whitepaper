@@ -1,0 +1,15 @@
+{
+    "cSpell.words": [
+        "cryptosystem",
+        "extrinsics",
+        "Hasher",
+        "incents",
+        "rdcw",
+        "reflectable",
+        "refls",
+        "verkel"
+    ],
+    "[rust]": {
+        "editor.formatOnSave": true
+    }
+}
