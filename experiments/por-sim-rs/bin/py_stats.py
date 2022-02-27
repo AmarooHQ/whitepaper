@@ -493,144 +493,6 @@ class SavePlot:
 @click.option('-j', '--n-jobs', default=max(1, mp.cpu_count() - 1), help='Number of chart-generation threads to run in parallel')
 def main(filter_fname: Optional[str], n_jobs: int):
 
-    if "put the old code in a block to make it collapsable":
-        csv_files = \
-            [
-                # ('exp-6-p5.csv', 'por', ''),
-                # ('exp-6-p10.csv', 'por', ''),
-                # ('exp-6-p20.csv', 'por', ''),
-                # ('exp-6-p100.csv', 'por', ''),
-                ('exp-6-p5-q0.42.csv', 'por', ''),
-                ('exp-6-p10-q0.42.csv', 'por', ''),
-                ('exp-6-p20-q0.42.csv', 'por', ''),
-                ('exp-6-p100-q0.42.csv', 'por', ''),
-            ]
-            # [ ('exp-4c-rng1.csv', 'por', '(rng,xx)')
-            # , ('exp-4c-rng-hash.csv', 'por', '(rng+hash,xx)')
-            # , ('exp-4c-hash-hash.csv', 'por', '(rng+hash,hash)')
-            # , ('exp-4c-hash-xxrev.csv', 'por', '(rng+hash,xxrev)')
-            # # , ('exp-aux1.csv', 'trad', '(1 chain)')  # this one compares a simulated traditional doublespend at various numbers of confirmations with n_chains=1
-            # , ('exp-aux1-q0.40.csv', 'trad', '(1 chain)')  # this one compares a simulated traditional doublespend at various numbers of confirmations with n_chains=1
-            # ]
-
-        # csv_files = list((f"exp-6m-q{q}.csv", 'por', None) for q in ['0.36', '0.4', '0.42', '0.44', '0.46', '0.48'])
-        # csv_files = list((f"exp-6n-q{q}.csv", 'por', None) for q in ['0.40'])
-        # csv_files = list((f"exp-6o-q{q}-t{t}.csv", 'por', None) for q in ['0.40'] for t in ['10', '20', '30'])
-
-        csv_files = [
-            ('exp-aux1-q0.44-sha256.csv', 'trad', '(trad; N_1=1)'),
-            ('exp-7-q0.44-t20-sha256.csv', 'por', None),
-            ]
-        csv_files = [
-            # ('exp-aux1-q0.44-sha256.csv', 'trad', '(trad; N_1=1)'),
-            # ('exp-8-q0.40-t10-blake3.csv', 'por', None),
-            # ('exp-8-q0.40-t10-p40-blake3.csv', 'por', None),
-            # ('exp-8-q0.40-t10-p100-blake3.csv', 'por', None),
-            # ('exp-8-q0.44-t10-p200-blake3.csv', 'por', None),
-            # ('exp-8-q0.44-t5-p200-blake3.csv', 'por', None),
-            # ('exp-8-q0.40-t10-p200-H25-blake3.csv', 'por', None),
-            # ('exp-8-q0.40-t5-p200-H25-blake3.csv', 'por', None),
-            # ('exp-8-q0.44-t10-p200-H25-blake3.csv', 'por', None),
-            # ('exp-8-q0.44-t5-p200-H25-blake3.csv', 'por', None),
-            # ('exp-8-q0.40-t5-p200-blake3.csv', 'por', None),
-            # ('exp-8-q0.40-t5-p100-H100-blake3.csv', 'por', None),
-            # ('exp-8-q0.44-t5-p100-H100-blake3.csv', 'por', None),
-            # ('exp-8-q0.40-t10-p100-H100-blake3.csv', 'por', None),
-            # ('exp-8-q0.44-t10-p100-H100-blake3.csv', 'por', None),
-            ('exp-8-q0.40-t20-p100-H100-blake3.csv', 'por', None),
-            # ('exp-8-q0.44-t20-p100-H100-blake3.csv', 'por', None),
-            # ('exp-9-RDoubleSpendWork-q0.40-t5-p100-H100-WeightedChain-blake3.csv', 'por', None),
-            # ('exp-9-RDoubleSpendWork-q0.40-t10-p100-H100-WeightedChain-blake3.csv', 'por', None),
-            ('exp-9-RDoubleSpendWork-q0.40-t20-p100-H100-WeightedChain-blake3.csv', 'por', None),
-            ]
-
-        csv_files_compare_DSW_t20 = [
-            ('exp-9-RDoubleSpendWork-q0.40-t20-p100-H100-WeightedChain-blake3.csv', 'por', '(DSW+WC)'),
-            ('exp-9-RDoubleSpendWork-q0.40-t20-p100-H100-WeightedDag-blake3.csv', 'por', '(DSW+WD)'),
-            ('exp-8-q0.40-t20-p100-H100-blake3.csv', 'por', '(DS+WC)'),
-        ]
-        csv_files_compare_DSW_t10 = [
-            ('exp-9-RDoubleSpendWork-q0.40-t10-p100-H100-WeightedChain-blake3.csv', 'por', '(DSW+WC)'),
-            ('exp-9-RDoubleSpendWork-q0.40-t10-p100-H100-WeightedDag-blake3.csv', 'por', '(DSW+WD)'),
-            ('exp-8-q0.40-t10-p100-H100-blake3.csv', 'por', '(DS+WC)'),
-        ]
-        csv_files_compare_DSW_t5 = [
-            ('exp-9-RDoubleSpendWork-q0.40-t5-p100-H100-WeightedChain-blake3.csv', 'por', '(DSW+WC)'),
-            ('exp-9-RDoubleSpendWork-q0.40-t5-p100-H100-WeightedDag-blake3.csv', 'por', '(DSW+WD)'),
-            ('exp-8-q0.40-t5-p100-H100-blake3.csv', 'por', '(DS+WC)'),
-        ]
-
-        csv_files_just_trad = [
-            # ('exp_aux1_q=0.40_dsconf-base=20.old.csv', 'trad', '(trad; $N_1=1$)'),
-            # ('exp_aux1_q=0.40_dsconf-base=5.csv', 'trad', '(trad; $N_1=1$)'),
-            # ('exp_aux1_q=0.40_dsconf-base=10.csv', 'trad', '(trad; $N_1=1$)'),
-            # ('exp_aux1_q=0.40_dsconf-base=20.csv', 'trad', '(trad; $N_1=1$)'),
-        ]
-
-        csv_exp_10 = [
-            ('exp-10-RDoubleSpend-q0.40-t5-p100-H100-DAA1000-WeightedChain-blake3.csv', 'por', 'e10 (DS+WC+DAA1000)'),
-            ('exp-9-RDoubleSpendWork-q0.40-t5-p100-H100-WeightedChain-blake3.csv', 'por', 'e9 (DSW+WC)'),
-            ('exp-9-RDoubleSpendWork-q0.40-t5-p100-H100-WeightedDag-blake3.csv', 'por', 'e9 (DSW+WD)'),
-            ('exp-8-q0.40-t5-p100-H100-blake3.csv', 'por', 'e8 (DS+WC)'),
-        ]
-
-        csv_exp_11 = [
-                ('exp-11-RDoubleSpend-q0.40-t5-p100-H50-DAA100-delay25-WeightedChain-blake3.csv', 'por', 'e11 (DS+WC + Delay 0.25 blocks)'),
-                ('exp-11-RDoubleSpend-q0.40-t5-p100-H50-DAA100-delay50-WeightedChain-blake3.csv', 'por', 'e11 (DS+WC + Delay 0.50 blocks)'),
-                ('exp-11-RDoubleSpend-q0.40-t5-p100-H50-DAA100-delay100-WeightedChain-blake3.csv', 'por', 'e11 (DS+WC + Delay 1 blocks)'),
-                ('exp-11-RDoubleSpend-q0.40-t5-p100-H50-DAA100-delay200-WeightedChain-blake3.csv', 'por', 'e11 (DS+WC + Delay 2 blocks)'),
-                ('exp-8-q0.40-t5-p100-H100-blake3.csv', 'por', 'e8 (DS+WC) Best prior'),
-                ('exp-11-RDoubleSpend-q0.40-t5-p100-H50-DAA100-delay0-WeightedChain-blake3.csv', 'por', 'e11 (DS+WC + Draft Refl Considered)'),
-            ]
-
-        csv_exp_11_vs_aux = [
-                ('exp-11-RDoubleSpend-q0.40-t5-p100-H50-DAA100-delay0-WeightedChain-blake3.csv', 'por', 'e11 (DS+WC + Draft Refl Considered)'),
-                ('exp-11-RDoubleSpendWork-q0.40-t5-p100-H50-DAA100-delay0-WeightedDag-blake3.csv', 'por', 'e11 (DSW+WD + Draft Refl Considered)'),
-                ('exp_aux1_q=0.40_dsconf-base=5.csv', 'trad', '(trad; $N_1=1$)'),
-            ]
-
-        csv_exp_12 = [
-            ('exp-12-repeat-8-RDoubleSpendWork-q0.40-t10-p50-H50-WeightedDag-blake3.csv', 'por', None),
-            ('exp-12-repeat-8-RDoubleSpendWork-q0.40-t20-p50-H50-WeightedDag-blake3.csv', 'por', None),
-            ('exp-12-repeat-8-RDoubleSpendWork-q0.40-t5-p50-H50-WeightedDag-blake3.csv', 'por', None),
-            ('exp-12-repeat-8-RDoubleSpendWork-q0.44-t10-p50-H50-WeightedDag-blake3.csv', 'por', None),
-            ('exp-12-repeat-8-RDoubleSpendWork-q0.44-t20-p50-H50-WeightedDag-blake3.csv', 'por', None),
-            ('exp-12-repeat-8-RDoubleSpendWork-q0.44-t5-p50-H50-WeightedDag-blake3.csv', 'por', None),
-            ('exp-12-repeat-8-RDoubleSpendWork-q0.48-t10-p50-H50-WeightedDag-blake3.csv', 'por', None),
-            ('exp-12-repeat-8-RDoubleSpendWork-q0.48-t20-p50-H50-WeightedDag-blake3.csv', 'por', None),
-            ('exp-12-repeat-8-RDoubleSpendWork-q0.48-t5-p50-H50-WeightedDag-blake3.csv', 'por', None),
-        ]
-
-        csv_exp_12_q40 = list(filter(lambda t: 'q0.40' in t[0], csv_exp_12))
-        csv_exp_12_q44 = list(filter(lambda t: 'q0.44' in t[0], csv_exp_12))
-        csv_exp_12_q48 = list(filter(lambda t: 'q0.48' in t[0], csv_exp_12))
-
-        csv_exp_12_q40_xx = [
-            # ('exp-12-repeat-8-RDoubleSpend-q0.40-t5-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-            # ('exp-12-repeat-8-RDoubleSpend-q0.40-t10-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-            # ('exp-12-repeat-8-RDoubleSpend-q0.40-t20-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-            # ('exp-12-repeat-8-RDoubleSpend-q0.44-t5-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-            # ('exp-12-repeat-8-RDoubleSpend-q0.44-t10-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-            # ('exp-12-repeat-8-RDoubleSpend-q0.44-t20-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-            # ('exp-12-repeat-8-RDoubleSpend-q0.48-t5-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-            # ('exp-12-repeat-8-RDoubleSpend-q0.48-t10-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-            ('exp-12-repeat-8-RDoubleSpend-q0.48-t20-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-        ]
-
-        csv_exp_12_5050 = [
-            # actual 50/50 is just high variance noise -- 0.5 < P() < 1 (whereas theoretical is == 1; but we cut off length of attack)
-            # ('exp-12-fiftyfifty-8-RDoubleSpend-q0.5-t5-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-            # ('exp-12-point495-RDoubleSpend-q0.495-t5-p50-H200-WeightedChain-xxh3.csv', 'por', None),
-            ('exp-12-point490-RDoubleSpend-q0.490-t5-p50-H100-WeightedChain-xxh3.csv', 'por', None),
-        ]
-
-        # csv_files = csv_files_just_trad
-        csv_files = csv_files_compare_DSW_t5
-        csv_files = csv_exp_11_vs_aux
-        csv_files = csv_exp_12_q40
-        csv_files = csv_exp_12_5050
-        csv_files = csv_exp_12_q40_xx
-
     csv_compare_aux = [
         ('exp_aux1_q=0.40_dsconf-base=5.csv', 'trad', 'DS+WC; DAA_100'),
         ('exp_aux2_q=0.40_dsconf-base=5_DoubleSpendWork_WeightedDag.csv', 'trad', 'DSW+WD; DAA_100'),
@@ -791,11 +653,11 @@ def main(filter_fname: Optional[str], n_jobs: int):
         return f"Simplex $N_1$"
 
 
-    CEC_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = 1; c = NC)$"
-    CEC_EXT_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$"
+    CEC_TITLE_STR = "$P(q; N_1 = N; c = C) \\; \\approx \\; P(q; N_1 = 1; c = NC)$"
+    CEC_EXT_TITLE_STR = "$P(q; N_1 = N; c = C) \\; \\approx \\; P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$"
     CEC_EXT2_TITLE_STR = "$P(q; N_1 = N; c = C) \\; \\approx \\; P(q; N_1 = a; c = \\frac{{CN}}{{a}}) \\; \\approx \\; P(q; N_1 = 1; c = CN)$"
     CEC_EXT3_TITLE_STR = "$P(q; N_1 = N; c = C) \\; \\approx \\; P(q; N_1 = \\frac{{N}}{{a}}; c = Ca) \\; \\approx \\; P(q; N_1 = 1; c = CN)$"
-    CEC_EXT4_TITLE_STR = "$\\forall a \\in [1, N]: P(q; N_1 = a; c = \\frac{{CN}}{{a}})$ is approximately constant."
+    CEC_EXT4_TITLE_STR = "$\\forall a \\in [1, N]: P(q; N_1 = a; c = \\frac{{CN}}{{a}})$ is approximately constant"
 
     RESULTS_FIG_WIDTH=10
     RESULTS_FIG_ASPECT=1/0.55
@@ -1115,7 +977,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture (Extended)",
                 f"{CEC_EXT2_TITLE_STR}",
-                f"If the CEC is true, then these plots should all line up.",
+                f"If the CEC is true, then these plots should align",
             ]),
             f"png/_e26_ext_9000_q={q}_t={t}_daa={daa}.png",
             x_label=std_x_label(t),
@@ -1129,7 +991,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture (Extended)",
                 f"{CEC_EXT2_TITLE_STR}",
-                f"If the CEC is true, then these plots should all line up.",
+                f"If the CEC is true, then these plots should align",
             ]),
             f"png/_e{exp}_ext_rev_9000_q={q}_t={t}_daa={daa}{suffix}.png",
             x_label=std_x_label(t),
@@ -1148,7 +1010,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             "\n".join([
                 f"PoR Simulator Validation: Doublespend via Traditional Blockchain",
                 # f"{CEC_EXT2_TITLE_STR}",
-                # f"If the CEC is true, then these plots should all line up.",
+                # f"If the CEC is true, then these plots should align",
             ]),
             f"png/_results_trad_validation_9000_t={t}_daa={daa}.pdf",
             x_label=f"Confirmations$\\div {t}$",
@@ -1168,7 +1030,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture",
                 f"{CEC_TITLE_STR}",
-                f"If the CEC is true, then the plots with equal $q$ should align.",
+                f"If the CEC is true, then the plots with equal $q$ should align",
             ]),
             # f"png/_results_trad_vs_1simplex_9000_q={q}_t={t}_daa={daa}.pdf",
             f"png/_results_trad_vs_1simplex_9000_qs={'-'.join(qs)}_t={t}_daa={daa}.pdf",
@@ -1191,7 +1053,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture (Extended)",
                 f"{CEC_EXT4_TITLE_STR}",
-                f"If the CEC is true, then the plots with equal $q$ should align.",
+                f"If the CEC is true, then the plots with equal $q$ should align",
             ]),
             # f"png/_results_cec_9000_q={q}_t={t}_daa={daa}.pdf",
             f"png/_results_cec_9000_qs={'-'.join(qs)}_t={t}_daa={daa}.pdf",

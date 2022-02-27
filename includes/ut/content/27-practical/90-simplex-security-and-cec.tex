@@ -143,9 +143,10 @@ Thus, the hypothesis is that:
 \end{equation}
 
 In fact, we can take this further.
+The relationship that exists is continuous -- it must be if confirmations are equivalent.
+This is the \emph{extended} CEC:
 % 1 \le x \le N; x \in \{a_i, b_i\}
 % , and $1 \le a_i \le N$, and $1 \le b_i \le N$
-For any $a,b \in \{1, 2, \dots, N\}$, the CEC implies:
 \begin{equation}
     %P\biggl(q; N_1 = a; c = \frac{NC}{a}\biggr) \approx P\biggl(q; N_1 = b; c = \frac{NC}{b}\biggr)
     \forall a \in \{x: 1 \le x \le N\}: P\biggl(q; N_1 = a; c = \frac{NC}{a}\biggr) \text{ is approximately constant}
@@ -161,7 +162,7 @@ So, we don't need to know a closed form of $P(q, N_1, c)$: all cases \emph{that 
     When using \emph{work} instead of \emph{height} as the measure of an attack's success, fractional values of $c$ have real meaning, especially with a reactive DAA and $N_1 \gg 1$.
     This turns out not to be much of an issue for us, here, though.
 }
-This is the basis of the method.
+This is the basis of the method used to test this hypothesis.
 
 Note that $P(q; N_1 = 1; c = C)$ is taken to be identical to Rosenfeld's analytical solution. That is:
 
@@ -189,17 +190,17 @@ Particularly:
         Table of parameters necessary to generate experimental results.
     ]{
         Table of parameters necessary to generate experimental results.
-        Some parameters as they are not directly relevant to this experiment.
+        Some parameters are omitted as they are not directly relevant to this experiment.
     }
-    \begin{tabular}{lp{0.7\linewidth}}
+    \begin{tabular}{llp{0.64\linewidth}}
         \toprule
-        Parameter & Significance \\
+        Parameter & Variable & Significance \\
         \midrule
-        $q$ (ratio) & Attacker's proportion of global hash rate. \\
-        $c$ (confirmations) & Local confirmations required before the attacker can succeed. \\
-        $B_f^{-1}$ (ticks) & Analogue of ``seconds'' used by the DAA. \\
-        $DAA_N$ (blocks) & The number of blocks over which the DAA operates. \\
-        $N_1$ (chains) & The number simplex-chains ($N_1 = 1$ for traditional blockchains). \\
+        $q$ (ratio) & Yes & Attacker's proportion of global hash rate. \\
+        $c$ (confirmations) & Yes & Work-equivalent of `$c$ local confirmations' waiting time. \\
+        $N_1$ (chains) & Yes & The number simplex-chains ($N_1 = 1$ for traditional blockchains). \\
+        $B_f^{-1}$ (ticks) & No & Analogue of `seconds' used by the DAA. \\
+        $DAA_N$ (blocks) & No & The number of blocks over which the DAA operates. \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -272,6 +273,7 @@ So, while it is \emph{possible} that a poor implementation of a simplex could co
         A comparison of the measured probability of a successful doublespend (for a traditional blockchain) compared with Rosenfeld's analytical solution.
     ]{
         A comparison of the measured probability of a successful doublespend (for a traditional blockchain) compared with Rosenfeld's analytical solution, for $q \in \{0.4, 0.44, 0.48\}$.
+        That the measured results converge with the analytical solution is taken to be validation of the simulation -- insofar as, for this experiment, it \emph{works} and is \emph{useful}.
     }
     \label{fig:simulation-trad-only}
 \end{figure}
@@ -317,7 +319,9 @@ documented in \autoref{sec:appendix-experiment-ec}
     \centering
     \includegraphics[max width=\linewidth, max height=0.4\textheight]{simulation/_results_trad_vs_1simplex_9000_qs=0.40-0.44_t=5_daa=500.pdf}
     \caption[]{
-        2 A comparison of the measured probabilities of a successful doublespend (for a traditional blockchain and for a simplex) compared with Rosenfeld's analytical solution, for $q \in \{0.4, 0.44\}$.
+        A comparison of the measured probabilities, for $q \in \{0.4, 0.44\}$, of a successful doublespend between: a traditional blockchain, a simplex, and Rosenfeld's analytical solution.
+        That the measured results for a simplex (converted via the CEC) converge with the other results is taken to be evidence of $O(n)$ security and that the CEC is non-refuted.
+        %That the measured results for a simplex (converted via the CEC) converge with the both the results for a traditional blockchain and the analytical solution is taken to be validation that simplexes are secure.
     }
     \label{fig:simulation-r1-single-simplex}
 \end{figure}
@@ -328,7 +332,8 @@ documented in \autoref{sec:appendix-experiment-ec}
     \centering
     \includegraphics[max width=\linewidth, max height=0.4\textheight]{simulation/_results_cec_9000_qs=0.40-0.44_t=5_daa=500.pdf}
     \caption[]{
-        3 A comparison of the measured probability of a successful doublespend compared with Rosenfeld's analytical solution, for $q \in \{0.4, 0.44\}$.
+        A comparison of the measured probabilities, for $q \in \{0.4, 0.44\}$, of a successful doublespend between: a traditional blockchain, a simplex, other simplexes converted via the CEC, and Rosenfeld's analytical solution.
+        That the measured results for a simplex (converted via the CEC) converge with the other results is taken to mean that the extended CEC is non-refuted.
     }
     \label{fig:simulation-r2-cec-ext}
 \end{figure}
