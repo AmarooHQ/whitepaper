@@ -324,9 +324,9 @@ def gen_cec_prob_str(ds_target: float, is_trad=False, scaled=None):
     cx_str = gen_ds_target_tex(ds_target, with_x=True)
     cec_prob = f"$P(q; N_1 = x; c = {c_str})$   "
     cec_trad_prob = f"$P(q; N_1 = 1; c = {cx_str})$ "
-    cec_scaled_prob = f"$P(q; N_1 = x / {scaled}; c = {c_str})$"
+    cec_scaled_prob = f"$P(q; N_1 = x/{scaled}; c = {c_str})$"
     if scaled and scaled < 1 and scaled_conv_lookup.get(scaled, None):
-        cec_scaled_prob = f"$P(q; N_1 = x · {scaled_conv_lookup[scaled]}; c = {c_str})$"
+        cec_scaled_prob = f"$P(q; N_1 = x·{scaled_conv_lookup[scaled]}; c = {c_str})$"
         extra_pad += -2 if scaled <= 0.0625 else 0
     return (cec_trad_prob if is_trad else (cec_scaled_prob if scaled else cec_prob)) + (' ' * extra_pad)
 
@@ -338,6 +338,15 @@ def get_unseen(already_seen: list, current_objs: list):
     obj = unseen[0]
     already_seen.append(obj)
     return obj
+
+
+def save_csv(filename: str, all_data: list[tuple[str, pd.Series]]):
+    df = pd.DataFrame({l:s for l,s in all_data})
+    df.to_csv(filename)
+
+
+def csv_col_label(results_ty, chain_ty, q, ds_target, daa: Any = '0', scale=None) -> str:
+    return "&".join([f"kls={results_ty}", f"ty={chain_ty}", f"q={q}", f"ds={ds_target}", f"daa={daa}", f"scale={scale or 1}"])
 
 
 def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_discounted=False,
@@ -361,7 +370,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
     # print(seen_lines) #debug
 
     print(f"Tabulating CSVs.")
-    csv_series = []
+    csv_series: list[tuple[str, pd.Series]] = []
     por_count = -1
     trad_count = -1
     for csv_i, (fname, chain_ty, label_extra) in enumerate(csv_files):
@@ -375,7 +384,6 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
             por_plot_opts = PorPlotOpts()
 
         n_trials, max_ix, block_target, _q, ds_target, csv_data, ms_elapsed, daa = read_csv_data(fname, chain_ty)
-        csv_series.append(csv_data)
         if chain_ty == 'por':
             ty_str = 'PoR: '
             por_count += 1
@@ -399,6 +407,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         prob_math = gen_cec_prob_str(ds_target, is_trad=is_trad, scaled=por_plot_opts and por_plot_opts.cec_scaled)
         if 'label' not in _kwargs:
             _kwargs['label'] = f"y = {prob_math} --- {ty_str} $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $\\mathrm{{DAA}}_N = {daa}$; ($n \\geq {n_trials}$) {label_extra or ''}"
+        csv_series.append((csv_col_label('results', chain_ty, _q, ds_target, daa=daa, scale=por_plot_opts.cec_scaled), csv_data))
 
         plot_res = csv_data.plot(**_kwargs)
         get_unseen(seen_lines, plot_res.get_lines()).set_gid(f'results_line_{chain_ty}_q{_q}_ds{ds_target}_daa{daa}'.replace('.', '_'))
@@ -428,11 +437,12 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
     for q in _qs:
         for ds_target in ds_targets:
             theoretical_data = ds_theoretical_series(multipliers, q=q, after_n_confs=ds_target)
-            t_series.append(theoretical_data)
             td_max_ys.append(theoretical_data.max())
             prob_math = gen_cec_prob_str(ds_target, is_trad=True)
+            label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)"
+            t_series.append((csv_col_label('analytical', 'trad', q, ds_target, daa='0'), theoretical_data))
             _kw = dict() if len(_qs) * len(ds_targets) > 1 else dict(color=analytical_plot_color)
-            t_axes = theoretical_data.plot(label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)", zorder=2, linestyle="dashed", linewidth=2.0, **_kw)
+            t_axes = theoretical_data.plot(label=label, zorder=2, linestyle="dashed", linewidth=2.0, **_kw)
             get_unseen(seen_lines, t_axes.get_lines()).set_gid(f'analytical_line_trad_q{q}_ds{ds_target}_daa0'.replace('.', '_'))
             legend_gids.append(('analytical', 'trad', q, ds_target, 0))
 
@@ -491,6 +501,10 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
 
     if out_filenames:
         for filename in out_filenames:
+            if filename.endswith('.csv'):
+                # save a csv file
+                save_csv(filename, csv_series + t_series)
+                continue
             figure.set_gid(filename.replace('/', '_').replace('=', '_').replace('.', '_'))
             # mutation stuff before drawing -- e.g., to fix comment layout
             for pscb in pre_save_cbs:
@@ -1113,7 +1127,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             ]),
             # f"png/_results_cec_9000_q={q}_t={t}_daa={daa}.pdf",
             f"png/_results_cec_9000_qs={'-'.join(qs)}_t={t}_daa={daa}",
-            save_as_file_exts=['pdf', 'svg'],
+            save_as_file_exts=['pdf', 'svg', 'csv'],
             x_label=std_x_label(t),
             # x_range=q_t_to_x_range[(q, t)],
             x_range=(0,31),
