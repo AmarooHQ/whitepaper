@@ -14,7 +14,7 @@ if [ -z "$TEX_FILES" ]; then
     exit 1
 fi
 
-bin/msg_good.sh "texLint.sh grepping over files: ${TEX_FILES}"
+bin/msg_good.sh "texLint.sh grepping over files: $(echo $TEX_FILES | wc -w)"
 
 function checkFor {
     REGEX="$1"
@@ -38,4 +38,6 @@ function checkFor {
 #   solution -> use \defineTermTex (drop-in replacement)
 
 checkFor '\$DAA_N\$' && \
-checkFor 'Any other banned things to search for'
+checkFor 'TTS_' && \
+checkFor 'N_{[Bb]lock' && \
+true

@@ -201,7 +201,10 @@ textlint:
 	npm run lint
 
 texlint:
-	bash bin/texLint.sh `find ./includes/ut/content -iname \*.tex`
+	bash bin/texLint.sh \
+		`find ./includes/ut/content -iname \*.tex` \
+		`find ./10-Ultra-Terminum/ -iname \*.md` \
+		`find ./includes/ut -iname \*.tex`
 
 pdflint:
 	bash bin/pdfLint.sh output/whitepaper.pdf
