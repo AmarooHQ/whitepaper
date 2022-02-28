@@ -21,10 +21,11 @@ import multiprocessing.pool as mpp
 import multiprocessing as mp
 
 matplotlib.rcParams['svg.hashsalt'] = 'Ultra Terminum'
-
+matplotlib.rcParams['svg.fonttype'] = 'none'
 
 MIN_DS_CONF = 1.25
 MAX_DS_CONF = 20
+
 
 @dataclass
 class PorPlotOpts:
