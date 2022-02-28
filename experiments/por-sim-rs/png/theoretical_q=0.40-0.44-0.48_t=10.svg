@@ -1901,7 +1901,7 @@ z
      </g>
     </g>
    </g>
-   <g id="analytical_line_trad_q0.4_ds10.0_daa0">
+   <g id="analytical_line_trad_q0_4_ds10_0_daa0">
     <path clip-path="url(#p3cde6987a8)" d="M 62.188043 261.963151 
 L 76.566087 319.798687 
 L 90.94413 349.053648 
@@ -1950,7 +1950,7 @@ L 694.821957 390.04
 L 709.2 390.04 
 " style="fill:none;stroke:#1f77b4;stroke-dasharray:7.4,3.2;stroke-dashoffset:0;stroke-width:2;"/>
    </g>
-   <g id="analytical_line_trad_q0.44_ds10.0_daa0">
+   <g id="analytical_line_trad_q0_44_ds10_0_daa0">
     <path clip-path="url(#p3cde6987a8)" d="M 62.188043 185.36334 
 L 76.566087 235.503836 
 L 90.94413 268.605574 
@@ -1999,7 +1999,7 @@ L 694.821957 389.935464
 L 709.2 389.950456 
 " style="fill:none;stroke:#ff7f0e;stroke-dasharray:7.4,3.2;stroke-dashoffset:0;stroke-width:2;"/>
    </g>
-   <g id="analytical_line_trad_q0.48_ds10.0_daa0">
+   <g id="analytical_line_trad_q0_48_ds10_0_daa0">
     <path clip-path="url(#p3cde6987a8)" d="M 62.188043 94.192381 
 L 76.566087 114.252731 
 L 90.94413 129.343423 
@@ -2082,13 +2082,13 @@ Q 267 131.5 269 131.5
 z
 " style="fill:#ffffff;opacity:0.8;stroke:#cccccc;stroke-linejoin:miter;"/>
     </g>
-    <g id="legend_line_analytical_line_trad_q0.4_ds10.0_daa0">
+    <g id="legend_line_analytical_line_trad_q0_4_ds10_0_daa0">
      <path d="M 271 92.5 
 L 291 92.5 
 " style="fill:none;stroke:#1f77b4;stroke-dasharray:7.4,3.2;stroke-dashoffset:0;stroke-width:2;"/>
     </g>
     <g id="line2d_92"/>
-    <g id="legend_text_analytical_line_trad_q0.4_ds10.0_daa0">
+    <g id="legend_text_analytical_line_trad_q0_4_ds10_0_daa0">
      <!-- y = $P(q; N_1 = 1; c = 10x)$  - - - Trad: $q=0.40$ (Analytical Solution: Rosenfeld, 2012) -->
      <g transform="translate(299 96)scale(0.1 -0.1)">
       <defs>
@@ -2351,13 +2351,13 @@ z
       <use transform="translate(3972.46582 0.015625)" xlink:href="#DejaVuSans-29"/>
      </g>
     </g>
-    <g id="legend_line_analytical_line_trad_q0.44_ds10.0_daa0">
+    <g id="legend_line_analytical_line_trad_q0_44_ds10_0_daa0">
      <path d="M 271 107.2 
 L 291 107.2 
 " style="fill:none;stroke:#ff7f0e;stroke-dasharray:7.4,3.2;stroke-dashoffset:0;stroke-width:2;"/>
     </g>
     <g id="line2d_93"/>
-    <g id="legend_text_analytical_line_trad_q0.44_ds10.0_daa0">
+    <g id="legend_text_analytical_line_trad_q0_44_ds10_0_daa0">
      <!-- y = $P(q; N_1 = 1; c = 10x)$  - - - Trad: $q=0.44$ (Analytical Solution: Rosenfeld, 2012) -->
      <g transform="translate(299 110.7)scale(0.1 -0.1)">
       <use transform="translate(0 0.015625)" xlink:href="#DejaVuSans-79"/>
@@ -2438,13 +2438,13 @@ L 291 107.2
       <use transform="translate(3972.46582 0.015625)" xlink:href="#DejaVuSans-29"/>
      </g>
     </g>
-    <g id="legend_line_analytical_line_trad_q0.48_ds10.0_daa0">
+    <g id="legend_line_analytical_line_trad_q0_48_ds10_0_daa0">
      <path d="M 271 121.9 
 L 291 121.9 
 " style="fill:none;stroke:#2ca02c;stroke-dasharray:7.4,3.2;stroke-dashoffset:0;stroke-width:2;"/>
     </g>
     <g id="line2d_94"/>
-    <g id="legend_text_analytical_line_trad_q0.48_ds10.0_daa0">
+    <g id="legend_text_analytical_line_trad_q0_48_ds10_0_daa0">
      <!-- y = $P(q; N_1 = 1; c = 10x)$  - - - Trad: $q=0.48$ (Analytical Solution: Rosenfeld, 2012) -->
      <g transform="translate(299 125.4)scale(0.1 -0.1)">
       <use transform="translate(0 0.015625)" xlink:href="#DejaVuSans-79"/>

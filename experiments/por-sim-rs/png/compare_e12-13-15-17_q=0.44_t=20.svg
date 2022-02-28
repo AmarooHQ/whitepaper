@@ -2018,7 +2018,7 @@ z
      </g>
     </g>
    </g>
-   <g id="analytical_line_trad_q0.44_ds20_daa0">
+   <g id="analytical_line_trad_q0_44_ds20_daa0">
     <path clip-path="url(#p02bbba23d7)" d="M 79.304762 92.988616 
 L 110.799524 202.559789 
 L 142.294286 265.133776 
@@ -2042,7 +2042,7 @@ L 677.705238 388.644337
 L 709.2 388.760944 
 " style="fill:none;stroke:#17becf;stroke-dasharray:7.4,3.2;stroke-dashoffset:0;stroke-width:2;"/>
    </g>
-   <g id="results_line_por_q0.44_ds20_daa100">
+   <g id="results_line_por_q0_44_ds20_daa100">
     <path clip-path="url(#p02bbba23d7)" d="M 79.304762 153.915886 
 L 110.799524 247.981531 
 L 142.294286 307.322009 
@@ -2087,7 +2087,7 @@ z
      <use style="fill:#1f77b4;stroke:#1f77b4;" x="992.652857" xlink:href="#mdaa1f12289" y="387.981102"/>
     </g>
    </g>
-   <g id="results_line_por_q0.44_ds20_daa100">
+   <g id="results_line_por_q0_44_ds20_daa100">
     <path clip-path="url(#p02bbba23d7)" d="M 79.304762 165.564202 
 L 110.799524 256.552934 
 L 142.294286 295.234134 
@@ -2135,7 +2135,7 @@ z
      <use style="fill:#ff7f0e;stroke:#ff7f0e;" x="992.652857" xlink:href="#m1690f2d7b4" y="387.981102"/>
     </g>
    </g>
-   <g id="results_line_por_q0.44_ds20_daa500">
+   <g id="results_line_por_q0_44_ds20_daa500">
     <path clip-path="url(#p02bbba23d7)" d="M 79.304762 139.244116 
 L 110.799524 239.214109 
 L 142.294286 284.298616 
@@ -2183,7 +2183,7 @@ z
      <use style="fill:#2ca02c;stroke:#2ca02c;" x="992.652857" xlink:href="#m8b0de892cc" y="387.995264"/>
     </g>
    </g>
-   <g id="results_line_por_q0.44_ds20_daa100">
+   <g id="results_line_por_q0_44_ds20_daa100">
     <path clip-path="url(#p02bbba23d7)" d="M 79.304762 156.113681 
 L 110.799524 253.6958 
 L 142.294286 298.970386 
@@ -2265,7 +2265,7 @@ Q 264.3 168.1 266.3 168.1
 z
 " style="fill:#ffffff;opacity:0.8;stroke:#cccccc;stroke-linejoin:miter;"/>
     </g>
-    <g id="legend_line_results_line_por_q0.44_ds20_daa100">
+    <g id="legend_line_results_line_por_q0_44_ds20_daa100">
      <path d="M 268.3 92.7 
 L 288.3 92.7 
 " style="fill:none;stroke:#1f77b4;stroke-linecap:square;stroke-width:1.5;"/>
@@ -2275,7 +2275,7 @@ L 288.3 92.7
       <use style="fill:#1f77b4;stroke:#1f77b4;" x="278.3" xlink:href="#mdaa1f12289" y="92.7"/>
      </g>
     </g>
-    <g id="legend_text_results_line_por_q0.44_ds20_daa100">
+    <g id="legend_text_results_line_por_q0_44_ds20_daa100">
      <!-- y = $P(q; N_1 = x; c = 20)$    - - - PoR:  $q=0.44$; $B_f^{-1} = 50$; $\mathrm{DAA}_N = 100$; ($n \geq 3000$) e12 -->
      <g transform="translate(296.3 96.2)scale(0.1 -0.1)">
       <defs>
@@ -2626,7 +2626,7 @@ z
       <use transform="translate(3975.05388 0.620313)" xlink:href="#DejaVuSans-32"/>
      </g>
     </g>
-    <g id="legend_line_results_line_por_q0.44_ds20_daa100">
+    <g id="legend_line_results_line_por_q0_44_ds20_daa100">
      <path d="M 268.3 109.5 
 L 288.3 109.5 
 " style="fill:none;stroke:#ff7f0e;stroke-linecap:square;stroke-width:1.5;"/>
@@ -2636,7 +2636,7 @@ L 288.3 109.5
       <use style="fill:#ff7f0e;stroke:#ff7f0e;" x="278.3" xlink:href="#m1690f2d7b4" y="109.5"/>
      </g>
     </g>
-    <g id="legend_text_results_line_por_q0.44_ds20_daa100">
+    <g id="legend_text_results_line_por_q0_44_ds20_daa100">
      <!-- y = $P(q; N_1 = x; c = 20)$    - - - PoR:  $q=0.44$; $B_f^{-1} = 50$; $\mathrm{DAA}_N = 100$; ($n \geq 3000$) e13 -->
      <g transform="translate(296.3 113)scale(0.1 -0.1)">
       <use transform="translate(0 0.620313)" xlink:href="#DejaVuSans-79"/>
@@ -2712,7 +2712,7 @@ L 288.3 109.5
       <use transform="translate(3975.05388 0.620313)" xlink:href="#DejaVuSans-33"/>
      </g>
     </g>
-    <g id="legend_line_results_line_por_q0.44_ds20_daa500">
+    <g id="legend_line_results_line_por_q0_44_ds20_daa500">
      <path d="M 268.3 126.3 
 L 288.3 126.3 
 " style="fill:none;stroke:#2ca02c;stroke-linecap:square;stroke-width:1.5;"/>
@@ -2722,7 +2722,7 @@ L 288.3 126.3
       <use style="fill:#2ca02c;stroke:#2ca02c;" x="278.3" xlink:href="#m8b0de892cc" y="126.3"/>
      </g>
     </g>
-    <g id="legend_text_results_line_por_q0.44_ds20_daa500">
+    <g id="legend_text_results_line_por_q0_44_ds20_daa500">
      <!-- y = $P(q; N_1 = x; c = 20)$    - - - PoR:  $q=0.44$; $B_f^{-1} = 50$; $\mathrm{DAA}_N = 500$; ($n \geq 3647$) e15 -->
      <g transform="translate(296.3 129.8)scale(0.1 -0.1)">
       <defs>
@@ -2830,7 +2830,7 @@ z
       <use transform="translate(3975.05388 0.620313)" xlink:href="#DejaVuSans-35"/>
      </g>
     </g>
-    <g id="legend_line_results_line_por_q0.44_ds20_daa100">
+    <g id="legend_line_results_line_por_q0_44_ds20_daa100">
      <path d="M 268.3 143.1 
 L 288.3 143.1 
 " style="fill:none;stroke:#d62728;stroke-linecap:square;stroke-width:1.5;"/>
@@ -2840,7 +2840,7 @@ L 288.3 143.1
       <use style="fill:#d62728;stroke:#d62728;" x="278.3" xlink:href="#m722e1e57ed" y="143.1"/>
      </g>
     </g>
-    <g id="legend_text_results_line_por_q0.44_ds20_daa100">
+    <g id="legend_text_results_line_por_q0_44_ds20_daa100">
      <!-- y = $P(q; N_1 = x; c = 20)$    - - - PoR:  $q=0.44$; $B_f^{-1} = 50$; $\mathrm{DAA}_N = 100$; ($n \geq 3000$) e17 -->
      <g transform="translate(296.3 146.6)scale(0.1 -0.1)">
       <use transform="translate(0 0.620313)" xlink:href="#DejaVuSans-79"/>
@@ -2916,13 +2916,13 @@ L 288.3 143.1
       <use transform="translate(3975.05388 0.620313)" xlink:href="#DejaVuSans-37"/>
      </g>
     </g>
-    <g id="legend_line_analytical_line_trad_q0.44_ds20_daa0">
+    <g id="legend_line_analytical_line_trad_q0_44_ds20_daa0">
      <path d="M 268.3 158.5 
 L 288.3 158.5 
 " style="fill:none;stroke:#17becf;stroke-dasharray:7.4,3.2;stroke-dashoffset:0;stroke-width:2;"/>
     </g>
     <g id="line2d_148"/>
-    <g id="legend_text_analytical_line_trad_q0.44_ds20_daa0">
+    <g id="legend_text_analytical_line_trad_q0_44_ds20_daa0">
      <!-- y = $P(q; N_1 = 1; c = 20x)$  - - - Trad: $q=0.44$ (Analytical Solution: Rosenfeld, 2012) -->
      <g transform="translate(296.3 162)scale(0.1 -0.1)">
       <defs>

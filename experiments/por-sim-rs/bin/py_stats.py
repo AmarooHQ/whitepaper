@@ -401,7 +401,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
             _kwargs['label'] = f"y = {prob_math} --- {ty_str} $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $\\mathrm{{DAA}}_N = {daa}$; ($n \\geq {n_trials}$) {label_extra or ''}"
 
         plot_res = csv_data.plot(**_kwargs)
-        get_unseen(seen_lines, plot_res.get_lines()).set_gid(f'results_line_{chain_ty}_q{_q}_ds{ds_target}_daa{daa}')
+        get_unseen(seen_lines, plot_res.get_lines()).set_gid(f'results_line_{chain_ty}_q{_q}_ds{ds_target}_daa{daa}'.replace('.', '_'))
         legend_gids.append(('results', chain_ty, _q, ds_target, daa))
         # ms_elapsed.plot(label=f"$\\bar{{d}}$ (ms); $B_f^{{-1}} = {block_target}$", secondary_y=True)
         # d2.plot(label="PoR - $y^{0.7}$")
@@ -433,7 +433,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
             prob_math = gen_cec_prob_str(ds_target, is_trad=True)
             _kw = dict() if len(_qs) * len(ds_targets) > 1 else dict(color=analytical_plot_color)
             t_axes = theoretical_data.plot(label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)", zorder=2, linestyle="dashed", linewidth=2.0, **_kw)
-            get_unseen(seen_lines, t_axes.get_lines()).set_gid(f'analytical_line_trad_q{q}_ds{ds_target}_daa0')
+            get_unseen(seen_lines, t_axes.get_lines()).set_gid(f'analytical_line_trad_q{q}_ds{ds_target}_daa0'.replace('.', '_'))
             legend_gids.append(('analytical', 'trad', q, ds_target, 0))
 
     #max_y = max(max(td_max_ys), max(s.max() for s in csv_series) if csv_series else 0)
@@ -453,9 +453,9 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
     plt.minorticks_on()
     legend = plt.legend()
     for lline, (graph_ty, chain_ty, q, ds, daa) in zip(legend.get_lines(), legend_gids):
-        lline.set_gid(f'legend_line_{graph_ty}_line_{chain_ty}_q{q}_ds{ds}_daa{daa}')
+        lline.set_gid(f'legend_line_{graph_ty}_line_{chain_ty}_q{q}_ds{ds}_daa{daa}'.replace('.', '_'))
     for ltext, (graph_ty, chain_ty, q, ds, daa) in zip(legend.get_texts(), legend_gids):
-        ltext.set_gid(f'legend_text_{graph_ty}_line_{chain_ty}_q{q}_ds{ds}_daa{daa}')
+        ltext.set_gid(f'legend_text_{graph_ty}_line_{chain_ty}_q{q}_ds{ds}_daa{daa}'.replace('.', '_'))
 
     if len(ds_targets) == 1:
         ds_c = list(ds_targets)[0]

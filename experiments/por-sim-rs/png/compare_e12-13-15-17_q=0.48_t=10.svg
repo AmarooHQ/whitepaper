@@ -2183,7 +2183,7 @@ z
      </g>
     </g>
    </g>
-   <g id="analytical_line_trad_q0.48_ds10_daa0">
+   <g id="analytical_line_trad_q0_48_ds10_daa0">
     <path clip-path="url(#p3b8af4f9af)" d="M 69.145161 89.59772 
 L 90.480323 109.904523 
 L 111.815484 125.180613 
@@ -2217,7 +2217,7 @@ L 687.864839 275.101665
 L 709.2 277.867331 
 " style="fill:none;stroke:#17becf;stroke-dasharray:7.4,3.2;stroke-dashoffset:0;stroke-width:2;"/>
    </g>
-   <g id="results_line_por_q0.48_ds10_daa100">
+   <g id="results_line_por_q0_48_ds10_daa100">
     <path clip-path="url(#p3b8af4f9af)" d="M 69.145161 151.272999 
 L 90.480323 169.851671 
 L 111.815484 185.991892 
@@ -2257,7 +2257,7 @@ L 0 -3
      <use style="fill:#1f77b4;stroke:#1f77b4;" x="687.864839" xlink:href="#me5ce521474" y="314.765312"/>
     </g>
    </g>
-   <g id="results_line_por_q0.48_ds10_daa100">
+   <g id="results_line_por_q0_48_ds10_daa100">
     <path clip-path="url(#p3b8af4f9af)" d="M 69.145161 148.950665 
 L 90.480323 168.574387 
 L 111.815484 177.97984 
@@ -2299,7 +2299,7 @@ L 0 -3
      <use style="fill:#ff7f0e;stroke:#ff7f0e;" x="687.864839" xlink:href="#m48b04b38ca" y="306.637143"/>
     </g>
    </g>
-   <g id="results_line_por_q0.48_ds10_daa500">
+   <g id="results_line_por_q0_48_ds10_daa500">
     <path clip-path="url(#p3b8af4f9af)" d="M 69.145161 148.815196 
 L 90.480323 170.974133 
 L 111.815484 179.973177 
@@ -2341,7 +2341,7 @@ L 0 -3
      <use style="fill:#2ca02c;stroke:#2ca02c;" x="687.864839" xlink:href="#m20c679eb41" y="305.959796"/>
     </g>
    </g>
-   <g id="results_line_por_q0.48_ds10_daa100">
+   <g id="results_line_por_q0_48_ds10_daa100">
     <path clip-path="url(#p3b8af4f9af)" d="M 69.145161 147.325031 
 L 90.480323 171.012838 
 L 111.815484 187.965876 
@@ -2417,7 +2417,7 @@ Q 264.3 168.1 266.3 168.1
 z
 " style="fill:#ffffff;opacity:0.8;stroke:#cccccc;stroke-linejoin:miter;"/>
     </g>
-    <g id="legend_line_results_line_por_q0.48_ds10_daa100">
+    <g id="legend_line_results_line_por_q0_48_ds10_daa100">
      <path d="M 268.3 92.7 
 L 288.3 92.7 
 " style="fill:none;stroke:#1f77b4;stroke-linecap:square;stroke-width:1.5;"/>
@@ -2427,7 +2427,7 @@ L 288.3 92.7
       <use style="fill:#1f77b4;stroke:#1f77b4;" x="278.3" xlink:href="#me5ce521474" y="92.7"/>
      </g>
     </g>
-    <g id="legend_text_results_line_por_q0.48_ds10_daa100">
+    <g id="legend_text_results_line_por_q0_48_ds10_daa100">
      <!-- y = $P(q; N_1 = x; c = 10)$    - - - PoR:  $q=0.48$; $B_f^{-1} = 50$; $\mathrm{DAA}_N = 100$; ($n \geq 3000$) e12 -->
      <g transform="translate(296.3 96.2)scale(0.1 -0.1)">
       <defs>
@@ -2778,7 +2778,7 @@ z
       <use transform="translate(3975.05388 0.620313)" xlink:href="#DejaVuSans-32"/>
      </g>
     </g>
-    <g id="legend_line_results_line_por_q0.48_ds10_daa100">
+    <g id="legend_line_results_line_por_q0_48_ds10_daa100">
      <path d="M 268.3 109.5 
 L 288.3 109.5 
 " style="fill:none;stroke:#ff7f0e;stroke-linecap:square;stroke-width:1.5;"/>
@@ -2788,7 +2788,7 @@ L 288.3 109.5
       <use style="fill:#ff7f0e;stroke:#ff7f0e;" x="278.3" xlink:href="#m48b04b38ca" y="109.5"/>
      </g>
     </g>
-    <g id="legend_text_results_line_por_q0.48_ds10_daa100">
+    <g id="legend_text_results_line_por_q0_48_ds10_daa100">
      <!-- y = $P(q; N_1 = x; c = 10)$    - - - PoR:  $q=0.48$; $B_f^{-1} = 50$; $\mathrm{DAA}_N = 100$; ($n \geq 3000$) e13 -->
      <g transform="translate(296.3 113)scale(0.1 -0.1)">
       <use transform="translate(0 0.620313)" xlink:href="#DejaVuSans-79"/>
@@ -2864,7 +2864,7 @@ L 288.3 109.5
       <use transform="translate(3975.05388 0.620313)" xlink:href="#DejaVuSans-33"/>
      </g>
     </g>
-    <g id="legend_line_results_line_por_q0.48_ds10_daa500">
+    <g id="legend_line_results_line_por_q0_48_ds10_daa500">
      <path d="M 268.3 126.3 
 L 288.3 126.3 
 " style="fill:none;stroke:#2ca02c;stroke-linecap:square;stroke-width:1.5;"/>
@@ -2874,7 +2874,7 @@ L 288.3 126.3
       <use style="fill:#2ca02c;stroke:#2ca02c;" x="278.3" xlink:href="#m20c679eb41" y="126.3"/>
      </g>
     </g>
-    <g id="legend_text_results_line_por_q0.48_ds10_daa500">
+    <g id="legend_text_results_line_por_q0_48_ds10_daa500">
      <!-- y = $P(q; N_1 = x; c = 10)$    - - - PoR:  $q=0.48$; $B_f^{-1} = 50$; $\mathrm{DAA}_N = 500$; ($n \geq 3600$) e15 -->
      <g transform="translate(296.3 129.8)scale(0.1 -0.1)">
       <use transform="translate(0 0.620313)" xlink:href="#DejaVuSans-79"/>
@@ -2950,7 +2950,7 @@ L 288.3 126.3
       <use transform="translate(3975.05388 0.620313)" xlink:href="#DejaVuSans-35"/>
      </g>
     </g>
-    <g id="legend_line_results_line_por_q0.48_ds10_daa100">
+    <g id="legend_line_results_line_por_q0_48_ds10_daa100">
      <path d="M 268.3 143.1 
 L 288.3 143.1 
 " style="fill:none;stroke:#d62728;stroke-linecap:square;stroke-width:1.5;"/>
@@ -2960,7 +2960,7 @@ L 288.3 143.1
       <use style="fill:#d62728;stroke:#d62728;" x="278.3" xlink:href="#mfa409f9e2b" y="143.1"/>
      </g>
     </g>
-    <g id="legend_text_results_line_por_q0.48_ds10_daa100">
+    <g id="legend_text_results_line_por_q0_48_ds10_daa100">
      <!-- y = $P(q; N_1 = x; c = 10)$    - - - PoR:  $q=0.48$; $B_f^{-1} = 50$; $\mathrm{DAA}_N = 100$; ($n \geq 3000$) e17 -->
      <g transform="translate(296.3 146.6)scale(0.1 -0.1)">
       <use transform="translate(0 0.620313)" xlink:href="#DejaVuSans-79"/>
@@ -3036,13 +3036,13 @@ L 288.3 143.1
       <use transform="translate(3975.05388 0.620313)" xlink:href="#DejaVuSans-37"/>
      </g>
     </g>
-    <g id="legend_line_analytical_line_trad_q0.48_ds10_daa0">
+    <g id="legend_line_analytical_line_trad_q0_48_ds10_daa0">
      <path d="M 268.3 158.5 
 L 288.3 158.5 
 " style="fill:none;stroke:#17becf;stroke-dasharray:7.4,3.2;stroke-dashoffset:0;stroke-width:2;"/>
     </g>
     <g id="line2d_166"/>
-    <g id="legend_text_analytical_line_trad_q0.48_ds10_daa0">
+    <g id="legend_text_analytical_line_trad_q0_48_ds10_daa0">
      <!-- y = $P(q; N_1 = 1; c = 10x)$  - - - Trad: $q=0.48$ (Analytical Solution: Rosenfeld, 2012) -->
      <g transform="translate(296.3 162)scale(0.1 -0.1)">
       <defs>
