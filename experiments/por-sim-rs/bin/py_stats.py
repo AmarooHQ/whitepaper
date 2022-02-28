@@ -12,11 +12,15 @@ from typing import Any, Callable, Literal, Optional
 from matplotlib.cbook import flatten
 import numpy
 import pandas as pd
+import matplotlib
+import matplotlib.axes
 import matplotlib.pyplot as plt
 from decimal import Decimal
 import click
 import multiprocessing.pool as mpp
 import multiprocessing as mp
+
+matplotlib.rcParams['svg.hashsalt'] = 'Ultra Terminum'
 
 
 MIN_DS_CONF = 1.25
@@ -342,6 +346,9 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
     ds_targets = set(seed_ds_targets or [])
     kwargs = dict(style='.') if as_scatter else dict()
     kwargs.update(plot_kwargs or dict())
+
+    legend_gids = []
+
     print(f"Tabulating CSVs.")
     csv_series = []
     por_count = -1
@@ -382,7 +389,9 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         if 'label' not in _kwargs:
             _kwargs['label'] = f"y = {prob_math} --- {ty_str} $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $\\mathrm{{DAA}}_N = {daa}$; ($n \\geq {n_trials}$) {label_extra or ''}"
 
-        csv_data.plot(**_kwargs)
+        plot_res = csv_data.plot(**_kwargs)
+        plot_res.get_lines()[csv_i].set_gid(f'results_line_q{_q}_ds{ds_target}_daa{daa}')
+        legend_gids.append(('results', _q, ds_target, daa))
         # ms_elapsed.plot(label=f"$\\bar{{d}}$ (ms); $B_f^{{-1}} = {block_target}$", secondary_y=True)
         # d2.plot(label="PoR - $y^{0.7}$")
         _max_ix = max(_max_ix, max_ix)
@@ -412,7 +421,9 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
             td_max_ys.append(theoretical_data.max())
             prob_math = gen_cec_prob_str(ds_target, is_trad=True)
             _kw = dict() if len(_qs) * len(ds_targets) > 1 else dict(color=analytical_plot_color)
-            theoretical_data.plot(label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)", zorder=2, linestyle="dashed", linewidth=2.0, **_kw)
+            t_axes = theoretical_data.plot(label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)", zorder=2, linestyle="dashed", linewidth=2.0, **_kw)
+            t_axes.get_lines()[len(t_series)-1].set_gid(f'analytical_line_q{q}_ds{ds_target}_daa0')
+            legend_gids.append(('analytical', q, ds_target, 0))
 
     #max_y = max(max(td_max_ys), max(s.max() for s in csv_series) if csv_series else 0)
     print(f"Done. Now drawing.")
@@ -429,7 +440,11 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
     plt.grid(True)
     plt.grid(True, which='minor', color=(0.9, 0.9, 0.9, 0.1))
     plt.minorticks_on()
-    plt.legend()
+    legend = plt.legend()
+    for lline, (graph_ty, q, ds, daa) in zip(legend.get_lines(), legend_gids):
+        lline.set_gid(f'legend_line_{graph_ty}_line_q{q}_ds{ds}_daa{daa}')
+    for ltext, (graph_ty, q, ds, daa) in zip(legend.get_texts(), legend_gids):
+        ltext.set_gid(f'legend_text_{graph_ty}_line_q{q}_ds{ds}_daa{daa}')
 
     if len(ds_targets) == 1:
         ds_c = list(ds_targets)[0]
@@ -465,9 +480,14 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
 
     if out_filenames:
         for filename in out_filenames:
+            # mutation stuff before drawing -- e.g., to fix comment layout
             for pscb in pre_save_cbs:
                 pscb(filename)
-            plt.savefig(filename)
+            # deterministic svg/pdf output
+            metadata = dict()
+            metadata.update({'CreationDate': None} if filename.endswith('.pdf') else {})
+            metadata.update({'Date': None} if filename.endswith('.svg') else {})
+            plt.savefig(filename, metadata=metadata)
         print(f"Saved figure out: {out_filenames}")
     else:
         print(f"Showing figure (X11)")
@@ -500,6 +520,7 @@ class SavePlot:
         return list(f'{self._filename}.{ext}' for ext in exts)
 
     def run(self):
+        matplotlib.rcParams['svg.hashsalt'] = f'Ultra Terminum {self._filename}'
         plot_chart(
             self.csv_files, save_png=True, out_filenames=self.filenames,
             title=self.title, x_label=self.x_label, y_label=self.y_label,
