@@ -14,14 +14,22 @@ import numpy
 import pandas as pd
 import matplotlib
 import matplotlib.axes
+import matplotlib.font_manager as mplfm
 import matplotlib.pyplot as plt
 from decimal import Decimal
 import click
 import multiprocessing.pool as mpp
 import multiprocessing as mp
 
+# mplfm.
+
 matplotlib.rcParams['svg.hashsalt'] = 'Ultra Terminum'
-matplotlib.rcParams['svg.fonttype'] = 'none'
+# matplotlib.rcParams['svg.fonttype'] = 'none'
+# matplotlib.rcParams['font.family'] = 'NewComputerModern08'
+# matplotlib.rcParams['font.serif'] = 'cmr10'
+# matplotlib.rcParams['font.serif'] = 'NewComputerModern08'
+# matplotlib.rcParams['mathtext.fontset'] = 'cm'
+# matplotlib.rcParams['mathtext.rm'] = 'serif'
 
 MIN_DS_CONF = 1.25
 MAX_DS_CONF = 20
@@ -467,6 +475,9 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         lline.set_gid(f'legend_line_{graph_ty}_line_{chain_ty}_q{q}_ds{ds}_daa{daa}'.replace('.', '_'))
     for ltext, (graph_ty, chain_ty, q, ds, daa) in zip(legend.get_texts(), legend_gids):
         ltext.set_gid(f'legend_text_{graph_ty}_line_{chain_ty}_q{q}_ds{ds}_daa{daa}'.replace('.', '_'))
+        # ltext.set_backgroundcolor((1,1,1,0.01))
+        # ltext.set_backgroundcolor((1,0.2,0.7,0.5))  # debug
+        ltext.set(bbox={'boxstyle': 'round, pad=0.2', 'lw': 0, 'facecolor': (1,1,1,0.01)})
 
     if len(ds_targets) == 1:
         ds_c = list(ds_targets)[0]
