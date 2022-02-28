@@ -331,6 +331,15 @@ def gen_cec_prob_str(ds_target: float, is_trad=False, scaled=None):
     return (cec_trad_prob if is_trad else (cec_scaled_prob if scaled else cec_prob)) + (' ' * extra_pad)
 
 
+def get_unseen(already_seen: list, current_objs: list):
+    unseen = list(filter(lambda x: x not in already_seen, current_objs))
+    if len(unseen) != 1:
+        return print(f"WARNING: get_unseen found unseen with len /= 1: {unseen}")
+    obj = unseen[0]
+    already_seen.append(obj)
+    return obj
+
+
 def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_discounted=False,
         title=None, x_label=None, y_label=None, comment: Optional[Comment] = None,
         save_png=False, out_filenames=None,
@@ -339,7 +348,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         as_scatter=False,
         ):
     print(f"\nPlotting chart: {out_filenames or '<tmp-not-saved>'}")
-    plt.figure(figsize=figsize, dpi=dpi)
+    figure = plt.figure(figsize=figsize, dpi=dpi)
     _x_range_max = x_range[1] if x_range else 21
     _max_ix = 0
     qs = set(seed_qs or [])
@@ -348,6 +357,8 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
     kwargs.update(plot_kwargs or dict())
 
     legend_gids = []
+    seen_lines = list(plt.axes().get_lines())
+    # print(seen_lines) #debug
 
     print(f"Tabulating CSVs.")
     csv_series = []
@@ -390,8 +401,8 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
             _kwargs['label'] = f"y = {prob_math} --- {ty_str} $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $\\mathrm{{DAA}}_N = {daa}$; ($n \\geq {n_trials}$) {label_extra or ''}"
 
         plot_res = csv_data.plot(**_kwargs)
-        plot_res.get_lines()[csv_i].set_gid(f'results_line_q{_q}_ds{ds_target}_daa{daa}')
-        legend_gids.append(('results', _q, ds_target, daa))
+        get_unseen(seen_lines, plot_res.get_lines()).set_gid(f'results_line_{chain_ty}_q{_q}_ds{ds_target}_daa{daa}')
+        legend_gids.append(('results', chain_ty, _q, ds_target, daa))
         # ms_elapsed.plot(label=f"$\\bar{{d}}$ (ms); $B_f^{{-1}} = {block_target}$", secondary_y=True)
         # d2.plot(label="PoR - $y^{0.7}$")
         _max_ix = max(_max_ix, max_ix)
@@ -422,8 +433,8 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
             prob_math = gen_cec_prob_str(ds_target, is_trad=True)
             _kw = dict() if len(_qs) * len(ds_targets) > 1 else dict(color=analytical_plot_color)
             t_axes = theoretical_data.plot(label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)", zorder=2, linestyle="dashed", linewidth=2.0, **_kw)
-            t_axes.get_lines()[len(t_series)-1].set_gid(f'analytical_line_q{q}_ds{ds_target}_daa0')
-            legend_gids.append(('analytical', q, ds_target, 0))
+            get_unseen(seen_lines, t_axes.get_lines()).set_gid(f'analytical_line_trad_q{q}_ds{ds_target}_daa0')
+            legend_gids.append(('analytical', 'trad', q, ds_target, 0))
 
     #max_y = max(max(td_max_ys), max(s.max() for s in csv_series) if csv_series else 0)
     print(f"Done. Now drawing.")
@@ -441,10 +452,10 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
     plt.grid(True, which='minor', color=(0.9, 0.9, 0.9, 0.1))
     plt.minorticks_on()
     legend = plt.legend()
-    for lline, (graph_ty, q, ds, daa) in zip(legend.get_lines(), legend_gids):
-        lline.set_gid(f'legend_line_{graph_ty}_line_q{q}_ds{ds}_daa{daa}')
-    for ltext, (graph_ty, q, ds, daa) in zip(legend.get_texts(), legend_gids):
-        ltext.set_gid(f'legend_text_{graph_ty}_line_q{q}_ds{ds}_daa{daa}')
+    for lline, (graph_ty, chain_ty, q, ds, daa) in zip(legend.get_lines(), legend_gids):
+        lline.set_gid(f'legend_line_{graph_ty}_line_{chain_ty}_q{q}_ds{ds}_daa{daa}')
+    for ltext, (graph_ty, chain_ty, q, ds, daa) in zip(legend.get_texts(), legend_gids):
+        ltext.set_gid(f'legend_text_{graph_ty}_line_{chain_ty}_q{q}_ds{ds}_daa{daa}')
 
     if len(ds_targets) == 1:
         ds_c = list(ds_targets)[0]
@@ -480,6 +491,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
 
     if out_filenames:
         for filename in out_filenames:
+            figure.set_gid(filename.replace('/', '_').replace('=', '_').replace('.', '_'))
             # mutation stuff before drawing -- e.g., to fix comment layout
             for pscb in pre_save_cbs:
                 pscb(filename)
@@ -515,7 +527,7 @@ class SavePlot:
     def filenames(self):
         # hacky check for whether a file extension was included (svg, png, pdf are the ones we care about)
         if len(self._filename.rsplit('.', 1)[-1]) == 3:
-            return list(self._filename)
+            return [self._filename]
         exts = self.save_as_file_exts or list('pdf')
         return list(f'{self._filename}.{ext}' for ext in exts)
 
@@ -650,7 +662,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
         csv_name_f = csv_name_f_from_exp(exp)
         csvs = [
             (csv_name_f(q, t, bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', None),
-            (csv_name_f(q, t, bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None),
+            (csv_name_f(q, t, bt, hr, exp_num=aux, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None),
             (csv_name_f(q, render_conf_target(float(t) * 2), bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=2)),
         ]
         if float(t) <= 5:
@@ -796,27 +808,27 @@ def main(filter_fname: Optional[str], n_jobs: int):
                 ('16', '3', '50', '50', '100'),
                 ('17', '3', '50', '50', '100'),
             ]
-    ] + [
-        # $P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$
-        SavePlot(
-            gen_por_cec_ext_test(q, t, exp=exp, aux=aux, bt=bt, hr=hr, daa=daa),
-            "\n".join([
-                f"PoR Confirmation Equivalence Conjecture (Extended)",
-                f"$q={q}$ | WD+DSW | {'random' if int(exp) < 17 else 'uniform'} hash rate distribution",
-                f"{CEC_EXT_TITLE_STR}"]),
-            # f" PoR Confirmation Equivalence Conjecture (Extended) \n $q={q}$ | WD+DSW | random hash rate distribution \n{CEC_EXT_TITLE_STR}",
-            f"png/por_equiv_orw_ext-cec_e{exp}_q={q}_t{t}.png",
-            x_label=std_x_label(t),
-            x_range=q_t_to_x_range[(q, t)],
-        ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10']
-            for (exp, aux, bt, hr, daa) in [
-                    ('12', '3', '50', '50', '100'),
-                    ('13', '3', '50', '50', '100'),
-                    ('14', '14', '100', '100', '100'),
-                    ('15', '3', '50', '50', '500'),
-                    ('16', '3', '50', '50', '100'),
-                    ('17', '3', '50', '50', '100'),
-                    ]
+    # ] + [
+    #     # $P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$
+    #     SavePlot(
+    #         gen_por_cec_ext_test(q, t, exp=exp, aux=aux, bt=bt, hr=hr, daa=daa),
+    #         "\n".join([
+    #             f"PoR Confirmation Equivalence Conjecture (Extended)",
+    #             f"$q={q}$ | WD+DSW | {'random' if int(exp) < 17 else 'uniform'} hash rate distribution",
+    #             f"{CEC_EXT_TITLE_STR}"]),
+    #         # f" PoR Confirmation Equivalence Conjecture (Extended) \n $q={q}$ | WD+DSW | random hash rate distribution \n{CEC_EXT_TITLE_STR}",
+    #         f"png/por_equiv_orw_ext-cec_e{exp}_q={q}_t{t}.png",
+    #         x_label=std_x_label(t),
+    #         x_range=q_t_to_x_range[(q, t)],
+    #     ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10']
+    #         for (exp, aux, bt, hr, daa) in [
+    #                 ('12', 'aux3', '50', '50', '100'),
+    #                 ('13', 'aux3', '50', '50', '100'),
+    #                 ('14', 'aux14', '100', '100', '100'),
+    #                 ('15', 'aux3', '50', '50', '500'),
+    #                 ('16', 'aux3', '50', '50', '100'),
+    #                 ('17', 'aux3', '50', '50', '100'),
+    #                 ]
     ] + [
         SavePlot(
             [
@@ -1017,7 +1029,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
     ] + [
         # just e26 CEC EXT
         SavePlot(
-            gen_por_cec_ext_test(q, t, exp='26', aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3"),
+            gen_por_cec_ext_test(q, t, exp='26', aux='26aux', bt=75, hr=75, daa=daa, hashname="xxh3"),
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture (Extended)",
                 f"{CEC_EXT2_TITLE_STR}",
