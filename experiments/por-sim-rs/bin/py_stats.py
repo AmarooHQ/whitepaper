@@ -8,9 +8,11 @@ import math
 import os
 from pathlib import Path
 import sys
-from typing import Any, Callable, Literal, Optional
+from typing import Any, Callable, Iterable, Literal, Optional
 from matplotlib.cbook import flatten
 import numpy
+import scipy
+import scipy.special as spsc
 import pandas as pd
 import matplotlib
 import matplotlib.axes
@@ -33,6 +35,30 @@ matplotlib.rcParams['svg.hashsalt'] = 'Ultra Terminum'
 
 MIN_DS_CONF = 1.25
 MAX_DS_CONF = 20
+
+
+def _assert_eq(a, b) -> Optional[Exception]:
+    if a != b:
+        return Exception(f"Not equal: {a}, {b}")
+
+def assert_eq(a, b):
+    e = _assert_eq(a, b)
+    if e: raise e
+
+def _assert_all(xs, predicate, msg=None) -> Optional[list[Exception]]:
+    ex_msg = '' if not msg else f' (msg: {msg})'
+    es = [Exception(f"predicate failed{ex_msg} for x: {x}") for x in xs if not predicate(x)]
+    if len(es) > 0:
+        return es
+
+
+def assert_all_eq(xs, ys):
+    pred = lambda t: t[0] == t[1]
+    es = _assert_all(zip(xs, ys), pred)
+    nt = '\n\t'
+    if es:
+        exs = nt.join([''] + list(map(str, es)))
+        raise Exception(f"Exceptions during assert_all_eq: {exs}")
 
 
 @dataclass
@@ -90,13 +116,48 @@ def pow(b: Decimal, i) -> Decimal:
     return b ** Decimal(i)
 
 
+# # try over reals?
+# # doesn't work with sum: range is over ints
+# def nck_cont(n,k):
+#     print(n, k)
+#     g_f = spsc.gamma
+#     gk = 1 if k == 0 else g_f(k)
+#     return g_f(n) / (gk * g_f(n-k))
+
+
+# @lru_cache
+# def p_ds_success_analytical_cont(q, n):
+#     n = float(n)
+#     q = float(q)
+#     p = 1 - q
+#     if q >= p: return 1
+#     # to_sum = list(nck_cont(m+n-1, m) * (pow(p,n) * pow(q,m) - pow(p,m) * pow(q,n)) for m in range(n + 1))
+#     to_sum = list(n_choose_k(m+n-1, m) * (float(p*q) ** m * ((p ** (n-m)) - (q ** (n-m)))
+#     # pow(p,n) * pow(q,m) - pow(p,m) * pow(q,n)
+#     ) for m in range(n + 1))
+#     print(to_sum)
+#     return 1 - sum(to_sum)
+
+
 @lru_cache
 def p_ds_success_theoretical(q, n=20):
     q = Decimal(q)
     p = 1 - q
     if q >= p: return 1
-    to_sum = list(n_choose_k(m+n-1, m) * (pow(p,n) * pow(q,m) - pow(p,m) * pow(q,n)) for m in range(n + 1))
+    # to_sum = list(n_choose_k(m+n-1, m) * (pow(p,n) * pow(q,m) - pow(p,m) * pow(q,n)) for m in range(n + 1))
+    to_sum = list(n_choose_k(m+n-1, m) * (pow(p*q,m) * (pow(p,n-m) - pow(q,n-m))) for m in range(n + 1))
     return 1.0 - float(sum(to_sum))
+
+
+ahbds_44_table = ['88.000', '82.086', '77.715', '74.125', '71.028', '68.282', '65.801', '63.530', '61.431', '59.478']
+assert_all_eq([
+    f"{p_ds_success_theoretical(0.44, c)*100:6.3f}"
+    for c in range(1, len(ahbds_44_table))
+], ahbds_44_table)
+
+
+# print((p_ds_success_theoretical(0.3, 20), p_ds_success_analytical_cont(0.3, 20)))
+# assert p_ds_success_theoretical(0.3, 20) == p_ds_success_analytical_cont(0.3, 20)
 
 
 def tri_numbers_decreasing(i_start, iter_limit):
@@ -150,11 +211,11 @@ assert exp_numbers_decreasing(4, 7) == 12
 def ds_theoretical_series(multipliers, q=0.44, after_n_confs=20):
     xs = []
     ys = []
-    for n_por_chains in multipliers:
-        n = int(after_n_confs * n_por_chains)
-        r = p_ds_success_theoretical(q, n)
-        xs.append(n_por_chains)
-        # ys.append(math.log(max(r, 0.0000000001))/n)
+    max_trad_confs = int(max(multipliers) * after_n_confs) + 1
+    for c in range(1, max_trad_confs+1):
+        r = p_ds_success_theoretical(q, c)
+        # n = int(after_n_confs * n_por_chains)
+        xs.append(c / after_n_confs)
         ys.append(r)
     data = pd.Series(ys, index=xs)
     return data
@@ -533,6 +594,15 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
     plt.close()
 
 
+# def plot_comparison_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_discounted=False,
+#         title=None, x_label=None, y_label=None, comment: Optional[Comment] = None,
+#         save_png=False, out_filenames=None,
+#         figsize: tuple[float, float] = (10, 7), dpi=100, x_range=None,
+#         seed_qs=None, seed_ds_targets=None,
+#         as_scatter=False,
+#         ):
+
+
 @dataclass
 class SavePlot:
     csv_files: list[CsvFileToPlot]
@@ -569,9 +639,13 @@ class SavePlot:
 
 
 @click.command()
-@click.option('-F', '--filter-fname', default=None, help='If present, only generate those graphs with filenames contining the filter string.')
+@click.option('-F', '--filter-fnames', default=None, multiple=True, help='If present, only generate those graphs with filenames contining the filter string.')
+@click.option('--filter-mode-or', is_flag=True, help='Use OR logic to check matches for filters rather than AND logic (AND is the default).')
 @click.option('-j', '--n-jobs', default=max(1, mp.cpu_count() - 1), help='Number of chart-generation threads to run in parallel')
-def main(filter_fname: Optional[str], n_jobs: int):
+def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bool):
+
+    if filter_fnames and not isinstance(filter_fnames, Iterable):
+        raise Exception(f'wanted an iterable :( -- {filter_fnames}')
 
     csv_compare_aux = [
         ('exp_aux1_q=0.40_dsconf-base=5.csv', 'trad', 'DS+WC; DAA_100'),
@@ -1067,7 +1141,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
         )
         for q in ['0.40', '0.44', '0.48'] for t in ['1.25', '2.5', '5', '10'] for daa in [100, 500]
     ] + [
-        # just e26 CEC EXT
+        # just e26+e28 CEC EXT
         SavePlot(
             gen_por_cec_full_csvs(q, int(t), exp=exp, aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3", **gen_csv_kwargs),
             "\n".join([
@@ -1075,7 +1149,8 @@ def main(filter_fname: Optional[str], n_jobs: int):
                 f"{CEC_EXT2_TITLE_STR}",
                 f"If the CEC is true, then these plots should align",
             ]),
-            f"png/_e{exp}_ext_rev_9000_q={q}_t={t}_daa={daa}{suffix}.png",
+            f"png/_e{exp}_ext_rev_9000_q={q}_t={t}_daa={daa}{suffix}",
+            save_as_file_exts=['png', 'csv'],
             x_label=std_x_label(t),
             x_range=q_t_to_x_range[(q, t)],
         )
@@ -1094,7 +1169,8 @@ def main(filter_fname: Optional[str], n_jobs: int):
                 # f"{CEC_EXT2_TITLE_STR}",
                 # f"If the CEC is true, then these plots should align",
             ]),
-            f"png/_results_trad_validation_9000_t={t}_daa={daa}.pdf",
+            f"png/_results_trad_validation_9000_t={t}_daa={daa}",
+            save_as_file_exts=['pdf', 'csv'],
             x_label=f"Confirmations$\\div {t}$",
             x_range=(0, 31),
             figsize=RESULTS_FIG_SIZE
@@ -1115,7 +1191,8 @@ def main(filter_fname: Optional[str], n_jobs: int):
                 f"If the CEC is true, then the plots with equal $q$ should align",
             ]),
             # f"png/_results_trad_vs_1simplex_9000_q={q}_t={t}_daa={daa}.pdf",
-            f"png/_results_trad_vs_1simplex_9000_qs={'-'.join(qs)}_t={t}_daa={daa}.pdf",
+            f"png/_results_trad_vs_1simplex_9000_qs={'-'.join(qs)}_t={t}_daa={daa}",
+            save_as_file_exts=['pdf', 'csv'],
             x_label=std_x_label(t),
             # x_range=q_t_to_x_range[(q, t)],
             x_range=(0,31),
@@ -1148,14 +1225,15 @@ def main(filter_fname: Optional[str], n_jobs: int):
         for qs in [['0.40', '0.44'], ['0.48']]  # , '0.48'
         for t in ['5']
         for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
-
     ]
 
     pool = mpp.Pool(n_jobs)
     count = 0
 
+    #filter_fname
     for j in jobs_to_save:
-        if filter_fname is None or any(filter_fname in fn for fn in j.filenames):
+        filter_mode = any if filter_mode_or else all
+        if filter_fnames is None or any(filter_mode(fstr in fn for fstr in filter_fnames) for fn in j.filenames):
             if n_jobs > 1:
                 pool.apply_async(j.run)
             else:
