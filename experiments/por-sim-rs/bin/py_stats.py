@@ -382,7 +382,7 @@ def gen_ds_target_tex(t: float, with_x=False) -> str:
     return c_str
 
 
-def gen_cec_prob_str(ds_target: float, is_trad=False, scaled=None):
+def gen_cec_prob_str(ds_target: float, is_trad=False, is_analytical=False, scaled=None):
     if isinstance(ds_target, str):
         print(f"don't store ds_target as str")
         raise Exception('expected float but got string')
@@ -392,13 +392,17 @@ def gen_cec_prob_str(ds_target: float, is_trad=False, scaled=None):
     # extra_pad += 1 if ds_target < 5 and is_trad else 0
     c_str = gen_ds_target_tex(ds_target)
     cx_str = gen_ds_target_tex(ds_target, with_x=True)
-    cec_prob = f"$P(q; N_1 = x; c = {c_str})$   "
-    cec_trad_prob = f"$P(q; N_1 = 1; c = {cx_str})$ "
-    cec_scaled_prob = f"$P(q; N_1 = x/{scaled}; c = {c_str})$"
+    cec_prob = f"$P^\\prime(q; c = {c_str}; N_1 = x)$   "
+    cec_ana_prob = f"$P(q; c = {cx_str})\\;\\!$" + ' '*13
+    cec_trad_prob = f"$P^\\prime(q; c = {cx_str}; N_1 = 1)$ "
+    cec_scaled_prob = f"$P^\\prime(q; c = {c_str}; N_1 = x/{scaled})$"
     if scaled and scaled < 1 and scaled_conv_lookup.get(scaled, None):
-        cec_scaled_prob = f"$P(q; N_1 = x·{scaled_conv_lookup[scaled]}; c = {c_str})$"
+        cec_scaled_prob = f"$P^\\prime(q; c = {c_str}; N_1 = x·{scaled_conv_lookup[scaled]})$"
         extra_pad += -2 if scaled <= 0.0625 else 0
-    return (cec_trad_prob if is_trad else (cec_scaled_prob if scaled else cec_prob)) + (' ' * extra_pad)
+    return ((cec_ana_prob if is_analytical else cec_trad_prob)
+                if is_trad
+                else (cec_scaled_prob if scaled else cec_prob)
+            ) + (' ' * extra_pad)
 
 
 def get_unseen(already_seen: list, current_objs: list):
@@ -508,7 +512,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         for ds_target in ds_targets:
             theoretical_data = ds_theoretical_series(multipliers, q=q, after_n_confs=ds_target)
             td_max_ys.append(theoretical_data.max())
-            prob_math = gen_cec_prob_str(ds_target, is_trad=True)
+            prob_math = gen_cec_prob_str(ds_target, is_trad=True, is_analytical=True)
             label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)"
             t_series.append((csv_col_label('analytical', 'trad', q, ds_target, daa='0'), theoretical_data))
             _kw = dict() if len(_qs) * len(ds_targets) > 1 else dict(color=analytical_plot_color)
