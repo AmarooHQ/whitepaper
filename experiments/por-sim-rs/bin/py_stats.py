@@ -18,6 +18,7 @@ import matplotlib
 import matplotlib.axes
 import matplotlib.font_manager as mplfm
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 from decimal import Decimal
 import click
 import multiprocessing.pool as mpp
@@ -37,12 +38,12 @@ MIN_DS_CONF = 1.25
 MAX_DS_CONF = 20
 
 
-def _assert_eq(a, b) -> Optional[Exception]:
+def _assert_eq(a, b, msg=None) -> Optional[Exception]:
     if a != b:
-        return Exception(f"Not equal: {a}, {b}")
+        return Exception(f"Not equal: {a}, {b}." + "" if msg is None else f" Message: {msg}")
 
-def assert_eq(a, b):
-    e = _assert_eq(a, b)
+def assert_eq(a, b, msg=None):
+    e = _assert_eq(a, b, msg=msg)
     if e: raise e
 
 def _assert_all(xs, predicate, msg=None) -> Optional[list[Exception]]:
@@ -332,7 +333,7 @@ def get_line_default_kwargs(chain_ty: Literal['por', 'trad'], ds_target, as_scat
     z_order = 2 + (.1 if is_por else -.1)
     # color = get_color(ds_target)
     color = plot_colors[chain_ty][ds_target]
-    kw: dict[str, Any] = dict(zorder=z_order, color=color, linewidth=1.5 if is_por else 2.5)
+    kw: dict[str, Any] = dict(zorder=z_order, color=color, linewidth=2.0 if is_por else 2.5)
     marker_k: str = 'style' if as_scatter else 'marker'
     kw[marker_k] = line_markers[chain_ty][ds_target]
     return kw
@@ -423,12 +424,45 @@ def csv_col_label(results_ty, chain_ty, q, ds_target, daa: Any = '0', scale=None
     return "&".join([f"kls={results_ty}", f"ty={chain_ty}", f"q={q}", f"ds={ds_target}", f"daa={daa}", f"scale={scale or 1}"])
 
 
+def _plot_this_csv(_csv_data, seen_lines, legend_gids, _chain_ty, __q, _ds_target, _daa, __kwargs):
+    def _inner():
+        plot_res = _csv_data.plot(**__kwargs)
+        get_unseen(seen_lines, plot_res.get_lines()).set_gid(
+            f'results_line_{_chain_ty}_q{__q}_ds{_ds_target}_daa{_daa}'
+            .replace('.', '_'))
+        legend_gids.append(('results', _chain_ty, __q, _ds_target, _daa))
+    return _inner
+
+
+def _plot_this_analytical(theoretical_data, label, seen_lines, legend_gids, __q, _ds_target, __kw):
+    def _inner():
+        t_axes = theoretical_data.plot(label=label, zorder=2, linestyle="dashed", linewidth=2.0, **__kw)
+        get_unseen(seen_lines, t_axes.get_lines()).set_gid(
+            f'analytical_line_trad_q{__q}_ds{int(_ds_target)}_daa0'.replace('.', '_'))
+        legend_gids.append(('analytical', 'trad', __q, int(_ds_target), 0))
+    return _inner
+
+
+"""
+########  ##        #######  ########          ######  ##     ##    ###    ########  ########
+##     ## ##       ##     ##    ##            ##    ## ##     ##   ## ##   ##     ##    ##
+##     ## ##       ##     ##    ##            ##       ##     ##  ##   ##  ##     ##    ##
+########  ##       ##     ##    ##            ##       ######### ##     ## ########     ##
+##        ##       ##     ##    ##            ##       ##     ## ######### ##   ##      ##
+##        ##       ##     ##    ##            ##    ## ##     ## ##     ## ##    ##     ##
+##        ########  #######     ##    #######  ######  ##     ## ##     ## ##     ##    ##
+
+PLOT_CHART
+"""
+
+
 def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_discounted=False,
         title=None, x_label=None, y_label=None, comment: Optional[Comment] = None,
         save_png=False, out_filenames=None,
         figsize: tuple[float, float] = (10, 7), dpi=100, x_range=None, y_lim=None,
         seed_qs=None, seed_ds_targets=None,
         as_scatter=False,
+        plot_this_order: Optional[list[int]] = None,
         ):
     print(f"\nPlotting chart: {out_filenames or '<tmp-not-saved>'}")
     figure = plt.figure(figsize=figsize, dpi=dpi)
@@ -439,9 +473,12 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
     kwargs = dict(style='.') if as_scatter else dict()
     kwargs.update(plot_kwargs or dict())
 
+    # functions that we call later to do the actual plotting. call them later so we can control the order they are drawn / added to legend.
+    plot_fs = []
+    # track parameters for legend element global ids -- should be done in plot_f so the order matches.
     legend_gids = []
     seen_lines = list(plt.axes().get_lines())
-    # print(seen_lines) #debug
+
 
     print(f"Tabulating CSVs.")
     csv_series: list[tuple[str, pd.Series]] = []
@@ -483,9 +520,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
             _kwargs['label'] = f"y = {prob_math} --- {ty_str} $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $\\mathrm{{DAA}}_N = {daa}$; ($n \\geq {n_trials}$) {label_extra or ''}"
         csv_series.append((csv_col_label('results', chain_ty, _q, ds_target, daa=daa, scale=por_plot_opts.cec_scaled), csv_data))
 
-        plot_res = csv_data.plot(**_kwargs)
-        get_unseen(seen_lines, plot_res.get_lines()).set_gid(f'results_line_{chain_ty}_q{_q}_ds{ds_target}_daa{daa}'.replace('.', '_'))
-        legend_gids.append(('results', chain_ty, _q, ds_target, daa))
+        plot_fs.append(_plot_this_csv(csv_data, seen_lines, legend_gids, chain_ty, _q, ds_target, daa, _kwargs))
         # ms_elapsed.plot(label=f"$\\bar{{d}}$ (ms); $B_f^{{-1}} = {block_target}$", secondary_y=True)
         # d2.plot(label="PoR - $y^{0.7}$")
         _max_ix = max(_max_ix, max_ix)
@@ -516,12 +551,19 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
             label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)"
             t_series.append((csv_col_label('analytical', 'trad', q, ds_target, daa='0'), theoretical_data))
             _kw = dict() if len(_qs) * len(ds_targets) > 1 else dict(color=analytical_plot_color)
-            t_axes = theoretical_data.plot(label=label, zorder=2, linestyle="dashed", linewidth=2.0, **_kw)
-            get_unseen(seen_lines, t_axes.get_lines()).set_gid(f'analytical_line_trad_q{q}_ds{int(ds_target)}_daa0'.replace('.', '_'))
-            legend_gids.append(('analytical', 'trad', q, int(ds_target), 0))
+            plot_fs.append(_plot_this_analytical(theoretical_data, label, seen_lines, legend_gids, q, ds_target, _kw))
 
     #max_y = max(max(td_max_ys), max(s.max() for s in csv_series) if csv_series else 0)
     print(f"Done. Now drawing.")
+
+    if plot_this_order:
+        assert_eq(len(plot_this_order), len(plot_fs), "length of `plot_this_order` must = the number of series we're plotting")
+        assert_eq(len(plot_this_order), len(set(plot_this_order)), "`plot_this_order` must have unique elements")
+        for series_i in plot_this_order:
+            plot_fs[series_i]()
+    else:
+        for f in plot_fs:
+            f()
 
     default_title = "\n".join([
         f"P(atk success) PoR vs Traditional Chain",
@@ -544,19 +586,28 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         # ltext.set_backgroundcolor((1,0.2,0.7,0.5))  # debug
         ltext.set(bbox={'boxstyle': 'round, pad=0.2', 'lw': 0, 'facecolor': (1,1,1,0.01)})
 
+    # force integer ticks on main x axis
+    plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=20, integer=True))
+    plt.gca().xaxis.set_minor_locator(MaxNLocator(nbins=80, integer=True))
+
+    # set top x axis
     if len(ds_targets) == 1:
         ds_c = list(ds_targets)[0]
         c2n = lambda c: c / ds_c
         n2c = lambda n: n * ds_c
         sec_x_axis = plt.gca().secondary_xaxis('top', functions=(n2c, c2n))
         sec_x_axis.set_xlabel('Traditional Confirmations (PoR Equivalent via CEC)')
+        # can't do this on sec axis? mb need to do a different way
+        # sec_x_axis.set_major_locator(MaxNLocator(nbins=20, integer=True))
     else:
         _id = lambda x: x
         sec_x_axis = plt.gca().secondary_xaxis('top', functions=(_id, _id))
         sec_x_axis.set_xlabel('WARNING: UNABLE TO SET TOP X AXIS!!!', color='red')
+        raise Exception("can't plot secondary x axis")
 
     if x_range:
         plt.xlim(x_range)
+
     if y_lim:
         plt.ylim(y_lim)
     else:
@@ -626,6 +677,7 @@ class SavePlot:
     seed_qs: Optional[set[float]] = None
     seed_ds_targets: Optional[set[float]] = None
     save_as_file_exts: Optional[list[str]] = None
+    plot_this_order: Optional[list[int]] = None
 
     @property
     def filenames(self):
@@ -643,6 +695,7 @@ class SavePlot:
             comment=self.comment, figsize=self.figsize, dpi=self.dpi,
             x_range=self.x_range, y_lim=self.y_lim,
             seed_qs=self.seed_qs, seed_ds_targets=self.seed_ds_targets,
+            plot_this_order=self.plot_this_order,
         )
 
 
@@ -1243,10 +1296,12 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             ],
             f"CEC: Early PoR results",
             f"png/lp_early_results",
-            save_as_file_exts=['svg', 'png'],
+            save_as_file_exts=['svg', 'png', 'csv'],
             x_range=(0, 21),
-            y_lim=(0, 0.5),
-            figsize=(8, 8*0.6)
+            y_lim=(0, 0.45),
+            figsize=(8, 8*0.6),
+            x_label=std_x_label(20),
+            plot_this_order=[2,1,0],
         )
     ] + [
         # for LP: after draft refl work
@@ -1259,10 +1314,49 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             ],
             f"CEC: Early PoR results -- Accounting for Draft Reflected Work",
             f"png/lp_results_after_draft_refl_work",
-            save_as_file_exts=['svg', 'png'],
+            save_as_file_exts=['svg', 'png', 'csv'],
+            x_range=(0, 31),
+            y_lim=(0, 0.7),
+            figsize=(8, 8*0.6),
+            x_label=std_x_label(5),
+            plot_this_order=[2,1,0],
+        )
+    ] + [
+        # for LP: main results (copy of _results_cec_9000)
+        SavePlot(
+            list(chain(*[
+                gen_por_cec_full_csvs(q, int(t), bt=75, hr=75, exp=exp, aux='aux', daa=daa, min_ds_conf=5, hashname="xxh3")
+                for q in qs
+            ])),
+            "\n".join([
+                f"Testing the Confirmation Equivalence Conjecture",
+                # f"{CEC_EXT4_TITLE_STR}",
+                f"If the CEC is true, then the plots with equal $q$ should align",
+            ]),
+            f"png/lp_main_results",
+            save_as_file_exts=['svg', 'csv', 'png'],
+            x_label=std_x_label(t),
+            x_range=(0,31),
+            figsize=(9, 9*0.65),
+            y_lim=(0, 0.85),
+            plot_this_order=[8,3,0,1,2,9,7,4,5,6],
+        )
+        for qs in [['0.40', '0.44']]
+        for t in ['5']
+        for exp,daa in [('26', 500)]
+    ] + [
+        # for LP: analytical only
+        SavePlot(
+            [],
+            f"Rosenfeld's Analytical Solution",
+            f"png/lp_analytical_only",
+            save_as_file_exts=['svg', 'png', 'csv'],
             x_range=(0, 21),
-            # y_lim=(0, 0.5),
-            figsize=(8, 8*0.6)
+            y_lim=(0, 0.75),
+            figsize=(8, 8*0.6),
+            x_label=f"x = Confirmations / 5",
+            seed_ds_targets={5},
+            seed_qs={0.40, 0.44}
         )
     ]
 
