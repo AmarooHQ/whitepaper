@@ -513,8 +513,8 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
             t_series.append((csv_col_label('analytical', 'trad', q, ds_target, daa='0'), theoretical_data))
             _kw = dict() if len(_qs) * len(ds_targets) > 1 else dict(color=analytical_plot_color)
             t_axes = theoretical_data.plot(label=label, zorder=2, linestyle="dashed", linewidth=2.0, **_kw)
-            get_unseen(seen_lines, t_axes.get_lines()).set_gid(f'analytical_line_trad_q{q}_ds{ds_target}_daa0'.replace('.', '_'))
-            legend_gids.append(('analytical', 'trad', q, ds_target, 0))
+            get_unseen(seen_lines, t_axes.get_lines()).set_gid(f'analytical_line_trad_q{q}_ds{int(ds_target)}_daa0'.replace('.', '_'))
+            legend_gids.append(('analytical', 'trad', q, int(ds_target), 0))
 
     #max_y = max(max(td_max_ys), max(s.max() for s in csv_series) if csv_series else 0)
     print(f"Done. Now drawing.")
