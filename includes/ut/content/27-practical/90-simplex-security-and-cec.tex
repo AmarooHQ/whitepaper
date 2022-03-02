@@ -42,7 +42,7 @@ $\blacksquare$
     See \autoref{eq:por-sim-hypothesis-extended}
     % Given $q$ and some integer $N$, the probability of
     % an attack succeeding after $C$ confirmations is
-    % $\forall a \in \{1,2,\dots,N\}: P(q; N_1 = a; c = \frac{NC}{a})$
+    % $\forall a \in \{1,2,\dots,N\}: P^\prime(q; N_1 = a; c = \frac{NC}{a})$
 }
 
 The Confirmation Equivalence Conjecture is why PoR works.
@@ -131,14 +131,14 @@ Let's test the Confirmation Equivalence Conjecture.
 
 The hypothesis is that: doublespends against an \emph{individual simplex-chain} in an $N$-chain simplex after $C$ \emph{local} confirmations are \emph{as hard} as doublespends against a traditional blockchain after $N\cdot C$ confirmations.
 
-Define $P(q; N_1 = N; c = C)$ (for some given $N$ and $C$) to be the probability of an attack succeeding after $c$ confirmations against a simplex with $N_1$ simplex-chains, given an attacker with $q$ proportion of the network hash-rate.
+Define $P^\prime(q; N_1 = N; c = C)$ (for some given $N$ and $C$) to be the probability of an attack succeeding after $c$ confirmations against a simplex with $N_1$ simplex-chains, given an attacker with $q$ proportion of the network hash-rate.
 
 Note that a simplex of 1 chain (the 0-simplex) \emph{is} a traditional blockchain.
-So we can take Bitcoin for example: the probability of an attack succeeding after 6 confirmations is given by $P(q; N_1 = 1; c = 6)$ -- of course, we still need to know the attacker's hash-rate, $q$, to calculate this.
+So we can take Bitcoin for example: the probability of an attack succeeding after 6 confirmations is given by $P^\prime(q; N_1 = 1; c = 6)$ -- of course, we still need to know the attacker's hash-rate, $q$, to calculate this.
 
 Thus, the hypothesis is that:
 \begin{equation}
-    P(q; N_1 = 1; c = NC) \approx P(q; N_1 = N; c = C)
+    P^\prime(q; N_1 = 1; c = NC) \approx P^\prime(q; N_1 = N; c = C)
     \label{eq:por-sim-hypothesis}
 \end{equation}
 
@@ -156,7 +156,7 @@ This is the \emph{extended} CEC:
 If \autoref{eq:por-sim-hypothesis-extended} is correct, it indicates that there exists a \emph{generalization} of traditional blockchains (which have $N_1 = 1$);
 particularly, that there is \emph{another dimension} ($N_1$; the size of the simplex) which is geometrically related to the first dimension, $c$.
 
-So, we don't need to know a closed form of $P(q, N_1, c)$: all cases \emph{that we can measure} are equivalent to some \emph{other} case, and we can convert between them.\footnote{
+So, we don't need to know a closed form of $P^\prime(q, N_1, c)$: all cases \emph{that we can measure} are equivalent to some \emph{other} case, and we can convert between them.\footnote{
     This is not strictly true: Rosenfeld's solution requires an integer value for $c$.
     This is due to his solution assuming a static difficulty and the longest-chain fork rule; the \emph{construction} is consistent with Bitcoin (provided the difficulty doesn't adjust), but not with chains that recalculate difficulty every block.
     Additionally, when using \emph{work} instead of \emph{height} as the measure of an attack's success, fractional values of $c$ have real meaning -- especially with a reactive DAA and $N_1 \gg 1$.
@@ -165,10 +165,10 @@ So, we don't need to know a closed form of $P(q, N_1, c)$: all cases \emph{that 
 }
 This is the basis of the method used to test this hypothesis.
 
-Note that $P(q; N_1 = 1; c = C)$ is taken to be identical to Rosenfeld's analytical solution. That is:
+Note that $P^\prime(q; N_1 = 1; c = C)$ is taken to be identical to Rosenfeld's analytical solution. That is:
 
 \begin{equation}
-    \forall c \in \{1, 2, \dots\}: P(q; N_1 = 1; c) = \begin{cases}
+    \forall c \in \{1, 2, \dots\}: P^\prime(q; N_1 = 1; c) = \begin{cases}
         1 - \sum_{m=0}^c \binom{m+c-1}{m}(p^c q^m - p^m q^c), & \text{if } q < p \\
         1, & \text{otherwise}
     \end{cases}
@@ -226,13 +226,13 @@ For each data-point, typically at least 9,000 samples were taken (this is indica
 Simultaneously graph:
 
 Graph 1:
-PoR: $P(q; N_1 = x; c = C)$ vs Traditional: $P(q; N_1 = 1; c = Cx)$
+PoR: $P^\prime(q; N_1 = x; c = C)$ vs Traditional: $P^\prime(q; N_1 = 1; c = Cx)$
 
 Graph 2:
 Simplex A vs Simplex B
 \begin{align*}
-    \text{Simplex A} \to & & P(q; N_1 = x / 2; c = C) &\approx P(q; N_1 = x; c = 2C) & & \leftarrow \text{Simplex B} \\
-    & & P(q; N_1 = x; c = C) &\approx P(q; N_1 = 2x; c = 2C) & &
+    \text{Simplex A} \to & & P^\prime(q; N_1 = x / 2; c = C) &\approx P^\prime(q; N_1 = x; c = 2C) & & \leftarrow \text{Simplex B} \\
+    & & P^\prime(q; N_1 = x; c = C) &\approx P^\prime(q; N_1 = 2x; c = 2C) & &
 \end{align*}
 
 Both graphs should be basically overlapping
@@ -285,10 +285,10 @@ So, while it is \emph{possible} that a poor implementation of a simplex could co
 
 \subsubsubsubsection{Error Correction Iteration}
 
-Following the initial implementation of PoR in the simulator, results were promising but did not align with the theoretical prediction (based on Rosenfeld's analytical derivation of $P(q; N_1 = 1; c = C)$).
+Following the initial implementation of PoR in the simulator, results were promising but did not align with the theoretical prediction (based on Rosenfeld's analytical derivation of $P^\prime(q; N_1 = 1; c = C)$).
 
 traditional chains were okay but not perfect -- a bit better than predicted tho.
-simplexes, however, were way worse for $N_1 > 5$ or so -- $P(\cdots)$ never dropped below $\sim 0.1$.
+simplexes, however, were way worse for $N_1 > 5$ or so -- $P^\prime(\cdots)$ never dropped below $\sim 0.1$.
 
 documented in \autoref{sec:appendix-experiment-ec}
 
@@ -305,10 +305,10 @@ documented in \autoref{sec:appendix-experiment-ec}
 \todo{por sim - Interpreting the Results}
 
 \begin{itemize}
-    \item benchmark against traditional blockchain analytical solution (Rosenfeld, 2012): $P(q; N_1 = 1; c = Cx)$
-    \item plot of measured $P(q; N_1 = 1; c = Cx)$
-    \item plot of measured $P(q; N_1 = x; c = C)$
-    \item plot of scaled measured $P(q; N_1 = x/a; c = Ca)$ for different values of $a$
+    \item benchmark against traditional blockchain analytical solution (Rosenfeld, 2012): $P^\prime(q; N_1 = 1; c = Cx)$
+    \item plot of measured $P^\prime(q; N_1 = 1; c = Cx)$
+    \item plot of measured $P^\prime(q; N_1 = x; c = C)$
+    \item plot of scaled measured $P^\prime(q; N_1 = x/a; c = Ca)$ for different values of $a$
     \item According to the CEC, they should all line up.
 \end{itemize}
 

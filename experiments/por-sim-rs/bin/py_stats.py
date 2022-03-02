@@ -317,7 +317,7 @@ plot_colors = {
     'trad': {1.25: 'C3', 2.5: 'C3', 5: 'C3', 10: 'C3', 20: 'C3'},
 }
 # C4: purple
-analytical_plot_color = 'C9'
+DEFAULT_ANALYTICAL_COLOR = 'C9'
 
 '''color scale'''
 def get_color(ds_target):
@@ -463,6 +463,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         seed_qs=None, seed_ds_targets=None,
         as_scatter=False,
         plot_this_order: Optional[list[int]] = None,
+        analytical_plot_color=DEFAULT_ANALYTICAL_COLOR,
         ):
     print(f"\nPlotting chart: {out_filenames or '<tmp-not-saved>'}")
     figure = plt.figure(figsize=figsize, dpi=dpi)
@@ -678,6 +679,7 @@ class SavePlot:
     seed_ds_targets: Optional[set[float]] = None
     save_as_file_exts: Optional[list[str]] = None
     plot_this_order: Optional[list[int]] = None
+    analytical_plot_color: Optional[str] = DEFAULT_ANALYTICAL_COLOR
 
     @property
     def filenames(self):
@@ -689,6 +691,8 @@ class SavePlot:
 
     def run(self):
         matplotlib.rcParams['svg.hashsalt'] = f'Ultra Terminum {self._filename}'
+        kwargs = dict()
+        kwargs.update(dict(analytical_plot_color=self.analytical_plot_color) if self.analytical_plot_color else {})
         plot_chart(
             self.csv_files, save_png=True, out_filenames=self.filenames,
             title=self.title, x_label=self.x_label, y_label=self.y_label,
@@ -696,6 +700,7 @@ class SavePlot:
             x_range=self.x_range, y_lim=self.y_lim,
             seed_qs=self.seed_qs, seed_ds_targets=self.seed_ds_targets,
             plot_this_order=self.plot_this_order,
+            **kwargs
         )
 
 
@@ -1302,6 +1307,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             figsize=(8, 8*0.6),
             x_label=std_x_label(20),
             plot_this_order=[2,1,0],
+            analytical_plot_color='C8',
         )
     ] + [
         # for LP: after draft refl work
@@ -1320,6 +1326,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             figsize=(8, 8*0.6),
             x_label=std_x_label(5),
             plot_this_order=[2,1,0],
+            analytical_plot_color='C8',
         )
     ] + [
         # for LP: main results (copy of _results_cec_9000)
