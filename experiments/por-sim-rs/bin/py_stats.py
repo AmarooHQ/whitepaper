@@ -422,7 +422,7 @@ def csv_col_label(results_ty, chain_ty, q, ds_target, daa: Any = '0', scale=None
 def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_discounted=False,
         title=None, x_label=None, y_label=None, comment: Optional[Comment] = None,
         save_png=False, out_filenames=None,
-        figsize: tuple[float, float] = (10, 7), dpi=100, x_range=None,
+        figsize: tuple[float, float] = (10, 7), dpi=100, x_range=None, y_lim=None,
         seed_qs=None, seed_ds_targets=None,
         as_scatter=False,
         ):
@@ -553,7 +553,10 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
 
     if x_range:
         plt.xlim(x_range)
-    plt.ylim(bottom=0)
+    if y_lim:
+        plt.ylim(y_lim)
+    else:
+        plt.ylim(bottom=0)
 
     plt.tight_layout()
 
@@ -612,6 +615,7 @@ class SavePlot:
     x_label: Optional[str] = None
     y_label: Optional[str] = None
     x_range: Optional[tuple[float, float]] = None
+    y_lim: Optional[tuple[float, float]] = None
     comment: Optional[Comment] = None
     figsize: tuple[float, float] = (10, 10 * 0.6)
     dpi: int = 300
@@ -633,7 +637,7 @@ class SavePlot:
             self.csv_files, save_png=True, out_filenames=self.filenames,
             title=self.title, x_label=self.x_label, y_label=self.y_label,
             comment=self.comment, figsize=self.figsize, dpi=self.dpi,
-            x_range=self.x_range,
+            x_range=self.x_range, y_lim=self.y_lim,
             seed_qs=self.seed_qs, seed_ds_targets=self.seed_ds_targets,
         )
 
@@ -1225,6 +1229,21 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
         for qs in [['0.40', '0.44'], ['0.48']]  # , '0.48'
         for t in ['5']
         for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
+    ] + [
+        # for LP: some early results
+        SavePlot(
+            [
+                # ('exp-4c-hash-xxrev.csv', 'por', None)  # already fixed
+                ('exp-3.csv', 'por', None),
+                ('exp-aux1.csv', 'trad', None),
+            ],
+            f"CEC: Early PoR results",
+            f"png/lp_early_results",
+            save_as_file_exts=['svg', 'png'],
+            x_range=(0, 21),
+            y_lim=(0, 0.5),
+            figsize=(8, 8*0.6)
+        )
     ]
 
     pool = mpp.Pool(n_jobs)
