@@ -1244,6 +1244,22 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             y_lim=(0, 0.5),
             figsize=(8, 8*0.6)
         )
+    ] + [
+        # for LP: after draft refl work
+        SavePlot(
+            [
+                # ('exp-4c-hash-xxrev.csv', 'por', None),  # already fixed
+                # ('exp-9-RDoubleSpendWork-q0.40-t5-p100-H100-WeightedDag-blake3.csv', 'por', None),
+                ('exp-12-repeat-8-RDoubleSpendWork-q0.44-t5-p50-H50-WeightedDag-xxh3.csv', 'por', None),
+                ('exp_aux2_q=0.44_dsconf-base=5_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', None),
+            ],
+            f"CEC: Early PoR results -- Accounting for Draft Reflected Work",
+            f"png/lp_results_after_draft_refl_work",
+            save_as_file_exts=['svg', 'png'],
+            x_range=(0, 21),
+            # y_lim=(0, 0.5),
+            figsize=(8, 8*0.6)
+        )
     ]
 
     pool = mpp.Pool(n_jobs)
