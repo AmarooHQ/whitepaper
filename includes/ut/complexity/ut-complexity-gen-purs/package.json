@@ -8,7 +8,7 @@
     "run": "spago run",
     "bundle-here": "spago bundle-app",
     "bundle-for-wp": "spago bundle-app --to ../populateWPTables.js",
-    "run-lp": "spago run -b \"--lp-tables --html\"",
+    "lp": "spago run -b \"--lp-tables --html\"",
     "dev": "spago run -b \"--dev-tables\""
   },
   "author": "max",

@@ -34,7 +34,7 @@ ut_params = {explicitPoRs: true, headerOmission: true, hashTruncation: true}
 
 trim_for_lp :: Array String -> Array String
 -- trim_for_lp [e1, e2, e3, e4, e5, e6, e7, e8, e9] = [e1, e3, e4, e5, e6, e7, e9]
-trim_for_lp [e1, e3, e4, e5, e6, e7, _e8, e9] = [e1, e3, e4, e5, e6, e7, e9]
+trim_for_lp [e1, e3, e4, e5, e6, e7, _e8, _e9] = [e1, e3, e4, e5, e6, e7]
 trim_for_lp _row = unsafePartial $ crashWith $ "trim_for_lp: bad sized row: " <> show _row
 
 tree_tiling_table :: Int -> {k :: Number, lp :: Boolean} -> Table

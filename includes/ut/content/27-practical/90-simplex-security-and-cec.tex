@@ -131,14 +131,14 @@ Let's test the Confirmation Equivalence Conjecture.
 
 The hypothesis is that: doublespends against an \emph{individual simplex-chain} in an $N$-chain simplex after $C$ \emph{local} confirmations are \emph{as hard} as doublespends against a traditional blockchain after $N\cdot C$ confirmations.
 
-Define $P^\prime(q; N_1 = N; c = C)$ (for some given $N$ and $C$) to be the probability of an attack succeeding after $c$ confirmations against a simplex with $N_1$ simplex-chains, given an attacker with $q$ proportion of the network hash-rate.
+Define $P^\prime(q; c = C; N_1 = N)$ (for some given $N$ and $C$) to be the probability of an attack succeeding after $C$ confirmations against a simplex with $N$ simplex-chains, given an attacker with $q$ proportion of the network hash-rate.
 
 Note that a simplex of 1 chain (the 0-simplex) \emph{is} a traditional blockchain.
-So we can take Bitcoin for example: the probability of an attack succeeding after 6 confirmations is given by $P^\prime(q; N_1 = 1; c = 6)$ -- of course, we still need to know the attacker's hash-rate, $q$, to calculate this.
+So we can take Bitcoin for example: the probability of an attack succeeding after 6 confirmations is given by $P^\prime(q; c = 6; N_1 = 1)$ -- of course, we still need to know the attacker's hash-rate, $q$, to calculate this.
 
 Thus, the hypothesis is that:
 \begin{equation}
-    P^\prime(q; N_1 = 1; c = NC) \approx P^\prime(q; N_1 = N; c = C)
+    P^\prime(q; c = NC; N_1 = 1) \approx P^\prime(q; c = C; N_1 = N)
     \label{eq:por-sim-hypothesis}
 \end{equation}
 
@@ -149,7 +149,7 @@ This is the \emph{extended} CEC:
 % , and $1 \le a_i \le N$, and $1 \le b_i \le N$
 \begin{equation}
     %P\biggl(q; N_1 = a; c = \frac{NC}{a}\biggr) \approx P\biggl(q; N_1 = b; c = \frac{NC}{b}\biggr)
-    \forall a \in \{x: 1 \le x \le N\}: P\biggl(q; N_1 = a; c = \frac{NC}{a}\biggr) \text{ is approximately constant}
+    \forall a \in \{x: 1 \le x \le N\}: P^\prime\biggl(q; c = \frac{NC}{a}; N_1 = a\biggr) \text{ is approximately constant}
     \label{eq:por-sim-hypothesis-extended}
 \end{equation}
 
@@ -165,10 +165,11 @@ So, we don't need to know a closed form of $P^\prime(q, N_1, c)$: all cases \emp
 }
 This is the basis of the method used to test this hypothesis.
 
-Note that $P^\prime(q; N_1 = 1; c = C)$ is taken to be identical to Rosenfeld's analytical solution. That is:
+Note that $P^\prime(q; c = C; N_1 = 1)$ is taken to be identical to Rosenfeld's analytical solution.
+That is:
 
 \begin{equation}
-    \forall c \in \{1, 2, \dots\}: P^\prime(q; N_1 = 1; c) = \begin{cases}
+    \forall c \in \{1, 2, \dots\}: P^\prime(q; c; N_1 = 1) = \begin{cases}
         1 - \sum_{m=0}^c \binom{m+c-1}{m}(p^c q^m - p^m q^c), & \text{if } q < p \\
         1, & \text{otherwise}
     \end{cases}

@@ -3,7 +3,7 @@ module Amaroo.WP.Tables where
 import Amaroo.WP.Tables.Types
 import Prel
 
-import Amaroo.WP.Calcs (ChainStats, Params, UtVariants, allUtChainCalcs, allUtChainCalcsF, applyTDiscountToBH, auxStats, mkNestedPs, mkSimplePs, pToPF, runChainCalcFor, tradChainCalc, tradChainCalcEth2, tradChainCalcPolkadot, utChainCalc)
+import Amaroo.WP.Calcs (Params, UtVariants, ChainStats, allUtChainCalcs, allUtChainCalcsF, applyTDiscountToBH, auxStats, mkNestedPs, mkSimplePs, pToPF, runChainCalcFor, tradChainCalc, tradChainCalcEth2, tradChainCalcPolkadot, utChainCalc)
 import Amaroo.WP.Formatter (fdPlain, fdPlainMixed, fdPlainZero, fdStd, fdStdMixed, fdStdNoSiMixed, fdStdTwo, fdStdZero, fmt1GbpsPs, fmtDyn, fmtPsKBfBh, fmtPsKBfBhDh, wrap, wrapXml, wrapXmlWAttr)
 import Amaroo.WP.Tables.Booktabs (renderBooktabs)
 import Amaroo.WP.Tables.Types (LatexTablePos(..), TPositioning(..))
@@ -359,6 +359,17 @@ netToTps (UT ut) cd = case utNameI ut of
   2 -> cd.d2.tps
   3 -> cd.d3.tps
   _ -> unsafeThrowException $ error $ "[netToTps] got bad level of nesting in UT network: " <> utName_ ut
+
+netToEffDh :: Network -> ChainStats -> Number
+netToEffDh Bitcoin cd = nan
+netToEffDh Cardano cd = nan
+netToEffDh Solana cd = nan
+netToEffDh Eth2 cd = cd.effDh
+netToEffDh Polkadot cd = cd.effDh
+netToEffDh OptShard cd = cd.effDh
+netToEffDh (UT ut) cd = case utNameI ut of
+  1 -> nan
+  _ -> cd.effDh
 
 notPoRs :: Network -> Boolean
 notPoRs (UT (PoRs _)) = false
@@ -734,11 +745,13 @@ genLpCompareRow' lim k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdS
 genLpCompareRow = genLpCompareRow' Nothing
 genLpCompareLimitedRow = genLpCompareRow'
 
-genLpCompare2Row k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdStdNoSiMixed <$> [cs.effBh, cs.effDh, tps])
+genLpCompare2Row k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (_fmt <$> [cs.effBh, effDh, tps])
   where
     p = o.p k
     cs = netToChainStats net p
     tps = if isAleph net then infinity else netToTps net cs
+    effDh = netToEffDh net cs
+    _fmt = fmtDyn fdStdNoSiMixed
 
 lpCompareTH = Table
     ["$k$, $B_f$, $B_h$", "Network", "E. $B_h$ (B)", "$\\Sigma$ TPS (tx/s)"]

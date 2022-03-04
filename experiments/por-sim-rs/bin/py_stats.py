@@ -457,7 +457,7 @@ PLOT_CHART
 
 
 def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_discounted=False,
-        title=None, x_label=None, y_label=None, comment: Optional[Comment] = None,
+        title=None, x_label=None, y_label=None, sec_x_label=None, comment: Optional[Comment] = None,
         save_png=False, out_filenames=None,
         figsize: tuple[float, float] = (10, 7), dpi=100, x_range=None, y_lim=None,
         seed_qs=None, seed_ds_targets=None,
@@ -571,7 +571,8 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         "(more confirmations w/ trad chain vs more chains w/ PoR)",
         # f"Trials={n_trials}"
         ])
-    plt.suptitle(title or default_title, fontdict=dict(linespacing=1.5))
+    if title is None or title:
+        plt.suptitle(title or default_title, fontdict=dict(linespacing=1.5))
     plt.title('', fontdict=dict(fontsize=8))
     plt.xlabel(x_label or "x = Confirmation Multiplier / # Chains")
     plt.ylabel(y_label or "Probability of a successful doublespend")
@@ -597,7 +598,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         c2n = lambda c: c / ds_c
         n2c = lambda n: n * ds_c
         sec_x_axis = plt.gca().secondary_xaxis('top', functions=(n2c, c2n))
-        sec_x_axis.set_xlabel('Traditional Confirmations (PoR Equivalent via CEC)')
+        sec_x_axis.set_xlabel(sec_x_label or 'Traditional Confirmations (PoR Equivalent via CEC)')
         # can't do this on sec axis? mb need to do a different way
         # sec_x_axis.set_major_locator(MaxNLocator(nbins=20, integer=True))
     else:
@@ -613,6 +614,11 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         plt.ylim(y_lim)
     else:
         plt.ylim(bottom=0)
+
+    if len(csv_series) == 0:
+        # disable bottom x axis
+        plt.gca().xaxis.set(ticklabels=[])
+        plt.gca().set(xlabel=None)
 
     plt.tight_layout()
 
@@ -670,6 +676,7 @@ class SavePlot:
     kwargs: Optional[dict[str, Any]] = None
     x_label: Optional[str] = None
     y_label: Optional[str] = None
+    sec_x_label: Optional[str] = None
     x_range: Optional[tuple[float, float]] = None
     y_lim: Optional[tuple[float, float]] = None
     comment: Optional[Comment] = None
@@ -695,7 +702,7 @@ class SavePlot:
         kwargs.update(dict(analytical_plot_color=self.analytical_plot_color) if self.analytical_plot_color else {})
         plot_chart(
             self.csv_files, save_png=True, out_filenames=self.filenames,
-            title=self.title, x_label=self.x_label, y_label=self.y_label,
+            title=self.title, x_label=self.x_label, y_label=self.y_label, sec_x_label=self.sec_x_label,
             comment=self.comment, figsize=self.figsize, dpi=self.dpi,
             x_range=self.x_range, y_lim=self.y_lim,
             seed_qs=self.seed_qs, seed_ds_targets=self.seed_ds_targets,
@@ -879,10 +886,12 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
     CEC_EXT3_TITLE_STR = "$P(q; N_1 = N; c = C) \\; \\approx \\; P(q; N_1 = \\frac{{N}}{{a}}; c = Ca) \\; \\approx \\; P(q; N_1 = 1; c = CN)$"
     CEC_EXT4_TITLE_STR = "$\\forall a \\in [1, N]: P(q; N_1 = a; c = \\frac{{CN}}{{a}})$ is approximately constant"
 
-    RESULTS_FIG_WIDTH=10
-    RESULTS_FIG_ASPECT=1/0.55
-    RESULTS_FIG_SIZE=(RESULTS_FIG_WIDTH, RESULTS_FIG_WIDTH / RESULTS_FIG_ASPECT)
+    RESULTS_FIG_WIDTH = 10
+    RESULTS_FIG_ASPECT = 1/0.55
+    RESULTS_FIG_SIZE = (RESULTS_FIG_WIDTH, RESULTS_FIG_WIDTH / RESULTS_FIG_ASPECT)
 
+    LP_SEC_X_LABEL = f"Traditional Blockchain Confirmations ($\\sim$time)"
+    LP_X_LABEL = f"Simplex $N_1$ ($\\sim$capacity)"
 
     jobs_to_save: list[SavePlot] = [
         SavePlot(
@@ -1306,6 +1315,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             y_lim=(0, 0.45),
             figsize=(8, 8*0.6),
             x_label=std_x_label(20),
+            sec_x_label=LP_SEC_X_LABEL,
             plot_this_order=[2,1,0],
             analytical_plot_color='C8',
         )
@@ -1325,6 +1335,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             y_lim=(0, 0.7),
             figsize=(8, 8*0.6),
             x_label=std_x_label(5),
+            sec_x_label=LP_SEC_X_LABEL,
             plot_this_order=[2,1,0],
             analytical_plot_color='C8',
         )
@@ -1336,15 +1347,16 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
                 for q in qs
             ])),
             "\n".join([
-                f"Testing the Confirmation Equivalence Conjecture",
-                # f"{CEC_EXT4_TITLE_STR}",
-                f"If the CEC is true, then the plots with equal $q$ should align",
+                # f"Testing the Confirmation Equivalence Conjecture",
+                # # f"{CEC_EXT4_TITLE_STR}",
+                # f"If the CEC is true, then the plots with equal $q$ should align",
             ]),
             f"png/lp_main_results",
             save_as_file_exts=['svg', 'csv', 'png'],
-            x_label=std_x_label(t),
+            x_label=LP_X_LABEL,
+            sec_x_label=LP_SEC_X_LABEL,
             x_range=(0,31),
-            figsize=(9, 9*0.65),
+            figsize=(9.2, 4.8),
             y_lim=(0, 0.85),
             plot_this_order=[8,3,0,1,2,9,7,4,5,6],
         )
@@ -1355,13 +1367,15 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
         # for LP: analytical only
         SavePlot(
             [],
-            f"Rosenfeld's Analytical Solution",
+            # f"Rosenfeld's Analytical Solution",
+            f"", # no title
             f"png/lp_analytical_only",
             save_as_file_exts=['svg', 'png', 'csv'],
-            x_range=(0, 21),
+            x_range=(0, 31),
             y_lim=(0, 0.75),
-            figsize=(8, 8*0.6),
+            figsize=(8.4, 4.2),
             x_label=f"x = Confirmations / 5",
+            sec_x_label=LP_SEC_X_LABEL,
             seed_ds_targets={5},
             seed_qs={0.40, 0.44}
         )
