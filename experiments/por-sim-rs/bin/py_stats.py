@@ -99,9 +99,14 @@ CsvFileToPlot = tuple[str, Literal['por', 'trad'], Optional[str | PorPlotOpts]]
 def f_is_whole(x):
     return x//1 == x
 
+def rstrip_extra_zeros(s: str):
+    _s = s.rstrip('0')
+    if _s.endswith('.'):
+        _s += '0'
+    return _s
 
 def render_conf_target(t: float):
-    return f'{int(t):d}' if f_is_whole(t) else f'{t:f}'.rstrip('0')
+    return f'{int(t):d}' if f_is_whole(t) and t >= 5 else rstrip_extra_zeros(f'{t:f}')
 
 
 # functions for decimal calcs to get accurate analytical results
@@ -332,10 +337,12 @@ def get_line_default_kwargs(chain_ty: Literal['por', 'trad'], ds_target, as_scat
     is_por = chain_ty == 'por'
     z_order = 2 + (.1 if is_por else -.1)
     # color = get_color(ds_target)
-    color = plot_colors[chain_ty][ds_target]
-    kw: dict[str, Any] = dict(zorder=z_order, color=color, linewidth=2.0 if is_por else 2.5)
+    color = plot_colors[chain_ty].get(ds_target, None)
+    kw: dict[str, Any] = dict(zorder=z_order, linewidth=2.0 if is_por else 2.5)
+    kw.update(dict(color=color) if color else {})
     marker_k: str = 'style' if as_scatter else 'marker'
-    kw[marker_k] = line_markers[chain_ty][ds_target]
+    marker = line_markers[chain_ty].get(ds_target, None)
+    kw.update({marker_k: marker} if marker else {})
     return kw
 
 
@@ -371,10 +378,33 @@ class Comment:
 
 
 # '2^{4}'
-scaled_conv_lookup = {0.0625: '16', 0.125: '8', 0.25: '4', 0.5: '2'}
+scaled_conv_lookup = {
+    0.0625: '16', 0.125: '8', 0.25: '4', 0.5: '2',
+    1/3: '3',
+    1/2.4: '\\frac{12}{5}',
+    7/12: '\\frac{12}{7}',
+    19/30: '\\frac{30}{19}',
+    2/3: '\\frac{3}{2}',
+    3/4: '\\frac{4}{3}',
+    5/6: '\\frac{6}{5}',
+    11/12: '\\frac{12}{11}',
+    29/30: '\\frac{30}{29}',
+}
 
 
-scaled_target_lookup = {1.25: '\\frac{{5}}{{4}}', 2.5: '\\frac{{5}}{{2}}'}
+scaled_target_lookup = {
+    1.25: '\\frac{{5}}{{4}}',
+    2.5: '\\frac{{5}}{{2}}',
+    1.5: '\\frac{3}{2}',
+    1.75: '\\frac{7}{4}',
+    1.9: '\\frac{19}{10}',
+    2.25: '\\frac{9}{4}',
+    2.75: '\\frac{11}{4}',
+    2.9: '\\frac{29}{10}',
+    1.0: '1',
+    2.0: '2',
+    3.0: '3',
+}
 
 
 def gen_ds_target_tex(t: float, with_x=False) -> str:
@@ -443,6 +473,18 @@ def _plot_this_analytical(theoretical_data, label, seen_lines, legend_gids, __q,
     return _inner
 
 
+def plot_analytical(multipliers, q: float, ds_target: int, td_max_ys, t_series, plot_fs, seen_lines, legend_gids, cec_scaled=None):
+    theoretical_data = ds_theoretical_series(multipliers, q=q, after_n_confs=ds_target)
+    if cec_scaled:
+        theoretical_data = pd.Series(theoretical_data.values, index=[x * cec_scaled for x in theoretical_data.index])
+    td_max_ys.append(theoretical_data.max())
+    prob_math = gen_cec_prob_str(ds_target, is_trad=True, is_analytical=True)
+    label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)"
+    t_series.append((csv_col_label('analytical', 'trad', q, ds_target, daa='0'), theoretical_data))
+    plot_fs.append(_plot_this_analytical(theoretical_data, label, seen_lines, legend_gids, q, ds_target, dict()))
+
+
+
 """
 ########  ##        #######  ########          ######  ##     ##    ###    ########  ########
 ##     ## ##       ##     ##    ##            ##    ## ##     ##   ## ##   ##     ##    ##
@@ -463,7 +505,9 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         seed_qs=None, seed_ds_targets=None,
         as_scatter=False,
         plot_this_order: Optional[list[int]] = None,
-        analytical_plot_color=DEFAULT_ANALYTICAL_COLOR,
+        # analytical_plot_color=DEFAULT_ANALYTICAL_COLOR,
+        legend_loc: Optional[str] = None,
+        draw_scaled_analytical: Optional[list[tuple[float, int, Optional[float]]]] = None,
         ):
     print(f"\nPlotting chart: {out_filenames or '<tmp-not-saved>'}")
     figure = plt.figure(figsize=figsize, dpi=dpi)
@@ -505,12 +549,13 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
 
         _kwargs = dict(**kwargs)
         _kwargs.update(get_line_default_kwargs(chain_ty, ds_target, as_scatter))
-        if trad_count > 1 or not por_plot_opts.use_consistent_color:
-            del _kwargs['color']
+        # if trad_count > 1 or not por_plot_opts.use_consistent_color:
+        #     del _kwargs['color']
 
         log_ds_target = ds_target
         if por_plot_opts and por_plot_opts.cec_scaled:
             csv_data = pd.Series(csv_data.values, index=[x * por_plot_opts.cec_scaled for x in csv_data.index])
+            max_ix *= por_plot_opts.cec_scaled
             log_ds_target = ds_target / por_plot_opts.cec_scaled
 
         if por_plot_opts:
@@ -544,15 +589,22 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
     multipliers = list(range(1, _max_ix+1))
     largest_x = _max_ix
     td_max_ys = []
+
     for q in _qs:
         for ds_target in ds_targets:
-            theoretical_data = ds_theoretical_series(multipliers, q=q, after_n_confs=ds_target)
-            td_max_ys.append(theoretical_data.max())
-            prob_math = gen_cec_prob_str(ds_target, is_trad=True, is_analytical=True)
-            label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)"
-            t_series.append((csv_col_label('analytical', 'trad', q, ds_target, daa='0'), theoretical_data))
-            _kw = dict() if len(_qs) * len(ds_targets) > 1 else dict(color=analytical_plot_color)
-            plot_fs.append(_plot_this_analytical(theoretical_data, label, seen_lines, legend_gids, q, ds_target, _kw))
+            # theoretical_data = ds_theoretical_series(multipliers, q=q, after_n_confs=ds_target)
+            # td_max_ys.append(theoretical_data.max())
+            # prob_math = gen_cec_prob_str(ds_target, is_trad=True, is_analytical=True)
+            # label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)"
+            # t_series.append((csv_col_label('analytical', 'trad', q, ds_target, daa='0'), theoretical_data))
+            # _kw = dict() if len(_qs) * len(ds_targets) > 1 else dict(color=analytical_plot_color)
+            # plot_fs.append(_plot_this_analytical(theoretical_data, label, seen_lines, legend_gids, q, ds_target, _kw))
+            plot_analytical(multipliers, q, ds_target, td_max_ys, t_series, plot_fs, seen_lines, legend_gids)
+
+    if draw_scaled_analytical:
+        for (q, ds_target, _scale) in draw_scaled_analytical:
+            plot_analytical(multipliers, q, ds_target, td_max_ys, t_series, plot_fs, seen_lines, legend_gids, cec_scaled=_scale)
+
 
     #max_y = max(max(td_max_ys), max(s.max() for s in csv_series) if csv_series else 0)
     print(f"Done. Now drawing.")
@@ -579,7 +631,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
     plt.grid(True)
     plt.grid(True, which='minor', color=(0.9, 0.9, 0.9, 0.1))
     plt.minorticks_on()
-    legend = plt.legend()
+    legend = plt.legend(loc=legend_loc or 'upper right')
     for lline, (graph_ty, chain_ty, q, ds, daa) in zip(legend.get_lines(), legend_gids):
         lline.set_gid(f'legend_line_{graph_ty}_line_{chain_ty}_q{q}_ds{ds}_daa{daa}'.replace('.', '_'))
     for ltext, (graph_ty, chain_ty, q, ds, daa) in zip(legend.get_texts(), legend_gids):
@@ -686,7 +738,8 @@ class SavePlot:
     seed_ds_targets: Optional[set[float]] = None
     save_as_file_exts: Optional[list[str]] = None
     plot_this_order: Optional[list[int]] = None
-    analytical_plot_color: Optional[str] = DEFAULT_ANALYTICAL_COLOR
+    # analytical_plot_color: Optional[str] = DEFAULT_ANALYTICAL_COLOR
+    legend_loc: Optional[str] = None
 
     @property
     def filenames(self):
@@ -699,14 +752,17 @@ class SavePlot:
     def run(self):
         matplotlib.rcParams['svg.hashsalt'] = f'Ultra Terminum {self._filename}'
         kwargs = dict()
-        kwargs.update(dict(analytical_plot_color=self.analytical_plot_color) if self.analytical_plot_color else {})
+        # kwargs.update(dict(analytical_plot_color=self.analytical_plot_color) if self.analytical_plot_color else {})
         plot_chart(
             self.csv_files, save_png=True, out_filenames=self.filenames,
-            title=self.title, x_label=self.x_label, y_label=self.y_label, sec_x_label=self.sec_x_label,
-            comment=self.comment, figsize=self.figsize, dpi=self.dpi,
+            title=self.title, x_label=self.x_label,
+            y_label=self.y_label, sec_x_label=self.sec_x_label,
+            comment=self.comment,
+            figsize=self.figsize, dpi=self.dpi,
             x_range=self.x_range, y_lim=self.y_lim,
             seed_qs=self.seed_qs, seed_ds_targets=self.seed_ds_targets,
             plot_this_order=self.plot_this_order,
+            legend_loc=self.legend_loc,
             **kwargs
         )
 
@@ -809,9 +865,10 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             '24': exp_16_csv_name,
             '25': exp_16_csv_name,
             '26': exp_16_csv_name,
-            '27': exp_16_csv_name,
+            # '27': exp_16_csv_name,
             '28': exp_16_csv_name,
-            '29': exp_16_csv_name,
+            # '29': exp_16_csv_name,
+            '30': exp_16_csv_name,
         }).get(exp_num, unknown_exp_num_name)
 
     def gen_por_equiv_rand_hrs_csvs(q, t, bt=50, hr=50, only_real_world=False, exp_num='13', aux_num='3', daa=100) -> list[CsvFileToPlot]:
@@ -856,7 +913,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             csvs.append((csv_name_f(q, render_conf_target(float(t) / 4), bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=0.25)))
         return csvs
 
-    def gen_por_cec_full_csvs(q: str, t: int, exp, aux, bt, hr, daa, max_c_oom_span=4, oom_base=2,
+    def gen_por_cec_full_csvs(q: str, t: float, exp, aux, bt, hr, daa, max_c_oom_span=4, oom_base=2,
                               min_ds_conf=MIN_DS_CONF, max_ds_conf=MAX_DS_CONF, **kwargs
                               ) -> list[CsvFileToPlot]:
         csvs = []
@@ -869,12 +926,34 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
         csvs.append((csv_name_f(q, t, bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None))
         return csvs
 
+    # for many ts
+    def gen_por_cec_scaled_csvs(q: str, ts: list[str], exp, aux, bt, hr, daa,
+                              scale_relative_to = 5.0,
+                              min_ds_conf=1.0, max_ds_conf=MAX_DS_CONF, **kwargs
+                              ) -> list[CsvFileToPlot]:
+        csvs = []
+        csv_name_f = csv_name_f_from_exp(exp)
+        ppo_kw = dict(use_consistent_color=False)
+
+        f_s = lambda _t: float(_t) / scale_relative_to
+        scaling_options = [(float(t), PorPlotOpts(cec_scaled=f_s(t), **ppo_kw) if f_s(t) != 1 else PorPlotOpts(**ppo_kw)) for t in ts]
+        for (_t, opts) in scaling_options:
+            if min_ds_conf <= _t <= max_ds_conf:
+                # hack to get around exp numbers
+                t = render_conf_target(_t)
+                _exp = exp if t not in ['1.25', '2.5'] else '26'
+                csvs.append((csv_name_f(q, t, bt, hr, exp_num=_exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', opts))
+        csvs.append((csv_name_f(q, ts[0], bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None))
+        csvs.append((csv_name_f(q, ts[-1], bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', PorPlotOpts(cec_scaled=f_s(ts[-1]), **ppo_kw)))
+        # for t in [5,10,20]:
+        #     csvs.append((csv_name_f(q, t, bt, hr, exp_num=f'26{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', PorPlotOpts(cec_scaled=f_s(t), **ppo_kw)))
+        return csvs
+
     def gen_por_hash_comare(q, t) -> list[CsvFileToPlot]:
         return [
             (exp_13_csv_name(q, t, exp_num='13', strat="DoubleSpendWork", cs="WeightedDag"), 'por', 'hash:xxh3'),
             (exp_16_csv_name(q, t, exp_num='16', strat="DoubleSpendWork", cs="WeightedDag", hashname="blake3"), 'por', 'hash:blake3'),
         ]
-
 
     def std_x_label(t):
         return f"Simplex $N_1$"
@@ -1232,6 +1311,26 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
         for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20'] for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
         for suffix, gen_csv_kwargs in [('', dict()), ('_nofrac', dict(min_ds_conf=5))]
     ] + [
+        # e30 partial confs
+        SavePlot(
+            gen_por_cec_scaled_csvs(q, ts, exp=exp, aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3",
+                scale_relative_to=float(ts[0]),
+                **gen_csv_kwargs),
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture (Extended)",
+                f"{CEC_EXT2_TITLE_STR}",
+                f"If the CEC is true, then these plots should align",
+            ]),
+            f"png/_e{exp}_partialConfs_q={q}_t={ts[0]}-{ts[-1]}_daa={daa}{suffix}",
+            save_as_file_exts=['png', 'csv'],
+            x_label=std_x_label(ts[-1]),
+            x_range=(0, 121),
+            figsize=(9,12),
+            legend_loc='upper right',
+        )
+        for q in ['0.40', '0.44', '0.48'] for ts in [['1.0', '1.25', '1.5', '1.75', '1.9', '2.0', '2.25', '2.5', '2.75', '2.9', '3.0']] for exp,daa in [('30', 100)]
+        for suffix, gen_csv_kwargs in [('', dict())] # , ('_nofrac', dict(min_ds_conf=5))]
+    ] + [
         # for results - just trad only
         SavePlot(
             # gen_por_cec_full_csvs(q, int(t), exp=exp, aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3", **gen_csv_kwargs),
@@ -1317,7 +1416,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             x_label=std_x_label(20),
             sec_x_label=LP_SEC_X_LABEL,
             plot_this_order=[2,1,0],
-            analytical_plot_color='C8',
+            # analytical_plot_color='C8',
         )
     ] + [
         # for LP: after draft refl work
@@ -1337,7 +1436,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             x_label=std_x_label(5),
             sec_x_label=LP_SEC_X_LABEL,
             plot_this_order=[2,1,0],
-            analytical_plot_color='C8',
+            # analytical_plot_color='C8',
         )
     ] + [
         # for LP: main results (copy of _results_cec_9000)

@@ -16,10 +16,13 @@ partial confirmations
 -------
 
 (
-export DAA2_N_BLOCKS=100
-export SKIP_EXP_CONF_PROMPT=1
-export RESUME_FROM=61  # 30 rounds; 3k samples
-export EXP_IS_AUX=0
-export EXP_NUM=30
-./bin/experiment-30-and-beyond.sh
+  for _aux in 1 0; do
+    export EXP_IS_AUX=$_aux;
+    export DAA2_N_BLOCKS=100
+    export SKIP_EXP_CONF_PROMPT=1
+    export RESUME_FROM=71  # 30 rounds; 3k samples
+    export EXP_NUM=30
+    export N_CPUS=28
+    ./bin/experiment-30-and-beyond.sh
+  done
 )
