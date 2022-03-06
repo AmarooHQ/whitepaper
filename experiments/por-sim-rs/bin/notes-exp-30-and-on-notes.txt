@@ -1,0 +1,25 @@
+stuff to mb test:
+- target chain has non-random hash rate, does that matter? (prediction: no)
+- partial confirmations
+  - prediction:
+    - partial confirmations generally increase security,
+      till getting close to whole numbers (possible increase in efficacy),
+      match theory at whole numbers, then get more secure again.
+      cycle repeats but dampens.
+  - parameter sets:
+    - c = 1.0, 1.25, 1.5, 1.75, 1.9, 2.0, 2.25, 2.5, 2.75, 2.9, 3.0
+
+
+
+
+partial confirmations
+-------
+
+(
+export DAA2_N_BLOCKS=100
+export SKIP_EXP_CONF_PROMPT=1
+export RESUME_FROM=61  # 30 rounds; 3k samples
+export EXP_IS_AUX=0
+export EXP_NUM=30
+./bin/experiment-30-and-beyond.sh
+)
