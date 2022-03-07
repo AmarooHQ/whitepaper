@@ -34,6 +34,11 @@ jobs:
         shell: bash
         run: make docker "DOCKER_CMD=bash build.sh"
 
+  lint:
+    needs: build
+    runs-on: 'self-hosted'
+
+    steps:
       - name: lint whitepaper
         shell: bash
         run: |
