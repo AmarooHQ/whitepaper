@@ -319,7 +319,8 @@ line_markers = {
 
 plot_colors = {
     'por': {1.25: 'C8', 2.5: 'C5', 5: 'C0', 10: 'C1', 20: 'C2'},
-    'trad': {1.25: 'C3', 2.5: 'C3', 5: 'C3', 10: 'C3', 20: 'C3'},
+    # 'trad': {1.25: 'C3', 2.5: 'C3', 5: 'C3', 10: 'C3', 20: 'C3'},
+    'trad': {},
 }
 # C4: purple
 DEFAULT_ANALYTICAL_COLOR = 'C9'
@@ -1347,7 +1348,8 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             save_as_file_exts=['pdf', 'csv'],
             x_label=f"Confirmations$\\div {t}$",
             x_range=(0, 31),
-            figsize=RESULTS_FIG_SIZE
+            figsize=RESULTS_FIG_SIZE,
+            plot_this_order=[3,0,4,1,5,2]
         )
         for qs in [['0.40', '0.44', '0.48']] for t in ['5', '10', '20'] for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
         # for suffix, gen_csv_kwargs in [('', dict()), ('_nofrac', dict(min_ds_conf=5))]
@@ -1370,7 +1372,8 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             x_label=std_x_label(t),
             # x_range=q_t_to_x_range[(q, t)],
             x_range=(0,31),
-            figsize=RESULTS_FIG_SIZE
+            figsize=RESULTS_FIG_SIZE,
+            plot_this_order=[4,2,0,5,3,1]
         )
         for qs in [['0.40', '0.44'], ['0.48']]  # , '0.48'
         for t in ['5', '10', '20']
@@ -1394,9 +1397,10 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             x_label=std_x_label(t),
             # x_range=q_t_to_x_range[(q, t)],
             x_range=(0,31),
-            figsize=RESULTS_FIG_SIZE
+            figsize=RESULTS_FIG_SIZE,
+            plot_this_order=[8,3,0,1,2,9,7,4,5,6]
         )
-        for qs in [['0.40', '0.44'], ['0.48']]  # , '0.48'
+        for qs in [['0.40', '0.44']] # , ['0.48']]  # , '0.48'
         for t in ['5']
         for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
     ] + [
@@ -1483,18 +1487,26 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
     pool = mpp.Pool(n_jobs)
     count = 0
 
+    res: list[tuple[SavePlot, mpp.AsyncResult]] = []
     #filter_fname
     for j in jobs_to_save:
         filter_mode = any if filter_mode_or else all
         if filter_fnames is None or any(filter_mode(fstr in fn for fstr in filter_fnames) for fn in j.filenames):
             if n_jobs > 1:
-                pool.apply_async(j.run)
+                res.append((j, pool.apply_async(j.run)))
             else:
                 j.run()
             count += 1
 
     pool.close()
     pool.join()
+
+    for j, _res in res:
+        try:
+            _res.get()
+        except Exception as e:
+            print(f"Exception processing job: {j.filenames[0]}: {str(e)}")
+
     print(f"should be all done generating {count} graphs via {n_jobs} threads")
 
 

@@ -2,11 +2,12 @@ name: Build WP
 
 on:
   push:
-    branches: '*'
+    branches:
+      - '*'
 
 jobs:
   build:
-    runs-on: 'self-hosted'
+    runs-on: ['self-hosted', 'runner4']
 
     steps:
       - uses: actions/checkout@v2

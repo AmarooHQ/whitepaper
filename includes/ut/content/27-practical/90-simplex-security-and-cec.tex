@@ -131,10 +131,22 @@ Let's test the Confirmation Equivalence Conjecture.
 
 The hypothesis is that: doublespends against an \emph{individual simplex-chain} in an $N$-chain simplex after $C$ \emph{local} confirmations are \emph{as hard} as doublespends against a traditional blockchain after $N\cdot C$ confirmations.
 
-Define $P^\prime(q; c = C; N_1 = N)$ (for some given $N$ and $C$) to be the probability of an attack succeeding after $C$ confirmations against a simplex with $N$ simplex-chains, given an attacker with $q$ proportion of the network hash-rate.
+First, define $P(q; c)$ to be the function that returns the probability of an attempted doublespend succeeding on a traditional blockchain according to Rosenfeld's analytical solution:
+\begin{equation}
+    \forall c \in \{1, 2, \dots\}: P(q; c) = \begin{cases}
+        1 - \sum_{m=0}^c \binom{m+c-1}{m}(p^c q^m - p^m q^c), & \text{if } q < p \\
+        1, & \text{otherwise}
+    \end{cases}
+    \label{eq:rosenfeld-analytical-p}
+\end{equation}
 
+Next, we will declare a new function, $P^\prime$, and assume that it \emph{exists and is measurable}.
+Particularly: $P^\prime(q; c = C; N_1 = N)$ is the probability of a doublespend attack succeeding against a simplex with $N$ simplex-chains after $C$ confirmations, given an attacker with $q$ proportion of the network hash-rate.
+We do not know the definition of this function, but we can measure it.
+
+As a base case, it is taken that $P(q; c) \equiv P^\prime(q; c; N_1 = 1)$.
 Note that a simplex of 1 chain (the 0-simplex) \emph{is} a traditional blockchain.
-So we can take Bitcoin for example: the probability of an attack succeeding after 6 confirmations is given by $P^\prime(q; c = 6; N_1 = 1)$ -- of course, we still need to know the attacker's hash-rate, $q$, to calculate this.
+So we can take Bitcoin for example: the probability of an attack succeeding after 6 confirmations is given by $P(q; c = 6) \approx P^\prime(q; c = 6; N_1 = 1)$.
 
 Thus, the hypothesis is that:
 \begin{equation}
@@ -277,7 +289,7 @@ So, while it is \emph{possible} that a poor implementation of a simplex could co
         A comparison of the measured probability of a successful doublespend (for a traditional blockchain) compared with Rosenfeld's analytical solution.
     ]{
         A comparison of the measured probability of a successful doublespend (for a traditional blockchain) compared with Rosenfeld's analytical solution, for $q \in \{0.4, 0.44, 0.48\}$.
-        That the measured results converge with the analytical solution is taken to be validation of the simulation -- insofar as, for this experiment, it \emph{works} and is \emph{useful}.
+        That the measured results converge with the analytical solution is taken to be validation of the simulation -- i.e., it \emph{works} and is \emph{useful} in the context of this experiment.
     }
     \label{fig:simulation-trad-only}
 \end{figure}
