@@ -653,7 +653,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         # f"Trials={n_trials}"
         ])
     if title is None or title:
-        plt.suptitle(title or default_title, fontdict=dict(linespacing=1.5))
+        plt.suptitle(title or default_title, fontdict=dict(linespacing=1.5, fontsize=12))
     plt.title('', fontdict=dict(fontsize=8))
     plt.xlabel(x_label or "x = Confirmation Multiplier / # Chains")
     plt.ylabel(y_label or "Probability of a successful doublespend")
@@ -994,16 +994,18 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
         return (csv_name_f_from_exp('29')('0.44', 5, bt=75, hr=75, exp_num='29', daa=2000, hashname="xxh3"), 'por', None)
 
 
-    CEC_TITLE_STR = "$P(q; N_1 = N; c = C) \\; \\approx \\; P(q; N_1 = 1; c = NC)$"
-    CEC_EXT_TITLE_STR = "$P(q; N_1 = N; c = C) \\; \\approx \\; P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$"
-    CEC_EXT2_TITLE_STR = "$P(q; N_1 = N; c = C) \\; \\approx \\; P(q; N_1 = a; c = \\frac{{CN}}{{a}}) \\; \\approx \\; P(q; N_1 = 1; c = CN)$"
-    CEC_EXT3_TITLE_STR = "$P(q; N_1 = N; c = C) \\; \\approx \\; P(q; N_1 = \\frac{{N}}{{a}}; c = Ca) \\; \\approx \\; P(q; N_1 = 1; c = CN)$"
-    CEC_EXT4_TITLE_STR = "$\\forall a \\in [1, N]: P(q; N_1 = a; c = \\frac{{CN}}{{a}})$ is approximately constant"
+    CEC_TITLE_STR = "$P(q; c = C; N_1 = N) \\; \\approx \\; P(q; c = NC; N_1 = 1)$"
+    CEC_EXT_TITLE_STR = "$P(q; c = C; N_1 = N) \\; \\approx \\; P(q; c = 2C; N_1 = \\frac{{N}}{{2}})$"
+    CEC_EXT2_TITLE_STR = "$P(q; c = C; N_1 = N) \\; \\approx \\; P(q; c = \\frac{{CN}}{{a}}; N_1 = a) \\; \\approx \\; P(q; c = CN; N_1 = 1)$"
+    CEC_EXT3_TITLE_STR = "$P(q; c = C; N_1 = N) \\; \\approx \\; P(q; c = Ca; N_1 = \\frac{{N}}{{a}}) \\; \\approx \\; P(q; c = CN; N_1 = 1)$"
+    CEC_EXT4_TITLE_STR = "$\\forall a \\in [1, N]: P(q; c = \\frac{{CN}}{{a}}; N_1 = a)$ is approximately constant"
 
     RESULTS_FIG_WIDTH = 10
     RESULTS_FIG_ASPECT = 1/0.55
-    mk_results_fig = lambda w: (w, w / RESULTS_FIG_ASPECT)
+    mk_fig_aspect = lambda w, a: (w, w / a)
+    mk_results_fig = lambda w: mk_fig_aspect(w, RESULTS_FIG_ASPECT)
     RESULTS_FIG_SIZE = mk_results_fig(RESULTS_FIG_WIDTH)
+    RESULTS_FIG_TALLER_SIZE = mk_fig_aspect(0.85 * RESULTS_FIG_WIDTH, 14/10)
     RESULTS_ZOOMED_FIG_SIZE = mk_results_fig(0.85 * RESULTS_FIG_WIDTH)
     RESULTS_MORE_ZOOMED_FIG_SIZE = mk_results_fig(0.8 * RESULTS_FIG_WIDTH)
     RESULTS_ZOOMED_TALLER_FIG_SIZE = (RESULTS_ZOOMED_FIG_SIZE[0], RESULTS_ZOOMED_FIG_SIZE[1] * 1.2)
@@ -1440,7 +1442,8 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             x_label=std_x_label(t),
             # x_range=q_t_to_x_range[(q, t)],
             x_range=(0,31) if '0.48' not in qs else (0,46),
-            figsize=RESULTS_FIG_SIZE,
+            # figsize=RESULTS_FIG_SIZE,
+            figsize=RESULTS_FIG_TALLER_SIZE,
             plot_this_order=order,
             legend_loc=ll,
         )
