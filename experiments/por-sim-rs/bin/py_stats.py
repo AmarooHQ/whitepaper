@@ -219,6 +219,8 @@ def ds_theoretical_series(multipliers, q=0.44, after_n_confs=20):
     ys = []
     max_trad_confs = int(max(multipliers) * after_n_confs) + 1
     for c in range(1, max_trad_confs+1):
+        if (100 < c <= 200 and c % 3 != 0) or (200 < c and c % 5 != 0):
+            continue
         r = p_ds_success_theoretical(q, c)
         # n = int(after_n_confs * n_por_chains)
         xs.append(c / after_n_confs)
@@ -633,7 +635,8 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
     plt.grid(True)
     plt.grid(True, which='minor', color=(0.9, 0.9, 0.9, 0.1))
     plt.minorticks_on()
-    legend = plt.legend(loc=legend_loc or 'upper right')
+    legend_kwargs = dict(loc=legend_loc) if legend_loc else {}
+    legend = plt.legend(**legend_kwargs)
     for lline, (graph_ty, chain_ty, q, ds, daa) in zip(legend.get_lines(), legend_gids):
         lline.set_gid(f'legend_line_{graph_ty}_line_{chain_ty}_q{q}_ds{ds}_daa{daa}'.replace('.', '_'))
     for ltext, (graph_ty, chain_ty, q, ds, daa) in zip(legend.get_texts(), legend_gids):

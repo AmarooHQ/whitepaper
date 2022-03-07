@@ -44,3 +44,24 @@ note: aux results are cheap to generate -- it's large simplexes that are the mai
     ./bin/experiment-26-repeat-e23-w-bonusfix.sh
   done
 )
+(
+    export EXP_IS_AUX=1
+    export DAA2_N_BLOCKS=500
+    export SKIP_EXP_CONF_PROMPT=1
+    export ATK_DS_CONF_ONLY=5
+    export ATK_HR_ONLY=0.48
+    ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+)
+
+test if dynamic cutoff gave invalid results for high DS target (particularly with q0.48)
+
+(
+  for daa2_blocks in 500 100; do
+    export EXP_IS_AUX=1
+    export DAA2_N_BLOCKS=$daa2_blocks
+    export SKIP_EXP_CONF_PROMPT=1
+    export ATK_DS_CONF_ONLY=20
+    export ATK_HR_ONLY=0.48
+    ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+  done
+)
