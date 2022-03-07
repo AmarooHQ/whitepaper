@@ -189,8 +189,10 @@ I have implemented a simulation of a blockchain network that is suitable for thi
 Particularly:
 
 \begin{itemize}
-    \item The implementation is modular. It supports multiple: attack strategies; blockchain data structures; hashing algorithms (for PoW); and fork rules.
-    \item An executable is produced that can run a single instance of a simulated attack, and takes a variety of parameters. (This is looped through via bash script to obtain CSVs of the results.)
+    \item The implementation is modular.
+    It supports multiple: attack strategies; blockchain data structures; hashing algorithms (for PoW); and fork rules.
+    \item An executable is produced that can run a single instance of a simulated attack, and takes a variety of parameters.
+    (This is looped through via bash script to obtain CSVs of the results.)
     \item The implementation supports both traditional blockchains ($N_1 = 1$) and PoR/simplexes.
 \end{itemize}
 
@@ -234,14 +236,22 @@ The DAA used\footnote{
     The simulation uses the algorithm named \textsc{DAA-2} from \citeDaaTwoLink{}.
 } adjusts every block, so lower values of $\text{DAA}_N$ mean the DAA is more reactive to a drop in hash-rate.
 If the DAA is more reactive, then attackers need to do \emph{a little bit more work} since, on average, each of their blocks will weigh less than an honest block at an equivalent height.
-The only way to overcome this is for the attacker to be \emph{a little bit luckier than usual}.
-In essence, $P^\prime$ approaches zero a bit faster.
-So, to \emph{match} analytical results, we want a \emph{large} value of $\text{DAA}_N$ because this is most like an assumption of Rosenfeld's solution: \emph{constant difficulty}.
-(Though, in practice, we should seriously consider smaller values of $\text{DAA}_N$ for the security benefit.)
+If the attacker's blocks (on average) weight less, then the fork rule will favor an honest chain-segment (which has, on average, heavier blocks) and the attacker will need at least one \emph{extra} block for their chain-segment be favored.
+The only way to overcome this, for shorter attacks or attacks against smaller simplexes, is for the attacker to be \emph{a little bit luckier than usual}.
+(The effect is less significant with long attacks or attacks against larger simplexes since $P^\prime \to 0$ anyway.)
 
-For the purposes of matching the analytical solution (based on the assumption mentioned above), a value of $\text{DAA}_N = 500$ was chosen.
+In essence, a shorter $\text{DAA}_N$ means that $P^\prime$ approaches zero faster.
+Since we want to \emph{match} analytical results, we want a \emph{larger} value of $\text{DAA}_N$ for this experiment -- this is most like an assumption of Rosenfeld's solution: \emph{constant difficulty}.
 
-For each data-point, typically at least 9,000 samples were taken (this is indicated by ``$n \ge 9000$'' in these figures' legends).
+\aside{
+    In practice, we should seriously consider smaller values of $\text{DAA}_N$ for the security benefit.
+}
+
+So that we match the analytical solution's assumptions, a value of $\text{DAA}_N = 500$ was chosen.
+The most important thing is that $\text{DAA}_N \gg c$, particularly regarding simplexes.
+
+With regards to the other values -- $q$, $c$, and $N_1$ -- they will be varied as part of the experiment so that we can generate each data-point.
+For each data-point, we'll gather at least 9,000 samples (this is indicated by ``$n \ge 9000$'' in these figures' legends).
 
 \todo{asdf - continue method}
 
@@ -356,15 +366,15 @@ documented in \autoref{sec:appendix-experiment-ec}
     \label{fig:simulation-r1-single-simplex}
 \end{figure}
 
-\begin{figure}[]
-    \centering
-    \includegraphics[max width=\linewidth, max height=0.4\textheight]{simulation/_results_trad_vs_1simplex_9000_qs=0.48_t=5_daa=500.pdf}
-    \caption[]{
-        Version of \autoref{fig:simulation-r1-single-simplex} for $q = 0.48$.
-        %That the measured results for a simplex (converted via the CEC) converge with the both the results for a traditional blockchain and the analytical solution is taken to be validation that simplexes are secure.
-    }
-    \label{fig:simulation-r1-single-simplex-q48}
-\end{figure}
+% \begin{figure}[]
+%     \centering
+%     \includegraphics[max width=\linewidth, max height=0.4\textheight]{simulation/_results_trad_vs_1simplex_9000_qs=0.48_t=5_daa=500.pdf}
+%     \caption[]{
+%         Version of \autoref{fig:simulation-r1-single-simplex} for $q = 0.48$.
+%         %That the measured results for a simplex (converted via the CEC) converge with the both the results for a traditional blockchain and the analytical solution is taken to be validation that simplexes are secure.
+%     }
+%     \label{fig:simulation-r1-single-simplex-q48}
+% \end{figure}
 
 \autoref{fig:simulation-r2-cec-ext}
 
@@ -378,14 +388,14 @@ documented in \autoref{sec:appendix-experiment-ec}
     \label{fig:simulation-r2-cec-ext}
 \end{figure}
 
-\begin{figure}[]
-    \centering
-    \includegraphics[max width=\linewidth, max height=0.4\textheight]{simulation/_results_cec_9000_qs=0.48_t=5_daa=500.pdf}
-    \caption[]{
-        Version of \autoref{fig:simulation-r2-cec-ext} for $q = 0.48$.
-    }
-    \label{fig:simulation-r2-cec-ext-q48}
-\end{figure}
+% \begin{figure}[]
+%     \centering
+%     \includegraphics[max width=\linewidth, max height=0.4\textheight]{simulation/_results_cec_9000_qs=0.48_t=5_daa=500.pdf}
+%     \caption[]{
+%         Version of \autoref{fig:simulation-r2-cec-ext} for $q = 0.48$.
+%     }
+%     \label{fig:simulation-r2-cec-ext-q48}
+% \end{figure}
 
 \subsubsubsubsection{Discussion}
 

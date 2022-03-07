@@ -898,7 +898,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             '26': exp_16_csv_name,
             # '27': exp_16_csv_name,
             '28': exp_16_csv_name,
-            # '29': exp_16_csv_name,
+            '29': exp_16_csv_name,
             '30': exp_16_csv_name,
         }).get(exp_num, unknown_exp_num_name)
 
@@ -988,6 +988,10 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
 
     def std_x_label(t):
         return f"Simplex $N_1$"
+
+
+    def special_q44_t5_daa2000() -> CsvFileToPlot:
+        return (csv_name_f_from_exp('29')('0.44', 5, bt=75, hr=75, exp_num='29', daa=2000, hashname="xxh3"), 'por', None)
 
 
     CEC_TITLE_STR = "$P(q; N_1 = N; c = C) \\; \\approx \\; P(q; N_1 = 1; c = NC)$"
@@ -1380,12 +1384,15 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             f"png/_results_trad_validation_9000_t={t}_daa={daa}",
             save_as_file_exts=['pdf', 'csv'],
             x_label=f"Confirmations$\\div {t}$",
-            x_range=(0, 61),
-            y_lim=(0, 1.4),
+            # x_range=(0, 61),
+            x_range=(0, 31),
+            # y_lim=(0, 1.4),
             figsize=RESULTS_ZOOMED_FIG_SIZE,
-            plot_this_order=[3,0,4,1,5,2]
+            # plot_this_order=[3,0,4,1,5,2]
+            plot_this_order=[2,0,3,1]
         )
-        for qs in [['0.40', '0.44', '0.48']] for t in ['5', '10', '20']
+        for qs in [['0.40', '0.44']] # , '0.48']]
+        for t in ['5', '10', '20']
         for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
         # for suffix, gen_csv_kwargs in [('', dict()), ('_nofrac', dict(min_ds_conf=5))]
     ] + [
@@ -1420,14 +1427,14 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             list(chain(*[
                 gen_por_cec_full_csvs(q, int(t), bt=75, hr=75, exp=exp, aux='aux', daa=daa, min_ds_conf=5, hashname="xxh3")
                 for q in qs
-            ])),
+            ])) + ([] if not add_special else [special_q44_t5_daa2000()]),
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture (Extended)",
                 f"{CEC_EXT4_TITLE_STR}",
                 f"If the CEC is true, then the plots with equal $q$ should align",
             ]),
             # f"png/_results_cec_9000_q={q}_t={t}_daa={daa}.pdf",
-            f"png/_results_cec_9000_qs={'-'.join(qs)}_t={t}_daa={daa}",
+            f"png/_results_cec_9000_qs={'-'.join(qs)}_t={t}{'' if not add_special else '_with_daa2k'}_daa={daa}",
             save_as_file_exts=['pdf', 'svg', 'csv'],
             x_label=std_x_label(t),
             # x_range=q_t_to_x_range[(q, t)],
@@ -1436,7 +1443,11 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             plot_this_order=order,
             legend_loc=ll,
         )
-        for qs,order,ll in [(['0.40', '0.44'], [8,3,0,1,2,9,7,4,5,6], None), (['0.48'], [4,3,0,1,2], 'lower left')]  # , '0.48'
+        for qs,order,ll,add_special in [
+            (['0.40', '0.44'], [9,3,0,1,2,10,7,4,8,5,6], None, True),
+            (['0.40', '0.44'], [8,3,0,1,2,9,4,7,5,6], None, False),
+            (['0.48'], [4,3,0,1,2], 'lower left', False)
+            ]  # , '0.48'
         for t in ['5']
         for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
     ] + [
