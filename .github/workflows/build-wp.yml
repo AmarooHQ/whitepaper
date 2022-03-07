@@ -40,7 +40,7 @@ jobs:
         run: make docker "DOCKER_CMD=bash build.sh"
 
   lint_and_release:
-    needs: build
+    needs: basic_build
     runs-on: 'self-hosted'
 
     if: ${{ inputs.build_release }}
