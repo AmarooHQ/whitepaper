@@ -58,9 +58,10 @@ export N_CPUS=${N_CPUS:-$MEASURED_N_CPUS}
 SECONDS=0
 
 # nchain_arr=( 1 2 30 `seq 21 -2 7` `seq 6 -1 1` )
-nchain_arr=( 1 2 60 42 30 `seq 21 -2 7` `seq 6 -1 1` )
-# ds_conf_arr=( 1.0 1.25 1.5 1.75 1.9 2.0 2.25 2.5 2.75 2.9 3.0 5 10 20 )
-ds_conf_arr=( 1.0 1.5 1.75 1.9 2.0 2.25 2.75 2.9 3.0 )  # exclude previously acquired data
+# nchain_arr=( 1 2 60 42 30 `seq 21 -2 7` `seq 6 -1 1` )
+nchain_arr=( 30 25 `seq 21 -2 7` `seq 6 -1 1` )
+ds_conf_arr=( 1.0 1.25 1.5 1.75 1.9 2.0 2.25 2.5 2.75 2.9 3.0 5 10 20 )
+# ds_conf_arr=( 1.0 1.5 1.75 1.9 2.0 2.25 2.75 2.9 3.0 )  # exclude previously acquired data
 
 # note: in reality a simplex needs to use WeightedDag and an attacker needs to win via the DoubleSpendWork strategy.
 # => no point calculating other combinations (those including WeightedChain or DoubleSpend strat)

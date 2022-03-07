@@ -78,12 +78,17 @@ test if dynamic cutoff gave invalid results for high DS target (particularly wit
   done
 )
 
+### this one just for checking DAA_N different with particular regard to results q0.44 t=5 daa=2000
+
 (
   for daa2_blocks in 2000; do
-    export EXP_IS_AUX=1
+    export EXP_IS_AUX=
     export DAA2_N_BLOCKS=$daa2_blocks
     export SKIP_EXP_CONF_PROMPT=1
+    export DRY_RUN=1
     export ATK_DS_CONF_ONLY=5
-    ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+    export ATK_HR_ONLY=0.44
+    export EXP_NUM=29
+    ./bin/experiment-30-and-beyond.sh
   done
 )
