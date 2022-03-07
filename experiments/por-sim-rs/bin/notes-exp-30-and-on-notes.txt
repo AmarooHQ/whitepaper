@@ -26,3 +26,21 @@ partial confirmations
     ./bin/experiment-30-and-beyond.sh
   done
 )
+
+
+
+
+
+extra data points added to aux chains that appear in WP results
+------
+note: aux results are cheap to generate -- it's large simplexes that are the main issue.
+(
+  for atk_hr_only in 0.40 0.44; do
+    export EXP_IS_AUX=1
+    export DAA2_N_BLOCKS=500
+    export DRY_RUN=1
+    export ATK_DS_CONF_ONLY=5
+    export ATK_HR_ONLY=$atk_hr_only
+    ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+  done
+)

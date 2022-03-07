@@ -39,10 +39,10 @@ $\blacksquare$
     The conjecture that, when using PoR and appropriately converting work,
     confirmations of reflecting chains
     can be treated as \emph{equivalent} to local confirmations of the same weight.
-    See \autoref{eq:por-sim-hypothesis-extended}
+    See \autoref{eq:cec-extended-hypothesis}
     % Given $q$ and some integer $N$, the probability of
     % an attack succeeding after $C$ confirmations is
-    % $\forall a \in \{1,2,\dots,N\}: P^\prime(q; N_1 = a; c = \frac{NC}{a})$
+    % $\forall a \in \{1,2,\dots,N\}: P^\prime(q; N_1 = a; c = \frac{CN}{a})$
 }
 
 The Confirmation Equivalence Conjecture is why PoR works.
@@ -63,7 +63,7 @@ So \emph{security takes \textbf{time}}, because confirmations take time.
 
 Now, consider a simplex: the equivalence conjecture says that it doesn't matter whether confirmations come from the \emph{local} chain, or if they come from a \emph{reflecting} chain.
 So, a simplex-chain in a 2-chain simplex (wherein each simplex-chain has $\mathbb{C}^\prime = 2 \times B_f$) \emph{should}, after $C$ confirmations, be as secure as a standalone blockchain with $2C$ confirmations.
-Or, more generally, a simplex-chain in an $N$-chain simplex will, after $C$ \emph{local} confirmations, be as secure as a standalone blockchain after $NC$ confirmations.
+Or, more generally, a simplex-chain in an $N$-chain simplex will, after $C$ \emph{local} confirmations, be as secure as a standalone blockchain after $CN$ confirmations.
 
 This is something we can test!
 (See \autoref{sec:por-simulation-experiment} for that.)
@@ -129,7 +129,7 @@ Let's test the Confirmation Equivalence Conjecture.
 
 \subsubsubsubsection{Hypothesis}
 
-The hypothesis is that: doublespends against an \emph{individual simplex-chain} in an $N$-chain simplex after $C$ \emph{local} confirmations are \emph{as hard} as doublespends against a traditional blockchain after $N\cdot C$ confirmations.
+The hypothesis is that: doublespends against an \emph{individual simplex-chain} in an $N$-chain simplex after $C$ \emph{local} confirmations are \emph{as hard} as doublespends against a traditional blockchain after $C\cdot N$ confirmations.
 
 First, define $P(q; c)$ to be the function that returns the probability of an attempted doublespend succeeding on a traditional blockchain according to Rosenfeld's analytical solution:
 \begin{equation}
@@ -144,31 +144,37 @@ Next, we will declare a new function, $P^\prime$, and assume that it \emph{exist
 Particularly: $P^\prime(q; c = C; N_1 = N)$ is the probability of a doublespend attack succeeding against a simplex with $N$ simplex-chains after $C$ confirmations, given an attacker with $q$ proportion of the network hash-rate.
 We do not know the definition of this function, but we can measure it.
 
-As a base case, it is taken that $P(q; c) \equiv P^\prime(q; c; N_1 = 1)$.
+As a base case, it is taken that:
+\begin{equation}
+    P(q; c) \equiv P^\prime(q; c; N_1 = 1)
+\end{equation}
 Note that a simplex of 1 chain (the 0-simplex) \emph{is} a traditional blockchain.
 So we can take Bitcoin for example: the probability of an attack succeeding after 6 confirmations is given by $P(q; c = 6) \approx P^\prime(q; c = 6; N_1 = 1)$.
 
-Thus, the hypothesis is that:
+One prediction of the hypothesis is that:
 \begin{equation}
-    P^\prime(q; c = NC; N_1 = 1) \approx P^\prime(q; c = C; N_1 = N)
+    P^\prime(q; c = CN; N_1 = 1) \approx P^\prime(q; c = C; N_1 = N)
     \label{eq:por-sim-hypothesis}
 \end{equation}
-
 In fact, we can take this further.
 The relationship that exists is continuous -- it must be if confirmations are equivalent.
 This is the \emph{extended} CEC:
 % 1 \le x \le N; x \in \{a_i, b_i\}
 % , and $1 \le a_i \le N$, and $1 \le b_i \le N$
 \begin{equation}
-    %P\biggl(q; N_1 = a; c = \frac{NC}{a}\biggr) \approx P\biggl(q; N_1 = b; c = \frac{NC}{b}\biggr)
-    \forall a \in \{x: 1 \le x \le N\}: P^\prime\biggl(q; c = \frac{NC}{a}; N_1 = a\biggr) \text{ is approximately constant}
-    \label{eq:por-sim-hypothesis-extended}
+    \begin{split}
+        %P\biggl(q; N_1 = a; c = \frac{CN}{a}\biggr) \approx P\biggl(q; N_1 = b; c = \frac{CN}{b}\biggr)
+        \forall a \in \{x: 1 \le x \le N\}: P^\prime\biggl(q; c = \frac{CN}{a}; N_1 = a\biggr) &\text{ is approximately constant}
+        \label{eq:cec-extended-hypothesis} \\
+        \implies P^\prime\biggl(q; c = \frac{CN}{a}; N_1 = a\biggr) &\approx P(q; c = CN)
+        % \label{eq:cec-approx-rosenfeld}
+    \end{split}
 \end{equation}
 
-If \autoref{eq:por-sim-hypothesis-extended} is correct, it indicates that there exists a \emph{generalization} of traditional blockchains (which have $N_1 = 1$);
+If \autoref{eq:cec-extended-hypothesis} is correct, it indicates that there exists a \emph{generalization} of traditional blockchains (which have $N_1 = 1$);
 particularly, that there is \emph{another dimension} ($N_1$; the size of the simplex) which is geometrically related to the first dimension, $c$.
 
-So, we don't need to know a closed form of $P^\prime(q, N_1, c)$: all cases \emph{that we can measure} are equivalent to some \emph{other} case, and we can convert between them.\footnote{
+Crucially, we don't need to know a closed form of $P^\prime(q, c, N_1)$: all cases \emph{that we can measure} are equivalent to some \emph{other, traditional} case, and we can convert between them.\footnote{
     This is not strictly true: Rosenfeld's solution requires an integer value for $c$.
     This is due to his solution assuming a static difficulty and the longest-chain fork rule; the \emph{construction} is consistent with Bitcoin (provided the difficulty doesn't adjust), but not with chains that recalculate difficulty every block.
     Additionally, when using \emph{work} instead of \emph{height} as the measure of an attack's success, fractional values of $c$ have real meaning -- especially with a reactive DAA and $N_1 \gg 1$.
@@ -176,16 +182,6 @@ So, we don't need to know a closed form of $P^\prime(q, N_1, c)$: all cases \emp
     Rosenfeld's solution has reach beyond those assumptions and observed results converge with it.
 }
 This is the basis of the method used to test this hypothesis.
-
-Note that $P^\prime(q; c = C; N_1 = 1)$ is taken to be identical to Rosenfeld's analytical solution.
-That is:
-
-\begin{equation}
-    \forall c \in \{1, 2, \dots\}: P^\prime(q; c; N_1 = 1) = \begin{cases}
-        1 - \sum_{m=0}^c \binom{m+c-1}{m}(p^c q^m - p^m q^c), & \text{if } q < p \\
-        1, & \text{otherwise}
-    \end{cases}
-\end{equation}
 
 \subsubsubsubsection{Method}
 
@@ -198,34 +194,38 @@ Particularly:
     \item The implementation supports both traditional blockchains ($N_1 = 1$) and PoR/simplexes.
 \end{itemize}
 
+The source code for this model blockchain network is contained in the \href{https://github.com/AmarooHQ/whitepaper/tree/master/experiments/por-sim-rs}{\texttt{/experiments/por-sim-rs/}} folder of \href{https://github.com/AmarooHQ/whitepaper}{this paper's repository}.
+
 \begin{table}[H]
     \centering
     \caption[
-        Table of parameters necessary to generate experimental results.
+        Table of parameters necessary to generate the main CEC experimental results.
     ]{
-        Table of parameters necessary to generate experimental results.
+        Table of parameters necessary to generate the main CEC experimental results.
+        Only those parameters marked as variable were altered while generating the main results.
         Some parameters are omitted as they are not directly relevant to this experiment.
     }
     \begin{tabular}{llp{0.64\linewidth}}
         \toprule
         Parameter & Variable & Significance \\
         \midrule
-        $q$ (ratio) & Yes & Attacker's proportion of global hash rate. \\
+        $q$ (ratio) & Yes & Attacker's proportion of the global hash rate. \\
         $c$ (confirmations) & Yes & Work-equivalent of `$c$ local confirmations' waiting time. \\
         $N_1$ (chains) & Yes & The number simplex-chains ($N_1 = 1$ for traditional blockchains). \\
-        $B_f^{-1}$ (ticks) & No & Analogue of `seconds' used by the DAA. \\
+        $B_f^{-1}$ (ticks) & No & Artificial units of time used by the DAA. \\
         $\text{DAA}_N$ (blocks) & No & The number of blocks over which the DAA operates. \\
+        $H$ (hashes) & No & The network-wide hashes per chain per tick. \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-with attack simulations wherein each chain uses PoW and has a fully functioning fork rule.
-This design is modular, such that it supports different fork rules, different block data structures and ordering algorithms (including multiple parents), different attack strategies.
-The program also accepts a variety of parameters -- both for the simulation itself, the individual chains, and for each attack strategy.
+% with attack simulations wherein each chain uses PoW and has a fully functioning fork rule.
+% This design is modular, such that it supports different fork rules, different block data structures and ordering algorithms (including multiple parents), different attack strategies.
+% The program also accepts a variety of parameters -- both for the simulation itself, the individual chains, and for each attack strategy.
 
-The source code for this model blockchain network is contained in the \href{https://github.com/AmarooHQ/whitepaper/tree/master/experiments/por-sim-rs}{\texttt{/experiments/por-sim-rs/}} folder of \href{https://github.com/AmarooHQ/whitepaper}{this paper's repository}.
+% As we can optimize this model, we can simulate many attacks quickly; so we can efficiently make statistically significant measurements.
 
-As we can optimize this model, we can simulate many attacks quickly; so we can efficiently make statistically significant measurements.
+
 
 For each data-point, typically at least 9,000 samples were taken (this is indicated by ``$n \ge 9000$'' in these figures' legends).
 
@@ -286,9 +286,9 @@ So, while it is \emph{possible} that a poor implementation of a simplex could co
     \centering
     \includegraphics[max width=\linewidth, max height=0.5\textheight]{simulation/_results_trad_validation_9000_t=5_daa=500.pdf}
     \caption[
-        A comparison of the measured probability of a successful doublespend (for a traditional blockchain) compared with Rosenfeld's analytical solution.
+        A comparison of the measured probability of a successful doublespend against a traditional blockchain compared with Rosenfeld's analytical solution.
     ]{
-        A comparison of the measured probability of a successful doublespend (for a traditional blockchain) compared with Rosenfeld's analytical solution, for $q \in \{0.4, 0.44, 0.48\}$.
+        A comparison of the measured probability of a successful doublespend against a traditional blockchain compared with Rosenfeld's analytical solution, for $q \in \{0.4, 0.44, 0.48\}$.
         That the measured results converge with the analytical solution is taken to be validation of the simulation -- i.e., it \emph{works} and is \emph{useful} in the context of this experiment.
     }
     \label{fig:simulation-trad-only}

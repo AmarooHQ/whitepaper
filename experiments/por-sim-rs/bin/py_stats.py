@@ -338,7 +338,8 @@ def get_line_default_kwargs(chain_ty: Literal['por', 'trad'], ds_target, as_scat
     is_por = chain_ty == 'por'
     z_order = 2 + (.1 if is_por else -.1)
     # color = get_color(ds_target)
-    color = plot_colors[chain_ty].get(ds_target, None)
+    # color = plot_colors[chain_ty].get(ds_target, None)
+    color = None
     kw: dict[str, Any] = dict(zorder=z_order, linewidth=2.0 if is_por else 2.5)
     kw.update(dict(color=color) if color else {})
     marker_k: str = 'style' if as_scatter else 'marker'
@@ -968,7 +969,10 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
 
     RESULTS_FIG_WIDTH = 10
     RESULTS_FIG_ASPECT = 1/0.55
-    RESULTS_FIG_SIZE = (RESULTS_FIG_WIDTH, RESULTS_FIG_WIDTH / RESULTS_FIG_ASPECT)
+    mk_results_fig = lambda w: (w, w / RESULTS_FIG_ASPECT)
+    RESULTS_FIG_SIZE = mk_results_fig(RESULTS_FIG_WIDTH)
+    RESULTS_ZOOMED_FIG_SIZE = mk_results_fig(0.85 * RESULTS_FIG_WIDTH)
+    RESULTS_ZOOMED_TALLER_FIG_SIZE = (RESULTS_ZOOMED_FIG_SIZE[0], RESULTS_ZOOMED_FIG_SIZE[1] * 1.2)
 
     LP_SEC_X_LABEL = f"Traditional Blockchain Confirmations ($\\sim$time)"
     LP_X_LABEL = f"Simplex $N_1$ ($\\sim$capacity)"
@@ -1340,18 +1344,20 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
                 for q in qs
             ],
             "\n".join([
-                f"PoR Simulator Validation: Doublespend via Traditional Blockchain",
+                f"Amaroo Simulator Validation: Doublespend via Traditional Blockchain",
                 # f"{CEC_EXT2_TITLE_STR}",
                 # f"If the CEC is true, then these plots should align",
             ]),
             f"png/_results_trad_validation_9000_t={t}_daa={daa}",
             save_as_file_exts=['pdf', 'csv'],
             x_label=f"Confirmations$\\div {t}$",
-            x_range=(0, 31),
-            figsize=RESULTS_FIG_SIZE,
+            x_range=(0, 61),
+            y_lim=(0, 1.4),
+            figsize=RESULTS_ZOOMED_FIG_SIZE,
             plot_this_order=[3,0,4,1,5,2]
         )
-        for qs in [['0.40', '0.44', '0.48']] for t in ['5', '10', '20'] for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
+        for qs in [['0.40', '0.44', '0.48']] for t in ['5', '10', '20']
+        for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
         # for suffix, gen_csv_kwargs in [('', dict()), ('_nofrac', dict(min_ds_conf=5))]
     ] + [
         # for results - just trad only + main simplex
@@ -1372,10 +1378,10 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             x_label=std_x_label(t),
             # x_range=q_t_to_x_range[(q, t)],
             x_range=(0,31),
-            figsize=RESULTS_FIG_SIZE,
-            plot_this_order=[4,2,0,5,3,1]
+            figsize=RESULTS_ZOOMED_FIG_SIZE,
+            plot_this_order=order
         )
-        for qs in [['0.40', '0.44'], ['0.48']]  # , '0.48'
+        for qs, order in [(['0.40', '0.44'], [4,2,0,5,3,1]), (['0.48'], [2,1,0])]  # , '0.48'
         for t in ['5', '10', '20']
         for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
 
@@ -1398,9 +1404,10 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             # x_range=q_t_to_x_range[(q, t)],
             x_range=(0,31),
             figsize=RESULTS_FIG_SIZE,
-            plot_this_order=[8,3,0,1,2,9,7,4,5,6]
+            plot_this_order=order,
+            legend_loc=ll,
         )
-        for qs in [['0.40', '0.44']] # , ['0.48']]  # , '0.48'
+        for qs,order,ll in [(['0.40', '0.44'], [8,3,0,1,2,9,7,4,5,6], None), (['0.48'], [4,3,0,1,2], 'lower left')]  # , '0.48'
         for t in ['5']
         for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
     ] + [
@@ -1498,16 +1505,27 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
                 j.run()
             count += 1
 
+    # wait for all results
+    [_res.wait() for j,_res in res]
+
     pool.close()
     pool.join()
+
+    print(f"\n\n>> should be all done generating {count} graphs via {n_jobs} threads\n")
+
+    ex_errors = []
 
     for j, _res in res:
         try:
             _res.get()
         except Exception as e:
-            print(f"Exception processing job: {j.filenames[0]}: {str(e)}")
+            ex_errors.append(f"Exception processing job: {j.filenames[0]}: {str(e)}")
 
-    print(f"should be all done generating {count} graphs via {n_jobs} threads")
+    if len(ex_errors) == 0:
+        print(f"No exceptions found.")
+    else:
+        print(f"Exceptions found:\n\t> " + "\n\t> ".join(ex_errors))
 
+    # done
 
 main()

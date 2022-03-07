@@ -17,6 +17,7 @@ export RUST_LOG=warn
 # Second aux run: DAA=500 (test if reactivity of DAA is responsible for trad better-than-theoretical performance)
 # - generate some extra data for high n-chains
 export EXP_NUM=26
+export EXP_IS_AUX=${EXP_IS_AUX:-}
 if [[ "1" = "$EXP_IS_AUX" ]]; then
   export EXP_NUM=${EXP_NUM}aux
 fi
@@ -57,6 +58,11 @@ SECONDS=0
 
 # nchain_arr=( 1 2 30 `seq 21 -2 7` `seq 6 -1 1` )
 nchain_arr=( 1 2 60 42 30 `seq 21 -2 7` `seq 6 -1 1` )
+if [[ "$EXP_IS_AUX" = "1" ]]; then
+  nchain_arr=( 60 50 42 38 35 32 )
+  # for q=0.48
+  # nchain_arr=( 50 38 35 32 )
+fi
 # ds_conf_arr=( 1.25 2.5 )
 ds_conf_arr=( 1.25 2.5 5 10 20 )
 
