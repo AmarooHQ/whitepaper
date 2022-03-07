@@ -31,7 +31,7 @@ export ATK_DS_CONF_ONLY=${ATK_DS_CONF_ONLY:-}
 # status updates are more frequent with larger REPEAT_TIMES
 export N_TRIALS_PER=100
 export REPEAT_TIMES=90
-export RESUME_FROM=1  # subtract (this-1) from REPEAT_TIMES
+export RESUME_FROM=${RESUME_FROM:-1}  # subtract (this-1) from REPEAT_TIMES
 export REPEAT_TIMES=$(echo "$REPEAT_TIMES-$RESUME_FROM+1" | bc)
 if [[ ! -z "$DRY_RUN" ]]; then
   export REPEAT_TIMES=1

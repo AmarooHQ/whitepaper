@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from asyncore import loop
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import lru_cache
@@ -112,9 +113,15 @@ def render_conf_target(t: float):
 # functions for decimal calcs to get accurate analytical results
 
 
+@lru_cache(2**16)
+def factorial(n):
+    return math.factorial(n)
+
+
 # n! / (k! * (n - k)!)
+@lru_cache(2**16)
 def n_choose_k(n, k) -> Decimal:
-    return Decimal(math.factorial(n) // (math.factorial(k) * math.factorial(n - k)))
+    return Decimal(factorial(n) // (factorial(k) * factorial(n - k)))
 
 
 def pow(b: Decimal, i) -> Decimal:
@@ -131,7 +138,8 @@ def pow(b: Decimal, i) -> Decimal:
 #     return g_f(n) / (gk * g_f(n-k))
 
 
-# @lru_cache
+# @
+@lru_cache(2**16)
 # def p_ds_success_analytical_cont(q, n):
 #     n = float(n)
 #     q = float(q)
@@ -145,13 +153,19 @@ def pow(b: Decimal, i) -> Decimal:
 #     return 1 - sum(to_sum)
 
 
-@lru_cache
+@lru_cache(2**16)
+def rosenfeld_inner(p, q, n, m):
+    return n_choose_k(m+n-1, m) * (pow(p*q,m) * (pow(p,n-m) - pow(q,n-m)))
+
+
+@lru_cache(2**16)
 def p_ds_success_theoretical(q, n=20):
+    # print(f'p_ds_succ_mr: {(q, n)}')
     q = Decimal(q)
     p = 1 - q
     if q >= p: return 1
     # to_sum = list(n_choose_k(m+n-1, m) * (pow(p,n) * pow(q,m) - pow(p,m) * pow(q,n)) for m in range(n + 1))
-    to_sum = list(n_choose_k(m+n-1, m) * (pow(p*q,m) * (pow(p,n-m) - pow(q,n-m))) for m in range(n + 1))
+    to_sum = list(rosenfeld_inner(p, q, n, m) for m in range(n + 1))
     return 1.0 - float(sum(to_sum))
 
 
@@ -218,8 +232,18 @@ def ds_theoretical_series(multipliers, q=0.44, after_n_confs=20):
     xs = []
     ys = []
     max_trad_confs = int(max(multipliers) * after_n_confs) + 1
-    for c in range(1, max_trad_confs+1):
-        if (100 < c <= 200 and c % 3 != 0) or (200 < c and c % 5 != 0):
+    # loop_over = list(range(1, min(max_trad_confs+1, 200)))
+    loop_over = list(range(1, max_trad_confs+1))
+    # if len(loop_over) >= 199:
+    #     loop_over += [int(m * after_n_confs) for m in multipliers]
+    # print(after_n_confs, max(loop_over), multipliers)
+    # loop_over = [int(m * after_n_confs) for m in multipliers]
+    loop_over.sort()
+    for c in loop_over:
+        # sanity check -- avoid hanging for many minutes
+        if (c > 3000):
+            continue
+        if (100 < c <= 200 and c % 5 != 0) or (200 < c and c % after_n_confs != 0):
             continue
         r = p_ds_success_theoretical(q, c)
         # n = int(after_n_confs * n_por_chains)
@@ -273,7 +297,7 @@ def read_csv_data(fname, chain_ty: Literal['por', 'trad']):
     d: pd.DataFrame = pd.read_csv(fname)
     only_target = d['block_target'][1]
     daa = d['daa2_n_blocks'][1]
-    ds_target: float = d['doublespend_after_n_confs'][1]
+    ds_target: float = d['doublespend_after_n_confs'].min()
     q = d['atk_q'][1]
     if chain_ty == 'por':
         xs = d['n_chains'].unique()
@@ -450,7 +474,8 @@ def get_unseen(already_seen: list, current_objs: list):
 
 
 def save_csv(filename: str, all_data: list[tuple[str, pd.Series]]):
-    df = pd.DataFrame({l:s for l,s in all_data})
+    data = {l:s for l,s in all_data}
+    df = pd.DataFrame(data)
     df.to_csv(filename)
 
 
@@ -659,10 +684,11 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         # can't do this on sec axis? mb need to do a different way
         # sec_x_axis.set_major_locator(MaxNLocator(nbins=20, integer=True))
     else:
-        _id = lambda x: x
-        sec_x_axis = plt.gca().secondary_xaxis('top', functions=(_id, _id))
-        sec_x_axis.set_xlabel('WARNING: UNABLE TO SET TOP X AXIS!!!', color='red')
-        raise Exception("can't plot secondary x axis")
+        pass
+        # _id = lambda x: x
+        # sec_x_axis = plt.gca().secondary_xaxis('top', functions=(_id, _id))
+        # sec_x_axis.set_xlabel('WARNING: UNABLE TO SET TOP X AXIS!!!', color='red')
+        # raise Exception("can't plot secondary x axis")
 
     if x_range:
         plt.xlim(x_range)
@@ -1497,16 +1523,24 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
     pool = mpp.Pool(n_jobs)
     count = 0
 
-    res: list[tuple[SavePlot, mpp.AsyncResult]] = []
-    #filter_fname
+    filtered_jobs: list[SavePlot] = []
     for j in jobs_to_save:
         filter_mode = any if filter_mode_or else all
         if filter_fnames is None or any(filter_mode(fstr in fn for fstr in filter_fnames) for fn in j.filenames):
-            if n_jobs > 1:
-                res.append((j, pool.apply_async(j.run)))
-            else:
-                j.run()
-            count += 1
+            filtered_jobs.append(j)
+
+    for j in filtered_jobs:
+        print(f"Generating: {j._filename} (in formats: {j.save_as_file_exts})")
+    print(f"\n>> Generating {len(filtered_jobs)} jobs total\n")
+
+    res: list[tuple[SavePlot, mpp.AsyncResult]] = []
+    #filter_fname
+    for j in filtered_jobs:
+        if n_jobs > 1:
+            res.append((j, pool.apply_async(j.run)))
+        else:
+            j.run()
+        count += 1
 
     # wait for all results
     [_res.wait() for j,_res in res]

@@ -314,8 +314,12 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
 
     pub fn run_attack(&mut self) -> Result<bool, String> {
         let mut msgs_from = Vec::new();
+        // WRT limit of ~1_000_000: with q=0.48 at ds_win=1200 -- no successes went this high, but otherwise they'd typically go >2m
+        // 1200 * 11 * 75(bt) = 960k
         let ts_limit = if self.args.use_dynamic_cutoff {
-            ((100.0 as f32).max(self.atk_params.ds_win_as_f32().unwrap_or(20.0).powf(2.0)) as u32)
+            ((100.0 as f32)
+                .max(self.atk_params.ds_win_as_f32().unwrap_or(20.0).powf(2.0))
+                .min(self.atk_params.ds_win_as_f32().unwrap_or(20.0) * 11.0)) as u32
                 * self.net_args.block_target as u32
                 + self.args.attack_starts_at
         } else {
