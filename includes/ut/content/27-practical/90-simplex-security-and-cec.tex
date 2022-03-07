@@ -183,6 +183,42 @@ This is the basis of the method used to test this hypothesis.
 If \autoref{eq:cec-extended-hypothesis} is correct, it indicates that there exists a \emph{generalization} of traditional blockchains (which have $N_1 = 1$);
 particularly, that there is \emph{another dimension} ($N_1$; the size of the simplex) which is geometrically related to the first dimension, $c$.
 
+\subsubsubsubsection{Scope and Constraints}
+
+This experiment is not intended to be comprehensive -- many significant real-world factors are basically ignored: e.g., block propagation latency, transaction processing overhead, geographic latency, bandwidth constraints, etc.
+
+The scope is \emph{only} intended to cover PoR as a consensus mechanism -- particularly with respect to doublespends.
+
+This constraint means there are many ways to simplify implementation -- for example, reflected blocks are not checked against the history of a blockchain.
+These simplifications would render a \emph{production} blockchain insecure.
+However, the simplifications are okay in this case since we \emph{expect} near-identical behavior from well functioning networks, and the simplifications are otherwise independent of what we are testing -- the consensus mechanism.
+In essence, we want to simulate a \emph{specific} attack, so the implementation doesn't need to be hardened because we know that the attacker will \emph{only} attack in the specific way we care about.
+
+So, while it is \emph{possible} that a poor implementation of a simplex could compromise its security, we'll assume these kinds of design flaws are \emph{in principle} avoidable.
+
+\todoDraftOnly{Test chains of different hash-rates + anything else to cover bases re CEC}
+
+
+
+\subsubsubsubsection{Error Correction Iteration}
+
+Following the initial implementation of PoR in the simulator, results were promising but did not align with the theoretical prediction (based on Rosenfeld's analytical derivation of $P^\prime(q; N_1 = 1; c = C)$).
+
+traditional chains were okay but not perfect -- a bit better than predicted tho.
+simplexes, however, were way worse for $N_1 > 5$ or so -- $P^\prime(\cdots)$ never dropped below $\sim 0.1$.
+
+documented in \autoref{sec:appendix-experiment-ec}
+
+\begin{enumerate}
+    \item Accounting for draft reflected work
+    \item Implementing the \texttt{DoubleSpendWork} attack strategy
+    \item Randomizing hash rate over simplex chains ($p + q = 1$ is globally maintained)
+    \item Implementing the attacker's ``Bonus Block''
+    \item Increasing the number of blocks over which the DAA operates ($\text{DAA}_N = 100 \to 500$)
+\end{enumerate}
+
+
+
 \subsubsubsubsection{Method}
 
 I have implemented a simulation of a blockchain network that is suitable for this experiment.
@@ -248,7 +284,7 @@ Since we want to \emph{match} analytical results, we want a \emph{larger} value 
 }
 
 So that we match the analytical solution's assumptions, a value of $\text{DAA}_N = 500$ was chosen.
-The most important thing is that $\text{DAA}_N \gg c$, particularly regarding simplexes.
+The most important thing is that $\text{DAA}_N \gg c$, particularly regarding traditional chains.
 
 With regards to the other values -- $q$, $c$, and $N_1$ -- they will be varied as part of the experiment so that we can generate each data-point.
 For each data-point, we'll gather at least 9,000 samples (this is indicated by ``$n \ge 9000$'' in these figures' legends).
@@ -277,21 +313,6 @@ Both graphs should be basically overlapping
 Also compare to theoretical probability based on \href{https://web.archive.org/web/20220209100515/https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{Analysis of hashrate-based double-spending}.
 
 
-\subsubsubsubsection{Scope and Constraints}
-
-This experiment is not intended to be comprehensive -- many significant real-world factors are basically ignored: e.g., block propagation latency, transaction processing overhead, geographic latency, bandwidth constraints, etc.
-
-The scope is \emph{only} intended to cover PoR as a consensus mechanism -- particularly with respect to doublespends.
-
-This constraint means there are many ways to simplify implementation -- for example, reflected blocks are not checked against the history of a blockchain.
-These simplifications would render a \emph{production} blockchain insecure.
-However, the simplifications are okay in this case since we \emph{expect} near-identical behavior from well functioning networks, and the simplifications are otherwise independent of what we are testing -- the consensus mechanism.
-In essence, we want to simulate a \emph{specific} attack, so the implementation doesn't need to be hardened because we know that the attacker will \emph{only} attack in the specific way we care about.
-
-So, while it is \emph{possible} that a poor implementation of a simplex could compromise its security, we'll assume these kinds of design flaws are \emph{in principle} avoidable.
-
-\todoDraftOnly{Test chains of different hash-rates + anything else to cover bases re CEC}
-
 \subsubsubsubsection{Validating the Model}
 
 \todo{
@@ -317,25 +338,6 @@ So, while it is \emph{possible} that a poor implementation of a simplex could co
     }
     \label{fig:simulation-trad-only}
 \end{figure}
-
-
-
-\subsubsubsubsection{Error Correction Iteration}
-
-Following the initial implementation of PoR in the simulator, results were promising but did not align with the theoretical prediction (based on Rosenfeld's analytical derivation of $P^\prime(q; N_1 = 1; c = C)$).
-
-traditional chains were okay but not perfect -- a bit better than predicted tho.
-simplexes, however, were way worse for $N_1 > 5$ or so -- $P^\prime(\cdots)$ never dropped below $\sim 0.1$.
-
-documented in \autoref{sec:appendix-experiment-ec}
-
-\begin{enumerate}
-    \item Accounting for draft reflected work
-    \item Implementing the \texttt{DoubleSpendWork} attack strategy
-    \item Randomizing hash rate over simplex chains ($p + q = 1$ is globally maintained)
-    \item Implementing the attacker's ``Bonus Block''
-    \item Increasing the number of blocks over which the DAA operates ($\text{DAA}_N = 100 \to 500$)
-\end{enumerate}
 
 \subsubsubsubsection{Interpreting the Results}
 
