@@ -52,10 +52,9 @@ release:
 
 cilint-prep: PP_MODE=lint
 cilint-prep: whitepaper
-
-cilint: cilint-prep
 	npm i
-	npm run lint
+
+cilint: cilint-prep lint
 
 wp-no-lint: PP_LINT_FLAG="--no-lint-check"
 wp-no-lint: whitepaper

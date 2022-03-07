@@ -1,0 +1,16 @@
+name: Build WP Draft
+
+on:
+  pull_request:
+    branches:
+      - master
+      - main
+      - 'prerelease-*'
+      - 'pre-release-*'
+      - 'releases/**'
+
+jobs:
+  call-wp-workflow:
+    uses: ./.github/workflows/build-wp.yml
+    with:
+      build_release: true
