@@ -171,10 +171,7 @@ This is the \emph{extended} CEC:
     \end{split}
 \end{equation}
 
-If \autoref{eq:cec-extended-hypothesis} is correct, it indicates that there exists a \emph{generalization} of traditional blockchains (which have $N_1 = 1$);
-particularly, that there is \emph{another dimension} ($N_1$; the size of the simplex) which is geometrically related to the first dimension, $c$.
-
-Crucially, we don't need to know a closed form of $P^\prime(q, c, N_1)$: all cases \emph{that we can measure} are equivalent to some \emph{other, traditional} case, and we can convert between them.\footnote{
+Notice that we don't need to know a closed form of $P^\prime(q, c, N_1)$ to test the CEC: all cases \emph{that we can measure} are equivalent to some \emph{other, traditional} case, and we can convert between them.\footnote{
     This is not strictly true: Rosenfeld's solution requires an integer value for $c$.
     This is due to his solution assuming a static difficulty and the longest-chain fork rule; the \emph{construction} is consistent with Bitcoin (provided the difficulty doesn't adjust), but not with chains that recalculate difficulty every block.
     Additionally, when using \emph{work} instead of \emph{height} as the measure of an attack's success, fractional values of $c$ have real meaning -- especially with a reactive DAA and $N_1 \gg 1$.
@@ -182,6 +179,9 @@ Crucially, we don't need to know a closed form of $P^\prime(q, c, N_1)$: all cas
     Rosenfeld's solution has reach beyond those assumptions and observed results converge with it.
 }
 This is the basis of the method used to test this hypothesis.
+
+If \autoref{eq:cec-extended-hypothesis} is correct, it indicates that there exists a \emph{generalization} of traditional blockchains (which have $N_1 = 1$);
+particularly, that there is \emph{another dimension} ($N_1$; the size of the simplex) which is geometrically related to the first dimension, $c$.
 
 \subsubsubsubsection{Method}
 
@@ -225,7 +225,21 @@ The source code for this model blockchain network is contained in the \href{http
 
 % As we can optimize this model, we can simulate many attacks quickly; so we can efficiently make statistically significant measurements.
 
+When choosing values for $B_f^{-1}$ and $H$, we want them to be low enough for the simulation to be efficient, but large enough to ensure that there are no issues with limits-of-accuracy.
+To this end, both were chosen to be 75.
+This means that, prior to the doublespend attack beginning, the average difficulty is around 5625.
 
+We also want to consider $\text{DAA}_N$ -- but there isn't an issue of \emph{precision} in this case.
+The DAA used\footnote{
+    The simulation uses the algorithm named \textsc{DAA-2} from \citeDaaTwoLink{}.
+} adjusts every block, so lower values of $\text{DAA}_N$ mean the DAA is more reactive to a drop in hash-rate.
+If the DAA is more reactive, then attackers need to do \emph{a little bit more work} since, on average, each of their blocks will weigh less than an honest block at an equivalent height.
+The only way to overcome this is for the attacker to be \emph{a little bit luckier than usual}.
+In essence, $P^\prime$ approaches zero a bit faster.
+So, to \emph{match} analytical results, we want a \emph{large} value of $\text{DAA}_N$ because this is most like an assumption of Rosenfeld's solution: \emph{constant difficulty}.
+(Though, in practice, we should seriously consider smaller values of $\text{DAA}_N$ for the security benefit.)
+
+For the purposes of matching the analytical solution (based on the assumption mentioned above), a value of $\text{DAA}_N = 500$ was chosen.
 
 For each data-point, typically at least 9,000 samples were taken (this is indicated by ``$n \ge 9000$'' in these figures' legends).
 

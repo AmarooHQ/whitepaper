@@ -293,7 +293,7 @@ def skip_csv_row(ds_target, x) -> bool:
 def read_csv_data(fname, chain_ty: Literal['por', 'trad']):
     # ensure that csv used for generating graphs are in the csv folder
     fname = f"csv" / Path(fname)
-    # print(f"Reading: {fname}")
+    print(f"Reading: {fname}")
     d: pd.DataFrame = pd.read_csv(fname)
     only_target = d['block_target'][1]
     daa = d['daa2_n_blocks'][1]
@@ -1431,7 +1431,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             save_as_file_exts=['pdf', 'svg', 'csv'],
             x_label=std_x_label(t),
             # x_range=q_t_to_x_range[(q, t)],
-            x_range=(0,31),
+            x_range=(0,31) if '0.48' not in qs else (0,46),
             figsize=RESULTS_FIG_SIZE,
             plot_this_order=order,
             legend_loc=ll,

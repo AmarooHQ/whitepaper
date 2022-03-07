@@ -871,7 +871,7 @@ information is *lost* through the DAA. -->
 
 \aside{
   With regards to DAAs, it should be noted that Bitcoin's was the first and the method has some undesirable properties.
-  I quite like the algorithm named \textsc{DAA-2} (which is used by Bitcoin Cash) in \href{https://cloudflare-ipfs.com/ipfs/Qmd8BE6xYCH58LNipE1zZ7BCftemN8hQWnfZJSJYq5XUE8}{An Economic Analysis of Difficulty Adjustment Algorithms in Proof-of-Work Blockchain Systems} \href{https://web.archive.org/web/20211018042402/https://econ.hkbu.edu.hk/eng/Doc/20201016_NODA.pdf}{[m1]} \href{https://web.archive.org/web/20211018043918/https://cloudflare-ipfs.com/ipfs/Qmd8BE6xYCH58LNipE1zZ7BCftemN8hQWnfZJSJYq5XUE8}{[m2]}.
+  I quite like the algorithm named \textsc{DAA-2} (which is used by Bitcoin Cash) in \citeDaaTwoLink{}.
   Experimentally, it seems to work well with \autoref{sec:dos-and-dags}.
 }
 
