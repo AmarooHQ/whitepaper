@@ -24,6 +24,13 @@ jobs:
 
       - uses: purescript-contrib/setup-purescript@main
 
+      # need to do this before we run bundle-for-wp in next step
+      - name: purs tables check compiled
+        if: ${{ inputs.build_release }}
+        shell: bash
+        run: |
+          make purs-ci-check
+
       - name: "purescript tables generator"
         shell: bash
         run: |

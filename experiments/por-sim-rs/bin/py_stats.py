@@ -1005,6 +1005,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
     mk_results_fig = lambda w: (w, w / RESULTS_FIG_ASPECT)
     RESULTS_FIG_SIZE = mk_results_fig(RESULTS_FIG_WIDTH)
     RESULTS_ZOOMED_FIG_SIZE = mk_results_fig(0.85 * RESULTS_FIG_WIDTH)
+    RESULTS_MORE_ZOOMED_FIG_SIZE = mk_results_fig(0.8 * RESULTS_FIG_WIDTH)
     RESULTS_ZOOMED_TALLER_FIG_SIZE = (RESULTS_ZOOMED_FIG_SIZE[0], RESULTS_ZOOMED_FIG_SIZE[1] * 1.2)
 
     LP_SEC_X_LABEL = f"Traditional Blockchain Confirmations ($\\sim$time)"
@@ -1387,7 +1388,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             # x_range=(0, 61),
             x_range=(0, 31),
             # y_lim=(0, 1.4),
-            figsize=RESULTS_ZOOMED_FIG_SIZE,
+            figsize=RESULTS_MORE_ZOOMED_FIG_SIZE,
             # plot_this_order=[3,0,4,1,5,2]
             plot_this_order=[2,0,3,1]
         )
@@ -1445,7 +1446,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
         )
         for qs,order,ll,add_special in [
             (['0.40', '0.44'], [9,3,0,1,2,10,7,4,8,5,6], None, True),
-            (['0.40', '0.44'], [8,3,0,1,2,9,4,7,5,6], None, False),
+            (['0.40', '0.44'], [8,3,0,1,2,9,7,4,5,6], None, False),
             (['0.48'], [4,3,0,1,2], 'lower left', False)
             ]  # , '0.48'
         for t in ['5']

@@ -10,6 +10,7 @@ LP_TABLES=$(LP_DIR)/tables.tex
 LP_TABLES_OUT=$(OUTDIR)/tables.tex
 
 PURS_GEN_DIR=includes/ut/complexity/ut-complexity-gen-purs
+PURS_GEN_OUT=includes/ut/complexity/populateWPTables.js
 
 GIT_SHORTHASH=$(shell git rev-parse --short HEAD)
 
@@ -124,7 +125,7 @@ build-whitepaper: %.md
 	  echo -n "\n\n" >> $(WPFILE) ; \
 	done
 	# replace tables placeholder with actual tables
-	node ./includes/ut/complexity/populateWPTables.js --populate-wp-md
+	node $(PURS_GEN_OUT) --populate-wp-md
 	# this fixes texcount (since import-paths don't need to be searched).
 	sed -r -i 's/input\{([0-9]+-[a-z]+)/input\{includes\/ut\/content\/\1/' $(WPFILE)
 # if you need to build the above: cd includes/ut/complexity/ut-complexity-gen-purs && npm i && npm run bundle-for-wp
@@ -214,7 +215,7 @@ pdflint:
 mk-lp-tables:
 	cp $(LP_TABLES) $(LP_TABLES_OUT)
 	export REPLACE_TABLES_IN=$(LP_TABLES_OUT) && \
-	node ./includes/ut/complexity/populateWPTables.js --populate-wp-md --lp-tables
+	node $(PURS_GEN_OUT) --populate-wp-md --lp-tables
 	latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(LP_TABLES_OUT)
 	cp $(OUTDIR)/tables.pdf ./tables.pdf
 
@@ -230,6 +231,15 @@ purs-build:
 purs-test:
 	cd $(PURS_GEN_DIR) && \
 	npm run test
+
+purs-ci-init-hash:
+	sha256sum $(PURS_GEN_OUT) > ci-check-purs-1.log
+
+purs-ci-post-hash:
+	sha256sum $(PURS_GEN_OUT) > ci-check-purs-2.log
+
+purs-ci-check: purs-ci-init-hash purs-build purs-ci-post-hash
+	bash bin/checkFilesIdentical.sh ci-check-purs-1.log ci-check-purs-2.log
 
 pert:
 	mkdir -p output/pert

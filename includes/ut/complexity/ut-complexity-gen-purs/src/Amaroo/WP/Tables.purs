@@ -1,12 +1,12 @@
 module Amaroo.WP.Tables where
 
-import Amaroo.WP.Tables.Types
 import Prel
 
 import Amaroo.WP.Calcs (Params, UtVariants, ChainStats, allUtChainCalcs, allUtChainCalcsF, applyTDiscountToBH, auxStats, mkNestedPs, mkSimplePs, pToPF, runChainCalcFor, tradChainCalc, tradChainCalcEth2, tradChainCalcPolkadot, utChainCalc)
 import Amaroo.WP.Formatter (fdPlain, fdPlainMixed, fdPlainZero, fdStd, fdStdMixed, fdStdNoSiMixed, fdStdTwo, fdStdZero, fmt1GbpsPs, fmtDyn, fmtPsKBfBh, fmtPsKBfBhDh, wrap, wrapXml, wrapXmlWAttr)
 import Amaroo.WP.Tables.Booktabs (renderBooktabs)
 import Amaroo.WP.Tables.Types (LatexTablePos(..), TPositioning(..))
+import Amaroo.WP.Tables.Types
 import Amaroo.WP.Utils (binarySearch, diagonalApply, ui)
 import Data.Array (drop, filter, intercalate, take)
 import Data.Array as A
@@ -277,6 +277,7 @@ utVsOther =
 filterUtVsOther :: Array Network -> Array UtVsOtherDesc
 filterUtVsOther = filterRecsByNet utVsOther
 
+-- | filter records containing `net` based on whether `net` is a members of the `nets` array
 filterRecsByNet :: forall (r ∷ Row Type) a. Eq a ⇒ Array { net ∷ a | r } → Array a → Array { net ∷ a | r }
 filterRecsByNet recs nets = do
     n <- nets
@@ -288,6 +289,7 @@ compareNetsFilterList = [Bitcoin, Cardano, Solana, UT (PoRTs 1), UT (HOPoRTs 1),
 filteredUtVsOther :: Array UtVsOtherDesc
 filteredUtVsOther = filterUtVsOther compareNetsFilterList
 
+id ∷ ∀ (a ∷ Type). a → a
 id x = x
 
 utNestingLvl :: UtName -> Int
@@ -501,14 +503,15 @@ tpsOPT :: Table
 tpsOPT = porTpsHeader T (genPoRRow (\cd -> cd.ut.t) <$> utComplexityData)
 
 -- todo: fix fmtDyn fdPlain
-genCompareRow k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdPlainMixed <$> [cs.effBh, cs.effDh]) <> ([fmtDyn fdStdZero scalingFactor, fmtDyn fdStdMixed n2]) <> (fmtDyn fdStdMixed <$> [tps])
+genCompareRow k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdPlainMixed <$> [cs.effBh, effDh]) <> ([fmtDyn fdStdZero scalingFactor, fmtDyn fdStdMixed n2]) <> (fmtDyn fdStdMixed <$> [tps])
   where
     p = o.p k
     cs = netToChainStats net p
     aux = auxStats cs
     -- n1 = if isAleph net then infinity else cs.d1.n
     tps = if isAleph net then infinity else netToTps net cs
-    tpsPerBaseChain = netToTps net cs / cs.d1.n
+    effDh = netToEffDh net cs
+    _tpsPerBaseChain = netToTps net cs / cs.d1.n
     scalingFactor = netToScalingFactor net aux
     n2 = if isAleph net then infinity else netToN2 net cs
 
