@@ -53,7 +53,7 @@ Can we test it? If so, how?
 
 Consider a traditional PoW blockchain (e.g., Bitcoin, Eth1, etc).
 It's well known that the risk of a doublespend against a particular block is related to the number of \emph{confirmations} that block has.\footnote{
-    See \href{https://web.archive.org/web/20220209100515/https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{Analysis of hashrate-based double-spending}.
+    \citeAHBDSFull
 }
 However, this is not a linear relationship; rather, it's similar to \emph{exponential decay}.
 After the first few confirmations, each additional confirmation reduces the risk of a doublespend by approximately the same factor.\footnote{
@@ -170,7 +170,7 @@ This is the \emph{extended} CEC:
 \begin{equation}
     \begin{split}
         %P\biggl(q; N_1 = a; c = \frac{CN}{a}\biggr) \approx P\biggl(q; N_1 = b; c = \frac{CN}{b}\biggr)
-        \forall a \in \{x: 1 \le x \le N\}: P^\prime\biggl(q; c = \frac{CN}{a}; N_1 = a\biggr) &\text{ is approximately constant}
+        \forall a \in \{1,\dots,N\}: P^\prime\biggl(q; c = \frac{CN}{a}; N_1 = a\biggr) &\text{ is approximately constant}
         \label{eq:cec-extended-hypothesis} \\
         \implies P^\prime\biggl(q; c = \frac{CN}{a}; N_1 = a\biggr) &\approx P(q; c = CN)
         % \label{eq:cec-approx-rosenfeld}
@@ -455,7 +455,7 @@ These results are, for the purpose of this paper, taken to indicate the followin
     A decisive criticism of UT/PoR/CEC must therefore explain how these results are wrong -- the explanation needs to include a \emph{refutation} of these results.
     Such a refutation could be an explanation of how: the implementation was flawed, the methodology was flawed, or that UT cannot be effectively implemented as a production blockchain.
     No such explanations are currently known.
-    In the \emph{absence} of such criticisms, it is reasonable to work under the assumption that UT is secure, since PoR and the CEC are currently (to my knowledge) the only viable explanation for these results.
+    In the \emph{absence} of such criticisms, it is reasonable to work under the assumption that UT is secure, since \emph{PoR works} and \emph{the CEC is true} are currently (to my knowledge) the only viable explanation for these results.
 }.
 \begin{enumerate}
     \item Sharing PoW security between blockchains without merged mining is possible.

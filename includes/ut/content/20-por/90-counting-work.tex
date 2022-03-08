@@ -10,8 +10,8 @@
 
 \SelectTips{cm}{}
 
-When chains L and R have the same ${B_f}^{-1}$ and produce blocks in an orderly fashion, it's trivial to count how much work is contributed by each PoR.
-However, real-world blockchains do not produce blocks like this -- sometimes chain L will produce 2 or 3 (or more) blocks before R produces its next one (or vice versa).
+When chains L and R have the same block frequency and produce blocks in an orderly fashion, it's trivial to count how much work is contributed by each PoR.
+However, real-world blockchains do not produce blocks like this -- even if chains L and R have the same block frequencies, sometimes L will produce 2 or 3 (or more) blocks before R produces its next one (or vice versa).
 \begin{equation*}
     \xymatrix@M=3pt@R=4pt{
         \ar[rrrrrr]_<{Time} & & & & & & \\
@@ -56,8 +56,8 @@ The difficulty in answering these questions -- with what we've covered so far --
 When the fork rule compares \BL{4} to an alternative block, only the \emph{total} chain-weight of each is relevant.
 However, to understand exactly how PoRs \emph{should} be counted, we need to know more.
 
-The essence of PoR is \emph{the confirmation of another chain's \underline{history}} -- so a reflection cannot contribute to a blocks which only exist \emph{in the reflecting block's \underline{future}}.
-So it must be that reflections contribute to the \emph{most recent common ancestor} of all possible L blocks which could include that PoR.
+The essence of PoR is \emph{the confirmation of another chain's \underline{history}} -- so a reflection cannot contribute to a block which exist \emph{in the reflecting block's \underline{future}}.
+So it must be that reflections contribute to the \emph{most recent common ancestor} of all possible L blocks that could include the PoR.
 
 This leads us to a simple and elegant way to count reflected work: follow the arrows back from the reflecting block to the most recently reflected local block.
 

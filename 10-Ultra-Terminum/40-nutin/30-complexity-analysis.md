@@ -16,7 +16,7 @@ For example, Ethereum 2 has *The Beacon Chain* -- its root-chain (the single bas
 
 \bquote{
     The Beacon Chain will conduct or coordinate the expanded network of shards and stakers. But it won't be like the Ethereum mainnet of today. It can't handle accounts or smart contracts.
-}{\url{https://ethereum.org/en/eth2/beacon-chain/}}
+}{\citeBeaconChainLink}
 
 This type of configuration, where a base-chain facilitates child-chains, is referred to as *nesting* in this section and in the context of UT's architecture and complexity.
 Base-chains are at the first level of nesting.

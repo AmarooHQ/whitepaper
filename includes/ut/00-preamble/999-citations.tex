@@ -1,5 +1,35 @@
+% todo: incomplete?
+\newcommand{\allCitations}{
+    \citeBitcoinFull \\
+    \citeAHBDSFull \\
+    \citeGhostFull \\
+    \citeInclusiveFull \\
+}
 
+% todo: incomplete?
+\newcommand{\allReferences}{
+    \citeSelfishMiningFull \\
+    \citeBeaconChainLink \\
+    \citeLJCoiledcoinFull \\
+}
 
+%--- GHOST
+
+\newcommand{\citeGhostLink}{%
+\href{https://cloudflare-ipfs.com/ipfs/QmTDz4WuAXi2rV7Ei3pHHKTFCYGPeDbDoAkmypkHdJnnKe}{Secure High-Rate Transaction Processing in Bitcoin}%
+}
+
+\newcommand{\citeGhostAuthors}{%
+Sompolinsky, Zohar; 2013%
+}
+
+\newcommand{\citeGhostFull}{%
+\citeGhostLink{}
+\href{https://web.archive.org/web/20220308084727/https://cloudflare-ipfs.com/ipfs/QmTDz4WuAXi2rV7Ei3pHHKTFCYGPeDbDoAkmypkHdJnnKe}{[m1]}
+(\citeGhostAuthors)%
+}
+
+%--- DAA2
 
 \newcommand{\citeDaaTwoLink}{%
     \href{https://cloudflare-ipfs.com/ipfs/Qmd8BE6xYCH58LNipE1zZ7BCftemN8hQWnfZJSJYq5XUE8}{An Economic Analysis of Difficulty Adjustment Algorithms in Proof-of-Work Blockchain Systems}%
@@ -16,6 +46,8 @@
     Noda, Okumura, Hashimoto; 2020%
 }
 
+%--- Analysis of hashrate-based double-spending
+
 \newcommand{\citeAHBDS}{%
     \href{https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{Analysis of hashrate-based double-spending}%
     % \href{https://web.archive.org/web/20130426054844/https://bitcoil.co.il/Doublespend.pdf}{[m1]}
@@ -31,4 +63,89 @@
 
 \newcommand{\citeAHBDSAuthors}{%
     Rosenfeld; 2012%
+}
+
+%--- Inclusive
+
+\newcommand{\citeInclusive}{%
+    \href{https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy}{Inclusive Block Chain Protocols}% by Yoad Lewenberg, Yonatan Sompolinsky, and Aviv Zohar. \href{https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Avivz Mirror}, \href{http://web.archive.org/web/20210426004808/https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Archive.org Mirror}
+}
+
+\newcommand{\citeInclusiveAuthors}{%
+    Lewenberg, Sompolinsky, Zohar; 2015%
+}
+
+\newcommand{\citeInclusiveFull}{%
+    \citeInclusive{}
+    \href{https://web.archive.org/web/20210426004808/https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{[m1]}
+    \href{https://web.archive.org/web/20210426004857/https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy}{[m2]}
+    (\citeInclusiveAuthors)%
+}
+
+%--- Beacon chain
+
+\newcommand{\citeBeaconChainLink}{%
+    \href{https://web.archive.org/web/20210225022359/https://ethereum.org/en/eth2/beacon-chain/}{The Beacon Chain | ethereum.org}%
+}
+
+%--- Bitcoin
+
+\newcommand{\citeBitcoinLink}{%
+\href{https://bitcoin.org/bitcoin.pdf}{Bitcoin: A Peer-to-Peer Electronic Cash System}%
+}
+
+\newcommand{\citeBitcoinAuthors}{%
+    Satoshi Nakamoto; 2008%
+}
+
+\newcommand{\citeBitcoinFull}{%
+    \citeBitcoinLink
+    (\citeBitcoinAuthors)%
+}
+
+%--- Polkadot
+
+\newcommand{\citePolkadotLink}{%
+\href{https://cloudflare-ipfs.com/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Polkadot Whitepaper}%
+}
+
+%--- Ouroboros
+
+\newcommand{\citeOuroborosLink}{%
+\href{https://cloudflare-ipfs.com/ipfs/QmWCAHyi35SeXH2E4e8jRVk7yNse2x6D14uPfABnhagbvN}{Ouroboros: A Provably Secure Proof-of-Stake Blockchain Protocol}%
+}
+
+%--- eth yellow paper
+
+\newcommand{\citeEthYellowPaperLink}{%
+\href{https://cloudflare-ipfs.com/ipfs/QmcdwaEqKjsASs1sZqxBNPw5vmypE5YL61zSvWdGoX7wtC}{Ethereum Yellow Paper / Petersburg Version 41c1837}%
+}
+
+%--- selfish mining
+
+\newcommand{\citeSelfishMiningLink}{%
+\href{https://cloudflare-ipfs.com/ipfs/QmNukb1L8BhEsiCbrmnkEJWAvUjhBHidinKMZKfCaLG6ep}{Majority is not Enough: Bitcoin Mining is Vulnerable}%
+}
+
+\newcommand{\citeSelfishMiningAuthors}{%
+% Ittay Eyal and Emin Gün Sirer
+Eyal, Sirer; 2013%
+}
+
+\newcommand{\citeSelfishMiningFull}{%
+\citeSelfishMiningLink
+(\citeSelfishMiningAuthors)%
+}
+
+%--- luke jr coiledcoin
+
+% note: `%23` = `#` in URLs
+
+\newcommand{\citeLJCoiledcoinLink}{
+    \href{https://bitcointalk.org/index.php?topic=56675.msg678006\#msg678006}{Luke Jr's attack on Coiledcoin}%
+}
+
+\newcommand{\citeLJCoiledcoinFull}{%
+    \citeLJCoiledcoinLink
+    \href{https://web.archive.org/web/20141006215827/https://bitcointalk.org/index.php?topic=56675.msg678006}{[m1]}%
 }

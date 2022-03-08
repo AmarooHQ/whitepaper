@@ -104,7 +104,7 @@ Traditionally, blockchain protocols have some *global* state and a state-transit
         \sigma_{t+1} \equiv \Upsilon(\sigma_t, T)
     \end{equation*}
     where $\Upsilon$ is the Ethereum state transition function.
-}{Dr. Gavin Wood; \href{https://cloudflare-ipfs.com/ipfs/QmcdwaEqKjsASs1sZqxBNPw5vmypE5YL61zSvWdGoX7wtC}{Ethereum Yellow Paper / Petersburg Version 41c1837}, s2}
+}{Dr. Gavin Wood; \citeEthYellowPaperLink, s2}
 
 One of the reasons for this tradition is that transactions are (typically) permitted to depend on any part of the global state. For example: a Bitcoin transaction is permitted to spend any UTXO, and an Ethereum smart contract may interact with any other smart contract on the Ethereum blockchain.
 
@@ -161,34 +161,29 @@ Additionally, these merkle branches *will be part of specific SPV proofs*, so wh
 This UT protocol variant is +HOPoRs, the combination of *header omission* (+HO) and *explicit proofs* (+PoRs). It may present decisive advantages for implementations of *simplex tilings* (which are introduced in \autoref{sec:tiling}).
 
 \aside{
-    There is an independent protocol variant (from those above) called +T which provides a significant reduction to proof size and header size. This optimization is currently redacted. \\
+    There is an independent protocol variant (from those above) called +T which provides a significant reduction to header size.
+    % proof size and
+    This optimization is currently redacted. \\
     \\
     Each protocol variant thus far has a corresponding +T variant, e.g., +PoRs and +PoRTs, +HO and +HOT, etc.
 }
 
-%% END ### RELEASE
-
-%% BEGIN ### DRAFT
-
 \begin{figure}[H]
 \begin{equation*}
-\xymatrix@R=14pt@C=-10pt@M=4pt{
-    \text{Conservative} \ar@*{[deepskyblue]}[d] \\
-    \text{UT}_{+\text{PoRs}} \ar@*{[gold]}[dr] \ar[rr] \ar[dd] & & \text{UT}_{+\text{OP}} \ar'[d][dd] \ar[dr] & \\
-    & \text{UT}_{+\text{PoRTs}} \ar[dd] \ar@*{[gold]}[rr] & & \text{UT}_{+\text{OPT}} \ar@*{[gold]}[dd] \\
-    \text{UT}_{+\text{HOPoRs}} \ar[dr] \ar'[r][rr] & & \text{UT}_{+\text{HO}} \ar[dr] & \\
-    & \text{UT}_{+\text{HOPoRTs}} \ar[rr] & & \text{UT}_{+\text{HOT}} \\
-    & & & \text{Maximal TPS} \ar@*{[darkorange]}[u]
+\xymatrix@R=14pt@!R@C=-24pt@!C@M=4pt{
+    *+[F:<3pt>]{\text{Conservative}} \ar@{.>}[d] \\
+     \text{UT}_{+\text{PoRs}} \ar@*{[gold]}[dr] \ar[rr] \ar[dd] & & \text{UT}_{+\text{OP}} \ar'[d][dd] \ar[dr] & \\
+     & \text{UT}_{+\text{PoRTs}} \ar[dd] \ar@*{[gold]}[rr] & & \text{UT}_{+\text{OPT}} \ar@*{[gold]}[dd] \\
+     \text{UT}_{+\text{HOPoRs}} \ar[dr] \ar'[r][rr] & & \text{UT}_{+\text{HO}} \ar[dr] & \\
+     & \text{UT}_{+\text{HOPoRTs}} \ar[rr] & & \text{UT}_{+\text{HOT}} \\
+     & & & *+[F:<3pt>]{\text{Maximal TPS}} \ar@{.>}[u]
 }
 \end{equation*}
 \caption{
-    Possible upgrade paths between UT variants, starting at $\UT{\text{+PoRs}}$ -- the most conservative variant.
+    Possible upgrade paths between UT variants, starting at $\UT{\text{+PoRs}}$ in the top left -- the most conservative variant.
+    Solid arrows show paths of increasing capacity.
 }
 \end{figure}
-
-%% END ### DRAFT
-
-%% BEGIN ### RELEASE
 
 ### Confirmation Times
 
@@ -198,7 +193,7 @@ A confirmation is a *discrete* event that occurs when a block is produced. When 
 
 \bquote{
     The probability of success [of a double-spend attempt] depends on the number of blocks [by which the honest network has an advantage], and not on the time constant $T_0$.
-}{Meni Rosenfeld; \href{https://web.archive.org/web/20220209100515/https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{Analysis of hashrate-based double-spending}}
+}{Meni Rosenfeld; \citeAHBDS}
 
 In a traditional blockchain (e.g., Bitcoin, Ethereum) confirmations occur, on average, at a predictable rate (that of the target block production frequency). Thus, for any *particular* traditional blockchain, a convenient time-based \emph{rule of thumb} can be devised, e.g., a Bitcoin transaction is safe to accept after 1 hour. However, this approximation only works because blocks (and thus confirmations) are only produced locally (to that blockchain) and at a probabilistic (roughly constant) rate. Put another way, the frequency of confirmations is identical to the frequency of blocks, $B_f$ Hz. Since $O(B_f) = O(1)$, the time-complexity of confirmation in these networks is also $O(1)$.
 
@@ -216,14 +211,16 @@ Additionally, any competing block (published immediately by an honest miner) wil
 So the published block has two distinct advantages over the withheld block.
 This mitigates the selfish mining[^selfish-mining] attack.
 
-[^selfish-mining]: See \href{https://cloudflare-ipfs.com/ipfs/QmNukb1L8BhEsiCbrmnkEJWAvUjhBHidinKMZKfCaLG6ep}{Majority is not Enough: Bitcoin Mining is Vulnerable} by Ittay Eyal and Emin Gün Sirer.
+[^selfish-mining]: See \citeSelfishMiningLink{} by Ittay Eyal and Emin Gün Sirer.
 
 ### DoS and DAGs
 
 \label{sec:dos-and-dags}
 
 Up to this point, simplex-chains have been treated like traditional blockchains, where each block has only one parent.
-Since the vast majority of a simplex-chain's security is provided by other simplex-chains (and only a small proportion comes from that chain's foundational consensus method), are attacks like an empty-block Denial of Service[^empty-dos] (DoS) possible?
+Since the vast majority of a simplex-chain's security is provided by other simplex-chains (and only a small proportion comes from that chain's foundational consensus method), are attacks like an empty-block Denial of Service\footnote{
+    For an example of this attack, see \citeLJCoiledcoinLink.
+} (DoS) possible?
 If a simplex-chain were to use PoW, then it might be (relatively) trivial for an attacker to perform such an attack.
 This is because -- in traditional blockchains -- controlling more than 50% of the blocks produced provides *exclusive* control over *which candidate child blocks win* (i.e., are accepted into the canonical chain).\footnote{
     Exclusive control of this nature also allows for protocol changes via soft-forks.
@@ -233,25 +230,25 @@ This is because -- in traditional blockchains -- controlling more than 50% of th
 Is there a way that we can mitigate this risk?
 If blocks were permitted *more* than a single parent, can this *exclusivity* be denied?
 
-[^empty-dos]: For an example of this attack, see \href{https://bitcointalk.org/index.php?topic=56675.msg678006\#msg678006}{Luke Jr's attack on Coiledcoin}.
-
 #### Block-DAG Lineage
 
 \label{sec:block-dag-lineage}
 
-The idea that blocks in a chain can have multiple parents -- i.e., the chain forms a Directed Acyclic Graph (DAG) that is not also a tree -- dates back to (at least) late 2013[^ghost-dec-2013] with the publication of GHOST by Sompolinsky and Zohar. However, GHOST disallows multiple *canonical* parents, and a chain using GHOST defines its *canonical history* -- the *main chain* -- via the chain formed exclusively from the first parent of each block. A block's other, non-canonical parents are linked to *only* for the purpose of contributing to the total chain-weight.
+The idea that blocks in a chain can have multiple parents -- i.e., the chain forms a Directed Acyclic Graph (DAG) that is not also a tree -- dates back to (at least) late 2013 with the publication of GHOST\footnote{
+    \citeGhostFull{}
+} by Sompolinsky and Zohar. However, GHOST disallows multiple *canonical* parents, and a chain using GHOST defines its *canonical history* -- the *main chain* -- via the chain formed exclusively from the first parent of each block. A block's other, non-canonical parents are linked to *only* for the purpose of contributing to the total chain-weight.
 
 In the two years after GHOST was published, a number of DAG-based blockchain designs were developed that facilitated merging histories from multiple parent blocks.
 
 In mid-2014 I created a prototype DAG-based blockchain called Quanta[^quanta-2014] with a novel method of linearization that converged to a complete and stable ordering of blocks.
 This method was independently rediscovered[^redisc] in mid-2015 by Lewenberg, Sompolinsky, and Zohar[^inclusive-july-2015] -- who also further developed and analyzed the method, which they named *the inclusive protocol*.
-Additionally, in 2016 Paul Firth further developed Quanta in his *Trustless Eventual Total Order* draft[^teto-2016].
+Additionally, in 2016 Paul Firth further developed Quanta in his *Trustless Eventual Total Order* draft.[^teto-2016]
 
 In late-2015 several new, alternative methods were also published, however these are not generalizations of Nakamoto consensus. Namely: Lerner's DagCoin[^dagcoin-sept-2015], and IOTA's Tangle[^iota-oct-2015]. Since then, multiple other models have been proposed, and some built.
 
 For the purposes of this paper, we are concerned with the method detailed in *Inclusive Block Chain Protocols*.
 
-[^ghost-dec-2013]: \href{https://cloudflare-ipfs.com/ipfs/QmTDz4WuAXi2rV7Ei3pHHKTFCYGPeDbDoAkmypkHdJnnKe}{Secure High-Rate Transaction Processing in Bitcoin} by Yonatan Sompolinsky and Aviv Zohar.
+<!-- \href{https://cloudflare-ipfs.com/ipfs/QmTDz4WuAXi2rV7Ei3pHHKTFCYGPeDbDoAkmypkHdJnnKe}{Secure High-Rate Transaction Processing in Bitcoin} by Yonatan Sompolinsky and Aviv Zohar. -->
 
 [^quanta-2014]: \href{https://github.com/XertroV/quanta-test/blob/ba598d5fe89d3b16db07533957a2080edb19a9cd/quanta.py\#L157}{Quanta source code}, \href{https://bitcointalk.org/index.php?topic=1057342}{Quanta BitcoinTalk thread}.
 
@@ -259,7 +256,7 @@ For the purposes of this paper, we are concerned with the method detailed in *In
 
 [^iota-oct-2015]: \href{https://bitcointalk.org/index.php?topic=1216479.0}{IOTA BitcoinTalk thread}.
 
-[^inclusive-july-2015]: \href{https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy}{\textit{Inclusive Block Chain Protocols}} by Yoad Lewenberg, Yonatan Sompolinsky, and Aviv Zohar. \href{https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Avivz Mirror}, \href{http://web.archive.org/web/20210426004808/https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Archive.org Mirror}
+[^inclusive-july-2015]: \citeInclusiveFull{}
 
 [^redisc]: As far as I can tell, the linearization methods produce identical results.
 
@@ -348,8 +345,6 @@ https://3.basecamp.com/4985262/buckets/20820958/messages/4184917383#__recording_
 goal: support this sentence (top of section):
 
 > There are decisive advantages to using DAGs (instead of trees) as the fundamental structure of a chain. Namely, multiple histories (both compatible and incompatible) can be merged into a single, consistent history -- a feature which eliminates stale blocks and thwarts attacks like an empty-block Denial of Service
-
-[^incl-proto]: \href{https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy}{\textit{Inclusive Block Chain Protocols}} by Yoad Lewenberg, Yonatan Sompolinsky, and Aviv Zohar. \href{https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Avivz Mirror}, \href{http://web.archive.org/web/20210426004808/https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Archive.org Mirror}
 
 \end{comment}
 -->
@@ -461,7 +456,7 @@ Ancestors of one parent may not be ancestors of another parent.
 The exact protocol for handling conflicts is up to the implementation, but a trivial method is that blocks commit to (via hash-pointers) conflicting transactions.
 If a miner produces an invalid block (which is invalid only because it breaks this rule), then other miners can flag it as a conflicting *block* via a similar mechanism.
 
-Further reading: [*Inclusive Block Chain Protocols*](https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy)
+Further reading: \citeInclusive{}.
 
 #### Preventing DoS Attacks
 

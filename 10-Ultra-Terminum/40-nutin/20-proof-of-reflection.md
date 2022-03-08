@@ -89,11 +89,11 @@ Say that the protocol of Chain L is extended to support a projection of Chain R.
 \resizebox{\textwidth}{!} {%
 \begin{tabular}{lllllll}
 \toprule
-{Time} & {L block made} & {L block contents} & {L state} & {R block made} & {R block contents} & {R state} \\
+{Time} & \shortstack[l]{L block \\ made} & \shortstack[l]{L block \\ contents} & {L state} & \shortstack[l]{R block \\ made} & \shortstack[l]{R block \\ contents} & {R state} \\
 \midrule
 {$\vdots$} & {} & {} & {} & {} & {} & {} \\
 {0} & {k} & {$R_{j-1}$ header} & {Records $R_{0 \cdots j-1}$} & {} & {} & {} \\
-{1} & {} & {} & {} & { j} & {$L_{k}$ header} & {Records $L_{0 \cdots k}$} \\
+{1} & {} & {} & {} & {j} & {$L_{k}$ header} & {Records $L_{0 \cdots k}$} \\
 {2} & {k + 1} & {$R_{j}$ header} & {Records $R_{0 \cdots j}$} & {} & {} & {} \\
 {3} & {} & {} & {} & {j + 1} & {$L_{k+1}$ header} & {Records $L_{0 \cdots k+1}$} \\
 {$\vdots$} & {} & {} & {} & {} & {} & {} \\
@@ -280,8 +280,8 @@ Chain L nodes would *not* reorganize around this new chain-segment, so why would
 If the projection of Chain L in Chain R *does not account for reflections*, then the attacker's chain-segment will appear (to Chain R) to have more work than the honest chain-segment.
 Thus the *projection* of L in R will reorganize to favor the attacker's chain-segment.
 If the attacker has more hash power than the honest miners (i.e., $q > p$\footnote{
-  In \href{https://bitcoin.org/bitcoin.pdf}{Satoshi's original paper} the parameters $p$ and $q$ represent the probability that the next block will be found by an honest node or the attacker, respectively.
-  This convention has been continued in subsequent analysis, e.g., Rosenfeld's \href{https://web.archive.org/web/20220209100515/https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{\emph{Analysis of hash-rate-based double-spending}}, and is continued here, also.
+  In Satoshi's \citeBitcoinLink{} the parameters $p$ and $q$ represent the probability that the next block will be found by an honest node or the attacker, respectively.
+  This convention has been continued in subsequent analysis, e.g., Rosenfeld's \citeAHBDS{}, and is continued here, also.
 }) then they might\footnotemark{} be able to use this reorganization as a foothold -- either to launch a traditional 51% attack against L, or to attack SPV verification and light clients.
 
 \footnotetext{
@@ -660,10 +660,10 @@ If blocks on L are $5\times$ heavier than blocks on R,
 then we'd have a constant of conversion of $\nicefrac{1}{5}$ L-blocks/R-block;
 and a chain of 5 R-blocks would be \emph{roughly} as hard to create as a chain of 1 L-block.
 So $\nicefrac{1}{5}$ seems like a reasonable estimate for \emph{relative confirmations}, too.\footnote{
-  Due to the dynamics of confirmations, we can't directly compare chain-segments like this -- this example is here to help give you an intuition.
+  Due to the dynamics of confirmations, we can't directly compare chain-segments like this, \emph{generally} speaking -- this example is here to help give you an intuition.
   The reason we can't directly compare in this way is that simply \emph{having more confirmations} is worth something in and of itself.
   The relationship is not linear.
-  See \href{https://web.archive.org/web/20220209100515/https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{Analysis of hashrate-based double-spending} for more.
+  See \citeAHBDS{} for more.
 }
 
 Naively, \emph{relative block frequencies} seems to be in the same units as the other two: L-blocks/R-blocks; but they \emph{cannot} be in the same units as \emph{the values mean different things}.
@@ -1160,11 +1160,11 @@ There are some other conjectured solutions to the *Nothing at Stake* problem.
 \bquote{
   %% cspell: disable-next-line
   Long-range ``nothing-at-stake'' attacks are circumvented through a simple ``checkpoint'' latch which prevents a dangerous chain-reorganisation of more than a particular chain-depth. To ensure newly-syncing clients are not able to be fooled onto the wrong chain, regular ``hard forks'' will occur (of at most the same period of the validators' bond liquidation) that hard-code recent checkpoint block hashes into clients.
-}{Dr. Gavin Wood; \href{https://cloudflare-ipfs.com/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Polkadot Whitepaper, s5.2}}
+}{Dr. Gavin Wood; \citePolkadotLink, s5.2}
 
 \bquote{
   Provided that stakeholders are frequently online, nothing at stake is taken care of by our analysis of forkable strings (even if the adversary brute-forces all possible strategies to fork the evolving blockchain in the near future, there is none that is viable), and our chain selection rule that instructs players to ignore very deep forks that deviate from the block they received the last time they were online.
-}{\href{https://cloudflare-ipfs.com/ipfs/QmWCAHyi35SeXH2E4e8jRVk7yNse2x6D14uPfABnhagbvN}{Ouroboros: A Provably Secure Proof-of-Stake Blockchain Protocol, s10}}
+}{\citeOuroborosLink, s10}
 
 These two examples solve the \emph{Nothing at Stake} problem via mechanisms that are *external* to the protocol itself, i.e., hard-coded checkpoints and the requirement that nodes are online ``frequently''.
 
