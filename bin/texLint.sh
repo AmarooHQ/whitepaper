@@ -40,4 +40,5 @@ function checkFor {
 checkFor '\$DAA_N\$' && \
 checkFor 'TTS_' && \
 checkFor 'N_{[Bb]lock' && \
+checkFor 'B_[fh]\^' && \
 true

@@ -204,7 +204,7 @@ In a traditional blockchain (e.g., Bitcoin, Ethereum) confirmations occur, on av
 
 When using PoR, though, the assumptions behind that \emph{rule of thumb} do not hold -- while blocks on a single chain may be produced at a constant rate, that chain also gains a security benefit from other chains. For the case of a 2-chain simplex (where those chains have the same block production frequency), the rate of confirmations will be twice the rate of block production. This is easily generalized: for an $N_1$-simplex with simplex-chains that share some block frequency $B_f$, the rate of confirmation will be $\mathbb{C}^\prime = N_1 \cdot B_f$ Hz. Thus, the rate of confirmations has complexity $O(\mathbb{C}^\prime) = O(N_1 \cdot B_f) = O(N_1) = O(c)$.
 
-Let *confirmation time* be the duration breakpoint beyond which enough confirmations have occurred to consider a transaction *safe*. This is equivalent to the *rule of thumb* mentioned earlier. For a traditional blockchain, as mentioned, this is the product of some constant and the expected duration between blocks: $B_f^{-1}$. For a simplex, though, the expected *duration* is ${\mathbb{C}^\prime}^{-1} = \frac{1}{N_1 \cdot B_f}$. Thus, as the simplex grows -- as $N_1$ *increases* -- the entire network's rate of confirmations also increases, and thus *confirmation time* approaches 0[^approach-zero].
+Let *confirmation time* be the duration breakpoint beyond which enough confirmations have occurred to consider a transaction *safe*. This is equivalent to the *rule of thumb* mentioned earlier. For a traditional blockchain, as mentioned, this is the product of some constant and the expected duration between blocks: ${B_f}^{-1}$. For a simplex, though, the expected *duration* is ${\mathbb{C}^\prime}^{-1} = \frac{1}{N_1 \cdot B_f}$. Thus, as the simplex grows -- as $N_1$ *increases* -- the entire network's rate of confirmations also increases, and thus *confirmation time* approaches 0[^approach-zero].
 
 [^approach-zero]: To say that confirmation time approaches 0 only tells the latter half of the process by which a transaction becomes confirmed. The first half of that process is *getting an initial confirmation*, which is effectively a small, but constant, overhead.
 
@@ -494,7 +494,7 @@ For traditional (non-DAG) chains -- where each non-genesis block has exactly one
 (Typically, this means the attacker produces blocks more frequently.)
 
 However, if blocks are allowed to have *more* than one parent then there *is no point* where an attacker can *maintain* a DoS attack indefinitely. Instead, they can only *delay the execution* of some transactions for a short period of time.
-Particularly, if an attacker can produce $A_{blocks} = \nicefrac{q}{p} > 1$ for every 1 block produced by the honest network, then the attack can delay transactions for up to $A_{blocks} \cdot B_f^{-1}$ seconds, where $B_f$ is the frequency of block production (in Hz).
+Particularly, if an attacker can produce $A_{blocks} = \nicefrac{q}{p} > 1$ for every 1 block produced by the honest network, then the attack can delay transactions for up to $A_{blocks} \cdot {B_f}^{-1}$ seconds, where $B_f$ is the frequency of block production (in Hz).
 After this (approximate) point, the weight of the honest chain-segment, which includes the attacker's chain-segment, is always greatest.
 
 If an attacker performs a *repeating cycle* of these attacks, then they may be able to decrease the effective capacity of the chain by a factor of $A_{blocks} = \nicefrac{q}{p}$.

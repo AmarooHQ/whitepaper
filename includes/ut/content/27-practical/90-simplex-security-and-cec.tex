@@ -234,11 +234,11 @@ In total, 5 main error corrections were applied, which incrementally brought the
     \item Increasing the number of blocks over which the DAA operates ($\text{DAA}_N = 100 \to 500$)
 \end{enumerate}
 
-Many possible sources of error were ruled out, too, like: choice of hashing algorithm (\texttt{xxh3}); values of $B_f^{-1}$, $H$, and other parameters; and implementation details like omitting certain validation steps.
+Many possible sources of error were ruled out, too, like: choice of hashing algorithm (\texttt{xxh3}); values of ${B_f}^{-1}$, $H$, and other parameters; and implementation details like omitting certain validation steps.
 
 % \begin{itemize}
 %     \item Hashing algorithm -- \texttt{xxh3} is used and produces results consistent with \texttt{blake3}.
-%     \item Values of $B_f^{-1}$ and $H$ -- both have enough precision; particularly $Hq$ should result in an integer.
+%     \item Values of ${B_f}^{-1}$ and $H$ -- both have enough precision; particularly $Hq$ should result in an integer.
 %     \item Several implementation details -- e.g., how much validation is done on blocks.
 % \end{itemize}
 
@@ -283,7 +283,7 @@ The source code for this model blockchain network is contained in the \href{http
         $q$ (ratio) & Yes & Attacker's proportion of the global hash rate. \\
         $c$ (confirmations) & Yes & Work-equivalent of `$c$ local confirmations' waiting time. \\
         $N_1$ (chains) & Yes & The number simplex-chains ($N_1 = 1$ for traditional blockchains). \\
-        $B_f^{-1}$ (ticks) & No & Artificial units of time used by the DAA. \\
+        ${B_f}^{-1}$ (ticks) & No & Artificial units of time used by the DAA. \\
         $\text{DAA}_N$ (blocks) & No & The number of blocks over which the DAA operates. \\
         $H$ (hashes) & No & The network-wide hashes per chain per tick. \\
         \bottomrule
@@ -296,7 +296,7 @@ The source code for this model blockchain network is contained in the \href{http
 
 % As we can optimize this model, we can simulate many attacks quickly; so we can efficiently make statistically significant measurements.
 
-When choosing values for $B_f^{-1}$ and $H$, we want them to be low enough for the simulation to be efficient, but large enough to ensure that there are no issues with limits-of-accuracy.
+When choosing values for ${B_f}^{-1}$ and $H$, we want them to be low enough for the simulation to be efficient, but large enough to ensure that there are no issues with limits-of-accuracy.
 To this end, both were chosen to be 75.
 This means that, prior to the doublespend attack beginning, the average difficulty is around 5625.
 
