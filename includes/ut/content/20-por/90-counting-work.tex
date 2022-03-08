@@ -6,13 +6,17 @@
 \providecommand\BL[1]{\BCI{L}{i}{#1}}
 \providecommand\BR[1]{\BCI{R}{j}{#1}}
 % note: \BR renewed below
+\providecommand\xyB[1]{*+[F]+{#1}}
 
-When chains L and R have the same $B_f^{-1}$ and produce blocks in an orderly fashion, it's trivial to count how much work is contributed by each PoR. However, real-world blockchains do not produce blocks like this -- sometimes chain L will produce 2 or 3 (or more) blocks before R produces its next one (or vice versa).
+\SelectTips{cm}{}
+
+When chains L and R have the same $B_f^{-1}$ and produce blocks in an orderly fashion, it's trivial to count how much work is contributed by each PoR.
+However, real-world blockchains do not produce blocks like this -- sometimes chain L will produce 2 or 3 (or more) blocks before R produces its next one (or vice versa).
 \begin{equation*}
-    \xymatrix@M=4pt@R=10pt{
+    \xymatrix@M=3pt@R=4pt{
         \ar[rrrrrr]_<{Time} & & & & & & \\
-        \cdots & L_i \ar[l] & & L_{i+1} \ar[ll] \ar@{-->}[ld] & L_{i+2} \ar[l] & L_{i+3} \ar[l] & \\
-        \cdots & & R_j \ar[ll] \ar@{-->}[lu] & & & & R_{j+1} \ar[llll] \ar@{-->}[lu]
+        \cdots & \xyB{L_i} \ar[l] & & \xyB{L_{i+1}} \ar[ll] \ar@{.>}[ld] & \xyB{L_{i+2}} \ar[l] & \xyB{L_{i+3}} \ar[l] & \\
+        \cdots & & \xyB{R_j} \ar[ll] \ar@{.>}[lu] & & & & \xyB{R_{j+1}} \ar[llll] \ar@{.>}[lu]
     }
 \end{equation*}
 Should \BR{1} include 3 PoRs, or just 1?
@@ -37,10 +41,10 @@ So, yes \BR{1} should include and count work from all 3 PoRs in this case.
 
 What about a more complicated example?
 \begin{equation*}
-    \xymatrix@M=4pt@R=10pt{
+    \xymatrix@M=3pt@R=4pt{
         \ar[rrrrrrr]_<{Time} & & & & & & & \\
-        \cdots & L_i \ar[l] & & L_{i+1} \ar[ll] \ar@{-->}[ld] & L_{i+2} \ar[l] & L_{i+3} \ar[l] & & L_{i+4} \ar[ll] \ar@{-->}[ld] \\
-        \cdots & & R_k \ar[ll] \ar@{-->}[lu] & & R_{k+1} \ar[ll] & & R_{k+2} \ar[ll] \ar@{-->}[lu]
+        \cdots & \xyB{L_i} \ar[l] & & \xyB{L_{i+1}} \ar[ll] \ar@{.>}[ld] & \xyB{L_{i+2}} \ar[l] & \xyB{L_{i+3}} \ar[l] & & \xyB{L_{i+4}} \ar[ll] \ar@{.>}[ld] \\
+        \cdots & & \xyB{R_k} \ar[ll] \ar@{.>}[lu] & & \xyB{R_{k+1}} \ar[ll] & & \xyB{R_{k+2}} \ar[ll] \ar@{.>}[lu]
     }
 \end{equation*}
 \BR{2} can be evaluated by similar logic to \BRj{1} above, but what about \BL{4}?
@@ -55,14 +59,21 @@ However, to understand exactly how PoRs \emph{should} be counted, we need to kno
 The essence of PoR is \emph{the confirmation of another chain's \underline{history}} -- so a reflection cannot contribute to a blocks which only exist \emph{in the reflecting block's \underline{future}}.
 So it must be that reflections contribute to the \emph{most recent common ancestor} of all possible L blocks which could include that PoR.
 
-This leads us to a simple and elegant way to count reflected work: follow the arrows back to the most recently reflected local block.
+This leads us to a simple and elegant way to count reflected work: follow the arrows back from the reflecting block to the most recently reflected local block.
 
 \BL{4}'s reflection of \BR{2} contributes chain-weight to \BL{3} because \emph{any} block that builds on \BL{3} could reflect \BR{2}.
-Following the arrows: $L_{i+4} \dashrightarrow R_{k+2} \dashrightarrow L_{i+3}$.
+% (L_{i+4} \; \ar@{.>}[r] &) \;
+Following the arrows: $\xymatrix@C=10pt@M=0pt{R_{k+2} \; \ar@{.>}[r] & \; L_{i+3}}$.
+% Note that the blocks and links in parentheses are specific to the block
+
+% Following the arrows: $L_{i+4} \dashrightarrow R_{k+2} \dashrightarrow L_{i+3}$.
 
 Similarly, \BL{4}'s reflection of \BR{1} (which could be either explicit or implicit via \BR{2}) must contribute chain-weight to $L_i$ because \emph{any} block building on $L_i$ could reflect \BR{1} and include that PoR.
-Following the arrows: $L_{i+4} \dashrightarrow R_{k+2} \to R_{k+1} \to R_k \dashrightarrow L_{i}$.
+% (L_{i+4} \; \ar@{.>}[r] & \; R_{k+2} \; \ar[r] &) \;
+Following the arrows: $\xymatrix@C=10pt@M=0pt{R_{k+1} \; \ar[r] & \; R_k \; \ar@{.>}[r] & \; L_{i}}$.
+
 % \BL{4} \textrightarrow \BR{2} \textrightarrow \BR{1} \textrightarrow $R_k$ \textrightarrow $L_i$.
+% Following the arrows: $L_{i+4} \dashrightarrow R_{k+2} \to R_{k+1} \to R_k \dashrightarrow L_{i}$.
 
 We can also say more about \BR{2}'s reflection of \BL{3}, now, too.
 Particularly, that the reflected work of \BL{1\cdots 3} should contribute to $R_k$, \emph{not} \BR{1}.
