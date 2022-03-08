@@ -994,11 +994,11 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
         return (csv_name_f_from_exp('29')('0.44', 5, bt=75, hr=75, exp_num='29', daa=2000, hashname="xxh3"), 'por', None)
 
 
-    CEC_TITLE_STR = "$P(q; c = C; N_1 = N) \\; \\approx \\; P(q; c = NC; N_1 = 1)$"
-    CEC_EXT_TITLE_STR = "$P(q; c = C; N_1 = N) \\; \\approx \\; P(q; c = 2C; N_1 = \\frac{{N}}{{2}})$"
-    CEC_EXT2_TITLE_STR = "$P(q; c = C; N_1 = N) \\; \\approx \\; P(q; c = \\frac{{CN}}{{a}}; N_1 = a) \\; \\approx \\; P(q; c = CN; N_1 = 1)$"
-    CEC_EXT3_TITLE_STR = "$P(q; c = C; N_1 = N) \\; \\approx \\; P(q; c = Ca; N_1 = \\frac{{N}}{{a}}) \\; \\approx \\; P(q; c = CN; N_1 = 1)$"
-    CEC_EXT4_TITLE_STR = "$\\forall a \\in [1, N]: P(q; c = \\frac{{CN}}{{a}}; N_1 = a)$ is approximately constant"
+    CEC_TITLE_STR = "$P^\\prime(q; c = C; N_1 = N) \\; \\approx \\; P^\\prime(q; c = NC; N_1 = 1)$"
+    CEC_EXT_TITLE_STR = "$P^\\prime(q; c = C; N_1 = N) \\; \\approx \\; P^\\prime(q; c = 2C; N_1 = \\frac{{N}}{{2}})$"
+    CEC_EXT2_TITLE_STR = "$P^\\prime(q; c = C; N_1 = N) \\; \\approx \\; P^\\prime(q; c = \\frac{{CN}}{{a}}; N_1 = a) \\; \\approx \\; P^\\prime(q; c = CN; N_1 = 1)$"
+    CEC_EXT3_TITLE_STR = "$P^\\prime(q; c = C; N_1 = N) \\; \\approx \\; P^\\prime(q; c = Ca; N_1 = \\frac{{N}}{{a}}) \\; \\approx \\; P^\\prime(q; c = CN; N_1 = 1)$"
+    CEC_EXT4_TITLE_STR = "$\\forall a \\in [1, N]: P^\\prime(q; c = \\frac{{CN}}{{a}}; N_1 = a)$ is approximately constant"
 
     RESULTS_FIG_WIDTH = 10
     RESULTS_FIG_ASPECT = 1/0.55

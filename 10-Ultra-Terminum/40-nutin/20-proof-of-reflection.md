@@ -1175,13 +1175,15 @@ Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
   \autoref{sec:converting-block-weights} mentions a \emph{natural symmetry} --
 } -->
 
-
 %% END ### RELEASE
 
 %% BEGIN ### DRAFT
 
 \todo{new section mb: How to count work -- e.g., explain bitcoin <-> eth1 from first principles, exactly what gets counted when?}
 
+### Counting Work
+
+\input{20-por/90-counting-work.tex}
 
 ### The Insecurity of Merged Mining in UT
 
