@@ -1005,11 +1005,12 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
     RESULTS_FIG_ASPECT = 1/0.55
     mk_fig_aspect = lambda w, a: (w, w / a)
     mk_results_fig = lambda w: mk_fig_aspect(w, RESULTS_FIG_ASPECT)
+    mod_fig_size_h = lambda fs, r: (fs[0], fs[1] * r)
     RESULTS_FIG_SIZE = mk_results_fig(RESULTS_FIG_WIDTH)
     RESULTS_FIG_TALLER_SIZE = mk_fig_aspect(0.85 * RESULTS_FIG_WIDTH, 14/10)
     RESULTS_ZOOMED_FIG_SIZE = mk_results_fig(0.85 * RESULTS_FIG_WIDTH)
     RESULTS_MORE_ZOOMED_FIG_SIZE = mk_results_fig(0.8 * RESULTS_FIG_WIDTH)
-    RESULTS_ZOOMED_TALLER_FIG_SIZE = (RESULTS_ZOOMED_FIG_SIZE[0], RESULTS_ZOOMED_FIG_SIZE[1] * 1.2)
+    RESULTS_ZOOMED_TALLER_FIG_SIZE = mod_fig_size_h(RESULTS_ZOOMED_FIG_SIZE, 1.1)
 
     LP_SEC_X_LABEL = f"Traditional Blockchain Confirmations ($\\sim$time)"
     LP_X_LABEL = f"Simplex $N_1$ ($\\sim$capacity)"
@@ -1467,8 +1468,8 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             f"png/lp_early_results",
             save_as_file_exts=['svg', 'png', 'pdf', 'csv'],
             x_range=(0, 21),
-            y_lim=(0, 0.45),
-            figsize=(8, 8*0.6),
+            y_lim=(0, 0.5),
+            figsize=RESULTS_MORE_ZOOMED_FIG_SIZE,
             x_label=std_x_label(20),
             sec_x_label=LP_SEC_X_LABEL,
             plot_this_order=[2,1,0],
@@ -1477,18 +1478,19 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
         # for LP: after draft refl work
         SavePlot(
             [
-                ('exp-12-repeat-8-RDoubleSpendWork-q0.44-t5-p50-H50-WeightedDag-xxh3.csv', 'por', None),
-                ('exp_aux2_q=0.44_dsconf-base=5_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', None),
+                ('exp-3.csv', 'por', 'no DRW'),
+                ('exp-12-repeat-8-RDoubleSpendWork-q0.44-t20-p50-H50-WeightedDag-xxh3.csv', 'por', 'w/ DRW'),
+                # ('exp_aux2_q=0.44_dsconf-base=5_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', None),
             ],
-            f"PoR Simulator: Early Results -- Accounting for Draft Reflected Work",
+            f"PoR Simulator: Early Results -- Accounting for Draft Reflected Work (DRW)",
             f"png/lp_results_after_draft_refl_work",
             save_as_file_exts=['svg', 'png', 'pdf', 'csv'],
-            x_range=(0, 31),
-            y_lim=(0, 0.7),
-            figsize=(8, 8*0.6),
+            x_range=(0, 21),
+            y_lim=(0, 0.45),
+            figsize=RESULTS_MORE_ZOOMED_FIG_SIZE,
             x_label=std_x_label(5),
             sec_x_label=LP_SEC_X_LABEL,
-            plot_this_order=[-1,-2,0],
+            plot_this_order=[-1,0,1],
             # analytical_plot_color='C8',
         )
     ] + [
@@ -1503,7 +1505,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             f"png/_interim_randhr",
             save_as_file_exts=['png', 'pdf', 'csv'],
             x_range=(0, 21),
-            y_lim=(0, 0.7),
+            y_lim=(0, 0.45),
             figsize=RESULTS_ZOOMED_FIG_SIZE,
             x_label=std_x_label(5),
             sec_x_label=LP_SEC_X_LABEL,
@@ -1546,12 +1548,31 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             save_as_file_exts=['pdf', 'csv'],
             x_range=(0, 21),
             y_lim=(0, 0.7),
-            figsize=RESULTS_ZOOMED_FIG_SIZE,
+            figsize=RESULTS_MORE_ZOOMED_FIG_SIZE,
             x_label=std_x_label(5),
             sec_x_label=LP_SEC_X_LABEL,
             plot_this_order=[-1,-3,-2],
             # analytical_plot_color='C8',
         )
+    ] + [
+        # extra resutls q48 for appendix
+        SavePlot(
+            gen_por_cec_full_csvs(q, int(t), exp=exp, aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3", **gen_csv_kwargs),
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture (Extended)",
+                f"{CEC_EXT4_TITLE_STR}",
+                f"If the CEC is true, then these plots should align",
+            ]),
+            f"png/_results_extra_q={q}_daa={daa}{suffix}",
+            save_as_file_exts=['pdf', 'csv'],
+            figsize=RESULTS_ZOOMED_FIG_SIZE,
+            x_label=std_x_label(t),
+            # x_range=(0, 121),
+            x_range=(0, 46),
+            plot_this_order=[-1,-2,0,1,2]
+        )
+        for q in ['0.48'] for t in ['20'] for exp,daa in [('26', 500)]
+        for suffix, gen_csv_kwargs in [('_nofrac', dict(min_ds_conf=5))]
     ] + [
         # for LP: main results (copy of _results_cec_9000)
         SavePlot(
