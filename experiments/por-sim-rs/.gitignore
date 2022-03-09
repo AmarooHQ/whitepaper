@@ -8,4 +8,5 @@ perf.data*
 !**/png/*.png
 !**/png/*.csv
 !**/png/*.svg
+!**/png/*.pdf
 cleanly_stop_sim

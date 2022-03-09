@@ -229,7 +229,7 @@ In total, 5 main error corrections were applied, which incrementally brought the
 \begin{enumerate}
     \item Accounting for draft reflected work (explained in \autoref{sec:cec-draft-refl-work})
     \item Implementing the \texttt{DoubleSpendWork} attack strategy
-    \item Randomizing hash rate over simplex chains ($p + q = 1$ is globally maintained)
+    \item Randomizing hash-rate over simplex chains ($p + q = 1$ is globally maintained)
     \item Implementing the attacker's ``Bonus Block''
     \item Increasing the number of blocks over which the DAA operates ($\text{DAA}_N = 100 \to 500$)
 \end{enumerate}
@@ -280,7 +280,7 @@ The source code for this model blockchain network is contained in the \href{http
         \toprule
         Parameter & Variable & Significance \\
         \midrule
-        $q$ (ratio) & Yes & Attacker's proportion of the global hash rate. \\
+        $q$ (ratio) & Yes & Attacker's proportion of the global hash-rate. \\
         $c$ (confirmations) & Yes & Work-equivalent of `$c$ local confirmations' waiting time. \\
         $N_1$ (chains) & Yes & The number simplex-chains ($N_1 = 1$ for traditional blockchains). \\
         ${B_f}^{-1}$ (ticks) & No & Artificial units of time used by the DAA. \\
@@ -451,7 +451,7 @@ These results are, for the purpose of this paper, taken to indicate the followin
 % Additionally, the following observations are made:
 
 % \begin{enumerate}
-%     \item An attacker whose hash rate is \emph{uniformly} distributed over a simplex is at a disadvantage compared to an attacker whose hash rate is \emph{randomly} distributed.
+%     \item An attacker whose hash-rate is \emph{uniformly} distributed over a simplex is at a disadvantage compared to an attacker whose hash-rate is \emph{randomly} distributed.
 %     \item Decreasing $\text{DAA}_N$ increases the security of both simplexes and traditional blockchains -- except for ``Longest Chain'' fork rules.
 %     \item An attacker that waits to generate a block on a target chain is at a decisive advantage compared to one that does not.
 %     \item Rosenfeld's closed form solution is consistent with empirical results.

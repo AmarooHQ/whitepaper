@@ -639,8 +639,9 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
     print(f"Done. Now drawing.")
 
     if plot_this_order:
-        assert_eq(len(plot_this_order), len(plot_fs), "length of `plot_this_order` must = the number of series we're plotting")
-        assert_eq(len(plot_this_order), len(set(plot_this_order)), "`plot_this_order` must have unique elements")
+        len_pto = len(plot_this_order)
+        assert_eq(len_pto, len(plot_fs), f"length of `plot_this_order` ({len_pto}) must = the number of series we're plotting ({len(plot_fs)})")
+        assert_eq(len_pto, len(set(plot_this_order)), "`plot_this_order` must have unique elements")
         for series_i in plot_this_order:
             plot_fs[series_i]()
     else:
@@ -1089,7 +1090,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             gen_por_equiv_rand_hrs_csvs(q, t, bt, hr, only_real_world=True, exp_num=exp, aux_num=aux, daa=daa),
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture | WeightedDag + DoubleSpendWork",
-                f"$q={q}$ | {'hash-rate randomly distributed ($q+p=1$ true network-wide)' if int(exp) < 17 else 'uniform hash rate distribution'}",
+                f"$q={q}$ | {'hash-rate randomly distributed ($q+p=1$ true network-wide)' if int(exp) < 17 else 'uniform hash-rate distribution'}",
                 f"{CEC_TITLE_STR}"]),
             f"png/por_equiv_onlyrealworld_{'rand_hr' if int(exp) < 17 else 'uni_hr'}_e{exp}_a{aux}_q={q}_t{t}_bt={bt}_hr={hr}_daa={daa}.png",
             x_label=std_x_label(t),
@@ -1109,9 +1110,9 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
     #         gen_por_cec_ext_test(q, t, exp=exp, aux=aux, bt=bt, hr=hr, daa=daa),
     #         "\n".join([
     #             f"PoR Confirmation Equivalence Conjecture (Extended)",
-    #             f"$q={q}$ | WD+DSW | {'random' if int(exp) < 17 else 'uniform'} hash rate distribution",
+    #             f"$q={q}$ | WD+DSW | {'random' if int(exp) < 17 else 'uniform'} hash-rate distribution",
     #             f"{CEC_EXT_TITLE_STR}"]),
-    #         # f" PoR Confirmation Equivalence Conjecture (Extended) \n $q={q}$ | WD+DSW | random hash rate distribution \n{CEC_EXT_TITLE_STR}",
+    #         # f" PoR Confirmation Equivalence Conjecture (Extended) \n $q={q}$ | WD+DSW | random hash-rate distribution \n{CEC_EXT_TITLE_STR}",
     #         f"png/por_equiv_orw_ext-cec_e{exp}_q={q}_t{t}.png",
     #         x_label=std_x_label(t),
     #         x_range=q_t_to_x_range[(q, t)],
@@ -1462,35 +1463,93 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
                 ('exp-3.csv', 'por', None),
                 ('exp-aux1.csv', 'trad', None),
             ],
-            f"CEC: Early PoR results",
+            f"PoR Simulator: Early Results",
             f"png/lp_early_results",
-            save_as_file_exts=['svg', 'png', 'csv'],
+            save_as_file_exts=['svg', 'png', 'pdf', 'csv'],
             x_range=(0, 21),
             y_lim=(0, 0.45),
             figsize=(8, 8*0.6),
             x_label=std_x_label(20),
             sec_x_label=LP_SEC_X_LABEL,
             plot_this_order=[2,1,0],
-            # analytical_plot_color='C8',
         )
     ] + [
         # for LP: after draft refl work
         SavePlot(
             [
-                # ('exp-4c-hash-xxrev.csv', 'por', None),  # already fixed
-                # ('exp-9-RDoubleSpendWork-q0.40-t5-p100-H100-WeightedDag-blake3.csv', 'por', None),
                 ('exp-12-repeat-8-RDoubleSpendWork-q0.44-t5-p50-H50-WeightedDag-xxh3.csv', 'por', None),
                 ('exp_aux2_q=0.44_dsconf-base=5_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', None),
             ],
-            f"CEC: Early PoR results -- Accounting for Draft Reflected Work",
+            f"PoR Simulator: Early Results -- Accounting for Draft Reflected Work",
             f"png/lp_results_after_draft_refl_work",
-            save_as_file_exts=['svg', 'png', 'csv'],
+            save_as_file_exts=['svg', 'png', 'pdf', 'csv'],
             x_range=(0, 31),
             y_lim=(0, 0.7),
             figsize=(8, 8*0.6),
             x_label=std_x_label(5),
             sec_x_label=LP_SEC_X_LABEL,
-            plot_this_order=[2,1,0],
+            plot_this_order=[-1,-2,0],
+            # analytical_plot_color='C8',
+        )
+    ] + [
+        # interim results: before/after randomizing hash-rates
+        SavePlot(
+            [
+                ('exp-12-repeat-8-RDoubleSpendWork-q0.40-t5-p50-H50-WeightedDag-xxh3.csv', 'por', 'Uniform HRs'),
+                ('exp_13_RandHR_q=0.40_dswin=5_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', 'Random HRs'),
+                # ('exp_13_RandHR_q=0.44_dswin=5_bt=50_hr=50_DoubleSpend_WeightedDag_DAA100.csv', 'por', None),
+            ],
+            f"PoR Simulator: Early Results -- Randomizing Hash-rates",
+            f"png/_interim_randhr",
+            save_as_file_exts=['png', 'pdf', 'csv'],
+            x_range=(0, 21),
+            y_lim=(0, 0.7),
+            figsize=RESULTS_ZOOMED_FIG_SIZE,
+            x_label=std_x_label(5),
+            sec_x_label=LP_SEC_X_LABEL,
+            plot_this_order=[-1,0,1],
+            # analytical_plot_color='C8',
+        )
+    ] + [
+        # interim results: before/after adding bonus block
+        SavePlot(
+            [
+                ('exp_13_RandHR_q=0.40_dswin=5_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', 'No Bonus Block'),
+                # ('exp_22c_RandHR_xxh3_q=0.40_dswin=5_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', '+Bonus Block'),
+                ('exp_26_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', '+Bonus Block'),
+                # ('exp_22aux_RandHR_xxh3_q=0.40_dswin=5_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', '+Bonus Block'),
+                ('exp_aux3_q=0.40_dsconf-base=5_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', 'No Bonus Block'),
+                ('exp_26aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', '+Bonus Block'),
+            ],
+            f"PoR Simulator: Early Results -- Bonus Block",
+            f"png/_interim_bonusblock",
+            save_as_file_exts=['png', 'pdf', 'csv'],
+            x_range=(0, 21),
+            y_lim=(0, 0.7),
+            figsize=RESULTS_ZOOMED_FIG_SIZE,
+            x_label=std_x_label(5),
+            sec_x_label=LP_SEC_X_LABEL,
+            plot_this_order=[-1,-3,0,-2,1],
+            # analytical_plot_color='C8',
+        )
+    ] + [
+        # interim results: before/after DAA
+        SavePlot(
+            [
+                # ('exp_26_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', None),
+                # ('exp_26_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA500.csv', 'por', None),
+                ('exp_26aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', None),
+                ('exp_26aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA500.csv', 'trad', None),
+            ],
+            "PoR Simulator: Early Results -- $\\mathrm{DAA}_N = 100 \\to 500$",
+            f"png/_interim_daa",
+            save_as_file_exts=['pdf', 'csv'],
+            x_range=(0, 21),
+            y_lim=(0, 0.7),
+            figsize=RESULTS_ZOOMED_FIG_SIZE,
+            x_label=std_x_label(5),
+            sec_x_label=LP_SEC_X_LABEL,
+            plot_this_order=[-1,-3,-2],
             # analytical_plot_color='C8',
         )
     ] + [
