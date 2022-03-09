@@ -1,1 +1,29 @@
 \definecolor{maxsColor}{HTML}{F01990}
+
+% https://alexwlchan.net/2017/10/latex-underlines/
+% better underlines. note that \setlength was needed instead of \renewcommand as is used in the above post.
+
+\usepackage[outline]{contour}
+\usepackage[normalem]{ulem}
+
+\setlength{\ULdepth}{1.8pt}
+% \contourlength{0.8pt}
+\contourlength{1.0pt}
+
+\newcommand{\ul}[1]{%
+  % \uline{\phantom{#1}}%
+  % \llap{\contour{white}{#1}}%
+  \uline{\contour{white}{#1}}%
+}
+
+% \usepackage{pdfrender}
+
+% \newcommand{\ul}[1]{%
+%   \textpdfrender{
+%     TextRenderingMode=Stroke,
+%     LineWidth=1pt,
+%     StrokeColor=white,
+%     FillColor=black,
+%     % MiterLimit=1
+%   }{\uline{#1}}%
+% }

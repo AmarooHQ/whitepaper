@@ -135,7 +135,7 @@ Let's test the Confirmation Equivalence Conjecture.
 The hypothesis is that: doublespends against an \emph{individual simplex-chain} in an $N$-chain simplex after $C$ \emph{local} confirmations are \emph{as hard} as doublespends against a traditional blockchain after $C\cdot N$ confirmations.
 
 First, define $P(q; c)$ to be the function that returns the probability of an attempted doublespend succeeding on a traditional blockchain according to Rosenfeld's analytical solution\footnote{
-    See \citeAHBDSFull.
+    \citeAHBDSFull
 }:
 \begin{equation}
     \forall c \in \{1, 2, \dots\}: P(q; c) = \begin{cases}
@@ -249,7 +249,7 @@ Since we \emph{know} that a simulation will naturally include simplifying assump
 So focusing on, and correcting, those simplifications does not compromise the method.
 Rather, the fact that \emph{these} corrections were the significant ones is consistent with the idea that \emph{the simulation is consistent with real-world blockchain networks}; that the simulation \emph{works}.
 
-The error correction steps (including interim results) are documented in \autoref{sec:appendix-experiment-ec}.
+The error correction steps (including interim results) are documented in \autoref{sec:appendix-cec-extra}.
 
 
 \subsubsubsubsection{Method}
@@ -285,7 +285,7 @@ The source code for this model blockchain network is contained in the \href{http
         $N_1$ (chains) & Yes & The number simplex-chains ($N_1 = 1$ for traditional blockchains). \\
         ${B_f}^{-1}$ (ticks) & No & Artificial units of time used by the DAA. \\
         $\text{DAA}_N$ (blocks) & No & The number of blocks over which the DAA operates. \\
-        $H$ (hashes) & No & The network-wide hashes per chain per tick. \\
+        $H$ (hashes) & No & The network-wide average hashes per chain per tick. \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -420,29 +420,10 @@ While it appears that simplexes (for $q=0.44, c=5, N_1 \in [3,10]$, at least) ar
 As we are about to see, it also diminishes as $c$ increases.
 For this experiment, it is taken to be a \emph{non-critical} error.
 
-% \begin{figure}[]
-%     \centering
-%     \includegraphics[max width=\linewidth, max height=0.4\textheight]{simulation/_results_trad_vs_1simplex_9000_qs=0.48_t=5_daa=500.pdf}
-%     \caption[]{
-%         Version of \autoref{fig:simulation-r1-single-simplex} for $q = 0.48$.
-%         %That the measured results for a simplex (converted via the CEC) converge with the both the results for a traditional blockchain and the analytical solution is taken to be validation that simplexes are secure.
-%     }
-%     \label{fig:simulation-r1-single-simplex-q48}
-% \end{figure}
-
 Second, what about the \emph{general case?}
 Does the extended CEC hold true, also?
 \autoref{fig:simulation-r2-cec-ext} graphs $f_1, f_2, f_3, f_4, f_5$ and these results are also consistent with predictions (\autoref{eq:cec-extended-hypothesis}).
 
-
-% \begin{figure}[]
-%     \centering
-%     \includegraphics[max width=\linewidth, max height=0.4\textheight]{simulation/_results_cec_9000_qs=0.48_t=5_daa=500.pdf}
-%     \caption[]{
-%         Version of \autoref{fig:simulation-r2-cec-ext} for $q = 0.48$.
-%     }
-%     \label{fig:simulation-r2-cec-ext-q48}
-% \end{figure}
 
 
 \subsubsubsubsection{Conclusions}

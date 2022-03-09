@@ -7,17 +7,21 @@
 \providecommand\BR[1]{\BCI{R}{j}{#1}}
 % note: \BR renewed below
 \providecommand\xyB[1]{*+[F]+{#1}}
+\providecommand\xyL[1]{*++[F:<2pt>]{#1}}
 
-\SelectTips{cm}{}
+\providecommand\xyMChains[1]{\xymatrix@M=3pt@R=4pt@C=14pt{#1}}
+\providecommand\xyTimeHoriz[1]{\ar@{>->}@<-6pt>[#1]_<{\qquad\text{Time}}}
+
+% \SelectTips{cm}{}
 
 When chains L and R have the same block frequency and produce blocks in an orderly fashion, it's trivial to count how much work is contributed by each PoR.
 However, real-world blockchains do not produce blocks like this -- even if chains L and R have the same block frequencies, sometimes L will produce 2 or 3 (or more) blocks before R produces its next one (or vice versa).
 \begin{equation*}
-    \xymatrix@M=3pt@R=4pt{
-        \ar[rrrrrr]_<{Time} & & & & & & \\
-        \cdots & \xyB{L_i} \ar[l] & & \xyB{L_{i+1}} \ar[ll] \ar@{.>}[ld] & \xyB{L_{i+2}} \ar[l] & \xyB{L_{i+3}} \ar[l] & \\
-        \cdots & & \xyB{R_j} \ar[ll] \ar@{.>}[lu] & & & & \xyB{R_{j+1}} \ar[llll] \ar@{.>}[lu]
-    }
+    \xyMChains{
+        \xyL{\text{Chain L}} & \cdots & \xyB{L_i} \ar[l] & & \xyB{L_{i+1}} \ar[ll] \ar@{.>}[ld] & \xyB{L_{i+2}} \ar[l] & \xyB{L_{i+3}} \ar[l] & \\
+        \xyL{\text{Chain R}} & \cdots & & \xyB{R_j} \ar[ll] \ar@{.>}[lu] & & & & \xyB{R_{j+1}} \ar[llll] \ar@{.>}[lu] \\
+        \xyTimeHoriz{rrrrrrr} & & & & & & & \\
+        }
 \end{equation*}
 Should \BR{1} include 3 PoRs, or just 1?
 How should \BR{1} calculate the weight of those PoRs and the total weight contributed to chain R?
@@ -41,10 +45,10 @@ So, yes \BR{1} should include and count work from all 3 PoRs in this case.
 
 What about a more complicated example?
 \begin{equation*}
-    \xymatrix@M=3pt@R=4pt{
-        \ar[rrrrrrr]_<{Time} & & & & & & & \\
-        \cdots & \xyB{L_i} \ar[l] & & \xyB{L_{i+1}} \ar[ll] \ar@{.>}[ld] & \xyB{L_{i+2}} \ar[l] & \xyB{L_{i+3}} \ar[l] & & \xyB{L_{i+4}} \ar[ll] \ar@{.>}[ld] \\
-        \cdots & & \xyB{R_k} \ar[ll] \ar@{.>}[lu] & & \xyB{R_{k+1}} \ar[ll] & & \xyB{R_{k+2}} \ar[ll] \ar@{.>}[lu]
+    \xyMChains{
+        \xyL{\text{Chain L}} & \cdots & \xyB{L_i} \ar[l] & & \xyB{L_{i+1}} \ar[ll] \ar@{.>}[ld] & \xyB{L_{i+2}} \ar[l] & \xyB{L_{i+3}} \ar[l] & & \xyB{L_{i+4}} \ar[ll] \ar@{.>}[ld] \\
+        \xyL{\text{Chain R}} & \cdots & & \xyB{R_k} \ar[ll] \ar@{.>}[lu] & & \xyB{R_{k+1}} \ar[ll] & & \xyB{R_{k+2}} \ar[ll] \ar@{.>}[lu] & \\
+        \xyTimeHoriz{rrrrrrrr} & & & & & & & & \\
     }
 \end{equation*}
 \BR{2} can be evaluated by similar logic to \BRj{1} above, but what about \BL{4}?
@@ -56,8 +60,8 @@ The difficulty in answering these questions -- with what we've covered so far --
 When the fork rule compares \BL{4} to an alternative block, only the \emph{total} chain-weight of each is relevant.
 However, to understand exactly how PoRs \emph{should} be counted, we need to know more.
 
-The essence of PoR is \emph{the confirmation of another chain's \underline{history}} -- so a reflection cannot contribute to a block which exist \emph{in the reflecting block's \underline{future}}.
-So it must be that reflections contribute to the \emph{most recent common ancestor} of all possible L blocks that could include the PoR.
+The essence of PoR is \emph{the confirmation of another chain's \ul{history}} -- so a reflection cannot contribute to a block which exists \emph{in the reflecting block's \ul{future}}.
+It must be that reflections contribute to the \emph{most recent common ancestor} of all \emph{possible} L blocks which \emph{could} include that specific PoR.
 
 This leads us to a simple and elegant way to count reflected work: follow the arrows back from the reflecting block to the most recently reflected local block.
 
