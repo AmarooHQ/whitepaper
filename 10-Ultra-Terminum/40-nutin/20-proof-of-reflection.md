@@ -988,7 +988,9 @@ There is no way to say \emph{X work on L is worth Y work on R} without adding ne
 Confirmations (like work) require that grounding, since they need to be scaled when converting between different chains.
 What about confirmations from the same chain?
 Unlike work (which can be summed directly), confirmations always require conversion to a \emph{known standard} -- even when they're \emph{from the same chain}.
-For example, we can say that the single confirmation provided by Bitcoin block 704610 is \emph{equivalent} to approximately 19,893,045,000,000 genesis-confirmations.\footnote{A genesis-confirmation is relative to the Bitcoin genesis block -- which had a difficulty of exactly 1.}
+For example, we can say that the single confirmation provided by Bitcoin block 704610 is \emph{equivalent} to approximately 19,893,045,000,000 genesis-confirmations.\footnote{
+  A genesis-confirmation is relative to the Bitcoin genesis block -- which had a difficulty of exactly 1.
+}
 The conversion-ratio is equal to the difficulty of block 704610.
 That is, it would take a chain of $\sim$ 20 trillion blocks, each with 1 genesis-confirmation worth of work, to match the weight of block 704610.
 

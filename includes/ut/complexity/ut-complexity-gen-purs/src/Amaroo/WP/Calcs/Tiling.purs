@@ -37,13 +37,22 @@ trim_for_lp :: Array String -> Array String
 trim_for_lp [e1, e3, e4, e5, e6, e7, _e8, _e9] = [e1, e3, e4, e5, e6, e7]
 trim_for_lp _row = unsafePartial $ crashWith $ "trim_for_lp: bad sized row: " <> show _row
 
+filter_big_hs_for_v :: Array Int -> Int -> Array Int
+filter_big_hs_for_v hs v = A.filter (_ <= hLimit) hs
+  where
+    hLimit = case v of
+      3 -> 90
+      4 -> 60
+      5 -> 50
+      _ -> 90
+
 tree_tiling_table :: Int -> {k :: Number, lp :: Boolean} -> Table
 tree_tiling_table v {k, lp} = Table
     headings
     ({md: mkSpacer <$> A.replicate (l) 3, texTabular: "l" <> repeatSafe (l-1) "r"})
     $ mkRow <$> row_hs
   where
-    row_hs = if lp then [0, 5, 10, 15, 20, 30, 60] else A.range 0 6 <> [10, 15, 20, 25, 29, 30, 60]
+    row_hs = flip (filter_big_hs_for_v) v $ if lp then [0, 1, 2, 5, 10, 15, 20, 30, 60, 90] else A.range 0 6 <> [10, 15, 20, 25, 30, 60, 90]
     headings = (if lp then trim_for_lp else id)
       [ if lp then "# of Layers" else "$h$"
       -- , "$N_{\\text{tiles}|h}$"
@@ -95,23 +104,23 @@ tree_tiling_table v {k, lp} = Table
         _x_ut_n2 = s_n2 / ut_n2
         conf_rate = ut_cs.confRate * sx_to_tile_ratio
 
-tree_tiling_3k_v4_table :: Table
-tree_tiling_3k_v4_table = tree_tiling_table 4 {k: 3000.0, lp: false}
-
 tree_tiling_3k_v3_table :: Table
 tree_tiling_3k_v3_table = tree_tiling_table 3 {k: 3000.0, lp: false}
 
 tree_tiling_3k_v3_table_lp :: Table
 tree_tiling_3k_v3_table_lp = tree_tiling_table 3 {k: 3000.0, lp: true}
 
+tree_tiling_3k_v4_table :: Table
+tree_tiling_3k_v4_table = tree_tiling_table 4 {k: 3000.0, lp: false}
+
 tree_tiling_3k_v5_table :: Table
 tree_tiling_3k_v5_table = tree_tiling_table 5 {k: 3000.0, lp: false}
 
-tree_tiling_20k_v4_table :: Table
-tree_tiling_20k_v4_table = tree_tiling_table 4 {k: 20000.0, lp: false}
-
 tree_tiling_20k_v3_table :: Table
 tree_tiling_20k_v3_table = tree_tiling_table 3 {k: 20000.0, lp: false}
+
+tree_tiling_20k_v4_table :: Table
+tree_tiling_20k_v4_table = tree_tiling_table 4 {k: 20000.0, lp: false}
 
 tree_tiling_20k_v5_table :: Table
 tree_tiling_20k_v5_table = tree_tiling_table 5 {k: 20000.0, lp: false}

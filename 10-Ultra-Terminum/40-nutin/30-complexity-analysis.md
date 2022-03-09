@@ -191,7 +191,6 @@ k_{1,tx} = k_1 - N_1 \cdot B_f \cdot B_h
 \end{equation}
 
 Since each simplex-chain reserves $k_{1,tx}$ B/s for transactions, the total throughput reserved for transactions will be $N_1 \cdot k_{1,tx}$. Thus:
-
 \begin{align}
 T_1 & = N_1 \cdot k_{1,tx} \label{eq:reflection-t1-start} \\
 & = N_1(k_1 - N_1 \cdot B_f \cdot B_h) \notag \\
@@ -200,7 +199,8 @@ T_1 & = N_1 \cdot k_{1,tx} \label{eq:reflection-t1-start} \\
 %% & = N_1 \cdot k_1 - {N_1}^2 \cdot B_f \cdot B_h + N_1 \cdot B_f \cdot B_h \label{eq:reflection-t1-in-terms-of-n1}
 \end{align}
 
-The optimal number of simplex-chains will maximize throughput. We can find that maxima via:
+The optimal number of simplex-chains will maximize throughput.
+We can find that maxima via:
 \begin{equation*}
 \begin{split}
 \frac{dT_1}{dN_1} & = k_1 - 2 \cdot N_1 \cdot B_f \cdot B_h
@@ -209,7 +209,6 @@ The optimal number of simplex-chains will maximize throughput. We can find that 
 \end{equation*}
 
 At $\frac{dT_1}{dN_1} = 0$:
-
 \begin {equation}
 \label{eq:simplex-N1}
 \begin{split}

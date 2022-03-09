@@ -108,8 +108,12 @@ devTables =
     -- , TD "tree_tiling_3k_v4_table" tree_tiling_3k_v4_table defaultPositioning
     [ TD "compareUtOptimizationsA" compareUtOptimizationsA defaultPositioning
     , TD "compare_optimizations_a_20k" compareUtOptimizationsA20k defaultPositioning
-    , TD "tree_tiling_3k_v4_table" tree_tiling_3k_v4_table hereish
     , TD "comparison_1m_tps" compareNets1mTps hereish
+    , TD "compareUtOptimizationsAWithLvl3" compareUtOptimizationsAWithLvl3 defaultPositioning
+    , TD "compareUtOptimizationsA20kWithLvl3" compareUtOptimizationsA20kWithLvl3 defaultPositioning
+    , TD "tree_tiling_3k_v3_table" tree_tiling_3k_v3_table hereish
+    , TD "tree_tiling_3k_v4_table" tree_tiling_3k_v4_table hereish
+    , TD "compareNets100k" compareNets100k hereish
     ]
 
 

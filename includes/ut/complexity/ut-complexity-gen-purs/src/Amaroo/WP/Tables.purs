@@ -198,6 +198,9 @@ _UT_INIT_CONFIG = mkSimplePs 3000.0 _UT_HF _TX_SIZE
 _COMPARE_20K = 20_000.0
 _UT_20K_CONFIG = mkSimplePs _COMPARE_20K _UT_HF _TX_SIZE
 
+_COMPARE_100K = 100_000.0
+_UT_100K_CONFIG = mkSimplePs _COMPARE_100K _UT_HF _TX_SIZE
+
 utComparativeComplexityParams :: Array Params
 utComparativeComplexityParams =
       [ mkSimplePs _POLKADOT_1M_K {bf: btToF 15, bh: 112.0} _TX_SIZE
@@ -283,8 +286,9 @@ filterRecsByNet recs nets = do
     n <- nets
     A.filter (\{net} -> net == n) recs
 
+-- note: UT (T {1,2}) removed 2022-03-09
 compareNetsFilterList :: Array Network
-compareNetsFilterList = [Bitcoin, Cardano, Solana, UT (PoRTs 1), UT (HOPoRTs 1), UT (T 1), UT (HOT 1), Polkadot, Eth2, OptShard, UT (PoRTs 2), UT (HOPoRTs 2), UT (T 2), UT (HOT 2), UT (Aleph (HOT 2))]
+compareNetsFilterList = [Bitcoin, Cardano, Solana, UT (PoRTs 1), UT (HOPoRTs 1), UT (HOT 1), Polkadot, Eth2, OptShard, UT (PoRTs 2), UT (HOPoRTs 2), UT (HOT 2), UT (Aleph (HOT 2))]
 
 filteredUtVsOther :: Array UtVsOtherDesc
 filteredUtVsOther = filterUtVsOther compareNetsFilterList
@@ -537,6 +541,10 @@ compareNets20k :: Table
 compareNets20k =
     compareNetsTH (genCompareRow _COMPARE_20K <$> filteredUtVsOther)
 
+compareNets100k :: Table
+compareNets100k =
+    compareNetsTH (genCompareRow _COMPARE_100K <$> filteredUtVsOther)
+
 makeCompareRowConcise [ps, net, _, _, scale, n2, tps] = [ps, net, scale, n2, tps]
 makeCompareRowConcise _ = unsafeThrowException $ error "makeCompareRowConcise got wrong number of cols"
 
@@ -620,6 +628,7 @@ type OProps = {s :: String, f :: (ChainStats -> String)}
 
 sigmaTps1 = "$\\Sigma\\;\\text{TPS}_{1}$"
 sigmaTps2 = "$\\Sigma\\;\\text{TPS}_{2}$"
+sigmaTps3 = "$\\Sigma\\;\\text{TPS}_{3}$"
 
 optimizationProps1 :: Array OProps
 optimizationProps1 =
@@ -635,6 +644,19 @@ optimizationProps1 =
   , {s: "E. $B_h$ (B)", f: \cs -> fmtDyn fdPlainZero cs.effBh}
   -- , {s: "E. $D_h$ (B)", f: \cs -> fmtDyn fdPlainZero cs.effDh}
   , {s: "PoR (B)", f: \cs -> fmtDyn fdPlainZero cs.porBytes}
+  ]
+
+optimizationProps1WithLvl3 :: Array OProps
+optimizationProps1WithLvl3 =
+  [ {s: "$N_1$", f: \cs -> fmtDyn fdStdMixed cs.d1.n}
+  -- , {s: "$T_1$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.d1.t}
+  , {s: sigmaTps1, f: \cs -> fmtDyn fdStdMixed cs.d1.tps}
+  , {s: "$N_2$", f: \cs -> fmtDyn fdStdMixed cs.d2.n}
+  , {s: sigmaTps2, f: \cs -> fmtDyn fdStdMixed cs.d2.tps}
+  -- , {s: "$T_2$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.d2.t}
+  -- , {s: "$T_3$ (B/s)", f: \cs -> fmtDyn fdPlainZero cs.d3.t}
+  , {s: "$N_3$", f: \cs -> fmtDyn fdStdMixed cs.d3.n}
+  , {s: sigmaTps3, f: \cs -> fmtDyn fdStdMixed cs.d3.tps}
   ]
 
 optimizationProps2 :: Array OProps
@@ -675,8 +697,14 @@ compareUtOptimizations_ ps oProps = Table
 compareUtOptimizationsA :: Table
 compareUtOptimizationsA = compareUtOptimizations_ _UT_INIT_CONFIG optimizationProps1
 
+compareUtOptimizationsAWithLvl3 :: Table
+compareUtOptimizationsAWithLvl3 = compareUtOptimizations_ _UT_INIT_CONFIG optimizationProps1WithLvl3
+
 compareUtOptimizationsA20k :: Table
 compareUtOptimizationsA20k = compareUtOptimizations_ _UT_20K_CONFIG optimizationProps1
+
+compareUtOptimizationsA20kWithLvl3 :: Table
+compareUtOptimizationsA20kWithLvl3 = compareUtOptimizations_ _UT_20K_CONFIG optimizationProps1WithLvl3
 
 compareUtLimOptimizationsA :: Table
 compareUtLimOptimizationsA = compareUtOptimizations_ (_UT_INIT_CONFIG {limitN1Ratio = Just 0.667}) optimizationProps1

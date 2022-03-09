@@ -7,7 +7,7 @@
 Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes are tiled, I call the result a *simplex tiling*.
 
 \defineTerm{Simplex Tile}{
-    Like a simplex, but $>75\%$ of the PoR capacity is reserved for reflections with \emph{neighboring} tiles; typically a quadrifurcated maximal simplex
+    Like a simplex, but $\ge 75\%$ of the PoR capacity is reserved for reflections with \emph{neighboring} tiles; typically a quadrifurcated maximal simplex
 }
 
 \todoDraftOnly{terms and edit / refactor this section}
@@ -85,7 +85,11 @@ We start from the foundation that each tile has a maximum of $\frac{N_1}{4}$ sim
 Our starting point is a $\frac{N_1}{4}$-simplex which constitutes a single tile.
 This is shown in \autoref{fig:tiled-simplex-5-d0}.
 
-The next iteration is to add $3$ adjacent tiles, since tiling has a valence of 3. Each of these new tiles has one pre-existing neighbor (the root tile), so each new tile has capacity for 2 more neighbors. Thus, the next iteration will add twice the number of tiles as the preceding iteration -- in this case, $6$ new tiles. This pattern -- adding twice the number of tiles as the previous iteration -- continues indefinitely.
+The next iteration is to add $3$ adjacent tiles, since tiling has a valence of 3.
+Each of these new tiles has one pre-existing neighbor (the root tile), so each new tile has capacity for 2 more neighbors.
+Thus, the next iteration will add twice the number of tiles as the preceding iteration -- in this case, $6$ new tiles.
+This pattern -- adding twice the number of tiles as the previous iteration -- continues indefinitely.
+It is shown in \autoref{fig:simplex-tiling}.
 
 \begin{comment}
 side by side figures: https://tex.stackexchange.com/questions/37581/latex-figures-side-by-side

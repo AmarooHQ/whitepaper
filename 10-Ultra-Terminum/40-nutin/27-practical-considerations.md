@@ -587,9 +587,9 @@ Does a miner ever benefit from withholding reflections?
 
 %% BEGIN ### RELEASE
 
-### The Crux: Simplex Security and the Confirmation Equivalence Conjecture
+### Simplex Security and the Confirmation Equivalence Conjecture
 
-\label{sec:crux-simplex-security-cec}
+\label{sec:simplex-security-cec}
 
 \input{27-practical/90-simplex-security-and-cec.tex}
 

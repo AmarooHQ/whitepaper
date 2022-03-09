@@ -213,45 +213,6 @@ Note: this experiment does \emph{not} test the conversion of chain-work -- the s
 
 
 
-\subsubsubsubsection{Error Correction Iteration}
-
-Following the initial implementation of PoR in the simulator, results were promising but did not align with the theoretical prediction (based on Rosenfeld's analytical derivation of $P(q; c)$).
-At lower values of $c$ and/or $N_1$, the results suggested that the simulation was \emph{more} secure than expected.
-At higher values of $N_1$, $P^\prime$ did not appear to approach 0, instead approaching $\sim 0.05$.
-
-Given the nature of writing a simulation (compared to writing a production blockchain), many simplifications were made.
-Some of these simplifications shouldn't matter, but some might.
-How do we know if a given simplification (or implementation detail) introduced errors that were responsible for unexpected results?
-
-In this case, sources of error were brainstormed, and evaluated in turn based on their potential to explain the largest sources of error.
-In total, 5 main error corrections were applied, which incrementally brought the simulation results closer and closer to the expected results (based on the CEC prediction).
-
-\begin{enumerate}
-    \item Accounting for draft reflected work (explained in \autoref{sec:cec-draft-refl-work})
-    \item Implementing the \texttt{DoubleSpendWork} attack strategy
-    \item Randomizing hash-rate over simplex chains ($p + q = 1$ is globally maintained)
-    \item Implementing the attacker's ``Bonus Block''
-    \item Increasing the number of blocks over which the DAA operates ($\text{DAA}_N = 100 \to 500$)
-\end{enumerate}
-
-Many possible sources of error were ruled out, too, like: choice of hashing algorithm (\texttt{xxh3}); values of ${B_f}^{-1}$, $H$, and other parameters; and implementation details like omitting certain validation steps.
-
-% \begin{itemize}
-%     \item Hashing algorithm -- \texttt{xxh3} is used and produces results consistent with \texttt{blake3}.
-%     \item Values of ${B_f}^{-1}$ and $H$ -- both have enough precision; particularly $Hq$ should result in an integer.
-%     \item Several implementation details -- e.g., how much validation is done on blocks.
-% \end{itemize}
-
-Changing the simulation based on early results is dangerous though -- why should we believe these results are valid?
-The answer is simple: all error corrections were motivated by \emph{making the simulation more like a real blockchain}.
-No magic numbers were introduced, no values were scaled arbitrarily, simulations were not repeated to get better results, etc.
-Since we \emph{know} that a simulation will naturally include simplifying assumptions (and omitted implementation details), we should expect that some of these simplifications might be significant.
-So focusing on, and correcting, those simplifications does not compromise the method.
-Rather, the fact that \emph{these} corrections were the significant ones is consistent with the idea that \emph{the simulation is consistent with real-world blockchain networks}; that the simulation \emph{works}.
-
-The error correction steps (including interim results) are documented in \autoref{sec:appendix-cec-extra}.
-
-
 \subsubsubsubsection{Method}
 
 I have implemented a simulation of a blockchain network that is suitable for this experiment.
@@ -263,6 +224,7 @@ Particularly:
     \item An executable is produced that can run a single instance of a simulated attack, and takes a variety of parameters.
     (This is looped through via bash script to obtain CSVs of the results.)
     \item The implementation supports both traditional blockchains ($N_1 = 1$) and PoR/simplexes.
+    \item It is fast.
 \end{itemize}
 
 The source code for this model blockchain network is contained in the \href{https://github.com/AmarooHQ/whitepaper/tree/master/experiments/por-sim-rs}{\texttt{/experiments/por-sim-rs/}} folder of \href{https://github.com/AmarooHQ/whitepaper}{this paper's repository}.
@@ -359,9 +321,53 @@ If the CEC is true then we expect: $f_1(x) \approx f_2(x) \approx f_3(x) \approx
 
 
 
+
+\subsubsubsubsection{Error Correction Iteration}
+
+Following the initial implementation of PoR in the simulator, results were promising but did not align with the theoretical prediction (based on Rosenfeld's analytical derivation of $P(q; c)$).
+At lower values of $c$ and/or $N_1$, the results suggested that the simulation was \emph{more} secure than expected.
+At higher values of $N_1$, $P^\prime$ did not appear to approach 0, instead approaching $\sim 0.05$.
+
+Given the nature of writing a simulation (compared to writing a production blockchain), many simplifications were made.
+Some of these simplifications shouldn't matter, but some might.
+How do we know if a given simplification (or implementation detail) introduced errors that were responsible for unexpected results?
+
+In this case, sources of error were brainstormed, and evaluated in turn based on their potential to explain the largest sources of error.
+In total, 4 main error corrections were applied, which incrementally brought the simulation results closer and closer to the expected results (based on the CEC prediction).
+The error correction steps (including interim results) are briefly documented in \autoref{sec:appendix-cec-extra}.
+Those corrections were:
+
+\begin{enumerate}
+    % \item Implementing the \texttt{DoubleSpendWork} attack strategy
+    \item Accounting for draft reflected work (explained in \autoref{sec:cec-draft-refl-work})
+    \item Randomizing hash-rates over the simplex ($p + q = 1$ is globally maintained)
+    \item Implementing the attacker's ``Bonus Block''
+    \item Increasing the number of blocks over which the DAA operates ($\text{DAA}_N = 100 \to 500$)
+\end{enumerate}
+
+Many possible sources of error were ruled out, too, like: choice of hashing algorithm (\texttt{xxh3}); values of ${B_f}^{-1}$, $H$, and other parameters; and implementation details like omitting certain validation steps.
+
+% \begin{itemize}
+%     \item Hashing algorithm -- \texttt{xxh3} is used and produces results consistent with \texttt{blake3}.
+%     \item Values of ${B_f}^{-1}$ and $H$ -- both have enough precision; particularly $Hq$ should result in an integer.
+%     \item Several implementation details -- e.g., how much validation is done on blocks.
+% \end{itemize}
+
+Changing the simulation based on early results is dangerous though -- why should we believe these results are valid?
+The answer is simple: all error corrections were motivated by \emph{making the simulation more like a real blockchain}.
+No magic numbers were introduced, no values were scaled arbitrarily, simulations were not repeated to get better results, etc.
+Since we \emph{know} that a simulation will naturally include simplifying assumptions (and omitted implementation details), we should expect that some of these simplifications might be significant.
+So focusing on, and correcting, those simplifications does not compromise the method.
+Rather, the fact that \emph{these} corrections were the significant ones is consistent with the idea that \emph{the simulation is consistent with real-world blockchain networks}; that the simulation \emph{works}.
+
+
+
+
+
+
 \subsubsubsubsection{Validating the Model}
 
-\begin{figure}[]
+\begin{figure}[hp]
     \centering
     \includegraphics[max width=\linewidth, max height=0.5\textheight]{simulation/_results_trad_validation_9000_t=5_daa=500.pdf}
     \caption[
@@ -383,18 +389,15 @@ As $q$ increases, statistical artifacts and other inaccuracies \emph{do} become 
 There are more significant differences at $q=0.48$, however this is close to limiting threshold of blockchain security in general ($q<0.5$), so we should expect larger error in the simulation results.
 Such differences are taken to be \emph{non-critical}, i.e., they do not compromise the results.
 
-\todo{
-    More to do wrt: simulation of doublespend vs theoretical results?
-}
-
 \subsubsubsubsection{Results}
-
-\todo{por sim results}
 
 In this section we will only look at results for $q \in \{0.4, 0.44\}$, though results for $q=0.48$ were also generated (among other combinations of parameters).
 Results that are omitted from this section are available in \autoref{sec:appendix-cec-extra}.
 
-\begin{figure}[ph]
+First, do results of the simplest version of the CEC match predictions?
+\autoref{fig:simulation-r1-single-simplex} graphs $f_1, f_2, f_3$ and the results are consistent with predictions (\autoref{eq:por-sim-hypothesis}).
+
+\begin{figure}[hp]
     \centering
     \includegraphics[max width=\linewidth, max height=0.4\textheight]{simulation/_results_trad_vs_1simplex_9000_qs=0.40-0.44_t=5_daa=500.pdf}
     \caption[]{
@@ -403,18 +406,6 @@ Results that are omitted from this section are available in \autoref{sec:appendi
     }
     \label{fig:simulation-r1-single-simplex}
 \end{figure}
-\begin{figure}[ph]
-    \centering
-    \includegraphics[max width=\linewidth, max height=0.6\textheight]{simulation/_results_cec_9000_qs=0.40-0.44_t=5_daa=500.pdf}
-    \caption[]{
-        A comparison of the measured probabilities, for $q \in \{0.4, 0.44\}$, of a successful doublespend between: a traditional blockchain, a simplex, other simplexes converted via the CEC, and Rosenfeld's analytical solution.
-        That the measured results for a simplex (converted via the CEC) converge with the other results is taken to mean that the extended CEC is non-refuted.
-    }
-    \label{fig:simulation-r2-cec-ext}
-\end{figure}
-
-First, do results of the simplest version of the CEC match predictions?
-\autoref{fig:simulation-r1-single-simplex} graphs $f_1, f_2, f_3$ and the results are consistent with predictions (\autoref{eq:por-sim-hypothesis}).
 
 While it appears that simplexes (for $q=0.44, c=5, N_1 \in [3,10]$, at least) are slightly more secure than expected, this effect diminishes as $N_1$ increases.
 As we are about to see, it also diminishes as $c$ increases.
@@ -424,6 +415,15 @@ Second, what about the \emph{general case?}
 Does the extended CEC hold true, also?
 \autoref{fig:simulation-r2-cec-ext} graphs $f_1, f_2, f_3, f_4, f_5$ and these results are also consistent with predictions (\autoref{eq:cec-extended-hypothesis}).
 
+\begin{figure}[hp]
+    \centering
+    \includegraphics[max width=\linewidth, max height=0.6\textheight]{simulation/_results_cec_9000_qs=0.40-0.44_t=5_daa=500.pdf}
+    \caption[]{
+        A comparison of the measured probabilities, for $q \in \{0.4, 0.44\}$, of a successful doublespend between: a traditional blockchain and multiple simplexes converted via the CEC.
+        That the results converge as predicted is taken to mean that the extended CEC is non-refuted.
+    }
+    \label{fig:simulation-r2-cec-ext}
+\end{figure}
 
 
 \subsubsubsubsection{Conclusions}
