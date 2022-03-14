@@ -92,3 +92,19 @@ test if dynamic cutoff gave invalid results for high DS target (particularly wit
     ./bin/experiment-30-and-beyond.sh
   done
 )
+
+
+-----
+
+try DS=40,80 for q=0.48
+
+(
+  export DAA2_N_BLOCKS=500
+  export ATK_HR_ONLY=0.48
+  export N_CPUS=28
+  export DO_LONG_DS_CONFS=1
+  export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=31
+  ./bin/experiment-30-and-beyond.sh
+)

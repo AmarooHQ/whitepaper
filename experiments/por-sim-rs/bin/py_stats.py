@@ -901,6 +901,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             '28': exp_16_csv_name,
             '29': exp_16_csv_name,
             '30': exp_16_csv_name,
+            '31': exp_16_csv_name,
         }).get(exp_num, unknown_exp_num_name)
 
     def gen_por_equiv_rand_hrs_csvs(q, t, bt=50, hr=50, only_real_world=False, exp_num='13', aux_num='3', daa=100) -> list[CsvFileToPlot]:
@@ -1555,7 +1556,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             # analytical_plot_color='C8',
         )
     ] + [
-        # extra resutls q48 for appendix
+        # extra results q48 for appendix
         SavePlot(
             gen_por_cec_full_csvs(q, int(t), exp=exp, aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3", **gen_csv_kwargs),
             "\n".join([
@@ -1573,6 +1574,25 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
         )
         for q in ['0.48'] for t in ['20'] for exp,daa in [('26', 500)]
         for suffix, gen_csv_kwargs in [('_nofrac', dict(min_ds_conf=5))]
+    ] + [
+        # draft extra results q48 for appendix with ds=40,80
+        SavePlot(
+            gen_por_cec_full_csvs(q, int(t), exp=exp, aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3", **gen_csv_kwargs),
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture (Extended)",
+                f"{CEC_EXT4_TITLE_STR}",
+                f"If the CEC is true, then these plots should align",
+            ]),
+            f"png/_results_extra_long_q={q}_daa={daa}{suffix}",
+            save_as_file_exts=['pdf', 'csv'],
+            figsize=RESULTS_ZOOMED_FIG_SIZE,
+            x_label=std_x_label(t),
+            # x_range=(0, 121),
+            x_range=(0, 46),
+            plot_this_order=[-1,-2,0,1,2,3,4]
+        )
+        for q in ['0.48'] for t in ['20'] for exp,daa in [('26', 500)]
+        for suffix, gen_csv_kwargs in [('_nofrac', dict(min_ds_conf=5, max_ds_conf=80))]
     ] + [
         # for LP: main results (copy of _results_cec_9000)
         SavePlot(

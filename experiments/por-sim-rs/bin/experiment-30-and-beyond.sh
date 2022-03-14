@@ -60,8 +60,14 @@ SECONDS=0
 # nchain_arr=( 1 2 30 `seq 21 -2 7` `seq 6 -1 1` )
 # nchain_arr=( 1 2 60 42 30 `seq 21 -2 7` `seq 6 -1 1` )
 nchain_arr=( 30 25 `seq 21 -2 7` `seq 6 -1 1` )
+
+export DO_LONG_DS_CONFS=${DO_LONG_DS_CONFS:-}
 ds_conf_arr=( 1.0 1.25 1.5 1.75 1.9 2.0 2.25 2.5 2.75 2.9 3.0 5 10 20 )
 # ds_conf_arr=( 1.0 1.5 1.75 1.9 2.0 2.25 2.75 2.9 3.0 )  # exclude previously acquired data
+if [[ "$DO_LONG_DS_CONFS" = "1" ]]; then
+  # extra long DSs for q=0.48
+  ds_conf_arr=( 40 80 )
+fi
 
 # note: in reality a simplex needs to use WeightedDag and an attacker needs to win via the DoubleSpendWork strategy.
 # => no point calculating other combinations (those including WeightedChain or DoubleSpend strat)
@@ -138,7 +144,10 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
 
           # for nchains in 1 2 30 `seq 21 -2 7` `seq 6 -1 1`; do
           for nchains in ${nchain_arr[@]}; do
-            if [[ ("$ds_conf_base" = "20" && "$nchains" -gt 31) || ("$ds_conf_base" = "10" && "$nchains" -gt 40) ]]; then
+            if [[ ("$ds_conf_base" = "20" && "$nchains" -gt 31) \
+               || ("$ds_conf_base" = "40" && "$nchains" -gt 31) \
+               || ("$ds_conf_base" = "80" && "$nchains" -gt 20) \
+               || ("$ds_conf_base" = "10" && "$nchains" -gt 40) ]]; then
               # skip b/c we're not interested in these datapoints (v expensive)
               continue;
             fi
