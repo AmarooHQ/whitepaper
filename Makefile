@@ -169,12 +169,15 @@ preprocess-build:
 	bash bin/msg_good.sh "Finished preprocessing of $(WPTEX) in mode $(PP_MODE)"
 
 # latexrun first for error msgs, then run run latexmk once for gitinfo2/glossary, then use latexrun
+# note: the *-reloadable.pdf files are copies of interim outputs (and then the final output) so that you can f5 them in a browser without getting partially written documents.
 mk-latex-pdf: preprocess-build
 	bash bin/msg_good.sh "Run ./latexrun to get good error msgs"
 	$(LATEXRUN) $(WPTEX) -O $(OUTDIR)
+	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE)-reloadable.pdf
 
 	bash bin/msg_good.sh "Running latexmk to update gitinfo, build glossaries"
 	latexmk -pdf -interaction=batchmode --enable-write18 -output-directory=$(OUTDIR) $(WPTEX) > _latexmk.log
+	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE)-reloadable.pdf
 
 	bash bin/msg_good.sh "Update glossaries (run \`make glossary-fix-1 && make && make\` to fix glossaries if something breaks)"
 	#-rm $(WPNOEXT).gl*
@@ -182,6 +185,7 @@ mk-latex-pdf: preprocess-build
 
 	bash bin/msg_good.sh "./latexrun to build paper proper"
 	$(LATEXRUN) $(WPTEX) -O $(OUTDIR)
+	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE)-reloadable.pdf
 
 	cp $(WPNOEXT).pdf $(OUTPUT_PDF)
 	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE).pdf

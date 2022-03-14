@@ -279,7 +279,11 @@ Since we want to \emph{match} analytical results, we want a \emph{larger} value 
 }
 
 So that we match the analytical solution's assumptions, a value of $\text{DAA}_N = 500$ was chosen.
-The most important thing is that $\text{DAA}_N \gg c$, particularly regarding traditional chains.
+The most important thing is that $\text{DAA}_N \gg c$, particularly regarding traditional chains.\footnote{
+    The differential effect seems to diminish as an attack goes on, so $\text{DAA}_N$ is particular important for \emph{lower} values of $c$.
+    $\text{DAA}_N \gg c$ matters when c is small, but not so much when $c$ is large.
+    In other words: if the doublespend occurs over 600 blocks, the value of $\text{DAA}_N$ doesn't matter much; but if the doublespend occurs over 20 blocks, then the value of $\text{DAA}_N$ is a significant variable.
+}
 
 With regards to the other values -- $q$, $c$, and $N_1$ -- they will be varied as part of the experiment so that we can generate each data-point.
 For each data-point, we'll gather at least 9,000 samples (this is indicated by ``$n \ge 9000$'' in these figures' legends).
@@ -333,7 +337,7 @@ Some of these simplifications shouldn't matter, but some might.
 How do we know if a given simplification (or implementation detail) introduced errors that were responsible for unexpected results?
 
 In this case, sources of error were brainstormed, and evaluated in turn based on their potential to explain the largest sources of error.
-In total, 4 main error corrections were applied, which incrementally brought the simulation results closer and closer to the expected results (based on the CEC prediction).
+Of those, 4 major sources of error were corrected, which incrementally brought the simulation results closer and closer to the expected results (based on the CEC prediction).
 The error correction steps (including interim results) are briefly documented in \autoref{sec:appendix-cec-extra}.
 Those corrections were:
 
@@ -382,7 +386,7 @@ Rather, the fact that \emph{these} corrections were the significant ones is cons
 At a minimum, we should expect the simulation to faithfully replicate doublespends against \emph{traditional} chains -- i.e., $f_1(x) \approx f_2(x)$.
 Results of this, for $q \in \{0.4, 0.44\}$, are shown in \autoref{fig:simulation-trad-only}.
 
-\autoref{fig:simulation-trad-only} shows that the simulation \emph{does} align with Rosenfeld's solution, especially at lower values of $q$.
+\autoref{fig:simulation-trad-only} shows that the simulation \emph{does} align with Rosenfeld's solution, especially at values of $q \lesssim 0.40$.
 This is consistent with \autoref{eq:cec-base-case}.
 As $q$ increases, statistical artifacts and other inaccuracies \emph{do} become more significant, but not enough to compromise the results -- the largest differences (for $q=0.44$ and $c=5$) are around 50 parts per thousand, and typically less than this.
 

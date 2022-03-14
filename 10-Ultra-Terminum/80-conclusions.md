@@ -81,12 +81,12 @@ No real-world sharded network has come close to this level of performance, and i
         \FL
         Network & Decentralized? & $O(n)$ Secure? & \multicolumn{2}{l}{$O(n)$ Scalable?}
         \ML
-        Bitcoin   & Yes           & Yes         & No    & (Max. TPS: $\sim$ 5)\tmark[bt] \NN
+        Bitcoin   & Yes           & Yes              & No    & (Max. TPS: $\sim$ 5)\tmark[bt] \NN
         Cardano   & Yes           & Maybe\tmark[PoS] & No    & (Max. TPS: $\sim$ 10 - 80)\tmark[ct] \NN
-        Solana    & No\tmark[st]  & No ($O(c)$)\tmark[ss]  & Maybe & (Max. TPS: $\sim$ 50K)\tmark[st] \NN
+        Solana    & No\tmark[st]  & No ($O(c)$)\tmark[ss] & Maybe & (Max. TPS: $\sim$ 50K)\tmark[st] \NN
         Polkadot  & Maybe         & Maybe\tmark[PoS] & Maybe & (Max. TPS: $\sim$ 200 - 12K)\tmark[pt] \NN
         Eth2      & Maybe         & Maybe\tmark[PoS] & Maybe & (Max. TPS: $\sim$ 1K - 62K)\tmark[et] \NN
-        Opt.Shard & Yes           & Yes         & Maybe & (Max. TPS: $\sim$ 8K - 350K)\tmark[ot]
+        Opt.Shard & Yes           & Yes              & Maybe & (Max. TPS: $\sim$ 8K - 350K)\tmark[ot]
         \LL
 }
 
