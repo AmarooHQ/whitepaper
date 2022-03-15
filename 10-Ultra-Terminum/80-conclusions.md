@@ -54,7 +54,7 @@ No real-world sharded network has come close to this level of performance, and i
     center,
     label = tab:other-nets-trilemma,
 ]{lllll}{
-    \tnote[bt]{Real-world performance of Bitcoin; $k \approx 1700$.}
+    \tnote[bt]{Real-world performance of Bitcoin; $k \approx 1700$ B/s; $\text{Tx}_\text{avg} \approx 375$ B.}
     \tnote[ct,et,pt]{Prediction based on $3000 \le k \le 20000$.}
     %\tnote[et]{Prediction based on $3000 \le k \le 20000$.}
     %\tnote[pt]{Prediction based on $3000 \le k \le 20000$.}

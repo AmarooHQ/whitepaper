@@ -1,10 +1,10 @@
 %% BEGIN ### RELEASE
 
-\subsection{\texorpdfstring{$\text{UT}_{\aleph}$}{UT-aleph}: Tiling Simplexes}
+\subsection{\titlemath{$\text{UT}_{\aleph}$:}{UT-aleph:} Tiling Simplexes}
 
 \label{sec:tiling}
 
-Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes are tiled, I call the result a *simplex tiling*.
+Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes are tiled, the result is called a *simplex tiling*.
 
 \defineTerm{Simplex Tile}{
     Like a simplex, but $\ge 75\%$ of the PoR capacity is reserved for reflections with \emph{neighboring} tiles; typically a quadrifurcated maximal simplex
@@ -12,7 +12,9 @@ Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes
 
 \todoDraftOnly{terms and edit / refactor this section}
 
-A simplex tile, on its own, is very similar to a standalone simplex. If a standalone simplex (of a given capacity) could host $1600$ simplex-chains, then an equivalent simplex tile will host $400$ (or maybe less); only $25\%$ of the PoR capacity is reserved for *internal* reflections -- i.e., reflections within that simplex tile. The other $75\%$ is reserved for *external* reflections to simplex-chains in *neighboring* tiles.
+A simplex tile, on its own, is very similar to a standalone simplex.
+If a standalone simplex (of a given capacity) could host $1600$ simplex-chains, then an equivalent simplex tile will host $400$ (or maybe less); only $25\%$ of the PoR capacity is reserved for *internal* reflections -- i.e., reflections within that simplex tile.
+The other $75\%$ is reserved for *external* reflections to simplex-chains in *neighboring* tiles.
 
 That is: it is a simplex that deliberately reserves only $\nicefrac{1}{4}$ of its otherwise maximum PoR capacity for internal reflections.
 By definition, the maximum PoR capacity of a tile is $\nicefrac{1}{4}$ the maximum PoR capacity of an equivalent maximal simplex.

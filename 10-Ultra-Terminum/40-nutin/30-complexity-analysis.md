@@ -63,7 +63,9 @@ With regards to simplexes, we are particularly concerned with the complexity of 
 Additionally, $O(k_i)$ is \emph{defined} as $O(k_i) \equiv O(c)$.
 This is reasonable provided there are no $O(c)$ bottlenecks, e.g., network bandwidth, CPU throughput, memory requirements, etc (\autoref{sec:a-principle-of-scaling}).
 
-### Complexity of $O(c)$ Chains
+%%### Complexity of $O(c)$ Chains
+
+\subsubsection{Complexity of \titlemath{$O(c)$}{O(c)} Chains}
 
 Example: Bitcoin.
 
@@ -88,7 +90,9 @@ For Bitcoin -- given $k_1 \approx 1700$ B/s, and transaction size $\text{Tx}_{\t
 
 This is what we expect based on the measured real-world performance of Bitcoin.
 
-### Optimistic Complexity of $O(c^2)$ Chains
+%%### Optimistic Complexity of $O(c^2)$ Chains
+
+\subsubsection{Optimistic Complexity of \titlemath{$O(c^2)$}{O(c²)} Chains}
 
 Examples: Ethereum 2, Polkadot.
 
@@ -161,7 +165,9 @@ note: MAX_SHARD_HEADERS_PER_SHARD=4.
 There's enough capacity for attestations (128 each block for 64 shards) that they could be done each block. That doesn't include any committee stuff. -->
 \end{comment}
 
-### Complexity of $\UT{1}$
+%%### Complexity of $\UT{1}$
+
+\subsubsection{Complexity of \titlemath{$\UT{1}$}{UT₁}}
 
 There is no single root-chain for a collection of mutually reflecting blockchains (i.e., a simplex), so $N_1 \neq 1$.
 What is $N_1$ then?
@@ -254,7 +260,11 @@ Thus, from the definition of $k_1$ in \autoref{eq:k1-reflection-defn}:
 k_{1,B} = \frac{k_1}{2}
 \end{equation*}
 
-### Dapp-Chains and the Complexity of $\UT{2}$ and $\UT{3}$
+\begin{comment}
+Dapp-Chains and the Complexity of $\UT{2}$ and $\UT{3}$
+\end{comment}
+
+\subsubsection{Dapp-Chains and the Complexity of \titlemath{$\UT{2}$}{UT₂} and \titlemath{$\UT{3}$}{UT₃}}
 
 #### Dapp-Chains
 
@@ -278,7 +288,10 @@ Combining these yields:
 N_{i+1} = \frac{T_{i+1}}{k_{i+1}}
 \end{equation}
 
-#### UT with Dapp-Chains ($\UT{2}$)
+%%#### UT with Dapp-Chains (\titlemath{$\UT{2}$}{UT2})
+
+\subsubsubsection{UT with Dapp-Chains (\titlemath{$\UT{2}$}{UT₂})}
+
 
 Starting with \autoref{eq:simplex-T1} and building on \autoref{eq:throughput-iter}:
 \begin{equation}
@@ -301,7 +314,9 @@ N_2 & = \frac{T_2}{k_2} \\
 
 When $D_h = B_h$ and $D_f = B_f$, note that $N_2 = {N_1}^2$.
 
-#### UT with Dapp-Dapp-Chains ($\UT{3}$)
+%%#### UT with Dapp-Dapp-Chains ($\UT{3}$)
+
+\subsubsubsection{UT with Dapp-Dapp-Chains (\titlemath{$\UT{3}$}{UT₃})}
 
 If we say each dapp-chain hosts shards or more dapp-chains (e.g., as a dapp-chain version of Eth2 or Polkadot would), then via \autoref{eq:throughput-iter} and \autoref{eq:throughput-c-3},
 \begin{equation}
