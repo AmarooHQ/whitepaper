@@ -339,7 +339,7 @@ por_line_markers = ['x','+','*','3','4'] * 10
 trad_line_markers = ['s','o','P','D','X'] * 10
 
 line_markers = {
-    'por': {1.25: 'x', 2.5: '3', 5: '*', 10: '+', 20: '.'},
+    'por': {1.25: 'x', 2.5: '3', 5: '*', 10: '+', 20: '.', 40: '1', 80: '2'},
     'trad': {1.25: 's', 2.5: 'o', 5: 'P', 10: 'D', 20: 'X'},
 }
 
@@ -1578,7 +1578,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
     ] + [
         # draft extra results q48 for appendix with ds=40,80
         SavePlot(
-            gen_por_cec_full_csvs(q, int(t), exp=exp, aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3", **gen_csv_kwargs),
+            gen_por_cec_full_csvs(q, int(t), exp=exp, aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3", **gen_csv_kwargs)[::-1],
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture (Extended)",
                 f"{CEC_EXT4_TITLE_STR}",
@@ -1589,8 +1589,8 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             figsize=RESULTS_ZOOMED_FIG_SIZE,
             x_label=std_x_label(t),
             # x_range=(0, 121),
-            x_range=(0, 61),
-            plot_this_order=[-1,-2,0,1,2,3,4]
+            x_range=(0, 81),
+            plot_this_order=[-1,0,1,2,3,4,5]
         )
         for q in ['0.48'] for t in ['20'] for exp,daa in [('26', 500)]
         for suffix, gen_csv_kwargs in [('_nofrac', dict(min_ds_conf=5, max_ds_conf=80))]
