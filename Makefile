@@ -333,3 +333,9 @@ count-words-diff: count-words-git-help
 	@echo "Words added: $(GIT_WC_ADDED)"
 	@echo "Words removed: $(GIT_WC_REMOVED)"
 	@echo "Words diff: `echo $(GIT_WC_ADDED)-$(GIT_WC_REMOVED) | bc`"
+
+
+# shortcut for simulation RandHR PMFs -- only here b/c it's mentioned in the WP.
+# for simulation makefile proper see /experiments/por-sim-rs/Makefile
+print-randhr-pmfs:
+	cd experiments/por-sim-rs && $(MAKE) print-randhr-pmfs || echo "\nHint: is /experiments/por-sim-rs set up? (cargo, rust, etc)"
