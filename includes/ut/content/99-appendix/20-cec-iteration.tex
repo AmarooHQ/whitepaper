@@ -76,6 +76,14 @@ These include:
 
 \subsubsection{Attacker's Hash Rate Distribution: Uniform vs Random}
 
+When hash-rates are \emph{uniformly} distributed: the miners of each chain do $H$ hashes per tick, and the attacker does $q\cdot H$ of those hashes per tick.
+
+When hash-rates are \emph{randomly} distributed: for all chains but the primary chain, $H \cdot (N_1 - 1)$ hashes per tick are distributed randomly over those chains, with the attacker responsible for $q \cdot H \cdot (N_1 - 1)$ of those hashes per tick.
+Some chains will have a hash-rate greater than $H$ hashes per tick, and some chains fewer.
+It's possible for an attacker to have \emph{any} proportion of a particular chain's hash-rate, but $p + q = 1$ is maintained globally.
+Both the attacker's and honest miners' hash-rates are uniformly distributed, and thus the hash-rate of each chain has a trapezoidal distribution.
+PMFs of the hash-rate of each chain, the honest miners, and the attacker can be obtained via \texttt{make print-randhr-pmfs}.
+
 \begin{figure}[H]
     \centering
     \includegraphics[max width=\linewidth, max height=0.33\textheight]{simulation/_interim_randhr.pdf}

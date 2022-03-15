@@ -107,3 +107,5 @@ sudo-flamegraph:
 
 print-randomized-hr-distributions:
 	cargo t -- --nocapture --test test_random_hr_distribution_properties
+
+print-randhr-pmfs: print-randomized-hr-distributions
