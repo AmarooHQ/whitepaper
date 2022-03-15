@@ -479,6 +479,9 @@ pub fn gen_random_hr_distribution(n_chains: u32, q: f32, total_hr: Difficulty) -
     rd.into_iter().map(|v| v as Difficulty).collect()
 }
 
+/// Unimplemented
+/// Idea is to generate two distributions where an upper limit of 80% and a lower limit of 20% is applied to both honest and attacker nodes.
+/// Note: this presents issues if q<0.2
 pub fn gen_paired_80_20_hr_distributions(
     n_chains: u32,
     q: f32,
@@ -501,6 +504,7 @@ mod tests {
     use crate::cryptosystem::*;
     use crate::transactions::Transaction;
     use crate::transactions::TxId;
+    use cli_graph::*;
     use conv::ConvUtil;
     use rstats::*;
 
@@ -918,5 +922,92 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn test_random_hr_distribution_properties() {
+        let n_chains = 100;
+        // let hr_p = 0.65;
+        // let hr_q = 0.35;
+        // let (hr_p, hr_q) = (0.5, 0.5);
+        let (hr_p, hr_q) = (0.7, 0.3);
+        let per_chain_hr = 200;
+        let total_hr: u64 = (n_chains as u64) * per_chain_hr;
+        // results
+        let n_buckets = 21;
+        let max_chain_hr = per_chain_hr * 2;
+        let bucket_period = max_chain_hr / (n_buckets - 1); // integer divide by this to get bucket index
+        let results_len = n_buckets as usize * 2;
+
+        let mut results_honest = vec![0.0; results_len]; // hash-rate distribution of honest miners
+        let mut results_attacker = vec![0.0; results_len]; // hash-rate distribution of attacker
+        let mut results_chain = vec![0.0; results_len]; // hash-rate of a chain
+
+        let n_trials = 1000;
+        for _i in 0..n_trials {
+            let rd_h = gen_random_hr_distribution(n_chains, hr_p, total_hr);
+            let rd_a = gen_random_hr_distribution(n_chains, hr_q, total_hr);
+            let cw_hash_rates: Vec<_> = rd_h.into_iter().zip(rd_a.into_iter()).collect();
+            for (_p, _q) in cw_hash_rates {
+                results_honest[(_p / bucket_period) as usize] += 1.0 / (n_trials * n_chains) as f64;
+                results_attacker[(_q / bucket_period) as usize] +=
+                    1.0 / (n_trials * n_chains) as f64;
+                results_chain[((_p + _q) / bucket_period) as usize] +=
+                    1.0 / (n_trials * n_chains) as f64;
+            }
+        }
+
+        fn with_ix(n_buckets: u64, ys: Vec<f64>) -> Vec<(String, f64)> {
+            (0..(n_buckets - 1))
+                .map(|v| format!("{:02}", v))
+                .zip(ys.iter().cloned())
+                .collect()
+        }
+
+        fn make_gc() -> GraphConfig<f64> {
+            GraphConfig::new().max_height(16)
+        }
+
+        let print_params = || {
+            println!("");
+            println!(
+                "HR distribution x-axis are buckets of size {} hashes.",
+                bucket_period
+            );
+            println!("Bucket lower limit: x*{} hashes.", bucket_period);
+            println!("Bucket upper limit: (x+1)*{} hashes.", bucket_period);
+            println!("n_trials: {}.", n_trials);
+            println!("n_chains per trial: {}.", n_chains);
+            println!("average HR per chain: {}.", per_chain_hr);
+            println!("p={}; q={}.", hr_p, hr_q);
+            println!("");
+        };
+
+        print_params();
+        println!("---");
+
+        println!("\nHR Distribution (PMF) over all chains:\n");
+        graph(with_ix(n_buckets, results_chain), make_gc(), GraphType::Bar).unwrap();
+
+        println!("\n---");
+        println!("\nHR Distribution (PMF) of honest miners:\n");
+        graph(
+            with_ix(n_buckets, results_honest),
+            make_gc(),
+            GraphType::Bar,
+        )
+        .unwrap();
+
+        println!("\n---");
+        println!("\nHR Distribution (PMF) of the attacker:\n");
+        graph(
+            with_ix(n_buckets, results_attacker),
+            make_gc(),
+            GraphType::Bar,
+        )
+        .unwrap();
+
+        println!("\n---");
+        print_params();
     }
 }

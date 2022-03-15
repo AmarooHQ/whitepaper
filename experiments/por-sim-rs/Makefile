@@ -104,3 +104,6 @@ run-dag-doublespend-100:
 
 sudo-flamegraph:
 	bash ./bin/unsafe_flamegraph.sh
+
+print-randomized-hr-distributions:
+	cargo t -- --nocapture --test test_random_hr_distribution_properties
