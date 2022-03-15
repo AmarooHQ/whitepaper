@@ -1541,6 +1541,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             [
                 # ('exp_26_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', None),
                 # ('exp_26_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA500.csv', 'por', None),
+                ('exp_28aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA20.csv', 'trad', None),
                 ('exp_26aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', None),
                 ('exp_26aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA500.csv', 'trad', None),
             ],
@@ -1552,7 +1553,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             figsize=RESULTS_MORE_ZOOMED_FIG_SIZE,
             x_label=std_x_label(5),
             sec_x_label=LP_SEC_X_LABEL,
-            plot_this_order=[-1,-3,-2],
+            plot_this_order=[-1,0,1,2],
             # analytical_plot_color='C8',
         )
     ] + [
@@ -1588,7 +1589,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             figsize=RESULTS_ZOOMED_FIG_SIZE,
             x_label=std_x_label(t),
             # x_range=(0, 121),
-            x_range=(0, 46),
+            x_range=(0, 61),
             plot_this_order=[-1,-2,0,1,2,3,4]
         )
         for q in ['0.48'] for t in ['20'] for exp,daa in [('26', 500)]

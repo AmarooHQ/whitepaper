@@ -471,7 +471,7 @@ Can we find some function, $\text{ConvWork}_{R\rightarrow L}(w)$, that converts 
     & & \label{eq:por-conv-work}
 \end{align}
 
-With \autoref{eq:por-conversion-const-1}, \textbf{we have just found our first constant of conversion for \textbf{block-weight.}}
+With \autoref{eq:por-conversion-const-1}, \textbf{we have just found our first constant of conversion for \ul{block-weight}.}
 
 \aside{
   \autoref{eq:por-conversion-const-1} has a natural symmetry.
@@ -629,7 +629,7 @@ Consider:
 
 These two values are \textbf{not} equal (or comparable), and nothing we've said implies that they should be!
 There are \emph{qualitative differences} between the two that is not represented in the current units.
-On the one hand, we have something like *relative block frequencies,* and on the other we have something like \emph{a ratio of the \textbf{weight or value} of block creation}.
+On the one hand, we have something like *relative block frequencies,* and on the other we have something like \emph{a ratio of the \ul{weight or value} of block creation}.
 But they have the same units!
 What's going on?
 How do we know whether a constant of conversion \emph{works} for our purposes?
@@ -704,7 +704,7 @@ We can see that \autoref{eq:rel-conf-hz} and \autoref{eq:rel-block-weight} are n
 Moreover, it's easy to see why \emph{relative confirmations} is not as simple as \emph{relative confirmation rates}.
 \end{comment}
 
-The reason that $\nicefrac{L_f}{R_f}$ did not make sense before is that we \emph{were not including all necessary \textbf{context}!}
+The reason that $\nicefrac{L_f}{R_f}$ did not make sense before is that we \emph{were not including all necessary \ul{context}!}
 There is \emph{implicit context} in some properties of blockchains -- \emph{participation}.
 Values like $\nicefrac{L_f}{R_f}$ -- when used to measure the \emph{target block frequency} -- \emph{do not factor in participation}; the target block time is usually a \emph{constant}, so it can hold no \emph{network-specific context}.
 
@@ -730,7 +730,7 @@ Note that the units of $\Delta t_\text{actual}$ are B-seconds/(2016 B-blocks), a
 
 DAA's are special: they are the means by which \emph{context} is added.
 DAA's don't explicitly deal with this context though --- it's not mentioned in the algorithm itself.
-The key to a DAA's success is that it operates \emph{relative to a past state that is \textbf{already} context laden.}
+The key to a DAA's success is that it operates \emph{relative to a past state that is \ul{already} context laden.}
 So DAA's don't need to have any special awareness of context, just that multiplying the past difficulty by a \emph{particular ratio} will adjust the \emph{confirmation rate} to align with the \emph{target block frequency}.
 It's an \emph{incremental and ongoing process}.
 Since DAA's don't have initial conditions, there's no bootstrapping concern.
@@ -1128,7 +1128,13 @@ If the two chains have equal block production frequencies, then (using \autoref{
 
 Consider an attack on the PoW chain and presume that the difficulty on the PoW chain is constant over the attack, i.e., the PoW chain's difficulty doesn't adjust quickly enough to react to the attack. Additionally, assume the attacker has *not* been contributing to the network before the attack, i.e., their hash-rate is not accounted for in the PoW chain's difficulty. Given the two chains are mutually reflecting, half of the network's security is provided by the PoS chain (and thus immune to the attacker in this case). Therefore, a successful attacker -- *using the traditional method of mining a competing chain-segment in private* -- must generate more blocks than both chains combined. That means the attacker needs *twice* the honest hash-rate for a guaranteed successful attack.
 
-However, consider the case that *the security contribution of the PoW chain is \textbf{capped} at 50%* -- i.e., capped at the proportion of root tokens hosted on that chain. For our purposes, this situation is approximately equivalent to that where the PoW chain has a *perfect* difficulty adjustment algorithm, i.e., the network instantly adapts to keep the block production frequency constant. For the sake of this demonstration, assume that these chains *retroactively* adjust block weightings to ensure this cap holds. Let $p > 0$ be the honest miners' contribution to *overall* network security, and $q > 0$ be the attacker's contribution. As the PoW contribution to overall security is capped at 50%, the equality $p + q = 0.5$ is enforced. In this case, the attacker will have a maximum chain-weight contribution rate of $\frac{1}{2} \cdot \frac{q}{q + p}$ and the honest chain-segments will have a maximum contribution rate of $\frac{1}{2} \cdot \frac{p}{q + p} + \frac{1}{2}$. The condition for a successful attack is shown in \autoref{eq:refl-pow-pos-1}, and the inequality has no solutions.
+However, consider the case that \emph{the security contribution of the PoW chain is \ul{capped} at 50%} -- i.e., capped at the proportion of root tokens hosted on that chain.
+For our purposes, this situation is approximately equivalent to that where the PoW chain has a *perfect* difficulty adjustment algorithm, i.e., the network instantly adapts to keep the block production frequency constant.
+For the sake of this demonstration, assume that these chains *retroactively* adjust block weightings to ensure this cap holds.
+Let $p > 0$ be the honest miners' contribution to *overall* network security, and $q > 0$ be the attacker's contribution.
+As the PoW contribution to overall security is capped at 50%, the equality $p + q = 0.5$ is enforced.
+In this case, the attacker will have a maximum chain-weight contribution rate of $\frac{1}{2} \cdot \frac{q}{q + p}$ and the honest chain-segments will have a maximum contribution rate of $\frac{1}{2} \cdot \frac{p}{q + p} + \frac{1}{2}$.
+The condition for a successful attack is shown in \autoref{eq:refl-pow-pos-1}, and the inequality has no solutions.
 \begin{align}
 && \frac{1}{2} \cdot \frac{q}{q + p} & > \frac{1}{2} \cdot \frac{p}{q + p} + \frac{1}{2} \notag \\
 && q & > p + (q + p) \notag \\

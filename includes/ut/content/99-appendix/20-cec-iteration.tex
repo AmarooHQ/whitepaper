@@ -17,28 +17,59 @@ These results do converge as predicted by the CEC, but not as closely as the res
     \label{fig:cec-48-results}
 \end{figure}
 
+Blockchain security breaks down at $q \ge 0.5$, so, as $q \to 0.5$ we should expect that \emph{previously insignificant} implementation details become more and more significant.
+Any previously insignificant advantages for the honest network or the attacker (at lower values of $q$) can become substantial as $q$ approaches that threshold.
+It might be possible to further refine the simulation (via additional iterations and error corrections), but at some point it's not worth it.
+
+So we should expect the simulation to lose accuracy as $q \to 0.5$ and especially as $c$ and/or $N_1$ increase.
+Given this, it seems reasonable to conclude that \autoref{fig:cec-48-results} is consistent with the CEC's predictions, albeit with the caveat of lower accuracy.
+
 \subsection{Simulator Iteration}
+
+The purpose of this section is to avoid excluding all but the best results, and to document the steps taken that increased the accuracy of the simulation.
+
+Other than the major changes discussed in \autoref{sec:cec-iteration-init-results} and on, many other configurations were also tested to establish that certain implementation details were \emph{not} significant.
+These include:
+\begin{itemize}
+    \item Hashing algorithm: \texttt{xxh3} was compared against \texttt{blake3} and \texttt{sha256}.
+    No significant differences were observed.
+    \item ${B_f}^{-1}$: No significant difference was found for values of 50, 75, and 100.
+    The final value of 75 was, in part, chosen to ensure there was sufficient excess capacity in ${B_f}^{-1}$ (so that it did not affect results).
+    Lower values (e.g., 10) seemed to work okay during early testing, but also result in more blocks being generated simultaneously.
+    \item $H$: this value is important because $q\cdot H$ should result in a whole number.
+    If $H$ is too small, or $q\cdot H$ is not a whole number, loss of precision occurs.
+    $H=50$ is sufficient to test values of $q$ that are multiples of 0.02.
+    $H=75$ works for values of $q$ that are multiples of 0.04, and was chosen over $H=50$ to ensure excess capacity.
+    \item Iteration between $H$ and ${B_f}^{-1}$: the difficulty is the number of hashes to find a block, which, before the attack starts, is $\sim H\cdot {B_f}^{-1}$.
+    Thus, $H = {B_f}^{-1} = 75$ is about \emph{half} the computation cost of using $H = {B_f}^{-1} = 100$.
+    Smaller values for both could work, but risks invalidating results if either is too small.
+\end{itemize}
 
 \todoDraftOnly{add captions and discussion}
 
 \subsubsection{Initial Results}
 
+\label{sec:cec-iteration-init-results}
+
 \begin{figure}[H]
     \centering
     \includegraphics[max width=\linewidth, max height=0.33\textheight]{simulation/lp_early_results.pdf}
-    \caption[]{
+    \caption[Early simulation results]{
+        Early results showed that, although $P^\prime(q, c=Cx, N_1 = 1) \to 0$ as expected (traditional chains), $P^\prime(q, c=C, N_1=x)$ did not approach 0 as $N_1$ increased (simplexes).
+        This was prior to the substantive error corrections shown in subsequent figures.
     }
     \label{fig:cec-extra-first-res}
 \end{figure}
-
-% \subsubsection{Doublespends on Traditional Chains and DAAs}
 
 \subsubsection{Accounting for Draft Reflecting Work}
 
 \begin{figure}[H]
     \centering
     \includegraphics[max width=\linewidth, max height=0.33\textheight]{simulation/lp_results_after_draft_refl_work.pdf}
-    \caption[]{
+    \caption[Simulation iteration: accounting for draft reflected work]{
+        Early results (no DRW) did not shown $P^\prime \to 0$ as $N_1$ increased.
+        This was fixed after accounting for draft reflected work (w/ DRW) in the function that determines whether an attack has succeeded.
+        The significance of this is explained in \autoref{sec:cec-draft-refl-work}.
     }
     \label{fig:cec-extra-draft-refl-work}
 \end{figure}
@@ -48,7 +79,9 @@ These results do converge as predicted by the CEC, but not as closely as the res
 \begin{figure}[H]
     \centering
     \includegraphics[max width=\linewidth, max height=0.33\textheight]{simulation/_interim_randhr.pdf}
-    \caption[]{
+    \caption[Simulation iteration: randomizing hash-rates]{
+        These results indicated that simplexes were \emph{more} secure when an attacker has the same hash-rate over all simplex-chains.
+        Randomizing hash-rates (of both the honest network and the attacker) over all simplex-chains, while globally maintaining $p + q = 1$, improved the accuracy of the simulation with respect to the CEC's predictions.
     }
     \label{fig:cec-extra-randhr}
 \end{figure}
@@ -58,7 +91,11 @@ These results do converge as predicted by the CEC, but not as closely as the res
 \begin{figure}[H]
     \centering
     \includegraphics[max width=\linewidth, max height=0.33\textheight]{simulation/_interim_bonusblock.pdf}
-    \caption[]{
+    \caption[Simulation iteration: the ``bonus block'']{
+        In general, an attacker has the opportunity to prepare for a doublespend attack.
+        Particularly, they can wait to mine their first private block before making the public transaction (which is the target of the doublespend).
+        When the attacker waits to mine this first private block before starting the attack, it's called (in this paper) the ``bonus block''.
+        Implementing this substantially increased the accuracy of the simulation with respect to the CEC's predictions for smaller values of $c$ and/or $N_1$.
     }
     \label{fig:cec-extra-bonusblock}
 \end{figure}
@@ -68,7 +105,11 @@ These results do converge as predicted by the CEC, but not as closely as the res
 \begin{figure}[H]
     \centering
     \includegraphics[max width=\linewidth, max height=0.33\textheight]{simulation/_interim_daa.pdf}
-    \caption[]{
+    \caption[Simulation iteration: increasing $\text{DAA}_N$]{
+        This was the last iteration prior generating the final results (\autoref{sec:cec-experiment-results}).
+        Early results indicated that lower values of $\text{DAA}_N$ were more secure for traditional chains, and that $\text{DAA}_N \approx 500$ was sufficient for results to closely match the analytical solution.
+        $\text{DAA}_N$ is not as significant for the security of simplexes and PoR.
+        Results for $\text{DAA}_N = 20$ are included to better demonstrate the effect of increasing $\text{DAA}_N$.
     }
     \label{fig:cec-extra-daa}
 \end{figure}

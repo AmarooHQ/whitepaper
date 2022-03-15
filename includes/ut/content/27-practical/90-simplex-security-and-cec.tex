@@ -59,7 +59,7 @@ However, this is not a linear relationship; rather, it's similar to \emph{expone
 After the first few confirmations, each additional confirmation reduces the risk of a doublespend by approximately the same factor.\footnote{
     The exact factor depends on the attacker's hash-rate as a proportion of the network's (i.e., $q$).
 }
-So \emph{security takes \textbf{time}}, because confirmations take time.
+So \emph{security takes \ul{time}}, because confirmations take time.
 
 Now, consider a simplex: the equivalence conjecture says that it doesn't matter whether confirmations come from the \emph{local} chain, or if they come from a \emph{reflecting} chain.
 So, a simplex-chain in a 2-chain simplex (wherein each simplex-chain has $\mathbb{C}^\prime = 2 \times B_f$) \emph{should}, after $C$ confirmations, be as secure as a standalone blockchain with $2C$ confirmations.
@@ -229,6 +229,9 @@ Particularly:
 
 The source code for this model blockchain network is contained in the \href{https://github.com/AmarooHQ/whitepaper/tree/master/experiments/por-sim-rs}{\texttt{/experiments/por-sim-rs/}} folder of \href{https://github.com/AmarooHQ/whitepaper}{this paper's repository}.
 
+While the simulation supports blockchains with single-parent blocks and a ``longest chain'' fork rule, these were not used in this experiment.
+Rather, multi-parent blocks were used (which simulates both GHOST and DAG-chains), along with the weight-based fork rule -- these are required by UT.
+
 \begin{table}[H]
     \centering
     \caption[
@@ -387,13 +390,17 @@ At a minimum, we should expect the simulation to faithfully replicate doublespen
 Results of this, for $q \in \{0.4, 0.44\}$, are shown in \autoref{fig:simulation-trad-only}.
 
 \autoref{fig:simulation-trad-only} shows that the simulation \emph{does} align with Rosenfeld's solution, especially at values of $q \lesssim 0.40$.
-This is consistent with \autoref{eq:cec-base-case}.
-As $q$ increases, statistical artifacts and other inaccuracies \emph{do} become more significant, but not enough to compromise the results -- the largest differences (for $q=0.44$ and $c=5$) are around 50 parts per thousand, and typically less than this.
-
+It is consistent with \autoref{eq:cec-base-case}.
+As $q$ increases, statistical artifacts and other inaccuracies \emph{do} become more significant, but not enough to compromise the results -- the largest differences (for $q=0.44$ and $c=5$) are around 50 parts per thousand (\autoref{fig:simulation-r1-single-simplex}) and typically less than this.
 There are more significant differences at $q=0.48$, however this is close to limiting threshold of blockchain security in general ($q<0.5$), so we should expect larger error in the simulation results.
 Such differences are taken to be \emph{non-critical}, i.e., they do not compromise the results.
 
+
+
+
 \subsubsubsubsection{Results}
+
+\label{sec:cec-experiment-results}
 
 In this section we will only look at results for $q \in \{0.4, 0.44\}$, though results for $q=0.48$ were also generated (among other combinations of parameters).
 Results that are omitted from this section are available in \autoref{sec:appendix-cec-extra}.

@@ -338,7 +338,7 @@ It is because of a \emph{new asymmetry} between \emph{capacity} and \emph{securi
 \label{sec:tiling-sec-cap-asymmetry}
 
 If there is a \emph{symmetry} between capacity and security, that means they're \emph{coupled} somehow; i.e., a change in one results in a change to the other.
-In this case, they're inversely related -- so the claim of \emph{\textbf{symmetry}} is essentially a restatement of Buterin's trilemma!
+In this case, they're inversely related -- so the claim of \emph{\ul{symmetry}} is essentially a restatement of Buterin's trilemma!
 In traditional blockchain designs that have a maximum block size, the tradeoffs described in \autoref{sec:core-conflict} are describing\footnote{
     When considering a traditional blockchain, the tradeoffs are discrete and granular.
     In this case (simplex tiling), the tradeoffs could have a much finer resolution.
