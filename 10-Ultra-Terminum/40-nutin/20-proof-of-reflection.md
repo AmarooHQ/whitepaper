@@ -18,41 +18,51 @@ The idea of one blockchain 'tracking' another blockchain via chain-headers and i
 [^xc3]: <https://github.com/XertroV/coppr/blob/master/chainheaders.py>
 [^xc4]: <https://github.com/ethereum/btcrelay>
 
-The general idea of an on-chain headers-only version of another chain does not -- to my knowledge -- have a name. Herein this is called a *projection*. The generalized process via which projections are created is called *imaging*.
-
 \defineTerm{Projection}{
   A \emph{projection} of a chain is its \emph{headers-only} version which is recorded and evaluated \emph{by a different chain}. For example \href{https://github.com/ethereum/btcrelay}{BTC Relay} is a smart contract by which Ethereum can host a \emph{projection} of Bitcoin. The \emph{act} of one chain creating and maintaining the projection of another is called \emph{imaging}
 }
+
+The general idea of an on-chain headers-only version of another chain does not -- to my knowledge -- have a name. Herein this is called a *projection*. The generalized process via which projections are created is called *imaging*.
 
 ### A Projection of Bitcoin in Ethereum
 
 The idea that Ethereum smart contracts (SCs) can track Bitcoin chain-headers is well understood -- i.e., Ethereum *images* Bitcoin. The result of this is that the *projection* of Bitcoin is available to Ethereum users and SCs. Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is viable. In principle, any chain that supports some headers-only mode can include projections in this way. In practice that can be difficult (e.g., Ethereum's EVM doesn't support memory hard hashes unless special cases are introduced). But we're not interested in practicality *at the moment*.
 
-Let's add such a contract to Ethereum and describe the relevant data and events in the following table. \autoref{fig:pr-btc-eth-step1} illustrates this. Note: \autoref{fig:pr-btc-eth-step1} includes some variance in Ethereum's block production rate, similar to what might be observed in a real-world environment.
-
-| Time (~15s increments) | Bitcoin block made | Eth block made | Eth block contents | Eth state |
-|---|---|---|-----|------|
-| $\vdots$ | | | | |
-| 0 | k | | | |
-| 1 | | j | $\text{BTC}_k$ header | Records $\text{BTC}_{0 \cdots k}$ |
-| $\vdots$ | | | | |
-| 40 | k + 1 | | | |
-| 41 | | j + 40 | $\text{BTC}_{k+1}$ header | Records $\text{BTC}_{0 \cdots k+1}$ |
-| $\vdots$ | | | | |
-
-: Data and events for both Bitcoin and Ethereum as blocks are produced and a projection of Bitcoin in Ethereum is maintained via Bitcoin headers being included in an Ethereum SC.
+Let's add such a contract to Ethereum and describe the relevant data and events in \autoref{tab:eth-images-btc}.
+\autoref{fig:pr-btc-eth-step1} illustrates this.
+Note: \autoref{fig:pr-btc-eth-step1} includes some variance in Ethereum's block production rate, similar to what might be observed in a real-world environment, but \autoref{tab:eth-images-btc} does not.
 
 \begin{figure}[]
 \centering
 \includegraphics[max width=\linewidth, height=0.35\textheight]{pow_refl_btc_eth_step1_sag}
 \caption[
-  Bitcoin headers, as they are produced, are included in Ethereum's state (via user made transactions).
+  (Hypothetical) A projection of Bitcoin in Ethereum via an SC and transactions.
 ]{
-  Bitcoin headers, as they are produced, are included in Ethereum's state (via user made transactions).
+  (Hypothetical) Bitcoin headers, as they are produced, are included in Ethereum's state via a smart contract and user made transactions.
   This is roughly how \textit{BTC Relay} works.
 }
 \label{fig:pr-btc-eth-step1}
 \end{figure}
+
+\ctable[
+  pos = h,
+  caption = (Hypothetical) Data and events for both Bitcoin and Ethereum as a projection of Bitcoin in Ethereum is maintained via Bitcoin headers being included in an Ethereum SC.,
+  cap = (Hypothetical) Data and events as Ethereum images Bitcoin.,
+  center,
+  label = tab:eth-images-btc,
+]{lllll}{}{
+  \FL
+  \shortstack[l]{Time step (\textasciitilde{}15 s \\ increments)} & \shortstack[l]{Bitcoin \\ block mined} & \shortstack[l]{Eth \\ block mined} & \shortstack[l]{Eth block contents} & {Eth state}
+  \ML
+  $\vdots$ & & & & \NN
+  0 & $k$ & & & \NN
+  1 & & $j$ & $\text{BTC}_k$ header & Records $\text{BTC}_{0 \cdots k}$ \NN
+  $\vdots$ & & & & \NN
+  40 & $k+1$ & & & \NN
+  41 & & $j+40$ & $\text{BTC}_{k+1}$ header & Records $\text{BTC}_{0 \cdots k+1}$ \NN
+  $\vdots$ & & & &
+  \LL
+}
 
 After a Bitcoin block is produced, an Ethereum miner includes a transaction containing the Bitcoin header, which updates the SC imaging the Bitcoin chain. In reality there are practical concerns about incenting someone to produce such a transaction (among other things); we're not concerned with those here. We're just concerned with the relationships that exist and what they can do.
 
@@ -62,9 +72,12 @@ Why would a chain want to include a projection of another chain? The typical ans
 
 \label{sec:two-blockchains}
 
-Let's build up the idea via a hypothetical situation with two distinct blockchains. For simplicity, you can imagine these as Bitcoin and Ethereum 1 -- at least to start with. However, keep in mind that the changes required to support *Proof of Reflection* are unlikely to ever be integrated with either Bitcoin or Ethereum (and reaching social agreement about the details would be difficult, to say the least).
+Let's build up the idea via a hypothetical situation with two distinct blockchains.
+For simplicity, you can imagine these as Bitcoin and Ethereum 1 -- at least to start with.
+However, keep in mind that the changes required to support *Proof of Reflection* are unlikely to ever be integrated with either Bitcoin or Ethereum (and reaching social agreement about the details would be difficult, to say the least).
 
-Our starting case is that both chains use different Proof of Work algorithms and neither includes a projection of the other. For simplicity, the following progression will use two blockchains with identical block times, and will not account for variance in block production.
+Our starting case is that both chains use different Proof of Work algorithms and neither includes a projection of the other.
+For simplicity, the following progression will use two blockchains with identical block times, and will not account for variance in block production.
 
 #### Step 1. Chain R images Chain L
 
@@ -72,7 +85,7 @@ This is conceptually similar to having a projection of Bitcoin in Ethereum, and 
 
 Similar to before, Chain R will include Chain L's headers as they are produced. Note that this can be a protocol-level implementation; it does not have to be at the smart contract level -- as it would be with Ethereum.
 
-\begin{figure}[p]
+\begin{figure}
 \centering
 \includegraphics[max width=\linewidth, height=0.28\textheight]{pow_refl_step1_sag}
 \caption{Step 1: Chain R images Chain L; thus Chain R hosts a \emph{projection} of Chain L.}
@@ -81,21 +94,25 @@ Similar to before, Chain R will include Chain L's headers as they are produced. 
 
 #### Step 2. Chain L images Chain R
 
-Say that the protocol of Chain L is extended to support a projection of Chain R. That is, a bespoke protocol extension is created that allows/requires miners to publish known Chain R headers along with their Chain L block. Similar to the way Chain R images Chain L, now Chain L also images Chain R. This is shown in \autoref{fig:pow_refl_step2} and the following table.
+Say that the protocol of Chain L is extended to support a projection of Chain R.
+That is, a bespoke protocol extension is created that allows/requires miners to publish known Chain R headers along with their Chain L block.
+Similar to the way Chain R images Chain L, now Chain L also images Chain R.
+This is shown in \autoref{fig:pow_refl_step2} and \autoref{tab:por-step-2}.
 
-\begin{table}[H]
+\begin{table}
 \centering
-\caption{Both Chain L and Chain R host a projection of each-other.}
+\caption{Step 2: Both Chain L and Chain R host a projection of each-other.}
+\label{tab:por-step-2}
 \resizebox{\textwidth}{!} {%
 \begin{tabular}{lllllll}
 \toprule
 {Time} & \shortstack[l]{L block \\ made} & \shortstack[l]{L block \\ contents} & {L state} & \shortstack[l]{R block \\ made} & \shortstack[l]{R block \\ contents} & {R state} \\
 \midrule
 {$\vdots$} & {} & {} & {} & {} & {} & {} \\
-{0} & {k} & {$R_{j-1}$ header} & {Records $R_{0 \cdots j-1}$} & {} & {} & {} \\
-{1} & {} & {} & {} & {j} & {$L_{k}$ header} & {Records $L_{0 \cdots k}$} \\
-{2} & {k + 1} & {$R_{j}$ header} & {Records $R_{0 \cdots j}$} & {} & {} & {} \\
-{3} & {} & {} & {} & {j + 1} & {$L_{k+1}$ header} & {Records $L_{0 \cdots k+1}$} \\
+{0} & $k$ & {$R_{j-1}$ header} & {Records $R_{0 \cdots j-1}$} & {} & {} & {} \\
+{1} & {} & {} & {} & $j$ & {$L_{k}$ header} & {Records $L_{0 \cdots k}$} \\
+{2} & $k + 1$ & {$R_{j}$ header} & {Records $R_{0 \cdots j}$} & {} & {} & {} \\
+{3} & {} & {} & {} & $j + 1$ & {$L_{k+1}$ header} & {Records $L_{0 \cdots k+1}$} \\
 {$\vdots$} & {} & {} & {} & {} & {} & {} \\
 \bottomrule
 \end{tabular}%
@@ -103,19 +120,24 @@ Say that the protocol of Chain L is extended to support a projection of Chain R.
 \end{table}
 
 
-\begin{figure}[p]
+\begin{figure}
 \centering
 \includegraphics[max width=\linewidth, max height=0.4\textheight]{pow_refl_step2_sag}
 \caption{Step 2: Chain L and Chain R contain a projection of each other's headers-only chain.}
 \label{fig:pow_refl_step2}
 \end{figure}
 
+
+\FloatBarrier
+
 #### Step 3. Chain L's *reflection* in Chain R
+
+%%\subsubsubsection{Step 3. Chain L's \emph{reflection} in Chain R}
 
 Can we use a projection of a chain for a different purpose?
 What happens if Chain L tracks whether Chain L's history is confirmed within Chain R?
 This can be done via merkle branches\footnote{
-  Vector commitments (or verkle branches) can be used, too (this applies to most usages of merkle tress / branches in this paper).
+  Vector commitments (or verkle branches) can be used, too (this applies to most uses of merkle trees / branches in this paper).
   For the sake of convenience and simplicity, verkle trees won't be explicitly mentioned as an alternative unless there is a specific purpose.
 } that prove Chain R's relevant state.
 In essence, Chain L uses its projection of Chain R to prove that its *own history* matches that of its *projection* in Chain R.
@@ -130,7 +152,7 @@ We can do that via a merkle branch, too, but full nodes of Chain L already know 
 However, L's nodes must be able to generate it.
 The \emph{full} collection of information required to prove reflection is called a *proof of reflection*.
 
-\begin{figure}[p]
+\begin{figure}
     \begin{subfigure}[t]{.31\textwidth}
         \vskip 0pt
         \centering
@@ -158,8 +180,39 @@ The \emph{full} collection of information required to prove reflection is called
     \label{fig:por-step3-parts}
 \end{figure}
 
-Segments of Chain L and R (events and data) are shown in the following table and \autoref{fig:por-step3}.
+Segments of Chain L and R (events and data) are shown in \autoref{tab:por-step-3} and \autoref{fig:por-step3}.
 
+
+\ctable[
+  pos = hp,
+  caption = {
+    Step 3: Chain L records which of its headers are known about by Chain R.
+    That is: Chain L includes \emph{proofs of reflection}.
+    Note: ``Headers'' is abbreviated to ``Hdrs''.
+  },
+  cap = Step 3: Chain L records \emph{PoRs} via Chain R.,
+  center,
+  label = tab:por-step-3,
+  width = \textwidth,
+]{llZZlZZ}{}{
+  \FL
+  {Time} & \shortstack[l]{L block \\ mined} & \shortstack[l]{L block \\ contents} & {L state} & \shortstack[l]{R block \\ mined} & \shortstack[l]{R block \\ contents} & {R state}
+  \ML
+  $\vdots$ & & & & & & \NN
+  0 & $k$ & {$R_{j-1}$ header, \newline $L_{k-1}$ PoR} & Hdrs: $R_{0 \cdots j-1}$, \newline PoRs: $L_{0 \cdots k-1}$ & & &
+  \NN
+  1 & & & & $j$ & $L_{k}$ header & Hdrs: $L_{0 \cdots k}$
+  \NN
+  2 & $k+1$ & $R_{j}$ header, \newline $L_{k}$ PoR & Hdrs: $R_{0 \cdots j}$, \newline PoRs: $L_{0 \cdots k}$ & & &
+  \NN
+  3 & & & & $j+1$ & $L_{k+1}$ header & Hdrs: $L_{0 \cdots k+1}$
+  \NN
+  $\vdots$ & & & & & &
+  \LL
+}
+
+
+<!--
 | Time | L block made | L block contents | L state | R block made | R block contents | R state |
 |--|---|------|------|---|-----|------|
 | $\vdots$ | | | | | | |
@@ -169,11 +222,11 @@ Segments of Chain L and R (events and data) are shown in the following table and
 | 3 | | | | j + 1 | $L_{k+1}$ header | Records $L_{0 \cdots k+1}$ |
 | $\vdots$ | | | | | | |
 
-: Chain L records which of its headers are known about by Chain R. That is: Chain L includes *proofs of reflection*.
+: Chain L records which of its headers are known about by Chain R. That is: Chain L includes *proofs of reflection*. -->
 
-\begin{figure}[p]
+\begin{figure}
 \centering
-\includegraphics[max width=\linewidth, max height=0.4\textheight]{pow_refl_step3_sag}
+\includegraphics[max width=\linewidth, max height=0.35\textheight]{pow_refl_step3_sag}
 \caption{
   Step 3: Chain L includes \textit{proofs of reflection} (PoRs) along with headers.
   Proofs of Reflection allow Chain L to know which of its own blocks are known to Chain R.
@@ -351,16 +404,19 @@ This might become an issue in the case of an active attack, but R nodes can fall
 
 #### Step 5. Mutual Reflection
 
-The final step in this progression is *mutual reflection* -- where both chains image one-another and include the necessary PoRs and modifications to their chain-weight algorithms. This is shown in \autoref{fig:por-step5}.
+The final step in this progression is *mutual reflection* -- where both chains image one-another and include the necessary PoRs and modifications to their chain-weight algorithms.
+This is shown in \autoref{fig:por-step5}.
 
 \begin{figure}[]
 \centering
 \includegraphics[max width=\linewidth, height=0.35\textheight]{pow_refl_step5_sag}
-\caption{\textit{Proof of Reflection} between two UT Chains, Chain L and Chain R}
+\caption{Step 5: \textit{Proof of Reflection} between two UT Chains, Chain L and Chain R}
 \label{fig:por-step5}
 \end{figure}
 
-When two chains (Chain L and Chain R) mutually reflect each-other, detecting attacks becomes easier. The security of both Chain L and R are partially dependent on each others' histories (along with their own, of course). If one chain is attacked, where some alternate chain-segment is published, then that chain's nodes will know that those blocks have not been reflected - potentially indicating that the recently-published chain-segment was constructed in private or constructed after the fact.
+When two chains (Chain L and Chain R) mutually reflect each-other, detecting attacks becomes easier.
+The security of both Chain L and R are partially dependent on each others' histories (along with their own, of course).
+If one chain is attacked, where some alternate chain-segment is published, then that chain's nodes will know that those blocks have not been reflected -- potentially indicating that the recently-published chain-segment was constructed in private or constructed after the fact.
 
 There are several details that still require discussion, though, such as: *how exactly is weight contributed by a reflecting chain converted to weight in the local chain?* (discussed in \autoref{sec:comparing-chain-work}); and *how can proofs of reflection be calculated without the requirement that miners are full nodes of both chains?* (discussed in \autoref{sec:practical-considerations}).
 This last question is particularly important for moving beyond mutual reflection between only two chains.
