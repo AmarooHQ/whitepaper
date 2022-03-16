@@ -1366,7 +1366,7 @@ Otherwise, the iteration algorithm is the same.
 This tiling is shown in \autoref{fig:alt-tri-tiling} and has $N_{\text{tiles}} = 3 \cdot 2^{h}$.
 One advantage of this variant is that the tiling algorithm can begin when a single original simplex reaches $75\%$ capacity (at which point, it must be split into the trio of root-tiles).
 
-\begin{figure}[p]
+\begin{figure}
     \centering
     \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
@@ -1395,7 +1395,7 @@ One advantage of this variant is that the tiling algorithm can begin when a sing
     \label{fig:alt-tiling}
 \end{figure}
 
-\begin{figure}[p]
+\begin{figure}
     \centering
     \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
@@ -1430,7 +1430,7 @@ A 3-simplex (which has 4 chains) is the least populous simplex that may be tiled
 The result of this is shown in \autoref{fig:tiled-3-simplexes} and is equivalent to a tiling of individual blockchains (a single-chain tiling).
 This configuration still has $O(n)$ scalability.
 
-\begin{figure}[p]
+\begin{figure}
 \centering
     \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
@@ -1664,8 +1664,8 @@ Now, let's consider two systems of equal (network wide) throughput: a tiling of 
 In the tiled system, with non-recursive validation, miners on the root tile need to do more work than miners on leaf tiles -- internal reflections for 4 tiles and 3 sets of inter-tile reflections. With recursive validation all miners (for all tiles) have this same burden.
 \begin{equation}
 \begin{split}
-& \text{Tiling Refls} = (\frac{N_1}{4})^2 \cdot (4 + 3) = \frac{7 N_1^2}{16} \\
-& \text{Simplex Refls} = N_1^2
+& \text{Tiling Refls} = (\frac{N_1}{4})^2 \cdot (4 + 3) = \frac{7 {N_1}^2}{16} \\
+& \text{Simplex Refls} = {N_1}^2
 \end{split}
 \end{equation}
 

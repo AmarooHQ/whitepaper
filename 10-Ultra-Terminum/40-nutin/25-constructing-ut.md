@@ -12,6 +12,8 @@ Such a foundation (*the simplex*) is *not* a sharded blockchain -- there's no re
 
 \label{sec:generalizing-reflection}
 
+\input{includes/ut/algorithms/por-reflected-block-weight.tex}
+
 *Proof of Reflection* is, in essence, the idea that a chain can acknowledge that its history has been confirmed by a different chain[^reflection-prior]. That is a simplification, but it *is* the essence of it.
 
 [^reflection-prior]: I have not been able to find any existing discussion of this method. If you know of any existing discussion of this method, please post a link to the forum topic that is linked in the abstract.
@@ -32,7 +34,6 @@ In order to support arbitrarily many reflections, we need to modify \textsc{Refl
 
 Note that \autoref{alg:por-reflected-block-weight} integrates the cap on weight contributed by each reflecting chain, as suggested in \autoref{sec:reflection-pow-and-pos}.
 
-\input{includes/ut/algorithms/por-reflected-block-weight.tex}
 
 %% --- %%
 

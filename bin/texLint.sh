@@ -23,8 +23,8 @@ function checkFor {
         grep "$REGEX" "$texfile" > /dev/null
         GREP_STATUS="$?"
         if [ "0" = "$GREP_STATUS" ]; then
-        bin/msg_error.sh "Lint failed for regex: \`${REGEX}\` in $texfile"
-        FAILED=1
+            bin/msg_error.sh "Lint failed for regex: \`${REGEX}\` in $texfile"
+            FAILED=1
         fi
     done
     if [[ "$FAILED" = "1" ]]; then
@@ -37,8 +37,12 @@ function checkFor {
 # if post@space is there, are you using \defineTerm from a .tex document (not .md)?
 #   solution -> use \defineTermTex (drop-in replacement)
 
+# oh man, the escapes for UT{+PoRs} check...
+
 checkFor '\$DAA_N\$' && \
 checkFor 'TTS_' && \
 checkFor 'N_{[Bb]lock' && \
 checkFor 'B_[fh]\^' && \
+checkFor 'UT\(inf\)\?{[123]\?+[PoRsTHOP]\+}' && \
+checkFor 'N_[123]\^' && \
 true

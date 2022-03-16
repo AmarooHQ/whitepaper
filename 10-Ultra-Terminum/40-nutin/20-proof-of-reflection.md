@@ -32,18 +32,6 @@ Let's add such a contract to Ethereum and describe the relevant data and events 
 \autoref{fig:pr-btc-eth-step1} illustrates this.
 Note: \autoref{fig:pr-btc-eth-step1} includes some variance in Ethereum's block production rate, similar to what might be observed in a real-world environment, but \autoref{tab:eth-images-btc} does not.
 
-\begin{figure}[]
-\centering
-\includegraphics[max width=\linewidth, height=0.35\textheight]{pow_refl_btc_eth_step1_sag}
-\caption[
-  (Hypothetical) A projection of Bitcoin in Ethereum via an SC and transactions.
-]{
-  (Hypothetical) Bitcoin headers, as they are produced, are included in Ethereum's state via a smart contract and user made transactions.
-  This is roughly how \textit{BTC Relay} works.
-}
-\label{fig:pr-btc-eth-step1}
-\end{figure}
-
 \ctable[
   pos = h,
   caption = (Hypothetical) Data and events for both Bitcoin and Ethereum as a projection of Bitcoin in Ethereum is maintained via Bitcoin headers being included in an Ethereum SC.,
@@ -63,6 +51,18 @@ Note: \autoref{fig:pr-btc-eth-step1} includes some variance in Ethereum's block 
   $\vdots$ & & & &
   \LL
 }
+
+\begin{figure}
+\centering
+\includegraphics[max width=\linewidth, height=0.35\textheight]{pow_refl_btc_eth_step1_sag}
+\caption[
+  (Hypothetical) A projection of Bitcoin in Ethereum via an SC and transactions.
+]{
+  (Hypothetical) Bitcoin headers, as they are produced, are included in Ethereum's state via a smart contract and user made transactions.
+  This is roughly how \textit{BTC Relay} works.
+}
+\label{fig:pr-btc-eth-step1}
+\end{figure}
 
 After a Bitcoin block is produced, an Ethereum miner includes a transaction containing the Bitcoin header, which updates the SC imaging the Bitcoin chain. In reality there are practical concerns about incenting someone to produce such a transaction (among other things); we're not concerned with those here. We're just concerned with the relationships that exist and what they can do.
 
@@ -407,7 +407,7 @@ This might become an issue in the case of an active attack, but R nodes can fall
 The final step in this progression is *mutual reflection* -- where both chains image one-another and include the necessary PoRs and modifications to their chain-weight algorithms.
 This is shown in \autoref{fig:por-step5}.
 
-\begin{figure}[]
+\begin{figure}
 \centering
 \includegraphics[max width=\linewidth, height=0.35\textheight]{pow_refl_step5_sag}
 \caption{Step 5: \textit{Proof of Reflection} between two UT Chains, Chain L and Chain R}

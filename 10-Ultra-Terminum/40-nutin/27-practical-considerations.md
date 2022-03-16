@@ -356,10 +356,6 @@ This can be repeated to allow for arbitrarily many parents.
 \autoref{fig:dag-ex1-full} is an example of this algorithm for a moderately complex chain-segment ($B_i\cdots B_{i+3}$ which is 7 blocks total), and each step is enumerated and explained.
 
 \begin{figure}[p]
-    \caption[
-        Example: sorting a moderately complex block-DAG.
-    ]{
-        Example: sorting a moderately complex block-DAG; note that the left parent is always the best parent, so will have priority. Each block is annotated with its \emph{chain-weight} ($\Sigma_w$). \label{fig:dag-ex1-full}}
     \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
         \centering
@@ -432,7 +428,12 @@ This can be repeated to allow for arbitrarily many parents.
         \caption{And finally we order the last remaining blocks. (We could remove virtual blocks too).}
         \label{fig:dag-ex1-order-70}
     \end{subfigure}
-    %$\text{Note: caption at top.}$
+    \caption[
+        Example: sorting a moderately complex block-DAG.
+    ]{
+        Example: sorting a moderately complex block-DAG; note that the left parent is always the best parent, so will have priority. Each block is annotated with its \emph{chain-weight} ($\Sigma_w$).
+    }
+    \label{fig:dag-ex1-full}
 \end{figure}
 
 We should expect that conflicting transactions (which might otherwise be attempted doublespends) arise during this process.

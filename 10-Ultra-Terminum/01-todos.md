@@ -2,6 +2,8 @@
 
 \todoDraftOnly{discuss impact of PoW/PoS choice for simplex-/dapp-chains -- PoS overhead (sorta discussed atm, but only for headers)}
 
-\todoDraftOnly{lint for patterns like $\UT{+PoRs}$ instead of $\UT{\text{+PoRs}}$.}
+<!-- wrap the + below in braces to avoid texlint triggering -->
+
+\todoDraftOnly{lint for patterns like $\UT{{+}PoRs}$ instead of $\UT{\text{+PoRs}}$.}
 
 %% END ### RELEASE
