@@ -262,22 +262,6 @@ For the purposes of this paper, we are concerned with the method detailed in *In
 
 [^teto-2016]: \href{https://github.com/wildbunny/docs/blob/master/T.E.T.O-draft.pdf}{T.E.T.O Draft} by Paul Firth.
 
-##### A Criticism of GHOST
-
-GHOST allows for blocks to link to a single canonical parent and multiple *uncle* blocks.
-In the full GHOST algorithm, uncle blocks contribute *weight* to the canonical chain-segment, but do not contribute *transactions*.
-Thus, uncles have *no ability* to substantially contribute to the canonical chain's *state*.
-
-Consider an empty-block DoS against a chain using GHOST.
-If an attacker were to perform an empty-block DoS, the attacker could link back to honest miners' blocks as uncles, but never parents.
-Given this, there is no easy way for the honest miners to end or mitigate the DoS.
-The attacker can include honest miners' chain-work in a purely *beneficial* way -- there is a symmetry, thus honest miners (and the network) are at the mercy of the attacker.
-
-Why does this symmetry exist?
-Because the *cumulative weight* of each block (including uncles) is *divorced* from *the set of transactions* that is contributed by that block.
-However, with a full DAG-chain, when an attacker links to uncles in this way *they must allow for the execution of all non-conflicting transactions* (i.e., those which would not cause a doublespend to occur).
-Thus, GHOST *does not mitigate* empty-block DoS attacks; *only* a full DAG-chain can do that.
-
 #### Basic Structure
 
 There are decisive advantages to using DAGs (instead of trees) as the fundamental structure of a chain.
@@ -456,7 +440,7 @@ Ancestors of one parent may not be ancestors of another parent.
 The exact protocol for handling conflicts is up to the implementation, but a trivial method is that blocks commit to (via hash-pointers) conflicting transactions.
 If a miner produces an invalid block (which is invalid only because it breaks this rule), then other miners can flag it as a conflicting *block* via a similar mechanism.
 
-Further reading: \citeInclusive{}.
+Further reading: \citeInclusiveFull{}.
 
 #### Preventing DoS Attacks
 
@@ -529,9 +513,24 @@ If there were, it'd be possible to temporarily limit the attacker to $<50\%$ of 
 
 \todoDraftOnly{Dynamic average block-size for simplex-chains based on dapp-chain headers having some PoW}
 
-%% END ### RELEASE
 
-%% BEGIN ### RELEASE
+#### A Criticism of GHOST
+
+GHOST allows for blocks to link to a single canonical parent and multiple *uncle* blocks.
+In the full GHOST algorithm, uncle blocks contribute *weight* to the canonical chain-segment, but do not contribute *transactions*.
+Thus, uncles have *no ability* to substantially contribute to the canonical chain's *state*.
+
+Consider an empty-block DoS against a chain using GHOST.
+If an attacker were to perform an empty-block DoS, the attacker could link back to honest miners' blocks as uncles, but never parents.
+Given this, there is no easy way for the honest miners to end or mitigate the DoS.
+The attacker can include honest miners' chain-work in a purely *beneficial* way -- there is a symmetry, thus honest miners (and the network) are at the mercy of the attacker.
+
+Why does this symmetry exist?
+Because the *cumulative weight* of each block (including uncles) is *divorced* from *the set of transactions* that is contributed by that block.
+However, with a full DAG-chain, when an attacker links to uncles in this way *they must allow for the execution of all non-conflicting transactions* (i.e., those which would not cause a doublespend to occur).
+Thus, GHOST *does not mitigate* empty-block DoS attacks; *only* a full DAG-chain can do that.
+
+
 
 ### Lowering Block Production Variance
 

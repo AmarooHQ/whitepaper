@@ -165,6 +165,11 @@ note: MAX_SHARD_HEADERS_PER_SHARD=4.
 There's enough capacity for attestations (128 each block for 64 shards) that they could be done each block. That doesn't include any committee stuff. -->
 \end{comment}
 
+
+
+
+
+
 %%### Complexity of $\UT{1}$
 
 \subsubsection{Complexity of \titlemath{$\UT{1}$}{UT₁}}
@@ -260,6 +265,9 @@ Thus, from the definition of $k_1$ in \autoref{eq:k1-reflection-defn}:
 k_{1,B} = \frac{k_1}{2}
 \end{equation*}
 
+
+
+
 \begin{comment}
 Dapp-Chains and the Complexity of $\UT{2}$ and $\UT{3}$
 \end{comment}
@@ -288,6 +296,9 @@ Combining these yields:
 N_{i+1} = \frac{T_{i+1}}{k_{i+1}}
 \end{equation}
 
+
+
+
 %%#### UT with Dapp-Chains (\titlemath{$\UT{2}$}{UT2})
 
 \subsubsubsection{UT with Dapp-Chains (\titlemath{$\UT{2}$}{UT₂})}
@@ -314,6 +325,9 @@ N_2 & = \frac{T_2}{k_2} \\
 
 When $D_h = B_h$ and $D_f = B_f$, note that $N_2 = {N_1}^2$.
 
+
+
+
 %%#### UT with Dapp-Dapp-Chains ($\UT{3}$)
 
 \subsubsubsection{UT with Dapp-Dapp-Chains (\titlemath{$\UT{3}$}{UT₃})}
@@ -338,6 +352,9 @@ N_3 & = \frac{T_3}{k_3} \\
 & = \frac{{k_1}^2 \cdot k_2}{4 \cdot B_f \cdot B_h \cdot {D_h}^2 \cdot {D_f}^2}
 \end{split}
 \end{equation*}
+
+
+
 
 ### Complexity of Cross-Chain SPV Proofs & Proofs of Reflection
 
