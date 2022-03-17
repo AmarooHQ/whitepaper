@@ -237,12 +237,14 @@ purs-test:
 
 purs-ci-init-hash:
 	sha256sum $(PURS_GEN_OUT) > ci-check-purs-1.log
+	cp $(PURS_GEN_OUT) $(PURS_GEN_OUT).old
 
 purs-ci-post-hash:
 	sha256sum $(PURS_GEN_OUT) > ci-check-purs-2.log
 
 purs-ci-check: purs-ci-init-hash purs-build purs-ci-post-hash
-	bash bin/checkFilesIdentical.sh ci-check-purs-1.log ci-check-purs-2.log
+	bash bin/checkFilesIdentical.sh ci-check-purs-1.log ci-check-purs-2.log \
+	  || (diff -c $(PURS_GEN_OUT) $(PURS_GEN_OUT).old && false)
 
 pert:
 	mkdir -p output/pert
