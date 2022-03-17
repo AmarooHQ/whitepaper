@@ -8,7 +8,8 @@
 Simplexes are secure if attacking a single simplex-chain is as difficult as attacking the whole simplex (the network).
 
 Say the attacker controls $q$ proportion of the network's work-generation capacity (e.g., hash-rate for PoW chains), and honest nodes control $p$ proportion, such that $p+q=1$.
-The attacker should only be able to control the network's history if $q > p$.
+An attacker with $q < p$ can attempt doublespends, and should succeed some of the time (see \autoref{sec:sec:cec-overview}), but never with certainty.
+The attacker should only be able to \emph{control} the network's history if $q > p$.
 
 Successfully attacking a single blockchain requires an attacker to publish an alternate chain-segment that the fork rule considers heavier than the corresponding public chain-segment.
 Those two segments will have a common ancestor, so the weight of the attacker's segment must be greater than the weight of the public chain-segment (both start at that common ancestor).
@@ -16,7 +17,7 @@ Those two segments will have a common ancestor, so the weight of the attacker's 
 Simplex-chains evaluate block-weight as the sum of work done on that block, plus work done on reflecting blocks.
 So effecting a doublespend on one simplex-chain requires generating a chain-segment with more total block-weight (including reflections) than the public chain-segment.
 
-It is not viable for the attacker to mine the attacking chain-segment in public (see \autoref{sec:dos-and-dags}), so they must mine it in private.
+It is not viable for the attacker to mine the attacking chain-segment in public (it is self-defeating; see \autoref{sec:dos-and-dags}), so they must mine it in private.
 Blocks mined in private will not gain reflections from honest miners on other simplex-chains, so any reflections contributing to the doublespend must be created by the attacker.
 The attacker's reflecting blocks (which reflect the attacking chain-segment) on other simplex-chains can be public, but the attacker's task is simpler and not detectable if the attacker mines reflecting blocks in private.\footnote{
     Additionally, if reflecting chains maintain projections as headers-only chains (i.e., construct a main chain via SPV rules), then it should be much harder for an attacker to succeed if reflections are mined in public.
@@ -26,14 +27,14 @@ There is no viable way for the attacker to prevent honest miners from reflecting
 The honest chain-segment, on the targeted simplex-chain, will not be reflected by the attacker (since that would be self-defeating).
 Similarly, the attacker's chain-segment will not be reflected by the honest network, since it's being mined in private.
 
-\todo{need to add some stuff in here -- a bit more explanation and linking, particularly consider editing 'it is not viable' paragraph}
-
 Let $r$ be the network-wide rate-of-work (hash-rate).
-Over some attack duration $d$, we expect the attacker's chain-segment to weigh $qrd$, and the honest chain-segment to weigh $prd$.
-Thus, for the attacker's chain-segment to win, it must be that $qrd > prd \implies q > p$.
+Over some attack duration $d$, on \emph{average} we expect the attacker's chain-segment to weigh $qrd$ and the honest chain-segment to weigh $prd$.
+Thus, for the attacker's chain-segment to \emph{reliably} win, it must be that $qrd > prd \implies q > p$.
 $\blacksquare$
 
 \subsubsubsection{Confirmation Equivalence Conjecture}
+
+\label{sec:cec-overview}
 
 \defineTermTex{Confirmation Equivalence Conjecture (CEC)}{
     The conjecture that, when using PoR and appropriately converting work,
@@ -62,8 +63,8 @@ After the first few confirmations, each additional confirmation reduces the risk
 So \emph{security takes \ul{time}}, because confirmations take time.
 
 Now, consider a simplex: the equivalence conjecture says that it doesn't matter whether confirmations come from the \emph{local} chain, or if they come from a \emph{reflecting} chain.
-So, a simplex-chain in a 2-chain simplex (wherein each simplex-chain has $\mathbb{C}^\prime = 2 \times B_f$) \emph{should}, after $C$ confirmations, be as secure as a standalone blockchain with $2C$ confirmations.
-This is true for larger simplexes, too: \emph{doubling} the size of a simplex means we can \emph{halve} the number of confirmations we wait for -- the chance of a doublespend succeeding should be approximately the same.
+So, a simplex-chain in a 2-chain simplex (wherein each simplex-chain has $\mathbb{C}^\prime = 2 \times B_f$) \emph{should}, after $C$ \emph{local} confirmations, be as secure as a standalone blockchain with $2C$ confirmations.
+This is true for larger simplexes, too: \emph{doubling} the size of a simplex means we can \emph{halve} the number of \emph{local} confirmations that we wait for -- the chance of a doublespend succeeding should be approximately the same.
 More generally, a simplex-chain in an $N$-chain simplex will, after $C$ \emph{local} confirmations, be as secure as a standalone blockchain after $CN$ confirmations.
 
 This is something we can test!
@@ -79,13 +80,12 @@ As blockchain architects, if the CEC is true, then UT allows us to maintain secu
 
 \label{sec:cec-draft-refl-work}
 
-With a traditional blockchain, the network has no ``memory'' of work (hashes) that have been done but are not accounted for in the main chain.
+With a traditional blockchain, the network has no ``memory'' of work (mining) that has been done which did \emph{not} result in a valid block (i.e., the main chain does not record or account for that work).
 Specifically, the network gains no knowledge of how much work has been done \emph{between} blocks.
 This is almost self-evident: each block is the \emph{sole} way that work can be \emph{added} to the chain.
 Naturally, there is no smaller unit of contributed work than an individual block -- so there's no ``memory''.\footnote{
     We're not concerned with things like \emph{weak blocks} or super-block hybrid designs; though it's possible that doublespend methodology for those designs has some overlap with this section.
 }
-
 When an attacker publishes a heavier chain-segment which causes a reorganization, it is \emph{immediately} in the interests of miners to begin building on the attacker's best block.
 A heavier chain-segment is \emph{decisively better} in all cases.
 That may seem so obvious that it isn't worth mentioning, but it's actually a \emph{specific case} that only works for traditional blockchains.
@@ -98,7 +98,7 @@ As it turns out: yes.
 
 Let the total chain-weight of the attacker's best block be called $W_A$, and the total chain-weight of the honest network's best block be called $W_H$.
 
-Consider a miner of a simplex-chain (chain $L$) who is working on a \emph{draft block} during an active attack (though, of course, the miner does not know that).
+Consider a miner of a simplex-chain (chain $L$) who is working on a \emph{draft block} during an active attack (though, of course, the miner does not know about the attack).
 Specifically, let's consider \emph{just before} the attacker publishes their chain-segment.
 In the memory pool\footnote{
   The \emph{memory pool} is where unconfirmed transactions (and other things) are stored before they are included in a block.
@@ -107,10 +107,11 @@ In the memory pool\footnote{
 } of that miner, there will be PoRs, and those PoRs are \emph{only} valid for the \emph{honest} chain-segment (most likely they are for the best known honest block, but don't need to be).
 Each $L$ block, in and of itself, only adds $\sim w$ weight to the $L$ chain.
 However, if that \emph{draft block} contains $\sim n$ pending PoRs, and each PoR provides $\sim w$ weight on average, then a valid block (created from that draft) will contribute, via PoRs, $\sim nw$ weight to the \emph{honest chain-segment}.
-Thus, the miner has this choice: reorganize to the attacker's chain-segment and mine on top of a chain with weight $W_A$, \emph{or} continue mining on the honest chain-segment that weighs $W_H + nw$.
+What happens when the attacker's chain-segment is published (along with their reflecting chain-segments for other simplex-chains)?
+The miner has a choice: reorganize to the attacker's chain-segment and mine on top of a chain with weight $W_A$, \emph{or} continue mining on the honest chain-segment that weighs $W_H + nw$.
 
-The $nw$ term is that ``memory'', and it makes all the difference.
-Only when $W_A > W_H + nw$ is it safe for an attacker to publish their chain-segment -- then it is \emph{decisively better} than the honest chain-segment.
+That extra term, $nw$, is the ``memory'' we're looking for, and it makes all the difference.
+It is only safe for the attacker to publish their chain-segment \emph{after} $W_A > W_H + nw$ -- only then is it \emph{decisively better} than the honest chain-segment.
 If, however, the attacker publishes their chain-segment when $W_H < W_A < W_H + nw$: the best chain-segment for honest miners to mine is \emph{still} the honest chain-segment, not the attacker's!
 
 Miners don't actually have to change their behavior at all: their choice is the same, whether they are mining a simplex-chain \emph{or} a traditional chain.

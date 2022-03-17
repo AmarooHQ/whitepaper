@@ -182,7 +182,7 @@
         // add to .textlintrc.js too
         "hte", "DOS", "teh", "\\being{",
         "itertext", "the attackers", "DAA_N",
-        "tress",
+        "tress", "\\lable{", "lable",
     ],
     "cSpell.ignoreRegExpList": [
         "\\usepackage{([a-z,]*)}",
