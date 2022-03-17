@@ -91,14 +91,12 @@ lpTables =
     [ TD "lp_compare_networks" lpCompareNetworks defaultPositioning
     , TD "comparison_1m_tps" compareNets1mTps tablePageOnly
     , TD "comparison_1m_tps_all" compareNets1mTpsAll tablePageOnly
+    , TD "lp_compare_ut2_to_optshard_20k" lpCompareUt2OptShard20k defaultPositioning
+    , TD "tree_tiling_3k_v3_table" tree_tiling_3k_v3_table_lp hereish
     , TD "lp_compare_optimizations_1" lpCompareUtOptimizations1 defaultPositioning
     , TD "lp_compare_ut1_to_eth2" lpCompareUt1Eth2 defaultPositioning
     , TD "lp_compare_ut1_to_optshard" lpCompareUt1OptShard defaultPositioning
     , TD "lp_compare_ut2_to_optshard" lpCompareUt2OptShard defaultPositioning
-    , TD "lp_compare_ut2_to_optshard_20k" lpCompareUt2OptShard20k defaultPositioning
-    -- , TD "lp_compare_optimizations2" lpCompareUtOptimizations2 defaultPositioning
-    -- , TD "lp_compare_optimizations3" lpCompareUtOptimizations3 defaultPositioning
-    , TD "tree_tiling_3k_v3_table" tree_tiling_3k_v3_table_lp hereish
     ]
 
 
@@ -110,8 +108,12 @@ devTables =
     -- , TD "tree_tiling_3k_v4_table" tree_tiling_3k_v4_table defaultPositioning
     [ TD "compareUtOptimizationsA" compareUtOptimizationsA defaultPositioning
     , TD "compare_optimizations_a_20k" compareUtOptimizationsA20k defaultPositioning
-    , TD "tree_tiling_3k_v4_table" tree_tiling_3k_v4_table hereish
     , TD "comparison_1m_tps" compareNets1mTps hereish
+    , TD "compareUtOptimizationsAWithLvl3" compareUtOptimizationsAWithLvl3 defaultPositioning
+    , TD "compareUtOptimizationsA20kWithLvl3" compareUtOptimizationsA20kWithLvl3 defaultPositioning
+    , TD "tree_tiling_3k_v3_table" tree_tiling_3k_v3_table hereish
+    , TD "tree_tiling_3k_v4_table" tree_tiling_3k_v4_table hereish
+    , TD "compareNets100k" compareNets100k hereish
     ]
 
 

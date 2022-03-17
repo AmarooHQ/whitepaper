@@ -1,0 +1,110 @@
+stuff to mb test:
+- target chain has non-random hash rate, does that matter? (prediction: no)
+- partial confirmations
+  - prediction:
+    - partial confirmations generally increase security,
+      till getting close to whole numbers (possible increase in efficacy),
+      match theory at whole numbers, then get more secure again.
+      cycle repeats but dampens.
+  - parameter sets:
+    - c = 1.0, 1.25, 1.5, 1.75, 1.9, 2.0, 2.25, 2.5, 2.75, 2.9, 3.0
+
+
+
+
+partial confirmations
+-------
+
+(
+  for _aux in 1 0; do
+    export EXP_IS_AUX=$_aux;
+    export DAA2_N_BLOCKS=100
+    export SKIP_EXP_CONF_PROMPT=1
+    export RESUME_FROM=71  # 30 rounds; 3k samples
+    export EXP_NUM=30
+    export N_CPUS=28
+    ./bin/experiment-30-and-beyond.sh
+  done
+)
+
+
+
+
+
+extra data points added to aux chains that appear in WP results
+------
+note: aux results are cheap to generate -- it's large simplexes that are the main issue.
+(
+  for atk_hr_only in 0.40 0.44; do
+    export EXP_IS_AUX=1
+    export DAA2_N_BLOCKS=500
+    export DRY_RUN=1
+    export ATK_DS_CONF_ONLY=5
+    export ATK_HR_ONLY=$atk_hr_only
+    ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+  done
+)
+(
+    export EXP_IS_AUX=1
+    export DAA2_N_BLOCKS=500
+    export SKIP_EXP_CONF_PROMPT=1
+    export ATK_DS_CONF_ONLY=5
+    export ATK_HR_ONLY=0.48
+    ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+)
+
+test if dynamic cutoff gave invalid results for high DS target (particularly with q0.48)
+
+(
+  for daa2_blocks in 500 100; do
+    export EXP_IS_AUX=1
+    export DAA2_N_BLOCKS=$daa2_blocks
+    export SKIP_EXP_CONF_PROMPT=1
+    export ATK_DS_CONF_ONLY=20
+    export ATK_HR_ONLY=0.48
+    ./bin/experiment-26-repeat-e23-w-bonusfix.sh
+  done
+)
+
+(
+  for daa2_blocks in 20; do
+    export EXP_IS_AUX=1
+    export DAA2_N_BLOCKS=$daa2_blocks
+    export SKIP_EXP_CONF_PROMPT=1
+    export DRY_RUN=1
+    export ATK_DS_CONF_ONLY=20
+    export ATK_HR_ONLY=0.48
+    ./bin/experiment-28-short-daa.sh
+  done
+)
+
+### this one just for checking DAA_N different with particular regard to results q0.44 t=5 daa=2000
+
+(
+  for daa2_blocks in 2000; do
+    export EXP_IS_AUX=
+    export DAA2_N_BLOCKS=$daa2_blocks
+    export SKIP_EXP_CONF_PROMPT=1
+    export DRY_RUN=1
+    export ATK_DS_CONF_ONLY=5
+    export ATK_HR_ONLY=0.44
+    export EXP_NUM=29
+    ./bin/experiment-30-and-beyond.sh
+  done
+)
+
+
+-----
+
+try DS=40,80 for q=0.48
+
+(
+  export DAA2_N_BLOCKS=500
+  export ATK_HR_ONLY=0.48
+  export N_CPUS=28
+  export DO_LONG_DS_CONFS=1
+  export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=31
+  ./bin/experiment-30-and-beyond.sh
+)

@@ -144,6 +144,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "cli_graph"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ac64d85c5eebb14b2bbf3d0c59bba152fdc5bc468d0d64e16694a57dcfb5ed3"
+
+[[package]]
 name = "commoncrypto"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -559,6 +565,7 @@ dependencies = [
  "array_tool",
  "blake3",
  "clap",
+ "cli_graph",
  "conv",
  "coz",
  "crypto-hash",

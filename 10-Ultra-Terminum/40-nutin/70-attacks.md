@@ -6,7 +6,7 @@
 
 *Ultra Terminum* -- with appropriate configuration -- is resistant to the following attacks; see the linked section for discussion:
 
-- 51% Attack, see \autoref{sec:proof-of-reflection} and \autoref{sec:preventing-dos-attacks}.
+- 51% Attack, see \autoref{sec:proof-of-reflection}, \autoref{sec:preventing-dos-attacks}, and \autoref{sec:simplex-security-cec}.
 - Selfish mining, see \autoref{sec:confirmation-times}
 - Reflection without publication, see \autoref{sec:availability-of-blocks}
 - Empty block DoS and censorship, see \autoref{sec:dos-and-dags}

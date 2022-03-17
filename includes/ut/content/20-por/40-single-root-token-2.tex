@@ -59,7 +59,6 @@ We can rely on that idea because \emph{equality of work} is a result of the mark
 
 If the network uses this rule to determine block reward, then, for either chain $C$, what can we say?
 Let: $I$ (coins/s) be the network-wide inflation rate; $G_t$ (coins) be the network-wide root token supply; and $C_t$ (coins) be the number of root tokens on chain $C$. $C_f$ (blocks/s) is the block production frequency of chain $C$.
-
 \begin{align}
     C_r \cdot C_f & = \frac{C_t}{G_t} \cdot I
         & & \frac{\text{C-coins}}{\text{second}}
@@ -99,6 +98,32 @@ This way, if a miner (or a chain) tries to subvert or attack the RAA, it's trivi
   Similar to a DAA, the \emph{output} of an RAA is \emph{context laden}
 }
 
+\todoDraftOnly{RAA is long term context, DAA is short term -- they don't interfere w/ eachother}
+
+% figures here to let them be moved around however latex decides.
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[max width=\linewidth]{diff_adjustment_alg_times_3_sag}
+    \caption[
+        How does implicit context change when considering networks of a single root token?
+        This figure shows the convertible context for networks of a single root token and how, in this specific context, $L_f$ and $R_f$ have meaning when converting work.
+    ]{
+        How does implicit context change when considering networks of a single root token?
+        In this case, because we set a network-wide inflation rate (\autoref{eq:srt-reward}), by \emph{definition}, $L_f$ and $R_f$ have meaning in the convertible context.
+        In essence: both L and R have convertible factors that are dependent on the same meaning of ``seconds''.
+        The collection of values mutually linked by two-way arrows ($\longleftrightarrow$) define the \emph{convertible context}.
+        Double-lined arrows indicate the \emph{new} context used in the RAA (which is related to the world context).
+        Thick Double-lined arrows indicate the new hybrid context which allows for conversion (for multi-chain networks of a single root token).
+        As before, dashed arrows indicate the flow of context.
+    }
+    \label{fig:daa-raa-conversion}
+\end{figure}
+
+\input{includes/ut/algorithms/weightof-ratio.tex}
+
+
+
 If we use an RAA, then the RAA \emph{output} could become \emph{context laden} (depending on the RAA's input parameters).
 In the case of a global inflation rate, \emph{this means that chains would rely on a common meaning of ``seconds''!}
 So it is by \emph{construction and definition} that the block frequency introduced in \autoref{eq:srt-reward} becomes part of the convertible context.
@@ -127,23 +152,3 @@ Let's use \autoref{eq:srt-block-ratios} to create our next \textsc{WeightOf} alg
     These and the following conversions all collapse nicely if we set $R \equiv L$.
     This is due to the symmetry mentioned at the start of \autoref{sec:converting-block-weights}.
 }
-
-\input{includes/ut/algorithms/weightof-ratio.tex}
-
-\begin{figure}[p]
-    \centering
-    \includegraphics[max width=\linewidth]{diff_adjustment_alg_times_3_sag}
-    \caption[
-        How does implicit context change when considering networks of a single root token?
-        This figure shows the convertible context for networks of a single root token and how, in this specific context, $L_f$ and $R_f$ have meaning when converting work.
-    ]{
-        How does implicit context change when considering networks of a single root token?
-        In this case, because we set a network-wide inflation rate (\autoref{eq:srt-reward}), by \emph{definition}, $L_f$ and $R_f$ have meaning in the convertible context.
-        In essence: both L and R have convertible factors that are dependent on the same meaning of ``seconds''.
-        The collection of values mutually linked by two-way arrows ($\longleftrightarrow$) define the \emph{convertible context}.
-        Double-lined arrows indicate the \emph{new} context used in the RAA (which is related to the world context).
-        Thick Double-lined arrows indicate the new hybrid context which allows for conversion (for multi-chain networks of a single root token).
-        As before, dashed arrows indicate the flow of context.
-    }
-    \label{fig:daa-raa-conversion}
-\end{figure}

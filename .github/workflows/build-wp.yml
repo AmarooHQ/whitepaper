@@ -1,11 +1,17 @@
 name: Build WP
 
 on:
-  push:
-    branches: '*'
+  workflow_call:
+    inputs:
+      build_release:
+        required: true
+        type: boolean
+  # push:
+  #   branches:
+  #     - '*'
 
 jobs:
-  build:
+  basic_build:
     runs-on: 'self-hosted'
 
     steps:
@@ -17,6 +23,13 @@ jobs:
           make docker-build
 
       - uses: purescript-contrib/setup-purescript@main
+
+      # need to do this before we run bundle-for-wp in next step
+      - name: purs tables check compiled
+        if: ${{ inputs.build_release }}
+        shell: bash
+        run: |
+          make purs-ci-check
 
       - name: "purescript tables generator"
         shell: bash
@@ -33,14 +46,21 @@ jobs:
         shell: bash
         run: make docker "DOCKER_CMD=bash build.sh"
 
-      - name: lint whitepaper
+  lint_and_release:
+    needs: basic_build
+    runs-on: 'self-hosted'
+
+    if: ${{ inputs.build_release }}
+
+    steps:
+      - name: set up linter
         shell: bash
         run: |
           make docker "DOCKER_CMD=bash -c 'make cilint-prep'"
           npm i
-          npm run lint
+          make textlint
 
-      - name: build release whitepaper
+      - name: build release whitepaper (includes linting)
         shell: bash
         run: |
           make docker "DOCKER_CMD=bash -c 'make release'"

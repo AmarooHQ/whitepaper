@@ -1,24 +1,67 @@
 #!/usr/bin/env python3
 
+from asyncore import loop
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import lru_cache
+from itertools import chain
 import math
 import os
 from pathlib import Path
 import sys
-from typing import Any, Callable, Literal, Optional
+from typing import Any, Callable, Iterable, Literal, Optional
+from matplotlib.cbook import flatten
 import numpy
+import scipy
+import scipy.special as spsc
 import pandas as pd
+import matplotlib
+import matplotlib.axes
+import matplotlib.font_manager as mplfm
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 from decimal import Decimal
 import click
 import multiprocessing.pool as mpp
 import multiprocessing as mp
 
+# mplfm.
+
+matplotlib.rcParams['svg.hashsalt'] = 'Ultra Terminum'
+# matplotlib.rcParams['svg.fonttype'] = 'none'
+# matplotlib.rcParams['font.family'] = 'NewComputerModern08'
+# matplotlib.rcParams['font.serif'] = 'cmr10'
+# matplotlib.rcParams['font.serif'] = 'NewComputerModern08'
+# matplotlib.rcParams['mathtext.fontset'] = 'cm'
+# matplotlib.rcParams['mathtext.rm'] = 'serif'
 
 MIN_DS_CONF = 1.25
 MAX_DS_CONF = 20
+
+
+def _assert_eq(a, b, msg=None) -> Optional[Exception]:
+    if a != b:
+        return Exception(f"Not equal: {a}, {b}." + "" if msg is None else f" Message: {msg}")
+
+def assert_eq(a, b, msg=None):
+    e = _assert_eq(a, b, msg=msg)
+    if e: raise e
+
+def _assert_all(xs, predicate, msg=None) -> Optional[list[Exception]]:
+    ex_msg = '' if not msg else f' (msg: {msg})'
+    es = [Exception(f"predicate failed{ex_msg} for x: {x}") for x in xs if not predicate(x)]
+    if len(es) > 0:
+        return es
+
+
+def assert_all_eq(xs, ys):
+    pred = lambda t: t[0] == t[1]
+    es = _assert_all(zip(xs, ys), pred)
+    nt = '\n\t'
+    if es:
+        exs = nt.join([''] + list(map(str, es)))
+        raise Exception(f"Exceptions during assert_all_eq: {exs}")
+
 
 @dataclass
 class PorPlotOpts:
@@ -57,17 +100,28 @@ CsvFileToPlot = tuple[str, Literal['por', 'trad'], Optional[str | PorPlotOpts]]
 def f_is_whole(x):
     return x//1 == x
 
+def rstrip_extra_zeros(s: str):
+    _s = s.rstrip('0')
+    if _s.endswith('.'):
+        _s += '0'
+    return _s
 
 def render_conf_target(t: float):
-    return f'{int(t):d}' if f_is_whole(t) else f'{t:f}'.rstrip('0')
+    return f'{int(t):d}' if f_is_whole(t) and t >= 5 else rstrip_extra_zeros(f'{t:f}')
 
 
 # functions for decimal calcs to get accurate analytical results
 
 
+@lru_cache(2**16)
+def factorial(n):
+    return math.factorial(n)
+
+
 # n! / (k! * (n - k)!)
+@lru_cache(2**16)
 def n_choose_k(n, k) -> Decimal:
-    return Decimal(math.factorial(n) // (math.factorial(k) * math.factorial(n - k)))
+    return Decimal(factorial(n) // (factorial(k) * factorial(n - k)))
 
 
 def pow(b: Decimal, i) -> Decimal:
@@ -75,13 +129,55 @@ def pow(b: Decimal, i) -> Decimal:
     return b ** Decimal(i)
 
 
-@lru_cache
+# # try over reals?
+# # doesn't work with sum: range is over ints
+# def nck_cont(n,k):
+#     print(n, k)
+#     g_f = spsc.gamma
+#     gk = 1 if k == 0 else g_f(k)
+#     return g_f(n) / (gk * g_f(n-k))
+
+
+# @
+@lru_cache(2**16)
+# def p_ds_success_analytical_cont(q, n):
+#     n = float(n)
+#     q = float(q)
+#     p = 1 - q
+#     if q >= p: return 1
+#     # to_sum = list(nck_cont(m+n-1, m) * (pow(p,n) * pow(q,m) - pow(p,m) * pow(q,n)) for m in range(n + 1))
+#     to_sum = list(n_choose_k(m+n-1, m) * (float(p*q) ** m * ((p ** (n-m)) - (q ** (n-m)))
+#     # pow(p,n) * pow(q,m) - pow(p,m) * pow(q,n)
+#     ) for m in range(n + 1))
+#     print(to_sum)
+#     return 1 - sum(to_sum)
+
+
+@lru_cache(2**16)
+def rosenfeld_inner(p, q, n, m):
+    return n_choose_k(m+n-1, m) * (pow(p*q,m) * (pow(p,n-m) - pow(q,n-m)))
+
+
+@lru_cache(2**16)
 def p_ds_success_theoretical(q, n=20):
+    # print(f'p_ds_succ_mr: {(q, n)}')
     q = Decimal(q)
     p = 1 - q
     if q >= p: return 1
-    to_sum = list(n_choose_k(m+n-1, m) * (pow(p,n) * pow(q,m) - pow(p,m) * pow(q,n)) for m in range(n + 1))
+    # to_sum = list(n_choose_k(m+n-1, m) * (pow(p,n) * pow(q,m) - pow(p,m) * pow(q,n)) for m in range(n + 1))
+    to_sum = list(rosenfeld_inner(p, q, n, m) for m in range(n + 1))
     return 1.0 - float(sum(to_sum))
+
+
+ahbds_44_table = ['88.000', '82.086', '77.715', '74.125', '71.028', '68.282', '65.801', '63.530', '61.431', '59.478']
+assert_all_eq([
+    f"{p_ds_success_theoretical(0.44, c)*100:6.3f}"
+    for c in range(1, len(ahbds_44_table))
+], ahbds_44_table)
+
+
+# print((p_ds_success_theoretical(0.3, 20), p_ds_success_analytical_cont(0.3, 20)))
+# assert p_ds_success_theoretical(0.3, 20) == p_ds_success_analytical_cont(0.3, 20)
 
 
 def tri_numbers_decreasing(i_start, iter_limit):
@@ -135,11 +231,23 @@ assert exp_numbers_decreasing(4, 7) == 12
 def ds_theoretical_series(multipliers, q=0.44, after_n_confs=20):
     xs = []
     ys = []
-    for n_por_chains in multipliers:
-        n = int(after_n_confs * n_por_chains)
-        r = p_ds_success_theoretical(q, n)
-        xs.append(n_por_chains)
-        # ys.append(math.log(max(r, 0.0000000001))/n)
+    max_trad_confs = int(max(multipliers) * after_n_confs) + 1
+    # loop_over = list(range(1, min(max_trad_confs+1, 200)))
+    loop_over = list(range(1, max_trad_confs+1))
+    # if len(loop_over) >= 199:
+    #     loop_over += [int(m * after_n_confs) for m in multipliers]
+    # print(after_n_confs, max(loop_over), multipliers)
+    # loop_over = [int(m * after_n_confs) for m in multipliers]
+    loop_over.sort()
+    for c in loop_over:
+        # sanity check -- avoid hanging for many minutes
+        if (c > 3000):
+            continue
+        if (100 < c <= 200 and c % 5 != 0) or (200 < c and c % after_n_confs != 0):
+            continue
+        r = p_ds_success_theoretical(q, c)
+        # n = int(after_n_confs * n_por_chains)
+        xs.append(c / after_n_confs)
         ys.append(r)
     data = pd.Series(ys, index=xs)
     return data
@@ -185,11 +293,11 @@ def skip_csv_row(ds_target, x) -> bool:
 def read_csv_data(fname, chain_ty: Literal['por', 'trad']):
     # ensure that csv used for generating graphs are in the csv folder
     fname = f"csv" / Path(fname)
-    # print(f"Reading: {fname}")
+    print(f"Reading: {fname}")
     d: pd.DataFrame = pd.read_csv(fname)
     only_target = d['block_target'][1]
     daa = d['daa2_n_blocks'][1]
-    ds_target: float = d['doublespend_after_n_confs'][1]
+    ds_target: float = d['doublespend_after_n_confs'].min()
     q = d['atk_q'][1]
     if chain_ty == 'por':
         xs = d['n_chains'].unique()
@@ -231,16 +339,17 @@ por_line_markers = ['x','+','*','3','4'] * 10
 trad_line_markers = ['s','o','P','D','X'] * 10
 
 line_markers = {
-    'por': {1.25: 'x', 2.5: '3', 5: '*', 10: '+', 20: '.'},
+    'por': {1.25: 'x', 2.5: '3', 5: '*', 10: '+', 20: '.', 40: '1', 80: '2'},
     'trad': {1.25: 's', 2.5: 'o', 5: 'P', 10: 'D', 20: 'X'},
 }
 
 plot_colors = {
     'por': {1.25: 'C8', 2.5: 'C5', 5: 'C0', 10: 'C1', 20: 'C2'},
-    'trad': {1.25: 'C3', 2.5: 'C3', 5: 'C3', 10: 'C3', 20: 'C3'},
+    # 'trad': {1.25: 'C3', 2.5: 'C3', 5: 'C3', 10: 'C3', 20: 'C3'},
+    'trad': {},
 }
 # C4: purple
-analytical_plot_color = 'C9'
+DEFAULT_ANALYTICAL_COLOR = 'C9'
 
 '''color scale'''
 def get_color(ds_target):
@@ -255,10 +364,13 @@ def get_line_default_kwargs(chain_ty: Literal['por', 'trad'], ds_target, as_scat
     is_por = chain_ty == 'por'
     z_order = 2 + (.1 if is_por else -.1)
     # color = get_color(ds_target)
-    color = plot_colors[chain_ty][ds_target]
-    kw: dict[str, Any] = dict(zorder=z_order, color=color, linewidth=1.5 if is_por else 2.5)
+    # color = plot_colors[chain_ty].get(ds_target, None)
+    color = None
+    kw: dict[str, Any] = dict(zorder=z_order, linewidth=2.0 if is_por else 2.5)
+    kw.update(dict(color=color) if color else {})
     marker_k: str = 'style' if as_scatter else 'marker'
-    kw[marker_k] = line_markers[chain_ty][ds_target]
+    marker = line_markers[chain_ty].get(ds_target, None)
+    kw.update({marker_k: marker} if marker else {})
     return kw
 
 
@@ -294,10 +406,33 @@ class Comment:
 
 
 # '2^{4}'
-scaled_conv_lookup = {0.0625: '16', 0.125: '8', 0.25: '4', 0.5: '2'}
+scaled_conv_lookup = {
+    0.0625: '16', 0.125: '8', 0.25: '4', 0.5: '2',
+    1/3: '3',
+    1/2.4: '\\frac{12}{5}',
+    7/12: '\\frac{12}{7}',
+    19/30: '\\frac{30}{19}',
+    2/3: '\\frac{3}{2}',
+    3/4: '\\frac{4}{3}',
+    5/6: '\\frac{6}{5}',
+    11/12: '\\frac{12}{11}',
+    29/30: '\\frac{30}{29}',
+}
 
 
-scaled_target_lookup = {1.25: '\\frac{{5}}{{4}}', 2.5: '\\frac{{5}}{{2}}'}
+scaled_target_lookup = {
+    1.25: '\\frac{{5}}{{4}}',
+    2.5: '\\frac{{5}}{{2}}',
+    1.5: '\\frac{3}{2}',
+    1.75: '\\frac{7}{4}',
+    1.9: '\\frac{19}{10}',
+    2.25: '\\frac{9}{4}',
+    2.75: '\\frac{11}{4}',
+    2.9: '\\frac{29}{10}',
+    1.0: '1',
+    2.0: '2',
+    3.0: '3',
+}
 
 
 def gen_ds_target_tex(t: float, with_x=False) -> str:
@@ -306,7 +441,7 @@ def gen_ds_target_tex(t: float, with_x=False) -> str:
     return c_str
 
 
-def gen_cec_prob_str(ds_target: float, is_trad=False, scaled=None):
+def gen_cec_prob_str(ds_target: float, is_trad=False, is_analytical=False, scaled=None):
     if isinstance(ds_target, str):
         print(f"don't store ds_target as str")
         raise Exception('expected float but got string')
@@ -316,32 +451,111 @@ def gen_cec_prob_str(ds_target: float, is_trad=False, scaled=None):
     # extra_pad += 1 if ds_target < 5 and is_trad else 0
     c_str = gen_ds_target_tex(ds_target)
     cx_str = gen_ds_target_tex(ds_target, with_x=True)
-    cec_prob = f"$P(q; N_1 = x; c = {c_str})$   "
-    cec_trad_prob = f"$P(q; N_1 = 1; c = {cx_str})$ "
-    cec_scaled_prob = f"$P(q; N_1 = x / {scaled}; c = {c_str})$"
+    cec_prob = f"$P^\\prime(q; c = {c_str}; N_1 = x)$   "
+    cec_ana_prob = f"$P(q; c = {cx_str})\\;\\!$" + ' '*13
+    cec_trad_prob = f"$P^\\prime(q; c = {cx_str}; N_1 = 1)$ "
+    cec_scaled_prob = f"$P^\\prime(q; c = {c_str}; N_1 = x/{scaled})$"
     if scaled and scaled < 1 and scaled_conv_lookup.get(scaled, None):
-        cec_scaled_prob = f"$P(q; N_1 = x · {scaled_conv_lookup[scaled]}; c = {c_str})$"
+        cec_scaled_prob = f"$P^\\prime(q; c = {c_str}; N_1 = x·{scaled_conv_lookup[scaled]})$"
         extra_pad += -2 if scaled <= 0.0625 else 0
-    return (cec_trad_prob if is_trad else (cec_scaled_prob if scaled else cec_prob)) + (' ' * extra_pad)
+    return ((cec_ana_prob if is_analytical else cec_trad_prob)
+                if is_trad
+                else (cec_scaled_prob if scaled else cec_prob)
+            ) + (' ' * extra_pad)
+
+
+def get_unseen(already_seen: list, current_objs: list):
+    unseen = list(filter(lambda x: x not in already_seen, current_objs))
+    if len(unseen) != 1:
+        return print(f"WARNING: get_unseen found unseen with len /= 1: {unseen}")
+    obj = unseen[0]
+    already_seen.append(obj)
+    return obj
+
+
+def save_csv(filename: str, all_data: list[tuple[str, pd.Series]]):
+    data = {l:s for l,s in all_data}
+    df = pd.DataFrame(data)
+    df.to_csv(filename)
+
+
+def csv_col_label(results_ty, chain_ty, q, ds_target, daa: Any = '0', scale=None) -> str:
+    return "&".join([f"kls={results_ty}", f"ty={chain_ty}", f"q={q}", f"ds={ds_target}", f"daa={daa}", f"scale={scale or 1}"])
+
+
+def _plot_this_csv(_csv_data, seen_lines, legend_gids, _chain_ty, __q, _ds_target, _daa, __kwargs):
+    def _inner():
+        plot_res = _csv_data.plot(**__kwargs)
+        get_unseen(seen_lines, plot_res.get_lines()).set_gid(
+            f'results_line_{_chain_ty}_q{__q}_ds{_ds_target}_daa{_daa}'
+            .replace('.', '_'))
+        legend_gids.append(('results', _chain_ty, __q, _ds_target, _daa))
+    return _inner
+
+
+def _plot_this_analytical(theoretical_data, label, seen_lines, legend_gids, __q, _ds_target, __kw):
+    def _inner():
+        t_axes = theoretical_data.plot(label=label, zorder=2, linestyle="dashed", linewidth=2.0, **__kw)
+        get_unseen(seen_lines, t_axes.get_lines()).set_gid(
+            f'analytical_line_trad_q{__q}_ds{int(_ds_target)}_daa0'.replace('.', '_'))
+        legend_gids.append(('analytical', 'trad', __q, int(_ds_target), 0))
+    return _inner
+
+
+def plot_analytical(multipliers, q: float, ds_target: int, td_max_ys, t_series, plot_fs, seen_lines, legend_gids, cec_scaled=None):
+    theoretical_data = ds_theoretical_series(multipliers, q=q, after_n_confs=ds_target)
+    if cec_scaled:
+        theoretical_data = pd.Series(theoretical_data.values, index=[x * cec_scaled for x in theoretical_data.index])
+    td_max_ys.append(theoretical_data.max())
+    prob_math = gen_cec_prob_str(ds_target, is_trad=True, is_analytical=True)
+    label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)"
+    t_series.append((csv_col_label('analytical', 'trad', q, ds_target, daa='0'), theoretical_data))
+    plot_fs.append(_plot_this_analytical(theoretical_data, label, seen_lines, legend_gids, q, ds_target, dict()))
+
+
+
+"""
+########  ##        #######  ########          ######  ##     ##    ###    ########  ########
+##     ## ##       ##     ##    ##            ##    ## ##     ##   ## ##   ##     ##    ##
+##     ## ##       ##     ##    ##            ##       ##     ##  ##   ##  ##     ##    ##
+########  ##       ##     ##    ##            ##       ######### ##     ## ########     ##
+##        ##       ##     ##    ##            ##       ##     ## ######### ##   ##      ##
+##        ##       ##     ##    ##            ##    ## ##     ## ##     ## ##    ##     ##
+##        ########  #######     ##    #######  ######  ##     ## ##     ## ##     ##    ##
+
+PLOT_CHART
+"""
 
 
 def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_discounted=False,
-        title=None, x_label=None, y_label=None, comment: Optional[Comment] = None,
-        save_png=False, png_filename=None,
-        figsize: tuple[float, float] = (10, 7), dpi=100, x_range=None,
+        title=None, x_label=None, y_label=None, sec_x_label=None, comment: Optional[Comment] = None,
+        save_png=False, out_filenames=None,
+        figsize: tuple[float, float] = (10, 7), dpi=100, x_range=None, y_lim=None,
         seed_qs=None, seed_ds_targets=None,
         as_scatter=False,
+        plot_this_order: Optional[list[int]] = None,
+        # analytical_plot_color=DEFAULT_ANALYTICAL_COLOR,
+        legend_loc: Optional[str] = None,
+        draw_scaled_analytical: Optional[list[tuple[float, int, Optional[float]]]] = None,
         ):
-    print(f"\nPlotting chart: {png_filename or '<tmp-not-saved>'}")
-    plt.figure(figsize=figsize, dpi=dpi)
+    print(f"\nPlotting chart: {out_filenames or '<tmp-not-saved>'}")
+    figure = plt.figure(figsize=figsize, dpi=dpi)
     _x_range_max = x_range[1] if x_range else 21
     _max_ix = 0
     qs = set(seed_qs or [])
     ds_targets = set(seed_ds_targets or [])
     kwargs = dict(style='.') if as_scatter else dict()
     kwargs.update(plot_kwargs or dict())
+
+    # functions that we call later to do the actual plotting. call them later so we can control the order they are drawn / added to legend.
+    plot_fs = []
+    # track parameters for legend element global ids -- should be done in plot_f so the order matches.
+    legend_gids = []
+    seen_lines = list(plt.axes().get_lines())
+
+
     print(f"Tabulating CSVs.")
-    csv_series = []
+    csv_series: list[tuple[str, pd.Series]] = []
     por_count = -1
     trad_count = -1
     for csv_i, (fname, chain_ty, label_extra) in enumerate(csv_files):
@@ -355,7 +569,6 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
             por_plot_opts = PorPlotOpts()
 
         n_trials, max_ix, block_target, _q, ds_target, csv_data, ms_elapsed, daa = read_csv_data(fname, chain_ty)
-        csv_series.append(csv_data)
         if chain_ty == 'por':
             ty_str = 'PoR: '
             por_count += 1
@@ -365,12 +578,13 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
 
         _kwargs = dict(**kwargs)
         _kwargs.update(get_line_default_kwargs(chain_ty, ds_target, as_scatter))
-        if trad_count > 1 or not por_plot_opts.use_consistent_color:
-            del _kwargs['color']
+        # if trad_count > 1 or not por_plot_opts.use_consistent_color:
+        #     del _kwargs['color']
 
         log_ds_target = ds_target
         if por_plot_opts and por_plot_opts.cec_scaled:
             csv_data = pd.Series(csv_data.values, index=[x * por_plot_opts.cec_scaled for x in csv_data.index])
+            max_ix *= por_plot_opts.cec_scaled
             log_ds_target = ds_target / por_plot_opts.cec_scaled
 
         if por_plot_opts:
@@ -379,8 +593,9 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         prob_math = gen_cec_prob_str(ds_target, is_trad=is_trad, scaled=por_plot_opts and por_plot_opts.cec_scaled)
         if 'label' not in _kwargs:
             _kwargs['label'] = f"y = {prob_math} --- {ty_str} $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $\\mathrm{{DAA}}_N = {daa}$; ($n \\geq {n_trials}$) {label_extra or ''}"
+        csv_series.append((csv_col_label('results', chain_ty, _q, ds_target, daa=daa, scale=por_plot_opts.cec_scaled), csv_data))
 
-        csv_data.plot(**_kwargs)
+        plot_fs.append(_plot_this_csv(csv_data, seen_lines, legend_gids, chain_ty, _q, ds_target, daa, _kwargs))
         # ms_elapsed.plot(label=f"$\\bar{{d}}$ (ms); $B_f^{{-1}} = {block_target}$", secondary_y=True)
         # d2.plot(label="PoR - $y^{0.7}$")
         _max_ix = max(_max_ix, max_ix)
@@ -394,239 +609,204 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
         _max_ix = _x_range_max
 
     # if we don't have data then don't needlessly increase x_range
-    _max_ix = min(_max_ix + 1, _x_range_max)
+    _max_ix = int(min(_max_ix + 1, _x_range_max))
     x_range = (0 if x_range is None else x_range[0], _max_ix)
 
-    print(f"Calculating theoretical probabilities.")
+    print(f"Calculating theoretical probabilities. (max_ix={_max_ix})")
     t_series = []
     # multipliers = list(range(1, min(_max_ix+1,20))) + list(range(20, _max_ix+1, 1))
     multipliers = list(range(1, _max_ix+1))
     largest_x = _max_ix
     td_max_ys = []
+
     for q in _qs:
         for ds_target in ds_targets:
-            theoretical_data = ds_theoretical_series(multipliers, q=q, after_n_confs=ds_target)
-            t_series.append(theoretical_data)
-            td_max_ys.append(theoretical_data.max())
-            prob_math = gen_cec_prob_str(ds_target, is_trad=True)
-            theoretical_data.plot(label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)", zorder=2, linestyle="dashed", linewidth=2.0, color=analytical_plot_color)
-    max_y = max(max(td_max_ys), max(s.max() for s in csv_series) if csv_series else 0)
+            # theoretical_data = ds_theoretical_series(multipliers, q=q, after_n_confs=ds_target)
+            # td_max_ys.append(theoretical_data.max())
+            # prob_math = gen_cec_prob_str(ds_target, is_trad=True, is_analytical=True)
+            # label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)"
+            # t_series.append((csv_col_label('analytical', 'trad', q, ds_target, daa='0'), theoretical_data))
+            # _kw = dict() if len(_qs) * len(ds_targets) > 1 else dict(color=analytical_plot_color)
+            # plot_fs.append(_plot_this_analytical(theoretical_data, label, seen_lines, legend_gids, q, ds_target, _kw))
+            plot_analytical(multipliers, q, ds_target, td_max_ys, t_series, plot_fs, seen_lines, legend_gids)
+
+    if draw_scaled_analytical:
+        for (q, ds_target, _scale) in draw_scaled_analytical:
+            plot_analytical(multipliers, q, ds_target, td_max_ys, t_series, plot_fs, seen_lines, legend_gids, cec_scaled=_scale)
+
+
+    #max_y = max(max(td_max_ys), max(s.max() for s in csv_series) if csv_series else 0)
     print(f"Done. Now drawing.")
+
+    if plot_this_order:
+        len_pto = len(plot_this_order)
+        assert_eq(len_pto, len(plot_fs), f"length of `plot_this_order` ({len_pto}) must = the number of series we're plotting ({len(plot_fs)})")
+        assert_eq(len_pto, len(set(plot_this_order)), "`plot_this_order` must have unique elements")
+        for series_i in plot_this_order:
+            plot_fs[series_i]()
+    else:
+        for f in plot_fs:
+            f()
 
     default_title = "\n".join([
         f"P(atk success) PoR vs Traditional Chain",
         "(more confirmations w/ trad chain vs more chains w/ PoR)",
         # f"Trials={n_trials}"
         ])
-    plt.suptitle(title or default_title, fontdict=dict(linespacing=1.5))
+    if title is None or title:
+        plt.suptitle(title or default_title, fontdict=dict(linespacing=1.5, fontsize=12))
     plt.title('', fontdict=dict(fontsize=8))
     plt.xlabel(x_label or "x = Confirmation Multiplier / # Chains")
-    plt.ylabel(y_label or "P(atk success)")
+    plt.ylabel(y_label or "Probability of a successful doublespend")
     plt.grid(True)
     plt.grid(True, which='minor', color=(0.9, 0.9, 0.9, 0.1))
     plt.minorticks_on()
-    plt.legend()
+    legend_kwargs = dict(loc=legend_loc) if legend_loc else {}
+    legend = plt.legend(**legend_kwargs)
+    for lline, (graph_ty, chain_ty, q, ds, daa) in zip(legend.get_lines(), legend_gids):
+        lline.set_gid(f'legend_line_{graph_ty}_line_{chain_ty}_q{q}_ds{ds}_daa{daa}'.replace('.', '_'))
+    for ltext, (graph_ty, chain_ty, q, ds, daa) in zip(legend.get_texts(), legend_gids):
+        ltext.set_gid(f'legend_text_{graph_ty}_line_{chain_ty}_q{q}_ds{ds}_daa{daa}'.replace('.', '_'))
+        # ltext.set_backgroundcolor((1,1,1,0.01))
+        # ltext.set_backgroundcolor((1,0.2,0.7,0.5))  # debug
+        ltext.set(bbox={'boxstyle': 'round, pad=0.2', 'lw': 0, 'facecolor': (1,1,1,0.01)})
 
+    # force integer ticks on main x axis
+    plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=20, integer=True))
+    plt.gca().xaxis.set_minor_locator(MaxNLocator(nbins=80, integer=True))
+
+    # set top x axis
     if len(ds_targets) == 1:
         ds_c = list(ds_targets)[0]
         c2n = lambda c: c / ds_c
         n2c = lambda n: n * ds_c
         sec_x_axis = plt.gca().secondary_xaxis('top', functions=(n2c, c2n))
-        sec_x_axis.set_xlabel('Traditional Confirmations (PoR Equivalent via CEC)')
+        sec_x_axis.set_xlabel(sec_x_label or 'Traditional Confirmations (PoR Equivalent via CEC)')
+        # can't do this on sec axis? mb need to do a different way
+        # sec_x_axis.set_major_locator(MaxNLocator(nbins=20, integer=True))
     else:
-        _id = lambda x: x
-        sec_x_axis = plt.gca().secondary_xaxis('top', functions=(_id, _id))
-        sec_x_axis.set_xlabel('WARNING: UNABLE TO SET TOP X AXIS!!!', color='red')
+        pass
+        # _id = lambda x: x
+        # sec_x_axis = plt.gca().secondary_xaxis('top', functions=(_id, _id))
+        # sec_x_axis.set_xlabel('WARNING: UNABLE TO SET TOP X AXIS!!!', color='red')
+        # raise Exception("can't plot secondary x axis")
 
     if x_range:
         plt.xlim(x_range)
-    plt.ylim(bottom=0)
+
+    if y_lim:
+        plt.ylim(y_lim)
+    else:
+        plt.ylim(bottom=0)
+
+    if len(csv_series) == 0:
+        # disable bottom x axis
+        plt.gca().xaxis.set(ticklabels=[])
+        plt.gca().set(xlabel=None)
 
     plt.tight_layout()
 
+    pre_save_cbs = []
     if comment:
         x = comment.x or x_range[1] - 0.5
         txt = plt.text(x, comment.y, comment.body,
             ha='right', va='center', wrap=True,
             fontdict=comment.font, bbox=comment.bbox)
-        # https://gist.github.com/dneuman/90af7551c258733954e3b1d1c17698fe
-        txt._get_wrap_line_width = lambda: comment.scaled_line_width(dpi)
+        def comment_pre_save_cb(fname: str):
+            if fname.endswith('.png'):
+                # https://gist.github.com/dneuman/90af7551c258733954e3b1d1c17698fe
+                txt._get_wrap_line_width = lambda: comment.scaled_line_width(dpi)
+            else:
+                txt._get_wrap_line_width = lambda: comment.scaled_line_width(72)
+        pre_save_cbs.append(comment_pre_save_cb)
 
-    if save_png:
-        plt.savefig(png_filename)
-        print(f"Saved figure out: {png_filename}")
+
+    if out_filenames:
+        for filename in out_filenames:
+            if filename.endswith('.csv'):
+                # save a csv file
+                save_csv(filename, csv_series + t_series)
+                continue
+            figure.set_gid(filename.replace('/', '_').replace('=', '_').replace('.', '_'))
+            # mutation stuff before drawing -- e.g., to fix comment layout
+            for pscb in pre_save_cbs:
+                pscb(filename)
+            # deterministic svg/pdf output
+            metadata = dict()
+            metadata.update({'CreationDate': None} if filename.endswith('.pdf') else {})
+            metadata.update({'Date': None} if filename.endswith('.svg') else {})
+            plt.savefig(filename, metadata=metadata)
+        print(f"Saved figure out: {out_filenames}")
     else:
+        print(f"Showing figure (X11)")
         plt.show()
     plt.close()
+
+
+# def plot_comparison_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_discounted=False,
+#         title=None, x_label=None, y_label=None, comment: Optional[Comment] = None,
+#         save_png=False, out_filenames=None,
+#         figsize: tuple[float, float] = (10, 7), dpi=100, x_range=None,
+#         seed_qs=None, seed_ds_targets=None,
+#         as_scatter=False,
+#         ):
 
 
 @dataclass
 class SavePlot:
     csv_files: list[CsvFileToPlot]
     title: str
-    filename: str
+    _filename: str
     kwargs: Optional[dict[str, Any]] = None
     x_label: Optional[str] = None
     y_label: Optional[str] = None
+    sec_x_label: Optional[str] = None
     x_range: Optional[tuple[float, float]] = None
+    y_lim: Optional[tuple[float, float]] = None
     comment: Optional[Comment] = None
     figsize: tuple[float, float] = (10, 10 * 0.6)
     dpi: int = 300
     seed_qs: Optional[set[float]] = None
     seed_ds_targets: Optional[set[float]] = None
+    save_as_file_exts: Optional[list[str]] = None
+    plot_this_order: Optional[list[int]] = None
+    # analytical_plot_color: Optional[str] = DEFAULT_ANALYTICAL_COLOR
+    legend_loc: Optional[str] = None
+
+    @property
+    def filenames(self):
+        # hacky check for whether a file extension was included (svg, png, pdf are the ones we care about)
+        if len(self._filename.rsplit('.', 1)[-1]) == 3:
+            return [self._filename]
+        exts = self.save_as_file_exts or list('pdf')
+        return list(f'{self._filename}.{ext}' for ext in exts)
 
     def run(self):
+        matplotlib.rcParams['svg.hashsalt'] = f'Ultra Terminum {self._filename}'
+        kwargs = dict()
+        # kwargs.update(dict(analytical_plot_color=self.analytical_plot_color) if self.analytical_plot_color else {})
         plot_chart(
-            self.csv_files, save_png=True, png_filename=self.filename,
-            title=self.title, x_label=self.x_label, y_label=self.y_label,
-            comment=self.comment, figsize=self.figsize, dpi=self.dpi,
-            x_range=self.x_range,
+            self.csv_files, save_png=True, out_filenames=self.filenames,
+            title=self.title, x_label=self.x_label,
+            y_label=self.y_label, sec_x_label=self.sec_x_label,
+            comment=self.comment,
+            figsize=self.figsize, dpi=self.dpi,
+            x_range=self.x_range, y_lim=self.y_lim,
             seed_qs=self.seed_qs, seed_ds_targets=self.seed_ds_targets,
+            plot_this_order=self.plot_this_order,
+            legend_loc=self.legend_loc,
+            **kwargs
         )
 
 
 @click.command()
-@click.option('-F', '--filter-fname', default=None, help='If present, only generate those graphs with filenames contining the filter string.')
+@click.option('-F', '--filter-fnames', default=None, multiple=True, help='If present, only generate those graphs with filenames contining the filter string.')
+@click.option('--filter-mode-or', is_flag=True, help='Use OR logic to check matches for filters rather than AND logic (AND is the default).')
 @click.option('-j', '--n-jobs', default=max(1, mp.cpu_count() - 1), help='Number of chart-generation threads to run in parallel')
-def main(filter_fname: Optional[str], n_jobs: int):
+def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bool):
 
-    if "put the old code in a block to make it collapsable":
-        csv_files = \
-            [
-                # ('exp-6-p5.csv', 'por', ''),
-                # ('exp-6-p10.csv', 'por', ''),
-                # ('exp-6-p20.csv', 'por', ''),
-                # ('exp-6-p100.csv', 'por', ''),
-                ('exp-6-p5-q0.42.csv', 'por', ''),
-                ('exp-6-p10-q0.42.csv', 'por', ''),
-                ('exp-6-p20-q0.42.csv', 'por', ''),
-                ('exp-6-p100-q0.42.csv', 'por', ''),
-            ]
-            # [ ('exp-4c-rng1.csv', 'por', '(rng,xx)')
-            # , ('exp-4c-rng-hash.csv', 'por', '(rng+hash,xx)')
-            # , ('exp-4c-hash-hash.csv', 'por', '(rng+hash,hash)')
-            # , ('exp-4c-hash-xxrev.csv', 'por', '(rng+hash,xxrev)')
-            # # , ('exp-aux1.csv', 'trad', '(1 chain)')  # this one compares a simulated traditional doublespend at various numbers of confirmations with n_chains=1
-            # , ('exp-aux1-q0.40.csv', 'trad', '(1 chain)')  # this one compares a simulated traditional doublespend at various numbers of confirmations with n_chains=1
-            # ]
-
-        # csv_files = list((f"exp-6m-q{q}.csv", 'por', None) for q in ['0.36', '0.4', '0.42', '0.44', '0.46', '0.48'])
-        # csv_files = list((f"exp-6n-q{q}.csv", 'por', None) for q in ['0.40'])
-        # csv_files = list((f"exp-6o-q{q}-t{t}.csv", 'por', None) for q in ['0.40'] for t in ['10', '20', '30'])
-
-        csv_files = [
-            ('exp-aux1-q0.44-sha256.csv', 'trad', '(trad; N_1=1)'),
-            ('exp-7-q0.44-t20-sha256.csv', 'por', None),
-            ]
-        csv_files = [
-            # ('exp-aux1-q0.44-sha256.csv', 'trad', '(trad; N_1=1)'),
-            # ('exp-8-q0.40-t10-blake3.csv', 'por', None),
-            # ('exp-8-q0.40-t10-p40-blake3.csv', 'por', None),
-            # ('exp-8-q0.40-t10-p100-blake3.csv', 'por', None),
-            # ('exp-8-q0.44-t10-p200-blake3.csv', 'por', None),
-            # ('exp-8-q0.44-t5-p200-blake3.csv', 'por', None),
-            # ('exp-8-q0.40-t10-p200-H25-blake3.csv', 'por', None),
-            # ('exp-8-q0.40-t5-p200-H25-blake3.csv', 'por', None),
-            # ('exp-8-q0.44-t10-p200-H25-blake3.csv', 'por', None),
-            # ('exp-8-q0.44-t5-p200-H25-blake3.csv', 'por', None),
-            # ('exp-8-q0.40-t5-p200-blake3.csv', 'por', None),
-            # ('exp-8-q0.40-t5-p100-H100-blake3.csv', 'por', None),
-            # ('exp-8-q0.44-t5-p100-H100-blake3.csv', 'por', None),
-            # ('exp-8-q0.40-t10-p100-H100-blake3.csv', 'por', None),
-            # ('exp-8-q0.44-t10-p100-H100-blake3.csv', 'por', None),
-            ('exp-8-q0.40-t20-p100-H100-blake3.csv', 'por', None),
-            # ('exp-8-q0.44-t20-p100-H100-blake3.csv', 'por', None),
-            # ('exp-9-RDoubleSpendWork-q0.40-t5-p100-H100-WeightedChain-blake3.csv', 'por', None),
-            # ('exp-9-RDoubleSpendWork-q0.40-t10-p100-H100-WeightedChain-blake3.csv', 'por', None),
-            ('exp-9-RDoubleSpendWork-q0.40-t20-p100-H100-WeightedChain-blake3.csv', 'por', None),
-            ]
-
-        csv_files_compare_DSW_t20 = [
-            ('exp-9-RDoubleSpendWork-q0.40-t20-p100-H100-WeightedChain-blake3.csv', 'por', '(DSW+WC)'),
-            ('exp-9-RDoubleSpendWork-q0.40-t20-p100-H100-WeightedDag-blake3.csv', 'por', '(DSW+WD)'),
-            ('exp-8-q0.40-t20-p100-H100-blake3.csv', 'por', '(DS+WC)'),
-        ]
-        csv_files_compare_DSW_t10 = [
-            ('exp-9-RDoubleSpendWork-q0.40-t10-p100-H100-WeightedChain-blake3.csv', 'por', '(DSW+WC)'),
-            ('exp-9-RDoubleSpendWork-q0.40-t10-p100-H100-WeightedDag-blake3.csv', 'por', '(DSW+WD)'),
-            ('exp-8-q0.40-t10-p100-H100-blake3.csv', 'por', '(DS+WC)'),
-        ]
-        csv_files_compare_DSW_t5 = [
-            ('exp-9-RDoubleSpendWork-q0.40-t5-p100-H100-WeightedChain-blake3.csv', 'por', '(DSW+WC)'),
-            ('exp-9-RDoubleSpendWork-q0.40-t5-p100-H100-WeightedDag-blake3.csv', 'por', '(DSW+WD)'),
-            ('exp-8-q0.40-t5-p100-H100-blake3.csv', 'por', '(DS+WC)'),
-        ]
-
-        csv_files_just_trad = [
-            # ('exp_aux1_q=0.40_dsconf-base=20.old.csv', 'trad', '(trad; $N_1=1$)'),
-            # ('exp_aux1_q=0.40_dsconf-base=5.csv', 'trad', '(trad; $N_1=1$)'),
-            # ('exp_aux1_q=0.40_dsconf-base=10.csv', 'trad', '(trad; $N_1=1$)'),
-            # ('exp_aux1_q=0.40_dsconf-base=20.csv', 'trad', '(trad; $N_1=1$)'),
-        ]
-
-        csv_exp_10 = [
-            ('exp-10-RDoubleSpend-q0.40-t5-p100-H100-DAA1000-WeightedChain-blake3.csv', 'por', 'e10 (DS+WC+DAA1000)'),
-            ('exp-9-RDoubleSpendWork-q0.40-t5-p100-H100-WeightedChain-blake3.csv', 'por', 'e9 (DSW+WC)'),
-            ('exp-9-RDoubleSpendWork-q0.40-t5-p100-H100-WeightedDag-blake3.csv', 'por', 'e9 (DSW+WD)'),
-            ('exp-8-q0.40-t5-p100-H100-blake3.csv', 'por', 'e8 (DS+WC)'),
-        ]
-
-        csv_exp_11 = [
-                ('exp-11-RDoubleSpend-q0.40-t5-p100-H50-DAA100-delay25-WeightedChain-blake3.csv', 'por', 'e11 (DS+WC + Delay 0.25 blocks)'),
-                ('exp-11-RDoubleSpend-q0.40-t5-p100-H50-DAA100-delay50-WeightedChain-blake3.csv', 'por', 'e11 (DS+WC + Delay 0.50 blocks)'),
-                ('exp-11-RDoubleSpend-q0.40-t5-p100-H50-DAA100-delay100-WeightedChain-blake3.csv', 'por', 'e11 (DS+WC + Delay 1 blocks)'),
-                ('exp-11-RDoubleSpend-q0.40-t5-p100-H50-DAA100-delay200-WeightedChain-blake3.csv', 'por', 'e11 (DS+WC + Delay 2 blocks)'),
-                ('exp-8-q0.40-t5-p100-H100-blake3.csv', 'por', 'e8 (DS+WC) Best prior'),
-                ('exp-11-RDoubleSpend-q0.40-t5-p100-H50-DAA100-delay0-WeightedChain-blake3.csv', 'por', 'e11 (DS+WC + Draft Refl Considered)'),
-            ]
-
-        csv_exp_11_vs_aux = [
-                ('exp-11-RDoubleSpend-q0.40-t5-p100-H50-DAA100-delay0-WeightedChain-blake3.csv', 'por', 'e11 (DS+WC + Draft Refl Considered)'),
-                ('exp-11-RDoubleSpendWork-q0.40-t5-p100-H50-DAA100-delay0-WeightedDag-blake3.csv', 'por', 'e11 (DSW+WD + Draft Refl Considered)'),
-                ('exp_aux1_q=0.40_dsconf-base=5.csv', 'trad', '(trad; $N_1=1$)'),
-            ]
-
-        csv_exp_12 = [
-            ('exp-12-repeat-8-RDoubleSpendWork-q0.40-t10-p50-H50-WeightedDag-blake3.csv', 'por', None),
-            ('exp-12-repeat-8-RDoubleSpendWork-q0.40-t20-p50-H50-WeightedDag-blake3.csv', 'por', None),
-            ('exp-12-repeat-8-RDoubleSpendWork-q0.40-t5-p50-H50-WeightedDag-blake3.csv', 'por', None),
-            ('exp-12-repeat-8-RDoubleSpendWork-q0.44-t10-p50-H50-WeightedDag-blake3.csv', 'por', None),
-            ('exp-12-repeat-8-RDoubleSpendWork-q0.44-t20-p50-H50-WeightedDag-blake3.csv', 'por', None),
-            ('exp-12-repeat-8-RDoubleSpendWork-q0.44-t5-p50-H50-WeightedDag-blake3.csv', 'por', None),
-            ('exp-12-repeat-8-RDoubleSpendWork-q0.48-t10-p50-H50-WeightedDag-blake3.csv', 'por', None),
-            ('exp-12-repeat-8-RDoubleSpendWork-q0.48-t20-p50-H50-WeightedDag-blake3.csv', 'por', None),
-            ('exp-12-repeat-8-RDoubleSpendWork-q0.48-t5-p50-H50-WeightedDag-blake3.csv', 'por', None),
-        ]
-
-        csv_exp_12_q40 = list(filter(lambda t: 'q0.40' in t[0], csv_exp_12))
-        csv_exp_12_q44 = list(filter(lambda t: 'q0.44' in t[0], csv_exp_12))
-        csv_exp_12_q48 = list(filter(lambda t: 'q0.48' in t[0], csv_exp_12))
-
-        csv_exp_12_q40_xx = [
-            # ('exp-12-repeat-8-RDoubleSpend-q0.40-t5-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-            # ('exp-12-repeat-8-RDoubleSpend-q0.40-t10-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-            # ('exp-12-repeat-8-RDoubleSpend-q0.40-t20-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-            # ('exp-12-repeat-8-RDoubleSpend-q0.44-t5-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-            # ('exp-12-repeat-8-RDoubleSpend-q0.44-t10-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-            # ('exp-12-repeat-8-RDoubleSpend-q0.44-t20-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-            # ('exp-12-repeat-8-RDoubleSpend-q0.48-t5-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-            # ('exp-12-repeat-8-RDoubleSpend-q0.48-t10-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-            ('exp-12-repeat-8-RDoubleSpend-q0.48-t20-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-        ]
-
-        csv_exp_12_5050 = [
-            # actual 50/50 is just high variance noise -- 0.5 < P() < 1 (whereas theoretical is == 1; but we cut off length of attack)
-            # ('exp-12-fiftyfifty-8-RDoubleSpend-q0.5-t5-p50-H50-WeightedChain-xxh3.csv', 'por', None),
-            # ('exp-12-point495-RDoubleSpend-q0.495-t5-p50-H200-WeightedChain-xxh3.csv', 'por', None),
-            ('exp-12-point490-RDoubleSpend-q0.490-t5-p50-H100-WeightedChain-xxh3.csv', 'por', None),
-        ]
-
-        # csv_files = csv_files_just_trad
-        csv_files = csv_files_compare_DSW_t5
-        csv_files = csv_exp_11_vs_aux
-        csv_files = csv_exp_12_q40
-        csv_files = csv_exp_12_5050
-        csv_files = csv_exp_12_q40_xx
+    if filter_fnames and not isinstance(filter_fnames, Iterable):
+        raise Exception(f'wanted an iterable :( -- {filter_fnames}')
 
     csv_compare_aux = [
         ('exp_aux1_q=0.40_dsconf-base=5.csv', 'trad', 'DS+WC; DAA_100'),
@@ -717,9 +897,11 @@ def main(filter_fname: Optional[str], n_jobs: int):
             '24': exp_16_csv_name,
             '25': exp_16_csv_name,
             '26': exp_16_csv_name,
-            '27': exp_16_csv_name,
+            # '27': exp_16_csv_name,
             '28': exp_16_csv_name,
             '29': exp_16_csv_name,
+            '30': exp_16_csv_name,
+            '31': exp_16_csv_name,
         }).get(exp_num, unknown_exp_num_name)
 
     def gen_por_equiv_rand_hrs_csvs(q, t, bt=50, hr=50, only_real_world=False, exp_num='13', aux_num='3', daa=100) -> list[CsvFileToPlot]:
@@ -743,7 +925,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
         csv_name_f = csv_name_f_from_exp(exp)
         csvs = [
             (csv_name_f(q, t, bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', None),
-            (csv_name_f(q, t, bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None),
+            (csv_name_f(q, t, bt, hr, exp_num=aux, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None),
             (csv_name_f(q, render_conf_target(float(t) * 2), bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=2)),
         ]
         if float(t) <= 5:
@@ -764,7 +946,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             csvs.append((csv_name_f(q, render_conf_target(float(t) / 4), bt, hr, exp_num=exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', PorPlotOpts(cec_scaled=0.25)))
         return csvs
 
-    def gen_por_cec_full_csvs(q: str, t: int, exp, aux, bt, hr, daa, max_c_oom_span=4, oom_base=2,
+    def gen_por_cec_full_csvs(q: str, t: float, exp, aux, bt, hr, daa, max_c_oom_span=4, oom_base=2,
                               min_ds_conf=MIN_DS_CONF, max_ds_conf=MAX_DS_CONF, **kwargs
                               ) -> list[CsvFileToPlot]:
         csvs = []
@@ -777,22 +959,62 @@ def main(filter_fname: Optional[str], n_jobs: int):
         csvs.append((csv_name_f(q, t, bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None))
         return csvs
 
+    # for many ts
+    def gen_por_cec_scaled_csvs(q: str, ts: list[str], exp, aux, bt, hr, daa,
+                              scale_relative_to = 5.0,
+                              min_ds_conf=1.0, max_ds_conf=MAX_DS_CONF, **kwargs
+                              ) -> list[CsvFileToPlot]:
+        csvs = []
+        csv_name_f = csv_name_f_from_exp(exp)
+        ppo_kw = dict(use_consistent_color=False)
+
+        f_s = lambda _t: float(_t) / scale_relative_to
+        scaling_options = [(float(t), PorPlotOpts(cec_scaled=f_s(t), **ppo_kw) if f_s(t) != 1 else PorPlotOpts(**ppo_kw)) for t in ts]
+        for (_t, opts) in scaling_options:
+            if min_ds_conf <= _t <= max_ds_conf:
+                # hack to get around exp numbers
+                t = render_conf_target(_t)
+                _exp = exp if t not in ['1.25', '2.5'] else '26'
+                csvs.append((csv_name_f(q, t, bt, hr, exp_num=_exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', opts))
+        csvs.append((csv_name_f(q, ts[0], bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None))
+        csvs.append((csv_name_f(q, ts[-1], bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', PorPlotOpts(cec_scaled=f_s(ts[-1]), **ppo_kw)))
+        # for t in [5,10,20]:
+        #     csvs.append((csv_name_f(q, t, bt, hr, exp_num=f'26{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', PorPlotOpts(cec_scaled=f_s(t), **ppo_kw)))
+        return csvs
+
     def gen_por_hash_comare(q, t) -> list[CsvFileToPlot]:
         return [
             (exp_13_csv_name(q, t, exp_num='13', strat="DoubleSpendWork", cs="WeightedDag"), 'por', 'hash:xxh3'),
             (exp_16_csv_name(q, t, exp_num='16', strat="DoubleSpendWork", cs="WeightedDag", hashname="blake3"), 'por', 'hash:blake3'),
         ]
 
-
     def std_x_label(t):
         return f"Simplex $N_1$"
 
 
-    CEC_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = 1; c = NC)$"
-    CEC_EXT_TITLE_STR = "$P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$"
-    CEC_EXT2_TITLE_STR = "$P(q; N_1 = N; c = C) \\; \\approx \\; P(q; N_1 = a; c = \\frac{{CN}}{{a}}) \\; \\approx \\; P(q; N_1 = 1; c = CN)$"
-    CEC_EXT3_TITLE_STR = "$P(q; N_1 = N; c = C) \\; \\approx \\; P(q; N_1 = \\frac{{N}}{{a}}; c = Ca) \\; \\approx \\; P(q; N_1 = 1; c = CN)$"
+    def special_q44_t5_daa2000() -> CsvFileToPlot:
+        return (csv_name_f_from_exp('29')('0.44', 5, bt=75, hr=75, exp_num='29', daa=2000, hashname="xxh3"), 'por', None)
 
+
+    CEC_TITLE_STR = "$P^\\prime(q; c = C; N_1 = N) \\; \\approx \\; P^\\prime(q; c = NC; N_1 = 1)$"
+    CEC_EXT_TITLE_STR = "$P^\\prime(q; c = C; N_1 = N) \\; \\approx \\; P^\\prime(q; c = 2C; N_1 = \\frac{{N}}{{2}})$"
+    CEC_EXT2_TITLE_STR = "$P^\\prime(q; c = C; N_1 = N) \\; \\approx \\; P^\\prime(q; c = \\frac{{CN}}{{a}}; N_1 = a) \\; \\approx \\; P^\\prime(q; c = CN; N_1 = 1)$"
+    CEC_EXT3_TITLE_STR = "$P^\\prime(q; c = C; N_1 = N) \\; \\approx \\; P^\\prime(q; c = Ca; N_1 = \\frac{{N}}{{a}}) \\; \\approx \\; P^\\prime(q; c = CN; N_1 = 1)$"
+    CEC_EXT4_TITLE_STR = "$\\forall a \\in [1, N]: P^\\prime(q; c = \\frac{{CN}}{{a}}; N_1 = a)$ is approximately constant"
+
+    RESULTS_FIG_WIDTH = 10
+    RESULTS_FIG_ASPECT = 1/0.55
+    mk_fig_aspect = lambda w, a: (w, w / a)
+    mk_results_fig = lambda w: mk_fig_aspect(w, RESULTS_FIG_ASPECT)
+    mod_fig_size_h = lambda fs, r: (fs[0], fs[1] * r)
+    RESULTS_FIG_SIZE = mk_results_fig(RESULTS_FIG_WIDTH)
+    RESULTS_FIG_TALLER_SIZE = mk_fig_aspect(0.85 * RESULTS_FIG_WIDTH, 14/10)
+    RESULTS_ZOOMED_FIG_SIZE = mk_results_fig(0.85 * RESULTS_FIG_WIDTH)
+    RESULTS_MORE_ZOOMED_FIG_SIZE = mk_results_fig(0.8 * RESULTS_FIG_WIDTH)
+    RESULTS_ZOOMED_TALLER_FIG_SIZE = mod_fig_size_h(RESULTS_ZOOMED_FIG_SIZE, 1.1)
+
+    LP_SEC_X_LABEL = f"Traditional Blockchain Confirmations ($\\sim$time)"
+    LP_X_LABEL = f"Simplex $N_1$ ($\\sim$capacity)"
 
     jobs_to_save: list[SavePlot] = [
         SavePlot(
@@ -805,6 +1027,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
                 ]),
             # "Traditional Doublespend Comparison: $N_1=1$\nTheoretical vs DS+WC vs DSW+WD vs DS+LC (w/ DAA over {100,1000} blocks)",
             fname,
+            save_as_file_exts=['png', 'pdf', 'svg'],
             x_label=f"x = Confirmations / {t}",
             comment=Comment(' '.join([
                 "Notice that the green line does not approach 0:",
@@ -819,7 +1042,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
                 "This is why fork rules should use chain $weight$ rather than $height$."
                 ]), c_y, wrap_line_width=425),
             ) for t, csvs, c_y, fname in [
-                (5, csv_compare_aux, 0.22, "png/trad_doublespend_comparison.png"),
+                (5, csv_compare_aux, 0.22, "png/trad_doublespend_comparison"),
             ]
     ] + [
         SavePlot(
@@ -829,6 +1052,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
                 f"Q: Is the simulation of traditional doublespends consisted with theoretical results?",
                 f"$N_1=1$; $q={q}$; doublespend target: ${t} x$"]),
             f"png/trad_ds_comparison_q={q}_t={t}.png",
+            # save_as_file_exts=['png', 'pdf', 'svg'],
             x_label=f"x = Confirmations / {t}",
             x_range=q_t_to_x_range[(q, t)],
         ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20']
@@ -868,7 +1092,7 @@ def main(filter_fname: Optional[str], n_jobs: int):
             gen_por_equiv_rand_hrs_csvs(q, t, bt, hr, only_real_world=True, exp_num=exp, aux_num=aux, daa=daa),
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture | WeightedDag + DoubleSpendWork",
-                f"$q={q}$ | {'hash-rate randomly distributed ($q+p=1$ true network-wide)' if int(exp) < 17 else 'uniform hash rate distribution'}",
+                f"$q={q}$ | {'hash-rate randomly distributed ($q+p=1$ true network-wide)' if int(exp) < 17 else 'uniform hash-rate distribution'}",
                 f"{CEC_TITLE_STR}"]),
             f"png/por_equiv_onlyrealworld_{'rand_hr' if int(exp) < 17 else 'uni_hr'}_e{exp}_a{aux}_q={q}_t{t}_bt={bt}_hr={hr}_daa={daa}.png",
             x_label=std_x_label(t),
@@ -882,27 +1106,27 @@ def main(filter_fname: Optional[str], n_jobs: int):
                 ('16', '3', '50', '50', '100'),
                 ('17', '3', '50', '50', '100'),
             ]
-    ] + [
-        # $P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$
-        SavePlot(
-            gen_por_cec_ext_test(q, t, exp=exp, aux=aux, bt=bt, hr=hr, daa=daa),
-            "\n".join([
-                f"PoR Confirmation Equivalence Conjecture (Extended)",
-                f"$q={q}$ | WD+DSW | {'random' if int(exp) < 17 else 'uniform'} hash rate distribution",
-                f"{CEC_EXT_TITLE_STR}"]),
-            # f" PoR Confirmation Equivalence Conjecture (Extended) \n $q={q}$ | WD+DSW | random hash rate distribution \n{CEC_EXT_TITLE_STR}",
-            f"png/por_equiv_orw_ext-cec_e{exp}_q={q}_t{t}.png",
-            x_label=std_x_label(t),
-            x_range=q_t_to_x_range[(q, t)],
-        ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10']
-            for (exp, aux, bt, hr, daa) in [
-                    ('12', '3', '50', '50', '100'),
-                    ('13', '3', '50', '50', '100'),
-                    ('14', '14', '100', '100', '100'),
-                    ('15', '3', '50', '50', '500'),
-                    ('16', '3', '50', '50', '100'),
-                    ('17', '3', '50', '50', '100'),
-                    ]
+    # ] + [
+    #     # $P(q; N_1 = N; c = C) \\approx P(q; N_1 = \\frac{{N}}{{2}}; c = 2C)$
+    #     SavePlot(
+    #         gen_por_cec_ext_test(q, t, exp=exp, aux=aux, bt=bt, hr=hr, daa=daa),
+    #         "\n".join([
+    #             f"PoR Confirmation Equivalence Conjecture (Extended)",
+    #             f"$q={q}$ | WD+DSW | {'random' if int(exp) < 17 else 'uniform'} hash-rate distribution",
+    #             f"{CEC_EXT_TITLE_STR}"]),
+    #         # f" PoR Confirmation Equivalence Conjecture (Extended) \n $q={q}$ | WD+DSW | random hash-rate distribution \n{CEC_EXT_TITLE_STR}",
+    #         f"png/por_equiv_orw_ext-cec_e{exp}_q={q}_t{t}.png",
+    #         x_label=std_x_label(t),
+    #         x_range=q_t_to_x_range[(q, t)],
+    #     ) for q in ['0.40', '0.44', '0.48'] for t in ['5', '10']
+    #         for (exp, aux, bt, hr, daa) in [
+    #                 ('12', 'aux3', '50', '50', '100'),
+    #                 ('13', 'aux3', '50', '50', '100'),
+    #                 ('14', 'aux14', '100', '100', '100'),
+    #                 ('15', 'aux3', '50', '50', '500'),
+    #                 ('16', 'aux3', '50', '50', '100'),
+    #                 ('17', 'aux3', '50', '50', '100'),
+    #                 ]
     ] + [
         SavePlot(
             [
@@ -1103,11 +1327,11 @@ def main(filter_fname: Optional[str], n_jobs: int):
     ] + [
         # just e26 CEC EXT
         SavePlot(
-            gen_por_cec_ext_test(q, t, exp='26', aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3"),
+            gen_por_cec_ext_test(q, t, exp='26', aux='26aux', bt=75, hr=75, daa=daa, hashname="xxh3"),
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture (Extended)",
                 f"{CEC_EXT2_TITLE_STR}",
-                f"If the CEC is true, then these plots should all line up.",
+                f"If the CEC is true, then these plots should align",
             ]),
             f"png/_e26_ext_9000_q={q}_t={t}_daa={daa}.png",
             x_label=std_x_label(t),
@@ -1115,36 +1339,346 @@ def main(filter_fname: Optional[str], n_jobs: int):
         )
         for q in ['0.40', '0.44', '0.48'] for t in ['1.25', '2.5', '5', '10'] for daa in [100, 500]
     ] + [
-        # just e26 CEC EXT
+        # just e26+e28 CEC EXT
         SavePlot(
             gen_por_cec_full_csvs(q, int(t), exp=exp, aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3", **gen_csv_kwargs),
             "\n".join([
                 f"PoR Confirmation Equivalence Conjecture (Extended)",
                 f"{CEC_EXT2_TITLE_STR}",
-                f"If the CEC is true, then these plots should all line up.",
+                f"If the CEC is true, then these plots should align",
             ]),
-            f"png/_e{exp}_ext_rev_9000_q={q}_t={t}_daa={daa}{suffix}.png",
+            f"png/_e{exp}_ext_rev_9000_q={q}_t={t}_daa={daa}{suffix}",
+            save_as_file_exts=['png', 'csv'],
             x_label=std_x_label(t),
             x_range=q_t_to_x_range[(q, t)],
         )
         for q in ['0.40', '0.44', '0.48'] for t in ['5', '10', '20'] for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
         for suffix, gen_csv_kwargs in [('', dict()), ('_nofrac', dict(min_ds_conf=5))]
+    ] + [
+        # e30 partial confs
+        SavePlot(
+            gen_por_cec_scaled_csvs(q, ts, exp=exp, aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3",
+                scale_relative_to=float(ts[0]),
+                **gen_csv_kwargs),
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture (Extended)",
+                f"{CEC_EXT2_TITLE_STR}",
+                f"If the CEC is true, then these plots should align",
+            ]),
+            f"png/_e{exp}_partialConfs_q={q}_t={ts[0]}-{ts[-1]}_daa={daa}{suffix}",
+            save_as_file_exts=['png', 'csv'],
+            x_label=std_x_label(ts[-1]),
+            x_range=(0, 121),
+            figsize=(9,12),
+            legend_loc='upper right',
+        )
+        for q in ['0.40', '0.44', '0.48'] for ts in [['1.0', '1.25', '1.5', '1.75', '1.9', '2.0', '2.25', '2.5', '2.75', '2.9', '3.0']] for exp,daa in [('30', 100)]
+        for suffix, gen_csv_kwargs in [('', dict())] # , ('_nofrac', dict(min_ds_conf=5))]
+    ] + [
+        # for results - just trad only
+        SavePlot(
+            # gen_por_cec_full_csvs(q, int(t), exp=exp, aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3", **gen_csv_kwargs),
+            [
+                (csv_name_f_from_exp(exp)(q, render_conf_target(float(t)), bt=75, hr=75, exp_num=exp+'aux', daa=daa, hashname="xxh3"), 'trad', None)
+                for q in qs
+            ],
+            "\n".join([
+                f"Amaroo Simulator Validation: Doublespend via Traditional Blockchain",
+                # f"{CEC_EXT2_TITLE_STR}",
+                # f"If the CEC is true, then these plots should align",
+            ]),
+            f"png/_results_trad_validation_9000_t={t}_daa={daa}",
+            save_as_file_exts=['pdf', 'csv'],
+            x_label=f"Confirmations$\\div {t}$",
+            # x_range=(0, 61),
+            x_range=(0, 31),
+            # y_lim=(0, 1.4),
+            figsize=RESULTS_MORE_ZOOMED_FIG_SIZE,
+            # plot_this_order=[3,0,4,1,5,2]
+            plot_this_order=[2,0,3,1]
+        )
+        for qs in [['0.40', '0.44']] # , '0.48']]
+        for t in ['5', '10', '20']
+        for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
+        # for suffix, gen_csv_kwargs in [('', dict()), ('_nofrac', dict(min_ds_conf=5))]
+    ] + [
+        # for results - just trad only + main simplex
+        SavePlot(
+            [(csv_name_f_from_exp(exp)(q, render_conf_target(float(t)), bt=75, hr=75, exp_num=exp, daa=daa, hashname="xxh3"), 'por', None)
+                for q in qs
+            ] + [(csv_name_f_from_exp(exp)(q, render_conf_target(float(t)), bt=75, hr=75, exp_num=exp+'aux', daa=daa, hashname="xxh3"), 'trad', None)
+                for q in qs
+            ], # type: ignore
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture",
+                f"{CEC_TITLE_STR}",
+                f"If the CEC is true, then the plots with equal $q$ should align",
+            ]),
+            # f"png/_results_trad_vs_1simplex_9000_q={q}_t={t}_daa={daa}.pdf",
+            f"png/_results_trad_vs_1simplex_9000_qs={'-'.join(qs)}_t={t}_daa={daa}",
+            save_as_file_exts=['pdf', 'csv'],
+            x_label=std_x_label(t),
+            # x_range=q_t_to_x_range[(q, t)],
+            x_range=(0,31),
+            figsize=RESULTS_ZOOMED_FIG_SIZE,
+            plot_this_order=order
+        )
+        for qs, order in [(['0.40', '0.44'], [4,2,0,5,3,1]), (['0.48'], [2,1,0])]  # , '0.48'
+        for t in ['5', '10', '20']
+        for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
+
+    ] + [
+        # for results - EXT CEC
+        SavePlot(
+            list(chain(*[
+                gen_por_cec_full_csvs(q, int(t), bt=75, hr=75, exp=exp, aux='aux', daa=daa, min_ds_conf=5, hashname="xxh3")
+                for q in qs
+            ])) + ([] if not add_special else [special_q44_t5_daa2000()]),
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture (Extended)",
+                f"{CEC_EXT4_TITLE_STR}",
+                f"If the CEC is true, then the plots with equal $q$ should align",
+            ]),
+            # f"png/_results_cec_9000_q={q}_t={t}_daa={daa}.pdf",
+            f"png/_results_cec_9000_qs={'-'.join(qs)}_t={t}{'' if not add_special else '_with_daa2k'}_daa={daa}",
+            save_as_file_exts=['pdf', 'svg', 'csv'],
+            x_label=std_x_label(t),
+            # x_range=q_t_to_x_range[(q, t)],
+            x_range=(0,31) if '0.48' not in qs else (0,46),
+            # figsize=RESULTS_FIG_SIZE,
+            figsize=RESULTS_FIG_TALLER_SIZE,
+            plot_this_order=order,
+            legend_loc=ll,
+        )
+        for qs,order,ll,add_special in [
+            (['0.40', '0.44'], [9,3,0,1,2,10,7,4,8,5,6], None, True),
+            (['0.40', '0.44'], [8,3,0,1,2,9,7,4,5,6], None, False),
+            (['0.48'], [4,3,0,1,2], 'lower left', False)
+            ]  # , '0.48'
+        for t in ['5']
+        for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
+    ] + [
+        # for LP: some early results
+        SavePlot(
+            [
+                # ('exp-4c-hash-xxrev.csv', 'por', None)  # already fixed
+                ('exp-3.csv', 'por', None),
+                ('exp-aux1.csv', 'trad', None),
+            ],
+            f"PoR Simulator: Early Results",
+            f"png/lp_early_results",
+            save_as_file_exts=['svg', 'png', 'pdf', 'csv'],
+            x_range=(0, 21),
+            y_lim=(0, 0.5),
+            figsize=RESULTS_MORE_ZOOMED_FIG_SIZE,
+            x_label=std_x_label(20),
+            sec_x_label=LP_SEC_X_LABEL,
+            plot_this_order=[2,1,0],
+        )
+    ] + [
+        # for LP: after draft refl work
+        SavePlot(
+            [
+                ('exp-3.csv', 'por', 'no DRW'),
+                ('exp-12-repeat-8-RDoubleSpendWork-q0.44-t20-p50-H50-WeightedDag-xxh3.csv', 'por', 'w/ DRW'),
+                # ('exp_aux2_q=0.44_dsconf-base=5_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', None),
+            ],
+            f"PoR Simulator: Early Results -- Accounting for Draft Reflected Work (DRW)",
+            f"png/lp_results_after_draft_refl_work",
+            save_as_file_exts=['svg', 'png', 'pdf', 'csv'],
+            x_range=(0, 21),
+            y_lim=(0, 0.45),
+            figsize=RESULTS_MORE_ZOOMED_FIG_SIZE,
+            x_label=std_x_label(5),
+            sec_x_label=LP_SEC_X_LABEL,
+            plot_this_order=[-1,0,1],
+            # analytical_plot_color='C8',
+        )
+    ] + [
+        # interim results: before/after randomizing hash-rates
+        SavePlot(
+            [
+                ('exp-12-repeat-8-RDoubleSpendWork-q0.40-t5-p50-H50-WeightedDag-xxh3.csv', 'por', 'Uniform HRs'),
+                ('exp_13_RandHR_q=0.40_dswin=5_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', 'Random HRs'),
+                # ('exp_13_RandHR_q=0.44_dswin=5_bt=50_hr=50_DoubleSpend_WeightedDag_DAA100.csv', 'por', None),
+            ],
+            f"PoR Simulator: Early Results -- Randomizing Hash-rates",
+            f"png/_interim_randhr",
+            save_as_file_exts=['png', 'pdf', 'csv'],
+            x_range=(0, 21),
+            y_lim=(0, 0.45),
+            figsize=RESULTS_ZOOMED_FIG_SIZE,
+            x_label=std_x_label(5),
+            sec_x_label=LP_SEC_X_LABEL,
+            plot_this_order=[-1,0,1],
+            # analytical_plot_color='C8',
+        )
+    ] + [
+        # interim results: before/after adding bonus block
+        SavePlot(
+            [
+                ('exp_13_RandHR_q=0.40_dswin=5_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', 'No Bonus Block'),
+                # ('exp_22c_RandHR_xxh3_q=0.40_dswin=5_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', '+Bonus Block'),
+                ('exp_26_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', '+Bonus Block'),
+                # ('exp_22aux_RandHR_xxh3_q=0.40_dswin=5_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', '+Bonus Block'),
+                ('exp_aux3_q=0.40_dsconf-base=5_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', 'No Bonus Block'),
+                ('exp_26aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', '+Bonus Block'),
+            ],
+            f"PoR Simulator: Early Results -- Bonus Block",
+            f"png/_interim_bonusblock",
+            save_as_file_exts=['png', 'pdf', 'csv'],
+            x_range=(0, 21),
+            y_lim=(0, 0.7),
+            figsize=RESULTS_ZOOMED_FIG_SIZE,
+            x_label=std_x_label(5),
+            sec_x_label=LP_SEC_X_LABEL,
+            plot_this_order=[-1,-3,0,-2,1],
+            # analytical_plot_color='C8',
+        )
+    ] + [
+        # interim results: before/after DAA
+        SavePlot(
+            [
+                # ('exp_26_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', None),
+                # ('exp_26_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA500.csv', 'por', None),
+                ('exp_28aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA20.csv', 'trad', None),
+                ('exp_26aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', None),
+                ('exp_26aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA500.csv', 'trad', None),
+            ],
+            "PoR Simulator: Early Results -- $\\mathrm{DAA}_N = 100 \\to 500$",
+            f"png/_interim_daa",
+            save_as_file_exts=['pdf', 'csv'],
+            x_range=(0, 21),
+            y_lim=(0, 0.7),
+            figsize=RESULTS_MORE_ZOOMED_FIG_SIZE,
+            x_label=std_x_label(5),
+            sec_x_label=LP_SEC_X_LABEL,
+            plot_this_order=[-1,0,1,2],
+            # analytical_plot_color='C8',
+        )
+    ] + [
+        # extra results q48 for appendix
+        SavePlot(
+            gen_por_cec_full_csvs(q, int(t), exp=exp, aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3", **gen_csv_kwargs),
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture (Extended)",
+                f"{CEC_EXT4_TITLE_STR}",
+                f"If the CEC is true, then these plots should align",
+            ]),
+            f"png/_results_extra_q={q}_daa={daa}{suffix}",
+            save_as_file_exts=['pdf', 'csv'],
+            figsize=RESULTS_ZOOMED_FIG_SIZE,
+            x_label=std_x_label(t),
+            # x_range=(0, 121),
+            x_range=(0, 46),
+            plot_this_order=[-1,-2,0,1,2]
+        )
+        for q in ['0.48'] for t in ['20'] for exp,daa in [('26', 500)]
+        for suffix, gen_csv_kwargs in [('_nofrac', dict(min_ds_conf=5))]
+    ] + [
+        # draft extra results q48 for appendix with ds=40,80
+        SavePlot(
+            gen_por_cec_full_csvs(q, int(t), exp=exp, aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3", **gen_csv_kwargs)[::-1],
+            "\n".join([
+                f"PoR Confirmation Equivalence Conjecture (Extended)",
+                f"{CEC_EXT4_TITLE_STR}",
+                f"If the CEC is true, then these plots should align",
+            ]),
+            f"png/_results_extra_long_q={q}_daa={daa}{suffix}",
+            save_as_file_exts=['pdf', 'csv'],
+            figsize=RESULTS_ZOOMED_FIG_SIZE,
+            x_label=std_x_label(t),
+            # x_range=(0, 121),
+            x_range=(0, 81),
+            plot_this_order=[-1,0,1,2,3,4,5]
+        )
+        for q in ['0.48'] for t in ['20'] for exp,daa in [('26', 500)]
+        for suffix, gen_csv_kwargs in [('_nofrac', dict(min_ds_conf=5, max_ds_conf=80))]
+    ] + [
+        # for LP: main results (copy of _results_cec_9000)
+        SavePlot(
+            list(chain(*[
+                gen_por_cec_full_csvs(q, int(t), bt=75, hr=75, exp=exp, aux='aux', daa=daa, min_ds_conf=5, hashname="xxh3")
+                for q in qs
+            ])),
+            "\n".join([
+                # f"Testing the Confirmation Equivalence Conjecture",
+                # # f"{CEC_EXT4_TITLE_STR}",
+                # f"If the CEC is true, then the plots with equal $q$ should align",
+            ]),
+            f"png/lp_main_results",
+            save_as_file_exts=['svg', 'csv', 'png'],
+            x_label=LP_X_LABEL,
+            sec_x_label=LP_SEC_X_LABEL,
+            x_range=(0,31),
+            figsize=(9.2, 4.8),
+            y_lim=(0, 0.85),
+            plot_this_order=[8,3,0,1,2,9,7,4,5,6],
+        )
+        for qs in [['0.40', '0.44']]
+        for t in ['5']
+        for exp,daa in [('26', 500)]
+    ] + [
+        # for LP: analytical only
+        SavePlot(
+            [],
+            # f"Rosenfeld's Analytical Solution",
+            f"", # no title
+            f"png/lp_analytical_only",
+            save_as_file_exts=['svg', 'png', 'csv'],
+            x_range=(0, 31),
+            y_lim=(0, 0.75),
+            figsize=(8.4, 4.2),
+            x_label=f"x = Confirmations / 5",
+            sec_x_label=LP_SEC_X_LABEL,
+            seed_ds_targets={5},
+            seed_qs={0.40, 0.44}
+        )
     ]
 
     pool = mpp.Pool(n_jobs)
     count = 0
 
+    filtered_jobs: list[SavePlot] = []
     for j in jobs_to_save:
-        if filter_fname is None or filter_fname in j.filename:
-            if n_jobs > 1:
-                pool.apply_async(j.run)
-            else:
-                j.run()
-            count += 1
+        filter_mode = any if filter_mode_or else all
+        if filter_fnames is None or any(filter_mode(fstr in fn for fstr in filter_fnames) for fn in j.filenames):
+            filtered_jobs.append(j)
+
+    for j in filtered_jobs:
+        print(f"Generating: {j._filename} (in formats: {j.save_as_file_exts})")
+    print(f"\n>> Generating {len(filtered_jobs)} jobs total\n")
+
+    res: list[tuple[SavePlot, mpp.AsyncResult]] = []
+    #filter_fname
+    for j in filtered_jobs:
+        if n_jobs > 1:
+            res.append((j, pool.apply_async(j.run)))
+        else:
+            j.run()
+        count += 1
+
+    # wait for all results
+    [_res.wait() for j,_res in res]
 
     pool.close()
     pool.join()
-    print(f"should be all done generating {count} graphs via {n_jobs} threads")
 
+    print(f"\n\n>> should be all done generating {count} graphs via {n_jobs} threads\n")
+
+    ex_errors = []
+
+    for j, _res in res:
+        try:
+            _res.get()
+        except Exception as e:
+            ex_errors.append(f"Exception processing job: {j.filenames[0]}: {str(e)}")
+
+    if len(ex_errors) == 0:
+        print(f"No exceptions found.")
+    else:
+        print(f"Exceptions found:\n\t> " + "\n\t> ".join(ex_errors))
+
+    # done
 
 main()

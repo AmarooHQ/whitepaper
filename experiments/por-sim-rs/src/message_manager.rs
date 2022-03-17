@@ -314,10 +314,12 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
 
     pub fn run_attack(&mut self) -> Result<bool, String> {
         let mut msgs_from = Vec::new();
+        // WRT limit of ~1_000_000: with q=0.48 at ds_win=1200 -- no successes went this high, but otherwise they'd typically go >2m
+        // 1200 * 11 * 75(bt) = 960k
         let ts_limit = if self.args.use_dynamic_cutoff {
             ((100.0 as f32)
-                .max(self.atk_params.ds_win_as_f32().unwrap_or(20.0).powf(2.0))
-                .min(1000.0) as u32)
+                .max(self.atk_params.ds_win_as_f32().unwrap_or(20.0).powf(2.0) * 4.0)
+                .min(self.atk_params.ds_win_as_f32().unwrap_or(20.0) * 11.0)) as u32
                 * self.net_args.block_target as u32
                 + self.args.attack_starts_at
         } else {
@@ -477,6 +479,9 @@ pub fn gen_random_hr_distribution(n_chains: u32, q: f32, total_hr: Difficulty) -
     rd.into_iter().map(|v| v as Difficulty).collect()
 }
 
+/// Unimplemented
+/// Idea is to generate two distributions where an upper limit of 80% and a lower limit of 20% is applied to both honest and attacker nodes.
+/// Note: this presents issues if q<0.2
 pub fn gen_paired_80_20_hr_distributions(
     n_chains: u32,
     q: f32,
@@ -499,6 +504,7 @@ mod tests {
     use crate::cryptosystem::*;
     use crate::transactions::Transaction;
     use crate::transactions::TxId;
+    use cli_graph::*;
     use conv::ConvUtil;
     use rstats::*;
 
@@ -916,5 +922,140 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn test_random_hr_distribution_properties() {
+        let n_chains = 100;
+        // let hr_p = 0.65;
+        // let hr_q = 0.35;
+        // let (hr_p, hr_q) = (0.5, 0.5);
+        let (hr_p, hr_q) = (0.7, 0.3);
+        let per_chain_hr = 200;
+        let total_hr: u64 = (n_chains as u64) * per_chain_hr;
+        // results
+        let n_buckets = 21;
+        let max_chain_hr = per_chain_hr * 2;
+        let bucket_period = max_chain_hr / (n_buckets - 1); // integer divide by this to get bucket index
+        let results_len = n_buckets as usize * 2;
+        let local_q_res_len = 20;
+
+        let mut results_honest = vec![0.0; results_len]; // hash-rate distribution of honest miners
+        let mut results_attacker = vec![0.0; results_len]; // hash-rate distribution of attacker
+        let mut results_chain = vec![0.0; results_len]; // hash-rate of a chain
+        let mut results_local_q = vec![0.0; local_q_res_len + 1]; // hash-rate of a chain
+
+        let n_trials = 1000;
+        let count_incr = 1.0 / (n_trials * n_chains) as f64; // add this to the right bucket each loop
+        for _i in 0..n_trials {
+            let rd_h = gen_random_hr_distribution(n_chains, hr_p, total_hr);
+            let rd_a = gen_random_hr_distribution(n_chains, hr_q, total_hr);
+            let cw_hash_rates: Vec<_> = rd_h.into_iter().zip(rd_a.into_iter()).collect();
+            for (_p, _q) in cw_hash_rates {
+                results_honest[(_p / bucket_period) as usize] += count_incr;
+                results_attacker[(_q / bucket_period) as usize] += count_incr;
+                results_chain[((_p + _q) / bucket_period) as usize] += count_incr;
+
+                let _local_q = _q as f64 / (_p + _q) as f64;
+                let res_l_q_ix = (_local_q * local_q_res_len as f64).floor() as usize;
+                results_local_q[res_l_q_ix] += count_incr;
+            }
+        }
+
+        fn with_ix(n_buckets: u64, ys: &Vec<f64>) -> Vec<(String, f64)> {
+            (0..(n_buckets - 1))
+                .map(|v| format!("{:02}", v))
+                .zip(ys.iter().cloned())
+                .collect()
+        }
+
+        fn with_ix_range(from: f64, to: f64, step: f64, ys: &Vec<f64>) -> Vec<(String, f64)> {
+            let mut x: f64 = from;
+            let mut xs = vec![];
+            while x <= to {
+                xs.push(x);
+                x += step;
+            }
+            xs.into_iter()
+                .map(|v| format!("{:.2}", v))
+                .zip(ys.iter().cloned())
+                .collect()
+        }
+
+        fn make_gc() -> GraphConfig<f64> {
+            GraphConfig::new()
+                .max_height(16)
+                .y_range(YDataRange::Zero2Max)
+        }
+
+        let print_params = || {
+            println!("");
+            println!(
+                "HR distribution x-axis are buckets of size {} hashes.",
+                bucket_period
+            );
+            println!("Bucket lower limit: x*{} hashes.", bucket_period);
+            println!("Bucket upper limit: (x+1)*{} hashes.", bucket_period);
+            println!("n_trials: {}.", n_trials);
+            println!("n_chains per trial: {}.", n_chains);
+            println!("average HR per chain: {}.", per_chain_hr);
+            println!("p={}; q={}.", hr_p, hr_q);
+            println!("");
+        };
+
+        print_params();
+        println!("---");
+
+        println!("\nHR Distribution (PMF) over all chains:\n");
+        graph(
+            with_ix(n_buckets, &results_chain),
+            make_gc(),
+            GraphType::Bar,
+        )
+        .unwrap();
+
+        println!("\n---");
+        println!("\nHR Distribution (PMF) of honest miners:\n");
+        graph(
+            with_ix(n_buckets, &results_honest),
+            make_gc(),
+            GraphType::Bar,
+        )
+        .unwrap();
+
+        println!("\n---");
+        println!("\nHR Distribution (PMF) of the attacker:\n");
+        graph(
+            with_ix(n_buckets, &results_attacker),
+            make_gc(),
+            GraphType::Bar,
+        )
+        .unwrap();
+
+        println!("\n---");
+        println!("\nPMF Distribution of attacker's HR proportion (per chain):\n");
+        graph(
+            with_ix_range(0.0, 1.0, 1.0 / local_q_res_len as f64, &results_local_q),
+            make_gc().max_height(30).max_width(140),
+            GraphType::Bar,
+        )
+        .unwrap();
+        println!(
+            "\nRaw values: {:?}",
+            with_ix_range(0.0, 1.0, 1.0 / local_q_res_len as f64, &results_local_q)
+        );
+
+        println!("\n---");
+        print_params();
+
+        fn sum_pmf(pmf: &Vec<f64>) -> f64 {
+            let precision = 1_000_000.0;
+            return (pmf.iter().sum::<f64>() * precision).round() / precision;
+        }
+
+        assert_eq!(sum_pmf(&results_chain), 1.0);
+        assert_eq!(sum_pmf(&results_honest), 1.0);
+        assert_eq!(sum_pmf(&results_attacker), 1.0);
+        assert_eq!(sum_pmf(&results_local_q), 1.0);
     }
 }

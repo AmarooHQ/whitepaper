@@ -46,17 +46,49 @@ No real-world sharded network has come close to this level of performance, and i
 : A comparison of various networks' $k$ and TPS given a maximum network-wide throughput of 1 Gb/s ($\sim1.3\times 10^8$ B/s). Also included is the rate at which chains on that network grow in size (which is proportional to $k$).
 \end{comment}
 
-%% END ### RELEASE
 
-%% BEGIN ### DRAFT
-
-Why go to the effort of these comparisons (besides so that we have the numbers are at hand)?
-
-\todo{conclusion}
-
-%% END ### DRAFT
-
-%% BEGIN ### RELEASE
+\ctable[
+    pos = htb,
+    caption = Table evaluating various other networks against trilemma criteria.,
+    cap = Table evaluating various other networks against trilemma criteria.,
+    center,
+    label = tab:other-nets-trilemma,
+]{lllll}{
+    \tnote[bt]{Real-world performance of Bitcoin; $k \approx 1700$ B/s; $\text{Tx}_\text{avg} \approx 375$ B.}
+    \tnote[ct,et,pt]{Prediction based on $3000 \le k \le 20000$.}
+    %\tnote[et]{Prediction based on $3000 \le k \le 20000$.}
+    %\tnote[pt]{Prediction based on $3000 \le k \le 20000$.}
+    \tnote[ot]{
+        Assuming $3000 \le k \le 20000$ and that child-chains use PoW + PoR with the smallest possible headers.
+    }
+    \tnote[PoS]{
+        \href{\linkZackPoSCriticisms}{Unanswered criticisms of PoS} (\href{\linkZackPoSDefence}{replies})
+        mean that we cannot conclude that PoS is $O(n)$ secure.
+        Saying PoS is ``Maybe'' $O(n)$ secure is being kind -- since there are unanswered criticisms, we should really conclude ``No''.
+        (There are no such unanswered criticisms of PoW-based consensus.)
+    }
+    \tnote[ss]{
+        PoH is $O(c)$ secure by design.
+        Solana uses PoS on top of PoH, but it's unclear which has precedence (and one must).
+        Additionally, since a $\le O(c)$ DoS has brought down Solana before, this is an upper limit on Solana's security.
+    }
+    \tnote[st]{
+        Even though Solana requires $k \approx 10^8$ ($\sim$ 12 MB/s) for 50K TPS, this is consistent with their published ``strategy'' for ``scaling''.
+        50K is chosen as the limit because \href{\linkSolanaFiftyKClaim}{the official site claims \emph{at least} 50K as the upper limit} and \href{\linkSolanaFourHundKFail}{400K is known to be beyond Solana's capabilities}.
+        (Note: this also earns Solana a decisive ``No'' under the ``Decentralized?'' column.)
+    }
+}{
+        \FL
+        Network & Decentralized? & $O(n)$ Secure? & \multicolumn{2}{l}{$O(n)$ Scalable?}
+        \ML
+        Bitcoin   & Yes           & Yes              & No    & (Max. TPS: $\sim$ 5)\tmark[bt] \NN
+        Cardano   & Yes           & Maybe\tmark[PoS] & No    & (Max. TPS: $\sim$ 10 - 80)\tmark[ct] \NN
+        Solana    & No\tmark[st]  & No ($O(c)$)\tmark[ss] & Maybe & (Max. TPS: $\sim$ 50K)\tmark[st] \NN
+        Polkadot  & Maybe         & Maybe\tmark[PoS] & Maybe & (Max. TPS: $\sim$ 200 - 12K)\tmark[pt] \NN
+        Eth2      & Maybe         & Maybe\tmark[PoS] & Maybe & (Max. TPS: $\sim$ 1K - 62K)\tmark[et] \NN
+        Opt.Shard & Yes           & Yes              & Maybe & (Max. TPS: $\sim$ 8K - 350K)\tmark[ot]
+        \LL
+}
 
 ## Addressing *Buterin's Trilemma*
 
@@ -68,5 +100,23 @@ Why go to the effort of these comparisons (besides so that we have the numbers a
 \caption{A solution to the core conflict of \textit{Buterin's Trilemma}.}
 \label{fig:trilemma-core-conflict-solved}
 \end{figure}
+
+
+\begin{table}[H]
+    \centering
+    \caption{
+        Table evaluating UT against trilemma criteria.
+    }
+    \begin{tabular}{lllll}
+        \toprule
+        UT Config. & Decentralized? & $O(n)$ Secure? & \multicolumn{2}{l}{$O(n)$ Scalable?} \\
+        \midrule
+        $\UT{1}$ & Yes & Yes & Maybe & (Max. TPS: $\sim$ 1K - 400K) \\
+        $\UT{2}$ & Yes & Yes & Possibly & (Max. TPS: $\sim$ 600K - 2B) \\
+        $\UT{3}$ & Yes & Yes & Probably & (Max. TPS: $\sim$ 300M - 6T) \\
+        $\UTinf{}$ & Yes & Yes & Yes & (Max. TPS: $\gtrsim 10^{30}$) \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
 %% END ### RELEASE

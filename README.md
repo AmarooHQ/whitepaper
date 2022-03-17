@@ -15,6 +15,14 @@ To compile the complexity tables generator: `cd includes/ut/complexity/ut-comple
 
 - Ubuntu 20.04 (WSL or whatever)
 
+## developing
+
+- read `Makefile`
+- `make serve` to serve output folder via little python3 server
+- `make watch` to watch for changes to .md or .tex and recompile
+- get quick auto-preview-reloads in vscode via `includes/ut/test-render.tex` (change imports at bottom to suit)
+- view `whitepaper-draft-reloadable.pdf` if you want to auto-reload it or refresh in browser etc without waiting for latex build to be done.
+
 ## build it
 
 - `make`: markdown (.md) files in folders with a dash in their name will be "compiled" into `whitepaper.markdown`. the order of files will be via their natural sorting (run `find *-* -iname \*.md` to list them; that's the cmd used in the makefile).
@@ -102,3 +110,8 @@ Builds will fail if, after all content between these sections (inclusive of tags
 ## errors and solutions
 
 * `Illegal parameter number in definition of \Hy@tempa.` -- a URL has a hash in it -- escape the hash. `.html#heading` -> `.html\#heading`
+
+## graphs and things
+
+- should be .pdf
+- use pdfcrop to trim down margins if need be: `pdfcrop --margins '0 0 0 0' in.pdf out.pdf`

@@ -10,6 +10,7 @@ LP_TABLES=$(LP_DIR)/tables.tex
 LP_TABLES_OUT=$(OUTDIR)/tables.tex
 
 PURS_GEN_DIR=includes/ut/complexity/ut-complexity-gen-purs
+PURS_GEN_OUT=includes/ut/complexity/populateWPTables.js
 
 GIT_SHORTHASH=$(shell git rev-parse --short HEAD)
 
@@ -52,10 +53,9 @@ release:
 
 cilint-prep: PP_MODE=lint
 cilint-prep: whitepaper
-
-cilint: cilint-prep
 	npm i
-	npm run lint
+
+cilint: cilint-prep lint
 
 wp-no-lint: PP_LINT_FLAG="--no-lint-check"
 wp-no-lint: whitepaper
@@ -125,9 +125,9 @@ build-whitepaper: %.md
 	  echo -n "\n\n" >> $(WPFILE) ; \
 	done
 	# replace tables placeholder with actual tables
-	node ./includes/ut/complexity/populateWPTables.js --populate-wp-md
+	node $(PURS_GEN_OUT) --populate-wp-md
 	# this fixes texcount (since import-paths don't need to be searched).
-	sed -r -i 's/input\{20-por/input\{includes\/ut\/content\/20-por/' $(WPFILE)
+	sed -r -i 's/input\{([0-9]+-[a-z]+)/input\{includes\/ut\/content\/\1/' $(WPFILE)
 # if you need to build the above: cd includes/ut/complexity/ut-complexity-gen-purs && npm i && npm run bundle-for-wp
 
 
@@ -169,9 +169,11 @@ preprocess-build:
 	bash bin/msg_good.sh "Finished preprocessing of $(WPTEX) in mode $(PP_MODE)"
 
 # latexrun first for error msgs, then run run latexmk once for gitinfo2/glossary, then use latexrun
+# note: the *-reloadable.pdf files are copies of interim outputs (and then the final output) so that you can f5 them in a browser without getting partially written documents.
 mk-latex-pdf: preprocess-build
 	bash bin/msg_good.sh "Run ./latexrun to get good error msgs"
 	$(LATEXRUN) $(WPTEX) -O $(OUTDIR)
+	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE)-reloadable.pdf
 
 	bash bin/msg_good.sh "Running latexmk to update gitinfo, build glossaries"
 	latexmk -pdf -interaction=batchmode --enable-write18 -output-directory=$(OUTDIR) $(WPTEX) > _latexmk.log
@@ -182,6 +184,7 @@ mk-latex-pdf: preprocess-build
 
 	bash bin/msg_good.sh "./latexrun to build paper proper"
 	$(LATEXRUN) $(WPTEX) -O $(OUTDIR)
+	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE)-reloadable.pdf
 
 	cp $(WPNOEXT).pdf $(OUTPUT_PDF)
 	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE).pdf
@@ -195,10 +198,16 @@ glossary-fix-1:
 finished-msg:
 	bash bin/msg_good.sh 'Finished build for mode=$(PP_MODE)'
 
-lint: textlint pdflint
+lint: textlint texlint pdflint
 
 textlint:
 	npm run lint
+
+texlint:
+	bash bin/texLint.sh \
+		`find ./includes/ut/content -iname \*.tex` \
+		`find ./10-Ultra-Terminum/ -iname \*.md` \
+		`find ./includes/ut -iname \*.tex`
 
 pdflint:
 	bash bin/pdfLint.sh output/whitepaper.pdf
@@ -209,7 +218,7 @@ pdflint:
 mk-lp-tables:
 	cp $(LP_TABLES) $(LP_TABLES_OUT)
 	export REPLACE_TABLES_IN=$(LP_TABLES_OUT) && \
-	node ./includes/ut/complexity/populateWPTables.js --populate-wp-md --lp-tables
+	node $(PURS_GEN_OUT) --populate-wp-md --lp-tables
 	latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(LP_TABLES_OUT)
 	cp $(OUTDIR)/tables.pdf ./tables.pdf
 
@@ -225,6 +234,15 @@ purs-build:
 purs-test:
 	cd $(PURS_GEN_DIR) && \
 	npm run test
+
+purs-ci-init-hash:
+	sha256sum $(PURS_GEN_OUT) > ci-check-purs-1.log
+
+purs-ci-post-hash:
+	sha256sum $(PURS_GEN_OUT) > ci-check-purs-2.log
+
+purs-ci-check: purs-ci-init-hash purs-build purs-ci-post-hash
+	bash bin/checkFilesIdentical.sh ci-check-purs-1.log ci-check-purs-2.log
 
 pert:
 	mkdir -p output/pert
@@ -302,3 +320,21 @@ viewweb:
 
 cloc:
 	cloc --exclude-dir=node_modules,bin,target,.spago,output --exclude_ext=svg,pdf,js,json,toml ./10-Ultra-Terminum ./bin ./experiments ./includes
+
+GIT_WC_DEPTH ?= 1
+GIT_WC_REMOVED = $(shell git diff HEAD~$(GIT_WC_DEPTH) --word-diff=porcelain | grep -e '^-[^-]' | wc -w)
+GIT_WC_ADDED = $(shell git diff HEAD~$(GIT_WC_DEPTH) --word-diff=porcelain | grep -e '^+[^+]' | wc -w)
+
+count-words-git-help:
+	@echo "!! note the parameter: GIT_WC_DEPTH env var"
+
+count-words-diff: count-words-git-help
+	@echo "Words added: $(GIT_WC_ADDED)"
+	@echo "Words removed: $(GIT_WC_REMOVED)"
+	@echo "Words diff: `echo $(GIT_WC_ADDED)-$(GIT_WC_REMOVED) | bc`"
+
+
+# shortcut for simulation RandHR PMFs -- only here b/c it's mentioned in the WP.
+# for simulation makefile proper see /experiments/por-sim-rs/Makefile
+print-randhr-pmfs:
+	cd experiments/por-sim-rs && $(MAKE) print-randhr-pmfs || echo "\nHint: is /experiments/por-sim-rs set up? (cargo, rust, etc)"

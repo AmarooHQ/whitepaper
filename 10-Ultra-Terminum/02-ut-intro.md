@@ -13,7 +13,7 @@ As a consensus method[^ut-consensus-method], UT differs from existing consensus 
 
 [^ut-consensus-method]: Whether *Ultra Terminum* is a consensus \emph{method} or not is somewhat unclear.
 On the one hand: a new combination of methods is still a method.
-On the other hand: UT provides a way to modify most/all other consensus methods, and UT doesn't provide a way to run a *single* blockchain.
+On the other hand: UT provides a way to modify other consensus methods with a fork rule, and UT doesn't provide a way to run a *single* blockchain.
 This is why I've described it as a cross-chain consensus *strategy*.
 
 UT is capable of supporting millions of transactions per second with similar network parameters (like block size) to those of traditional blockchains (like Bitcoin or Eth1).
@@ -27,15 +27,5 @@ UT's novel structure means that confirmation times within UT are of order $O(c^{
 This means that, as computers get more powerful, confirmation times in UT will approach 0.
 This is a improvement over existing architectures, which are (ideally) of order $O(1)$.
 
-<!-- * Nakamoto Consensus (i.e., how Bitcoin's blockchain works)
-* The idea of $O(c)$ and $O(c^2)$ scaling and existing strategies -- you can read the first few FAQs [here](https://eth.wiki/sharding/Sharding-FAQs) for a refresher
-* SPV proofs
-* Cross-chain SPV proofs via Smart Contracts (e.g., [BTC Relay](https://github.com/ethereum/btcrelay))
-
-And you'll need to understand the following to understand how *Ultra Terminum* thwarts some attacks:
-
-* Generalizations of Nakamoto Consensus to DAGs (particularly, read [*Inclusive Block Chain Protocols*](https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy)[^incl-proto])
-
-[^incl-proto]: \href{https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy}{\textit{Inclusive Block Chain Protocols}} by Yoad Lewenberg, Yonatan Sompolinsky, and Aviv Zohar. \href{https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Avivz Mirror}, \href{http://web.archive.org/web/20210426004808/https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Archive.org Mirror} -->
 
 %% END ### RELEASE

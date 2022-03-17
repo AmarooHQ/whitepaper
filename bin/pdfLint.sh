@@ -20,5 +20,9 @@ function checkFor {
     fi
 }
 
+# if post@space is there, are you using \defineTerm from a .tex document (not .md)?
+#   solution -> use \defineTermTex (drop-in replacement)
+
+checkFor 'post@space' && \
 checkFor '\?\?' && \
 checkFor 'todo'

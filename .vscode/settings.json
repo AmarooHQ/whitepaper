@@ -16,6 +16,7 @@
         "Buterin's",
         "Cardano",
         "Cardano's",
+        "CEC",
         "cilint",
         "codebases",
         "Coiledcoin",
@@ -24,6 +25,7 @@
         "Conv",
         "counterintuitively",
         "CPUs",
+        "CSVs",
         "curr",
         "daa",
         "dapp-chain",
@@ -35,6 +37,7 @@
         "DLTs",
         "doublespend",
         "doublespends",
+        "Doublespends",
         "droppable",
         "ECDSAs",
         "EMalo",
@@ -81,6 +84,7 @@
         "Nunc",
         "parachain",
         "permissioned",
+        "PMF",
         "PoA",
         "PoH",
         "Polkadot",
@@ -114,6 +118,7 @@
         "SPV",
         "SRT",
         "Terminum",
+        "textlint",
         "there'll",
         "tilings",
         "Tilings",
@@ -126,6 +131,7 @@
         "unitless",
         "unpaywalled",
         "unvalidated",
+        "UTᵢ",
         "UTXO",
         "varnothing",
         "Verkle",
@@ -167,11 +173,16 @@
         "papersize",
         "pandoc",
         "keepaspectratio",
-        "algs"
+        "algs",
+        "\\textsc{ChainWeight}",
+        "print-randhr-pmfs",
     ],
     "cSpell.minWordLength": 2,
     "cSpell.flagWords": [
-        "hte", "DOS", "teh", "\\being{", "itertext",
+        // add to .textlintrc.js too
+        "hte", "DOS", "teh", "\\being{",
+        "itertext", "the attackers", "DAA_N",
+        "tress", "\\lable{", "lable",
     ],
     "cSpell.ignoreRegExpList": [
         "\\usepackage{([a-z,]*)}",
@@ -192,6 +203,7 @@
     "files.autoSave": "onFocusChange",
     "latex-workshop.view.pdf.viewer": "tab",
     "latex-workshop.latex.autoBuild.run": "onFileChange",
+    "latex-workshop.latex.pdfWatch.delay": 400,
     "[latex]": {
         "editor.formatOnPaste": false,
         "editor.suggestSelection": "recentlyUsedByPrefix",
@@ -254,7 +266,6 @@
         ".textlintrc": "jsonc"
     },
     "cSpell.enableFiletypes": [
-        "tex",
-        //
+        "tex"
     ]
 }

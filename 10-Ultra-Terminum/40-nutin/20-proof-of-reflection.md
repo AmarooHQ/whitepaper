@@ -18,37 +18,47 @@ The idea of one blockchain 'tracking' another blockchain via chain-headers and i
 [^xc3]: <https://github.com/XertroV/coppr/blob/master/chainheaders.py>
 [^xc4]: <https://github.com/ethereum/btcrelay>
 
-The general idea of an on-chain headers-only version of another chain does not -- to my knowledge -- have a name. Herein this is called a *projection*. The generalized process via which projections are created is called *imaging*.
-
 \defineTerm{Projection}{
   A \emph{projection} of a chain is its \emph{headers-only} version which is recorded and evaluated \emph{by a different chain}. For example \href{https://github.com/ethereum/btcrelay}{BTC Relay} is a smart contract by which Ethereum can host a \emph{projection} of Bitcoin. The \emph{act} of one chain creating and maintaining the projection of another is called \emph{imaging}
 }
+
+The general idea of an on-chain headers-only version of another chain does not -- to my knowledge -- have a name. Herein this is called a *projection*. The generalized process via which projections are created is called *imaging*.
 
 ### A Projection of Bitcoin in Ethereum
 
 The idea that Ethereum smart contracts (SCs) can track Bitcoin chain-headers is well understood -- i.e., Ethereum *images* Bitcoin. The result of this is that the *projection* of Bitcoin is available to Ethereum users and SCs. Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is viable. In principle, any chain that supports some headers-only mode can include projections in this way. In practice that can be difficult (e.g., Ethereum's EVM doesn't support memory hard hashes unless special cases are introduced). But we're not interested in practicality *at the moment*.
 
-Let's add such a contract to Ethereum and describe the relevant data and events in the following table. \autoref{fig:pr-btc-eth-step1} illustrates this. Note: \autoref{fig:pr-btc-eth-step1} includes some variance in Ethereum's block production rate, similar to what might be observed in a real-world environment.
+Let's add such a contract to Ethereum and describe the relevant data and events in \autoref{tab:eth-images-btc}.
+\autoref{fig:pr-btc-eth-step1} illustrates this.
+Note: \autoref{fig:pr-btc-eth-step1} includes some variance in Ethereum's block production rate, similar to what might be observed in a real-world environment, but \autoref{tab:eth-images-btc} does not.
 
-| Time (~15s increments) | Bitcoin block made | Eth block made | Eth block contents | Eth state |
-|---|---|---|-----|------|
-| $\vdots$ | | | | |
-| 0 | k | | | |
-| 1 | | j | $\text{BTC}_k$ header | Records $\text{BTC}_{0 \cdots k}$ |
-| $\vdots$ | | | | |
-| 40 | k + 1 | | | |
-| 41 | | j + 40 | $\text{BTC}_{k+1}$ header | Records $\text{BTC}_{0 \cdots k+1}$ |
-| $\vdots$ | | | | |
+\ctable[
+  pos = h,
+  caption = (Hypothetical) Data and events for both Bitcoin and Ethereum as a projection of Bitcoin in Ethereum is maintained via Bitcoin headers being included in an Ethereum SC.,
+  cap = (Hypothetical) Data and events as Ethereum images Bitcoin.,
+  center,
+  label = tab:eth-images-btc,
+]{lllll}{}{
+  \FL
+  \shortstack[l]{Time step (\textasciitilde{}15 s \\ increments)} & \shortstack[l]{Bitcoin \\ block mined} & \shortstack[l]{Eth \\ block mined} & \shortstack[l]{Eth block contents} & {Eth state}
+  \ML
+  $\vdots$ & & & & \NN
+  0 & $k$ & & & \NN
+  1 & & $j$ & $\text{BTC}_k$ header & Records $\text{BTC}_{0 \cdots k}$ \NN
+  $\vdots$ & & & & \NN
+  40 & $k+1$ & & & \NN
+  41 & & $j+40$ & $\text{BTC}_{k+1}$ header & Records $\text{BTC}_{0 \cdots k+1}$ \NN
+  $\vdots$ & & & &
+  \LL
+}
 
-: Data and events for both Bitcoin and Ethereum as blocks are produced and a projection of Bitcoin in Ethereum is maintained via Bitcoin headers being included in an Ethereum SC.
-
-\begin{figure}[]
+\begin{figure}
 \centering
 \includegraphics[max width=\linewidth, height=0.35\textheight]{pow_refl_btc_eth_step1_sag}
 \caption[
-  Bitcoin headers, as they are produced, are included in Ethereum's state (via user made transactions).
+  (Hypothetical) A projection of Bitcoin in Ethereum via an SC and transactions.
 ]{
-  Bitcoin headers, as they are produced, are included in Ethereum's state (via user made transactions).
+  (Hypothetical) Bitcoin headers, as they are produced, are included in Ethereum's state via a smart contract and user made transactions.
   This is roughly how \textit{BTC Relay} works.
 }
 \label{fig:pr-btc-eth-step1}
@@ -62,9 +72,12 @@ Why would a chain want to include a projection of another chain? The typical ans
 
 \label{sec:two-blockchains}
 
-Let's build up the idea via a hypothetical situation with two distinct blockchains. For simplicity, you can imagine these as Bitcoin and Ethereum 1 -- at least to start with. However, keep in mind that the changes required to support *Proof of Reflection* are unlikely to ever be integrated with either Bitcoin or Ethereum (and reaching social agreement about the details would be difficult, to say the least).
+Let's build up the idea via a hypothetical situation with two distinct blockchains.
+For simplicity, you can imagine these as Bitcoin and Ethereum 1 -- at least to start with.
+However, keep in mind that the changes required to support *Proof of Reflection* are unlikely to ever be integrated with either Bitcoin or Ethereum (and reaching social agreement about the details would be difficult, to say the least).
 
-Our starting case is that both chains use different Proof of Work algorithms and neither includes a projection of the other. For simplicity, the following progression will use two blockchains with identical block times, and will not account for variance in block production.
+Our starting case is that both chains use different Proof of Work algorithms and neither includes a projection of the other.
+For simplicity, the following progression will use two blockchains with identical block times, and will not account for variance in block production.
 
 #### Step 1. Chain R images Chain L
 
@@ -72,7 +85,7 @@ This is conceptually similar to having a projection of Bitcoin in Ethereum, and 
 
 Similar to before, Chain R will include Chain L's headers as they are produced. Note that this can be a protocol-level implementation; it does not have to be at the smart contract level -- as it would be with Ethereum.
 
-\begin{figure}[p]
+\begin{figure}
 \centering
 \includegraphics[max width=\linewidth, height=0.28\textheight]{pow_refl_step1_sag}
 \caption{Step 1: Chain R images Chain L; thus Chain R hosts a \emph{projection} of Chain L.}
@@ -81,21 +94,25 @@ Similar to before, Chain R will include Chain L's headers as they are produced. 
 
 #### Step 2. Chain L images Chain R
 
-Say that the protocol of Chain L is extended to support a projection of Chain R. That is, a bespoke protocol extension is created that allows/requires miners to publish known Chain R headers along with their Chain L block. Similar to the way Chain R images Chain L, now Chain L also images Chain R. This is shown in \autoref{fig:pow_refl_step2} and the following table.
+Say that the protocol of Chain L is extended to support a projection of Chain R.
+That is, a bespoke protocol extension is created that allows/requires miners to publish known Chain R headers along with their Chain L block.
+Similar to the way Chain R images Chain L, now Chain L also images Chain R.
+This is shown in \autoref{fig:pow_refl_step2} and \autoref{tab:por-step-2}.
 
-\begin{table}[H]
+\begin{table}
 \centering
-\caption{Both Chain L and Chain R host a projection of each-other.}
+\caption{Step 2: Both Chain L and Chain R host a projection of each-other.}
+\label{tab:por-step-2}
 \resizebox{\textwidth}{!} {%
 \begin{tabular}{lllllll}
 \toprule
-{Time} & {L block made} & {L block contents} & {L state} & {R block made} & {R block contents} & {R state} \\
+{Time} & \shortstack[l]{L block \\ made} & \shortstack[l]{L block \\ contents} & {L state} & \shortstack[l]{R block \\ made} & \shortstack[l]{R block \\ contents} & {R state} \\
 \midrule
 {$\vdots$} & {} & {} & {} & {} & {} & {} \\
-{0} & {k} & {$R_{j-1}$ header} & {Records $R_{0 \cdots j-1}$} & {} & {} & {} \\
-{1} & {} & {} & {} & { j} & {$L_{k}$ header} & {Records $L_{0 \cdots k}$} \\
-{2} & {k + 1} & {$R_{j}$ header} & {Records $R_{0 \cdots j}$} & {} & {} & {} \\
-{3} & {} & {} & {} & {j + 1} & {$L_{k+1}$ header} & {Records $L_{0 \cdots k+1}$} \\
+{0} & $k$ & {$R_{j-1}$ header} & {Records $R_{0 \cdots j-1}$} & {} & {} & {} \\
+{1} & {} & {} & {} & $j$ & {$L_{k}$ header} & {Records $L_{0 \cdots k}$} \\
+{2} & $k + 1$ & {$R_{j}$ header} & {Records $R_{0 \cdots j}$} & {} & {} & {} \\
+{3} & {} & {} & {} & $j + 1$ & {$L_{k+1}$ header} & {Records $L_{0 \cdots k+1}$} \\
 {$\vdots$} & {} & {} & {} & {} & {} & {} \\
 \bottomrule
 \end{tabular}%
@@ -103,19 +120,24 @@ Say that the protocol of Chain L is extended to support a projection of Chain R.
 \end{table}
 
 
-\begin{figure}[p]
+\begin{figure}
 \centering
 \includegraphics[max width=\linewidth, max height=0.4\textheight]{pow_refl_step2_sag}
 \caption{Step 2: Chain L and Chain R contain a projection of each other's headers-only chain.}
 \label{fig:pow_refl_step2}
 \end{figure}
 
+
+\FloatBarrier
+
 #### Step 3. Chain L's *reflection* in Chain R
+
+%%\subsubsubsection{Step 3. Chain L's \emph{reflection} in Chain R}
 
 Can we use a projection of a chain for a different purpose?
 What happens if Chain L tracks whether Chain L's history is confirmed within Chain R?
 This can be done via merkle branches\footnote{
-  Vector commitments (or verkle branches) can be used, too (this applies to most usages of merkle tress / branches in this paper).
+  Vector commitments (or verkle branches) can be used, too (this applies to most uses of merkle trees / branches in this paper).
   For the sake of convenience and simplicity, verkle trees won't be explicitly mentioned as an alternative unless there is a specific purpose.
 } that prove Chain R's relevant state.
 In essence, Chain L uses its projection of Chain R to prove that its *own history* matches that of its *projection* in Chain R.
@@ -130,7 +152,7 @@ We can do that via a merkle branch, too, but full nodes of Chain L already know 
 However, L's nodes must be able to generate it.
 The \emph{full} collection of information required to prove reflection is called a *proof of reflection*.
 
-\begin{figure}[p]
+\begin{figure}
     \begin{subfigure}[t]{.31\textwidth}
         \vskip 0pt
         \centering
@@ -158,8 +180,39 @@ The \emph{full} collection of information required to prove reflection is called
     \label{fig:por-step3-parts}
 \end{figure}
 
-Segments of Chain L and R (events and data) are shown in the following table and \autoref{fig:por-step3}.
+Segments of Chain L and R (events and data) are shown in \autoref{tab:por-step-3} and \autoref{fig:por-step3}.
 
+
+\ctable[
+  pos = hp,
+  caption = {
+    Step 3: Chain L records which of its headers are known about by Chain R.
+    That is: Chain L includes \emph{proofs of reflection}.
+    Note: ``Headers'' is abbreviated to ``Hdrs''.
+  },
+  cap = Step 3: Chain L records \emph{PoRs} via Chain R.,
+  center,
+  label = tab:por-step-3,
+  width = \textwidth,
+]{llZZlZZ}{}{
+  \FL
+  {Time} & \shortstack[l]{L block \\ mined} & \shortstack[l]{L block \\ contents} & {L state} & \shortstack[l]{R block \\ mined} & \shortstack[l]{R block \\ contents} & {R state}
+  \ML
+  $\vdots$ & & & & & & \NN
+  0 & $k$ & {$R_{j-1}$ header, \newline $L_{k-1}$ PoR} & Hdrs: $R_{0 \cdots j-1}$, \newline PoRs: $L_{0 \cdots k-1}$ & & &
+  \NN
+  1 & & & & $j$ & $L_{k}$ header & Hdrs: $L_{0 \cdots k}$
+  \NN
+  2 & $k+1$ & $R_{j}$ header, \newline $L_{k}$ PoR & Hdrs: $R_{0 \cdots j}$, \newline PoRs: $L_{0 \cdots k}$ & & &
+  \NN
+  3 & & & & $j+1$ & $L_{k+1}$ header & Hdrs: $L_{0 \cdots k+1}$
+  \NN
+  $\vdots$ & & & & & &
+  \LL
+}
+
+
+<!--
 | Time | L block made | L block contents | L state | R block made | R block contents | R state |
 |--|---|------|------|---|-----|------|
 | $\vdots$ | | | | | | |
@@ -169,11 +222,11 @@ Segments of Chain L and R (events and data) are shown in the following table and
 | 3 | | | | j + 1 | $L_{k+1}$ header | Records $L_{0 \cdots k+1}$ |
 | $\vdots$ | | | | | | |
 
-: Chain L records which of its headers are known about by Chain R. That is: Chain L includes *proofs of reflection*.
+: Chain L records which of its headers are known about by Chain R. That is: Chain L includes *proofs of reflection*. -->
 
-\begin{figure}[p]
+\begin{figure}
 \centering
-\includegraphics[max width=\linewidth, max height=0.4\textheight]{pow_refl_step3_sag}
+\includegraphics[max width=\linewidth, max height=0.35\textheight]{pow_refl_step3_sag}
 \caption{
   Step 3: Chain L includes \textit{proofs of reflection} (PoRs) along with headers.
   Proofs of Reflection allow Chain L to know which of its own blocks are known to Chain R.
@@ -280,8 +333,8 @@ Chain L nodes would *not* reorganize around this new chain-segment, so why would
 If the projection of Chain L in Chain R *does not account for reflections*, then the attacker's chain-segment will appear (to Chain R) to have more work than the honest chain-segment.
 Thus the *projection* of L in R will reorganize to favor the attacker's chain-segment.
 If the attacker has more hash power than the honest miners (i.e., $q > p$\footnote{
-  In \href{https://bitcoin.org/bitcoin.pdf}{Satoshi's original paper} the parameters $p$ and $q$ represent the probability that the next block will be found by an honest node or the attacker, respectively.
-  This convention has been continued in subsequent analysis, e.g., Rosenfeld's \href{https://web.archive.org/web/20220209100515/https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{\emph{Analysis of hash-rate-based double-spending}}, and is continued here, also.
+  In Satoshi's \citeBitcoinLink{} the parameters $p$ and $q$ represent the probability that the next block will be found by an honest node or the attacker, respectively.
+  This convention has been continued in subsequent analysis, e.g., Rosenfeld's \citeAHBDS{}, and is continued here, also.
 }) then they might\footnotemark{} be able to use this reorganization as a foothold -- either to launch a traditional 51% attack against L, or to attack SPV verification and light clients.
 
 \footnotetext{
@@ -351,16 +404,19 @@ This might become an issue in the case of an active attack, but R nodes can fall
 
 #### Step 5. Mutual Reflection
 
-The final step in this progression is *mutual reflection* -- where both chains image one-another and include the necessary PoRs and modifications to their chain-weight algorithms. This is shown in \autoref{fig:por-step5}.
+The final step in this progression is *mutual reflection* -- where both chains image one-another and include the necessary PoRs and modifications to their chain-weight algorithms.
+This is shown in \autoref{fig:por-step5}.
 
-\begin{figure}[]
+\begin{figure}
 \centering
 \includegraphics[max width=\linewidth, height=0.35\textheight]{pow_refl_step5_sag}
-\caption{\textit{Proof of Reflection} between two UT Chains, Chain L and Chain R}
+\caption{Step 5: \textit{Proof of Reflection} between two UT Chains, Chain L and Chain R}
 \label{fig:por-step5}
 \end{figure}
 
-When two chains (Chain L and Chain R) mutually reflect each-other, detecting attacks becomes easier. The security of both Chain L and R are partially dependent on each others' histories (along with their own, of course). If one chain is attacked, where some alternate chain-segment is published, then that chain's nodes will know that those blocks have not been reflected - potentially indicating that the recently-published chain-segment was constructed in private or constructed after the fact.
+When two chains (Chain L and Chain R) mutually reflect each-other, detecting attacks becomes easier.
+The security of both Chain L and R are partially dependent on each others' histories (along with their own, of course).
+If one chain is attacked, where some alternate chain-segment is published, then that chain's nodes will know that those blocks have not been reflected -- potentially indicating that the recently-published chain-segment was constructed in private or constructed after the fact.
 
 There are several details that still require discussion, though, such as: *how exactly is weight contributed by a reflecting chain converted to weight in the local chain?* (discussed in \autoref{sec:comparing-chain-work}); and *how can proofs of reflection be calculated without the requirement that miners are full nodes of both chains?* (discussed in \autoref{sec:practical-considerations}).
 This last question is particularly important for moving beyond mutual reflection between only two chains.
@@ -471,7 +527,7 @@ Can we find some function, $\text{ConvWork}_{R\rightarrow L}(w)$, that converts 
     & & \label{eq:por-conv-work}
 \end{align}
 
-With \autoref{eq:por-conversion-const-1}, \textbf{we have just found our first constant of conversion for \textbf{block-weight.}}
+With \autoref{eq:por-conversion-const-1}, \textbf{we have just found our first constant of conversion for \ul{block-weight}.}
 
 \aside{
   \autoref{eq:por-conversion-const-1} has a natural symmetry.
@@ -507,7 +563,7 @@ Here are the key assumptions:
 * There's no comparative advantage between GPU makes/models -- i.e., a miner can't increase their revenue by cleverly organizing which GPUs mine which networks.
 * The cost of running both L and R nodes is negligible.
 * L and R have perfect difficulty adjustment algorithms.
-* The miner(s) used in this thought experiment are small relative to the total population of miners -- their choices don't meaningfully impact network hash rates or difficulty adjustments.
+* The miner(s) used in this thought experiment are small relative to the total population of miners -- their choices don't meaningfully impact network hash-rates or difficulty adjustments.
 
 What should we expect regarding the conversion of work?
 To start with, let's note that GPU miners could work on either chain -- good hardware for one chain is good hardware for the other, too.
@@ -629,7 +685,7 @@ Consider:
 
 These two values are \textbf{not} equal (or comparable), and nothing we've said implies that they should be!
 There are \emph{qualitative differences} between the two that is not represented in the current units.
-On the one hand, we have something like *relative block frequencies,* and on the other we have something like \emph{a ratio of the \textbf{weight or value} of block creation}.
+On the one hand, we have something like *relative block frequencies,* and on the other we have something like \emph{a ratio of the \ul{weight or value} of block creation}.
 But they have the same units!
 What's going on?
 How do we know whether a constant of conversion \emph{works} for our purposes?
@@ -660,10 +716,10 @@ If blocks on L are $5\times$ heavier than blocks on R,
 then we'd have a constant of conversion of $\nicefrac{1}{5}$ L-blocks/R-block;
 and a chain of 5 R-blocks would be \emph{roughly} as hard to create as a chain of 1 L-block.
 So $\nicefrac{1}{5}$ seems like a reasonable estimate for \emph{relative confirmations}, too.\footnote{
-  Due to the dynamics of confirmations, we can't directly compare chain-segments like this -- this example is here to help give you an intuition.
+  Due to the dynamics of confirmations, we can't directly compare chain-segments like this, \emph{generally} speaking -- this example is here to help give you an intuition.
   The reason we can't directly compare in this way is that simply \emph{having more confirmations} is worth something in and of itself.
   The relationship is not linear.
-  See \href{https://web.archive.org/web/20220209100515/https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{Analysis of hashrate-based double-spending} for more.
+  See \citeAHBDS{} for more.
 }
 
 Naively, \emph{relative block frequencies} seems to be in the same units as the other two: L-blocks/R-blocks; but they \emph{cannot} be in the same units as \emph{the values mean different things}.
@@ -704,7 +760,7 @@ We can see that \autoref{eq:rel-conf-hz} and \autoref{eq:rel-block-weight} are n
 Moreover, it's easy to see why \emph{relative confirmations} is not as simple as \emph{relative confirmation rates}.
 \end{comment}
 
-The reason that $\nicefrac{L_f}{R_f}$ did not make sense before is that we \emph{were not including all necessary \textbf{context}!}
+The reason that $\nicefrac{L_f}{R_f}$ did not make sense before is that we \emph{were not including all necessary \ul{context}!}
 There is \emph{implicit context} in some properties of blockchains -- \emph{participation}.
 Values like $\nicefrac{L_f}{R_f}$ -- when used to measure the \emph{target block frequency} -- \emph{do not factor in participation}; the target block time is usually a \emph{constant}, so it can hold no \emph{network-specific context}.
 
@@ -730,7 +786,7 @@ Note that the units of $\Delta t_\text{actual}$ are B-seconds/(2016 B-blocks), a
 
 DAA's are special: they are the means by which \emph{context} is added.
 DAA's don't explicitly deal with this context though --- it's not mentioned in the algorithm itself.
-The key to a DAA's success is that it operates \emph{relative to a past state that is \textbf{already} context laden.}
+The key to a DAA's success is that it operates \emph{relative to a past state that is \ul{already} context laden.}
 So DAA's don't need to have any special awareness of context, just that multiplying the past difficulty by a \emph{particular ratio} will adjust the \emph{confirmation rate} to align with the \emph{target block frequency}.
 It's an \emph{incremental and ongoing process}.
 Since DAA's don't have initial conditions, there's no bootstrapping concern.
@@ -871,7 +927,7 @@ information is *lost* through the DAA. -->
 
 \aside{
   With regards to DAAs, it should be noted that Bitcoin's was the first and the method has some undesirable properties.
-  I quite like the algorithm named \textsc{DAA-2} (which is used by Bitcoin Cash) in \href{https://cloudflare-ipfs.com/ipfs/Qmd8BE6xYCH58LNipE1zZ7BCftemN8hQWnfZJSJYq5XUE8}{An Economic Analysis of Difficulty Adjustment Algorithms in Proof-of-Work Blockchain Systems} \href{https://web.archive.org/web/20211018042402/https://econ.hkbu.edu.hk/eng/Doc/20201016_NODA.pdf}{[m1]} \href{https://web.archive.org/web/20211018043918/https://cloudflare-ipfs.com/ipfs/Qmd8BE6xYCH58LNipE1zZ7BCftemN8hQWnfZJSJYq5XUE8}{[m2]}.
+  I quite like the algorithm named \textsc{DAA-2} (which is used by Bitcoin Cash) in \citeDaaTwoLink{}.
   Experimentally, it seems to work well with \autoref{sec:dos-and-dags}.
 }
 
@@ -988,7 +1044,9 @@ There is no way to say \emph{X work on L is worth Y work on R} without adding ne
 Confirmations (like work) require that grounding, since they need to be scaled when converting between different chains.
 What about confirmations from the same chain?
 Unlike work (which can be summed directly), confirmations always require conversion to a \emph{known standard} -- even when they're \emph{from the same chain}.
-For example, we can say that the single confirmation provided by Bitcoin block 704610 is \emph{equivalent} to approximately 19,893,045,000,000 genesis-confirmations.\footnote{A genesis-confirmation is relative to the Bitcoin genesis block -- which had a difficulty of exactly 1.}
+For example, we can say that the single confirmation provided by Bitcoin block 704610 is \emph{equivalent} to approximately 19,893,045,000,000 genesis-confirmations.\footnote{
+  A genesis-confirmation is relative to the Bitcoin genesis block -- which had a difficulty of exactly 1.
+}
 The conversion-ratio is equal to the difficulty of block 704610.
 That is, it would take a chain of $\sim$ 20 trillion blocks, each with 1 genesis-confirmation worth of work, to match the weight of block 704610.
 
@@ -1126,7 +1184,13 @@ If the two chains have equal block production frequencies, then (using \autoref{
 
 Consider an attack on the PoW chain and presume that the difficulty on the PoW chain is constant over the attack, i.e., the PoW chain's difficulty doesn't adjust quickly enough to react to the attack. Additionally, assume the attacker has *not* been contributing to the network before the attack, i.e., their hash-rate is not accounted for in the PoW chain's difficulty. Given the two chains are mutually reflecting, half of the network's security is provided by the PoS chain (and thus immune to the attacker in this case). Therefore, a successful attacker -- *using the traditional method of mining a competing chain-segment in private* -- must generate more blocks than both chains combined. That means the attacker needs *twice* the honest hash-rate for a guaranteed successful attack.
 
-However, consider the case that *the security contribution of the PoW chain is \textbf{capped} at 50%* -- i.e., capped at the proportion of root tokens hosted on that chain. For our purposes, this situation is approximately equivalent to that where the PoW chain has a *perfect* difficulty adjustment algorithm, i.e., the network instantly adapts to keep the block production frequency constant. For the sake of this demonstration, assume that these chains *retroactively* adjust block weightings to ensure this cap holds. Let $p > 0$ be the honest miners' contribution to *overall* network security, and $q > 0$ be the attacker's contribution. As the PoW contribution to overall security is capped at 50%, the equality $p + q = 0.5$ is enforced. In this case, the attacker will have a maximum chain-weight contribution rate of $\frac{1}{2} \cdot \frac{q}{q + p}$ and the honest chain-segments will have a maximum contribution rate of $\frac{1}{2} \cdot \frac{p}{q + p} + \frac{1}{2}$. The condition for a successful attack is shown in \autoref{eq:refl-pow-pos-1}, and the inequality has no solutions.
+However, consider the case that \emph{the security contribution of the PoW chain is \ul{capped} at 50%} -- i.e., capped at the proportion of root tokens hosted on that chain.
+For our purposes, this situation is approximately equivalent to that where the PoW chain has a *perfect* difficulty adjustment algorithm, i.e., the network instantly adapts to keep the block production frequency constant.
+For the sake of this demonstration, assume that these chains *retroactively* adjust block weightings to ensure this cap holds.
+Let $p > 0$ be the honest miners' contribution to *overall* network security, and $q > 0$ be the attacker's contribution.
+As the PoW contribution to overall security is capped at 50%, the equality $p + q = 0.5$ is enforced.
+In this case, the attacker will have a maximum chain-weight contribution rate of $\frac{1}{2} \cdot \frac{q}{q + p}$ and the honest chain-segments will have a maximum contribution rate of $\frac{1}{2} \cdot \frac{p}{q + p} + \frac{1}{2}$.
+The condition for a successful attack is shown in \autoref{eq:refl-pow-pos-1}, and the inequality has no solutions.
 \begin{align}
 && \frac{1}{2} \cdot \frac{q}{q + p} & > \frac{1}{2} \cdot \frac{p}{q + p} + \frac{1}{2} \notag \\
 && q & > p + (q + p) \notag \\
@@ -1160,11 +1224,11 @@ There are some other conjectured solutions to the *Nothing at Stake* problem.
 \bquote{
   %% cspell: disable-next-line
   Long-range ``nothing-at-stake'' attacks are circumvented through a simple ``checkpoint'' latch which prevents a dangerous chain-reorganisation of more than a particular chain-depth. To ensure newly-syncing clients are not able to be fooled onto the wrong chain, regular ``hard forks'' will occur (of at most the same period of the validators' bond liquidation) that hard-code recent checkpoint block hashes into clients.
-}{Dr. Gavin Wood; \href{https://cloudflare-ipfs.com/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Polkadot Whitepaper, s5.2}}
+}{Dr. Gavin Wood; \citePolkadotLink, s5.2}
 
 \bquote{
   Provided that stakeholders are frequently online, nothing at stake is taken care of by our analysis of forkable strings (even if the adversary brute-forces all possible strategies to fork the evolving blockchain in the near future, there is none that is viable), and our chain selection rule that instructs players to ignore very deep forks that deviate from the block they received the last time they were online.
-}{\href{https://cloudflare-ipfs.com/ipfs/QmWCAHyi35SeXH2E4e8jRVk7yNse2x6D14uPfABnhagbvN}{Ouroboros: A Provably Secure Proof-of-Stake Blockchain Protocol, s10}}
+}{\citeOuroborosLink, s10}
 
 These two examples solve the \emph{Nothing at Stake} problem via mechanisms that are *external* to the protocol itself, i.e., hard-coded checkpoints and the requirement that nodes are online ``frequently''.
 
@@ -1175,12 +1239,16 @@ Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
   \autoref{sec:converting-block-weights} mentions a \emph{natural symmetry} --
 } -->
 
+### Counting Work
+
+\todoDraftOnly{Revisit counting work section in a bit and mb redraft}
+
+\input{20-por/90-counting-work.tex}
+
 
 %% END ### RELEASE
 
 %% BEGIN ### DRAFT
-
-
 
 ### The Insecurity of Merged Mining in UT
 

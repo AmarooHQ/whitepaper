@@ -104,7 +104,7 @@ Traditionally, blockchain protocols have some *global* state and a state-transit
         \sigma_{t+1} \equiv \Upsilon(\sigma_t, T)
     \end{equation*}
     where $\Upsilon$ is the Ethereum state transition function.
-}{Dr. Gavin Wood; \href{https://cloudflare-ipfs.com/ipfs/QmcdwaEqKjsASs1sZqxBNPw5vmypE5YL61zSvWdGoX7wtC}{Ethereum Yellow Paper / Petersburg Version 41c1837}, s2}
+}{Dr. Gavin Wood; \citeEthYellowPaperLink, s2}
 
 One of the reasons for this tradition is that transactions are (typically) permitted to depend on any part of the global state. For example: a Bitcoin transaction is permitted to spend any UTXO, and an Ethereum smart contract may interact with any other smart contract on the Ethereum blockchain.
 
@@ -161,34 +161,29 @@ Additionally, these merkle branches *will be part of specific SPV proofs*, so wh
 This UT protocol variant is +HOPoRs, the combination of *header omission* (+HO) and *explicit proofs* (+PoRs). It may present decisive advantages for implementations of *simplex tilings* (which are introduced in \autoref{sec:tiling}).
 
 \aside{
-    There is an independent protocol variant (from those above) called +T which provides a significant reduction to proof size and header size. This optimization is currently redacted. \\
+    There is an independent protocol variant (from those above) called +T which provides a significant reduction to header size.
+    % proof size and
+    This optimization is currently redacted. \\
     \\
     Each protocol variant thus far has a corresponding +T variant, e.g., +PoRs and +PoRTs, +HO and +HOT, etc.
 }
 
-%% END ### RELEASE
-
-%% BEGIN ### DRAFT
-
 \begin{figure}[H]
 \begin{equation*}
-\xymatrix@R=14pt@C=-10pt@M=4pt{
-    \text{Conservative} \ar@*{[deepskyblue]}[d] \\
-    \text{UT}_{+\text{PoRs}} \ar@*{[gold]}[dr] \ar[rr] \ar[dd] & & \text{UT}_{+\text{OP}} \ar'[d][dd] \ar[dr] & \\
-    & \text{UT}_{+\text{PoRTs}} \ar[dd] \ar@*{[gold]}[rr] & & \text{UT}_{+\text{OPT}} \ar@*{[gold]}[dd] \\
-    \text{UT}_{+\text{HOPoRs}} \ar[dr] \ar'[r][rr] & & \text{UT}_{+\text{HO}} \ar[dr] & \\
-    & \text{UT}_{+\text{HOPoRTs}} \ar[rr] & & \text{UT}_{+\text{HOT}} \\
-    & & & \text{Maximal TPS} \ar@*{[darkorange]}[u]
+\xymatrix@R=14pt@!R@C=-24pt@!C@M=4pt{
+    *+[F:<3pt>]{\text{Conservative}} \ar@{.>}[d] \\
+     \text{UT}_{+\text{PoRs}} \ar@*{[gold]}[dr] \ar[rr] \ar[dd] & & \text{UT}_{+\text{OP}} \ar'[d][dd] \ar[dr] & \\
+     & \text{UT}_{+\text{PoRTs}} \ar[dd] \ar@*{[gold]}[rr] & & \text{UT}_{+\text{OPT}} \ar@*{[gold]}[dd] \\
+     \text{UT}_{+\text{HOPoRs}} \ar[dr] \ar'[r][rr] & & \text{UT}_{+\text{HO}} \ar[dr] & \\
+     & \text{UT}_{+\text{HOPoRTs}} \ar[rr] & & \text{UT}_{+\text{HOT}} \\
+     & & & *+[F:<3pt>]{\text{Maximal TPS}} \ar@{.>}[u]
 }
 \end{equation*}
 \caption{
-    Possible upgrade paths between UT variants, starting at $\UT{\text{+PoRs}}$ -- the most conservative variant.
+    Possible upgrade paths between UT variants, starting at $\UT{\text{+PoRs}}$ in the top left -- the most conservative variant.
+    Solid arrows show paths of increasing capacity.
 }
 \end{figure}
-
-%% END ### DRAFT
-
-%% BEGIN ### RELEASE
 
 ### Confirmation Times
 
@@ -198,13 +193,13 @@ A confirmation is a *discrete* event that occurs when a block is produced. When 
 
 \bquote{
     The probability of success [of a double-spend attempt] depends on the number of blocks [by which the honest network has an advantage], and not on the time constant $T_0$.
-}{Meni Rosenfeld; \href{https://web.archive.org/web/20220209100515/https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{Analysis of hashrate-based double-spending}}
+}{Meni Rosenfeld; \citeAHBDS}
 
 In a traditional blockchain (e.g., Bitcoin, Ethereum) confirmations occur, on average, at a predictable rate (that of the target block production frequency). Thus, for any *particular* traditional blockchain, a convenient time-based \emph{rule of thumb} can be devised, e.g., a Bitcoin transaction is safe to accept after 1 hour. However, this approximation only works because blocks (and thus confirmations) are only produced locally (to that blockchain) and at a probabilistic (roughly constant) rate. Put another way, the frequency of confirmations is identical to the frequency of blocks, $B_f$ Hz. Since $O(B_f) = O(1)$, the time-complexity of confirmation in these networks is also $O(1)$.
 
 When using PoR, though, the assumptions behind that \emph{rule of thumb} do not hold -- while blocks on a single chain may be produced at a constant rate, that chain also gains a security benefit from other chains. For the case of a 2-chain simplex (where those chains have the same block production frequency), the rate of confirmations will be twice the rate of block production. This is easily generalized: for an $N_1$-simplex with simplex-chains that share some block frequency $B_f$, the rate of confirmation will be $\mathbb{C}^\prime = N_1 \cdot B_f$ Hz. Thus, the rate of confirmations has complexity $O(\mathbb{C}^\prime) = O(N_1 \cdot B_f) = O(N_1) = O(c)$.
 
-Let *confirmation time* be the duration breakpoint beyond which enough confirmations have occurred to consider a transaction *safe*. This is equivalent to the *rule of thumb* mentioned earlier. For a traditional blockchain, as mentioned, this is the product of some constant and the expected duration between blocks: $B_f^{-1}$. For a simplex, though, the expected *duration* is ${\mathbb{C}^\prime}^{-1} = \frac{1}{N_1 \cdot B_f}$. Thus, as the simplex grows -- as $N_1$ *increases* -- the entire network's rate of confirmations also increases, and thus *confirmation time* approaches 0[^approach-zero].
+Let *confirmation time* be the duration breakpoint beyond which enough confirmations have occurred to consider a transaction *safe*. This is equivalent to the *rule of thumb* mentioned earlier. For a traditional blockchain, as mentioned, this is the product of some constant and the expected duration between blocks: ${B_f}^{-1}$. For a simplex, though, the expected *duration* is ${\mathbb{C}^\prime}^{-1} = \frac{1}{N_1 \cdot B_f}$. Thus, as the simplex grows -- as $N_1$ *increases* -- the entire network's rate of confirmations also increases, and thus *confirmation time* approaches 0[^approach-zero].
 
 [^approach-zero]: To say that confirmation time approaches 0 only tells the latter half of the process by which a transaction becomes confirmed. The first half of that process is *getting an initial confirmation*, which is effectively a small, but constant, overhead.
 
@@ -216,14 +211,16 @@ Additionally, any competing block (published immediately by an honest miner) wil
 So the published block has two distinct advantages over the withheld block.
 This mitigates the selfish mining[^selfish-mining] attack.
 
-[^selfish-mining]: See \href{https://cloudflare-ipfs.com/ipfs/QmNukb1L8BhEsiCbrmnkEJWAvUjhBHidinKMZKfCaLG6ep}{Majority is not Enough: Bitcoin Mining is Vulnerable} by Ittay Eyal and Emin Gün Sirer.
+[^selfish-mining]: See \citeSelfishMiningLink{} by Ittay Eyal and Emin Gün Sirer.
 
 ### DoS and DAGs
 
 \label{sec:dos-and-dags}
 
 Up to this point, simplex-chains have been treated like traditional blockchains, where each block has only one parent.
-Since the vast majority of a simplex-chain's security is provided by other simplex-chains (and only a small proportion comes from that chain's foundational consensus method), are attacks like an empty-block Denial of Service[^empty-dos] (DoS) possible?
+Since the vast majority of a simplex-chain's security is provided by other simplex-chains (and only a small proportion comes from that chain's foundational consensus method), are attacks like an empty-block Denial of Service\footnote{
+    For an example of this attack, see \citeLJCoiledcoinLink.
+} (DoS) possible?
 If a simplex-chain were to use PoW, then it might be (relatively) trivial for an attacker to perform such an attack.
 This is because -- in traditional blockchains -- controlling more than 50% of the blocks produced provides *exclusive* control over *which candidate child blocks win* (i.e., are accepted into the canonical chain).\footnote{
     Exclusive control of this nature also allows for protocol changes via soft-forks.
@@ -233,25 +230,25 @@ This is because -- in traditional blockchains -- controlling more than 50% of th
 Is there a way that we can mitigate this risk?
 If blocks were permitted *more* than a single parent, can this *exclusivity* be denied?
 
-[^empty-dos]: For an example of this attack, see \href{https://bitcointalk.org/index.php?topic=56675.msg678006\#msg678006}{Luke Jr's attack on Coiledcoin}.
-
 #### Block-DAG Lineage
 
 \label{sec:block-dag-lineage}
 
-The idea that blocks in a chain can have multiple parents -- i.e., the chain forms a Directed Acyclic Graph (DAG) that is not also a tree -- dates back to (at least) late 2013[^ghost-dec-2013] with the publication of GHOST by Sompolinsky and Zohar. However, GHOST disallows multiple *canonical* parents, and a chain using GHOST defines its *canonical history* -- the *main chain* -- via the chain formed exclusively from the first parent of each block. A block's other, non-canonical parents are linked to *only* for the purpose of contributing to the total chain-weight.
+The idea that blocks in a chain can have multiple parents -- i.e., the chain forms a Directed Acyclic Graph (DAG) that is not also a tree -- dates back to (at least) late 2013 with the publication of GHOST\footnote{
+    \citeGhostFull{}
+} by Sompolinsky and Zohar. However, GHOST disallows multiple *canonical* parents, and a chain using GHOST defines its *canonical history* -- the *main chain* -- via the chain formed exclusively from the first parent of each block. A block's other, non-canonical parents are linked to *only* for the purpose of contributing to the total chain-weight.
 
 In the two years after GHOST was published, a number of DAG-based blockchain designs were developed that facilitated merging histories from multiple parent blocks.
 
 In mid-2014 I created a prototype DAG-based blockchain called Quanta[^quanta-2014] with a novel method of linearization that converged to a complete and stable ordering of blocks.
 This method was independently rediscovered[^redisc] in mid-2015 by Lewenberg, Sompolinsky, and Zohar[^inclusive-july-2015] -- who also further developed and analyzed the method, which they named *the inclusive protocol*.
-Additionally, in 2016 Paul Firth further developed Quanta in his *Trustless Eventual Total Order* draft[^teto-2016].
+Additionally, in 2016 Paul Firth further developed Quanta in his *Trustless Eventual Total Order* draft.[^teto-2016]
 
 In late-2015 several new, alternative methods were also published, however these are not generalizations of Nakamoto consensus. Namely: Lerner's DagCoin[^dagcoin-sept-2015], and IOTA's Tangle[^iota-oct-2015]. Since then, multiple other models have been proposed, and some built.
 
 For the purposes of this paper, we are concerned with the method detailed in *Inclusive Block Chain Protocols*.
 
-[^ghost-dec-2013]: \href{https://cloudflare-ipfs.com/ipfs/QmTDz4WuAXi2rV7Ei3pHHKTFCYGPeDbDoAkmypkHdJnnKe}{Secure High-Rate Transaction Processing in Bitcoin} by Yonatan Sompolinsky and Aviv Zohar.
+<!-- \href{https://cloudflare-ipfs.com/ipfs/QmTDz4WuAXi2rV7Ei3pHHKTFCYGPeDbDoAkmypkHdJnnKe}{Secure High-Rate Transaction Processing in Bitcoin} by Yonatan Sompolinsky and Aviv Zohar. -->
 
 [^quanta-2014]: \href{https://github.com/XertroV/quanta-test/blob/ba598d5fe89d3b16db07533957a2080edb19a9cd/quanta.py\#L157}{Quanta source code}, \href{https://bitcointalk.org/index.php?topic=1057342}{Quanta BitcoinTalk thread}.
 
@@ -259,27 +256,11 @@ For the purposes of this paper, we are concerned with the method detailed in *In
 
 [^iota-oct-2015]: \href{https://bitcointalk.org/index.php?topic=1216479.0}{IOTA BitcoinTalk thread}.
 
-[^inclusive-july-2015]: \href{https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy}{\textit{Inclusive Block Chain Protocols}} by Yoad Lewenberg, Yonatan Sompolinsky, and Aviv Zohar. \href{https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Avivz Mirror}, \href{http://web.archive.org/web/20210426004808/https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Archive.org Mirror}
+[^inclusive-july-2015]: \citeInclusiveFull{}
 
 [^redisc]: As far as I can tell, the linearization methods produce identical results.
 
 [^teto-2016]: \href{https://github.com/wildbunny/docs/blob/master/T.E.T.O-draft.pdf}{T.E.T.O Draft} by Paul Firth.
-
-##### A Criticism of GHOST
-
-GHOST allows for blocks to link to a single canonical parent and multiple *uncle* blocks.
-In the full GHOST algorithm, uncle blocks contribute *weight* to the canonical chain-segment, but do not contribute *transactions*.
-Thus, uncles have *no ability* to substantially contribute to the canonical chain's *state*.
-
-Consider an empty-block DoS against a chain using GHOST.
-If an attacker were to perform an empty-block DoS, the attacker could link back to honest miners' blocks as uncles, but never parents.
-Given this, there is no easy way for the honest miners to end or mitigate the DoS.
-The attacker can include honest miners' chain-work in a purely *beneficial* way -- there is a symmetry, thus honest miners (and the network) are at the mercy of the attacker.
-
-Why does this symmetry exist?
-Because the *cumulative weight* of each block (including uncles) is *divorced* from *the set of transactions* that is contributed by that block.
-However, with a full DAG-chain, when an attacker links to uncles in this way *they must allow for the execution of all non-conflicting transactions* (i.e., those which would not cause a doublespend to occur).
-Thus, GHOST *does not mitigate* empty-block DoS attacks; *only* a full DAG-chain can do that.
 
 #### Basic Structure
 
@@ -349,8 +330,6 @@ goal: support this sentence (top of section):
 
 > There are decisive advantages to using DAGs (instead of trees) as the fundamental structure of a chain. Namely, multiple histories (both compatible and incompatible) can be merged into a single, consistent history -- a feature which eliminates stale blocks and thwarts attacks like an empty-block Denial of Service
 
-[^incl-proto]: \href{https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy}{\textit{Inclusive Block Chain Protocols}} by Yoad Lewenberg, Yonatan Sompolinsky, and Aviv Zohar. \href{https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Avivz Mirror}, \href{http://web.archive.org/web/20210426004808/https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Archive.org Mirror}
-
 \end{comment}
 -->
 
@@ -377,10 +356,6 @@ This can be repeated to allow for arbitrarily many parents.
 \autoref{fig:dag-ex1-full} is an example of this algorithm for a moderately complex chain-segment ($B_i\cdots B_{i+3}$ which is 7 blocks total), and each step is enumerated and explained.
 
 \begin{figure}[p]
-    \caption[
-        Example: sorting a moderately complex block-DAG.
-    ]{
-        Example: sorting a moderately complex block-DAG; note that the left parent is always the best parent, so will have priority. Each block is annotated with its \emph{chain-weight} ($\Sigma_w$). \label{fig:dag-ex1-full}}
     \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
         \centering
@@ -453,7 +428,12 @@ This can be repeated to allow for arbitrarily many parents.
         \caption{And finally we order the last remaining blocks. (We could remove virtual blocks too).}
         \label{fig:dag-ex1-order-70}
     \end{subfigure}
-    %$\text{Note: caption at top.}$
+    \caption[
+        Example: sorting a moderately complex block-DAG.
+    ]{
+        Example: sorting a moderately complex block-DAG; note that the left parent is always the best parent, so will have priority. Each block is annotated with its \emph{chain-weight} ($\Sigma_w$).
+    }
+    \label{fig:dag-ex1-full}
 \end{figure}
 
 We should expect that conflicting transactions (which might otherwise be attempted doublespends) arise during this process.
@@ -461,7 +441,7 @@ Ancestors of one parent may not be ancestors of another parent.
 The exact protocol for handling conflicts is up to the implementation, but a trivial method is that blocks commit to (via hash-pointers) conflicting transactions.
 If a miner produces an invalid block (which is invalid only because it breaks this rule), then other miners can flag it as a conflicting *block* via a similar mechanism.
 
-Further reading: [*Inclusive Block Chain Protocols*](https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy)
+Further reading: \citeInclusiveFull{}.
 
 #### Preventing DoS Attacks
 
@@ -469,7 +449,7 @@ Further reading: [*Inclusive Block Chain Protocols*](https://cloudflare-ipfs.com
 
 Consider the situation where an attacker is attempting to deny service via the production of empty blocks, and that the attacker can create blocks faster than the honest network. Such a situation is illustrated in \autoref{fig:dag-dos-1}. Since the goal of the attack is to prevent transactions from occurring, the attacker must[^nb-must] produce empty blocks[^empty-nb]. Furthermore, if the attacker links back to any honest blocks then the honest blocks' histories will be merged with the canonical history; thus the attack would fail. The attacker's only available strategy is to produce a single chain of empty blocks.
 
-[^nb-must]: The attacker could also fill the blocks with spam transactions. That's more work for the attacker, but also more work for the honest network (calculating and storing that state, maybe indefinitely). It's preferable that the attacker has minimal transactions in their blocks. It's tempting to think of ideas like: \emph{since the attackers blocks are empty, we can let honest nodes make larger blocks via some kind of weighted average block size calculation plus some flexibility in the size of blocks produced}. The problem with this is that it incents the attacker to fill their blocks with spam transactions, which is counterproductive.
+[^nb-must]: The attacker could also fill the blocks with spam transactions. That's more work for the attacker, but also more work for the honest network (calculating and storing that state, maybe indefinitely). It's preferable that the attacker has minimal transactions in their blocks. It's tempting to think of ideas like: \emph{since the attacker's blocks are empty, we can let honest nodes make larger blocks via some kind of weighted average block size calculation plus some flexibility in the size of blocks produced}. The problem with this is that it incents the attacker to fill their blocks with spam transactions, which is counterproductive.
 
 [^empty-nb]: Note that the attacker should still be reflecting other simplex-chains so as to maximize the total weight of the attacker's chain-segment. Given this, the attacker's blocks will contain reflected simplex-chain headers but no transactions.
 
@@ -494,7 +474,7 @@ For traditional (non-DAG) chains -- where each non-genesis block has exactly one
 (Typically, this means the attacker produces blocks more frequently.)
 
 However, if blocks are allowed to have *more* than one parent then there *is no point* where an attacker can *maintain* a DoS attack indefinitely. Instead, they can only *delay the execution* of some transactions for a short period of time.
-Particularly, if an attacker can produce $A_{blocks} = \nicefrac{q}{p} > 1$ for every 1 block produced by the honest network, then the attack can delay transactions for up to $A_{blocks} \cdot B_f^{-1}$ seconds, where $B_f$ is the frequency of block production (in Hz).
+Particularly, if an attacker can produce $A_{blocks} = \nicefrac{q}{p} > 1$ for every 1 block produced by the honest network, then the attack can delay transactions for up to $A_{blocks} \cdot {B_f}^{-1}$ seconds, where $B_f$ is the frequency of block production (in Hz).
 After this (approximate) point, the weight of the honest chain-segment, which includes the attacker's chain-segment, is always greatest.
 
 If an attacker performs a *repeating cycle* of these attacks, then they may be able to decrease the effective capacity of the chain by a factor of $A_{blocks} = \nicefrac{q}{p}$.
@@ -504,10 +484,10 @@ All that sounds okay so far (maybe not that last bit), but this thought experime
 
 Consider an attacker producing 2 blocks for every 1 honest block.
 What happens most of the time?
-Well the attackers blocks get reflected first, so those blocks have an appreciable advantage over the honest blocks.
-The honest blocks will get reflected, too, but most of the time the attackers blocks will get the advantage from earlier reflections.
+Well the attacker's blocks get reflected first, so those blocks have an appreciable advantage over the honest blocks.
+The honest blocks will get reflected, too, but most of the time the attacker's blocks will get the advantage from earlier reflections.
 \emph{Most} of the time.
-Occasionally, when an honest block is a bit lucky, an honest block will beat the attackers next block -- gaining reflections earlier.
+Occasionally, when an honest block is a bit lucky, an honest block will beat the attacker's next block -- gaining reflections earlier.
 At that point, the attacker has lost -- they need to outpace the \emph{difference} in the number of reflections between the honest block and attacking blocks.
 So, unlike a normal doublespend (where the attacker wins if they \emph{ever} get ahead), now the honest network wins (ends the DoS) if it \emph{ever} gets ahead of the attacker -- after that point, there's no viable strategy for the attacker besides to build on the honest blocks.
 \emph{The asymmetry has flipped!}
@@ -534,9 +514,24 @@ If there were, it'd be possible to temporarily limit the attacker to $<50\%$ of 
 
 \todoDraftOnly{Dynamic average block-size for simplex-chains based on dapp-chain headers having some PoW}
 
-%% END ### RELEASE
 
-%% BEGIN ### RELEASE
+#### A Criticism of GHOST
+
+GHOST allows for blocks to link to a single canonical parent and multiple *uncle* blocks.
+In the full GHOST algorithm, uncle blocks contribute *weight* to the canonical chain-segment, but do not contribute *transactions*.
+Thus, uncles have *no ability* to substantially contribute to the canonical chain's *state*.
+
+Consider an empty-block DoS against a chain using GHOST.
+If an attacker were to perform an empty-block DoS, the attacker could link back to honest miners' blocks as uncles, but never parents.
+Given this, there is no easy way for the honest miners to end or mitigate the DoS.
+The attacker can include honest miners' chain-work in a purely *beneficial* way -- there is a symmetry, thus honest miners (and the network) are at the mercy of the attacker.
+
+Why does this symmetry exist?
+Because the *cumulative weight* of each block (including uncles) is *divorced* from *the set of transactions* that is contributed by that block.
+However, with a full DAG-chain, when an attacker links to uncles in this way *they must allow for the execution of all non-conflicting transactions* (i.e., those which would not cause a doublespend to occur).
+Thus, GHOST *does not mitigate* empty-block DoS attacks; *only* a full DAG-chain can do that.
+
+
 
 ### Lowering Block Production Variance
 
@@ -594,168 +589,8 @@ Does a miner ever benefit from withholding reflections?
 
 ### Simplex Security and the Confirmation Equivalence Conjecture
 
-#### Simplex Security
+\label{sec:simplex-security-cec}
 
-\label{sec:simplex-security}
-
-Simplexes are secure if attacking a single simplex-chain is as difficult as attacking the whole simplex (the network).
-
-Say the attacker controls $q$ proportion of the network's work-generation capacity (e.g., hash-rate for PoW chains), and honest nodes control $p$ proportion, such that $p+q=1$.
-The attacker should only be able to perform a doublespend if $q > p$.
-
-Successfully attacking a single blockchain requires an attacker to publish an alternate chain-segment that the fork rule considers heavier than the corresponding public chain-segment.
-Those two segments will have a common ancestor, so the weight of the attacker's segment must be greater than the weight of the public chain-segment (from that common ancestor on).
-
-Simplex-chains evaluate block-weight as the sum of work done on that block, plus work done on reflecting blocks.
-So effecting a doublespend on one simplex-chain requires generating a chain-segment with more total block-weight (including reflections) than the public chain-segment.
-
-It is not viable for the attacker to mine the attacking chain-segment in public (see \autoref{sec:dos-and-dags}), so they must mine it in private.
-Blocks mined in private will not gain reflections from honest miners on other simplex-chains, so any reflections contributing to the doublespend must be created by the attacker.
-The attacker's reflecting blocks (which reflect the attacking chain-segment) on other simplex-chains can be public, but the attacker's task is simpler and not detectable if the attacker mines reflecting blocks in private.\footnote{
-    Additionally, if reflecting chains maintain projections as headers-only chains, then it should be much harder for an attacker to mine reflections in public .
-}
-There is no viable way for the attacker to prevent honest miners from reflecting the honest chain-segment, including new blocks that extend it, nor to prevent the honest chain-segment from reflecting blocks from other simplex-chains (again, see \autoref{sec:dos-and-dags}).
-
-The honest chain-segment, on the targeted simplex-chain, will not be reflected by the attacker (since that would be self-defeating).
-Similarly, the attacker's chain-segment will not be reflected by the honest network, since it's being mined in private.
-
-Let $r$ be the network-wide rate-of-work (hash-rate).
-Over some attack duration $d$, we expect the attacker's chain-segment to weigh $qrd$, and the honest chain-segment to weigh $prd$.
-Thus, for the attacker's chain-segment to win, it must be that $qrd > prd \implies q > p$.
-$\blacksquare$
-
-#### Confirmation Equivalence Conjecture
-
-\defineTerm{Equivalency Hypothesis}{
-    The hypothesis that, when using PoR and appropriately converting work,
-    confirmations of reflecting chains are \emph{equivalent}
-    to local confirmations of the same weight (and are linearly convertible otherwise)
-}
-
-\defineTerm{Confirmation Equivalence Conjecture (CEC)}{
-    The conjecture that, when using PoR and appropriately converting work,
-    confirmations of reflecting chains
-    can be treated as \emph{equivalent} to local confirmations of the same weight
-}
-
-The Confirmation Equivalence Conjecture is why PoR works.
-If it were false, then PoR could not work, and neither would simplexes.
-Additionally, this is the root of UT's $O(c)$ confirmation rate -- the conjecture implies that confirmation rate is proportional to the number of mutually reflecting chains.
-
-Can we test it? If so, how?
-
-Consider a traditional PoW blockchain (e.g., Bitcoin, Eth1, etc).
-It's well known that the risk of a doublespend against a particular block is related to the number of \emph{confirmations} that block has.\footnote{
-    See \href{https://web.archive.org/web/20220209100515/https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{Analysis of hashrate-based double-spending}.
-}
-However, this is not a linear relationship; rather, it's similar to \emph{exponential decay}.
-After the first few confirmations, each additional confirmation reduces the risk of a doublespend by approximately the same factor.\footnote{
-    The exact factor depends on the attackers hash rate as a proportion of the network's (i.e., $q$).
-}
-So \emph{security takes \textbf{time}}, because confirmations take time.
-
-Now, consider a simplex: the equivalence conjecture says that it doesn't matter whether confirmations come from the \emph{local} chain, or if they come from a \emph{reflecting} chain.
-So, a simplex-chain in a 2-chain simplex (wherein each simplex-chain has $\mathbb{C}^\prime = 2 \times B_f$) \emph{should}, after $C$ confirmations, be as secure as a standalone blockchain with $2C$ confirmations.
-Or, more generally, a simplex-chain in an $N$-chain simplex will, after $C$ \emph{local} confirmations, be as secure as a standalone blockchain after $NC$ confirmations.
-
-This is something we can test!
-(See \autoref{sec:por-simulation-results} for that.)
-
-As blockchain architects, if the CEC is true, then UT allows us to maintain security by trading \emph{waiting time} for \emph{more simplex-chains!}
-
-\aside{
-    If you were looking for an essence of how UT breaks the core conflict of Buterin's Trilemma\dots
-}
-
-#### Generalizing Doublespends
-
-With a traditional blockchain, the network has no "memory" of work (hashes) that have been done but are not accounted for in the main chain.
-Specifically, the network gains no knowledge of how much work has been done \emph{between} block.
-This is almost self-evident: each block is the \emph{sole} way that work can be \emph{added} to the chain.
-Naturally, there is no smaller unit of contributed work than an individual block -- so there's no "memory".\footnote{
-    We're not concerned with things like \emph{weak blocks} or super-block hybrid designs; though it's possible that doublespend methodology for those designs has some overlap with this section.
-}
-
-When an attacker publishes a heavier chain-segment which causes a reorganization, it is \emph{immediately} in the interests of miners to begin building on the attacker's best block.
-A heavier chain-segment is \emph{decisively better} in all cases.
-That may seem so obvious that it isn't worth mentioning, but it's actually a \emph{specific case} that only works for traditional blockchains.
-If there were some "memory", it might be worth miners \emph{continuing} mining their \emph{existing} block, \emph{instead} of reorganizing and building on the attacker's best block.
-
-What kind of "memory" could there be?
-Are \emph{Proofs of Reflection} a "memory"?
-
-As it turns out: yes.
-
-Let the total chain-weight of the attacker's best block be called $W_A$, and the total chain-weight of the honest network's best block be called $W_H$.
-
-Consider a miner of a simplex-chain (chain $L$) who is working on a \emph{draft block} during an active attack (though, of course, the miner does not know that).
-Specifically, let's consider \emph{just before} the attacker publishes their chain-segment.
-In the memory pool\footnote{
-  The \emph{memory pool} is where unconfirmed transactions (and other things) are stored before they are included in a block.
-  Each node has their own memory pool -- this must be the case because securely synchronizing memory pools between untrusted parties is as difficult as running a whole blockchain.
-  A miner typically decides a block's contents by choosing the combination of transactions from their memory pool that results in the largest reward (i.e., transactions with the largest fees).
-} of that miner, there will be PoRs, and those PoRs are \emph{only} valid for the \emph{honest} chain-segment (most likely they are for the best known honest block, but don't need to be).
-Each $L$ block, in and of itself, only adds $\sim w$ weight to the $L$ chain.
-However, if that \emph{draft block} contains $\sim n$ pending PoRs, and each PoR provides $\sim w$ weight on average, then a valid block (created from that draft) will contribute, via PoRs, $\sim nw$ weight to the \emph{honest chain-segment}.
-Thus, the miner has this choice: reorganize to the attacker's chain-segment and mine on top of a chain with weight $W_A$, \emph{or} continue mining on the honest chain-segment that weighs $W_H + nw$.
-
-The $nw$ term is that "memory", and it makes all the difference.
-Only when $W_A > W_H + nw$ is it safe for an attacker to publish their chain-segment -- then it is \emph{decisively better} than the honest chain-segment.
-If, however, the attacker publishes their chain-segment when $W_H < W_A < W_H + nw$: the best chain-segment for honest miners to mine is \emph{still} the honest chain-segment, not the attacker's!
-
-Miners don't actually have to change their behavior at all: their choice is the same, whether they are mining a simplex-chain \emph{or} a traditional chain.
-That choice is: \emph{of all possible blocks to mine, which results in the greatest reward?}
-If they build on the honest chain-segment, does their resulting block have more total chain-weight than if they were to build on the attacker's chain-segment?
-
-\aside{
-    There are some subtleties to consider if chains are DAGs or use GHOST: both chain-segments can be included as ancestors, but which should take priority?
-    If the weight of PoRs is not taken into account (or applied after evaluating the order of parents), then the attacker's chain-segment takes priority when $W_A > W_H$.
-    This rule conflicts with what we discussed above, so it must be that parents are ordered based on their chain-weights \emph{including} any PoRs in that block -- the honest network should take priority when $W_A < W_H + nw$.
-    Also, note that this is why the weight of PoRs is attributed to the \emph{reflected} block (usually a block's parent), not the actual block that contains them.
-}
-
-#### Testing the Confirmation Equivalence Conjecture
-
-\label{sec:por-simulation-results}
-
-Let's test the Confirmation Equivalence Conjecture.
-
-##### Hypothesis
-
-The hypothesis is that: doublespends against an \emph{individual simplex-chain} in an $N$-chain simplex after $C$ \emph{local} confirmations are \emph{as hard} as doublespends against a traditional blockchain after $N\cdot C$ confirmations.
-
-Define $P(N_1 = N; c = C; q = Q)$ (for some given $N$, $C$, and $Q$) to be the probability of an attack succeeding after $c$ confirmations against a simplex with $N_1$ simplex-chains, given an attacker with $q$ proportion of the network hash rate.
-
-Note that a simplex of 1 chain (the 0-simplex) \emph{is} a traditional blockchain.
-So we can take Bitcoin for example: the probability of an attack succeeding after 6 confirmations is given by $P(N_1 = 1; c = 6; q = Q)$ -- of course, we still need to know the attackers hash rate to calculate this.
-
-Thus, the hypothesis is that:
-\begin{equation}
-    P(N_1 = N; c = C; q = Q) \approx P(N_1 = 1; c = NC; q = Q)
-    \label{eq:por-sim-hypothesis}
-\end{equation}
-
-##### Method
-
-I have implemented a model blockchain network with attack simulations wherein each chain uses PoW and has a fully functioning fork rule.
-This design is modular, such that it supports different fork rules, different block data structures and ordering algorithms (including multiple parents), different attack strategies.
-The program also
-
-The source code for this model blockchain network is contained in the `/experiments/por-sim-rs/` folder of this repository.
-
-##### Scope and Constraints
-
-This experiment is not intended to be comprehensive -- many significant real-world factors are basically ignored: e.g., block propagation latency, transaction processing overhead, geographic latency, bandwidth constraints, etc.
-
-The scope is \emph{only} intended to cover PoR as a consensus mechanism -- particularly with respect to doublespends.
-
-This constraint means there are many ways to simplify implementation -- for example, reflected blocks are not checked against the history of a blockchain.
-These simplifications would render a \emph{production} blockchain insecure.
-However, the simplifications are okay in this case since we \emph{expect} near-identical behavior from well functioning networks, and the simplifications are otherwise independent of what we are testing -- the consensus mechanism.
-In essence, we want to simulate a \emph{specific} attack, so the implementation doesn't need to be hardened because we know that the attacker will \emph{only} attack in the specific way we care about.
-
-So, while it is \emph{possible} that a poor implementation of a simplex could compromise its security, we'll assume these kinds of design flaws are \emph{in principle} avoidable.
-
-\todoDraftOnly{Test chains of different hash rates + anything else to cover bases re CEC}
+\input{27-practical/90-simplex-security-and-cec.tex}
 
 %% END ### RELEASE

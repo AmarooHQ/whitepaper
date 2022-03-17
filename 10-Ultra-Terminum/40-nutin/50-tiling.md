@@ -1,18 +1,20 @@
 %% BEGIN ### RELEASE
 
-\subsection{\texorpdfstring{$\text{UT}_{\aleph}$}{UT-aleph}: Tiling Simplexes}
+\subsection{\titlemath{$\text{UT}_{\aleph}$:}{UT-aleph:} Tiling Simplexes}
 
 \label{sec:tiling}
 
-Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes are tiled, I call the result a *simplex tiling*.
+Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes are tiled, the result is called a *simplex tiling*.
 
 \defineTerm{Simplex Tile}{
-    Like a simplex, but $>75\%$ of the PoR capacity is reserved for reflections with \emph{neighboring} tiles; typically a quadrifurcated maximal simplex
+    Like a simplex, but $\ge 75\%$ of the PoR capacity is reserved for reflections with \emph{neighboring} tiles; typically a quadrifurcated maximal simplex
 }
 
 \todoDraftOnly{terms and edit / refactor this section}
 
-A simplex tile, on its own, is very similar to a standalone simplex. If a standalone simplex (of a given capacity) could host $1600$ simplex-chains, then an equivalent simplex tile will host $400$ (or maybe less); only $25\%$ of the PoR capacity is reserved for *internal* reflections -- i.e., reflections within that simplex tile. The other $75\%$ is reserved for *external* reflections to simplex-chains in *neighboring* tiles.
+A simplex tile, on its own, is very similar to a standalone simplex.
+If a standalone simplex (of a given capacity) could host $1600$ simplex-chains, then an equivalent simplex tile will host $400$ (or maybe less); only $25\%$ of the PoR capacity is reserved for *internal* reflections -- i.e., reflections within that simplex tile.
+The other $75\%$ is reserved for *external* reflections to simplex-chains in *neighboring* tiles.
 
 That is: it is a simplex that deliberately reserves only $\nicefrac{1}{4}$ of its otherwise maximum PoR capacity for internal reflections.
 By definition, the maximum PoR capacity of a tile is $\nicefrac{1}{4}$ the maximum PoR capacity of an equivalent maximal simplex.
@@ -85,7 +87,11 @@ We start from the foundation that each tile has a maximum of $\frac{N_1}{4}$ sim
 Our starting point is a $\frac{N_1}{4}$-simplex which constitutes a single tile.
 This is shown in \autoref{fig:tiled-simplex-5-d0}.
 
-The next iteration is to add $3$ adjacent tiles, since tiling has a valence of 3. Each of these new tiles has one pre-existing neighbor (the root tile), so each new tile has capacity for 2 more neighbors. Thus, the next iteration will add twice the number of tiles as the preceding iteration -- in this case, $6$ new tiles. This pattern -- adding twice the number of tiles as the previous iteration -- continues indefinitely.
+The next iteration is to add $3$ adjacent tiles, since tiling has a valence of 3.
+Each of these new tiles has one pre-existing neighbor (the root tile), so each new tile has capacity for 2 more neighbors.
+Thus, the next iteration will add twice the number of tiles as the preceding iteration -- in this case, $6$ new tiles.
+This pattern -- adding twice the number of tiles as the previous iteration -- continues indefinitely.
+It is shown in \autoref{fig:simplex-tiling}.
 
 \begin{comment}
 side by side figures: https://tex.stackexchange.com/questions/37581/latex-figures-side-by-side
@@ -334,7 +340,7 @@ It is because of a \emph{new asymmetry} between \emph{capacity} and \emph{securi
 \label{sec:tiling-sec-cap-asymmetry}
 
 If there is a \emph{symmetry} between capacity and security, that means they're \emph{coupled} somehow; i.e., a change in one results in a change to the other.
-In this case, they're inversely related -- so the claim of \emph{\textbf{symmetry}} is essentially a restatement of Buterin's trilemma!
+In this case, they're inversely related -- so the claim of \emph{\ul{symmetry}} is essentially a restatement of Buterin's trilemma!
 In traditional blockchain designs that have a maximum block size, the tradeoffs described in \autoref{sec:core-conflict} are describing\footnote{
     When considering a traditional blockchain, the tradeoffs are discrete and granular.
     In this case (simplex tiling), the tradeoffs could have a much finer resolution.
@@ -568,7 +574,7 @@ As before $p + q = 1$; note that: $q - p = 2q - 1$.
             }
         \end{equation*}
         \caption{The complete tile tree for $h=2$.}
-        \label{fig:tiling-sec-tile-tree-h2-complete}
+        \label{fig:tiling-sec-tile-tree-h2-complete22}
     \end{subfigure}%%
     \hfill
     \begin{subfigure}[t]{.35\textwidth}
@@ -582,11 +588,11 @@ As before $p + q = 1$; note that: $q - p = 2q - 1$.
             }
         \end{equation*}
         \caption{The branch around $1|i$.}
-        \label{fig:tiling-sec-tile-tree-h2-branch}
+        \label{fig:tiling-sec-tile-tree-h2-branch22}
     \end{subfigure}%%
     \hfill
     \caption{Tile trees for $h=2$, $v=3$.}
-    \label{fig:tiling-sec-tile-tree-h2}
+    \label{fig:tiling-sec-tile-tree-h22}
 \end{figure}
 
 %% END ### DRAFT
@@ -632,7 +638,7 @@ We are particularly interested in the \emph{boundary} of when attacks are possib
     \caption{\textbf{TODO} A diagram of the root tile attempting to sever a child.
     This diagram covers the relevant partial segment of the tiling.
     The link that the attacker is attempting to cut is shown with a squiggly line.}
-    \label{fig:tiling-sec-tile-tree-parent-sev-childfffffff}
+    %%\label{fig:tiling-sec-tile-tree-parent-sev-childfffffff}
 \end{figure}
 
 If the root tile, alone, \textbf{cannot} sever a child tile, then it must be that $q w_1 < p w_1 + v w_{1|i}$ -- some proportion $q$ of the root tile's chain-work is \emph{never} sufficient to overcome the combined weight of reflections from child tiles.
@@ -1117,7 +1123,7 @@ So we know, at least, that the root tile is still secure.
 
 Can $1|i$ be \emph{severed} from the tiling, though?
 To do that, the attacker needs at least 51% of $\sec{1|i}$.
-Let's use $q$ to represent the attackers proportion of hash-power (in total over $w_{1|i|j}$ and $w_{1|i}$).
+Let's use $q$ to represent the attacker's proportion of hash-power (in total over $w_{1|i|j}$ and $w_{1|i}$).
 When is the tiling secure?
 \begin{align*}
     \sec{1|i} &= 2w_{1|i|j} + w_{1|i} + w_{1} \\
@@ -1360,7 +1366,7 @@ Otherwise, the iteration algorithm is the same.
 This tiling is shown in \autoref{fig:alt-tri-tiling} and has $N_{\text{tiles}} = 3 \cdot 2^{h}$.
 One advantage of this variant is that the tiling algorithm can begin when a single original simplex reaches $75\%$ capacity (at which point, it must be split into the trio of root-tiles).
 
-\begin{figure}[p]
+\begin{figure}
     \centering
     \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
@@ -1389,7 +1395,7 @@ One advantage of this variant is that the tiling algorithm can begin when a sing
     \label{fig:alt-tiling}
 \end{figure}
 
-\begin{figure}[p]
+\begin{figure}
     \centering
     \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
@@ -1424,7 +1430,7 @@ A 3-simplex (which has 4 chains) is the least populous simplex that may be tiled
 The result of this is shown in \autoref{fig:tiled-3-simplexes} and is equivalent to a tiling of individual blockchains (a single-chain tiling).
 This configuration still has $O(n)$ scalability.
 
-\begin{figure}[p]
+\begin{figure}
 \centering
     \begin{subfigure}[t]{.32\textwidth}
         \vskip 0pt
@@ -1533,17 +1539,17 @@ Additionally, a model of tilings of similar capacity -- i.e., similar $N_{\text{
 \begin{figure}
 \centering
     \hspace{0.03\textwidth}
-    \begin{subfigure}[t]{.40\textwidth}
+    \begin{subfigure}[t]{.45\textwidth}
         \vskip 0pt
         \centering
-        \includegraphics[height=.95\linewidth]{avg-dist-v3}
+        \includegraphics[max width=1.0\textwidth]{avg-dist-v3}
         \caption{Tree of valence 3.}
     \end{subfigure}%%
     \hfill
-    \begin{subfigure}[t]{.40\textwidth}
+    \begin{subfigure}[t]{.45\textwidth}
         \vskip 0pt
         \centering
-        \includegraphics[height=.95\linewidth]{avg-dist-v4}
+        \includegraphics[max width=1.0\textwidth]{avg-dist-v4}
         \caption{Tree of valence 4.}
     \end{subfigure}%%
     \hspace{0.03\textwidth}
@@ -1658,8 +1664,8 @@ Now, let's consider two systems of equal (network wide) throughput: a tiling of 
 In the tiled system, with non-recursive validation, miners on the root tile need to do more work than miners on leaf tiles -- internal reflections for 4 tiles and 3 sets of inter-tile reflections. With recursive validation all miners (for all tiles) have this same burden.
 \begin{equation}
 \begin{split}
-& \text{Tiling Refls} = (\frac{N_1}{4})^2 \cdot (4 + 3) = \frac{7 N_1^2}{16} \\
-& \text{Simplex Refls} = N_1^2
+& \text{Tiling Refls} = (\frac{N_1}{4})^2 \cdot (4 + 3) = \frac{7 {N_1}^2}{16} \\
+& \text{Simplex Refls} = {N_1}^2
 \end{split}
 \end{equation}
 
