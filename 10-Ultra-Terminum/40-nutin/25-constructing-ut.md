@@ -1,6 +1,6 @@
 %% BEGIN ### RELEASE
 
-\subsection{\texorpdfstring{$\UT{i}$}{UT}: Constructing \emph{Ultra Terminum}}
+\subsection{\titlemath{$\UT{i}$}{UTᵢ}: Constructing \emph{Ultra Terminum}}
 
 \label{sec:constructing-ut}
 
@@ -12,8 +12,6 @@ Such a foundation (*the simplex*) is *not* a sharded blockchain -- there's no re
 
 \label{sec:generalizing-reflection}
 
-\input{includes/ut/algorithms/por-reflected-block-weight.tex}
-
 *Proof of Reflection* is, in essence, the idea that a chain can acknowledge that its history has been confirmed by a different chain[^reflection-prior]. That is a simplification, but it *is* the essence of it.
 
 [^reflection-prior]: I have not been able to find any existing discussion of this method. If you know of any existing discussion of this method, please post a link to the forum topic that is linked in the abstract.
@@ -23,6 +21,8 @@ In principle, the necessary capabilities (and actions) that some chains, $C_A$ a
 1. The headers of $C_A$ can be (and are) freely recorded -- promptly and unambiguously -- in $C_B$;
 2. The headers of $C_B$ can be (and are) freely recorded -- promptly and unambiguously -- in $C_A$; and
 3. $C_A$ is able to (and does) promptly prove that its past headers have been recorded in $C_B$, and has full knowledge of which headers have been recorded.
+
+\input{includes/ut/algorithms/por-reflected-block-weight.tex}
 
 The benefits from *Proof of Reflection* begin as soon as $C_A$ integrates this knowledge into its chain-weighting algorithm, by a method suitably similar to \autoref{alg:refl-1-bw} and \autoref{alg:weightof-1}.
 

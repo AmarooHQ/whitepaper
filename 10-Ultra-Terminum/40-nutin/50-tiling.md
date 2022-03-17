@@ -574,7 +574,7 @@ As before $p + q = 1$; note that: $q - p = 2q - 1$.
             }
         \end{equation*}
         \caption{The complete tile tree for $h=2$.}
-        \label{fig:tiling-sec-tile-tree-h2-complete}
+        \label{fig:tiling-sec-tile-tree-h2-complete22}
     \end{subfigure}%%
     \hfill
     \begin{subfigure}[t]{.35\textwidth}
@@ -588,11 +588,11 @@ As before $p + q = 1$; note that: $q - p = 2q - 1$.
             }
         \end{equation*}
         \caption{The branch around $1|i$.}
-        \label{fig:tiling-sec-tile-tree-h2-branch}
+        \label{fig:tiling-sec-tile-tree-h2-branch22}
     \end{subfigure}%%
     \hfill
     \caption{Tile trees for $h=2$, $v=3$.}
-    \label{fig:tiling-sec-tile-tree-h2}
+    \label{fig:tiling-sec-tile-tree-h22}
 \end{figure}
 
 %% END ### DRAFT
@@ -638,7 +638,7 @@ We are particularly interested in the \emph{boundary} of when attacks are possib
     \caption{\textbf{TODO} A diagram of the root tile attempting to sever a child.
     This diagram covers the relevant partial segment of the tiling.
     The link that the attacker is attempting to cut is shown with a squiggly line.}
-    \label{fig:tiling-sec-tile-tree-parent-sev-childfffffff}
+    %%\label{fig:tiling-sec-tile-tree-parent-sev-childfffffff}
 \end{figure}
 
 If the root tile, alone, \textbf{cannot} sever a child tile, then it must be that $q w_1 < p w_1 + v w_{1|i}$ -- some proportion $q$ of the root tile's chain-work is \emph{never} sufficient to overcome the combined weight of reflections from child tiles.
@@ -1539,17 +1539,17 @@ Additionally, a model of tilings of similar capacity -- i.e., similar $N_{\text{
 \begin{figure}
 \centering
     \hspace{0.03\textwidth}
-    \begin{subfigure}[t]{.40\textwidth}
+    \begin{subfigure}[t]{.45\textwidth}
         \vskip 0pt
         \centering
-        \includegraphics[height=.95\linewidth]{avg-dist-v3}
+        \includegraphics[max width=1.0\textwidth]{avg-dist-v3}
         \caption{Tree of valence 3.}
     \end{subfigure}%%
     \hfill
-    \begin{subfigure}[t]{.40\textwidth}
+    \begin{subfigure}[t]{.45\textwidth}
         \vskip 0pt
         \centering
-        \includegraphics[height=.95\linewidth]{avg-dist-v4}
+        \includegraphics[max width=1.0\textwidth]{avg-dist-v4}
         \caption{Tree of valence 4.}
     \end{subfigure}%%
     \hspace{0.03\textwidth}
