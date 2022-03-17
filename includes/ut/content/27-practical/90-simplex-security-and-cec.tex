@@ -11,7 +11,7 @@ Say the attacker controls $q$ proportion of the network's work-generation capaci
 The attacker should only be able to control the network's history if $q > p$.
 
 Successfully attacking a single blockchain requires an attacker to publish an alternate chain-segment that the fork rule considers heavier than the corresponding public chain-segment.
-Those two segments will have a common ancestor, so the weight of the attacker's segment must be greater than the weight of the public chain-segment (from that common ancestor on).
+Those two segments will have a common ancestor, so the weight of the attacker's segment must be greater than the weight of the public chain-segment (both start at that common ancestor).
 
 Simplex-chains evaluate block-weight as the sum of work done on that block, plus work done on reflecting blocks.
 So effecting a doublespend on one simplex-chain requires generating a chain-segment with more total block-weight (including reflections) than the public chain-segment.
@@ -80,7 +80,7 @@ As blockchain architects, if the CEC is true, then UT allows us to maintain secu
 \label{sec:cec-draft-refl-work}
 
 With a traditional blockchain, the network has no ``memory'' of work (hashes) that have been done but are not accounted for in the main chain.
-Specifically, the network gains no knowledge of how much work has been done \emph{between} block.
+Specifically, the network gains no knowledge of how much work has been done \emph{between} blocks.
 This is almost self-evident: each block is the \emph{sole} way that work can be \emph{added} to the chain.
 Naturally, there is no smaller unit of contributed work than an individual block -- so there's no ``memory''.\footnote{
     We're not concerned with things like \emph{weak blocks} or super-block hybrid designs; though it's possible that doublespend methodology for those designs has some overlap with this section.
@@ -283,7 +283,7 @@ Since we want to \emph{match} analytical results, we want a \emph{larger} value 
 
 So that we match the analytical solution's assumptions, a value of $\text{DAA}_N = 500$ was chosen.
 The most important thing is that $\text{DAA}_N \gg c$, particularly regarding traditional chains.\footnote{
-    The differential effect seems to diminish as an attack goes on, so $\text{DAA}_N$ is particular important for \emph{lower} values of $c$.
+    The differential effect seems to diminish as an attack goes on, so $\text{DAA}_N$ is particularly important for \emph{lower} values of $c$.
     $\text{DAA}_N \gg c$ matters when c is small, but not so much when $c$ is large.
     In other words: if the doublespend occurs over 600 blocks, the value of $\text{DAA}_N$ doesn't matter much; but if the doublespend occurs over 20 blocks, then the value of $\text{DAA}_N$ is a significant variable.
 }
