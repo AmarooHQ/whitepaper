@@ -215,17 +215,21 @@ vcCommitSize = 32.0
 -- vcCommitSize = 48.0
 
 -- | estimate PoR len via average depth in a verkle tree
-porVCLen2 ∷ Number → Number
-porVCLen2 n = if n <= vcBranchingF
+porVCLen2' ∷ Boolean → Number → Number
+porVCLen2' doubleBranching n = if n <= _vcBranchingF
     then 1.0
-    else if l2Groups > vcBranchingF
-      then 1.0 + porVCLen2 (n / vcBranchingF)
+    else if l2Groups > _vcBranchingF
+      then 1.0 + porVCLen2' doubleBranching (n / _vcBranchingF)
       else avgDepth
   where
-    l2Groups = floor $ n / vcBranchingF
-    l1Nodes = (min n vcBranchingF) - l2Groups
+    l2Groups = floor $ n / _vcBranchingF
+    l1Nodes = (min n _vcBranchingF) - l2Groups
     l2Nodes = n - l1Nodes
     avgDepth = (1.0 * l1Nodes + 2.0 * l2Nodes) / n
+    _vcBranchingF = vcBranchingF * (if doubleBranching then 2.0 else 1.0)
+
+porVCLen2 ∷ Number → Number
+porVCLen2 = porVCLen2' false
 
 -- ethereum numbers add 0.66 to branch length (I think to account for sparseness)
 -- and we use the average not the ceil
@@ -233,12 +237,11 @@ vcSparseExtra ∷ Number
 -- vcSparseExtra = 0.66
 vcSparseExtra = 0.0
 
--- | deprecated
+-- | deprecated in favor of porVCLen2
 porVCLen :: Number -> Number
 porVCLen n = max 1.0 $ (log n / log vcBranchingF + vcSparseExtra)
 
 -- | Length (in bytes) of a merkle proof
--- | deprecated in favor of porVCLen2
 porMPLen :: Number -> Number
 porMPLen = log2c
 
@@ -246,7 +249,9 @@ porLen ∷ Number → Number → Number
 porLen g n = min porBytesMerkle porBytesVerkle
   where
     -- add 1.0 to each verkle layer to account for location data -- 256 children implies 8 bits (1 B) for required per node
-    porBytesVerkle = (1.0 + vcCommitSize) * porVCLen2 n
+    porBytesVerkle = (1.0 + vcCommitSize) * porVCLen2' false n
+    -- hashTrunk = g < 20.0
+    -- Note: we can call porVCLen2' with `hashTrunk` as the first arg -- this provides very modest optimization and really doesn't help us much. However, it breaks tests, so not going to include it
     porBytesMerkle = g * porMPLen n
 
 utPorsT1 :: Number -> Number -> Number -> Number -> Number -> Number

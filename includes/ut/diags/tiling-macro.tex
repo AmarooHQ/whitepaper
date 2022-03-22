@@ -15,6 +15,10 @@
 \providecommand\TilingAltTriPattern{0}%
 \providecommand\TilingLineColor{black}%
 \providecommand\TilingOnlyTopHalf{0}%
+% after the root tile, each tile has (V-\TilingValenceModAfterRoot) children
+\providecommand\TilingValenceModAfterRoot{1}%
+% multiply the number of simplex-chains it the root tile by \TilingRootSimplexMult
+\providecommand\TilingRootSimplexMult{1}%
 \providecommand\DoTilingHexagon{0}%
 \providecommand\SetNewChildren[1]{
     % \xdef\ncInput{}
@@ -22,7 +26,6 @@
         \xintifboolexpr{#1 == 0}{3}{\xintifboolexpr{#1 == 1}{4}{\xintifboolexpr{#1 == 2}{1}{2}}}
     }{\TilingValence - \xintifboolexpr{ #1 < 1 }{0}{1}}}
 }
-\input{simplex-macro}%
 % \makeatletter%
 % \def\fillRGB#1#2#3{\pgfsys@color@rgb@fill{#1}{#2}{#3}}%
 % \makeatother%
@@ -30,18 +33,24 @@
 \pgfdeclarelayer{groups}%
 \pgfdeclarelayer{tiles}%
 \pgfsetlayers{reflections,groups,main,tiles}%
+%
+\providecommand\SimplexDeclareLayers{0}
+\input{simplex-macro}%
+%
 \newcommand\TikzSimplexTiling{
     \renewcommand\SimplexOutlineColor{\TilingLineColor}
-    \pgfmathsetmacro\nNodesTotal{3*(2^(\TilingDepth)-1)+1}
     \xdef\initNodeR{\TilingInitSize*\TilingSizeToNodeRRatio}
     \xdef\nodeR{\initNodeR}
-    \pgfmathsetmacro\newChildren{\TilingValence-1}
+    \pgfmathsetmacro\newChildren{\TilingValence-\TilingValenceModAfterRoot}
     \xdef\lastTilesTotal{0}
     \def\nodeNameRoot{r}
     \xdef\tilingCurrSize{\TilingInitSize}
     \xdef\createCurrent{1}
     \xdef\createDistance{0}
     \xdef\createChildren{\TilingValence}
+    \xdef\normalSimplexSize{\SimplexChains}
+    \xdef\lastSimplexChains{\normalSimplexSize}
+    \xdef\thisSimplexChains{\normalSimplexSize}
     \ifnum 1=\TilingAltPattern
         \xdef\createCurrent{2}
         \pgfmathsetmacro\newCreateChildren{(\TilingValence-1)*\createCurrent}
@@ -89,6 +98,7 @@
                 \foreach \s in {1,...,\createCurrentMbTrimmed} {
                         \def\parentSimplex{\nodeNameRoot/0/1}
                         \pgfmathsetmacro\parentId{0}
+                        % if we're at d=0 or using \TilingAltPattern
                         \ifnum 1=\xintifboolexpr{1 < \d || \TilingAltPattern == 1}{1}{0}
                             \xdef\newChildrenSub{\xintifboolexpr{1 == \d && 1 == \TilingAltTriPattern}{1}{0}}
                             % how many children we're actually creating. Note, this is to calc the parentId,
@@ -146,7 +156,19 @@
                         \pgfmathparse{\timesRun+1}
                         \xdef\timesRun{\pgfmathresult}
 
+                        % if we're at d=0 multiply simplex chains by \TilingRootSimplexMult
+                        \ifnum 1=\xintifboolexpr{0 == \d && \TilingRootSimplexMult != 1}{1}{0}
+                            % sub 1 to keep things odd
+                            \pgfmathparse{\SimplexChains*\TilingRootSimplexMult-1}
+                            \xdef\tmpSimplexChains{\pgfmathresult}
+                            \renewcommand\SimplexChains{\tmpSimplexChains}
+                        \fi
+
                         \TikzSimplex
+
+                        \xdef\thisSimplexChains{\SimplexChains}
+                        \renewcommand\SimplexChains{\normalSimplexSize}
+
                         \ifnum 1=\TilingDrawGroups
                             \begin{pgfonlayer}{groups}
                                 \node (\tileName/group)
@@ -157,34 +179,32 @@
                                     at (\sxAngle: \createDistance) {};
                             \end{pgfonlayer}
                         \fi
-                        % \node () [yshift=30pt] at (\SimplexNodeName//1) {$\nNodesTotal$};
-                        % \node () [yshift=20pt] at (\SimplexNodeName//1) {\parentSimplex};
 
                         \ifnum 0>\d
-                            % don't draw debug info for these depths
+                            % don't draw refls/debug info for these depths
                         \else
                             \ifnum 1=\TilingRotateDebug
-                            \node (\tileName-d1) [above of=\SimplexNodeName//1] {\SimplexNodeName//1};
-                            \node (\tileName-d2) [above of=\SimplexNodeName//2] {parentDist: \distToParent, dist: \createDistance};
-                            \node (\tileName-d3) [yshift=10pt, above of=\SimplexNodeName//2] {self: \s, parent: \parentId};
-                            \node (\tileName-d4) [yshift=20pt, above of=\SimplexNodeName//2] {sxAngle: \sxAngle};
-                            \node (\tileName-d5) [yshift=30pt, above of=\SimplexNodeName//2] {parentSx: \parentSxAngle};
-                            \node (\tileName-d6) [yshift=40pt, above of=\SimplexNodeName//2] {theta: \angleDiff};
-                            \node (\tileName-d7) [yshift=50pt, above of=\SimplexNodeName//2] {alpha: \angleToParent};
-                            \node (\tileName-d8) [yshift=60pt, above of=\SimplexNodeName//2] {final: \finalRotation};
+                                \node (\tileName-d1) [above of=\SimplexNodeName//1] {\SimplexNodeName//1};
+                                \node (\tileName-d2) [above of=\SimplexNodeName//2] {parentDist: \distToParent, dist: \createDistance};
+                                \node (\tileName-d3) [yshift=10pt, above of=\SimplexNodeName//2] {self: \s, parent: \parentId};
+                                \node (\tileName-d4) [yshift=20pt, above of=\SimplexNodeName//2] {sxAngle: \sxAngle};
+                                \node (\tileName-d5) [yshift=30pt, above of=\SimplexNodeName//2] {parentSx: \parentSxAngle};
+                                \node (\tileName-d6) [yshift=40pt, above of=\SimplexNodeName//2] {theta: \angleDiff};
+                                \node (\tileName-d7) [yshift=50pt, above of=\SimplexNodeName//2] {alpha: \angleToParent};
+                                \node (\tileName-d8) [yshift=60pt, above of=\SimplexNodeName//2] {final: \finalRotation};
                             \fi
                             \begin{pgfonlayer}{reflections}
                                 % draw refl lines to parent
                                 \ifnum 1=\TilingDrawAllReflections
                                     \foreach \sn in {1,...,\SimplexChains} {
-                                        \foreach \pn in {1,...,\SimplexChains} {
+                                        \foreach \pn in {1,...,\lastSimplexChains} {
                                                 \draw [thin, draw=\TilingLineColor] (\parentSimplex//\pn) -- (\SimplexNodeName//\sn);
                                             }
                                     }
                                     % if using TilingAltTri pattern then last tile at d=0 needs extra refls
                                     \ifnum 1=\xintifboolexpr{0 == \d && \s == \createCurrent && 1 == \TilingAltTriPattern}{1}{0}
                                         \foreach \sn in {1,...,\SimplexChains} {
-                                            \foreach \pn in {1,...,\SimplexChains} {
+                                            \foreach \pn in {1,...,\lastSimplexChains} {
                                                     \draw [thin, draw=\TilingLineColor] (\nodeNameRoot/\lastD/1//\pn) -- (\SimplexNodeName//\sn);
                                                 }
                                         }
@@ -199,7 +219,7 @@
                         \ifnum 1=\xintifboolexpr{1 == \d && 1 < \s && 1 == \DoTilingHexagon && 2 < \createCurrentMbTrimmed}{1}{0}
                             \pgfmathtruncatemacro\prevSib{\s - 1}
                             \foreach \pn in {1,...,\SimplexChains} {
-                                \foreach \sn in {1,...,\SimplexChains} {
+                                \foreach \sn in {1,...,\lastSimplexChains} {
                                     \draw [thin, draw=\TilingLineColor] (\nodeNameRoot/\d/\prevSib//\pn) -- (\SimplexNodeName//\sn);
                                     \ifnum 1=\xintifboolexpr{\s == \createCurrentMbTrimmed}{1}{0}
                                         \draw [thin, draw=\TilingLineColor] (\nodeNameRoot/\d/1//\pn) -- (\SimplexNodeName//\sn);
@@ -210,6 +230,7 @@
                     }
 
 
+                \xdef\lastSimplexChains{\thisSimplexChains}
                 \xdef\lastAngleOffset{\sxAngleOffset}
                 \def\tmpAngleOffset{\sxAngleOffset}
                 \xdef\prevCreateDist{\createDistance}

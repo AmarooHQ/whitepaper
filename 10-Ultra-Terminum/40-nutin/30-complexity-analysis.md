@@ -379,6 +379,8 @@ A simplex-chain reflects $N_1 - 1 \approx N_1$ other simplex-chains. A merkle tr
 
 Note: In a production system, these proofs can be excluded from blocks by treating them as droppable witnesses; see \autoref{sec:proving-reflection}.
 
+\todo{Total reflections + computational burden (+PoRs vs omitted proofs) -- $O(c)$ vs $O(c^2)$}
+
 ### TPS Complexity Comparison
 
 $k$: raw per-chain throughput (bytes/$s$) \newline

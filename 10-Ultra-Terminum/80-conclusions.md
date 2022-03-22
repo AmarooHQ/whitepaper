@@ -105,7 +105,7 @@ No real-world sharded network has come close to this level of performance, and i
 \begin{table}[H]
     \centering
     \caption{
-        Table evaluating UT against trilemma criteria.
+        Table evaluating UT against trilemma criteria ($3000 \le k \le 20000$ B/s).
     }
     \begin{tabular}{lllll}
         \toprule
@@ -114,7 +114,9 @@ No real-world sharded network has come close to this level of performance, and i
         $\UT{1}$ & Yes & Yes & Maybe & (Max. TPS: $\sim$ 1K - 400K) \\
         $\UT{2}$ & Yes & Yes & Possibly & (Max. TPS: $\sim$ 600K - 2B) \\
         $\UT{3}$ & Yes & Yes & Probably & (Max. TPS: $\sim$ 300M - 6T) \\
-        $\UTinf{}$ & Yes & Yes & Yes & (Max. TPS: $\gtrsim 10^{30}$) \\
+        $\UTinf{1}$ & Yes & Yes & Probably & (Max. TPS: $\sim$ 50M - $10^{18}$) \\
+        $\UTinf{2}$ & Yes & Yes & Yes & (Max. TPS: $\sim$ 300B - $10^{21}$) \\
+        $\UTinf{3}$ & Yes & Yes & Yes & (Max. TPS: $\sim$ $10^{14}$ - $10^{25}$) \\
         \bottomrule
     \end{tabular}
 \end{table}

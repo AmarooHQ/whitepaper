@@ -9,12 +9,17 @@
 \providecommand\SimplexRotationMod{0}%
 \providecommand\SimplexOutlineColor{black}%
 \providecommand\SimplexLineScale{1}%
+\providecommand\SimplexDeclareLayers{1}%
 %
 % ultra thick = 1.6pt
 \pgfmathtruncatemacro\nodeLineThickness{1.6 * \SimplexLineScale}
 \tikzstyle{refl} = [line width=\nodeLineThickness pt, draw=\SimplexOutlineColor, shorten >= 0pt, shorten <= 0pt]
 \tikzstyle{splxNode} = [draw=\SimplexOutlineColor, line width=\nodeLineThickness pt, shape=circle]
 %
+\ifnum 1=\SimplexDeclareLayers
+    \pgfdeclarelayer{reflections}%
+    \pgfsetlayers{reflections,main}%
+\fi
 \newcommand\TikzSimplex{
     \pgfmathsetmacro\rOffset{(360/\SimplexChains)+90+\SimplexRotationMod}
     \node (\SimplexNodeName-origin) at (\SimplexOffsetAngle: \SimplexOffsetR) {};
@@ -30,6 +35,8 @@
                 at ([shift=({\r: \sxRadius*0.8cm})]\SimplexNodeName-origin)
                 {};
         }
+
+    \begin{pgfonlayer}{reflections}
     \foreach \i in {1,...,\SimplexChains} {
             \foreach \j in {1,...,\SimplexChains} {
                     \ifnum \i>\j
@@ -40,4 +47,5 @@
                     \fi
                 }
         }
+    \end{pgfonlayer}
 }%
