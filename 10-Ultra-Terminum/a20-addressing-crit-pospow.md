@@ -49,14 +49,14 @@ The hybrid \emph{context} that UT provides[^hybrid-context] is different to the 
   \\
   Increasing PoS participation, or increasing hashpower, can only have a positive influence on the weight of that subchain. \\
   \\
-  The cost to take majority control of the PoS portion is cheap, because of market failure in voting systems. So lets consider the case where the attacker has 2/3rds control of the validator stake.
+  The cost to take majority control of the PoS portion is cheap, because of market failure in voting systems. So let's consider the case where the attacker has 2/3rds control of the validator stake.
   normal = weight(H0, P), attacker = weight(H1, P*2). \\
   \\
   To calculate how much hashpower the attacker would need to have exactly 50% likelyhood of the attack succeeding: \\
   \\
   F1: weight(H1, P*2) = weight(H0, P). \\
   \\
-  lets suppose that the pow/pos hybrid design is more secure than pow, or at least equally secure. This means that the attacker's hashpower needs to be bigger than the network hashpower for the attack to succeed. (We will use proof by contradiction to show that this supposition is false.) \\
+  let's suppose that the pow/pos hybrid design is more secure than pow, or at least equally secure. This means that the attacker's hashpower needs to be bigger than the network hashpower for the attack to succeed. (We will use proof by contradiction to show that this supposition is false.) \\
   \\
   S1: H1 > H0. \\
   \\

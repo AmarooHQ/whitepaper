@@ -13,8 +13,11 @@
 \providecommand\TilingDrawGroups{0}%
 \providecommand\TilingAltPattern{0}%
 \providecommand\TilingAltTriPattern{0}%
+\providecommand\TilingAltQuadPattern{0}%
 \providecommand\TilingLineColor{black}%
 \providecommand\TilingOnlyTopHalf{0}%
+% set this to 1 to not rotate any simplexes
+\providecommand\TilingNoSimplexRotation{0}%
 % after the root tile, each tile has (V-\TilingValenceModAfterRoot) children
 \providecommand\TilingValenceModAfterRoot{1}%
 % multiply the number of simplex-chains it the root tile by \TilingRootSimplexMult
@@ -61,6 +64,11 @@
             \pgfmathsetmacro\newCreateChildren{(\TilingValence-2)*\createCurrent}
             % \xdef\tilingCurrSize{\TilingInitSize/\TilingScaleConst}
         \fi
+        \ifnum 1=\TilingAltQuadPattern
+            \xdef\createCurrent{4}
+            \pgfmathsetmacro\newCreateChildren{(\TilingValence-3)*\createCurrent}
+            \pgfmathsetmacro\newCreateDistance{\tilingCurrSize*\TilingScaleConst*1.5}
+        \fi
         \xdef\createDistance{\newCreateDistance}
         \xdef\createChildren{\newCreateChildren}
     \fi
@@ -72,10 +80,11 @@
     \foreach \d in {0,...,\TilingDepth} {
             \ifnum 0<\createCurrent
                 \renewcommand\SimplexRadius{\tilingCurrSize}
-                \ifnum 1=\xintifboolexpr{1 == \TilingAltTriPattern}{1}{0}
+                \xdef\tilingTriOrQuad{\xintifboolexpr{1 == \TilingAltTriPattern || 1 == \TilingAltQuadPattern}{1}{0}}
+                \ifnum 1=\xintifboolexpr{1 == \tilingTriOrQuad}{1}{0}
                     \renewcommand\SimplexRadius{\tilingCurrSize/\TilingScaleConst}
                 \fi
-                \ifnum 1=\xintifboolexpr{1 == \TilingAltTriPattern && 0 == \d}{1}{0}
+                \ifnum 1=\xintifboolexpr{1 == \tilingTriOrQuad && 0 == \d}{1}{0}
                     \renewcommand\SimplexRadius{\tilingCurrSize/\TilingScaleConst/\TilingScaleConst}
                 \fi
                 \renewcommand\SimplexOffsetR{\createDistance}
@@ -152,6 +161,9 @@
                             % \pgfmathsetmacro\finalRotation{\parentSxAngle + (90 - abs(\angleToParent)) * (abs(\angleToParent)/\angleToParent)}
                             \renewcommand\SimplexRotationMod{\finalRotation}
                         \fi
+                        \ifnum 1=\TilingNoSimplexRotation
+                            \renewcommand\SimplexRotationMod{-90}
+                        \fi
 
                         \pgfmathparse{\timesRun+1}
                         \xdef\timesRun{\pgfmathresult}
@@ -206,6 +218,16 @@
                                         \foreach \sn in {1,...,\SimplexChains} {
                                             \foreach \pn in {1,...,\lastSimplexChains} {
                                                     \draw [thin, draw=\TilingLineColor] (\nodeNameRoot/\lastD/1//\pn) -- (\SimplexNodeName//\sn);
+                                                }
+                                        }
+                                    \fi
+                                    % similar for quad
+                                    \ifnum 1=\xintifboolexpr{0 == \d && 1 == \TilingAltQuadPattern}{1}{0}
+                                        \foreach \sn in {1,...,\SimplexChains} {
+                                            \foreach \pn in {1,...,\lastSimplexChains} {
+                                                    \foreach \tilen in {1,...,\s} {
+                                                        \draw [thin, draw=\TilingLineColor] (\nodeNameRoot/\lastD/\tilen//\pn) -- (\SimplexNodeName//\sn);
+                                                    }
                                                 }
                                         }
                                     \fi

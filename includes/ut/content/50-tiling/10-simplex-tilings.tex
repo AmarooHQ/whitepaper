@@ -1,1 +1,85 @@
 \subsubsection{Simplex Tilings}
+
+We connect simplex tiles together, via mutual reflection, to create a simplex tiling.
+For the sake of brevity, when we say that a simplex tile reflects another tile (or that a tile is \emph{connected} to another tile), we mean that all simplex-chains in the first tile mutually reflect all simplex-chains in the second tile.
+% There are an infinite number of simplex tilings, and an infinite number of \emph{patterns} by which we can construct simplex tilings.
+A simplex tiling is thus a \emph{graph} of interconnected tiles.
+Connected tiles are \emph{neighbors} and are \emph{adjacent} to one another in the tiling.
+
+\defineTermTex{Simplex Tiling}{
+    An internconnected graph of mutually reflecting simplex tiles
+}
+
+Before we look at some complex (and useful) tilings, let's consider three examples that are some of the simplest tilings possible: \autoref{fig:trivial-simplex-tiling}.
+The examples contain 2, 3, and 4 simplex tiles respectively.
+
+\begin{figure}
+    \begin{subfigure}[m]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[max height=\linewidth, max width=\linewidth]{tiling_alt_s5_d0_sag.pdf}
+        \caption{2 simplex tiles}
+        \label{fig:triv-tiling-2}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[m]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[max height=\linewidth, max width=\linewidth]{tiling_a3_v3_s5_d0_sag.pdf}
+        \caption{3 simplex tiles}
+        \label{fig:triv-tiling-3}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[m]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[max height=\linewidth, max width=\linewidth]{tiling_a4_v3_s5_d0_sag.pdf}
+        \caption{4 simplex tiles}
+        \label{fig:triv-tiling-4}
+    \end{subfigure}
+    \caption[Trivial simplex tilings]{Trivial simplex tilings -- these are all equivalent to a single simplex as each simplex-chain reflects all other simplex-chains in the network.}
+    \label{fig:trivial-simplex-tiling}
+\end{figure}
+
+In those examples, notice that each simplex tile reflects each other tile.
+This means that each simplex-chain is mutually reflecting \emph{all} other simplex-chains (in all other tiles), so each of these tilings is equivalent to a standalone simplex.
+These tilings aren't particularly useful to us, though, because we don't have a way to increase network-wide capacity beyond $O(c^2)$.
+
+If we want $O(n)$ capacity, then we'll need to come up with a new pattern for how to connect tiles together and how to add new tiles.
+Specifically: the pattern must \emph{always} have room for more simplex tiles, and each tile we add needs to, on average, add \emph{more} that 1 new spot for additional tiles.
+
+
+\subsubsection{Tile Valence}
+
+The \emph{valence} ($v$) of a tile is the number of other tiles that it can connect to.
+In our example earlier, we split our simplex tile's capacity for reflections into 4 equal parts -- each part was 12.5\% of each simplex-chain's total capacity.
+Since 1 of those parts is reserved for internal reflections, and 3 parts are reserved for external reflections, that simplex tile has a valence of $v=3$.
+
+We don't \emph{have} to use a valence of 3 -- we can split up a tile's capacity for reflections any way that we like.
+Each tile could even have different valencies, too, but this makes designing a tiling more complex.
+For the sake of simplicity, let's only consider tilings where each tile has the same valence.
+When we say that a \emph{tiling} (rather than a tile) has a valence of $v$, we mean that \emph{each tile in the tiling} has a valence of $v$.
+
+If a tile has a valence of $v=0$, then all capacity for reflections is reserved for internal reflections -- so this is just a normal simplex.
+
+If a tiling has a valence of $v=1$, then the tiling is limited to 2 tiles at most.
+This is equivalent to a normal simplex since all simplex-chains reflect all other simplex-chains.
+The complete tiling with $v=1$, which is the only possible tiling in this case, is shown in \autoref{fig:triv-tiling-2}.
+
+If a tiling has a valence of $v=2$, then there are two possible solutions.
+The first is where each simplex tile is connected to all other simplex tiles -- this is the trivial solution and shown in \autoref{fig:triv-tiling-3}.
+The second is our first \emph{unbounded} solution -- it's a solution were we can always add more tiles (\autoref{fig:tiling-v2-unbounded}).
+The problem with this second solution is that, although it may have $O(n)$ capacity, the \emph{distance} between tiles is \emph{also} $O(n)$.
+This is not practical since chained SPV proofs will be $O(n)$ in length.
+
+\begin{figure}
+    \centering
+    \includegraphics[max width=.9\linewidth]{tiling_v2_s5_d6_sag.pdf}
+    \caption[The only unbounded tiling at $v=2$.]{
+        The only unbounded tiling at $v=2$.
+        Although it is unbounded (we can always keep adding tiles), the \emph{distance} between those tiles is proportional to the size of the network -- so this isn't scalable.
+    }
+    \label{fig:tiling-v2-unbounded}
+\end{figure}
+
+\newpage
