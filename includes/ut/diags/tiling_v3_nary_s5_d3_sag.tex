@@ -1,0 +1,22 @@
+\documentclass[]{standalone}
+\usepackage[T1]{fontenc}\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usepackage{pgfbaselayers}
+\usepackage{xintexpr}
+\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
+
+\makeatletter
+\def\input@path{{./includes/}{./includes/ut/diags/}}
+\makeatother
+
+% overwrite (either \providecommand or \renewcommand) to control the parts of the diagram which are drawn or not.
+
+\begin{document}%
+% tiling params
+\providecommand\TilingDepth{3}%
+\input{tiling_v3_series2_params.tex}%
+\input{tiling-macro}%
+\begin{tikzpicture}%
+    \TikzSimplexTiling%
+\end{tikzpicture}%
+\end{document}

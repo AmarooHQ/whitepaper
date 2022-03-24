@@ -170,8 +170,9 @@
 
                         % if we're at d=0 multiply simplex chains by \TilingRootSimplexMult
                         \ifnum 1=\xintifboolexpr{0 == \d && \TilingRootSimplexMult != 1}{1}{0}
-                            % sub 1 to keep things odd
-                            \pgfmathparse{\SimplexChains*\TilingRootSimplexMult-1}
+                            % ~~sub 1 to keep things odd~~
+                            % \pgfmathparse{\SimplexChains*\TilingRootSimplexMult-1}
+                            \pgfmathparse{\SimplexChains*\TilingRootSimplexMult}
                             \xdef\tmpSimplexChains{\pgfmathresult}
                             \renewcommand\SimplexChains{\tmpSimplexChains}
                         \fi

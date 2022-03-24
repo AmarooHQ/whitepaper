@@ -1,4 +1,5 @@
-\emph{Amaroo's} consensus mechanism: \emph{Ultra Terminum}.
+This paper explains and constructs \emph{Amaroo's} consensus mechanism: \emph{Ultra Terminum}.
+
 \emph{Ultra Terminum} (UT) is a proof-agnostic cross-chain consensus strategy providing multiple scaling configurations: $\UT{1}\;(O(c^2))$, $\UT{2}\;(O(c^3))$, $\UT{3}\;(O(c^4))$, and $\UTinf{}\;(O(n))$.
 UT remains secure against an attacker with up to $O(n)$ resources.
 UT addresses the core conflict of the \emph{Scalability Trilemma} (herein called \emph{Buterin's Trilemma}).
@@ -9,7 +10,7 @@ With reasonable parameters (i.e., a per-chain load comparable to Bitcoin, $k = 3
 This is Amaroo's \emph{initial configuration}.
 % In the $\UT{2}$ configuration, doubling the block time quadruples TPS.
 \par
-Capacity of $\UTinf{}$ is \emph{independent} of parameters and is \emph{unbounded} -- i.e., practically infinite.
+Capacity of $\UTinf{}$ is \emph{independent} of those parameters and is \emph{unbounded}.
 It has variants $\UTinf{1}$, $\UTinf{2}$, and $\UTinf{3}$; corresponding to $\UT{1}$, $\UT{2}$, and $\UT{3}$, respectively.
 \par
 % Confirmation times within UT are $\frac{1}{O(c)}$, i.e., confirmation rate is $O(c)$.
