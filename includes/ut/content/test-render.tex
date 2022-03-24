@@ -122,12 +122,17 @@
 \input{../00-preamble/060-autoref.tex}
 \input{../00-preamble/110-quotes.tex}
 \input{../00-preamble/130-todos.tex}
+\input{../00-preamble/510-maths.tex}
 \input{../00-preamble/999-citations.tex}
 
-
+\makeatletter
 \providecommand\defineTermTex[2]{
-    GLOSSARY ENTRY: #1: #2.
+  \begin{tcolorbox}[]
+      \textbf{#1}: \trim@post@space{#2}.
+  \end{tcolorbox}
+    % GLOSSARY ENTRY: #1: #2.
 }
+\makeatother
 
 \providecommand\todo[1]{
     TODO: #1
@@ -154,6 +159,12 @@
 \begin{document}
 
 \begin{section}{Section 1}
+
+\subsection{UT Aleph}
+
+\input{50-tiling/00-tiling-intro.tex}
+
+\input{50-tiling/10-simplex-tilings.tex}
 
 %
 % The in-prog doc we want to preview

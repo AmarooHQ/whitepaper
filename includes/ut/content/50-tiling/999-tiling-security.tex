@@ -1,5 +1,3 @@
-\subsection{tiling (todo: remove this)}
-
 \subsubsection{Tiling Security Stuff (Notes)}
 
 \begin{itemize}
@@ -69,9 +67,14 @@ Simplex-work is the sum of all chain-work that contributes to a chain in a given
 Tile-work is only the work that is contributed from simplex-chains part of a single tile.
 
 We'll normalize tile-work via a \emph{baseline} tile.
-There won't actually be a tile that matches this exactly
+This will simplify our analysis.
 
 \subsubsubsubsection{The Core}
+
+The core of a simplex tiling is the root tile and its children.
+
+All nodes in the network verify the work and PoRs of all simplex-chains that are part of the core.
+Additionally, the core is where the vast majority of work is done.
 
 \subsubsubsubsection{Inter-tile Security Relationship}
 

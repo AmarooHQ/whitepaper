@@ -1,0 +1,39 @@
+In a simplex, \emph{all} simplex-chains mutually reflect \emph{all other} simplex-chains.
+This method ($\UT{1}$) is useful, but, without dapp-chains, it is limited to $O(c^2)$ scalability.
+
+Can we do better?
+
+Currently, each chain in a simplex reserves \half of its capacity for reflections (with other simplex-chains) and \half of its capacity for transactions and dapp-chain headers.
+We could, however, use some of this \emph{capacity for reflections} for a slightly different purpose.
+If we were to divide the \emph{capacity for reflections} into multiple partitions, then we would have a \emph{smaller simplex}, but could also use this new \emph{excess capacity} for something else.
+Let's consider a simplex where $\nicefrac34$ of its capacity for reflections is reserved as \emph{excess capacity}.
+Here, \emph{internal reflections} are the mutual reflections between all simplex-chains that are part of the same simplex.
+% Assuming we divide the \emph{capacity for reflections} into four equal parts, where one of those parts is reserved for  , each simplex-chain's capacity will be split like this:
+
+% page 29 of https://mirrors.ibiblio.org/CTAN/graphics/pgf/contrib/forest/forest-doc.pdf
+
+% \forestset{capbox/.style={
+%     draw, no edge, l=0, l sep=0ex, calign=first, anchor=base west,
+%     content format={\strut\forestoption{content}}
+% }}
+
+\begin{center}
+    \includegraphics[max width=.9\textwidth]{50-tiling/00-10-tile-capacity_sag.pdf}
+\end{center}
+
+What can we use that \emph{excess capacity} for?
+
+To answer this, we need to introduce a new \emph{type} of simplex: a simplex \emph{tile}.
+These are smaller simplexes which, unlike \emph{maximal simplexes}, deliberately reserve some reflection capacity for the purpose of mutually reflecting simplex-chains \emph{in other simplex tiles}.
+Reflections with simplex-chains in other tiles are called \emph{external reflections}.
+
+\defineTermTex{Simplex Tile}{
+    A simplex which partitions its capacity for mutual reflections such that each simplex-chain mutually reflects all other simplex-chains in that tile, and all other simplex-chains in \emph{neighboring} tiles
+}
+
+We can now replace the \emph{Excess Reflection Capacity} in our simplex-chain capacity diagram like this:
+\begin{center}
+    \includegraphics[max width=.9\textwidth]{50-tiling/00-20-tile-capacity2_sag.pdf}
+\end{center}
+
+Simplex tiles will be the foundational unit from which we construct a \emph{Simplex Tiling}.
