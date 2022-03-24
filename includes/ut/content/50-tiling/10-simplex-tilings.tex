@@ -81,7 +81,7 @@ The last solution is a long chain of tiles that never loops back around; see \au
 This is our first \emph{unbounded} solution -- it's a solution where we can always add more tiles.
 The problem with this solution is that, although it may have $O(n)$ capacity, the \emph{distance} between tiles is \emph{also} $O(n)$.
 This is not practical since $O(n)$ SPV proofs would be needed to prove state on the far side of the tiling.
-(The loop class of solutions is impractical for the same reason.)
+(The class of solutions that are loops is impractical for the same reason.)
 
 \begin{figure}
     \centering
@@ -142,6 +142,8 @@ We will focus on one particular class: the patterns of tiling that are also \emp
 We will break our rules slightly: the root tile will have both twice the capacity for internal reflections than it would otherwise and one fewer children.
 That is: the root tile reserves $2/v$ of it's capacity for reflections for internal reflections, instead of $1/v$ (as is the case for all other tiles), and it has $v-2$ children instead of $v-1$.
 \autoref{fig:binary-tree-tiling} shows the first 3 iterations for $v=3$, and \autoref{fig:ternary-tree-tiling} shows the first 3 iterations for $v=4$.
+
+\todo{This tiling doesn't work because children of the root will need (v+1)/v capacity for reflections. mb just better to let the root tile have extra txs and fewer chains? easy solution and gives more tx capacity in root.}
 
 \begin{figure}
     \begin{subfigure}[m]{.32\textwidth}
