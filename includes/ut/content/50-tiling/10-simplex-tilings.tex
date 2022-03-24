@@ -7,7 +7,7 @@ A simplex tiling is thus a \emph{graph} of interconnected tiles.
 Connected tiles are \emph{neighbors} and are \emph{adjacent} to one another in the tiling.
 
 \defineTermTex{Simplex Tiling}{
-    An internconnected graph of mutually reflecting simplex tiles
+    An interconnected graph of mutually reflecting simplex tiles
 }
 
 Before we look at some complex (and useful) tilings, let's consider three examples that are some of the simplest tilings possible: \autoref{fig:trivial-simplex-tiling}.
@@ -46,31 +46,34 @@ This means that each simplex-chain is mutually reflecting \emph{all} other simpl
 These tilings aren't particularly useful to us, though, because we don't have a way to increase network-wide capacity beyond $O(c^2)$.
 
 If we want $O(n)$ capacity, then we'll need to come up with a new pattern for how to connect tiles together and how to add new tiles.
-Specifically: the pattern must \emph{always} have room for more simplex tiles, and each tile we add needs to, on average, add \emph{more} that 1 new spot for additional tiles.
-
+Specifically: the pattern must \emph{always} have room for more simplex tiles, and each tile added must, on average, add \emph{more} that 1 new spot for additional tiles.\footnote{
+    There are tilings where a tile consumes more than one free spot.
+    For those tilings, on average each tile must add more spots than it consumes.
+}
 
 \subsubsection{Tile Valence}
 
 The \emph{valence} ($v$) of a tile is the number of other tiles that it can connect to.
-In our example earlier, we split our simplex tile's capacity for reflections into 4 equal parts -- each part was 12.5\% of each simplex-chain's total capacity.
+In our example earlier, we split our simplex tile's capacity for reflections into 4 equal parts -- each part was 12.5\% of each simplex-chain's \emph{total} capacity.
 Since 1 of those parts is reserved for internal reflections, and 3 parts are reserved for external reflections, that simplex tile has a valence of $v=3$.
 
 We don't \emph{have} to use a valence of 3 -- we can split up a tile's capacity for reflections any way that we like.
 Each tile could even have different valencies, too, but this makes designing a tiling more complex.
-For the sake of simplicity, let's only consider tilings where each tile has the same valence.
+For the sake of simplicity, we will only consider tilings where each tile has the same capacity and the same valence.
 When we say that a \emph{tiling} (rather than a tile) has a valence of $v$, we mean that \emph{each tile in the tiling} has a valence of $v$.
 
-If a tile has a valence of $v=0$, then all capacity for reflections is reserved for internal reflections -- so this is just a normal simplex.
+If a tiling has a valence of $v=0$, then all capacity for reflections is reserved for internal reflections -- so this is just a normal simplex.
 
 If a tiling has a valence of $v=1$, then the tiling is limited to 2 tiles at most.
-This is equivalent to a normal simplex since all simplex-chains reflect all other simplex-chains.
-The complete tiling with $v=1$, which is the only possible tiling in this case, is shown in \autoref{fig:triv-tiling-2}.
+We end up with a tiling that's equivalent to a normal simplex, though, since all simplex-chains \emph{must} reflect all other simplex-chains.
+The complete tiling with $v=1$, which is the only possible tiling, is shown in \autoref{fig:triv-tiling-2}.
 
 If a tiling has a valence of $v=2$, then there are two possible solutions.
 The first is where each simplex tile is connected to all other simplex tiles -- this is the trivial solution and shown in \autoref{fig:triv-tiling-3}.
-The second is our first \emph{unbounded} solution -- it's a solution were we can always add more tiles (\autoref{fig:tiling-v2-unbounded}).
+The second solution is a long chain of tiles; see \autoref{fig:tiling-v2-unbounded}.
+This is our first \emph{unbounded} solution -- it's a solution where we can always add more tiles.
 The problem with this second solution is that, although it may have $O(n)$ capacity, the \emph{distance} between tiles is \emph{also} $O(n)$.
-This is not practical since chained SPV proofs will be $O(n)$ in length.
+This is not practical since $O(n)$ SPV proofs would be needed to prove state on the far side of the tiling.
 
 \begin{figure}
     \centering
@@ -81,5 +84,51 @@ This is not practical since chained SPV proofs will be $O(n)$ in length.
     }
     \label{fig:tiling-v2-unbounded}
 \end{figure}
+
+Things start to get interesting when $v > 2$.
+
+If a tiling has a valence of $v=3$, then there are many possible solutions (in fact, there are infinitely many).
+We will focus on one particular pattern: the tiling that is also a \emph{tree}.
+
+\subsubsection{Tree Tilings}
+
+\begin{forest}
+    [
+        tree tiling
+        [root tile]
+        [first iteration]
+        [further iterations]
+    ]
+\end{forest}
+
+\begin{figure}
+    \begin{subfigure}[m]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[max width=\linewidth, max height=\linewidth]{tiling_s5_d1_sag}
+        \caption{1st iteration. 4 tiles.}
+        \label{fig:tiled-simplex-5-d1}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[m]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[max width=\linewidth, max height=\linewidth]{tiling_s5_d2_sag}
+        \caption{2nd iteration. 10 tiles.}
+        \label{fig:tiled-simplex-5-d2}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[m]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[max width=\linewidth, max height=\linewidth]{tiling_s5_d3_sag}
+        \caption{3rd iteration. 22 tiles.}
+        \label{fig:tiled-simplex-5-d3}
+    \end{subfigure}
+    \caption{The state of tiled 5-chain simplexes after sequential iterations. Vertices are simplex-chains. Edges are the reflections between simplex-chains.}
+    \label{fig:simplex-tiling}
+\end{figure}
+
+\subsubsection{Tree Tilings: Preliminary Scaling Analysis}
 
 \newpage

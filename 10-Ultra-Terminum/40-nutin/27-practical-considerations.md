@@ -4,6 +4,8 @@
 
 \label{sec:practical-considerations}
 
+\todo{compact spv proofs via reusing PoR branches}
+
 ### Availability of Reflected Blocks
 
 \label{sec:availability-of-blocks}
