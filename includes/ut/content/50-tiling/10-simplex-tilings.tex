@@ -60,6 +60,7 @@ Specifically: the pattern must \emph{always} have room for more simplex tiles, a
 The \emph{valence} ($v$) of a tile is the number of other tiles that it can connect to.
 In our example earlier, we split our simplex tile's capacity for reflections into 4 equal parts -- each part was 12.5\% of each simplex-chain's \emph{total} capacity.
 Since 1 of those parts is reserved for internal reflections, and 3 parts are reserved for external reflections, that simplex tile has a valence of $v=3$.
+If, instead, we split our simplex tile's capacity for reflections into \emph{5} equal parts, then each part would be 10\% of each simplex-chain's \emph{total} capacity, and the tile would have $v=4$.
 
 We don't \emph{have} to use a valence of 3 -- we can split up a tile's capacity for reflections any way that we like.
 Each tile could even have different valencies, too, but this makes designing a tiling more complex.
@@ -74,7 +75,7 @@ The complete tiling with $v=1$, which is the only possible tiling, is shown in \
 
 If a tiling has a valence of $v=2$, then there is a countably infinite number of solutions.
 The trivial solution (which has 3 tiles) is where each simplex tile is connected to all other simplex tiles -- this is shown in \autoref{fig:triv-tiling-3}.
-We can create a tiling of $v=2$ will 4 tiles, too: $A \lrar B \lrar C \lrar D \lrar A$.
+We can create a tiling of $v=2$ with 4 tiles, too: $A \lrar B \lrar C \lrar D \lrar A$.
 This is part of a class of solutions: a loop.
 With $v=2$, we can construct a loop of arbitrary length.
 The last solution is a long chain of tiles that never loops back around; see \autoref{fig:tiling-v2-unbounded}.
@@ -95,55 +96,28 @@ This is not practical since $O(n)$ SPV proofs would be needed to prove state on 
 
 Things start to get interesting when $v > 2$.
 
-If a tiling has a valence of $v=3$, then there are many possible solutions (in fact, the number of solutions is uncountably infinite).
+If a tiling has a valence of $v\ge 3$, then there are many possible patterns of solutions.
 We will focus on one particular class: the patterns of tiling that are also \emph{trees}.
 
-\subsubsection{Tree Tilings}
+\subsubsection{Tree-Tilings}
 
-\begin{forest}
-    [
-        tree tiling
-        [root tile]
-        [first iteration]
-        [further iterations]
-    ]
-\end{forest}
+\label{sec:tree-tilings}
 
-\begin{figure}
-    \begin{subfigure}[m]{.32\textwidth}
-        \vskip 0pt
-        \centering
-        \includegraphics[max width=\linewidth, max height=\linewidth]{tiling_s5_d1_sag}
-        \caption{1st iteration. 4 tiles.}
-        \label{fig:tree-tiling-v3-d1}
-    \end{subfigure}%%
-    \hfill
-    \begin{subfigure}[m]{.32\textwidth}
-        \vskip 0pt
-        \centering
-        \includegraphics[max width=\linewidth, max height=\linewidth]{tiling_s5_d2_sag}
-        \caption{2nd iteration. 10 tiles.}
-        \label{fig:tree-tiling-v3-d2}
-    \end{subfigure}%%
-    \hfill
-    \begin{subfigure}[m]{.32\textwidth}
-        \vskip 0pt
-        \centering
-        \includegraphics[max width=\linewidth, max height=\linewidth]{tiling_s5_d3_sag}
-        \caption{3rd iteration. 22 tiles.}
-        \label{fig:tree-tiling-v3-d3}
-    \end{subfigure}
-    \caption{}
-    \label{fig:tree-tiling-v3}
-\end{figure}
+The tree-tilings that we'll consider are straight forward to construct.
+First, we start with a \emph{root tile}.
+Then, when we need more capacity, we create new tiles that are children of the root tile.
+Then, when each of these child-tiles is nearing maximum utilization, new children are created as children of \emph{that} tile -- they are grandchildren of the root tile.
+We can continue in this manner indefinitely.
 
-\subsubsubsection{\titlemath{$n$}{n}-ary Tree Tilings}
-
-We will break our rules slightly: the root tile will have both twice the capacity for internal reflections than it would otherwise and one fewer children.
-That is: the root tile reserves $2/v$ of it's capacity for reflections for internal reflections, instead of $1/v$ (as is the case for all other tiles), and it has $v-2$ children instead of $v-1$.
-\autoref{fig:binary-tree-tiling} shows the first 3 iterations for $v=3$, and \autoref{fig:ternary-tree-tiling} shows the first 3 iterations for $v=4$.
-
-\todo{This tiling doesn't work because children of the root will need (v+1)/v capacity for reflections. mb just better to let the root tile have extra txs and fewer chains? easy solution and gives more tx capacity in root.}
+How many children, at most, should we create under each tile?
+The root tile has \emph{capacity} for $v$ children, but each other tile only has capacity for $v-1$ children.
+We \emph{could} allow the root tile to have up to $v$ children -- and it is possible to create a tree-tiling like this -- however, we're not going to do that here.
+Instead, we'll limit the root tile to $v-1$ children to match all other tiles.\footnote{
+    Exactly why we should do this will be discussed after Tiling Security in \autoref{sec:tiling-security}.
+}
+This means that the tilings we'll consider will be $n$-ary trees -- if $v=3$ then the tiling is a binary tree; if $v=4$ then it's a ternary tree; if $v=5$ then it's a quaternary tree, etc.
+Binary tree-tilings of depths 1, 2, and 3 are shown in \autoref{fig:binary-tree-tiling}.
+Note that, although \autoref{fig:binary-tree-tiling} constructs the tiling as a balanced tree, there's no requirement that a tree-tiling needs to be balanced.
 
 \begin{figure}
     \begin{subfigure}[m]{.32\textwidth}
@@ -169,37 +143,40 @@ That is: the root tile reserves $2/v$ of it's capacity for reflections for inter
         \caption{3rd iteration. 15 tiles.}
         \label{fig:binary-tree-tiling-d3}
     \end{subfigure}
-    \caption{}
+    \caption{Constructing a binary tree-tiling: the first 3 iterations.}
     \label{fig:binary-tree-tiling}
 \end{figure}
 
-\begin{figure}
-    \begin{subfigure}[m]{.32\textwidth}
-        \vskip 0pt
-        \centering
-        \includegraphics[max width=\linewidth, max height=\linewidth]{tiling_v4_nary_s5_d1_sag}
-        \caption{1st iteration. 4 tiles.}
-        \label{fig:ternary-tree-tiling-d1}
-    \end{subfigure}%%
-    \hfill
-    \begin{subfigure}[m]{.32\textwidth}
-        \vskip 0pt
-        \centering
-        \includegraphics[max width=\linewidth, max height=\linewidth]{tiling_v4_nary_s5_d2_sag}
-        \caption{2nd iteration. 13 tiles.}
-        \label{fig:ternary-tree-tiling-d2}
-    \end{subfigure}%%
-    \hfill
-    \begin{subfigure}[m]{.32\textwidth}
-        \vskip 0pt
-        \centering
-        \includegraphics[max width=\linewidth, max height=\linewidth]{tiling_v4_nary_s5_d3_sag}
-        \caption{3rd iteration. 40 tiles.}
-        \label{fig:ternary-tree-tiling-d3}
-    \end{subfigure}
-    \caption{}
-    \label{fig:ternary-tree-tiling}
-\end{figure}
+
+% \begin{figure}
+%     \hspace{.15\textwidth}
+%     \begin{subfigure}[m]{.3\textwidth}
+%         \vskip 0pt
+%         \centering
+%         \begin{forest}
+%             minimum width=2em, minimum height=2em, draw, align=center,
+%             for descendants={l=4em, minimum width=2em, minimum height=2em, draw, align=center},
+%             [Root
+%                 [ [] []]
+%                 [ [] []]
+%             ]
+%         \end{forest}
+%         \caption{A binary tree of depth 2.}
+%     \end{subfigure}%
+%     \hfill
+%     \begin{subfigure}[m]{.3\textwidth}
+%         \vskip 0pt
+%         \centering
+%         \includegraphics[max width=\linewidth, max height=\linewidth]{tiling_v3_nary_s5_d2_sag}
+%         \caption{A binary tree-tiling of depth 2.}
+%     \end{subfigure}%
+%     \hspace{.15\textwidth}
+%     \caption{Equivalent binary trees of depth 2.}
+% \end{figure}
+
+
+Let's use the term \emph{depth} ($d$) to describe how far a tile is from the root tile.
+The root tile has $d=0$, children of the root tile have $d=1$, grandchildren of the root tile have $d=2$, etc.
 
 \subsubsection{Tree Tilings: Preliminary Scaling Analysis}
 

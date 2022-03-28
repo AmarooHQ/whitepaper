@@ -130,6 +130,7 @@
         "Uhh",
         "Ultimum",
         "unconvertible",
+        "uncountably",
         "uncriticized",
         "unitless",
         "unpaywalled",
@@ -186,6 +187,7 @@
         "hte", "DOS", "teh", "\\being{",
         "itertext", "the attackers", "DAA_N",
         "tress", "\\lable{", "lable",
+        "tree tiling", "tree tilings"
     ],
     "cSpell.ignoreRegExpList": [
         "\\usepackage{([a-z,]*)}",

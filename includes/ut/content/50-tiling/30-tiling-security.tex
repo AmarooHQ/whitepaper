@@ -54,6 +54,8 @@
 
 \subsubsection{Tiling Security}
 
+\label{sec:tiling-security}
+
 \todo{``Simplex Tile'' or ``Simplex-Tile''}
 
 \subsubsubsection{Analysis Method}
@@ -121,10 +123,10 @@ chains:
 
 \begin{align*}
     N_\text{chains} &= N_{1,d=0} + 2N_{1,d=1} + 4N_{1,d=2} \\
-    &= \frac{N_1}{2} + 2\frac{N_1}{4} + 4\frac{N_1}{4} \\
-    &= 2N_1 = O(c) \\
+    &= \frac{N_1}{4} + 2\frac{N_1}{4} + 4\frac{N_1}{4} \\
+    &= \frac74 N_1 = O(c) \\
     \intertext{but if the core is just the root + children:}
-    N_\text{chains} &= N_1
+    N_\text{chains} &= \frac34 N_1
 \end{align*}
 
 refls
@@ -135,22 +137,22 @@ refls
 \providecommand\NOneSq{{{N_1}^2}}
 
 \begin{align*}
-    N_\text{refls} &= \left(\frac{N_1}{2}\right)^2 + 6\left( \frac{N_1}{4} \right)^2
-                    + 2\left(\frac{N_1}{2}\cdot \frac{N_1}{4}\right)
+    N_\text{refls} &= \left(\frac{N_1}{4}\right)^2 + 6\left( \frac{N_1}{4} \right)^2
+                    + 2\left(\frac{N_1}{4}\cdot \frac{N_1}{4}\right)
                     + 4\left(\frac{N_1}{4}\right)^2 \\
-    &= \NOneSq\parens{\frac{1}{4} + \frac{6}{16} + \frac{1}{4} + \frac{4}{16}} \\
-    &= \frac{9}{8}\NOneSq = O(c^2) \\
+    &= \NOneSq\parens{\frac{1}{16} + \frac{6}{16} + \frac{2}{16} + \frac{4}{16}} \\
+    &= \frac{13}{16}\NOneSq = O(c^2) \\
     \intertext{but if the core is just the root + children:}
-    N_\text{refls} &= \parens{\frac{N_1}{2}}^2 + 2\parens{\frac{N_1}{4}}^2 + 2\parens{\frac{N_1}{2}\cdot \frac{N_1}{4}} \\
-    &= \frac{5}{8}\NOneSq
+    N_\text{refls} &= \parens{\frac{N_1}{4}}^2 + 2\parens{\frac{N_1}{4}}^2 + 2\parens{\frac{N_1}{4}\cdot \frac{N_1}{4}} \\
+    &= \frac{5}{16}\NOneSq
 \end{align*}
 
-for a leaf tile, each layer adds $2\parens{\frac{N_1}{4}}^2$ more reflections, so we get 3 layers for free.
+for a leaf tile, each layer adds $2\parens{\frac{N_1}{4}}^2$ more reflections, so we get $\ceil{8 (1 - \frac5{16})}-1 = 5$ layers for free.
 
 \begin{align*}
-    2^2 - 1 &\to 2^5 - 1 \\
-    &\implies \frac{2^5 - 1}{3}\times \text{ the capacity.} \\
-    &\approx 10\times
+    2^2 - 1 &\to 2^{2+5} - 1 \\
+    &\implies \frac{2^7 - 1}{3}\times \text{ the capacity.} \\
+    &\approx 42\times
 \end{align*}
 
 \begin{equation*}
@@ -224,3 +226,5 @@ that's $((v-1)^2 + (v-1) + R) + \max(0, h - 3) + (1 + (v-1))$
 
 % https://www.desmos.com/calculator/7trq5aehnm
 % https://www.desmos.com/calculator/n17w3560ig
+
+\todo{why do $n$-ary tree-tilings?}
