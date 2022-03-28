@@ -101,7 +101,7 @@ This is shown in \autoref{fig:pow_refl_step2} and \autoref{tab:por-step-2}.
 
 \begin{table}
 \centering
-\caption{Step 2: Both Chain L and Chain R host a projection of each-other.}
+\caption{Step 2: Both Chain L and Chain R host a projection of each other.}
 \label{tab:por-step-2}
 \resizebox{\textwidth}{!} {%
 \begin{tabular}{lllllll}
@@ -414,7 +414,7 @@ This is shown in \autoref{fig:por-step5}.
 \label{fig:por-step5}
 \end{figure}
 
-When two chains (Chain L and Chain R) mutually reflect each-other, detecting attacks becomes easier.
+When two chains (Chain L and Chain R) mutually reflect each other, detecting attacks becomes easier.
 The security of both Chain L and R are partially dependent on each others' histories (along with their own, of course).
 If one chain is attacked, where some alternate chain-segment is published, then that chain's nodes will know that those blocks have not been reflected -- potentially indicating that the recently-published chain-segment was constructed in private or constructed after the fact.
 

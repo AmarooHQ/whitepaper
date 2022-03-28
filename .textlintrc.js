@@ -112,6 +112,8 @@ module.exports = {
                 ['$DAA_N$', '\\text{DAA}_N'],
                 ["tree tiling", "tree-tiling"],
                 ["tree tilings", "tree-tilings"],
+                ["each-other", "each other"],
+                ["eachother", "each other"],
                 // ["Decreasing .* increases"]
                 // note: the below seems like it does not work :(
                 // ...flaggedWords.map(w => [w]),

@@ -52,39 +52,154 @@
     ]
 \end{forest}
 
-\subsubsection{Tiling Security}
+\subsubsection{Tree-Tiling Security}
 
 \label{sec:tiling-security}
 
 \todo{``Simplex Tile'' or ``Simplex-Tile''}
 
-\subsubsubsection{Analysis Method}
+What does it mean for a tiling to be secure?
+Well, we have our broad definition from the trilemma: the network is secure against an $O(n)$ attacker.
+To answer this more specifically, though, we need to first answer: \emph{What does a doublespend against a tiling look like?}
+Currently, we don't know enough to answer this -- we next need answers to questions like \emph{Which PoRs do simplex-chains in a given tile use?} and \emph{How do we govern the difficulties of simplex-chains in different tiles?}
 
-\subsubsubsubsection{Local Chain-work, Simplex-work, and Tile-work}
+To answer these questions, and then evaluate the security of tree-tiling, we first need to define some key concepts.
+After that we will construct a security architecture so that we can answer the above questions.
+Finally, we will analyze this architecture to find out if it's secure.
 
-We're familiar with local chain-work (that's work contributed by a single simplex-chain).
+\subsubsubsection{Key Concepts}
 
-Simplex-work is the sum of all chain-work that contributes to a chain in a given simplex-tile.
 
-Tile-work is only the work that is contributed from simplex-chains part of a single tile.
 
-We'll normalize tile-work via a \emph{baseline} tile.
+\subsubsubsubsection{Local Chain-work, Tile-work, and Unit Tile}
+
+We're familiar with \emph{local chain-work} (that's work directly contributed by a single simplex-chain).
+
+\emph{Tile-work} is the work that is contributed from simplex-chains that are part of a given tile.
+\emph{Tile-work} is the sum of the local chain-work of each constituent simplex-chain.
+
+We could talk about tile-work directly in terms of \emph{number of hashes}, but this isn't necessary.
+Instead, we'll normalize tile-work via a \emph{unit tile}.
+If some tile's tile-work is $3\times$ that of the \emph{unit tile}, then we write down that tile-work as $3$ instead of some number of hashes.
 This will simplify our analysis.
 
 \subsubsubsubsection{The Core}
 
-The core of a simplex tiling is the root tile and its children.
-
-All nodes in the network verify the work and PoRs of all simplex-chains that are part of the core.
+\emph{The core} of a tree-tiling is \emph{the root tile and its children}.
+It's called \emph{the core} because all nodes in the network verify the work and PoRs of all simplex-chains that are part of the core.
 Additionally, the core is where the vast majority of work is done.
+
+\subsubsubsubsection{Recursive \emph{Proof of Reflection}}
+
+\newcommand\cL{\ensuremath{L}\xspace}
+\newcommand\cM{\ensuremath{M}\xspace}
+\newcommand\cR{\ensuremath{R}\xspace}
+
+Part of our security architecture will be the idea of \emph{recursive PoR}.
+
+Say we have three chains: \cL, \cM, and \cR.
+They are doing mutual reflection like this: $\xymatrix@C=1em@M=0em{{\cL} \; \ar@{<->}[r] & \; {\cM} \; \ar@{<->}[r] & \;{\cR}}$.
+That is: \cL reflects \cM but not \cR; \cM reflects both \cL and \cR; and \cR reflects \cM but not \cL.
+
+With what we already know, it's clear that \cM is as secure as all three combined.
+However, that isn't the case for \cL and \cR.
+How can we make \cL and \cR as secure as \cM?
+Is this even reasonable?
+
+Let's consider chain \cL -- what happens if \cL's local chain-work is, say, $3\times$ that of chain \cM?
+The total chain-work that \cL takes into account is $\nicefrac43$ of its local chain-work, so an attacker would need $\nicefrac23$ worth of \cL's local chain-work to control \cL's history.
+This is more than 50\%, but it's within reason that an attacker might achieve the required hash-rate.
+
+Case 1: If \cR's local chain-work is large (say, $3\times$ that of \cM), then \cM is almost twice as hard to attack as \cL.\footnote{
+    \cM is $\nicefrac74\times$ harder to attack than \cL.
+}
+This is a problematic situation: it means that an attacker might be able to perform a doublespend against \cL even though they could not perform one against \cM.
+Therefore, this case would not be $O(n)$ secure.
+
+Case 2: However, if \cR's local chain-work is small (say, $\nicefrac13$ that of \cM), then \cR is not particularly significant.
+Thus, \cM is not substantially harder to attack than \cL, and an attacker could attack both \cL and \cM simultaneously (optionally, \cR too).
+But, \cR \emph{is} substantially easier to attack than either \cM or \cL.
+The total chain-work that \cR takes into account is only $\nicefrac4{13}$ that of the whole network.
+So, this case is \emph{also} not $O(n)$ secure, even though \cL \emph{is} $O(n)$ secure.
+
+These two problem cases are what recursive PoR solves.
+
+Notice that in both cases, \cM is $O(n)$ secure.
+Given this, chains \cL and \cR should be able to use the same work that chain \cM does to reach the same level of security.
+
+The first problem is that \cL and \cR cannot use the same \textsc{WeightOf} algorithm as before (although, \cM can).
+Particularly, \cL and \cR's \textsc{WeightOf} must count: not only their local chain-work and that contributed reflected \cM blocks, but also some additional weight based on reflections from \emph{other} chains.
+Each \cM block might record the total chain-work that it adds to \cM (including PoRs), but \cL and \cR's new \textsc{WeightOf} can't use this value directly.
+Firstly, that value includes past local chain-work that reflected \cM, but more importantly: we don't want to force \cL and \cR to verify \emph{every} PoR that contributes to \cM, just the ones that matter.
+
+There is a trivial solution to this problem: require \cL and \cR nodes to download the headers of \emph{all} relevant chains, verify their PoRs, and track the origin of those PoRs.
+Nodes must track the origin of work contributed via PoR to avoid double-counting work.
+An easy example of this is: \cL nodes should not count PoRs where an \cL block is the reflecting block; that work is already directly included in \cL's local chain-work.
+Another example is where there are \emph{multiple paths} that depend on the same chain.
+This leads us into the second problem.
+
+\subsubsubsubsection{Recursive PoR with Multiple Paths}
+
+\newcommand\cMone{\ensuremath{M_1\xspace}}
+\newcommand\cMtwo{\ensuremath{M_2\xspace}}
+
+Say that we now have four chains: \cL, \cMone, \cMtwo, and \cR doing mutual PoR like so:
+\begin{equation*}
+    \xymatrix@C=2em@R=-.15em{
+        & {\cMone} & \\
+        {\cL} \ar@{<->}[ur] & & {\cR} \ar@{<->}[ul] \\
+        & {\cMtwo} \ar@{<->}[ul] \ar@{<->}[ur] &
+    }
+\end{equation*}
+
+\todo{continue}
+
+\subsubsubsection{Security Architecture}
 
 \subsubsubsubsection{Inter-tile Security Relationship}
 
 $r$
 
+\begin{forest}
+    [ITSR
+        [govern via RAA + DAA]
+        [ratio of work based on $d$
+            [$r$ \textrightarrow work drops by $1/r$ per layer]
+        ]
+        [root tile exception]
+    ]
+\end{forest}
+
 \subsubsubsubsection{Total Work Across a Tiling}
 
 $S$
+
+\begin{itemize}
+    \item Except for the root tile, each tile contributes $\frac1{r^d}$ work to the tiling.
+    \item At each depth, there are $u^d$ tiles.
+    \item Root tile contributes $M$ units of tile-work.
+\end{itemize}
+
+\begin{align}
+    S &= M + \frac{u}{r} + \frac{u^2}{r^2} + \cdots && \text{Sum \emph{all} chain-work}
+    \nonumber \\
+    S - (M-1) &= 1 + \frac{u}{r} + \frac{u^2}{r^2} + \cdots
+    \nonumber \\
+    \intertext{This is a geometric series, and since $\frac{u}{r} < 1$:}
+    S - (M-1) &= \frac{1}{1 - \frac{u}{r}} && \text{Sum of geometric series}
+    \nonumber \\
+    S - (M-1) &= \frac{r}{r - u} && \times\frac{r}r
+    \nonumber \\
+    S &= M-1 + \frac{r}{r - u}
+    \label{eq:tree-tiling-total-work}
+\end{align}
+
+\subsubsubsubsection{Doublespend Requirements}
+
+\subsubsubsection{Analysis Method}
+
+How can we analyze the security of tree-tilings?
+
 
 \subsubsubsection{Assumptions}
 
@@ -98,6 +213,30 @@ $S$
 \subsubsubsection{Security Criteria for Specific Cases}
 
 \subsubsubsection{Security Evaluation of Specific Cases}
+
+\begin{itemize}
+    \item $r>u$
+    \item \dots
+\end{itemize}
+
+\subsubsubsubsection{The Core is (Almost) as Secure as the Network}
+
+$M \ge 1$, $u > 1$, $r > u$, and $0 \le q \le 0.5$.
+
+\begin{align}
+    \frac12 (M + \frac{u}r) &> qS
+    \nonumber \\
+    \frac12 (Mr + u) &> rq(M-1+\frac{r}{r-u}) && \times r \text{ and substitute } S \text{ via \autoref{eq:tree-tiling-total-work}}
+    \nonumber \\
+    (Mr + u)(r-u) &> 2rq((M-1)(r-u)+r) && \times 2(r-u)
+    \label{eq:tree-tiling-safe-q}
+    % https://www.wolframalpha.com/input?i=%28My+%2B+x%29%28y-x%29+%3E+2yq%28%28M-1%29%28y-x%29%2By%29%2C+0+%3C%3D+q+%3C%3D+0.5
+    % note for above: y=r; x=u
+    % 2Mr &> |u| \sqrt{\frac{2M^2q-M^2-4Mq-2M+2q-1}{2q-1}}+u(M-1) \\
+    % 2Mr &> |u| \sqrt{\frac{M^2(1 - 2q) - 2M(2q + 1) + (2q - 1)}{2q-1}}+u(M-1) \\
+\end{align}
+
+There is no elegant form of \autoref{eq:tree-tiling-safe-q}, but this form is, at least, easy to evaluate and graph.
 
 \subsubsubsection{Scaling Complexity}
 

@@ -71,9 +71,9 @@ Note that \autoref{alg:por-reflected-block-weight} integrates the cap on weight 
 
 \label{sec:the-simplex}
 
-\defineTerm{Simplex}{The single coherent structure that emerges from a collection of blockchains that mutually reflect each-other}
+\defineTerm{Simplex}{The single coherent structure that emerges from a collection of blockchains that mutually reflect each other}
 
-When two or more blockchains *mutually reflect* each-other, they form a *simplex*[^simplex-maths]. For the sake of brevity: all *reflections* within a simplex are *mutual reflections*, and I will omit *mutual* from now on when discussing them. Examples of simplexes are shown in \autoref{fig:simplexes}.
+When two or more blockchains *mutually reflect* each other, they form a *simplex*[^simplex-maths]. For the sake of brevity: all *reflections* within a simplex are *mutual reflections*, and I will omit *mutual* from now on when discussing them. Examples of simplexes are shown in \autoref{fig:simplexes}.
 
 When a blockchain is part of a simplex, it is called a *simplex-chain* (as distinct from *dapp-chains*).
 
@@ -253,7 +253,7 @@ Naturally, there are some other components that are necessary (like a component 
 #### Dapp-chain simplexes
 
 \todo{
-  Dapp-chains can make simplexes between each-other (in addition to one-way PoR with their host simplex-chain).
+  Dapp-chains can make simplexes between each other (in addition to one-way PoR with their host simplex-chain).
   This is mb useful?
 }
 

@@ -29,7 +29,7 @@ When you quote someone, you are attributing something to them in a precise way. 
 
 Note: I say "no excuses", but there are exceptions. For example, if you are quoting someone speaking on a podcast or video, then it's impossible to accurately transcribe the grammar (except for simple sentences). In such a case, *be forgiving and honorable* to the person being quoted (especially when you are disagreeing with the quote). Another exception is *ambiguous context*; e.g., it might not be obvious if the preceding sentence is necessary to include or not. If you are on-the-fence, favor being concise but leave a comment noting the source and problem sentence -- if someone raises an issue, then err on the side of caution and include that extra context. Another exception is relevant context that's far away, like a preceding paragraph. In that case, if you know about it then leave a comment (like you would for an ambiguous preceding sentence), but if someone brings it up then consider changing the quote to `(possible context relevant sentence) [...] (main sentence you wanted to quote) [...] (possible context relevant sentence)`.
 
-When there's reason to make an exception, let's not eat each-other alive. *We are on the same team, after-all.*
+When there's reason to make an exception, let's not eat each other alive. *We are on the same team, after-all.*
 
 ### Reference Standards
 
