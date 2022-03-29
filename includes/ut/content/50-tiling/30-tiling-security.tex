@@ -183,7 +183,7 @@ Notice that 4 blocks (in order) are required for this recursive PoR to exist: \B
 This is twice the number of blocks that would normally be required without any recursion (e.g., a valid PoR for \BL1 exists after \BM1 and then \BL2 are mined).
 Therefore, the delay required for this PoR is twice what we would expect from non-recursive PoR.
 
-Recapping the first problem: \cL and \cR nodes need an expanded \textsc{WeightOf} function with access to \emph{the origin} of implicitly reflected work, knowledge of \emph{where} that work has already been counted.
+Recapping the first problem: \cL and \cR nodes need an expanded \textsc{WeightOf} function with access to \emph{the origin} of implicitly reflected work, and knowledge of \emph{where} that work has already been counted.
 Nodes can do this relatively efficiently, for all relevant chains, by downloading the headers and verifying the PoRs.
 This method does not require recursive PoRs to be explicitly recorded in full since the components of these PoRs are already available and have already been individually verified.
 Our existing rules about how to attribute the weight of PoRs (follow the arrows) still works.
@@ -193,7 +193,7 @@ For example: along the lines of NIPoPoWs\footnote{
     Non-Interactive Proofs of Proof-of-Work (NIPoPoWs), see \citeNIPoPoWsFull.
 }, are \emph{Non-Interactive Proofs of Proof-of-Work Reflections} (NIPoPoWRs) possible?
 
-Our solution to the first problem is promising, but it we have used an implicit assumption: there is only one viable path for PoRs between \cL and \cR.
+Our solution to the first problem is promising, but we have used an implicit assumption: there is only one viable path for PoRs between \cL and \cR.
 What if there are \emph{multiple paths} between \cL and \cR?
 This is the second problem.
 
@@ -286,6 +286,7 @@ Do we even need to solve this problem, now, though?
     \item this is b/c we'll simplify tiles: every ${B_f}^{-1}$ seconds all chains in each tile mine 1 new block and provide reflections of 1 new block in their local tile and adjacent tiles, and vice versa.
     Thus all PoR paths are available all at once.
     \item we just need to be confident that an answer \emph{does} exist
+    \item also, simplification case is much easier to reason about and solve for
     \item full solution left as a future research
     \item some ideas or questions for that future research:
     \begin{itemize}
