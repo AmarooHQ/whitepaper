@@ -1,18 +1,10 @@
 \label{sec:counting-work}
 
-\providecommand\BCI[3]{%
-    ${#1}_{{#2}+{#3}}$%
-}
+\todo{review all of 3.1 for references to PoRs only providing weight to the best block, etc. (this was an old idea and is not the case.)}
+
 \providecommand\BL[1]{\BCI{L}{i}{#1}}
 \providecommand\BR[1]{\BCI{R}{j}{#1}}
-% note: \BR renewed below
-\providecommand\xyB[1]{*+[F]+{#1}}
-\providecommand\xyL[1]{*++[F:<2pt>]{#1}}
-
-\providecommand\xyMChains[1]{\xymatrix@M=3pt@R=4pt@C=14pt{#1}}
-\providecommand\xyTimeHoriz[1]{\ar@{>->}@<-6pt>[#1]_<{\qquad\text{Time}}}
-
-% \SelectTips{cm}{}
+% note: \BR renewed below to change `j` term to `k`
 
 When chains L and R have the same block frequency and produce blocks in an orderly fashion, it's trivial to count how much work is contributed by each PoR.
 However, real-world blockchains do not produce blocks like this -- even if chains L and R have the same block frequencies, sometimes L will produce 2 or 3 (or more) blocks before R produces its next one (or vice versa).
@@ -21,7 +13,7 @@ However, real-world blockchains do not produce blocks like this -- even if chain
         \xyL{\text{Chain L}} & \cdots & \xyB{L_i} \ar[l] & & \xyB{L_{i+1}} \ar[ll] \ar@{.>}[ld] & \xyB{L_{i+2}} \ar[l] & \xyB{L_{i+3}} \ar[l] & \\
         \xyL{\text{Chain R}} & \cdots & & \xyB{R_j} \ar[ll] \ar@{.>}[lu] & & & & \xyB{R_{j+1}} \ar[llll] \ar@{.>}[lu] \\
         \xyTimeHoriz{rrrrrrr} & & & & & & & \\
-        }
+    }
 \end{equation*}
 Should \BR{1} include 3 PoRs, or just 1?
 How should \BR{1} calculate the weight of those PoRs and the total weight contributed to chain R?
@@ -67,14 +59,14 @@ This leads us to a simple and elegant way to count reflected work: follow the ar
 
 \BL{4}'s reflection of \BR{2} contributes chain-weight to \BL{3} because \emph{any} block that builds on \BL{3} could reflect \BR{2}.
 % (L_{i+4} \; \ar@{.>}[r] &) \;
-Following the arrows: $\xymatrix@C=10pt@M=0pt{R_{k+2} \; \ar@{.>}[r] & \; L_{i+3}}$.
+Following the arrows: $\xyInlineRefl{R_{k+2} \; \ar@{.>}[r] & \; L_{i+3}}$.
 % Note that the blocks and links in parentheses are specific to the block
 
 % Following the arrows: $L_{i+4} \dashrightarrow R_{k+2} \dashrightarrow L_{i+3}$.
 
 Similarly, \BL{4}'s reflection of \BR{1} (which could be either explicit or implicit via \BR{2}) must contribute chain-weight to $L_i$ because \emph{any} block building on $L_i$ could reflect \BR{1} and include that PoR.
 % (L_{i+4} \; \ar@{.>}[r] & \; R_{k+2} \; \ar[r] &) \;
-Following the arrows: $\xymatrix@C=10pt@M=0pt{R_{k+1} \; \ar[r] & \; R_k \; \ar@{.>}[r] & \; L_{i}}$.
+Following the arrows: $\xyInlineRefl{R_{k+1} \; \ar[r] & \; R_k \; \ar@{.>}[r] & \; L_{i}}$.
 
 % \BL{4} \textrightarrow \BR{2} \textrightarrow \BR{1} \textrightarrow $R_k$ \textrightarrow $L_i$.
 % Following the arrows: $L_{i+4} \dashrightarrow R_{k+2} \to R_{k+1} \to R_k \dashrightarrow L_{i}$.

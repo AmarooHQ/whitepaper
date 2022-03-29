@@ -462,7 +462,7 @@ Consider the situation where an attacker is attempting to deny service via the p
         An attempted DoS attack on a block-DAG.
     ]{
         An attempted DoS attack on a block-DAG.
-        The attacker's blocks, $A_j$, contain no transactions.
+        The attacker's blocks, $A_j$, are mined in public and contain no transactions.
         Each block is annotated with its \emph{chain-weight} ($\Sigma_w$).
         Even though the attacker produces $2\times$ as many blocks as the honest network, the attack inevitably fails after a short while.
         NB: $H_i$ is defined to have $\Sigma_w = 0$ for illustrative convenience.

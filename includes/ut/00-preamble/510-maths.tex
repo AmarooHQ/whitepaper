@@ -1,7 +1,57 @@
-\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+% xypic options
+% enable line options and more styles and stuff.
+\xyoption{line}
+\xyoption{color}
+\xyoption{pdf}
 
+% floor and ceil convenience macros
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+
+% allow aligns to break over pages
 \allowdisplaybreaks
 
 \providecommand\half{$\nicefrac{1}{2}$\xspace}
 
 \providecommand\lrar{\leftrightarrow}
+
+% make \sim not include a space afterwards (like: `~x`).
+% for the normal version use \opsim (like: `a ~ b`).
+% source: https://tex.stackexchange.com/a/55723
+\let\opsim\sim
+% `\mathord{}' just for clarity -- `{}' would work just as well
+\renewcommand\sim{\mathord{\opsim}}
+
+% labels for chains that work in and out of math mode
+% if \xspace is inside \ensuremath then it won't work outside math mode
+
+\newcommand\cL{\ensuremath{L}\xspace}
+\newcommand\cM{\ensuremath{M}\xspace}
+\newcommand\cR{\ensuremath{R}\xspace}
+\newcommand\cMone{\ensuremath{M^1}\xspace}
+\newcommand\cMtwo{\ensuremath{M^2}\xspace}
+
+% helper for block identifiers: \BCI{L}{i}{2} = $L_{i+2}$
+% note, the first arg is not wrapped in {} so that we can do things like:
+%   M^1_{i+1} (the superscript 1 and subscript i+1 will be left-aligned vertically)
+
+\providecommand\BCI[3]{%
+    \ensuremath{#1_{{#2}+{#3}}}\xspace%
+}
+
+%
+% helpers for xymatrix based chain-diags
+%
+
+% std margin, cols, spacing for chain diag based on xymatrix
+\providecommand\xyMChains[1]{\xymatrix@M=3pt@R=4pt@C=14pt{#1}}
+
+% use \xyTimeHoriz as first/last row in \xyMChains. the argument is an arrow direction and length (in cols)
+% e.g., `\xyTimeHoriz{rrrrrrr} & & & & & & & \\`
+\providecommand\xyTimeHoriz[1]{\ar@{>->}@<-6pt>[#1]_<{\qquad\text{Time}}}
+
+\providecommand\xyInlineRefl[1]{\xymatrix@C=10pt@M=0pt{#1}}
+
+% chain-diags: boxes for blocks (xyB) and chain names (xyL)
+\providecommand\xyB[1]{*+[F]+{#1}}
+\providecommand\xyL[1]{*++[F:<2pt>]{#1}}

@@ -87,13 +87,9 @@ This will simplify our analysis.
 
 \emph{The core} of a tree-tiling is \emph{the root tile and its children}.
 It's called \emph{the core} because all nodes in the network verify the work and PoRs of all simplex-chains that are part of the core.
-Additionally, the core is where the vast majority of work is done.
+Additionally, the core is where the vast majority of chain-work is done.
 
 \subsubsubsubsection{Recursive \emph{Proof of Reflection}}
-
-\newcommand\cL{\ensuremath{L}\xspace}
-\newcommand\cM{\ensuremath{M}\xspace}
-\newcommand\cR{\ensuremath{R}\xspace}
 
 Part of our security architecture will be the idea of \emph{recursive PoR}.
 
@@ -131,34 +127,210 @@ The first problem is that \cL and \cR cannot use the same \textsc{WeightOf} algo
 Particularly, \cL and \cR's \textsc{WeightOf} must count: not only their local chain-work and that contributed reflected \cM blocks, but also some additional weight based on reflections from \emph{other} chains.
 Each \cM block might record the total chain-work that it adds to \cM (including PoRs), but \cL and \cR's new \textsc{WeightOf} can't use this value directly.
 Firstly, that value includes past local chain-work that reflected \cM, but more importantly: we don't want to force \cL and \cR to verify \emph{every} PoR that contributes to \cM, just the ones that matter.
+So how can \cL and \cR nodes know which work to count?
 
 There is a trivial solution to this problem: require \cL and \cR nodes to download the headers of \emph{all} relevant chains, verify their PoRs, and track the origin of those PoRs.
 Nodes must track the origin of work contributed via PoR to avoid double-counting work.
 An easy example of this is: \cL nodes should not count PoRs where an \cL block is the reflecting block; that work is already directly included in \cL's local chain-work.
-Another example is where there are \emph{multiple paths} that depend on the same chain.
-This leads us into the second problem.
+
+% commands used in the following xy chains diag
+
+\providecommand\BL{}
+\renewcommand\BL[1]{\BCI{\cL}{i}{#1}}
+\newcommand\xBL[1]{\xyB{\BL{#1}}}
+
+\providecommand\BR{}
+\renewcommand\BR[1]{\BCI{\cR}{k}{#1}}
+\newcommand\xBR[1]{\xyB{\BR{#1}}}
+
+\providecommand\BM{}
+\renewcommand\BM[1]{\BCI{\cM}{j}{#1}}
+\newcommand\xBM[1]{\xyB{\BM{#1}}}
+
+% ARrow reFlection
+\newcommand\arf[1][]{\ar@{.>}[#1]}
+\newcommand\arff[1][]{\ar@2{.>}@[Maroon][#1]}
+
+Chain \cL can only count work contributed by \cR \emph{after} a multi-stage PoR can be constructed.
+For example, let's consider these (rather orderly) chain-segments:
+\begin{equation*}
+    \xyMChains{
+        \xyL{\text{Chain \cL}} & \cdots & \xBL1 \ar[l] & & \xBL2 \ar[ll] \arf[ld] & & \xBL3 \ar[ll] \arf[ld] \\
+        \xyL{\text{Chain \cM}} & \cdots & & \xBM1 \ar[ll] \arf[ld] \arf[lu] & & \xBM2 \ar[ll] \arf[lu] \arf[ld] & \\
+        \xyL{\text{Chain \cR}} & \cdots & \xBR1 \ar[l] & & \xBR2 \ar[ll] \arf[lu] & & \xBR3 \ar[ll] \arf[lu] \\
+        \xyTimeHoriz{rrrrrr} &&&&&&
+    }
+\end{equation*}
+We can see that \BR{2} implicitly images \BL{1} via \BR{2}'s explicit imaging of \BM{1}.
+This is because the network already depends on the PoRs that are sufficient to prove this. \BL{2}'s PoR for \BL{1} will prove $\xyInlineRefl{\BL{1}\;&\;\BM{1}\arf[l]}$ (i.e., that \BL{1} was imaged by \BM{1}).
+\BM{2}'s PoR (via \cR) for \BM{1} will prove $\xyInlineRefl{\BM{1}\;&\;\BR{2}\arf[l]}$.
+
+Similarly, we know that \BL{3} implicitly images \BR{2}: $\xyInlineRefl{\BR2\;&\;\BM2\arf[l]\;&\;\BL3\arf[l]}$.
+
+Thus, for \BL3, we can construct a full PoR of \BL1 via \BR2 using the proofs for each link between them: $\xyInlineRefl{\BL1 \;&\; \BM{1}\arf[l] \;&\; \BR2\arf[l] \;&\; \BM2\arf[l] \;&\; \BL3\arf[l]}$.
+
+Since \cL nodes already know about all the \cM and \cR blocks (and the relevant PoRs), the full recursive PoR \emph{does not need to be explicitly recorded}.
+It is already known to all \cL nodes, since each part of the recursive PoR is available in one of the \cL, \cM, or \cR chains (it is explicitly recorded if a +PoRs UT variant is used, and recalculated by the node otherwise).
+
+In \autoref{sec:counting-work} we discussed the idea that a PoR can only contribute to local blocks that are in the reflecting block's past.
+By inspection, we can see that the most recent \cR block (the reflecting block) in \BL{3}'s past is \BR{2}, and the most recent \cL block (the local block) in \BR2's past is \BL1.
+Thus, we can see that our method for counting reflected work -- following the arrows -- works for recursive PoR, too.
+
+There is something important to point out here: \emph{latency}.
+Notice that 4 blocks (in order) are required for this recursive PoR to exist: \BM1, \BR2, \BM2, and \BL3.
+This is twice the number of blocks that would normally be required without any recursion (e.g., a valid PoR for \BL1 exists after \BM1 and then \BL2 are mined).
+Therefore, the delay required for this PoR is twice what we would expect from non-recursive PoR.
+
+Recapping the first problem: \cL and \cR nodes need an expanded \textsc{WeightOf} function with access to \emph{the origin} of implicitly reflected work, knowledge of \emph{where} that work has already been counted.
+Nodes can do this relatively efficiently, for all relevant chains, by downloading the headers and verifying the PoRs.
+This method does not require recursive PoRs to be explicitly recorded in full since the components of these PoRs are already available and have already been individually verified.
+Our existing rules about how to attribute the weight of PoRs (follow the arrows) still works.
+
+There are some future areas of research that may improve this process, too.
+For example: along the lines of NIPoPoWs\footnote{
+    Non-Interactive Proofs of Proof-of-Work (NIPoPoWs), see \citeNIPoPoWsFull.
+}, are \emph{Non-Interactive Proofs of Proof-of-Work Reflections} (NIPoPoWRs) possible?
+
+Our solution to the first problem is promising, but it we have used an implicit assumption: there is only one viable path for PoRs between \cL and \cR.
+What if there are \emph{multiple paths} between \cL and \cR?
+This is the second problem.
 
 \subsubsubsubsection{Recursive PoR with Multiple Paths}
 
-\newcommand\cMone{\ensuremath{M_1\xspace}}
-\newcommand\cMtwo{\ensuremath{M_2\xspace}}
+\providecommand\BMone{}
+\renewcommand\BMone[1]{\BCI{\cMone}{g}{#1}}
+\newcommand\xBMone[1]{\xyB{\BMone{#1}}}
+
+\providecommand\BMtwo{}
+\renewcommand\BMtwo[1]{\BCI{\cMtwo}{h}{#1}}
+\newcommand\xBMtwo[1]{\xyB{\BMtwo{#1}}}
+
+% ARrow reFlection Bent Down
+\newcommand\arfbd[1][]{\ar@{.>}@/_9pt/[#1]}
+\newcommand\arfbu[1][]{\ar@{.>}@/^9pt/[#1]}
 
 Say that we now have four chains: \cL, \cMone, \cMtwo, and \cR doing mutual PoR like so:
 \begin{equation*}
     \xymatrix@C=2em@R=-.15em{
-        & {\cMone} & \\
+        & {\cMone}
+        \ar@{<->}[dd]
+        & \\
         {\cL} \ar@{<->}[ur] & & {\cR} \ar@{<->}[ul] \\
         & {\cMtwo} \ar@{<->}[ul] \ar@{<->}[ur] &
     }
 \end{equation*}
+Both \cMone and \cMtwo are already $O(n)$ secure.
+Assuming that \cL and \cR nodes download and verify all PoRs, how can \cL and \cR count each other's work?
+
+First, let's consider when \cL can \emph{definitely} count \emph{all} the work contributed by a \cR block.
+
+\begin{figure}
+    \begin{equation*}
+        \xyMChains{
+            \xyL{\text{Chain \cL}} & \cdots & \xBL1 \ar[l] & & \xBL2 \ar[ll] \arf[ld] \arfbu[ldd] & & \xBL3 \ar[ll] \arf[ld] \arfbu[ldd] \\
+            \xyL{\text{Chain \cMone}} & \cdots & & \xBMone1 \ar[ll] \arfbd[ldd] \arf[lu] & & \xBMone2 \ar[ll] \arf[lu] \arfbd[ldd] & \\
+            \xyL{\text{Chain \cMtwo}} & \cdots & & \xBMtwo1 \ar[ll] \arf[ld] \arfbu[luu] & & \xBMtwo2 \ar[ll] \arfbu[luu] \arf[ld] & \\
+            \xyL{\text{Chain \cR}} & \cdots & \xBR1 \ar[l] & & \xBR2 \ar[ll] \arf[lu] \arfbd[luu] & & \xBR3 \ar[ll] \arf[lu] \arfbd[luu] \\
+            \xyTimeHoriz{rrrrrr} &&&&&&
+        }
+    \end{equation*}
+    \caption[
+        asdf.
+    ]{
+        asdf.
+        Note that reflections between \cMone and \cMtwo are not shown.
+    }
+    \label{fig:multi-path-recursive-por-chain-diag}
+\end{figure}
+
+As before, we'll look at valid PoRs for \BL3 that prove \BL1 was reflected in \BR2.
+The exact reflections that exist will be analogous to our prior example, too.
+See \autoref{fig:multi-path-recursive-por-chain-diag} for the chain-diagram.
+% For each $x$ in $\{1,2,3\}$, we'll assume that \BL{x} and \BR{x} occur simultaneously, and both image \BMone{x-1} and \BMtwo{x-1}.
+% After \BL{x}, but before \BL{x+1}, we'll assume that \BMone{x} and \BMtwo{x} are mined simultaneously and both blocks image \BL{x} and \BR{x}.
+Notice that there are 4 possible paths from \BL{3} to \BL1:
+% \\[-.66em]
+\begin{equation*}
+    \xymatrix@C=1em@R=-.5em{
+        & & \BMone1 \arf[ld] & & \BMone2 \arf[ld] & \\
+        \BL0 & \BL1 & & \BR2 \arf[lu] \arf[ld] & & \BL3 \arf[lu] \arf[ld] & \BL4 \\
+        & & \BMtwo1 \arf[lu] & & \BMtwo2 \arf[lu] & \\
+    }
+\end{equation*}
+% \\[-.66em]
+Here is what we can say about this case: if all 4 of these PoR paths exist, then \BR2 \emph{definitely} reflects \BL1, and its weight can be included in \BL3's total chain-weight.
+
+But, what if only some of those paths are available?
+Consider this alternative case:
+\begin{equation*}
+    \xymatrix@C=1em@R=-.15em{
+        & \BMone1 \arff[ld] & & & \BMone2 \arf[llld] \arff[ld] & \\
+        \BL0 & \BL1 & & \BR2 \arff[llu] \arff[ld] & & \BL3 \arff[lu] \arf[llld] & \BL4 \arf[ld] \\
+        & & \BMtwo1 \arff[lu] & & & \BMtwo2 \arf[llu] \\
+    }
+\end{equation*}
+In this case, \cL is implicitly reflected in \BR2, and \BL3 has two possible recursive PoRs of this (indicated via the double-lined arrows): \BL{1} via \BMtwo1; and \BL{0} via \BMone1.
+Are both valid?
+Is either preferable?
+If \BL3 includes the full weight of \BR2 in its chain-weight, then what happens when \BL4 is mined and the other two PoR paths via \BMtwo2 become available?
+
+We \emph{can} be sure that \BR2's weight can be fully included in \cL's chain-weight \emph{after} \BL4 is mined (as all PoR paths now exist).
+However, it's not so clear what we should do when not all PoR paths yet exist.
+Do we even need to solve this problem, now, though?
+
+\begin{itemize}
+    \item no -- it's enough to know that, when all PoR paths exist, the full weight is okay
+    \item this is b/c we'll simplify tiles: every ${B_f}^{-1}$ seconds all chains in each tile mine 1 new block and provide reflections of 1 new block in their local tile and adjacent tiles, and vice versa.
+    Thus all PoR paths are available all at once.
+    \item we just need to be confident that an answer \emph{does} exist
+    \item full solution left as a future research
+    \item some ideas or questions for that future research:
+    \begin{itemize}
+        \item is a single PoR path enough to count the full weight of the reflecting block?
+        \item if so -- tiling is very fast and secure. if not, tiling is pretty fast and still secure.
+        \item what happens if some paths \emph{never} end up existing?
+        \item do we divide contributed work by the number of paths?
+        \item do paths have to go through the same chain? (i.e., $\cL \to \cMone \to \cR \to \cMone \to \cL$)
+        \item can paths go through different chains? (i.e., $\cL \to \cMone \to \cR \to \cMtwo \to \cL$)
+        \item should each PoR be valid if 1st and last entries are removed?
+        if so, then it passes its weight to like that chain-segment (of the intermediate chain for which the middle bits of the recursive PoR are valid).
+        \item but PoRs via different chains should still be valid b/c it shows order (thus we know that whatever's being reflected is in the history of every intermediate block)
+        \item do we ever really need to consider this partial paths stuff?
+        like a block (\BL3) that enables some PoR paths via a new block (\BR2) will probs also enable other missing PoR paths.
+        Example: \BL4 enables \BR2 via \BMtwo2, but could also mb enable \BR3 via \BMtwo2, too.
+        We should expect all paths to be available within a few block periods (e.g., $\sim 60$ s).
+    \end{itemize}
+\end{itemize}
 
 \todo{continue}
 
+\todo{answer Qs like what a doublespend looks like}
+
 \subsubsubsection{Security Architecture}
+
+The literal keystone of our tiling is the root tile.
+More than half of the network's total chain-work will be produced by chains in the root tile.
+We'll guarantee this for $d \ge 1$ via the RAA by enforcing an \emph{upper limit} on each tile's tile-work.\footnote{
+    This also means that we're only considering the PoR context of a single root token.
+}
+This upper limit will exponentially decrease as the depth of the tiling increases.
+
+
+
+... In general, each tile \emph{must} produce no more tile-work than $r^{-1}$ that of its parent.
+
+
+Our security architecture will be based on a few ideas:
+\begin{itemize}
+    \item The core is where the vast majority of chain-work is done.
+    \item The RAA will enforce an \emph{upper limit} on the chain-work of each non-root tile based on the chain-work of its parent.
+    \item Nodes for all simplex-chains verify all PoRs between the local tile and the root tile, and all PoRs within the core.
+\end{itemize}
 
 \subsubsubsubsection{Inter-tile Security Relationship}
 
-$r$
+Except for the root tile, each tile contributes $r^{-d}$ work to the tiling.
+At each depth, there are $u^d$ tiles.
 
 \begin{forest}
     [ITSR
@@ -174,32 +346,52 @@ $r$
 
 $S$
 
+% https://www.desmos.com/calculator/nku2g8qxmy
+% https://www.desmos.com/calculator/vxp5spzr4q
+
+\newcommand\Mroot{\ensuremath{\mathcal{M}}\xspace}
+
 \begin{itemize}
-    \item Except for the root tile, each tile contributes $\frac1{r^d}$ work to the tiling.
+    \item Except for the root tile, each tile contributes $r^{-d}$ work to the tiling.
     \item At each depth, there are $u^d$ tiles.
-    \item Root tile contributes $M$ units of tile-work.
+    \item Root tile contributes $\Mroot$ units of tile-work -- \Mroot stands for ``multiplier''.
 \end{itemize}
 
 \begin{align}
-    S &= M + \frac{u}{r} + \frac{u^2}{r^2} + \cdots && \text{Sum \emph{all} chain-work}
+    S &= \Mroot + \frac{u}{r} + \frac{u^2}{r^2} + \cdots && \text{Sum \emph{all} chain-work}
     \nonumber \\
-    S - (M-1) &= 1 + \frac{u}{r} + \frac{u^2}{r^2} + \cdots
+    S - (\Mroot-1) &= 1 + \frac{u}{r} + \frac{u^2}{r^2} + \cdots
     \nonumber \\
     \intertext{This is a geometric series, and since $\frac{u}{r} < 1$:}
-    S - (M-1) &= \frac{1}{1 - \frac{u}{r}} && \text{Sum of geometric series}
+    S - (\Mroot-1) &= \frac{1}{1 - \frac{u}{r}} && \text{Sum of geometric series}
     \nonumber \\
-    S - (M-1) &= \frac{r}{r - u} && \times\frac{r}r
+    S - (\Mroot-1) &= \frac{r}{r - u} && \times\frac{r}r
     \nonumber \\
-    S &= M-1 + \frac{r}{r - u}
+    S &= \Mroot-1 + \frac{r}{r - u}
     \label{eq:tree-tiling-total-work}
 \end{align}
 
 \subsubsubsubsection{Doublespend Requirements}
 
+relax security of network very slightly -- still $O(n)$ though.
+instead of resisting an attacker with up to 50\% of the network-wide hash-rate, we'll require that an attacker only have 49.5\%, instead.
+
+For the purpose of this paper, it is assumed that: \UTinf{} being secure against as attacker with $q \le 0.495$ counts as $O(n)$ secure. ($q \le 0.495$ is \emph{good enough}.)
+
 \subsubsubsection{Analysis Method}
 
 How can we analyze the security of tree-tilings?
 
+We need to consider cases where the majority of tile-work is done by an attacker.
+We'll call this a \emph{majority-malicious} tile.
+
+Analyze cases, if we can satisfy all of them then we should be good:
+\begin{itemize}
+    \item core is almost as secure as the whole network: $(\Mroot + ur^{-1}) > 2qS$
+    \item tile can't sever it's children
+    \item tile can't self-sever
+\end{itemize}
+Use as recursive cases to show that every tile is $O(n)$ secure.
 
 \subsubsubsection{Assumptions}
 
@@ -221,22 +413,24 @@ How can we analyze the security of tree-tilings?
 
 \subsubsubsubsection{The Core is (Almost) as Secure as the Network}
 
-$M \ge 1$, $u > 1$, $r > u$, and $0 \le q \le 0.5$.
-
+$\Mroot  \ge 1$, $u > 1$, $r > u$, and $0 \le q \le 0.5$.
 \begin{align}
-    \frac12 (M + \frac{u}r) &> qS
+    \frac12 (\Mroot  + \frac{u}r) &> qS
     \nonumber \\
-    \frac12 (Mr + u) &> rq(M-1+\frac{r}{r-u}) && \times r \text{ and substitute } S \text{ via \autoref{eq:tree-tiling-total-work}}
+    \frac12 (\Mroot r + u) &> rq(\Mroot -1+\frac{r}{r-u}) && \times r \text{ and substitute } S \text{ via \autoref{eq:tree-tiling-total-work}}
     \nonumber \\
-    (Mr + u)(r-u) &> 2rq((M-1)(r-u)+r) && \times 2(r-u)
+    (\Mroot r + u)(r-u) &> 2rq((\Mroot -1)(r-u)+r) && \times 2(r-u)
     \label{eq:tree-tiling-safe-q}
     % https://www.wolframalpha.com/input?i=%28My+%2B+x%29%28y-x%29+%3E+2yq%28%28M-1%29%28y-x%29%2By%29%2C+0+%3C%3D+q+%3C%3D+0.5
     % note for above: y=r; x=u
+    % M>0, 0<=q<0.5,
+    % 2My > (M abs(x) sqrt((2 M^2 q - M^2 - 4 M q - 2 M + 2 q - 1)/(M^2 (2 q - 1))) + M x - x)
+    % \\
     % 2Mr &> |u| \sqrt{\frac{2M^2q-M^2-4Mq-2M+2q-1}{2q-1}}+u(M-1) \\
-    % 2Mr &> |u| \sqrt{\frac{M^2(1 - 2q) - 2M(2q + 1) + (2q - 1)}{2q-1}}+u(M-1) \\
+    % 2Mr &> |u| \sqrt{\frac{M^2(2q-1) - 2M(2q + 1) + (2q - 1)}{2q-1}}+u(M-1) \\
+    % 2Mr &> |u| \sqrt{M^2 - 2M\frac{2q + 1}{2q-1} + 1}+u(M-1) \\
 \end{align}
-
-There is no elegant form of \autoref{eq:tree-tiling-safe-q}, but this form is, at least, easy to evaluate and graph.
+There is no elegant form of \autoref{eq:tree-tiling-safe-q}, but this form is easy to evaluate and graph, at least.
 
 \subsubsubsection{Scaling Complexity}
 

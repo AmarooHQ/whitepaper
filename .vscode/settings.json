@@ -267,6 +267,7 @@
         "./output/*.tex",
         "./output/**/*.tex",
     ],
+    "latex-workshop.view.pdf.internal.synctex.keybinding": "double-click",
     "files.associations": {
         ".textlintrc": "jsonc"
     },

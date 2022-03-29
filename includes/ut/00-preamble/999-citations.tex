@@ -13,6 +13,10 @@
     \citeLJCoiledcoinFull \\
 }
 
+%--- Util
+
+\newcommand\cfIpfs[1]{https://cloudflare-ipfs.com/ipfs/#1}
+
 %--- GHOST
 
 \newcommand{\citeGhostLink}{%
@@ -147,7 +151,7 @@ Eyal, Sirer; 2013%
 
 % note: `%23` = `#` in URLs
 
-\newcommand{\citeLJCoiledcoinLink}{
+\newcommand{\citeLJCoiledcoinLink}{%
     \href{https://bitcointalk.org/index.php?topic=56675.msg678006\#msg678006}{Luke Jr's attack on Coiledcoin}%
 }
 
@@ -158,19 +162,49 @@ Eyal, Sirer; 2013%
 
 %--- zack-bitcoin docs re PoS
 
-\newcommand{\linkZackPoSDefence}{
+\newcommand{\linkZackPoSDefence}{%
     https://web.archive.org/web/20220309063254/https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/the_defence_of_pos.md%
 }
-\newcommand{\linkZackPoSCriticisms}{
+\newcommand{\linkZackPoSCriticisms}{%
     https://web.archive.org/web/20220309063128/https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/proof_of_stake.md%
 }
 
 %--- solana stuff
 
-\newcommand{\linkSolanaFiftyKClaim}{
+\newcommand{\linkSolanaFiftyKClaim}{%
     https://web.archive.org/web/20210914230947/https://solana.com/news/8-innovations-that-make-solana-the-first-web-scale-blockchain%
 }
 
-\newcommand{\linkSolanaFourHundKFail}{
+\newcommand{\linkSolanaFourHundKFail}{%
     https://web.archive.org/web/20220309064429/https://www.cryptosizzle.com/scalability-or-stability-failures-in-the-solana-network-indicate-that-work-is-still-needed/%
+}
+
+%--- NIPoPoWs
+
+\newcommand\linkNIPoPoWs{%
+\href{\cfIpfs{QmYDpsHgs8wjX4qedMUDzanErehZuUcpV8fp2dBFbr9c5r}}{Non-Interactive Proofs of Proof-of-Work}%
+\xspace
+}
+
+\newcommand\citeNIPoPoWsAuthors{%
+%Aggelos Kiayias, Andrew Miller and Dionysis Zindros
+Kiayias, Miller, and Zindros; 2018%
+\xspace
+}
+
+\newcommand\linkNIPoPoWsMirrors{%
+\href{https://web.archive.org/web/20190123153947/https://eprint.iacr.org/2017/963.pdf}{[m1]}
+\href{https://web.archive.org/web/20220329012237/https://cloudflare-ipfs.com/ipfs/QmYDpsHgs8wjX4qedMUDzanErehZuUcpV8fp2dBFbr9c5r}{[m2]}%
+\xspace
+}
+
+\newcommand\citeNIPoPoWs{%
+    \linkNIPoPoWs{}
+    (\citeNIPoPoWsAuthors{})%
+}
+
+\newcommand\citeNIPoPoWsFull{%
+    \linkNIPoPoWs{}
+    \linkNIPoPoWsMirrors{}
+    (\citeNIPoPoWsAuthors{})%
 }
