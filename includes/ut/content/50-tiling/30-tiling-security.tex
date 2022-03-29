@@ -305,8 +305,15 @@ Do we even need to solve this problem, now, though?
         \item WRT paths like $\cL \to \cMtwo \to \cMone \to \cR \to \cMone \to \cMtwo \to \cL$ (i.e., it's longer than the shortest path possible) -- we shouldn't need to count these.
         we should always be able to go directly b/c an implicit reflection in a chain's history that can also be explicit, should be explicit.
         so count these as 0 weight.
+        \item idea: only the paths back matter. making more paths between the \cR block and most recent \cL block isn't so hard, but making the \cR block is (if the \cR block is relatively heavy, that is).
+        So: divide \cR block weight by the number of \emph{paths back} and then only count unique shortest paths from $\BR{x} \to \BL{y}$.
+        By that point, shouldn't \emph{all} those paths be available, anyway?
+        \item maybe: path availability is only an issue between the reflecting \cR block and the current \cL block, but not between the \cR block and the reflected \cL block?
+        (This sounds like it logically has to be true -- how could any new paths back be introduced!?)
     \end{itemize}
 \end{itemize}
+
+\todo{por sim: are we double-counting reflections sometimes? should we divide the weight of a block by the number of local blocks that in reflects? what about blocks that have no explicit reflections? need to check sim logic.}
 
 \todo{continue}
 
@@ -427,9 +434,9 @@ $\Mroot  \ge 1$, $u > 1$, $r > u$, and $0 \le q \le 0.5$.
 \begin{align}
     \frac12 (\Mroot  + \frac{u}r) &> qS
     \nonumber \\
-    \frac12 (\Mroot r + u) &> rq(\Mroot -1+\frac{r}{r-u}) && \times r \text{ and substitute } S \text{ via \autoref{eq:tree-tiling-total-work}}
+    \frac12 (\Mroot r + u) &> qr(\Mroot -1+\frac{r}{r-u}) && \times r \text{ and substitute } S \text{ via \autoref{eq:tree-tiling-total-work}}
     \nonumber \\
-    (\Mroot r + u)(r-u) &> 2rq((\Mroot -1)(r-u)+r) && \times 2(r-u)
+    (\Mroot r + u)(r-u) &> 2qr((\Mroot -1)(r-u)+r) && \times 2(r-u)
     \label{eq:tree-tiling-safe-q}
     % https://www.wolframalpha.com/input?i=%28My+%2B+x%29%28y-x%29+%3E+2yq%28%28M-1%29%28y-x%29%2By%29%2C+0+%3C%3D+q+%3C%3D+0.5
     % note for above: y=r; x=u
@@ -440,7 +447,20 @@ $\Mroot  \ge 1$, $u > 1$, $r > u$, and $0 \le q \le 0.5$.
     % 2Mr &> |u| \sqrt{\frac{M^2(2q-1) - 2M(2q + 1) + (2q - 1)}{2q-1}}+u(M-1) \\
     % 2Mr &> |u| \sqrt{M^2 - 2M\frac{2q + 1}{2q-1} + 1}+u(M-1) \\
 \end{align}
-There is no elegant form of \autoref{eq:tree-tiling-safe-q}, but this form is easy to evaluate and graph, at least.
+There is no elegant form of \autoref{eq:tree-tiling-safe-q} when solving for $r$,\footnote{%
+    % https://www.desmos.com/calculator/jghfe9511e
+    Closed form solved for $r$ assuming $r,u > 0$: $r > \frac{u}{2\Mroot}\left( \Mroot - 1 + \sqrt{(\Mroot - 1)^2 + \frac{4\Mroot}{1-2q}} \right)$
+    % \begin{align*}
+    %     (\Mroot r + u)(r-u) &> 2qr((\Mroot -1)(r-u)+r) \\
+    %     \Mroot r^2 - \Mroot ru + ru - u^2 &> 2qr(\Mroot r - u(\Mroot - 1)) \\
+    %     \Mroot r^2 - ru(\Mroot - 1) - u^2 &> 2\Mroot qr^2 - 2qru(\Mroot - 1) \\
+    %     \Mroot r^2 (1 - 2q) + ru(\Mroot - 1)(2q - 1) - u^2 &> 0 \\
+    %     r &> \frac{u(\Mroot - 1)(1 - 2q)}{2\Mroot (1-2q)} + \frac{\sqrt{u^2(\Mroot -1)^2 (2q-1)^2 + 4\Mroot u^2 (1-2q)}}{2\Mroot (1-2q)} \\
+    %     r &> \frac{u(\Mroot - 1)}{2\Mroot} + u \frac{\sqrt{(\Mroot -1)^2 (1-2q)^2 + 4\Mroot (1-2q)^2(1-2q)^{-1}}}{2\Mroot (1-2q)} \\
+    %     &> \frac{u(\Mroot - 1)}{2\Mroot} + u \frac{\sqrt{(\Mroot -1)^2 + 4\Mroot (1-2q)^{-1}}}{2\Mroot} \\
+    %     &> \frac{u}{2\Mroot}\left( \Mroot - 1 + \sqrt{(\Mroot - 1)^2 + \frac{4\Mroot}{1-2q}} \right)
+    % \end{align*}
+} but this form is easy to evaluate and graph, at least.
 
 \subsubsubsection{Scaling Complexity}
 
