@@ -187,6 +187,8 @@ This UT protocol variant is +HOPoRs, the combination of *header omission* (+HO) 
 }
 \end{figure}
 
+\todo{uber optimization at mega cost? reflecting a block also reflects all blocks that it reflects? hmm. think this doesn't work b/c recursive PoR in a simplex would get stupid. also, what's the upper limit? each block can end up reflecting like $k^2$ blocks? pretty cray}
+
 ### Confirmation Times
 
 \label{sec:confirmation-times}

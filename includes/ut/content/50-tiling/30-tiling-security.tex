@@ -91,6 +91,8 @@ Additionally, the core is where the vast majority of chain-work is done.
 
 \subsubsubsubsection{Recursive \emph{Proof of Reflection}}
 
+\mk{Maybe recursive PoR stuff should be moved to the PoR section, but that doesn't feel right b/c we don't use it before now (besides dapp-chains but that's trivial).}
+
 Part of our security architecture will be the idea of \emph{recursive PoR}.
 
 Say we have three chains: \cL, \cM, and \cR.
@@ -262,6 +264,7 @@ Here is what we can say about this case: if all 4 of these PoR paths exist, then
 
 But, what if only some of those paths are available?
 Consider this alternative case:
+% hmm, unsure about the colors / focused arrows
 \begin{equation*}
     \xymatrix@C=1em@R=-.15em{
         & \BMone1 \arff[ld] & & & \BMone2 \arf[llld] \arff[ld] & \\
@@ -299,12 +302,19 @@ Do we even need to solve this problem, now, though?
         like a block (\BL3) that enables some PoR paths via a new block (\BR2) will probs also enable other missing PoR paths.
         Example: \BL4 enables \BR2 via \BMtwo2, but could also mb enable \BR3 via \BMtwo2, too.
         We should expect all paths to be available within a few block periods (e.g., $\sim 60$ s).
+        \item WRT paths like $\cL \to \cMtwo \to \cMone \to \cR \to \cMone \to \cMtwo \to \cL$ (i.e., it's longer than the shortest path possible) -- we shouldn't need to count these.
+        we should always be able to go directly b/c an implicit reflection in a chain's history that can also be explicit, should be explicit.
+        so count these as 0 weight.
     \end{itemize}
 \end{itemize}
 
 \todo{continue}
 
 \todo{answer Qs like what a doublespend looks like}
+
+\subsubsubsubsection{Excess Capacity in Proof of Work}
+
+\todo{this should probs go in practical considerations -- that's where +T is introduced.}
 
 \subsubsubsection{Security Architecture}
 
@@ -480,7 +490,7 @@ refls
     &= \frac{5}{16}\NOneSq
 \end{align*}
 
-for a leaf tile, each layer adds $2\parens{\frac{N_1}{4}}^2$ more reflections, so we get $\ceil{8 (1 - \frac5{16})}-1 = 5$ layers for free.
+for a leaf tile, each layer adds $2\parens{\frac{N_1}{4}}^2$ more reflections, so we get $\floor{8 (1 - \frac5{16})} = 5$ layers for free.
 
 \begin{align*}
     2^2 - 1 &\to 2^{2+5} - 1 \\
@@ -496,7 +506,7 @@ for a leaf tile, each layer adds $2\parens{\frac{N_1}{4}}^2$ more reflections, s
 
 each tile has a local $O(c)$ load for PoR verification
 
-each tile is $h \lesssim \log_2(n)$ away from the root
+each tile is $d \lesssim \log_2(n)$ away from the root
 
 all tiles between that tile and the root need to have PoRs verified, plus the root and its surrounding tiles, and the local tile's neighbors.
 
@@ -504,14 +514,14 @@ root + children + gc + in-between + local + children
 
 $R = \text{root} = 2$
 
-that's $((v-1)^2 + (v-1) + R) + \max(0, h - 3) + (1 + (v-1))$
+that's $((v-1)^2 + (v-1) + R) + \max(0, d - 3) + (1 + (v-1))$
 
 \begin{align*}
-    & & &\quad\:\: ((v-1)^2 + (v-1) + R) + \max(0, h - 3) + (1 + (v-1)) \\
-    & & &= (v^2 - 2v - 1 + v - 1 + 2) + \max(0, h - 3) + v \\
-    & & &= v^2 + \max(0, h-3) \\
-    & & &= O(v^2) + O(\max(0, h-3)) \\
-    & & &= O(v^2) + O(h) \\
+    & & &\quad\:\: ((v-1)^2 + (v-1) + R) + \max(0, d - 3) + (1 + (v-1)) \\
+    & & &= (v^2 - 2v - 1 + v - 1 + 2) + \max(0, d - 3) + v \\
+    & & &= v^2 + \max(0, d-3) \\
+    & & &= O(v^2) + O(\max(0, d-3)) \\
+    & & &= O(v^2) + O(d) \\
     & & &= O(v^2) + O(\log(n)) \\
     & & &= O(v^2 + \log(n)) \\
     \text{since } v^2 \text{ is constant:} & & &= O(\log(n)) \\
@@ -537,21 +547,21 @@ that's $((v-1)^2 + (v-1) + R) + \max(0, h - 3) + (1 + (v-1))$
 \end{center}
 
 \begin{align*}
-    N_\text{tiles} &= \frac{u^{h+1} - 1}{u-1} \\
-    &= O(u^h) = O(n)
+    N_\text{tiles} &= \frac{u^{d+1} - 1}{u-1} \\
+    &= O(u^d) = O(n)
 \end{align*}
 
 \begin{align*}
-    2^{44} &> r^{h} \\
-    44 &> h \log_2(r) \\
-    \frac{44}{\log_2(r)} &> h \\
+    2^{44} &> r^{d} \\
+    44 &> d \log_2(r) \\
+    \frac{44}{\log_2(r)} &> d \\
     \intertext{$r' \ge r$, so:}
-    \frac{44}{\log_2(r)} \ge \frac{44}{\log_2(r')} &> h \\
-    \frac{44}{\log_2(5)} &> h \\
-    \sim 19 &> h \\
+    \frac{44}{\log_2(r)} \ge \frac{44}{\log_2(r')} &> d \\
+    \frac{44}{\log_2(5)} &> d \\
+    \sim 19 &> d \\
     \implies N_\text{tiles} &\lesssim 2^{19} \approx 5\cdot 10^{5} \\
     \intertext{if 96 bits are available:}
-    \sim 41 &> h \\
+    \sim 41 &> d \\
     \implies N_\text{tiles} &\lesssim 2^{41} \approx 2\cdot 10^{12} \\
 \end{align*}
 
