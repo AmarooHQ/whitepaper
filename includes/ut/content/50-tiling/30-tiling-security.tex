@@ -324,6 +324,8 @@ Do we even need to solve this problem, now, though?
         \item idea: the principle \emph{don't double-count work} means that when we have multiple paths back, that block's weight is attributable to the \emph{most recent} reflected \cL block.
         \item idea: the principle that \emph{a PoR is worth whatever is required to attack it} means that only 1 PoR path to the \cR block is required -- once that happens all other paths are redundant (though useful for SPV).
         \item idea: so the total weight contributed by a set of PoRs is the sum of all unique blocks in that set of PoRs -- multiple paths doesn't help.
+        \item so simplex-chains in a deep tile get the security benefit of root tile chains as soon as a single path is available from an L block to any R block back to any L block.
+        \item this should happen MUCH faster than the predicted delay between singularly reflected chains -- $v\cdot{N_1}^{-1}\times$ the duration, I think.
     \end{itemize}
     \item do miners need to be incentivized to reflect child chains?
 \end{itemize}
