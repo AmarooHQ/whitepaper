@@ -154,7 +154,9 @@ An easy example of this is: \cL nodes should not count PoRs where an \cL block i
 \newcommand\arff[1][]{\ar@2{.>}@[Maroon][#1]}
 
 Chain \cL can only count work contributed by \cR \emph{after} a multi-stage PoR can be constructed.
-For example, let's consider these (rather orderly) chain-segments:
+For example, let's consider the (rather orderly) chain-segments in \autoref{fig:simple-recursive-por-chain-diag}.
+
+\begin{figure}
 \begin{equation*}
     \xyMChains{
         \xyL{\text{Chain \cL}} & \cdots & \xBL1 \ar[l] & & \xBL2 \ar[ll] \arf[ld] & & \xBL3 \ar[ll] \arf[ld] \\
@@ -163,6 +165,14 @@ For example, let's consider these (rather orderly) chain-segments:
         \xyTimeHoriz{rrrrrr} &&&&&&
     }
 \end{equation*}
+\caption[
+    asdf.
+]{
+    asdf.
+}
+\label{fig:simple-recursive-por-chain-diag}
+\end{figure}
+
 We can see that \BR{2} implicitly images \BL{1} via \BR{2}'s explicit imaging of \BM{1}.
 This is because the network already depends on the PoRs that are sufficient to prove this. \BL{2}'s PoR for \BL{1} will prove $\xyInlineRefl{\BL{1}\;&\;\BM{1}\arf[l]}$ (i.e., that \BL{1} was imaged by \BM{1}).
 \BM{2}'s PoR (via \cR) for \BM{1} will prove $\xyInlineRefl{\BM{1}\;&\;\BR{2}\arf[l]}$.
@@ -176,22 +186,21 @@ It is already known to all \cL nodes, since each part of the recursive PoR is av
 
 In \autoref{sec:counting-work} we discussed the idea that a PoR can only contribute to local blocks that are in the reflecting block's past.
 By inspection, we can see that the most recent \cR block (the reflecting block) in \BL{3}'s past is \BR{2}, and the most recent \cL block (the local block) in \BR2's past is \BL1.
-Thus, we can see that our method for counting reflected work -- following the arrows -- works for recursive PoR, too.
+Thus, we can see that our method for attributing reflected work -- following the arrows -- works for recursive PoR, too.
 
 There is something important to point out here: \emph{latency}.
-Notice that 4 blocks (in order) are required for this recursive PoR to exist: \BM1, \BR2, \BM2, and \BL3.
-This is twice the number of blocks that would normally be required without any recursion (e.g., a valid PoR for \BL1 exists after \BM1 and then \BL2 are mined).
+Notice that these 4 blocks (in chronological order) are required for this recursive PoR to exist: \BM1, \BR2, \BM2, and \BL3.
+This is twice the number of blocks that would normally be required without any recursion (e.g., a valid non-recursive PoR for \BL1 exists after \BM1 and then \BL2 are mined).
 Therefore, the delay required for this PoR is twice what we would expect from non-recursive PoR.
+In general (if only one PoR path between two given blocks will exist) this delay, measured in block periods, is the length of the full PoR.\footnote{
+    For chains with equal block periods (and ignoring \emph{miner resonance}), there is a 50\% chance that chain \cR will produce a block before the next \cL block.
+
+}
 
 Recapping the first problem: \cL and \cR nodes need an expanded \textsc{WeightOf} function with access to \emph{the origin} of implicitly reflected work, and knowledge of \emph{where} that work has already been counted.
 Nodes can do this relatively efficiently, for all relevant chains, by downloading the headers and verifying the PoRs.
 This method does not require recursive PoRs to be explicitly recorded in full since the components of these PoRs are already available and have already been individually verified.
 Our existing rules about how to attribute the weight of PoRs (follow the arrows) still works.
-
-There are some future areas of research that may improve this process, too.
-For example: along the lines of NIPoPoWs\footnote{
-    Non-Interactive Proofs of Proof-of-Work (NIPoPoWs), see \citeNIPoPoWsFull.
-}, are \emph{Non-Interactive Proofs of Proof-of-Work Reflections} (NIPoPoWRs) possible?
 
 Our solution to the first problem is promising, but we have used an implicit assumption: there is only one viable path for PoRs between \cL and \cR.
 What if there are \emph{multiple paths} between \cL and \cR?
@@ -311,8 +320,18 @@ Do we even need to solve this problem, now, though?
         By that point, shouldn't \emph{all} those paths be available, anyway?
         \item maybe: path availability is only an issue between the reflecting \cR block and the current \cL block, but not between the \cR block and the reflected \cL block?
         (This sounds like it logically has to be true -- how could any new paths back be introduced!?)
+        \item idea: the weights of all blocks in a recursive PoR path \emph{all} have the same \cL in their history, so their weights can be safely added to \cL.
+        \item idea: the principle \emph{don't double-count work} means that when we have multiple paths back, that block's weight is attributable to the \emph{most recent} reflected \cL block.
+        \item idea: the principle that \emph{a PoR is worth whatever is required to attack it} means that only 1 PoR path to the \cR block is required -- once that happens all other paths are redundant (though useful for SPV).
+        \item idea: so the total weight contributed by a set of PoRs is the sum of all unique blocks in that set of PoRs -- multiple paths doesn't help.
     \end{itemize}
+    \item do miners need to be incentivized to reflect child chains?
 \end{itemize}
+
+There are some future areas of research that may improve this process, too.
+For example: along the lines of NIPoPoWs\footnote{
+    Non-Interactive Proofs of Proof-of-Work (NIPoPoWs), see \citeNIPoPoWsFull.
+}, are \emph{Non-Interactive Proofs of Proof-of-Work Reflections} (NIPoPoWRs) possible?
 
 \todo{por sim: are we double-counting reflections sometimes? should we divide the weight of a block by the number of local blocks that in reflects? what about blocks that have no explicit reflections? need to check sim logic.}
 
@@ -360,8 +379,8 @@ Since each tile has $v-1$ children, we will let $u = v-1$ for convenience.
 
 We will limit each tile's maximum tile-work production, measured against the unit tile, using the following rules:
 \begin{enumerate}
-    \item The root tile produces at least \Mroot units of tile-work ($\Mroot \ge 1$).
-    \item Each non-root tile is limited to $r^{-d}$ units of tile-work, where $r$ is a network-wide constant and $r > u \ge 2$.
+    \item The root tile produces at least \Mroot units of tile-work ($\Mroot \ge 1$; \Mroot stands for ``multiplier'').
+    \item Each non-root tile is limited to $r^{-d}$ units of tile-work ($r > u \ge 2$) where $r$ is a network-wide constant.
 \end{enumerate}
 
 The RAA sets the block reward so that each tile produces an appropriate amount of tile-work.
@@ -381,30 +400,21 @@ This process continues until all tiles are under their respective limits.
 
 \subsubsubsubsection{Total Work Across a Tiling}
 
-How much tile-work is produced over the complete tiling?
-Let's construct a sum of tile-work over the complete tiling.
-
-At depth $d$, each tile (except the root tile) produces $r^{-d}$ units of tile-work, and there are $u^d$ such tiles.
-So at that depth there is at most $u^d r^{-1}$ tile-work produced.
-
-
-
-Except for the root tile, each tile contributes $r^{-d}$ work to the tiling.
-At each depth, there are $u^d$ tiles.
-
 % https://www.desmos.com/calculator/nku2g8qxmy
 % https://www.desmos.com/calculator/vxp5spzr4q
 
-\begin{itemize}
-    \item Except for the root tile, each tile contributes $r^{-d}$ work to the tiling.
-    \item At each depth, there are $u^d$ tiles.
-    \item Root tile contributes $\Mroot$ units of tile-work -- \Mroot stands for ``multiplier''.
-\end{itemize}
+How much tile-work is produced over the complete tiling?
+Let's construct a sum of tile-work over the complete tiling.
 
+The root tile produces \Mroot units of tile-work.
+At depth $d \ge 1$, each tile produces $r^{-d}$ units of tile-work, and there are $u^d$ such tiles.
+So at depth $d$ there is at most $(ur^{-1})^d$ tile-work produced.
+We'll assume that tiles produce the maximum amount of tile-work possible.
+The sum ($S$) of all work over the tiling is thus:
 \begin{align}
-    S &= \Mroot + \frac{u}{r} + \frac{u^2}{r^2} + \cdots && \text{Sum \emph{all} chain-work}
+    S &= \Mroot + \frac{u}{r} + \frac{u^2}{r^2} + \frac{u^3}{r^3} + \cdots && \text{Sum \emph{all} chain-work}
     \nonumber \\
-    S - (\Mroot-1) &= 1 + \frac{u}{r} + \frac{u^2}{r^2} + \cdots
+    S - (\Mroot-1) &= 1 + \frac{u}{r} + \frac{u^2}{r^2} + \frac{u^3}{r^3} + \cdots
     \nonumber \\
     \intertext{This is a geometric series, and since $\frac{u}{r} < 1$:}
     S - (\Mroot-1) &= \frac{1}{1 - \frac{u}{r}} && \text{Sum of geometric series}
@@ -426,7 +436,16 @@ For the purpose of this paper, it is assumed that: \UTinf{} being secure against
 
 How can we analyze the security of tree-tilings?
 
-We need to consider cases where the majority of tile-work is done by an attacker.
+We will consider multiple cases, and in each case establish a \emph{bound} on $r$ in terms of $u$, $q$, and \Mroot.
+The intersection of these bounds on $r$ from each of these cases will yield the values of $r$ for which \emph{tiling works} (i.e., it is secure).
+The value of $q$ that we choose will determine how difficult the root tile is to attack, relative to the entire network -- we will choose $q \le 0.495$ as an acceptable bound on $q$, so $q=0.495$ is our threshold.
+The cases that we analyze will cover all possible positions of a tile in the tiling.
+
+The primary case for us to analyze is that the root tile is secure against an attacker with $q$ proportion of the network-wide hash-rate.
+
+
+
+We need to consider cases where the majority of tile-work \emph{for specific tiles} is produced by an attacker.
 We'll call this a \emph{majority-malicious} tile.
 
 Analyze cases, if we can satisfy all of them then we should be good:
