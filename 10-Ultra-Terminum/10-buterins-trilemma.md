@@ -14,7 +14,7 @@ keep toc to d=1 for this section -- reduces ToC page size. default is d=3
 
 For some magnitude of computational resources (computation, bandwidth, storage, etc), *c*, and magnitude of the network (transaction throughput, state size, market cap, etc), *n*, it is claimed that blockchain systems have, at most, 2 of these 3 properties:
 
-* Decentralization --- the system can operate with participants that have only $O(c)$ resources (e.g., a laptop, a raspberry pi, a VPS, etc).
+* Decentralization --- the system can operate with participants that have only $O(c)$ resources (e.g., a laptop, a raspberry pi, a VPS; typical internet bandwidth, storage space, etc).
 * Security --- the system is secure against attackers with up to $O(n)$ resources.
 * Scalability --- the system can process $O(n)$ transactions with $O(n) > O(c)$; this means that, as the network grows, the throughput of the system grows faster than the computational resources required per user.
 
@@ -22,8 +22,9 @@ The definition of scalability is perhaps problematic.
 If the network, which is $O(n)$, becomes bottlenecked by an $O(c^2)$ scaling method, is the network really scalable?
 I prefer an alternative definition of scalability: the system can process $O(n)$ transactions in $O(1)$ time, i.e., confirmations neither take longer nor become more scarce as $n$ and/or $c$ change.
 
-Why is $O(c^2)$ an important breakpoint for scaling configurations?
-Sharding.
+Why mention $O(c^2)$ scaling particularly?
+Why is that an important breakpoint for scaling configurations?
+In a word: sharding.
 The standard method of sharding (or hosting child-chains generally) is to replace transactions with shard-headers in the host-chain.
 Extra data might also be required.
 If the host-chain has $O(c)$ capacity, then it should be able support $O(c)$ shards (presuming a secure method of sharding is known and in use).

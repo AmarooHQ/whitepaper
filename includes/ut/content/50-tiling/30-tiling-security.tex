@@ -364,22 +364,33 @@ We will limit each tile's maximum tile-work production, measured against the uni
     \item Each non-root tile is limited to $r^{-d}$ units of tile-work, where $r$ is a network-wide constant and $r > u \ge 2$.
 \end{enumerate}
 
-Except for the root tile, each tile contributes $r^{-d}$ work to the tiling.
-At each depth, there are $u^d$ tiles.
+The RAA sets the block reward so that each tile produces an appropriate amount of tile-work.
+The root tile has no upper limit on tile-work production.
+If a tile would have aggregate rewards greater than its upper limit, then the block rewards of constituent chains are proportionally capped and any excess is allocated to the parent tile.
+This process continues until all tiles are under their respective limits.
 
-\begin{forest}
-    [ITSR
-        [govern via RAA + DAA]
-        [ratio of work based on $d$
-            [$r$ \textrightarrow work drops by $1/r$ per layer]
-        ]
-        [root tile exception]
-    ]
-\end{forest}
+% \begin{forest}
+%     [ITSR
+%         [govern via RAA + DAA]
+%         [ratio of work based on $d$
+%             [$r$ \textrightarrow work drops by $1/r$ per layer]
+%         ]
+%         [root tile exception]
+%     ]
+% \end{forest}
 
 \subsubsubsubsection{Total Work Across a Tiling}
 
-$S$
+How much tile-work is produced over the complete tiling?
+Let's construct a sum of tile-work over the complete tiling.
+
+At depth $d$, each tile (except the root tile) produces $r^{-d}$ units of tile-work, and there are $u^d$ such tiles.
+So at that depth there is at most $u^d r^{-1}$ tile-work produced.
+
+
+
+Except for the root tile, each tile contributes $r^{-d}$ work to the tiling.
+At each depth, there are $u^d$ tiles.
 
 % https://www.desmos.com/calculator/nku2g8qxmy
 % https://www.desmos.com/calculator/vxp5spzr4q
