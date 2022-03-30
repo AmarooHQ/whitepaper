@@ -4,6 +4,13 @@
 
 \label{sec:tiling}
 
+\input{50-tiling/00-tiling-intro.tex}
+\input{50-tiling/10-simplex-tilings.tex}
+\input{50-tiling/30-tiling-security.tex}
+\input{50-tiling/80-future-work.tex}
+
+\subsection{tiling: old}
+
 Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes are tiled, the result is called a *simplex tiling*.
 
 \defineTerm{Simplex Tile}{

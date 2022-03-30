@@ -332,20 +332,37 @@ We'll guarantee this for $d \ge 1$ via the RAA by enforcing an \emph{upper limit
     This also means that we're only considering the PoR context of a single root token.
 }
 This upper limit will exponentially decrease as the depth of the tiling increases.
+Even though tiles at $d \ge 2$ will produce substantially less tile-work than the root tile, they will use recursive PoR to be \emph{at least} as secure as the core.
 
+The purpose of this design is to enable the following argument for $O(n)$ security:
+%each tile is at least as difficult to attack as the core; the core is secure against an attacker with up to some $q$ (e.g., $q < 0.495$); and $q \approx 0.495$ is sufficient to conclude that the network is secure against an attacker with $O(n)$ resources.
+\begin{enumerate}
+    \item Attacking a single chain in a single simplex-tile is at least as difficult as attacking the entire tile and its neighbors (\autoref{sec:simplex-security-cec}).
+    \item Attacking any tile is at least as difficult as attacking the core (via recursive PoR).
+    \item 99\% of work is done in the core.
+    \item Therefore: the core is secure against an attacker with $q < 0.495$.
+    \item If $q < 0.5$ is $O(n)$ secure, then $q < 0.495$ is also $O(n)$ secure.
+    \item Therefore: attacking any single chain in any tile is as difficult as attacking the entire tiling, and thus the network is $O(n)$ secure.
+\end{enumerate}
 
+% ... In general, each tile \emph{must} produce no more tile-work than $r^{-1}$ that of its parent.
 
-... In general, each tile \emph{must} produce no more tile-work than $r^{-1}$ that of its parent.
-
-
-Our security architecture will be based on a few ideas:
-\begin{itemize}
-    \item The core is where the vast majority of chain-work is done.
-    \item The RAA will enforce an \emph{upper limit} on the chain-work of each non-root tile based on the chain-work of its parent.
-    \item Nodes for all simplex-chains verify all PoRs between the local tile and the root tile, and all PoRs within the core.
-\end{itemize}
+% Our security architecture will be based on a few ideas:
+% \begin{itemize}
+%     \item The core is where the vast majority of chain-work is done.
+%     \item The RAA will enforce an \emph{upper limit} on the chain-work of each non-root tile based on the chain-work of its parent.
+%     \item Nodes for all simplex-chains verify all PoRs between the local tile and the root tile, and all PoRs within the core.
+% \end{itemize}
 
 \subsubsubsubsection{Inter-tile Security Relationship}
+
+Since each tile has $v-1$ children, we will let $u = v-1$ for convenience.
+
+We will limit each tile's maximum tile-work production, measured against the unit tile, using the following rules:
+\begin{enumerate}
+    \item The root tile produces at least \Mroot units of tile-work ($\Mroot \ge 1$).
+    \item Each non-root tile is limited to $r^{-d}$ units of tile-work, where $r$ is a network-wide constant and $r > u \ge 2$.
+\end{enumerate}
 
 Except for the root tile, each tile contributes $r^{-d}$ work to the tiling.
 At each depth, there are $u^d$ tiles.
@@ -366,8 +383,6 @@ $S$
 
 % https://www.desmos.com/calculator/nku2g8qxmy
 % https://www.desmos.com/calculator/vxp5spzr4q
-
-\newcommand\Mroot{\ensuremath{\mathcal{M}}\xspace}
 
 \begin{itemize}
     \item Except for the root tile, each tile contributes $r^{-d}$ work to the tiling.
@@ -438,7 +453,10 @@ $\Mroot  \ge 1$, $u > 1$, $r > u$, and $0 \le q \le 0.5$.
     \frac12 (\Mroot r + u) &> qr(\Mroot -1+\frac{r}{r-u}) && \times r \text{ and substitute } S \text{ via \autoref{eq:tree-tiling-total-work}}
     \nonumber \\
     (\Mroot r + u)(r-u) &> 2qr((\Mroot -1)(r-u)+r) && \times 2(r-u)
-    \label{eq:tree-tiling-safe-q}
+    \label{eq:tree-tiling-safe-r-nofrac}
+    \\
+    r &> \frac{u}{2\Mroot}\left( \Mroot - 1 + \sqrt{(\Mroot - 1)^2 + \frac{4\Mroot}{1-2q}} \right) && \text{Solve quadratic and simplify\footnotemark}
+    \label{eq:tree-tiling-safe-r}
     % https://www.wolframalpha.com/input?i=%28My+%2B+x%29%28y-x%29+%3E+2yq%28%28M-1%29%28y-x%29%2By%29%2C+0+%3C%3D+q+%3C%3D+0.5
     % note for above: y=r; x=u
     % M>0, 0<=q<0.5,
@@ -448,20 +466,20 @@ $\Mroot  \ge 1$, $u > 1$, $r > u$, and $0 \le q \le 0.5$.
     % 2Mr &> |u| \sqrt{\frac{M^2(2q-1) - 2M(2q + 1) + (2q - 1)}{2q-1}}+u(M-1) \\
     % 2Mr &> |u| \sqrt{M^2 - 2M\frac{2q + 1}{2q-1} + 1}+u(M-1) \\
 \end{align}
-There is no elegant form of \autoref{eq:tree-tiling-safe-q} when solving for $r$,\footnote{%
-    % https://www.desmos.com/calculator/jghfe9511e
-    Closed form solved for $r$ assuming $r,u > 0$: $r > \frac{u}{2\Mroot}\left( \Mroot - 1 + \sqrt{(\Mroot - 1)^2 + \frac{4\Mroot}{1-2q}} \right)$
-    % \begin{align*}
-    %     (\Mroot r + u)(r-u) &> 2qr((\Mroot -1)(r-u)+r) \\
-    %     \Mroot r^2 - \Mroot ru + ru - u^2 &> 2qr(\Mroot r - u(\Mroot - 1)) \\
-    %     \Mroot r^2 - ru(\Mroot - 1) - u^2 &> 2\Mroot qr^2 - 2qru(\Mroot - 1) \\
-    %     \Mroot r^2 (1 - 2q) + ru(\Mroot - 1)(2q - 1) - u^2 &> 0 \\
-    %     r &> \frac{u(\Mroot - 1)(1 - 2q)}{2\Mroot (1-2q)} + \frac{\sqrt{u^2(\Mroot -1)^2 (2q-1)^2 + 4\Mroot u^2 (1-2q)}}{2\Mroot (1-2q)} \\
-    %     r &> \frac{u(\Mroot - 1)}{2\Mroot} + u \frac{\sqrt{(\Mroot -1)^2 (1-2q)^2 + 4\Mroot (1-2q)^2(1-2q)^{-1}}}{2\Mroot (1-2q)} \\
-    %     &> \frac{u(\Mroot - 1)}{2\Mroot} + u \frac{\sqrt{(\Mroot -1)^2 + 4\Mroot (1-2q)^{-1}}}{2\Mroot} \\
-    %     &> \frac{u}{2\Mroot}\left( \Mroot - 1 + \sqrt{(\Mroot - 1)^2 + \frac{4\Mroot}{1-2q}} \right)
-    % \end{align*}
-} but this form is easy to evaluate and graph, at least.
+\footnotetext{
+    We can quickly verify that \autoref{eq:tree-tiling-safe-r-nofrac} and \autoref{eq:tree-tiling-safe-r} are identical for $u,r > 1$ \href{https://www.desmos.com/calculator/7pzmo7t8tc}{by graphing them}.
+}
+% Closed form solved for $r$ assuming $r,u > 0$: $r > \frac{u}{2\Mroot}\left( \Mroot - 1 + \sqrt{(\Mroot - 1)^2 + \frac{4\Mroot}{1-2q}} \right)$
+% \begin{align*}
+%     (\Mroot r + u)(r-u) &> 2qr((\Mroot -1)(r-u)+r) \\
+%     \Mroot r^2 - \Mroot ru + ru - u^2 &> 2qr(\Mroot r - u(\Mroot - 1)) \\
+%     \Mroot r^2 - ru(\Mroot - 1) - u^2 &> 2\Mroot qr^2 - 2qru(\Mroot - 1) \\
+%     \Mroot r^2 (1 - 2q) + ru(\Mroot - 1)(2q - 1) - u^2 &> 0 \\
+%     r &> \frac{u(\Mroot - 1)(1 - 2q)}{2\Mroot (1-2q)} + \frac{\sqrt{u^2(\Mroot -1)^2 (2q-1)^2 + 4\Mroot u^2 (1-2q)}}{2\Mroot (1-2q)} \\
+%     r &> \frac{u(\Mroot - 1)}{2\Mroot} + u \frac{\sqrt{(\Mroot -1)^2 (1-2q)^2 + 4\Mroot (1-2q)^2(1-2q)^{-1}}}{2\Mroot (1-2q)} \\
+%     &> \frac{u(\Mroot - 1)}{2\Mroot} + u \frac{\sqrt{(\Mroot -1)^2 + 4\Mroot (1-2q)^{-1}}}{2\Mroot} \\
+%     &> \frac{u}{2\Mroot}\left( \Mroot - 1 + \sqrt{(\Mroot - 1)^2 + \frac{4\Mroot}{1-2q}} \right)
+% \end{align*}
 
 \subsubsubsection{Scaling Complexity}
 
