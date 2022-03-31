@@ -12,8 +12,8 @@
 So far, we've defined the `shape' of our tiling, but we don't know much about whether it is (or even can be) secure.
 Before we cover that in \autoref{sec:tree-tiling-security-architecture}, we need to cover a new idea that we are currently missing: \emph{recursive Proofs of Reflection}.
 The reason for covering recursive PoR first will become obvious, but for now, notice that the leaf tiles in \autoref{fig:binary-tree-tiling-d3} are 3 reflections away from the root tile.
-Eventually, we will need to answer two questions: \emph{Can the chains in those leaf tiles be secured by the root tile?} and \emph{How do we do this?}
-Recursive PoR provides the foundation that we need to answer those questions and analyze the security of our tiling.
+Eventually, we will need to answer at least these two questions: \emph{Can the chains in those leaf tiles be secured by the root tile?} and \emph{How do we do this?}
+Recursive PoR provides the foundation that we need to answer those questions and analyze the security of our constructed tiling.
 
 Let us begin with the simplest case of recursive PoR: 3 chains that do not form a simplex.
 
@@ -55,12 +55,13 @@ Given this, chains \cL and \cR should be able to use the same work that chain \c
 The first problem is that \cL and \cR cannot use the same \textsc{WeightOf} algorithm as before (although, \cM can).
 Particularly, \cL and \cR's \textsc{WeightOf} must count: not only their local chain-work and that contributed reflected \cM blocks, but also some additional weight based on reflections from \emph{other} chains.
 Each \cM block might record the total chain-work that it adds to \cM (including PoRs), but \cL and \cR's new \textsc{WeightOf} can't use this value directly.
-Firstly, that value includes past local chain-work that reflected \cM, but more importantly: we don't want to force \cL and \cR to verify \emph{every} PoR that contributes to \cM, just the ones that matter.
+Firstly, that value includes past local chain-work that reflected \cM (which includes both \cL and \cR blocks).
+But more importantly, we don't want to force \cL and \cR to verify \emph{every} PoR that contributes to \cM, just the ones that matter.
 So how can \cL and \cR nodes know which work to count?
 
 There is a trivial solution to this problem: require \cL and \cR nodes to download the headers of \emph{all} relevant chains, verify relevant PoRs, and track the origin of those PoRs.
 Nodes must track the origin of work contributed via PoR to avoid double-counting work.
-An easy example of this is: \cL nodes should not count PoRs where an \cL block is the reflecting block; that work is already directly included in \cL's local chain-work.
+An easy example of this is: \cL nodes should not count \cM's PoRs where an \cL block is the reflecting block; that work is already directly included in \cL's local chain-work.
 
 % commands used in the following xy chains diag
 
@@ -217,19 +218,21 @@ We \emph{can} be sure that \BR2's weight can be fully included in \cL's chain-we
 However, it's not so clear what we should do when not all PoR paths yet exist.
 % Do we even need to solve this problem, now, though?
 
+\todo{edit below}
+
 Let us approach this from first principles.
-Particularly, we will need these principles:
+Particularly, these two:
 \begin{itemize}
     \item A reflecting block can only contribute work once -- we should not count work more than once.
     \item A PoR contributes as much work as an attacker would need to perform to create a competing PoR of the same weight.
 \end{itemize}
 
-Firstly, we can say that the total work contributed by all possible PoR paths is equal to the sum of local work contributed by each block in those paths.
+Firstly, we can say that the total work contributed by all possible PoR paths is equal to the sum of local work contributed by each block in those paths to their respective chains.
 That is: no work is counted twice, and all blocks in a PoR path contribute work.
 
 Secondly, consider that the work contributed by an individual PoR is equal to the amount of work that an attacker would need to do to produce an equal and competing PoR.
 This means that \emph{any} PoR path proving that \BR2 reflects \BL1 is worth \emph{at least} as much as \BR2.
-Additionally, a recursive PoR is, in isolation, worth \emph{exactly} as much as the sum of weights of each block in that PoR.
+Additionally, a recursive PoR is, in isolation, worth \emph{exactly} as much as the sum of weights of each block in that PoR (excluding local blocks).
 
 Thus, we can safely add \BR2's \emph{full} weight via \BL3 (and that weight is attributed to \BL1 since it is the most recent \cL block in \BR2's history).
 An attacker would need to produce at least as much work as \BR2 to perform doublespend against \cL \emph{after} \BR2's reflection of \BL1 has been counted (assuming the doublespend competes with \BL1).
@@ -271,6 +274,8 @@ That configuration would look like this:
     }
 \end{equation*}
 In general, for a recursive PoR of length $2d-1$, were each reflection could be provided by $N_1 v^{-1}$ possible chains, the expected latency of draft reflected work is ${N_1}^{-1} v (2d-1)$ block periods.
+This is directly relevant to how fast work propagates within a tiling.
+
 Note that, for a standalone simplex, we can see that $2d-1 = 1$ (each PoR is of length 1), and $v=1$ (there is no tiling), so the expected latency of draft reflected work is ${N_1}^{-1}$ block periods, which, in seconds, is $(N_1 B_f)^{-1} = {\Cprime}^{-1}$.
 
 % \begin{itemize}

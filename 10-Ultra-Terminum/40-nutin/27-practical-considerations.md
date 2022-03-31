@@ -571,7 +571,7 @@ We should thus expect that this configuration of chains actually *synchronizes* 
     The effect whereby block production \emph{variance} is reduced when miners can (and do) collectively change which chain they are currently mining faster than blocks are produced for those chains, due to changes in network-wide incentivization
 }
 
-One reason that we can predict that transactions will build up in this fashion (with those fees and in a predictable way) is that most of the transactions that are included in simplex blocks will be dapp-chain-header-transactions.
+One reason that we can predict that transactions will build up in this fashion (with those fees and in a predictable way) is that most of the transactions that are included in simplex blocks will be dapp-chain header-transactions.
 
 The average hash-rate on each simplex-chain, as described above, is always the same regardless of which of the two miner strategies are used.
 However, the variance of block production on each of these chains won't be that of a chain with 60s block times, it'll be closer to that of a chain with 6s block times.

@@ -19,14 +19,18 @@ The idea of one blockchain 'tracking' another blockchain via chain-headers and i
 [^xc4]: <https://github.com/ethereum/btcrelay>
 
 \defineTerm{Projection}{
-  A \emph{projection} of a chain is its \emph{headers-only} version which is recorded and evaluated \emph{by a different chain}. For example \href{https://github.com/ethereum/btcrelay}{BTC Relay} is a smart contract by which Ethereum can host a \emph{projection} of Bitcoin. The \emph{act} of one chain creating and maintaining the projection of another is called \emph{imaging}
+  A \emph{projection} of a chain is its \emph{headers-only} version which is recorded and evaluated \emph{by a different chain}.
+  For example \href{https://github.com/ethereum/btcrelay}{BTC Relay} is a smart contract by which Ethereum previously hosted a \emph{projection} of Bitcoin.
+  The \emph{act} of one chain creating and maintaining the projection of another is called \emph{imaging}
 }
 
 The general idea of an on-chain headers-only version of another chain does not -- to my knowledge -- have a name. Herein this is called a *projection*. The generalized process via which projections are created is called *imaging*.
 
 ### A Projection of Bitcoin in Ethereum
 
-The idea that Ethereum smart contracts (SCs) can track Bitcoin chain-headers is well understood -- i.e., Ethereum *images* Bitcoin. The result of this is that the *projection* of Bitcoin is available to Ethereum users and SCs. Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is viable. In principle, any chain that supports some headers-only mode can include projections in this way. In practice that can be difficult (e.g., Ethereum's EVM doesn't support memory hard hashes unless special cases are introduced). But we're not interested in practicality *at the moment*.
+The idea that Ethereum smart contracts (SCs) can track Bitcoin chain-headers is well understood -- i.e., Ethereum *images* Bitcoin. The result of this is that the *projection* of Bitcoin is available to Ethereum users and SCs. Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is viable. In principle, any chain that supports some headers-only mode can include projections in this way. In practice that can be difficult (e.g., Ethereum's EVM doesn't generally support memory hard hashes unless special cases are introduced). But we're not interested in practicality *at the moment*.
+
+\todo{``In principle, any chain that supports some headers-only mode can include projections in this way'' -- do I mean \emph{can be imaged in this way}?}
 
 Let's add such a contract to Ethereum and describe the relevant data and events in \autoref{tab:eth-images-btc}.
 \autoref{fig:pr-btc-eth-step1} illustrates this.
@@ -59,7 +63,7 @@ Note: \autoref{fig:pr-btc-eth-step1} includes some variance in Ethereum's block 
   (Hypothetical) A projection of Bitcoin in Ethereum via an SC and transactions.
 ]{
   (Hypothetical) Bitcoin headers, as they are produced, are included in Ethereum's state via a smart contract and user made transactions.
-  This is roughly how \textit{BTC Relay} works.
+  This is roughly how \textit{BTC Relay} worked.
 }
 \label{fig:pr-btc-eth-step1}
 \end{figure}
