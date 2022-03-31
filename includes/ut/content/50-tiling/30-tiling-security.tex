@@ -1,57 +1,3 @@
-\subsubsection{Tiling Security Stuff (Notes)}
-
-\begin{itemize}
-    \item self severance
-    \item self sev + children
-    \item sev child
-\end{itemize}
-
-\begin{itemize}
-    \item floor((v-1)/2) = just less than half branches of root
-    \item root + floor((v-1)/2) -- 50\% always
-    \item
-\end{itemize}
-
-------
-
-\begin{itemize}
-    \item
-\end{itemize}
-
-\begin{forest}
-    grow'=east,child anchor=west,
-    for descendants={grow'=east,child anchor=west, align=center},
-    [tiling security structure
-     [analysis method
-        [construction
-            [tile-work]
-            [$\text{Sec}(g|i)$ vs $w_{g|i}$]
-            [$r$ and $s$]
-            [$S {=} \sum_i w_i$]
-        ]
-     ]
-     [evaluate cases
-        [control tile \\ requires parent, align=center
-            [don't need other cases]
-            [below is stricter anyway]
-        ]
-        [root $> \frac{1}{2}S$, align=center]
-        [$\frac{1}{2}$ (r + c) $> qS$, align=center]
-        [$\frac{1}{2}$ (r + c + gc) $> qS$, align=center]
-     ]
-     [concessions
-        [recursive PoR \\ validation, align=center
-            [validate: \\ root + c + \\ ancestor tiles, align=center
-                [$O(c \log(n))$]
-            ]
-            [problem: how \\ to count work?, align=center
-                [sum of work can't \\ be > actual work]
-            ]
-        ]
-     ]
-    ]
-\end{forest}
-
 \subsubsection{Tree-Tiling Security}
 
 \label{sec:tiling-security}
@@ -68,8 +14,6 @@ After that we will construct a security architecture so that we can answer the a
 Finally, we will analyze this architecture to find out if it's secure.
 
 \subsubsubsection{Key Concepts}
-
-
 
 \subsubsubsubsection{Local Chain-work, Tile-work, and Unit Tile}
 
@@ -89,11 +33,38 @@ This will simplify our analysis.
 It's called \emph{the core} because all nodes in the network verify the work and PoRs of all simplex-chains that are part of the core.
 Additionally, the core is where the vast majority of chain-work is done.
 
+% \subsubsubsubsection{Recursive PoR}
+
+% Part of our security architecture will be the idea of \emph{recursive PoR}.
+
+% A non-recursive PoR involves two proofs of imaging: that a specific \cR block imaged a prior \cL block, and that a subsequent \cL block imaged that \cR block.
+% A \emph{recursive} PoR is one that proves a reflection via \emph{one or more intermediate chains}.
+
+% \providecommand\B[2]{#1_{#2}}
+
+% For example, if chain \cL mutually reflects \cM and \cM mutually reflects \cR but \cL and \cR do not mutually reflect one another, then \cL can recursively prove reflection in \cR via \cM.
+% Such a PoR, in the simplest form, looks like:
+% $\xyInlineRefl{\B\cL{a} \;&\; \B\cM{b} \arf[l] \;&\; \B\cR{c} \arf[l] \;&\; \B\cM{d} \arf[l] \;&\; \B\cL{e} \arf[l] }$.\footnote{
+%     Here, the subscripts $a,b,c,d,e$ are somewhat arbitrary and are used to indicate a temporal ordering according to $a < b < c < d < e$.
+%     This is somewhat self-evident since a block can only reflect other blocks that have already been created.
+%     The main point is that we only care about the ordering of $a,b,c,d,e$ -- not their exact values.
+% }
+
+% It will become clear in \autoref{sec:tree-tiling-security-architecture} \emph{why} we need recursive PoR for tiling.
+% However, we won't look at the details just yet (that is the subject of \autoref{sec:recursive-por}).
+% For the moment, only a few facts are important:
+% \begin{itemize}
+%     \item Recursive PoR is possible and works.
+%     \item Once a recursive PoR for some \cR block becomes available, \cL blocks can add that \cR block's weight to their own chain-weight.
+% \end{itemize}
+
 \subsubsubsubsection{Excess Capacity in Proof of Work}
 
 \todo{this should probs go in practical considerations -- that's where +T is introduced.}
 
 \subsubsubsection{Security Architecture}
+
+\label{sec:tree-tiling-security-architecture}
 
 \todo{answer Qs like what a doublespend looks like}
 
@@ -116,8 +87,6 @@ The purpose of this design is to enable the following argument for $O(n)$ securi
     \item Therefore: attacking any single chain in any tile is as difficult as attacking the entire tiling, and thus the network is $O(n)$ secure.
 \end{enumerate}
 
-% ... In general, each tile \emph{must} produce no more tile-work than $r^{-1}$ that of its parent.
-
 % Our security architecture will be based on a few ideas:
 % \begin{itemize}
 %     \item The core is where the vast majority of chain-work is done.
@@ -139,16 +108,6 @@ The RAA sets the block reward so that each tile produces an appropriate amount o
 The root tile has no upper limit on tile-work production.
 If a tile would have aggregate rewards greater than its upper limit, then the block rewards of constituent chains are proportionally capped and any excess is allocated to the parent tile.
 This process continues until all tiles are under their respective limits.
-
-% \begin{forest}
-%     [ITSR
-%         [govern via RAA + DAA]
-%         [ratio of work based on $d$
-%             [$r$ \textrightarrow work drops by $1/r$ per layer]
-%         ]
-%         [root tile exception]
-%     ]
-% \end{forest}
 
 \subsubsubsubsection{Total Work Across a Tiling}
 
@@ -208,16 +167,19 @@ Analyze cases, if we can satisfy all of them then we should be good:
 \end{itemize}
 Use as recursive cases to show that every tile is $O(n)$ secure.
 
-\subsubsubsection{Assumptions}
+\subsubsubsubsection{Assumptions}
 
 \begin{itemize}
     \item security of tile works like that of a simplex
     \item able to apply logic recursively
 \end{itemize}
 
-\subsubsubsection{Additional Imposed Requirements}
+\subsubsubsubsection{Additional Imposed Requirements}
 
 \subsubsubsection{Security Criteria for Specific Cases}
+
+what are the cases?
+what are their criteria?
 
 \subsubsubsection{Security Evaluation of Specific Cases}
 
@@ -228,11 +190,16 @@ Use as recursive cases to show that every tile is $O(n)$ secure.
 
 \subsubsubsubsection{The Core is (Almost) as Secure as the Network}
 
-$\Mroot  \ge 1$, $u > 1$, $r > u$, and $0 \le q \le 0.5$.
+Let's constrain the core to being secure against an attacker with up to $q$ proportion of the network-wide hash-rate ($0 \le q \le 0.5$).
+
+The amount of work that attacker is capable of is at most $qS$ (via \autoref{eq:tree-tiling-total-work}).
+And the amount of work securing the core is the sum of work contributed by the root tile and its immediate children: $\Mroot + u\cdot r^{-1}$.
+The core is not secure when the attacker is responsible for more than half of the work securing the core.
+Thus, the core is secure when:
 \begin{align}
-    \frac12 (\Mroot  + \frac{u}r) &> qS
+    \frac12 (\Mroot  + \frac{u}r) &> qS && \text{Assume that the core is secure}
     \nonumber \\
-    \frac12 (\Mroot r + u) &> qr(\Mroot -1+\frac{r}{r-u}) && \times r \text{ and substitute } S \text{ via \autoref{eq:tree-tiling-total-work}}
+    \frac12 (\Mroot r + u) &> qr(\Mroot -1+\frac{r}{r-u}) && \times r \text{ and substitute } S \text{ (\autoref{eq:tree-tiling-total-work})}
     \nonumber \\
     (\Mroot r + u)(r-u) &> 2qr((\Mroot -1)(r-u)+r) && \times 2(r-u)
     \label{eq:tree-tiling-safe-r-nofrac}
@@ -263,9 +230,16 @@ $\Mroot  \ge 1$, $u > 1$, $r > u$, and $0 \le q \le 0.5$.
 %     &> \frac{u}{2\Mroot}\left( \Mroot - 1 + \sqrt{(\Mroot - 1)^2 + \frac{4\Mroot}{1-2q}} \right)
 % \end{align*}
 
-\subsubsubsection{Scaling Complexity}
+This is our first bound on $r$.
+If $u = 2$, $\Mroot = 8$, and $q = 0.495$, then $r > 8$.
 
-\subsubsubsubsection{Complexity of the Core}
+\subsubsubsubsection{Self-Severance}
+
+\subsubsubsection{Security Propagation Speed / Finalization}
+
+\subsubsection{Scaling Complexity}
+
+\subsubsubsection{Complexity of the Core}
 
 \begin{forest}
     rectangle, draw=black, minimum width=6em, minimum height=1.5em,
@@ -323,7 +297,7 @@ for a leaf tile, each layer adds $2\parens{\frac{N_1}{4}}^2$ more reflections, s
     a
 \end{equation*}
 
-\subsubsubsubsection{Security Burden Complexity}
+\subsubsubsection{Security Burden Complexity}
 
 each tile has a local $O(c)$ load for PoR verification
 
@@ -350,7 +324,7 @@ that's $((v-1)^2 + (v-1) + R) + \max(0, d - 3) + (1 + (v-1))$
     \therefore \text{ total load is:} & & & O(c^2\log(n)) \\
 \end{align*}
 
-\subsubsubsubsection{Capacity Complexity}
+\subsubsubsection{Capacity Complexity}
 
 \begin{center}
 \begin{forest}

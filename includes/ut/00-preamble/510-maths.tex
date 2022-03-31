@@ -15,6 +15,8 @@
 
 \providecommand\lrar{\leftrightarrow}
 
+\providecommand{\Cprime}{\mathbb{C}^\prime}
+
 % make \sim not include a space afterwards (like: `~x`).
 % for the normal version use \opsim (like: `a ~ b`).
 % source: https://tex.stackexchange.com/a/55723
@@ -30,6 +32,8 @@
 \newcommand\cR{\ensuremath{R}\xspace}
 \newcommand\cMone{\ensuremath{M^1}\xspace}
 \newcommand\cMtwo{\ensuremath{M^2}\xspace}
+\newcommand\cRone{\ensuremath{R^1}\xspace}
+\newcommand\cRtwo{\ensuremath{R^2}\xspace}
 
 % helper for block identifiers: \BCI{L}{i}{2} = $L_{i+2}$
 % note, the first arg is not wrapped in {} so that we can do things like:
@@ -50,14 +54,55 @@
 % e.g., `\xyTimeHoriz{rrrrrrr} & & & & & & & \\`
 \providecommand\xyTimeHoriz[1]{\ar@{>->}@<-6pt>[#1]_<{\qquad\text{Time}}}
 
+% wrapper for inline refl paths
 \providecommand\xyInlineRefl[1]{\xymatrix@C=10pt@M=0pt{#1}}
+
 
 % chain-diags: boxes for blocks (xyB) and chain names (xyL)
 \providecommand\xyB[1]{*+[F]+{#1}}
 \providecommand\xyL[1]{*++[F:<2pt>]{#1}}
 
 
+% ARrow reFlection
+\newcommand\arf[1][]{\ar@{.>}[#1]}
+% \newcommand\arff[1][]{\ar@2{.>}@[Maroon][#1]}
+\newcommand\arff[1][]{\ar@{.>}[#1]}
+
+
+% % \def\useone#1{#1}
+% % % make a reflection chain from the provided elements
+% \ExplSyntaxOn
+% \NewDocumentCommand{\reflPathRaw}{o o o o o o o o o}{%
+% % {\ifnum0=`}\fi%
+% %     % do nothing if no args provided
+% %     \IfNoValueTF{#1}{}{%
+% %         % if only the first arg is provided, just print it
+% %         \useone{#1} &%
+% %         \IfNoValueTF{#2}{}{\; #2 \arf[l]}%
+% %         % \IfNoValueTF{#3}{}{\; & \; \arf[l]}%
+% %         % \IfNoValueTF{#4}{}{\; & \; \arf[l]}%
+% %         % \IfNoValueTF{#5}{}{\; & \; \arf[l]}%
+% %         % \IfNoValueTF{#6}{}{\; & \; \arf[l]}%
+% %         % \IfNoValueTF{#7}{}{\; & \; \arf[l]}%
+% %         % \IfNoValueTF{#8}{}{\; & \; \arf[l]}%
+% %         % \IfNoValueTF{#9}{}{\; & \; \arf[l]}%
+% %     }%
+%         \IfNoValueTF{#1}{}{\; #1 \;} %& %
+%         \IfNoValueTF{#2}{}{\protect& \; #2 \arf[l] \;} %& %
+%         \IfNoValueTF{#3}{}{\; #3 \arf[l] \;} %& %
+%         \IfNoValueTF{#4}{}{\; #4 \arf[l] \;} %& %
+%         \IfNoValueTF{#5}{}{\; #5 \arf[l] \;} %& %
+%         \IfNoValueTF{#6}{}{\; #6 \arf[l] \;} %& %
+%         \IfNoValueTF{#7}{}{\; #7 \arf[l] \;} %& %
+%         \IfNoValueTF{#8}{}{\; #8 \arf[l] \;} %& %
+%         \IfNoValueTF{#9}{}{\; #9 \arf[l] \;} %
+% % \ifnum0=`{\fi}%
+% }%
+% \ExplSyntaxOff
+
+%
 % Tiling stuff
+%
 
 % multiplier for root tile's tile-work
 \newcommand\Mroot{\ensuremath{\mathcal{M}}\xspace}

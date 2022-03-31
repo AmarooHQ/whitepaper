@@ -24,16 +24,18 @@ COMMIT_MSG_FILE=$1
 COMMIT_SOURCE=$2
 SHA1=$3
 
+_TMP_FILE="/tmp/987fgy8d97fg"
+
 # /usr/bin/perl -i.bak -ne 'print unless(m/^. Please enter the commit message/..m/^#$/)' "$COMMIT_MSG_FILE"
 
-prevmsg=$(cat "$COMMIT_MSG_FILE")
+cat "$COMMIT_MSG_FILE" > "$_TMP_FILE"
 echo "\n" > "$COMMIT_MSG_FILE"
 (
 make count-words-diff | tail -n+2 | while read -r cwline; do
     echo "# $cwline"
 done
 ) >> "$COMMIT_MSG_FILE"
-echo "$prevmsg" >> "$COMMIT_MSG_FILE"
+cat "$_TMP_FILE" >> "$COMMIT_MSG_FILE"
 
 # case "$COMMIT_SOURCE,$SHA1" in
 #  ,|template,)

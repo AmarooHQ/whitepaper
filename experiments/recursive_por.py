@@ -14,8 +14,6 @@ from logging import info
 from collections import defaultdict
 from math import floor
 
-from pyparsing import alphas
-
 logging.basicConfig(level=logging.INFO)
 
 def was_a_block_mined(block_period: float, group_size=1):
@@ -85,7 +83,7 @@ def run_test_expected_delay(n_trials=1000, max_por_depth=3, block_period=100):
     results: dict[int, dict[int, list[int]]] = defaultdict(lambda: defaultdict(list))
     stats_msgs_per_data_set = 13
     trials_per_pct = n_trials / stats_msgs_per_data_set
-    group_sizes = [1, 10, 32, 326//4, 100, 1406//4]
+    group_sizes = [1, 2, 10, 32, 326//4, 100, 1406//4]
     por_depths = list(filter(lambda d: d < 3 or d % 2 == 1, range(1, max_por_depth+1)))
     n_data_sets = len(por_depths) * len(group_sizes)
     c_data_sets_done = 0
@@ -126,7 +124,7 @@ def run_test_expected_delay(n_trials=1000, max_por_depth=3, block_period=100):
     return
 
 # run_test_expected_delay()
-run_test_expected_delay(n_trials=9000, max_por_depth=11, block_period=1000)
+run_test_expected_delay(n_trials=9000, max_por_depth=11, block_period=3000)
 
 
 def memeify(msg: str) -> str:
