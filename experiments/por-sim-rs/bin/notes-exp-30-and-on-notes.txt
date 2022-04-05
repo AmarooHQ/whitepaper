@@ -108,3 +108,111 @@ try DS=40,80 for q=0.48
   export EXP_NUM=31
   ./bin/experiment-30-and-beyond.sh
 )
+
+-----
+
+low # of confs
+
+(
+  export B_PERIOD=50
+  export HR_PER_CHAIN=50
+  export DAA2_N_BLOCKS=200
+  export ATK_HR_ONLY=0.40
+  export N_CPUS=16
+  export DS_CONFS_PRESET=very-short
+  export N_CHAINS_PRESET=balanced-with-big
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=32
+  ./bin/experiment-30-and-beyond.sh
+)
+
+(
+  export REPEAT_TIMES=47
+  export B_PERIOD=50
+  export HR_PER_CHAIN=50
+  export DAA2_N_BLOCKS=200
+  export ATK_HR_ONLY=0.40
+  export N_CPUS=16
+  export DS_CONFS_PRESET=just-three
+  export N_CHAINS_PRESET=balanced-with-big
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=32
+  ./bin/experiment-30-and-beyond.sh
+)
+
+# do the <1 ds_confs
+
+(
+  export REPEAT_TIMES=47
+  export B_PERIOD=50
+  export HR_PER_CHAIN=50
+  export DAA2_N_BLOCKS=200
+  export N_CPUS=16
+  export ATK_HR_ONLY=0.40
+  export DS_CONFS_PRESET=less-than-one
+  export N_CHAINS_PRESET=balanced-with-big
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=32
+  ./bin/experiment-30-and-beyond.sh
+)
+
+# like above but for q=0.2, 0.3, (do 0.44 later and separately)
+# note: updated with attacker draft refl work
+# need to check for like ds>=5 that nothing substantial has changed
+
+(
+  export REPEAT_TIMES=30
+  export B_PERIOD=50
+  export HR_PER_CHAIN=50
+  export DAA2_N_BLOCKS=200
+  export N_CPUS=16
+  export ATK_HR_ONLY="0.2,0.3"
+  export ATK_START_TICK="3333"
+  export DS_CONFS_PRESET=half-to-three
+  export N_CHAINS_PRESET=balanced-with-big
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=32
+  ./bin/experiment-30-and-beyond.sh
+)
+
+# check WRT attacker draft refl work
+
+(
+  export REPEAT_TIMES=30
+  export B_PERIOD=50
+  export HR_PER_CHAIN=50
+  export DAA2_N_BLOCKS=200
+  export N_CPUS=8
+  export ATK_HR_ONLY="0.44"
+  export ATK_START_TICK="3333"
+  export ATK_DS_CONF_ONLY="5"
+  export N_CHAINS_PRESET=balanced-with-big
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=33
+  ./bin/experiment-30-and-beyond.sh
+)
+
+# hmm, attacker draft refl work breaks things -- but it's also not a decisive win (attacker needs buffer)
+
+# disabled attacker DRW
+
+(
+  export REPEAT_TIMES=30
+  export B_PERIOD=50
+  export HR_PER_CHAIN=50
+  export DAA2_N_BLOCKS=200
+  export N_CPUS=16
+  export ATK_HR_ONLY="0.2,0.3"
+  export ATK_START_TICK="3333"
+  export DS_CONFS_PRESET=half-to-three
+  export N_CHAINS_PRESET=balanced-with-big
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=34
+  ./bin/experiment-30-and-beyond.sh
+)

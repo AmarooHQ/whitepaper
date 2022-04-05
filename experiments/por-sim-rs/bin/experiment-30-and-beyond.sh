@@ -30,7 +30,7 @@ export ATK_NCHAINS_ONLY=${ATK_NCHAINS_ONLY:-}
 # => this should be >= 3000 (picked b/c it's not too many but graphs are reasonably smooth)
 # status updates are more frequent with larger REPEAT_TIMES
 export N_TRIALS_PER=100
-export REPEAT_TIMES=90
+export REPEAT_TIMES=${REPEAT_TIMES:-90}
 export RESUME_FROM=${RESUME_FROM:-1}  # subtract (this-1) from REPEAT_TIMES
 export REPEAT_TIMES=$(echo "$REPEAT_TIMES-$RESUME_FROM+1" | bc)
 if [[ ! -z "$DRY_RUN" ]]; then
@@ -47,10 +47,11 @@ export OUT_F_PREFIX=csv/exp_${EXP_NUM}_${HR_DISTRIB}_${POR_SIM_HASH}
 
 # note: the attackers q is multiplied by HR_PER_CHAIN and fractional components are dropped.
 # so HR_PER_CHAIN=50 means q can only go up/down in increments of 0.02
-export B_PERIOD=75
-export HR_PER_CHAIN=75
+export B_PERIOD=${B_PERIOD:-75}
+export HR_PER_CHAIN=${HR_PER_CHAIN:-75}
 export DAA2_N_BLOCKS=${DAA2_N_BLOCKS:-100}
-export ATK_START_TICK=$(echo ${B_PERIOD}\*${DAA2_N_BLOCKS}/2 | bc)
+export ATK_START_TICK_DEFAULT=$(echo ${B_PERIOD}\*${DAA2_N_BLOCKS}/2 | bc)
+export ATK_START_TICK=${ATK_START_TICK:-$ATK_START_TICK_DEFAULT}
 
 export MEASURED_N_CPUS=$(echo $(grep -c ^processor /proc/cpuinfo)-1 | bc)
 export N_CPUS=${N_CPUS:-$MEASURED_N_CPUS}
@@ -68,6 +69,80 @@ if [[ "$DO_LONG_DS_CONFS" = "1" ]]; then
   # extra long DSs for q=0.48
   ds_conf_arr=( 40 80 )
 fi
+
+# easier way to manage DS confs -- presets with names:
+case "$DS_CONFS_PRESET" in
+  very-short-to-very-long)
+    ds_conf_arr=(1.0 1.41 2.0 3.0 4 5 6 7 9 15 20 30 45 60 90)
+    ;;
+  very-short)
+    ds_conf_arr=(1.0 1.41 2.0)
+    ;;
+  one-to-three)
+    ds_conf_arr=(1.0 1.41 2.0 3.0)
+    ;;
+  half-to-three)
+    ds_conf_arr=(0.5 0.7 1.0 1.41 2.0 3.0)
+    ;;
+  just-three)
+    ds_conf_arr=( 3.0 )
+    ;;
+  less-than-one)
+    ds_conf_arr=(0.5 0.7)
+    ;;
+  *)
+    if [[ ! -z "$ATK_DS_CONF_ONLY" ]]; then
+      IFS=',' read -ra ds_conf_arr <<< "$ATK_DS_CONF_ONLY"
+    fi
+    ;;
+esac
+
+case "$N_CHAINS_PRESET" in
+  # note: this is probs too big -- 256 takes many minutes to simulate even for smaller DAAs
+  balanced-with-very-big)
+    nchain_arr=(256 128 64 32 23 16 11 `seq 8 -1 1`)
+    ;;
+  balanced-with-big)
+    nchain_arr=(64 32 23 16 11 `seq 8 -1 1`)
+    ;;
+  *)
+    if [[ ! -z "$ATK_NCHAINS_ONLY" ]]; then
+      IFS=',' read -ra nchain_arr <<< "$ATK_NCHAINS_ONLY"
+    fi
+    ;;
+esac
+
+atk_qs=( 0.40 0.44 0.48 )
+case "$ATK_QS_PRESET" in
+  std)
+    atk_qs=( 0.40 0.44 0.48 )
+    ;;
+  0.2,0.3,0.4)
+    atk_qs=( 0.2 0.3 0.4 )
+    ;;
+  0.2,0.3)
+    atk_qs=( 0.2 0.3 )
+    ;;
+  *)
+    if [[ ! -z "$ATK_HR_ONLY" ]]; then
+      # atk_qs=( $ATK_HR_ONLY )
+      IFS=',' read -ra atk_qs <<< "$ATK_HR_ONLY"
+    fi
+    ;;
+esac
+
+cat << EOF
+----------------------------------------
+Parameters:
+  atk_qs: ${atk_qs[@]}
+  ds_confs: ${ds_conf_arr[@]}
+  n_chains: ${nchain_arr[@]}
+  B_PERIOD: ${B_PERIOD}
+  HR_PER_CHAIN: ${HR_PER_CHAIN}
+  DAA2_N_BLOCKS: ${DAA2_N_BLOCKS}
+  ATK_START_TICK: ${ATK_START_TICK}
+----------------------------------------
+EOF
 
 # note: in reality a simplex needs to use WeightedDag and an attacker needs to win via the DoubleSpendWork strategy.
 # => no point calculating other combinations (those including WeightedChain or DoubleSpend strat)
@@ -117,17 +192,18 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
     for crypto_sys in WeightedDag; do #WeightedChain, LongestChain; do
       export CRYPTO_SYSTEM=$crypto_sys
 
-      for atk_r in 0.40 0.44 0.48; do
+      for atk_r in ${atk_qs[@]}; do
         export ATK_RATIO=$atk_r
-        if [[ ! -z "$ATK_HR_ONLY" ]] && [[ "$ATK_RATIO" != "$ATK_HR_ONLY" ]]; then
-          continue
-        fi
+        # this is replaced by new way of constructing atk_qs array
+        # if [[ ! -z "$ATK_HR_ONLY" ]] && [[ "$ATK_RATIO" != "$ATK_HR_ONLY" ]]; then
+        #   continue
+        # fi
 
         for ds_conf_base in ${ds_conf_arr[@]}; do
           export ATK_DS_CONFS=$ds_conf_base;
-          if [[ ! -z "$ATK_DS_CONF_ONLY" ]] && [[ "$ATK_DS_CONFS" != "$ATK_DS_CONF_ONLY" ]]; then
-            continue
-          fi
+          # if [[ ! -z "$ATK_DS_CONF_ONLY" ]] && [[ "$ATK_DS_CONFS" != "$ATK_DS_CONF_ONLY" ]]; then
+          #   continue
+          # fi
 
           export OUT_FILE=${OUT_F_PREFIX}_q=${ATK_RATIO}_dswin=${ATK_DS_CONFS}_bt=${B_PERIOD}_hr=${HR_PER_CHAIN}_${ATK_STRATEGY}_${CRYPTO_SYSTEM}_DAA${DAA2_N_BLOCKS}.csv
 
@@ -151,9 +227,9 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
               # skip b/c we're not interested in these datapoints (v expensive)
               continue;
             fi
-            if [[ ! -z "$ATK_NCHAINS_ONLY" && "$ATK_NCHAINS_ONLY" != "$nchains" ]]; then
-              continue;
-            fi
+            # if [[ ! -z "$ATK_NCHAINS_ONLY" && "$ATK_NCHAINS_ONLY" != "$nchains" ]]; then
+            #   continue;
+            # fi
 
             if [[ "1" = "$EXP_IS_AUX" ]]; then
               export N_CHAINS=1;

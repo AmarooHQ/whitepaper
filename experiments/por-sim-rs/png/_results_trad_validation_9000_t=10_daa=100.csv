@@ -1,4 +1,4 @@
-,kls=results&ty=trad&q=0.4&ds=10&daa=100&scale=1,kls=results&ty=trad&q=0.44&ds=10&daa=100&scale=1,kls=analytical&ty=trad&q=0.4&ds=10&daa=0&scale=1,kls=analytical&ty=trad&q=0.44&ds=10&daa=0&scale=1
+,kls=results&ty=trad&q=0.4&ds=10.0&daa=100&scale=1,kls=results&ty=trad&q=0.44&ds=10.0&daa=100&scale=1,kls=analytical&ty=trad&q=0.4&ds=10.0&daa=0&scale=1,kls=analytical&ty=trad&q=0.44&ds=10.0&daa=0&scale=1
 0.1,,,0.8,0.88
 0.2,,,0.7040000000000001,0.820864
 0.3,,,0.6348800000000001,0.7771506688

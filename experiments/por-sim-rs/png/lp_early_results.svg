@@ -1855,7 +1855,7 @@ z
      </g>
     </g>
    </g>
-   <g id="results_line_trad_q0_44_ds20_daa100">
+   <g id="results_line_trad_q0_44_ds20_0_daa100">
     <path clip-path="url(#p0bfd169594)" d="M 72.447619 132.42432 
 L 97.085238 177.74096 
 L 121.722857 215.43424 
@@ -1979,7 +1979,7 @@ L 565.2 273.675057
 L 565.2 273.675057 
 " style="fill:none;stroke:#1f77b4;stroke-dasharray:7.4,3.2;stroke-dashoffset:0;stroke-width:2;"/>
    </g>
-   <g id="results_line_por_q0_44_ds20_daa100">
+   <g id="results_line_por_q0_44_ds20_0_daa100">
     <path clip-path="url(#p0bfd169594)" d="M 72.447619 120.56576 
 L 97.085238 146.40048 
 L 121.722857 192.14064 
@@ -2384,7 +2384,7 @@ z
       <use transform="translate(4003.108616 0.015625)" xlink:href="#DejaVuSans-29"/>
      </g>
     </g>
-    <g id="legend_line_results_line_trad_q0_44_ds20_daa100">
+    <g id="legend_line_results_line_trad_q0_44_ds20_0_daa100">
      <path d="M 123.9 91.32 
 L 143.9 91.32 
 " style="fill:none;stroke:#ff7f0e;stroke-linecap:square;stroke-width:2.5;"/>
@@ -2394,7 +2394,7 @@ L 143.9 91.32
       <use style="fill:#ff7f0e;stroke:#ff7f0e;stroke-linejoin:miter;" x="133.9" xlink:href="#mcc1a5ae98c" y="91.32"/>
      </g>
     </g>
-    <g id="legend_text_results_line_trad_q0_44_ds20_daa100">
+    <g id="legend_text_results_line_trad_q0_44_ds20_0_daa100">
      <g id="patch_11">
       <path d="M 151.9 99.62 
 L 540.3 99.62 
@@ -2614,7 +2614,7 @@ z
       <use transform="translate(3851.362643 0.620313)" xlink:href="#DejaVuSans-20"/>
      </g>
     </g>
-    <g id="legend_line_results_line_por_q0_44_ds20_daa100">
+    <g id="legend_line_results_line_por_q0_44_ds20_0_daa100">
      <path d="M 123.9 108.12 
 L 143.9 108.12 
 " style="fill:none;stroke:#2ca02c;stroke-linecap:square;stroke-width:2;"/>
@@ -2624,7 +2624,7 @@ L 143.9 108.12
       <use style="fill:#2ca02c;stroke:#2ca02c;" x="133.9" xlink:href="#m6f83f41d1b" y="108.12"/>
      </g>
     </g>
-    <g id="legend_text_results_line_por_q0_44_ds20_daa100">
+    <g id="legend_text_results_line_por_q0_44_ds20_0_daa100">
      <g id="patch_12">
       <path d="M 151.9 116.42 
 L 539.8 116.42 

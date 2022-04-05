@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from asyncore import loop
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import lru_cache
@@ -281,8 +280,10 @@ def estimate_inverse(data: pd.Series, y_val):
     raise Exception("we should never reach this point")
 
 
-def skip_csv_row(ds_target, x) -> bool:
+def skip_csv_row(ds_target: float, x) -> bool:
     ''' Skip csv rows with ds_target >= 20 && x > 30 or t >= 10 && x > 40 '''
+    if isinstance(ds_target, str):
+        print(f"Warning: ds_target is string: {ds_target}")
     return (ds_target >= 20 and x > 30) or (ds_target >= 10 and x > 40)
     # (t, nc) = (row.doublespend_after_n_confs, row.n_chains)
     # if chain_ty != 'por':
@@ -297,7 +298,7 @@ def read_csv_data(fname, chain_ty: Literal['por', 'trad']):
     d: pd.DataFrame = pd.read_csv(fname)
     only_target = d['block_target'][1]
     daa = d['daa2_n_blocks'][1]
-    ds_target: float = d['doublespend_after_n_confs'].min()
+    ds_target: float = float(d['doublespend_after_n_confs'].min())
     q = d['atk_q'][1]
     if chain_ty == 'por':
         xs = d['n_chains'].unique()
@@ -417,10 +418,24 @@ scaled_conv_lookup = {
     5/6: '\\frac{6}{5}',
     11/12: '\\frac{12}{11}',
     29/30: '\\frac{30}{29}',
+    1/1.41: '\\sqrt{2}',
+    # should really be 0.71...
+    0.7: '\\sqrt{2}',
+    0.71: '\\sqrt{2}',
+}
+
+scaled_conv_gt_one_lookup = {
+    1.41: '\\sqrt{2}',
+    1.0: '1',
+    2.0: '2',
+    3.0: '3',
 }
 
 
 scaled_target_lookup = {
+    0.5: '\\frac{1}{2}',
+    0.7: '\\frac{1}{\\sqrt{2}}',
+    0.71: '\\frac{1}{\\sqrt{2}}',
     1.25: '\\frac{{5}}{{4}}',
     2.5: '\\frac{{5}}{{2}}',
     1.5: '\\frac{3}{2}',
@@ -432,6 +447,7 @@ scaled_target_lookup = {
     1.0: '1',
     2.0: '2',
     3.0: '3',
+    1.41: '\\sqrt{2}',
 }
 
 
@@ -454,7 +470,7 @@ def gen_cec_prob_str(ds_target: float, is_trad=False, is_analytical=False, scale
     cec_prob = f"$P^\\prime(q; c = {c_str}; N_1 = x)$   "
     cec_ana_prob = f"$P(q; c = {cx_str})\\;\\!$" + ' '*13
     cec_trad_prob = f"$P^\\prime(q; c = {cx_str}; N_1 = 1)$ "
-    cec_scaled_prob = f"$P^\\prime(q; c = {c_str}; N_1 = x/{scaled})$"
+    cec_scaled_prob = f"$P^\\prime(q; c = {c_str}; N_1 = x/{scaled_conv_gt_one_lookup.get(scaled, scaled)})$"
     if scaled and scaled < 1 and scaled_conv_lookup.get(scaled, None):
         cec_scaled_prob = f"$P^\\prime(q; c = {c_str}; N_1 = x·{scaled_conv_lookup[scaled]})$"
         extra_pad += -2 if scaled <= 0.0625 else 0
@@ -1634,6 +1650,82 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             seed_ds_targets={5},
             seed_qs={0.40, 0.44}
         )
+    ] + [
+        # check confs=1,1.41,2 for q=0.4
+        SavePlot(
+            [
+                # ('exp_32_RandHR_xxh3_q=0.40_dswin=1.0_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA200.csv', 'por', None),
+                # ('exp_32_RandHR_xxh3_q=0.40_dswin=1.41_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA200.csv', 'por', None),
+                # ('exp_32_RandHR_xxh3_q=0.40_dswin=2.0_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA200.csv', 'por', None),
+                (f'exp_32_RandHR_xxh3_q={q}_dswin={t}_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA200.csv', 'por', None),
+            ],
+            f"Test low confs at q={q}", # no title
+            f"png/test_low_confs_q={q}_t={t}",
+            save_as_file_exts=['pdf', 'png', 'csv'],
+            x_range=(0, 65),
+            # y_lim=(0, 0.75),
+            figsize=(8.4, 4.2),
+            x_label=std_x_label(t),
+            sec_x_label=LP_SEC_X_LABEL,
+            # seed_ds_targets={5},
+            # seed_qs={0.40, 0.44}
+        )
+        for q in ['0.40']
+        for t in ['1.0', '1.41', '2.0', '3.0']
+    ] + [
+        SavePlot(
+            [
+                (f'exp_32_RandHR_xxh3_q={q}_dswin=0.5_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA200.csv', 'por', PorPlotOpts(cec_scaled=0.5)),
+                (f'exp_32_RandHR_xxh3_q={q}_dswin=0.7_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA200.csv', 'por', PorPlotOpts(cec_scaled=0.7)),
+                (f'exp_32_RandHR_xxh3_q={q}_dswin=1.0_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA200.csv', 'por', PorPlotOpts(cec_scaled=1.0)),
+                (f'exp_32_RandHR_xxh3_q={q}_dswin=1.41_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA200.csv', 'por', PorPlotOpts(cec_scaled=1.41)),
+                (f'exp_32_RandHR_xxh3_q={q}_dswin=2.0_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA200.csv', 'por', PorPlotOpts(cec_scaled=2.0)),
+                (f'exp_32_RandHR_xxh3_q={q}_dswin=3.0_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA200.csv', 'por', PorPlotOpts(cec_scaled=3.0)),
+            ],
+            f"Test low confs CEC at q={q}" + (" with attacker DRW" if q in ['0.2', '0.3'] else ""),
+            f"png/test_low_confs_cec_q={q}",
+            save_as_file_exts=['pdf', 'png', 'csv'],
+            x_range=(0, 65),
+            figsize=(8.4, 4.2),
+            x_label=std_x_label(1),
+            sec_x_label=LP_SEC_X_LABEL,
+        )
+        for q in ['0.40', '0.2', '0.3']
+    ] + [
+        SavePlot(
+            [
+                (f'exp_33_RandHR_xxh3_q=0.44_dswin=5_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA200.csv', 'por', PorPlotOpts(cec_scaled=1.0)),
+                (f'exp_26_RandHR_xxh3_q=0.44_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', PorPlotOpts(cec_scaled=1.0)),
+                (f'exp_26_RandHR_xxh3_q=0.44_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA500.csv', 'por', PorPlotOpts(cec_scaled=1.0)),
+            ],
+            f"Check whether attacker draft refl work makes a diff at q=0.44",
+            f"png/test_attacker_draft_refl_work_at_q=0.44",
+            save_as_file_exts=['pdf', 'csv'],
+            x_range=(0, 65),
+            figsize=(8.4, 4.2),
+            x_label=std_x_label(1),
+            sec_x_label=LP_SEC_X_LABEL,
+        )
+    ] + [
+        # check confs=1,1.41,2 for q=0.4
+        SavePlot(
+            [
+                (f'exp_34_RandHR_xxh3_q={q}_dswin=0.5_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA200.csv', 'por', PorPlotOpts(cec_scaled=0.5)),
+                (f'exp_34_RandHR_xxh3_q={q}_dswin=0.7_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA200.csv', 'por', PorPlotOpts(cec_scaled=0.7)),
+                (f'exp_34_RandHR_xxh3_q={q}_dswin=1.0_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA200.csv', 'por', PorPlotOpts(cec_scaled=1.0)),
+                (f'exp_34_RandHR_xxh3_q={q}_dswin=1.41_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA200.csv', 'por', PorPlotOpts(cec_scaled=1.41)),
+                (f'exp_34_RandHR_xxh3_q={q}_dswin=2.0_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA200.csv', 'por', PorPlotOpts(cec_scaled=2.0)),
+                (f'exp_34_RandHR_xxh3_q={q}_dswin=3.0_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA200.csv', 'por', PorPlotOpts(cec_scaled=3.0)),
+            ],
+            f"Test low confs CEC at q={q}",
+            f"png/test_low_confs_34_cec_q={q}",
+            save_as_file_exts=['pdf', 'png', 'csv'],
+            x_range=(0, 65),
+            figsize=(8.4, 4.2),
+            x_label=std_x_label(1),
+            sec_x_label=LP_SEC_X_LABEL,
+        )
+        for q in ['0.2', '0.3']
     ]
 
     pool = mpp.Pool(n_jobs)
