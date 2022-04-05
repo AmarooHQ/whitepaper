@@ -220,14 +220,13 @@ However, it's not so clear what we should do when not all PoR paths yet exist.
 
 \todo{edit below}
 
-Let us approach this from first principles.
-Particularly, these two:
+Let us approach this from these principles:
 \begin{itemize}
     \item A reflecting block can only contribute work once -- we should not count work more than once.
     \item A PoR contributes as much work as an attacker would need to perform to create a competing PoR of the same weight.
 \end{itemize}
 
-Firstly, we can say that the total work contributed by all possible PoR paths is equal to the sum of local work contributed by each block in those paths to their respective chains.
+Firstly, we can say that the total work contributed by all possible PoR paths is equal to the sum of local work contributed by each unique block in those paths to their respective chains.
 That is: no work is counted twice, and all blocks in a PoR path contribute work.
 
 Secondly, consider that the work contributed by an individual PoR is equal to the amount of work that an attacker would need to do to produce an equal and competing PoR.
@@ -317,6 +316,27 @@ Note that, for a standalone simplex, we can see that $2d-1 = 1$ (each PoR is of 
 %     \end{itemize}
 %     \item do miners need to be incentivized to reflect child chains?
 % \end{itemize}
+
+\subsubsubsection{Assumptions}
+
+\begin{itemize}
+    \item all blocks were public / available
+    \item no conflicting PoR paths
+\end{itemize}
+
+\subsubsubsection{Conflicting Paths}
+
+\begin{equation*}
+    \xymatrix@R=.3em@C=.75em{
+        \BL0 & \BL1 \ar[l] \\
+        & \BM0 & \BM1 \ar[l] \arf[ul] & \BM{2} \ar[l] \\
+        & & & \BR{1a} \arf[dl] & \BR2 \ar[l] \arf[ul] \arf[ull] \\
+        & & \BM{1a} \ar[luu] \arf[dl] & \\
+        & \BL{1a} \ar[luuuu]
+    }
+\end{equation*}
+
+\subsubsubsection{Data Availability}
 
 \subsubsubsection{Future Research}
 

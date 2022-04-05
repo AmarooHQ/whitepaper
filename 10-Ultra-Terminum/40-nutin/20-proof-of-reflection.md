@@ -311,16 +311,20 @@ Thus, *either*:
 
 Note that, at this point, there is no benefit to Chain R's security. That's because Chain R isn't 'reading' the reflected work back from Chain L. Thus a doublespend attack against Chain R has the expected, non-reflected profile -- it isn't more difficult to attack Chain R yet. However, Chain R can take advantage of the reflection. The main requirements are: the inclusion of appropriate proofs of reflection that show known Chain R blocks according to Chain L, and an update to Chain R's block-weight calculations to account for the reflected work. *Proof of Reflection* doesn't automatically secure both chains; each chain can proactively and independently take advantage of *Proof of Reflection*.
 
-Naturally, if there were a large difference in target block frequencies (e.g., 10 minutes vs 15 seconds) then there would also be a good deal of latency before a chain gains the security benefit from reflected work.
+Naturally, if there were a large difference in target block frequencies (e.g., 10 minutes vs 15 seconds) then there would also be a good deal of latency between the points where the higher-frequency chain gains the security benefit from reflected work.
 For this reason, *Proof of Reflection* is most useful between high frequency chains, or chains of similar frequencies.
 One downside of this is that shortening the block production frequency requires the inclusion of more block headers.
-In the scheme of things, this can be somewhat significant but is not a deal-breaker.
+In the scheme of things, this can be somewhat significant but it is not a deal-breaker.
 
-Practical methods of comparing (and converting the weight of) different Proofs of Work are discussed in \autoref{sec:comparing-chain-work}.
+Exactly how one chain can properly account for reflected work requires that we cover how to compare (and convert) that work, and is the topic of \autoref{sec:comparing-chain-work}.
 
-Note that, as the Chain L tip is gaining reflections from Chain R, miners on Chain L are incented to include as many Chain R headers and PoRs as possible.
-That's because each new Chain R header (with a PoR) will increase the weight of the *parent* of the Chain L draft block.
+\todo{move this bit to step 5?}
+
+Note that, as the Chain L tip is gaining reflections from Chain R, miners on Chain L are incented to include as many novel Chain R headers and PoRs as possible.
+That's because each new Chain R header (with a PoR) will increase the weight of the *ancestors* of the Chain L draft block, which helps the draft block compete with other draft L blocks.
 This increases the overall chain-weight that the miner is building on, and thus contributes to their block becoming part of the most-worked chain.
+<!-- Additionally, this provides of reflections of R blocks, too, which allows Chain R miners to use these L blocks for their own PoRs.
+The takeaway is that there's a positive feedback loop. -->
 
 \aside{
   Where do Chain L miners get PoRs from?
@@ -353,11 +357,13 @@ If the attacker has more hash power than the honest miners (i.e., $q > p$\footno
   Since a correctly-evaluated projection of L is useful (for users of either chain), we should solve this problem if we can.
 }
 
+\todo{rewrite / edit this: evaluating PoR weight -- inconsistent with later I think}
+
 How can we prevent this kind of attack?
 The attack is only possible because Chain R was *not* accounting for reflected weight -- if Chain R's projection of Chain L accounts for reflections, then this attack is not possible.
-In other words, Chain R and Chain L must always agree on which Chain L block is the current tip.
-If Chain R users were \emph{required} to run nodes for both L and R, then we've essentially just combined L and R into one big, overly-complex blockchain -- this change would thwart the attack, but it isn't a solution.
-Instead, we need to ensure that Chain R can cheaply and reliably evaluate L's tip, and that requires some protocol changes.
+<!-- In other words, Chain R and Chain L must always agree on which Chain L block is the current tip. -->
+If Chain R users were \emph{required} to run full nodes for both L and R, then we've essentially just combined L and R into one big, overly-complex blockchain -- this change would thwart the attack, but it isn't a solution.
+Instead, we need to ensure that Chain R can cheaply and reliably evaluate the weight of L's reflections.
 
 First, let's add a field to L's header: the total chain-weight\footnote{
   Instead of the total chain-weight, the sum of reflected weight works too (these are essentially equivalent).
@@ -375,7 +381,9 @@ We need additional protocol changes to ensure that the \emph{claimed} chain-weig
   It is discussed in \autoref{sec:segmented-state} and \autoref{sec:exploiting-seg-state}, and analyzed in \autoref{sec:bandwidth-complexity}.
 }
 
-Broadly, there are two categories of low-overhead solutions: proofs of validity, and proofs of invalidity (i.e., fraud proofs).
+\todo{revisit / edit this}
+
+Broadly, there are two categories of low-overhead, potential solutions: proofs of validity, and proofs of invalidity (i.e., fraud proofs).
 Let's consider the latter.
 
 \todoDraftOnly{NIPOPoWRs as proofs of validity}
@@ -1188,7 +1196,7 @@ If the two chains have equal block production frequencies, then (using \autoref{
 
 Consider an attack on the PoW chain and presume that the difficulty on the PoW chain is constant over the attack, i.e., the PoW chain's difficulty doesn't adjust quickly enough to react to the attack. Additionally, assume the attacker has *not* been contributing to the network before the attack, i.e., their hash-rate is not accounted for in the PoW chain's difficulty. Given the two chains are mutually reflecting, half of the network's security is provided by the PoS chain (and thus immune to the attacker in this case). Therefore, a successful attacker -- *using the traditional method of mining a competing chain-segment in private* -- must generate more blocks than both chains combined. That means the attacker needs *twice* the honest hash-rate for a guaranteed successful attack.
 
-However, consider the case that \emph{the security contribution of the PoW chain is \ul{capped} at 50%} -- i.e., capped at the proportion of root tokens hosted on that chain.
+However, consider the case that \emph{the security contribution of the PoW chain is \ul{capped} at 50\%} -- i.e., capped at the proportion of root tokens hosted on that chain.
 For our purposes, this situation is approximately equivalent to that where the PoW chain has a *perfect* difficulty adjustment algorithm, i.e., the network instantly adapts to keep the block production frequency constant.
 For the sake of this demonstration, assume that these chains *retroactively* adjust block weightings to ensure this cap holds.
 Let $p > 0$ be the honest miners' contribution to *overall* network security, and $q > 0$ be the attacker's contribution.
