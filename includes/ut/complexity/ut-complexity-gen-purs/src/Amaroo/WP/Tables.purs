@@ -69,7 +69,7 @@ https://web.archive.org/web/20210831185445/https://docs.solana.com/running-valid
 -}
 
 _B_PER_S_TO_GB_PER_YR :: Number
-_B_PER_S_TO_GB_PER_YR = 86400.0 * 365.25 / 1024.0 / 1024.0 / 1024.0
+_B_PER_S_TO_GB_PER_YR = 86400.0 * 365.25 / 1000.0 / 1000.0 / 1000.0
 
 confRateTex = "\\mathbb{C}^\\prime"
 
@@ -600,7 +600,7 @@ compareNets1mTpsAll = Table
 
 genCompare1GbpsRow {net, p} = [fmt1GbpsPs cs p, show net] <> (fmtDyn fdPlain <$> [netToTps net cs, k, mbChainDay])
   where
-    mbChainDay = k * 86400.0 / 1024.0 / 1024.0
+    mbChainDay = k * 86400.0 / 1000.0 / 1000.0
     k = (pToPF p).k
     cs = netToChainStats net p
 
