@@ -102,7 +102,8 @@ Consider a miner of a simplex-chain (chain $L$) who is working on a \emph{draft 
 Specifically, let's consider \emph{just before} the attacker publishes their chain-segment.
 In the memory pool\footnote{
   The \emph{memory pool} is where unconfirmed transactions (and other things) are stored before they are included in a block.
-  Each node has their own memory pool -- this must be the case because securely synchronizing memory pools between untrusted parties is as difficult as running a whole blockchain.
+  Each node has their own memory pool.
+  %% -- this must be the case because securely synchronizing memory pools between untrusted parties is as difficult as running a whole blockchain. %% Note: I think this is wrong -- it's only as hard if you have to achieve consensus on which of two conflicting transactions are included.
   A miner typically decides a block's contents by choosing the combination of transactions from their memory pool that results in the largest reward (i.e., transactions with the largest fees).
 } of that miner, there will be PoRs, and those PoRs are \emph{only} valid for the \emph{honest} chain-segment (most likely they are for the best known honest block, but don't need to be).
 Each $L$ block, in and of itself, only adds $\sim w$ weight to the $L$ chain.

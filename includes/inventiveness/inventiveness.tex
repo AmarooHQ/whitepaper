@@ -28,11 +28,6 @@
 \setlength{\parskip}{6pt plus 2pt minus 1pt}
 }
 \usepackage{hyperref}
-\hypersetup{
-            pdftitle={Ultra Terminum - Invention Details},
-            pdfauthor={Max Kaye},
-            pdfborder={0 0 0},
-            breaklinks=true}
 \urlstyle{same}  % don't use monospace font for urls
 \usepackage[left=1.5cm,right=1.5cm,top=1.5cm,bottom=1.8cm]{geometry}
 \usepackage{longtable,booktabs}
@@ -59,14 +54,14 @@
 \def\fps@figure{htbp}
 \makeatother
 
+
 \usepackage[utf8]{inputenc}
 \usepackage{comment}
-\usepackage{siunitx}
 \usepackage[lastpage,user]{zref}
-%\usepackage{fancyhdr}
+% \usepackage{fancyhdr}
 \usepackage[dvipsnames]{xcolor}
-\usepackage{amsmath, amsfonts}
-\usepackage{hyperref}
+\usepackage{amsmath,amsfonts}
+\usepackage{mathtools}
 \usepackage{mdframed}
 \usepackage[skins,breakable]{tcolorbox}
 \usepackage[yyyymmdd,hhmmss]{datetime}
@@ -80,12 +75,26 @@
 \usepackage{pdfpages}
 \usepackage{algpseudocode}
 \usepackage{algorithm}
-\usepackage[toc]{glossaries}
-\usepackage{tocloft}
+\usepackage[titles]{tocloft}
 \usepackage[fit]{truncate}
 \usepackage{wallpaper}
 \usepackage[section]{placeins}
-\usepackage[nomarkers,tablesonly]{endfloat}
+\usepackage[export]{adjustbox}
+\usepackage{ifthen}
+\usepackage{ctable}
+\usepackage{tablefootnote}
+\usepackage{trimspaces}
+\usepackage{cancel}
+\usepackage{array}
+\usepackage[all,cmtip]{xy}
+\usepackage{morewrites}
+\usepackage{xparse}
+\usepackage{forest}
+\usepackage{mathdots}
+% \usepackage[nomarkers,tablesonly]{endfloat}
+
+
+
 
 \makeatletter
 \def\input@path{{./}{../}{../../}}
@@ -104,9 +113,25 @@
 \def\subsubsectionautorefname{Section}
 \def\paragraphautorefname{Section}
 
-\title{Ultra Terminum - Invention Details}
+\input{../ut/00-preamble/510-maths.tex}
+\input{../ut/00-preamble/999-citations.tex}
+
+\def\titleOfDoc{Proof of Reflection \& Ultra Terminum - Invention Details}
+
+\hypersetup{
+            pdftitle={\titleOfDoc},
+            pdfauthor={Max Kaye},
+            pdfborder={0 0 0},
+            breaklinks=true}
+
+\title{\titleOfDoc}
 \author{Max Kaye}
-\date{Last Updated: \\ Body text: 2021-05-09 \\ Algorithms \& Figures: 2022-03-18 \\ (Note: ``??'' indicates a link to something in the WP -- not included here.)}
+\date{
+  Last Updated: \\
+  Body text: 2021-05-09 \\
+  Algorithms \& Figures: 2022-03-18 \\
+  (Note: ``??'' indicates a link to something in the WP -- not included here.)
+}
 
 \begin{document}
 \maketitle
@@ -119,6 +144,257 @@
 \setcounter{tocdepth}{1}
 \tableofcontents
 }
+
+\section{Introduction \& Background}
+
+\subsection{Background}
+
+Blockchains are data structures that provide an append-only transaction log that is secure against an attacker.
+That append-only log is extended via ``blocks''.
+A block is a cryptographic data structure that includes a specific collection of transactions.
+Each block points back to one or more parent blocks.
+Typically, a newly created block will use the ``tip'' of the blockchain as its parent block(s).
+Once a new block has been created, it is broadcast over the network, and nodes will validate the block and extend their local copy of the blockchain.
+Thus, each newly created block provides new transactions, extends the chain, and allows future blocks to point back to it, facilitating an ongoing cycle of: create, broadcast, validate, append, create, etc.
+
+When a new block is created, broadcast, validated, and accepted as an extension of the blockchain, that block provides a ``confirmation'' to all prior blocks, and to all transactions both in prior blocks and in the new block.
+Once a transaction has received a sufficient number of confirmations (and the corresponding block is still part of the canonical chain), the transaction is considered ``confirmed''.
+The number of ``confirmations'' that a block or transaction has is 1 plus the number of blocks that build on top of that block (or, for a transaction, the block that the transaction was contained in).
+A new block builds on top of all prior blocks that it is cryptographically dependent on.
+
+Each block has a property called ``weight'' that corresponds to the amount of ``work'' that was required to create the block.
+For blockchains using a consensus system based on \emph{Proof of Work}, ``weight'' and ``work'' are both measured in \emph{hashes} -- particularly, the average number of hashes that the network (in aggregate) needed to calculate in order to find a valid block.
+The weight of multiple blocks is simply the sum of their individual weights -- thus the weight of the full chain is the sum of all blocks between its initial block (the genesis block) and the ``best'' known block.
+This is how a consensus algorithm \emph{chooses} the best block: it is the valid block with the greatest total weight of all blocks between it and the genesis block.
+Block producers are incentivized to build on the best block because they receive a smaller reward (often 0) if they build on other blocks.
+
+A function known as \emph{the fork rule} encapsulates the specific calculations involved in how a particular consensus algorithm chooses the best block.
+Particularly, the fork rule determines which of two possible chain histories (complete sequences of blocks) is the canonical one -- the one that block producers should build on and extend.
+
+The \emph{security} of a blockchain (or a network of chains) is measured by the amount of resources that an attacker would need in order to effect a doublespend.
+
+A doublespend is when an attacker makes a valid transaction, which then seems to be confirmed as a permanent part of the ledger, and then that attacker publishes previously private blocks that cause a chain \emph{reorganization}.
+The effect of this is that the previously valid transaction is now invalid.
+A doublespend is conceptually similar to a credit card charge-back that is made after a consumer has received the goods.
+
+The \emph{speed} of a blockchain is inversely proportional to the duration that a user has to wait before a transaction is considered ``confirmed''.
+This duration is measured in ``confirmations'' -- e.g., it is common for users to consider a Bitcoin transaction confirmed after 6 confirmations (which takes approximately 60 minutes).
+After this number of confirmations has occurred, it is taken that the chances of an attack succeeding are so low that the possibility can be dismissed -- thus a transaction is considered secure after this point.
+
+\subsection{Block Headers and State}
+
+Blockchains typically specify that blocks have a \emph{header} -- a small data (usually between $\sim 100$ and $\sim 1000$ bytes large) that includes crucial cryptographic metadata.
+That metadata typically includes (but is not limited to): the hash of the parent block(s), a cryptographic commitment (often a merkle root or equivalent) to both/either the transactions included in the block and/or the current \emph{state} of the blockchain, network information such as the \emph{difficulty}, the timestamp of the block's creation, a \emph{nonce}, and protocol version information.
+Certain classes of consensus protocols (e.g., those based on \emph{Proof of Stake}) may require additional data to be included in the header.
+
+Since a block header is distinct from the transactions in the corresponding block, a \emph{headers-only} chain can be constructed.
+A \emph{headers-only} version of a blockchain is typically sufficient to verify both the \emph{order} of blocks (and thus transactions) and the \emph{chain-weight} of the chain; however, the corresponding chain cannot be \emph{fully} validated because the validity of all constituent transactions is not established (that requires downloading and evaluating those transactions).
+
+\emph{Headers-only} chains are still secure, though, since the work required to produce them is practically equivalent to the work required to produce the full blockchain.
+Thus, headers-only chains are as secure against an attacker as the full chain \emph{in most circumstances} (note: the exceptions are not relevant here).
+
+We can use headers-only chains via their commitment to both/either the transactions included in the block and/or the current state of the blockchain.
+
+The state of a blockchain is protocol dependent -- a rough general description is: all of the up-to-date data required to evaluate whether new transactions are valid and, if so, the results of those transactions.
+For example: the state of the Bitcoin blockchain is all of the current \emph{unspent transaction outputs} set; and the state of the Ethereum blockchain is all current account balances, all smart contract code, and the databases of all smart contracts.
+
+It is possible to exclude an explicit commitment to the exact transactions in a block (since the resulting state root will not match if an incorrect list of transactions is evaluated), but this is costly.
+Typically, all but the earliest generation of blockchains specify headers that include commitments to both transactions and state.
+
+These cryptographic commitments use systems chosen for their ability to produce succinct proofs.
+For example: it is efficient to prove that a bitcoin block contains a specific transaction, or, on an Ethereum-based blockchain, to prove the balance of a specific account.
+The method of constructing a headers-only chain (or chain-segment) and verifying that a transaction was included in one of the corresponding blocks is known as \emph{Simple Payment Verification} (SPV) and was initially detailed in the Bitcoin whitepaper (2008).
+
+Although PoR and UT do not technically require succinct proofs, the overall throughput of the method is highly sensitive to the size of these proofs (with smaller proofs corresponding to higher throughput).
+
+The exact set of things that can be proven in this way is protocol dependent.
+
+\section{Proof of Reflection}
+
+\emph{Proof of Reflection} (PoR) is the foundational method of UT.
+
+\subsection{Key Concepts}
+
+\subsubsection{Projection / Imaging}
+
+Blockchain transactions can include many different types of content.
+Particularly, we are interested in the case where transactions include the headers of blocks from other blockchains.
+This situation can be useful for users of a blockchain network.
+For example: it is possible to write an Ethereum smart contract which accepts the headers of Bitcoin blocks and constructs a headers-only version of the Bitcoin chain.
+Such a smart contract can (provided all relevant headers have been provided) then be used to prove that a transaction has occurred on the Bitcoin network.
+Since there is no established term for this concept (a headers-only version of one chain recorded and evaluated by a second chain), we call this a \emph{projection} of the first chain in the second chain.
+Alternatively: the second chain \emph{images} the first chain.
+\emph{Image} in this case is a verb, and the result of a second chain imaging a first chain is the projection of the first chain in the second.
+
+\subsubsection{Reflection}
+
+When both a first chain images a second chain and the second chain images the first, we say that each chain contains a \emph{reflection} of the other.
+That is: the first chain can use its projection of the second chain to prove which blocks of the first chain have been imaged by the second chain.
+When two chains image one another in this way, we say that the chains reflect one another.
+When we say that a block of one blockchain was reflected (or imaged) by a block of another blockchain, we mean that the header of that block was included as part of the block of another blockchain in a way that is able to be proven.
+
+The word \emph{reflection} is used because a projection of a projection is a reflection.
+
+A \emph{proof of reflection} is a multi-stage proof that: a specific ancestor block ($L_a$) of a first block ($L_i$) of a first blockchain (\cL) was reflected by a specific block ($R_j$) of a second blockchain (\cR), and that the block of the second blockchain ($R_j$) was in turn reflected by the first block of the first blockchain ($L_i$).
+Thus, a PoR is comprised of these three parts:
+\begin{enumerate}
+  \item A proof that $L_a$ is an ancestor of $L_i$; and
+  \item A proof that $R_j$ reflected $L_a$; and
+  \item A proof that $L_i$ reflected $R_j$.
+\end{enumerate}
+
+Note that full nodes of the \cL chain already know the first and last part (i.e., they already have all the data required to verify whether they are true).
+Thus, the crucial ``missing'' part of the PoR is the middle proof: that $R_j$ reflected $L_a$.
+
+We typically use \cL and \cR to denote the ``local'' and ``reflecting'' chains, and $L_n$ to identify the $n^{th}$ block in the \cL chain (and similarly for $R_n$ in the \cR chain).
+
+Note: the proper noun ``Proof of Reflection'' refers to the system where proofs of reflection (PoRs) are used, in combination with the conversion of work, to increase the security of a blockchain.
+
+\subsection{Method -- Using PoRs}
+
+One of the key ideas behind PoR is that the weights of blocks are summable.
+In isolation, this fact is already used by traditional PoW blockchains (such as Bitcoin) to calculate chain-weight.
+Chain-weight is the total amount of work that has contributed to a complete sequence of blocks from the genesis block to any other specific block.
+The chain-weight of a blockchain is the chain-weight between the genesis block and the best block.
+
+A key \emph{insight} here, is that the weight of blocks in \emph{different} blockchains can, in certain contexts, contribute to an individual blockchain's security through a process of recording PoRs and \emph{converting work}.
+
+Typically, the chain-weights of two different blockchains are not able to be directly compared as they are measured in different \emph{dimensions}.
+In the universal and generic case, it is not possible to convert between different dimensions; rather, we need a specific goal and context in order to convert.\footnote{
+  Attribution: \href{https://criticalfallibilism.com}{Critical Fallibilism}; e.g., see \href{https://criticalfallibilism.com/multi-factor-decision-making-math/}{Multi-Factor Decision Making Math}.
+}
+% A dimension is a range of all possible values that are qualitatively unique.
+For example: the dimension of \emph{duration} (of time) is qualitatively different to the dimension of \emph{distance}.
+We know that duration and distance are different dimensions both because they measure different things, and because there is no way to generically convert between the two.
+Similarly, the weight of blocks from one blockchain may be measured in hashes of one type (e.g., SHA256) and the weight of blocks of another blockchain may be measured in hashes of a different type (e.g., ETHash).
+
+Only by introducing certain contexts can we convert between different dimensions -- including different weights of different blockchains.
+For example: in the context of some object with an unchanging \emph{velocity}, we do have a way to convert between distance and duration -- the velocity acts as a \emph{constant of conversion}.
+If the object has velocity $s$, and moves some distance $d$, then it must have done so in $d/s$ units of time.
+Just as the context of the above example enables conversion between distance and duration, PoR requires that we choose a suitable context to enable the conversion of work.
+
+The conversion of work is novel and a key component PoR.
+
+Algorithms for conversion are detailed in \autoref{sec:patent-conversion-algs}.
+
+Assuming that work can be converted, how do blockchains actually integrate the work of other, different, blockchains?
+
+The key insight is that a block can use a proof of reflection of an ancestor block, combined with the conversion of work, to increase the chain-weight of the chain-segment that it builds on.
+That is: when the fork rule is comparing chain-weights of two competing chain-segments, it counts the work contributed by each local block, and the work contributed by all reflecting blocks (which is equivalent to the reflecting blocks' individual weights, summed).
+
+Also, there are some principles that the fork rule's implementation of PoR should adhere to:
+\begin{itemize}
+  \item contributed work should not be double-counted (i.e., each reflecting block can contribute its weight exactly once only); and
+  \item where more than one block is reflected and those blocks form a continuous chain-segment, contributed work should be attributed to the reflected block(s) that were created most recently (i.e., are at the tip of that/those chain-segment(s)); and
+  \item a block, $R_j$, in a reflecting chain (\cR) that does not reflect any local blocks (\cL blocks) eventually contributes its weight to the same \cL blocks that were reflected by the most recent ancestor of $R_j$ that reflected \cL blocks; and
+  \item a chain, when considering contributed weight, should only consider reflections of blocks in its own history -- if a later block builds on two chain-tips\footnote{
+    This is possible in some DAG-based blockchain data structures, e.g., \citeInclusiveFull.
+  } that were reflected by the same \cR block, then care should be taken to avoid double-counting the work contributed by that \cR block.
+\end{itemize}
+
+This method works because, for an attacker to successfully perform a doublespend, they are required to produce a chain-segment with a weight greater than the individual weights of all relevant \cL and \cR blocks that have contributed work to the chain-segment that the attacker wishes to undo.
+
+If chain \cL accounts for reflected work in this way, but chain \cR does not, then it may be possible for an attacker to first attack chain \cR so as to enable a cheaper attack on \cL.
+However, this is only possible: if chain \cR does not use PoR; or if there is a large asymmetry between the work contributed by \cL and \cR, such that the work that \cL would contribute is negligible for chain \cR.
+If both chains \cL and \cR use PoR (a situation called ``mutual reflection''), then attacking either chain is as difficult as attacking both.
+
+\section{Simplexes}
+
+Simplexes are collections of chains that all mutually reflect one another.
+Blockchains that are part of a simplex are called \emph{simplex-chains}.
+The simplest possible simplex has 2 simplex-chains.
+
+Simplex-chains only need to consider proofs of reflection concerning their own history because blocks of all simplex-chains include the headers of blocks of all other simplex-chains.
+
+The capacity of each simplex-chain can be separated into two parts: one part for recording other simplex-chains' headers and relevant PoRs, and the other part for recording all other transactions.
+Meaningful transactions from users are counted in the latter part.
+
+The number of simplex-chains in a simplex is constrained by the size of the first part, and the number of meaningful transactions per second is constrained by the second part.
+
+We can calculate the optimal ratio of these two parts in order to maximize the number of meaningful transactions that a simplex can process.
+The result is approximately that half the capacity of each chain should be dedicated to each part; i.e., $\sim\half$ to reflections and PoRs, and $\sim\half$ to other transactions.
+
+Such a simplex, given reasonable parameters,\footnote{
+  The relevant parameters are: block size, block frequency, and block header size.
+  We particularly consider: $k$ (bytes/s), a generalization of block size which is the product of block size and block frequency; $B_f$ ($\text{s}^{-1}$), the block frequency; and $B_h$ (bytes), the size of each block header.
+} can host hundreds or thousands of simplex-chains.
+Additionally, simplex-chains can be incrementally created and added to the simplex as the network's capacity requirements increase.
+
+\section{Blockchain ``Speed'': Confirmation Time}
+
+The amount of time that a user of a chain must wait in order for their transaction to be ``confirmed'' is network dependent.
+Some networks take longer than others.
+This is because, for an attacker that controls $q$ proportion of the network's security,\footnote{
+  By convention a PoW blockchain's security is analyzed in terms of an attacker with $0 < q < 0.5$ proportion of the network's hash rate, such that the ``honest'' block producers have $p$ proportion, and $p + q = 1$.
+} the chance that a doublespend succeeds depends on the number of confirmations that a user waits -- the more confirmations, the lower the chance of a successful doublespend; the larger $q$ is, the higher the chance of a successful doublespend.
+For transactions of lower value, a user can afford to wait for fewer confirmations than a more valuable transaction.
+
+When two blockchains use mutual PoR, the confirmation rate (\Cprime) \emph{increases}: a confirmation is received for each local block and each reflecting block.
+In essence: in a simplex with 2 simplex-chains, each simplex-chain has $2\times$ the confirmation rate that it would have if it were not using PoR; a simplex with 3 simplex-chains has $3\times$ the confirmation rate; and so on.
+
+What does this mean for users?
+Consider a simplex-chain which is part of a simplex with $N$ simplex-chains.
+That simplex-chain has $N\times$ the confirmation rate that it would if it were standalone (i.e., not part of a simplex).
+Consequently, to achieve an equivalent level of security, users of that simplex-chain need to wait $N^{-1}\times$ as long as they would need to wait if the simplex-chain were standalone.
+Equivalently: confirmation waiting time has decreased by a factor of $N^{-1}$, i.e., confirmations happen $N\times$ more often.
+
+Practically speaking, this means that large simplexes confirm transactions almost instantly (after the first confirmation, which is when a transaction is included in a block).
+
+\section{Recursive PoR}
+
+\begin{itemize}
+  \item PoR can be done recursively
+  \item e.g., $L \leftrightarrow M \leftrightarrow R$
+  \item details are a little more complex, but principles the same as PoR
+  \item required for tiling (it might be possible to avoid this, but that's speculative at this point)
+\end{itemize}
+
+\dots
+
+\section{Simplex Tilings}
+
+When simplexes become part of a simplex tiling they are called \emph{tiles}, or \emph{simplex tiles}.
+
+\emph{Simplex tilings} (or just \emph{tilings}) are a bidirectional graph of mutually reflecting simplex tiles.
+
+Simplex tilings require that each simplex-chain in a given simplex tile does mutual PoR with each other simplex-chain in all adjacent simplex tiles (this is what is meant when we say that a simplex tile mutually reflects another simplex tile).
+
+When each tile in a tiling reflects no more than a certain number of other tiles, we call this number the \emph{valence} ($v$) of the tiling.
+We are particularly concerned with tilings of $v > 2$ because it is only these tilings that can grow in an unbounded capacity.
+If a tiling has a complex architecture, it could conceivably have a fractional valence (i.e., $v$ is not a whole number).
+However, this is unnecessarily complex, so we will only consider tilings with integer valencies.
+Thus, we are concerned with tilings of $v \ge 3$.
+
+\begin{itemize}
+  \item Security requirements: distribution of weight
+  \item Possible configs without that requirement are speculative
+\end{itemize}
+
+\dots
+
+\section{Child-chains / Dapp-chains / Sharding}
+
+todo note: child-chains is the general category of chains that are either hosted on or facilitated by another blockchain.
+dapp-chains are a specific type of child-chain, as are shards.
+This is our terminology; there isn't a widely agreed-upon term for this.
+some definitions of child-chains (if you google them) are different from this definition.
+
+\begin{itemize}
+  \item chains can hosting child-chains via PoR
+  \item this is architecturally similar to other methods of doing child-chains / dapp-chains / sharding,
+\end{itemize}
+
+\dots
+
+\section{Proxy chains}
+
+\begin{itemize}
+  \item special simplex-chain that acts as a proxy for reflections from an external, pre-existing chain (e.g., Bitcoin)
+  \item no permission required / no soft fork needed; Bitcoin miners can opt-in for extra rewards
+  \item special network rules can enable direct contribution via this indirection
+\end{itemize}
+
+\dots
 
 \section{Claims}
 
@@ -138,13 +414,25 @@
   \item dapp-chain simplexes
 \end{itemize}
 
+\section{Previous doc below}
+
 \input{body.tex}
 
 \newpage
 
-\begin{section}{Figures and Algorithms}
-    \input{figs-in-wp.tex}
-    \input{figs-orig.tex}
-\end{section}
+\section{Figures and Algorithms -- omitted atm to decrease compilation time}
+
+\subsection{Algorithms}
+
+\label{sec:patent-conversion-algs}
+
+\subsection{Figures}
+
+\dots
+
+% \begin{section}{Figures and Algorithms}
+%     \input{figs-in-wp.tex}
+%     \input{figs-orig.tex}
+% \end{section}
 
 \end{document}
