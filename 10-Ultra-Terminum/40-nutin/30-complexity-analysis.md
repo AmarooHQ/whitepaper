@@ -379,7 +379,7 @@ A simplex-chain reflects $N_1 - 1 \approx N_1$ other simplex-chains. A merkle tr
 
 Note: In a production system, these proofs can be excluded from blocks by treating them as droppable witnesses; see \autoref{sec:proving-reflection}.
 
-\todo{Total reflections + computational burden (+PoRs vs omitted proofs) -- $O(c)$ vs $O(c^2)$}
+\todoDraftOnly{Total reflections + computational burden (+PoRs vs omitted proofs) -- $O(c)$ vs $O(c^2)$}
 
 ### TPS Complexity Comparison
 
@@ -482,7 +482,7 @@ This effect is not unique to UT, though. In general, any system of sharding is a
 
 Practically, this effect means that a decrease to the size of headers has *increasing* marginal benefit. Compared to $O(c)$ blockchains (e.g., Bitcoin), efficient header schemes are far more important for UT and sharded blockchain networks.
 
-\todo{some discussion to replace +HOT stuff.}
+\todoDraftOnly{some discussion to replace +HOT stuff.}
 
 
 ### Comparison of UT Variants

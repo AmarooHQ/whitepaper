@@ -4,7 +4,7 @@
 
 \label{sec:practical-considerations}
 
-\todo{compact spv proofs via reusing PoR branches}
+\todoDraftOnly{compact spv proofs via reusing PoR branches}
 
 ### Availability of Reflected Blocks
 
@@ -19,7 +19,7 @@ That would mean that chain L contains a header, $H_{R,1a}$, for chain R for whic
 This does not break chain R, but it could mean that other blocks on chain R temporarily have a harder time competing, or waste the resources of chain R nodes as they go looking for that block, $B_{R,1a}$.
 Furthermore, it risks chain R miners doing SPV mining, which is bad.
 
-\todo{i think the below is wrong. should probs rewrite section}
+\todoDraftOnly{i think the below is wrong. should probs rewrite section}
 
 After $H_{R,1a}$ is reflected, chain R miners shouldn't build on that header without validating the block (so they should not mine on top of it).
 Before long they'd produce an alternate valid block, $B_{R,1b}$.
@@ -187,7 +187,7 @@ This UT protocol variant is +HOPoRs, the combination of *header omission* (+HO) 
 }
 \end{figure}
 
-\todo{uber optimization at mega cost? reflecting a block also reflects all blocks that it reflects? hmm. think this doesn't work b/c recursive PoR in a simplex would get stupid. also, what's the upper limit? each block can end up reflecting like $k^2$ blocks? pretty cray}
+<!-- \todoDraftOnly{uber optimization at mega cost? reflecting a block also reflects all blocks that it reflects? hmm. think this doesn't work b/c recursive PoR in a simplex would get stupid. also, what's the upper limit? each block can end up reflecting like $k^2$ blocks? pretty cray} -->
 
 ### Confirmation Times
 

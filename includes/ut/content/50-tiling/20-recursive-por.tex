@@ -5,8 +5,6 @@
 
 \mk{Maybe recursive PoR stuff should be moved to the PoR section, but that doesn't feel right b/c we don't use it before now (besides dapp-chains but that's trivial).}
 
-\todo{edit start of this section to lead in from previous instead of being burried in Key Concepts}
-
 %Part of our security architecture will be the idea of \emph{recursive PoR}.
 
 So far, we've defined the `shape' of our tiling, but we don't know much about whether it is (or even can be) secure.
@@ -218,7 +216,7 @@ We \emph{can} be sure that \BR2's weight can be fully included in \cL's chain-we
 However, it's not so clear what we should do when not all PoR paths yet exist.
 % Do we even need to solve this problem, now, though?
 
-\todo{edit below}
+\todoDraftOnly{edit below}
 
 Let us approach this from these principles:
 \begin{itemize}
@@ -317,6 +315,9 @@ Note that, for a standalone simplex, we can see that $2d-1 = 1$ (each PoR is of 
 %     \item do miners need to be incentivized to reflect child chains?
 % \end{itemize}
 
+
+\begin{draftonly}
+
 \subsubsubsection{Assumptions}
 
 \begin{itemize}
@@ -336,7 +337,12 @@ Note that, for a standalone simplex, we can see that $2d-1 = 1$ (each PoR is of 
     }
 \end{equation*}
 
+\end{draftonly}
+
+
 \subsubsubsection{Data Availability}
+
+\mk{Essence: UT solves issues of consensus at scale -- problem replaced with new problem: data availability at scale. this is easy though b/c data can just be downloaded and doesn't require processing. so it's just a problem of bandwidth, not CPU or long-term overhead.}
 
 \subsubsubsection{Future Research}
 

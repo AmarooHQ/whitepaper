@@ -2,7 +2,7 @@
 
 \label{sec:tiling-security}
 
-\todo{``Simplex Tile'' or ``Simplex-Tile''}
+\todoDraftOnly{``Simplex Tile'' or ``Simplex-Tile''}
 
 What does it mean for a tiling to be secure?
 Well, we have our broad definition from the trilemma: the network is secure against an $O(n)$ attacker.
@@ -58,15 +58,19 @@ Additionally, the core is where the vast majority of chain-work is done.
 %     \item Once a recursive PoR for some \cR block becomes available, \cL blocks can add that \cR block's weight to their own chain-weight.
 % \end{itemize}
 
+\begin{draftonly}
+
 \subsubsubsubsection{Excess Capacity in Proof of Work}
 
 \todo{this should probs go in practical considerations -- that's where +T is introduced.}
+
+\end{draftonly}
 
 \subsubsubsection{Security Architecture}
 
 \label{sec:tree-tiling-security-architecture}
 
-\todo{answer Qs like what a doublespend looks like}
+\todoDraftOnly{answer Qs like what a doublespend looks like}
 
 The literal keystone of our tiling is the root tile.
 More than half of the network's total chain-work will be produced by chains in the root tile.
@@ -144,6 +148,8 @@ instead of resisting an attacker with up to 50\% of the network-wide hash-rate, 
 For the purpose of this paper, it is assumed that: \UTinf{} being secure against as attacker with $q \le 0.495$ counts as $O(n)$ secure. ($q \le 0.495$ is \emph{good enough}.)
 
 \subsubsubsection{Analysis Method}
+
+\mk{Note: this section is in draft.}
 
 How can we analyze the security of tree-tilings?
 
@@ -381,7 +387,7 @@ But it proves as much work as the bundle of 40 - 60 KB that we had before.
 This time, though, the burden is only 2.7 - 4.0 KB per local block.
 (If $k=3000, B_f = \nicefrac1{15}$, then each block is $\sim 45$ KB.)
 
-\todo{what about withholding attacks where an attacker gets a conflicting block implicilty reflected? might be possible via tile boundaries. can an attacker get a recursive PoR path generated without publishing the block? the attacker can mine in multiple tiles, too. mb answer is in work attribution -- which }
+\todoDraftOnly{what about withholding attacks where an attacker gets a conflicting block implicilty reflected? might be possible via tile boundaries. can an attacker get a recursive PoR path generated without publishing the block? the attacker can mine in multiple tiles, too. mb answer is in work attribution -- which }
 
 % \begin{equation*}
 %     \xymatrix@C=1em@R-1.8em{
@@ -395,8 +401,7 @@ This time, though, the burden is only 2.7 - 4.0 KB per local block.
 %     }
 % \end{equation*}
 
-
-
+\begin{draftonly}
 
 \subsubsubsection{Capacity Complexity}
 
@@ -440,3 +445,5 @@ This time, though, the burden is only 2.7 - 4.0 KB per local block.
 % https://www.desmos.com/calculator/n17w3560ig
 
 \todo{why do $n$-ary tree-tilings?}
+
+\end{draftonly}

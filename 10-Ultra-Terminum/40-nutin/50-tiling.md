@@ -4,13 +4,19 @@
 
 \label{sec:tiling}
 
+\mk{This section (\autoref{sec:tiling}) is being redrafted. It replaces \autoref{sec:tiling-old}}
+
 \input{50-tiling/00-tiling-intro.tex}
 \input{50-tiling/10-simplex-tilings.tex}
 \input{50-tiling/20-recursive-por.tex}
 \input{50-tiling/30-tiling-security.tex}
 \input{50-tiling/80-future-work.tex}
 
-\subsection{tiling: old}
+\subsection{Tiling -- Previous (Old) Version}
+
+\label{sec:tiling-old}
+
+\mk{This section is being replaced by \autoref{sec:tiling} (which is currently being redrafted.)}
 
 Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes are tiled, the result is called a *simplex tiling*.
 
@@ -65,9 +71,9 @@ The first reason is that, for complexity orders involving logarithms, higher val
 The second reason is: an increase in valence means that the tile's capacity for reflections is divided into more pieces, only one of which is reserved for internal reflections; that means that the tile will have fewer internal reflections (and more external reflections) which decreases confirmation rate.
  <!-- and the security of leaf tiles. -->
 
-\todo{revisit the above: The second reason is: an increase in valence means that the tile's capacity for reflections is divided into more pieces, only one of which is reserved for internal reflections; that means that the tile will have fewer internal reflections (and more external reflections) which decreases confirmation rate.}
+\todoDraftOnly{revisit the above: The second reason is: an increase in valence means that the tile's capacity for reflections is divided into more pieces, only one of which is reserved for internal reflections; that means that the tile will have fewer internal reflections (and more external reflections) which decreases confirmation rate.}
 
-### Tree Tiling
+### Tree-Tiling
 
 As shown in \autoref{sec:tessellating-tiles-efficiency}, there are different ways to arrange a tiling.
 We will focus on a tiling method that exploits the exponential growth of \emph{trees}.
@@ -234,7 +240,7 @@ For all practical purposes, if we can grow the tiling fast enough, $\UTinf{}$ pr
 
 %% INSERT ### TABLE: tree_tiling_3k_v4_table
 
-: Tree Tiling performance with $v=4$ and $k=3000$.
+: Tree-Tiling performance with $v=4$ and $k=3000$.
 Values for $N_1$ and $N_2$ and a comparison between $\UTinf{\text{+OPT}}$ and $\UT{\text{+OPT}}$ with equivalent values.
 
 %% END ### DRAFT
@@ -283,7 +289,7 @@ One advantage of this variant is that the tiling algorithm can begin when a sing
         \caption{3rd iteration. 30 tiles.}
         \label{fig:tiled-simplex-alt-d4}
     \end{subfigure}%%
-    \caption{An alternate tree tiling, starting with 2 tiles, that is equivalent in terms of complexity, security, etc.}
+    \caption{An alternate tree-tiling, starting with 2 tiles, that is equivalent in terms of complexity, security, etc.}
     \label{fig:alt-tiling}
 \end{figure}
 
@@ -312,7 +318,7 @@ One advantage of this variant is that the tiling algorithm can begin when a sing
         \caption{3rd iteration. 24 tiles.}
         \label{fig:tiled-simplex-alt3-d4}
     \end{subfigure}%%
-    \caption{An alternate tree tiling, starting with 3 tiles, that is equivalent in terms of complexity, security, etc.}
+    \caption{An alternate tree-tiling, starting with 3 tiles, that is equivalent in terms of complexity, security, etc.}
     \label{fig:alt-tri-tiling}
 \end{figure}
 
@@ -344,7 +350,7 @@ This configuration still has $O(n)$ scalability.
         \includegraphics[height=.95\linewidth]{tiling_a3_s1_d6_sag}
         \label{fig:tiled-3-simplexes-a3}
     \end{subfigure}%%
-    \caption{Tree tilings ($v=3$) where each tile has only external reflections, i.e., there is only 1 single blockchain per tile.}
+    \caption{Tree-tilings ($v=3$) where each tile has only external reflections, i.e., there is only 1 single blockchain per tile.}
     \label{fig:tiled-3-simplexes}
 \end{figure}
 

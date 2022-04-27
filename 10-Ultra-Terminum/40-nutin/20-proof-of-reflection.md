@@ -28,9 +28,13 @@ The general idea of an on-chain headers-only version of another chain does not -
 
 ### A Projection of Bitcoin in Ethereum
 
-The idea that Ethereum smart contracts (SCs) can track Bitcoin chain-headers is well understood -- i.e., Ethereum *images* Bitcoin. The result of this is that the *projection* of Bitcoin is available to Ethereum users and SCs. Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is viable. In principle, any chain that supports some headers-only mode can include projections in this way. In practice that can be difficult (e.g., Ethereum's EVM doesn't generally support memory hard hashes unless special cases are introduced). But we're not interested in practicality *at the moment*.
+The idea that Ethereum smart contracts (SCs) can track Bitcoin chain-headers is well understood -- i.e., Ethereum *images* Bitcoin.
+The result of this is that the *projection* of Bitcoin is available to Ethereum users and SCs.
+Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is viable.
+In principle, any chain that supports some headers-only mode can be imaged in this way.
+In practice that can be difficult (e.g., Ethereum's EVM doesn't generally support memory hard hashes unless special cases are introduced).
+But we're not interested in practicality *at the moment*.
 
-\todo{``In principle, any chain that supports some headers-only mode can include projections in this way'' -- do I mean \emph{can be imaged in this way}?}
 
 Let's add such a contract to Ethereum and describe the relevant data and events in \autoref{tab:eth-images-btc}.
 \autoref{fig:pr-btc-eth-step1} illustrates this.
@@ -318,7 +322,7 @@ In the scheme of things, this can be somewhat significant but it is not a deal-b
 
 Exactly how one chain can properly account for reflected work requires that we cover how to compare (and convert) that work, and is the topic of \autoref{sec:comparing-chain-work}.
 
-\todo{move this bit to step 5?}
+\todoDraftOnly{move this bit to step 5?}
 
 Note that, as the Chain L tip is gaining reflections from Chain R, miners on Chain L are incented to include as many novel Chain R headers and PoRs as possible.
 That's because each new Chain R header (with a PoR) will increase the weight of the *ancestors* of the Chain L draft block, which helps the draft block compete with other draft L blocks.
@@ -357,7 +361,7 @@ If the attacker has more hash power than the honest miners (i.e., $q > p$\footno
   Since a correctly-evaluated projection of L is useful (for users of either chain), we should solve this problem if we can.
 }
 
-\todo{rewrite / edit this: evaluating PoR weight -- inconsistent with later I think}
+\todoDraftOnly{rewrite / edit this: evaluating PoR weight -- inconsistent with later I think}
 
 How can we prevent this kind of attack?
 The attack is only possible because Chain R was *not* accounting for reflected weight -- if Chain R's projection of Chain L accounts for reflections, then this attack is not possible.
@@ -381,7 +385,7 @@ We need additional protocol changes to ensure that the \emph{claimed} chain-weig
   It is discussed in \autoref{sec:segmented-state} and \autoref{sec:exploiting-seg-state}, and analyzed in \autoref{sec:bandwidth-complexity}.
 }
 
-\todo{revisit / edit this}
+\todoDraftOnly{revisit / edit this}
 
 Broadly, there are two categories of low-overhead, potential solutions: proofs of validity, and proofs of invalidity (i.e., fraud proofs).
 Let's consider the latter.

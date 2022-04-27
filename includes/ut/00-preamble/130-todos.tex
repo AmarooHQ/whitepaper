@@ -37,3 +37,7 @@
     }
     \let\todo\todo
 }{}
+
+\NewDocumentEnvironment{draftonly}{+b}{
+    \ifthenelse{\equal{\BuildMode}{draft}}{ #1 }{}
+}{}

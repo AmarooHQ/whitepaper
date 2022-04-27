@@ -57,6 +57,7 @@ module.exports = {
                 "ConvReward", "ConvBlocks", "NextWork", "DAA", "RAA",
                 "20201016_NODA", "m1", "m2", "2r", "RHS", "LHS",
                 "llZZlZZ", "Hdrs",
+                "irLabel", "recLabel", "tcLabel", "reflsExCap"
             ],
         },
         "en-max-word-count": {
