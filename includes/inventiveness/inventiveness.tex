@@ -197,7 +197,7 @@ After this number of confirmations has occurred, it is taken that the chances of
 
 \subsection{Block Headers and State}
 
-Blockchains typically specify that blocks have a \emph{header} -- a small data (usually between $\sim 100$ and $\sim 1000$ bytes large) that includes crucial cryptographic metadata.
+Blockchains typically specify that blocks have a \emph{header} -- a small data structure (usually between $\sim 100$ and $\sim 1000$ bytes large) that includes crucial cryptographic metadata.
 That metadata typically includes (but is not limited to): the hash of the parent block(s), a cryptographic commitment (often a merkle root or equivalent) to both/either the transactions included in the block and/or the current \emph{state} of the blockchain, network information such as the \emph{difficulty}, the timestamp of the block's creation, a \emph{nonce}, and protocol version information.
 Certain classes of consensus protocols (e.g., those based on \emph{Proof of Stake}) may require additional data to be included in the header.
 
@@ -299,7 +299,11 @@ That is: when the fork rule is comparing chain-weights of two competing chain-se
 Also, there are some principles that the fork rule's implementation of PoR should adhere to:
 \begin{itemize}
   \item contributed work should not be double-counted (i.e., each reflecting block can contribute its weight exactly once only); and
-  \item where more than one block is reflected and those blocks form a continuous chain-segment, contributed work should be attributed to the reflected block(s) that were created most recently (i.e., are at the tip of that/those chain-segment(s)); and
+  \item one of the following (these points are equivalent): \begin{itemize}
+    \item where more than one block is reflected and those blocks form a continuous chain-segment, contributed work should be attributed to the reflected block(s) that were created most recently (i.e., are at the tip of that/those chain-segment(s)); and
+    \item where a reflecting block reflects multiple blocks that form a continuous chain-segment, the work that the reflecting block contributes should be attributed to the tip of that chain-segment; and
+    \item when an \cR block reflects multiple \cL blocks that form a continuous chain-segment, the work contributed by that \cR block should be attributed to the most recent \cL block in that chain-segment; and
+  \end{itemize}
   \item a block, $R_j$, in a reflecting chain (\cR) that does not reflect any local blocks (\cL blocks) eventually contributes its weight to the same \cL blocks that were reflected by the most recent ancestor of $R_j$ that reflected \cL blocks; and
   \item a chain, when considering contributed weight, should only consider reflections of blocks in its own history -- if a later block builds on two chain-tips\footnote{
     This is possible in some DAG-based blockchain data structures, e.g., \citeInclusiveFull.
@@ -457,8 +461,8 @@ Thus, we are concerned with tilings of $v \ge 3$.
 
 \begin{section}{Figures and Algorithms}
   \mk{Figures and algorithms from the WP -- the algorithms will probably need some updating but can do that towards the end.}
-    \input{figs-in-wp.tex}
-    \input{figs-orig.tex}
+    % \input{figs-in-wp.tex}
+    % \input{figs-orig.tex}
 \end{section}
 
 \end{document}
