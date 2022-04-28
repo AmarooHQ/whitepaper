@@ -33,6 +33,7 @@ ifndef OUTPUT_PDF
 override OUTPUT_PDF = $(OUTPUT_PDF_DEFAULT)
 endif
 
+PREPARE_FOR ?=
 PREPROC_ARG_PF=
 ifdef PREPARE_FOR
 override PREPROC_ARG_PF=--prepare-for '$(PREPARE_FOR)'
