@@ -159,6 +159,8 @@
 \tableofcontents
 }
 
+\mk{Note WRT latter sections: dotpoint lists are notes and planning for that section and ``\dots'' indicates somewhere that is not yet drafted.}
+
 \section{Introduction \& Background}
 
 \subsection{Background}
@@ -288,6 +290,9 @@ For example: in the context of some object with an unchanging \emph{velocity}, w
 If the object has velocity $s$, and moves some distance $d$, then it must have done so in $d/s$ units of time.
 Just as the context of the above example enables conversion between distance and duration, PoR requires that we choose a suitable context to enable the conversion of work.
 
+There are two known methods of conversions and each is dependent on a different context.
+These methods and contexts are detailed primarily in the whitepaper sections ``Comparing Incomparable Proofs of Work'' and ``Conversion Contexts''.
+
 The conversion of work is novel and a key component PoR.
 
 Algorithms for conversion are detailed in \autoref{sec:patent-conversion-algs}.
@@ -349,7 +354,7 @@ This is because, for an attacker that controls $q$ proportion of the network's s
 } the chance that a doublespend succeeds depends on the number of confirmations that a user waits -- the more confirmations, the lower the chance of a successful doublespend; the larger $q$ is, the higher the chance of a successful doublespend.
 For transactions of lower value, a user can afford to wait for fewer confirmations than a more valuable transaction.
 
-When two blockchains use mutual PoR, the confirmation rate (\Cprime) \emph{increases}: a confirmation is received for each local block and each reflecting block.
+When two blockchains use mutual PoR, the confirmation rate (\Cprime) of each chain \emph{increases}: a confirmation is received for each local block and each reflecting block.
 In essence: in a simplex with 2 simplex-chains, each simplex-chain has $2\times$ the confirmation rate that it would have if it were not using PoR; a simplex with 3 simplex-chains has $3\times$ the confirmation rate; and so on.
 
 What does this mean for users?
@@ -360,18 +365,89 @@ Equivalently: confirmation waiting time has decreased by a factor of $N^{-1}$, i
 
 Practically speaking, this means that large simplexes confirm transactions almost instantly (after the first confirmation, which is when a transaction is included in a block).
 
+\section{Miner Resonance (Lower variance in block production)}
+
+Scope/context: a set of simplex-chains (in the same simplex) that use the same PoW hashing algorithm.
+
+Miners gain revenue in two ways: block rewards and transaction fees.
+
+For a given simplex-chain, the block rewards are essentially fixed block-to-block; i.e., the typical difference in block reward between a block and its parent(s) is negligible.
+
+However, there can be a large difference in the transaction fees of a block compared to those of its parent(s).
+This is because transactions are produced (by users) during the gaps between blocks, and a block cannot include transactions that have already been included in prior blocks.
+Thus, ``unconfirmed'' transactions (which have not yet been included in a block) accumulate between blocks, typically sorted to prioritize transactions with the highest fees, are ``cleared out'' when a new block is created.
+In other words: the transaction fees associated with a block will be somewhat proportional to the gap between that block and its parent(s).
+
+Note, also, that the production of blocks in such chains is stochastic.
+Blocks are, \emph{on average}, produced at an approximately constant rate, which is governed by the Difficulty Adjustment Algorithm (DAA).
+But, in traditional PoW chains, there is significant variance associated with the production of each \emph{individual} block.
+
+So, in this context, how can block producers (miners) maximize their return on investment (RoI)?
+
+Say that a miner can choose to mine any of $N$ chains (and there is negligible overhead to swapping between them).
+The miner should roughly prioritize mining the chain that will produce a block with the largest reward (including transaction fees) divided by that chain's average time between blocks.
+Practically speaking, this will often result in the miner choosing the chain with a large number of unconfirmed transactions, and this will often be the chain that has gone the longest without a block having been produced.
+
+Say the set of miners and mining resources (hash-rate) is split between $N$ simplex-chains.
+The miner should, on average, mine each chain for the same amount of time; their hash rate will be, on average, evenly split between all $N$ chains, even though the miner is only mining one chain at a time.
+
+This method works because \emph{all} miners are incentivized to mine the same chain at the same moment.
+Thus, all miners are \emph{synchronized} in a decentralized way.
+
+If one chain has a low volume of transactions and/or low transaction fees, then miners might not prioritize mining that chain.
+However, this is what the difficulty adjustment algorithm is for!
+The difficulty of such a chain will decrease, which increases the reward relative to the amount of work that must be done, which makes that chain competitive again in attracting miners.
+
+Moreover, miners that are not synchronized in this way will reduce their ROI.
+
+Thus, this phenomena is \emph{resonant} -- the synchronization between miners is \emph{stable and attracting}.
+
+
+
 \section{Recursive PoR}
 
-\mk{Dotpoint lists are notes and planning for the section and ``\dots'' indicates somewhere that is not yet drafted.}
+% \begin{itemize}
+%   \item PoR can be done recursively
+%   \item e.g., $\cL \leftrightarrow \cM \leftrightarrow \cR$
+%   \item details are a little more complex, but principles the same as PoR
+%   \item required for tiling (it might be possible to avoid this, but that's speculative at this point)
+% \end{itemize}
 
+% \dots
+
+
+An essence of PoR is the idea of chain \cL learning that some \cR block was made after some prior \cL block -- that the work attributed to the reflecting \cR block \emph{incudes} a reference to part of \cL's history.
+
+Proofs of reflection have (up till now) been direct between the local chain and the reflecting chain.
+However, we can use the same technique \emph{recursively} to handle additional contexts.
+
+Consider 3 chains: \cL, \cM, and \cR, that are doing mutual reflection like this:
+\begin{equation}
+  L \leftrightarrow M \leftrightarrow R
+\end{equation}
+That is: \cL mutually reflects \cM, and \cM mutually reflects \cR.
+Using recursive PoR, \cL can count proofs of reflection via \cR that involve two intermediate \cM blocks.
+Since \cL is already doing mutual reflection with \cM, it will already know of PoRs for the relevant \cM blocks, too.
+The only missing data is the PoR that the relevant \cM blocks were reflected by an \cR block.
+This also means that PoRs are composable into recursive PoRs.
+
+Specifically, we have a situation like this:
 \begin{itemize}
-  \item PoR can be done recursively
-  \item e.g., $L \leftrightarrow M \leftrightarrow R$
-  \item details are a little more complex, but principles the same as PoR
-  \item required for tiling (it might be possible to avoid this, but that's speculative at this point)
+  \item \BL{2} has a PoR for \BL{0} reflected via \BM{1}
+  \item \BL{4} has a PoR for \BL{2} reflected via \BM{3}
+  \item \BL{4} has \BM{3}'s PoR for \BM{1} reflected via \BR{2}
 \end{itemize}
+Thus, \BL{4} implicitly has all the information to deduce the recursive PoR: that \BL{0} was imaged by \BM{1}, that \BM{1} was imaged by \BR{2}, that \BR{2} was imaged by \BM{3}, and that \BM{3} was imaged by \BL{4}.
 
-\dots
+The precise nature of how recursive PoRs should be counted and attributed, as well as which matter and which don't, is explored in the ``Recursive \emph{Proof of Reflection}'' section of the whitepaper.
+
+Recursive PoRs use converted work via the same principles as non-recursive PoRs, though the work may need to be converted in two stages depending on the conversion context used.
+
+Although \cL, \cM, and \cR are doing \emph{mutual} PoR with their neighboring chains, there's no requirement that \emph{recursive} PoR needs to be mutual.
+Provided that chains mutually reflect their neighbor, \cL and \cR are free to do one-way recursive PoR via the other.
+This is particularly sensible when there is a large asymmetry in the relative work between \cL and \cR: it makes sense for the lighter of the two to use one-way recursive PoR, but the heavier one doesn't gain a substantial benefit by including recursive PoRs via the lighter one.
+
+Recursive PoR is required for \emph{Tiling}.
 
 \section{Simplex Tilings}
 
@@ -387,13 +463,55 @@ If a tiling has a complex architecture, it could conceivably have a fractional v
 However, this is unnecessarily complex, so we will only consider tilings with integer valencies.
 Thus, we are concerned with tilings of $v \ge 3$.
 
-\begin{itemize}
-  \item Security requirements: distribution of weight
-  \item Possible configs without that requirement are speculative
-  \item An infinite number of different patterns and structures are possible, but whether a particular pattern is secure needs to be analyzed case-by-case
-\end{itemize}
+\subsection{Tree Tilings}
 
-\dots
+One particular pattern of tiling has been heavily analyzed in the whitepaper: tree tilings.
+These are tilings with a root tile, and where each tile has between $0$ and $v-1$ children.
+
+The \emph{core} of a tree tiling refers to the root tile and its immediate children.
+The core is the primary source of security in a tree tiling, and over $99\%$ of the tiling's chain-work is done by chains in the core.
+
+Tiles that are \emph{outside} of the core (i.e., grandchildren of the root tile, or tiles further away) use one-way recursive PoR with the root tile to secure themselves.
+In general, tiles only require: standard PoRs via all chains in their tile and neighboring tiles, and recursive PoRs via chains in the root tile.
+
+Additionally, all chains should validate PoRs between tiles in the core.
+This is a requirement because, provided this is done, the full security of the core is transitive using recursive PoR.
+Thus, all tiles outside the core can be roughly as secure as the core, and attacking a chain in any tile requires attacking the core.
+
+Additionally, reflected chain-work in a tiling propagates incredibly quickly.
+After a chain in a tile produces a new block (call it \BL{1}), it only takes a single reflecting block of a chain in the parent tile to expose (via recursive PoR) \BL{1} to the next tile on the way to the root tile.
+The delay between those two blocks being mined is, on average, the block period divided by the number of chains in the reflecting tile.
+So if we have 50 chains in each simplex tile,\footnote{
+  A safe minimum upper-limit of the size of a tile is at least 50 chains under $O(c)$ constraints -- see the whitepaper for the calculations.
+} and all chains have a block period of $15$ s, then the per-step delay between \BL{1} being mined a recursive PoR becoming available is $15/50$ seconds.
+Additionally, since a recursive PoR is from the local tile to the reflecting tile and back again, the recursive PoR requires $2d-1$ steps, where $d$ is the distance (number of direct links) that are between the local tile and the root tile.
+Thus, in this example, reflected work (via one-way recursive PoR with the root tile) begins to become available in $(2d-1) \cdot 15/50$ seconds.
+For $d = 9$, this means that a new PoR becomes available to \cL miners around 2.7 seconds after \BL{1} was mined.\footnote{
+  Note: this has been experimentally verified via a statistical simulation.
+}
+
+In practice, this means that new blocks in a tiling become as secure as the root tile with an almost negligible delay.
+
+\subsection{Other Tiling Patterns}
+
+There are an infinite number of tiling patterns.
+Some examples are discussed in the whitepaper and shown in \autoref{sec:patent-figs}.
+
+Not all of these patterns are useful, though.
+Additionally, it might be difficult or impossible to secure some patterns.
+While a security architecture for tree tilings is presented in the whitepaper, it is not expected that all tilings can be designed in a secure way, and it may take considerable work to show whether any particular tiling pattern is secure or not.
+
+It is questionable whether other tiling patterns are worth looking into further, since tree tilings satisfy the three criteria of Buterin's Trilemma.
+Those three criteria are: each chain is $O(c)$ constrained (decentralization), each chain is as secure as the network, and the network is scalable.
+Scalability is achieved because the tree structure allows for network capacity to grow exponentially faster than the average distance between tiles (and thus the maximum size of SPV proofs between any two chains in the network does not conflict with increasing capacity via adding new tiles).
+
+% \begin{itemize}
+%   \item Security requirements: distribution of weight
+%   \item Possible configs without that requirement are speculative
+%   \item An infinite number of different patterns and structures are possible, but whether a particular pattern is secure needs to be analyzed case-by-case
+% \end{itemize}
+
+% \dots
 
 \section{Child-chains / Dapp-chains / Sharding}
 
@@ -457,6 +575,8 @@ Thus, we are concerned with tilings of $v \ge 3$.
 \label{sec:patent-conversion-algs}
 
 \subsection{Figures}
+
+\label{sec:patent-figs}
 
 \dots
 

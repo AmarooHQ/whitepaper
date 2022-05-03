@@ -46,6 +46,18 @@
     \ensuremath{#1_{{#2}+{#3}}}\xspace%
 }
 
+\providecommand\BL{}
+\renewcommand\BL[1]{\BCI{\cL}{i}{#1}}
+\newcommand\xBL[1]{\xyB{\BL{#1}}}
+
+\providecommand\BR{}
+\renewcommand\BR[1]{\BCI{\cR}{k}{#1}}
+\newcommand\xBR[1]{\xyB{\BR{#1}}}
+
+\providecommand\BM{}
+\renewcommand\BM[1]{\BCI{\cM}{j}{#1}}
+\newcommand\xBM[1]{\xyB{\BM{#1}}}
+
 %
 % helpers for xymatrix based chain-diags
 %

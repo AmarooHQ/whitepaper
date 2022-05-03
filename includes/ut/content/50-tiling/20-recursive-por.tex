@@ -65,15 +65,15 @@ An easy example of this is: \cL nodes should not count \cM's PoRs where an \cL b
 
 \providecommand\BL{}
 \renewcommand\BL[1]{\BCI{\cL}{i}{#1}}
-\newcommand\xBL[1]{\xyB{\BL{#1}}}
+\providecommand\xBL[1]{\xyB{\BL{#1}}}
 
 \providecommand\BR{}
 \renewcommand\BR[1]{\BCI{\cR}{k}{#1}}
-\newcommand\xBR[1]{\xyB{\BR{#1}}}
+\providecommand\xBR[1]{\xyB{\BR{#1}}}
 
 \providecommand\BM{}
 \renewcommand\BM[1]{\BCI{\cM}{j}{#1}}
-\newcommand\xBM[1]{\xyB{\BM{#1}}}
+\providecommand\xBM[1]{\xyB{\BM{#1}}}
 
 Chain \cL can only count work contributed by \cR \emph{after} a multi-stage PoR can be constructed.
 For example, let's consider the (rather orderly) chain-segments in \autoref{fig:simple-recursive-por-chain-diag}.

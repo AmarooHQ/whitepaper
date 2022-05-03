@@ -20,7 +20,7 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y pdfgrep && \
     rm -rf /var/lib/apt/lists/*
 
-RUN mkdir /.npm && chown -R 1000:1000 "/.npm"
+RUN mkdir -p /.npm && chown -R 1000:1000 "/.npm"
 
 WORKDIR /work
 
