@@ -142,7 +142,7 @@
 \author{Max Kaye}
 \date{
   Currently in draft \\
-  Last Updated: 2022-05-03 \\
+  Last Updated: 2022-05-09 \\
   (Note: ``??'' indicates a link to something in the WP -- not included here.)
 }
 
@@ -514,48 +514,132 @@ Scalability is achieved because the tree structure allows for network capacity t
 
 \section{Child-chains / Dapp-chains / Sharding}
 
-\todo{
-  child-chains is the general category of chains that are either hosted on or facilitated by another blockchain.
-  dapp-chains are a specific type of child-chain, as are shards.
-  This is our terminology; there isn't a widely agreed-upon term for this.
-  some definitions of child-chains (if you google them) are different from this definition.
+\mk{This section / claim might not be necessary. It's basically just one-way PoR with a focus on a particular use case, but including it might be more hassle than it's worth.}
+
+Here, a ``child-chain'' is specifically the category of blockchains that are facilitated and secured by a parent-chain in a one-way relationship.\footnote{
+  There is no widely agreed upon term for this class of blockchain, so we use \emph{child-chain}.
+  Note that some definitions of ``child-chain'' (in other sources) may be incompatible with the definition we use here.
+}
+For example, techniques like sharding, ``parachains'' (as in the Polkadot network), and dapp-chains are all (typically) types of child-chains.
+Crucially: they depend on a parent-chain (e.g., Ethereum's \emph{Beacon chain}, Polkadot's \emph{Relay chain}, etc).
+The term ``sidechain'' refers to multiple types of blockchains, some of which are child-chains.\footnote{
+  \href{https://www.bitcoin.com/get-started/what-are-sidechains/}{This article (``What are sidechains?'')} covers the two types and provides examples.
 }
 
-\begin{itemize}
-  \item chains can hosting child-chains via PoR
-  \item this is architecturally similar to other methods of doing child-chains / dapp-chains / sharding,
-\end{itemize}
+PoR provides a method for hosting child-chains via one-way PoR (where the child-chain is reflected in the parent-chain).
 
-\dots
+Ideally, a large asymmetry should exist between the local\footnote{
+  \emph{Local} work is the work associated directly with the creation of a block.
+  Work contributed via PoR is never local work.
+} work securing the parent-chain and the local work (if any\footnote{
+  The child-chain can use a consensus mechanism that uses features that are not readily convertible, e.g., Proof of Authority, or avoid the idea of block rewards and/or a native token all together.
+}) securing the child-chain -- the parent-chain should have far more local work than the child-chain.
+In this way, the parent-chain can secure many child-chains.
+
+One advantage of using PoR for hosting child-chains is that it is incredibly efficient as the burden of recording and validating PoRs is entirely on the child-chain.
+In some cases, only the hash of a child-chain block needs to be reflected by the parent (typically 32 bytes).
+However, if the entire header of the child-chain is recorded such that a headers-only version of the child-chain is available on the parent-chain, then efficient SPV proofs can be used to facilitate techniques such as cross-chain transactions.
+Since child-chain headers can be relatively small ($\sim 80$ bytes), a modest blockchain could host thousands of child-chains using this technique.
+
+Although other systems of child-chains superficially resemble the method of hosting child-chains via PoR, they differ substantially in their implementation and security architecture.
+Crucially, those other systems do not involve the conversion of work.
+
+\mk{Note: can write more about the differences if necessary.}
+
+Child-chains via PoR can be combined with simplexes to increase the capacity of a blockchain network.
+
+% \todo{
+%   child-chains is the general category of chains that are either hosted on or facilitated by another blockchain.
+%   dapp-chains are a specific type of child-chain, as are shards.
+%   This is our terminology; there isn't a widely agreed-upon term for this.
+%   some definitions of child-chains (if you google them) are different from this definition.
+% }
+
+% \begin{itemize}
+%   \item chains can hosting child-chains via PoR
+%   \item this is architecturally similar to other methods of doing child-chains / dapp-chains / sharding,
+% \end{itemize}
+
+% \dots
 
 \section{Proxy chains}
 
-\begin{itemize}
-  \item special simplex-chain that acts as a proxy for reflections from an external, pre-existing chain (e.g., Bitcoin)
-  \item no permission required / no soft fork needed; Bitcoin miners can opt-in for extra rewards
-  \item special network rules can enable direct contribution via this indirection
-\end{itemize}
+\mk{Note: this is not covered in the WP}
 
-\dots
+A ``proxy chain'' is a special simplex-chain that a simplex uses (in combination with recursive PoR) to integrate external work done on an otherwise independent blockchain which is not part of the simplex.
+It is \emph{via} the \emph{proxy chain} that the security of that external chain is shared with the simplex.
+
+To illustrate this arrangement, let's consider a simplex with 50 chains, where only one of those simplex-chains is a proxy chain.
+This proxy chain records all of the valid headers of the external chain and all valid PoRs that can be proven via that header.
+
+Since there are PoRs of the proxy chain reflected in the external chain, there must be some method of the external chain reflecting the proxy chain.
+Additionally, we need to be able to prove that there were \emph{zero} blocks reflected by the external chain when that is applicable.\footnote{
+  We must be able to do this because we cannot assume that all miners of the external chain will participate and produce blocks (of the external chain) that reflect the proxy chain.
+  When an external block without reflections is produced, its weight contributes to the proxy chain's block(s) that were most recently reflected by an ancestor of the external block.
+}
+
+When a miner of the external chain produces a block, miners of the proxy chain include the header of that block in their draft blocks, along with a PoR of all reflected blocks.
+These PoRs are special in that the rest of the simplex is aware of them, validates them, and integrates work contributed by the external chain via the proxy chain as though the external chain were directly contributing work to the simplex.
+This integration is done via recursive PoR.
+
+Some external chains might be capable of reflecting the proxy chain via typical \emph{transactions}.
+Such external chains require suitably rich smart contract systems at a minimum.
+
+For external chains that do not have suitably rich smart contract systems, reflections must have a \emph{known location} within the block so that it is possible to prove exactly how many proxy chain blocks were reflected by any particular external block.\footnote{
+  For external chains \emph{with} suitably rich smart contract systems, the reflecting smart contract must have a known location in \emph{state}.
+  Additionally, reflecting transactions submitted to the smart contract must be reliably included in blocks of the external chain -- i.e., the external network is not so congested as to effectively censor reflections.
+  This may be mitigated to some degree via block rewards paid to the miner of the external chain and distributed via the proxy chain.
+}
+For example, if Bitcoin were used as an external chain, reflections could be provided in the \emph{coinbase} transaction (which is always the first transaction), since this is data with a known location in the Bitcoin block and a suitable reflection scheme will allow the exact number of reflected blocks to be proven (including zero).
+However, Bitcoin could not provide reflections of the proxy chain via any other transactions, since proving the number of reflected blocks requires checking every transaction in a given Bitcoin block.
+
+Note that neither permission from the external chain's community nor a soft-fork of the external chain's protocol are required for that external chain to contribute work via the proxy chain.
+Provided their is suitable freedom in the external chain's protocol (which there typically is), each individual miner on the external chain can reflect blocks of the proxy chain at their discretion.
+
+Additionally, note that the conversion of work (from that of the external chain to that of the proxy chain) requires a suitable decentralized exchange (DEX) hosted on the proxy chain, and a reliable exchange rate (between root tokens of the proxy chain and root tokens of the external chain) must be readily provable and available to the conversion algorithm.
+
+
+\subsection{Comparison to Merged Mining}
+
+A major difference between proxy chains and merged mining (aka AuxPoW) is that proxy chains use the canonical history of that other chain, but merged mining does not.
+
+Merged mining is a PoW-specific process whereby miners of a primary chain (e.g., Bitcoin) can simultaneously mine one or more secondary chains (e.g., Namecoin) without reducing their hash-rate on the primary chain.
+That is, the PoW solutions that the miner produces could be valid on the primary chain, the secondary chain(s), both, or neither.
+Typically, if a PoW solution is found for the primary chain, that solution is also valid for the secondary chain(s).\footnote{
+  This is only true when the secondary chain's PoW validation method is the same as the primary chain's.
+  If the secondary chain uses a different method to validate the PoW, then solutions for the primary chain are not necessarily solutions for the secondary chain.
+}
+This is because all hash-rate contributing to a secondary chain is also contributing to the primary chain, but not necessarily vice-versa.
+
+Since some PoW solutions for the secondary chain are not solutions for the primary chain, it is clear that merged mining and proxy chains are distinct methods of sharing PoW between blockchains.
+
+
+% \begin{itemize}
+%   \item special simplex-chain that acts as a proxy for reflections from an external, pre-existing chain (e.g., Bitcoin)
+%   \item no permission required / no soft fork needed; Bitcoin miners can opt-in for extra rewards
+%   \item special network rules can enable direct contribution via this indirection
+% \end{itemize}
+
+% \dots
 
 \section{Claims}
 
-\begin{itemize}
-  \item conversion of work + add to chain-weight
-  \item two blockchains + both do reflection + 1 or 2 do all of [PoR + conversion of work + fork rule]. result: increases security, throughput, confirmation rate; can reduce mining variance
-  \begin{itemize}
+\begin{enumerate}
+  \item PoR core: conversion of work + add to chain-weight (one-way or two-way)
+  \item two blockchains + both do reflection + either or both do all of [PoR + conversion of work + fork rule]. result: increases security, throughput/capacity, confirmation rate, whilst maintaining decentralization; can reduce mining variance (see claim below)
+  \begin{enumerate}
     \item as above for mutual reflection
-  \end{itemize}
-  \item many chains doing mutual PoR = simplex
+  \end{enumerate}
+  \item many chains doing mutual PoR = simplex ($O(c^2)$ scale)
   \item proxy chains (one way PoR with existing chains like Bitcoin to have BTC's work included in chain)
   \item recursive PoR
-  \item recursive PoR + proxy chain
-  \item mutual recursive PoR
-  \item tiling
-  \item dapp-chains via PoR
-  \item dapp-chain simplexes
+  \item proxy chain: simplex + recursive PoR + external chain
+  \item mutual recursive PoR (note: Amaroo doesn't plan to use this but it's possible)
+  \item tiling ($O(n)$ scale)
+  \item dapp-chains via PoR ($O(c^2)$ scale, or greater)
+  \item dapp-chain simplexes ($O(c^3)$ scale, or greater)
   \item miner resonance / lower mining variance
-\end{itemize}
+\end{enumerate}
 
 \section{Previous doc below}
 
@@ -565,7 +649,7 @@ Scalability is achieved because the tree structure allows for network capacity t
 
 \newpage
 
-\section{Figures and Algorithms -- omitted atm to decrease compilation time}
+\section{Figures and Algorithms} % -- omitted atm to decrease compilation time}
 
 \mk{placeholder sections}
 
@@ -582,8 +666,8 @@ Scalability is achieved because the tree structure allows for network capacity t
 
 \begin{section}{Figures and Algorithms}
   \mk{Figures and algorithms from the WP -- the algorithms will probably need some updating but can do that towards the end of the drafting process.}
-    % \input{figs-in-wp.tex}
-    % \input{figs-orig.tex}
+    \input{figs-in-wp.tex}
+    \input{figs-orig.tex}
 \end{section}
 
 \end{document}
