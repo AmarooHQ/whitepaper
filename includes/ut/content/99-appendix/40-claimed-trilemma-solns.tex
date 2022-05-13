@@ -1,0 +1,75 @@
+\section{Claimed Solutions to the Trilemma}
+
+\label{sec:claimed-trilemma-solns}
+
+A somewhat common response to our claim that UT solves the trilemma is: \emph{X claims to solve the trilemma, too, what about them?}
+
+This section will criticize claims of other projects being a solution to the trilemma.
+
+\subsection{Fantom}
+
+Fantom uses a new consensus mechanism that they call Lachesis.
+The core elements of Lachesis are: asynchronous BFT, a DAG-chain, and some form of PoS.
+
+The Fantom Foundation website says\footnote{
+    See: \url{\citeFantomIntro}, \url{\citeFantomIndexingSoln}, \url{\citeFantomLachesis}, \url{\citeFantomFaq}
+} that Fantom (via Lachesis, their consensus mechanism) solves the trilemma:
+
+% \bquote{
+%     Current solutions make trade-offs between three components: scalability, security and decentralization. This is known as the blockchain trilemma.
+
+%     [...]
+
+%     Fantom tackles the problem at the core: its high-speed consensus mechanism, Lachesis, allows digital assets to operate at unprecedented speed and delivers dramatic improvements over the current systems.
+% }{\url{\citeFantomIntro}}
+
+
+\bquote{
+    It solves the blockchain Scalability Trilemma, [...]
+}{\href{\citeFantomLachesis}{What is Lachesis?}}
+
+\bquote{
+    \emph{``Fantom is an exceptional platform that is cutting no corners in tackling the blockchain trilemma.} [...] \\
+    Covalent CEO
+}{\href{\citeFantomIndexingSoln}{Fantom press release, 2021-03-23}}
+
+\subsubsection{No Citations, Reasoning, or Explanation}
+
+There is no citation (provided by Fantom or anyone else) to a proper argument that Lachesis is a solution to the trilemma.
+
+Neither the Fantom whitepaper nor their paper on Lachesis even mention ``trilemma''.\footnote{
+    See: \url{\citeFantomWP} and \url{\citeFantomWP2}.
+}
+
+Why is no basis for the claim provided?
+
+\subsubsection{Shifting Goal Posts}
+
+In Fantom's own publications (as well as being repeated\footnote{
+    Example: \url{https://www.nansen.ai/research/fantom-solving-the-blockchain-trilemma} (also republished at \url{https://tritiumvc.medium.com/fantom-solving-the-blockchain-trilemma-9b2dd3d6eab6}).
+    These are two of the top search results for \emph{fantom trilemma}.
+} by others) state:
+
+\bquote{
+    The blockchain trilemma is the known trade-off in distributed ledger technologies, which have to balance between speed, security, and decentralization.
+}{\href{\citeFantomFaq}{Answer to \emph{What problem does Fantom solve? What is the blockchain trilemma?}}}
+
+This is incorrect and does not represent the trilemma.
+
+Particularly, the trilemma says nothing about \emph{speed}, rather, it's about \emph{capacity}.\footnote{
+    This mistake is not made on another page of theirs: \url{https://web.archive.org/web/20210913152616/https://fantom.foundation/lachesis-consensus-algorithm/}.
+}
+
+There are at least three qualitatively different meanings of \emph{speed} that apply to blockchains:
+
+\begin{itemize}
+    \item When a transaction is made, how long until the next block is produced (latency).
+    \item When the network is congested, how long a transaction takes to be included in a block (latency under congestion).
+    \item After a transaction is first included in a block, how long until that transaction is considered ``confirmed'' or ``finalized'' (confirmation time).
+\end{itemize}
+
+However, the trilemma is (canonically) about confirming $O(n) > O(c)$ transactions -- i.e., \emph{throughput} or \emph{capacity}.
+None of the meanings of speed are directly relevant to solving the trilemma.
+Being ``fast'' might make for a better user experience, but it's not relevant here.
+
+% Since a solution to the trilemma should never experience global congestion, we don't care about \emph{latency under congestion}.

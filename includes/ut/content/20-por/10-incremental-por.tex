@@ -17,10 +17,10 @@ Can we come up with a general to share security between chains?
 }
 
 Our starting point is the idea of one chain 'tracking' another chain via its headers -- it's the sort of thing that would enable a smart contract to do on-chain SPV proof evaluation.
-This isn't a new idea: in 2013\footnote{
-    \url{https://bitcointalk.org/index.php?topic=198032.0},
-    \url{https://bitcointalk.org/index.php?topic=598784.0}
-}, I proposed a system which used this method to support rich cross-chain exchange.
+This isn't a new idea: in 2013, I proposed a system which used this method to support rich cross-chain exchange.\footnote{
+  see \url{https://bitcointalk.org/index.php?topic=198032.0}, and
+  \url{https://bitcointalk.org/index.php?topic=598784.0}
+}
 I also wrote a simplified implementation of this method for Bitcoin SPV proofs in the very early days of Ethereum\footnote{
     \url{https://github.com/XertroV/coppr/blob/master/chainheaders.py}
 } -- a precursor to the later-successful BTC Relay\footnote{
@@ -80,7 +80,7 @@ Note: \autoref{fig:pr-btc-eth-step1} includes some variance in Ethereum's block 
   (Hypothetical) A projection of Bitcoin in Ethereum via an SC and transactions.
 ]{
   (Hypothetical) Bitcoin headers, as they are produced, are included in Ethereum's state via a smart contract and user made transactions.
-  This is roughly how \textit{BTC Relay} worked.
+  This is roughly how BTC Relay worked.
 }
 \label{fig:pr-btc-eth-step1}
 \end{figure}
@@ -118,7 +118,7 @@ Unlike before, let's assume this is a \emph{protocol-level} implementation; so \
 \begin{figure}
     \centering
     \includegraphics[max width=\linewidth, height=0.28\textheight]{pow_refl_step1_sag}
-    \caption{Step 1: Chain R images Chain L; thus Chain R hosts a \emph{projection} of Chain L.}
+    \caption{Step 1. Chain R images Chain L; thus Chain R hosts a \emph{projection} of Chain L.}
     \label{fig:pow_refl_step1}
 \end{figure}
 
@@ -128,9 +128,9 @@ Similar to \cR, \cL will begin including \cR headers in each block via appropria
 Just as \cR hosts a projection of \cL, \cL now hosts a projection of \cR.
 This is shown in \autoref{fig:pow_refl_step2} and \autoref{tab:por-step-2}.
 
-\begin{table}
+\begin{table}[hb]
 \centering
-\caption{Step 2: Both Chain L and Chain R host a projection of each other.}
+\caption{Step 2. Both Chain L and Chain R host a projection of each other.}
 \label{tab:por-step-2}
 \resizebox{\textwidth}{!} {%
 \begin{tabular}{lllllll}
@@ -152,7 +152,7 @@ This is shown in \autoref{fig:pow_refl_step2} and \autoref{tab:por-step-2}.
 \begin{figure}
 \centering
 \includegraphics[max width=\linewidth, max height=0.4\textheight]{pow_refl_step2_sag}
-\caption{Step 2: Chain L and Chain R contain a projection of each other's headers-only chain.}
+\caption{Step 2. Chain L and Chain R contain a projection of each other's headers-only chain.}
 \label{fig:pow_refl_step2}
 \end{figure}
 
