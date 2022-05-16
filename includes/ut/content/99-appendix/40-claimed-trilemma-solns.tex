@@ -12,7 +12,7 @@ Fantom uses a new consensus mechanism that they call Lachesis.
 The core elements of Lachesis are: asynchronous BFT, a DAG-chain, and some form of PoS.
 
 The Fantom Foundation website says\footnote{
-    See: \url{\citeFantomIntro}, \url{\citeFantomIndexingSoln}, \url{\citeFantomLachesis}, \url{\citeFantomFaq}
+    See: \url{\linkFantomIntro}, \url{\linkFantomIndexingSoln}, \url{\linkFantomLachesis}, \url{\linkFantomFaq}
 } that Fantom (via Lachesis, their consensus mechanism) solves the trilemma:
 
 % \bquote{
@@ -21,27 +21,49 @@ The Fantom Foundation website says\footnote{
 %     [...]
 
 %     Fantom tackles the problem at the core: its high-speed consensus mechanism, Lachesis, allows digital assets to operate at unprecedented speed and delivers dramatic improvements over the current systems.
-% }{\url{\citeFantomIntro}}
+% }{\url{\linkFantomIntro}}
 
 
 \bquote{
     It solves the blockchain Scalability Trilemma, [...]
-}{\href{\citeFantomLachesis}{What is Lachesis?}}
+}{\citeFantomLachesis}
 
 \bquote{
-    \emph{``Fantom is an exceptional platform that is cutting no corners in tackling the blockchain trilemma.} [...] \\
-    Covalent CEO
-}{\href{\citeFantomIndexingSoln}{Fantom press release, 2021-03-23}}
+    \emph{``Fantom is an exceptional platform that is cutting no corners in tackling the blockchain trilemma. {[...]}''}
+    -- Ganesh, Covalent CEO
+}{\href{\linkFantomIndexingSoln}{Fantom press release, 2021-03-23}}
 
 \subsubsection{No Citations, Reasoning, or Explanation}
 
-There is no citation (provided by Fantom or anyone else) to a proper argument that Lachesis is a solution to the trilemma.
-
-Neither the Fantom whitepaper nor their paper on Lachesis even mention ``trilemma''.\footnote{
-    See: \url{\citeFantomWP} and \url{\citeFantomWP2}.
+Pages on Fantom's website provide no citation or reference that leads to a proper argument that Lachesis is a solution to the trilemma.
+Where there is some explanation, it is superficial and insufficient.\footnote{
+    Example: \citeFantomLachesis.
 }
 
-Why is no basis for the claim provided?
+Neither the Fantom whitepaper nor their paper on Lachesis even mention ``trilemma''.\footnote{
+    See: \url{\linkFantomWP} and \url{\linkFantomWPLachesis}.
+}
+
+Why isn't the claim ever accompanied by a citation?
+
+
+
+\subsubsection{Lachesis is $O(c)$}
+
+Fantom claim that the \emph{asynchronous} nature of Lachesis is the reason that it is scalable:
+
+\bquote{
+    Finally, aBFT networks allow for greater scalability and decentralization since there isn't excessive communication to limit the number of participating nodes.
+}{\citeFantomLachesis}
+
+While this does argue that aBFT is superior to pBFT, it isn't relevant to the trilemma -- communication overhead isn't the issue.
+
+Rather, Fantom must show that Lachesis can process $> O(c)$ transactions, \emph{at a minimum}, whilst not suffering network degradation.
+However, regardless of the order of blocks processed, $\nicefrac{2}{3}$ of validating nodes must agree before a block is finalized.\footnote{
+    ``Transactions are finalized as soon as the nodes agree on the decision.'' -- \citeFantomLachesis.
+}
+Since validators are $O(c)$ constrained, Lachesis is $O(c)$ scalable.
+
 
 \subsubsection{Shifting Goal Posts}
 
@@ -51,8 +73,9 @@ In Fantom's own publications (as well as being repeated\footnote{
 } by others) state:
 
 \bquote{
-    The blockchain trilemma is the known trade-off in distributed ledger technologies, which have to balance between speed, security, and decentralization.
-}{\href{\citeFantomFaq}{Answer to \emph{What problem does Fantom solve? What is the blockchain trilemma?}}}
+    The blockchain trilemma is the known trade-off in distributed ledger technologies, which have to balance between speed, security, and decentralization. \\
+    {[...]}
+}{\href{\linkFantomFaq}{Answer to \emph{What problem does Fantom solve? What is the blockchain trilemma?}}}
 
 This is incorrect and does not represent the trilemma.
 
