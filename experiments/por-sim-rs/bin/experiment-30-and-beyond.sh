@@ -75,6 +75,9 @@ case "$DS_CONFS_PRESET" in
   very-short-to-very-long)
     ds_conf_arr=(1.0 1.41 2.0 3.0 4 5 6 7 9 15 20 30 45 60 90)
     ;;
+  very-short-to-long)
+    ds_conf_arr=(1.0 1.41 2.0 3.0 4 5 6 7 9 15 20 30 45 60)
+    ;;
   very-short)
     ds_conf_arr=(1.0 1.41 2.0)
     ;;
@@ -105,6 +108,9 @@ case "$N_CHAINS_PRESET" in
   balanced-with-big)
     nchain_arr=(64 32 23 16 11 `seq 8 -1 1`)
     ;;
+  balanced)
+    nchain_arr=(32 23 16 11 `seq 8 -1 1`)
+    ;;
   *)
     if [[ ! -z "$ATK_NCHAINS_ONLY" ]]; then
       IFS=',' read -ra nchain_arr <<< "$ATK_NCHAINS_ONLY"
@@ -122,6 +128,9 @@ case "$ATK_QS_PRESET" in
     ;;
   0.2,0.3)
     atk_qs=( 0.2 0.3 )
+    ;;
+  bft)
+    atk_qs=( 0.3333333 )
     ;;
   *)
     if [[ ! -z "$ATK_HR_ONLY" ]]; then

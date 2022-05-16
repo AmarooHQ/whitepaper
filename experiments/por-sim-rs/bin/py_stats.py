@@ -1726,6 +1726,38 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             sec_x_label=LP_SEC_X_LABEL,
         )
         for q in ['0.2', '0.3']
+    ] + [
+        # bft comparison
+        SavePlot(
+            [
+                (f'exp_35_RandHR_xxh3_q={q}_dswin={ds}_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA500.csv', 'por', PorPlotOpts(cec_scaled=ds_ / cec_scaling_confs))
+                for (ds, ds_) in [
+                    ('1.0', 1.0),
+                    ('1.41', 1.41),
+                    ('2.0', 2.0),
+                    ('3.0', 3.0),
+                    ('4', 4),
+                    ('5', 5),
+                    ('6', 6),
+                    ('7', 7),
+                    ('9', 9),
+                    ('15', 15),
+                    ('20', 20),
+                    ('30', 30),
+                    ('45', 45),
+                    ('60', 60),
+                    ]
+            ],
+            f"BFT comparison (q={q})\nw/ scaling via CEC to {cec_scaling_confs} confs",
+            f"png/exp_35_bft_comparison_cec_q={q}_cecscale={cec_scaling_confs}",
+            save_as_file_exts=['pdf', 'png', 'csv'],
+            x_range=(0, 65),
+            figsize=(10, 7),
+            x_label=std_x_label(None),
+            sec_x_label=LP_SEC_X_LABEL,
+        )
+        for q in ['0.3333333']
+        for cec_scaling_confs in [1.0, 4.0]
     ]
 
     pool = mpp.Pool(n_jobs)

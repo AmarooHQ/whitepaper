@@ -216,3 +216,19 @@ low # of confs
   export EXP_NUM=34
   ./bin/experiment-30-and-beyond.sh
 )
+
+# q=33% for comparison to {a/p}BFT based stuff
+
+(
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=16
+  export ATK_QS_PRESET=bft
+  export DS_CONFS_PRESET=very-short-to-long
+  export N_CHAINS_PRESET=balanced
+  export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=35
+  ./bin/experiment-30-and-beyond.sh
+)
