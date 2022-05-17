@@ -63,6 +63,13 @@ def assert_all_eq(xs, ys):
 
 
 @dataclass
+class Anno:
+    label: str
+    x_pos: float
+    anno_pos: tuple[float, float]
+
+
+@dataclass
 class PorPlotOpts:
     _trans_x: Optional[Callable[[float], float]] = None
     _label_extra: Optional[str] = None
@@ -70,6 +77,7 @@ class PorPlotOpts:
     _kwargs: Optional[dict] = None
     # colors are consistent regardless of por plot order or number (based on ds_target)
     use_consistent_color: bool = False
+    annotation: Optional[Anno] = None
 
     def trans_x(self, x):
         if self._trans_x:
@@ -499,13 +507,14 @@ def csv_col_label(results_ty, chain_ty, q, ds_target, daa: Any = '0', scale=None
     return "&".join([f"kls={results_ty}", f"ty={chain_ty}", f"q={q}", f"ds={ds_target}", f"daa={daa}", f"scale={scale or 1}"])
 
 
-def _plot_this_csv(_csv_data, seen_lines, legend_gids, _chain_ty, __q, _ds_target, _daa, __kwargs):
+def _plot_this_csv(_csv_data, seen_lines, legend_gids, _chain_ty, __q, _ds_target, _daa, __kwargs, ppo):
     def _inner():
         plot_res = _csv_data.plot(**__kwargs)
         get_unseen(seen_lines, plot_res.get_lines()).set_gid(
             f'results_line_{_chain_ty}_q{__q}_ds{_ds_target}_daa{_daa}'
             .replace('.', '_'))
         legend_gids.append(('results', _chain_ty, __q, _ds_target, _daa))
+        add_optional_annotation(ppo, _csv_data)
     return _inner
 
 
@@ -527,6 +536,31 @@ def plot_analytical(multipliers, q: float, ds_target: int, td_max_ys, t_series, 
     label=f"y = {prob_math} --- Trad: $q={q:.2f}$ (Analytical Solution: Rosenfeld, 2012)"
     t_series.append((csv_col_label('analytical', 'trad', q, ds_target, daa='0'), theoretical_data))
     plot_fs.append(_plot_this_analytical(theoretical_data, label, seen_lines, legend_gids, q, ds_target, dict()))
+
+
+def add_optional_annotation(plot_opts: PorPlotOpts, data: pd.Series):
+    '''
+        if no anno -> return
+        1. calculate point on series (might be between two data points)
+        2. call annotate(text, xy, xytext)
+            arrowprops=dict(arrowstyle='-',)
+    '''
+    anno = plot_opts.annotation
+    if anno is None:
+        return
+    upper_x = list(filter(lambda x: x >= anno.x_pos, data.index))[0]
+    lower_x = list(filter(lambda x: x <= anno.x_pos, data.index))[-1]
+    upper_y = data[upper_x]
+    lower_y = data[lower_x]
+    xy: tuple[float, float] = ((upper_x + lower_x)/2, (upper_y + lower_y)/2)
+    _anno = plt.annotate(
+        anno.label, xy, xytext=anno.anno_pos,
+        arrowprops=dict(arrowstyle='-',),
+        annotation_clip=False)
+    _anno.set(ha='center', va='center')
+    _anno.set(bbox=dict(boxstyle='square', fill=True, fc=(0.9, 0.9, 0.9, 0.7)))
+
+
 
 
 
@@ -611,7 +645,7 @@ def plot_chart(csv_files: list[CsvFileToPlot], plot_kwargs=None, graph_theory_di
             _kwargs['label'] = f"y = {prob_math} --- {ty_str} $q={_q:.2f}$; $B_f^{{-1}} = {block_target}$; $\\mathrm{{DAA}}_N = {daa}$; ($n \\geq {n_trials}$) {label_extra or ''}"
         csv_series.append((csv_col_label('results', chain_ty, _q, ds_target, daa=daa, scale=por_plot_opts.cec_scaled), csv_data))
 
-        plot_fs.append(_plot_this_csv(csv_data, seen_lines, legend_gids, chain_ty, _q, ds_target, daa, _kwargs))
+        plot_fs.append(_plot_this_csv(csv_data, seen_lines, legend_gids, chain_ty, _q, ds_target, daa, _kwargs, ppo=por_plot_opts))
         # ms_elapsed.plot(label=f"$\\bar{{d}}$ (ms); $B_f^{{-1}} = {block_target}$", secondary_y=True)
         # d2.plot(label="PoR - $y^{0.7}$")
         _max_ix = max(_max_ix, max_ix)
@@ -1474,12 +1508,12 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
         for t in ['5']
         for exp,daa in [('26', 100), ('26', 500), ('28', 20)]
     ] + [
-        # for LP: some early results
+        # for LP / CEC Iter: some early results
         SavePlot(
             [
                 # ('exp-4c-hash-xxrev.csv', 'por', None)  # already fixed
-                ('exp-3.csv', 'por', None),
-                ('exp-aux1.csv', 'trad', None),
+                ('exp-3.csv', 'por', PorPlotOpts(annotation=Anno("Simplex", 5, (8, 0.25)))),
+                ('exp-aux1.csv', 'trad', PorPlotOpts(annotation=Anno("Traditional", 4, (2, 0.05)))),
             ],
             f"PoR Simulator: Early Results",
             f"png/lp_early_results",
@@ -1492,11 +1526,11 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             plot_this_order=[2,1,0],
         )
     ] + [
-        # for LP: after draft refl work
+        # for LP / CEC Iter: after draft refl work
         SavePlot(
             [
-                ('exp-3.csv', 'por', 'no DRW'),
-                ('exp-12-repeat-8-RDoubleSpendWork-q0.44-t20-p50-H50-WeightedDag-xxh3.csv', 'por', 'w/ DRW'),
+                ('exp-3.csv', 'por', PorPlotOpts(annotation=Anno("Before", 5, (10, 0.2)), _label_extra='no DRW')),
+                ('exp-12-repeat-8-RDoubleSpendWork-q0.44-t20-p50-H50-WeightedDag-xxh3.csv', 'por', PorPlotOpts(annotation=Anno("After", 4, (2, 0.05)), _label_extra='w/ DRW')),
                 # ('exp_aux2_q=0.44_dsconf-base=5_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', None),
             ],
             f"PoR Simulator: Early Results -- Accounting for Draft Reflected Work (DRW)",
@@ -1514,8 +1548,8 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
         # interim results: before/after randomizing hash-rates
         SavePlot(
             [
-                ('exp-12-repeat-8-RDoubleSpendWork-q0.40-t5-p50-H50-WeightedDag-xxh3.csv', 'por', 'Uniform HRs'),
-                ('exp_13_RandHR_q=0.40_dswin=5_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', 'Random HRs'),
+                ('exp-12-repeat-8-RDoubleSpendWork-q0.40-t5-p50-H50-WeightedDag-xxh3.csv', 'por', PorPlotOpts(annotation=Anno("Before", 4, (2, 0.05)), _label_extra='Uniform HRs')),
+                ('exp_13_RandHR_q=0.40_dswin=5_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', PorPlotOpts(annotation=Anno("After", 6, (9, 0.2)), _label_extra='Random HRs')),
                 # ('exp_13_RandHR_q=0.44_dswin=5_bt=50_hr=50_DoubleSpend_WeightedDag_DAA100.csv', 'por', None),
             ],
             f"PoR Simulator: Early Results -- Randomizing Hash-rates",
@@ -1533,9 +1567,9 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
         # interim results: before/after adding bonus block
         SavePlot(
             [
-                ('exp_13_RandHR_q=0.40_dswin=5_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', 'No Bonus Block'),
+                ('exp_13_RandHR_q=0.40_dswin=5_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', PorPlotOpts(annotation=Anno("Before", 4, (2, 0.075)), _label_extra='No Bonus Block')),
                 # ('exp_22c_RandHR_xxh3_q=0.40_dswin=5_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', '+Bonus Block'),
-                ('exp_26_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', '+Bonus Block'),
+                ('exp_26_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', PorPlotOpts(annotation=Anno("After", 3, (6, 0.3)), _label_extra='+Bonus Block')),
                 # ('exp_22aux_RandHR_xxh3_q=0.40_dswin=5_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', '+Bonus Block'),
                 ('exp_aux3_q=0.40_dsconf-base=5_bt=50_hr=50_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', 'No Bonus Block'),
                 ('exp_26aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', '+Bonus Block'),
@@ -1558,8 +1592,8 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
                 # ('exp_26_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', None),
                 # ('exp_26_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA500.csv', 'por', None),
                 ('exp_28aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA20.csv', 'trad', None),
-                ('exp_26aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', None),
-                ('exp_26aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA500.csv', 'trad', None),
+                ('exp_26aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', PorPlotOpts(annotation=Anno("Before", 5, (2, 0.1)))),
+                ('exp_26aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA500.csv', 'trad', PorPlotOpts(annotation=Anno("After", 6, (10, 0.3)))),
             ],
             "PoR Simulator: Early Results -- $\\mathrm{DAA}_N = 100 \\to 500$",
             f"png/_interim_daa",

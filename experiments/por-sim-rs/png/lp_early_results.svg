@@ -2069,8 +2069,62 @@ L 565.2 273.88
 L 565.2 62.12 
 " style="fill:none;stroke:#000000;stroke-linecap:square;stroke-linejoin:miter;stroke-width:0.8;"/>
    </g>
+   <g id="patch_9">
+    <path d="M 120.038227 243.629091 
+Q 132.269141 238.793363 144.500054 233.957634 
+" style="fill:none;stroke:#000000;stroke-linecap:round;"/>
+   </g>
+   <g id="text_30">
+    <g id="patch_10">
+     <path d="M 68.055551 260.543063 
+L 126.114926 260.543063 
+L 126.114926 244.864938 
+L 68.055551 244.864938 
+z
+" style="fill:#e6e6e6;fill-opacity:0.7;stroke:#000000;stroke-linejoin:miter;"/>
+    </g>
+    <!-- Traditional -->
+    <g transform="translate(71.055551 255.463375)scale(0.1 -0.1)">
+     <use xlink:href="#DejaVuSans-54"/>
+     <use x="46.333984" xlink:href="#DejaVuSans-72"/>
+     <use x="87.447266" xlink:href="#DejaVuSans-61"/>
+     <use x="148.726562" xlink:href="#DejaVuSans-64"/>
+     <use x="212.203125" xlink:href="#DejaVuSans-69"/>
+     <use x="239.986328" xlink:href="#DejaVuSans-74"/>
+     <use x="279.195312" xlink:href="#DejaVuSans-69"/>
+     <use x="306.978516" xlink:href="#DejaVuSans-6f"/>
+     <use x="368.160156" xlink:href="#DejaVuSans-6e"/>
+     <use x="431.539062" xlink:href="#DejaVuSans-61"/>
+     <use x="492.818359" xlink:href="#DejaVuSans-6c"/>
+    </g>
+   </g>
+   <g id="patch_11">
+    <path d="M 227.997243 177.303879 
+Q 200.372625 192.499604 172.748008 207.69533 
+" style="fill:none;stroke:#000000;stroke-linecap:round;"/>
+   </g>
+   <g id="text_31">
+    <g id="patch_12">
+     <path d="M 221.96564 175.839063 
+L 267.856265 175.839063 
+L 267.856265 160.160938 
+L 221.96564 160.160938 
+z
+" style="fill:#e6e6e6;fill-opacity:0.7;stroke:#000000;stroke-linejoin:miter;"/>
+    </g>
+    <!-- Simplex -->
+    <g transform="translate(224.96564 170.759375)scale(0.1 -0.1)">
+     <use xlink:href="#DejaVuSans-53"/>
+     <use x="63.476562" xlink:href="#DejaVuSans-69"/>
+     <use x="91.259766" xlink:href="#DejaVuSans-6d"/>
+     <use x="188.671875" xlink:href="#DejaVuSans-70"/>
+     <use x="252.148438" xlink:href="#DejaVuSans-6c"/>
+     <use x="279.931641" xlink:href="#DejaVuSans-65"/>
+     <use x="339.705078" xlink:href="#DejaVuSans-78"/>
+    </g>
+   </g>
    <g id="legend_1">
-    <g id="patch_9">
+    <g id="patch_13">
      <path d="M 121.9 118.42 
 L 558.2 118.42 
 Q 560.2 118.42 560.2 116.42 
@@ -2090,7 +2144,7 @@ L 143.9 75.22
     </g>
     <g id="line2d_106"/>
     <g id="legend_text_analytical_line_trad_q0_44_ds20_daa0">
-     <g id="patch_10">
+     <g id="patch_14">
       <path d="M 151.9 82.82 
 L 556.2 82.82 
 Q 558.2 82.82 558.2 80.82 
@@ -2395,7 +2449,7 @@ L 143.9 91.32
      </g>
     </g>
     <g id="legend_text_results_line_trad_q0_44_ds20_0_daa100">
-     <g id="patch_11">
+     <g id="patch_15">
       <path d="M 151.9 99.62 
 L 540.3 99.62 
 Q 542.3 99.62 542.3 97.62 
@@ -2625,7 +2679,7 @@ L 143.9 108.12
      </g>
     </g>
     <g id="legend_text_results_line_por_q0_44_ds20_0_daa100">
-     <g id="patch_12">
+     <g id="patch_16">
       <path d="M 151.9 116.42 
 L 539.8 116.42 
 Q 541.8 116.42 541.8 114.42 
@@ -2713,7 +2767,7 @@ z
     </g>
    </g>
   </g>
-  <g id="text_30">
+  <g id="text_32">
    <!-- PoR Simulator: Early Results -->
    <g transform="translate(203.349375 15.454125)scale(0.12 -0.12)">
     <defs>

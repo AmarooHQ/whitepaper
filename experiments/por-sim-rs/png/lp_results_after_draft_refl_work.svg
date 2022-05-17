@@ -2333,8 +2333,73 @@ L 565.2 273.88
 L 565.2 62.12 
 " style="fill:none;stroke:#000000;stroke-linecap:square;stroke-linejoin:miter;stroke-width:0.8;"/>
    </g>
+   <g id="patch_9">
+    <path d="M 275.703566 183.645309 
+Q 226.759547 192.352775 177.815528 201.06024 
+" style="fill:none;stroke:#000000;stroke-linecap:round;"/>
+   </g>
+   <g id="text_34">
+    <g id="patch_10">
+     <path d="M 278.171525 187.603507 
+L 316.863713 187.603507 
+L 316.863713 171.925382 
+L 278.171525 171.925382 
+z
+" style="fill:#e6e6e6;fill-opacity:0.7;stroke:#000000;stroke-linejoin:miter;"/>
+    </g>
+    <!-- Before -->
+    <g transform="translate(281.171525 182.523819)scale(0.1 -0.1)">
+     <use xlink:href="#DejaVuSans-42"/>
+     <use x="68.603516" xlink:href="#DejaVuSans-65"/>
+     <use x="130.126953" xlink:href="#DejaVuSans-66"/>
+     <use x="165.332031" xlink:href="#DejaVuSans-6f"/>
+     <use x="226.513672" xlink:href="#DejaVuSans-72"/>
+     <use x="265.376953" xlink:href="#DejaVuSans-65"/>
+    </g>
+   </g>
+   <g id="patch_11">
+    <path d="M 120.24973 244.796007 
+Q 134.927338 240.112798 149.604946 235.429589 
+" style="fill:none;stroke:#000000;stroke-linecap:round;"/>
+   </g>
+   <g id="text_35">
+    <g id="patch_12">
+     <path d="M 87.835618 258.190174 
+L 117.84343 258.190174 
+L 117.84343 242.512049 
+L 87.835618 242.512049 
+z
+" style="fill:#e6e6e6;fill-opacity:0.7;stroke:#000000;stroke-linejoin:miter;"/>
+    </g>
+    <!-- After -->
+    <g transform="translate(90.835618 253.110486)scale(0.1 -0.1)">
+     <defs>
+      <path d="M 2188 4044 
+L 1331 1722 
+L 3047 1722 
+L 2188 4044 
+z
+M 1831 4666 
+L 2547 4666 
+L 4325 0 
+L 3669 0 
+L 3244 1197 
+L 1141 1197 
+L 716 0 
+L 50 0 
+L 1831 4666 
+z
+" id="DejaVuSans-41" transform="scale(0.015625)"/>
+     </defs>
+     <use xlink:href="#DejaVuSans-41"/>
+     <use x="64.783203" xlink:href="#DejaVuSans-66"/>
+     <use x="98.238281" xlink:href="#DejaVuSans-74"/>
+     <use x="137.447266" xlink:href="#DejaVuSans-65"/>
+     <use x="198.970703" xlink:href="#DejaVuSans-72"/>
+    </g>
+   </g>
    <g id="legend_1">
-    <g id="patch_9">
+    <g id="patch_13">
      <path d="M 98.1 118.42 
 L 558.2 118.42 
 Q 560.2 118.42 560.2 116.42 
@@ -2354,7 +2419,7 @@ L 120.1 75.22
     </g>
     <g id="line2d_146"/>
     <g id="legend_text_analytical_line_trad_q0_44_ds20_daa0">
-     <g id="patch_10">
+     <g id="patch_14">
       <path d="M 128.1 82.82 
 L 532.4 82.82 
 Q 534.4 82.82 534.4 80.82 
@@ -2509,22 +2574,6 @@ L 750 2516
 L 750 3309 
 z
 " id="DejaVuSans-3a" transform="scale(0.015625)"/>
-       <path d="M 2188 4044 
-L 1331 1722 
-L 3047 1722 
-L 2188 4044 
-z
-M 1831 4666 
-L 2547 4666 
-L 4325 0 
-L 3669 0 
-L 3244 1197 
-L 1141 1197 
-L 716 0 
-L 50 0 
-L 1831 4666 
-z
-" id="DejaVuSans-41" transform="scale(0.015625)"/>
        <path d="M 2841 2188 
 Q 3044 2119 3236 1894 
 Q 3428 1669 3622 1275 
@@ -2659,7 +2708,7 @@ L 120.1 91.32
      </g>
     </g>
     <g id="legend_text_results_line_por_q0_44_ds20_0_daa100">
-     <g id="patch_11">
+     <g id="patch_15">
       <path d="M 128.1 99.62 
 L 556.2 99.62 
 Q 558.2 99.62 558.2 97.62 
@@ -2912,7 +2961,7 @@ L 120.1 108.12
      </g>
     </g>
     <g id="legend_text_results_line_por_q0_44_ds20_0_daa100">
-     <g id="patch_12">
+     <g id="patch_16">
       <path d="M 128.1 116.42 
 L 555.3 116.42 
 Q 557.3 116.42 557.3 114.42 
@@ -3031,7 +3080,7 @@ z
     </g>
    </g>
   </g>
-  <g id="text_34">
+  <g id="text_36">
    <!-- PoR Simulator: Early Results - - Accounting for Draft Reflected Work (DRW) -->
    <g transform="translate(66.225 15.454125)scale(0.12 -0.12)">
     <defs>
