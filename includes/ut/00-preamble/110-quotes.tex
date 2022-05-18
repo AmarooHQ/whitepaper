@@ -41,11 +41,11 @@
     \end{quote}
 }
 
-\newcommand{\bquote}[2]{
+\NewDocumentCommand{\bquote}{ m o }{
     \begin{quote}{}
     #1
     \IfNoValueTF{#2}{}{
-
+        \par
         \noindent
         \xrfill[0.7ex]{0.5pt}
         \vspace{0em}

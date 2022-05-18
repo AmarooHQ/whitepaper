@@ -14,9 +14,11 @@ Hosting dapp-chains on many simplex-chains also provides greater system-wide max
 A common method of sharding is to *nest* blockchains.
 For example, Ethereum 2 has *The Beacon Chain* -- its root-chain (the single base-chain of a network).
 
+```{=latex}
 \bquote{
     The Beacon Chain will conduct or coordinate the expanded network of shards and stakers. But it won't be like the Ethereum mainnet of today. It can't handle accounts or smart contracts.
-}{\citeBeaconChainLink}
+}[\citeBeaconChainLink{}]
+```
 
 This type of configuration, where a base-chain facilitates child-chains, is referred to as *nesting* in this section and in the context of UT's architecture and complexity.
 Base-chains are at the first level of nesting.
@@ -37,7 +39,7 @@ Such PoS UT dapp-chains have \emph{all} the security qualities of an equivalent 
 If they were called *layer 1* chains, then what is the simplex -- *layer 0*?
 It is clear that the common idea behind *layer 1/2* scaling does not have sufficient capacity to accurately describe UT's simplex- and dapp-chains; it is inadequate.
 
-#### Analysis Methodology
+### Analysis Methodology
 
 The following derivations focus on *throughput* of particular blockchain designs and scaling configurations.
 These derivations will let us evaluate the complexity of each design.

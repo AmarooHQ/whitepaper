@@ -1,19 +1,14 @@
-\section{Claimed Solutions to the Trilemma}
-
-\label{sec:claimed-trilemma-solns}
-
-A somewhat common response to our claim that UT solves the trilemma is: \emph{X claims to solve the trilemma, too, what about them?}
-
-This section will criticize claims of other projects being a solution to the trilemma.
 
 \subsection{Fantom}
 
 Fantom uses a new consensus mechanism that they call Lachesis.
 The core elements of Lachesis are: asynchronous BFT, a DAG-chain, and some form of PoS.
 
-The Fantom Foundation website says\footnote{
-    See: \url{\linkFantomIntro}, \url{\linkFantomIndexingSoln}, \url{\linkFantomLachesis}, \url{\linkFantomFaq}
-} that Fantom (via Lachesis, their consensus mechanism) solves the trilemma:
+The Fantom Foundation website says that Fantom (via Lachesis, their consensus mechanism) solves the trilemma:
+
+% \footnote{
+%     See: \url{\linkFantomIntro}, \url{\linkFantomIndexingSoln}, \url{\linkFantomLachesis}, \url{\linkFantomFaq}
+% }
 
 % \bquote{
 %     Current solutions make trade-offs between three components: scalability, security and decentralization. This is known as the blockchain trilemma.
@@ -21,17 +16,19 @@ The Fantom Foundation website says\footnote{
 %     [...]
 
 %     Fantom tackles the problem at the core: its high-speed consensus mechanism, Lachesis, allows digital assets to operate at unprecedented speed and delivers dramatic improvements over the current systems.
-% }{\url{\linkFantomIntro}}
+% }[\url{\linkFantomIntro}]
 
 
 \bquote{
     It solves the blockchain Scalability Trilemma, [...]
-}{\citeFantomLachesis}
+}[\citeFantomLachesis]
+
+Fantom also uses quotes like this in promotional material:
 
 \bquote{
     \emph{``Fantom is an exceptional platform that is cutting no corners in tackling the blockchain trilemma. {[...]}''}
     -- Ganesh, Covalent CEO
-}{\href{\linkFantomIndexingSoln}{Fantom press release, 2021-03-23}}
+}[{\href{\linkFantomIndexingSoln}{Fantom press release, 2021-03-23}}]
 
 \subsubsection{No Citations, Reasoning, or Explanation}
 
@@ -54,7 +51,7 @@ Fantom claim that the \emph{asynchronous} nature of Lachesis is the reason that 
 
 \bquote{
     Finally, aBFT networks allow for greater scalability and decentralization since there isn't excessive communication to limit the number of participating nodes.
-}{\citeFantomLachesis}
+}[{\citeFantomLachesis}]
 
 While this does argue that aBFT is superior to pBFT, it isn't relevant to the trilemma -- communication overhead isn't the issue.
 
@@ -67,20 +64,17 @@ Since validators are $O(c)$ constrained, Lachesis is $O(c)$ scalable.
 
 \subsubsection{Shifting Goal Posts}
 
-In Fantom's own publications (as well as being repeated\footnote{
-    Example: \url{https://www.nansen.ai/research/fantom-solving-the-blockchain-trilemma} (also republished at \url{https://tritiumvc.medium.com/fantom-solving-the-blockchain-trilemma-9b2dd3d6eab6}).
-    These are two of the top search results for \emph{fantom trilemma}.
-} by others) state:
+From Fantom's FAQ:
 
 \bquote{
     The blockchain trilemma is the known trade-off in distributed ledger technologies, which have to balance between speed, security, and decentralization. \\
     {[...]}
-}{\href{\linkFantomFaq}{Answer to \emph{What problem does Fantom solve? What is the blockchain trilemma?}}}
+}[{\href{\linkFantomFaq}{Answer to \emph{What problem does Fantom solve? What is the blockchain trilemma?}}}]
 
 This is incorrect and does not represent the trilemma.
 
 Particularly, the trilemma says nothing about \emph{speed}, rather, it's about \emph{capacity}.\footnote{
-    This mistake is not made on another page of theirs: \url{https://web.archive.org/web/20210913152616/https://fantom.foundation/lachesis-consensus-algorithm/}.
+    This mistake is not made on another page of theirs: \citeFantomLachesis.
 }
 
 There are at least three qualitatively different meanings of \emph{speed} that apply to blockchains:
@@ -96,3 +90,11 @@ None of the meanings of speed are directly relevant to solving the trilemma.
 Being ``fast'' might make for a better user experience, but it's not relevant here.
 
 % Since a solution to the trilemma should never experience global congestion, we don't care about \emph{latency under congestion}.
+
+Misstating the trilemma in this way is changing the goal posts, which is (at best) misleading.
+
+Moreover, transaction latency has never been the primary issue in PoW blockchains.\footnote{
+    In 2014 I briefly worked on an ``instant confirmation'' prototype, for example.
+    See: \linkQantaBitcointalk.
+}
+The primary issue has always been: \emph{how do you build a cohesive blockchain network such that $O(n)$ people can use it simultaneously?}

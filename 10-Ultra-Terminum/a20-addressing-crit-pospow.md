@@ -18,7 +18,7 @@ PoS must fail in one of these ways, A or B: \newline
 \newline
 A) Once attackers have $>51\%$ of validator stake they can maintain the attack perpetually. They control who is added to the validator set. They can censor anything. They can use censorship to push through arbitrary soft-fork updates, including updates to change the consensus mechanism to PoW. Users who don't like the new rules are incentivized to sell to users who do like the new rules.\newline
 \newline
-B) Alternatively, if there is a way for the users to decide that the current validator set is majority attackers, and that they should be punished, this is a recovery mechanism. The attacker's can use propaganda to abuse this recovery mechanism. If an attacker can convince the users that the current validator set are attackers, then the users will rob those honest validators of their stake.}{Zack Hess; \href{https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/the_defence_of_pos.md}{The Defense of PoS}}
+B) Alternatively, if there is a way for the users to decide that the current validator set is majority attackers, and that they should be punished, this is a recovery mechanism. The attacker's can use propaganda to abuse this recovery mechanism. If an attacker can convince the users that the current validator set are attackers, then the users will rob those honest validators of their stake.}[Zack Hess; \href{https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/the_defence_of_pos.md}{The Defense of PoS}]
 
 
 NOTES:
@@ -78,7 +78,7 @@ The hybrid \emph{context} that UT provides[^hybrid-context] is different to the 
   Therefore H0 > H1. \\
   \\
   This means that it is always cheaper to do a hashrate rental attack against a pow/pos hybrid than against a normal pow blockchain.
-}{Zack Hess; \href{https://github.com/zack-bitcoin/amoveo-docs/blob/9a4ffa2e800c24772fd68e1f745b6a14967e59c2/other_blockchains/pow_pos_hybrid.md}{PoW/PoS Hybrid Consensus Mechanisms}}
+}[Zack Hess; \href{https://github.com/zack-bitcoin/amoveo-docs/blob/9a4ffa2e800c24772fd68e1f745b6a14967e59c2/other_blockchains/pow_pos_hybrid.md}{PoW/PoS Hybrid Consensus Mechanisms}]
 
 UT has two main complicating factors: simplex-chains are DAGs instead of trees (see \autoref{sec:dos-and-dags}), and the contribution of a chain's security contribution is capped via chain-work conversion (see \autoref{sec:reflection-pow-and-pos} and \autoref{sec:generalizing-reflection}). These answers assume that the the PoS method is DAG-compatible, that PoS validators can choose when to produce a block, and that (todo)
 

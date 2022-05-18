@@ -39,6 +39,13 @@ ifdef PREPARE_FOR
 override PREPROC_ARG_PF=--prepare-for '$(PREPARE_FOR)'
 endif
 
+DARK_MODE ?=
+PREPROC_ARG_DM=
+ifdef DARK_MODE
+override PREPROC_ARG_DM=--dark-mode
+endif
+
+
 
 default: whitepaper
 draft: default
@@ -166,7 +173,7 @@ wc:
 
 # preprocess tex for draft/release/lint
 preprocess-build:
-	python3 bin/preprocessModes.py process-tex $(WPTEX) --mode $(PP_MODE) --allow-in-place $(PP_LINT_FLAG) $(PREPROC_ARG_PF)
+	python3 bin/preprocessModes.py process-tex $(WPTEX) --mode $(PP_MODE) --allow-in-place $(PP_LINT_FLAG) $(PREPROC_ARG_PF) $(PREPROC_ARG_DM)
 	bash bin/msg_good.sh "Finished preprocessing of $(WPTEX) in mode $(PP_MODE)"
 
 # latexrun first for error msgs, then run run latexmk once for gitinfo2/glossary, then use latexrun

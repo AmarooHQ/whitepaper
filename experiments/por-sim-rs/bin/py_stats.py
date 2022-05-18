@@ -1591,9 +1591,9 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             [
                 # ('exp_26_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv', 'por', None),
                 # ('exp_26_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA500.csv', 'por', None),
-                ('exp_28aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA20.csv', 'trad', None),
-                ('exp_26aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', PorPlotOpts(annotation=Anno("Before", 5, (2, 0.1)))),
-                ('exp_26aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA500.csv', 'trad', PorPlotOpts(annotation=Anno("After", 6, (10, 0.3)))),
+                ('exp_28aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA20.csv', 'trad', PorPlotOpts(annotation=Anno("Trad. $\\mathrm{DAA}_N = 20$", 5, (2, 0.05)))),
+                ('exp_26aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA100.csv', 'trad', PorPlotOpts(annotation=Anno("Trad. Before ($\\mathrm{DAA}_N = 100$)", 5, (6, 0.35)))),
+                ('exp_26aux_RandHR_xxh3_q=0.40_dswin=5_bt=75_hr=75_DoubleSpendWork_WeightedDag_DAA500.csv', 'trad', PorPlotOpts(annotation=Anno("Trad. After ($\\mathrm{DAA}_N = 500$)", 6, (10, 0.25)))),
             ],
             "PoR Simulator: Early Results -- $\\mathrm{DAA}_N = 100 \\to 500$",
             f"png/_interim_daa",

@@ -25,9 +25,10 @@ In this case, for a single R-block, \autoref{eq:por-conv-work} collapses to
         \nonumber
 \end{align}
 
-If we convert like this (treating 1 R-block as worth $R_r \cdot 1$ L-coins) then we'll we need to convert the result to L-hashes \emph{eventually} -- but we can sum this up if we had multiple reflections to process (since $\nicefrac{L_r}{L_d}$ is a constant for some given moment in time).
+If we convert like this (treating 1 R-block as worth $R_r \cdot 1$ L-coins) then we'll we need to convert the result to L-hashes \emph{eventually}, but, if we have multiple reflections to process, we can calculate interim values (with units of L-coins) and sum them before that final conversion.
+% (since $\nicefrac{L_r}{L_d}$ is a constant for some given moment in time).
 It's worth remembering that block-weight is measured \emph{per block}.
-Since we're only converting with respect to \emph{a single block} at any one time, the \emph{per block} part of the resulting units \emph{cancels out}.
+Since we're only converting with respect to \emph{a single block} at any one time, the \emph{per block} part of the resulting units \emph{cancels out} -- e.g., \autoref{eq:por-conv-work-srt}.
 
 Let's use this context to write our first \textsc{WeightOf} function: \autoref{alg:weightof-1} (we'll still return work in L-hashes, though, not L-coins).
 
