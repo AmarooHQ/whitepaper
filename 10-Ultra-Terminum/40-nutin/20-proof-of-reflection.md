@@ -466,7 +466,9 @@ The *essence* of *Proof of Reflection* should now be apparent. *In principle*, w
 
 \todoDraftOnly{PoW -- 2 chains using the same algorithm isn't insecure!}
 
-\begin{draftonly}
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
 
 \todoDraftOnly{redraft the following}
 
@@ -509,7 +511,9 @@ For non-PoW chains, we'll need conversion methods that have non-arbitrary answer
   All bets are off for other architectures.
 }
 
-\end{draftonly}
+%% END ### DRAFT
+
+%% BEGIN ### RELEASE
 
 ### Comparing Incomparable Proofs of Work
 
