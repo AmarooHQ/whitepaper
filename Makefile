@@ -57,7 +57,8 @@ release: whitepaper
 release: pdflint
 release:
 	# No matches for \todo{ should be found
-	grep -qzv '\\todo{' output/whitepaper.tex || (grep '\\todo{' output/whitepaper.tex | wc -l; bash bin/msg_error.sh 'Detected `\\\\todo{` in output/whitepaper.tex during release build.'; exit 1)
+	grep -qzv '\\todo{' output/whitepaper.tex || (grep '\\todo{' output/whitepaper.tex | wc -l; bash bin/msg_error.sh 'Detected `\\\\todo{` in output/whitepaper.tex during release build.'; grep '\\todo{' output/whitepaper.tex; exit 1)
+	bash bin/msg_good.sh "Release build complete."
 
 cilint-prep: PP_MODE=lint
 cilint-prep: whitepaper
@@ -93,8 +94,14 @@ DVIGraphics = $(patsubst %_sag.tex,%_sag.dvi,$(StandAloneGraphicsTeXFiles))
 PNGGraphics = $(patsubst %_sag.pdf,%_sag.png,$(PDFGraphics))
 InputTeXFiles = $(wildcard *_input.tex)
 
+WATCH_CMD = make
+
 watch:
-	bin/onchange.sh ./10-Ultra-Terminum ./includes/ut/content ./includes/ut/algorithms "make"
+	bash bin/msg_good.sh "Watching. Command to re-run: $(WATCH_CMD)"
+	bin/onchange.sh ./10-Ultra-Terminum ./includes/ut/content ./includes/ut/algorithms '$(WATCH_CMD)'
+
+watch-release: WATCH_CMD=make release
+watch-release: watch
 
 wp-graphics-standalone: $(PDFGraphics)
 wp-graphics-ps: $(PSGraphics)
@@ -102,11 +109,13 @@ wp-graphics-png: $(PNGGraphics)
 
 %_sag.pdf: %_sag.tex
 	#$(LATEXRUN) $< -O `dirname $<`
+	bash bin/msg_good.sh "[$<]: PP_MODE=$(PP_MODE)"
 	cd `dirname $<` && \
 	$(PDFLATEX) `basename $<`
 	$(PDFCROP) $@ $@
 
 %_sag.ps: %_sag.tex
+	bash bin/msg_good.sh "[$<]: PP_MODE=$(PP_MODE)"
 	cd `dirname $<` && \
 	$(PSLATEX) `basename $<`
 # $(PDFCROP) $@ $@
@@ -125,6 +134,7 @@ par-gfx:
 # to do that: replace '10-Ultra-Terminum' with '*-*'
 # nb: add `clean-wp-md` as a dependency if there are issues building.
 build-whitepaper: %.md
+	bash bin/msg_good.sh "[build-whitepaper]: PP_MODE=$(PP_MODE)"
 	mkdir -p $(OUTDIR)
 	echo '' > $(WPFILE)
 	for mdfile in `find 10-Ultra-Terminum/ -iname \*.md | sort`; do \
@@ -149,11 +159,12 @@ set-wp-properties:
 	egrep '^geometry: (.*)$$' $(WPFILE)
 
 wp-pandoc:
-	pandoc -s --number-sections --toc -f markdown -t latex -o $(WPTEX) $(WPFILE)
+	bash bin/msg_good.sh "[wp-pandoc]: PP_MODE=$(PP_MODE)"
+	pandoc -s --number-sections --toc -f markdown-latex_macros -t latex -o $(WPTEX) $(WPFILE)
 	sed -i 's/\\%\\%/%/g' $(WPTEX)
 
 pandoc-stdin:
-	pandoc -s --number-sections -f markdown -t latex
+	pandoc -s --number-sections -f markdown-latex_macros -t latex
 
 # added to make testing quote boxes easier I think
 wp-just-quotes: clean-wp-md
@@ -179,18 +190,19 @@ preprocess-build:
 # latexrun first for error msgs, then run run latexmk once for gitinfo2/glossary, then use latexrun
 # note: the *-reloadable.pdf files are copies of interim outputs (and then the final output) so that you can f5 them in a browser without getting partially written documents.
 mk-latex-pdf: preprocess-build
+	bash bin/msg_good.sh "[mk-latex-pdf]: PP_MODE=$(PP_MODE)"
 	bash bin/msg_good.sh "Run ./latexrun to get good error msgs"
 	$(LATEXRUN) $(WPTEX) -O $(OUTDIR)
 	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE)-reloadable.pdf
 
-	bash bin/msg_good.sh "Running latexmk to update gitinfo, build glossaries"
+	bash bin/msg_good.sh "Running latexmk to update gitinfo, build glossaries; PP_MODE=$(PP_MODE)"
 	latexmk -pdf -interaction=batchmode --enable-write18 -output-directory=$(OUTDIR) $(WPTEX) > _latexmk.log
 
-	bash bin/msg_good.sh "Update glossaries (run \`make glossary-fix-1 && make && make\` to fix glossaries if something breaks)"
+	bash bin/msg_good.sh "Update glossaries (run \`make glossary-fix-1 && make && make\` to fix glossaries if something breaks). PP_MODE=$(PP_MODE)"
 	#-rm $(WPNOEXT).gl*
 	(cd $(OUTDIR) && makeglossaries $(WPFILENAME))
 
-	bash bin/msg_good.sh "./latexrun to build paper proper"
+	bash bin/msg_good.sh "./latexrun to build paper proper. PP_MODE=$(PP_MODE)"
 	$(LATEXRUN) $(WPTEX) -O $(OUTDIR)
 	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE)-reloadable.pdf
 
@@ -209,15 +221,18 @@ finished-msg:
 lint: textlint texlint pdflint
 
 textlint:
+	bash bin/msg_good.sh "[textlint] PP_MODE=$(PP_MODE)"
 	npm run lint
 
 texlint:
+	bash bin/msg_good.sh "[texlint]: PP_MODE=$(PP_MODE)"
 	bash bin/texLint.sh \
 		`find ./includes/ut/content -iname \*.tex` \
 		`find ./10-Ultra-Terminum/ -iname \*.md` \
 		`find ./includes/ut -iname \*.tex`
 
 pdflint:
+	bash bin/msg_good.sh "[pdflint]: PP_MODE=$(PP_MODE)"
 	bash bin/pdfLint.sh output/whitepaper.pdf
 
 %.md:
@@ -261,8 +276,8 @@ pert:
 
 handout:
 	dot -Gdpi=300 -Tpng includes/handout/topic-tree.gv -o includes/handout/topic-tree.png
-	pandoc --standalone --mathjax -f markdown --pdf-engine=context -V fontsize=11.5pt -o includes/handout/exec-summary.pdf includes/handout/exec-summary.md
-	pandoc --standalone --mathjax -f markdown --pdf-engine=context -V fontsize=16pt -o includes/handout/terms.pdf includes/handout/terms.md
+	pandoc --standalone --mathjax -f markdown-latex_macros --pdf-engine=context -V fontsize=11.5pt -o includes/handout/exec-summary.pdf includes/handout/exec-summary.md
+	pandoc --standalone --mathjax -f markdown-latex_macros --pdf-engine=context -V fontsize=16pt -o includes/handout/terms.pdf includes/handout/terms.md
 
 # latex files anywhere
 clean: init

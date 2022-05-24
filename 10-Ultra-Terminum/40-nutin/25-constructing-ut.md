@@ -71,13 +71,13 @@ Note that \autoref{alg:por-reflected-block-weight} integrates the cap on weight 
 
 \label{sec:the-simplex}
 
-\defineTerm{Simplex}{The single coherent structure that emerges from a collection of blockchains that mutually reflect each other}
+\defineTermTex{Simplex}{The single coherent structure that emerges from a collection of blockchains that mutually reflect each other}
 
 When two or more blockchains *mutually reflect* each other, they form a *simplex*[^simplex-maths]. For the sake of brevity: all *reflections* within a simplex are *mutual reflections*, and I will omit *mutual* from now on when discussing them. Examples of simplexes are shown in \autoref{fig:simplexes}.
 
 When a blockchain is part of a simplex, it is called a *simplex-chain* (as distinct from *dapp-chains*).
 
-\defineTerm{Simplex-chain}{A blockchain that is part of a \emph{simplex}; it mutually reflects all other simplex-chains in that simplex}
+\defineTermTex{Simplex-chain}{A blockchain that is part of a \emph{simplex}; it mutually reflects all other simplex-chains in that simplex}
 
 To maintain consistency with the geometric usage of the term *simplex*: a simplex with $k+1$ chains is called a $k$-simplex or a $(k+1)$-chain simplex[^simplex-approx].
 In a $k$-simplex, each simplex-chain has $k$ reflections (one reflection for each of the other simplex-chains).
@@ -99,7 +99,7 @@ The security of simplexes is discussed in \autoref{sec:simplex-security}.
 
 *Dapp-chains* are the method by which *Ultra Terminum* exceeds $O(c^2)$ scaling *without* using the method described in \autoref{sec:tiling}. To be clear: the $O(c^2)$ configuration of UT is compatible with that other method; dapp-chains are a *separate and independent* method of scaling. However, there are *decisive* reasons to introduce and use *dapp-chains*. Dapp-chains provide features that the $O(n)$ scaling configuration alone cannot \emph{easily} provide. Additionally, dapp-chains increase the simplex's scalability to $O(c^3)$ or $O(c^4)$.
 
-\defineTerm{Dapp-chain}{
+\defineTermTex{Dapp-chain}{
   An \emph{application-specific} child-chain that is secured via the parent-chain. Dapp-chains may have architecturally distinct state- and transaction-schemes (distinct from those schemes used in the simplex, and other dapp-chains)
 }
 
@@ -117,7 +117,7 @@ This means that simplex-chains can *specialize* in hosting *particular types* of
 Validating dapp-chain headers, on-chain, can be done via the following simple, clean, and extensible method: \emph{encode dapp-chain headers as simplex-level transactions}.
 This means that supporting new dapp-chain consensus methods is about as difficult as introducing new transaction types (or opcodes), and different simplex-chains have a great deal of freedom in choosing which dapp-chain consensus methods to support.
 
-\defineTerm{Header-transactions}{
+\defineTermTex{Header-transactions}{
   Dapp-chain headers that are encoded as simplex-level transactions; i.e., they are processed by a simplex-chain as a transaction, but they also function as the header for a dapp-chain block
 }
 
@@ -164,11 +164,11 @@ Even if such a fee is *not always necessary*, the *ability* to provide a fee has
 
 If it is possible to implement dapp-chains (or any system of child-chains) such that those chains have \emph{freedom of protocol} and \emph{freedom of incentivization} whilst inheriting the parent-chain's security, then we should strive to achieve that.
 
-\defineTerm{Freedom of Incentivization}{
+\defineTermTex{Freedom of Incentivization}{
   The property whereby child-chains have free choice of incentive-system (i.e., the nature and dynamics of their root token, or lack thereof)
 }
 
-\defineTerm{Freedom of Protocol}{
+\defineTermTex{Freedom of Protocol}{
   The property whereby child-chains have free choice of protocol (including consensus mechanism, scripting, accounting methods, block structures, etc)
 }
 

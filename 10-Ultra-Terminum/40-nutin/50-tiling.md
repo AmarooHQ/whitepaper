@@ -20,7 +20,7 @@
 
 Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes are tiled, the result is called a *simplex tiling*.
 
-<!-- \defineTerm{Simplex Tile}{
+<!-- \defineTermTex{Simplex Tile}{
     Like a simplex, but $\ge 75\%$ of the PoR capacity is reserved for reflections with \emph{neighboring} tiles; typically a quadrifurcated maximal simplex
 } -->
 
@@ -40,7 +40,7 @@ Each child tile, at this stage, has only reserved 50% of its full PoR capacity -
 Thus, each tile is able to reflect all simplex-chains of the parent tile *and* two additional child tiles.
 Child tiles can be instantiated in an ad-hoc basis, i.e., as a simplex-tiling (or an individual tile) approaches maximum capacity.
 
-<!-- \defineTerm{Simplex Tiling}{An interconnected graph of mutually reflecting simplexes. This graph grows in a scalable manner when simplex tiles have a valence $\ge 3$} -->
+<!-- \defineTermTex{Simplex Tiling}{An interconnected graph of mutually reflecting simplexes. This graph grows in a scalable manner when simplex tiles have a valence $\ge 3$} -->
 
 <!-- \todoDraftOnly{
     from forum: \\

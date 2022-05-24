@@ -6,6 +6,10 @@
 
 \todoDraftOnly{compact spv proofs via reusing PoR branches}
 
+\todoDraftOnly{Add to dos/dags: linking back to invalid parents}
+
+\todoDraftOnly{stateless blockchains}
+
 ### Availability of Reflected Blocks
 
 \label{sec:availability-of-blocks}
@@ -56,7 +60,7 @@ That branch is the only required branch (i.e., the \emph{missing} branch), as ch
 
 Miners would need to do this for *all* simplex-chains that they reflect. Predictably, this has overhead with order $O(N_1 \cdot \log_2 N_1)$, where $N_1$ is the number of chains in the simplex. This method has complexity $O(c \cdot \log_2 c)$ which is discussed in \autoref{sec:complexity-reflection-proof}.
 
-\defineTerm{Explicit Proofs (+PoRs)}{
+\defineTermTex{Explicit Proofs (+PoRs)}{
     The UT protocol variant wherein miners/validators explicitly record \emph{both} reflected headers \emph{and} the single missing merkle branch required to prove reflection
 }
 
@@ -64,7 +68,7 @@ Do we *need* to include proofs of reflection, though? Is it possible to avoid th
 
 If miners of any simplex-chain download the blocks of *all* simplex-chains -- as mentioned in \autoref{sec:availability-of-blocks} -- then including all necessary proofs of reflection can be made redundant. Since miners, theoretically, have all the necessary data to construct the proofs, do those miners need to actually include those proofs? Could we treat those proofs as witnesses and prune them -- similar to SegWit?
 
-\defineTerm{Omitted Proofs (+OP)}{
+\defineTermTex{Omitted Proofs (+OP)}{
     The UT protocol variant wherein miners/validators explicitly record \emph{only} reflected headers, such that necessary proofs of reflection are deterministically recalculable
 }
 
@@ -148,7 +152,7 @@ For $g=32; B_h=112$, this reduces effective block size to $\sim 0.643 b$ --- an 
 However, \emph{instead} of using that technique to \emph{minimize bandwidth} we could instead use it to \emph{maximize the number of simplex-chains}.
 If simplex-blocks dedicate $\nicefrac{1}{2}$ of their capacity to reflections, then we can reduce that burden by $1 - \nicefrac{32}{B_h} \approx 70\%$, \emph{or} we could increase the capacity for reflections by $\nicefrac{B_h}{32} \approx 300\%$!
 
-\defineTerm{Header Omission (+HO)}{
+\defineTermTex{Header Omission (+HO)}{
     The UT protocol variant wherein miners/validators explicitly record \emph{only} the hashes of reflected headers.
     A requirement is that block producers must eagerly download the headers of all simplex-chains and deterministically recalculate the relevant Proofs of Reflection
 }
@@ -571,7 +575,7 @@ Why wouldn't they just keep mining on the same chain? Because in the time that t
 
 We should thus expect that this configuration of chains actually *synchronizes* miners, resulting in block production that is somewhat regular and lower in variance.
 
-\defineTerm{Miner Resonance}{
+\defineTermTex{Miner Resonance}{
     The effect whereby block production \emph{variance} is reduced when miners can (and do) collectively change which chain they are currently mining faster than blocks are produced for those chains, due to changes in network-wide incentivization
 }
 

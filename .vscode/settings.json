@@ -277,5 +277,6 @@
     },
     "cSpell.enableFiletypes": [
         "tex"
-    ]
+    ],
+    "gitlens.advanced.externalDiffTool": "meld"
 }

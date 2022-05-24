@@ -25,7 +25,7 @@ Base-chains are at the first level of nesting.
 The shards of Ethereum 2 are *a level of nesting* above the Beacon Chain, i.e., nesting level 2.
 UT's dapp-chains are also at nesting level 2.
 
-\defineTerm{Base-chain}{A chain that has no parent-chains; i.e., is at the base nesting level}
+\defineTermTex{Base-chain}{A chain that has no parent-chains; i.e., is at the base nesting level}
 
 Sometimes (but not always) people use terms like *layer 2* to describe this sort of nesting, though such usage of *layer 2* is ambiguous and potentially misleading.
 It easily confuses nesting with off-chain scaling methods (such as payment channels, rollups, or ephemeral 'child' blockchains, e.g., Plasma), and it potentially misleads readers about the security properties of nested blockchains.
@@ -58,7 +58,7 @@ For most existing blockchain designs, $N_1 = 1$.
 
 With regards to simplexes, we are particularly concerned with the complexity of a \emph{maximal} simplex -- i.e., the simplex with the highest TPS possible.
 
-\defineTerm{Maximal Simplex}{
+\defineTermTex{Maximal Simplex}{
     A simplex with the maximum TPS under given $O(c)$ constraints
 }
 
