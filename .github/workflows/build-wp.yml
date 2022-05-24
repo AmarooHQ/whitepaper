@@ -23,6 +23,8 @@ jobs:
           make docker-build
 
       - uses: purescript-contrib/setup-purescript@main
+        with:
+          purescript: "0.14.9"
 
       # need to do this before we run bundle-for-wp in next step
       - name: purs tables check compiled

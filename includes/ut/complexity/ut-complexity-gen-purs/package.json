@@ -9,7 +9,8 @@
     "bundle-here": "spago bundle-app",
     "bundle-for-wp": "spago bundle-app --to ../populateWPTables.js",
     "lp": "spago run -b \"--lp-tables --html\"",
-    "dev": "spago run -b \"--dev-tables\""
+    "dev": "spago run -b \"--dev-tables\"",
+    "purs-upgrade": "npm upgrade -S purescript spago && spago upgrade-set"
   },
   "author": "max",
   "license": "UNLICENSED",
@@ -17,6 +18,6 @@
     "purescript": "^0.14.9",
     "purescript-psa": "^0.8.2",
     "purty": "^7.0.0",
-    "spago": "^0.20.7"
+    "spago": "^0.20.9"
   }
 }

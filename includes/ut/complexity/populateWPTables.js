@@ -6522,7 +6522,7 @@ var PS = {};
   var Data_Show = $PS["Data.Show"];
   var Node_Encoding = $PS["Node.Encoding"];
   var Node_FS_Internal = $PS["Node.FS.Internal"];          
-  var fs = Node_FS_Internal.unsafeRequireFS;                                                                                  
+  var fs = Node_FS_Internal.unsafeRequireFS;                                                                                                    
   var readFile = function (file) {
       return Node_FS_Internal.mkEffect(function (v) {
           return fs.readFileSync(file, {});
