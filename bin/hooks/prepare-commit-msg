@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # An example hook script to prepare the commit log message.
 # Called by "git commit" with the name of the file that has the
@@ -24,18 +24,31 @@ COMMIT_MSG_FILE=$1
 COMMIT_SOURCE=$2
 SHA1=$3
 
-_TMP_FILE="/tmp/987fgy8d97fg"
+_TMP_FILE_PRE="/tmp/987fgy8d97fg_pre"
+_TMP_FILE_POST="/tmp/987fgy8d97fg_post"
 
-# /usr/bin/perl -i.bak -ne 'print unless(m/^. Please enter the commit message/..m/^#$/)' "$COMMIT_MSG_FILE"
+echo "" > $_TMP_FILE_PRE
+echo "" > $_TMP_FILE_POST
 
-cat "$COMMIT_MSG_FILE" > "$_TMP_FILE"
-echo "\n" > "$COMMIT_MSG_FILE"
+_fst_comment=false;
+cat "$COMMIT_MSG_FILE" | while read -r line; do
+    [[ "$line" =~ ^\#.*$ ]] && _fst_comment=true;
+    if [[ "$_fst_comment" = "false" ]]; then
+        echo "$line" >> $_TMP_FILE_PRE
+    else
+        echo "$line" >> $_TMP_FILE_POST
+    fi
+done
+
+cat $_TMP_FILE_PRE > "$COMMIT_MSG_FILE"
+
 (
 make count-words-diff | tail -n+2 | while read -r cwline; do
     echo "# $cwline"
 done
 ) >> "$COMMIT_MSG_FILE"
-cat "$_TMP_FILE" >> "$COMMIT_MSG_FILE"
+
+cat "$_TMP_FILE_POST" >> "$COMMIT_MSG_FILE"
 
 # case "$COMMIT_SOURCE,$SHA1" in
 #  ,|template,)
