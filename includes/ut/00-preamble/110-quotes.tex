@@ -22,13 +22,14 @@
 
 %% less buggy quoting using tcolorbox
 
-\renewenvironment{quote}[1][]{
+\RenewDocumentEnvironment{quote}{ o }{%
     \begin{tcolorbox}[
         colback=gray!15,colbacktitle=gray!15,
         tile,
         borderline west={0.75pt}{0pt}{black},
         % breakable,
-        #1]
+        \IfNoValueTF{#1}{}{#1}
+        ]
 }{
     \end{tcolorbox}
 }
@@ -36,13 +37,21 @@
 %% conditionally add attribution to block quotes
 
 \newcommand{\q}[1]{
-    \begin{quote}{hbox}
+    % directly copying quote env begin/end here -- not ideal, fixes build issues w/ hbox when it's provided as a parameter.
+    % possibly related? https://github.com/T-F-S/tcolorbox/issues/154
+    \begin{tcolorbox}[
+        colback=gray!15,colbacktitle=gray!15,
+        tile,
+        borderline west={0.75pt}{0pt}{black},
+        % breakable,
+        hbox
+        ]
     #1
-    \end{quote}
+    \end{tcolorbox}
 }
 
 \NewDocumentCommand{\bquote}{ m o }{
-    \begin{quote}{}
+    \begin{quote}
     #1
     \IfNoValueTF{#2}{}{
         \par

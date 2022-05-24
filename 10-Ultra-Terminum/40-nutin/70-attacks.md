@@ -153,7 +153,7 @@ Bribes don't work either b/c the PoS set-up is done on a different chain and ref
   Still there?
 }
 
-\begin{tcolorbox}[title={\pill{\scriptsize{\checkmark \; BOT}} Clyde}]
+\begin{tcolorbox}[title={\pill{\scriptsize{\checkmark \; BOT}} Clyde:}]
 Your message could not be delivered. This is usually because you don't share a server with the recipient or the recipient is only accepting direct messages from friends.
 \end{tcolorbox}
 

@@ -45,7 +45,7 @@ ifdef DARK_MODE
 override PREPROC_ARG_DM=--dark-mode
 endif
 
-
+SKIP_TEXTLINT = false
 
 default: whitepaper
 draft: default
@@ -59,6 +59,9 @@ release:
 	# No matches for \todo{ should be found
 	grep -qzv '\\todo{' output/whitepaper.tex || (grep '\\todo{' output/whitepaper.tex | wc -l; bash bin/msg_error.sh 'Detected `\\\\todo{` in output/whitepaper.tex during release build.'; grep '\\todo{' output/whitepaper.tex; exit 1)
 	bash bin/msg_good.sh "Release build complete."
+
+release-quick: SKIP_TEXTLINT=true
+release-quick: release
 
 cilint-prep: PP_MODE=lint
 cilint-prep: whitepaper
@@ -100,7 +103,7 @@ watch:
 	bash bin/msg_good.sh "Watching. Command to re-run: $(WATCH_CMD)"
 	bin/onchange.sh ./10-Ultra-Terminum ./includes/ut/content ./includes/ut/algorithms '$(WATCH_CMD)'
 
-watch-release: WATCH_CMD=make release
+watch-release: WATCH_CMD=make release-quick
 watch-release: watch
 
 wp-graphics-standalone: $(PDFGraphics)
@@ -222,7 +225,7 @@ lint: textlint texlint pdflint
 
 textlint:
 	bash bin/msg_good.sh "[textlint] PP_MODE=$(PP_MODE)"
-	npm run lint
+	if [ "$(SKIP_TEXTLINT)" = "false" ]; then npm run lint; else bash bin/msg_warn.sh 'skipping textlint'; fi
 
 texlint:
 	bash bin/msg_good.sh "[texlint]: PP_MODE=$(PP_MODE)"
