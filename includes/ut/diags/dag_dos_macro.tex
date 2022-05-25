@@ -7,6 +7,12 @@
 \providecommand\DagFinalX{8}
 
 
+% interval between attackers blocks (measured in terms of \x)
+\providecommand\aEvery{1}
+% interval between honest blocks (in terms of \x)
+\providecommand\hEvery{2}
+
+
 \input{dag-styles}%
 
 
@@ -22,7 +28,7 @@
 
     \node (prevDots) [align=center] {$\cdots$};
 
-    \node (block0) [block, align=center, right = of prevDots] {$\AbbrHChain_{i}$ \\ \footnotesize{$\Sigma_{w} = 0$}};
+    \node (block0) [block, mainChain, right = of prevDots] {$\AbbrHChain_{i}$ \\ \footnotesize{$\Sigma_{w} = 0$}};
     \draw [arrowParent] (block0) -- (prevDots);
 
 
@@ -38,12 +44,7 @@
     \node (labelA) [align=center, above = of block0, yshift=-0.4*\DagNodeDist] {Attacker's \\ Blocks};
     \node (labelH) [align=center, below = of block0, yshift=0.4*\DagNodeDist] {Honest \\ Blocks};
 
-    % interval between attackers blocks (measured in terms of \x)
-    \xdef\aEvery{1}
-    % interval between honest blocks (in terms of \x)
-    \xdef\hEvery{2}
     % loop through possible x positions for blocks starting at 1
-    \pgfmathtruncatemacro\lastHonestB{floor(\DagFinalX / \hEvery)}
     \foreach \x in {1,...,\DagFinalX} {
         % set up "x axis" dummy nodes
         \pgfmathtruncatemacro\lastX{\x - 1}
@@ -76,6 +77,9 @@
                     \xdef\prevNodes{\bName\lastBNum}
                     \pgfmathtruncatemacro\sigmaW{\bNum}
                     \pgfmathtruncatemacro\otherSigmaW{\otherBNum + \otherOtherLastBNum}
+                    % curr honest block has Sw < the next A block that an H block links to
+                    \pgfmathtruncatemacro\nextLinkedBNum{((\otherBNum + 1) * \otherBlockEvery - 1) / \blockEvery}
+                    \pgfmathtruncatemacro\isMainChain{\otherSigmaW < \nextLinkedBNum ? 1 : 0}
                 \else
                     \xdef\bName{blockH}
                     \xdef\otherBName{blockA}
@@ -83,6 +87,8 @@
                     \xdef\chainName{\AbbrHChain}
                     \pgfmathtruncatemacro\sigmaW{\bNum + \otherLastBNum}
                     \pgfmathtruncatemacro\otherSigmaW{\otherLastBNum + 1}
+                    % is main chain: next honest block links back to A block w/ Sw <= curr H Sw
+                    \pgfmathtruncatemacro\isMainChain{floor((\x + \blockEvery - 1) / \otherBlockEvery) <= \sigmaW ? 1 : 0}
                     % a bit messy
                     \ifnum 1<\bNum
                         \xdef\prevNodes{\bName\lastBNum,\otherBName\otherLastBNum}
@@ -91,10 +97,10 @@
                     \fi
                 \fi
 
-                \xdef\isMainChain{1}
-                \ifnum \sigmaW<\otherSigmaW
-                    \xdef\isMainChain{0}
-                \fi
+                % \xdef\isMainChain{1}
+                % \ifnum \sigmaW<\otherSigmaW
+                %     \xdef\isMainChain{0}
+                % \fi
 
                 \ifnum 1=\x
                     \xdef\prevNodes{block0}
@@ -131,13 +137,11 @@
     \node (labelALineHeight) [below = of labelA, yshift=0.85*\DagNodeDist] {};
     \node (labelHLineHeight) [above = of labelH, yshift=-0.85*\DagNodeDist] {};
 
-    \xdef\lastHBlock{\lastHonestB}
-
     \xdef\xs{0cm}
     \xdef\topNode{blockA1}
     \xdef\botNode{blockH1}
     \xdef\leftMostNode{prevDots}
-    \xdef\rightMostNode{blockH\lastHBlock}
+    \xdef\rightMostNode{x\DagFinalX}
 
     \draw [dashed] (labelALineHeight -| \leftMostNode.west) -- (labelALineHeight -| \rightMostNode.east);
     \draw [dashed] (labelHLineHeight -| \leftMostNode.west) -- (labelHLineHeight -| \rightMostNode.east);
