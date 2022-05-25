@@ -1,19 +1,54 @@
 \documentclass[]{standalone}
-\usepackage[T1]{fontenc}\usepackage{tikz}
+\usepackage[T1]{fontenc}
+\usepackage{tikz}
 \usepackage{amsmath, amsfonts}
 \usepackage{xintexpr}
+\usepackage{xparse}
 \usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
 
 \makeatletter
 \def\input@path{{./includes/}{./includes/ut/diags/}}
 \makeatother
 
+
+\providecommand{\OffsetHonestBlocks}{0}  % work but not pretty
+\providecommand{\MainChainCentered}{0}  % doesn't work
+\providecommand\DagNodeDist{0.8cm}
+
+
+\newcommand{\isAMain}[1]{%
+    % the arg (which is equiv to \h in the honest blocks section) is
+    % expecting an honest block number, not an attacker's. So we
+    % divide by 2.
+    \pgfmathtruncatemacro\htmp{(#1) / 2}%
+    \pgfmathtruncatemacro\prevH{(\htmp - 1)}%
+    \pgfmathtruncatemacro\prevA{((\htmp - \aHOffset)*2 - \aOffset)}%
+    \pgfmathtruncatemacro\sigmawH{int(\prevH + \prevA + 1)}%
+    \pgfmathtruncatemacro\sigmawA{int(\prevA + 1)}%
+    \ifnum \sigmawH > \sigmawA
+        0%
+    \else
+        1%
+    \fi%
+}
+
+
 \begin{document}
 \input{dag-styles}%
-\providecommand\DagNodeDist{0.8cm}
 \newcommand\TikzDagSimple{
     \providecommand\AbbrHChain{H}
     \providecommand\AbbrAChain{A}
+
+    % setup for honest blocks offset
+    % if set then honest blocks will be shifted right (fwd in time) by 1 block
+    \ifnum 1=\OffsetHonestBlocks
+        \xdef\aHOffset{0}
+        \xdef\aOffset{1}
+    \else
+        \xdef\aHOffset{1}
+        \xdef\aOffset{0}
+    \fi
+
     \node (prevDots) [yshift=0cm, align=center] {$\cdots$};
 
     \node (block0) [block, align=center, right = of prevDots] {$\AbbrHChain_{i}$ \\ \footnotesize{$\Sigma_{w} = 0$}};
@@ -23,6 +58,11 @@
     % \node (spacing) [block, above = of block0, yshift=100pt] {spacing debug node};
 
     \node (forkPoint) [right = of block0, xshift=20pt] {};
+    % \node (aStart) [above = of forkPoint] {};
+    % \node (hStart) [above = of forkPoint] {};
+
+    \node (labelA) [align=center, above = of block0, yshift=-0.4*\DagNodeDist] {Attacker's \\ Blocks};
+    \node (labelH) [align=center, below = of block0, yshift=0.4*\DagNodeDist] {Honest \\ Blocks};
 
     % start of attacker's chain
     \xdef\prevNodeBeforeLoop{block0}
@@ -34,26 +74,48 @@
         \draw [arrowParent] (blockA\a) -- (\prevNode);
         \xdef\prevNode{blockA\a}
         \xdef\nodePosDir{right}
-        \xdef\nodePosRel{\prevNode}
+        % \xdef\nodePosRel{\prevNode}
+        \ifnum 0=\MainChainCentered
+            \xdef\nodePosRel{\prevNode}
+        \else
+            \xdef\nodePosRel{block0 -| \prevNode.east}
+        \fi
     }
 
     % honest chain
+    \node (hForkPoint) [] at (forkPoint -| blockA2) {};
+
     \xdef\prevNode{\prevNodeBeforeLoop}
     \xdef\nodePosDir{below}
-    \xdef\nodePosRel{forkPoint}
     \xdef\lastHBlock{2}
+
+    % if set then honest blocks will be shifted right (fwd in time) by 1 block
+    \ifnum 1=\OffsetHonestBlocks
+        \xdef\nodePosRel{hForkPoint}
+        % \xdef\aHOffset{0}
+        % \xdef\aOffset{1}
+    \else
+        \xdef\nodePosRel{forkPoint}
+        % \xdef\aHOffset{1}
+        % \xdef\aOffset{0}
+    \fi
 
     \node (blockH1) [block, align=center, \nodePosDir = of \nodePosRel] {$\AbbrHChain_{i+1}$ \\ \footnotesize{$\Sigma_{w} = 1$}};
     \draw [arrowParent] (blockH1) -- (\prevNode);
 
+    % honest blocks
     \foreach \h in {2,...,4} {
         \pgfmathtruncatemacro\prevH{int(\h-1)}
-        \pgfmathtruncatemacro\prevA{int((\h-1)*2)}
+        \pgfmathtruncatemacro\prevA{int((\h - \aHOffset)*2 - \aOffset)}
         \pgfmathtruncatemacro\sigmawH{\prevH + \prevA + 1}
         \xdef\prevNodes{blockH\prevH,blockA\prevA}
         \xdef\nodePosDir{right}
-        \xdef\nodePosRel{blockH\prevH -| blockA\prevA.east}
         \xdef\lastHBlock{\h}
+        \ifnum 0=\MainChainCentered
+            \xdef\nodePosRel{blockH\prevH -| blockA\prevA.east}
+        \else
+            \xdef\nodePosRel{block0 -| blockA\prevA.east}
+        \fi
 
         \node (blockH\h) [block, align=center, \nodePosDir = of \nodePosRel] {$\AbbrHChain_{i+\h}$ \\ \footnotesize{$\Sigma_{w} = \sigmawH$}};
 
@@ -61,9 +123,6 @@
             \draw [arrowParent] (blockH\h) -- (\p);
         }
     }
-
-    \node (labelA) [align=center] at (blockA1 -| block0) {Attacker's \\ Blocks};
-    \node (labelH) [align=center] at (blockH1 -| block0) {Honest \\ Blocks};
 
     \node (labelALineHeight) [below = of labelA, yshift=0.85*\DagNodeDist] {};
     \node (labelHLineHeight) [above = of labelH, yshift=-0.85*\DagNodeDist] {};
@@ -85,6 +144,10 @@
     % \draw [arrowTime] (topLeft) node () [anchor=west, yshift=-10pt] {\textit{Time}} -- (topRight);
     \draw [arrowTime] (botLeft) node () [anchor=west, yshift=-10pt] {\textit{Time}} -- (botRight);
 }%
+
+
+
+
 \begin{tikzpicture}[node distance=\DagNodeDist]
     \TikzDagSimple
 \end{tikzpicture}

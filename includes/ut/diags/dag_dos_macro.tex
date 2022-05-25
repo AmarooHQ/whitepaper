@@ -1,0 +1,151 @@
+\providecommand{\HighlightMainChain}{1}
+\providecommand\DagNodeDist{0.8cm}
+
+\providecommand\AbbrHChain{H}
+\providecommand\AbbrAChain{A}
+
+\providecommand\DagFinalX{8}
+
+
+\input{dag-styles}%
+
+
+\newcommand\TikzDagSimple{
+    % measured block W/H via trial and error
+    \xdef\blockWidth{3.9em};
+    \xdef\blockHeight{2.65em};
+
+    \tikzstyle{coord} = [minimum width=\blockWidth, minimum height=\blockHeight]
+    \tikzstyle{block} = [rectangle, draw=black, align=center, minimum width=\blockWidth, minimum height=\blockHeight]
+    \tikzstyle{offMainChain} = []
+    \tikzstyle{mainChain} = [double, thick]
+
+    \node (prevDots) [align=center] {$\cdots$};
+
+    \node (block0) [block, align=center, right = of prevDots] {$\AbbrHChain_{i}$ \\ \footnotesize{$\Sigma_{w} = 0$}};
+    \draw [arrowParent] (block0) -- (prevDots);
+
+
+    \xdef\fpDist{20pt}
+    % draw all but initial block based on this point
+    \node (forkPoint) [right = of block0, xshift=\fpDist] {};
+
+    \node (fpBlock) [coord] at (forkPoint) {};  % node at fp that is the size of a block
+    \node (aStart) [above = of forkPoint, yshift=1em] {};
+    \node (hStart) [below = of forkPoint, yshift=-1em] {};
+    \node (x0) [coord, left = of fpBlock] {};
+
+    \node (labelA) [align=center, above = of block0, yshift=-0.4*\DagNodeDist] {Attacker's \\ Blocks};
+    \node (labelH) [align=center, below = of block0, yshift=0.4*\DagNodeDist] {Honest \\ Blocks};
+
+    % interval between attackers blocks (measured in terms of \x)
+    \xdef\aEvery{1}
+    % interval between honest blocks (in terms of \x)
+    \xdef\hEvery{2}
+    % loop through possible x positions for blocks starting at 1
+    \pgfmathtruncatemacro\lastHonestB{floor(\DagFinalX / \hEvery)}
+    \foreach \x in {1,...,\DagFinalX} {
+        % set up "x axis" dummy nodes
+        \pgfmathtruncatemacro\lastX{\x - 1}
+        \node (x\x) [coord, right = of x\lastX] {};
+
+        \foreach \chainId in {0,1} {
+            % 0 = attacker
+            % 1 = honest
+            \pgfmathtruncatemacro\blockEvery{((1-\chainId) * \aEvery) + (\chainId * \hEvery)}
+            \pgfmathtruncatemacro\otherBlockEvery{(\chainId * \aEvery) + ((1 - \chainId) * \hEvery)}
+            \pgfmathtruncatemacro\bNum{floor((\x) / \blockEvery)}
+            \pgfmathtruncatemacro\otherBNum{floor((\x) / \otherBlockEvery)}
+            \pgfmathtruncatemacro\lastBNum{\bNum - 1} % \blockEvery}
+            \pgfmathtruncatemacro\otherLastBNum{floor((\x - 1) / \otherBlockEvery)} % \otherBlockEvery}
+            % the x coord of the last other block:
+            \pgfmathtruncatemacro\otherX{\otherBNum * \otherBlockEvery}
+            \pgfmathtruncatemacro\otherLastX{\otherLastBNum * \otherBlockEvery}
+            % this is the last local block that the other chain knows about:
+            \pgfmathtruncatemacro\otherOtherLastBNum{floor((\otherX - 1) / \blockEvery)}
+
+            % \shouldDraw is only 1 when the mod(_, _) is 0:
+            \pgfmathtruncatemacro\shouldDraw{max(0, 1 - Mod(\x, \blockEvery))}
+
+            \ifnum 1=\shouldDraw
+                % set chain-specific vars
+                \ifnum 0=\chainId
+                    \xdef\bName{blockA}
+                    \xdef\yStart{aStart}
+                    \xdef\chainName{\AbbrAChain}
+                    \xdef\prevNodes{\bName\lastBNum}
+                    \pgfmathtruncatemacro\sigmaW{\bNum}
+                    \pgfmathtruncatemacro\otherSigmaW{\otherBNum + \otherOtherLastBNum}
+                \else
+                    \xdef\bName{blockH}
+                    \xdef\otherBName{blockA}
+                    \xdef\yStart{hStart}
+                    \xdef\chainName{\AbbrHChain}
+                    \pgfmathtruncatemacro\sigmaW{\bNum + \otherLastBNum}
+                    \pgfmathtruncatemacro\otherSigmaW{\otherLastBNum + 1}
+                    % a bit messy
+                    \ifnum 1<\bNum
+                        \xdef\prevNodes{\bName\lastBNum,\otherBName\otherLastBNum}
+                    \else
+                        \xdef\prevNodes{\otherBName\otherLastBNum}
+                    \fi
+                \fi
+
+                \xdef\isMainChain{1}
+                \ifnum \sigmaW<\otherSigmaW
+                    \xdef\isMainChain{0}
+                \fi
+
+                \ifnum 1=\x
+                    \xdef\prevNodes{block0}
+                \fi
+
+                \xdef\styleExtra{offMainChain}
+                \ifnum 1=\HighlightMainChain
+                    \ifnum 1=\isMainChain
+                        % \xdef\yStart{x0}
+                        \xdef\styleExtra{mainChain}
+                    \fi
+                \fi
+
+                \node (\bName\bNum) [block, \styleExtra] at (\yStart -| x\x) {$\chainName_{i+\bNum}$ \\ \footnotesize{$\Sigma_{w} = \sigmaW$}
+                    % debug:
+                    % \\ \footnotesize{
+                    %     (\otherLastX)
+                    %     \otherBNum |
+                    %     % lOBNum: \otherLastBNum
+                    %     \otherOtherLastBNum |
+                    %     \otherSigmaW
+                    % }
+                };
+                \foreach \p in \prevNodes {
+                    \draw [arrowParent] (\bName\bNum) -- (\p);
+                }
+            \fi
+        }
+        % \node (blockA\a) [block, align=center, \nodePosDir = of \nodePosRel] {$\AbbrAChain_{i+\a}$ \\ \footnotesize{$\Sigma_{w} = \a$}};
+    }
+
+    % lines and labels and things
+
+    \node (labelALineHeight) [below = of labelA, yshift=0.85*\DagNodeDist] {};
+    \node (labelHLineHeight) [above = of labelH, yshift=-0.85*\DagNodeDist] {};
+
+    \xdef\lastHBlock{\lastHonestB}
+
+    \xdef\xs{0cm}
+    \xdef\topNode{blockA1}
+    \xdef\botNode{blockH1}
+    \xdef\leftMostNode{prevDots}
+    \xdef\rightMostNode{blockH\lastHBlock}
+
+    \draw [dashed] (labelALineHeight -| \leftMostNode.west) -- (labelALineHeight -| \rightMostNode.east);
+    \draw [dashed] (labelHLineHeight -| \leftMostNode.west) -- (labelHLineHeight -| \rightMostNode.east);
+
+    \node (topLeft) [above = of \topNode -| \leftMostNode.west, minimum width=0, xshift=\xs] {};
+    \node (botLeft) [below = of \botNode -| \leftMostNode.west, minimum width=0, xshift=\xs] {};
+    \node (topRight) [above = of \topNode -| \rightMostNode.east, minimum width=0, xshift=\xs] {};
+    \node (botRight) [below = of \botNode -| \rightMostNode.east, minimum width=0, xshift=\xs] {};
+    % \draw [arrowTime] (topLeft) node () [anchor=west, yshift=-10pt] {\textit{Time}} -- (topRight);
+    \draw [arrowTime] (botLeft) node () [anchor=west, yshift=-10pt] {\textit{Time}} -- (botRight);
+}%

@@ -1296,7 +1296,7 @@ Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
 
 ### Counting Work
 
-\todoDraftOnly{Revisit counting work section in a bit and mb redraft}
+\label{sec:counting-work}
 
 \input{20-por/90-counting-work.tex}
 
