@@ -581,13 +581,21 @@ Particularly, the network must be structured such that miners' choices result in
 It's important that it's emergent and not synthetic (e.g., by increasing the block reward with time-since-last-block) because we don't want people to game the system.
 It's better to have a simple system with emergent properties than a complex system with those properties \`\`designed in''.
 
-Say you have a network with 10 chains: $C_0, C_1, C_2, ..., C_9$. If the networks are separate, then you have 10 groups of miners: $M_0, M_1, M_2, ..., M_9$. They have to choose one chain to mine on, so the distribution of miners is expected to be approximately the distribution of normalized block rewards + tx fees. The proportions of block rewards between $C_i$ & $C_j$ don't really matter, we expect the mining groups $M_i$ & $M_j$ will just sort themselves out due to market forces. For simplicity, though, this example assumes that mining rewards and the distribution of miners is an even 10% across the board.
+Say you have a network with 10 chains: $C_0, C_1, C_2, ..., C_9$.
+If the networks are separate, then you have 10 groups of miners: $M_0, M_1, M_2, ..., M_9$.
+They have to choose one chain to mine on, so the distribution of miners is expected to be approximately the distribution of normalized block rewards plus tx fees.
+The proportions of block rewards between $C_i$ & $C_j$ don't really matter, we expect the mining groups $M_i$ & $M_j$ will just sort themselves out due to market forces.
+For simplicity, though, this example assumes that mining rewards and the distribution of miners is an even 10% across the board.
 
 If the network has spare capacity (i.e., transactions are mostly cleared out with each block; the mempool for each chain is ~empty) then we have a situation like this:
 
-Set $t=0$ to be immediately after a block is published on a chain. Then, as $t$ progresses, transactions with fees should build up in the mempool, so $\text{TxFees} \propto t$. The reward for mining a block is $r + \text{TxFees}$ for some block reward, $r$. if $\text{TxFees} \propto t$ then $r + \text{TxFees} \propto K + t$ for some constant $K$.
+Set $t=0$ to be immediately after a block is published on a chain.
+Then, as $t$ progresses, transactions with fees should build up in the mempool, so $\text{TxFees} \propto t$.
+The reward for mining a block is $r + \text{TxFees}$ for some block reward, $r$.
+If $\text{TxFees} \propto t$ then $r + \text{TxFees} \propto K + t$ for some constant $K$.
 
-The potential reward-over-time for a miner ($t$ vs $r + \text{TxFees}$) looks like a sawtooth function with a y-axis offset. It builds as more transactions pile up, and drops back to the baseline reward after a block.
+The potential reward-over-time for a miner ($t$ vs $r + \text{TxFees}$) looks like a sawtooth function with a y-axis offset.
+It builds as more transactions pile up, and drops back to the baseline reward after a block.
 
 If the miners $M_0, ..., M_9$ are capable of working on one of any $\{C_0, ..., C_9\}$ (and they have identical ROI profiles to the other miners), then they're incented to work on the chain with the most transactions in the mempool. That means: miners should, roughly, work the chain that has gone the longest without a block. What should we expect based on those incentives? Miners should work on each chain only in the final moments of the block production cycle. If block times were set to 60s, then they'd start mining at around the 54s mark because that's how they maximize their ROI.
 
