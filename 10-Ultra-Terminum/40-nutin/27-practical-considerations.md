@@ -14,9 +14,11 @@
 
 \label{sec:availability-of-blocks}
 
+\input{includes/ut/content/27-practical/10-refl-availability.tex}
+
 \todoDraftOnly{Review this section. Got some feedback that this section was unclear. Is nomenclature introduced prior to this section? check if there's something that interacts with DAGs and mention if so.}
 
-What would happen if a header -- with valid PoW but *without* a valid block -- were to be reflected? Let's consider the two chains (L and R) from \autoref{fig:por-step5}.
+What would happen if a header -- with valid PoW but *without* a valid block -- were to be reflected? Let's consider the two chains from before (L and R) in a mutual PoR configuration.
 
 That would mean that chain L contains a header, $H_{R,1a}$, for chain R for which no block is available.
 
@@ -73,7 +75,7 @@ If miners of any simplex-chain download the blocks of *all* simplex-chains -- as
 }
 
 There would be some downsides to omitting the proofs of reflection.
-For one, it would mean that simplex-chain nodes, during an initial sync, would not be able to verify the PoRs without auxillary data -- potentially a lot.
+For one, it would mean that simplex-chain nodes, during an initial sync, would not be able to verify the PoRs without auxiliary data -- potentially a lot.
 Secondly, it would mean that miners *must* track the state of *all* reflections in the simplex for some period of time so that they ensure the integrity of the reflection protocol.
 Given \autoref{sec:availability-of-blocks}, this is possible without significant overhead.
 
@@ -105,7 +107,7 @@ Traditionally, blockchain protocols have some *global* state and a state-transit
 ```{=latex}
 \bquote{
     Ethereum, taken as a whole, can be viewed as a transaction-based state machine: we begin with a genesis state and incrementally execute transactions to morph it into some current state. It is this current state which we accept as the canonical “version” of the world of Ethereum. \\
-    \ldots \\
+    {[\ldots]} \\
     A valid state transition is one which comes about through a transaction. Formally:
     \begin{equation*}
         \sigma_{t+1} \equiv \Upsilon(\sigma_t, T)
@@ -637,3 +639,16 @@ Does a miner ever benefit from withholding reflections?
 \input{27-practical/90-simplex-security-and-cec.tex}
 
 %% END ### RELEASE
+
+<!--
+
+atk situations:
+- global 51%
+- local 51%
+- bad block
+- spv in presence of bad block
+  - flag invalid blocks + spv requires uncontested block in main chain as soln?
+- miners play invalid "tag" game (where 1 always claims the other's blocks are invalid so there's a back and forth)
+- reflection censorship (not rly a problem)
+
+-->

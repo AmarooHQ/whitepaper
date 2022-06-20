@@ -935,7 +935,7 @@ The second has units L-blocks/R-block, which sounds like it should be the ratio 
 (So this conversion method fails.)
 
 \autoref{eq:conv-both-ctx-seconds} has weird units, though.
-R-seconds/L-second means something like: the relative participation of each network compared with a recent past state; i.e., the ratio of the ratios of each network's \emph{actual} block production compared to it's \emph{target} block production.
+R-seconds/L-second means something like: the relative participation of each network compared with a recent past state; i.e., the ratio of the ratios of each network's \emph{actual} block production compared to its \emph{target} block production.
 (This conversion method also fails.)
 
 \autoref{eq:conv-both-ctx-laden} measures something like \emph{relative weighted confirmation rates}.
@@ -1137,7 +1137,7 @@ Nice and simple.
 
 \label{sec:coins-per-confirmation}
 
-Given a multi-chain network, could we measure measure block-weight in coins?
+Given a multi-chain network, could we measure block-weight in coins?
 It seems promising and elegant if it works, but does it have any real-world meaning?
 
 One example where measuring chain-weight in coins does have some meaning is \autoref{sec:conversion-single-root-token} (the SRT context).

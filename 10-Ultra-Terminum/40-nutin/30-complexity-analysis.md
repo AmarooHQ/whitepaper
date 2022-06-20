@@ -278,7 +278,7 @@ Dapp-Chains and the Complexity of $\UT{2}$ and $\UT{3}$
 
 #### Dapp-Chains
 
-If a system supports nested chains, then we can say that for some throughput, $T_i$, at nesting level $i$, that $(i+1)^{th}$ nesting level can support $N_{i+1}$ nested chains via:
+If a system supports nested chains, then we can say that for some throughput, $T_i$, at nesting level $i$, the $(i+1)^{th}$ nesting level can support $N_{i+1}$ nested chains via:
 \begin{equation}
 \label{eq:N-i-plus-1-in-terms-of-Ti}
 N_{i+1} = \frac{T_i}{D_f \cdot D_h}
@@ -364,7 +364,8 @@ N_3 & = \frac{T_3}{k_3} \\
 
 Each chain -- at full capacity -- operates with order $O(c)$ by definition. Thus its state has order $O(c)$ also. The size of SPV proofs scale logarithmically with the set you're proving membership of, e.g., the number of transactions, or size of the chain's state, etc. Thus, SPV proofs scale with order $O(\log_2 c)$.
 
-For a given $O(c^j); j \in \{2,3,4\}$ configuration of UT (i.e., $\UT{1}$, $\UT{2}$, $\UT{3}$), a chain can process SPV proofs of state on another chain. For $j = 4$, the furthest that a transaction can occur from its host simplex-chain is in the 3rd level of nesting (i.e., a dapp-dapp-chain). It would require $j-1$ SPV proofs to \`\`ascend'' from the host simplex-chain to a dapp-dapp-chain. However, given that full nodes of a dapp-dapp-chain are required to be full nodes of both the host dapp-chain and the host simplex-chain, transactions in that dapp-dapp-chain do not need to provide SPV proofs of state in either of those host chains -- full nodes already have those details. That is: transactions which \`\`descend'' the levels of nesting can do so with $O(1)$ cost. SPV proofs are only required when transactions \`\`ascend'' the levels of nesting to other simplex-, dapp-, or dapp-dapp-chains.
+For a given $O(c^j); j \in \{2,3,4\}$ configuration of UT (i.e., $\UT{1}$, $\UT{2}$, $\UT{3}$), a chain can process SPV proofs of state on another chain. For $j = 4$, the furthest that a transaction can occur from its host simplex-chain is in the 3rd level of nesting (i.e., a dapp-dapp-chain).
+It would require $j-1$ SPV proofs to \`\`ascend'' from the host simplex-chain to a dapp-dapp-chain. However, given that full nodes of a dapp-dapp-chain are required to be full nodes of both the host dapp-chain and the host simplex-chain, transactions in that dapp-dapp-chain do not need to provide SPV proofs of state in either of those host chains -- full nodes already have those details. That is: transactions which \`\`descend'' the levels of nesting can do so with $O(1)$ cost. SPV proofs are only required when transactions \`\`ascend'' the levels of nesting to other simplex-, dapp-, or dapp-dapp-chains.
 
 Thus, the maximum number of SPV proofs required to prove state anywhere in a UT simplex is $j$.
 
