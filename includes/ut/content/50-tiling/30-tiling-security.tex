@@ -264,20 +264,20 @@ If $u = 2$, $\Mroot = 8$, and $q = 0.495$, then $r > 8$.
 
 \subsubsubsection{Complexity of the Core}
 
-\begin{forest}
-    % rectangle, draw=black, minimum width=6em, minimum height=1.5em,
-    % for descendants={rectangle, draw=black, minimum width=3em, minimum height=1.5em}
-    for tree={rectangle, draw=black, minimum width=3em, minimum height=1.5em}
-    [
-        0,
-        [0|0
-        ]
-        [0|1
-        ]
-    ]
-\end{forest}
+% \begin{forest}
+%     % rectangle, draw=black, minimum width=6em, minimum height=1.5em,
+%     % for descendants={rectangle, draw=black, minimum width=3em, minimum height=1.5em}
+%     for tree={rectangle, draw=black, minimum width=3em, minimum height=1.5em}
+%     [
+%         0,
+%         [0|0
+%         ]
+%         [0|1
+%         ]
+%     ]
+% \end{forest}
 
-core + children:
+Complexity of the core and its children:
 
 \begin{align}
     N_\text{chains} &= \frac{N_1}{v+1} + (v-1)\frac{N_1}{v+1}
@@ -285,13 +285,12 @@ core + children:
     &= \frac{N_1v}{v+1} = O(N_1) = O(c)
 \end{align}
 
-refls
-
 \providecommand\NOneSq{{{N_1}^2}}
 
-internal root + internal children + external between root and any child
+The complexity of relevant reflections:
+internal root + internal children + external between root and any child.
 
-$internal + (v-1) * internal + (v-1) (chains^2)$
+% $internal + (v-1) * internal + (v-1) (chains^2)$
 
 \begin{align}
     N_\text{refls} &= \parens{\frac{N_1}{v+1}}^2 + (v-1)\parens{\frac{N_1}{v+1}}^2
