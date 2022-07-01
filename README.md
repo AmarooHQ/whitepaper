@@ -115,3 +115,10 @@ Builds will fail if, after all content between these sections (inclusive of tags
 
 - should be .pdf
 - use pdfcrop to trim down margins if need be: `pdfcrop --margins '0 0 0 0' in.pdf out.pdf`
+
+## misc
+
+To put raw latex in .md docs so that pandoc doesn't mangle stuff, wrap latex in:
+
+    ```{=latex}
+    ```

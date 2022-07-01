@@ -14,7 +14,7 @@
 
 \label{sec:availability-of-blocks}
 
-\input{includes/ut/content/27-practical/10-refl-availability.tex}
+\draftOnly{\input{includes/ut/content/27-practical/10-refl-availability.tex}}
 
 \todoDraftOnly{Review this section. Got some feedback that this section was unclear. Is nomenclature introduced prior to this section? check if there's something that interacts with DAGs and mention if so.}
 
@@ -508,7 +508,7 @@ In \autoref{fig:dag-dos-1}, those're explicitly excluded!
 What happens if we include the effect of other simplex-chains, though?
 Well... something \emph{magical}.
 
-\todo{As soon as an honest block is created linking back to a most-recent attacker block, the game is over.}
+\todoDraftOnly{As soon as an honest block is created linking back to a most-recent attacker block, the game is over.}
 
 Consider an attacker producing 2 blocks for every 1 honest block.
 What happens most of the time?
@@ -527,7 +527,7 @@ cut from after "when an honest block is a bit lucky":
 it's worth noting the convergence better than we do atm (right now, that's: "If there were, it'd be possible to temporarily limit the attacker to $<50\%$ of mining power, ending the DoS quickly. (See \autoref{sec:miner-resonance}.))"
 \end{comment}
 
-\todo{
+\todoDraftOnly{
     Analyze including requirement to only reflect extant data.
     This means that the chain-tips get the weight (advantage honest b/c H builds on A blocks and H blocks).
     Attacker blocks lose out on PoRs but honest chain includes all PoRs.
@@ -539,7 +539,7 @@ That will attract miners from other chains due to unrealized RoI (potentially a 
 The attacker could include that transaction, but then they need to voluntarily end the DoS themselves.
 If you're worried about that, because it seems like miners might empty-block DoS simplex-chains, consider: when in equilibrium, that situation is essentially the same as an efficient market (for transaction execution).
 
-\todo{Is it essentially the same?}
+\todoDraftOnly{Is it essentially the same?}
 
 Is there a reasonable strategy whereby the honest network can temporarily increase the number of miners?
 If there were, it'd be possible to temporarily limit the attacker to $<50\%$ of mining power, ending the DoS quickly.

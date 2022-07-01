@@ -4,13 +4,17 @@
 
 \label{sec:tiling}
 
-\mk{This section (\autoref{sec:tiling}) is being redrafted. It replaces \autoref{sec:tiling-old}}
+\draftOnly{\mk{This section (\autoref{sec:tiling}) is being redrafted. It replaces \autoref{sec:tiling-old}}}
 
 \input{50-tiling/00-tiling-intro.tex}
 \input{50-tiling/10-simplex-tilings.tex}
 \input{50-tiling/20-recursive-por.tex}
 \input{50-tiling/30-tiling-security.tex}
 \input{50-tiling/80-future-work.tex}
+
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
 
 \subsection{Tiling -- Previous (Old) Version}
 
@@ -234,7 +238,7 @@ O(c^j \cdot N_{\text{tiles}}) & = O(c^j \cdot \frac{n}{c^j}) \\
 
 For all practical purposes, if we can grow the tiling fast enough, $\UTinf{}$ provides unbounded capacity.
 
-%% END ### RELEASE
+%% END ### DRAFT
 
 %% BEGIN ### DRAFT
 
@@ -245,7 +249,7 @@ Values for $N_1$ and $N_2$ and a comparison between $\UTinf{\text{+OPT}}$ and $\
 
 %% END ### DRAFT
 
-%% BEGIN ### RELEASE
+%% BEGIN ### DRAFT
 
 ### Tiling Variants
 
@@ -489,7 +493,7 @@ Additionally, a model of tilings of similar capacity -- i.e., similar $N_{\text{
     \label{fig:tiling-square}
 \end{figure}
 
-%% END ### RELEASE
+%% END ### DRAFT
 
 %% BEGIN ### DRAFT
 
