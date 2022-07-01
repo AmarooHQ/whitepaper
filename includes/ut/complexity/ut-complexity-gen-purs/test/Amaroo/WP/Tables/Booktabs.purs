@@ -32,7 +32,7 @@ positioningSpec = do
 
 booktabsSample = """\begin{table}[!hbp]
 \centering
-\caption{Some caption for the table} \label{table:mytable}
+\caption[Some caption for the table]{Some caption for the table} \label{table:mytable}
 \begin{tabular}{llll}
 \toprule
 {Id} & {$N_T$} & {$E_p$ [keV]} & {Something $\Delta E$ [keV]} \\
@@ -76,5 +76,5 @@ renderBooktabsSpec = describe "render" do
         pure $ shouldEqual l1 l2
       booktabsSample `shouldEqual` renderedSample
       (S.replace (Pattern " \\label{table:mytable}") (Replacement "") booktabsSample) `shouldEqual` renderedSNoLabel
-      (S.replace (Pattern "\\caption{Some caption for the table} ") (Replacement "") booktabsSample) `shouldEqual` renderedSNoCaption
-      (S.replace (Pattern "\\caption{Some caption for the table} \\label{table:mytable}\n") (Replacement "") booktabsSample) `shouldEqual` renderedSNoMeta
+      (S.replace (Pattern "\\caption[Some caption for the table]{Some caption for the table} ") (Replacement "") booktabsSample) `shouldEqual` renderedSNoCaption
+      (S.replace (Pattern "\\caption[Some caption for the table]{Some caption for the table} \\label{table:mytable}\n") (Replacement "") booktabsSample) `shouldEqual` renderedSNoMeta

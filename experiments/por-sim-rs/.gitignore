@@ -6,5 +6,7 @@ perf.data*
 *.svg
 !**/csv/*.csv
 !**/png/*.png
-#!**/png/*.svg
+!**/png/*.csv
+!**/png/*.svg
+!**/png/*.pdf
 cleanly_stop_sim

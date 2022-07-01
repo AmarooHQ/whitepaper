@@ -1,0 +1,26 @@
+\documentclass[]{standalone}
+\usepackage[T1]{fontenc}
+\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usepackage{xintexpr}
+\usepackage{xparse}
+\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
+
+\makeatletter
+\def\input@path{{./includes/}{./includes/ut/diags/}}
+\makeatother
+
+
+\providecommand\DagFinalX{26}
+\providecommand\hEvery{5}
+
+
+\input{dag-styles}%
+\input{dag_dos_macro}%
+
+
+\begin{document}%
+\begin{tikzpicture}[node distance=\DagNodeDist]%
+    \TikzDagSimple%
+\end{tikzpicture}%
+\end{document}

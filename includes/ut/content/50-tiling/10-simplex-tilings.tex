@@ -1,0 +1,196 @@
+\subsubsection{Simplex Tilings}
+
+We connect simplex tiles together, via mutual reflection, to create a simplex tiling.
+For the sake of brevity, when we say that a simplex tile reflects another tile (or that a tile is \emph{connected} to another tile), we mean that all simplex-chains in the first tile mutually reflect all simplex-chains in the second tile.
+% There are an infinite number of simplex tilings, and an infinite number of \emph{patterns} by which we can construct simplex tilings.
+A simplex tiling is thus a \emph{graph} of interconnected tiles.
+Connected tiles are \emph{neighbors} and are \emph{adjacent} to one another in the tiling.
+
+\defineTermTex{Simplex Tiling}{
+    An interconnected graph of mutually reflecting simplex tiles
+}
+
+Before we look at some complex (and useful) tilings, let's consider three examples that are some of the simplest tilings possible: \autoref{fig:trivial-simplex-tiling}.
+The examples contain 2, 3, and 4 simplex tiles respectively.
+
+\aside{
+    Note: we are not yet concerned with the security properties of these examples -- we need to build up to that first.
+}
+
+\begin{figure}
+    \begin{subfigure}[m]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[max height=\linewidth, max width=\linewidth]{tiling_alt_s5_d0_sag.pdf}
+        \caption{2 simplex tiles}
+        \label{fig:triv-tiling-2}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[m]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[max height=\linewidth, max width=\linewidth]{tiling_a3_v3_s5_d0_sag.pdf}
+        \caption{3 simplex tiles}
+        \label{fig:triv-tiling-3}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[m]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[max height=\linewidth, max width=\linewidth]{tiling_a4_v3_s5_d0_sag.pdf}
+        \caption{4 simplex tiles}
+        \label{fig:triv-tiling-4}
+    \end{subfigure}
+    \caption[Trivial simplex tilings]{Trivial simplex tilings -- these are all equivalent to a single simplex as each simplex-chain reflects all other simplex-chains in the network.}
+    \label{fig:trivial-simplex-tiling}
+\end{figure}
+
+In those examples, notice that each simplex tile reflects each other tile.
+This means that each simplex-chain is mutually reflecting \emph{all} other simplex-chains (in all other tiles), so each of these tilings is equivalent to a standalone simplex.
+These tilings aren't particularly useful to us in practice, though, because we don't have a way to increase network-wide capacity beyond $O(c^2)$.
+
+If we want $O(n)$ capacity, then we'll need to come up with a new pattern for how to connect tiles together and how to add new tiles.
+Specifically: the pattern must \emph{always} have room for more simplex tiles, and each tile added must, on average, add \emph{more} that 1 new spot for additional tiles.\footnote{
+    There are tilings where a tile consumes more than one free spot.
+    For those tilings, on average each tile must add more spots than it consumes.
+}
+
+\subsubsection{Tile Valence}
+
+The \emph{valence} ($v$) of a tile is the number of other tiles that it can connect to.
+In our example earlier, we split our simplex tile's capacity for reflections into 4 equal parts -- each part was 12.5\% of each simplex-chain's \emph{total} capacity.
+Since 1 of those parts is reserved for internal reflections, and 3 parts are reserved for external reflections, that simplex tile has a valence of $v=3$.
+If, instead, we split our simplex tile's capacity for reflections into \emph{5} equal parts, then each part would be 10\% of each simplex-chain's \emph{total} capacity, and the tile would have $v=4$.
+
+We don't \emph{have} to use a valence of 3 -- we can split up a tile's capacity for reflections any way that we like.
+Each tile could even have different valencies, too, but this makes designing a tiling more complex.
+For the sake of simplicity, we will only consider tilings where each tile has the same capacity and the same valence.
+When we say that a \emph{tiling} (rather than a tile) has a valence of $v$, we mean that \emph{each tile in the tiling} has a valence of $v$.
+
+If a tiling has a valence of $v=0$, then all capacity for reflections is reserved for internal reflections -- so this is just a normal simplex.
+
+If a tiling has a valence of $v=1$, then the tiling is limited to 2 tiles at most -- there is only one solution.
+We end up with a tiling that's equivalent to a normal simplex, though, since all simplex-chains \emph{must} reflect all other simplex-chains.
+The complete tiling with $v=1$, which is the only possible tiling, is shown in \autoref{fig:triv-tiling-2}.
+
+If a tiling has a valence of $v=2$, then there is a countably infinite number of solutions.
+The trivial solution (which has 3 tiles) is where each simplex tile is connected to all other simplex tiles -- this is shown in \autoref{fig:triv-tiling-3}.
+We can create a tiling of $v=2$ with 4 tiles, too: $A \lrar B \lrar C \lrar D \lrar A$.
+This is part of a class of solutions: a loop.
+With $v=2$, we can construct a loop of arbitrary length.
+The last solution is a long chain of tiles that never loops back around; see \autoref{fig:tiling-v2-unbounded}.
+This is our first \emph{unbounded} solution -- it's a solution where we can always add more tiles.
+The problem with this solution is that, although it may have $O(n)$ capacity, the \emph{distance} between tiles is \emph{also} $O(n)$.
+This is not practical since $O(n)$ SPV proofs would be needed to prove state on the far side of the tiling.
+(The class of solutions that are loops is impractical for the same reason.)
+
+\begin{figure}
+    \centering
+    \includegraphics[max width=.9\linewidth]{tiling_v2_s5_d6_sag.pdf}
+    \caption[The only unbounded tiling at $v=2$.]{
+        The only unbounded tiling at $v=2$.
+        Although it is unbounded (we can always keep adding tiles), the \emph{distance} between those tiles is proportional to the size of the network -- so this isn't scalable.
+    }
+    \label{fig:tiling-v2-unbounded}
+\end{figure}
+
+Things start to get interesting when $v > 2$.
+
+If a tiling has a valence of $v\ge 3$, then there are many possible patterns of solutions.
+We will focus on one particular class: the patterns of tiling that are also \emph{trees}.
+
+\subsubsection{Tree-Tilings}
+
+\label{sec:tree-tilings}
+
+The tree-tilings that we'll consider are straight forward to construct.
+First, we start with a \emph{root tile}.
+Then, when we need more capacity, we create new tiles that are children of the root tile.
+Then, when each of these child-tiles is nearing maximum utilization, new children are created as children of \emph{that} tile -- they are grandchildren of the root tile.
+We can continue in this manner indefinitely.
+
+How many children, at most, should we create under each tile?
+The root tile has \emph{capacity} for $v$ children, but each other tile only has capacity for $v-1$ children.
+We \emph{could} allow the root tile to have up to $v$ children -- and it is possible to create a tree-tiling like this -- however, we're not going to do that here.
+Instead, we'll limit the root tile to $v-1$ children to match all other tiles.\footnote{
+    Exactly why we should do this will be discussed after Tiling Security in \autoref{sec:tiling-security}.
+}
+This means that the tilings we'll consider will be $n$-ary trees -- if $v=3$ then the tiling is a binary tree; if $v=4$ then it's a ternary tree; if $v=5$ then it's a quaternary tree, etc.
+Binary tree-tilings of depths 1, 2, and 3 are shown in \autoref{fig:binary-tree-tiling}.
+Note that, although \autoref{fig:binary-tree-tiling} constructs the tiling as a balanced tree, there's no requirement that a tree-tiling needs to be balanced.
+
+\begin{figure}
+    \begin{subfigure}[m]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[max width=\linewidth, max height=\linewidth]{tiling_v3_nary_s5_d1_sag}
+        \caption{1st iteration. 3 tiles.}
+        \label{fig:binary-tree-tiling-d1}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[m]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[max width=\linewidth, max height=\linewidth]{tiling_v3_nary_s5_d2_sag}
+        \caption{2nd iteration. 7 tiles.}
+        \label{fig:binary-tree-tiling-d2}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[m]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[max width=\linewidth, max height=\linewidth]{tiling_v3_nary_s5_d3_sag}
+        \caption{3rd iteration. 15 tiles.}
+        \label{fig:binary-tree-tiling-d3}
+    \end{subfigure}
+    \caption{Constructing a binary tree-tiling: the first 3 iterations.}
+    \label{fig:binary-tree-tiling}
+\end{figure}
+
+
+% \begin{figure}
+%     \hspace{.15\textwidth}
+%     \begin{subfigure}[m]{.3\textwidth}
+%         \vskip 0pt
+%         \centering
+%         \begin{forest}
+%             minimum width=2em, minimum height=2em, draw, align=center,
+%             for descendants={l=4em, minimum width=2em, minimum height=2em, draw, align=center},
+%             [Root
+%                 [ [] []]
+%                 [ [] []]
+%             ]
+%         \end{forest}
+%         \caption{A binary tree of depth 2.}
+%     \end{subfigure}%
+%     \hfill
+%     \begin{subfigure}[m]{.3\textwidth}
+%         \vskip 0pt
+%         \centering
+%         \includegraphics[max width=\linewidth, max height=\linewidth]{tiling_v3_nary_s5_d2_sag}
+%         \caption{A binary tree-tiling of depth 2.}
+%     \end{subfigure}%
+%     \hspace{.15\textwidth}
+%     \caption{Equivalent binary trees of depth 2.}
+% \end{figure}
+
+
+Let's use the term \emph{depth} ($d$) to describe how far a tile is from the root tile.
+The root tile has $d=0$, children of the root tile have $d=1$, grandchildren of the root tile have $d=2$, etc.
+
+% Note: let's do complexity stuff after security.
+
+% \subsubsection{Tree-Tilings: Preliminary Scaling Analysis}
+
+% Let's briefly analyze the scaling complexity of tree-tilings.
+% We'll return to
+
+% The tree-tilings we're to analyze have a \emph{branching factor} of $v-1$.
+% To help keep these derivations clean:
+% \begin{equation}
+%     \text{let } u = v - 1
+%     \label{eq:u-defn}
+% \end{equation}
+
+
+% \newpage

@@ -1,0 +1,95 @@
+\documentclass[varwidth=30cm]{standalone}
+\usepackage[T1]{fontenc}
+\usepackage{mathtools}
+\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usepackage{pgfbaselayers}
+\usepackage{xintexpr}
+\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
+
+\makeatletter
+\def\input@path{{./includes/}{./includes/ut/diags/}}
+\makeatother
+
+% overwrite (either \providecommand or \renewcommand) to control the parts of the diagram which are drawn or not.
+
+\begin{document}%
+\providecommand\TilingDepth{0}%
+\providecommand\TilingInitSize{2}%
+\providecommand\TilingScaleConst{1.2}%
+\providecommand\TilingSizeToNodeRRatio{7}%
+\providecommand\SimplexChains{1}%
+\providecommand\TilingDrawReflections{1}
+\providecommand\TilingDrawAllReflections{1}
+\providecommand\SimplexLineScale{0.8}
+\input{tiling-hex-macro}%
+
+\begin{figure}
+    \hspace{1cm}
+\renewcommand\SimplexChains{5}
+\begin{tikzpicture}[scale=0.25, every node/.style={transform shape}]
+    \TikzSimplexTiling
+\end{tikzpicture}
+\hspace{1cm}
+\renewcommand\SimplexChains{2}
+\renewcommand\TilingDepth{1}
+\begin{tikzpicture}[scale=0.25, every node/.style={transform shape}]
+    \TikzSimplexTiling
+\end{tikzpicture}
+\hspace{1cm}
+\renewcommand\SimplexChains{3}
+\renewcommand\TilingDepth{2}
+\begin{tikzpicture}[scale=0.25, every node/.style={transform shape}]
+    \TikzSimplexTiling
+\end{tikzpicture}
+\hspace{1cm}
+\renewcommand\SimplexChains{1}
+\renewcommand\TilingDepth{3}
+\begin{tikzpicture}[scale=0.25, every node/.style={transform shape}]
+    \TikzSimplexTiling
+\end{tikzpicture}
+\end{figure}
+\vspace{2cm}
+
+\renewcommand\SimplexChains{1}
+\begin{figure}
+    \hspace{1cm}
+\renewcommand\TilingDepth{4}
+\begin{tikzpicture}[scale=0.2, every node/.style={transform shape}]
+    \TikzSimplexTiling
+\end{tikzpicture}
+\hspace{1cm}
+\renewcommand\TilingDepth{5}
+\begin{tikzpicture}[scale=0.2, every node/.style={transform shape}]
+    \TikzSimplexTiling
+\end{tikzpicture}
+\hspace{1cm}
+\renewcommand\TilingDepth{7}
+\begin{tikzpicture}[scale=0.2, every node/.style={transform shape}]
+    \TikzSimplexTiling
+\end{tikzpicture}
+\end{figure}
+\vspace{2cm}
+
+\renewcommand\SimplexChains{1}
+\providecommand\SimplexLineScale{0.6}
+\begin{figure}
+\hspace{1cm}
+\renewcommand\TilingDepth{9}
+\begin{tikzpicture}[scale=0.2, every node/.style={transform shape}]
+    \TikzSimplexTiling
+\end{tikzpicture}
+% \hspace{1cm}
+% \renewcommand\TilingDepth{5}
+% \begin{tikzpicture}[scale=0.2, every node/.style={transform shape}]
+%     \TikzSimplexTiling
+% \end{tikzpicture}
+% \hspace{1cm}
+% \renewcommand\TilingDepth{7}
+% \begin{tikzpicture}[scale=0.2, every node/.style={transform shape}]
+%     \TikzSimplexTiling
+% \end{tikzpicture}
+\end{figure}
+\vspace{2cm}
+
+\end{document}

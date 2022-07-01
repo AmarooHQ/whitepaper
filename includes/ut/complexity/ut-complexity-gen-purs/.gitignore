@@ -12,3 +12,4 @@ src/LambertW.js
 index.js
 *-waymore*
 test-*.csv
+*.csv

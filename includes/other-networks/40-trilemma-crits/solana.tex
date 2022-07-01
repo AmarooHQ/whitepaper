@@ -1,0 +1,61 @@
+\subsection{Solana}
+
+Solana claims to solve the trilemma:
+
+\bquote{
+    In this post, we'll explore Turbine, Solana's block propagation protocol---inspired by BitTorrent---that solves the blockchain scalability trilemma.
+    % [\dots] \\
+    % With that context, let's jump into Turbine, Solana's block propagation protocol, to explain how the Solana network propagates data to solve the blockchain scalability trilemma.
+}[\linkSolanaTurbineTrilemma (Anatoly Yakovenko, 2019-07-11)]
+
+In March 2021, Anatoly Yakovenko -- author of the Solana whitepaper and a co-founder -- said this in answer to the question ``How does Solana solve the trilemma: decentralized, scalable and secure?'':
+
+\bquote{
+    With hardware. Latest nvidia GPU has 10,000 cores. So imagine each validator doing 10,000 more work [than] a single threaded evm environment.
+}[\linkSolanaRedditTrilemma (Anatoly Yakovenko, 2021-03-13)]
+
+These quotes contradict one another.
+
+%
+%
+
+\subsubsection{Block Propagation?}
+
+\label{sec:solana-block-propagation}
+
+In \linkSolanaTurbineTrilemma, Yakovenko says:
+
+\bquote{
+    The scalability trilemma in blockchain technology is all about bandwidth. In most blockchain networks today, given a fixed amount of bandwidth per node, increasing the node count will increase the amount of time necessary to propagate all the data to all nodes. That's a big problem.
+}
+
+This is inaccurate -- the scalability criterion of the trilemma is about \emph{capacity to process transactions}.
+
+Reliable block propagation is important for blockchains and \emph{can} be a capacity bottleneck.
+However, good block propagation doesn't solve the trilemma -- just because block propagation isn't a bottleneck does not mean that a network can scale.
+
+This misstatement of the trilemma constitutes changing the goal posts.
+
+\subsubsection{GPUs are still $O(c)$}
+
+Yakovenko's other idea (from March 2021) is to optimize each node's ability to process transactions via consumer hardware.
+But, that consumer hardware (a GPU) is an $O(c)$ device -- adding a GPU to a computer does not allow that single computer to process $> O(c)$ transactions.
+In this case, the bottleneck is still an $O(c)$ device, so the network is still limited to $O(c)$ scalability.
+
+% What is ``that context''?
+% Under the section ``The Scalability Trilemma'':
+
+% \bquote{
+%     The scalability trilemma in blockchain technology is all about bandwidth. [\dots]
+% }
+
+% \bquote{
+%     With hardware. Latest nvidia GPU has 10,000 cores. So imagine each validator doing 10,000 more work then a single threaded evm environment.
+% }[\linkSolanaRedditTrilemma]
+
+
+% not solana, does not come with a citation:
+
+% \bquote{
+%     Solana relies on proof of history as the key innovation to solve the blockchain trilemma instead of sharding or relying on Layer-2s.
+% }[Martin Lee; \href{https://www.nansen.ai/research/solana-scalability-through-speed}{Solana: Scalability through speed}]

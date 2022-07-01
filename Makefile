@@ -10,6 +10,7 @@ LP_TABLES=$(LP_DIR)/tables.tex
 LP_TABLES_OUT=$(OUTDIR)/tables.tex
 
 PURS_GEN_DIR=includes/ut/complexity/ut-complexity-gen-purs
+PURS_GEN_OUT=includes/ut/complexity/populateWPTables.js
 
 GIT_SHORTHASH=$(shell git rev-parse --short HEAD)
 
@@ -32,11 +33,19 @@ ifndef OUTPUT_PDF
 override OUTPUT_PDF = $(OUTPUT_PDF_DEFAULT)
 endif
 
+PREPARE_FOR ?=
 PREPROC_ARG_PF=
 ifdef PREPARE_FOR
 override PREPROC_ARG_PF=--prepare-for '$(PREPARE_FOR)'
 endif
 
+DARK_MODE ?=
+PREPROC_ARG_DM=
+ifdef DARK_MODE
+override PREPROC_ARG_DM=--dark-mode
+endif
+
+SKIP_TEXTLINT = false
 
 default: whitepaper
 draft: default
@@ -48,14 +57,17 @@ release: whitepaper
 release: pdflint
 release:
 	# No matches for \todo{ should be found
-	grep -qzv '\\todo{' output/whitepaper.tex || (grep '\\todo{' output/whitepaper.tex | wc -l; bash bin/msg_error.sh 'Detected `\\\\todo{` in output/whitepaper.tex during release build.'; exit 1)
+	grep -qzv '\\todo{' output/whitepaper.tex || (grep '\\todo{' output/whitepaper.tex | wc -l; bash bin/msg_error.sh 'Detected `\\\\todo{` in output/whitepaper.tex during release build.'; grep '\\todo{' output/whitepaper.tex; exit 1)
+	bash bin/msg_good.sh "Release build complete."
+
+release-quick: SKIP_TEXTLINT=true
+release-quick: release
 
 cilint-prep: PP_MODE=lint
 cilint-prep: whitepaper
-
-cilint: cilint-prep
 	npm i
-	npm run lint
+
+cilint: cilint-prep lint
 
 wp-no-lint: PP_LINT_FLAG="--no-lint-check"
 wp-no-lint: whitepaper
@@ -69,6 +81,8 @@ entropy:
 TIME     = /usr/bin/time -p
 # LATEXMK  = latexmk -silent -f -g -ps
 # PDFLATEX = latexmk -pdf -shell-escape -interaction=nonstopmode
+# LATEXRUN = TZ='Australia/Sydney' python3 ./latexrun --color always --latex-args "-shell-escape -interaction=batchmode"
+LATEXRUN = python3 ./latexrun --color always --latex-args "-shell-escape -interaction=batchmode"
 PDFLATEX = latexmk -pdf -shell-escape -interaction=batchmode
 # PDFLATEX = latexmk -pdf -shell-escape -interaction=batchmode
 # PDFLATEX = python3 $(PWD)/latexrun --color always --latex-args "-shell-escape -interaction=batchmode"
@@ -83,19 +97,28 @@ DVIGraphics = $(patsubst %_sag.tex,%_sag.dvi,$(StandAloneGraphicsTeXFiles))
 PNGGraphics = $(patsubst %_sag.pdf,%_sag.png,$(PDFGraphics))
 InputTeXFiles = $(wildcard *_input.tex)
 
+WATCH_CMD = make
+
 watch:
-	bin/onchange.sh ./10-Ultra-Terminum ./includes/ut/content ./includes/ut/algorithms "make"
+	bash bin/msg_good.sh "Watching. Command to re-run: $(WATCH_CMD)"
+	bin/onchange.sh ./10-Ultra-Terminum ./includes/ut/content ./includes/ut/algorithms '$(WATCH_CMD)'
+
+watch-release: WATCH_CMD=make release-quick
+watch-release: watch
 
 wp-graphics-standalone: $(PDFGraphics)
 wp-graphics-ps: $(PSGraphics)
 wp-graphics-png: $(PNGGraphics)
 
 %_sag.pdf: %_sag.tex
+	#$(LATEXRUN) $< -O `dirname $<`
+	bash bin/msg_good.sh "[$<]: PP_MODE=$(PP_MODE)"
 	cd `dirname $<` && \
 	$(PDFLATEX) `basename $<`
 	$(PDFCROP) $@ $@
 
 %_sag.ps: %_sag.tex
+	bash bin/msg_good.sh "[$<]: PP_MODE=$(PP_MODE)"
 	cd `dirname $<` && \
 	$(PSLATEX) `basename $<`
 # $(PDFCROP) $@ $@
@@ -114,6 +137,7 @@ par-gfx:
 # to do that: replace '10-Ultra-Terminum' with '*-*'
 # nb: add `clean-wp-md` as a dependency if there are issues building.
 build-whitepaper: %.md
+	bash bin/msg_good.sh "[build-whitepaper]: PP_MODE=$(PP_MODE)"
 	mkdir -p $(OUTDIR)
 	echo '' > $(WPFILE)
 	for mdfile in `find 10-Ultra-Terminum/ -iname \*.md | sort`; do \
@@ -122,9 +146,9 @@ build-whitepaper: %.md
 	  echo -n "\n\n" >> $(WPFILE) ; \
 	done
 	# replace tables placeholder with actual tables
-	node ./includes/ut/complexity/populateWPTables.js --populate-wp-md
+	node $(PURS_GEN_OUT) --populate-wp-md
 	# this fixes texcount (since import-paths don't need to be searched).
-	sed -r -i 's/input\{20-por/input\{includes\/ut\/content\/20-por/' $(WPFILE)
+	sed -r -i 's/input\{([0-9]+-[a-z]+)/input\{includes\/ut\/content\/\1/' $(WPFILE)
 # if you need to build the above: cd includes/ut/complexity/ut-complexity-gen-purs && npm i && npm run bundle-for-wp
 
 
@@ -138,11 +162,12 @@ set-wp-properties:
 	egrep '^geometry: (.*)$$' $(WPFILE)
 
 wp-pandoc:
-	pandoc -s --number-sections --toc -f markdown -t latex -o $(WPTEX) $(WPFILE)
+	bash bin/msg_good.sh "[wp-pandoc]: PP_MODE=$(PP_MODE)"
+	pandoc -s --number-sections --toc -f markdown-latex_macros -t latex -o $(WPTEX) $(WPFILE)
 	sed -i 's/\\%\\%/%/g' $(WPTEX)
 
 pandoc-stdin:
-	pandoc -s --number-sections -f markdown -t latex
+	pandoc -s --number-sections -f markdown-latex_macros -t latex
 
 # added to make testing quote boxes easier I think
 wp-just-quotes: clean-wp-md
@@ -162,18 +187,28 @@ wc:
 
 # preprocess tex for draft/release/lint
 preprocess-build:
-	python3 bin/preprocessModes.py process-tex $(WPTEX) --mode $(PP_MODE) --allow-in-place $(PP_LINT_FLAG) $(PREPROC_ARG_PF)
+	python3 bin/preprocessModes.py process-tex $(WPTEX) --mode $(PP_MODE) --allow-in-place $(PP_LINT_FLAG) $(PREPROC_ARG_PF) $(PREPROC_ARG_DM)
 	bash bin/msg_good.sh "Finished preprocessing of $(WPTEX) in mode $(PP_MODE)"
 
-# run latexmk once so that gitinfo2 runs, then use latexrun
+# latexrun first for error msgs, then run run latexmk once for gitinfo2/glossary, then use latexrun
+# note: the *-reloadable.pdf files are copies of interim outputs (and then the final output) so that you can f5 them in a browser without getting partially written documents.
 mk-latex-pdf: preprocess-build
-	bash bin/msg_good.sh "Running latexmk to update gitinfo"
-	TZ='Australia/Sydney' latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(WPTEX) > _latexmk.log
-	bash bin/msg_good.sh "Update glossaries (run \`make glossary-fix-1 && make && make\` to fix glossaries if something breaks)"
+	bash bin/msg_good.sh "[mk-latex-pdf]: PP_MODE=$(PP_MODE)"
+	bash bin/msg_good.sh "Run ./latexrun to get good error msgs"
+	$(LATEXRUN) $(WPTEX) -O $(OUTDIR)
+	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE)-reloadable.pdf
+
+	bash bin/msg_good.sh "Running latexmk to update gitinfo, build glossaries; PP_MODE=$(PP_MODE)"
+	latexmk -pdf -interaction=batchmode --enable-write18 -output-directory=$(OUTDIR) $(WPTEX) > _latexmk.log
+
+	bash bin/msg_good.sh "Update glossaries (run \`make glossary-fix-1 && make && make\` to fix glossaries if something breaks). PP_MODE=$(PP_MODE)"
 	#-rm $(WPNOEXT).gl*
 	(cd $(OUTDIR) && makeglossaries $(WPFILENAME))
-	bash bin/msg_good.sh "./latexrun to build paper proper"
-	TZ='Australia/Sydney' python3 ./latexrun --color always --latex-args "-shell-escape -interaction=batchmode" $(WPTEX) -O $(OUTDIR)
+
+	bash bin/msg_good.sh "./latexrun to build paper proper. PP_MODE=$(PP_MODE)"
+	$(LATEXRUN) $(WPTEX) -O $(OUTDIR)
+	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE)-reloadable.pdf
+
 	cp $(WPNOEXT).pdf $(OUTPUT_PDF)
 	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE).pdf
 	cp $(WPNOEXT).pdf $(WPFILENAME)-$(PP_MODE).pdf
@@ -186,10 +221,21 @@ glossary-fix-1:
 finished-msg:
 	bash bin/msg_good.sh 'Finished build for mode=$(PP_MODE)'
 
+lint: textlint texlint pdflint
+
 textlint:
-	npm run lint
+	bash bin/msg_good.sh "[textlint] PP_MODE=$(PP_MODE)"
+	if [ "$(SKIP_TEXTLINT)" = "false" ]; then npm run lint; else bash bin/msg_warn.sh 'skipping textlint'; fi
+
+texlint:
+	bash bin/msg_good.sh "[texlint]: PP_MODE=$(PP_MODE)"
+	bash bin/texLint.sh \
+		`find ./includes/ut/content -iname \*.tex` \
+		`find ./10-Ultra-Terminum/ -iname \*.md` \
+		`find ./includes/ut -iname \*.tex`
 
 pdflint:
+	bash bin/msg_good.sh "[pdflint]: PP_MODE=$(PP_MODE)"
 	bash bin/pdfLint.sh output/whitepaper.pdf
 
 %.md:
@@ -198,7 +244,7 @@ pdflint:
 mk-lp-tables:
 	cp $(LP_TABLES) $(LP_TABLES_OUT)
 	export REPLACE_TABLES_IN=$(LP_TABLES_OUT) && \
-	node ./includes/ut/complexity/populateWPTables.js --populate-wp-md --lp-tables
+	node $(PURS_GEN_OUT) --populate-wp-md --lp-tables
 	latexmk -pdf --enable-write18 -output-directory=$(OUTDIR) $(LP_TABLES_OUT)
 	cp $(OUTDIR)/tables.pdf ./tables.pdf
 
@@ -215,6 +261,17 @@ purs-test:
 	cd $(PURS_GEN_DIR) && \
 	npm run test
 
+purs-ci-init-hash:
+	sha256sum $(PURS_GEN_OUT) > ci-check-purs-1.log
+	cp $(PURS_GEN_OUT) $(PURS_GEN_OUT).old
+
+purs-ci-post-hash:
+	sha256sum $(PURS_GEN_OUT) > ci-check-purs-2.log
+
+purs-ci-check: purs-ci-init-hash purs-build purs-ci-post-hash
+	bash bin/checkFilesIdentical.sh ci-check-purs-1.log ci-check-purs-2.log \
+	  || (diff -c $(PURS_GEN_OUT) $(PURS_GEN_OUT).old && false)
+
 pert:
 	mkdir -p output/pert
 	dot -Gdpi=300 -Tpng includes/pert/chart.gv -o output/pert/chart.png
@@ -222,8 +279,8 @@ pert:
 
 handout:
 	dot -Gdpi=300 -Tpng includes/handout/topic-tree.gv -o includes/handout/topic-tree.png
-	pandoc --standalone --mathjax -f markdown --pdf-engine=context -V fontsize=11.5pt -o includes/handout/exec-summary.pdf includes/handout/exec-summary.md
-	pandoc --standalone --mathjax -f markdown --pdf-engine=context -V fontsize=16pt -o includes/handout/terms.pdf includes/handout/terms.md
+	pandoc --standalone --mathjax -f markdown-latex_macros --pdf-engine=context -V fontsize=11.5pt -o includes/handout/exec-summary.pdf includes/handout/exec-summary.md
+	pandoc --standalone --mathjax -f markdown-latex_macros --pdf-engine=context -V fontsize=16pt -o includes/handout/terms.pdf includes/handout/terms.md
 
 # latex files anywhere
 clean: init
@@ -282,3 +339,34 @@ docker-bash:
 # run a little python3 server from output dir
 serve:
 	cd $(OUTDIR) && python3 -m http.server 3131
+
+view:
+	wslview output/whitepaper.pdf
+
+viewweb:
+	wslview http://localhost:3131/whitepaper.pdf
+
+cloc:
+	cloc --exclude-dir=node_modules,bin,target,.spago,output --exclude_ext=svg,pdf,js,json,toml ./10-Ultra-Terminum ./bin ./experiments ./includes
+
+GIT_WC_DEPTH ?= 0
+GIT_WC_REMOVED = $(shell git diff HEAD~$(GIT_WC_DEPTH) --word-diff=porcelain | grep -e '^-[^-]' | wc -w)
+GIT_WC_ADDED = $(shell git diff HEAD~$(GIT_WC_DEPTH) --word-diff=porcelain | grep -e '^+[^+]' | wc -w)
+
+count-words-git-help:
+	@echo "!! note the parameter: GIT_WC_DEPTH env var"
+
+count-words-diff: count-words-git-help
+	@echo "Words added: $(GIT_WC_ADDED)"
+	@echo "Words removed: $(GIT_WC_REMOVED)"
+	@echo "Words diff: `echo $(GIT_WC_ADDED)-$(GIT_WC_REMOVED) | bc`"
+
+git-count-words: count-words-diff
+
+git-setup-hooks:
+	for _f in `ls ./bin/hooks`; do ln -s "../../bin/hooks/$$_f" ".git/hooks/$$_f"; done
+
+# shortcut for simulation RandHR PMFs -- only here b/c it's mentioned in the WP.
+# for simulation makefile proper see /experiments/por-sim-rs/Makefile
+print-randhr-pmfs:
+	cd experiments/por-sim-rs && $(MAKE) print-randhr-pmfs || echo "\nHint: is /experiments/por-sim-rs set up? (cargo, rust, etc)"

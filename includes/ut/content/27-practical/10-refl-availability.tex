@@ -1,0 +1,108 @@
+What happens if a chain reflects a block that is not available?
+Could an attacker use this to their advantage?
+
+For example, consider the following (shown in \autoref{fig:unavailable-ex1}).
+We have two chains using mutual PoR -- \cL and \cR.
+Additionally, the most recently produced block is \BL{1}, which reflected \BR{1}.
+Next, a malicious \cR miner produces a valid block (\BR{2a}) which reflects \BL{1}.
+That miner broadcasts the \emph{header} of \BR{2a} along with a PoR branch proving that \BL{1} was reflected, but does not broadcast the rest of the block.
+The \cL miners receive the header and PoR branch, and shortly thereafter an \cL miner produces \BL{2}, which reflects \BR{2a}.
+Since other (honest) \cR miners cannot build on \BR{2a}, they must work on the draft block \BR{2} instead.
+Note that, although \BR2 will almost certainly reflect \BL1, whether it reflects \BL2 is at the miner's discretion.
+
+\begin{figure}
+    % extra column at start as padding -- centering is a bit off b/c of the length of labels.
+    % without the padding, the (time >->) arrow is centered but the diagram is too far to the left.
+    \begin{equation*}
+        \xyMChains{
+            & \xyL{\text{Chain \cL}} & \cdots & & \xBL1 \arf[dl] \ar[ll] & & \xBL2 \ar[ll] \arf[ldd] & & \\
+            & \xyL{\text{Chain \cR}} & \cdots & \xBR1 \ar[l] & & & & \xyBDraft{\BR{2}} \ar[llll] \arf[lllu] \arf[lu] \\
+            & \xyL{\text{Unavailable}} & & & & \xBR{2a} \ar[llu] \arf[luu] & & & \\
+            & \xyTimeHoriz{rrrrrr} &&&&&&
+        }
+    \end{equation*}
+    \caption[
+        Chain-segments showing an unavailable \cR block that was reflected anyway.
+    ]{
+        Chain-segments showing an unavailable \cR block that was reflected anyway.
+        The dashed frame of \BR{2} indicates that it is a draft block (i.e., not yet mined, but being actively worked on by miners).
+        Note: \BR{2} reflects \BL{2} at the miner's discretion -- it is optional.
+    }
+    \label{fig:unavailable-ex1}
+\end{figure}
+
+The attacker can use this situation to their advantage if \BR{2a} has precedence over \BR{2} (i.e., it's favored by the fork-rule).
+In that case, the attacker can publish \BR{2a} \emph{after} \BR{2} is mined for an advantage.\footnote{
+    This is similar (if not equivalent) to the \emph{selfish mining} attack published in \citeSelfishMiningFull{}.
+}
+When does this case occur?
+
+If \BR{2} does \emph{not} reflect \BL2, then \BR{2} will claim the same chain-weight as \BR{2a}.
+However, the next block -- \BR{3} -- will favor \BR{2a} since the PoR via \BL{2} contributes weight to \BR{2a} (as discussed in \autoref{sec:counting-work}).
+So the attacker \emph{always} has the advantage if \BR{2} \emph{does not} reflect \BL2.
+
+If \BR2 does reflect \BL2, then where should we attribute the work contributed by \BL2?
+
+work counted as 0 -> same as before, atker advantage
+
+work counted towards \BR1 -> \BR2a and \BR2 have the same claimed chain-weight.
+
+
+
+
+
+
+Once an honest \cR miner successfully creates \BR{2}, can it ever have precedence over \BR{2a}?
+
+Let's assume that the attacker publishes the \BR{2a} block in full immediately after \BR{2} is mined.
+\cR miners now have a choice: which of the two available blocks should they prioritize?
+
+Should the honest \cR miners reflect \BL{2}?
+(It is their choice, after all.)
+
+
+\begin{figure}
+    \begin{equation*}
+        \xyMChains{
+            & \xyL{\text{Chain \cL}} & \cdots & & \xBL1 \arf[dl] \ar[ll] & & \xBL2 \ar[ll] \arf[ldd] & && \\
+            & \xyL{\text{Chain \cR}} & \cdots & \xBR1 \ar[l] & & &
+                & \xyB{\BR{2}} \ar[llll] \arf[lllu] \arf[lu]
+                & \xBR3 \ar[l] \ar@/_.75pc/@{.>}[llu] \ar@/^.85pc/[llld] \\
+            & \xyL{\text{Available}} & & & & \xBR{2a} \ar[llu] \arf[luu] & & && \\
+            & \xyTimeHoriz{rrrrrrr} &&&&&&&
+        }
+    \end{equation*}
+    \caption[
+        asdf.
+    ]{
+        % asdf.
+        % The dashed frame of \BR{2} indicates that it is a draft block (i.e., not yet mined, but being actively worked on by miners).
+        % Note: \BR{2} optionally reflects \BL{2} -- there's no requirement that \cR miners must do so.
+    }
+    \label{fig:unavailable-ex2}
+\end{figure}
+
+
+If yes:
+- what do to with the PoR of L2->R2a?
+  - ignore R2a -- refl weight attributed to R1 via L2->L1->R1
+    - reason for ignoring: R2a not in history of R2
+    - on R2a public: it has priority over R2 since L2->R2a now valid
+  - count it as zero, but then why bother reflecting L2?
+    - so that L3 reflects R2
+    - on R2a public: it has priority over R2 since L2->R2a now valid
+
+If no:
+  - can only reflect L1 -- same chain-weight as R2a before draft refls
+    - on R2a public: it has priority over R2 since L2->R2a now valid
+
+
+
+- conclusions WRT
+  - PoR working at all
+  - SPV clients
+
+
+For example: a \cL miner receives a header for some block \BR{1a} along with a PoR via a \BL{1}
+
+Let's consider the example in \autoref{fig:unavailable-ex}:

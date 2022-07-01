@@ -2,14 +2,15 @@ module Main where
 
 import Prel
 
+import Amaroo.WP.Calcs.Tiling
 import Amaroo.WP.Formatter (wrap)
-import Amaroo.WP.Tables (compareNets1mTps, compareNets1mTpsAll, compareNets20k, compareNets3k, compareUtOptimizations, compareUtOptimizations2, dappChains, dappChainsHot, lpCompareNetworks, lpCompareUt1Eth2, lpCompareUt1OptShard, lpCompareUt2OptShard, lpCompareUt2OptShard20k, lpCompareUtOptimizations1, showHtmlTable, showLatexTable, showMdTable, tableTps, tableTpsHot, tpsPor, tpsPort)
+import Amaroo.WP.Tables
 import Amaroo.WP.Tables.Booktabs (renderBooktabs)
 import Amaroo.WP.Tables.Types (LatexTablePos(..), TPositioning(..), TableDesc(..))
 import Control.Alt ((<|>))
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.State (State, modify_, runState)
-import Data.Array (drop, dropWhile, elem, filter, head, intercalate, take, takeWhile)
+import Data.Array (drop, dropWhile, elem, filter, head, intercalate, length, take, takeWhile)
 import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Data.String (Pattern(..), contains)
 import Data.String as S
@@ -57,16 +58,32 @@ here = [Here]
 wpTables :: Array TableDesc
 wpTables =
     [ TD "tps" tableTps defaultPositioning
-    , TD "tps_optimized" tableTpsHot defaultPositioning
+    -- , TD "tps_optimized" tableTpsHot defaultPositioning
+    -- , TD "tps_hopors" tableTpsHOPoRs defaultPositioning
     , TD "dapp-chains" dappChains defaultPositioning
-    , TD "dapp-chains_optimized" dappChainsHot defaultPositioning
+    -- , TD "dapp-chains_optimized" dappChainsHot defaultPositioning
+    -- , TD "dapp-chains_hopors" dappChainsHOPoRs defaultPositioning
     , TD "tps_por" tpsPor defaultPositioning
     , TD "tps_port" tpsPort defaultPositioning
-    , TD "compare_optimizations" compareUtOptimizations defaultPositioning
-    , TD "compare_optimizations2" compareUtOptimizations2 defaultPositioning
+    , TD "tps_hopors" tpsHOPoRs defaultPositioning
+    , TD "tps_hoports" tpsHOPoRTs defaultPositioning
+    , TD "tps_ho" tpsHO defaultPositioning
+    , TD "tps_hot" tpsHOT defaultPositioning
+    , TD "tps_op" tpsOP defaultPositioning
+    , TD "tps_opt" tpsOPT defaultPositioning
+    , TD "compare_optimizations_a" compareUtOptimizationsA defaultPositioning
+    , TD "compare_optimizations_b" compareUtOptimizationsB defaultPositioning
+    , TD "compare_optimizations_a_20k" compareUtOptimizationsA20k defaultPositioning
+    , TD "compare_optimizations_b_20k" compareUtOptimizationsB20k defaultPositioning
     , TD "compare_nets_3k" compareNets3k hereish
     , TD "compare_nets_20k" compareNets20k hereish
     , TD "comparison_1m_tps" compareNets1mTps hereish
+    , TD "tree_tiling_3k_v4_table" tree_tiling_3k_v4_table hereish
+    -- , TD "tree_tiling_3k_v3_table" tree_tiling_3k_v3_table hereish
+    -- , TD "tree_tiling_3k_v5_table" tree_tiling_3k_v5_table hereish
+    -- , TD "tree_tiling_20k_v4_table" tree_tiling_20k_v4_table hereish
+    -- , TD "tree_tiling_20k_v3_table" tree_tiling_20k_v3_table hereish
+    -- , TD "tree_tiling_20k_v5_table" tree_tiling_20k_v5_table hereish
     ]
 
 lpTables :: Array TableDesc
@@ -74,19 +91,37 @@ lpTables =
     [ TD "lp_compare_networks" lpCompareNetworks defaultPositioning
     , TD "comparison_1m_tps" compareNets1mTps tablePageOnly
     , TD "comparison_1m_tps_all" compareNets1mTpsAll tablePageOnly
+    , TD "lp_compare_ut2_to_optshard_20k" lpCompareUt2OptShard20k defaultPositioning
+    , TD "tree_tiling_3k_v3_table" tree_tiling_3k_v3_table_lp hereish
     , TD "lp_compare_optimizations_1" lpCompareUtOptimizations1 defaultPositioning
     , TD "lp_compare_ut1_to_eth2" lpCompareUt1Eth2 defaultPositioning
     , TD "lp_compare_ut1_to_optshard" lpCompareUt1OptShard defaultPositioning
     , TD "lp_compare_ut2_to_optshard" lpCompareUt2OptShard defaultPositioning
-    , TD "lp_compare_ut2_to_optshard_20k" lpCompareUt2OptShard20k defaultPositioning
-    -- , TD "lp_compare_optimizations2" lpCompareUtOptimizations2 defaultPositioning
-    -- , TD "lp_compare_optimizations3" lpCompareUtOptimizations3 defaultPositioning
     ]
 
+
+devTables =
+    -- [ TD "lp_compare_ut1_to_optshard" lpCompareUt1OptShard defaultPositioning
+    -- , TD "lp_compare_ut1_lim_to_optshard" lpCompareUt1LimitedOptShard defaultPositioning
+    -- , TD "compare_optimizations_a" compareUtOptimizationsA defaultPositioning
+    -- , TD "compare_lim_optimizations_a" compareUtLimOptimizationsA defaultPositioning
+    -- , TD "tree_tiling_3k_v4_table" tree_tiling_3k_v4_table defaultPositioning
+    [ TD "compareUtOptimizationsA" compareUtOptimizationsA defaultPositioning
+    , TD "compare_optimizations_a_20k" compareUtOptimizationsA20k defaultPositioning
+    , TD "comparison_1m_tps" compareNets1mTps hereish
+    , TD "compareUtOptimizationsAWithLvl3" compareUtOptimizationsAWithLvl3 defaultPositioning
+    , TD "compareUtOptimizationsA20kWithLvl3" compareUtOptimizationsA20kWithLvl3 defaultPositioning
+    , TD "tree_tiling_3k_v3_table" tree_tiling_3k_v3_table hereish
+    , TD "tree_tiling_3k_v4_table" tree_tiling_3k_v4_table hereish
+    , TD "compareNets100k" compareNets100k hereish
+    ]
+
+
 allTables :: Array TableDesc
-allTables = if elem "--lp-tables" argv
-  then lpTables
-  else wpTables
+allTables
+  | elem "--lp-tables" argv = lpTables
+  | elem "--dev-tables" argv = devTables
+  | otherwise = wpTables
 
 readWhitepaperMd :: Effect String
 readWhitepaperMd = do
@@ -101,24 +136,31 @@ readWhitepaperMd = do
 renderTable :: TableDesc -> Maybe String -> String
 renderTable (TD tn table pos) caption = renderBooktabs (TPositioning pos) {label: Just tn, caption} table
 
-insertReplacement :: TableDesc -> {before :: Array String, mid :: _, after :: Array String} -> Array String
-insertReplacement td {before, mid: Just caption, after} = before <> [renderTable td caption] <> after
-insertReplacement _ {before, mid: Nothing, after} = before <> after
+insertReplacement :: TableDesc -> {before :: Array String, mid :: Maybe String, after :: Array String} -> Array String
+insertReplacement td {before, mid, after} = before <> [renderTable td mid] <> after
+-- insertReplacement _ {before, mid: Nothing, after} = before <> after
 
 toBeforeTableAfter tn ls = {before: takeWhile (_ /= toReplace) ls, mid, after}
   where
     midPre = dropWhile (_ /= toReplace) ls
-    mid = (\_ -> getCaption $ take 3 midPre) <$> head midPre
+    -- capRes = (\_ -> getCaption $ take 2 midPre <> takeWhile (_ /= "") (drop 2 midPre)) =<< head midPre
+    capRes = getCaption $ take 2 midPre <> (takeWhile (_ /= "") <<< drop 2) midPre
+    toDrop = capRes <#> (\{capLines} -> length capLines + 2) |> fromMaybe 0
     after = drop toDrop midPre
-    toDrop = (mid <#> (\caption -> if isJust caption then 3 else 1) |> fromMaybe 0)
+    -- toDrop = (capRes <#> (\caption -> if isJust caption then 3 else 1) |> fromMaybe 0)
+    mid = (capRes <#> (\{cap} -> cap)) :: Maybe String
     toReplace = genStrToReplace tn
 
-getCaption [_, blank, caption] = if S.length blank == 0
-    then S.stripPrefix (Pattern ": ") trimmedCaption <|> S.stripPrefix (Pattern "Table: ") trimmedCaption
-    else Nothing
+getCaption :: Array String -> Maybe {cap :: String, capLines :: Array String}
+getCaption lines = do
+    _ <- shouldBeBlank
+    cap <- S.stripPrefix (Pattern ": ") trimmedCaption <|> S.stripPrefix (Pattern "Table: ") trimmedCaption
+    pure { cap, capLines }
   where
-    trimmedCaption = S.trim caption
-getCaption _ = unsafeThrowException $ error "getCaption recieved an array with length /= 3"
+    trimmedCaption = S.trim $ intercalate "\n" capLines
+    capLines = drop 2 lines
+    shouldBeBlank = (\l -> if l == "" then Just "" else Nothing) <=< head $ drop 1 $ take 2 lines
+-- getCaption _ = unsafeThrowException $ error "getCaption recieved an array with length /= 3"
 
 replaceTable :: TableDesc -> State String Unit
 replaceTable td@(TD tn _ _) = modify_ $ lines >>> toBeforeTableAfter tn >>> insertReplacement td >>> intercalate "\n"

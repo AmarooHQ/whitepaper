@@ -1,0 +1,42 @@
+\documentclass[]{standalone}
+\usepackage[T1]{fontenc}\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usepackage{xintexpr}
+\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing, patterns}
+
+\begin{document}
+
+\providecommand{\fullWidth}{15cm}
+\providecommand{\widthPct}[1]{{#1/100*\fullWidth}}
+
+\tikzstyle{capbox} = [rectangle, draw, align=center, minimum height=3em]
+
+\tikzstyle{braceLL} = [decorate, decoration={brace,amplitude=6pt,mirror,raise=2pt}]%
+% \tikzstyle{braceLR} = [decorate, decoration={brace,amplitude=6pt,raise=-8pt}]%
+% \tikzstyle{ethBraceL} = [braceLL, sloped, rotate=180]%
+% \tikzstyle{braceRR} = [decorate, decoration={brace,amplitude=6pt,raise=2pt}]%
+% \tikzstyle{braceRL} = [decorate, decoration={brace,amplitude=6pt,raise=-8pt,mirror}]%
+% \tikzstyle{ethBraceR} = [braceRR, sloped]%
+
+\providecommand{\braceMgn}{0.3em}
+
+\begin{tikzpicture}[node distance=-.5pt]
+    \node (internalRefls) [capbox, yshift=3em, minimum width=\widthPct{12.5}] {Internal \\ Reflections};
+    \node (reflsExCap) [capbox, right = of internalRefls, minimum width=\widthPct{37.5}] {Excess Reflection Capacity};
+    \node (txCap) [capbox, right = of reflsExCap, minimum width=\widthPct{50}] {Transactions and Dapp-chain Headers};
+
+    \node (heading) [above = of $ (internalRefls.west) !.5! (txCap.east) $, yshift=2em] {Simplex-chain Capacity};
+
+    % this adds some buffer space around the diag for easier auto-reload using latex workshop.
+    % the extra space gets cut off by pdfcrop
+    \node (nothing) [above = of heading, yshift=2em] {};
+    \node (nothing2) [right = of txCap, xshift=2em] {};
+
+    \node (irLabel) [below = of internalRefls, yshift=-1em] {12.5\%};
+    \node (recLabel) [below = of reflsExCap, yshift=-1em] {37.5\%};
+    \node (tcLabel) [below = of txCap, yshift=-1em] {50\%};
+    \draw [braceLL] ([xshift=\braceMgn]internalRefls.west |- internalRefls.south) -- ([xshift=-\braceMgn]internalRefls.south -| internalRefls.east);
+    \draw [braceLL] ([xshift=\braceMgn]reflsExCap.west |- reflsExCap.south) -- ([xshift=-\braceMgn]reflsExCap.south -| reflsExCap.east);
+    \draw [braceLL] ([xshift=\braceMgn]txCap.west |- txCap.south) -- ([xshift=-\braceMgn]txCap.south -| txCap.east);
+\end{tikzpicture}
+\end{document}

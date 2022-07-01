@@ -54,10 +54,10 @@ fmtSpec = describe "formatting" do
     it "dynamic" do
       fmtDyn testFdPlain 2345.6789 `shouldEqual` "2345.68"
       fmtDyn fdStd 2345.6789 `shouldEqual` "2,345.7"
-      fmtDyn fdStd 23_456_789.11 `shouldEqual` (wrap "$" $ testFSN "2.3" "7")
-      fmtDyn testFdPlain 23_456_789.11 `shouldEqual` testFSN "2.35" "7"
-      fmtDyn testFdPlain 1_000_000.0 `shouldEqual` testFSN "1.00" "6"
-      fmtDyn testFdPlain 999_999.999 `shouldEqual` testFSN "1.00" "6"
+      fmtDyn fdStd 23_456_789_123.11 `shouldEqual` (wrap "$" $ testFSN "2.3" "10")
+      fmtDyn testFdPlain 23_456_789_123.11 `shouldEqual` testFSN "2.35" "10"
+      fmtDyn testFdPlain 1_000_000_000.0 `shouldEqual` testFSN "1.00" "9"
+      fmtDyn testFdPlain 999_999_999.999 `shouldEqual` testFSN "1.00" "9"
       fmtDyn testFdPlain 0.9 `shouldEqual` "0.90"
       fmtDyn testFdPlain 0.1 `shouldEqual` testFSN "1.00" "-1"
 
