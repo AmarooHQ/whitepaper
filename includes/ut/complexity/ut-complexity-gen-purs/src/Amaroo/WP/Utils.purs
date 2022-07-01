@@ -4,8 +4,10 @@ import Prel
 
 import Data.Array (filter, head, length, splitAt, tail, unsafeIndex)
 import Data.Maybe (Maybe(..), fromMaybe)
+import Math as M
 import Partial.Unsafe (unsafePartial)
 
+-- | unsafe index array
 ui :: forall a. Array a -> Int -> a
 ui xs i = unsafePartial unsafeIndex xs i
 
@@ -31,3 +33,18 @@ uniq xs = checkPosRec {i: 0, xs}
     filterAfter {before, after} = case head after of
       Just h -> {before, after: [h] <> (tail after |> fromMaybe [] |> filter (_ /= h))}
       Nothing -> {before, after}
+
+
+-- | Return the input value that most closely matches the target
+binarySearch :: {f :: Number -> Number, target :: Number, epsilon :: Number} -> Number
+binarySearch {f, target, epsilon} = loop {l: 1.0, r: 1_000_000.0}
+  where
+    loop {l, r}
+      | l > r = (r + l) / 2.0
+      | M.abs (r - l) <= min 1.0 epsilon = (r + l) / 2.0
+      | otherwise = if midMatches then mid else loop next
+        where
+          mid = (r + l) / 2.0
+          midRes = f mid
+          midMatches = M.abs (target - midRes) <= epsilon
+          next = if midRes < target then {l: mid, r} else {l, r: mid}

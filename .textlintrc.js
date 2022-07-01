@@ -55,7 +55,9 @@ module.exports = {
                 "Petersburg", "SegWit", "s2", "TOC", "Incentivization",
                 "ReflectedBlockWeight", "Ouroboros", "s10",
                 "ConvReward", "ConvBlocks", "NextWork", "DAA", "RAA",
-                "20201016_NODA", "m1", "m2"
+                "20201016_NODA", "m1", "m2", "2r", "RHS", "LHS",
+                "llZZlZZ", "Hdrs",
+                "irLabel", "recLabel", "tcLabel", "reflsExCap"
             ],
         },
         "en-max-word-count": {
@@ -74,6 +76,10 @@ module.exports = {
                 ["dappchains", "dapp-chains"],
                 ["dapp chain", "dapp-chain"],
                 ["dapp chains", "dapp-chains"],
+                ["simplex chain", "simplex-chain"],
+                ["simplex chains", "simplex-chains"],
+                ["simplexchain", "simplex-chain"],
+                ["simplexchains", "simplex-chains"],
                 ["root-token", "root token"],
                 ["DApp", "dapp"],
                 ["DApps", "dapps"],
@@ -103,6 +109,15 @@ module.exports = {
                 ["rashes", "hashes"],
                 ["dependant", "dependent"],
                 ["hash rate", "hash-rate"],
+                ["the attackers", "the attacker's"],
+                ['$DAA_N$', '\\text{DAA}_N'],
+                ["tree tiling", "tree-tiling"],
+                ["tree tilings", "tree-tilings"],
+                ["each-other", "each other"],
+                ["eachother", "each other"],
+                // ["Decreasing .* increases"]
+                // note: the below seems like it does not work :(
+                // ...flaggedWords.map(w => [w]),
             ]
         }
     }

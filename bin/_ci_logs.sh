@@ -11,7 +11,7 @@ function msg_info {
 }
 
 function msg_warn {
-    clr_bold clr_yellow "\n> $1\n"
+    clr_bold clr_magenta "\n> $1\n"
 }
 
 function msg_error {

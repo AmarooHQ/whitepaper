@@ -1,10 +1,12 @@
 %% BEGIN ### RELEASE
 
+\newpage
+
 ## Attacks
 
 *Ultra Terminum* -- with appropriate configuration -- is resistant to the following attacks; see the linked section for discussion:
 
-- 51% Attack, see \autoref{sec:proof-of-reflection} and \autoref{sec:preventing-dos-attacks}.
+- 51% Attack, see \autoref{sec:proof-of-reflection}, \autoref{sec:preventing-dos-attacks}, and \autoref{sec:simplex-security-cec}.
 - Selfish mining, see \autoref{sec:confirmation-times}
 - Reflection without publication, see \autoref{sec:availability-of-blocks}
 - Empty block DoS and censorship, see \autoref{sec:dos-and-dags}
@@ -151,7 +153,7 @@ Bribes don't work either b/c the PoS set-up is done on a different chain and ref
   Still there?
 }
 
-\begin{tcolorbox}[title={\pill{\scriptsize{\checkmark \; BOT}} Clyde}]
+\begin{tcolorbox}[title={\pill{\scriptsize{\checkmark \; BOT}} Clyde:}]
 Your message could not be delivered. This is usually because you don't share a server with the recipient or the recipient is only accepting direct messages from friends.
 \end{tcolorbox}
 

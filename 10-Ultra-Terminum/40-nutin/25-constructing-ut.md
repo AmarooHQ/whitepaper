@@ -1,6 +1,6 @@
 %% BEGIN ### RELEASE
 
-\subsection{\texorpdfstring{$\UT{i}$}{UT}: Constructing \emph{Ultra Terminum}}
+\subsection{\titlemath{$\UT{i}$}{UTᵢ}: Constructing \emph{Ultra Terminum}}
 
 \label{sec:constructing-ut}
 
@@ -22,6 +22,8 @@ In principle, the necessary capabilities (and actions) that some chains, $C_A$ a
 2. The headers of $C_B$ can be (and are) freely recorded -- promptly and unambiguously -- in $C_A$; and
 3. $C_A$ is able to (and does) promptly prove that its past headers have been recorded in $C_B$, and has full knowledge of which headers have been recorded.
 
+\input{includes/ut/algorithms/por-reflected-block-weight.tex}
+
 The benefits from *Proof of Reflection* begin as soon as $C_A$ integrates this knowledge into its chain-weighting algorithm, by a method suitably similar to \autoref{alg:refl-1-bw} and \autoref{alg:weightof-1}.
 
 If $C_A$ and $C_B$ are doing *mutual* Proof of Reflection, then both chains must satisfy all requirements.
@@ -32,7 +34,6 @@ In order to support arbitrarily many reflections, we need to modify \textsc{Refl
 
 Note that \autoref{alg:por-reflected-block-weight} integrates the cap on weight contributed by each reflecting chain, as suggested in \autoref{sec:reflection-pow-and-pos}.
 
-\input{includes/ut/algorithms/por-reflected-block-weight.tex}
 
 %% --- %%
 
@@ -64,47 +65,41 @@ Note that \autoref{alg:por-reflected-block-weight} integrates the cap on weight 
         \caption{A 17-chain simplex; a 16-simplex. It has 136 unique mutual reflections in total.}
         \label{fig:simplex-17-d1}
     \end{subfigure}
-    \caption{Simplexes of increasing capacity. Vertices are simplex-chains. Edges are the reflections between simplex-chains.}
+    \caption[Simplexes of increasing capacity.]{Simplexes of increasing capacity. Vertices are simplex-chains. Edges are the reflections between simplex-chains.}
     \label{fig:simplexes}
 \end{figure}
 
 \label{sec:the-simplex}
 
-\defineTerm{Simplex}{The single coherent structure that emerges from a collection of blockchains that mutually reflect each-other}
+\defineTermTex{Simplex}{The single coherent structure that emerges from a collection of blockchains that mutually reflect each other}
 
-When two or more blockchains *mutually reflect* each-other, they form a *simplex*[^simplex-maths]. For the sake of brevity: all *reflections* within a simplex are *mutual reflections*, and I will omit *mutual* from now on when discussing them. Examples of simplexes are shown in \autoref{fig:simplexes}.
+When two or more blockchains *mutually reflect* each other, they form a *simplex*[^simplex-maths]. For the sake of brevity: all *reflections* within a simplex are *mutual reflections*, and I will omit *mutual* from now on when discussing them. Examples of simplexes are shown in \autoref{fig:simplexes}.
 
 When a blockchain is part of a simplex, it is called a *simplex-chain* (as distinct from *dapp-chains*).
 
-\defineTerm{Simplex-chain}{A blockchain that is part of a \emph{simplex}; it mutually reflects all other simplex-chains in that simplex}
+\defineTermTex{Simplex-chain}{A blockchain that is part of a \emph{simplex}; it mutually reflects all other simplex-chains in that simplex}
 
-To maintain consistency with the geometric usage of the term *simplex*: a simplex with $k+1$ chains is called a $k$-simplex or a $(k+1)$-chain simplex[^simplex-approx]. In a $k$-simplex, each simplex-chain has $k$ reflections (one reflection for each of the other simplex-chains). A $k$-simplex has, in total, ${k+1} \choose 2$ reflections.
+To maintain consistency with the geometric usage of the term *simplex*: a simplex with $k+1$ chains is called a $k$-simplex or a $(k+1)$-chain simplex[^simplex-approx].
+In a $k$-simplex, each simplex-chain has $k$ reflections (one reflection for each of the other simplex-chains).
+A $k$-simplex has, in total, ${k+1} \choose 2$ reflections.
 
 [^simplex-maths]: The name is taken from geometry (particularly: the higher-dimensional kind). A simplex, for a given dimensionality, is the uniquely simplest polytope; e.g., a line in 1D space, a triangle in 2D space, a tetrahedron in 3D space, etc. A $k$-dimensional simplex is known as a $k$-simplex. As shown in \autoref{fig:simplexes}, a particular 2D projection of a $k$-simplex is identical to a diagram of all possible mutual reflections between $k+1$ blockchains, where each chain is represented by a vertex and each mutual reflection is represented by an edge.
 
 [^simplex-approx]: \textbf{NB:} I will ignore this distinction for $k \gg 1$.
 
-#### Simplex Security
-
-\label{sec:simplex-security}
-
-\todo{Attacking a simplex-chain is as difficult as attacking the whole simplex}
+The security of simplexes is discussed in \autoref{sec:simplex-security}.
 
 %% --- %%
+
+
 
 \input{includes/ut/headings/25-dapp-chains.tex}
 
 \label{sec:dapp-chains}
 
-\bquote{
-    Decoupling the underlying consensus from the state-transition has been informally proposed in private for at least two years---Max Kaye was a proponent of such a strategy during the very early days of Ethereum.
-}{
-    Dr. Gavin Wood; \href{https://cloudflare-ipfs.com/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Polkadot Whitepaper, s2.2}
-}
-
 *Dapp-chains* are the method by which *Ultra Terminum* exceeds $O(c^2)$ scaling *without* using the method described in \autoref{sec:tiling}. To be clear: the $O(c^2)$ configuration of UT is compatible with that other method; dapp-chains are a *separate and independent* method of scaling. However, there are *decisive* reasons to introduce and use *dapp-chains*. Dapp-chains provide features that the $O(n)$ scaling configuration alone cannot \emph{easily} provide. Additionally, dapp-chains increase the simplex's scalability to $O(c^3)$ or $O(c^4)$.
 
-\defineTerm{Dapp-chain}{
+\defineTermTex{Dapp-chain}{
   An \emph{application-specific} child-chain that is secured via the parent-chain. Dapp-chains may have architecturally distinct state- and transaction-schemes (distinct from those schemes used in the simplex, and other dapp-chains)
 }
 
@@ -122,7 +117,7 @@ This means that simplex-chains can *specialize* in hosting *particular types* of
 Validating dapp-chain headers, on-chain, can be done via the following simple, clean, and extensible method: \emph{encode dapp-chain headers as simplex-level transactions}.
 This means that supporting new dapp-chain consensus methods is about as difficult as introducing new transaction types (or opcodes), and different simplex-chains have a great deal of freedom in choosing which dapp-chain consensus methods to support.
 
-\defineTerm{Header-transactions}{
+\defineTermTex{Header-transactions}{
   Dapp-chain headers that are encoded as simplex-level transactions; i.e., they are processed by a simplex-chain as a transaction, but they also function as the header for a dapp-chain block
 }
 
@@ -169,11 +164,11 @@ Even if such a fee is *not always necessary*, the *ability* to provide a fee has
 
 If it is possible to implement dapp-chains (or any system of child-chains) such that those chains have \emph{freedom of protocol} and \emph{freedom of incentivization} whilst inheriting the parent-chain's security, then we should strive to achieve that.
 
-\defineTerm{Freedom of Incentivization}{
+\defineTermTex{Freedom of Incentivization}{
   The property whereby child-chains have free choice of incentive-system (i.e., the nature and dynamics of their root token, or lack thereof)
 }
 
-\defineTerm{Freedom of Protocol}{
+\defineTermTex{Freedom of Protocol}{
   The property whereby child-chains have free choice of protocol (including consensus mechanism, scripting, accounting methods, block structures, etc)
 }
 
@@ -254,6 +249,13 @@ Naturally, there are some other components that are necessary (like a component 
 %% END ### RELEASE
 
 %% BEGIN ### DRAFT
+
+#### Dapp-chain simplexes
+
+\todo{
+  Dapp-chains can make simplexes between each other (in addition to one-way PoR with their host simplex-chain).
+  This is mb useful?
+}
 
 #### Future Dapp-chain Stuff (todo)
 
