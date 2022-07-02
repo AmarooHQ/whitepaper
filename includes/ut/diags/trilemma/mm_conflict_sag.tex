@@ -21,12 +21,12 @@
     \draw [arrow] (goal) -- (mr1);
     \draw [arrow] (goal) -- (mr2);
 
-    \node (arp1) [node, right = of mr1.east] {\begin{tabular}{c} Users don't have to \\ keep all chains \end{tabular}};
-    \node (arp2) [node] at (mr2 -| arp1) {\begin{tabular}{c} Miners must \\ keep all chains \end{tabular}};
+    \node (arp1) [node, right = of mr1.east, xshift=2mm] {\begin{tabular}{c} Users don't have to \\ validate all chains \end{tabular}};
+    \node (arp2) [node] at (mr2 -| arp1) {\begin{tabular}{c} Miners must \\ validate all chains \end{tabular}};
     \draw [arrow] (mr1) -- (arp1);
     \draw [arrow] (mr2) -- (arp2);
 
-    \draw [conflict] (arp1) -- node (c) [anchor=west, inner sep=5pt] {\begin{tabular}{c} \textbf{Conflict} \\ Users $\equiv$ Miners \end{tabular}} (arp2);
+    \draw [conflict] (arp1) -- node (c) [anchor=west, inner sep=5pt] {\begin{tabular}{c} \textbf{Conflict} \\ Miners are Users \end{tabular}} (arp2);
     %\node (conflict) [node] at ([xshift=1cm]c.west) {\textbf{Conflict}};
 \end{tikzpicture}
 \end{document}

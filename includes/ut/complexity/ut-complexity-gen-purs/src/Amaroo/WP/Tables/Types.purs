@@ -6,6 +6,7 @@ import Amaroo.WP.Utils (uniq)
 import Data.Array (intercalate)
 import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe)
+import Data.Show.Generic (genericShow)
 
 data ColAlignment
 
@@ -14,6 +15,11 @@ type Alignments = {md :: Array String, texTabular :: String}
 type Rows = Array (Array String)
 
 data Table = Table Headings Alignments Rows
+
+derive instance genericTable :: Generic Table _
+
+instance showTable :: Show Table where
+  show = genericShow
 
 data LatexTablePos = Hereish | Top | Bottom | TablePage | Override | Here
 

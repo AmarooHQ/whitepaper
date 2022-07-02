@@ -4,31 +4,70 @@
 
 \label{sec:ut-complexity}
 
-UT has two primary methods of scaling: reflection and dapp-chains. Reflection is novel. Dapp-chains are similar to many of the sharding and pseudo-sharding ideas proposed for other networks (Polkadot, Eth2, etc), though there are fewer restrictions on dapp-chains in UT compared to other designs. Additionally, dapp-chains in UT are hosted by the simplex. In the case of PoS dapp-chains, this provides \emph{additional} security compared to 'naked' PoS chains -- and without compromising on any other associated developments (e.g., finality). Hosting dapp-chains on simplex-chains also provides greater maximum capacity than a single base-chain.
+UT has two primary methods of scaling: horizontally via mutual PoR (simplex-chains), and vertically via one-way PoR (dapp-chains).
+Horizontal scaling via PoR is novel.
+Dapp-chains are similar to many of the sharding and pseudo-sharding ideas proposed for other networks (Polkadot, Eth2, etc), though there are fewer restrictions on dapp-chains in UT compared to other designs.
+Additionally, dapp-chains in UT are secured by the entire simplex.
+In the case of PoS dapp-chains, this provides \emph{additional} security compared to 'naked' PoS chains.
+Hosting dapp-chains on many simplex-chains also provides greater system-wide maximum capacity than a network built upon a single base-chain.
 
-A common method of sharding is to *nest* blockchains. For example, Ethereum 2 has *The Beacon Chain* -- its root-chain (the single base-chain of a network).
+A common method of sharding is to *nest* blockchains.
+For example, Ethereum 2 has *The Beacon Chain* -- its root-chain (the single base-chain of a network).
 
+```{=latex}
 \bquote{
     The Beacon Chain will conduct or coordinate the expanded network of shards and stakers. But it won't be like the Ethereum mainnet of today. It can't handle accounts or smart contracts.
-}{\url{https://ethereum.org/en/eth2/beacon-chain/}}
+}[\citeBeaconChainLink{}]
+```
 
-This type of configuration, where a base-chain facilitates child-chains, is referred to as *nesting* in the context of discussing UT's architecture and complexity.
+This type of configuration, where a base-chain facilitates child-chains, is referred to as *nesting* in this section and in the context of UT's architecture and complexity.
 Base-chains are at the first level of nesting.
 The shards of Ethereum 2 are *a level of nesting* above the Beacon Chain, i.e., nesting level 2.
+UT's dapp-chains are also at nesting level 2.
 
-\defineTerm{Base-chain}{A chain that has no parent-chains; i.e., is at the base nesting level}
+\defineTermTex{Base-chain}{A chain that has no parent-chains; i.e., is at the base nesting level}
 
-Sometimes (but not always) people use terms like *layer 2* to describe this sort of nesting, though such usage of *layer 2* is ambiguous and potentially misleading. It easily confuses nesting with off-chain scaling methods (such as payment channels or ephemeral 'child' blockchains, e.g., Plasma), and it potentially misleads readers about the security properties of nested blockchains. Nested blockchains *can* faithfully inherit the security properties of their parent-chains, which is not the case for layer 2 solutions.
+Sometimes (but not always) people use terms like *layer 2* to describe this sort of nesting, though such usage of *layer 2* is ambiguous and potentially misleading.
+It easily confuses nesting with off-chain scaling methods (such as payment channels, rollups, or ephemeral 'child' blockchains, e.g., Plasma), and it potentially misleads readers about the security properties of nested blockchains.
+Nested blockchains *can* faithfully inherit the security properties of their parent-chains, which is not the case for layer 2 solutions prior to finalization.
 
-Furthermore, terms like *layer x* cannot accurately describe UT's design. Consider a PoS dapp-chain on UT. Would that dapp-chain be *layer 1* or *layer 2*? It would be misleading to call them *layer 2* whilst comparable chains (like Ethereum 2, Polkadot, or Cardano) are called *layer 1*. Such UT dapp-chains have all the security qualities equivalent to stand-alone PoS chains, *and more*. If they were called *layer 1* chains, then what is the simplex -- *layer 0*? It is clear that the common idea behind *layer 1/2* scaling does not have sufficient capacity to accurately describe UT's simplex- and dapp-chains; it is inadequate.
+Furthermore, terms like *layer x* cannot accurately describe UT's design.
+Consider a PoS dapp-chain on UT.
+Would that dapp-chain be *layer 1* or *layer 2*?
+It would be misleading to call it *layer 2* whilst \emph{directly comparable} chains (like Ethereum 2, Polkadot, or Cardano) are called *layer 1*.
+Such PoS UT dapp-chains have \emph{all} the security qualities of an equivalent stand-alone PoS chains, *and more*.
+If they were called *layer 1* chains, then what is the simplex -- *layer 0*?
+It is clear that the common idea behind *layer 1/2* scaling does not have sufficient capacity to accurately describe UT's simplex- and dapp-chains; it is inadequate.
 
-The following derivations focus on *throughput* of particular blockchain designs and scaling configurations. Raw throughput of a network, $T_i$, is measured in bytes/sec (B/s) for some level of nesting, $i$. Note that $T_i$ directly corresponds to a design's maximum transactions per second (TPS) via $\text{Tx}_{i} = \nicefrac{T_i}{\text{Tx}_{\text{avg}}}$, where $\text{Tx}_{\text{avg}}$ is the average size of a transaction. The raw B/s throughput of a chain at the $i^{\text{th}}$ level of nesting is denoted by $k_i$. Note that $T_i$ is a *calculated* value, but $k_i$ is a *parameter* that may be chosen. An increase to $k_i$ is equivalent or similar to an increase in maximum block size.
+### Analysis Methodology
 
-Shown below are relationships between the maximum number of chains at a level of nesting, $N_i$, and the maximum network throughput at that level of nesting, $T_i$. For most existing blockchain designs, note that $N_1 = 1$.
+The following derivations focus on *throughput* of particular blockchain designs and scaling configurations.
+These derivations will let us evaluate the complexity of each design.
+
+Raw throughput of a network, $T_i$, is measured in bytes/sec (B/s) for some level of nesting, $i$.
+$T_i$ directly corresponds to a design's maximum transactions per second ($\text{TPS}_i$), where $\text{Tx}_{\text{avg}}$ is the average size of a transaction, via:
+\begin{equation*}
+  \text{TPS}_{i} = \nicefrac{T_i}{\text{Tx}_{\text{avg}}}
+\end{equation*}
+The raw B/s throughput of a chain at the $i^{\text{th}}$ level of nesting is denoted by $k_i$.
+Note that $T_i$ is a *calculated* value, but $k_i$ is a *parameter* that may be chosen.
+An increase to $k_i$ is effectively an increase in maximum block size.
+
+We will also derive relationships between the maximum number of chains at a level of nesting, $N_i$, and the maximum network throughput at that level of nesting, $T_i$.
+For most existing blockchain designs, $N_1 = 1$.
+
+With regards to simplexes, we are particularly concerned with the complexity of a \emph{maximal} simplex -- i.e., the simplex with the highest TPS possible.
+
+\defineTermTex{Maximal Simplex}{
+    A simplex with the maximum TPS under given $O(c)$ constraints
+}
 
 Additionally, $O(k_i)$ is \emph{defined} as $O(k_i) \equiv O(c)$.
+This is reasonable provided there are no $O(c)$ bottlenecks, e.g., network bandwidth, CPU throughput, memory requirements, etc (\autoref{sec:a-principle-of-scaling}).
 
-### Complexity of $O(c)$ Chains
+%%### Complexity of $O(c)$ Chains
+
+\subsubsection{Complexity of \titlemath{$O(c)$}{O(c)} Chains}
 
 Example: Bitcoin.
 
@@ -53,49 +92,13 @@ For Bitcoin -- given $k_1 \approx 1700$ B/s, and transaction size $\text{Tx}_{\t
 
 This is what we expect based on the measured real-world performance of Bitcoin.
 
-### Optimistic Complexity of $O(c^2)$ Chains
+%%### Optimistic Complexity of $O(c^2)$ Chains
+
+\subsubsection{Optimistic Complexity of \titlemath{$O(c^2)$}{O(c²)} Chains}
 
 Examples: Ethereum 2, Polkadot.
 
 Suppose the root-chain has a throughput of $k_1$ B/s and it can support up to $N_2$ nested chains. Those nested chains have headers of $D_h$ bytes that are produced at a frequency of $D_f$ ($s^{-1}$). If \emph{all} headers of nested chains are recorded in the host chain, then each nested chain consumes \emph{at least} $D_f \cdot D_h$ B/s of the root-chain's capacity.
-
-\aside{
-  It's typical, though, that the headers of nested chains, alone, are not sufficient: additional data is required.
-  For example, in an \emph{Ethereum 2} beacon block, each shard has a header size of 280 B, but there is additional overhead, and a reasonable lower-bound is that each header uses a minimum of 312 B per beacon block.\footnotemark
-  \par
-  In the case of \emph{Polkadot}, it is \href{https://github.com/AmarooHQ/polkadot-effective-dh/blob/5cd0f0d21ff1cd3c57d1c2af70aaf6d8ee19dc11/main.js}{measurable} that a minimum of 819 B is used in the \texttt{paraInclusion.candidateBacked} extrinsic (i.e., transaction).
-  So, a lower-bound on the effective header size of a parachain is 819 B (this does not include \emph{bitfields}\footnotemark).
-  \par
-  In those situations, with regards to these capacity derivations, one can use the \emph{effective} header size as a replacement for the \emph{raw} header size.
-}
-
-\addtocounter{footnote}{-1}
-\footnotetext{
-  The \emph{current} Ethereum 2 \href{https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/sharding/beacon-chain.md\#beaconblockbody}{sharding spec} has capacity for 2:1 attestations to shards per block (with 64 shards), but only 32 B of each attestation is dedicated to sharding.
-  The spec also has capacity for 4:1 shard headers to shards per block.
-  It seems reasonable that capacity which exists will be used within reason.
-  Thus a reasonable lower-bound for the effective header-size of shards is taken via: $1\times$ headers per shard per block, $1\times$ attestations per shard per block (which do not count towards effective header-size), and $1\times$ 32 B per attestation per block.
-  Shards have headers of 280 B, so the minimum effective header size is taken to be 312 B.
-  (note: a required dependency of the current sharding spec is the \href{https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/merge/beacon-chain.md\#beaconblockbody}{current merge spec} and \href{https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/phase0/beacon-chain.md}{current phase0 spec}.)
-}
-\footnotetext{
-  Bitfields is a Polkadot term -- it's a list of hundreds of signatures, totalling $> 14$ KB per block on the current Kusama testnet (October $3^{\text{rd}}$ 2021).
-}
-
-\begin{comment}
-<!-- I think Eth2 sharding (wrt headers) has a larger effective Dh than we calculated before:
-
-* attestations: 8 + 8 + 32 + 2*(8 + 32) + 32 + 96 = 256
-  * https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md#attestationdata
-* SignedShardBlobHeader: 96 + (8 * 4 + (48 + 8 + 48 + 32 + 8*2)) = 280
-  * https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md#shard-work-status
-
-Both are included in the BeaconBlockBody: https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md#beaconblockbody  (inherits from https://github.com/ethereum/consensus-specs/blob/dev/specs/merge/beacon-chain.md#beaconblockbody).
-The sharding spec for BeaconBlockBody has: shard_headers: List[SignedShardBlobHeader, MAX_SHARDS * MAX_SHARD_HEADERS_PER_SHARD] which seems to indicate that headers would be included every block (for every shard).
-note: MAX_SHARD_HEADERS_PER_SHARD=4.
-
-There's enough capacity for attestations (128 each block for 64 shards) that they could be done each block. That doesn't include any committee stuff. -->
-\end{comment}
 
 Thus, $N_2$ is given by:
 \begin{equation}
@@ -116,9 +119,68 @@ T_2 & = \frac{k_1 \cdot k_2}{D_f \cdot D_h} \\
 
 Thus $O(T_2) = O(c^2)$ as expected.
 
-### Complexity of $\UT{1}$
+#### Effective Header Size
 
-There is no single root-chain for a collection of mutually reflecting blockchains (i.e., a simplex), so $N_1 \neq 1$. What is $N_1$ then? In a simplex, each chain has $k_1$ B/s capacity, but this is split between reflections and transactions. At this foundational level (where there is no nesting yet), headers are $B_h$ bytes with a frequency of $B_f$ Hz. There are $N_1$ simplex chains.
+It's typical, though, that the headers of nested chains, alone, are not sufficient: additional data is required.
+When such data is required to be recorded on-chain (i.e., it cannot be deterministically regenerated), then the \emph{effective} header size is the size of the raw header, plus the size of any auxiliary data.
+
+For example, in an \emph{Ethereum 2} beacon block, each shard has a header size of 280 B, but there is additional overhead.
+A reasonable lower-bound is that each header has an \emph{effective} minimum header size of 312 B.\footnote{
+  As of late September 2021, the Ethereum 2 \href{https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/sharding/beacon-chain.md\#beaconblockbody}{sharding spec} has capacity for 2:1 attestations to shards per block (with 64 shards), but only 32 B of each attestation is dedicated to sharding.
+  The spec also has capacity for 4:1 shard headers to shards per block.
+  It seems reasonable that capacity which exists will be used within reason.
+  Thus a reasonable lower-bound for the effective header-size of shards is taken via: $1\times$ headers per shard per block, $1\times$ attestations per shard per block (which do not count towards effective header-size), and $1\times$ 32 B per attestation per block.
+  Shards have headers of 280 B, so the minimum effective header size is taken to be 312 B.
+  (note: a required dependency of the current sharding spec is the \href{https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/merge/beacon-chain.md\#beaconblockbody}{current merge spec} and \href{https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/phase0/beacon-chain.md}{current phase0 spec}.)
+}
+
+In the case of \emph{Polkadot}, it is \href{https://github.com/AmarooHQ/polkadot-effective-dh/blob/5cd0f0d21ff1cd3c57d1c2af70aaf6d8ee19dc11/main.js}{measurable}\footnote{
+  Whilst some parachain headers exist that are smaller than 819 B, it's not really significant for this analysis (a reduction of 10\% wouldn't change much).
+  We're already ignoring bitfields, and 819 B seems optimistic if we're interested in the \emph{average} parachain header size, since many are larger.
+  All-in-all, I guess that 819 B is a bit generous, and (ideally) all claims about existing chains in this paper err on the side of generosity.
+} that a typical minimum of 819 B is used in the \texttt{paraInclusion.candidateBacked} extrinsic (i.e., the transaction type that records parachain headers).
+So, a lower-bound on the effective header size of a parachain is 819 B (this does not include \emph{bitfields}\footnote{
+  Bitfields is a Polkadot term -- it's a list of hundreds of signatures, totalling $> 14$ KB per block on the current Kusama testnet (October $3^{\text{rd}}$ 2021).
+}).
+
+In those situations, with regards to these capacity derivations, one can use the \emph{effective} header size as a replacement for the \emph{raw} header size.
+
+%%\addtocounter{footnote}{-2}
+
+%%\addtocounter{footnote}{1}
+
+%%\addtocounter{footnote}{1}
+
+
+\begin{comment}
+<!-- I think Eth2 sharding (wrt headers) has a larger effective Dh than we calculated before:
+
+* attestations: 8 + 8 + 32 + 2*(8 + 32) + 32 + 96 = 256
+  * https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md#attestationdata
+* SignedShardBlobHeader: 96 + (8 * 4 + (48 + 8 + 48 + 32 + 8*2)) = 280
+  * https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md#shard-work-status
+
+Both are included in the BeaconBlockBody: https://github.com/ethereum/consensus-specs/blob/dev/specs/sharding/beacon-chain.md#beaconblockbody  (inherits from https://github.com/ethereum/consensus-specs/blob/dev/specs/merge/beacon-chain.md#beaconblockbody).
+The sharding spec for BeaconBlockBody has: shard_headers: List[SignedShardBlobHeader, MAX_SHARDS * MAX_SHARD_HEADERS_PER_SHARD] which seems to indicate that headers would be included every block (for every shard).
+note: MAX_SHARD_HEADERS_PER_SHARD=4.
+
+There's enough capacity for attestations (128 each block for 64 shards) that they could be done each block. That doesn't include any committee stuff. -->
+\end{comment}
+
+
+
+
+
+
+%%### Complexity of $\UT{1}$
+
+\subsubsection{Complexity of \titlemath{$\UT{1}$}{UT₁}}
+
+There is no single root-chain for a collection of mutually reflecting blockchains (i.e., a simplex), so $N_1 \neq 1$.
+What is $N_1$ then?
+In a simplex, each chain has $k_1$ B/s capacity, but this is split between reflections and transactions.
+At this foundational level (where there is no nesting yet), headers are $B_h$ bytes with a frequency of $B_f$ Hz.
+There are $N_1$ simplex-chains.
 
 For the purpose of \autoref{sec:ut-complexity} we will generally *not* consider the impact of *explicitly* including PoRs along with block headers (i.e., the +PoRs UT variants).
 The methods we use here are easily generalized to account for those variants, and associated analysis can be found in \autoref{sec:por-with-proofs}.
@@ -142,7 +204,6 @@ k_{1,tx} = k_1 - N_1 \cdot B_f \cdot B_h
 \end{equation}
 
 Since each simplex-chain reserves $k_{1,tx}$ B/s for transactions, the total throughput reserved for transactions will be $N_1 \cdot k_{1,tx}$. Thus:
-
 \begin{align}
 T_1 & = N_1 \cdot k_{1,tx} \label{eq:reflection-t1-start} \\
 & = N_1(k_1 - N_1 \cdot B_f \cdot B_h) \notag \\
@@ -151,7 +212,8 @@ T_1 & = N_1 \cdot k_{1,tx} \label{eq:reflection-t1-start} \\
 %% & = N_1 \cdot k_1 - {N_1}^2 \cdot B_f \cdot B_h + N_1 \cdot B_f \cdot B_h \label{eq:reflection-t1-in-terms-of-n1}
 \end{align}
 
-The optimal number of simplex-chains will maximize throughput. We can find that maxima via:
+The optimal number of simplex-chains will maximize throughput.
+We can find that maxima via:
 \begin{equation*}
 \begin{split}
 \frac{dT_1}{dN_1} & = k_1 - 2 \cdot N_1 \cdot B_f \cdot B_h
@@ -160,7 +222,6 @@ The optimal number of simplex-chains will maximize throughput. We can find that 
 \end{equation*}
 
 At $\frac{dT_1}{dN_1} = 0$:
-
 \begin {equation}
 \label{eq:simplex-N1}
 \begin{split}
@@ -206,11 +267,18 @@ Thus, from the definition of $k_1$ in \autoref{eq:k1-reflection-defn}:
 k_{1,B} = \frac{k_1}{2}
 \end{equation*}
 
-### Dapp-Chains and the Complexity of $\UT{2}$ and $\UT{3}$
+
+
+
+\begin{comment}
+Dapp-Chains and the Complexity of $\UT{2}$ and $\UT{3}$
+\end{comment}
+
+\subsubsection{Dapp-Chains and the Complexity of \titlemath{$\UT{2}$}{UT₂} and \titlemath{$\UT{3}$}{UT₃}}
 
 #### Dapp-Chains
 
-If a system supports nested chains, then we can say that for some throughput, $T_i$, at nesting level $i$, that $(i+1)^{th}$ nesting level can support $N_{i+1}$ nested chains via:
+If a system supports nested chains, then we can say that for some throughput, $T_i$, at nesting level $i$, the $(i+1)^{th}$ nesting level can support $N_{i+1}$ nested chains via:
 \begin{equation}
 \label{eq:N-i-plus-1-in-terms-of-Ti}
 N_{i+1} = \frac{T_i}{D_f \cdot D_h}
@@ -230,7 +298,13 @@ Combining these yields:
 N_{i+1} = \frac{T_{i+1}}{k_{i+1}}
 \end{equation}
 
-#### UT with Dapp-Chains ($\UT{2}$)
+
+
+
+%%#### UT with Dapp-Chains (\titlemath{$\UT{2}$}{UT2})
+
+\subsubsubsection{UT with Dapp-Chains (\titlemath{$\UT{2}$}{UT₂})}
+
 
 Starting with \autoref{eq:simplex-T1} and building on \autoref{eq:throughput-iter}:
 \begin{equation}
@@ -253,7 +327,12 @@ N_2 & = \frac{T_2}{k_2} \\
 
 When $D_h = B_h$ and $D_f = B_f$, note that $N_2 = {N_1}^2$.
 
-#### UT with Dapp-Dapp-Chains ($\UT{3}$)
+
+
+
+%%#### UT with Dapp-Dapp-Chains ($\UT{3}$)
+
+\subsubsubsection{UT with Dapp-Dapp-Chains (\titlemath{$\UT{3}$}{UT₃})}
 
 If we say each dapp-chain hosts shards or more dapp-chains (e.g., as a dapp-chain version of Eth2 or Polkadot would), then via \autoref{eq:throughput-iter} and \autoref{eq:throughput-c-3},
 \begin{equation}
@@ -276,13 +355,17 @@ N_3 & = \frac{T_3}{k_3} \\
 \end{split}
 \end{equation*}
 
+
+
+
 ### Complexity of Cross-Chain SPV Proofs & Proofs of Reflection
 
 #### Cross-Chain SPV Proofs
 
 Each chain -- at full capacity -- operates with order $O(c)$ by definition. Thus its state has order $O(c)$ also. The size of SPV proofs scale logarithmically with the set you're proving membership of, e.g., the number of transactions, or size of the chain's state, etc. Thus, SPV proofs scale with order $O(\log_2 c)$.
 
-For a given $O(c^j); j \in \{2,3,4\}$ configuration of UT (i.e., $\UT{1}$, $\UT{2}$, $\UT{3}$), a chain can process SPV proofs of state on another chain. For $j = 4$, the furthest that a transaction can occur from its host simplex-chain is in the 3rd level of nesting (i.e., a dapp-dapp-chain). It would require $j-1$ SPV proofs to \`\`ascend'' from the host simplex-chain to a dapp-dapp-chain. However, given that full nodes of a dapp-dapp-chain are required to be full nodes of both the host dapp-chain and the host simplex-chain, transactions in that dapp-dapp-chain do not need to provide SPV proofs of state in either of those host chains -- full nodes already have those details. That is: transactions which \`\`descend'' the levels of nesting can do so with $O(1)$ cost. SPV proofs are only required when transactions \`\`ascend'' the levels of nesting to other simplex-, dapp-, or dapp-dapp-chains.
+For a given $O(c^j); j \in \{2,3,4\}$ configuration of UT (i.e., $\UT{1}$, $\UT{2}$, $\UT{3}$), a chain can process SPV proofs of state on another chain. For $j = 4$, the furthest that a transaction can occur from its host simplex-chain is in the 3rd level of nesting (i.e., a dapp-dapp-chain).
+It would require $j-1$ SPV proofs to \`\`ascend'' from the host simplex-chain to a dapp-dapp-chain. However, given that full nodes of a dapp-dapp-chain are required to be full nodes of both the host dapp-chain and the host simplex-chain, transactions in that dapp-dapp-chain do not need to provide SPV proofs of state in either of those host chains -- full nodes already have those details. That is: transactions which \`\`descend'' the levels of nesting can do so with $O(1)$ cost. SPV proofs are only required when transactions \`\`ascend'' the levels of nesting to other simplex-, dapp-, or dapp-dapp-chains.
 
 Thus, the maximum number of SPV proofs required to prove state anywhere in a UT simplex is $j$.
 
@@ -299,6 +382,8 @@ A simplex-chain reflects $N_1 - 1 \approx N_1$ other simplex-chains. A merkle tr
 
 Note: In a production system, these proofs can be excluded from blocks by treating them as droppable witnesses; see \autoref{sec:proving-reflection}.
 
+\todoDraftOnly{Total reflections + computational burden (+PoRs vs omitted proofs) -- $O(c)$ vs $O(c^2)$}
+
 ### TPS Complexity Comparison
 
 $k$: raw per-chain throughput (bytes/$s$) \newline
@@ -310,24 +395,31 @@ $D_h = B_h$: dapp-chain block header size (bytes) \newline
 $Tx_{avg}$: average tx size (bytes)
 \end{comment}
 
-NB: For the purposes of \autoref{table:tps}, the average transaction size is taken to be 250 bytes.
-\begin{comment}
-Additionally, the discrepancy in header size (between $B_h$ and $D_h$) is due to the overhead of PoS mechanisms.
-\end{comment}
+NB: For the purposes of \autoref{table:tps} and on, the average transaction size is taken to be 250 bytes.
 
 %% INSERT ### TABLE: tps
 
-: A comparison of the maximum transaction throughput (transactions per second) given different scaling configurations. Note that the \emph{Sharded $O(c^2)$} column is optimal if all headers are recorded in the base-chain.
+: A comparison of the maximum transaction throughput (transactions per second; TPS) given different $\UT{\text{+OP}}$ scaling configurations.
+Note that the \emph{Sharded $O(c^2)$} column is theoretically optimal for sharding systems where all headers are recorded in the base-chain.
+
+More detailed comparison tables can be found in \autoref{sec:ut-variant-complexities}.
 
 ### Bandwidth Complexity
 
 \label{sec:bandwidth-complexity}
 
-What data must a full node download? A full node must be able to *completely validate* a *single chain*. Thus, a full node of a simplex-chain needs to download all blocks for that simplex-chain, and all auxiliary data to verify PoRs. Provided that the PoRs and corresponding headers remain available (which they always do[^alwaysdo]), the total depends on which UT protocol variant is used (some already include that auxiliary data).
+What data must a full node download?
+A full node must be able to *completely validate* a *single chain*.
+For a simplex-chain, provided that the PoRs and corresponding headers remain available (which they always do[^alwaysdo]), this means it must download: all blocks for that simplex-chain, and all auxiliary data to verify PoRs.
+Note that bandwidth requirements depend on which UT protocol variant is used.
 
 [^alwaysdo]: The necessary PoRs are, at the very least, part of other simplex-chains, so "always do" assumes that simplex-chains themselves remain available, excluding planned shutdown. Since all blockchain networks *depend* on the availability of their chains, this is a safe assumption.
 
-The data a full node requires are: each block, the headers of all reflecting chains, and the missing branches for all PoRs. Network-wide, headers consume $N_1 \cdot B_f \cdot B_h$ B/s, and PoRs (only for that specific chain) use $N_1 \cdot B_f \cdot g \cdot \ceil{\log_2 N_1}$ B/s. Let's denote the total bandwidth required $\Delta s$. In the worst case, where both headers and PoRs must be downloaded:
+For $\UT{\text{+OP}}$, the data a full node requires are: each block, the headers of all reflecting chains, and the missing branches for all PoRs.
+Network-wide, headers consume $N_1 \cdot B_f \cdot B_h$ B/s.
+For a single chain, PoRs use $N_1 \cdot B_f \cdot g \cdot \ceil{\log_2 N_1}$ B/s -- $g$ is the digest size of the hash used for merkle trees (usually 32 bytes).
+Let's denote the total bandwidth required $\Delta s$.
+In the worst case, where both headers and PoRs must be downloaded:
 \begin{equation}
 \begin{split}
 \Delta s & = k_1 + (N_1 \cdot B_f \cdot B_h) + (N_1 \cdot B_f \cdot g \cdot \ceil{\log_2 N_1}) \\
@@ -341,11 +433,23 @@ However, with *explicit PoRs* (variants including +PoRs), $\Delta s \le k_1 + N_
 
 \todoDraftOnly{in effect: we get to choose the aspect that the $\log c$ influences -- this matters b/c of \emph{a principle of scaling} section. we get to choose based on *worst case* so basically scalability isn't affected by that term b/c we can always put it in the non-bottleneck component.}
 
+\aside{
+  The term $g \cdot \ceil{\log_2 N_1}$ in these equations is the size of a merkle branch for a PoR.
+  What if verkle trees are used instead?
+  With a branching factor of 256, 32 byte commitments and proofs, and 1 byte location specifiers, this term should be replaced with
+  $(1+32) \cdot \max(1, \log_{256} N_1)$.
+  The complexity of these two terms is the same -- $O(\log c)$ -- but in practice verkle PoRs are less than half the size of merkle PoRs.
+  For this reason, the numerical calculations in this paper assume that the UT implementation uses verkle trees.
+}
+
 That is for a full node. What about the bandwidth required to verify *the entire simplex*?
 
-If miners temporarily keep the blocks of every simplex-chain (so that they can verify that reflected headers correspond to existent blocks) then what is the complexity and burden of this? Each simplex-chain has a raw throughput of $k_1$ bytes/s. From \autoref{eq:simplex-N1} we know that $N_1 = \frac{k_1}{2 \cdot B_f \cdot B_h}$.
+If miners temporarily keep the blocks of every simplex-chain (so that they can regenerate PoRs and verify that reflected headers correspond to existent blocks) then what is the complexity and burden of this?
+Each simplex-chain has a raw throughput of $k_1$ bytes/s.
+From \autoref{eq:simplex-N1} we know that $N_1 = \frac{k_1}{2 \cdot B_f \cdot B_h}$.
 
 The amount of network bandwidth, $\Delta S$, required to download all blocks (as they are produced) across all simplex-chains is equal to the product of: the number of simplex-chains -- $N_1$, and the raw throughput of each chain -- $k_1$.
+Any auxiliary data can be deterministically regenerated, so doesn't need to be downloaded.
 \begin{equation}
 \begin{split}
 \Delta S & = N_1 \cdot k_1 \\
@@ -354,13 +458,16 @@ The amount of network bandwidth, $\Delta S$, required to download all blocks (as
 \end{split}
 \end{equation}
 
-It is clear that $\Delta S$ has order $O(c^2)$, but how bad is this? For $k_1 = 3000$, $B_f = \frac{1}{60}$, and $B_h = 112$: $\Delta S \approx 2.4$ MB/s. With those figures: $N_1 \approx 800$ simplex-chains, $N_2 \approx 645,000$ dapp-chains, and maximum tps of $\sim 7.7\times 10^{6}$. Decreasing block times to 15s correspondingly decrease the bandwidth requirements to 0.6 MB/s for a simplex with $\sim 200$ chains, $\sim 40,000$ dapp-chains, and $\sim 484,000$ max tps.
+It is clear that $\Delta S$ has order $O(c^2)$, but how bad is this?
+For $k_1 = 3000$, $B_f = \frac{1}{60}$, and $B_h = 112$: $\Delta S \approx 2.4$ MB/s.
+With those figures: $N_1 \approx 800$ simplex-chains, $N_2 \approx 645,000$ dapp-chains, and maximum tps of $\sim 7.7\times 10^{6}$.
+Decreasing block times to 15s correspondingly decrease the bandwidth requirements to 0.6 MB/s for a simplex with $\sim 200$ chains, $\sim 40,000$ dapp-chains, and $\sim 484,000$ max tps.
 
 While $O(c^2)$ bandwidth scaling is not ideal, it's clear that -- especially in the early days of a UT simplex when there are fewer simplex-chains -- there are tolerable configurations available; i.e., there is *excess capacity*.
 
 %% INSERT ### TABLE: dapp-chains
 
-: UT's capacity and bandwidth requirements: $N_1, N_2, N_3, \text{and}\;\Delta S$ for various parameters.
+: Chain-capacity and bandwidth requirements for $\UT{\text{+OP}}$: $N_1, N_2, N_3, \Delta S$, and $\mathbb{C}^\prime$ for various parameters.
 
 ### The Impact of Header Size
 
@@ -378,40 +485,34 @@ This effect is not unique to UT, though. In general, any system of sharding is a
 
 Practically, this effect means that a decrease to the size of headers has *increasing* marginal benefit. Compared to $O(c)$ blockchains (e.g., Bitcoin), efficient header schemes are far more important for UT and sharded blockchain networks.
 
-### Optimizations
+\todoDraftOnly{some discussion to replace +HOT stuff.}
 
-\todoDraftOnly{present TPS and $N_x$ numbers using header-omission and hash-compression optimizations as mentioned in \autoref{sec:exploiting-seg-state}}
-
-%% INSERT ### TABLE: tps_optimized
-
-: TPS when using +HOT simplex optimizations (Header Omission and +T).
-
-%% INSERT ### TABLE: dapp-chains_optimized
-
-: Values of $N_i$, $\mathbb{C}^\prime$, and $\Delta S$ for a simplex using +HOT simplex optimizations.
-
-%% END ### RELEASE
-
-%% BEGIN ### DRAFT
-
-#### Impact on the Impact of Header Size
-
-\todo{headers at base layer don't matter now -- only for nesting -- so PoS chains (even with big headers) might be okay at base layer without impacting scalability}
-
-%% END ### DRAFT
-
-%% BEGIN ### RELEASE
 
 ### Comparison of UT Variants
 
-\autoref{table:compare_optimizations} and \autoref{table:compare_optimizations2} show a comparison between UT variants. Note that the +PoRs variants are covered in \autoref{sec:por-with-proofs}.
+\autoref{table:compare_optimizations_a} and \autoref{table:compare_optimizations_b} show a comparison between UT variants.
+For comparisons over a range of parameters, see \autoref{sec:ut-variant-complexities}.
 
-%% INSERT ### TABLE: compare_optimizations
+%% INSERT ### TABLE: compare_optimizations_a
 
-: Comparison of UT variants. Parameters are: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions. ``E. $B_h$'' means the \emph{effective} header-size.
+: Comparison of UT variants' capacities with parameters: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions.
+``E. $B_h$'' means the \emph{effective} header-size.
 
-%% INSERT ### TABLE: compare_optimizations2
+%% INSERT ### TABLE: compare_optimizations_a_20k
 
-: Comparison of UT variants. Parameters are: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions. The time to sync 5 years of a simplex-chain's history, including verifying PoRs ($\text{TTS}_{5yrs}$) is measured against a fully utilized 10 MB/s network connection and assumes no software bottlenecks. The equivalent for \emph{all} simplex-chains and PoRs being verified ($\Sigma$ $\text{TTS}_{5yrs}$) is also shown.
+: Comparison of UT variants' capacities; as in \autoref{table:compare_optimizations_a} with $k = 20000$ B/s.
+
+%% INSERT ### TABLE: compare_optimizations_b
+
+: Comparison of UT variants' network and storage requirements with parameters: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions.
+$\text{TTS}_{5yrs}$: The time to sync 5 years of a simplex-chain's history, including PoRs, with a fully utilized 10 MB/s network connection.
+
+\begin{comment}
+$\Sigma$ $\text{TTS}_{5yrs}$: The time to sync 5 years for all simplex-chains.
+\end{comment}
+
+%% INSERT ### TABLE: compare_optimizations_b_20k
+
+: Comparison of UT variants' network and storage requirements; as in \autoref{table:compare_optimizations_b} with $k = 20000$ B/s.
 
 %% END ### RELEASE

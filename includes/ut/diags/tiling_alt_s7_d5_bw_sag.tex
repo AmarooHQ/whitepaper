@@ -1,0 +1,31 @@
+\documentclass[]{standalone}
+\usepackage[T1]{fontenc}\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usepackage{pgfbaselayers}
+\usepackage{xintexpr}
+\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
+
+\makeatletter
+\def\input@path{{./includes/}{./includes/ut/diags/}}
+\makeatother
+
+% overwrite (either \providecommand or \renewcommand) to control the parts of the diagram which are drawn or not.
+
+\begin{document}%
+\providecommand\TilingDepth{5}%
+\providecommand\TilingInitSize{10}%
+\providecommand\TilingScaleConst{1.5}%
+\providecommand\TilingSizeToNodeRRatio{3}%
+\providecommand\TilingValence{3}%
+\providecommand\SimplexChains{7}%
+\providecommand\TilingAltPattern{1}%
+\providecommand\TilingAutoRotate{1}%
+\providecommand\TilingMonoColor{1}%
+\providecommand\TilingNodeColor{white}%
+\providecommand\TilingLineColor{white!70!black}%
+\providecommand\TilingOnlyTopHalf{1}%
+\input{tiling-macro}%
+\begin{tikzpicture}[rotate=90]%
+    \TikzSimplexTiling%
+\end{tikzpicture}%
+\end{document}

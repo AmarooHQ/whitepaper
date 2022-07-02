@@ -1,13 +1,13 @@
 module Amaroo.WP.Tables where
 
-import Amaroo.WP.Tables.Types
 import Prel
 
 import Amaroo.WP.Calcs (Params, UtVariants, ChainStats, allUtChainCalcs, allUtChainCalcsF, applyTDiscountToBH, auxStats, mkNestedPs, mkSimplePs, pToPF, runChainCalcFor, tradChainCalc, tradChainCalcEth2, tradChainCalcPolkadot, utChainCalc)
 import Amaroo.WP.Formatter (fdPlain, fdPlainMixed, fdPlainZero, fdStd, fdStdMixed, fdStdNoSiMixed, fdStdTwo, fdStdZero, fmt1GbpsPs, fmtDyn, fmtPsKBfBh, fmtPsKBfBhDh, wrap, wrapXml, wrapXmlWAttr)
 import Amaroo.WP.Tables.Booktabs (renderBooktabs)
 import Amaroo.WP.Tables.Types (LatexTablePos(..), TPositioning(..))
-import Amaroo.WP.Utils (diagonalApply, ui)
+import Amaroo.WP.Tables.Types
+import Amaroo.WP.Utils (binarySearch, diagonalApply, ui)
 import Data.Array (drop, filter, intercalate, take)
 import Data.Array as A
 import Data.Int (decimal, toNumber)
@@ -20,6 +20,7 @@ import Data.Traversable (sequence)
 import Effect.Exception (error)
 import Effect.Exception.Unsafe (unsafeThrowException)
 import Math (pow)
+import Math as M
 import Partial.Unsafe (unsafePartial)
 
 {-|
@@ -66,6 +67,9 @@ https://web.archive.org/web/20210831185445/https://docs.solana.com/running-valid
 ~~how solana makes sure the validator base is decentralized enough :/ <https://twitter.com/aeyakovenko/status/1315689754743107584>~~
 
 -}
+
+_B_PER_S_TO_GB_PER_YR :: Number
+_B_PER_S_TO_GB_PER_YR = 86400.0 * 365.25 / 1000.0 / 1000.0 / 1000.0
 
 confRateTex = "\\mathbb{C}^\\prime"
 
@@ -126,6 +130,16 @@ ut1TpsToK tps txSize bf bh = pow (tps * txSize * 4.0 * bf * bh) 0.5
 ut2TpsToK tps txSize bf bh dh = pow (tps * txSize * 4.0 * bf * bf * bh * dh) (1.0 / 3.0)
 oc2TpsToK tps txSize bf bh = pow (tps * txSize * bf * bh) 0.5
 
+
+findKFor1MTps ∷ Network → Number
+findKFor1MTps utNet = bump answer
+  where
+    f k = netToTps utNet $ netToChainStats utNet $ mkSimplePs k _UT_HF _TX_SIZE
+    answer = M.ceil $ binarySearch {epsilon: 100.0, target: _1M, f}
+    bump _k = if f _k > _1M then _k else bump (_k + 1.0)
+
+_TX_SIZE = 250.0
+
 _1M = 1_000_000.0
 
 _BTC_BH = 80.0
@@ -134,6 +148,11 @@ _BTC_1M_K = 250000000.0
 _CARDANO_BH :: Number
 _CARDANO_BH = 1070.0
 _CARDANO_1M_K = _BTC_1M_K
+
+_SOLANA_BH = 144.0
+_SOLANA_1M_K = _BTC_1M_K
+-- | 1hr slot time avg on 2022-03-01
+_SOLANA_BF = 1000.0/633.0
 
 _ETH2_BF = btToF 12
 _ETH2_BH = 200.0
@@ -152,53 +171,74 @@ _UT_BH = 84.0
 _UT_BH_FOR_SHARDING = applyTDiscountToBH _UT_BH
 _UT_HF = {bh: _UT_BH, bf: _UT_BF}
 
-_UT1PORS_1M_K = 177000.0  -- manual binary search
-_UT1PORTS_1M_K = 131250.0  -- manual binary search
-_UT1HOPORS_1M_K = 160_000.0  -- manual search
-_UT1HOPORTS_1M_K = 113_500.0  -- manual search
-_UT1_1M_K = ut1TpsToK _1M 250.0 _UT_BF _UT_BH
-_UT1T_1M_K = ut1TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING
-_UT1HO_1M_K = ut1TpsToK _1M 250.0 _UT_BF 32.0
-_UT1HOT_1M_K = ut1TpsToK _1M 250.0 _UT_BF 16.0
+-- _UT1PORS_1M_K = 177000.0  -- manual binary search
+_UT1PORS_1M_K = findKFor1MTps (UT (PoRs 1))
+_UT1PORTS_1M_K = findKFor1MTps (UT (PoRTs 1))
+_UT1HOPORS_1M_K = findKFor1MTps (UT (HOPoRs 1))
+_UT1HOPORTS_1M_K = findKFor1MTps (UT (HOPoRTs 1))
+_UT1_1M_K = ut1TpsToK _1M _TX_SIZE _UT_BF _UT_BH
+_UT1T_1M_K = ut1TpsToK _1M _TX_SIZE _UT_BF _UT_BH_FOR_SHARDING
+_UT1HO_1M_K = ut1TpsToK _1M _TX_SIZE _UT_BF 32.0
+_UT1HOT_1M_K = ut1TpsToK _1M _TX_SIZE _UT_BF 16.0
 
-_UT2PORS_1M_K = 4870.0  -- manual binary search
-_UT2PORTS_1M_K = 3790.0  -- manual binary search
-_UT2HOPORS_1M_K = 4400.0  -- manual search
-_UT2HOPORTS_1M_K = 3450.0  -- manual search
-_UT2_1M_K = ut2TpsToK _1M 250.0 _UT_BF _UT_BH _UT_BH
-_UT2T_1M_K = ut2TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING _UT_BH_FOR_SHARDING
-_UT2HO_1M_K = ut2TpsToK _1M 250.0 _UT_BF 32.0 _UT_BH
-_UT2HOT_1M_K = ut2TpsToK _1M 250.0 _UT_BF 16.0 _UT_BH_FOR_SHARDING
+_UT2PORS_1M_K = findKFor1MTps (UT (PoRs 2))
+_UT2PORTS_1M_K = findKFor1MTps (UT (PoRTs 2))
+_UT2HOPORS_1M_K = findKFor1MTps (UT (HOPoRs 2))
+_UT2HOPORTS_1M_K = findKFor1MTps (UT (HOPoRTs 2))
+_UT2_1M_K = ut2TpsToK _1M _TX_SIZE _UT_BF _UT_BH _UT_BH
+_UT2T_1M_K = ut2TpsToK _1M _TX_SIZE _UT_BF _UT_BH_FOR_SHARDING _UT_BH_FOR_SHARDING
+_UT2HO_1M_K = ut2TpsToK _1M _TX_SIZE _UT_BF 32.0 _UT_BH
+_UT2HOT_1M_K = ut2TpsToK _1M _TX_SIZE _UT_BF 16.0 _UT_BH_FOR_SHARDING
 
-_OPT_SHARD_1M_K = oc2TpsToK _1M 250.0 _UT_BF _UT_BH_FOR_SHARDING
+_OPT_SHARD_1M_K = oc2TpsToK _1M _TX_SIZE _UT_BF _UT_BH_FOR_SHARDING
 
 
-_UT_INIT_CONFIG = mkSimplePs 3000.0 _UT_HF 250.0
+_UT_INIT_CONFIG = mkSimplePs 3000.0 _UT_HF _TX_SIZE
 
 _COMPARE_20K = 20_000.0
+_UT_20K_CONFIG = mkSimplePs _COMPARE_20K _UT_HF _TX_SIZE
+
+_COMPARE_100K = 100_000.0
+_UT_100K_CONFIG = mkSimplePs _COMPARE_100K _UT_HF _TX_SIZE
+
+utComparativeComplexityParams :: Array Params
+utComparativeComplexityParams =
+      [ mkSimplePs _POLKADOT_1M_K {bf: btToF 15, bh: 112.0} _TX_SIZE
+      , mkSimplePs _ETH2_1M_K {bf: btToF 15, bh: 112.0} _TX_SIZE ]
 
 utComplexityParams :: Array Params
 utComplexityParams = do
       k <- [3000.0, _COMPARE_20K]
       bf <- [1.0 / 7.5, 1.0 / 15.0, 1.0 / 30.0, 1.0 / 60.0]
       bh <- [112.0, 84.0]
-      txSize <- [250.0]
+      txSize <- [_TX_SIZE]
       pure $ mkSimplePs k {bf, bh} txSize
-    <> [ mkSimplePs _POLKADOT_1M_K {bf: btToF 15, bh: 84.0} 250.0
-       , mkSimplePs _ETH2_1M_K {bf: btToF 15, bh: 84.0} 250.0 ]
+    <> utComparativeComplexityParams
+
+utShortComplexityParams :: Array Params
+utShortComplexityParams = do
+      k <- [3000.0]
+      bf <- [1.0 / 15.0, 1.0 / 30.0, 1.0 / 60.0]
+      bh <- [112.0, 84.0]
+      txSize <- [_TX_SIZE]
+      pure $ mkSimplePs k {bf, bh} txSize
+    -- <> utComparativeComplexityParams
+
 
 utComplexityData = runChainCalcFor <$> utComplexityParams
+utShortComplexityData = runChainCalcFor <$> utShortComplexityParams
 
 btToF :: Int -> Number
 btToF t = 1.0 / (toNumber t)
 
-data Network = Bitcoin | Cardano | Eth2 | Polkadot | OptShard | UT UtName
+data Network = Bitcoin | Cardano | Solana | Eth2 | Polkadot | OptShard | UT UtName
 
 derive instance eqNetwork :: Eq Network
 
 instance showNetwork :: Show Network where
   show Bitcoin = "Bitcoin"
   show Cardano = "Cardano"
+  show Solana = "Solana"
   show Eth2 = "Eth2"
   show Polkadot = "Polkadot"
   show OptShard = "Opt.Shard"
@@ -210,6 +250,7 @@ utVsOther :: Array UtVsOtherDesc
 utVsOther =
     [ {net: Bitcoin, p: \k -> mkSimplePs k {bf: btToF 600, bh: 80.0} tx, oneMTps: Just _BTC_1M_K}
     , {net: Cardano, p: \k -> mkSimplePs k {bf: btToF 20, bh: _CARDANO_BH} tx, oneMTps: Just _CARDANO_1M_K}
+    , {net: Solana, p: \k -> mkSimplePs k {bf: _SOLANA_BF, bh: _SOLANA_BH} tx, oneMTps: Just _SOLANA_1M_K}
     , {net: UT (PoRs 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1PORS_1M_K}
     , {net: UT (PoRTs 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1PORTS_1M_K}
     , {net: UT (HOPoRs 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1HOPORS_1M_K}
@@ -239,17 +280,20 @@ utVsOther =
 filterUtVsOther :: Array Network -> Array UtVsOtherDesc
 filterUtVsOther = filterRecsByNet utVsOther
 
+-- | filter records containing `net` based on whether `net` is a members of the `nets` array
 filterRecsByNet :: forall (r ∷ Row Type) a. Eq a ⇒ Array { net ∷ a | r } → Array a → Array { net ∷ a | r }
 filterRecsByNet recs nets = do
     n <- nets
     A.filter (\{net} -> net == n) recs
 
+-- note: UT (T {1,2}) removed 2022-03-09
 compareNetsFilterList :: Array Network
-compareNetsFilterList = [Bitcoin, Cardano, UT (PoRTs 1), UT (HOPoRTs 1), UT (T 1), UT (HOT 1), Polkadot, Eth2, OptShard, UT (PoRTs 2), UT (HOPoRTs 2), UT (T 2), UT (HOT 2), UT (Aleph (HOT 2))]
+compareNetsFilterList = [Bitcoin, Cardano, Solana, UT (PoRTs 1), UT (HOPoRTs 1), UT (HOT 1), Polkadot, Eth2, OptShard, UT (PoRTs 2), UT (HOPoRTs 2), UT (HOT 2), UT (Aleph (HOT 2))]
 
 filteredUtVsOther :: Array UtVsOtherDesc
 filteredUtVsOther = filterUtVsOther compareNetsFilterList
 
+id ∷ ∀ (a ∷ Type). a → a
 id x = x
 
 utNestingLvl :: UtName -> Int
@@ -292,6 +336,7 @@ netLookupChainStats net _ = unsafeThrowException $ error $ "[netLookupChainStats
 netToScalingFactor :: Network -> _ -> Number
 netToScalingFactor Bitcoin aux = aux.scalingFactors.noNesting
 netToScalingFactor Cardano aux = aux.scalingFactors.noNesting
+netToScalingFactor Solana aux = aux.scalingFactors.noNesting
 netToScalingFactor Eth2 aux = aux.scalingFactors.nesting
 netToScalingFactor Polkadot aux = aux.scalingFactors.nesting
 netToScalingFactor OptShard aux = aux.scalingFactors.nesting
@@ -304,12 +349,14 @@ netToScalingFactor (UT ut) aux = case utNameI ut of
 netToN2 :: Network -> ChainStats -> Number
 netToN2 Bitcoin _ = nan
 netToN2 Cardano _ = nan
+netToN2 Solana _ = nan
 netToN2 (UT ut) cs = if utNestingLvl ut >= 2 then cs.d2.n else nan
 netToN2 _ cs = cs.d2.n
 
 netToTps :: Network -> ChainStats -> Number
 netToTps Bitcoin cd = cd.d1.tps
 netToTps Cardano cd = cd.d1.tps
+netToTps Solana cd = cd.d1.tps
 netToTps Eth2 cd = cd.d2.tps
 netToTps Polkadot cd = cd.d2.tps
 netToTps OptShard cd = cd.d2.tps
@@ -318,6 +365,17 @@ netToTps (UT ut) cd = case utNameI ut of
   2 -> cd.d2.tps
   3 -> cd.d3.tps
   _ -> unsafeThrowException $ error $ "[netToTps] got bad level of nesting in UT network: " <> utName_ ut
+
+netToEffDh :: Network -> ChainStats -> Number
+netToEffDh Bitcoin cd = nan
+netToEffDh Cardano cd = nan
+netToEffDh Solana cd = nan
+netToEffDh Eth2 cd = cd.effDh
+netToEffDh Polkadot cd = cd.effDh
+netToEffDh OptShard cd = cd.effDh
+netToEffDh (UT ut) cd = case utNameI ut of
+  1 -> nan
+  _ -> cd.effDh
 
 notPoRs :: Network -> Boolean
 notPoRs (UT (PoRs _)) = false
@@ -364,17 +422,30 @@ getTps ns = ns.tps
 
 genTpsRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> getTps <$> [cd.trad.d1, cd.trad.d2, (utF cd).d1, (utF cd).d2, (utF cd).d3])
 
+tpsHeaderCommon = ["$k$, $B_f$, $B_h$", "$O(c)$", "Sharded $O(c^2)$"]
+tpsAlignments = {md: mkSpacer <$> [6, 2, 5, 4, 4, 4], texTabular: "lrrrrr"}
+
+utNamesWTPS ns = utNames ns <#> (_ <> " TPS")
+
 tableTps :: Table
 tableTps = Table
-    (["$k$, $B_f$, $B_h$", "$O(c)$", "Sharded $O(c^2)$"] <> utNames [Std 1, Std 2, Std 3])  -- , sigmaTps 1, sigmaTps 2, sigmaTps 3]
-    {md: mkSpacer <$> [6, 2, 5, 4, 4, 4], texTabular: "lrrrrr"}
-    (genTpsRow (\cd -> cd.ut.std) <$> utComplexityData)
+    (tpsHeaderCommon <> utNamesWTPS [Std 1, Std 2, Std 3])  -- , sigmaTps 1, sigmaTps 2, sigmaTps 3]
+    tpsAlignments
+    (genTpsRow (\cd -> cd.ut.std) <$> utShortComplexityData)
 
+-- not in use
 tableTpsHot :: Table
 tableTpsHot = Table
-    (["$k$, $B_f$, $B_h$", "$O(c)$", "Sharded $O(c^2)$"] <> utNames [HOT 1, HOT 2, HOT 3])
-    {md: mkSpacer <$> [6, 2, 5, 4, 4, 4], texTabular: "lrrrrr"}
-    (genTpsRow (\cd -> cd.ut.hot) <$> utComplexityData)
+    (tpsHeaderCommon <> utNames [HOT 1, HOT 2, HOT 3])
+    tpsAlignments
+    (genTpsRow (\cd -> cd.ut.hot) <$> utShortComplexityData)
+
+-- not in use
+tableTpsHOPoRs :: Table
+tableTpsHOPoRs = Table
+    (tpsHeaderCommon <> utNames [HOPoRs 1, HOPoRs 2, HOPoRs 3])
+    tpsAlignments
+    (genTpsRow (\cd -> cd.ut.hopors) <$> utShortComplexityData)
 
 genDappChainsRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> [(utF cd).d1.n, (utF cd).d2.n, (utF cd).d3.n, (utF cd).deltaBigS]) <> [fmtDyn fdStd (utF cd).confRate]
 
@@ -382,13 +453,21 @@ dappChains :: Table
 dappChains = Table
     ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", confRateTh]
     {md: mkSpacer <$> [6, 4, 5, 5, 5, 4], texTabular: "lrrrrr"}
-    (genDappChainsRow (\cd -> cd.ut.std) <$> utComplexityData)
+    (genDappChainsRow (\cd -> cd.ut.std) <$> utShortComplexityData)
 
+-- not in use
 dappChainsHot :: Table
 dappChainsHot = Table
     ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", confRateTh]
     {md: mkSpacer <$> [6, 4, 5, 5, 5, 4], texTabular: "lrrrrr"}
-    (genDappChainsRow (\cd -> cd.ut.hot) <$> utComplexityData)
+    (genDappChainsRow (\cd -> cd.ut.hot) <$> utShortComplexityData)
+
+-- not in use
+dappChainsHOPoRs :: Table
+dappChainsHOPoRs = Table
+    ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", confRateTh]
+    {md: mkSpacer <$> [6, 4, 5, 5, 5, 4], texTabular: "lrrrrr"}
+    (genDappChainsRow (\cd -> cd.ut.hopors) <$> utShortComplexityData)
 
 -- TODO: replace `fmtDyn fdPlain`
 genPoRRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> [ut.d1.n, ut.d1.tps, ut.d2.n, ut.d2.tps, ut.porBytes]) <> [fmtDyn fdStd ut.confRate] -- <> (fmtDyn fdStdTwo <$> [ut.d1.n / ut.d1.p.k])
@@ -399,7 +478,8 @@ porTableSpacer = mkSpacer <$> [6, 2, 5, 4, 5, 3, 3] -- , 4]
 
 porTpsHeader :: (Int -> UtName) -> _ -> Table
 porTpsHeader utv = Table
-    ["$k$, $B_f$, $B_h$", "$N_1$", (utName_ $ utv 1) <> " TPS", "$N_2$", (utName_ $ utv 2) <> " TPS", "PoR (B)", confRateTh] -- , "$\\nicefrac{N_1}{k}$"]
+    -- ["$k$, $B_f$, $B_h$", "$N_1$", (utName_ $ utv 1) <> " TPS", "$N_2$", (utName_ $ utv 2) <> " TPS", "PoR (B)", confRateTh] -- , "$\\nicefrac{N_1}{k}$"]
+    ["$k$, $B_f$, $B_h$", "$N_1$", sigmaTps1, "$N_2$", sigmaTps2, "PoR (B)", confRateTh] -- , "$\\nicefrac{N_1}{k}$"]
     {md: porTableSpacer, texTabular: "lrrrrrr"}
 
 tpsPor :: Table
@@ -408,15 +488,34 @@ tpsPor = porTpsHeader PoRs (genPoRRow (\cd -> cd.ut.pors) <$> utComplexityData)
 tpsPort :: Table
 tpsPort = porTpsHeader PoRTs (genPoRRow (\cd -> cd.ut.ports) <$> utComplexityData)
 
+tpsHOPoRs :: Table
+tpsHOPoRs = porTpsHeader HOPoRs (genPoRRow (\cd -> cd.ut.hopors) <$> utComplexityData)
+
+tpsHOPoRTs :: Table
+tpsHOPoRTs = porTpsHeader HOPoRTs (genPoRRow (\cd -> cd.ut.hoports) <$> utComplexityData)
+
+tpsHO :: Table
+tpsHO = porTpsHeader HO (genPoRRow (\cd -> cd.ut.ho) <$> utComplexityData)
+
+tpsHOT :: Table
+tpsHOT = porTpsHeader HOT (genPoRRow (\cd -> cd.ut.hot) <$> utComplexityData)
+
+tpsOP :: Table
+tpsOP = porTpsHeader Std (genPoRRow (\cd -> cd.ut.std) <$> utComplexityData)
+
+tpsOPT :: Table
+tpsOPT = porTpsHeader T (genPoRRow (\cd -> cd.ut.t) <$> utComplexityData)
+
 -- todo: fix fmtDyn fdPlain
-genCompareRow k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdPlainMixed <$> [cs.effBh, cs.effDh]) <> ([fmtDyn fdStdZero scalingFactor, fmtDyn fdStdMixed n2]) <> (fmtDyn fdStdMixed <$> [tps])
+genCompareRow k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdPlainMixed <$> [cs.effBh, effDh]) <> ([fmtDyn fdStdZero scalingFactor, fmtDyn fdStdMixed n2]) <> (fmtDyn fdStdMixed <$> [tps])
   where
     p = o.p k
     cs = netToChainStats net p
     aux = auxStats cs
     -- n1 = if isAleph net then infinity else cs.d1.n
     tps = if isAleph net then infinity else netToTps net cs
-    tpsPerBaseChain = netToTps net cs / cs.d1.n
+    effDh = netToEffDh net cs
+    _tpsPerBaseChain = netToTps net cs / cs.d1.n
     scalingFactor = netToScalingFactor net aux
     n2 = if isAleph net then infinity else netToN2 net cs
 
@@ -441,6 +540,10 @@ compareNets3k =
 compareNets20k :: Table
 compareNets20k =
     compareNetsTH (genCompareRow _COMPARE_20K <$> filteredUtVsOther)
+
+compareNets100k :: Table
+compareNets100k =
+    compareNetsTH (genCompareRow _COMPARE_100K <$> filteredUtVsOther)
 
 makeCompareRowConcise [ps, net, _, _, scale, n2, tps] = [ps, net, scale, n2, tps]
 makeCompareRowConcise _ = unsafeThrowException $ error "makeCompareRowConcise got wrong number of cols"
@@ -497,7 +600,7 @@ compareNets1mTpsAll = Table
 
 genCompare1GbpsRow {net, p} = [fmt1GbpsPs cs p, show net] <> (fmtDyn fdPlain <$> [netToTps net cs, k, mbChainDay])
   where
-    mbChainDay = k * 86400.0 / 1024.0 / 1024.0
+    mbChainDay = k * 86400.0 / 1000.0 / 1000.0
     k = (pToPF p).k
     cs = netToChainStats net p
 
@@ -523,13 +626,17 @@ genCompareUtRow uts props v = [utName_ v] <> (propGens <@> (getCS v))
 
 type OProps = {s :: String, f :: (ChainStats -> String)}
 
+sigmaTps1 = "$\\Sigma\\;\\text{TPS}_{1}$"
+sigmaTps2 = "$\\Sigma\\;\\text{TPS}_{2}$"
+sigmaTps3 = "$\\Sigma\\;\\text{TPS}_{3}$"
+
 optimizationProps1 :: Array OProps
 optimizationProps1 =
   [ {s: "$N_1$", f: \cs -> fmtDyn fdStdMixed cs.d1.n}
   -- , {s: "$T_1$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.d1.t}
-  , {s: "$\\Sigma\\;\\text{TPS}_{1}$", f: \cs -> fmtDyn fdStdMixed cs.d1.tps}
+  , {s: sigmaTps1, f: \cs -> fmtDyn fdStdMixed cs.d1.tps}
   , {s: "$N_2$", f: \cs -> fmtDyn fdStdMixed cs.d2.n}
-  , {s: "$\\Sigma\\;\\text{TPS}_{2}$", f: \cs -> fmtDyn fdStdMixed cs.d2.tps}
+  , {s: sigmaTps2, f: \cs -> fmtDyn fdStdMixed cs.d2.tps}
   -- , {s: "$T_2$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.d2.t}
   -- , {s: "$T_3$ (B/s)", f: \cs -> fmtDyn fdPlainZero cs.d3.t}
   -- , {s: "$N_3$", f: \cs -> fmtDyn fdPlainZero cs.d3.n}
@@ -539,13 +646,27 @@ optimizationProps1 =
   , {s: "PoR (B)", f: \cs -> fmtDyn fdPlainZero cs.porBytes}
   ]
 
+optimizationProps1WithLvl3 :: Array OProps
+optimizationProps1WithLvl3 =
+  [ {s: "$N_1$", f: \cs -> fmtDyn fdStdMixed cs.d1.n}
+  -- , {s: "$T_1$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.d1.t}
+  , {s: sigmaTps1, f: \cs -> fmtDyn fdStdMixed cs.d1.tps}
+  , {s: "$N_2$", f: \cs -> fmtDyn fdStdMixed cs.d2.n}
+  , {s: sigmaTps2, f: \cs -> fmtDyn fdStdMixed cs.d2.tps}
+  -- , {s: "$T_2$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.d2.t}
+  -- , {s: "$T_3$ (B/s)", f: \cs -> fmtDyn fdPlainZero cs.d3.t}
+  , {s: "$N_3$", f: \cs -> fmtDyn fdStdMixed cs.d3.n}
+  , {s: sigmaTps3, f: \cs -> fmtDyn fdStdMixed cs.d3.tps}
+  ]
+
 optimizationProps2 :: Array OProps
 optimizationProps2 =
   [ {s: "$\\Delta s$ (B/s)", f: \cs -> fmtDyn fdStdZero cs.deltaSmallS}
   , {s: "$\\text{TTS}_{5yrs}$ (days)", f: \cs -> fmtDyn fdStdTwo cs.tts}
-  , {s: "Chain-GB/yr", f: \cs -> fmtDyn fdStdTwo (cs.deltaSmallS * 86400.0 * 365.25 / 1024.0 / 1024.0 / 1024.0)}
+  -- , {s: "Chain-GB/yr", f: \cs -> intercalate " +" $ (fmtDyn fdStd <<< (_ * _B_PER_S_TO_GB_PER_YR)) <$> [cs.k1, cs.deltaSmallS - cs.k1]}
+  , {s: "Chain-GB/yr", f: \cs -> fmtDyn fdStd <<< (_ * _B_PER_S_TO_GB_PER_YR) $ cs.deltaSmallS}
   , {s: "$\\Delta S$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.deltaBigS}
-  , {s: "$\\Sigma$ $\\text{TTS}_{5yrs}$ (days)", f: \cs -> fmtDyn fdStdTwo cs.sigmaTts}
+  , {s: "$\\Sigma$ $\\text{TTS}_{5yrs}$ (days)", f: \cs -> fmtDyn fdStdMixed cs.sigmaTts}
   -- , {s: "$\\nicefrac{\\Sigma\\;\\text{TPS}}{\\Delta s}$ (Tx/B)", f: \cs -> fmtDyn fdStdTwo (cs.d1.tps / cs.deltaSmallS)}
   -- , {s: "Scale $\\times$", f: \cs -> fmtDyn fdStd (auxStats cs).scalingFactors.nesting}
   ]
@@ -561,63 +682,107 @@ compareUtOptimizationsFlipped = Table
     ut = allUtChainCalcs _UT_INIT_CONFIG
     variants = [PoRs 1, PoRTs 1, HOPoRs 1, HOPoRTs 1, Std 1, T 1, HO 1, HOT 1]
 
-compareUtOptimizations :: Table
-compareUtOptimizations = Table
+
+compareUtOptimizations_ :: Params -> Array OProps -> Table
+compareUtOptimizations_ ps oProps = Table
     ([""] <> (oProps <#> (\{s} -> s)))
     {md: mkSpacer <$> A.replicate (l+1) 3, texTabular: "l" <> repeatSafe l "r"}
     (genCompareUtRow ut oProps <$> variants)
   where
-    ut = allUtChainCalcs _UT_INIT_CONFIG
+    ut = allUtChainCalcs ps
     variants = [PoRs 0, PoRTs 0, HOPoRs 0, HOPoRTs 0, Std 0, T 0, HO 0, HOT 0]
-    oProps = optimizationProps1
     l = A.length oProps
 
-compareUtOptimizations2 :: Table
-compareUtOptimizations2 = Table
+
+compareUtOptimizationsA :: Table
+compareUtOptimizationsA = compareUtOptimizations_ _UT_INIT_CONFIG optimizationProps1
+
+compareUtOptimizationsAWithLvl3 :: Table
+compareUtOptimizationsAWithLvl3 = compareUtOptimizations_ _UT_INIT_CONFIG optimizationProps1WithLvl3
+
+compareUtOptimizationsA20k :: Table
+compareUtOptimizationsA20k = compareUtOptimizations_ _UT_20K_CONFIG optimizationProps1
+
+compareUtOptimizationsA20kWithLvl3 :: Table
+compareUtOptimizationsA20kWithLvl3 = compareUtOptimizations_ _UT_20K_CONFIG optimizationProps1WithLvl3
+
+compareUtLimOptimizationsA :: Table
+compareUtLimOptimizationsA = compareUtOptimizations_ (_UT_INIT_CONFIG {limitN1Ratio = Just 0.667}) optimizationProps1
+
+-- compareUtOptimizations = Table
+--     ([""] <> (oProps <#> (\{s} -> s)))
+--     {md: mkSpacer <$> A.replicate (l+1) 3, texTabular: "l" <> repeatSafe l "r"}
+--     (genCompareUtRow ut oProps <$> variants)
+--   where
+--     ut = allUtChainCalcs _UT_INIT_CONFIG
+--     variants = [PoRs 0, PoRTs 0, HOPoRs 0, HOPoRTs 0, Std 0, T 0, HO 0, HOT 0]
+--     oProps = optimizationProps1
+--     l = A.length oProps
+
+compareUtOptimizationsB :: Table
+compareUtOptimizationsB = compareUtOptimizations_ _UT_INIT_CONFIG optimizationProps2
+
+compareUtOptimizationsB20k :: Table
+compareUtOptimizationsB20k = compareUtOptimizations_ _UT_20K_CONFIG optimizationProps2
+
+-- compareUtOptimizations2 = Table
+--     ([""] <> (oProps <#> (\{s} -> s)))
+--     {md: mkSpacer <$> A.replicate (l+1) 3, texTabular: "l" <> repeatSafe l "r"}
+--     (genCompareUtRow ut oProps <$> variants)
+--   where
+--     ut = allUtChainCalcs _UT_INIT_CONFIG
+--     variants = [PoRs 0, PoRTs 0, HOPoRs 0, HOPoRTs 0, Std 0, T 0, HO 0, HOT 0]
+--     oProps = optimizationProps2
+--     l = A.length oProps
+
+
+defaultUtVariants ∷ Array UtName
+defaultUtVariants = [PoRs 0, PoRTs 0, Std 0, T 0, HOPoRs 0, HOPoRTs 0, HO 0, HOT 0]
+minimalUtVariants ∷ Array UtName
+minimalUtVariants = [PoRs 0, PoRTs 0, T 0, HOPoRTs 0, HOT 0]
+
+
+mkCompareUtOptimizations :: Array UtName -> Array OProps -> Table
+mkCompareUtOptimizations variants oProps = Table
     ([""] <> (oProps <#> (\{s} -> s)))
     {md: mkSpacer <$> A.replicate 6 3, texTabular: "l" <> repeatSafe 5 "r"}
     (genCompareUtRow ut oProps <$> variants)
   where
     ut = allUtChainCalcs _UT_INIT_CONFIG
-    variants = [PoRs 0, PoRTs 0, HOPoRs 0, HOPoRTs 0, Std 0, T 0, HO 0, HOT 0]
-    oProps = optimizationProps2
 
-
-mkCompareUtOptimizations :: Array OProps -> Table
-mkCompareUtOptimizations oProps = Table
-    ([""] <> (oProps <#> (\{s} -> s)))
-    {md: mkSpacer <$> A.replicate 6 3, texTabular: "l" <> repeatSafe 5 "r"}
-    (genCompareUtRow ut oProps <$> variants)
-  where
-    ut = allUtChainCalcs _UT_INIT_CONFIG
-    variants = [PoRs 0, PoRTs 0, HOPoRs 0, HOPoRTs 0, Std 0, T 0, HO 0, HOT 0]
-
+_fmtStd ∷ Number → String
 _fmtStd = fmtDyn fdStdMixed
 
 lpCompareUtOptimizations1 :: Table
-lpCompareUtOptimizations1 = mkCompareUtOptimizations
-    [ {s: "$\\Sigma\\;\\text{TPS}_{1}$ (tx/s)", f: \cs -> _fmtStd cs.d1.tps}
+lpCompareUtOptimizations1 = mkCompareUtOptimizations minimalUtVariants
+    [ {s: sigmaTps1 <> " (tx/s)", f: \cs -> _fmtStd cs.d1.tps}
     , {s: "$N_1$ (chains)", f: \cs -> _fmtStd cs.d1.n}
     , {s: confRateTh, f: \cs -> fmtDyn fdStd cs.confRate}
-    , {s: "$\\Sigma\\;\\text{TPS}_{2}$ (tx/s)", f: \cs -> _fmtStd cs.d2.tps}
+    , {s: sigmaTps2 <> " (tx/s)", f: \cs -> _fmtStd cs.d2.tps}
     , {s: "$N_2$ (chains)", f: \cs -> _fmtStd cs.d2.n}
     ]
 
-genLpCompareRow k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdStdMixed <$> [effBh, tps])
+genLpCompareRow' lim k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdStdMixed <$> [effBh, tps])
   where
-    p = o.p k
+    p = (o.p k) {limitN1Ratio = lim}
     cs = netToChainStats net p
+    -- not ideal to mix these two, but makes ut1-vs-eth2 table cleaner
     effBh = case net of
       Eth2 -> cs.effDh
       OptShard -> cs.effDh
       _ -> cs.effBh
     tps = if isAleph net then infinity else netToTps net cs
 
-genLpCompare2Row k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdStdNoSiMixed <$> [cs.effBh, cs.effDh, tps])
+genLpCompareRow = genLpCompareRow' Nothing
+genLpCompareLimitedRow = genLpCompareRow'
+
+genLpCompare2Row k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (_fmt <$> [cs.effBh, effDh, tps])
   where
     p = o.p k
     cs = netToChainStats net p
     tps = if isAleph net then infinity else netToTps net cs
+    effDh = netToEffDh net cs
+    _fmt = fmtDyn fdStdNoSiMixed
 
 lpCompareTH = Table
     ["$k$, $B_f$, $B_h$", "Network", "E. $B_h$ (B)", "$\\Sigma$ TPS (tx/s)"]
@@ -628,16 +793,19 @@ lpCompare2TH = Table
     {md: mkSpacer <$> [5, 6, 3, 3, 3], texTabular: "llrrr"}
 
 lpCompareUt1Eth2 :: Table
-lpCompareUt1Eth2 = lpCompareTH $ (genLpCompareRow 3000.0) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), Eth2, UT (T 1)])
+lpCompareUt1Eth2 = lpCompareTH $ (genLpCompareRow 3000.0) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), Eth2, UT (HOPoRTs 1)])
 
 lpCompareUt1OptShard :: Table
-lpCompareUt1OptShard = lpCompareTH $ (genLpCompareRow 3000.0) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), Eth2, UT (T 1), UT (HOT 1), OptShard])
+lpCompareUt1OptShard = lpCompareTH $ (genLpCompareRow 3000.0) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), Eth2, UT (HOPoRTs 1), UT (HOT 1), OptShard])
 
 lpCompareUt2OptShard :: Table
-lpCompareUt2OptShard = lpCompare2TH $ (genLpCompare2Row 3000.0) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), Eth2, UT (T 1), UT (HOT 1), OptShard, UT (PoRTs 2), UT(T 2), UT (HOT 2)])
+lpCompareUt2OptShard = lpCompare2TH $ (genLpCompare2Row 3000.0) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), Eth2, UT (HOPoRTs 1), UT (HOT 1), OptShard, UT (PoRTs 2), UT(HOPoRTs 2), UT (HOT 2)])
 
 lpCompareUt2OptShard20k :: Table
-lpCompareUt2OptShard20k = lpCompare2TH $ (genLpCompare2Row _COMPARE_20K) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), Eth2, UT (T 1), UT (HOT 1), OptShard, UT (PoRTs 2), UT(T 2), UT (HOT 2)])
+lpCompareUt2OptShard20k = lpCompare2TH $ (genLpCompare2Row _COMPARE_20K) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), Eth2, UT (HOPoRTs 1), UT (HOT 1), OptShard, UT (PoRTs 2), UT(HOPoRTs 2), UT (HOT 2)])
+
+lpCompareUt1LimitedOptShard :: Table
+lpCompareUt1LimitedOptShard = lpCompareTH $ (genLpCompareLimitedRow (Just 0.667) 3000.0) <$> (filterUtVsOther [Bitcoin, UT (PoRTs 1), Eth2, UT (HOPoRTs 1), UT (HOT 1), OptShard])
 
 
 fixRow2 :: Array String -> Array String

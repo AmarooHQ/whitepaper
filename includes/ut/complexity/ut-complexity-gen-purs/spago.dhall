@@ -16,6 +16,8 @@ to generate this file without the comments in this block.
   , "arrays"
   , "console"
   , "control"
+  , "crypto"
+  , "debug"
   , "effect"
   , "either"
   , "exceptions"
@@ -31,13 +33,13 @@ to generate this file without the comments in this block.
   , "prelude"
   , "psci-support"
   , "quickcheck"
+  , "random"
   , "spec"
   , "spec-quickcheck"
   , "strings"
   , "stringutils"
   , "transformers"
   , "tuples"
-  , "undefined"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]

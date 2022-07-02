@@ -141,6 +141,12 @@ def replace_prepared_for(contents: str, prepared_for: Optional[str]) -> str:
     return contents.replace(to_replace, replace_with)
 
 
+def replace_dark_mode(contents: str, dark_mode: bool) -> str:
+    if not dark_mode:
+        return contents
+    return contents.replace('\\newcommand\\darkMode{false}', '\\newcommand\\darkMode{true}')
+
+
 def read_file(file_path):
     with open(file_path, 'r') as f:
         return f.read()
@@ -159,8 +165,9 @@ def write_entire_file(file_path, contents):
 @click.option('--allow-in-place/--no-allow-in-place', default=False)
 @click.option('--print-output/--no-print-output', default=False)
 @click.option('--lint-check/--no-lint-check', default=True)
-@click.option('--prepare-for')
-def process_tex(input_file_path: str, mode: str, output_dir: Optional[str], md_check: bool, allow_in_place: bool, print_output: bool, lint_check: bool, prepare_for: str):
+@click.option('--prepare-for', help='Provide a name to *prepared for _* footer')
+@click.option('--dark-mode', is_flag=True, default=False, help='Change background and text colors.')
+def process_tex(input_file_path: str, mode: str, output_dir: Optional[str], md_check: bool, allow_in_place: bool, print_output: bool, lint_check: bool, prepare_for: str, dark_mode: bool):
     input_file = Path(input_file_path)
     file_ext = input_file.suffix
     file_name_w_ext = input_file.name
@@ -194,7 +201,11 @@ def process_tex(input_file_path: str, mode: str, output_dir: Optional[str], md_c
         # continue if this succeeds
         do_lint_check(process_file_contents_mode("lint", file_contents))
 
-    processed_file_start2 = replace_prepared_for(processed_file_start, prepare_for)
+    processed_file_start2 = replace_dark_mode(
+        replace_prepared_for(processed_file_start, prepare_for),
+        dark_mode
+    )
+
     final_output = '\n'.join([processed_file_start2, output_contents])
 
     if print_output:
@@ -210,7 +221,7 @@ def process_tex(input_file_path: str, mode: str, output_dir: Optional[str], md_c
 @click.option('--prepare-for')
 def copy_prepared_for(pdf_path, git: str, prepare_for: Optional[str]):
     if prepare_for:
-        for_name = prepare_for.lower().strip().replace(' ', '-')
+        for_name = prepare_for.lower().strip().replace(' ', '-').replace('(', '').replace(')', '')
         if not for_name.replace('-', '').isalpha():
             print(t.bold_red(f"Tried to turn `{prepare_for}` in to a filename compatible string (`{for_name}`) but it seems to have other characters in it (not just alpha + dash). Erroring out."))
             sys.exit(71)

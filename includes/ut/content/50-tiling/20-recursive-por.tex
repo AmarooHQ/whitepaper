@@ -1,0 +1,369 @@
+
+\subsubsection{Recursive \emph{Proof of Reflection}}
+
+\label{sec:recursive-por}
+
+\mk{Maybe recursive PoR stuff should be moved to the PoR section, but that doesn't feel right b/c we don't use it before now (besides dapp-chains but that's trivial).}
+
+%Part of our security architecture will be the idea of \emph{recursive PoR}.
+
+So far, we've defined the `shape' of our tiling, but we don't know much about whether it is (or even can be) secure.
+Before we cover that in \autoref{sec:tree-tiling-security-architecture}, we need to cover a new idea that we are currently missing: \emph{recursive Proofs of Reflection}.
+The reason for covering recursive PoR first will become obvious, but for now, notice that the leaf tiles in \autoref{fig:binary-tree-tiling-d3} are 3 reflections away from the root tile.
+Eventually, we will need to answer at least these two questions: \emph{Can the chains in those leaf tiles be secured by the root tile?} and \emph{How do we do this?}
+Recursive PoR provides the foundation that we need to answer those questions and analyze the security of our constructed tiling.
+
+Let us begin with the simplest case of recursive PoR: 3 chains that do not form a simplex.
+
+\subsubsubsection{Simple Recursive PoR: $\cL \lrar \cM \lrar \cR$}
+
+Say we have three chains: \cL, \cM, and \cR.
+They are doing mutual reflection like this: $\xymatrix@C=.85em@M=0em{{\cL} \; \ar@{<->}[r] & \; {\cM} \; \ar@{<->}[r] & \;{\cR}}$.
+That is: \cL reflects \cM but not \cR; \cM reflects both \cL and \cR; and \cR reflects \cM but not \cL.
+
+With what we already know, it's clear that \cM is as secure as all three combined.
+However, that isn't the case for \cL and \cR.
+How can we make \cL and \cR as secure as \cM \emph{without} having them mutually reflect one another?
+Is this even reasonable?
+
+Let's consider chain {\cL} -- what happens if \cL's local chain-work is, say, $3\times$ that of chain \cM?
+The total chain-work that \cL takes into account is $\nicefrac43$ of its local chain-work, so an attacker would need $\nicefrac23$ worth of \cL's local chain-work to control \cL's history.
+This is more than 50\% of \cL's local chain-work, but, depending on \cR, it's within reason that an attacker might achieve the required hash-rate.
+
+Case 1: If \cR's local chain-work is large (say, $3\times$ that of \cM), then \cM is almost twice as hard to attack as \cL.\footnote{
+    \cM is $\nicefrac74\times$ harder to attack than \cL.
+}
+This is a problematic situation: it means that an attacker might be able to perform a doublespend against \cL even though they could not perform one against \cM.
+Therefore, this case would not be $O(n)$ secure.\footnote{
+    If something is ``$O(n)$ secure'', that means that it is \emph{as difficult to attack as attacking the entire network}.
+    For a particular case to be $O(n)$ secure, each chain in that case must be $O(n)$ secure.
+}
+
+Case 2: However, if \cR's local chain-work is small (say, $\nicefrac13$ that of \cM), then \cR is not particularly significant.
+Thus, \cM is not substantially harder to attack than \cL, and an attacker could attack both \cL and \cM simultaneously (optionally, \cR too).
+But, \cR \emph{is} substantially easier to attack than either \cM or \cL.
+The total chain-work that \cR takes into account is only $\nicefrac4{13}$ that of the whole network.
+So, this case is \emph{also} not $O(n)$ secure, even though \cL \emph{is} $O(n)$ secure.
+
+These two problem cases are what recursive PoR solves.
+
+Notice that in both cases, \cM is $O(n)$ secure.
+Given this, chains \cL and \cR should be able to use the same work that chain \cM does to reach the same level of security.
+
+The first problem is that \cL and \cR cannot use the same \textsc{WeightOf} algorithm as before (although, \cM can).
+Particularly, \cL and \cR's \textsc{WeightOf} must count: not only their local chain-work and that contributed reflected \cM blocks, but also some additional weight based on reflections from \emph{other} chains.
+Each \cM block might record the total chain-work that it adds to \cM (including PoRs), but \cL and \cR's new \textsc{WeightOf} can't use this value directly.
+Firstly, that value includes past local chain-work that reflected \cM (which includes both \cL and \cR blocks).
+But more importantly, we don't want to force \cL and \cR to verify \emph{every} PoR that contributes to \cM, just the ones that matter.
+So how can \cL and \cR nodes know which work to count?
+
+There is a trivial solution to this problem: require \cL and \cR nodes to download the headers of \emph{all} relevant chains, verify relevant PoRs, and track the origin of those PoRs.
+Nodes must track the origin of work contributed via PoR to avoid double-counting work.
+An easy example of this is: \cL nodes should not count \cM's PoRs where an \cL block is the reflecting block; that work is already directly included in \cL's local chain-work.
+
+% commands used in the following xy chains diag
+
+\providecommand\BL{}
+\renewcommand\BL[1]{\BCI{\cL}{i}{#1}}
+\providecommand\xBL[1]{\xyB{\BL{#1}}}
+
+\providecommand\BR{}
+\renewcommand\BR[1]{\BCI{\cR}{k}{#1}}
+\providecommand\xBR[1]{\xyB{\BR{#1}}}
+
+\providecommand\BM{}
+\renewcommand\BM[1]{\BCI{\cM}{j}{#1}}
+\providecommand\xBM[1]{\xyB{\BM{#1}}}
+
+Chain \cL can only count work contributed by \cR \emph{after} a multi-stage PoR can be constructed.
+For example, let's consider the (rather orderly) chain-segments in \autoref{fig:simple-recursive-por-chain-diag}.
+
+\begin{figure}
+\begin{equation*}
+    \xyMChains{
+        \xyL{\text{Chain \cL}} & \cdots & \xBL1 \ar[l] & & \xBL2 \ar[ll] \arf[ld] & & \xBL3 \ar[ll] \arf[ld] \\
+        \xyL{\text{Chain \cM}} & \cdots & & \xBM1 \ar[ll] \arf[ld] \arf[lu] & & \xBM2 \ar[ll] \arf[lu] \arf[ld] & \\
+        \xyL{\text{Chain \cR}} & \cdots & \xBR1 \ar[l] & & \xBR2 \ar[ll] \arf[lu] & & \xBR3 \ar[ll] \arf[lu] \\
+        \xyTimeHoriz{rrrrrr} &&&&&&
+    }
+\end{equation*}
+\caption[
+    A diagram of chain-segments demonstrating the simplest case of recursive PoR.
+]{
+    A diagram of chain-segments demonstrating the simplest case of recursive PoR.
+    Solid arrows indicate the usual child-parent relationship, and dotted arrows ($\xyInlineRefl{& \arf[l]}$) indicate reflection.
+}
+\label{fig:simple-recursive-por-chain-diag}
+\end{figure}
+
+We can see that \BR{2} \ul{\emph{implicitly}} reflects \BL{1} via \BR{2}'s \ul{\emph{explicit}} reflection of \BM{1}.
+We can use this implicit reflection because the network already depends on all the PoRs that are sufficient to prove it.
+\BL{2}'s PoR for \BL{1} will prove $\xyInlineRefl{\BL{1}\;&\;\BM{1}\arf[l]}$ (i.e., that \BL{1} was reflected by \BM{1}).
+\BM{2}'s PoR (via \cR) for \BM{1} will prove $\xyInlineRefl{\BM{1}\;&\;\BR{2}\arf[l]}$.
+We combine these two for the full path by which \BR2 implicitly reflects \BL1:
+$\xyInlineRefl{\BL1 \;&\; \BM{1}\arf[l] \;&\; \BR{2}\arf[l]}$.
+
+Similarly, we know that \BL{3} implicitly reflects \BR{2}: $\xyInlineRefl{\BR2\;&\;\BM2\arf[l]\;&\;\BL3\arf[l]}$.
+
+Thus, for \BL3, we can construct a full recursive PoR of \BL1 via \BR2 using the proofs for each link between them:
+$\xyInlineRefl{\BL1 \;&\; \BM{1}\arf[l] \;&\; \BR2\arf[l] \;&\; \BM2\arf[l] \;&\; \BL3\arf[l]}$.
+
+Since \cL nodes already know about all the \cM and \cR blocks (and the relevant PoRs), the full recursive PoR \emph{does not need to be explicitly recorded}.
+It is already known to all \cL nodes, since each part of the recursive PoR is available in one of the \cL, \cM, or \cR chains (it is explicitly recorded if a +PoRs UT variant is used, and recalculated by the node otherwise).
+
+In \autoref{sec:counting-work} we discussed the idea that a PoR can only contribute to local blocks that are in the reflecting block's past.
+By inspection, we can see that the most recent \cR block (the reflecting block) in \BL{3}'s past is \BR{2}, and the most recent \cL block (the local block) in \BR2's past is \BL1.
+Thus, we can see that our method for attributing reflected work -- following the arrows -- works for recursive PoR, too.
+
+There is something important to point out here: \emph{latency}.
+Notice that these 3 blocks (in chronological order) are required for this recursive PoR to exist: \BM1, \BR2, and \BM2.
+A non-recursive PoR only needs to wait for 1 reflecting block to be produced (after which the PoR counts as \emph{draft reflected work}).
+So, in this case, the expected delay will be $3\times$ normal (assuming all chains have the same block periods).
+In general (if only one PoR path between two given blocks will exist) this delay, measured in block periods, is equal to the length of the full PoR (excluding \cL blocks), which equals $2x-1$ the depth of recursion ($x$).
+
+Recapping the first problem: \cL and \cR nodes need an expanded \textsc{WeightOf} function with access to \emph{the origin} of implicitly reflected work, and knowledge of \emph{where} that work has already been counted.
+Nodes can do this relatively efficiently, for all relevant chains, by downloading the headers and verifying the PoRs.
+This method does not require recursive PoRs to be explicitly recorded in full since the components of these PoRs are already available and have already been individually verified.
+Our existing rules about how to attribute the weight of PoRs (follow the arrows) still works.
+
+Our solution to the first problem is promising, but we have used an implicit assumption: there is only one viable path for PoRs between \cL and \cR.
+What if there are \emph{multiple paths} between \cL and \cR?
+This is the second problem.
+
+\subsubsubsection{Recursive PoR with Multiple Paths}
+
+\providecommand\BMone{}
+\renewcommand\BMone[1]{\BCI{\cMone}{g}{#1}}
+\newcommand\xBMone[1]{\xyB{\BMone{#1}}}
+
+\providecommand\BMtwo{}
+\renewcommand\BMtwo[1]{\BCI{\cMtwo}{h}{#1}}
+\newcommand\xBMtwo[1]{\xyB{\BMtwo{#1}}}
+
+% ARrow reFlection Bent Down
+\newcommand\arfbd[1][]{\ar@{.>}@/_9pt/[#1]}
+\newcommand\arfbu[1][]{\ar@{.>}@/^9pt/[#1]}
+
+Say that we now have four chains: \cL, \cMone, \cMtwo, and \cR doing mutual PoR like so:
+\begin{equation*}
+    \xymatrix@C=2em@R=-.15em{
+        & {\cMone}
+        \ar@{<->}[dd]
+        & \\
+        {\cL} \ar@{<->}[ur] & & {\cR} \ar@{<->}[ul] \\
+        & {\cMtwo} \ar@{<->}[ul] \ar@{<->}[ur] &
+    }
+\end{equation*}
+Both \cMone and \cMtwo are already $O(n)$ secure.
+Assuming that \cL and \cR nodes download and verify all PoRs, how can \cL and \cR count each other's work?
+
+First, let's consider when \cL can \emph{definitely} count \emph{all} the work contributed by a \cR block.
+
+\begin{figure}
+    \begin{equation*}
+        \xyMChains{
+            \xyL{\text{Chain \cL}} & \cdots & \xBL1 \ar[l] & & \xBL2 \ar[ll] \arf[ld] \arfbu[ldd] & & \xBL3 \ar[ll] \arf[ld] \arfbu[ldd] \\
+            \xyL{\text{Chain \cMone}} & \cdots & & \xBMone1 \ar[ll] \arfbd[ldd] \arf[lu] & & \xBMone2 \ar[ll] \arf[lu] \arfbd[ldd] & \\
+            \xyL{\text{Chain \cMtwo}} & \cdots & & \xBMtwo1 \ar[ll] \arf[ld] \arfbu[luu] & & \xBMtwo2 \ar[ll] \arfbu[luu] \arf[ld] & \\
+            \xyL{\text{Chain \cR}} & \cdots & \xBR1 \ar[l] & & \xBR2 \ar[ll] \arf[lu] \arfbd[luu] & & \xBR3 \ar[ll] \arf[lu] \arfbd[luu] \\
+            \xyTimeHoriz{rrrrrr} &&&&&&
+        }
+    \end{equation*}
+    \caption[
+        asdf.
+    ]{
+        asdf.
+        Note that reflections between \cMone and \cMtwo are not shown.
+    }
+    \label{fig:multi-path-recursive-por-chain-diag}
+\end{figure}
+
+As before, we'll look at valid PoRs for \BL3 that prove \BL1 was reflected in \BR2.
+The exact reflections that exist will be analogous to our prior example, too.
+See \autoref{fig:multi-path-recursive-por-chain-diag} for the chain-diagram.
+% For each $x$ in $\{1,2,3\}$, we'll assume that \BL{x} and \BR{x} occur simultaneously, and both reflect \BMone{x-1} and \BMtwo{x-1}.
+% After \BL{x}, but before \BL{x+1}, we'll assume that \BMone{x} and \BMtwo{x} are mined simultaneously and both blocks reflect \BL{x} and \BR{x}.
+Notice that there are 4 possible paths from \BL{3} to \BL1:
+% \\[-.66em]
+\begin{equation*}
+    \xymatrix@C=1em@R=-.5em{
+        & & \BMone1 \arf[ld] & & \BMone2 \arf[ld] & \\
+        \BL0 & \BL1 & & \BR2 \arf[lu] \arf[ld] & & \BL3 \arf[lu] \arf[ld] & \BL4 \\
+        & & \BMtwo1 \arf[lu] & & \BMtwo2 \arf[lu] & \\
+    }
+\end{equation*}
+% \\[-.66em]
+Here is what we can say about this case: if all 4 of these PoR paths exist, then \BR2 \emph{definitely} reflects \BL1, and its weight can be included in \BL3's total chain-weight.
+
+But, what if only some of those paths are available?
+Consider this alternative case:
+% hmm, unsure about the colors / focused arrows
+\begin{equation*}
+    \xymatrix@C=1em@R=-.15em{
+        % & \BMone1 \arff[ld] & & & \BMone2 \arf[llld] \arff[ld] & \\
+        & \BMone1 \arff[ld] & & & \BMone2 \arff[ld] & \\
+        % \BL0 & \BL1 & & \BR2 \arff[llu] \arff[ld] & & \BL3 \arff[lu] \arf[llld] & \BL4 \arf[ld] \\
+        \BL0 & \BL1 & & \BR2 \arff[llu] \arff[ld] & & \BL3 \arff[lu] & \BL4 \arf[ld] \\
+        & & \BMtwo1 \arff[lu] & & & \BMtwo2 \arf[llu] \\
+    }
+\end{equation*}
+In this case, \cL is implicitly reflected in \BR2, and \BL3 has two possible recursive PoRs of this: \BL{1} via \BMtwo1; and \BL{0} via \BMone1.
+Are both valid?
+Is either preferable?
+If \BL3 includes the full weight of \BR2 in its chain-weight, then what happens when \BL4 is mined and the other two PoR paths via \BMtwo2 become available?
+
+We \emph{can} be sure that \BR2's weight can be fully included in \cL's chain-weight \emph{after} \BL4 is mined (since all PoR paths now exist).
+However, it's not so clear what we should do when not all PoR paths yet exist.
+% Do we even need to solve this problem, now, though?
+
+\todoDraftOnly{edit below}
+
+Let us approach this from these principles:
+\begin{itemize}
+    \item A reflecting block can only contribute work once -- we should not count work more than once.
+    \item A PoR contributes as much work as an attacker would need to perform to create a competing PoR of the same weight.
+\end{itemize}
+
+Firstly, we can say that the total work contributed by all possible PoR paths is equal to the sum of local work contributed by each unique block in those paths to their respective chains.
+That is: no work is counted twice, and all blocks in a PoR path contribute work.
+
+Secondly, consider that the work contributed by an individual PoR is equal to the amount of work that an attacker would need to do to produce an equal and competing PoR.
+This means that \emph{any} PoR path proving that \BR2 reflects \BL1 is worth \emph{at least} as much as \BR2.
+Additionally, a recursive PoR is, in isolation, worth \emph{exactly} as much as the sum of weights of each block in that PoR (excluding local blocks).
+
+Thus, we can safely add \BR2's \emph{full} weight via \BL3 (and that weight is attributed to \BL1 since it is the most recent \cL block in \BR2's history).
+An attacker would need to produce at least as much work as \BR2 to perform doublespend against \cL \emph{after} \BR2's reflection of \BL1 has been counted (assuming the doublespend competes with \BL1).
+
+Therefore, only the \emph{first} available recursive PoR via \BR2 matters.
+The number of paths from \BR2 to past \cL blocks is not relevant: \BL0 is in the history of \BL1, and \BR2 can only count once.
+Additionally, the number of paths from \cL blocks to \BR2 is \emph{also} not relevant, since \BR2 is in the history of all such blocks.
+Having multiple paths does provide some benefit (as there must be some new reflecting blocks, at least initially), but there will almost always be shorter PoRs that provide the same benefit.
+
+Another way to look at multiple paths is that an attacker (who is attacking \cL, \cMone, \cMtwo, and \cR) does not have to do any additional work to generate multiple redundant paths (besides the additional work that is directly involved in creating new blocks).
+
+Notice that we do \emph{not} require that a recursive PoR to use the use the same chains in each half of the PoR.
+Of the 4 possible PoRs, the preferable one is:
+$\xyInlineRefl{\BL1 \;&\; \BMtwo1 \arf[l] \;&\; \BR2 \arf[l] \;&\; \BMone2 \arf[l] \;&\; \BL3\arf[l]}$.\footnote{
+    This recursive PoR path is preferable because it is from the \emph{first possible} \cL block to enable a PoR via \BR2, and goes to the \emph{most recent} \cL block in \BR2's history.
+}
+We go from \BL3 to \BR2 via \cMone, and from \BR2 to \BL1 via \cMtwo.
+
+We also can now reason about paths that are longer than the shortest possible path.
+For example, consider that \cMone and \cMtwo reflect each other (although this is not shown in our chain-segment examples).
+There could be PoR paths that include multiple blocks from \cMone and \cMtwo (e.g., $\xyInlineRefl{\BL0 \;&\; \BMone1 \arf[l] \;&\; \BMtwo1 \arf[l] \;&\; \BR2 \arf[l] \;&\; \BMone2 \arf[l] \;&\; \BL3 \arf[l]}$).
+Whilst these kind of paths are valid, they are not that useful: in the example, we expect that \BMtwo1 already reflects an \cL block, either \BL0 directly or a more recent \cL block.
+
+Finally, let's consider the issue of \emph{latency} again.
+Now that there are two possible chains to use going from \cL to \cR and vice versa, how long should we expect to wait for draft reflected work via \cR to appear?
+
+After the first \cL block is generated, we need to wait for a block from either \cMone or \cMtwo.
+That takes 0.5 block periods on average.
+Next, we wait for a block from \cR (1 block period on average), and then for another block from either \cMone or \cMtwo (0.5 block periods).
+So the expected waiting time is 2 block periods.
+
+If we had two possible \cR chains (\cRone and \cRtwo), then we'd expect to wait only 1.5 block periods for draft reflected work from \emph{either} \cRone or \cRtwo.
+That configuration would look like this:
+\begin{equation*}
+    \xymatrix@C=1.5em@R=-.15em{
+        & \cMone \ar@{<->}[dd] \ar@{<->}[r] & \cRone \ar@{<->}[dd] \\
+        \cL \ar@{<->}[ur] \ar@{<->}[dr] & & \\
+        & \cMtwo \ar@{<->}[r] \ar@{<->}[uur] & \cRtwo \ar@{<->}[uul]
+    }
+\end{equation*}
+In general, for a recursive PoR of length $2d-1$, were each reflection could be provided by $N_1 v^{-1}$ possible chains, the expected latency of draft reflected work is ${N_1}^{-1} v (2d-1)$ block periods.
+This is directly relevant to how fast work propagates within a tiling.
+
+Note that, for a standalone simplex, we can see that $2d-1 = 1$ (each PoR is of length 1), and $v=1$ (there is no tiling), so the expected latency of draft reflected work is ${N_1}^{-1}$ block periods, which, in seconds, is $(N_1 B_f)^{-1} = {\Cprime}^{-1}$.
+
+% \begin{itemize}
+%     \item no -- it's enough to know that, when all PoR paths exist, the full weight is okay
+%     \item this is b/c we'll simplify tiles: every ${B_f}^{-1}$ seconds all chains in each tile mine 1 new block and provide reflections of 1 new block in their local tile and adjacent tiles, and vice versa.
+%     Thus all PoR paths are available all at once.
+%     \item we just need to be confident that an answer \emph{does} exist
+%     \item also, simplification case is much easier to reason about and solve for
+%     \item full solution left as a future research
+%     \item some ideas or questions for that future research:
+%     \begin{itemize}
+%         \item is a single PoR path enough to count the full weight of the reflecting block?
+%         \item if so -- tiling is very fast and secure. if not, tiling is pretty fast and still secure.
+%         \item what happens if some paths \emph{never} end up existing?
+%         \item do we divide contributed work by the number of paths?
+%         \item do paths have to go through the same chain? (i.e., $\cL \to \cMone \to \cR \to \cMone \to \cL$)
+%         \item can paths go through different chains? (i.e., $\cL \to \cMone \to \cR \to \cMtwo \to \cL$)
+%         \item should each PoR be valid if 1st and last entries are removed?
+%         if so, then it passes its weight to like that chain-segment (of the intermediate chain for which the middle bits of the recursive PoR are valid).
+%         \item but PoRs via different chains should still be valid b/c it shows order (thus we know that whatever's being reflected is in the history of every intermediate block)
+%         \item do we ever really need to consider this partial paths stuff?
+%         like a block (\BL3) that enables some PoR paths via a new block (\BR2) will probs also enable other missing PoR paths.
+%         Example: \BL4 enables \BR2 via \BMtwo2, but could also mb enable \BR3 via \BMtwo2, too.
+%         We should expect all paths to be available within a few block periods (e.g., $\sim 60$ s).
+%         \item WRT paths like $\cL \to \cMtwo \to \cMone \to \cR \to \cMone \to \cMtwo \to \cL$ (i.e., it's longer than the shortest path possible) -- we shouldn't need to count these.
+%         we should always be able to go directly b/c an implicit reflection in a chain's history that can also be explicit, should be explicit.
+%         so count these as 0 weight.
+%         \item idea: only the paths back matter. making more paths between the \cR block and most recent \cL block isn't so hard, but making the \cR block is (if the \cR block is relatively heavy, that is).
+%         So: divide \cR block weight by the number of \emph{paths back} and then only count unique shortest paths from $\BR{x} \to \BL{y}$.
+%         By that point, shouldn't \emph{all} those paths be available, anyway?
+%         \item maybe: path availability is only an issue between the reflecting \cR block and the current \cL block, but not between the \cR block and the reflected \cL block?
+%         (This sounds like it logically has to be true -- how could any new paths back be introduced!?)
+%         \item idea: the weights of all blocks in a recursive PoR path \emph{all} have the same \cL in their history, so their weights can be safely added to \cL.
+%         \item idea: the principle \emph{don't double-count work} means that when we have multiple paths back, that block's weight is attributable to the \emph{most recent} reflected \cL block.
+%         \item idea: the principle that \emph{a PoR is worth whatever is required to attack it} means that only 1 PoR path to the \cR block is required -- once that happens all other paths are redundant (though useful for SPV).
+%         \item idea: so the total weight contributed by a set of PoRs is the sum of all unique blocks in that set of PoRs -- multiple paths doesn't help.
+%         \item so simplex-chains in a deep tile get the security benefit of root tile chains as soon as a single path is available from an L block to any R block back to any L block.
+%         \item this should happen MUCH faster than the predicted delay between singularly reflected chains -- $v\cdot{N_1}^{-1}\times$ the duration, I think.
+%     \end{itemize}
+%     \item do miners need to be incentivized to reflect child chains?
+% \end{itemize}
+
+
+\begin{draftonly}
+
+\subsubsubsection{Assumptions}
+
+\begin{itemize}
+    \item all blocks were public / available
+    \item no conflicting PoR paths
+\end{itemize}
+
+\subsubsubsection{Conflicting Paths}
+
+\begin{equation*}
+    \xymatrix@R=.3em@C=.75em{
+        \BL0 & \BL1 \ar[l] \\
+        & \BM0 & \BM1 \ar[l] \arf[ul] & \BM{2} \ar[l] \\
+        & & & \BR{1a} \arf[dl] & \BR2 \ar[l] \arf[ul] \arf[ull] \\
+        & & \BM{1a} \ar[luu] \arf[dl] & \\
+        & \BL{1a} \ar[luuuu]
+    }
+\end{equation*}
+
+\end{draftonly}
+
+
+\subsubsubsection{Data Availability}
+
+\mk{Essence: UT solves issues of consensus at scale -- problem replaced with new problem: data availability at scale. this is easy though b/c data can just be downloaded and doesn't require processing. so it's just a problem of bandwidth, not CPU or long-term overhead.}
+
+\subsubsubsection{Future Research}
+
+There are some future areas of research that may improve this process, too.
+For example: along the lines of NIPoPoWs\footnote{
+    Non-Interactive Proofs of Proof-of-Work (NIPoPoWs), see \citeNIPoPoWsFull.
+}, are \emph{Non-Interactive Proofs of Proof-of-Work Reflections} (NIPoPoWRs) possible?
+
+% \subsubsubsection{Principles of PoR}
+
+% \begin{itemize}
+%     \item work is work\footnote{
+%         law of identity; it means that it doesn't matter where/how work happens, just that it does and that its history includes the thing we want to prove
+%     }
+%     \item work can summed\footnote{
+%         conversion required if not using the same hashing alg
+%     }
+%     \item work only counts once\footnote{
+%         don't double-count
+%     }
+%     \item attribute work by following the arrows; work is attributable to the most recent L block reflected by an R block\footnote{
+%         implies: pow's weight is transitive to all things in that PoWs history
+%     }
+% \end{itemize}

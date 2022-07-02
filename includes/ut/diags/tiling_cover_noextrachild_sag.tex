@@ -1,0 +1,40 @@
+\documentclass[]{standalone}
+\usepackage[T1]{fontenc}\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usepackage{pgfbaselayers}
+\usepackage{xintexpr}
+\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
+
+\makeatletter
+\def\input@path{{./includes/}{./includes/ut/diags/}}
+\makeatother
+
+% overwrite (either \providecommand or \renewcommand) to control the parts of the diagram which are drawn or not.
+
+\begin{document}%
+% this graphic isn't used, and it's expensive to generate, so don't bother unless we need it
+% \providecommand\TilingDepth{6}%
+\providecommand\TilingDepth{7}%
+\providecommand\TilingInitSize{5}%
+\providecommand\TilingScaleConst{1.45}%
+\providecommand\TilingSizeToNodeRRatio{2.8}%
+\providecommand\TilingValence{2}%
+\providecommand\SimplexChains{7}%
+\providecommand\SimplexNodeRadius{3pt}%
+
+\providecommand\TilingAltPattern{0}%
+\providecommand\TilingAutoRotate{0}%
+\providecommand\TilingMonoColor{1}%
+\providecommand\TilingNodeColor{white}%
+\providecommand\TilingLineColor{white!70!black}%
+
+\providecommand\TilingDrawGroups{0}%
+\providecommand\TilingDrawAllReflections{1}%
+\providecommand\TilingValenceModAfterRoot{0}%
+\providecommand\TilingRootSimplexMult{1}%
+\providecommand\TilingOnlyTopHalf{1}%
+\input{tiling-macro}%
+\begin{tikzpicture}%
+    \TikzSimplexTiling
+\end{tikzpicture}%
+\end{document}

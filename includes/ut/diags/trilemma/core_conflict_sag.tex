@@ -20,8 +20,8 @@
     \draw [arrow] (goal) -- (mr1);
     \draw [arrow] (goal) -- (mr2);
 
-    \node (arp1) [node, right = of mr1.east] {Use sharding and small blocks};
-    \node (arp2) [node] at (mr2 -| arp1) {Use big blocks};
+    \node (arp1) [node, right = of mr1.east] {Use many chains and small blocks};
+    \node (arp2) [node] at (mr2 -| arp1) {Use one chain and big blocks};
     \draw [arrow] (mr1) -- (arp1);
     \draw [arrow] (mr2) -- (arp2);
 

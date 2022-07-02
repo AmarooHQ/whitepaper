@@ -3,6 +3,7 @@ module Amaroo.WP.Calcs where
 import Prel
 
 import Amaroo.WP.Utils (prel)
+import Data.Array (intercalate)
 import Data.Array as A
 import Data.Array.NonEmpty (cons)
 import Data.Int (toNumber)
@@ -11,9 +12,11 @@ import Data.List.NonEmpty (NonEmptyList, cons', fromList, head, singleton, tail)
 import Data.List.NonEmpty as NEL
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
-import Effect.Exception (error)
+import Effect.Exception (error, throwException)
 import Effect.Exception.Unsafe (unsafeThrowException)
+import Effect.Unsafe (unsafePerformEffect)
 import Math (abs, ceil, floor, ln2, log, pow, (%))
+import Math as M
 
 {-|
 
@@ -34,25 +37,26 @@ type ParamsL l
   = { ks :: l Number
     , hfs :: l ChainNestingParams -- | List of {header,frequency} pairs
     , txSize :: Number
+    , limitN1Ratio :: Maybe Number
     }
 type Params = ParamsL NonEmptyList
 
-type ParamsF = {k :: Number, hf :: ChainNestingParams, txSize :: Number}
+type ParamsF = {k :: Number, hf :: ChainNestingParams, txSize :: Number, limitN1Ratio :: Maybe Number}
 
 pToPF :: Params -> ParamsF
-pToPF p = {k: head p.ks, hf: head p.hfs, txSize: p.txSize}
+pToPF p = {k: head p.ks, hf: head p.hfs, txSize: p.txSize, limitN1Ratio: p.limitN1Ratio}
 
 showableParams :: Params -> ParamsL Array
-showableParams p = {ks: NEL.toUnfoldable p.ks, hfs: NEL.toUnfoldable p.hfs, txSize: p.txSize}
+showableParams p = {ks: NEL.toUnfoldable p.ks, hfs: NEL.toUnfoldable p.hfs, txSize: p.txSize, limitN1Ratio: p.limitN1Ratio}
 
 -- instance showParams :: Show Params where
 --   show {ks, hfs, txSize} = show {ks: NEL.toList ks, hfs: NEL.toList hfs, txSize}
 
 mkSimplePs :: Number -> ChainNestingParams -> Number -> Params
-mkSimplePs k hf txSize = {ks: singleton k, hfs: singleton hf, txSize}
+mkSimplePs k hf txSize = {ks: singleton k, hfs: singleton hf, txSize, limitN1Ratio: Nothing}
 
 mkNestedPs :: Number -> ChainNestingParams -> ChainNestingParams -> Number -> Params
-mkNestedPs k hf hf2 txSize = {ks: singleton k, hfs: hf `NEL.cons` singleton hf2, txSize}
+mkNestedPs k hf hf2 txSize = {ks: singleton k, hfs: hf `NEL.cons` singleton hf2, txSize, limitN1Ratio: Nothing}
 
 type UtVariants a
   = { pors :: a
@@ -120,7 +124,7 @@ type ChainComplexities
 
 -- | Return a set of parameters sutiable to use for the next nesting level
 paramsForNextNS :: Params -> Params
-paramsForNextNS ps@{txSize} = {ks, hfs, txSize}
+paramsForNextNS ps@{txSize} = {ks, hfs, txSize, limitN1Ratio: Nothing}
   where
     -- Take the tale of the list, or if that is empty, use the existing list as default (which must only have 1 entry)
     ks = tail ps.ks |> fromList |> fromMaybe ps.ks
@@ -202,24 +206,69 @@ tradChainCalcEth2 ps = tradChainCalc' ps TradEth2
 tradChainCalcPolkadot :: Params -> ChainStats
 tradChainCalcPolkadot ps = tradChainCalc' ps TradPolkadot
 
-porLen :: Number -> Number -> Number
-porLen hashSize n = hashSize * log2c n
+vcBranchingF ∷ Number
+vcBranchingF = 256.0
+-- vcBranchingF = 64.0
+
+vcCommitSize ∷ Number
+vcCommitSize = 32.0
+-- vcCommitSize = 48.0
+
+-- | estimate PoR len via average depth in a verkle tree
+porVCLen2' ∷ Boolean → Number → Number
+porVCLen2' doubleBranching n = if n <= _vcBranchingF
+    then 1.0
+    else if l2Groups > _vcBranchingF
+      then 1.0 + porVCLen2' doubleBranching (n / _vcBranchingF)
+      else avgDepth
+  where
+    l2Groups = floor $ n / _vcBranchingF
+    l1Nodes = (min n _vcBranchingF) - l2Groups
+    l2Nodes = n - l1Nodes
+    avgDepth = (1.0 * l1Nodes + 2.0 * l2Nodes) / n
+    _vcBranchingF = vcBranchingF * (if doubleBranching then 2.0 else 1.0)
+
+porVCLen2 ∷ Number → Number
+porVCLen2 = porVCLen2' false
+
+-- ethereum numbers add 0.66 to branch length (I think to account for sparseness)
+-- and we use the average not the ceil
+vcSparseExtra ∷ Number
+-- vcSparseExtra = 0.66
+vcSparseExtra = 0.0
+
+-- | deprecated in favor of porVCLen2
+porVCLen :: Number -> Number
+porVCLen n = max 1.0 $ (log n / log vcBranchingF + vcSparseExtra)
+
+-- | Length (in bytes) of a merkle proof
+porMPLen :: Number -> Number
+porMPLen = log2c
+
+porLen ∷ Number → Number → Number
+porLen g n = min porBytesMerkle porBytesVerkle
+  where
+    -- add 1.0 to each verkle layer to account for location data -- 256 children implies 8 bits (1 B) for required per node
+    porBytesVerkle = (1.0 + vcCommitSize) * porVCLen2' false n
+    -- hashTrunk = g < 20.0
+    -- Note: we can call porVCLen2' with `hashTrunk` as the first arg -- this provides very modest optimization and really doesn't help us much. However, it breaks tests, so not going to include it
+    porBytesMerkle = g * porMPLen n
 
 utPorsT1 :: Number -> Number -> Number -> Number -> Number -> Number
 utPorsT1 n1 k1 bf bh g = n1 * (k1 - bf * n1 * (bh + porLen g n1))
 
 utHOPorsT1 :: Number -> Number -> Number -> _ -> Number -> Number
-utHOPorsT1 n1 k1 bf _ g = n1 * (k1 - bf * n1 * porLen g n1)
+utHOPorsT1 n1 k1 bf _ g = n1 * (k1 - bf * n1 * (g + porLen g n1))
 
 type LoopFindMax = {i :: Int, t :: Number}
 
 loopFindMaxPoRsN1F :: _ -> Params -> Number -> LoopFindMax -> LoopFindMax
-loopFindMaxPoRsN1F utT1F ps g initM = inner ({i: initM.i, t: initM.t, bestI: 0 }) |> \{bestI,t} -> {i: bestI,t}
+loopFindMaxPoRsN1F utT1F ps g initM = inner ({i: initM.i, t: initM.t, bestI: initM.i }) |> \{bestI,t} -> {i: bestI,t}
   where
-    inner m@{i, t} = if i >= wontBeMoreThan || t1 < 0.0 || t1 < t * 0.96 || (t1 < t && (abs $ log2 bestN) % 1.0 > 0.01)
+    -- drop this condition:  i >= wontBeMoreThan ||
+    inner m@{i, t} = if t1 < 0.0 || t1 < t * 0.96 || (t1 < t && (abs $ log2 bestN) % 1.0 > 0.01)
         then m
-        else inner (
-          if t1 > t
+        else inner (if t1 > t
             then {i: i + 1, bestI: i, t: t1}
             else {i: i + 1, bestI: m.bestI, t: m.t})
       where
@@ -232,18 +281,20 @@ loopFindMaxPoRsN1F utT1F ps g initM = inner ({i: initM.i, t: initM.t, bestI: 0 }
     bf = hf.bf
     bh = hf.bh
     hf = head ps.hfs
-    wontBeMoreThan = I.ceil $ k1 / bf / bh  -- N1 without explicit PoRs * 2.0
+    -- wontBeMoreThan = I.ceil $ k1 / bf / bh  -- N1 without explicit PoRs * 2.0
+
     -- from WP, useful for some things.
     -- | \frac{\d{T_1}}{\d{N_1}}
-    utPorsDT1byDN1 n1 = (k1 * ln2 - bf * n1 * (g + bh * log 4.0) - 2.0 * bf * g * n1 * log n1) / ln2
+    -- utPorsDT1byDN1 n1 = (k1 * ln2 - bf * n1 * (g + bh * log 4.0) - 2.0 * bf * g * n1 * log n1) / ln2
 
 findMaxPoRsN1 :: Params -> Number -> Number
-findMaxPoRsN1 ps g = (loopFindMaxPoRsN1F utPorsT1 ps g {i: 1, t: 0.0}).i |> toNumber
+findMaxPoRsN1 ps g = (loopFindMaxPoRsN1F utPorsT1 ps g {i: 1, t: 0.0}).i |> toNumber >>> M.floor
 
 findMaxHOPoRsN1 :: Params -> Number -> Number
-findMaxHOPoRsN1 ps g = (loopFindMaxPoRsN1F utHOPorsT1 ps g {i: 1, t: 0.0}).i |> toNumber
+findMaxHOPoRsN1 ps g = (loopFindMaxPoRsN1F utHOPorsT1 ps g {i: 1, t: 0.0}).i |> toNumber >>> M.floor
 
--- | This will *efficiently* calculate the best N_1s for some array of parameters, provided N_1 will monotonically increase (which it does for increasing k)
+-- | This will *efficiently* calculate the best N_1s for some array of parameters, provided N_1 will monotonically increase (which it does for increasing k).
+-- | utT1F should be a function that returns T_1 for given parameters
 findMaxPoRsN1ForRanges' :: _ -> {g :: Number, r :: Array Params} -> Array (Tuple Params LoopFindMax)
 findMaxPoRsN1ForRanges' utT1F {g, r} = (inner {last: Nothing, next: A.head r, rest: A.tail r, outs: []}).outs
   where
@@ -275,11 +326,16 @@ applyTDiscountToBH bh = (bh - _) $ ceil $ (1.0 + prel {f: 80.0, t: 112.0, v: bh}
 type UtParams = {explicitPoRs :: Boolean, headerOmission :: Boolean, hashTruncation :: Boolean}
 
 utChainCalc :: Params -> UtParams -> ChainStats
-utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} =
+utChainCalc ps varParams@{explicitPoRs, headerOmission, hashTruncation} =
     if explicitPoRs && headerOmission
       then utCalcHOPoRs ps {hashTruncation}
-      else {d1, d2, d3, confRate, tts, sigmaTts, deltaBigS, deltaSmallS, porBytes, porBytes2, effBh, effDh, kTx, kB, k1}
+      else utCalcMonolithic ps varParams
+
+utCalcMonolithic :: Params -> UtParams -> ChainStats
+utCalcMonolithic ps varParams@{explicitPoRs, headerOmission, hashTruncation} =
+    {d1, d2, d3, confRate, tts, sigmaTts, deltaBigS, deltaSmallS, porBytes, porBytes2, effBh, effDh, kTx, kB, k1}
   where
+    _assertNoHOPoRs = if not (explicitPoRs && headerOmission) then unit else unsafePerformEffect $ throwException $ error $ "this function should never recieve (explicitPoRs && headerOmission)"
     hashSize = if hashTruncation then 16.0 else 32.0
     origBh = (head ps.hfs).bh
     -- ~~if bh<96 (1/2 way between 80 and 112) then only discount 1 hash, otherwise 2~~
@@ -293,15 +349,19 @@ utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} =
     hf = (head ps1.hfs)
     bfbh = hf.bf * hf.bh
     k1 = head ps1.ks
-    n1 = if explicitPoRs then findMaxPoRsN1 ps1 hashSize else (k1 / 2.0 / bfbh)
+    n1Raw = if explicitPoRs then findMaxPoRsN1 ps1 hashSize else (k1 / 2.0 / bfbh)
+    n1 = n1Raw * (fromMaybe 1.0 ps1.limitN1Ratio)
     confRate = hf.bf * n1
     porBytes = porLen hashSize n1
     -- if we are using headerOmission -> then we need to download headers + PoRs
     -- else if we are doingExplicitPoRs but otherwise the hash is fine (which is the last element in the branch, anyway)
     explicitPorsK = confRate * porBytes
     explicitHeadersK = confRate * htModBh origBh
-    kTx = if explicitPoRs then (k1 - explicitPorsK - explicitHeadersK) else (k1 / 2.0)
-    kB = k1 - kTx
+    kB = (if explicitPoRs then explicitPorsK else 0.0) + (if headerOmission then confRate * hashSize else explicitHeadersK)
+    kTx = k1 - kB
+    -- kTx refactored so that everything depends on N1
+    kTxOld = if explicitPoRs then (k1 - explicitPorsK - explicitHeadersK) else (k1 - confRate * hf.bh)
+    _asdf = if abs (kTx - kTxOld) < 1.0 then unit else unsafePerformEffect $ throwException $ error $ intercalate "\n-- " ["kTx != kTxOld:", show {kTx, kTxOld, n1, n1Raw, explicitPorsK, explicitHeadersK, confRate, porBytes}, "limitN1Ratio: " <> show ps.limitN1Ratio, "Variant Ps: " <> show varParams, "Params: " <> show ps]
     t1 = kTx * n1
     d1 = {n: n1, t: t1, tps: t1 / ps.txSize, p: pToPF ps1}
     effBh = if explicitPoRs then d1.p.hf.bh + porBytes else d1.p.hf.bh
@@ -318,7 +378,7 @@ utChainCalc ps {explicitPoRs, headerOmission, hashTruncation} =
     effDh = d2.p.hf.bh  -- Note: don't take into account porBytes2 -- if explicitPoRs then d2.p.hf.bh + porBytes2 else d2.p.hf.bh
     d3 = calcNextNestingLevel ps3 d2
 
-utCalcHOPoRs :: Params -> _ -> ChainStats
+utCalcHOPoRs :: Params -> {hashTruncation :: Boolean} -> ChainStats
 utCalcHOPoRs ps {hashTruncation} = {d1, d2, d3, confRate, tts, sigmaTts, deltaBigS, deltaSmallS, porBytes, porBytes2, effBh, effDh, kTx, kB, k1}
   where
     hashSize = if hashTruncation then 16.0 else 32.0
@@ -326,14 +386,16 @@ utCalcHOPoRs ps {hashTruncation} = {d1, d2, d3, confRate, tts, sigmaTts, deltaBi
     htModBh bh = if hashTruncation then applyTDiscountToBH bh else bh
     fixBH2 r@{bh} = r {bh = htModBh bh}
     ps1 = ps -- {hfs = (fixBH1 (head ps.hfs) `cons'` tail ps.hfs)}
-    n1 = findMaxHOPoRsN1 ps1 hashSize
+    -- limit N1 if specified
+    n1 = (fromMaybe 1.0 ps1.limitN1Ratio) * findMaxHOPoRsN1 ps1 hashSize
     porBytes = porLen hashSize n1
-    effBh = porBytes
+    -- since we're omitting headers, we need to include the header's hash still if using VCs
+    effBh = hashSize + porBytes
     k1 = head ps1.ks
     hf = (head ps1.hfs)
     confRate = hf.bf * n1
-    explicitPorsK = confRate * porBytes
-    kTx = k1 - explicitPorsK
+    explicitHOPorsK = confRate * effBh
+    kTx = k1 - explicitHOPorsK
     kB = k1 - kTx
     t1 = kTx * n1
     d1 = {n: n1, t: t1, tps: t1 / ps.txSize, p: pToPF ps1}

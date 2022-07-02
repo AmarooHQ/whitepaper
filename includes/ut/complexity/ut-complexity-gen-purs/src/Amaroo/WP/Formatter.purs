@@ -74,20 +74,24 @@ fmtFract n
 fmtFixedP p = NF.toStringWith (fixed p)
 
 fmtDyn :: _ -> Number -> String
-fmtDyn {low, high, mp, commas, pOnlySi, wSI, infLikeNan} n =
-    if not (isFinite n) then (if isNaN n || infLikeNan then "-" else wrap "$" "\\infty") else
-      if outsideRange then wrap (if wSI then "$" else "") $ fmtSciNot p n else
-        if commas then fmtP fmtCommasP fmtCommas else fmtFixedP pNotSi n
-  where
-    p = fromMaybe 2 mp
-    pNotSi = if pOnlySi then 0 else p
-    outsideRange = n < pow 10.0 (toNumber low) + err || n >= pow 10.0 (toNumber high) - err
-    err = (pow 10.0 $ -1.0 * toNumber p) * 0.5
-    fmtP fP f = case (Tuple pOnlySi mp) of
-        Tuple false (Just _) -> fP pNotSi n
-        Tuple _ _ -> f n
+fmtDyn {low, high, mp, commas, pOnlySi, wSI, infLikeNan} n
+  | n == 0.0 = "0"
+  | not (isFinite n) = if isNaN n || infLikeNan then "-" else wrap "$" "\\infty"
+  -- | outsideRange = wrap (if wSI then "$" else "") $ fmtSciNot p n
+  -- | commas = fmtP fmtCommasP fmtCommas
+  | otherwise =
+        if outsideRange then wrap (if wSI then "$" else "") $ fmtSciNot p n else
+          if commas then fmtP fmtCommasP fmtCommas else fmtFixedP pNotSi n
+      where
+        p = fromMaybe 2 mp
+        pNotSi = if pOnlySi then 0 else p
+        outsideRange = n < pow 10.0 (toNumber low) + err || n >= pow 10.0 (toNumber high) - err
+        err = (pow 10.0 $ -1.0 * toNumber p) * 0.5
+        fmtP fP f = case (Tuple pOnlySi mp) of
+            Tuple false (Just _) -> fP pNotSi n
+            Tuple _ _ -> f n
 
-fdDefaults = {low: -1, high: 6, mp: Just 1, commas: false, pOnlySi: false, wSI: true, infLikeNan: false}
+fdDefaults = {low: -1, high: 8, mp: Just 1, commas: false, pOnlySi: false, wSI: true, infLikeNan: false}
 fdK = fdDefaults {pOnlySi = true, wSI = false}
 fdPlain = fdDefaults {commas = false, pOnlySi = false}
 fdPlainZero = fdPlain {mp = Just 0}

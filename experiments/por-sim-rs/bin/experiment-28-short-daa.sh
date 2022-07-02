@@ -54,6 +54,9 @@ SECONDS=0
 
 # nchain_arr=( 1 2 30 `seq 21 -2 7` `seq 6 -1 1` )
 nchain_arr=( 1 2 60 42 30 `seq 21 -2 7` `seq 6 -1 1` )
+if [[ "$EXP_IS_AUX" = "1" ]]; then
+  nchain_arr=( 60 50 42 38 35 32 29 27 25 23 `seq 21 -2 7` `seq 6 -1 1` )
+fi
 ds_conf_arr=( 1.25 2.5 5 10 20 )
 
 # note: in reality a simplex needs to use WeightedDag and an attacker needs to win via the DoubleSpendWork strategy.
