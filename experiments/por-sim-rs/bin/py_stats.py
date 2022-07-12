@@ -1445,7 +1445,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
                 include_aux=False,
                 **gen_csv_kwargs),
             "\n".join([
-                f"Exp {exp}: random hr distrib includes targeted chain",
+                f"Exp {exp}: random hr distrib includes targeted chain series (exp 37 - ??)",
             ]),
             f"png/e{exp}_rand_hr_incl_main_q={q}_t={ts[0]}-{ts[-1]}_daa={daa}{suffix}",
             save_as_file_exts=['png', 'csv'],
@@ -1461,6 +1461,9 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             , ('38', 500)
             , ('39', 500)
             , ('40', 500)
+            , ('41', 500)
+            , ('42', 500)
+            , ('43', 500)
             ]
         for suffix, gen_csv_kwargs in [('', dict())] # , ('_nofrac', dict(min_ds_conf=5))]
     ] + [
