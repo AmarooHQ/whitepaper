@@ -922,7 +922,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
     def unknown_exp_num_name(q, t, bt=50, hr=50, strat="DoubleSpendWork", cs="WeightedDag", daa=100, exp_num='16', hashname='blake3') -> str:
         raise Exception(f'unknown exp_num: {exp_num}')
 
-    def csv_name_f_from_exp(exp_num):
+    def csv_name_f_from_exp(exp_num: str):
         try:
             exp_num = str(int(exp_num[:2]))
         except:
@@ -952,6 +952,10 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             '29': exp_16_csv_name,
             '30': exp_16_csv_name,
             '31': exp_16_csv_name,
+            '36': exp_16_csv_name,
+            '37': exp_16_csv_name,
+            '38': exp_16_csv_name,
+            '39': exp_16_csv_name,
         }).get(exp_num, unknown_exp_num_name)
 
     def gen_por_equiv_rand_hrs_csvs(q, t, bt=50, hr=50, only_real_world=False, exp_num='13', aux_num='3', daa=100) -> list[CsvFileToPlot]:
@@ -1012,8 +1016,11 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
     # for many ts
     def gen_por_cec_scaled_csvs(q: str, ts: list[str], exp, aux, bt, hr, daa,
                               scale_relative_to = 5.0,
-                              min_ds_conf=1.0, max_ds_conf=MAX_DS_CONF, **kwargs
+                              min_ds_conf=1.0, max_ds_conf=MAX_DS_CONF,
+                              include_aux=True,
+                              **kwargs
                               ) -> list[CsvFileToPlot]:
+        ''' generate a list of CsvFileToPlot rows '''
         csvs = []
         csv_name_f = csv_name_f_from_exp(exp)
         ppo_kw = dict(use_consistent_color=False)
@@ -1024,10 +1031,11 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             if min_ds_conf <= _t <= max_ds_conf:
                 # hack to get around exp numbers
                 t = render_conf_target(_t)
-                _exp = exp if t not in ['1.25', '2.5'] else '26'
+                _exp = exp if (int(exp) > 35 or t not in ['1.25', '2.5']) else '26'
                 csvs.append((csv_name_f(q, t, bt, hr, exp_num=_exp, daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'por', opts))
-        csvs.append((csv_name_f(q, ts[0], bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None))
-        csvs.append((csv_name_f(q, ts[-1], bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', PorPlotOpts(cec_scaled=f_s(ts[-1]), **ppo_kw)))
+        if include_aux:
+            csvs.append((csv_name_f(q, ts[0], bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', None))
+            csvs.append((csv_name_f(q, ts[-1], bt, hr, exp_num=f'{exp}{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', PorPlotOpts(cec_scaled=f_s(ts[-1]), **ppo_kw)))
         # for t in [5,10,20]:
         #     csvs.append((csv_name_f(q, t, bt, hr, exp_num=f'26{aux}', daa=daa, strat="DoubleSpendWork", cs="WeightedDag", **kwargs), 'trad', PorPlotOpts(cec_scaled=f_s(t), **ppo_kw)))
         return csvs
@@ -1423,6 +1431,31 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             legend_loc='upper right',
         )
         for q in ['0.40', '0.44', '0.48'] for ts in [['1.0', '1.25', '1.5', '1.75', '1.9', '2.0', '2.25', '2.5', '2.75', '2.9', '3.0']] for exp,daa in [('30', 100)]
+        for suffix, gen_csv_kwargs in [('', dict())] # , ('_nofrac', dict(min_ds_conf=5))]
+    ] + [
+        # e36 rand_hr_incl_main
+        # and e37
+        SavePlot(
+            gen_por_cec_scaled_csvs(
+                q, ts, exp=exp, aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3",
+                scale_relative_to=10.0,
+                min_ds_conf=2.5,
+                max_ds_conf=20,
+                include_aux=False,
+                **gen_csv_kwargs),
+            "\n".join([
+                f"Exp {exp}: random hr distrib includes targeted chain",
+            ]),
+            f"png/e{exp}_rand_hr_incl_main_q={q}_t={ts[0]}-{ts[-1]}_daa={daa}{suffix}",
+            save_as_file_exts=['png', 'csv'],
+            x_label=std_x_label(ts[-1]),
+            x_range=(0, 21),
+            figsize=RESULTS_ZOOMED_FIG_SIZE,
+            legend_loc='upper right',
+        )
+        for q in ['0.40', '0.44']
+        for ts in [['2.5', '5', '10', '20']]
+        for exp,daa in [('36', 500), ('37', 500)]
         for suffix, gen_csv_kwargs in [('', dict())] # , ('_nofrac', dict(min_ds_conf=5))]
     ] + [
         # for results - just trad only

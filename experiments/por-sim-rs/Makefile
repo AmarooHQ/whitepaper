@@ -15,9 +15,13 @@ ATK_END_DELAY_TICKS ?= 0
 
 # set this env var to `1` to do random hash-rate distrib
 RANDOMLY_DISTRIBUTE_HASHRATES ?=
+RAND_HR_INCLUDES_TARGET_CHAIN ?=
 _RAND_HRS_ARG =
 ifeq ($(RANDOMLY_DISTRIBUTE_HASHRATES),1)
 	_RAND_HRS_ARG = --random_hr_distrib
+	ifeq ($(RAND_HR_INCLUDES_TARGET_CHAIN),1)
+		_RAND_HRS_ARG = --random_hr_distrib --rand_hr_incl_main
+	endif
 endif
 
 ATK_USE_DYN_END_TICK ?=
@@ -107,5 +111,8 @@ sudo-flamegraph:
 
 print-randomized-hr-distributions:
 	cargo t -- --nocapture --test test_random_hr_distribution_properties
+
+print-bounded-rand-hr-distributions:
+	cargo t -- --nocapture --test test_gen_bounded_random_hr_distribution
 
 print-randhr-pmfs: print-randomized-hr-distributions

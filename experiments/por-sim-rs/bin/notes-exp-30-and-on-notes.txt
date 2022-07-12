@@ -232,3 +232,60 @@ low # of confs
   export EXP_NUM=35
   ./bin/experiment-30-and-beyond.sh
 )
+
+---------
+# e36
+----------
+
+test --rand_hr_incl_main
+
+(
+  # for this exp
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=24
+  export ATK_QS_PRESET=light
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=balanced
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=36
+  ./bin/experiment-30-and-beyond.sh
+)
+
+
+results: see png/e36*
+- large c results in higher than expected P between N_1 = 2..32
+- variance for lower c seems to be larger than otherwise expected
+
+explanation candidates:
+- rand hr on target chain must be significant
+  - perhaps an issue when very imbalanced?
+  - could try bounding the HR balance
+
+
+---------
+# e37
+----------
+
+test new rand hr
+
+(
+  # for this exp
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=24
+  export ATK_QS_PRESET=light
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=small-only
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=37
+  ./bin/experiment-30-and-beyond.sh
+)

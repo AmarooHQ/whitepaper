@@ -27,6 +27,7 @@ pub struct NetworkArgs {
     pub daa2_n_blocks: usize,
     pub por_chains: u16,
     pub random_hr_distrib: bool,
+    pub rand_hr_incl_main: bool,
 }
 
 impl NetworkArgs {
@@ -36,6 +37,7 @@ impl NetworkArgs {
             daa2_n_blocks: 100,
             por_chains: 1,
             random_hr_distrib: false,
+            rand_hr_incl_main: false,
         }
     }
 
@@ -45,6 +47,15 @@ impl NetworkArgs {
             daa2_n_blocks: 100,
             por_chains,
             random_hr_distrib: false,
+            rand_hr_incl_main: false,
+        }
+    }
+
+    pub fn n_extra_chains(&self) -> u32 {
+        if self.por_chains == 0 {
+            0
+        } else {
+            self.por_chains as u32 - (if self.rand_hr_incl_main { 0 } else { 1 })
         }
     }
 }
