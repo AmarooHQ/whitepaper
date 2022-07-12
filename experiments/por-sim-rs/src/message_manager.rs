@@ -153,9 +153,9 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
         let cw_hash_rates: Vec<(Difficulty, Difficulty)>;
 
         if net_args.random_hr_distrib {
-            // let rd_h = gen_random_hr_distribution_simple(n_chains, hr_p, total_hr);
-            // let rd_a = gen_random_hr_distribution_simple(n_chains, hr_q, total_hr);
-            let (rd_h, rd_a) = gen_random_hr_distributions(n_chains, hr_q, total_hr, hr_q / 2.0);
+            let rd_h = gen_random_hr_distribution_simple(n_chains, hr_p, total_hr);
+            let rd_a = gen_random_hr_distribution_simple(n_chains, hr_q, total_hr);
+            // let (rd_h, rd_a) = gen_random_hr_distributions(n_chains, hr_q, total_hr, hr_q / 2.0);
             cw_hash_rates = rd_h.into_iter().zip(rd_a.into_iter()).collect();
         } else {
             // uniform hash rates over all chains

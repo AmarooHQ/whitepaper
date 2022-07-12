@@ -272,6 +272,8 @@ explanation candidates:
 ----------
 
 test new rand hr
+(note: alt distribution gen didn't seem to help the issue hand)
+additional change: DSW win condition fix (base it on network wide HR / tick * ticks / block * num confirmations)
 
 (
   # for this exp
@@ -287,5 +289,25 @@ test new rand hr
   #export DRY_RUN=1
   export SKIP_EXP_CONF_PROMPT=0
   export EXP_NUM=37
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-- okay, that made it worse
+-- test: old distrib with DSW
+
+(
+  # for this exp
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=24
+  export ATK_QS_PRESET=light
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=small-only
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=38
   ./bin/experiment-30-and-beyond.sh
 )
