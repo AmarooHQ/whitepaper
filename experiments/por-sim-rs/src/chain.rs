@@ -170,6 +170,8 @@ lazy_static! {
 pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
     fn new(genesis: B, genesis_meta: BlockMD<B>, net_args: NetworkArgs) -> Self;
 
+    fn get_net_args(&self) -> &NetworkArgs;
+
     fn get_chain_id(&self) -> HashID;
 
     // fn save_block(&mut self, b_id: HashID, b: (B, BlockMD<B>));
@@ -781,6 +783,10 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
             _phantom_b: PhantomData,
             _phantom_f: PhantomData,
         }
+    }
+
+    fn get_net_args(&self) -> &NetworkArgs {
+        return &self.net_args;
     }
 
     fn get_chain_id(&self) -> HashID {

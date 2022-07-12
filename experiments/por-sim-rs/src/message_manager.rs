@@ -60,7 +60,7 @@ impl AttackArgs {
         }
     }
 
-    fn total_hr(&self) -> Difficulty {
+    pub fn total_hr(&self) -> Difficulty {
         self.honest_hr + self.attacker_hr
     }
 }
@@ -265,8 +265,10 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             let bb = self.honest_node.chain.get_any_best_block(false);
             let bb_id = bb.0.get_hash();
             let daa2_bs = BlockMD::<S::B>::get_daa2_blocks(bb_id).unwrap();
-            let _ago = daa2_bs.len() as Difficulty / 4;
+            // let _ago = daa2_bs.len() as Difficulty / 4;
+            let _ago = 10;
             let past_b = S::C::get_cached_block(&daa2_bs[_ago as usize]).unwrap();
+            // should we actually bother updating this with a measurement?
             self.avg_work_per_block_period = (bb.1.chain_weight - past_b.1.chain_weight) / _ago;
         }
     }
@@ -1179,12 +1181,12 @@ mod tests {
 
     #[test]
     fn test_random_hr_distribution_properties() {
-        let n_chains = 100;
+        let n_chains = 50;
         // let hr_p = 0.65;
         // let hr_q = 0.35;
         // let (hr_p, hr_q) = (0.5, 0.5);
         let (hr_p, hr_q) = (0.7, 0.3);
-        let per_chain_hr = 200;
+        let per_chain_hr = 60;
         let total_hr: u64 = (n_chains as u64) * per_chain_hr;
         // results
         let n_buckets = 21;
@@ -1201,8 +1203,9 @@ mod tests {
         let n_trials = 1000;
         let count_incr = 1.0 / (n_trials * n_chains) as f64; // add this to the right bucket each loop
         for _i in 0..n_trials {
-            let rd_h = gen_random_hr_distribution_simple(n_chains, hr_p, total_hr);
-            let rd_a = gen_random_hr_distribution_simple(n_chains, hr_q, total_hr);
+            // let rd_h = gen_random_hr_distribution_simple(n_chains, hr_p, total_hr);
+            // let rd_a = gen_random_hr_distribution_simple(n_chains, hr_q, total_hr);
+            let (rd_h, rd_a) = gen_random_hr_distributions(n_chains, hr_q, total_hr, hr_q / 2.0);
             let cw_hash_rates: Vec<_> = rd_h.into_iter().zip(rd_a.into_iter()).collect();
             for (_p, _q) in cw_hash_rates {
                 results_honest[(_p / bucket_period) as usize] += count_incr;
