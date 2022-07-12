@@ -311,3 +311,63 @@ additional change: DSW win condition fix (base it on network wide HR / tick * ti
   export EXP_NUM=38
   ./bin/experiment-30-and-beyond.sh
 )
+
+-- still borked
+-- test: no RAND_HR_INCLUDES_TARGET_CHAIN
+
+(
+  # for this exp
+  #export RAND_HR_INCLUDES_TARGET_CHAIN=0
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=24
+  export ATK_QS_PRESET=light
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=small-only
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=39
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-- still borked
+-- test: revert DSW calc
+
+(
+  # for this exp
+  #export RAND_HR_INCLUDES_TARGET_CHAIN=0
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=15
+  export ATK_QS_PRESET=light
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=small-only
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=40
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-- looks okay again (which it should be)
+-- test: new distrib
+
+(
+  # for this exp
+  #export RAND_HR_INCLUDES_TARGET_CHAIN=0
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=15
+  export ATK_QS_PRESET=light
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=small-only
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=41
+  ./bin/experiment-30-and-beyond.sh
+)

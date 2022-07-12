@@ -924,7 +924,10 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
 
     def csv_name_f_from_exp(exp_num: str):
         try:
-            exp_num = str(int(exp_num[:2]))
+            _e = int(exp_num[:2])
+            if _e > 37:
+                return exp_16_csv_name
+            exp_num = str(_e)
         except:
             pass
         return ({
@@ -954,8 +957,6 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             '31': exp_16_csv_name,
             '36': exp_16_csv_name,
             '37': exp_16_csv_name,
-            '38': exp_16_csv_name,
-            '39': exp_16_csv_name,
         }).get(exp_num, unknown_exp_num_name)
 
     def gen_por_equiv_rand_hrs_csvs(q, t, bt=50, hr=50, only_real_world=False, exp_num='13', aux_num='3', daa=100) -> list[CsvFileToPlot]:
@@ -1434,7 +1435,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
         for suffix, gen_csv_kwargs in [('', dict())] # , ('_nofrac', dict(min_ds_conf=5))]
     ] + [
         # e36 rand_hr_incl_main
-        # and e37
+        # and e37, e38
         SavePlot(
             gen_por_cec_scaled_csvs(
                 q, ts, exp=exp, aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3",
@@ -1455,7 +1456,12 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
         )
         for q in ['0.40', '0.44']
         for ts in [['2.5', '5', '10', '20']]
-        for exp,daa in [('36', 500), ('37', 500)]
+        for exp,daa in [('36', 500)
+            , ('37', 500)
+            , ('38', 500)
+            , ('39', 500)
+            , ('40', 500)
+            ]
         for suffix, gen_csv_kwargs in [('', dict())] # , ('_nofrac', dict(min_ds_conf=5))]
     ] + [
         # for results - just trad only

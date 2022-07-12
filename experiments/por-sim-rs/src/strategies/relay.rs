@@ -201,17 +201,17 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
     type DSMultType = f32;
     type Params = DoubleSpendWorkParams;
     fn init(chain: &S::C, atk_start_h: Height, params: Self::Params) -> Self {
-        let win_work_thresh =
-            (params.win_thres * chain.get_net_args().block_target as f32 * params.total_hr as f32)
-                .round() as Difficulty;
+        // let win_work_thresh =
+        //     (params.win_thres * chain.get_net_args().block_target as f32 * params.total_hr as f32)
+        //         .round() as Difficulty;
+        let win_work_thresh = params.n_por_chains as Difficulty
+            * (params.win_thres * chain.get_any_best_block(false).0.get_difficulty() as f32)
+                as Difficulty;
         DoubleSpendWorkStrat {
             params,
             atk_start_h,
             atk_start_work: chain.get_fork_measure_pub_priv().public,
             win_work_thresh,
-            // win_work_thresh: params.n_por_chains as Difficulty
-            //     * (params.win_thres * chain.get_any_best_block(false).0.get_difficulty() as f32)
-            //         as Difficulty,
         }
     }
     fn name() -> String {
