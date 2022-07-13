@@ -512,3 +512,29 @@ additional change: DSW win condition fix (base it on network wide HR / tick * ti
   export EXP_NUM=45
   ./bin/experiment-30-and-beyond.sh
 )
+
+---------
+e46
+test new DSW win condition + old HR distribution (TwinUniform)
+new HR distribution method is EachHash
+
+also note: changed std-range in exp script to be (2 5 10 20) instead of (2.5 5 10 20)
+---------
+
+(
+  export REPEAT_TIMES=30
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  export RANDOMLY_DISTRIBUTE_HASHRATES=1
+  export RAND_HR_METHOD=TwinUniform
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=15
+  export ATK_QS_PRESET=std
+  export DS_CONFS_PRESET=std
+  export N_CHAINS_PRESET=balanced
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=46
+  ./bin/experiment-30-and-beyond.sh
+)

@@ -51,6 +51,13 @@ arg_enum! {
         SelfishMining,
     }
 }
+arg_enum! {
+    #[derive(Debug, PartialEq, Clone)]
+    pub enum RandHrMethod {
+        TwinUniform,
+        EachHash,
+    }
+}
 
 fn num_is_between<T: PartialOrd + Display>(n: T, min: T, max: T) -> Result<(), String> {
     if min <= n && n <= max {
@@ -99,6 +106,7 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
         (@arg win_threshold: -C --ds_win_threshold +takes_value default_value("20") "[DoubleSpend] Minimum number of confirmations before the double-spending private chain is published.")
         (@arg random_hr_distrib: --random_hr_distrib !takes_value "If true, distribute the attackers hash-rate randomly over all but the targeted chain. (No effect with -P=1)")
         (@arg rand_hr_incl_main: --rand_hr_incl_main !takes_value "If true, the targeted chain's hash-rate will be included in the random distribution. (Requires --random_hr_distrib; No effect with -P=1)")
+        (@arg rand_hr_method: --rand_hr_method +takes_value default_value("TwinUniform") possible_values(&RandHrMethod::variants()) "Method of distributing hash rate when randomized (see `MessageManager.new`)")
         // selfish mining params
         // <none>
         // PoR params
@@ -136,6 +144,7 @@ pub fn main() -> Result<(), String> {
     let atk_end_delay_ticks = value_t_or_exit!(args.value_of("atk_end_delay_ticks"), Timestamp);
     let random_hr_distrib = args.is_present("random_hr_distrib");
     let rand_hr_incl_main = args.is_present("rand_hr_incl_main");
+    let rand_hr_method = value_t!(args, "rand_hr_method", RandHrMethod).unwrap();
     let use_dynamic_cutoff = args.is_present("use_dynamic_cutoff");
 
     let atk_args = AttackArgs {
@@ -154,6 +163,7 @@ pub fn main() -> Result<(), String> {
         daa2_n_blocks,
         random_hr_distrib,
         rand_hr_incl_main,
+        rand_hr_method,
     };
 
     let start_atk = SystemTime::now();

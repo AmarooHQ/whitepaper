@@ -4,6 +4,8 @@ use hashers::null::PassThroughHasher;
 use hashbrown::{HashMap, HashSet};
 use std::hash::BuildHasherDefault;
 
+use crate::RandHrMethod;
+
 pub type Difficulty = u64;
 pub type HashID = u64;
 pub type Height = u32;
@@ -13,7 +15,6 @@ pub type Weight = Difficulty;
 pub type ChainWeight = Weight;
 
 pub type PassThruHashMap<K, V> = HashMap<K, V, BuildHasherDefault<PassThroughHasher>>;
-pub type FxHashSet<K> = HashSet<K, BuildHasherDefault<FxHasher>>;
 pub type PassThruHashSet<K> = HashSet<K, BuildHasherDefault<PassThroughHasher>>;
 
 pub type ChainHeads = PassThruHashMap<HashID, ChainWeight>;
@@ -28,6 +29,7 @@ pub struct NetworkArgs {
     pub por_chains: u16,
     pub random_hr_distrib: bool,
     pub rand_hr_incl_main: bool,
+    pub rand_hr_method: RandHrMethod,
 }
 
 impl NetworkArgs {
@@ -38,6 +40,7 @@ impl NetworkArgs {
             por_chains: 1,
             random_hr_distrib: false,
             rand_hr_incl_main: false,
+            rand_hr_method: RandHrMethod::TwinUniform,
         }
     }
 
@@ -48,6 +51,7 @@ impl NetworkArgs {
             por_chains,
             random_hr_distrib: false,
             rand_hr_incl_main: false,
+            rand_hr_method: RandHrMethod::TwinUniform,
         }
     }
 

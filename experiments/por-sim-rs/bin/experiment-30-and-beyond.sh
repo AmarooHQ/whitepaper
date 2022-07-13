@@ -94,10 +94,10 @@ case "$DS_CONFS_PRESET" in
     ds_conf_arr=(0.5 0.7)
     ;;
   std-range)
-    ds_conf_arr=(2.5 5 10 20)
+    ds_conf_arr=(2 5 10 20)
     ;;
   std+40)
-    ds_conf_arr=(2.5 5 10 20 40)
+    ds_conf_arr=(2 5 10 20 40)
     ;;
   40)
     ds_conf_arr=(40)
@@ -212,7 +212,7 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
   if [[ -f "./cleanly_stop_sim" ]]; then
     echo "Exiting due to file presence: ./cleanly_stop_sim (delete it to enable running again)"
     date
-    echo "About to start: $repeat_i of ${REPEAT_TIMES}. (Note: RESUME_FROM=$RESUME_FROM)"
+    echo "About to start: $repeat_i of ${REPEAT_TIMES}. set RESUME_FROM=$repeat_i to resume. (Note: this run started with: RESUME_FROM=$RESUME_FROM)"
     echo "Exiting..."
     exit 0
   fi

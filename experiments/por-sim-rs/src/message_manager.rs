@@ -6,6 +6,7 @@ use crate::cryptosystem::CSystemT;
 use crate::msg::*;
 use crate::strategies::relay::*;
 use crate::types::*;
+use crate::RandHrMethod;
 use itertools::Itertools;
 use log::*;
 use num::ToPrimitive;
@@ -155,7 +156,14 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
         if net_args.random_hr_distrib {
             // let rd_h = gen_random_hr_distribution_simple(n_chains, hr_p, total_hr);
             // let rd_a = gen_random_hr_distribution_simple(n_chains, hr_q, total_hr);
-            let (rd_h, rd_a) = gen_random_hr_distributions(n_chains, hr_q, total_hr, hr_q / 2.0);
+            let (rd_h, rd_a) = match (net_args.rand_hr_method) {
+                RandHrMethod::EachHash => {
+                    gen_random_hr_distributions(n_chains, hr_q, total_hr, hr_q / 2.0)
+                }
+                RandHrMethod::TwinUniform => {
+                    gen_twin_random_hr_distributions(n_chains, hr_q, total_hr)
+                }
+            };
             cw_hash_rates = rd_h.into_iter().zip(rd_a.into_iter()).collect();
         } else {
             // uniform hash rates over all chains
@@ -474,6 +482,17 @@ pub fn gen_random_hr_distribution_simple(
     gen_random_hr_distribution(n_chains, hr, total_hr, 0.0, 1.0)
 }
 
+pub fn gen_twin_random_hr_distributions(
+    n_chains: u32,
+    q: f32,
+    total_hr: Difficulty,
+) -> (Vec<Difficulty>, Vec<Difficulty>) {
+    (
+        gen_random_hr_distribution_simple(n_chains, 1.0 - q, total_hr),
+        gen_random_hr_distribution_simple(n_chains, q, total_hr),
+    )
+}
+
 /// randomly distribute hash-rate over N_1 partitions so that the *overall* p+q=1 identity is maintained
 pub fn gen_random_hr_distribution(
     n_chains: u32,
@@ -701,6 +720,7 @@ mod tests {
                 por_chains: 10,
                 random_hr_distrib: false,
                 rand_hr_incl_main: false,
+                rand_hr_method: RandHrMethod::TwinUniform,
             },
         )
     }
@@ -1104,7 +1124,7 @@ mod tests {
     fn test_gen_bounded_random_hr_distribution() {
         // 7 chains, q=0.4, total_hr=66*7
         for chain_hr in [66] {
-            for n_chains in [7, 30, 57] {
+            for n_chains in [1, 2, 3, 7, 30, 57] {
                 let total_hr = (chain_hr * n_chains) as Difficulty;
                 for q in [0.4, 0.41, 0.21333, 0.6] {
                     let (rd1_h, rd1) = gen_random_hr_distributions(n_chains, q, total_hr, 0.1);
@@ -1117,13 +1137,15 @@ mod tests {
                         "total hr should match expected ({:?})",
                         rd1
                     );
-                    let exp_avg_hr = (chain_hr as f32 * q).round() as f64;
-                    assert_eq!(
+                    let exp_avg_hr = (chain_hr as f32 * q) as f64;
+                    let act_avg_hr = rd1_f64.amean().unwrap();
+                    let avg_diff = (exp_avg_hr - act_avg_hr).abs();
+                    assert!(
+                        avg_diff < 0.5,
+                        "average HR per chain >0.5 from expected act:{}, exp:{} (hrs: {:?})",
+                        act_avg_hr,
                         exp_avg_hr,
-                        rd1_f64.amean().unwrap().round(),
-                        "average HR per chain should be {} * {}",
-                        chain_hr,
-                        q
+                        rd1
                     );
 
                     // test honest + attacker distributions at once

@@ -16,11 +16,15 @@ ATK_END_DELAY_TICKS ?= 0
 # set this env var to `1` to do random hash-rate distrib
 RANDOMLY_DISTRIBUTE_HASHRATES ?=
 RAND_HR_INCLUDES_TARGET_CHAIN ?=
+# TwinUniform or EachHash
+RAND_HR_METHOD ?= TwinUniform
 _RAND_HRS_ARG =
+_R_HR_ARGS = --random_hr_distrib --rand_hr_method $(RAND_HR_METHOD)
+_R_HR_INCL_MAIN = --rand_hr_incl_main
 ifeq ($(RANDOMLY_DISTRIBUTE_HASHRATES),1)
-	_RAND_HRS_ARG = --random_hr_distrib
+	_RAND_HRS_ARG = $(_R_HR_ARGS)
 	ifeq ($(RAND_HR_INCLUDES_TARGET_CHAIN),1)
-		_RAND_HRS_ARG = --random_hr_distrib --rand_hr_incl_main
+		_RAND_HRS_ARG = $(_R_HR_ARGS) $(_R_HR_INCL_MAIN)
 	endif
 endif
 
@@ -39,6 +43,9 @@ RUN_BIN = target/release/por-sim-rs
 SIMULATOR_ARGS ?= -R $(ATK_STRATEGY) -s $(ATK_START_TICK) -e $(ATK_END_TICK) -r $(ATK_RATIO) -S $(CRYPTO_SYSTEM) -b $(B_PERIOD) -P $(N_CHAINS) -H $(HR_PER_CHAIN) --ds_win_threshold $(ATK_DS_CONFS) --daa2_n_blocks $(DAA2_N_BLOCKS) --atk_end_delay_ticks $(ATK_END_DELAY_TICKS) $(_RAND_HRS_ARG) $(_USE_DYN_END)
 
 test:
+	cargo test
+
+test-nc:
 	cargo test -- --nocapture
 
 lock-release:
