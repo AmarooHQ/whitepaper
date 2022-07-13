@@ -106,7 +106,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             1,
             chain.clone(),
             Some(NodeAtkParams { is_r_chain: false }),
-            args.attacker_hr,
+            attacker_hr,
             args.attacker_instant_propagation,
             net_args.por_chains,
         );

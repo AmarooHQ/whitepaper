@@ -411,3 +411,104 @@ additional change: DSW win condition fix (base it on network wide HR / tick * ti
   export EXP_NUM=43
   ./bin/experiment-30-and-beyond.sh
 )
+
+-- and looking good
+-- test: RAND_HR_INCLUDES_TARGET_CHAIN
+
+(
+  # for this exp
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=15
+  export ATK_QS_PRESET=light
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=small-only
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=44
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-- still got the bump at low n1 for high c
+-- test: add to e44: higher q
+
+(
+  # for this exp
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=15
+  export ATK_QS_PRESET=light
+  export DS_CONFS_PRESET=40
+  export N_CHAINS_PRESET=1-8
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=44
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-- bump is even worse at c=40. hmm
+-- is there a bias in the DAA that disadvantages honest?
+-- can we separate results into smaller than avg target chains and larger?
+-- wait, bug in MM.new: did not properly set attacker hash rate
+
+-- retest e44 as e45 (with fixed attacker hr)
+
+(
+  # for this exp
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=15
+  export ATK_QS_PRESET=light
+  export DS_CONFS_PRESET=std+40
+  export N_CHAINS_PRESET=1-8
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=45
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-- add 0.48 to e45
+
+(
+  # for this exp
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=15
+  export ATK_QS_PRESET=0.48
+  export DS_CONFS_PRESET=std+40
+  export N_CHAINS_PRESET=balanced
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=45
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-- add 2100 more runs
+
+(
+  export REPEAT_TIMES=21
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=15
+  export ATK_QS_PRESET=std
+  export DS_CONFS_PRESET=std+40
+  export N_CHAINS_PRESET=balanced
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=45
+  ./bin/experiment-30-and-beyond.sh
+)

@@ -96,6 +96,12 @@ case "$DS_CONFS_PRESET" in
   std-range)
     ds_conf_arr=(2.5 5 10 20)
     ;;
+  std+40)
+    ds_conf_arr=(2.5 5 10 20 40)
+    ;;
+  40)
+    ds_conf_arr=(40)
+    ;;
   *)
     if [[ ! -z "$ATK_DS_CONF_ONLY" ]]; then
       IFS=',' read -ra ds_conf_arr <<< "$ATK_DS_CONF_ONLY"
@@ -117,6 +123,9 @@ case "$N_CHAINS_PRESET" in
   small-only)
     nchain_arr=(16 11 `seq 8 -1 1`)
     ;;
+  1-8)
+    nchain_arr=(`seq 8 -1 1`)
+    ;;
   *)
     if [[ ! -z "$ATK_NCHAINS_ONLY" ]]; then
       IFS=',' read -ra nchain_arr <<< "$ATK_NCHAINS_ONLY"
@@ -128,6 +137,9 @@ atk_qs=( 0.40 0.44 0.48 )
 case "$ATK_QS_PRESET" in
   light)
     atk_qs=( 0.40 0.44 )
+    ;;
+  0.48)
+    atk_qs=(0.48)
     ;;
   std)
     atk_qs=( 0.40 0.44 0.48 )

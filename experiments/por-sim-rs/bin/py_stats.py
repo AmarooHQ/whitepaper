@@ -1431,7 +1431,9 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             figsize=(9,12),
             legend_loc='upper right',
         )
-        for q in ['0.40', '0.44', '0.48'] for ts in [['1.0', '1.25', '1.5', '1.75', '1.9', '2.0', '2.25', '2.5', '2.75', '2.9', '3.0']] for exp,daa in [('30', 100)]
+        for q in ['0.40', '0.44', '0.48']
+        for ts in [['1.0', '1.25', '1.5', '1.75', '1.9', '2.0', '2.25', '2.5', '2.75', '2.9', '3.0']]
+        for exp,daa in [('30', 100)]
         for suffix, gen_csv_kwargs in [('', dict())] # , ('_nofrac', dict(min_ds_conf=5))]
     ] + [
         # e36 rand_hr_incl_main
@@ -1441,7 +1443,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
                 q, ts, exp=exp, aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3",
                 scale_relative_to=10.0,
                 min_ds_conf=2.5,
-                max_ds_conf=20,
+                max_ds_conf=int(ts[-1]),
                 include_aux=False,
                 **gen_csv_kwargs),
             "\n".join([
@@ -1454,17 +1456,19 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             figsize=RESULTS_ZOOMED_FIG_SIZE,
             legend_loc='upper right',
         )
-        for q in ['0.40', '0.44']
-        for ts in [['2.5', '5', '10', '20']]
-        for exp,daa in [('36', 500)
-            , ('37', 500)
-            , ('38', 500)
-            , ('39', 500)
-            , ('40', 500)
-            , ('41', 500)
-            , ('42', 500)
-            , ('43', 500)
+        for exp,daa,qs,ts in
+            [ ('36', 500, ['0.40', '0.44'], ['2.5', '5', '10', '20'])
+            , ('37', 500, ['0.40', '0.44'], ['2.5', '5', '10', '20'])
+            , ('38', 500, ['0.40', '0.44'], ['2.5', '5', '10', '20'])
+            , ('39', 500, ['0.40', '0.44'], ['2.5', '5', '10', '20'])
+            , ('40', 500, ['0.40', '0.44'], ['2.5', '5', '10', '20'])
+            , ('41', 500, ['0.40', '0.44'], ['2.5', '5', '10', '20'])
+            , ('42', 500, ['0.40', '0.44'], ['2.5', '5', '10', '20'])
+            , ('43', 500, ['0.40', '0.44'], ['2.5', '5', '10', '20'])
+            , ('44', 500, ['0.40', '0.44'], ['2.5', '5', '10', '20', '40'])
+            , ('45', 500, ['0.40', '0.44', '0.48'], ['2.5', '5', '10', '20', '40'])
             ]
+        for q in qs
         for suffix, gen_csv_kwargs in [('', dict())] # , ('_nofrac', dict(min_ds_conf=5))]
     ] + [
         # for results - just trad only
