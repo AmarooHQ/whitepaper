@@ -207,10 +207,10 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
         let win_work_thresh_old = params.n_por_chains as Difficulty
             * (params.win_thres * chain.get_any_best_block(false).0.get_difficulty() as f32)
                 as Difficulty;
-        warn!(
-            "Normal win_work_t: {}; new win_work_t: {}",
-            win_work_thresh_old, win_work_thresh_test
-        );
+        // warn!(
+        //     "Normal win_work_t: {}; new win_work_t: {}",
+        //     win_work_thresh_old, win_work_thresh_test
+        // );
         DoubleSpendWorkStrat {
             params,
             atk_start_h,

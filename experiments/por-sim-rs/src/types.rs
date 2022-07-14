@@ -26,6 +26,7 @@ pub type SeenBlocks = PassThruHashSet<HashID>;
 pub struct NetworkArgs {
     pub block_target: u16,
     pub daa2_n_blocks: usize,
+    pub fixed_difficulty: Option<Difficulty>,
     pub por_chains: u16,
     pub random_hr_distrib: bool,
     pub rand_hr_incl_main: bool,
@@ -41,6 +42,7 @@ impl NetworkArgs {
             random_hr_distrib: false,
             rand_hr_incl_main: false,
             rand_hr_method: RandHrMethod::TwinUniform,
+            fixed_difficulty: None,
         }
     }
 
@@ -52,6 +54,7 @@ impl NetworkArgs {
             random_hr_distrib: false,
             rand_hr_incl_main: false,
             rand_hr_method: RandHrMethod::TwinUniform,
+            fixed_difficulty: None,
         }
     }
 
@@ -61,5 +64,13 @@ impl NetworkArgs {
         } else {
             self.por_chains as u32 - (if self.rand_hr_incl_main { 0 } else { 1 })
         }
+    }
+
+    /// clone and return self.
+    /// if fixed_difficulty is not None, then it will be replaced with Some(d) (where d is the input variable.)
+    pub fn clone_and_set_fixed_d(&self, d: u64) -> Self {
+        let mut ret = self.clone();
+        ret.fixed_difficulty = ret.fixed_difficulty.map(|_| d);
+        return ret;
     }
 }

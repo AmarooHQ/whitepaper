@@ -40,6 +40,7 @@ fi
 
 export POR_SIM_HASH=xxh3
 export RANDOMLY_DISTRIBUTE_HASHRATES=1
+export RAND_HR_METHOD=${RAND_HR_METHOD:-TwinUniform}
 export ATK_USE_DYN_END_TICK=1
 export HR_DISTRIB=$(if [[ "1" = "$RANDOMLY_DISTRIBUTE_HASHRATES" ]]; then echo 'RandHR'; else echo 'UniHR'; fi)
 
@@ -94,10 +95,13 @@ case "$DS_CONFS_PRESET" in
     ds_conf_arr=(0.5 0.7)
     ;;
   std-range)
-    ds_conf_arr=(2 5 10 20)
+    ds_conf_arr=(2.0 5 10 20)
+    ;;
+  2-5-10)
+    ds_conf_arr=(2.0 5 10)
     ;;
   std+40)
-    ds_conf_arr=(2 5 10 20 40)
+    ds_conf_arr=(2.0 5 10 20 40)
     ;;
   40)
     ds_conf_arr=(40)
@@ -161,9 +165,10 @@ case "$ATK_QS_PRESET" in
     ;;
 esac
 
-cat << EOF
+(cat | tee -a $OUT_F_PREFIX.log) << EOF
 ----------------------------------------
 Parameters:
+  EXP: ${EXP_NUM} (Aux:${EXP_IS_AUX})
   atk_qs: ${atk_qs[@]}
   ds_confs: ${ds_conf_arr[@]}
   n_chains: ${nchain_arr[@]}
@@ -171,6 +176,8 @@ Parameters:
   HR_PER_CHAIN: ${HR_PER_CHAIN}
   DAA2_N_BLOCKS: ${DAA2_N_BLOCKS}
   ATK_START_TICK: ${ATK_START_TICK}
+  RANDOMLY_DISTRIBUTE_HASHRATES: ${RANDOMLY_DISTRIBUTE_HASHRATES}
+  RAND_HR_METHOD: ${RAND_HR_METHOD}
 ----------------------------------------
 EOF
 
@@ -275,6 +282,7 @@ for repeat_i in `seq 1 ${REPEAT_TIMES}`; do
               echo "$SIM_ARGS"
             done
           done | xargs -P $N_CPUS -I{} sh -c "$SIM_BIN {} | grep 'RESULT:' | cut -d ':' -f 2- | tee -a $OUT_FILE" | tail -n 1
+          echo "SIM_ARGS=$(make print-sim-args)."
           # write_progress $repeat_i $strat $crypto_sys $atk_r $ds_conf_base
         done
       done

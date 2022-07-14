@@ -519,6 +519,10 @@ test new DSW win condition + old HR distribution (TwinUniform)
 new HR distribution method is EachHash
 
 also note: changed std-range in exp script to be (2 5 10 20) instead of (2.5 5 10 20)
+
+additionally: a bug existed where sometimes the attack wouldn't resolve b/c one of the hashrates were 0 (on the targeted chain). Added a minimum to TwinUniform
+
+results: looks pretty std, mb a little more secure than otherwise (possibly due to added floor on TwinUniform distrib)
 ---------
 
 (
@@ -531,10 +535,36 @@ also note: changed std-range in exp script to be (2 5 10 20) instead of (2.5 5 1
   export DAA2_N_BLOCKS=500
   export N_CPUS=15
   export ATK_QS_PRESET=std
-  export DS_CONFS_PRESET=std
+  export DS_CONFS_PRESET=std-range
   export N_CHAINS_PRESET=balanced
   #export DRY_RUN=1
   export SKIP_EXP_CONF_PROMPT=0
   export EXP_NUM=46
+  ./bin/experiment-30-and-beyond.sh
+)
+
+---------
+e47
+
+fixed difficulty
+- implemented behind `-d` flag `--fixed-difficulty`
+
+(
+  export REPEAT_TIMES=30
+  export USE_FIXED_DIFFICULTY=1
+  export ATK_START_TICK=1000
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  export RANDOMLY_DISTRIBUTE_HASHRATES=1
+  export RAND_HR_METHOD=TwinUniform
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=24
+  export ATK_QS_PRESET=std
+  export DS_CONFS_PRESET=2-5-10
+  export N_CHAINS_PRESET=balanced
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=47
   ./bin/experiment-30-and-beyond.sh
 )

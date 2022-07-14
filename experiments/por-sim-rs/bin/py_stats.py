@@ -1442,7 +1442,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             gen_por_cec_scaled_csvs(
                 q, ts, exp=exp, aux='aux', bt=75, hr=75, daa=daa, hashname="xxh3",
                 scale_relative_to=10.0,
-                min_ds_conf=2.5,
+                min_ds_conf=float(ts[0]),
                 max_ds_conf=int(ts[-1]),
                 include_aux=False,
                 **gen_csv_kwargs),
@@ -1467,6 +1467,8 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             , ('43', 500, ['0.40', '0.44'], ['2.5', '5', '10', '20'])
             , ('44', 500, ['0.40', '0.44'], ['2.5', '5', '10', '20', '40'])
             , ('45', 500, ['0.40', '0.44', '0.48'], ['2.5', '5', '10', '20', '40'])
+            , ('46', 500, ['0.40', '0.44', '0.48'], ['2.0', '5', '10', '20'])
+            , ('47', 500, ['0.40', '0.44', '0.48'], ['2.0', '5', '10'])
             ]
         for q in qs
         for suffix, gen_csv_kwargs in [('', dict())] # , ('_nofrac', dict(min_ds_conf=5))]

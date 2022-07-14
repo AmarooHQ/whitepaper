@@ -34,13 +34,19 @@ ifeq ($(ATK_USE_DYN_END_TICK),1)
 	_USE_DYN_END = --use_dyn_end_tick
 endif
 
+USE_FIXED_DIFFICULTY ?=
+_FIXED_DIFF_ARGS =
+ifeq ($(USE_FIXED_DIFFICULTY),1)
+	_FIXED_DIFF_ARGS = --fixed_difficulty
+endif
+
 
 CRYPTO_SYSTEM ?= WeightedDag
 # CRYPTO_SYSTEM ?= WeightedChain
 
 RUN_BIN = target/release/por-sim-rs
 
-SIMULATOR_ARGS ?= -R $(ATK_STRATEGY) -s $(ATK_START_TICK) -e $(ATK_END_TICK) -r $(ATK_RATIO) -S $(CRYPTO_SYSTEM) -b $(B_PERIOD) -P $(N_CHAINS) -H $(HR_PER_CHAIN) --ds_win_threshold $(ATK_DS_CONFS) --daa2_n_blocks $(DAA2_N_BLOCKS) --atk_end_delay_ticks $(ATK_END_DELAY_TICKS) $(_RAND_HRS_ARG) $(_USE_DYN_END)
+SIMULATOR_ARGS ?= -R $(ATK_STRATEGY) -s $(ATK_START_TICK) -e $(ATK_END_TICK) -r $(ATK_RATIO) -S $(CRYPTO_SYSTEM) -b $(B_PERIOD) -P $(N_CHAINS) -H $(HR_PER_CHAIN) --ds_win_threshold $(ATK_DS_CONFS) --daa2_n_blocks $(DAA2_N_BLOCKS) --atk_end_delay_ticks $(ATK_END_DELAY_TICKS) $(_RAND_HRS_ARG) $(_USE_DYN_END) $(_FIXED_DIFF_ARGS)
 
 test:
 	cargo test
@@ -116,10 +122,13 @@ run-dag-doublespend-100:
 sudo-flamegraph:
 	bash ./bin/unsafe_flamegraph.sh
 
-print-randomized-hr-distributions:
-	cargo t -- --nocapture --test test_random_hr_distribution_properties
+print-rand-hr-distrib-twinuniform:
+	cargo t -- --nocapture --test test_random_hr_twinuniform_properties
+
+print-rand-hr-distrib-eachhash:
+	cargo t -- --nocapture --test test_random_hr_eachhash_properties
 
 print-bounded-rand-hr-distributions:
 	cargo t -- --nocapture --test test_gen_bounded_random_hr_distribution
 
-print-randhr-pmfs: print-randomized-hr-distributions
+print-randhr-pmfs: print-rand-hr-distrib-twinuniform

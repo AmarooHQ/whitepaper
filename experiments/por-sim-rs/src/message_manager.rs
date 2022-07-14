@@ -73,16 +73,6 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             args.honest_hr, args.attacker_hr, args.attack_starts_at, args.attacker_instant_propagation
         );
         let mut extra_chain_nodes = Self::mk_extra_chain_nodes(&args, &net_args);
-        let genesis = S::B::genesis(0);
-        let chain = S::C::new(
-            genesis.clone(),
-            BlockMD::mk_genesis_md(&genesis.clone(), net_args.daa2_n_blocks.to_usize().unwrap()),
-            net_args.clone(),
-        );
-
-        // this later gets updated in self.check_and_set_atk_start_h
-        let avg_work_per_block_period =
-            (net_args.por_chains as u64) * (net_args.block_target as u64) * args.total_hr();
 
         // set HRs for targeted chain
         let mut honest_hr = args.honest_hr;
@@ -94,6 +84,18 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             attacker_hr = main_nodes.attacker.get_hr();
         }
 
+        let genesis = S::B::genesis(0);
+        let chain = S::C::new(
+            genesis.clone(),
+            BlockMD::mk_genesis_md(&genesis.clone(), net_args.daa2_n_blocks.to_usize().unwrap()),
+            net_args
+                .clone_and_set_fixed_d(net_args.block_target as u64 * (honest_hr + attacker_hr)),
+        );
+
+        // this later gets updated in self.check_and_set_atk_start_h
+        let avg_work_per_block_period =
+            (net_args.por_chains as u64) * (net_args.block_target as u64) * args.total_hr();
+
         // nodes for targeted chain
         let honest_node = Node::new(
             0,
@@ -103,7 +105,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             false,
             net_args.por_chains,
         );
-        let mut attacker_node = Node::new(
+        let attacker_node = Node::new(
             1,
             chain.clone(),
             Some(NodeAtkParams { is_r_chain: false }),
@@ -158,9 +160,11 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             // let rd_a = gen_random_hr_distribution_simple(n_chains, hr_q, total_hr);
             let (rd_h, rd_a) = match (net_args.rand_hr_method) {
                 RandHrMethod::EachHash => {
+                    debug!("EachHash");
                     gen_random_hr_distributions(n_chains, hr_q, total_hr, hr_q / 2.0)
                 }
                 RandHrMethod::TwinUniform => {
+                    debug!("TwinUniform");
                     gen_twin_random_hr_distributions(n_chains, hr_q, total_hr)
                 }
             };
@@ -220,7 +224,9 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
                         &genesis.clone(),
                         net_args.daa2_n_blocks.to_usize().unwrap(),
                     ),
-                    net_args.clone(),
+                    net_args.clone_and_set_fixed_d(
+                        net_args.block_target as u64 * (honest_hr + attacker_hr),
+                    ),
                 );
                 let honest = Node::new(
                     i * 1_000,
@@ -438,7 +444,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
         let win = if success { 1 } else { 0 };
         // win, ticks_elapsed, atk_start_h, pub_h, priv_h, pub_cw, priv_cw, atk_q, block_target, daa2_n_blocks, n_chains, ms_elapsed, ...atk_strategy_cols
         println!(
-            "RESULT:{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}",
+            "RESULT:{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}",
             win,
             last_ts,
             self.atk_start_h.unwrap_or(0),
@@ -455,6 +461,8 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
                 .as_ref()
                 .map(|s| s.params_as_csv())
                 .unwrap_or("_,_".to_string()),
+            self.honest_node.get_hr(),
+            self.attacker_node.get_hr(),
         );
     }
 }
@@ -515,6 +523,10 @@ pub fn gen_random_hr_distribution(
     );
     debug_assert_eq!(min_hr, 0.0, "unsupported otherwise");
     debug_assert_eq!(max_hr, 1.0, "unsupported otherwise");
+
+    let rand_min = 0.2;
+    let min_hr = rand_min;
+    let max_hr = 1.0;
 
     // set up hr range stuff for scaling
     let hr_range: f64 = (max_hr - min_hr) as f64; // / n_chains as f64;
@@ -721,6 +733,7 @@ mod tests {
                 random_hr_distrib: false,
                 rand_hr_incl_main: false,
                 rand_hr_method: RandHrMethod::TwinUniform,
+                fixed_difficulty: None,
             },
         )
     }
@@ -1202,14 +1215,36 @@ mod tests {
     }
 
     #[test]
-    fn test_random_hr_distribution_properties() {
+    fn test_random_hr_twinuniform_properties() {
+        println!("HASH-RATE DISTRIBUTION PMFs FOR __TWIN UNIFORM__ DISTRIBUTIONS");
         let n_chains = 50;
-        // let hr_p = 0.65;
-        // let hr_q = 0.35;
-        // let (hr_p, hr_q) = (0.5, 0.5);
         let (hr_p, hr_q) = (0.7, 0.3);
         let per_chain_hr = 60;
         let total_hr: u64 = (n_chains as u64) * per_chain_hr;
+        random_hr_distribution_properties(n_chains, hr_p, hr_q, per_chain_hr, &|| {
+            gen_twin_random_hr_distributions(n_chains, hr_q, total_hr)
+        });
+    }
+
+    #[test]
+    fn test_random_hr_eachhash_properties() {
+        println!("HASH-RATE DISTRIBUTION PMFs FOR __EACH HASH__ DISTRIBUTIONS");
+        let n_chains = 50;
+        let (hr_p, hr_q) = (0.7, 0.3);
+        let per_chain_hr = 60;
+        let total_hr: u64 = (n_chains as u64) * per_chain_hr;
+        random_hr_distribution_properties(n_chains, hr_p, hr_q, per_chain_hr, &|| {
+            gen_random_hr_distributions(n_chains, hr_q, total_hr, 0.15)
+        });
+    }
+
+    fn random_hr_distribution_properties(
+        n_chains: u32,
+        hr_p: f32,
+        hr_q: f32,
+        per_chain_hr: u64,
+        hr_distribs: &dyn Fn() -> (Vec<u64>, Vec<u64>),
+    ) {
         // results
         let n_buckets = 21;
         let max_chain_hr = per_chain_hr * 2;
@@ -1225,9 +1260,7 @@ mod tests {
         let n_trials = 1000;
         let count_incr = 1.0 / (n_trials * n_chains) as f64; // add this to the right bucket each loop
         for _i in 0..n_trials {
-            // let rd_h = gen_random_hr_distribution_simple(n_chains, hr_p, total_hr);
-            // let rd_a = gen_random_hr_distribution_simple(n_chains, hr_q, total_hr);
-            let (rd_h, rd_a) = gen_random_hr_distributions(n_chains, hr_q, total_hr, hr_q / 2.0);
+            let (rd_h, rd_a) = hr_distribs();
             let cw_hash_rates: Vec<_> = rd_h.into_iter().zip(rd_a.into_iter()).collect();
             for (_p, _q) in cw_hash_rates {
                 results_honest[(_p / bucket_period) as usize] += count_incr;
