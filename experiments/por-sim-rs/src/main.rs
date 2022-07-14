@@ -248,7 +248,7 @@ fn mk_run_atk<'a, S: CSystemT<'a>>(
                         args.attack_starts_at,
                         win_thresh,
                         network_args.por_chains,
-                        args.total_hr(),
+                        args.total_hr_per_chain(),
                     );
                     MM::<'_, S, DoubleSpendWorkStrat>::new(
                         args.clone(),

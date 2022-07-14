@@ -106,6 +106,21 @@ case "$DS_CONFS_PRESET" in
   40)
     ds_conf_arr=(40)
     ;;
+  20)
+    ds_conf_arr=(20)
+    ;;
+  13)
+    ds_conf_arr=(13)
+    ;;
+  16)
+    ds_conf_arr=(16)
+    ;;
+  13+16)
+    ds_conf_arr=(13 16)
+    ;;
+  std+13+16)
+    ds_conf_arr=(2.0 5 10 13 16 20)
+    ;;
   *)
     if [[ ! -z "$ATK_DS_CONF_ONLY" ]]; then
       IFS=',' read -ra ds_conf_arr <<< "$ATK_DS_CONF_ONLY"
@@ -144,6 +159,9 @@ case "$ATK_QS_PRESET" in
     ;;
   0.48)
     atk_qs=(0.48)
+    ;;
+  0.44)
+    atk_qs=(0.44)
     ;;
   std)
     atk_qs=( 0.40 0.44 0.48 )

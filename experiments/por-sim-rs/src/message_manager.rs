@@ -61,7 +61,7 @@ impl AttackArgs {
         }
     }
 
-    pub fn total_hr(&self) -> Difficulty {
+    pub fn total_hr_per_chain(&self) -> Difficulty {
         self.honest_hr + self.attacker_hr
     }
 }
@@ -92,9 +92,11 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
                 .clone_and_set_fixed_d(net_args.block_target as u64 * (honest_hr + attacker_hr)),
         );
 
-        // this later gets updated in self.check_and_set_atk_start_h
-        let avg_work_per_block_period =
-            (net_args.por_chains as u64) * (net_args.block_target as u64) * args.total_hr();
+        // ~~this later gets updated in self.check_and_set_atk_start_h~~
+        // keep the theoretical calc -- results seem to be way more accurate
+        let avg_work_per_block_period = (net_args.por_chains as u64)
+            * (net_args.block_target as u64)
+            * args.total_hr_per_chain();
 
         // nodes for targeted chain
         let honest_node = Node::new(
@@ -276,14 +278,14 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             let h = self.honest_node.chain.get_heights_pub_priv().public as Height;
             self.atk_start_h = Some(h);
             debug!("setting atk_start_h:{}", h);
-            let bb = self.honest_node.chain.get_any_best_block(false);
-            let bb_id = bb.0.get_hash();
-            let daa2_bs = BlockMD::<S::B>::get_daa2_blocks(bb_id).unwrap();
+            // let bb = self.honest_node.chain.get_any_best_block(false);
+            // let bb_id = bb.0.get_hash();
+            // let daa2_bs = BlockMD::<S::B>::get_daa2_blocks(bb_id).unwrap();
             // let _ago = daa2_bs.len() as Difficulty / 4;
-            let _ago = 10;
-            let past_b = S::C::get_cached_block(&daa2_bs[_ago as usize]).unwrap();
+            // let _ago = 10;
+            // let past_b = S::C::get_cached_block(&daa2_bs[_ago as usize]).unwrap();
             // should we actually bother updating this with a measurement?
-            self.avg_work_per_block_period = (bb.1.chain_weight - past_b.1.chain_weight) / _ago;
+            // self.avg_work_per_block_period = (bb.1.chain_weight - past_b.1.chain_weight) / _ago;
         }
     }
 
@@ -351,6 +353,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
         // WRT limit of ~1_000_000: with q=0.48 at ds_win=1200 -- no successes went this high, but otherwise they'd typically go >2m
         // 1200 * 11 * 75(bt) = 960k
         let ts_limit = if self.args.use_dynamic_cutoff {
+            // ticks
             ((100.0 as f32)
                 .max(self.atk_params.ds_win_as_f32().unwrap_or(20.0).powf(2.0) * 4.0)
                 .min(self.atk_params.ds_win_as_f32().unwrap_or(20.0) * 11.0)

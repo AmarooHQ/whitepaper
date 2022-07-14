@@ -1055,6 +1055,18 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
         return (csv_name_f_from_exp('29')('0.44', 5, bt=75, hr=75, exp_num='29', daa=2000, hashname="xxh3"), 'por', None)
 
 
+    def exp_36plus_title(exp) -> str:
+        _e = int(exp)
+        if _e >= 36:
+            if _e <= 46:
+                return f"Exp {exp}: random hr distrib includes targeted chain series (exp 37 - 46)"
+            if _e <= 51:
+                return f"Exp {exp}: investigating fixed hashrate & avg_work_per_block_period fix (e 47 - 51)"
+            if _e <= 75:
+                return f"Exp {exp}: c=2 curiousity (e 52 - ??)"
+        return f"Unknown (exp: {exp})"
+
+
     CEC_TITLE_STR = "$P^\\prime(q; c = C; N_1 = N) \\; \\approx \\; P^\\prime(q; c = NC; N_1 = 1)$"
     CEC_EXT_TITLE_STR = "$P^\\prime(q; c = C; N_1 = N) \\; \\approx \\; P^\\prime(q; c = 2C; N_1 = \\frac{{N}}{{2}})$"
     CEC_EXT2_TITLE_STR = "$P^\\prime(q; c = C; N_1 = N) \\; \\approx \\; P^\\prime(q; c = \\frac{{CN}}{{a}}; N_1 = a) \\; \\approx \\; P^\\prime(q; c = CN; N_1 = 1)$"
@@ -1447,7 +1459,7 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
                 include_aux=False,
                 **gen_csv_kwargs),
             "\n".join([
-                f"Exp {exp}: random hr distrib includes targeted chain series (exp 37 - ??)",
+                exp_36plus_title(exp),
             ]),
             f"png/e{exp}_rand_hr_incl_main_q={q}_t={ts[0]}-{ts[-1]}_daa={daa}{suffix}",
             save_as_file_exts=['png', 'csv'],
@@ -1468,7 +1480,11 @@ def main(filter_fnames: Optional[Iterable[str]], n_jobs: int, filter_mode_or: bo
             , ('44', 500, ['0.40', '0.44'], ['2.5', '5', '10', '20', '40'])
             , ('45', 500, ['0.40', '0.44', '0.48'], ['2.5', '5', '10', '20', '40'])
             , ('46', 500, ['0.40', '0.44', '0.48'], ['2.0', '5', '10', '20'])
-            , ('47', 500, ['0.40', '0.44', '0.48'], ['2.0', '5', '10'])
+            , ('47', 500, ['0.40', '0.44', '0.48'], ['2.0', '5', '10', '13', '16', '20'])
+            , ('48', 500, ['0.40', '0.44', '0.48'], ['2.0', '5', '10', '13', '16', '20'])
+            , ('49', 500, ['0.40', '0.44', '0.48'], ['2.0', '5', '10', '20'])
+            , ('50', 500, ['0.40', '0.44', '0.48'], ['2.0', '5', '10', '20'])
+            , ('51', 500, ['0.40', '0.44', '0.48'], ['2.0', '5', '10', '20'])
             ]
         for q in qs
         for suffix, gen_csv_kwargs in [('', dict())] # , ('_nofrac', dict(min_ds_conf=5))]

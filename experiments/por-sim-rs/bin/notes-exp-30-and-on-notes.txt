@@ -549,10 +549,19 @@ e47
 fixed difficulty
 - implemented behind `-d` flag `--fixed-difficulty`
 
+hmmm, v curious. I wouldn't have expected that necessarily (aligning with c=2) but it makes some sense -- difficulty changes the least with c=2 compared to longer DS attempts
+
+ideas:
+- rand hr method impacts anything?
+- attacker draft refl work?
+- with fixed difficulty a tie might bias one side; (but there's a 50% chance of success if the attacker just publishes mb?)
+  - i think explicitly gt/lt is right, not gte/lte
+---------
+
 (
   export REPEAT_TIMES=30
   export USE_FIXED_DIFFICULTY=1
-  export ATK_START_TICK=1000
+  export ATK_START_TICK=300
   export RAND_HR_INCLUDES_TARGET_CHAIN=1
   export RANDOMLY_DISTRIBUTE_HASHRATES=1
   export RAND_HR_METHOD=TwinUniform
@@ -568,3 +577,118 @@ fixed difficulty
   export EXP_NUM=47
   ./bin/experiment-30-and-beyond.sh
 )
+
+--------
+e48
+
+as above but using EachHash rand method (see if this makes and significant difference)
+
+hmm, pretty similar
+- mb try again without fixed daa?
+-----
+
+(
+  export REPEAT_TIMES=13
+  export USE_FIXED_DIFFICULTY=1
+  export ATK_START_TICK=300
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  export RANDOMLY_DISTRIBUTE_HASHRATES=1
+  export RAND_HR_METHOD=EachHash
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=24
+  export ATK_QS_PRESET=std
+  export DS_CONFS_PRESET=std+13+16
+  export N_CHAINS_PRESET=balanced
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=48
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-----------
+e49
+
+test calculation of avg_work_per_block_period -- going with a theoretical calc'd value instead of measured
+
+results: well that made a big difference -- results much more closely align with theoretical
+post mort: prior results may have terminated attacks too early (the value was used in the dynamic cutoff calculation)
+-----------
+
+(
+  export REPEAT_TIMES=13
+  export USE_FIXED_DIFFICULTY=1
+  export ATK_START_TICK=300
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  export RANDOMLY_DISTRIBUTE_HASHRATES=1
+  export RAND_HR_METHOD=EachHash
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=24
+  export ATK_QS_PRESET=std
+  export DS_CONFS_PRESET=std+13+16
+  export N_CHAINS_PRESET=balanced
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=49
+  ./bin/experiment-30-and-beyond.sh
+)
+
+----------
+e50
+
+use DAA again, make sure results make sense still
+looks good
+---------
+
+(
+  export REPEAT_TIMES=13
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  export RANDOMLY_DISTRIBUTE_HASHRATES=1
+  export RAND_HR_METHOD=EachHash
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=24
+  export ATK_QS_PRESET=std
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=balanced
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=50
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-----------
+e51
+
+does randomizing target chain really make a difference?
+-------
+
+(
+  export REPEAT_TIMES=13
+  export USE_FIXED_DIFFICULTY=1
+  export ATK_START_TICK=300
+  export RAND_HR_INCLUDES_TARGET_CHAIN=0
+  export RANDOMLY_DISTRIBUTE_HASHRATES=1
+  export RAND_HR_METHOD=TwinUniform
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=24
+  export ATK_QS_PRESET=std
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=balanced
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=51
+  ./bin/experiment-30-and-beyond.sh
+)
+
+
+
+
+
+c=2
