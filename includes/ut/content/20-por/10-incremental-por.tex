@@ -6,10 +6,10 @@
 
 In this section we will build up to and discuss a new consensus primitive: \emph{Proof of Reflection} (PoR).
 This is a proof that one blockchain's headers have been confirmed by a second chain.
-Using these proofs, we can share security between these two chains, such that attacking either is as difficult as attacking both.
+Using these proofs, we can share security between these two chains, such that attacking either chain is as difficult as attacking both.
 
 Our starting point is the question: is there anything \emph{in principle} that prohibits blockchains sharing security?
-We already have some examples of this (e.g., merged mining), but those existing methods aren't general.
+We already have some examples of this (e.g., merged mining), but those existing methods require each miner to opt-in and aren't general.
 Can we come up with a general to share security between chains?
 
 \aside{
@@ -30,7 +30,7 @@ I also wrote a simplified implementation of this method for Bitcoin SPV proofs i
 } (although BTC Relay seems to have been abandoned in late 2017).
 
 What should we call an on-chain version of a headers-only chain?
-In lieu of an existing term, let's call it a ``projection'', and let's call the \emph{act} of one chain creating a projection of another ``imaging''.
+Since there is no established term, let's call it a ``projection'', and let's call the \emph{act} of one chain creating a projection of another ``imaging''.
 
 \defineTermTex{Projection}{
   A \emph{projection} of a chain is its \emph{headers-only} version that has been recorded and evaluated \emph{by a different chain}.
