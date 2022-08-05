@@ -79,7 +79,7 @@ sigmaTps Nothing = "$\\Sigma\\;\\text{TPS}$"
 
 confRateTh = wrap "$" confRateTex <> " (Hz)"
 
-data UtName = PoRs Int | PoRTs Int | HOPoRs Int | HOPoRTs Int | Std Int | T Int | HO Int | HOT Int | Aleph UtName
+data UtName = PoRs Int | PoRTs Int | HOPoRs Int | HOPoRTs Int | Std Int | T Int | HO Int | HOT Int | OhnStd Int | OhnHO Int | OhnHOT Int | Aleph UtName
 
 derive instance eqUtName :: Eq UtName
 
@@ -104,6 +104,9 @@ utNameI (Std i) = i
 utNameI (T i) = i
 utNameI (HO i) = i
 utNameI (HOT i) = i
+utNameI (OhnStd i) = i
+utNameI (OhnHO i) = i
+utNameI (OhnHOT i) = i
 utNameI (Aleph n) = utNameI n
 
 utNameE :: UtName -> String
@@ -115,6 +118,9 @@ utNameE (Std _) = "OP"
 utNameE (T _) = "OPT"
 utNameE (HO _) = "HO"
 utNameE (HOT _) = "HOT"
+utNameE (OhnStd _) = "OhnOP"
+utNameE (OhnHO _) = "OhnHO"
+utNameE (OhnHOT _) = "OhnHOT"
 utNameE (Aleph n) = utNameE n
 
 utName :: UtName -> String
@@ -259,6 +265,8 @@ utVsOther =
     , {net: UT (T 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1T_1M_K}
     , {net: UT (HO 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1HO_1M_K}
     , {net: UT (HOT 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1HOT_1M_K}
+    -- , {net: UT (OhnStd 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just 1.0}
+    -- , {net: UT (OhnHO 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just 1.0}
     , {net: UT (Aleph (HOT 1)), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Nothing}
     , {net: Polkadot, p: \k -> mkSimplePs k {bf: _POLKADOT_BF, bh: _POLKADOT_BH} tx, oneMTps: Just _POLKADOT_1M_K}
     , {net: Eth2, p: \k -> mkNestedPs k {bf: _ETH2_BF, bh: _ETH2_BH} {bf: _ETH2_BF, bh: _ETH2_DH} tx, oneMTps: Just _ETH2_1M_K}
@@ -305,6 +313,9 @@ utNestingLvl (Std i) = i
 utNestingLvl (T i) = i
 utNestingLvl (HO i) = i
 utNestingLvl (HOT i) = i
+utNestingLvl (OhnStd i) = i
+utNestingLvl (OhnHO i) = i
+utNestingLvl (OhnHOT i) = i
 utNestingLvl (Aleph other) = utNestingLvl other
 
 netToChainStats :: Network -> Params -> ChainStats
@@ -316,6 +327,9 @@ netToChainStats (UT (Std _)) p = (utChainCalc p (allUtChainCalcsF id).std)
 netToChainStats (UT (T _)) p = (utChainCalc p (allUtChainCalcsF id).t)
 netToChainStats (UT (HO _)) p = (utChainCalc p (allUtChainCalcsF id).ho)
 netToChainStats (UT (HOT _)) p = (utChainCalc p (allUtChainCalcsF id).hot)
+netToChainStats (UT (OhnStd _)) p = (utChainCalc p (allUtChainCalcsF id).onh_std)
+netToChainStats (UT (OhnHO _)) p = (utChainCalc p (allUtChainCalcsF id).onh_ho)
+netToChainStats (UT (OhnHOT _)) p = (utChainCalc p (allUtChainCalcsF id).onh_hot)
 netToChainStats (UT (Aleph v)) p = netToChainStats (UT v) p
 netToChainStats Eth2 p = tradChainCalcEth2 p
 netToChainStats Polkadot p = tradChainCalcPolkadot p
@@ -330,6 +344,9 @@ netLookupChainStats (UT (Std _)) utvs = utvs.std
 netLookupChainStats (UT (T _)) utvs = utvs.t
 netLookupChainStats (UT (HO _)) utvs = utvs.ho
 netLookupChainStats (UT (HOT _)) utvs = utvs.hot
+netLookupChainStats (UT (OhnStd _)) utvs = utvs.onh_std
+netLookupChainStats (UT (OhnHO _)) utvs = utvs.onh_ho
+netLookupChainStats (UT (OhnHOT _)) utvs = utvs.onh_hot
 netLookupChainStats (UT (Aleph v)) utvs = netLookupChainStats (UT v) utvs
 netLookupChainStats net _ = unsafeThrowException $ error $ "[netLookupChainStats] non UT network provided: " <> show net
 
@@ -382,6 +399,10 @@ notPoRs (UT (PoRs _)) = false
 notPoRs (UT (PoRTs _)) = false
 notPoRs (UT (HOPoRs _)) = false
 notPoRs (UT (HOPoRTs _)) = false
+-- notPoRs (UT (OhnPoRs _)) = false
+-- notPoRs (UT (OhnPoRTs _)) = false
+-- notPoRs (UT (OhnHOPoRs _)) = false
+-- notPoRs (UT (OhnHOPoRTs _)) = false
 notPoRs _ = true
 
 isAleph :: Network -> Boolean
@@ -505,6 +526,15 @@ tpsOP = porTpsHeader Std (genPoRRow (\cd -> cd.ut.std) <$> utComplexityData)
 
 tpsOPT :: Table
 tpsOPT = porTpsHeader T (genPoRRow (\cd -> cd.ut.t) <$> utComplexityData)
+
+tpsOhnOP :: Table
+tpsOhnOP = porTpsHeader OhnStd (genPoRRow (\cd -> cd.ut.onh_std) <$> utComplexityData)
+
+tpsOhnHO :: Table
+tpsOhnHO = porTpsHeader OhnHO (genPoRRow (\cd -> cd.ut.onh_ho) <$> utComplexityData)
+
+tpsOhnHOT :: Table
+tpsOhnHOT = porTpsHeader OhnHOT (genPoRRow (\cd -> cd.ut.onh_hot) <$> utComplexityData)
 
 -- todo: fix fmtDyn fdPlain
 genCompareRow k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdPlainMixed <$> [cs.effBh, effDh]) <> ([fmtDyn fdStdZero scalingFactor, fmtDyn fdStdMixed n2]) <> (fmtDyn fdStdMixed <$> [tps])

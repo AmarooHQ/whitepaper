@@ -432,8 +432,8 @@ utSpec = describe "ut" do
     describe "+PoRs vs large headers checks" do
       it "large headers approx (w/in ~33%) of +PoRs" do
         let tx = 250.0
-            utL = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 115.0} tx) {explicitPoRs: false, hashTruncation: false, headerOmission: false}
-            utP = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 84.0} tx) {explicitPoRs: true, hashTruncation: false, headerOmission: false}
+            utL = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 115.0} tx) {explicitPoRs: false, hashTruncation: false, headerOmission: false, onlyNecessaryHeaders: false}
+            utP = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 84.0} tx) {explicitPoRs: true, hashTruncation: false, headerOmission: false, onlyNecessaryHeaders: false}
         -- +PoRs and std
         utP.d1.tps `shouldBeWithin 0.5` 1154.0
         utP.d1.n `shouldBeWithin 0.5` 192.0
@@ -441,8 +441,8 @@ utSpec = describe "ut" do
         utL.d1.n `shouldBeWithin 20.0` utP.d1.n  -- 82 vs 64
       it "large headers approx (w/in ~33%) of +PoRTs" do
         let tx = 250.0
-            utLT = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 99.0} tx) {explicitPoRs: false, hashTruncation: false, headerOmission: false}
-            utPT = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 84.0} tx) {explicitPoRs: true, hashTruncation: true, headerOmission: false}
+            utLT = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 99.0} tx) {explicitPoRs: false, hashTruncation: false, headerOmission: false, onlyNecessaryHeaders: false}
+            utPT = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 84.0} tx) {explicitPoRs: true, hashTruncation: true, headerOmission: false, onlyNecessaryHeaders: false}
         -- +T
         utPT.d1.tps `shouldBeWithin 0.5` 1364.0
         utPT.d1.n `shouldBeWithin 0.5` 227.0

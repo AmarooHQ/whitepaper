@@ -12,6 +12,7 @@ import Data.List.NonEmpty (NonEmptyList, cons', fromList, head, singleton, tail)
 import Data.List.NonEmpty as NEL
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
+import Debug as Debug
 import Effect.Exception (error, throwException)
 import Effect.Exception.Unsafe (unsafeThrowException)
 import Effect.Unsafe (unsafePerformEffect)
@@ -67,12 +68,21 @@ type UtVariants a
     , t :: a
     , ho :: a
     , hot :: a
+    , onh_pors :: a
+    , onh_ports :: a
+    , onh_hopors :: a
+    , onh_hoports :: a
+    , onh_std :: a
+    , onh_t :: a
+    , onh_ho :: a
+    , onh_hot :: a
     }
 
 type UtOptimizations
   = { explicitPoRs :: Boolean
     , headerOmission :: Boolean
     , hashTruncation :: Boolean
+    , onlyNecessaryHeaders :: Boolean
     }
 
 type NestingStats
@@ -323,7 +333,7 @@ findMaxHOPoRsN1ForRanges = findMaxPoRsN1ForRanges' utHOPorsT1
 applyTDiscountToBH :: Number -> Number
 applyTDiscountToBH bh = (bh - _) $ ceil $ (1.0 + prel {f: 80.0, t: 112.0, v: bh}) * 16.0
 
-type UtParams = {explicitPoRs :: Boolean, headerOmission :: Boolean, hashTruncation :: Boolean}
+type UtParams = {explicitPoRs :: Boolean, headerOmission :: Boolean, hashTruncation :: Boolean, onlyNecessaryHeaders :: Boolean}
 
 utChainCalc :: Params -> UtParams -> ChainStats
 utChainCalc ps varParams@{explicitPoRs, headerOmission, hashTruncation} =
@@ -331,8 +341,14 @@ utChainCalc ps varParams@{explicitPoRs, headerOmission, hashTruncation} =
       then utCalcHOPoRs ps {hashTruncation}
       else utCalcMonolithic ps varParams
 
+calcN1Raw :: UtParams -> _ -> Number
+calcN1Raw varParams@{explicitPoRs, onlyNecessaryHeaders} {k1, hf: {bf, bh}} = n1AllHeaders / onlyNecessaryDenom
+  where
+    n1AllHeaders = if explicitPoRs then 0.0 else k1 / 2.0 / bf / bh
+    onlyNecessaryDenom = if onlyNecessaryHeaders then bf else 1.0
+
 utCalcMonolithic :: Params -> UtParams -> ChainStats
-utCalcMonolithic ps varParams@{explicitPoRs, headerOmission, hashTruncation} =
+utCalcMonolithic ps varParams@{explicitPoRs, headerOmission, hashTruncation, onlyNecessaryHeaders} =
     {d1, d2, d3, confRate, tts, sigmaTts, deltaBigS, deltaSmallS, porBytes, porBytes2, effBh, effDh, kTx, kB, k1}
   where
     _assertNoHOPoRs = if not (explicitPoRs && headerOmission) then unit else unsafePerformEffect $ throwException $ error $ "this function should never recieve (explicitPoRs && headerOmission)"
@@ -349,18 +365,20 @@ utCalcMonolithic ps varParams@{explicitPoRs, headerOmission, hashTruncation} =
     hf = (head ps1.hfs)
     bfbh = hf.bf * hf.bh
     k1 = head ps1.ks
-    n1Raw = if explicitPoRs then findMaxPoRsN1 ps1 hashSize else (k1 / 2.0 / bfbh)
+    n1Raw = if explicitPoRs then findMaxPoRsN1 ps1 hashSize else (calcN1Raw varParams {k1, hf}) -- (k1 / 2.0 / bfbh)
     n1 = n1Raw * (fromMaybe 1.0 ps1.limitN1Ratio)
+    explicitHeadersN = if not onlyNecessaryHeaders then n1 else n1 * hf.bf
     confRate = hf.bf * n1
+    explicitConfRate = hf.bf * explicitHeadersN  -- this is the rate of production of headers that need to be included
     porBytes = porLen hashSize n1
     -- if we are using headerOmission -> then we need to download headers + PoRs
     -- else if we are doingExplicitPoRs but otherwise the hash is fine (which is the last element in the branch, anyway)
     explicitPorsK = confRate * porBytes
-    explicitHeadersK = confRate * htModBh origBh
-    kB = (if explicitPoRs then explicitPorsK else 0.0) + (if headerOmission then confRate * hashSize else explicitHeadersK)
+    explicitHeadersK = explicitConfRate * htModBh origBh
+    kB = (if explicitPoRs then explicitPorsK else 0.0) + (if headerOmission then explicitConfRate * hashSize else explicitHeadersK)
     kTx = k1 - kB
     -- kTx refactored so that everything depends on N1
-    kTxOld = if explicitPoRs then (k1 - explicitPorsK - explicitHeadersK) else (k1 - confRate * hf.bh)
+    kTxOld = if explicitPoRs then (k1 - explicitPorsK - explicitHeadersK) else (k1 - explicitConfRate * hf.bh)
     _asdf = if abs (kTx - kTxOld) < 1.0 then unit else unsafePerformEffect $ throwException $ error $ intercalate "\n-- " ["kTx != kTxOld:", show {kTx, kTxOld, n1, n1Raw, explicitPorsK, explicitHeadersK, confRate, porBytes}, "limitN1Ratio: " <> show ps.limitN1Ratio, "Variant Ps: " <> show varParams, "Params: " <> show ps]
     t1 = kTx * n1
     d1 = {n: n1, t: t1, tps: t1 / ps.txSize, p: pToPF ps1}
@@ -417,14 +435,22 @@ utCalcHOPoRs ps {hashTruncation} = {d1, d2, d3, confRate, tts, sigmaTts, deltaBi
 
 allUtChainCalcsF :: forall a. (UtOptimizations -> a) -> UtVariants a
 allUtChainCalcsF f =
-  { pors: f {explicitPoRs: true, headerOmission: false, hashTruncation: false}
-  , ports: f {explicitPoRs: true, headerOmission: false, hashTruncation: true}
-  , hopors: f {explicitPoRs: true, headerOmission: true, hashTruncation: false}
-  , hoports: f {explicitPoRs: true, headerOmission: true, hashTruncation: true}
-  , std: f {explicitPoRs: false, headerOmission: false, hashTruncation: false}
-  , t: f {explicitPoRs: false, headerOmission: false, hashTruncation: true}
-  , ho: f {explicitPoRs: false, headerOmission: true, hashTruncation: false}
-  , hot: f {explicitPoRs: false, headerOmission: true, hashTruncation: true}
+  { pors: f {explicitPoRs: true, headerOmission: false, hashTruncation: false, onlyNecessaryHeaders: false}
+  , ports: f {explicitPoRs: true, headerOmission: false, hashTruncation: true, onlyNecessaryHeaders: false}
+  , hopors: f {explicitPoRs: true, headerOmission: true, hashTruncation: false, onlyNecessaryHeaders: false}
+  , hoports: f {explicitPoRs: true, headerOmission: true, hashTruncation: true, onlyNecessaryHeaders: false}
+  , std: f {explicitPoRs: false, headerOmission: false, hashTruncation: false, onlyNecessaryHeaders: false}
+  , t: f {explicitPoRs: false, headerOmission: false, hashTruncation: true, onlyNecessaryHeaders: false}
+  , ho: f {explicitPoRs: false, headerOmission: true, hashTruncation: false, onlyNecessaryHeaders: false}
+  , hot: f {explicitPoRs: false, headerOmission: true, hashTruncation: true, onlyNecessaryHeaders: false}
+  , onh_pors: f {explicitPoRs: true, headerOmission: false, hashTruncation: false, onlyNecessaryHeaders: true}
+  , onh_ports: f {explicitPoRs: true, headerOmission: false, hashTruncation: true, onlyNecessaryHeaders: true}
+  , onh_hopors: f {explicitPoRs: true, headerOmission: true, hashTruncation: false, onlyNecessaryHeaders: true}
+  , onh_hoports: f {explicitPoRs: true, headerOmission: true, hashTruncation: true, onlyNecessaryHeaders: true}
+  , onh_std: f {explicitPoRs: false, headerOmission: false, hashTruncation: false, onlyNecessaryHeaders: true}
+  , onh_t: f {explicitPoRs: false, headerOmission: false, hashTruncation: true, onlyNecessaryHeaders: true}
+  , onh_ho: f {explicitPoRs: false, headerOmission: true, hashTruncation: false, onlyNecessaryHeaders: true}
+  , onh_hot: f {explicitPoRs: false, headerOmission: true, hashTruncation: true, onlyNecessaryHeaders: true}
   }
 
 
