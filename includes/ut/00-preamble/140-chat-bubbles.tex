@@ -1,22 +1,24 @@
 %% chat bubbles
 
-\newcommand{\ChatRaw}[2]{
-    \begin{tcolorbox}[
-        #1
-    ]
-    \begin{varwidth}{0.8\textwidth}
-    #2
-    \end{varwidth}
+\newcommand{\ChatRaw}[3]{
+    \ifthenelse{\equal{}{#1}}{
+        \begin{tcolorbox}[#2]
+    }{
+        \begin{tcolorbox}[#2,title=#1:]
+    }
+        \begin{varwidth}{0.8\textwidth}
+            #3
+        \end{varwidth}
     \end{tcolorbox}
 }
 
-\newcommand{\ChatL}[2]{
-    \ChatRaw{hbox,#1}{#2}
+\newcommand{\ChatL}[3]{
+    \ChatRaw{#1}{hbox,#2}{#3}
 }
 
-\newcommand{\ChatR}[2]{
+\newcommand{\ChatR}[3]{
     \begin{flushright}
-    \ChatRaw{hbox,#1}{#2}
+    \ChatRaw{#1}{hbox,#2}{#3}
     \end{flushright}
 }
 
@@ -27,3 +29,16 @@
 }
 
 \def\checkmark{\tikz\fill[scale=0.25](0,.35) -- (.25,0) -- (1,.7) -- (.25,.15) -- cycle;}
+
+%% dialog boxes
+
+\newcommand{\nefName}{EMalo}
+\newcommand{\cNef}[1]{\ChatL{\nefName}{colback=BrickRed!20}{#1}}  % title={\nefName:}
+\newcommand{\rNef}[1]{\ChatL{}{colback=BrickRed!20}{#1}}
+
+\newcommand{\cMax}[1]{\ChatR{Max}{colback=Cerulean!20}{#1}}  % title={Max:}
+\newcommand{\rMax}[1]{\ChatR{}{colback=Cerulean!20}{#1}}
+
+\newcommand{\cSe}[1]{\ChatL{ExSe}{colback=ForestGreen!20}{#1}}  % title={ExSe:}
+% \newcommand{\cSe}[1]{\ChatL{ExRatione}{colback=ForestGreen!20}{#1}}  % title={ExSe:}
+\newcommand{\rSe}[1]{\ChatL{}{colback=ForestGreen!20}{#1}}

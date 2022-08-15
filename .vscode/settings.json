@@ -25,6 +25,8 @@
         "Conv",
         "counterintuitively",
         "CPUs",
+        "cryptoeconomic",
+        "cryptosystems",
         "CSVs",
         "curr",
         "daa",
@@ -48,6 +50,7 @@
         "excap",
         "Fallibilism",
         "FPGA",
+        "Gav",
         "getrandom",
         "Goldratt's",
         "grayscale",
@@ -129,6 +132,7 @@
         "tilings",
         "Tilings",
         "TPS",
+        "Trilemma",
         "txs",
         "Uhh",
         "Ultimum",
@@ -151,9 +155,9 @@
         "Yoad",
         "Yonatan",
         "Zack",
+        "zk",
         "ZKPs",
-        "Zohar",
-        "Gav", "Trilemma"
+        "Zohar"
     ],
     "cSpell.ignoreWords": [
         "subsectionautorefname",
