@@ -1,0 +1,307 @@
+Our goal in this section is to find a method for SPV (Simple Payment Verification) between any two simplex-chains that is safe, fast, succinct, and reliable.
+\begin{itemize}
+    \item \emph{Safe}: an adversary must either perform a 51\% attack or break a cryptographic dependency to produce an SPV proof that appears valid but is dishonest/fraudulent (e.g., of a valid transaction that depends on a fraudulent transaction).
+    \item \emph{Fast}: $O(t) \le O(\lambda) = O(1)$, where: $t$ is the maximum delay between a transaction being confirmed by a simplex-chain and the point at which a different simplex-chain begins to accept SPVs proofs of transactions in that transaction's block; $\lambda$ is a security parameter (e.g., $\lambda = 6$ local confirmations).
+    \item \emph{Succinct}: for any SPV proof $\pi$, $O(\pi) < O(c)$ and $|\pi|$ is practical.
+    \item \emph{Reliable}: the above properties hold for all transactions in all simplex-chains.
+\end{itemize}
+
+Given everything we have discussed up to now, it's not clear how SPV is possible.
+The problem is that miners on one simplex-chain do not validate the state transitions of other simplex-chains.
+Each simplex-chain, locally, has an $O(\nicefrac{n}{c})$ share of the network's security (there are $O(c)$ many chains), so an $O(\nicefrac{n}{c})$ adversary could create a very long chain of blocks that have valid headers, PoRs, etc, but also contain one or more fraudulent transactions.
+Perhaps the main-chain eventually corrects to a non-fraudulent history (similar to \autoref{sec:preventing-dos-attacks}) -- but in that case we'd need to wait a \emph{very} long time to be sure that such a correction \emph{must} have happened.
+That violates the \emph{fast} goal, so this idea fails to meet our overall goal.
+
+Are we stuck?
+For a blockchain network to be scalable, it must be the case that miners are \emph{not} required to validate more than one chain!
+Have we come all this way, attempting to deal with the core conflict of the trilemma, only to find that we just moved the conflict?
+
+Let's not jump to that conclusion just yet -- there are cryptographic options like SNARGs and STARKs that might help.
+Before that, though, let's slow down and reconsider why SPV works for Bitcoin.
+Perhaps we can learn something.
+
+\subsubsubsection{Why does SPV work for Bitcoin?}
+
+For the sake of simplicity, let's consider Bitcoin in isolation.
+Particularly, we'll assume that there are no other networks of similar size using the same PoW algorithm or compatible mining hardware.
+
+A concise argument for the security of Bitcoin-SPV proofs is:
+
+\begin{argumentslist}
+    \item An SPV proof is a merkle branch proving that a transaction exists in a block.
+    \item All blocks are part of the same blockchain and history.
+    \item All transactions that occur are in some block's merkle tree.
+    \item If a transaction is invalid, then the block is invalid.
+    \item If a block builds on an invalid block, then it is invalid.
+    \item If a miner produces an invalid block, they get no block reward.
+    \item $\therefore$ Honest miners won't produce or build on invalid blocks.
+    \item \label{prem:spv-7} $\therefore$ For an adversary to produce an apparently valid (but fraudulent) proof leading to a \emph{main chain} block, they'd need to out-compete honest miners (i.e., 51\% attack the network).
+    \item \label{prem:spv-8} $\therefore$ Only valid transactions exist in the main chain.\footnote{
+        This isn't the full picture for some blockchains (e.g., Ethereum) even though SPV still works for them -- a transaction that fails to execute can still be valid and produce a valid state transition.
+        In these cases, an invalid state transition implies an invalid block, so it's customary to prove that some state has the right values rather than that a transaction exists.
+    }
+    \item $\therefore$ It's safe to accept SPV proofs for blocks in the main chain.
+\end{argumentslist}
+
+It appears that \cref{prem:spv-7} is our current sticking point for Simplex-SPV proofs.
+
+But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could get to \cref{prem:spv-8} by other means.
+
+\subsubsubsection{Dialog: Error Correction}
+
+\aside{
+    The following is a dramatized dialog based on my thoughts leading up to the afternoon of August 3\textsuperscript{rd}.
+    In reality, the dialog represents several days of exploratory learning and iteration.
+    Although these events have been compressed into a single dialog, it is faithful to the nature and order of significant moments and realizations.
+    % That said, given the characters, you'll have to take me at my word.
+}
+
+\begin{tcolorbox}[colback=black!70,coltext=white]
+    % \centering
+    3\textsuperscript{rd} August 2022, mid-afternoon, UTC+10
+\end{tcolorbox}
+\cMax{Hey, time to revist SPV.}
+\cSe{Great. Remind me, where are we at again?}
+\rMax{Still stuck on existence $\implies$ validity. Proving stuff isn't the issue, it's answering: how do we know that thing is part of a valid history?}
+\rMax{
+    Like, each simplex-chain already knows the main chain of each other simplex-chain, but that doesn't mean much if there's one chain with an attacker making like 90\% of the blocks.
+    We'd need to wait like 80 blocks for the honest branch to win out.
+}
+\rSe{
+    Only 80 blocks?
+    It's worse than that.
+    If that attack can fraudulently mint new RTs and move them to another chain, then the `block rewards' for the attacker are those new RTs.
+    So the attacker won't mind pumping up the difficulty to push other miners out.
+}
+\rMax{Oh\dots yeah i guess so.}
+\rMax{
+    Actually, i think it might even be rational for \emph{all} miners to do that.
+    Not good.
+}
+\rMax{I'm still convinced that, if SPV is possible in other networks, then there must be a method that works for UT.}
+\rSe{Hmm.}
+\rMax{Any ideas?}
+\rSe{
+    None that you don't have already. \\
+    Why don't we try something different, see if we can brainstorm some.
+}
+
+(Note: alt section inserted here)
+
+\rSe{How about we start by listing tools that Eth2 might use but which we don't?}
+\rMax{
+    Yup, okay.
+    DA proofs, BLS sigs, cryptoeconomic fraud proofs, SNARKs and STARKs, sharding / child-chains, staking, slashing, EVM, GHOST. \\
+    That's all that come to mind atm.
+}
+\rSe{
+    Cool -- plenty for the moment. \\
+    Let's go through the list and see if we can eliminate the options one-by-one.
+    Tell me about DA proofs.
+}
+\rMax{
+    Certain types of Ethereum nodes will generate them to prove that the node has some data.
+    The idea is that an attacker who wants to lie about having some data can't generate these proofs, and if enough of the network is sampling enough of the block data then it implies that the block is available for download.
+}
+\rMax{
+    This doesn't help us solve the SPV problem, though.
+    We already know the blocks are available because miners do simplex-wide consensus on that availability.
+    Miner's must only reflect blocks that they've downloaded, and only reflect blocks that reflect blocks that they've downloaded, etc.
+}
+\rSe{
+    Right, so we know that all the relevant blocks have been widely dispersed.
+    Seems like we can rule out DA proofs for now.
+    What about BLS sigs?
+}
+\rMax{
+    They're pretty neat -- mostly because of \emph{signature aggregation}.
+    If transactions had BLS sigs, then we could aggregate all of the signatures per-block into one signature.
+    It'd save space per-block, but might also make SPV stuff more complex.
+    That said, we could just use a protocol like segregated witness to achieve the same goal.
+    In any case, without introducing PoS-like consensus rules, I don't see how BLS sigs could help.
+}
+\rSe{
+    Okay.
+    Next, Eth2's fraud proofs.
+    These are different from our fraud proofs, right?
+}
+\rMax{
+    The main difference is that we don't have any sort of staking/slashing involved.
+    The general principle is the same: show that a computation was done incorrectly or that the correct execution of a block/transaction results in a contradiction with published results.
+}
+\rSe{So how do Eth2 fraud proofs work?}
+\rMax{
+    Some nodes act like police -- they stake some ETH and then check that blocks/state-transitions are valid.
+    If any of those police-nodes find a problem, they sign a message that challenges the invalid block.
+    If the fraud proof was false, then the police-node gets slashed.
+    Otherwise, whoever signed the original block gets slashed.
+}
+\rSe{
+    Okay, so that doesn't seem compatible with UT.
+    How do our fraud proofs work?
+}
+\rMax{
+
+}
+% note: the next few dialog msgs overlap with some from the alt section below
+\rSe{
+    So, tell me, why haven't you considered zk-STARKs as a useful tool for SPV?
+}
+\rMax{
+    Well, I guess I've always associated them with layer 2 stuff, and L2 isn't really relevant to UT's consensus-level design.
+    So I just put it to the side and didn't consider it.
+    I ruled it out early.
+}
+
+\subsubsubsubsection{alt section in dialog}
+
+\todo{removed this section b/c it is maybe innapropriate. but it ties into the theme of the dialog pretty well.}
+
+\rSe{Tell me about Ethereum's scaling tech; maybe they've come up with some ideas that are useful.}
+\rMax{I don't think Eth2's sharding or SPV methods are going to be very useful for us, it's all just cryptoeconomic game theory.}
+\rSe{
+    \dots Max, slow down.
+    Way too many errors just there to make progress.
+}
+\rSe{
+    If we don't fix them now, we'll be \href{https://criticalfallibilism.com/overreach-summary/}{overreaching}.
+    So, time to do some error correction.
+    Tell me where you went wrong.
+}
+\rMax{Yeah, you're right. Okay.}
+\rMax{
+    I can see 4 errors.
+    I didn't respond to what you asked;
+    I had a negative bias and assumed those ideas wouldn't help;
+    it's not just cryptoeconomics, there are other things like BLS signatures and zk-rollups;
+    and the cryptoeconomics comment was a bit rude/dismissive.
+}
+\rSe{
+    Right.
+    All those things are related.
+    We can avoid those mistakes by slowing down; by paying more attention to our biases and emotions.
+    Don't let them cloud your thinking.
+    If you get defensive, it'll shut down error correction.
+    Consciously maintain a truth-seeking mindset.
+    Remember: be humilitous.
+}
+\rSe{
+    There's a big one that you missed. \\
+    Consider our goal right now, and what might stop us realizing it?
+}
+\rMax{
+    Well, our goal is brainstoming -- ahh, yeah, \href{https://criticalfallibilism.com/brainstorming-advice/}{suppression}.
+}
+\rSe{
+    Right. \\
+    So, tell me, why haven't you considered zk-STARKs as a useful tool for SPV?
+}
+\rMax{
+    Well, I guess I've always associated them with layer 2 stuff, and L2 isn't really relevant to UT's consensus-level design.
+    So I just put it to the side and didn't consider it.
+    I ruled it out early.
+}
+\rSe{
+    See how suppression might be holding us back? \\
+    Okay, let's get back to brainstorming.
+    How about we start by listing tools that Eth2 might use but which we don't?
+}
+
+\subsubsubsection{What about SNARKs and STARKs?}
+
+SNARKs and STARKs, and their zk- siblings, refer to cryptosystems (or their respective proofs) with some remarkable properties.
+Particularly, these systems produce proofs of \emph{correct computation} for a known algorithm, and \emph{the proof can be verified both faster and using less data than doing the computation itself}.
+Even more remarkable is that large or private inputs to the computation can be hidden, and hiding inputs has negligible impact on the size of the proof and the verification time.
+
+Vitalik wrote\footnote{
+    Note that the quote is in the context of zk-SNARKs particularly, but the same idea applies to zk-STARKs, too.
+}:
+
+\bquote{
+    For example, you can make a proof for the statement "I know a secret number such that if you take the word `cow', add the number to the end, and SHA256 hash it 100 million times, the output starts with \texttt{0x57d00485aa}".
+    The verifier can verify the proof far more quickly than it would take for them to run 100 million hashes themselves, and the proof would also not reveal what the secret number is.
+}[\href{https://vitalik.ca/general/2021/01/26/snarks.html}{An approximate introduction to how zk-SNARKs are possible / vitalik.ca / 2021-01-26}]
+
+This is good motivation to explore whether any of these cryptosystems are useful for constructing a suitable Simplex-SPV method.
+
+\subsubsubsubsection{zk-STARKs}
+
+The major reason to consider S\textbf{T}ARKs first is their \textbf{t}ransparent (trustless) setup.
+
+At first glance, zk-STARKs seem promising: complexity of the proof size is $O(\log^2 |C|)$ for an algorithm with size $|C|$, and verification time is $O(\log |C|)$.\footnote{
+    These values and complexities are taken from \href{https://www.youtube.com/watch?v=h-94UhJLeck&t=1519s}{ZK Whiteboard Sessions - Module One: What is a SNARK? by Dan Boneh}.
+}
+(The algorithm, $C$, would be the block-verification algorithm including state-transitions.)
+
+However, the \emph{actual} proof size is more like 50 KB in the best case.
+This is problematic unless simplex-chain block sizes are much greater than 50 KB.
+Realistically, we should expect a single simplex-chain to record and verify many of these proofs -- as many as one for each block in each other simplex-chain.
+There are techniques to help here -- like \emph{recursive} STARKs -- but making the method more complex exacerbates other problems.
+For example: creating a STARK proof is somewhat resource intensive.
+The running-time is okay, but RAM requirements can be in the many-gigabytes.
+ these proofs would need to be verified for each block in each other simplex-chain that
+
+\begin{itemize}
+    \item transparency, good
+    \item proof size, bad
+    \item maybe combining proofs?
+    \item realistically, would be hard to make this feasible
+    \item come back to it if we run out of other options
+\end{itemize}
+
+\subsubsubsubsection{zk-SNARKs}
+
+\begin{itemize}
+    \item trusted set-up / toxic waste
+    \item why toxic waste bad
+    \item what if the toxic waste was public
+    \item what's the problem (fraudulent proofs)
+    \item that is a problem with ZK
+    \item but we can provide fraud proofs\dots
+    \item wait, if we can provide fraud proofs (and we'd rely on that), why do we need a zk-SNARK?
+\end{itemize}
+
+\subsubsubsection{What about Fraud Proofs?}
+
+
+
+
+\subsubsubsection{draft content below}
+
+
+It might be feasible for someone to create an invalid block that gets reflections.
+We expect this because PoR does not validate the state transitions of reflecting chains.
+So, just because some transaction exists, or some state can be proven, doesn't mean that we can use that proof.
+
+There's another case where we can't rely on SPV proofs: blocks that are not part of a block-DAG's main chain (since those transactions are eventually executed in a different context than the block was created in).
+
+We know -- from \autoref{sec:dos-and-dags} -- that an attacker with more than 50\% of a chain's local hash-rate can produce relatively long chain-segments of empty (or invalid) blocks.
+We also know that there will be some delay before honest miners' blocks are included in the main-chain once again.
+
+If an attacker on some simplex-chain is producing empty-but-valid blocks, that doesn't compromise SPV.
+
+----------------
+
+If you have followed everything up to this point and have been considering how $\UT1$ might be implemented, you have probably noticed an omission that we have not discussed: SPV.
+
+Let's consider:
+\begin{enumerate}
+    \item How does SPV work in Bitcoin?
+    \item Why wouldn't SPV work in UT?
+    \item How could we facilitate SPV in UT?
+    \item What is actually required to do SPV in UT?
+\end{enumerate}
+
+--------
+
+exists => valid -- technicality when txs can fail, but we just check the state for the success of that transaction instead.
+
+--------
+
+don't do consensus on state transitions; do consensus on error correction of state transitions.
+
+epistemic asymmetry between praise and criticism.
+
+---------
+
+limit of proofs of invalididty are always smaller/easier than contraproofs of fraud
