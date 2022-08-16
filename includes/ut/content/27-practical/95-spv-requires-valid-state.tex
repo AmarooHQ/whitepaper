@@ -341,21 +341,26 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 \rSe{Hmm. Maybe.}
 \rSe{Repeat the idea back, a bit more organized this time.}
 \rMax{
-    Yup.\\
-    \\
+    Yup.
+}
+\rMax{
     The first thing we need is for each simplex-chain to support general and short fraud proofs.
-    Ideally, full nodes should automatically generate them when processing an invalid block. \\
-    \\
+    Ideally, full nodes should automatically generate them when processing an invalid block.
+}
+\rMax{
     Then, each chain must support validating and recording these fraud proofs alongside PoRs.
     Sometimes, a valid block might reflect an invalid block before the miner learned of the fraud proof.
-    That's okay, since we expect the fraud proof to arrive a short time \emph{after} the invalid block. \\
-    \\
+    That's okay, since we expect the fraud proof to arrive a short time \emph{after} the invalid block.
+}
+\rMax{
     At some point, a simplex-chain will include the fraud proof in its PoR graph (which could be any simplex-chain).
     If a miner for a different simplex-chain wants to reflect that block, then they \emph{must} include the fraud proof, also.
-    If the invalid block was reflected by a past block, but the fraud proof wasn't yet known, then the miner flags the invalid block anyway, even though the corresponding PoR was in an ancestor block. \\
-    \\
-    Basically, the inclusion of these fraud proofs becomes a trigger for a fork -- blocks that don't acknowledge the fraud proof can't use PoRs via blocks that do acknowledge it. \\
-    \\
+    If the invalid block was reflected by a past block, but the fraud proof wasn't yet known, then the miner flags the invalid block anyway, even though the corresponding PoR was in an ancestor block.
+}
+\rMax{
+    Basically, the inclusion of these fraud proofs becomes a trigger for a fork -- blocks that don't acknowledge the fraud proof can't use PoRs via blocks that do acknowledge it.
+}
+\rMax{
     So, for an attacker to produce a dominant history that avoids the fraud proof, they need to do a 51\% attack.
 }
 \rSe{
@@ -370,6 +375,8 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     Like, including them is basically the same as assuming a block is valid in the absence of a fraud proof, but with extra computation.
 }
 \rMax{So we don't need them at all.}
+% note: maybe wrap up day 1 here and then have a <a few days later> banner or something.
+% then put all this extra stuff -- "i've thought about it now" and on -- into the 2nd part of the dialog
 \rSe{
     Cool. \\
     \\
@@ -378,13 +385,15 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 }
 \rSe{
     Attackers can choose which blocks they reflect.
-    So what about this case? \\
-    \\
+    So what about this case?
+}
+\rSe{
     An attacker first pushes all the other miners out of a chain by mining at a loss.
     Then they mine their invalid block that has some tx that will later be used for SPV fraud (maybe with intermediate transactions, too).
     The fraud proof for that block gets propagated throughout the PoR graph.
-    But each other simplex-chain only records it once. \\
-    \\
+    But each other simplex-chain only records it once.
+}
+\rSe{
     The attacker then just skips those blocks with the fraud proof.
     Is there anything to stop the attacker using PoRs via blocks \emph{after} those blocks with the fraud proof?
 }
@@ -431,39 +440,144 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     So the attacker would need to pay an extra block reward per invalid block per block-period (split among all simplex-chains).
 }
 \rMax{
-    Since the attacker loses the actual block rewards, too, the total cost after $k$ blocks is the $k$-th triangle number $+ k$.
-    ish. That's $O(k^2)$ cost.
+    Since the attacker loses the actual block rewards, too, the total cost after $z$ blocks is the $z$-th triangle number $+ z$.
+    ish.
+    That's $O(z^2)$ cost.
 }
 \rSe{
     Good, that gives a basis for security parameters.
 }
 \rSe{
+    How should the reward for including the fraud proof be split up?
+}
+\rMax{
+    Well, we don't want honest miners to have a reason to try and game it.
+    And we want all chains to record it in their PoR graph.
+    My first guess is to split the reward between all other chains.
+    So if the block reward for the invalid block was $r$, then the miner of the first block on each chain to contain the fraud proof should get $\sim\nicefrac{r}{N_1}$.
+}
+\rSe{
     If there's something for miners to gain from producing the \emph{first} block (in that simplex-chain) to contain the fraud proof, is there an incentive for them to mine sibling blocks instead of building on the best block?
 }
 \rMax{
-    Maybe -- only if that later block looks like the best block.
-    Like, the goal of such a miner is to have that later block be favored by the fork rule.
+    Maybe -- only if that sibling block looks like the best block.
+}
+\rMax{
+    The goal of such a miner is to have that sibling block be favored by the fork rule.
     That shouldn't happen with the way that we count work, though.
-    Like, if the later block uses any PoRs via R-blocks that reflect the earlier block, then the work will be attributed to the earlier block rather than the common ancestor.
+    Like, if the sibling block uses any PoRs via R-blocks that reflect the earlier block, then the work will end up being attributed to the earlier block rather than the common ancestor.
+}
+\rSe{
+    Is it ever honest for a miner to act like that?
+}
+\rMax{Hmm. I guess not.}
+\rMax{
+    Actually, here's a way to tighten things up.
 }
 \rMax{
-    I have just thought of a way to tighten things up, though.
     Consider that miners must only reflect blocks that they've downloaded, and that condition is recursive.
-    So, if a new L-block does PoR via some R-block, and that R-block reflects an L-block that isn't in the main L-block's history -- well that implies that the miner has downloaded that other L-block but has not linked back to it.
+    So, if a new L-block (\BL{2a}) does PoR via some R-block (\BR{1}), and that R-block reflected an L-block that isn't in the main L-block's history (\BL{2}) -- well that implies that the miner has downloaded \BL2 but has not linked back to it.
+}
+\rMax{
     But a miner can link back to both valid and invalid blocks.
-    If the other L-block is valid, then then honest miner should build on it, and if it's invalid then they should flag it as invalid.
+    If \BL{2} is valid, then an honest miner should build on it, and if \BL{2} is invalid then they should flag it as invalid.
 }
 \rMax{
-    Is there ever a case where it's honest to ignore a block like that? \\
-    I suspect not.
+    Similarly, all blocks that \BR{1} reflected (that aren't L-blocks) should have been downloaded, so can \emph{and should} be reflected, too.
 }
-
-
 \rMax{
-    Don't do consensus on state-transitions. \\
-    \\
-    Do consensus on data availability, maximal interconnection, and error correction of state-transitions.
+    So, we can add another two constraints to block validation:
 }
+\rMax{
+    \emph{if you reflect a block, then all non-local blocks reflected by that block must also be reflected, or have been reflected by a past local block}
+}
+\rMax{
+    and \emph{you must link back to all local blocks that both are \underline{chain-tips} and have been reflected by blocks you reflect}
+}
+\rMax{
+    Both constraints are free, and a violation of either of these constraints should be easy to prove via a fraud proof.
+}
+\rMax{
+    Oh, and the \emph{link back to all possible local blocks} rule would reduce the expected length of an empty-block DoS from $O({A_{\text{blocks}}}^2)$ to $O(A_{\text{blocks}})$, too.
+}
+\rSe{
+    How does this stop miners making sibling blocks to harvest fraud proof rewards?
+}
+\rMax{
+    Say that the local block \BL{2} contains the fraud proof for some other chain.
+    A miner could make a block, \BL{2a}, that looks like it was created earlier than \BL{2}.
+    They'd just set the timestamp earlier and only include some of the PoRs that \BL{2} has.
+    However, there are PoRs from other chains that point to \BL{2}, but not \BL{2a}.
+    So the next L-block (\BL{3}) will link back to both, but \BL{2} will be the primary parent.
+}
+\rMax{
+    If a miner is mining \BL{2a} after \BL{2}, they're now unable to include any PoRs via any blocks that reflect \BL{2} (and this applies recursively).
+    So there's no way for \BL{2a} to have substantially more PoRs than \BL{2}.
+    There might be \emph{some} PoRs that become available after \BL{2} was mined but before the miner downloaded \BL{2}.
+}
+\rMax{
+    But from \BL{3}'s perspective, those PoRs are valid for both \BL{2} and \BL{2a}.
+    And there will be some PoRs for \BL{2} that don't include \BL{2a} -- the PoRs produced after other miners learn of \BL{2} but before \BL{2a} was mined.
+}
+\rMax{
+    So \BL{2} should always out-weigh \BL{2a} $\implies$ \BL{2} always wins.
+}
+\rSe{I see.}
+\rSe{
+    So, we've covered \emph{safe} and \emph{reliable}.
+    What about \emph{succinct} and \emph{fast}?
+}
+\rMax{
+    WRT \emph{succinct}, the SPV proof is a merkle/verkle branch leading to some transaction or state, which is $O(\log c) + O(1)$.
+    Blocks will have room for $\sim 100$ transactions, so verkle branches could potentially be $O(1)$.
+}
+\rMax{
+    WRT \emph{fast} -- I think we need to go back to the cost of bribes.
+}
+\rMax{
+    Consider the targeted simplex-chain (which would have an `outgoing' tx).
+    Also assume the attacker is the only miner.
+    For a bribe over $z$ blocks, the attacker's cost ($Z$) is $Z = r(\frac{1}{2} z (z+1) + z) = \frac{1}{2} r z (z + 3)$.
+}
+\rMax{
+    If the total value of outgoing SPV transactions (for that block) have value $v$, then an attack is profitable if $2v > rz(z+3)$.
+    We want the opposite inequality for some idea of when an SPV transaction is safe to accept.
+}
+\rMax{
+    So, $2vr^{-1} < z(z+3) = zz + 3z$.
+}
+
+% \begin{align}
+%     0 &= zz + 3x - 2v/r \\
+%     z &= -3/2 \pm \sqrt{9 + 8v/r}/2 \\
+%     z &= (-3 + \sqrt{9+8v/r})/2 \\
+%     \text{if } v < r \\
+%     z &< (-3 + \sqrt{17} < \sqrt{25})/2 \\
+%     z &< (-3 + 5)/2 \\
+%     z &< 1 \\
+%     \text{if } v < xr \\
+%     2z &< -3 + \sqrt{9 + 32 = 41 < 49} \\
+%     2z &< -3 + 7 \\
+%     z &< 2
+%     \text{if } v < xr \\
+%     2z &< -3 + \sqrt{9 + 8x = 1 + 8(1+x)} \\
+%     2z &< -3 + 2\sqrt{2(9/8 + x)} \\
+%     2z &< -3 + 2\sqrt{2}\sqrt{2x} \\
+%     2z &< -3 + 4\sqrt{x} \\
+%     z &< 2\sqrt{x} - \frac{3}{2}
+% \end{align}
+
+% end of day 1
+% to go at the end:
+
+\rMax{I think I just realized something about scaling.}
+\rMax{
+    It's not about consensus on \emph{state-transitions}. \\
+    % \\
+    It's about consensus on the \emph{error correction} of state-transitions.
+}
+
+% note: start 2nd part/day here?
 
 
 --------
@@ -503,7 +617,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     Don't let them cloud your thinking.
     If you get defensive, it'll shut down error correction.
     Consciously maintain a truth-seeking mindset.
-    Remember: be humilitous.
+    Remember: criticism is a gift.
 }
 \rSe{
     There's a big one that you missed. \\
