@@ -341,15 +341,17 @@ each tile has a local $O(c)$ load for PoR verification
 each tile is $d \lesssim \log_2(n)$ away from the root
 
 all tiles between that tile and the root need to have PoRs verified, plus the root and its surrounding tiles, and the local tile's neighbors.
+however, the recursive PoRs between a tile and the root overlap substantially with the internal reflections of intermediate tiles.
+thus, the lower limit excludes those intermediate tiles, and the upper limit includes all PoRs in all intermediate tiles.
 
-root + children + gc + in-between + local + children
+additionally, some of those tiles contribution is negligible.
 
-$R = \text{root} = 2$
+upper limit: (root + root's children + grandchildren) + (in-between) + (local + local's children)
 
-that's $((v-1)^2 + (v-1) + R) + \max(0, d - 3) + (1 + (v-1))$
+that's $(1 + (v-1) + (v-1)^2) + \max(0, d - 3) + (1 + (v-1))$
 
 \begin{align*}
-    & & &\quad\:\: ((v-1)^2 + (v-1) + R) + \max(0, d - 3) + (1 + (v-1)) \\
+    & & &\quad\:\: (1 + (v-1) + (v-1)^2) + \max(0, d - 3) + (1 + (v-1)) \\
     & & &= (v^2 - 2v - 1 + v - 1 + 2) + \max(0, d - 3) + v \\
     & & &= v^2 + \max(0, d-3) \\
     & & &= O(v^2) + O(\max(0, d-3)) \\
@@ -358,9 +360,22 @@ that's $((v-1)^2 + (v-1) + R) + \max(0, d - 3) + (1 + (v-1))$
     & & &= O(v^2 + \log(n)) \\
     \text{since } v^2 \text{ is constant:} & & &= O(\log(n)) \\
     % \therefore \text{ (assuming +PoRs) total load is:} & & & O(c\log(n)) \\
-    \therefore \text{ total load is:} & & & O(c^2\log(n)) \\
+    \therefore \text{ total load is:} & & & O(c^2 \log(n)) \\
 \end{align*}
 
+lower limit: (root + root's children) + recursive + local
+
+$(1 + (v-1)) + \max(0, d - 2) + 1$
+
+\begin{align*}
+    & & &\quad\:\: (1 + (v-1)) + \max(0, d - 2) + 1 \\
+    & & &= v + \max(0, d - 2) + 1 \\
+    & & &= O(v) + O(\max(0, d-2)) + O(1) \\
+    & & &= O(v) + O(d) + O(1)\\
+    & & &= O(v) + O(\log(n)) + O(1) \\
+    \text{since } v \text{ is constant:} & & &= O(\log(n)) \\
+    \therefore \text{ total load is:} & & & O(c^2 \log(n)) \\
+\end{align*}
 
 \subsubsubsubsection{Complexity of Minimum Recursive PoR Set}
 

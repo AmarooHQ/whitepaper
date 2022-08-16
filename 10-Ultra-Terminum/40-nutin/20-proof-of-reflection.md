@@ -401,10 +401,10 @@ For now, let's assume that \cR records \cL headers \emph{and} the corresponding 
 \todoDraftOnly{this should go later when talking about mutual refl:\\
 In this case (with only 2 chains) it's somewhat trivial.
 It's trivial because, when \cR reflects a malicious \cL block, it will \emph{always} come with a PoR, even if that PoR proves that no \emph{new} \cR blocks were reflected by the \cL block (for reasons discussed in \autoref{sec:counting-work}).
-Since this case only has two chains (\cL and \cR), \cL will only be reflecting \cR blocks.
-- first branch of \cL's PoRs will be second branches of some \cR PoRs.
-- and those will correspond to known \cR blocks.
-- so it's trivial to check that all the required data exists etc.
+Since this case only has two chains (\cL and \cR), \cL will only be reflecting \cR blocks.\\
+- first branch of \cL's PoRs will be second branches of some \cR PoRs.\\
+- and those will correspond to known \cR blocks.\\
+- so it's trivial to check that all the required data exists etc.\\
 - combine with VLMTs.
 }
 
@@ -412,7 +412,6 @@ Since this case only has two chains (\cL and \cR), \cL will only be reflecting \
 
 <!-- Broadly, there are two categories of low-overhead, potential solutions: proofs of validity, and proofs of invalidity (i.e., fraud proofs).
 Let's consider the latter.
-
 
 Say that it is easy for a full node to construct a concise proof showing that the claimed chain-weight is fraudulent.
 Honest nodes (of both \cL and \cR) have an incentive to broadcast and record (on-chain) any such proofs.
@@ -756,7 +755,7 @@ What can L-blocks/R-block \emph{mean?}
 * \emph{Relative block weights} --- This has real-world meaning: how much harder is it to generate a block on one network vs another network?
 * \emph{Relative confirmations} --- This has real-world meaning: how many confirmations does one network take, compared to another, to reach equivalent security?\footnote{
   ``Equivalent security'' means that a doublespend attempt on one network is just as risky, costly, etc, as a doublespend attempt on the other network.
-  To do this comparison, we start by picking some $q$ for the attacker on \cL, a transaction value (in L-coins), \cL's block reward, and then finding boundary of attack-viability (measured in L-confirmations).
+  To do this comparison, we start by picking some $q$ for the attacker on \cL, a transaction value (in L-coins), \cL's block reward, and then find the boundary of attack-viability (measured in L-confirmations).
   The boundary of attack-viability is where rules of thumb around confirmation times come from, e.g., \emph{for Bitcoin, a transaction is safe after 6 confirmations.}
   Next, we consider an \emph{equivalently valuable} transaction on \cR (converting via the exchange rate), and an equivalent attacker (using \autoref{eq:por-conv-work} to convert).
   How many confirmations are needed on \cR so that $\text{P}_L(\text{attack success}) = \text{P}_R(\text{attack success})$?
@@ -859,10 +858,11 @@ We will use the subscript $W\rightarrow B$ to denote the idea of converting betw
 \end{align}
 
 When a DAA adds context, it converts blocks $\rightarrow$ B-blocks, and seconds $\rightarrow$ B-seconds.
-(Alternatively, it could \emph{strip} context; the only thing that matters is that $\text{ConversionConst}_{W\rightarrow B}$ is unitless.
-Either way works because the DAA acts as a boundary of the convertible context in both cases.)
+
+Alternatively, it could \emph{strip} context; the only thing that matters is that $\text{ConversionConst}_{W\rightarrow B}$ is unitless.
+Either way works because the DAA acts as a boundary of the convertible context in both cases.
 \begin{align}
-  \text{With context:}
+  \text{Alt. with context:}
     & & \text{NextWork}_{W\rightarrow B}(D_\text{prev})
     & = \frac{\Delta t_\text{actual}}{\Delta t_\text{target}} \cdot D_\text{prev}
     & & \frac{\text{B-hashes}}{\text{B-block}}
@@ -874,6 +874,8 @@ Either way works because the DAA acts as a boundary of the convertible context i
     & & \text{(unitless)}
     \nonumber
 \end{align}
+
+\todo{rework above and if kept then note that we'll include the context explicitly.}
 
 <!-- \autoref{eq:bitcoin-daa} -->
 
@@ -1051,6 +1053,8 @@ In that case, $\nicefrac{L_d}{L_r} \cdot \nicefrac{R_r}{R_d}$ gives us L-hashes/
 
 \label{sec:conversion-single-root-token}
 
+\todo{add degenerate case: same block reward, same difficulty}
+
 \input{20-por/40-single-root-token-2.tex}
 
 #### Different Root Tokens with a DEX
@@ -1058,6 +1062,19 @@ In that case, $\nicefrac{L_d}{L_r} \cdot \nicefrac{R_r}{R_d}$ gives us L-hashes/
 \label{sec:comparing-weight-dex}
 
 \input{20-por/45-diff-rts-and-dex-2.tex}
+
+#### What About SPV?
+
+Both contexts (SRT and DEX) require that participating chains can do on-chain SPV against one another.
+Chains need some ability to *introspect* reflecting chains -- e.g., SRT requires that users can move root tokens between chains, and the DEX context requires two chains to agree on the exchange rate between their root tokens.
+Even without this requirement, some method of cross-chain communication is clearly desirable.
+
+Eventually, we'll need to construct a method for SPV between mutually reflecting chains that works and is safe.
+However, there are still other problems that we have not yet solved, and the solutions may motivate certain blockchain designs over others.
+The difference between these designs will likely impact whether (and how) SPV can be done safely.
+So, attempting to solve the SPV problem at this point is premature.
+
+We will proceed on the \emph{assumption} that SPV is possible and easy to do in a reasonable time period, and we'll investigate the problem of SPV in detail in \autoref{sec:spv-in-ut}.
 
 ### Converting Confirmations
 

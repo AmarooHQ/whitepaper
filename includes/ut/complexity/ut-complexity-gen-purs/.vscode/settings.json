@@ -28,4 +28,5 @@
         "forall",
         "verkle"
     ],
+    "editor.rulers": [80, 120],
 }

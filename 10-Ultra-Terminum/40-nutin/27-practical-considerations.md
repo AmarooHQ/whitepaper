@@ -10,6 +10,14 @@
 
 \todoDraftOnly{stateless blockchains}
 
+\todo{
+    introduce $N_1$ and $O(N_1) = O(c)$.
+}
+
+$$
+\frac{c}{\log_2 c} = \frac{c \log_2 2}{\log_2 c} = c \log_c 2
+$$
+
 ### Availability of Reflected Blocks
 
 \label{sec:availability-of-blocks}
@@ -652,3 +660,15 @@ atk situations:
 - reflection censorship (not rly a problem)
 
 -->
+
+<!-- ### Exists $\implies$ Valid: Watching the Watchers -->
+
+%% BEGIN ### RELEASE
+
+### On SPV In UT
+
+\label{sec:spv-in-ut}
+
+\input{27-practical/95-spv-requires-valid-state.tex}
+
+%% END ### RELEASE

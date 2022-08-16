@@ -21,11 +21,6 @@
   The point of this dialog is to give you an \emph{intuition} for the effect of these factors; it's intended to help answer the question \emph{Why is attacking UT harder and more complex than attacking traditional consensus methods?}
 }
 
-\newcommand{\nefName}{EMalo}
-\newcommand{\cMax}[1]{\ChatR{title={Max:},colback=Cerulean!20}{#1}}
-\newcommand{\cNef}[1]{\ChatL{title={\nefName:},colback=BrickRed!20}{#1}}
-\newcommand{\cSe}[1]{\ChatL{title={ESe:},colback=ForestGreen!20}{#1}}
-
 \begin{tcolorbox}[colback=black!70,coltext=white]
     \centering
     This is the beginning of your direct message history with @\nefName

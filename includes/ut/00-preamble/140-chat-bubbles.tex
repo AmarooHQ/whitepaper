@@ -13,12 +13,12 @@
 }
 
 \newcommand{\ChatL}[3]{
-    \ChatRaw{#1}{hbox,#2}{#3}
+    \ChatRaw{#1}{hbox,breakable,parbox=false,#2}{#3}
 }
 
 \newcommand{\ChatR}[3]{
     \begin{flushright}
-    \ChatRaw{#1}{hbox,#2}{#3}
+    \ChatRaw{#1}{hbox,breakable,parbox=false,#2}{#3}
     \end{flushright}
 }
 

@@ -1,4 +1,4 @@
-What happens if a chain reflects a block that is not available?
+What happens if a chain reflects a valid block that is not available?
 Could an attacker use this to their advantage?
 
 For example, consider the following (shown in \autoref{fig:unavailable-ex1}).
@@ -33,7 +33,7 @@ Note that, although \BR2 will almost certainly reflect \BL1, whether it reflects
 
 The attacker can use this situation to their advantage if \BR{2a} has precedence over \BR{2} (i.e., it's favored by the fork-rule).
 In that case, the attacker can publish \BR{2a} \emph{after} \BR{2} is mined for an advantage.\footnote{
-    This is similar (if not equivalent) to the \emph{selfish mining} attack published in \citeSelfishMiningFull{}.
+    This is similar to the \emph{selfish mining} attack published in \citeSelfishMiningFull{}.
 }
 When does this case occur?
 
@@ -41,16 +41,44 @@ If \BR{2} does \emph{not} reflect \BL2, then \BR{2} will claim the same chain-we
 However, the next block -- \BR{3} -- will favor \BR{2a} since the PoR via \BL{2} contributes weight to \BR{2a} (as discussed in \autoref{sec:counting-work}).
 So the attacker \emph{always} has the advantage if \BR{2} \emph{does not} reflect \BL2.
 
-If \BR2 does reflect \BL2, then where should we attribute the work contributed by \BL2?
+If \BR2 does reflect \BL2, then \BR1 is the only block to which we can attribute the work contributed by \BL2.
+Thus \BR2 will claim a greater chain-weight than \BR{2a}.
+However, in the context of the next \cR block (\BR3), \BR{2a} will still have precedence over \BR2.
 
-work counted as 0 -> same as before, atker advantage
+Both these situations makes sense: sometimes two \cR blocks will be created near-simultaneously, and occasionally only one of those blocks will be reflected by an \cL block.
+In those naturally arising cases, we'd \emph{expect} the \BR{2a} block to take precedence.
 
-work counted towards \BR1 -> \BR2a and \BR2 have the same claimed chain-weight.
+So, we seem to have a conflict: on the one hand, an attacker could withhold a block (but not the header or PoRs) to gain some advantage; on the other hand, prioritizing the earlier block seems to be necessary and correct behavior when this situation arises naturally.
 
+The only difference between these two situations is whether \BR{2a} is available or not; so this will be our discriminating factor.
 
+Can \cR do anything to prevent \cL miner's reflecting \BR{2a} before the block body is released?
+The \cR miners' can't prevent a withheld \cR block from being produced or reflected.
+But, \cR miners can still influence \cL miners' choice to reflect \BR{2a} (and withheld blocks in general).
+\cL miners want their blocks to be reflected by \cR miners so that future \cL blocks will build on top of their's.
+So \cR miners could refuse to reflect some \cL blocks -- particularly, \cL blocks that reflect \cR block headers without a known body (such as \BR{2a}).
+Since \cL miners face the same problem, \cR miners should refuse to reflect \cL blocks for which they do not have the block body.
 
+If both \cR and \cL miners do this, then an equilibrium is achieved and an attacker cannot gain an advantage by withholding block bodies.
 
+asdf todo
 
+\ctable[
+  pos = h,
+  caption = A matrix of miner choices showing when PoR works.,
+  % cap = ,
+  center,
+  label = tab:matrix-availability-refl-blocks,
+]{rcc}{}{
+  \FL
+  {} & \shortstack[c]{\cL miners reflect \\ withheld \cR blocks} & \shortstack[c]{\cL miners do not reflect \\ withheld \cR blocks}
+  \ML
+  \shortstack[c]{\cR miners reflect \\ withheld \cL blocks} & no & no \NN
+  \shortstack[c]{\cR miners do not reflect \\ withheld \cL blocks} & no & yes
+  \LL
+}
+
+asdf
 
 Once an honest \cR miner successfully creates \BR{2}, can it ever have precedence over \BR{2a}?
 
@@ -106,3 +134,5 @@ If no:
 For example: a \cL miner receives a header for some block \BR{1a} along with a PoR via a \BL{1}
 
 Let's consider the example in \autoref{fig:unavailable-ex}:
+
+(asdf)
