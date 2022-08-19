@@ -103,6 +103,11 @@ watch:
 	bash bin/msg_good.sh "Watching. Command to re-run: $(WATCH_CMD)"
 	bin/onchange.sh ./10-Ultra-Terminum ./includes/ut/content ./includes/ut/algorithms '$(WATCH_CMD)'
 
+evince-draft-bg:
+	evince output/whitepaper-draft-reloadable.pdf 2>/dev/null &
+
+watch-evince: evince-draft-bg watch
+
 watch-release: WATCH_CMD=make release-quick
 watch-release: watch
 

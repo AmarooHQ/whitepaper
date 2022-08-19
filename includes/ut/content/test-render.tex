@@ -79,7 +79,7 @@
 \usepackage{amsmath,amsfonts}
 \usepackage{mathtools}
 \usepackage{mdframed}
-\usepackage[skins,breakable]{tcolorbox}
+\usepackage[skins,breakable,most]{tcolorbox}
 \usepackage[yyyymmdd,hhmmss]{datetime}
 \usepackage{nicefrac}
 \usepackage{epigraph}
@@ -91,22 +91,27 @@
 \usepackage{pdfpages}
 \usepackage{algpseudocode}
 \usepackage{algorithm}
+\usepackage[automake,toc,nogroupskip]{glossaries}
 \usepackage[titles]{tocloft}
 \usepackage[fit]{truncate}
 \usepackage{wallpaper}
 \usepackage[section]{placeins}
 \usepackage[export]{adjustbox}
 \usepackage{ifthen}
+\usepackage{array}
+\usepackage{tabularx}
 \usepackage{ctable}
-\usepackage{tablefootnote}
 \usepackage{trimspaces}
 \usepackage{cancel}
-\usepackage{array}
 \usepackage[all,cmtip]{xy}
 \usepackage{morewrites}
 \usepackage{xparse}
 \usepackage{forest}
 \usepackage{mathdots}
+%% for labeling lists
+\usepackage{enumitem}
+%% use cref not autoref for items
+\usepackage[nameinlink]{cleveref}
 
 
 \graphicspath{{../}{../diags/}}
@@ -114,18 +119,15 @@
 
 \providecommand*\ErrorOnReleaseIfTODOs{no}
 \providecommand*\BuildMode{draft}
+\providecommand*\preparedfor{}
 
 
-\input{../00-preamble/020-colors-and-styles.tex}
-\input{../00-preamble/030-hyperlinks.tex}
-\input{../00-preamble/050-utils.tex}
-\input{../00-preamble/060-autoref.tex}
-\input{../00-preamble/110-quotes.tex}
-\input{../00-preamble/120-comments.tex}
-\input{../00-preamble/130-todos.tex}
-\input{../00-preamble/510-maths.tex}
-\input{../00-preamble/610-ut-names.tex}
-\input{../00-preamble/999-citations.tex}
+\makeatletter
+\def\input@path{{./}{../}{../diags/}{../../}{../../../}}
+\makeatother
+
+
+\input{includes/ut/00-preamble/000-all-preambles.tex}
 
 \makeatletter
 \providecommand\defineTermTex[2]{
@@ -152,6 +154,10 @@
 \input{27-practical/10-refl-availability.tex}
 
 \input{20-por/10-incremental-por.tex}
+
+\subsection{SPV}
+
+\input{27-practical/95-spv-requires-valid-state.tex}
 
 \subsection{UT Aleph}
 

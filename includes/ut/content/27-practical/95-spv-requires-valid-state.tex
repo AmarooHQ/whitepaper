@@ -536,7 +536,9 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 }
 \rMax{
     Consider the targeted simplex-chain (which would have an `outgoing' tx).
-    Also assume the attacker is the only miner.
+    Also assume the attacker is the only miner on that chain.
+}
+\rMax{
     For a bribe over $z$ blocks, the attacker's cost ($Z$) is $Z = r(\frac{1}{2} z (z+1) + z) = \frac{1}{2} r z (z + 3)$.
 }
 \rMax{
@@ -546,6 +548,20 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 \rMax{
     So, $2vr^{-1} < z(z+3) = zz + 3z$.
 }
+
+todo:
+
+\begin{itemize}
+    \item why do we only care about outgoing SPV?
+    \item bribe threshold discussion
+    \item - only pay 1/2 miners?
+    \item - can briber profit?
+    \item - 'treasury' for fraud proofs? -- attacker can probs profit
+    \item - what about 1/sqrt(n)
+    \item - security parameter, z local confs and Nz global work?
+    \item nipopows
+\end{itemize}
+
 
 % \begin{align}
 %     0 &= zz + 3x - 2v/r \\
@@ -566,6 +582,15 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 %     2z &< -3 + 4\sqrt{x} \\
 %     z &< 2\sqrt{x} - \frac{3}{2}
 % \end{align}
+
+spv via bulletproofs?
+or something similar?
+basically the job is to prove that all inputs, since the last bulletproof, are valid.
+like you JUST prove that -- not all the blocks, just the chain of inputs
+
+if > some size -- makes sense mb?
+
+
 
 % end of day 1
 % to go at the end:
@@ -640,6 +665,20 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     Okay, let's get back to brainstorming.
     How about we start by listing tools that Eth2 might use but which we don't?
 }
+
+
+\subsubsubsection{SPV Limits}
+
+
+
+
+
+
+
+
+
+
+
 
 \subsubsubsection{What about SNARKs and STARKs?}
 
