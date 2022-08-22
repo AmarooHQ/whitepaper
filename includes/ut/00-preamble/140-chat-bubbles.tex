@@ -32,7 +32,7 @@
 
 %% dialog boxes
 
-\newcommand{\nefName}{EMalo}
+\newcommand{\nefName}{EMalō}
 \newcommand{\cNef}[1]{\ChatL{\nefName}{colback=BrickRed!20}{#1}}  % title={\nefName:}
 \newcommand{\rNef}[1]{\ChatL{}{colback=BrickRed!20}{#1}}
 
@@ -42,3 +42,73 @@
 \newcommand{\cSe}[1]{\ChatL{ExSe}{colback=ForestGreen!20}{#1}}  % title={ExSe:}
 % \newcommand{\cSe}[1]{\ChatL{ExRatione}{colback=ForestGreen!20}{#1}}  % title={ExSe:}
 \newcommand{\rSe}[1]{\ChatL{}{colback=ForestGreen!20}{#1}}
+
+%
+% v2 chat/dialog helpers
+% idea is to use \marginnote (or \marginpar) in combo with \reversemarginpar or \normalmarginpar
+%
+
+\NewDocumentCommand{\dialogBox}{m m}{
+    \begin{tcolorbox}[
+    % \tcbox[
+        % minipage,  % default for tcolorbox
+        breakable, % doesn't work with hbox
+        bicolor,
+        sharp corners,
+        boxrule=.5pt,
+        % frame engine=standard,
+        % size=title,
+        % hbox,
+        before skip=0.2em,
+        left=3.0mm,
+        right=3.0mm,
+        top=2.0mm,
+        bottom=2.0mm,
+        boxsep=0.3pt,
+        halign=flush left,
+        % tcbox width=auto limited,
+        % text width=\textwidth,
+        % parbox=false,
+        #1
+        ]
+        {#2}
+    %     % {
+    %     % \begin{varwidth}{0.9\textwidth}
+    %         #2
+    %     % \end{varwidth}
+    %     % }
+    \end{tcolorbox}
+}
+
+% args: name, options, text
+\NewDocumentCommand{\dRight}{m m m}{
+    % \begin{flushright}
+        \dialogBox{colback=#2, colframe=#2!40!black, left skip=0.1\linewidth}{
+            \normalmarginpar\marginnote{\textbf{#1\zerofontsize{:\ }}}%
+            #3
+            }
+    % \end{flushright}
+    % \par
+}
+\NewDocumentCommand{\dLeft}{m m m}{
+    \dialogBox{colback=#2, colframe=#2!40!black, right skip=0.1\linewidth}{
+        \reversemarginpar\marginnote{\textbf{#1\zerofontsize{:\ }}}
+        #3
+        }
+    % \par
+}
+
+\colorlet{DMaxCol}{Cerulean!20!white}
+\colorlet{DExSeCol}{ForestGreen!20!white}
+\colorlet{DEMaloCol}{BrickRed!20!white}
+
+\NewDocumentCommand{\dMax}{m}{%
+    \dRight{Max}{DMaxCol}{#1}%
+}
+\NewDocumentCommand{\dSe}{m}{%
+    % ExS\=e
+    \dLeft{ExSē}{DExSeCol}{#1}%
+}
+\NewDocumentCommand{\dNef}{m}{%
+    \dLeft{\nefName}{DEMaloCol}{#1}%
+}

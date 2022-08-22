@@ -47,7 +47,7 @@ It appears that \cref{prem:spv-7} is our current sticking point for Simplex-SPV 
 
 But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could get to \cref{prem:spv-8} by other means.
 
-\subsubsubsection{Dialog: Error Correction}
+\subsubsubsection{Dialog: Error Correction, Part I}
 
 \aside{
     The following is a dramatized dialog based on my thoughts leading up to the afternoon of August 3\textsuperscript{rd}.
@@ -60,492 +60,496 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     % \centering
     3\textsuperscript{rd} August 2022, mid-afternoon, UTC+10
 \end{tcolorbox}
-\cMax{Hey, time to revist SPV.}
-\cSe{Great. Remind me, where are we at again?}
-\rMax{Still stuck on existence $\implies$ validity. Proving stuff isn't the issue, it's answering: how do we know that thing is part of a valid history?}
-\rMax{
+
+\vspace{.5em}
+
+\dMax{Hey, time to revist SPV.}
+\dSe{Great. Remind me, where are we at again?}
+\dMax{
+    Still stuck on existence $\implies$ validity. Proving stuff isn't the issue, it's answering: how do we know that object of the proof is part of a valid history?
+}
+\dMax{
     Like, each simplex-chain already knows the main chain of each other simplex-chain, but that doesn't mean much if there's one chain with an attacker making like 90\% of the blocks.
     We'd need to wait like 80 blocks for the honest branch to win out.
 }
-\rSe{
+\dSe{
     Only 80 blocks?
     It's worse than that.
     If that attack can fraudulently mint new RTs and move them to another chain, then the `block rewards' for the attacker are those new RTs.
     So the attacker won't mind pumping up the difficulty to push other miners out.
 }
-\rMax{Oh\dots{} yeah i guess so.}
-\rMax{
+\dMax{Oh\dots{} yeah i guess so.}
+\dMax{
     Actually, i think it might even be rational for \emph{all} miners to do that.
     Not good.
 }
-\rMax{I'm still convinced that, if SPV is possible in other networks, then there must be a method that works for UT.}
-\rSe{Hmm.}
-\rMax{Any ideas?}
-\rSe{
-    None that you don't have already. \\
+\dMax{I'm still convinced that, if SPV is possible in other networks, then there must be a method that works for UT.}
+\dSe{Hmm.}
+\dMax{Any ideas?}
+\dSe{
+    None that you don't have already. \newline
     Why don't we try something different, see if we can brainstorm some.
 }
 
 (Note: alt section inserted here)
 
-\rSe{How about we start by listing tools that Eth2 might use but which we don't?}
-\rMax{
+\dSe{How about we start by listing tools that Eth2 might use but which we don't?}
+\dMax{
     Yup, okay.
-    DA proofs, BLS sigs, cryptoeconomic fraud proofs, SNARKs and STARKs, sharding / child-chains, staking, slashing, EVM, GHOST. \\
+    DA proofs, BLS sigs, cryptoeconomic fraud proofs, SNARKs and STARKs, sharding / child-chains, staking, slashing, EVM, GHOST. \newline
     That's all that come to mind atm.
 }
-\rSe{
-    Cool -- plenty for the moment. \\
-    Let's go through the list and see if we can eliminate the options one-by-one.
+\dSe{
+    Cool -- plenty for the moment. \newline
+    Let's go through the list and see if we can eliminate the options one-by-one. \\
     Tell me about DA proofs.
 }
-\rMax{
+\dMax{
     Certain types of Ethereum nodes will generate them to prove that the node has some data.
     The idea is that an attacker who wants to lie about having some data can't generate these proofs, and if enough of the network is sampling enough of the block data then it implies that the block is available for download.
 }
-\rMax{
+\dMax{
     This doesn't help us solve the SPV problem, though.
     We already know the blocks are available because miners do simplex-wide consensus on that availability.
     Miner's must only reflect blocks that they've downloaded, and only reflect blocks that reflect blocks that they've downloaded, etc.
 }
-\rSe{
+\dSe{
     Right, so we know that all the relevant blocks have been widely dispersed.
     Seems like we can rule out DA proofs for now.
     What about BLS sigs?
 }
-\rMax{
+\dMax{
     They're pretty neat -- mostly because of \emph{signature aggregation}.
     If transactions had BLS sigs, then we could aggregate all of the signatures per-block into one signature.
     It'd save space per-block, but might also make SPV stuff more complex.
     That said, we could just use a protocol like segregated witness to achieve the same goal.
     In any case, without introducing PoS-like consensus rules, I don't see how BLS sigs could help.
 }
-\rSe{
+\dSe{
     Okay.
     Next, Eth2's fraud proofs.
     These are different from our fraud proofs, right?
 }
-\rMax{
+\dMax{
     The main difference is that we don't have any sort of staking/slashing involved.
     The general principle is the same: show that a computation was done incorrectly, or that a block contains a contradiction.
 }
-\rSe{How do Eth2 fraud proofs work?}
-\rMax{
+\dSe{How do Eth2 fraud proofs work?}
+\dMax{
     Some nodes act like police -- they stake some ETH and then check that blocks/state-transitions are valid.
     If any of those police-nodes find a problem, they sign a message that challenges the invalid block.
     If the fraud proof was false, then the police-node gets slashed.
     Otherwise, whoever signed the original block gets slashed.
 }
-\rSe{
+\dSe{
     Okay, so that doesn't seem compatible with PoR/UT, at least not without big changes.
     How do our fraud proofs work?
 }
-\rMax{
+\dMax{
     The goal of our fraud proofs is to show only the problematic parts of the block using the minimum data necessary.
 }
-\rMax{
+\dMax{
     Say an attacker made a block that looks valid in all ways except the state-transition -- e.g., there's a tx that mints 1 billion coins or w/e.
     We can always prove that such a tx is fraudulent if miners have to commit to the state-root before and after each transaction (in the block itself).
     All we have to do is provide all of the state-tree witnesses that are necessary to evaluate that one tx.
     If the tx is valid, then the output state root will always match the one recorded.
     (This sort of design is related to \href{https://github.com/zack-bitcoin/amoveo-docs/blob/master/design/stateless_full_node.md}{stateless} full nodes, which use similar structures, constraints, and patterns.)
 }
-\rMax{
+\dMax{
     So, say an attacker makes an invalid block.
-    The honest miners in that chain will try to verify the block and find the error.
-    Then, instead of building on the invalid block like normal, they'd link back to that block as an invalid block along with the fraud proof.
+    The miners (and other full nodes) in that chain will try to verify the block and find the error.
+    Then, instead of building on the invalid block like normal, miners would link back to that block as an invalid block along with the fraud proof.
 }
-\rSe{
-    Right, and that only works on the local chain, so, if the attacker is making 90\% of the blocks we're in the same situation from the start, which we already know doesn't work.
+\dSe{
+    Right, and that only works on the local chain, so, if the attacker is making 90\% of the blocks then we're basically in the same `80 blocks' situation from before.
+    Which we already know doesn't work.
 }
-\rMax{
+\dMax{
     Exactly.
     We'd need to wait way too long for the situation to correct itself.
 }
-\rSe{
-    Hmm.
-    Okay, what's next?
-    Ahh, zk stuff.
+\dSe{
+    Okay, zk stuff next.
     Btw, I've been meaning to ask:
 }
 
 % note: the next few dialog msgs overlap with some from the alt section below
-\rSe{
+\dSe{
     Why haven't you considered zk-STARKs as a useful tool for SPV?
 }
-\rMax{
+\dMax{
     Well, I guess I've always associated them with layer 2 stuff, and L2 isn't really relevant to UT's consensus-level design.
     So I just put it to the side and didn't consider it.
     I ruled it out early.
 }
-\rSe{
+\dSe{
     But STARKs/SNARKs are proofs of valid computation, right?
     That seems like it might be useful.
 }
-\rMax{
+\dMax{
     Yeah.
-    If we could produce a ``validity proof'' for each block, then that could potentially solve the SPV problem. \\
-    \\
+    If we could produce a ``validity proof'' for each block, then that could potentially solve the SPV problem.\newline
+    \newline
     Maybe each block could come with a validity proof, or one for the previous block if they're too slow to generate.
     Then, before doing an SPV proof, you could prove that the block is valid first.
 }
-\rMax{
+\dMax{
     But, ofc, you'd need to prove that all the prior blocks were valid, too.
     If we did that for $O(c)$ many chains... well that's probably an issue.
 }
-\rSe{
+\dSe{
     Sure, but some of those proof methods can be aggregated, right?
 }
-\rMax{
+\dMax{
     True.
     Bulletproofs are one example.
     The proofs are short-ish, mb like 2-5 KB, but super slow to generate.
     Verification time is fine in practice for small proofs, but it's linear with the size of the circuit.
     So they're probably not practical without heavily rate-limiting them.
 }
-\rSe{
+\dSe{
     Hmm.
 }
-\rSe{
+\dSe{
     STARKs can be recursively verified, right?
 }
-\rMax{
+\dMax{
     Yeah, that's sort of like aggregation.
     Basically you take some STARKs, which verify e.g., a bunch of blocks in a chain-segment, and then you produce another STARK that verifies those STARKs.
     It's actually pretty neat: the inner STARKs have complexity relative to the block-verification circuit, but the `root' STARK has complexity relative to the STARK-verification circuit.
     Since the block-verification circuit presumably includes the STARK-verification one, we'll always end up with a smaller proof.
 }
-\rSe{
+\dSe{
     Sounds like there's some potential there.
     Is there a catch?
 }
-\rMax{
+\dMax{
     Yeah, there is.
     The cryptographic properties of STARKs are great, but the proof size is definitely an issue.
     We're talking like 50 KB minimum, and up to 200 KB.
     There are other problems, too.
     Like that creating such proofs can take many GB of RAM and that we don't know who'd generate them.
 }
-\rMax{
+\dMax{
     I guess we could have massive blocks to accomodate them, but it doesn't really feel viable.
 }
-\rSe{
+\dSe{
     I agree.
 }
-\rSe{
+\dSe{
     So what about SNARKs, then.
     Do they solve any of those problems?
 }
-\rMax{
-    Yeah\dots{} sorta. \\
+\dMax{
+    Yeah\dots{} sorta. \newline
     The proof size is constant, like 200-400 B depending on the scheme, and the verification time is $O(1)$ too.
 }
-\rMax{
+\dMax{
     The problem is the trusted setup.
     Like, SNARKs solve lots of the problems of STARKs, but the crypto properties aren't okay.
 }
-\rMax{
+\dMax{
     It's a real shame in some ways -- like the proofs are short enough and verification is fast enough that they could concievably be \emph{in the PoR graph itself}.
-    Then, you'd just \emph{know} that the blocks you were doing SPV against were valid. \\
+    Then, you'd just \emph{know} that the blocks you were doing SPV against were valid. \newline
     \dots{} actually, if we did that, we could basically enforce, \emph{at the consensus level}, that all PoRs require a SNARK.
     That'd mean that all reflected blocks are valid (since, if you were a miner, reflecting a block with an invalid SNARK would invalidate your block, and so on).
 }
-\rSe{
+\dSe{
     Huh.
     That seems like a decisive advantage.
 }
-\rMax{
+\dMax{
     Yeah!
     We might need to make blocks a bit bigger or adjust some parameters or something, but in principle everything would still work.
 }
-\rSe{
+\dSe{
     So, talk me through the problem, then.
 }
-\rMax{
-    Well, SNARKs have a trusted setup -- STARKs have a transparent setup so don't have this issue. \\
+\dMax{
+    Well, SNARKs have a trusted setup -- STARKs have a transparent setup so don't have this issue. \newline
     The best SNARK systems have a one-time setup where a special number gets generated.
     Then anyone else can reuse this number to prove correct execution of any suitable algorithm (though generating the proof is slow).
     The special number is the output of a special function that requires some random data as input.
     The random data is sometimes called ``toxic waste'': if it's not properly disposed of, then bad stuff happens.
     So if we used SNARKs, then the toxic waste is like an existential threat hanging over us forever -- because it's impossible to prove that it was disposed of.
 }
-\rSe{
+\dSe{
     Hmm. What sort of ``bad stuff''?
 }
-\rMax{
+\dMax{
     Well, most of this tech has been developed with a focus on L2 scaling.
     In that case the network operator (who also generates and publishes the proofs) could basically steal everyone's money/tokens/whatever.
     So, there's \emph{literally no way to tell} if a SNARK is honest and valid, or dishonest and just `looks' valid.
 }
-\rMax{
+\dMax{
     Plus, most of these systems have some zero knowledge component as well.
     So if, e.g., account balances were not public then an attacker could just print money and no one would be able to tell.
 }
-\rSe{
+\dSe{
     I can see how that'd be a big problem for confidential transactions and the like.
 }
-\rSe{\dots{}}
-\rSe{
+\dSe{\ldots}
+\dSe{
     What if the toxic waste was well known?
 }
-\rMax{
+\dMax{
     Oh, uh, I haven't really thought about it.
 }
-\rMax{
+\dMax{
     I guess that some people would make valid proofs and some people would try to make fraudulent ones.
 }
-\rMax{
+\dMax{
     For the bad ones, though, full nodes of that chain could always tell when the proof was bad.
     They'd find out when they validated the block.
 }
-\rMax{
+\dMax{
     Oh, and they can automatically generate a fraud proof for free at that point.
     Like they already have all the witness data there to produce it.
     Then, the next time an honest miner mines a block, they'll flag the fradulent block by linking back to it as invalid and include the fraud proof.
 }
-\rSe{
+\dSe{
     But we can't depend on any honest miners sticking around if the attacker's willing to mine at a loss.
     That was the original problem.
 }
-\rMax{
-    Oh, yeah. Hmm. \\
+\dMax{
+    Oh, yeah. Hmm. \newline
     If we put a SNARK in the PoR graph, why can't we put the fraud proof in it too?
-    Like, \emph{any} honest full node will generate the fraud proof, so they can just broadcast it.
+    Like, \emph{any} honest full node will generate the fraud proof and auto-broadcast it.
 }
-\rMax{
+\dMax{
     Then any miner of \emph{some other chain} can include the fraud proof in the PoR graph.
     (Which will protect that chain from bad SPV proofs against the bad block or its descendants.)
 }
-\rMax{
+\dMax{
     We just need the fraud proof to like `pollute' the complete PoR graph.
     That's doable, because the fraud proofs are short, like $O(\log c)$ or $O(1)$ or something.
-    Maybe like 500 - 1000 bytes.
+    Maybe like 500 -- 2000 bytes.
 }
-\rMax{
+\dMax{
     So we need a new rule.
-    Something like ``if you reflect a block that contains a fraud proof for some other chain, then you need to record the fraud proof for that other chain, too, unless it's already been recorded''.
+    Something like `if you reflect a block that contains a fraud proof for some other chain, then you need to record the fraud proof for that other chain, too, unless it's already been recorded'.
 }
-\rMax{
+\dMax{
     The goal being that as soon as \emph{any} simplex-chain records a fraud proof for \emph{any other} simplex-chain, then \emph{all other} simplex-chains follow suit.
     If they don't, then they can't take advantage of those PoRs.
     But all honest miners want to do this anyway -- they want the most PoRs possible and they don't want fraud.
 }
-\rMax{
+\dMax{
     And that would start happening almost immediately -- like way before the next block.
     So like within a block period or so the \emph{whole} network would know about it and have recorded it.
 }
-\rMax{
+\dMax{
     An attacker would need to 51\% attack the network!!
 }
-\rMax{Right?}
-\rSe{Hmm. Maybe.}
-\rSe{Repeat the idea back, a bit more organized this time.}
-\rMax{
+\dMax{Right?}
+\dSe{Hmm. Maybe.}
+\dSe{Repeat the idea back, a bit more organized this time.}
+\dMax{
     Yup.
 }
-\rMax{
+\dMax{
     The first thing we need is for each simplex-chain to support general and short fraud proofs.
     Ideally, full nodes should automatically generate them when processing an invalid block.
 }
-\rMax{
+\dMax{
     Then, each chain must support validating and recording these fraud proofs alongside PoRs.
     Sometimes, a valid block might reflect an invalid block before the miner learned of the fraud proof.
     That's okay, since we expect the fraud proof to arrive a short time \emph{after} the invalid block.
 }
-\rMax{
+\dMax{
     At some point, a simplex-chain will include the fraud proof in its PoR graph (which could be any simplex-chain).
     If a miner for a different simplex-chain wants to reflect that block, then they \emph{must} include the fraud proof, also.
     If the invalid block was reflected by a past block, but the fraud proof wasn't yet known, then the miner flags the invalid block anyway, even though the corresponding PoR was in an ancestor block.
 }
-\rMax{
+\dMax{
     Basically, the inclusion of these fraud proofs becomes a trigger for a fork -- blocks that don't acknowledge the fraud proof can't use PoRs via blocks that do acknowledge it.
 }
-\rMax{
+\dMax{
     So, for an attacker to produce a dominant history that avoids the fraud proof, they need to do a 51\% attack.
 }
-\rSe{
+\dSe{
     Hmm, let me think about it.
 }
-\rSe{
+\dSe{
     By the way, where do the SNARKs with publicly known toxic waste fit in?
 }
-\rMax{
+\dMax{
     Umm\dots{} I guess they're like a short way to verify the computations of the block, except, no that doesn't make sense b/c we need to wait and see if there's a fraud proof anyway.
     I guess they don't really do anything.
     Like, including them is basically the same as assuming a block is valid in the absence of a fraud proof, but with extra computation.
 }
-\rMax{So we don't need them at all.}
+\dMax{So we don't need them at all.}
 % note: maybe wrap up day 1 here and then have a <a few days later> banner or something.
 % then put all this extra stuff -- "i've thought about it now" and on -- into the 2nd part of the dialog
-\rSe{
-    Cool. \\
-    \\
+\dSe{Cool.}
+\todo{move this to additional reasoning to a new follow-up dialog?}
+\dSe{
     I've thought about it now.
     I see two problems.
 }
-\rSe{
+\dSe{
     Attackers can choose which blocks they reflect.
     So what about this case?
 }
-\rSe{
+\dSe{
     An attacker first pushes all the other miners out of a chain by mining at a loss.
     Then they mine their invalid block that has some tx that will later be used for SPV fraud (maybe with intermediate transactions, too).
     The fraud proof for that block gets propagated throughout the PoR graph.
     But each other simplex-chain only records it once.
 }
-\rSe{
+\dSe{
     The attacker then just skips those blocks with the fraud proof.
     Is there anything to stop the attacker using PoRs via blocks \emph{after} those blocks with the fraud proof?
 }
-\rMax{
+\dMax{
     Well, a block that builds on an invalid block is itself invalid, so the other simplex-chains would just record that fraud proof, too.
     Any time the attacker generates a new block, there's a new fraud proof.
 }
-\rSe{
+\dSe{
     And what is that fraud proof exactly?
 }
-\rMax{
+\dMax{
     It'd be like: proof2 = header2 + proof1.
     Also, some metadata to point out which ancestor, etc.
 }
-\rSe{
+\dSe{
     So what's the fraud proof of a block that builds on a block that builds on an invalid block?
 }
-\rMax{
+\dMax{
     I see your point -- the fraud proofs get too large (assuming they're stateless).
 }
-\rMax{
+\dMax{
     Tho, hang on, if the other simplex-chains know about the first fraud proof, then they automatically know that any block that builds on the invalid block must be invalid -- no matter how long ago that was.
     No fraud proof required.
 }
-\rSe{
+\dSe{
     That's assuming that the fraud proof is recorded.
 }
-\rMax{Yes.}
-\rSe{
+\dMax{Yes.}
+\dSe{
     So, second question: what sized bribe would prevent a miner from including the fraud proof?
 }
-\rSe{
+\dSe{
     `Honest' miners can choose whether or not to record the fraud proof.
     So as long as the proof hasn't yet been recorded in any other chain's PoR graph, then there's no penalty for the miner deliberately \emph{not} including the fraud proof.
     It's basically free money for the miner.
     From the miner's point of view, someone else will include the fraud proof later on, so it only makes sense to take the money, right?
 }
-\rSe{
+\dSe{
     You can't fix this by waiting longer, either, since the longer that period is, the easier it is for an honest miner to take the bribe -- there are even more future blocks that could contain the fraud proof than before.
 }
-\rMax{
+\dMax{
     Well, like you said there's no pentaly for the miner, currently.
     We can, however, set a lower bound on the bribe by dividing the fraudulent block's reward between the miners that record the fraud proof.
     So the attacker would need to pay an extra block reward per invalid block per block-period (split among all simplex-chains).
 }
-\rMax{
+\dMax{
     Since the attacker loses the actual block rewards, too, the total cost after $z$ blocks is the $z$-th triangle number $+ z$.
     ish.
     That's $O(z^2)$ cost.
 }
-\rSe{
+\dSe{
     Good, that gives a basis for security parameters.
 }
-\rSe{
+\dSe{
     How should the reward for including the fraud proof be split up?
 }
-\rMax{
+\dMax{
     Well, we don't want honest miners to have a reason to try and game it.
     And we want all chains to record it in their PoR graph.
     My first guess is to split the reward between all other chains.
     So if the block reward for the invalid block was $r$, then the miner of the first block on each chain to contain the fraud proof should get $\sim\nicefrac{r}{N_1}$.
 }
-\rSe{
+\dSe{
     If there's something for miners to gain from producing the \emph{first} block (in that simplex-chain) to contain the fraud proof, is there an incentive for them to mine sibling blocks instead of building on the best block?
 }
-\rMax{
+\dMax{
     Maybe -- only if that sibling block looks like the best block.
 }
-\rMax{
+\dMax{
     The goal of such a miner is to have that sibling block be favored by the fork rule.
     That shouldn't happen with the way that we count work, though.
     Like, if the sibling block uses any PoRs via R-blocks that reflect the earlier block, then the work will end up being attributed to the earlier block rather than the common ancestor.
 }
-\rSe{
+\dSe{
     Is it ever honest for a miner to act like that?
 }
-\rMax{Hmm. I guess not.}
-\rMax{
+\dMax{Hmm. I guess not.}
+\dMax{
     Actually, here's a way to tighten things up.
 }
-\rMax{
+\dMax{
     Consider that miners must only reflect blocks that they've downloaded, and that condition is recursive.
     So, if a new L-block (\BL{2a}) does PoR via some R-block (\BR{1}), and that R-block reflected an L-block that isn't in the main L-block's history (\BL{2}) -- well that implies that the miner has downloaded \BL2 but has not linked back to it.
 }
-\rMax{
+\dMax{
     But a miner can link back to both valid and invalid blocks.
     If \BL{2} is valid, then an honest miner should build on it, and if \BL{2} is invalid then they should flag it as invalid.
 }
-\rMax{
+\dMax{
     Similarly, all blocks that \BR{1} reflected (that aren't L-blocks) should have been downloaded, so can \emph{and should} be reflected, too.
 }
-\rMax{
+\dMax{
     So, we can add another two constraints to block validation:
 }
-\rMax{
+\dMax{
     \emph{if you reflect a block, then all non-local blocks reflected by that block must also be reflected, or have been reflected by a past local block}
 }
-\rMax{
-    and \emph{you must link back to all local blocks that both are \underline{chain-tips} and have been reflected by blocks you reflect}
+\dMax{
+    and \emph{you must link back to all local blocks that both are \ul[DMaxCol]{chain-tips} and have been reflected by blocks you reflect}
 }
-\rMax{
+\dMax{
     Both constraints are free, and a violation of either of these constraints should be easy to prove via a fraud proof.
 }
-\rMax{
+\dMax{
     Oh, and the \emph{link back to all possible local blocks} rule would reduce the expected length of an empty-block DoS from $O({A_{\text{blocks}}}^2)$ to $O(A_{\text{blocks}})$, too.
 }
-\rSe{
+\dSe{
     How does this stop miners making sibling blocks to harvest fraud proof rewards?
 }
-\rMax{
+\dMax{
     Say that the local block \BL{2} contains the fraud proof for some other chain.
     A miner could make a block, \BL{2a}, that looks like it was created earlier than \BL{2}.
     They'd just set the timestamp earlier and only include some of the PoRs that \BL{2} has.
     However, there are PoRs from other chains that point to \BL{2}, but not \BL{2a}.
     So the next L-block (\BL{3}) will link back to both, but \BL{2} will be the primary parent.
 }
-\rMax{
+\dMax{
     If a miner is mining \BL{2a} after \BL{2}, they're now unable to include any PoRs via any blocks that reflect \BL{2} (and this applies recursively).
     So there's no way for \BL{2a} to have substantially more PoRs than \BL{2}.
     There might be \emph{some} PoRs that become available after \BL{2} was mined but before the miner downloaded \BL{2}.
 }
-\rMax{
+\dMax{
     But from \BL{3}'s perspective, those PoRs are valid for both \BL{2} and \BL{2a}.
     And there will be some PoRs for \BL{2} that don't include \BL{2a} -- the PoRs produced after other miners learn of \BL{2} but before \BL{2a} was mined.
 }
-\rMax{
+\dMax{
     So \BL{2} should always out-weigh \BL{2a} $\implies$ \BL{2} always wins.
 }
-\rSe{I see.}
-\rSe{
+\dSe{I see.}
+\dSe{
     So, we've covered \emph{safe} and \emph{reliable}.
     What about \emph{succinct} and \emph{fast}?
 }
-\rMax{
+\dMax{
     WRT \emph{succinct}, the SPV proof is a merkle/verkle branch leading to some transaction or state, which is $O(\log c) + O(1)$.
     Blocks will have room for $\sim 100$ transactions, so verkle branches could potentially be $O(1)$.
 }
-\rMax{
+\dMax{
     WRT \emph{fast} -- I think we need to go back to the cost of bribes.
 }
-\rMax{
+\dMax{
     Consider the targeted simplex-chain (which would have an `outgoing' tx).
     Also assume the attacker is the only miner on that chain.
 }
-\rMax{
+\dMax{
     For a bribe over $z$ blocks, the attacker's cost ($Z$) is $Z = r(\frac{1}{2} z (z+1) + z) = \frac{1}{2} r z (z + 3)$.
 }
-\rMax{
+\dMax{
     If the total value of outgoing SPV transactions (for that block) have value $v$, then an attack is profitable if $2v > rz(z+3)$.
     We want the opposite inequality for some idea of when an SPV transaction is safe to accept.
 }
-\rMax{
+\dMax{
     So, $2vr^{-1} < z(z+3) = zz + 3z$.
 }
 
@@ -560,6 +564,7 @@ todo:
     \item - what about 1/sqrt(n)
     \item - security parameter, z local confs and Nz global work?
     \item nipopows
+    \item accelerate via staking?
 \end{itemize}
 
 
@@ -595,10 +600,10 @@ if > some size -- makes sense mb?
 % end of day 1
 % to go at the end:
 
-\rMax{I think I just realized something about scaling.}
-\rMax{
-    It's not about consensus on \emph{state-transitions}. \\
-    % \\
+\dMax{I think I just realized something about scaling.}
+\dMax{
+    It's not about consensus on \emph{state-transitions}. \newline
+    % \newline
     It's about consensus on the \emph{error correction} of state-transitions.
 }
 
@@ -616,26 +621,26 @@ if > some size -- makes sense mb?
     But it ties into the theme of the dialog pretty well.
 }
 
-\rSe{Tell me about Ethereum's scaling tech; maybe they've come up with some ideas that are useful.}
-\rMax{I don't think Eth2's sharding or SPV methods are going to be very useful for us, it's all just cryptoeconomic game theory.}
-\rSe{
+\dSe{Tell me about Ethereum's scaling tech; maybe they've come up with some ideas that are useful.}
+\dMax{I don't think Eth2's sharding or SPV methods are going to be very useful for us, it's all just cryptoeconomic game theory.}
+\dSe{
     \dots{} Max, slow down.
     Way too many errors just there to make progress.
 }
-\rSe{
+\dSe{
     If we don't fix them now, we'll be \href{https://criticalfallibilism.com/overreach-summary/}{overreaching}.
     So, time to do some error correction.
     Tell me where you went wrong.
 }
-\rMax{Yeah, you're right. Okay.}
-\rMax{
+\dMax{Yeah, you're right. Okay.}
+\dMax{
     I can see 4 errors.
     I didn't respond to what you asked;
     I had a negative bias and assumed those ideas wouldn't help;
     it's not just cryptoeconomics, there are other things like BLS signatures and zk-rollups;
     and the cryptoeconomics comment was a bit rude/dismissive.
 }
-\rSe{
+\dSe{
     Right.
     All those things are related.
     We can avoid those mistakes by slowing down; by paying more attention to our biases and emotions.
@@ -644,24 +649,24 @@ if > some size -- makes sense mb?
     Consciously maintain a truth-seeking mindset.
     Remember: criticism is a gift.
 }
-\rSe{
-    There's a big one that you missed. \\
+\dSe{
+    There's a big one that you missed. \newline
     Consider our goal right now, and what might stop us realizing it?
 }
-\rMax{
+\dMax{
     Well, our goal is brainstoming -- ahh, yeah, \href{https://criticalfallibilism.com/brainstorming-advice/}{suppression}.
 }
-\rSe{
-    Right. \\
+\dSe{
+    Right. \newline
     So, tell me, why haven't you considered zk-STARKs as a useful tool for SPV?
 }
-\rMax{
+\dMax{
     Well, I guess I've always associated them with layer 2 stuff, and L2 isn't really relevant to UT's consensus-level design.
     So I just put it to the side and didn't consider it.
     I ruled it out early.
 }
-\rSe{
-    See how suppression might be holding us back? \\
+\dSe{
+    See how suppression might be holding us back? \newline
     Okay, let's get back to brainstorming.
     How about we start by listing tools that Eth2 might use but which we don't?
 }
