@@ -16,7 +16,7 @@ Are we stuck?
 For a blockchain network to be scalable, it must be the case that miners are \emph{not} required to validate more than one chain!
 Have we come all this way, attempting to deal with the core conflict of the trilemma, only to find that we just moved the conflict?
 
-Let's not jump to that conclusion just yet -- there are cryptographic options like SNARGs and STARKs that might help.
+Let's not jump to that conclusion just yet -- there are cryptographic options like SNARKs and STARKs that might help.
 Before that, though, let's slow down and reconsider why SPV works for Bitcoin.
 Perhaps we can learn something.
 
@@ -47,7 +47,7 @@ It appears that \cref{prem:spv-7} is our current sticking point for Simplex-SPV 
 
 But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could get to \cref{prem:spv-8} by other means.
 
-\subsubsubsection{Dialog: Error Correction, Part I}
+\subsubsubsection{Dialog: Error Correction I}
 
 \aside{
     The following is a dramatized dialog based on my thoughts leading up to the afternoon of August 3\textsuperscript{rd}.
@@ -123,7 +123,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     If transactions had BLS sigs, then we could aggregate all of the signatures per-block into one signature.
     It'd save space per-block, but might also make SPV stuff more complex.
     That said, we could just use a protocol like segregated witness to achieve the same goal.
-    In any case, without introducing PoS-like consensus rules, I don't see how BLS sigs could help.
+    In any case, without introducing PoS-like consensus rules, I don't see how BLS sigs could help with SPV.
 }
 \dSe{
     Okay.
@@ -231,7 +231,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     Like that creating such proofs can take many GB of RAM and that we don't know who'd generate them.
 }
 \dMax{
-    I guess we could have massive blocks to accomodate them, but it doesn't really feel viable.
+    I guess we could have massive blocks to accommodate them, but it doesn't really feel viable.
 }
 \dSe{
     I agree.
@@ -368,7 +368,15 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     So, for an attacker to produce a dominant history that avoids the fraud proof, they need to do a 51\% attack.
 }
 \dSe{
-    Hmm, let me think about it.
+    Hmm.
+}
+\dMax{
+    Any criticisms?
+}
+\dSe{
+    Not yet.
+    % You'll need think about it more.
+    % I'll need think about it more.
 }
 \dSe{
     By the way, where do the SNARKs with publicly known toxic waste fit in?
@@ -382,10 +390,35 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 % note: maybe wrap up day 1 here and then have a <a few days later> banner or something.
 % then put all this extra stuff -- "i've thought about it now" and on -- into the 2nd part of the dialog
 \dSe{Cool.}
-\todo{move this to additional reasoning to a new follow-up dialog?}
+\dSe{
+    Okay, go tell Chris.
+    See what he thinks.
+    }
+\dMax{
+    On it.
+    Calling now.
+    }
+\dMax{\dots{} I think I just realized something about scaling.}
+\dMax{
+    It's not about consensus on \emph{state-transitions}. \\
+    It's about consensus on the \emph{error correction} of state-transitions.
+}
+% \dSe{\emph{ExS\=e is silent.}}
+\dSe{Does the convergence with epistemology suprise you?}
+\dMax{A bit.}
+\dMax{Talk soon.}
+\dSe{I'll be here.}
+
+\subsubsubsection{Dialog: Error Correction II}
+
+% \todo{move this to additional reasoning to a new follow-up dialog?}
 \dSe{
     I've thought about it now.
     I see two problems.
+}
+\dMax{
+    Great.
+    Let's go.
 }
 \dSe{
     Attackers can choose which blocks they reflect.
@@ -493,10 +526,10 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     So, we can add another two constraints to block validation:
 }
 \dMax{
-    \emph{if you reflect a block, then all non-local blocks reflected by that block must also be reflected, or have been reflected by a past local block}
+    1. \emph{if you reflect a block, then all non-local blocks reflected by that block must also be reflected, or have been reflected by a past local block}; and
 }
 \dMax{
-    and \emph{you must link back to all local blocks that both are \ul[DMaxCol]{chain-tips} and have been reflected by blocks you reflect}
+    2. \emph{you must link back to all local blocks that both are \ul[DMaxCol]{chain-tips} and have been reflected by blocks you reflect}.
 }
 \dMax{
     Both constraints are free, and a violation of either of these constraints should be easy to prove via a fraud proof.
@@ -562,7 +595,7 @@ todo:
     \item - can briber profit?
     \item - 'treasury' for fraud proofs? -- attacker can probs profit
     \item - what about 1/sqrt(n)
-    \item - security parameter, z local confs and Nz global work?
+    \item - security parameter, z local confs and N*z global work?
     \item nipopows
     \item accelerate via staking?
 \end{itemize}
@@ -602,8 +635,7 @@ if > some size -- makes sense mb?
 
 \dMax{I think I just realized something about scaling.}
 \dMax{
-    It's not about consensus on \emph{state-transitions}. \newline
-    % \newline
+    It's not about consensus on \emph{state-transitions}. \\
     It's about consensus on the \emph{error correction} of state-transitions.
 }
 

@@ -1,3 +1,28 @@
+% fix for incompatibility between ctable and tikz
+% \usepackage{scrlfile}
+% \usepackage{tikz}
+% \usepackage{transparent}
+% \let\OriginalTransparent=\transparent
+
+% \makeatletter
+% \begingroup\expandafter\expandafter\expandafter\endgroup
+% \expandafter\ifx\csname pgfutil@addpdfresource@extgs\endcsname\relax
+% \else
+%   \AtBeginDocument{%
+%     % \pgf@sys@addpdfresource@extgs@plain{%
+%     \pgfutil@addpdfresource@extgs{%
+%       \TRP@list
+%     }%
+%   }%
+%   \let\TRP@addresource\relax
+% \fi
+% \makeatother
+
+% \AfterPackage{tikz}{\usepackage{ctable}}
+% \AtBeginDocument{%
+%   \let\transparent=\OriginalTransparent
+% }
+
 \input{includes/ut/00-preamble/010-pagestyle.tex}
 \input{includes/ut/00-preamble/020-colors-and-styles.tex}
 \input{includes/ut/00-preamble/030-hyperlinks.tex}

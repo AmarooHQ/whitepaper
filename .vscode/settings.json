@@ -127,6 +127,7 @@
         "Sompolinsky",
         "SPV",
         "SRT",
+        "STARKs",
         "Terminum",
         "textlint",
         "there'll",
@@ -157,6 +158,7 @@
         "Yonatan",
         "Zack",
         "zk",
+        "ZK",
         "ZKPs",
         "Zohar"
     ],
@@ -282,6 +284,7 @@
         ".textlintrc": "jsonc"
     },
     "cSpell.enableFiletypes": [
+        "latex",
         "tex"
     ],
     "gitlens.advanced.externalDiffTool": "meld"

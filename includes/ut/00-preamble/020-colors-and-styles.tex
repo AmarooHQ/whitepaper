@@ -21,5 +21,14 @@
   \uline{\contour{\IfNoValueTF{#1}{white}{#1}}{#2}}\xspace%
 }
 
+% 'invisible' text attempts
 
-\NewDocumentCommand{\zerofontsize}{m}{\fontsize{0.001pt}{0.001pt}\selectfont #1}
+% works okay but can be a pain at start of sentence
+% \NewDocumentCommand{\zerofontsize}{m}{{\fontsize{0.001pt}{0.001pt}\selectfont{#1}}}
+
+% \NewDocumentCommand{\zerofontsize}{m}{\texttransparent{0}{#1}}
+\NewDocumentCommand{\zerofontsize}{o m}{%
+  \leavevmode\unskip%
+  \tikz[overlay,opacity=0,font={\tiny}]{\node [anchor = south \IfNoValueTF{#1}{east}{#1}, yshift=-.25em] {#2};}%
+  \ignorespaces%
+}

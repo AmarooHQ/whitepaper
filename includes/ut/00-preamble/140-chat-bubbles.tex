@@ -71,7 +71,9 @@
         % parbox=false,
         #1
         ]
-        {#2}
+        {%
+            #2%
+        }
     %     % {
     %     % \begin{varwidth}{0.9\textwidth}
     %         #2
@@ -84,7 +86,8 @@
 \NewDocumentCommand{\dRight}{m m m}{
     % \begin{flushright}
         \dialogBox{colback=#2, colframe=#2!40!black, left skip=0.1\linewidth}{
-            \normalmarginpar\marginnote{\textbf{#1\zerofontsize{:\ }}}%
+            \normalmarginpar\marginnote{\textbf{#1\zerofontsize[west]{:}}}%
+            \zerofontsize{#1: }%
             #3
             }
     % \end{flushright}
@@ -92,7 +95,8 @@
 }
 \NewDocumentCommand{\dLeft}{m m m}{
     \dialogBox{colback=#2, colframe=#2!40!black, right skip=0.1\linewidth}{
-        \reversemarginpar\marginnote{\textbf{#1\zerofontsize{:\ }}}
+        \reversemarginpar\marginnote{\textbf{#1\zerofontsize[west]{:}}}%
+        \zerofontsize{#1: }%
         #3
         }
     % \par
