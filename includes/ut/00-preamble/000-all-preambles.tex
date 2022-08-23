@@ -1,9 +1,11 @@
+%---
+
 % fix for incompatibility between ctable and tikz
 % \usepackage{scrlfile}
 % \usepackage{tikz}
 % \usepackage{transparent}
 % \let\OriginalTransparent=\transparent
-
+%
 % \makeatletter
 % \begingroup\expandafter\expandafter\expandafter\endgroup
 % \expandafter\ifx\csname pgfutil@addpdfresource@extgs\endcsname\relax
@@ -17,11 +19,27 @@
 %   \let\TRP@addresource\relax
 % \fi
 % \makeatother
-
+%
 % \AfterPackage{tikz}{\usepackage{ctable}}
 % \AtBeginDocument{%
 %   \let\transparent=\OriginalTransparent
 % }
+
+%---
+
+% accsupp provides a way to replace text when being copied
+% this might make screenreaders or the link say things other than what is read,
+% but the intention is to use to to avoid duplication for things like margin text in dialogs.
+\usepackage{accsupp}
+
+%---
+
+% add some tikz libs for inline diags (can be moved to SAG later)
+\usetikzlibrary{arrows, arrows.meta, calc, positioning, fit}
+
+%---
+
+% all the preamble stuff
 
 \input{includes/ut/00-preamble/010-pagestyle.tex}
 \input{includes/ut/00-preamble/020-colors-and-styles.tex}

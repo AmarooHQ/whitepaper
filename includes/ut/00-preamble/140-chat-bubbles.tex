@@ -82,11 +82,19 @@
     \end{tcolorbox}
 }
 
+% this doesn't seem to work, but also doesn't seem to hurt.
+% keeping it around for the moment.
+\NewDocumentCommand{\nullOnCopy}{m}{%
+    \BeginAccSupp{method=escape,ActualText={\;}}%
+    #1%
+    \EndAccSupp{}%
+}
+
 % args: name, options, text
 \NewDocumentCommand{\dRight}{m m m}{
     % \begin{flushright}
         \dialogBox{colback=#2, colframe=#2!40!black, left skip=0.1\linewidth}{
-            \normalmarginpar\marginnote{\textbf{#1\zerofontsize[west]{:}}}%
+            \normalmarginpar\marginnote{\nullOnCopy{\textbf{#1\zerofontsize[west]{:}}}}%
             \zerofontsize{#1: }%
             #3
             }
@@ -95,7 +103,7 @@
 }
 \NewDocumentCommand{\dLeft}{m m m}{
     \dialogBox{colback=#2, colframe=#2!40!black, right skip=0.1\linewidth}{
-        \reversemarginpar\marginnote{\textbf{#1\zerofontsize[west]{:}}}%
+        \reversemarginpar\marginnote{\nullOnCopy{\textbf{#1\zerofontsize[west]{:}}}}%
         \zerofontsize{#1: }%
         #3
         }
@@ -115,4 +123,15 @@
 }
 \NewDocumentCommand{\dNef}{m}{%
     \dLeft{\nefName}{DEMaloCol}{#1}%
+}
+
+% args:
+% - centering?
+% - body
+\NewDocumentCommand{\dialogHeader}{o m}{
+    \begin{tcolorbox}[colback=black!70,coltext=white]
+        \IfNoValueTF{#1}{}{\centering}
+        #2
+    \end{tcolorbox}
+    \vspace{.5em}
 }

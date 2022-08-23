@@ -122,3 +122,14 @@
 
 % multiplier for root tile's tile-work
 \newcommand\Mroot{\ensuremath{\mathcal{M}}\xspace}
+
+% 2 column vector
+\NewDocumentCommand{\vecXY}{m m}{\left[
+    \begin{array}{c}
+        #1 \\ #2
+    \end{array}
+\right]}
+
+\NewDocumentCommand{\BribeCost}{}{%
+    \ensuremath{\mathbb{B}}\xspace%
+}
