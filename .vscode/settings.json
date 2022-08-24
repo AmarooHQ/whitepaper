@@ -219,7 +219,7 @@
     },
     "files.autoSave": "onFocusChange",
     "latex-workshop.view.pdf.viewer": "tab",
-    "latex-workshop.latex.autoBuild.run": "onFileChange",
+    "latex-workshop.latex.autoBuild.run": "onSave",
     "latex-workshop.latex.pdfWatch.delay": 400,
     "[latex]": {
         "editor.formatOnPaste": false,

@@ -29,6 +29,6 @@
 % \NewDocumentCommand{\zerofontsize}{m}{\texttransparent{0}{#1}}
 \NewDocumentCommand{\zerofontsize}{o m}{%
   \leavevmode\unskip%
-  \tikz[overlay,opacity=0,font={\tiny}]{\node [anchor = south \IfNoValueTF{#1}{east}{#1}, yshift=-.25em] {#2};}%
+  \tikz[overlay,opacity=0,font={\tiny}]{\node [anchor = south \IfNoValueTF{#1}{east}{#1}, yshift=-.25em, xshift=.5em] {#2};}%
   \ignorespaces%
 }

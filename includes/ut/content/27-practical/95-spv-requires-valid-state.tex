@@ -1,5 +1,9 @@
 \todo{ensure enough complexity stuff is introduced before the next section -- enough to analyze complexities here.}
 
+
+
+\subsubsubsection{Introduction}
+
 Our goal in this section is to find a method for SPV (Simple Payment Verification) between any two simplex-chains that is safe, fast, succinct, and reliable.
 \begin{itemize}
     \item \emph{Safe}: an adversary must either perform a 51\% attack or break a cryptographic dependency to produce an SPV proof that appears valid but is dishonest/fraudulent (e.g., of a valid transaction that depends on a fraudulent transaction).
@@ -720,8 +724,8 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 \dMax{
     We don't, yet -- b/c the target chain is the \emph{outgoing} chain. \\
     I think we can solve both problems at once, tho.
-    First, we can flag all txs that are meant as outgoing SPV transactions.
-    That tells us which txs matter.
+    First, we can flag all txs that are meant as outgoing SPV transactions, or just include every tx.
+    Either way, that tells us which txs matter.
     Second, we can measure the waiting time for all the relevant txs and run them in batches.
 }
 \dSe{
@@ -771,7 +775,6 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 \dSe{
     What's your intuition so far?
 }
-\dMax{}
 
 \begin{comment}
     - bribe all miners
@@ -785,10 +788,214 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     - so ~z^2
 \end{comment}
 
--------------------
-
+\dMax{
+    Thinking about it from the miners' and attacker's points of view, let's start from just as the fradulent block is mined.
+}
+\dMax{
+    The attacker wants to bribe all miners on all chains to withhold the fraud proof.
+    We don't care too much about exactly how the bribe happens, except that the miners should be sure that they'll recieve the bribe (it won't be invalidated later).
+    So maybe the bribes are done via one tx per R-chain per R-block, and the tx is only valid if the fraud proof isn't recorded in the PoR graph.
+}
+\dMax{
+    There are lots of miners, though, and it's unpredictable which will mine the next block for any given chain.
+    So each miner has a choice, \emph{for each block they mine}, of whether to accept the bribe or not.
+}
+\dMax{
+    From the miner's perspective: the attacker doens't know if they've recieved a bribe before or not; and they could always earn some reward by publishing the fraud proof.
+    So \emph{each} bribe has to be worth more than the alternative.
+}
+\dMax{
+    Let's assume that there's a reward ($C_r H$) for publishing the fraud proof.
+    ($C_r$ is the block reward of the target chain, and $H$ is the proportion of the block reward each miner gets.)
+}
+\dMax{
+    If the attack has been in-progress for $z$ blocks, then each miner stands to make $\sim C_r H z$ coins by publishing the fraud proof.
+}
+\dMax{
+    So, the attacker needs to pay a bribe of $> C_r H z$ coins \emph{per R-block per R-chain}.
+}
+\dMax{
+    If all blocks were perfectly regular, that'd be $N_1 C_r H$ coins (total) for the first block period, $2 N_1 C_r H$ coins for the second, etc.
+}
+\dMax{
+    Factoring out $N_1 C_r H$, this means the total cost will be at least $1 + 2 + 3 + \cdots + z = z(z+1)/2$ after $z$ blocks.
+    Which is quadratic in $z$.
+}
 \dSe{
-    You know, if the waiting time for SPV transactions is $O(\sqrt{v})$, that doesn't the \emph{fast} criterion.
+    Okay.
+    What happens to the bribe amount \emph{after} someone publishes the fraud proof?
+}
+\dMax{
+    Well, the dishonest miners opportunity cost drops to $C_r H$.
+    So the bribes would be a lot cheaper.
+}
+\dMax{
+    But it's also a bit pointless for the attacker to keep going.
+}
+\dSe{
+    Why is that?
+    Can't they just keep bribing?
+}
+\dMax{
+    They could, but what's the end-game?
+    After some honest miners integrate the fraud proof into their PoR graph, they'll eventually dominate.
+}
+\dMax{
+    Like, the honest miners can use PoRs via the dishonest chain segements, but the dishonest miners can't use PoRs via the honest chain segements.
+}
+\dSe{
+    I see.
+    It's like the empty block DoS situation.
+}
+\dSe{
+    You mentioned $H$, earlier.
+    What is that, exactly?
+}
+\dMax{
+    The basic idea is that invalid blocks do some work, but the block reward isn't given to the miner.
+    Instead, we could split it between other miners.
+    So we could set $H = C_r/N_1$, where $C_r$ is the block reward.
+}
+\dSe{
+    Could you make $H$ larger?
+    Then, each bribe would need to be larger, too.
+}
+\dMax{
+    Maybe.
+}
+\dMax{
+    So I've got 3 ideas: just make it larger, split it between fewer miners, and have some kind of `treasury' or something to increase it.
+}
+\dMax{
+    If we just doubled $H$ (for example) then we'd end up rewarding honest miners with $2C_r$ coins all up.
+    Which would be a new source of inflation.
+}
+\dSe{
+    Inflation aside, what happens if you increased it more?
+}
+\dMax{
+    More?
+    Like to $4H$ or something?
+}
+\dMax{
+    Well, it'd make bribes more expensive.
+}
+\dSe{
+    \dots{} Yes, but is there a bigger problem with minting coins in exchange for fraud proofs?
+}
+\dMax{
+    Oh -- if we create new coins, then miners could increase their RoI by \emph{deliberately creating fraudulent blocks}.
+}
+\dMax{
+    Like, a group of miners (with e.g., 40\% of the hash rate) could deliberately make a fraud proof, then pre-mine blocks with that fraud proof, and end up with more coins than they'd have being honest.
+}
+\dMax{
+    It should never be profitable to do fraud, so the rewards for publishing fraud should never be more than a miner would make by being honest.
+}
+\dMax{
+    It's not safe to get more coins out more than were put in.
+}
+\dSe{
+    Right.
+}
+\dMax{
+    I guess that refutes the treasury idea, too.
+}
+\dSe{
+    Probably.
+    By the way, what if the attacker had 40\% of the hash rate?
+    You haven't considered that, yet.
+}
+\dMax{
+    Ahh, yeah.
+    If the attacker has excess capacity to mine other chains, then they can recover some of the bribes.
+    The attacker can keep the block rewards too if the blocks are valid.
+}
+\dMax{
+    We can approximate this by only counting rewards to \emph{other} miners in $\BribeCost$.
+    So we just multiply the inside of \BribeCost by $p$ (following the $p+q=1$ norm).
+}
+\dSe{
+    What about the other idea, rewarding fewer miners?
+}
+\dMax{
+    Well, an important breakpoint is when the fraud proof gets recorded for the first time.
+    So we could incentivize that by paying more to the miners that publish it first.
+}
+\dMax{
+    Like, we could have $H = 2/N_1$ and pay it to the first half of miners that publish the FP (once per chain).
+}
+\dMax{
+    Oh, and we always want the targeted chain to be included in that group, too.
+    So that there's always an incentive for miners to mine an honest block on that chain.
+}
+\dSe{
+    What about a sliding scale?
+    Like $5H$ to the first miner, $4H$ to the second and third, $3H$ to the next 3, and so on?
+}
+\dMax{
+    Maybe, but we expect blocks to get created simultaneously all the time, so the PoR graph might not have a definite \emph{first} miner.
+    That sounds like it could be gamed; not sure how we'd solve that.
+}
+\dSe{
+    Doesn't the same problem exist even if it's just the first half of eligible miners?
+}
+\dMax{
+    Maybe.
+    There could be an incentive for miners to group together to make it look like they were the first half, even if they weren't.
+}
+\dMax{
+    Sort of like a short-term reorg/censorship attack.
+}
+\dMax{
+    We could favor interconnection, though, in the PoR graph.
+    Like, instead of treating miners individually, we could reward the first \emph{group} of mutually reflecting blocks (including the FP) over $N_1/2$ chains that appears.
+}
+\dMax{
+    The idea being that an honest miner's best chance of collecting the reward is to mutually reflect as many other chains that already included the FP.
+}
+\dMax{
+    That's consistent with the protocol rules we've discussed, too.
+}
+\dSe{
+    Hmm.
+    Can we increase $H$ any more?
+}
+\dMax{
+    We could do $H = 1/\sqrt{N_1}$ maybe?
+    Or $H = 1/\log{N_1}$.
+}
+\dMax{
+    In general, $x$ miners would get paid $C_r H$ when $H = x^{-1}$.
+}
+\dMax{
+    Also, the attacker doesn't know which miners will publish the FP first, so the attacker still needs to make $\sim N_1$ bribes per block period.
+}
+\dMax{
+    Which increases the cost of bribes by a factor of $N_1 / x$.
+}
+\dMax{
+    Paying only a proportion of miners feels risky, though.
+}
+\dMax{
+    I'm not sure yet.
+}
+\dSe{
+    Neither am I.
+}
+\dMax{
+    Hmm.
+    I think I need to do some working-out.
+    Spend some time figuring out what this looks like in more detail.
+}
+\dSe{
+    I agree.
+}
+\dSe{
+    Before you go,
+}
+\dSe{
+    If the waiting time for SPV transactions is $O(\sqrt{v})$, that won't satisfy the \emph{fast} criterion.
 }
 \dMax{
     I know.
@@ -798,14 +1005,29 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 }
 \dMax{
     Yes.
-    Discuss it.
+    Discuss it with you.
+    Try to understand if it's impossible, or look for a mistake.
 }
 \dSe{
-    And the \emph{fast} criterion?
+    And what about the criterion itself?
 }
 \dMax{
-    Leave it be.
+    I think we should leave it.
     If we need to change our goals, then we'll address that when the time comes.
+}
+\dMax{
+    I don't like the idea of making excuses for failing at a goal.
+    Or outright hiding it.
+}
+\dSe{
+    Good.
+}
+\dMax{
+    See you next time, then?
+}
+\dSe{
+    Yes.
+    Good luck.
 }
 
 % \dMax{
@@ -905,118 +1127,204 @@ if > some size -- makes sense mb?
 Let's assume that an attacker is willing to bribe miners to exclude a fraud proof.
 The goal of the attacker is to continue this attack beyond whatever , how much will that cost them over the
 
+\todo{above}
+
 First, let's establish a baseline: what does a healthy simplex look like?
 \emph{Healthy} meaning: no fraud proof is possible because all blocks and state-transitions are valid.
-
 We need to know what a healthy simplex (and its PoR graph) looks like because a successful attack will be indistinguishable.
-Individual nodes of the network may all be aware of a fraud proof when an invalid block is mined -- and we expect this if the P2P layer is working correctly.
+
+The defining quality of a healthy simplex is that additions to the PoR graph are highly interconnected.
+When new blocks are mined, they reflect all possible remote blocks and link back to all possible local blocks.
+Thus, there should be no partitions or asymmetric boundaries.
+
+An \emph{asymmetric boundary} emerges when a group of miners contributes \emph{exclusively} to a \emph{subgraph} of the full PoR graph (e.g., a subgraph that censors the fraud proof).
+The asymmetric boundary lies between the full (honest) PoR graph and the dishonest subgraph.
+
+When an invalid block is mined, individual nodes of the network should rapidly become aware of the fraud proof -- and we expect this if the P2P layer is working correctly.
 However, during an ongoing (successful) attack, that fraud proof is not recorded in the PoR graph.
 The fraud is `invisible' when considering just the blockchain data itself, which means that SPV proofs may be fraudulent.
 
-qualities:
-- maximal interconnection (ish) in PoR graph;
-  all miners reflect all other chains and link back to all other blocks of their own chain.
+When fraud is detected, the PoR graph should proceed through multiple phase changes until normality is restored.
 
-- some 'fuzziness', though, where blocks were created near-simultaneously.
-  these are the only cases where blocks shouldn't reflect one another or build on other L-blocks.
-  (excluding cases like a bug which causes a network fork; e.g., bitcoin march 2013.)
+\begin{figure}[h]
+    \begin{center}
+        \tikzstyle{n} = [align=center, draw, rectangle, rounded corners, inner sep=5pt]
+        \tikzstyle{ar} = [->, anchor=north, rounded corners, shorten >= 2pt, shorten <= 2pt]
+        \tikzstyle{label} = [align=center, anchor=center]
+        \begin{tikzpicture}[node distance=1.8cm]
+            % states of PoR graph
+            \node (s0) [n] {0. PoR Graph \\ Looks Healthy};
+            \node (s1) [n, right=of s0, xshift=.95cm] {1. Attack \\ In Progress};
+            \node (s2) [n, right=of s1, xshift=.6cm] {2. Partial FP \\ Acknowledgement};
+            \node (s3) [n, below=of s1.north, yshift=.2cm] {3. Complete FP \\ Acknowledgement};
 
-When fraud is detected, the PoR graph goes through multiple phase changes until normality is restored.
+            % group s0 and s1
+            \node[n, fit=(s0) (s1), dashed, inner sep=7pt] {};
 
-\begin{center}
-    \tikzstyle{n} = [align=center, draw, rectangle, rounded corners, inner sep=5pt]
-    \tikzstyle{ar} = [->, anchor=north, rounded corners, shorten >= 2pt, shorten <= 2pt]
-    \tikzstyle{label} = [align=center, anchor=center]
-    \begin{tikzpicture}[node distance=1.8cm]
-        % states of PoR graph
-        \node (s0) [n] {0. PoR Graph \\ Looks Healthy};
-        \node (s1) [n, right=of s0, xshift=.95cm] {1. Attack \\ In Progress};
-        \node (s2) [n, right=of s1, xshift=.6cm] {2. Partial FP \\ Acknowledgement};
-        \node (s3) [n, below=of s1.north, yshift=.2cm] {3. Complete FP \\ Acknowledgement};
+            % arrows and labels
+            \draw [ar] (s0) -- node [label] {Fraudulent \\ block mined} (s1);
+            \draw [ar] (s1) -- node [label] {FP first \\ recorded} (s2);
+            \draw [ar] (s2) -- (s2 |- s3) -- node [label] {FP `pollutes' \\ PoR graph} (s3);
+            \draw [ar] (s3) -- node[label] {PoR graph now \\ resynchronized} (s3 -| s0) -- (s0);
+        \end{tikzpicture}
+    \end{center}
+    \caption[
+        Phase transitions of a PoR graph when fraud occurs.
+    ]{
+        The phase transitions of a PoR graph when fraud occurs.
+        The dashed outline around phase 0 and 1 indicates that it's not possible to observe this phase change on-chain.
+        Nodes connected to the P2P network should be aware of the fraud, but no chain has yet included the fraud proof in the PoR graph.
+    }
+    \label{fig:por-graph-phases}
+\end{figure}
 
-        % group s0 and s1
-        \node[n, fit=(s0) (s1), dashed, inner sep=7pt] {};
+An attacker always fails if the network from reaching phase 3.
+The attacker's primary goal is to prevent the network transitioning from phase 1 to phase 2.
 
-        % arrows and labels
-        \draw [ar] (s0) -- node [label] {Fraudulent \\ block mined} (s1);
-        \draw [ar] (s1) -- node [label] {FP first \\ recorded} (s2);
-        \draw [ar] (s2) -- (s2 |- s3) -- node [label] {FP `pollutes' \\ PoR graph} (s3);
-        \draw [ar] (s3) -- node[label] {PoR graph now \\ resynchronized} (s3 -| s0) -- (s0);
-    \end{tikzpicture}
-\end{center}
-
-The dashed outline around phase 0 and 1 indicates that there is no sign of the fraud within the PoR graph, yet.
-Nodes connected to the P2P network should be aware of the fraud, but no chain has yet published a block with the FP.
-
-The attacker's goal is to keep the network from reaching phase 3.
-Ideally, the network never transitions from phase 1 to phase 2.
-
-The attacker and miners (both bribed and non-bribed) experience different dynamics during each of the phases.
+The dynamics of the attack change for both the attacker and each miner during each phase.
 
 For example, there is a qualitative difference between phase 1 and phase 2 and it is in the attacker's interest to prevent the network transitioning to phase 2 if possible.
 Therefore it is most valuable for the attacker if they can prevent the FP being recorded.
+It is also more profitable for miners, since the size of bribes grow quadratically.
 
 Once the network has reached phase 2, it is only a matter of time before the network reaches phase 3, at which point we are back at the start.
 
-If the network is kept in phase 1, then the PoR graph and chain data is indistinguishable from a healthy PoR graph.
+If the network is kept in phase 1, then the PoR graph and (nearly all) chain data is indistinguishable from a healthy PoR graph.
 
 
 
 \subsubsubsubsection{Phase 1 $\not\to$ Phase 2 on the Target Chain}
 
-Reward for honest block is an extra $z/N_1$ of the block reward.
-So after $N_1$ blocks the block reward has doubled.
+The first honest block on the target chain must link back to the fraudulent block.
+The additional reward for this block after $k$ blocks is $C_r H k$.
+Thus, after $H^{-1}$ blocks, the \emph{effective} block reward for an honest miner will have doubled.
 
 A new honest block thus becomes heavily incentivized over time.
 
-To mitigate this, the attacker must raise the difficulty such that all other miners find it comparatively worse than mining other chains.
+To mitigate this, the attacker must raise the difficulty on the target chain such that all other potential miners find it comparatively unprofitable.
 
-Thus the attacker suffers losses compared to mining honestly: $Hkr$ of the block reward for the k-th block (e.g., $H = \frac{1}{N_1}$).
-That reward is lost to work securing the target chain that would otherwise earn the miner that much revenue.
-Additionally, the miner loses the block rewards each time -- so this is $r(1 + Hk)$ at round $k$.
-Let $r \cdot l_m$ represent the total losses due to mining: factoring out $l_m$ in this way allows us to analyze the situation independent of the block reward.
+Thus the attacker suffers losses compared to mining honestly: $C_r H k$ for the k-th block.
+That reward is lost to excessive work securing the target chain which would otherwise earn the attacker that much revenue.
+Additionally, the attacker loses the block rewards each time -- so these losses are $C_r (1 + H k)$ per block after $k$ blocks.
+Let $C_r \cdot l_m$ represent the total losses due to mining: factoring out $l_m$ in this way allows us to analyze the situation independent of the block reward.
 
 \begin{align}
-    l_m &> \sum\limits_{k=1}^z \Bigl( 1 + Hk \Bigr) \nonumber \\
-    &= z + H \sum\limits_{k=1}^z k \nonumber \\
-    &= z + H \frac{z (z + 1)}{2}
+    l_m &> \sum\limits_{k=0}^z \Bigl( 1 + H k \Bigr) \nonumber \\
+    &= z + 1 + H \sum\limits_{k=0}^z k \nonumber \\
+    &= z + 1 + H \frac{z (z + 1)}{2}
     \label{eq:spv-atk-losses-mining}
 \end{align}
 
 
 
-\subsubsubsubsection{Phase 1 $\not\to$ Phase 2}
+\subsubsubsubsection{Phase 1 $\not\to$ Phase 2 and $\BribeCost(z)$}
 
 \begin{itemize}
     \item Each miner (on each simplex-chain) needs bribing (but only if they make a block).
-    \item Each round, the attacker must pay $rZ_k$ in bribes (where $k$ is the round, starting at 1).
-    \item These bribes are split between $N_1 - 1$ miners.
-    \item A miner receives $Hkr$ coins as a reward for publishing a fraud proof that invalidates $k$ blocks.
-    \item Each round, miners can choose to publish the fraud proof, which earns them $Hkr$ in rewards.
-    \item Thus, each round, miners have an opportunity cost of $Hkr$ if they do \emph{not} take the bribe.
-    \item This only makes rational sense if the miner's bribe is greater than their opportunity cost: $rZ_k / (N_1 - 1) > Hkr$; \emph{and} the miner is \emph{guaranteed} to receive the bribe, regardless of whether the attack succeeds.
+    \item Each round, the attacker must pay $C_r Z_k$ in bribes (where $k$ is the round, starting at 1).
+    \item These bribes are given to $(N_1 - 1)$ miners (we subtract 1 to exclude the target chain from this split). One bribe per R-chain.
+    \item However, an attacker with $q$ proportion of the hashrate can recover $q(N_1 - 1)$ of these bribes, at most, and thus loses at least $p(N_1 - 1)$ of them.
+    \item A miner receives $C_r H k$ coins as a reward for publishing a fraud proof that invalidates $k$ blocks.
+    \item Each round, miners can choose to publish the fraud proof, which earns them $C_r H k$ in rewards.
+    \item Thus, each round, miners have an opportunity cost of $C_r H k$ if they do \emph{not} take the bribe.
+    \item This only makes rational sense if the miner's bribe is greater than their opportunity cost: $C_r Z_k / (N_1 - 1) > C_r H k$; \emph{and} the miner is \emph{guaranteed} to receive the bribe, regardless of whether the attack succeeds.
     \item The attack lasts $z$ rounds.
-    \item Let $r \cdot l_b$ be the total losses due to bribes.
+    \item Let $C_r \cdot l_b$ be the total losses due to bribes.
 \end{itemize}
 
 Therefore, we have:
 \begin{align}
     % \text{let } H(z) &= \frac{z}{N_1} \nonumber \\
     % \implies N_1 H(z) &= z \nonumber \\
-    Z_1 &> H (N_1-1) \nonumber \\
-    Z_2 &> 2 H (N_1-1) \nonumber \\
+    % Z_1 &> H (N_1-1) \nonumber \\
+    % Z_2 &> 2 H (N_1-1) \nonumber \\
     Z_k &> k H (N_1-1) \nonumber \\
-    \text{let } l_b &= Z_1 + \cdots + Z_z \nonumber \\
-    \therefore l_b &> H (N_1-1) \sum\limits_{k=1}^z k \nonumber \\
-    l_b &> H (N_1-1) \frac{z (z+1)}{2}
+    \text{let } l_b &= p (Z_1 + \cdots + Z_z) \nonumber \\
+    \therefore l_b &> p H (N_1-1) \sum\limits_{k=1}^z k \nonumber \\
+    l_b &> p H (N_1-1) \frac{z (z+1)}{2}
         \label{eq:spv-atk-losses-bribes}
 \end{align}
 
-Combining \autoref{eq:spv-atk-losses-mining} with \autoref{eq:spv-atk-losses-bribes} yields:
+% \begin{align*}
+%     (q + N_1 p) H \frac{z(z+1)}{2}
+% \end{align*}
+
+Combining \autoref{eq:spv-atk-losses-mining} with \autoref{eq:spv-atk-losses-bribes}, and noting that $p+q=1$ yields:
 \begin{equation}
-    l_z = l_b + l_m > z + H N_1 \frac{z(z+1)}{2}
+    l_b + (p+q)l_m > H (N_1 p + q) \frac{z(z+1)}{2} + z + 1
     \label{eq:spv-atk-losses-total}
 \end{equation}
+
+Observe that this is a lower bound on $\BribeCost(z)$.
+Let's define \BribeCost as the absolute minimum it can be given our current understanding.
+To reduce complexity, we'll also define \BribeCost \emph{in terms of the block reward} (i.e., in units of \emph{block rewards} rather than \emph{coins}).
+We can come back to it later if we need to.
+\begin{align}
+    \BribeCost(z) &= h \frac{z(z+1)}{2} + z + 1
+        & & \text{where } h = H(N_1 p + q)
+    \label{eq:spv-bribe-cost-1}
+\end{align}
+
+We should also note the inverse of \BribeCost, which gives us a lower bound on the number of blocks for which we should wait, given a total outgoing value, $v$ (expressed as a multiple of the block reward).
+\begin{align}
+    \BribeCost^{-1}(v) &= \frac{\sqrt{
+        (h - 2)^2 + 8hv
+    } - h - 2}{2h} & & \text{where } h = H(N_1 p + q)
+    \label{eq:spv-bribe-cost-inverse}
+\end{align}
+
+\subsubsubsubsection{Domain and Range of $\BribeCost(z)$ in the SRT context}
+
+It is clear that $\BribeCost(0) = 1$.
+That is: the attacker has lost exactly 1 block reward (the reward for the fraudulent block).
+
+Since this is a simplistic model, we'll only consider non-negative integer values of $z$.
+
+Although it is clear that $\lim_{z \to \infty} \BribeCost(z) = \infty$, there is a practical upper limit.
+
+Recall that we introduced \BribeCost via the requirement that $v - \BribeCost(z) < 0$ assuming an SPV attack yields $v - \BribeCost(z)$ profit for the attacker.
+
+There is a practical upper limit to $v$: \emph{all} of the root tokens on that simplex-chain.
+
+In the \emph{Single Root Token} PoR conversion context, recall that we defined the block reward in \autoref{eq:srt-reward} as:
+\begin{align*}
+    C_r &= \frac{C_t \cdot I}{G_t \cdot C_f} & & \frac{\text{C-coins}}{\text{C-block}}
+\end{align*}
+Currently, $I$ (the global inflation rate) is measured in coins/s.
+Let's assume that the inflation rate is proportional to $G_t$ (the total supply of root tokens).
+For example, we might desire an $I$ such that the \emph{annual} inflation amount is 2\% of $G_t$.
+Let's use $f$ to refer to that percentage of $G_t$ (e.g., $f = 0.02$), and $\syr = 365.25 \times 86400 = 3.078 \times 10^{7}$ seconds in a year.
+Thus, we have:
+\begin{align}
+    I &= \frac{f G_t}{\syr}
+        & & \FracUnits{coins}{second} \nonumber \\
+    \implies C_r &= \frac{f G_t}{\syr} \cdot \frac{C_t}{G_t \cdot C_f}
+        & & \FracUnits{C-coins}{C-block} \nonumber \\
+    C_r &= \frac{f C_t}{\syr C_f} \label{eq:block-reward-to-ct}
+\end{align}
+To convert $v$ from coins to block rewards, we divide by $C_r$.
+The maximum $v$ possible is $C_t$.
+\begin{align*}
+    \frac{v}{C_r} &= \frac{v \syr C_f}{f C_t} \\
+    \text{Set } v = C_t \implies \frac{C_t}{C_r} &= \frac{\syr C_f}{f} & \text{which is a constant.}
+\end{align*}
+So, the upper limit of $v$, expressed as a multiple of block rewards, is constant.
+Particularly, it is the number of blocks in a year divided by the inflation rate $f$.
+This represents the upper limit of the range of $\BribeCost(z)$ when using the SRT context.
+
+Let's apply \autoref{eq:spv-bribe-cost-inverse} to get an idea of what the maximum waiting time might be.
+For variables, let's use $q = p = 0.5$, $N_1 = 100$, and $H = 1/N_1 = 1/100$, which implies $h = 0.505$; and $C_f = \nicefrac{1}{15}$ and $f = 0.02$, which implies $\syr C_f f^{-1} = 1.026 \times 10^8$.
+\begin{equation*}
+    \BribeCost^{-1}(\syr C_f f^{-1}) \approx 20 115.3 \text{ blocks}
+        \implies \sim 3.5 \text{ days}
+\end{equation*}
+If, instead, $H = 1/\sqrt{N_1}$, then $h = 5.05$ and
+\begin{equation*}
+    \BribeCost^{-1}(\syr C_f f^{-1}) \approx 6373.8 \text{ blocks}
+        \implies \sim 1.1 \text{ days}
+\end{equation*}
+
+
 
 \subsubsubsubsection{Phase 1 $\to$ Phase 2}
 
@@ -1034,20 +1342,17 @@ Thus, using those PoRs effectively turns dishonest miners into honest miners.
 
 \subsubsubsubsection{Phase 2 $\to$ Phase 3}
 
-
 The duration of this transition depends on the proportion of honest miners ($h$, where $h + d = 1$ and $d$ is the proportion of dishonest miners).
 
-Similar to \autoref{sec:dos-and-dags}, the asymmetry between honest and dishonest miners means that, even for a small $h$, the chain-weight of the honest chain-tips will dominate the chain-weight of dishonest chain-tips.
-At that point, each simplex-chain's main chain will include the fraud proof, and the dishonest chain-tips will never be able to out-weigh the honest ones.
-
-Consider the case where only 1\% of miners refuse the bribe ($h = 0.01$), and that the other 99\% of miners continue to mine only blocks that do not include the fraud proof.
+Similar to \autoref{sec:dos-and-dags}, the asymmetry between honest and dishonest miners means that, even for a small $h$, the chain-weight of the honest chain-tips will eventuall dominate the chain-weight of dishonest chain-tips.
+After that point, each simplex-chain's main chain will include the fraud proof, and the dishonest chain-tips will never be able to out-weigh the honest ones.
 
 Let us represent the weight of the honest and dishonest chain segments with a vector.
 This is purely for convenience so that we can analyze both at the same time.
 The top row is the weight of the honest chain segment, and the second row is the weight of the dishonest chain segment.
 At the start of the attack ($t_0$), neither chain segment has any blocks, so $t_0 = \vec{0}$.
 
-Each round, we expect that $h$ proportion of new blocks were honest, and $d$ proportion are dishonest.
+Each round (block period), we expect that $h$ proportion of new blocks were honest, and $d$ proportion are dishonest.
 So, after 1 block period, we expect:
 \begin{equation*}
     t_1 = t_0 + \vecXY{N_1 h}{N_1 d} = N_1 \vecXY{h}{d}
@@ -1079,12 +1384,15 @@ Thus, the honest chain-tips dominate when
     k &> h^{-1} - 1
 \end{align*}
 
-If $h = \frac{1}{N_1}$, i.e., for each honest miner there are $N_1 - 1$ dishonest miners, then this inequality becomes:
-\begin{equation*}
-    k > N_1 - 1
-\end{equation*}
+If $h = \nicefrac{1}{N_1}$, i.e., for each honest miner there are $(N_1 - 1)$ dishonest miners, then this inequality becomes: $k > N_1 - 1$.
+% \begin{equation*}
+%     k > N_1 - 1
+% \end{equation*}
 
-
+If only 1\% of miners refuse the bribe ($h = 0.01$), and that the other 99\% of miners continue to mine only blocks that do not include the fraud proof, then we have: $k > 99$.
+% \begin{equation*}
+%     k > 99
+% \end{equation*}
 
 % ########  ####    ###    ##        #######   ######       #######
 % ##     ##  ##    ## ##   ##       ##     ## ##    ##     ##     ##

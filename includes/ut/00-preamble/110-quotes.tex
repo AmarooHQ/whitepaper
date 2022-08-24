@@ -30,6 +30,7 @@
         % breakable,
         \IfNoValueTF{#1}{}{#1}
         ]
+        \reversemarginpar\marginnote{\nullOnCopy{\textbf{Quote}}}
 }{
     \end{tcolorbox}
 }
@@ -52,6 +53,7 @@
 
 \NewDocumentCommand{\bquote}{ m o }{
     \begin{quote}
+    \reversemarginpar\marginnote{\nullOnCopy{\textbf{Quote}}}
     #1
     \IfNoValueTF{#2}{}{
         \par
@@ -69,6 +71,7 @@
         parbox=false,
         tile,
         breakable]
+        \reversemarginpar\marginnote{\nullOnCopy{\textbf{Aside}}}
 }{
     \end{tcolorbox}
 }
