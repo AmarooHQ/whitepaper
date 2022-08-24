@@ -68,16 +68,16 @@
 \newenvironment{easide}{
     \begin{tcolorbox}[
         colback=gray!15,colbacktitle=gray!15,
-        parbox=false,
         tile,
-        breakable]
-        \reversemarginpar\marginnote{\nullOnCopy{\textbf{Aside}}}
+        breakable]%
+    \reversemarginpar\marginnote{\nullOnCopy{\textbf{Aside}}}%
 }{
+    % \reversemarginpar\marginnote{\nullOnCopy{\textbf{Aside}}}%
     \end{tcolorbox}
 }
 
 \newcommand{\aside}[1]{
-    \begin{easide}
+    \begin{easide}%
     #1
     \end{easide}
 }
@@ -85,7 +85,6 @@
 \newenvironment{easide*}{
     \begin{tcolorbox}[
         colback=gray!15,colbacktitle=gray!15,
-        parbox=false,
         tile]
 }{
     \end{tcolorbox}

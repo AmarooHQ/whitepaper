@@ -1439,7 +1439,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 
 \subsubsubsection{Dialog: Error Correction III}
 
-\dialogHeader{24\textsuperscript{nd} August, 2022}
+\dialogHeader{24\textsuperscript{nd} August 2022}
 
 notes
 
@@ -1467,11 +1467,14 @@ notes
     \item user control of funds only on fraud-recognizing chains
     \item invalidation is leverage against dishonest miners (how to bribe them if the chain is invalidated? if it's invalidated then histories can't / won't be merged)
     \item sorta like a UASF every time there's fraud
+    \item \dots
+    \item note: a long chain of invalid blocks requires an optimization wrt to linking back to other blocks, like "from: block i, to: block (i + 10000)". otherwise headers would be huge. that's not a problem for the honest block b/c full nodes can download the whole section (maybe add a nipopow or something?). what about other chains? well, all of those blocks (i to i+10000) are in each chain's PoR graph. So is there ever a time that this cheap optimization doesn't work? It's easy for other chains. Maybe the honest block can include all the headers as an extra block segment (see segmented state). that way it's easy to verify without downloading the full set of invalid blocks in future. (we know all subsequent blocks are invalid b/c we have a fraud proof for the i'th block.)
+    \item solve by segmented state? fraud proof only invalidates tx state, not PoR state. That way, the PoR graph from the fraud chain-segment is inherited and doesn't need any replication, etc.
 \end{enumerate}
 
 --------
 
-ex se: if you can't answer the criticisms that your own mind come's up with, how will you be able to answer the criticisms that anyone else's mind come's up with?
+ex se: if you can't answer the criticisms that your own mind comes up with, how will you be able to answer the criticisms that anyone else's mind comes up with?
 
 --------
 
@@ -1554,9 +1557,47 @@ in response to writing a dialog and honestly and fully exploring everything.
 }
 
 
+
+\subsubsubsection{a diagram}
+
+
+\tikzstyle{stdText} = [align=center, inner sep=5pt]
+\tikzstyle{n} = [stdText, draw, rectangle, rounded corners]
+\tikzstyle{ar} = [->, anchor=north, rounded corners, shorten >= 2pt, shorten <= 2pt]
+\tikzstyle{label} = [align=center, anchor=center]
+\begin{center}
+    \begin{tikzpicture}[node distance=.8cm]
+        % % group s0 and s1
+        % \node[n, fit=(s0) (s1), dashed, inner sep=7pt] {};
+
+        % % arrows and labels
+        % \draw [ar] (s0) -- node [label] {Fraudulent \\ block mined} (s1);
+        % \draw [ar] (s1) -- node [label] {FP first \\ recorded} (s2);
+        % \draw [ar] (s2) -- (s2 |- s3) -- node [label] {FP `pollutes' \\ PoR graph} (s3);
+        % \draw [ar] (s3) -- node[label] {PoR graph now \\ resynchronized} (s3 -| s0) -- (s0);
+
+        \node (f1) [n] {Check \\ Header};
+        \node (f2) [n, below right=of f1] {Check \\ Form};
+        \node (f3) [n, below right=of f2] {Check \\ PoRs};
+        \node (f4) [n, below right=of f3] {Check \\ State};
+
+        \node (a1) [n, left = of f1, xshift=-.5cm] {Junk};
+        \node (a2) [n] at (a1 |- f2) {Unreadable \\ Link w/ FP};
+        \node (a3) [n] at (a1 |- f3) {Invalid \\ Use w/ FP};
+        \node (a4) [n] at (a1 |- f4) {Valid PoRs \\ Link FP if possible};
+
+        \node (actions) [stdText, above=of a1] {Action};
+        \node (p1) [stdText] at (actions -| f1) {P1};
+        \node (p2) [stdText] at (actions -| f2) {P2};
+        \node (p3) [stdText] at (actions -| f3) {P3};
+        \node (p4) [stdText] at (actions -| f4) {P4};
+    \end{tikzpicture}
+\end{center}
+
+
 \subsubsubsection{SPV Limits}
 
-
+(not sure if this section is necessary anymore)
 
 
 
