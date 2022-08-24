@@ -1,3 +1,5 @@
+\todo{ensure enough complexity stuff is introduced before the next section -- enough to analyze complexities here.}
+
 Our goal in this section is to find a method for SPV (Simple Payment Verification) between any two simplex-chains that is safe, fast, succinct, and reliable.
 \begin{itemize}
     \item \emph{Safe}: an adversary must either perform a 51\% attack or break a cryptographic dependency to produce an SPV proof that appears valid but is dishonest/fraudulent (e.g., of a valid transaction that depends on a fraudulent transaction).
@@ -6,9 +8,13 @@ Our goal in this section is to find a method for SPV (Simple Payment Verificatio
     \item \emph{Reliable}: the above properties hold for all transactions in all simplex-chains.
 \end{itemize}
 
+\todo{n/c adversary -- explain it}
+
 Given everything we have discussed up to now, it's not clear how SPV is possible.
 The problem is that miners on one simplex-chain do not validate the state transitions of other simplex-chains.
-Each simplex-chain, locally, has an $O(\nicefrac{n}{c})$ share of the network's security (there are $O(c)$ many chains), so an $O(\nicefrac{n}{c})$ adversary could create a very long chain of blocks that have valid headers, PoRs, etc, but also contain one or more fraudulent transactions.
+Each simplex-chain, locally, has an $O(\nicefrac{n}{c})$ share of the network's security (there are $O(c)$ many chains).
+An $O(\nicefrac{n}{c})$ adversary could theoretically produce \emph{all} of the blocks for a single simplex-chain (e.g., by mining at a slight loss to push other miners out).
+The adversary could then create a very long chain of blocks that have valid headers, PoRs, etc, but also contain one or more fraudulent transactions.
 Perhaps the main-chain eventually corrects to a non-fraudulent history (similar to \autoref{sec:preventing-dos-attacks}) -- but in that case we'd need to wait a \emph{very} long time to be sure that such a correction \emph{must} have happened.
 That violates the \emph{fast} goal, so this idea fails to meet our overall goal.
 
@@ -96,7 +102,9 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 \dSe{How about we start by listing tools that Eth2 might use but which we don't?}
 \dMax{
     Yup, okay.
-    DA proofs, BLS sigs, cryptoeconomic fraud proofs, SNARKs and STARKs, sharding / child-chains, staking, slashing, EVM, GHOST. \newline
+    DA proofs,
+    %BLS sigs,
+    cryptoeconomic fraud proofs, SNARKs and STARKs, sharding / child-chains, staking, slashing, EVM, GHOST. \newline
     That's all that come to mind atm.
 }
 \dSe{
@@ -116,15 +124,16 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 \dSe{
     Right, so we know that all the relevant blocks have been widely dispersed.
     Seems like we can rule out DA proofs for now.
-    What about BLS sigs?
+    % What about BLS sigs?
 }
-\dMax{
-    They're pretty neat -- mostly because of \emph{signature aggregation}.
-    If transactions had BLS sigs, then we could aggregate all of the signatures per-block into one signature.
-    It'd save space per-block, but might also make SPV stuff more complex.
-    That said, we could just use a protocol like segregated witness to achieve the same goal.
-    In any case, without introducing PoS-like consensus rules, I don't see how BLS sigs could help with SPV.
-}
+% NOTE: this has an error: can't aggregate BLS sigs unless the sign the same thing. (thx chris)
+% \dMax{
+%     They're pretty neat -- mostly because of \emph{signature aggregation}.
+%     If transactions had BLS sigs, then we could aggregate all of the signatures per-block into one signature.
+%     It'd save space per-block, but might also make SPV stuff more complex.
+%     That said, we could just use a protocol like segregated witness to achieve the same goal.
+%     In any case, without introducing PoS-like consensus rules, I don't see how BLS sigs could help with SPV.
+% }
 \dSe{
     Okay.
     Next, Eth2's fraud proofs.
@@ -776,6 +785,29 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     - so ~z^2
 \end{comment}
 
+-------------------
+
+\dSe{
+    You know, if the waiting time for SPV transactions is $O(\sqrt{v})$, that doesn't the \emph{fast} criterion.
+}
+\dMax{
+    I know.
+}
+\dSe{
+    Have you considered what to do in that case?
+}
+\dMax{
+    Yes.
+    Discuss it.
+}
+\dSe{
+    And the \emph{fast} criterion?
+}
+\dMax{
+    Leave it be.
+    If we need to change our goals, then we'll address that when the time comes.
+}
+
 % \dMax{
 %     I think we need to go back to the cost of bribes.
 % }
@@ -981,7 +1013,6 @@ Therefore, we have:
 \end{align}
 
 Combining \autoref{eq:spv-atk-losses-mining} with \autoref{eq:spv-atk-losses-bribes} yields:
-
 \begin{equation}
     l_z = l_b + l_m > z + H N_1 \frac{z(z+1)}{2}
     \label{eq:spv-atk-losses-total}
@@ -1012,6 +1043,8 @@ At that point, each simplex-chain's main chain will include the fraud proof, and
 Consider the case where only 1\% of miners refuse the bribe ($h = 0.01$), and that the other 99\% of miners continue to mine only blocks that do not include the fraud proof.
 
 Let us represent the weight of the honest and dishonest chain segments with a vector.
+This is purely for convenience so that we can analyze both at the same time.
+The top row is the weight of the honest chain segment, and the second row is the weight of the dishonest chain segment.
 At the start of the attack ($t_0$), neither chain segment has any blocks, so $t_0 = \vec{0}$.
 
 Each round, we expect that $h$ proportion of new blocks were honest, and $d$ proportion are dishonest.
@@ -1041,8 +1074,8 @@ Thus, the honest chain-tips dominate when
 \begin{align*}
     h + k - 1 &> dk \\
     k - dk &> 1 - h \\
-    k(1 - d) &> d \\
-    h k &> d \\
+    k(1 - d) &> 1-h \\
+    h k &> 1-h \\
     k &> h^{-1} - 1
 \end{align*}
 
