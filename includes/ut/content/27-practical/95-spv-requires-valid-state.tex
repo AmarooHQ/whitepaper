@@ -1325,6 +1325,23 @@ If, instead, $H = 1/\sqrt{N_1}$, then $h = 5.05$ and
 \end{equation*}
 
 
+\subsubsubsubsection{Fixed Points of $\BribeCost(z)$}
+
+Let's assume that there is a constant outbound SPV ``pressure''.
+That is, every block, $y$ multiples of the block reward are queued for the next batch.
+
+We should expect batch sizes (and the associated waiting duration) to be stable when $yz = \BribeCost(z)$.
+This is the point at which the outgoing per-block pressure multiplied by a waiting period results in the same waiting period.
+\begin{align}
+    yz &= \BribeCost(z) = h \frac{z(z+1)}{2} + z + 1
+        \nonumber \\
+    y &= h \frac{z+1}{2} + 1 + \frac{1}{z}
+        \nonumber
+\end{align}
+This is a hyperbola and, as $z$ increases, it approaches $y = \frac{h}{2}(z+1) + 1$.
+
+So, if $y = 10$ and $h = 1$, then we can estimate that we have a fixed point at $z \approx 17$ blocks.
+
 
 \subsubsubsubsection{Phase 1 $\to$ Phase 2}
 
