@@ -1195,8 +1195,8 @@ If the network is kept in phase 1, then the PoR graph and (nearly all) chain dat
 
 \subsubsubsubsection{Phase 1 $\not\to$ Phase 2 on the Target Chain}
 
-The first honest block on the target chain must link back to the fraudulent block.
-The additional reward for this block after $k$ blocks is $C_r H k$.
+The first honest block on the target chain must, by definition, link back to the fraudulent block as an invalid ancestor.
+The additional reward for this block after $k$ attacking blocks is $C_r H k$.
 Thus, after $H^{-1}$ blocks, the \emph{effective} block reward for an honest miner will have doubled.
 
 A new honest block thus becomes heavily incentivized over time.
@@ -1214,6 +1214,21 @@ Let $C_r \cdot l_m$ represent the total losses due to mining: factoring out $l_m
     \label{eq:spv-atk-losses-mining}
 \end{align}
 
+Additionally, the rise in difficulty of these blocks presents a practical limit for the attacker.
+When $k > q H^{-1} N_1$ the attacker is, \emph{by definition}, unable to keep up the attack.
+That is because, at that point, the attacker's losses are $C_r (1 + H (q H^{-1} N_1)) = C_r (1 + q N_1)$.
+Assuming an even hash-rate distribution, $C_r N_1 (p + q)$ represents the \emph{sum} of \emph{all} block rewards over the network.
+Therefore, the maximum output (measured in coins) of $q$ proportion of the hash rate, \emph{by definition}, is $C_r N_1 q$.
+Therefore, it an attacker must have additional support to maintain this portion of the attack -- when the mining losses per block (approx $C_r H k$) exceed the attacker's mining capacity ($C_r N_1 q$).
+% We have:
+\begin{align}
+    \text{\hspace{8em}}
+    && C_r H z &< C_r N_1 q \nonumber \\
+    && z &< q H^{-1} N_1 & H \ge {N_1}^{-1} \nonumber \\
+    && z &< q {N_1}^2 & \text{(worst case)} \nonumber
+\end{align}
+If $N_1 = 100$, then no attack is viable (without help) after 5000 blocks, unless $q > 0.5$.
+At that point, at least 50\% of the network hash-rate needs to be dedicated to the target chain to make it unprofitable enough to dissuade honest miners.
 
 \subsubsubsubsection{Phase 1 $\not\to$ Phase 2 and $\BribeCost(z)$}
 
@@ -1406,6 +1421,8 @@ If $h = \nicefrac{1}{N_1}$, i.e., for each honest miner there are $(N_1 - 1)$ di
 % \end{equation*}
 
 If only 1\% of miners refuse the bribe ($h = 0.01$), and that the other 99\% of miners continue to mine only blocks that do not include the fraud proof, then we have: $k > 99$.
+
+If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$, then $k > 2$.
 % \begin{equation*}
 %     k > 99
 % \end{equation*}
@@ -1421,6 +1438,36 @@ If only 1\% of miners refuse the bribe ($h = 0.01$), and that the other 99\% of 
 % dialog 3
 
 \subsubsubsection{Dialog: Error Correction III}
+
+\dialogHeader{24\textsuperscript{nd} August, 2022}
+
+notes
+
+\begin{enumerate}
+    \item \BribeCost understood
+    \item but not fast
+    \item however there's that other factor
+    \item like \emph{after} an FP is recorded
+    \item that's really fast
+    \item is this a contradiction?
+    \item check your premises.
+    \item stuff about spv batching dynamics
+    \item requirement for target chain
+    \item (other examples)
+    \item exse: there are more
+    \item spv fraud causing reorgs
+    \item premise: should not happen ever
+    \item what if it could?
+    \item new rule: invalid spv recursively invalidates?
+    \item (discuss)
+    \item new rule: invalidate blocks that reflect a fraud block without publishing the fraud proof inside of X blocks?
+    \item reorgs from bad spv fair game after a security period?
+    \item just make a protocol rule: you must record fraud proofs within 6 blocks (or 8 blocks or 20 blocks, etc)
+    \item honest miners will be fine with it
+    \item user control of funds only on fraud-recognizing chains
+    \item invalidation is leverage against dishonest miners (how to bribe them if the chain is invalidated? if it's invalidated then histories can't / won't be merged)
+    \item sorta like a UASF every time there's fraud
+\end{enumerate}
 
 --------
 
