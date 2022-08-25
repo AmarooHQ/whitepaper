@@ -29,7 +29,7 @@
 % source: https://tex.stackexchange.com/a/55723
 \let\opsim\sim
 % `\mathord{}' just for clarity -- `{}' would work just as well
-\renewcommand\sim{\mathord{\opsim}}
+\renewcommand\sim{\ensuremath{\mathord{\opsim}}}
 
 % labels for chains that work in and out of math mode
 % if \xspace is inside \ensuremath then it won't work outside math mode

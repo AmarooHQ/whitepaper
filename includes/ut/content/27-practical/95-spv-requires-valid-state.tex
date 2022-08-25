@@ -677,7 +677,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 \todo{Check that we cover safe and reliable explicitly (or add)}
 \dSe{
     Let's take stock for a moment.
-    We've covered \emph{safe} and \emph{reliable}.
+    We've covered \emph{safe}, and we need the other two, first, for \emph{reliable}.
     What about \emph{succinct}?
 }
 \dMax{
@@ -743,7 +743,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     So the waiting time is roughly proportional to the square root of the value being moved.
 }
 \dSe{
-    It would be troubling if the waiting time didn't scale like that.
+    It would be troubling if the waiting time scaled worse than that.
 }
 \dSe{
     But if that's the case, then can't the attacker exploit that complexity by adding a late transaction, close to the batch execution?
@@ -761,15 +761,36 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 \dSe{
     Hmm, okay.
 }
+\dMax{
+    Oh, and if we are basically certain that $v < \BribeCost(z)$, we can add a rule like: \emph{doing SPV against an invalid chain after $\ge z$ blocks invalidates your block}.
+}
+\dMax{
+    A reorg after a long time is better than not reorging at all.
+    And it means that the attacker needs to get their profit off-chain somehow.
+}
+\dSe{
+    It's probably safer to assume that the attacker can do that. \\
+    Could this potentially invalidate blocks recursively? Have unintended consequences?
+}
+\dMax{
+    Uhh\dots{} maybe.
+    It only happens after we pass $z$, though, so it's basically the same case as the original attacker's case.
+}
+\dMax{
+    I \emph{think} it's safe enough.
+}
+\dSe{
+    Okay, something for later, maybe.
+}
 \dSe{
     Let's return to \BribeCost.
     Can you derive it?
 }
 \dMax{
-    Maybe, the idea isn't well formed yet, though.
+    I can try; the idea isn't well formed yet, though.
 }
 \dSe{
-    Then let's discuss it a bit.
+    Then let's discuss it a bit more generally, first.
     See if we can come up with some understanding of how it behaves.
 }
 \dSe{
@@ -1444,11 +1465,402 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 \dialogHeader{24\textsuperscript{nd} August 2022}
 
 \dMax{
+    Okay, I think I understand the mechanics at play, now.
+}
+\dSe{
+    Seems like you found some new ideas, too.
+    Like that blocks on the target chain need to increase in difficulty, which eventually becomes prohibitive.
+}
+\dMax{
+    Yeah.
+    Though now there are three \emph{different} bases for security parameters, and they all \emph{disagree}.
+    None are decisively better than the others.
+}
+\dMax{
+    The phase 2 $\to$ 3 method is easily the fastest, but it depends on the phase 1 $\to$ 2 transition.
+    So we can't rely on it.
+}
+\dSe{
+    Perhaps you should consider the contradiction more deeply.
+}
+\dSe{
+    Check your premises.
+}
+\dMax{
+    \dots{} Okay, I'll make a list.
+}
+\dSe{
+    Good, then we can go through them.
+}
+\dMax{
+    \dots{}
+}
+\dMax{
+    First, a process one: \emph{non-statistical analysis is good enough} -- at least for now.
+}
+\dSe{
+    Do you think that calculating probabilities instead would fix the contradiction?
+}
+\dMax{
+    No, not unless the logic is substantially different.
+    We're calculating something like the average or expected value of breakpoints, rather than something like `99.99\% confidence that we're past the breakpoint'.
+}
+\dMax{
+    The breakpoint is there in both cases, so we can still learn about the system.
+    We'd use the same premises for a statistical model, anyway, so unless there's a logical error, we shouldn't expect the results to be divergent from what we've already found.
+}
+\dSe{
+    Hmm, okay.
+    Let's revisit this later if we can't get unstuck. \\
+    Next?
+}
+\dMax{
+    Okay, thinking about the attack.
+    The attacker wants to bribe other miners.
+    \emph{Dishonest miners aren't willing to make invalid blocks}, though.
+    They'll only make valid blocks that earn them the block reward \emph{and} the bribe.
+}
+\dMax{
+    Making dishonest but valid blocks is one thing, but making invalid blocks for the attacker is almost the same as contributing to a 51\% attack.
+}
+\dSe{
+    Hmm, I think the miners might be willing if they were paid more (and still got the bribe).
+    But, think about the attacker: what is the bribe \emph{for}?
+}
+\dMax{
+    The attacker wants to bypass all of the network's countermeasures to record the FP.
+    So invalid blocks wouldn't help the attacker.
+}
+\dMax{
+    Other invalid blocks (on other simplex-chains) only increase the incentive for honest miners to publish multiple FPs, so larger bribes would be required.
+}
+\dSe{
+    Right.
+    Seems okay.
+    Next?
+}
+\dMax{
+    \emph{The tx for the bribe to each miner is in the block that the bribe pays for.}
+}
+\dSe{
+    That might be efficient, but is it required?
+}
+\dMax{
+    Hmm\dots{} no.
+    Example: an Eth smart contract could hold bribes in escrow and miners could redeem them by replaying the PoR graph later.
+}
+\dMax{
+    So this premise is wrong, then, but I don't think that refuting it breaks anything. \\
+    We just established that valid dishonest blocks are good for the attacker, and we can assume that bribes are always possible (whether via the miner's chain or otherwise).
+}
+\dSe{
+    Okay, next.
+}
+\dMax{
+    \emph{We don't need to consider simultaneous attacks.}
+    The attacker can't reduce costs by attacking two chains at once, etc.
+}
+\dMax{
+    Attacking two chains would double the number of invalid blocks.
+    Which doubles the cost of bribes, etc.
+}
+\dMax{
+    Since each FP can be recorded independently of the other.
+}
+\dSe{
+    Okay, next.
+}
+\dMax{
+    \emph{The attacker can't bribe people to avoid mining the target chain.} \\
+    If this were wrong, then the attacker might not need to raise the difficulty of the target chain like I thought.
+}
+\dSe{
+    What are the goals of miners who accept the bribe?
+}
+\dMax{
+    Maximizing revenue (and thus profit).
+}
+\dMax{
+    So they'd only mine the target chain if it's profitable. \\
+    If the bribes for other chains are more profitable, they'd want to mine those instead.
+}
+\dSe{
+    Right.
+}
+\dMax{
+    Oh, and the attacker could just bribe miners of the target chain via that Eth SC from before.
+    The payout condition being that they extended the attacker's chain and didn't include the FP.
+    The bribe needs to cover the block reward, too, but that's already factored in.
+}
+\dMax{
+    So, it seems like my idea about raising the difficulty might be wrong.
+}
+\dSe{
+    Maybe; there are still advantages if the miner does raise the difficulty, though.
+}
+\dSe{
+    It might slow down honest miners.
+}
+\dMax{
+    True, I'm not sure if we can really rely on that, though.
+}
+\dSe{
+    Even if this premise is wrong, it doesn't break your whole model. \\
+    You have excess capacity via $\BribeCost(z)$.
+}
+\dSe{
+    Let's put this to the side for now.
+    Next?
+}
+\dMax{
+    Hmm, I just thought of something.
+    Not exactly a premise, but a conclusion.
+}
+\dMax{
+    One of the other simplex-chains needs to be the counterparty for the SPV tx, which will invalidate the block after the original FP is recorded.
+}
+\dMax{
+    Oh, this ties into the next one anyway: \emph{it's possible to bribe every miner}.
+}
+\dMax{
+    If one miner is going to invalidate their block, why would they mine it?
+}
+\dSe{
+    \dots{} Because they can redeem the bribe via the Eth SC from before?
+}
+\dSe{
+    The size of the necessary bribe is proportional to the number of blocks between the invalid block and the most recent one.
+    It's cheap to start with, so even if additional bribes are required, it's much less than the bribes for the original FP.
+}
+\dMax{
+    Oh, yeah.
+    So perfect bribes are possible.
+    Assuming \emph{all miners are motivated only by profit}, ofc.
+}
+\dSe{
+    \dots{} Are they?
+}
+\dMax{
+    Well, realistically, no.
+    But we can't \emph{know} that.
+    Or, rather, we can't rely on it being false, I don't think.
+}
+\dSe{
+    It seems like this was a premise you missed.
+}
+\dMax{
+    Yeah, I guess so.
+    That said, if we \emph{do} assume that all miners are motivated by profit, that's an exclusively \emph{weaker} system than otherwise.
+    So if we can find a good solution to SPV \emph{with} this premise, then it should always work without the premise, too.
+}
+\dSe{
+    Let's keep that option in mind as we keep going, then.
+    Next?
+}
+\dMax{
+    \emph{Non-mining users play no significant role in mitigating the attack.}
+}
+\dMax{
+    The rough idea is that users \emph{do} know about the FP, and can start to make txs that are invalid unless the corresponding chain has acknowledged the FP. \\
+    But this doesn't help mitigate the attack b/c the attacker's bribes are way more than the txs fees.
+    Businesses like centralized exchanges can stop processing txs till the network resolves itself, but the attacker can still profit, maybe through a DEX hosted on Ethereum or something.
+}
+\dMax{
+    Users can protect themselves, but it won't stop the attack.
+    It's not decisive.
+}
+\dSe{
+    Hmm.
+    We might need to think about that one later.
+}
+\dSe{
+    Next?
+}
+\dMax{
+    The next one is broad, it's that we understand \emph{batching dynamics} correctly.
+}
+\dSe{
+    Run through batching for us, then we can dig into it.
+}
+\dMax{
+    Outgoing SPV transactions occur in batches.
+    The goal is to measure the time ($z$, in blocks) that outgoing transactions have been waiting so we can compare the total value of those txs to $\BribeCost(z)$.
+}
+\dMax{
+    We could also count \emph{all} transactions as potentially being outgoing SPV txs, but that would increase the waiting time.
+}
+\dMax{
+    When an outgoing SPV tx is made, there's a previous batch, a current batch, and a next batch.
+}
+\dMax{
+    The previous batch can be used for SPV by other chains -- it's waited long enough.\\
+    The current batch is a set of transactions that are in the waiting period.\\
+    The next batch is where all outgoing txs (made during the current batch) are added.\\
+    The next batch becomes the current batch after the current batch waits $z$ blocks.\\
+    The old current batch becomes the previous batch, and a new next batch is created.
+}
+\dMax{
+    This way, we know that all txs in a batch are safe to use for SPV.
+}
+\dSe{
+    Hmm.
+    Walk me through how the attack would interact with batches.
+}
+\dMax{
+    The attacker would make some bad transaction in the current batch, then start bribing other miners.
+    The attacker mines all the blocks for that chain, so they can make that tx in the last block possible (right before the next batch becomes the current one).
+    Then the attacker waits for $z$ blocks and finalizes the attack.
 }
 
-notes
+\newcommand\batch[1]{\ensuremath{\text{batch }b_{#1}}\xspace}
+\dSe{
+    Let me get this straight.
+    The attacker makes the invalid transaction during some batch, call it \batch{i}, and it's added to \batch{i+1}?
+}
+\dMax{
+    Yeah.
+    Then, once \batch{i+1} is the previous batch, the attacker does the rest.
+}
+\dSe{
+    So would another chain accept SPV transactions against the target chain for \batch{i}?
+    (Which is only possible \emph{after} the fraudulent tx was confirmed.)
+}
+\dMax{
+    I guess so.
+}
+\dSe{
+    Even though that would mean doing SPV against an invalid block?
+}
+\dMax{
+    \dots{} only if that SPV transaction doesn't invalidate the corresponding block on that other chain.
+}
+\dMax{
+    But, if it \emph{did} invalidate that block, then the dishonest miners wouldn't be willing to process it.
+    And the attacker wouldn't want them to, either.
+}
+\dSe{
+    Does this change anything about the waiting period, then?
+}
+\dMax{
+    Uhh\dots{}
+}
+\dSe{
+    If you're stuck, think from first principles, what is the waiting period \emph{for}?
+}
+\dMax{
+    It's to convince other chains that a bribe attack would have been unprofitable, so it's safe to do SPV.
+}
+\dMax{
+    But, say that shortly after \batch{i} becomes available for SPV, some other chain \emph{does} process some SPV txs against \batch{i}.
+    Well, after that point, if SPV against an invalid block causes the local block to be invalid, we're basically banking on the validity of all the txs made while \batch{i} was waiting.
+    Even though they haven't waited long enough.
+}
+\dMax{
+    But, dishonest miners want to create valid blocks, so they won't do invalid SPV, so there's no reason to keep waiting.
+}
+\dMax{
+    \dots{} What?
+}
+\dMax{
+    It'd means that we could reduce the batch delay arbitrarily.
+}
+\dMax{
+    But that's nonsense, though.
+}
+\dMax{
+    Not to mention that future blocks would cause potentially massive simplex-wide reorganizations.
+}
+\dSe{
+    Wouldn't that reorg be necessary, \emph{anyway} if consistency between simplex-chains is maintained?
+}
+\dMax{
+    But we don't want future blocks to be able to cause massive reorgs!
+    A reorg on one chain is maybe okay, but this would completely undermine the network.
+}
+\dMax{
+    And we don't want to have each simplex-chain needing to check each other for consistency -- that's the whole bloody point!
+}
+\dMax{
+    This can't be right.
+}
+\dSe{
+    Max, slow down.
+}
+\dSe{
+    If you think there's a contradiction\dots{}?
+}
+\dMax{
+    \dots{} right, check your premises.
+}
+\dSe{
+    Right.
+}
+\dSe{
+    Do you notice anything about all the premises you have mentioned so far?
+}
+\dSe{
+    About where they come from?
+}
+\dMax{\dots}
+\dMax{
+    They're all to do with SPV stuff.
+    They're all ones that we thought up recently.
+}
+\dSe{
+    Yes.
+}
+\dSe{
+    We've already found errors in some of the premises about SPV.
+    Is it possible there are problems with \emph{other} premises you've adopted?
+}
+\dMax{yeah, I suppose so}
+\dSe{
+    So\dots{} you already mentioned three other, undiscussed, premises just now.
+}
+\dSe{
+    Why don't you start there?
+    What are they?
+}
+\dMax{
+    Uhh, let me think.
+}
+\begin{comment}
+    - reorgs for consistency are bad
+    - reorgs for consistency require chains validating other chains (not scalable)
+    - future blocks shouldn't be able to cause big reorganizations
+\end{comment}
+\dMax{
+    Okay, I think they're: 1. \emph{big reorgs are bad}, 2. \emph{big reorgs end up requiring nodes to validate other chains}, and 3. \emph{future blocks shouldn't be able to cause big reorgs}.
+}
 
-\begin{enumerate}
+
+\begin{comment}
+    \item d miners want to make valid blocks
+    \item bribe paid on-chain
+    \item only need to consider dynamics of 1 chain being attacked
+    \item what about simultaneous attacks?
+    \item attacker can't bribe ppl not to mine target chain
+    \item a chain needs to be the target of spv fraud -- can bribe those miners?
+    \item invalid spv -> invalidates R-block? so whoever is on target chain won't want to include that spv
+    \item can't reliably bcast fraud proofs and get them recorded (perfect bribes possible)
+    \item users moving txs away from non-FP acknowledging chains insignificant
+    \item batching dynamics
+    \item exse: what about premises you've used for a long time?
+    \item exse: or ones that apply much more broadly?
+    \item miners can move between chains
+    \item invalidation dynamics (based on \BribeCost?)
+    \item principle: cannot allow future data to invalidate past data
+    \item (reason: DA stuff, if you could hide data and show it later it'd cause a reorg)
+    \item but is invalidation okay if everyone knows that it'll be invalid?
+    \item like if the miner creating the block knows it'll eventually be invalid even if the block \emph{appears} valid now?
+    \item qualitatively different kind of invalidation
+    \item so is it okay to do that?
+    \item like, if you reflect a block, and an FP is available, it needs to be recorded within \sim 6 block periods or your block is invalidated?
+\end{comment}
+
+% notes
+
+\begin{comment}
     \item \BribeCost understood
     \item but not fast
     \item however there's that other factor
@@ -1475,7 +1887,7 @@ notes
     \item \dots
     \item note: a long chain of invalid blocks requires an optimization wrt to linking back to other blocks, like "from: block i, to: block (i + 10000)". otherwise headers would be huge. that's not a problem for the honest block b/c full nodes can download the whole section (maybe add a nipopow or something?). what about other chains? well, all of those blocks (i to i+10000) are in each chain's PoR graph. So is there ever a time that this cheap optimization doesn't work? It's easy for other chains. Maybe the honest block can include all the headers as an extra block segment (see segmented state). that way it's easy to verify without downloading the full set of invalid blocks in future. (we know all subsequent blocks are invalid b/c we have a fraud proof for the i'th block.)
     \item solve by segmented state? fraud proof only invalidates tx state, not PoR state. That way, the PoR graph from the fraud chain-segment is inherited and doesn't need any replication, etc.
-\end{enumerate}
+\end{comment}
 
 --------
 
@@ -1651,7 +2063,7 @@ in response to writing a dialog and honestly and fully exploring everything.
 
 
 
-
+\todo{cut below: old stuff}
 
 
 
