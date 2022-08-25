@@ -1464,7 +1464,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 
 \subsubsubsection{Dialog: Error Correction III}
 
-\dialogHeader{24\textsuperscript{nd} August 2022}
+\dialogHeader{25\textsuperscript{th} August 2022}
 
 \dMax{
     Okay, I think I understand the mechanics at play, now.
@@ -2019,7 +2019,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 }
 \dSe{
     Now, consider premise 1; only four words.
-    Where could an unseen premise be hiding?
+    Where could an unseen premise hide?
 }
 \dMax{
     \dots{} `reorg' -- that's the only real option
@@ -2029,7 +2029,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     What's a reorg?
 }
 \dMax{
-    It's what happens when the chain-tip changes to a second chain-tip that isn't a descendant of the first one.
+    It's what happens when the best chain-tip changes from a first chain-tip to a second one that isn't a descendant of the first one.
 }
 \dMax{
     For sibling chain-tips, the reorg isn't very disruptive and happens somewhat regularly.
@@ -2065,10 +2065,13 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 }
 \dMax{
     No, not for them either.
-    They had the fraud proof already, so they knew it was invalid.
+    The knew the block was invalid because they already had the fraud proof.
 }
 \dSe{
-    So what's the missing premise?
+    So\dots{}
+}
+\dSe{
+    What's the hidden premise?
 }
 \dMax{\dots}
 \dMax{
@@ -2078,16 +2081,25 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     But that premise is wrong! \\
     It's not a real reorg.
     Reorgs only happen between valid chain-tips. \\
-    Or, at least, those are the only ones that matter.
+    Or, at least, those are the only ones that matter, for us.
 }
 \dSe{
     Right.
 }
 \dMax{
-    So\dots{} what does this mean for SPV?
+    If a totally different chain, like Eth2, was verifying SPV proofs against the simplex, it must be aware of unpublished fraud proofs to be secure.
+    And it needs to tolerate to the sort of invalidation (via FPs) that might happen.
 }
 \dSe{
-    Retrace the conversation, to before any of the premises we just refuted, back to the last unrefuted thing you said.
+    Mm\dots{} perhaps.
+    Maybe leave that problem for later, once we've sorted out how \UT{1} will work.
+}
+\dMax{
+    Yeah, okay.
+    So\dots{} what does refuting the premise mean for SPV, then?
+}
+\dSe{
+    Retrace the conversation, to before you brought up any of the premises we just refuted, back to the last unrefuted thing you said.
 }
 \dSe{
     What was it?
@@ -2108,8 +2120,37 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 \dSe{
     Let's find out.
 }
+\dSe{
+    Do you have any reason to think that we can't reduce the mandatory SPV delay?
+}
 \dMax{
-    I guess we need some minimum waiting period so the FP has time to propagate, but that should be very fast if the P2P layer prioritizes it.
+    \dots{} I guess not.
+}
+\dSe{
+    So, if we've made a breakthrough, can you explain it?
+}
+\dMax{
+    I think so.
+    Roughly, we've discovered an asymmetry between honest and dishonest miners.
+    As long as fraud proofs are readily propagated, then we can alter mining dynamics based on off-chain information (i.e., the FP).
+}
+\dMax{
+    No honest miner willingly drafts an invalid block.
+    So, if fraud proofs are readily propagated, then honest miners can \emph{always} avoid drafting a block that \emph{could} be invalidated by a future block.
+}
+\dMax{
+    However, dishonest miners will \emph{willingly} draft such blocks in exchange for bribes.
+    So, we use that asymmetry to punish dishonest miners such that honest miners can always avoid becoming collateral damage.
+}
+\dSe{
+    Okay.
+    Good enough for now.
+    How do we start?
+    Initiative's on you.
+}
+\dMax{\dots}
+\dMax{
+    I guess we'd need some minimum waiting period so the FP has time to propagate, but that should be very fast if the P2P layer prioritizes it.
 }
 \dSe{
     Prioritizing error correction sounds like a good idea.
