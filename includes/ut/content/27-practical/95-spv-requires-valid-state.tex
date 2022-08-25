@@ -1968,6 +1968,9 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     So we actually \emph{do} want \emph{some} future blocks to be able to invalidate past blocks.
     The ones that honest miners make.
 }
+\dSe{
+    Yes, there is a \emph{qualitative difference} between types of invalidation.
+}
 \dMax{
     So premise 3 is false.
 }
@@ -1975,11 +1978,10 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     And premise 2 is false, too, because basically all nodes know of the FP, which includes honest miners.
 }
 \dSe{
-    Huh.
     So all three were false.
 }
 \dSe{
-    So there's one question left.
+    There's one question left, yet.
     What was the premise that you missed?
 }
 \dMax{
@@ -2007,7 +2009,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     You've automatized them, then?
 }
 \dMax{
-    Yeah.
+    Yeah\dots{}
     So if there's a mistake, I need to go slowly and carefully.
 }
 \dSe{
@@ -2015,7 +2017,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 }
 \dSe{
     Now, consider premise 1.
-    It's only four words, where could a premise be hiding.
+    It's only four words; where could a premise be hiding.
 }
 \dMax{
     \dots{} `reorg' -- that's the only real option
@@ -2040,14 +2042,15 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 \dSe{
     Consider a normal full node for the target chain when an attack is ongoing.
     At some point, a new local block (including the fraud proof) is published on the target chain.
-    What does that full node experience?
+    When that happens, what does the full node experience?
 }
 \dMax{
     Well\dots{} it wouldn't reorg\dots{} \\
-    Because it never used the attackers branch -- it was invalid.
+    Because it never used the attacker's branch -- that was invalid.
 }
 \dMax{
-    So it's like a typical newly mined block, except there's a long time between it and the last valid one, and it links back to like potentailly thousands of previous invalid blocks.
+    So it's like a typical newly mined block, except it was a long time since its parent.
+    And it links back to like potentailly thousands of previous invalid blocks.
 }
 \dSe{
     So, did publishing the fraud proof \emph{actually} cause a reorg?
@@ -2065,12 +2068,15 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 \dSe{
     So what's the missing premise?
 }
+\dMax{\dots}
 \dMax{
     That \emph{going from a invalid to a valid chain-tip (or vice versa) counts as a reorg}.
 }
 \dMax{
-    But that's wrong. \\
+    But that premise is wrong! \\
     It's not a real reorg.
+    Reorgs only happen between valid chain-tips. \\
+    Or, at least, those are the only ones that matter.
 }
 \dSe{
     Right.
@@ -2079,7 +2085,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     So\dots{} what does this mean for SPV?
 }
 \dSe{
-    Retrace the conversation, past all the premises we refuted, back to the last unrefuted thing you said.
+    Retrace the conversation, to before any of the premises we just refuted, back to the last unrefuted thing you said.
 }
 \dSe{
     What was it?
@@ -2090,8 +2096,124 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 \dMax{
     ``\ItMeansLowBatchDelays''
 }
-
-
+\dSe{
+    And\dots{}
+}
+\dMax{
+    Can we?
+    Is that really the answer?
+}
+\dSe{
+    Let's find out.
+}
+\dMax{
+    I guess we need some minimum waiting period so the FP has time to propagate, but that should be very fast if the P2P layer prioritizes it.
+}
+\dSe{
+    Prioritizing error correction sounds like a good idea.
+}
+\dSe{
+    How long should we wait?
+}
+\dMax{
+    IDK\dots{} a minute?
+    That'd be \sim4 blocks. \\
+    We could have batches every block or two.
+    Though, we don't need them anymore.
+}
+\dSe{
+    What bad things will happen if the waiting period is too low?
+}
+\dMax{
+    Well, if you could do SPV transactions within a block period, then there might not be enough time for an honest miner to hear about the FP.
+}
+\dMax{
+    You could \emph{make} the transaction at that point, but a miner shouldn't include it, yet.
+}
+\dMax{
+    An honest miner \emph{should} almost always hear about the FP before the next block, though.
+    Assuming blocks on the target chain are created regularly.
+}
+\dMax{
+    If a bunch of blocks come all at once, though, then the honest miner still shouldn't process the tx, yet.
+    They should wait based on the network-wide hash rate.
+    So, for a waiting period of $z$, we want the network to go through $z$ block periods overall, which is roughly $C_d N_1 z$ work (where $C_d$ is the average difficulty).
+    To do that we can check the difference between total chain-weight -- for each SPV transaction, each chain can check: when the header targeted by this SPV tx was reflected by us, is that chain-weight plus $C_d N_1 z$ less than the current chain-weight?
+}
+\dMax{
+    Maybe we could also require that both chains need $z$ local-confirmations of the relevant header -- i.e., the local chain reflected that header at least $z$ blocks ago, and there are at least $z$ R-blocks building on that header.
+}
+\dMax{
+    So we should wait at least 1 confirmation, but small reorgs are possible, so we need a little buffer, too.
+}
+\dSe{
+    What happens when the network experiences a partition?
+}
+\dMax{
+    The two (or more) sides could become inconsistent.
+    That said, users and miners would notice a >50\% drop in hash rate pretty quickly.
+    But eventually, any inconsistency could cause the miners on the smaller partition(s) lose out.
+}
+\dMax{
+    Actaully, no fraud proof would be possible (assuming honest miners).
+}
+\dMax{
+    All of the SPV transactions would become invalid when the partitions merge, because they target headers that are no longer in the respective main chains.
+    So they'd be invalid when replayed.
+}
+\todo{describe blockDAG tx merging policy in more detail (in the relevant section)}
+\dMax{
+    Other than that, if there are no doublespends then all purely local transactions should work out.
+    They'll get replayed when the partitions merge.
+}
+\dSe{
+    If a partition split off a long time ago (say, hours) there'd be many thousands of blocks in quick succession.
+    Is that a problem?
+}
+\dMax{
+    Uhh, well all of those blocks would get reflected by the rest of the PoR graph -- sequentially.
+    Both partitions would have to do that, based on the rules we introduced a few weeks ago.
+}
+\dMax{
+    Practically, that's a lot of reflection data to include in each block.
+    And miners will either stick with their existing partition, or swap to the heaviest one.
+}
+\dMax{
+    The heavist partition will produce blocks a bit faster for a little while as miners from the lighter partitions join.
+    Each block has some capacity for reflections, and we know the average number of reflections per block.
+    We also want some ``burstable'' capacity so the network doesn't grind to a halt when partitions merge, or the hash-rate changes suddenly for some other reason.
+}
+\dMax{
+    We need capacity for at least $2\times$ the average (so 50\% excap), because a network partition could be close to a 50/50 split, in which case block production rates would temporarily double when the partitions merge.
+    If we want to process headers from the minority partition(s) at the same time, then we need even more excap.
+}
+\dMax{
+    So if we had $3\times$ the average -- such that two-thirds is reserved as \emph{excess capacity} -- then we can handle those high volume times, and otherwise we can integrate reflections twice as fast as the average, without bottle-necking the production of new blocks.
+}
+\dMax{
+    So, by rate limiting the integration rate of reflections from other partitions, we naturally give enough time for fraud proofs to be broadcast.
+}
+\dMax{
+    Although, the main chain will gain work up to $3\times$ faster than before the partition merged.
+}
+\dMax{
+    So, if $z=4$ was a safe security parameter when everything is going well, we should use $z=12$ instead to ensure there's enough buffer to handle partition merges.
+}
+% \dSe{
+%     (bottleneck joining 2 partitions?)
+% }
+\dSe{
+    (thousands of invalid linkbacks for 1 block?)
+}
+\dSe{
+    (what if there are no SPV txs between two particular chains for many blocks?)
+    (can attacker leverage?)
+}
+\dSe{
+    (how much freedom to miners have in creating blocks -- can we improve SPV by changing any rules?)
+}
+% the PoR graph is truly immutable! 6:49pm
+% cotd time :)
 
 
 \begin{comment}
