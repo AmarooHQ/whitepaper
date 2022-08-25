@@ -1,3 +1,8 @@
+
+\colorlet{DMaxCol}{Cerulean!18!white}
+\colorlet{DExSeCol}{ForestGreen!18!white}
+\colorlet{DEMaloCol}{BrickRed!20!white}
+
 %% chat bubbles
 
 \newcommand{\ChatRaw}[3]{
@@ -33,15 +38,15 @@
 %% dialog boxes
 
 \newcommand{\nefName}{EMalō}
-\newcommand{\cNef}[1]{\ChatL{\nefName}{colback=BrickRed!20}{#1}}  % title={\nefName:}
-\newcommand{\rNef}[1]{\ChatL{}{colback=BrickRed!20}{#1}}
+\newcommand{\cNef}[1]{\ChatL{\nefName}{colback=DEMaloCol}{#1}}  % title={\nefName:}
+\newcommand{\rNef}[1]{\ChatL{}{colback=DEMaloCol}{#1}}
 
-\newcommand{\cMax}[1]{\ChatR{Max}{colback=Cerulean!20}{#1}}  % title={Max:}
-\newcommand{\rMax}[1]{\ChatR{}{colback=Cerulean!20}{#1}}
+\newcommand{\cMax}[1]{\ChatR{Max}{colback=DMaxCol}{#1}}  % title={Max:}
+\newcommand{\rMax}[1]{\ChatR{}{colback=DMaxCol}{#1}}
 
-\newcommand{\cSe}[1]{\ChatL{ExSe}{colback=ForestGreen!20}{#1}}  % title={ExSe:}
-% \newcommand{\cSe}[1]{\ChatL{ExRatione}{colback=ForestGreen!20}{#1}}  % title={ExSe:}
-\newcommand{\rSe}[1]{\ChatL{}{colback=ForestGreen!20}{#1}}
+\newcommand{\cSe}[1]{\ChatL{ExSe}{colback=DExSeCol}{#1}}  % title={ExSe:}
+% \newcommand{\cSe}[1]{\ChatL{ExRatione}{colback=DExSeCol}{#1}}  % title={ExSe:}
+\newcommand{\rSe}[1]{\ChatL{}{colback=DExSeCol}{#1}}
 
 %
 % v2 chat/dialog helpers
@@ -113,10 +118,6 @@
         }
     % \par
 }
-
-\colorlet{DMaxCol}{Cerulean!20!white}
-\colorlet{DExSeCol}{ForestGreen!20!white}
-\colorlet{DEMaloCol}{BrickRed!20!white}
 
 \NewDocumentCommand{\dMax}{m}{%
     \dRight{Max}{DMaxCol}{#1}%

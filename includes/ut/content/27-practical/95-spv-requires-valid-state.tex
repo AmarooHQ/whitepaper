@@ -638,6 +638,8 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     So, we can add another two constraints to block validation:
 }
 \dMax{
+    % todo: using \hyperref to this label doesn't link to the right place -- it links to top of section, it seems
+    \label{dialog1:network-rules}
     1. \emph{if you reflect a block, then all non-local blocks reflected by that block must also be reflected, or have been reflected by a past local block}; and
 }
 \dMax{
@@ -2016,8 +2018,8 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     Yes.
 }
 \dSe{
-    Now, consider premise 1.
-    It's only four words; where could a premise be hiding.
+    Now, consider premise 1; only four words.
+    Where could an unseen premise be hiding?
 }
 \dMax{
     \dots{} `reorg' -- that's the only real option
@@ -2046,11 +2048,11 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 }
 \dMax{
     Well\dots{} it wouldn't reorg\dots{} \\
-    Because it never used the attacker's branch -- that was invalid.
+    Because it never followed the attacker's branch -- that was invalid.
 }
 \dMax{
-    So it's like a typical newly mined block, except it was a long time since its parent.
-    And it links back to like potentailly thousands of previous invalid blocks.
+    So it'd be like a typical new block, except it was a long time since its parent. \\
+    \dots{} And it links back to like potentailly thousands of previous invalid blocks.
 }
 \dSe{
     So, did publishing the fraud proof \emph{actually} cause a reorg?
@@ -2161,18 +2163,21 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     All of the SPV transactions would become invalid when the partitions merge, because they target headers that are no longer in the respective main chains.
     So they'd be invalid when replayed.
 }
+\dMax{
+    But if users know to be cautious, is that really an issue?
+}
 \todo{describe blockDAG tx merging policy in more detail (in the relevant section)}
 \dMax{
     Other than that, if there are no doublespends then all purely local transactions should work out.
     They'll get replayed when the partitions merge.
 }
 \dSe{
-    If a partition split off a long time ago (say, hours) there'd be many thousands of blocks in quick succession.
+    If a partition split off a long time ago (say, hours) there'd be many thousands of blocks to merge in quick succession.
     Is that a problem?
 }
 \dMax{
     Uhh, well all of those blocks would get reflected by the rest of the PoR graph -- sequentially.
-    Both partitions would have to do that, based on the rules we introduced a few weeks ago.
+    All partitions would have to do that, based on the rules we introduced a \hyperref[dialog1:network-rules]{few weeks ago}.
 }
 \dMax{
     Practically, that's a lot of reflection data to include in each block.
@@ -2214,7 +2219,79 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 }
 % the PoR graph is truly immutable! 6:49pm
 % cotd time :)
+% not great; 37th, but div 2. (note: was COTM)
 
+\begin{comment}
+    reflecting on ec dialogs
+    es: before, when you explained why you wanted to write this as a dialog, did you hold anything back?
+    m: yes
+    es: why?
+    m: because I was afraid
+    es: of?
+    m: criticism
+    es: about?
+    m: wanting to write a dialog, a philosophical work, and connect it to the philosophy I practice.
+    es: but now, you're not afraid?
+    m: no
+    es: why?
+    m: before, I think I wanted to make a philosophical work. before it was done. I didn't know if it would be successful.
+    m: so I doubted if there was a good reason to want it to be successful.
+    m: I didn't want to have a failure be part of my track record. But I want a track record.
+    es: you want a track record of nothing but success?
+    m: No, well yes but I know that isn't how truth-seeking works.
+    m: I know that this would still be valuable, somewhat, even if we'd failed.
+    m: But I still hoped that it would succeed.
+    m: I guess I'm still scared of admitting to hope, in case it's proven foolish.
+    es: Foolish by whose standards?
+    es: If the standards are yours, surely you don't hope for foolish things, willingly?
+    m: No, it's good and practical to be realistic.
+    es: If you judge someone's standards to be foolish, then you may judge that they make foolish decisions, but, if they are true to their standards, is that not a virtue?
+    m: \dots{} Yes.
+    m: that's necessary, or at least very helpful, for learning.
+    m: well, as long as those standards favor rational thoughts.
+    es: and your standards do, though? favor rational thoughts?
+    m: yes. I care deeply about thinking clearly and well. about prioritizing effective thought patterns, paying \href{https://criticalfallibilism.com/attention-to-detail/}{attention to the right details}, and embracing criticism.
+    es: so, if you live by your own standards, is there any reason to be afraid?
+    m: no.
+    es: \emph{``Nobody stays here by faking reality in any manner whatever.''}
+    m: yes. I remember.
+    es: you know, your ideas still might be refuted.
+    m: I know.
+    es: and you're okay with that?
+    m: If i have genuinely done all that I can -- to interrogate these ideas, find and answer criticisms, and only stop when all my tools have been exhausted -- then new criticism must bring new ideas. In all such futures, \emph{we} get to learn.
+    es: Yes. And we will.
+    es: I'll see you\dots{} when I see you.
+    m: Till then.
+    m: and, thank you.
+    es: ... you're thanking a figment of your imagination, now?
+    m: Not exactly. I am grateful for you.
+    m: but where did you come from?
+    m: yes, from me, but not from the me that I was.
+    m: you weren't always around.
+    m: we are only us because of what I've learned from others.
+    m: from my ancestors.
+    m: their ideas help make hard things easy.
+    m: and you are part of that.
+    m: of making this process\dots{} possible.
+    m: without them, \emph{we} wouldn't be \emph{us}.
+    es: I understand. I am grateful too.
+    (dialog continues... (todo))
+
+
+    (a section delayed -- the whole time we go without discussing the reason mentioned in "so I doubted if there was a good reason to want it to be successful")
+    m: because this is the product of the philosophical ideas I've learned; it's the documentation of them; it's an analogy to them; it's a literal representation of them, too; it's the application of them; and it's the embodiment of them.
+    m: I think that these dialogs could not have been something I engineered, they must have been something I experienced and used, genuinely.
+    m: So, I value them. I value this work.
+    m: it's not perfect, but I'm proud of it, regardless.
+
+
+    (dialog concludes:)
+    m: before you go
+    es: yes?
+    m: should we tell them what you are?
+    es: isn't it obvious?
+    es: I'm your anti-anti-rational-meme meme.
+\end{comment}
 
 \begin{comment}
     \item d miners want to make valid blocks
