@@ -1516,7 +1516,12 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 }
 \dMax{
     Okay, thinking about the attack.
-    The attacker wants to bribe other miners.
+    \emph{The attacker needs to bribe other miners}.
+}
+\dMax{
+    Because the attacker wants to prevent the FP being recorded in the PoR graph, and the FP is readily available.
+}
+\dMax{
     \emph{Dishonest miners aren't willing to make invalid blocks}, though.
     They'll only make valid blocks that earn them the block reward \emph{and} the bribe.
 }
@@ -1761,8 +1766,9 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 \dMax{
     \dots{} What?
 }
+\newcommand\ItMeansLowBatchDelays{It'd mean that we could reduce the batch delay arbitrarily.}
 \dMax{
-    It'd means that we could reduce the batch delay arbitrarily.
+    \ItMeansLowBatchDelays
 }
 \dMax{
     But that's nonsense, though.
@@ -1778,7 +1784,10 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     A reorg on one chain is maybe okay, but this would completely undermine the network.
 }
 \dMax{
-    And we don't want to have each simplex-chain needing to check each other for consistency -- that's the whole bloody point!
+    And if that happens, practically, miners will have to validate other chains to know if it's safe and consistent.
+}
+\dMax{
+    But we don't want to have each simplex-chain needing to check each other for consistency -- that's the whole bloody point!
 }
 \dMax{
     This can't be right.
@@ -1832,6 +1841,257 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 \dMax{
     Okay, I think they're: 1. \emph{big reorgs are bad}, 2. \emph{big reorgs end up requiring nodes to validate other chains}, and 3. \emph{future blocks shouldn't be able to cause big reorgs}.
 }
+% also: (thought of after) that going from invalid -> valid histories is a reorg at all.
+\dSe{
+    Hmm, I guess four other premises, then.
+}
+\dSe{
+    Let's start with 1.
+}
+\dMax{
+    Okay, \emph{big reorgs are bad}.\\
+    You remember in \autoref{sec:availability-of-blocks} we covered what would happen if a miner could withhold blocks but also have the headers included in the PoR graph?
+}
+\dMax{
+    That would be bad, b/c, if a miner could do that, then releasing the block (or a chain-segment) at a future time could cause a reorg, and that would potentially invalidate a bunch of that chain's history.
+}
+\dMax{
+    An honest miner could have their reward reduced \emph{after} they publish their block, even though it was the best block they could have made.
+    It'd be a catch 22 for the honest miners, even on other chains.
+}
+\dMax{
+    We want to avoid big reorgs so that honest miners aren't in unfair situations.
+}
+\dMax{
+    Big reorgs would have flow on effects, too.
+    Like, for the SRT context, we need the number of RTs on each chain to be well known and in-sync.
+}
+\dSe{
+    Okay, a few things to unpack here.
+}
+\dSe{
+    First, we already solved the withheld blocks problem, right?
+    (In that section you linked.)
+}
+\dMax{
+    Yeah, that's right.
+    We added a network rule: \emph{valid blocks must only reflect blocks that exist}.
+}
+\dSe{
+    So, I agree that \emph{those} kind of big reorgs are bad, but we already mitigated them.
+}
+\dMax{
+    I guess, yeah.
+}
+\dSe{
+    So are big reorgs bad in \emph{general}?
+    Or are big reorgs required to avoid inconsistencies between simplex-chains?
+}
+\dMax{
+    Yeah, I guess \emph{if} premise 2 is false, then big reorgs might not be bad.
+}
+\dSe{
+    Forget about premise 2 for now.
+    We'll get to that soon. \\
+    What about reorgs due to inconsistencies?
+}
+\dMax{
+    Well, the network needs to stay consistent, like, that's required for maintaining integrity.
+}
+\dMax{
+    So yeah, I guess we do want big reorgs if the alternative were inconsistency.
+}
+\dMax{
+    But not if it means unfair situations for miners or breaking premise 3.
+}
+\dSe{
+    We'll get to that.
+}
+\dSe{
+    Okay, premise 2 next.
+}
+\dMax{
+    \emph{Big reorgs end up requiring nodes to validate other chains}.
+}
+\dMax{
+    This is because miners want to avoid big reorgs that will invalidate their blocks.
+    So, from a miner's perspective, if another miner can potentailly risk your income you need a plan to protect it.
+    And that plan would be: run full nodes for all the other chains so that you're sure any other chain is valid, and all of that chain's interactions with other chains were valid, etc, etc.
+}
+\dMax{
+    So \emph{if} big reorgs are possible, then miners end up validating all chains or risk losing their earnings, which would compromise the security of the network.
+}
+\dSe{
+    When you're saying all this, we only really care about honest miners, right?
+}
+\dMax{
+    Yeah, of course.
+}
+\dSe{
+    That's why catch 22 type situations are bad?
+}
+\dMax{
+    Yeah
+}
+\dSe{
+    So tell me about premise 3.
+}
+\dMax{
+    Are we done with 2 yet?
+}
+\dSe{
+    Just humor me.
+}
+\dMax{
+    \emph{Future blocks shouldn't be able to cause big reorgs}. \\
+    Because that's a catch 22.
+    Miner's wouldn't be able to tell whether their block would stay valid.
+}
+\dSe{
+    It would be in the case of withheld blocks, yes\dots \\
+}
+\dMax{
+    \dots{} But it's not in the case of bad SPV. \\
+    The attacker is already bribing the miner, that's why they'd ignore the FP in the first place.
+    But only dishonest miners are doing that.
+}
+\dSe{
+    Oh?
+}
+\dMax{
+    And we don't care about whether the \emph{dishonest} miners are punished, only the honest ones.
+}
+\dMax{
+    So an honest miner won't ever make a block that could be invalidated this way.
+}
+\dMax{
+    So we actually \emph{do} want \emph{some} future blocks to be able to invalidate past blocks.
+    The ones that honest miners make.
+}
+\dMax{
+    So premise 3 is false.
+}
+\dMax{
+    And premise 2 is false, too, because basically all nodes know of the FP, which includes honest miners.
+}
+\dSe{
+    Huh.
+    So all three were false.
+}
+\dSe{
+    So there's one question left.
+    What was the premise that you missed?
+}
+\dMax{
+    \dots{} I'm not sure.
+}
+\dSe{
+    It's implicit, and might be hard to see.
+}
+\dSe{
+    But it's there.
+    Hiding in the other three.
+}
+\dMax{
+    \dots{} I don't see it.
+}
+\dSe{
+    How long had you believe those three premises,
+    before you learned they were wrong just now?
+}
+\dMax{
+    I don't know, a year at least?
+    More even -- they're based on ideas that I learnt years ago.
+}
+\dSe{
+    You've automatized them, then?
+}
+\dMax{
+    Yeah.
+    So if there's a mistake, I need to go slowly and carefully.
+}
+\dSe{
+    Yes.
+}
+\dSe{
+    Now, consider premise 1.
+    It's only four words, where could a premise be hiding.
+}
+\dMax{
+    \dots{} `reorg' -- that's the only real option
+}
+\dSe{
+    Right.
+    What's a reorg?
+}
+\dMax{
+    It's what happens when the chain-tip changes to a second chain-tip that isn't a descendant of the first one.
+}
+\dMax{
+    For sibling chain-tips, the reorg isn't very disruptive and happens somewhat regularly.
+    But deeper reorgs can be disruptive because state can change significantly -- that's how doublespends are done.
+}
+\dSe{
+    And when a fraud proof is added to the PoR graph, that causes a reorg?
+}
+\dMax{
+    Yeah.
+}
+\dSe{
+    Consider a normal full node for the target chain when an attack is ongoing.
+    At some point, a new local block (including the fraud proof) is published on the target chain.
+    What does that full node experience?
+}
+\dMax{
+    Well\dots{} it wouldn't reorg\dots{} \\
+    Because it never used the attackers branch -- it was invalid.
+}
+\dMax{
+    So it's like a typical newly mined block, except there's a long time between it and the last valid one, and it links back to like potentailly thousands of previous invalid blocks.
+}
+\dSe{
+    So, did publishing the fraud proof \emph{actually} cause a reorg?
+}
+\dMax{
+    \dots{} not for the full node.
+}
+\dSe{
+    What about for other honest miners?
+}
+\dMax{
+    No, not for them either.
+    They had the fraud proof already, so they knew it was invalid.
+}
+\dSe{
+    So what's the missing premise?
+}
+\dMax{
+    That \emph{going from a invalid to a valid chain-tip (or vice versa) counts as a reorg}.
+}
+\dMax{
+    But that's wrong. \\
+    It's not a real reorg.
+}
+\dSe{
+    Right.
+}
+\dMax{
+    So\dots{} what does this mean for SPV?
+}
+\dSe{
+    Retrace the conversation, past all the premises we refuted, back to the last unrefuted thing you said.
+}
+\dSe{
+    What was it?
+}
+\dMax{
+    \dots{}
+}
+\dMax{
+    ``\ItMeansLowBatchDelays''
+}
+
+
 
 
 \begin{comment}
