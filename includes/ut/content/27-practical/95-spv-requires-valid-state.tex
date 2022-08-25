@@ -1219,7 +1219,7 @@ When $k > q H^{-1} N_1$ the attacker is, \emph{by definition}, unable to keep up
 That is because, at that point, the attacker's losses are $C_r (1 + H (q H^{-1} N_1)) = C_r (1 + q N_1)$.
 Assuming an even hash-rate distribution, $C_r N_1 (p + q)$ represents the \emph{sum} of \emph{all} block rewards over the network.
 Therefore, the maximum output (measured in coins) of $q$ proportion of the hash rate, \emph{by definition}, is $C_r N_1 q$.
-Therefore, it an attacker must have additional support to maintain this portion of the attack -- when the mining losses per block (approx $C_r H k$) exceed the attacker's mining capacity ($C_r N_1 q$).
+An attacker must have additional support to maintain this portion of the attack -- when the mining losses per block (approx $C_r H k$) exceed the attacker's mining capacity ($C_r N_1 q$).
 % We have:
 \begin{align}
     \text{\hspace{8em}}
@@ -1268,22 +1268,22 @@ Combining \autoref{eq:spv-atk-losses-mining} with \autoref{eq:spv-atk-losses-bri
     \label{eq:spv-atk-losses-total}
 \end{equation}
 
-\todo{nomenclature clash: $h$ used both for $H(Np+q)$ and in $h+d=1$.}
+\todo{nomenclature clash: $h$ was previously used both for $H(Np+q)$ and in $h+d=1$. set $\eta = H(Np+q)$ as a replacement. keep $h+d=1$.}
 
 Observe that this is a lower bound on $\BribeCost(z)$.
 Let's define \BribeCost as the absolute minimum it can be given our current understanding.
 To reduce complexity, we'll also define \BribeCost \emph{in terms of the block reward} (i.e., in units of \emph{block rewards} rather than \emph{coins}).
 We can come back to it later if we need to.
 \begin{align}
-    \BribeCost(z) &= h \frac{z(z+1)}{2} + z + 1
-        & & \text{where } h = H(N_1 p + q)
+    \BribeCost(z) &= \eta \frac{z(z+1)}{2} + z + 1
+        & & \text{where } \eta = H(N_1 p + q)
     \label{eq:spv-bribe-cost-1}
 \end{align}
 We should also note the inverse of \BribeCost, which gives us a lower bound on the number of blocks for which we should wait, given a total outgoing value, $v$ (expressed as a multiple of the block reward).
 \begin{align}
     \BribeCost^{-1}(v) &= \frac{\sqrt{
-        (h - 2)^2 + 8hv
-    } - h - 2}{2h} & & \text{where } h = H(N_1 p + q)
+        (\eta - 2)^2 + 8 \eta v
+    } - \eta - 2}{2\eta} & & \text{where } \eta = H(N_1 p + q)
     \label{eq:spv-bribe-cost-inverse}
 \end{align}
 
@@ -1322,17 +1322,17 @@ The maximum $v$ possible is $C_t$.
     \frac{v}{C_r} &= \frac{v \syr C_f}{f C_t} \\
     \text{Set } v = C_t \implies \frac{C_t}{C_r} &= \frac{\syr C_f}{f} & \text{which is a constant.}
 \end{align*}
-So, the upper limit of $v$, expressed as a multiple of block rewards, is constant.
+So, the upper limit of $v$, expressed as a multiple of block rewards, is a constant.
 Particularly, it is the number of blocks in a year divided by the inflation rate $f$.
 This represents the upper limit of the range of $\BribeCost(z)$ when using the SRT context.
 
 Let's apply \autoref{eq:spv-bribe-cost-inverse} to get an idea of what the maximum waiting time might be.
-For variables, let's use $q = p = 0.5$, $N_1 = 100$, and $H = 1/N_1 = 1/100$, which implies $h = 0.505$; and $C_f = \nicefrac{1}{15}$ and $f = 0.02$, which implies $\syr C_f f^{-1} = 1.026 \times 10^8$.
+For variables, let's use $q = p = 0.5$, $N_1 = 100$, and $H = 1/N_1 = 1/100$, which implies $\eta = 0.505$; and $C_f = \nicefrac{1}{15}$ and $f = 0.02$, which implies $\syr C_f f^{-1} = 1.026 \times 10^8$.
 \begin{equation*}
     \BribeCost^{-1}(\syr C_f f^{-1}) \approx 20 115.3 \text{ blocks}
         \implies \sim 3.5 \text{ days}
 \end{equation*}
-If, instead, $H = 1/\sqrt{N_1}$, then $h = 5.05$ and
+If, instead, $H = 1/\sqrt{N_1}$, then $\eta = 5.05$ and
 \begin{equation*}
     \BribeCost^{-1}(\syr C_f f^{-1}) \approx 6373.8 \text{ blocks}
         \implies \sim 1.1 \text{ days}
@@ -1347,15 +1347,15 @@ That is, every block, $y$ multiples of the block reward are queued for the next 
 We should expect batch sizes (and the associated waiting duration) to be stable when $yz = \BribeCost(z)$.
 This is the point at which the outgoing per-block pressure multiplied by a waiting period results in the same waiting period.
 \begin{align}
-    yz &= \BribeCost(z) = h \frac{z(z+1)}{2} + z + 1
+    yz &= \BribeCost(z) = \eta \frac{z(z+1)}{2} + z + 1
         \nonumber \\
-    y &= h \frac{z+1}{2} + 1 + \frac{1}{z}
+    y &= \eta \frac{z+1}{2} + 1 + \frac{1}{z}
         \nonumber
 \end{align}
-This is a hyperbola and, as $z$ increases, it approaches $y = \frac{h}{2}(z+1) + 1$.
-Alternatively: $z = \frac{2}{h}(y - 1) - 1$.
+This is a hyperbola and, as $z$ increases, it approaches $y = \frac{\eta}{2}(z+1) + 1$.
+Alternatively: $z = \frac{2}{\eta}(y - 1) - 1$.
 
-So, if $y = 10$ and $h = 1$, then we can estimate that we have a fixed point at $z \approx 17$ blocks.
+So, if $y = 10$ and $\eta = 1$, then we can estimate that we have a fixed point at $z \approx 17$ blocks.
 
 \subsubsubsubsection{Phase 1 $\to$ Phase 2}
 
@@ -1365,15 +1365,17 @@ The network transitions from phase 1 to phase 2 as soon as a first miner produce
 - dishonest nodes: the ones that take the bribe and help the attacker
 - honest nodes: the ones that produce blocks where the FP is included in the PoR graph
 
-Once this happens, an asymmetry emerges: honest miners (which include the fraud proof) produce proofs of reflection that are \emph{not} usable by the dishonest miners.
-If the dishonest miners tried to use those PoRs, they'd produce invalid blocks unless they also include the FP.
+Once this happens, an asymmetry emerges: honest blocks (which acknowledge the fraud proof) produce proofs of reflection that are \emph{not} usable by the dishonest miners.
+If the dishonest miners tried to use those PoRs, they'd produce invalid blocks unless they also acknowledge the FP.
 Thus, using those PoRs effectively turns dishonest miners into honest miners.
 
 
 
 \subsubsubsubsection{Phase 2 $\to$ Phase 3}
 
-The duration of this transition depends on the proportion of honest miners ($h$, where $h + d = 1$ and $d$ is the proportion of dishonest miners, including the attacker).
+The duration of this transition depends on the proportion of honest miners: $h$.
+Let's define $h$ via $h + d = 1$, where $d$ is the proportion of dishonest miners, including the attacker.
+Since $d$ includes the attacker, we can say $d > q$, and $h < p$.
 
 Similar to \autoref{sec:dos-and-dags}, the asymmetry between honest and dishonest miners means that, even for a small $h$, the chain-weight of the honest chain-tips will eventuall dominate the chain-weight of dishonest chain-tips.
 After that point, each simplex-chain's main chain will include the fraud proof, and the dishonest chain-tips will never be able to out-weigh the honest ones.
@@ -1440,6 +1442,9 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 \subsubsubsection{Dialog: Error Correction III}
 
 \dialogHeader{24\textsuperscript{nd} August 2022}
+
+\dMax{
+}
 
 notes
 
@@ -1565,32 +1570,77 @@ in response to writing a dialog and honestly and fully exploring everything.
 \tikzstyle{n} = [stdText, draw, rectangle, rounded corners]
 \tikzstyle{ar} = [->, anchor=north, rounded corners, shorten >= 2pt, shorten <= 2pt]
 \tikzstyle{label} = [align=center, anchor=center]
+\tikzstyle{l2} = [align=left, anchor=west, xshift=-1.5em]
+\tikzstyle{lb} = [align=center, anchor=north, yshift=-1em]
+\tikzstyle{braceUnder} = [decorate, decoration={brace,amplitude=6pt,mirror,raise=2pt}]%
 \begin{center}
     \begin{tikzpicture}[node distance=.8cm]
-        % % group s0 and s1
-        % \node[n, fit=(s0) (s1), dashed, inner sep=7pt] {};
-
-        % % arrows and labels
-        % \draw [ar] (s0) -- node [label] {Fraudulent \\ block mined} (s1);
-        % \draw [ar] (s1) -- node [label] {FP first \\ recorded} (s2);
-        % \draw [ar] (s2) -- (s2 |- s3) -- node [label] {FP `pollutes' \\ PoR graph} (s3);
-        % \draw [ar] (s3) -- node[label] {PoR graph now \\ resynchronized} (s3 -| s0) -- (s0);
-
+        % the conditions
         \node (f1) [n] {Check \\ Header};
         \node (f2) [n, below right=of f1] {Check \\ Form};
         \node (f3) [n, below right=of f2] {Check \\ PoRs};
         \node (f4) [n, below right=of f3] {Check \\ State};
+        \node (f3a) at (f3 |- f4) {};
+        \node (f5) [n, below left=of f4] {Fraud \\ Proof?};
+
+        \node (start) [xshift=-1.2em] at ($(f1)!2.3!(f1.north west)$) {};
 
         \node (a1) [n, left = of f1, xshift=-.5cm] {Junk};
         \node (a2) [n] at (a1 |- f2) {Unreadable \\ Link w/ FP};
         \node (a3) [n] at (a1 |- f3) {Invalid \\ Use w/ FP};
-        \node (a4) [n] at (a1 |- f4) {Valid PoRs \\ Link FP if possible};
+        % \node (a3a) [n] at (a1 |- f3a) {Add to \\ PoR Graph};
+        % \node (a4) [n] at (a1 |- f4) {Valid PoRs \\ Link FP if possible};
+        \node (a4) [n] at (a1 |- f4) {Add to \\ PoR Graph};
+        \node (a5) [n] at (a1 |- f5) {Add FP to \\ PoR Graph};
 
-        \node (actions) [stdText, above=of a1] {Action};
-        \node (p1) [stdText] at (actions -| f1) {P1};
-        \node (p2) [stdText] at (actions -| f2) {P2};
-        \node (p3) [stdText] at (actions -| f3) {P3};
-        \node (p4) [stdText] at (actions -| f4) {P4};
+        \node (actions) [stdText, yshift=2.9em] at (a1 |- start) {Action};
+        \node (p1) [stdText] at (actions -| f1) {$\text{AL}^1_a$};
+        \node (p2) [stdText] at (actions -| f2) {$\text{AL}^1_b$};
+        \node (p3) [stdText] at (actions -| f3) {$\text{AL}^1_c$};
+        \node (p4) [stdText] at (actions -| f4) {$\text{AL}^2$};
+
+        \node (fDone) at ($(f4)!2.1cm!(f4.east)$) {};
+
+        \foreach \x in {1,...,3}{
+            \draw [ar] (f\x) -- node [label] {Fail \\} (a\x);
+        }
+        % \draw [ar] (f4) -- node [label] {Fail \\} (a4);
+
+        \foreach \x in {1,...,3}{
+            \pgfmathtruncatemacro\y{\x + 1}
+            \node (t\x) at (f\x -| f\y) {};
+        }
+
+        \node (newBlock) [label, draw, sharp corners, dashed] at (start -| actions) {Receive \\ New Block};
+
+        \draw [ar] (newBlock) -- (start -| f1) -- (f1);
+        \draw [ar] (f1) -- node [l2] {Good PoW \\} (f1 -| f2) -- (f2);
+        \draw [ar] (f2) -- node [l2] {Good Form \\} (f2 -| f3) -- (f3);
+        \draw [ar] (f3) -- node [label, anchor=east] {Valid \\ PoRs} (f3 |- f4) -- (a4);
+        \draw [ar] (f3) -- (f3 |- f4) -- (f4);
+        \draw [ar] (f4) -- node [label, anchor=west, align=left] {Fail} (f4 |- f5) -- (f5);
+        \draw [ar] (f4) -- node [label] {Done\\} (fDone);
+        \draw [ar] (f5) -- node [label] {Good FP\\} (a5);
+
+        % \draw [braceRL] (ethS\x.east |- ethState\x.north) -- (ethS\x.east |- ethState\x.south);
+
+        \node (divPoint1) at ($(f3)!.5!(f4)$) {};
+        \node (divPointT) at (divPoint1 |- actions.north) {};
+        \node (divPointB) [yshift=-.4em] at (divPoint1 |- a5.south) {};
+        \node (BR) at ($(divPointB)!2!(f4.south |- divPointB)$) {};
+        \node (TR) at (BR |- divPointT) {};
+        \draw [thick, dashed] (divPointT) -- (divPointB.south);
+
+        \node (BL1) at (BR -| f1.west) {};
+
+        \draw [braceUnder] (BL1) -- node [lb] {$O(c)$} (divPointB);
+        \draw [braceUnder] (divPointB) -- node [lb] {$O(c^2)$} (BR);
+
+        % line under headings
+        \node (hruleL) [yshift=.0em] at (actions.south west -| a2.west) {};
+        \node (hrRX) at ($(f4)!.5!(fDone)$) {};
+        \node (hruleR) at (hruleL -| hrRX) {};
+        \draw (hruleL) -- (hruleR);
     \end{tikzpicture}
 \end{center}
 
