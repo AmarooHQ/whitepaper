@@ -89,8 +89,8 @@
     % \node (BL1) at (BR -| f1.west) {};
     \node (BL1) at (BR -| hruleL) {};
 
-    \draw [braceUnder] (BL1) -- node (complexity1) [lb, bigText] {$O(c)$} (divPointB);
-    \draw [braceUnder] (divPointB) -- node (complexity2) [lb, bigText] {$O(c^2)$} (BR);
+    \draw [braceUnder] (BL1) -- node (complexity1) [lb, bigText] {$O(c)$ \\ PoR Graph} (divPointB);
+    \draw [braceUnder] (divPointB) -- node (complexity2) [lb, bigText] {$O(c^2)$ \\ Blockchain State} (BR);
 
     \draw [stealth-stealth] (complexity1) -- node [label] {Independent \\ Progression} (complexity2);
 \end{tikzpicture}%

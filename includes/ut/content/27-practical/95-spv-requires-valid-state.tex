@@ -476,6 +476,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 \dMax{
     Yeah.
     I was having trouble writing it out.
+    I was stuck.
 }
 \dMax{
     A dialog felt natural once I started writing; it's helping me stay unstuck.
@@ -1843,7 +1844,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 \dMax{
     Okay, I think they're: 1. \emph{big reorgs are bad}, 2. \emph{big reorgs end up requiring nodes to validate other chains}, and 3. \emph{future blocks shouldn't be able to cause big reorgs}.
 }
-% also: (thought of after) that going from invalid -> valid histories is a reorg at all.
+% also: (i thought of after writing the above) that going from invalid -> valid histories is a reorg at all.
 \dSe{
     Hmm, I guess four other premises, then.
 }
@@ -1884,6 +1885,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 }
 \dMax{
     I guess, yeah.
+    That's the point of the rule we introduced.
 }
 \dSe{
     So are big reorgs bad in \emph{general}?
@@ -2330,9 +2332,10 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     m: before you go
     es: yes?
     m: should we tell them what you are?
-    es: isn't it obvious?\
-    m: for them, not in the slightest.
+    es: isn't it obvious?
+    % m: for them, not in the slightest.
     es: I'm your anti-anti-rational-meme meme.
+    % m: that wasn't obvious, even to me. even as I was writing you.
 \end{comment}
 
 \begin{comment}
@@ -2479,83 +2482,16 @@ in response to writing a dialog and honestly and fully exploring everything.
 \subsubsubsection{a diagram}
 
 
-\tikzstyle{stdText} = [align=center, inner sep=5pt]
-\tikzstyle{n} = [stdText, draw, rectangle, rounded corners]
-\tikzstyle{ar} = [->, anchor=north, rounded corners, shorten >= 2pt, shorten <= 2pt]
-\tikzstyle{label} = [align=center, anchor=center]
-\tikzstyle{l2} = [align=left, anchor=west, xshift=-1.5em]
-\tikzstyle{lb} = [align=center, anchor=north, yshift=-1em]
-\tikzstyle{braceUnder} = [decorate, decoration={brace,amplitude=6pt,mirror,raise=2pt}]%
-\begin{center}
-    \begin{tikzpicture}[node distance=.8cm]
-        % the conditions
-        \node (f1) [n] {Check \\ Header};
-        \node (f2) [n, below right=of f1] {Check \\ Form};
-        \node (f3) [n, below right=of f2] {Check \\ PoRs};
-        \node (f4) [n, below right=of f3] {Check \\ State};
-        \node (f3a) at (f3 |- f4) {};
-        \node (f5) [n, below left=of f4] {Fraud \\ Proof};
 
-        \node (start) [xshift=-1.2em] at ($(f1)!2.3!(f1.north west)$) {};
+\begin{figure}[h]
+    \centering
+    \includegraphics[max width=\linewidth]{spv/network_scale_AL_split_sag}
+    \caption[
+    ]{
+    }
+    \label{fig:spv-network-complexity-split}
+\end{figure}
 
-        \node (a1) [n, left = of f1, xshift=-.5cm] {Junk};
-        \node (a2) [n] at (a1 |- f2) {Unreadable; \\ Discard (Junk)};
-        \node (a3) [n] at (a1 |- f3) {Invalid; \\ Use w/ FP};
-        % \node (a3a) [n] at (a1 |- f3a) {Add to \\ PoR Graph};
-        % \node (a4) [n] at (a1 |- f4) {Valid PoRs \\ Link FP if possible};
-        \node (a4) [n] at (a1 |- f4) {Add to \\ PoR Graph};
-        \node (a5) [n] at (a1 |- f5) {Add FP to \\ PoR Graph};
-
-        \node (actions) [stdText, yshift=2.9em] at (a1 |- start) {Action};
-        \node (p1) [stdText] at (actions -| f1) {$\text{AL}^1_a$};
-        \node (p2) [stdText] at (actions -| f2) {$\text{AL}^1_b$};
-        \node (p3) [stdText] at (actions -| f3) {$\text{AL}^1_c$};
-        \node (p4) [stdText] at (actions -| f4) {$\text{AL}^2$};
-
-        \node (fDone) at ($(f4)!2.1cm!(f4.east)$) {};
-
-        \foreach \x in {1,...,3}{
-            \draw [ar] (f\x) -- node [label] {Fail \\} (a\x);
-        }
-        % \draw [ar] (f4) -- node [label] {Fail \\} (a4);
-
-        \foreach \x in {1,...,3}{
-            \pgfmathtruncatemacro\y{\x + 1}
-            \node (t\x) at (f\x -| f\y) {};
-        }
-
-        \node (newBlock) [label, draw, sharp corners, dashed] at (start -| actions) {Receive \\ New Block};
-
-        \draw [ar] (newBlock) -- (start -| f1) -- (f1);
-        \draw [ar] (f1) -- node [l2] {Good PoW \\} (f1 -| f2) -- (f2);
-        \draw [ar] (f2) -- node [l2] {Good Form \\} (f2 -| f3) -- (f3);
-        \draw [ar] (f3) -- node [label, anchor=east] {Valid \\ PoRs} (f3 |- f4) -- (a4);
-        \draw [ar] (f3) -- (f3 |- f4) -- (f4);
-        \draw [ar] (f4) -- node [label, anchor=west, align=left] {Fail} (f4 |- f5) -- (f5);
-        \draw [ar] (f4) -- node [label] {Pass; \\ Done} (fDone);
-        \draw [ar] (f5) -- node [label] {Good FP\\} (a5);
-
-        % \draw [braceRL] (ethS\x.east |- ethState\x.north) -- (ethS\x.east |- ethState\x.south);
-
-        \node (divPoint1) at ($(f3)!.5!(f4)$) {};
-        \node (divPointT) at (divPoint1 |- actions.north) {};
-        \node (divPointB) [yshift=-.4em] at (divPoint1 |- a5.south) {};
-        \node (BR) at ($(divPointB)!2!(f4.south |- divPointB)$) {};
-        \node (TR) at (BR |- divPointT) {};
-        \draw [thick, dashed] (divPointT) -- (divPointB.south);
-
-        \node (BL1) at (BR -| f1.west) {};
-
-        \draw [braceUnder] (BL1) -- node [lb] {$O(c)$} (divPointB);
-        \draw [braceUnder] (divPointB) -- node [lb] {$O(c^2)$} (BR);
-
-        % line under headings
-        \node (hruleL) [yshift=.0em] at (actions.south west -| a2.west) {};
-        \node (hrRX) at ($(f4)!.5!(fDone)$) {};
-        \node (hruleR) at (hruleL -| hrRX) {};
-        \draw (hruleL) -- (hruleR);
-    \end{tikzpicture}
-\end{center}
 
 
 \subsubsubsection{SPV Limits}
