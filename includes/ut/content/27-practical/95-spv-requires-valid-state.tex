@@ -580,7 +580,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     You can't fix this by waiting longer, either, since the longer that period is, the easier it is for an honest miner to take the bribe -- there are even more future blocks that could contain the fraud proof than before.
 }
 \dMax{
-    Well, like you said there's no pentaly for the miner, currently.
+    Well, like you said there's no penalty for the miner, currently.
     We can, however, set a lower bound on the bribe by dividing the fraudulent block's reward between miners that record the fraud proof.
     So the attacker would need to pay at least an extra block reward per invalid block per block-period (split among all simplex-chains).
 }
@@ -1149,7 +1149,7 @@ if > some size -- makes sense mb?
 
 
 Let's assume that an attacker is willing to bribe miners to exclude a fraud proof.
-The goal of the attacker is to continue this attack beyond whatever , how much will that cost them over the
+The goal of the attacker is to continue this attack beyond whatever, how much will that cost them over the
 
 \todo{above}
 
@@ -1496,10 +1496,10 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     Good, then we can go through them.
 }
 \dMax{
-    \dots{}
+    still writing 2 ticks.
 }
 \dMax{
-    First, a process one: \emph{non-statistical analysis is good enough} -- at least for now.
+    Okay, first, a process one: \emph{non-statistical analysis is good enough} -- at least for now.
 }
 \dSe{
     Do you think that calculating probabilities instead would fix the contradiction?
@@ -1522,7 +1522,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     \emph{The attacker needs to bribe other miners}.
 }
 \dMax{
-    Because the attacker wants to prevent the FP being recorded in the PoR graph, and the FP is readily available.
+    Because the attacker wants to prevent the FP being recorded in the PoR graph, and the FP is readily available and is a source of profit for honest miners.
 }
 \dMax{
     \emph{Dishonest miners aren't willing to make invalid blocks}, though.
@@ -1537,6 +1537,8 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 }
 \dMax{
     The attacker wants to bypass all of the network's countermeasures to record the FP.
+}
+\dMax{
     So invalid blocks wouldn't help the attacker.
 }
 \dMax{
@@ -1969,8 +1971,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     So an honest miner won't ever make a block that could be invalidated this way.
 }
 \dMax{
-    So we actually \emph{do} want \emph{some} future blocks to be able to invalidate past blocks.
-    The ones that honest miners make.
+    So we actually \emph{do} want \emph{some} future blocks to be able to invalidate past blocks: the ones that honest miners make.
 }
 \dSe{
     Yes, there is a \emph{qualitative difference} between types of invalidation.
@@ -1979,10 +1980,11 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     So premise 3 is false.
 }
 \dMax{
-    And premise 2 is false, too, because basically all nodes know of the FP, which includes honest miners.
+    And premise 2 is false, too, because basically all nodes know of the FP, which includes honest miners, so can always avoid the catch 22.
 }
 \dSe{
-    So all three were false.
+    So.
+    All three were false.
 }
 \dSe{
     There's one question left, yet.
@@ -2007,7 +2009,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 }
 \dMax{
     I don't know, a year at least?
-    More even -- they're based on ideas that I learnt years ago.
+    More even -- they're based on ideas I learnt years ago.
 }
 \dSe{
     You've automatized them, then?
@@ -2034,11 +2036,11 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     It's what happens when the best chain-tip changes from a first chain-tip to a second one that isn't a descendant of the first one.
 }
 \dMax{
-    For sibling chain-tips, the reorg isn't very disruptive and happens somewhat regularly.
+    With sibling chain-tips (that share a primary parent), the reorg isn't very disruptive and happens somewhat regularly.
     But deeper reorgs can be disruptive because state can change significantly -- that's how doublespends are done.
 }
 \dSe{
-    And when a fraud proof is added to the PoR graph, that causes a reorg?
+    And when a fraud proof is added to the PoR graph, that might cause a reorg?
 }
 \dMax{
     Yeah.
@@ -2089,7 +2091,8 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     Right.
 }
 \dMax{
-    If a totally different chain, like Eth2, was verifying SPV proofs against the simplex, it must be aware of unpublished fraud proofs to be secure.
+    Hmm.
+    If a totally different chain outside the simplex, like Eth2, is verifying SPV proofs against the simplex, it must be aware of unpublished fraud proofs to be secure.
     And it needs to tolerate to the sort of invalidation (via FPs) that might happen.
 }
 \dSe{
@@ -2098,7 +2101,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 }
 \dMax{
     Yeah, okay.
-    So\dots{} what does refuting the premise mean for SPV, then?
+    So\dots{} what does refuting the hidden premise mean for SPV, then?
 }
 \dSe{
     Retrace the conversation, to before you brought up any of the premises we just refuted, back to the last unrefuted thing you said.
@@ -2123,7 +2126,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     Let's find out.
 }
 \dSe{
-    Do you have any reason to think that we can't reduce the mandatory SPV delay?
+    Do you have any reason to think that we can't reduce the SPV delay?
 }
 \dMax{
     \dots{} I guess not.
@@ -2147,7 +2150,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 \dSe{
     Okay.
     Good enough for now.
-    How do we start?
+    What next?
     Initiative's on you.
 }
 \dMax{\dots}
@@ -2164,7 +2167,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     IDK\dots{} a minute?
     That'd be \sim4 blocks. \\
     We could have batches every block or two.
-    Though, we don't need them anymore.
+    (If we even need batches anymore.)
 }
 \dSe{
     What bad things will happen if the waiting period is too low?
@@ -2173,15 +2176,17 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     Well, if you could do SPV transactions within a block period, then there might not be enough time for an honest miner to hear about the FP.
 }
 \dMax{
-    You could \emph{make} the transaction at that point, but a miner shouldn't include it, yet.
+    You could \emph{make} the SPV tx at that point, but a miner shouldn't include it, yet.
 }
 \dMax{
-    An honest miner \emph{should} almost always hear about the FP before the next block, though.
+    An honest miner \emph{should} almost always hear about the FP within a block period, though.
     Assuming blocks on the target chain are created regularly.
 }
 \dMax{
     If a bunch of blocks come all at once, though, then the honest miner still shouldn't process the tx, yet.
     They should wait based on the network-wide hash rate.
+}
+\dMax{
     So, for a waiting period of $z$, we want the network to go through $z$ block periods overall, which is roughly $C_d N_1 z$ work (where $C_d$ is the average difficulty).
     To do that we can check the difference between total chain-weight -- for each SPV transaction, each chain can check: when the header targeted by this SPV tx was reflected by us, is that chain-weight plus $C_d N_1 z$ less than the current chain-weight?
 }
@@ -2189,7 +2194,8 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     Maybe we could also require that both chains need $z$ local-confirmations of the relevant header -- i.e., the local chain reflected that header at least $z$ blocks ago, and there are at least $z$ R-blocks building on that header.
 }
 \dMax{
-    So we should wait at least 1 confirmation, but small reorgs are possible, so we need a little buffer, too.
+    We should wait at least 1 conf plus some buffer for small reorgs.
+    I'd guess 3 or 4 block periods at a minimum.
 }
 \dSe{
     What happens when the network experiences a partition?
@@ -2197,30 +2203,40 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 \dMax{
     The two (or more) sides could become inconsistent.
     That said, users and miners would notice a >50\% drop in hash rate pretty quickly.
-    But eventually, any inconsistency could cause the miners on the smaller partition(s) lose out.
+    But eventually, any inconsistency could cause the miners on the smaller partition(s) lose out a bit.
 }
 \dMax{
-    Actaully, no fraud proof would be possible (assuming honest miners).
+    But, no fraud proof would be possible (assuming honest miners).
 }
 \dMax{
-    All of the SPV transactions would become invalid when the partitions merge, because they target headers that are no longer in the respective main chains.
+    All of the SPV txs that happened at least $z$ after the partition started would become invalid when the partitions merge -- but only for the minority partitions.
+    Those SPV txs must have targeted headers that are no longer in the respective main chains.
     So they'd be invalid when replayed.
 }
 \dMax{
-    But if users know to be cautious, is that really an issue?
+    But if users know about the partition and are cautious, is that really an issue?
 }
 \todo{describe blockDAG tx merging policy in more detail (in the relevant section)}
 \dMax{
-    Other than that, if there are no doublespends then all purely local transactions should work out.
+    Other than that, if there are no doublespends, then all purely local transactions should work out.
     They'll get replayed when the partitions merge.
 }
 \dSe{
     If a partition split off a long time ago (say, hours) there'd be many thousands of blocks to merge in quick succession.
     Is that a problem?
 }
+
+
+
+
 \dMax{
     Uhh, well all of those blocks would get reflected by the rest of the PoR graph -- sequentially.
     All partitions would have to do that, based on the rules we introduced a \hyperref[dialog1:network-rules]{few weeks ago}.
+}
+\todo{
+    is it actually required to be sequential?
+    need to consider from first principles.
+    (actually, I don't think it's required to integrate them like that. nodes can just link the tips.)
 }
 \dMax{
     Practically, that's a lot of reflection data to include in each block.
@@ -2228,7 +2244,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 }
 \dMax{
     The heavist partition will produce blocks a bit faster for a little while as miners from the lighter partitions join.
-    Each block has some capacity for reflections, and we know the average number of reflections per block.
+    Each block has some capacity for reflections, and we know the long-term average number of reflections per block ($N_1$).
     We also want some ``burstable'' capacity so the network doesn't grind to a halt when partitions merge, or the hash-rate changes suddenly for some other reason.
 }
 \dMax{
@@ -2236,16 +2252,57 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     If we want to process headers from the minority partition(s) at the same time, then we need even more excap.
 }
 \dMax{
-    So if we had $3\times$ the average -- such that two-thirds is reserved as \emph{excess capacity} -- then we can handle those high volume times, and otherwise we can integrate reflections twice as fast as the average, without bottle-necking the production of new blocks.
+    So if we had $3\times$ the average -- such that two-thirds is reserved as \emph{excess capacity} -- then we can handle those high volume times, and otherwise we can integrate reflections twice as fast as the average, without constraining the production of new blocks.
 }
 \dMax{
     So, by rate limiting the integration rate of reflections from other partitions, we naturally give enough time for fraud proofs to be broadcast.
 }
-\dMax{
-    Although, the main chain will gain work up to $3\times$ faster than before the partition merged.
+\dMax{%
+    Tho, the main chain will gain work up to $3\times$ faster than before the partition merged.%
 }
 \dMax{
     So, if $z=4$ was a safe security parameter when everything is going well, we should use $z=12$ instead to ensure there's enough buffer to handle partition merges.
+}
+\dSe{
+    If block production doubles for a short time (so we have double the number of blocks) why do we need $2\times$ the PoR capacity in each block?
+}
+\dMax{
+    Oh, yeah, I guess we don't.
+    There will be more sibling blocks than typical, so there might be some overhead, but otherwise that part is self-contained.
+}
+\dMax{
+    So if block production doubles, we'll integrate reflections twice as fast, too.
+    Relative to world time, that is.
+}
+\dMax{
+    We still want at least a $2\times$ capacity multiplier, though.
+    If it were less than that, minority partitions would take longer to integrate than they took to produce.
+}
+\dMax{
+    So we need to double $z$ to account for a hash rate increase, and then multiply by the capacity multiplier.
+    And that should be long enough for nodes to hear about any FPs.
+}
+\dSe{
+    And which FPs are those?
+}
+\dMax{
+    The ones for new blocks, or blocks in the minority partition(s).
+}
+\dMax{
+    \dots{} ofc!
+    The minority partition blocks won't ever be part of the main chain, so they don't really matter for SPV.
+    The important FPs are about newly mined blocks -- those are the blocks that might become main-chain blocks.
+}
+\dMax{
+    And new blocks would be invalid if they improperly handled replying txs from the partitioned blocks.
+}
+\dMax{
+    So, we can increase our capacity multiplier for integrating a partition.
+    And, provided that we don't count the work from partitioned blocks when considering whether SPV txs have waited long enough, this doesn't require an increase to $z$.
+}
+\dMax{
+    So doubling $z$ is fine.
+    We can add an extra 50\% as buffer, too. (so $3\times$ again.)
 }
 % \dSe{
 %     (bottleneck joining 2 partitions?)
@@ -2259,6 +2316,21 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 }
 \dSe{
     (how much freedom to miners have in creating blocks -- can we improve SPV by changing any rules?)
+}
+\dMax{
+    (new rule: you must acknowledge the FP of an R-block before it satisfies the $z$ blocks, or your block is invalid.)
+}
+\dMax{
+    (this kind of invalidation okay b/c honest miners can always avoid)
+}
+\dMax{
+    (as long as one honest miner acks, it should go simplex wide w/in a block period)
+}
+\dMax{
+    if dishonest miners try to avoid this, they must either make invalid blocks or ack the FP.
+}
+\dSe{
+    (role of users; UASF-like)
 }
 % the PoR graph is truly immutable! 6:49pm
 % cotd time :)

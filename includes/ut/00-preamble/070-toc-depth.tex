@@ -1,0 +1,5 @@
+\NewDocumentCommand{\SetToCDepth}{m}{%
+    \addtocontents{toc}{\protect\setcounter{tocdepth}{#1}}%
+}
+
+\NewDocumentCommand{\SetToCDepthDefault}{}{\SetToCDepth{4}}

@@ -15,8 +15,10 @@
 \tikzstyle{ar} = [->, anchor=north, rounded corners, shorten >= 2pt, shorten <= 2pt]
 \tikzstyle{label} = [align=center, anchor=center]
 \tikzstyle{l2} = [align=left, anchor=west, xshift=-1.5em]
+\tikzstyle{lr} = [align=right, anchor=east, xshift=1.5em]
 \tikzstyle{lb} = [align=center, anchor=north, yshift=-1em]
 \tikzstyle{braceUnder} = [decorate, decoration={brace,amplitude=6pt,mirror,raise=2pt}, line width=.25mm]%
+\tikzstyle{braceLeft} = [decorate, decoration={brace,amplitude=6pt,mirror,raise=4pt}, line width=.25mm]%
 \tikzstyle{bigText} = [scale=1.5]
 
 \begin{document}%
@@ -33,7 +35,7 @@
 
     \node (a1) [action, left = of f1, xshift=-.5cm] {Discard \\ as Junk};
     \node (start) [above left=of f1, yshift=1em] {};
-    \node (a2) [action] at (a1 |- f2) {Unreadable; \\ Discard};
+    \node (a2) [action] at (a1 |- f2) {Unreadable; \\ FP or Junk};
     \node (a3) [action] at (a1 |- f3) {Invalid; \\ Use w/ FP};
     % \node (a3a) [action] at (a1 |- f3a) {Add to \\ PoR Graph};
     % \node (a4) [action] at (a1 |- f4) {Valid PoRs \\ Link FP if possible};
@@ -91,7 +93,9 @@
 
     \draw [braceUnder] (BL1) -- node (complexity1) [lb, bigText] {$O(c)$ \\ PoR Graph} (divPointB);
     \draw [braceUnder] (divPointB) -- node (complexity2) [lb, bigText] {$O(c^2)$ \\ Blockchain State} (BR);
+    \draw [stealth-stealth] (complexity1) -- node [label] {Decoupled \\ Progression} (complexity2);
 
-    \draw [stealth-stealth] (complexity1) -- node [label] {Independent \\ Progression} (complexity2);
+    % \draw [braceLeft] (a3.north west) -- node [label, anchor=south, rotate=90] {DA Consensus\\} (a4.south west);
+    % \draw [braceLeft] (a5.north west) -- node [label, anchor=south, yshift=-1em, rotate=90] {EC Consensus\\} (a5.south west);
 \end{tikzpicture}%
 \end{document}%

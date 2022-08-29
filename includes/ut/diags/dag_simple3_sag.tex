@@ -8,7 +8,6 @@
 \def\input@path{{./includes/}{./includes/ut/diags/}}
 \makeatother
 
-\begin{document}
 \input{dag-styles}%
 \newcommand\TikzDagSimple{
     \providecommand\AbbrChain{B}
@@ -39,6 +38,7 @@
     \node (botLeft) [left = of \botNode.south -| \leftMostNode, minimum width=0, xshift=\xs] {};
     \draw [arrowTime] (topLeft) node () [anchor=west, yshift=-10pt] {\textit{Time}} -- (botLeft);
 }%
+\begin{document}%
 \begin{tikzpicture}[node distance=0.8cm]
     \TikzDagSimple
 \end{tikzpicture}

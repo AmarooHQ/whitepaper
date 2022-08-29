@@ -110,6 +110,6 @@ As long as there is *excess capacity* in those components, the system can still 
 end of section, reset toc to default
 \end{comment}
 
-\addtocontents{toc}{\protect\setcounter{tocdepth}{3}}
+\SetToCDepthDefault
 
 %% END ### RELEASE
