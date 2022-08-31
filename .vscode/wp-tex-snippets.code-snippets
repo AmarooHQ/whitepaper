@@ -49,5 +49,10 @@
 		"prefix": "define-term",
 		"body": "\\defineTermTex{$1}{\n    $2\n}\n",
 		"description": "define a term"
+	},
+	"comment": {
+		"prefix": "BCC",
+		"body": "\\begin{comment}\n$1\n\\end{comment}\n",
+		"description": "Multiline Comment"
 	}
 }

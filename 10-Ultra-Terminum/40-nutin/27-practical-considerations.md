@@ -297,12 +297,12 @@ There are decisive advantages to using DAGs (instead of trees) as the fundamenta
 Namely, multiple histories (both compatible and incompatible) can be merged into a single, consistent history -- a feature which eliminates stale blocks and thwarts attacks like an empty-block DoS.
 UT's simplex-chains must be block-DAGs to remain functional and avoid such DoS attacks.
 
-\textbf{Note:} often the motivation for using a block-DAG instead of a block-tree is to increase the block frequency.
-Since block-DAGs can reference multiple previous blocks, the stale-rate can approach (or reach) 0.
-Increasing the block frequency is counter-productive in UT, though, since UT is sensitive to the size and number of headers that are produced (see \autoref{sec:impact-of-header-size}).
+\textbf{Note:} often, the motivation for using a block-DAG -- instead of a block-tree -- is to increase the block frequency.
+Since block-DAGs can reference multiple parent blocks, the stale-rate can theoretically approach (or reach) 0.
+In UT, increasing the block frequency eventually becomes counter-productive, though, since UT is sensitive to the size and number of headers that are produced (see \autoref{sec:impact-of-header-size}).
 In UT, the purpose of using block-DAGs is to thwart certain attacks, not to increase the block frequency.
-The intention is for UT simplex-chains to use fairly typical block frequencies (e.g., 15s) -- possibly decreasing those frequencies over time to increase capacity.
-Slower block frequencies also decrease incidence of multiple parents (each parent typically increases the header size by 32 bytes).
+The intention is for UT simplex-chains to use fairly typical block frequencies (e.g., 1 block per 15 s) -- possibly decreasing those frequencies over time to increase capacity.
+Slower block frequencies also decrease the incidence of multiple parents -- this matters because each parent typically increases the header size by 32 bytes.
 
 Some basic block-dag segments are shown in \autoref{fig:dag-simple-segments}.
 
@@ -377,7 +377,7 @@ After the prioritized subgraph is processed, the remaining blocks (those that ar
 Finally, the best block is applied.
 In this way, all blocks are executed after their ancestors, and there is a clear and total ordering that trivially converges.
 
-In the case that more than two parent blocks are permitted, there is a trivial generalization of the above.
+There is a trivial generalization of the above to allow more than two parent blocks, too.
 That is: replace \emph{all} but the last (worst) parent with a *virtual parent block* that links back to all remaining *actual* parent blocks (but contributes zero block-weight itself).
 Replacing the best parents (rather than the worst parents) with a virtual block means that the fork rule works automatically.
 This can be repeated to allow for arbitrarily many parents.
@@ -581,6 +581,11 @@ However, with a full DAG-chain, when an attacker links to uncles in this way *th
 Thus, GHOST *does not mitigate* empty-block DoS attacks; *only* a full DAG-chain can do that.
 
 
+%%MERGING HISTORIES
+
+
+\input{includes/content/ut/27-practical/50-dags-50-merging-histories.tex}
+
 
 ### Lowering Block Production Variance
 
@@ -674,5 +679,7 @@ atk situations:
 \label{sec:spv-in-ut}
 
 \input{27-practical/95-spv-requires-valid-state.tex}
+
+\input{27-practical/98-ut1-protocol-summary.tex}
 
 %% END ### RELEASE
