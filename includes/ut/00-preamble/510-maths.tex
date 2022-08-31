@@ -82,13 +82,14 @@
 
 % use \xyTimeHoriz as first/last row in \xyMChains. the argument is an arrow direction and length (in cols)
 % e.g., `\xyTimeHoriz{rrrrrrr} & & & & & & & \\`
-\providecommand\xyTimeHoriz[1]{\ar@{>->}@<-6pt>[#1]_<{\qquad\text{Time}}}
+\providecommand\xyTimeHorizOld[1]{\ar@{>->}@<-6pt>[#1]_<{\qquad\text{Time}}}
+
 % \xyLabelHoriz{My Label}{arrow yshift}{rrrrr}{label position mod}
-% \providecommand\xyLabelHoriz[3]{\ar@{>->}@<#2>[#3]_<{\text{#1}}}
-% ^*!/u6pt/{\labelstyle a}
 % example:
 %     \xyLabelHoriz{Execution Order}{0pt}{rrrrrr}{r30pt}
 \providecommand\xyLabelHoriz[4]{\ar@{>->}@<#2>[#3]_<*!/#4/{\labelstyle\text{#1}}}
+
+\providecommand\xyTimeHoriz[1]{\xyLabelHoriz{Time}{0pt}{#1}{r10pt}}%
 
 % wrapper for inline refl paths
 \providecommand\xyInlineRefl[1]{\xymatrix@C=10pt@M=0pt{#1}}

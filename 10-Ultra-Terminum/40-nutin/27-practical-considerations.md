@@ -363,13 +363,20 @@ goal: support this sentence (top of section):
 -->
 
 The essence of DAG-based consensus (at least the kind we're concerned with) is to *prioritize execution* of blocks and transactions based on the *security contribution* (i.e., weight) of each parent block (and that parent's ancestry).
-Based on a *most recent common direct[^directanc] ancestor*, we can decide which parent's *history* has priority execution.
+Based on a *most recent common primary[^directanc] ancestor*, we can decide which parent's *history* has priority execution.
 Prioritized blocks are positioned *earlier* in the final ordering.
 
-[^directanc]: In DAG (or DAG-like) chains, direct ancestors are sometimes called the *pivot chain* or *main chain*.
-Provided that parent blocks *are sorted by cumulative work*, the chain of *direct ancestors* between a given block and the genesis block must be the *single heaviest path* between the two. (This is the case for UT.)
+[^directanc]: In DAG (or DAG-like) chains, primary ancestors form the \emph{main chain}, aka. \emph{pivot chain}.
+Provided that parent blocks *are prioritized by cumulative work*, the chain of *primary ancestors* between a given block and the genesis block must be the *single heaviest path* between the two. (This is the case for UT.) (TODO: FACT CHECK)
 
-Let's limit DAG-chain blocks to two parents. If the best block has two parents, then each parent will have a *subgraph of blocks* between itself and the *most recent common direct ancestor* of the two parents.
+When a block has more than one parent, the prioritized parent is the \emph{primary} one.
+The chain of primary parents forms the \emph{main chain}.
+
+\defineTermTex{Main Chain}{%
+    In a block-DAG, the \emph{main chain} is the continuous chain of primary parents from the best block to the genesis block. Blocks that are part of the main chain are \emph{on-main}, and blocks that are not are \emph{off-main}%
+}
+
+Let's limit DAG-chain blocks to two parents. If the best block has two parents, then each parent will have a *subgraph of blocks* between itself and the *most recent common primary ancestor* of the two parents.
 The subgraph which takes priority is that of the *prioritized parent's ancestry*.
 If that subgraph is a chain, then the ordering and execution of blocks is trivial.
 If it is not, then there must be another subgraph within that subgraph, and this algorithm is applied recursively.
@@ -468,8 +475,7 @@ This can be repeated to allow for arbitrarily many parents.
 
 We should expect that conflicting transactions (which might otherwise be attempted doublespends) arise during this process.
 Ancestors of one parent may not be ancestors of another parent.
-The exact protocol for handling conflicts is up to the implementation, but a trivial method is that blocks commit to (via hash-pointers) conflicting transactions.
-If a miner produces an invalid block (which is invalid only because it breaks this rule), then other miners can flag it as a conflicting *block* via a similar mechanism.
+The exact protocol for handling conflicts is up to the implementation.
 
 Further reading: \citeInclusiveFull{}.
 
@@ -584,8 +590,7 @@ Thus, GHOST *does not mitigate* empty-block DoS attacks; *only* a full DAG-chain
 %%MERGING HISTORIES
 
 
-\input{includes/content/ut/27-practical/50-dags-50-merging-histories.tex}
-
+\input{includes/ut/content/27-practical/50-dags-50-merging-histories.tex}
 
 ### Lowering Block Production Variance
 

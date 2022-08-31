@@ -25,6 +25,8 @@ includes/handout/*.md
 *.fls
 *.log
 *.mw
+*.glsdefs
+*.ist
 .latexrun.db*
 
 includes/**/*.old
