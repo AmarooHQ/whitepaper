@@ -89,9 +89,14 @@ A $k$-simplex has, in total, ${k+1} \choose 2$ reflections.
 
 The security of simplexes is discussed in \autoref{sec:simplex-security}.
 
+
+<!-- ### Scaling Complexity Intuition -->
+
+
+\input{includes/ut/content/25-constructing-ut/20-scaling-complexity-intuition.tex}
+
+
 %% --- %%
-
-
 
 \input{includes/ut/headings/25-dapp-chains.tex}
 

@@ -9,15 +9,6 @@
 \todoDraftOnly{Add to dos/dags: linking back to invalid parents}
 
 \todoDraftOnly{stateless blockchains}
-
-\todo{
-    introduce $N_1$ and $O(N_1) = O(c)$.
-}
-
-$$
-\frac{c}{\log_2 c} = \frac{c \log_2 2}{\log_2 c} = c \log_c 2
-$$
-
 ### Availability of Reflected Blocks
 
 \label{sec:availability-of-blocks}
@@ -208,6 +199,39 @@ This UT protocol variant is +HOPoRs, the combination of *header omission* (+HO) 
 \end{figure}
 
 <!-- \todoDraftOnly{uber optimization at mega cost? reflecting a block also reflects all blocks that it reflects? hmm. think this doesn't work b/c recursive PoR in a simplex would get stupid. also, what's the upper limit? each block can end up reflecting like $k^2$ blocks? pretty cray} -->
+
+<!--
+
+.dP"Y8 888888 88     .dP"Y8      d888         888888 88""Yb .dP"Y8
+`Ybo."   88   88     `Ybo."     dP_______     88__   88__dP `Ybo."
+o.`Y8b   88   88  .o o.`Y8b     Yb"""88""     88""   88"""  o.`Y8b
+8bodP'   88   88ood8 8bodP'     `Ybo 88       88     88     8bodP'
+
+-->
+
+
+\input{includes/ut/content/27-practical/25-stateless-and-fraud-proofs.tex}
+
+
+<!--
+
+88""Yb  dP"Yb  88""Yb      dP""b8 88""Yb    db    88""Yb 88  88
+88__dP dP   Yb 88__dP     dP   `" 88__dP   dPYb   88__dP 88  88
+88"""  Yb   dP 88"Yb      Yb  "88 88"Yb   dP__Yb  88"""  888888
+88      YbodP  88  Yb      YboodP 88  Yb dP""""Yb 88     88  88
+
+-->
+
+\input{includes/ut/content/27-practical/30-the-PoR-graph.tex}
+
+<!--
+%  dP""b8  dP"Yb  88b 88 888888     888888 88 8b    d8 888888 .dP"Y8
+% dP   `" dP   Yb 88Yb88 88__         88   88 88b  d88 88__   `Ybo."
+% Yb      Yb   dP 88 Y88 88""         88   88 88YbdP88 88""   o.`Y8b
+%  YboodP  YbodP  88  Y8 88           88   88 88 YY 88 888888 8bodP'
+
+conf times
+-->
 
 ### Confirmation Times
 
