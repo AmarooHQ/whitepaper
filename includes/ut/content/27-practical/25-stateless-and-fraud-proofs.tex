@@ -1,36 +1,66 @@
 \subsubsection{Stateless Full Nodes and Fraud Proofs}
 
+\label{sec:stateless-and-fraud-proofs}
+
 A stateless full node (aka. a stateless client) is a node that verifies all blocks, but does not actively track the current state of the chain.
-Instead, a stateless full node will use some minimal \emph{witness} data (specific to each block) to verify that the state transition was valid.
-This is possible because \emph{most} of the state tree remains untouched.
+Instead, a stateless full node will use some minimal \emph{witness data} (specific to each block) to verify that the state transition was valid.
+This is possible because \emph{most} of the state tree remains untouched and thus the state root can be recalculated easily.
 The mutations to the state tree made by a block's transactions are all calculable from the witness data and the transactions, alone.
 In other words: the prior state root, the witness data, and the full block are all that is required to calculate the output state root of that block.
 
 \aside{
     We won't discuss the general idea of stateless nodes here, since there are many existing resources\footnotemark{} on the topic.
-    Note that some stateless node designs require that each individual \emph{transaction} include appropriate witnesses, rather than each block having a combined witness.\\
-    \\
+    Note that some stateless node designs require that each individual \emph{transaction} include appropriate witnesses, rather than each block having a combined witness.
+
     Although we will design a method that supports transaction witnesses, we won't require that transactions include them.
 }
 \footnotetext{
-    See: \href{https://github.com/zack-bitcoin/amoveo-docs/blob/master/design/stateless_full_node.md}{\emph{Stateless Full Node}} (Zack Hess), \href{https://ethresear.ch/t/the-stateless-client-concept/172}{\emph{The Stateless Client Concept}} (V. Buterin), \href{https://petertodd.org/2016/delayed-txo-commitments}{\emph{Making UTXO Set Growth Irrelevant With Low-Latency Delayed TXO Commitments}} (Peter Todd).
+    See: \href{\linkZackStatelessFullNodes}{\emph{Stateless Full Node}} (Zack Hess), \href{\linkButerinStatelessClients}{\emph{The Stateless Client Concept}} (V. Buterin), \href{\linkPToddDelayedTxoCommitments}{\emph{Making UTXO Set Growth Irrelevant With Low-Latency Delayed TXO Commitments}} (Peter Todd).
 }
-% note: don't need to modify the footnote counter % \addtocounter{footnote}{1}
+% note: don't need to modify the footnote counter % \addtocounter{footnote}{0}
+
+Supporting stateless nodes introduces some constraints on the cryptographic design of state and blocks.
+Updates to the state tree must be computationally efficient -- something like $O(log n)$ complexity for $n$ total state elements.
+Practically, it appears that this requires using an append only structure (e.g., a \href{https://github.com/opentimestamps/opentimestamps-server/blob/master/doc/merkle-mountain-range.md}{Merkle Mountain Range}), or some kind of merklized prefix tree.
+Additionally, headers should\footnote{
+    This isn't \emph{strictly} true -- it could be recorded elsewhere in a block, e.g., the coinbase transaction.
+    However, in that case, the effective header size becomes the actual header, plus the branch to the coinbase tx, plus the coinbase tx.
+    Committing elsewhere in the block doesn't have any overhead for stateless full nodes (since they have the full block data, anyway), but it does increase witness sizes for individual transactions.
+} commit to the state root, too, so that witnesses for individual transactions are minimal.
+
+This is a good start, and we can now produce witnesses for each transaction.
+
+However, the witness associated with a transaction \emph{before} it is confirmed \emph{will rarely} be the same as the witness \emph{after} it is confirmed.
+The before-witness will prove some state against the prior block's state root.
+However, the state is almost always mutated before a transaction is executed -- the state root is different.
+The after-witness should use, instead of the state root to the prior block, the root of the \emph{intermediate} state immediately prior to the execution of that transaction.
+This way, the headers-only chain, the after-witness, and the transaction are the only data required to verify the validity of the transaction.
+
+Why does this after-witness matter so much?
+Because it is a \emph{fraud proof} for any fraudulent transaction.
+
+We do, however, need to ensure these mid-state roots are also recorded in the block.
+Typically, a block will commit to its transactions via something like the root of a merkle tree of those transactions.
+We can trivially modify this design by replacing each leaf with the corresponding {mid-state root, transaction} pair.
+Thus, if a block is invalid due to containing a fraudulent or otherwise invalid transaction, the fraud proof for that block consists of: the merkle branch proving the {mid-state root, tx} pair, the pair itself, and the witness data for that transaction matching the mid-state root.
+
+Additionally, such fraud proofs are all but \emph{automatically} generated by full nodes during block verification -- the witness data is exactly those state entries that the node requires to validate the transaction.
+In some cases, the witness data may not even be required if, for example, the transaction has an invalid signature.
+We could even optimize certain cases to reduce witness sizes by showing only the minimal data to prove that a particular condition was violated.
 
 
 
-
-plan:
-- fraud proofs
-  - many reasons for a block being invalid
-  - some of them (the important ones) are to do with state transition stuff
-  - proving that a block is invalid seems useful, as does knowing about it
-  - apply to individual transactions -- {root, tx} pairs
-  - proving a tx is invalid is a matter of:
-    - bad form (O(1))
-    - bad signature (O(1))
-    - bad state transition (O(log c)?)
-      - same principle as stateless full nodes
-      - just the necessary witness data
-      - could be optimized for particular tx types if other validity conditions can be efficiently proven
-      - if state root doesn't match and/or tx doesn't validate then we know the block is invalid
+% plan:
+% - fraud proofs
+%   - many reasons for a block being invalid
+%   - some of them (the important ones) are to do with state transition stuff
+%   - proving that a block is invalid seems useful, as does knowing about it
+%   - apply to individual transactions -- {root, tx} pairs
+%   - proving a tx is invalid is a matter of:
+%     - bad form (O(1))
+%     - bad signature (O(1))
+%     - bad state transition (O(log c)?)
+%       - same principle as stateless full nodes
+%       - just the necessary witness data
+%       - could be optimized for particular tx types if other validity conditions can be efficiently proven
+%       - if state root doesn't match and/or tx doesn't validate then we know the block is invalid

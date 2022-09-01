@@ -393,6 +393,8 @@ Prioritized blocks are positioned *earlier* in the final ordering.
 [^directanc]: In DAG (or DAG-like) chains, primary ancestors form the \emph{main chain}, aka. \emph{pivot chain}.
 Provided that parent blocks *are prioritized by cumulative work*, the chain of *primary ancestors* between a given block and the genesis block must be the *single heaviest path* between the two. (This is the case for UT.) (TODO: FACT CHECK)
 
+\todo{fact check footnote}
+
 When a block has more than one parent, the prioritized parent is the \emph{primary} one.
 The chain of primary parents forms the \emph{main chain}.
 
@@ -408,9 +410,9 @@ After the prioritized subgraph is processed, the remaining blocks (those that ar
 Finally, the best block is applied.
 In this way, all blocks are executed after their ancestors, and there is a clear and total ordering that trivially converges.
 
-There is a trivial generalization of the above to allow more than two parent blocks, too.
+There is a simple generalization of the above to allow more than two parent blocks, too.
 That is: replace \emph{all} but the last (worst) parent with a *virtual parent block* that links back to all remaining *actual* parent blocks (but contributes zero block-weight itself).
-Replacing the best parents (rather than the worst parents) with a virtual block means that the fork rule works automatically.
+Replacing the best parents (rather than the worst parents) with a virtual block means that the fork rule works when selecting which of the virtual block and the least-prioritized parent is prioritized.
 This can be repeated to allow for arbitrarily many parents.
 
 \autoref{fig:dag-ex1-full} is an example of this algorithm for a moderately complex chain-segment ($B_i\cdots B_{i+3}$ which is 7 blocks total), and each step is enumerated and explained.
@@ -497,9 +499,10 @@ This can be repeated to allow for arbitrarily many parents.
     \label{fig:dag-ex1-full}
 \end{figure}
 
-We should expect that conflicting transactions (which might otherwise be attempted doublespends) arise during this process.
+We should expect conflicting transactions (which might otherwise be attempted doublespends) to arise during this process.
 Ancestors of one parent may not be ancestors of another parent.
-The exact protocol for handling conflicts is up to the implementation.
+The exact protocol for handling conflicts is up to the implementation, but there is no reason that secondary parents should be treated as invalid blocks.
+We will discuss merging histories in \autoref{sec:merging-histories}.
 
 Further reading: \citeInclusiveFull{}.
 
@@ -546,7 +549,7 @@ The opportunity cost of this attack, for the attacker, is at least as much as th
 
 All that sounds okay so far (maybe not that last bit), but this thought experiment is flawed.
 It is *smoothed out* compared to what we'd expect in reality -- the discrete and probabilistic natures of block production and reflections are ignored.
-In \autoref{fig:dag-dos-1}, those're explicitly excluded!
+In \autoref{fig:dag-dos-1}, those are explicitly excluded!
 What happens if we include the effect of other simplex-chains, though?
 Well... something \emph{magical}.
 

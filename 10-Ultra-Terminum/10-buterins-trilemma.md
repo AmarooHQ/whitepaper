@@ -51,13 +51,15 @@ Additionally: using multiple chains compromises security; and big blocks comprom
 
 To understand the core conflict we need to look at the underlying assumptions.
 
-Buterin writes in the Ethereum sharding FAQ regarding the *many chains with small blocks* strategy:
+Buterin writes\footnote{
+    See \href{\citeShardingFAQsLink}{\emph{On sharding blockchains FAQs}} (this appears to have been originally written by V. Buterin).
+} in the Ethereum sharding FAQ regarding the *many chains with small blocks* strategy:
 
 > [...] This greatly increases throughput, but at a cost of security: an N-factor increase in throughput using this method necessarily comes with an N-factor decrease in security, as a level of resources 1/N the size of the whole ecosystem will be sufficient to attack any individual chain. [...]
 
 He writes, regarding the *big blocks* strategy:
 
-> ... such an approach inevitably has its limits: if one goes too far, then nodes running on consumer hardware will drop out, the network will start to rely exclusively on a very small number of supercomputers running the blockchain, which can lead to great centralization risk.
+> [...] such an approach inevitably has its limits: if one goes too far, then nodes running on consumer hardware will drop out, the network will start to rely exclusively on a very small number of supercomputers running the blockchain, which can lead to great centralization risk.
 
 A mistaken way to break the conflict is *merged mining* (aka AuxPoW). This method attempts to share security between chains, so that one might be able to have decentralization and security via small blocks and merged mined chains/shards (sometimes called side-chains). Buterin writes:
 

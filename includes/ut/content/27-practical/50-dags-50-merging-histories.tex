@@ -1,5 +1,7 @@
 \subsubsubsection{Merging Histories}
 
+\label{sec:merging-histories}
+
 % some commands to draw boxes around groups of blocks
 \def\blkGrp#1{\save [].[r]!C="g#1"*[F.]\frm{}\restore}%
 \def\blkGrpM[#1]#2{\save [].[#1]!C="g#2"*[F.]\frm{}\restore}%
@@ -93,7 +95,9 @@ Instead, it is a new witness structure initialized from \BB{2a}'s state, and mus
 In regards to fraud proofs, the technique that we discussed in \autoref{sec:stateless-and-fraud-proofs} requires additional data to be included in \BB3.
 Recall that the transaction root should correspond to a merkle tree with leaves alternating between state roots and transactions, with each root being that of the state immediately prior to the transaction's execution.
 Thus, \BB3 must provide intermediate state roots that uniquely correspond to each transaction in each novel off-main ancestor.
-Furthermore, the transaction root should commit to \emph{all} of these \{state root, transaction\} pairs, not only those of transactions that were included directly in \BB3.
+Furthermore, the transaction root should commit to \emph{all} of these \{mid-state root, transaction\} pairs, not only those of transactions that were included directly in \BB3.
+
+\todo{mb add something about blocks linking back to invalid blocks?}
 
 \subsubsubsubsection{Additional Example}
 
