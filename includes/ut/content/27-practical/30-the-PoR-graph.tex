@@ -1,1 +1,23 @@
 \subsubsection{The PoR Graph}
+
+As a simplex ages, a graph of PoRs is produced (and it is a DAG).
+Each vertex represents a block in some simplex-chain, and the outgoing edges point to reflected blocks.
+An example section of a simulated PoR graph is shown in \autoref{fig:por-graph-example}.
+
+\begin{figure}
+\centering
+\input{includes/ut/content/27-practical/30-fig1-por-graph-sim.tex}
+\caption[
+    A a simulated PoR graph of a 9-simplex over \sim 10 block periods.
+    Approximately 900 reflections are shown.
+]{
+    A a simulated PoR graph of a 9-simplex over \sim 10 block periods.
+    Approximately 900 reflections are shown.
+    For simplicity, only each chain's on-main blocks are shown.
+    Opaque horizontal arrows point from child to parent, and the semitransparent arrows point to reflected blocks.
+}
+\label{fig:por-graph-example}
+\end{figure}
+
+Since there are $N_1$ chains, and since each block has $\sim N_1$ reflections on average, the total number of reflections, per block period, is $\sim {N_1}^2 = O(c^2)$.
+Does this present a problem for fully validating nodes that wish to verify the entire PoR graph?
