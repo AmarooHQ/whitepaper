@@ -1,1 +1,36 @@
 \subsubsection{Stateless Full Nodes and Fraud Proofs}
+
+A stateless full node (aka. a stateless client) is a node that verifies all blocks, but does not actively track the current state of the chain.
+Instead, a stateless full node will use some minimal \emph{witness} data (specific to each block) to verify that the state transition was valid.
+This is possible because \emph{most} of the state tree remains untouched.
+The mutations to the state tree made by a block's transactions are all calculable from the witness data and the transactions, alone.
+In other words: the prior state root, the witness data, and the full block are all that is required to calculate the output state root of that block.
+
+\aside{
+    We won't discuss the general idea of stateless nodes here, since there are many existing resources\footnotemark{} on the topic.
+    Note that some stateless node designs require that each individual \emph{transaction} include appropriate witnesses, rather than each block having a combined witness.\\
+    \\
+    Although we will design a method that supports transaction witnesses, we won't require that transactions include them.
+}
+\footnotetext{
+    See: \href{https://github.com/zack-bitcoin/amoveo-docs/blob/master/design/stateless_full_node.md}{\emph{Stateless Full Node}} (Zack Hess), \href{https://ethresear.ch/t/the-stateless-client-concept/172}{\emph{The Stateless Client Concept}} (V. Buterin), \href{https://petertodd.org/2016/delayed-txo-commitments}{\emph{Making UTXO Set Growth Irrelevant With Low-Latency Delayed TXO Commitments}} (Peter Todd).
+}
+% note: don't need to modify the footnote counter % \addtocounter{footnote}{1}
+
+
+
+
+plan:
+- fraud proofs
+  - many reasons for a block being invalid
+  - some of them (the important ones) are to do with state transition stuff
+  - proving that a block is invalid seems useful, as does knowing about it
+  - apply to individual transactions -- {root, tx} pairs
+  - proving a tx is invalid is a matter of:
+    - bad form (O(1))
+    - bad signature (O(1))
+    - bad state transition (O(log c)?)
+      - same principle as stateless full nodes
+      - just the necessary witness data
+      - could be optimized for particular tx types if other validity conditions can be efficiently proven
+      - if state root doesn't match and/or tx doesn't validate then we know the block is invalid
