@@ -1,23 +1,110 @@
 \subsubsection{The PoR Graph}
 
-As a simplex ages, a graph of PoRs is produced (and it is a DAG).
+\todo{inprog}
+
+As a simplex ages, a complex graph of PoRs is produced (and it is a DAG).
 Each vertex represents a block in some simplex-chain, and the outgoing edges point to reflected blocks.
 An example section of a simulated PoR graph is shown in \autoref{fig:por-graph-example}.
 
 \begin{figure}
 \centering
-\input{includes/ut/content/27-practical/30-fig1-por-graph-sim.tex}
+\includegraphics{27-practical-30-fig1-por-graph-sim_sag}
 \caption[
     A a simulated PoR graph of a 9-simplex over \sim 10 block periods.
     Approximately 900 reflections are shown.
 ]{
     A a simulated PoR graph of a 9-simplex over \sim 10 block periods.
     Approximately 900 reflections are shown.
-    For simplicity, only each chain's on-main blocks are shown.
+    % For simplicity, only each chain's on-main blocks are shown.
     Opaque horizontal arrows point from child to parent, and the semitransparent arrows point to reflected blocks.
 }
 \label{fig:por-graph-example}
 \end{figure}
 
-Since there are $N_1$ chains, and since each block has $\sim N_1$ reflections on average, the total number of reflections, per block period, is $\sim {N_1}^2 = O(c^2)$.
+Since there are $N_1$ chains, and each block has $\sim N_1$ reflections on average, the total number of reflections, per block period, is $\sim {N_1}^2 = O(c^2)$.
 Does this present a problem for fully validating nodes that wish to verify the entire PoR graph?
+
+
+
+
+
+\FloatBarrier
+
+\subsubsubsection{NIPoPoWaPoWRs (or NIPoPoWRs for short)}
+
+\todo{inprog -- might be cut}
+
+Prior work: \citeNIPoPoWsFull{}.
+
+\bquote{
+    Non-Interactive Proofs of Proof-of-Work (NIPoPoWs) are short stand-alone strings that a computer program can inspect to verify that an event happened on a proof-of-work-based blockchain without connecting to the blockchain network and without downloading all block headers. For example, these proofs can illustrate that a cryptocurrency payment was made.
+}[\href{https://web.archive.org/web/20210520174729/https://nipopows.com/}{What are NIPoPoWs? (nipopows.com)}]
+
+NIPoPoWs work based on the statistical properties of proofs of work combined with a new interlink structure between blocks.
+
+
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+    \def\scale{0.65cm}
+    \edef\blockWH{\scale}
+    \def\spacingMult{1.2}
+    \edef\sx{1.2*\spacingMult*\scale}
+    \edef\sy{\spacingMult*\scale}
+
+    \tikzstyle{block} = [draw, rounded corners=3pt, align=center, minimum width=\blockWH, minimum height=\blockWH]
+
+    \def\bheights{{3,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0}}
+
+    \foreach \h in {0,...,15} {
+        % \pgfmathtruncatemacro{\mLevel}{mod(\h, 8)}
+        \pgfmathsetmacro{\blockMu}{\bheights[\h]}
+        \foreach \m in {0,...,\blockMu} {
+            % \node (n2\h) [block] at (\h*1cm, \m*1cm) {\m - \h};
+            \ifnum \m=\blockMu
+                \ifnum \h=0
+                    \def\blockLabel{G}
+                \else
+                    \def\blockLabel{\blockMu}
+                \fi
+            \else
+                \def\blockLabel{}
+            \fi
+            \node (n-\h-\m) [block] at (\h*\sx, \m*\sy) {\blockLabel};
+
+            % draw lines to lower blocks
+            \ifnum 0<\m
+                \pgfmathtruncatemacro{\lastM}{\m - 1}
+                \draw [double distance=4pt] (n-\h-\m) -- (n-\h-\lastM);
+            \fi
+
+            % no arrows for h=0
+            \ifnum 0<\h
+                % draw arrows to past blocks
+                \pgfmathtruncatemacro{\prevBlockAtMu}{\h - 2^\m}
+                \draw [->] (n-\h-\m) -- (n-\prevBlockAtMu-\m);
+            \fi
+        }
+    }
+
+    % finally, draw arrows from tip to super blocks
+    \draw (n-15-0) |- (n-0-3 -| n-15-0);
+    \draw [->] (n-15-0 |- n-14-1) -- (n-14-1);
+    \draw [->] (n-15-0 |- n-12-2) -- (n-12-2);
+    \draw [->] (n-15-0 |- n-8-3) -- (n-8-3);
+\end{tikzpicture}
+\caption[
+    The block interlink structure used by NIPoPoWs.
+]{
+    The block interlink structure used by NIPoPoWs. \\
+    \emph{Credit:} the structure and content of this figure is credited to the authors of the NIPoPoW paper (Kiayias, Miller, Zindros) -- shown is a recreation of one of their diagrams.\footnotemark
+}
+\label{fig:nipopows}
+\end{figure}
+% goes with above figure
+\footnotetext{
+    Source diagram: \url{https://nipopows.com/images/hierarchical-ledger.png}
+}
+
+\todo{nipopowapowrs}

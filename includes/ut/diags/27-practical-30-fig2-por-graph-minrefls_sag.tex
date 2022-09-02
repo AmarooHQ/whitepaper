@@ -1,0 +1,53 @@
+\documentclass[]{standalone}
+\usepackage[T1]{fontenc}\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usepackage{xintexpr}
+\usepackage{comment}
+\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
+
+\makeatletter
+\def\input@path{{./includes/}{./includes/ut/diags/}}
+\makeatother
+
+\immediate\write18{zsh -c './27-practical-30-fig2-gen.py no_replace_recent entropy=1662089394' 2> 27-practical-30-fig2-autogen.log}
+%includes/ut/diags/27-practical-30-fig2-gen.py
+
+\begin{comment}
+    Generate the blocks and reflections data using this python script:
+    `python3 ./27-practical-30-fig2-gen.py` which will generate ./27-practical-30-fig2-refls.tikz
+
+    good seeds:
+    - 1662088935
+    - 1662088959
+    - 1662088985
+    - 1662089394
+\end{comment}
+
+\begin{document}%
+\begin{tikzpicture}[node distance=0.1cm]%
+    \tikzstyle{block} = [draw, rounded corners=1.5pt, fill=white]
+
+    \tikzstyle{ar} = [->, -to, shorten >= 2pt, shorten <= 2pt, opacity=0.25]
+
+    \tikzstyle{arFocus} = [ar, opacity=.7]
+    \tikzstyle{arFocusTip} = [arFocus, color=red]
+    \tikzstyle{arFocusOut} = [arFocus, color=blue]
+    \tikzstyle{arFocusPrevTip} = [arFocus, color=red]
+    \tikzstyle{arPreFocusOut} = [arFocus, color=blue]
+    \tikzstyle{arFocusIn} = [arFocus, color=green]
+
+    \tikzstyle{pAr} = [ar, opacity=1]
+    \tikzstyle{arNone} = [opacity=0]
+
+    \tikzstyle{arrowTime} = [stealth reversed-stealth, shorten >= -2pt, shorten <= -2pt]
+
+    \def\scale{0.75cm}
+    \edef\sx{2*0.285*\scale}
+    \edef\sy{\scale}
+
+    \def\timeArY{-0.5*\sy}
+    \draw [arrowTime] (0, \timeArY) node () [anchor=west, yshift=-10pt] {\textit{Time}} -- (31*\sx, \timeArY);
+
+    \input{./27-practical-30-fig2-refls.tikz}
+\end{tikzpicture}
+\end{document}

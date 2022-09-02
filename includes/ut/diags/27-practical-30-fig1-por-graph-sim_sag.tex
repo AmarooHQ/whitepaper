@@ -1,3 +1,14 @@
+\documentclass[]{standalone}
+\usepackage[T1]{fontenc}\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usepackage{xintexpr}
+\usepackage{comment}
+\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing}
+
+\makeatletter
+\def\input@path{{./includes/}{./includes/ut/diags/}}
+\makeatother
+
 \begin{comment}
     Generate the blocks and reflections data using this python script:
 
@@ -7,7 +18,7 @@ n_ticks = 32
 overlap_each_tick = 3
 prob_mine = overlap_each_tick / n_chains
 print(f"expected blocks per chain: {n_ticks * prob_mine}")
-chain_blocks = list(list(sum([(1 if random.random() < prob_mine else 0) for _ in range(attempts)]) for _ in range(n_ticks)) for _ in range(n_chains))
+chain_blocks = list(list(sum([(1 if random.random() < prob_mine else 0) for _ in range(1)]) for _ in range(n_ticks)) for _ in range(n_chains))
 for chain in chain_blocks:
     print(f"{{{','.join(map(str,chain))}}},")
 
@@ -81,7 +92,8 @@ print(f"\n\ncount_refls: {count_refls}")
     ```
 \end{comment}
 
-\begin{tikzpicture}[node distance=0.1cm]
+\begin{document}%
+\begin{tikzpicture}[node distance=0.1cm]%
     \tikzstyle{block} = [draw, rounded corners=1.5pt, fill=white]
     \tikzstyle{ar} = [->, -to, shorten >= 2pt, shorten <= 2pt, opacity=0.25]
     \tikzstyle{pAr} = [ar, opacity=1]
@@ -1317,5 +1329,5 @@ print(f"\n\ncount_refls: {count_refls}")
     %             \fi
     %         }
     %     }
-
-    \end{tikzpicture}
+\end{tikzpicture}
+\end{document}

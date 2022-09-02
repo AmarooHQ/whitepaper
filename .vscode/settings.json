@@ -221,8 +221,8 @@
     },
     "files.autoSave": "onFocusChange",
     "latex-workshop.view.pdf.viewer": "tab",
-    "latex-workshop.latex.autoBuild.run": "onSave",
-    "latex-workshop.latex.pdfWatch.delay": 400,
+    "latex-workshop.latex.autoBuild.run": "onFileChange",
+    "latex-workshop.latex.pdfWatch.delay": 1000,
     "[latex]": {
         "editor.formatOnPaste": false,
         "editor.suggestSelection": "recentlyUsedByPrefix",
@@ -248,6 +248,7 @@
     ],
     "latex-workshop.latex.autoBuild.interval": 1000,
     "latex-workshop.latex.watch.files.ignore": [
+        "**/*.log",
         "**/*.bbx",
         "**/*.bbl",
         "**/*.cbx",
@@ -279,7 +280,7 @@
         "/dev/null",
         "output/**",
         "./output/*.tex",
-        "./output/**/*.tex",
+        "./output/**/*.tex"
     ],
     "latex-workshop.view.pdf.internal.synctex.keybinding": "double-click",
     "files.associations": {
