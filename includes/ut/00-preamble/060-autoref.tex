@@ -24,12 +24,3 @@
 \makeatother
 
 \def\subsubsubsubsubsection{\subsubparagraph}
-
-% for items in lists
-
-\newlist{argumentslist}{enumerate}{1}     % this creates a dedicated counter named 'argumentslisti'
-\setlist[argumentslist,1]{label=P.\arabic*,ref=\arabic*} % set form of enumeration label here
-
-\crefname{argumentslisti}{point}{points}
-
-% \renewcommand*\Itemautorefname{point}

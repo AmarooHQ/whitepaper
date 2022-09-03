@@ -1,0 +1,13 @@
+% a list of arguments
+
+\newlist{argumentslist}{enumerate}{1}     % this creates a dedicated counter named 'argumentslisti'
+\setlist[argumentslist,1]{label=P.\arabic*,ref=\arabic*} % set form of enumeration label here
+\crefname{argumentslisti}{point}{points}
+
+
+% a list for an axiom
+\SetEnumitemKey{notopsep}{topsep=0pt, partopsep=0pt, before={\setlength{\parskip}{0pt}}}
+
+\newlist{axiomreqs}{enumerate}{1}
+\setlist[axiomreqs,1]{label=\roman*.,ref=(\roman*),noitemsep,notopsep}
+\crefname{axiomreqsi}{Req.}{Reqs.}

@@ -76,7 +76,7 @@
 \usepackage[lastpage,user]{zref}
 \usepackage{fancyhdr}
 \usepackage[dvipsnames]{xcolor}
-\usepackage{amsmath,amsfonts}
+\usepackage{amsmath,amsfonts,bm}
 \usepackage{mathtools}
 \usepackage{mdframed}
 \usepackage[skins,breakable,most]{tcolorbox}
@@ -154,9 +154,37 @@
 
 \begin{section}{Section 1}
 
-% \subsection{PoR}
+%   \DeclareAxiom{MaximalReflection}{%
+%   A miner should reflect all possible blocks.
+% }{%
+%   A block, \BL{}, is invalid unless, for each reflected block \BR{}:
+%   \begin{axiomreqs}
+%       \item \BR{} is valid under this Axiom; and
+%       \item each block that was reflected by \BR{} or is a parent of \BR{}:
+%       \begin{itemize}
+%           \item is reflected by \BL{}; or
+%           \item is an ancestor of \BL{}; or
+%           \item was reflected by an ancestor of \BL{}.
+%       \end{itemize}
+%   \end{axiomreqs}
+% }[%
+%   $V(\BL{}) =
+%   % \\ \text{\hspace{5.5em}}
+%   V(\BR{}) \land (
+%       (\BL{} \refls{} \BBj{})
+%       \lor (\BL{} \descendsFrom \BBj{})
+%       \lor (\exists b (\BL{} \descendsFrom b \refls{} \BBj{}))
+%   ) \\
+%   \text{\hspace{7.5em}}
+%   \forall \{(\BR{}, \BBj{}) : \BL{} \refls \BR{}
+%       \land (\BR{} \refls{} \BBj{} \lor \BR{} \childOf \BBj{})\}
+%   $
+]
 
-% \input{20-por/10-incremental-por.tex}
+\subsection{PoR}
+
+\input{20-por/10-incremental-por.tex}
+
 \subsection{ constructing uT}
 
 

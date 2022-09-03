@@ -24,6 +24,63 @@ An example section of a simulated PoR graph is shown in \autoref{fig:por-graph-e
 Since there are $N_1$ chains, and each block has $\sim N_1$ reflections on average, the total number of reflections, per block period, is $\sim {N_1}^2 = O(c^2)$.
 Does this present a problem for fully validating nodes that wish to verify the entire PoR graph?
 
+Recall that in \autoref{sec:exploiting-segmented-state}, we took advantage of redundant data within the PoR graph.
+Particularly that, provided we knew \emph{which} blocks were reflected and the \emph{ordering} used to create the PoRs root, we could deterministically reconstruct those parts of any simplex-chain block.
+However, this relied on either tracking \emph{the entire} PoR graph, or additionally downloading all missing merkle branches corresponding to PoRs used by the reflected block.
+
+Why is so much information required?
+The reason is that each miner can choose \emph{whether} to reflect any block (assuming that the block is available), and has the freedom to choose the \emph{position} of each reflected block in the reflections tree.
+
+Regarding the \emph{position} of reflected blocks -- this is easy to solve.
+All we need to do is ensure there is only one position that a block can be in.
+For example, we could require that reflected blocks are ordered based on the ordering of their genesis blocks (which is fixed).
+If two or more blocks from a single simplex chain are reflected, we can use a sub-ordering method (of which there are many options).
+This gives us a total ordering, meaning that we only need to know \emph{which} blocks were reflected to reconstruct this segment of a block.
+Alternatively, we could use a merklized prefix tree which achieves the same goal.
+Either way, we have reduced the required information from a \emph{list} of block hashes to a \emph{set} of them.
+
+It is clear that miners need some freedom to choose \emph{whether} to reflect a block or not.
+For one, miners must be able to choose to reflect \emph{new} blocks as they appear.
+Additionally, due to the \AxiomOfAvailability, miners must not reflect unavailable blocks, even if a valid PoR can be generated.
+However, because all honest miners obey the \AxiomOfAvailability, there is never a reason for an honest miner \emph{not} to reflect a block that is available -- doing so will always increase the overall chain-weight of that miner's draft block.
+
+So, if an honest miner's block, \BL{}, reflects some other block, \BR{}, then any block reflected by \BR{} must also be available (since the \AxiomOfAvailability is recursive).
+Therefore, an honest miner should reflect all non-local blocks that were reflected by \BR{} but have not already been reflected by an ancestor of \BL{}.
+
+Let's call this a state of \emph{maximal reflection}.
+
+Specifically, we can say this about any PoR graph in a state of maximal reflection: for every block \BL{}, and for every block \BR{} reflected by \BL{}, then every block $b$ that is reflected by \BR{} satisfies one of: $b$ is reflected by \BL{}; or $b$ was reflected by an ancestor of \BL{}; or $b$ is an ancestor of \BL{}.
+
+There will always be at least one block reflected by \BL{} that was not reflected by any other block that was reflected by \BL{}.
+
+$$
+\forall\{b : \BL{} \refls \BR{} \refls b\}((\BL{} \refls b) \lor \exists l (\BL{} \descendsFrom l \refls b) \lor (\BL{} \descendsFrom b))
+$$
+
+$$
+\{b : (\BL{} \refls \BR{}) \land (\BR{} \notrefls b) \land (\BL{} \refls b) \land (\BL{} \notbdots b)\}
+$$
+
+We can enforce this through a new protocol rule: %the \AxiomOfMaximalReflection.
+\DeclareAxiom{MaximalReflection}{%
+    A miner should reflect all possible blocks.
+}{%
+    A block, \BL{}, is invalid unless, for each reflected block \BR{}:
+    \begin{axiomreqs}
+        \item \BR{} is valid under this Axiom; and
+        \item each block that was reflected by \BR{} or is a parent of \BR{}:
+        \begin{itemize}
+            \item is reflected by \BL{}; or
+            \item is an ancestor of \BL{}; or
+            \item was reflected by an ancestor of \BL{}.
+        \end{itemize}
+    \end{axiomreqs}
+}
+
+
+% Recall that the \AxiomOfAvailability requires miners to reflect only those blocks that are available, and that the \AxiomOfAvailability must be satisfied by all reflected blocks (applied recursively).
+
+% knowing that block A reflected block B tells us nothing about the \emph{other} blocks that A reflected.
 
 
 

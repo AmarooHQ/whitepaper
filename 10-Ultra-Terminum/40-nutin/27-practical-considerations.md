@@ -145,12 +145,16 @@ This would allow them to deterministically calculate proofs of reflection for al
 ### Exploiting Segmented State
 
 \label{sec:exploiting-seg-state}
+\label{sec:exploiting-segmented-state}
 
 Given that the reflection-segments of simplex-chains will contain mostly redundant data (i.e., headers), numerous optimizations are possible.
 
-For example, it's not necessary for a miner's node to re-download reflected headers since it already has most (or all) of them; that node just needs to know *which* headers are reflected and in what order.
-Transmitting the \emph{hashes} of headers, only, reduces the effective size of simplex-blocks[^sb-size] from $b$ to $b \cdot (\frac{g + B_h}{2B_h})$, where $g$ is the size of the relevant digest in bytes.
+For example, it's not necessary for a miner's node to re-download reflected headers (which are part of other chains' blocks), since it can download them in advance and as they become available.
+We can reconstruct the PoRs root provided that we know *which* headers are reflected and in what order.
+Transmitting the \emph{hashes} of headers, only, reduces the effective size of simplex-blocks[^sb-size] from $b$ to $\sim b \cdot (\frac{g + B_h}{2B_h})$, where $g$ is the size of the relevant digest in bytes.
 For $g=32; B_h=112$, this reduces effective block size to $\sim 0.643 b$ --- an improvement of $\sim 35\%$.
+
+\todo{ensure we've covered what a 'PoRs root' is, and that we're assuming a miner is tracking the entire PoR graph so it can be reconstructed easily}
 
 [^sb-size]: Assuming those blocks dedicate 50% capacity to transactions, and 50% to reflected headers (without PoRs).
 
@@ -171,7 +175,8 @@ Headers are trivial to acquire from the network, and each only needs to be acqui
 Since the *hash of each header* is *part* of the missing PoR merkle branch, miners only need to provided *an ordered list of merkle branches* for full PoR verifiability.
 Additionally, these merkle branches *will be part of specific SPV proofs*, so when a cross-chain SPV transaction (that uses those branches) is made, it can omit those parts of the proof (replacing them with a pointer).
 
-This UT protocol variant is +HOPoRs, the combination of *header omission* (+HO) and *explicit proofs* (+PoRs). It may present decisive advantages for implementations of *simplex tilings* (which are introduced in \autoref{sec:tiling}).
+This UT protocol variant is +HOPoRs, the combination of *header omission* (+HO) and *explicit proofs* (+PoRs).
+It may present decisive advantages for implementations of *simplex tilings* (which are introduced in \autoref{sec:tiling}).
 
 \aside{
     There is an independent protocol variant (from those above) called +T which provides a significant reduction to header size.

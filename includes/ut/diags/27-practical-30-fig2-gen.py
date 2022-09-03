@@ -127,9 +127,8 @@ new_in_rtips_past = set().union(*[all_blocks_in_refl_history(c, t) for c, t in f
 
 # generate code for the whole graph
 
-logging.warning("\n\nTIKZ CODE FOR POR GRAPH BELOW\n\n")
-
 def node_style(c, t):
+    return 'block'
     if c != focus_chain:
         ct = (c, t)
         if ct in all_in_prev_rtips_past:
@@ -142,7 +141,10 @@ def node_style(c, t):
             return 'block, color=orange'
     return 'block'
 
+count_blocks = 0
 def node_block(c, t):
+    global count_blocks
+    count_blocks += 1
     s = f"\\node ({nodename_of_block((c,t))}) [{node_style(c,t)}] at ({t}*\\sx, {c}*\\sy) {{}};"
     return s
 
@@ -156,6 +158,11 @@ def nodename_of_block(ct: tuple[int, int]):
 def edge_style(ct_from, ct_to):
     cf, tf = ct_from
     ct, tt = ct_to
+
+    if ct_to in refl_tips_of(*ct_from):
+        return 'ar'
+    return 'arNone'
+
     # we care about the focus chain
     if ct_from in special_from: # cf == focus_chain and tf <= focus_b_t:
         if ct_to in focus_refl_tips:
@@ -178,8 +185,14 @@ def edge_style(ct_from, ct_to):
     # default
     return 'ar'
 
+count_refls = 0
+
 def edge_refl(ct_from, ct_to):
-    s = f"\\draw [{edge_style(ct_from, ct_to)}] ({nodename_of_block(ct_from)}) -- ({nodename_of_block(ct_to)});"
+    global count_refls
+    style = edge_style(ct_from, ct_to)
+    if style != 'arNone':
+        count_refls += 1
+    s = f"\\draw [{style}] ({nodename_of_block(ct_from)}) -- ({nodename_of_block(ct_to)});"
     return s
 
 def edge_parent(ct_from, ct_to):
@@ -189,7 +202,6 @@ def edge_parent(ct_from, ct_to):
 def other_chains(local_c):
     return {c for c in range(n_chains) if c != local_c}
 
-count_refls = 0
 tikz_lines = []
 
 # loop through ticks and construct por graph segment
@@ -215,7 +227,6 @@ for t in range(n_ticks):
                 for prev_t in range(t - 1, max(last_local_block - 1, -1), -1):
                     if chain_blocks[other_c][prev_t]:
                         tikz_lines.append(edge_refl((c, t), (other_c, prev_t)))
-                        count_refls += 1
 
 # final arrows from future parents
 for c in range(n_chains):
@@ -233,4 +244,5 @@ for c in range(n_chains):
 with open(out_file, 'w') as f:
     f.write("\n".join(tikz_lines))
 
-logging.warning(f"\n\ncount_refls: {count_refls}")
+logging.warning(f"count_blocks / n_chains: {count_blocks / n_chains}")
+logging.warning(f"count_refls: {count_refls}")

@@ -9,7 +9,7 @@
 \def\input@path{{./includes/}{./includes/ut/diags/}}
 \makeatother
 
-\immediate\write18{zsh -c './27-practical-30-fig2-gen.py no_replace_recent entropy=1662089394' 2> 27-practical-30-fig2-autogen.log}
+% \immediate\write18{zsh -c './27-practical-30-fig2-gen.py no_replace_recent entropy=1662089394' 2> 27-practical-30-fig2-autogen.log}
 %includes/ut/diags/27-practical-30-fig2-gen.py
 
 \begin{comment}
@@ -25,9 +25,9 @@
 
 \begin{document}%
 \begin{tikzpicture}[node distance=0.1cm]%
-    \tikzstyle{block} = [draw, rounded corners=1.5pt, fill=white]
+    \tikzstyle{block} = [draw, rounded corners=1.5pt, fill=white, fill opacity=0]
 
-    \tikzstyle{ar} = [->, -to, shorten >= 2pt, shorten <= 2pt, opacity=0.25]
+    \tikzstyle{ar} = [->, -to, shorten >= 2pt, shorten <= 2pt, opacity=0.45]
 
     \tikzstyle{arFocus} = [ar, opacity=.7]
     \tikzstyle{arFocusTip} = [arFocus, color=red]
@@ -48,6 +48,9 @@
     \def\timeArY{-0.5*\sy}
     \draw [arrowTime] (0, \timeArY) node () [anchor=west, yshift=-10pt] {\textit{Time}} -- (31*\sx, \timeArY);
 
+    % testing transparency fill of blocks
+    % \draw [pAr] (20*\sx, 9*\sy) -- (5*\sx, 1*\sy);
+
     \input{./27-practical-30-fig2-refls.tikz}
-\end{tikzpicture}
+\end{tikzpicture}%
 \end{document}

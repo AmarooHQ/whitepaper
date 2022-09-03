@@ -33,16 +33,24 @@
     in
         ($(#3)!#6!(\p3)$) -- ($(\p3)!#5!(#3)$) ;
     }
+% p4: the corner
+% p1,2: same length towards the other corners
+    % \p5 = ($((\p3) + (((\p1) + (\p2))!1pt!(\p3)))$)
+    % \p5 = ($(\p3)$)
+% ($(#3)!#6!(\p3)$) -- ($(\p3)!#5!(#3)$) ;
+        % \p5 = ($((\p1) + (\p2))$),
 \newcommand{\reflectLine}[5][]{%
     \ifnum 1=\DrawPoRMirrors
     \path[#1] let
         \p4 = ($(#3)$),
         \p1 = ($(#3)!1cm!(#2)$),
         \p2 = ($(#3)!1cm!(#4)$),
-        \p3 = ($(\p1) + (\p2) - (#3)$)
+        \p3 = ($(\p1) + (\p2) - (\p4)$),
+        \p5 = ($(\p4)!.5pt!180:(\p3)$)
     in
-        % ($(#3)!#6!(\p3)$) -- ($(\p3)!#5!(#3)$) ;
-        ($(\p4)!#5!90:(\p3)$) -- ($(\p4)!-#5!90:(\p3)$);
+    ($(\p5)!#5!90:(\p3)$)
+        % -- node [rectangle, draw] {} (\p3)
+        -- ($(\p5)!-#5!90:(\p3)$);
     \fi
     }
 
@@ -186,12 +194,12 @@
                                 \ifnum 2<\xinteval{abs(2 * \StopPoRArrowsAt - 3)}
                                     \draw [arrowRefl2] (rOne) -- (rTwo) -- (rThree) -- (rOne);
                                     \draw [arrowRefl2RL] (rThree) -- (rOne);
-                                    \reflectLine[draw]{rTwo}{rThree}{rOne}{0.08};
+                                    \reflectLine[reflLine]{rTwo}{rThree}{rOne}{0.08};
                                 \fi
                                 \ifnum 1<\xinteval{abs(2 * \StopPoRArrowsAt - 1)}
                                     \draw [arrowRefl2LR] (rOne) -- (rTwo) -- (rThree);
                                     \draw [arrowRefl2LR] (rTwo) -- (rThree);
-                                    \reflectLine[draw]{rOne}{rTwo}{rThree}{0.1};
+                                    \reflectLine[reflLine]{rOne}{rTwo}{rThree}{0.1};
                                 \fi
                                 \ifnum 0<\StopPoRArrowsAt
                                     \draw [arrowRefl2] (rOne) -- (rTwo);
@@ -308,12 +316,12 @@
                             \ifnum 2<\xinteval{abs(2 * \StopPoRArrowsAt - 3)}
                                 \draw [arrowRefl2] (rOne) -- (rTwo) -- (rThree) -- (rOne);
                                 \draw [arrowRefl2RL] (rThree) -- (rOne);
-                                \reflectLine[draw]{rTwo}{rThree}{rOne}{0.08};
+                                \reflectLine[reflLine]{rTwo}{rThree}{rOne}{0.08};
                             \fi
                             \ifnum 1<\xinteval{abs(2 * \StopPoRArrowsAt - 1)}
                                 \draw [arrowRefl2LR] (rOne) -- (rTwo) -- (rThree);
                                 \draw [arrowRefl2LR] (rTwo) -- (rThree);
-                                \reflectLine[draw]{rOne}{rTwo}{rThree}{0.1};
+                                \reflectLine[reflLine]{rOne}{rTwo}{rThree}{0.1};
                             \fi
                             \ifnum 0<\StopPoRArrowsAt
                                 \draw [arrowRefl2] (rOne) -- (rTwo);

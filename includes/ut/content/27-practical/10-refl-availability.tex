@@ -136,3 +136,16 @@ For example: a \cL miner receives a header for some block \BR{1a} along with a P
 Let's consider the example in \autoref{fig:unavailable-ex}:
 
 (asdf)
+
+\todo{Define the \AxiomOfAvailability}
+
+\DeclareAxiom{Availability}{%
+    All reflected blocks must be: complete, readily available, and verifiable.
+}{%
+    A block, \BL{}, cannot yet be valid unless, for each reflected block \BR{}:
+    \begin{axiomreqs}
+        \item \BR{} has been downloaded (i.e., the block is available); and
+        \item the cryptographic integrity of \BR{} has been verified; and
+        \item \BR{} is valid under this axiom.
+    \end{axiomreqs}
+}
