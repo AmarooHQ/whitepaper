@@ -47,42 +47,44 @@
 % note, the first arg is not wrapped in {} so that we can do things like:
 %   M^1_{i+1} (the superscript 1 and subscript i+1 will be left-aligned vertically)
 
-\ProvideDocumentCommand{\BCI}{m m o}{%
-    \ensuremath{#1_{{#2}\IfNoValueTF{#3}{}{+{#3}}}}\xspace%
+\ExplSyntaxOn%
+\NewDocumentCommand{\prependPlusIfNotEmpty}{m}{%
+  \tl_if_empty:nTF{#1}{}{+{#1}}%
 }
-\providecommand\BCIStart[2]{%
+\ExplSyntaxOff%
+\NewDocumentCommand{\BCI}{m m g}{%
+  \ensuremath{#1_{{#2}\IfNoValueTF{#3}{}{\prependPlusIfNotEmpty{#3}}}}%
+  \xspace%
+}
+
+\NewDocumentCommand\BCIStart{m m}{%
     \ensuremath{#1_{{#2}}}\xspace%
 }
 
-\providecommand\BB{}
-\renewcommand\BB[1]{\BCI{\cB}{i}{#1}}
+\NewDocumentCommand{\BB}{g}{\BCI{\cB}{i}{#1}}
 \newcommand\xBB[1]{\xyB{\BB{#1}}}
 
-\providecommand\BBj{}
-\renewcommand\BBj[1]{\BCI{\cB}{j}{#1}}
-\newcommand\xBBj[1]{\xyB{\BBj{#1}}}
+\NewDocumentCommand{\BBj}{g}{\BCI{\cB}{j}{#1}}
+\NewDocumentCommand{\xBBj}{g}{\xyB{\BBj{#1}}}
 
-\newcommand\BBi{\BCIStart{\cB}{i}}
-\newcommand\xBBi{\xyB{\BBi}}
+\NewDocumentCommand{\BBi}{}{\BCIStart{\cB}{i}}
+\NewDocumentCommand{\xBBi}{}{\xyB{\BBi}}
 
-\providecommand\BL{}
-\renewcommand\BL[1]{\BCI{\cL}{i}{#1}}
-\newcommand\xBL[1]{\xyB{\BL{#1}}}
+\NewDocumentCommand{\BL}{g}{\BCI{\cL}{i}{#1}}
+\NewDocumentCommand{\xBL}{g}{\xyB{\BL{#1}}}
 
-\providecommand\BR{}
-\renewcommand\BR[1]{\BCI{\cR}{k}{#1}}
-\newcommand\xBR[1]{\xyB{\BR{#1}}}
+\NewDocumentCommand{\BR}{g}{\BCI{\cR}{k}{#1}}
+\NewDocumentCommand{\xBR}{g}{\xyB{\BR{#1}}}
 
-\providecommand\BM{}
-\renewcommand\BM[1]{\BCI{\cM}{j}{#1}}
-\newcommand\xBM[1]{\xyB{\BM{#1}}}
+\NewDocumentCommand{\BM}{g}{\BCI{\cM}{j}{#1}}
+\NewDocumentCommand{\xBM}{g}{\xyB{\BM{#1}}}
 
 %
 % helpers for xymatrix based chain-diags
 %
 
 % std margin, cols, spacing for chain diag based on xymatrix
-\providecommand\xyMChains[1]{\xymatrix@M=3pt@R=4pt@C=14pt{#1}}
+\ProvideDocumentCommand{\xyMChains}{m}{\xymatrix@M=3pt@R=4pt@C=14pt{#1}}
 
 % use \xyTimeHoriz as first/last row in \xyMChains. the argument is an arrow direction and length (in cols)
 % e.g., `\xyTimeHoriz{rrrrrrr} & & & & & & & \\`
@@ -113,6 +115,8 @@
 \newcommand\arm[1][]{\ar@{->}[#1]}
 % ARrow Secondary (for secondary parents)
 \newcommand\ars[1][]{\ar@{~>}[#1]}
+%
+\newcommand\arAncestor[1][]{\ar@{-->}[#1]}
 
 
 % % \def\useone#1{#1}
@@ -180,7 +184,7 @@
     }
 }
 
-\NewDocumentCommand{\refls}{}{%
+\NewDocumentCommand{\reflsPrev}{}{%
   \ensuremath{\mathbin{\tikz[utCustArrows]{
     \def\left{0}
     \def\bottom{.1}
@@ -284,3 +288,12 @@
 \NewDocumentCommand{\notbdots}{}{\bdots\mathrel{\mkern-16.75mu\not\:\mkern14mu}}
 
 \NewDocumentCommand{\bAnd}{}{\mathrel{\&\&}}
+
+\NewDocumentCommand{\rightdottedarrow}{}{\ensuremath{\xyInlineRefl{\;\arf[r]&\;}}}
+\NewDocumentCommand{\leftdottedarrow}{}{\ensuremath{\xyInlineRefl{\;&\;\arf[l]}}}
+
+\NewDocumentCommand{\refls}{}{\rightdottedarrow}
+\NewDocumentCommand{\refldBy}{}{\leftdottedarrow}
+
+\NewDocumentCommand{\rightdashedarrow}{}{\ensuremath{\xyInlineRefl{\;\arAncestor[r]&\;}}}
+\NewDocumentCommand{\leftdashedarrow}{}{\ensuremath{\xyInlineRefl{\;&\;\arAncestor[l]}}}

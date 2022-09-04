@@ -57,9 +57,23 @@ $$
 \forall\{b : \BL{} \refls \BR{} \refls b\}((\BL{} \refls b) \lor \exists l (\BL{} \descendsFrom l \refls b) \lor (\BL{} \descendsFrom b))
 $$
 
-$$
-\{b : (\BL{} \refls \BR{}) \land (\BR{} \notrefls b) \land (\BL{} \refls b) \land (\BL{} \notbdots b)\}
-$$
+
+\begin{align*}
+\{b : (\BL{} \refls \BR{}) \land (\BR{} \notrefls b) \land (\BL{} \refls b) \land (\BL{} \notbdots b)\} \\
+test \\
+\cdot \cdot \cdot \\
+\mathrel{\cdot}\mathrel{\cdot}\mathrel{\cdot} \\
+\mathord{\cdot}\mathord{\cdot}\mathord{\cdot}\symbol{41}\\
+\mathrel{\mkern-6mu\to} \\
+% \dottedarrow\\
+\BL{1} \rightdottedarrow \BR{2}
+\leftdottedarrow \\
+\rightdashedarrow
+\leftdashedarrow \\
+\to
+\gets \\
+\cdots
+\end{align*}
 
 We can enforce this through a new protocol rule: %the \AxiomOfMaximalReflection.
 \DeclareAxiom{MaximalReflection}{%
