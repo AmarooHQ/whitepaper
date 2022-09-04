@@ -51,29 +51,27 @@ Let's call this a state of \emph{maximal reflection}.
 
 Specifically, we can say this about any PoR graph in a state of maximal reflection: for every block \BL{}, and for every block \BR{} reflected by \BL{}, then every block $b$ that is reflected by \BR{} satisfies one of: $b$ is reflected by \BL{}; or $b$ was reflected by an ancestor of \BL{}; or $b$ is an ancestor of \BL{}.
 
-There will always be at least one block reflected by \BL{} that was not reflected by any other block that was reflected by \BL{}.
-
-$$
-\forall\{b : \BL{} \refls \BR{} \refls b\}((\BL{} \refls b) \lor \exists l (\BL{} \descendsFrom l \refls b) \lor (\BL{} \descendsFrom b))
-$$
+% $$
+% \forall\{b : \BL{} \refls \BR{} \refls b\}((\BL{} \refls b) \lor \exists l (\BL{} \descendsFrom l \refls b) \lor (\BL{} \descendsFrom b))
+% $$
 
 
-\begin{align*}
-\{b : (\BL{} \refls \BR{}) \land (\BR{} \notrefls b) \land (\BL{} \refls b) \land (\BL{} \notbdots b)\} \\
-test \\
-\cdot \cdot \cdot \\
-\mathrel{\cdot}\mathrel{\cdot}\mathrel{\cdot} \\
-\mathord{\cdot}\mathord{\cdot}\mathord{\cdot}\symbol{41}\\
-\mathrel{\mkern-6mu\to} \\
-% \dottedarrow\\
-\BL{1} \rightdottedarrow \BR{2}
-\leftdottedarrow \\
-\rightdashedarrow
-\leftdashedarrow \\
-\to
-\gets \\
-\cdots
-\end{align*}
+% \begin{align*}
+% \{b : (\BL{} \refls \BR{}) \land (\BR{} \notrefls b) \land (\BL{} \refls b) \land (\BL{} \notbdots b)\} \\
+% test \\
+% \cdot \cdot \cdot \\
+% \mathrel{\cdot}\mathrel{\cdot}\mathrel{\cdot} \\
+% \mathord{\cdot}\mathord{\cdot}\mathord{\cdot}\symbol{41}\\
+% \mathrel{\mkern-6mu\to} \\
+% % \dottedarrow\\
+% \BL{1} \rightdottedarrow \BR{2}
+% \leftdottedarrow \\
+% \rightdashedarrow
+% \leftdashedarrow \\
+% \to
+% \gets \\
+% \cdots
+% \end{align*}
 
 We can enforce this through a new protocol rule: %the \AxiomOfMaximalReflection.
 \DeclareAxiom{MaximalReflection}{%
@@ -91,6 +89,18 @@ We can enforce this through a new protocol rule: %the \AxiomOfMaximalReflection.
     \end{axiomreqs}
 }
 
+Notice that, if \BL reflected any blocks, there will always be at least one block, \BT, reflected by \BL that was not reflected by any other block that was reflected by \BL.
+Let us call these blocks the \emph{tips} of the PoR graph from \BL's perspective.
+Graph tips (like \BT) might reflect other blocks reflected by \BL, too.
+For example, consider this PoR graph segment:
+\begin{equation*}
+    \xyMChains{
+        & & & \xBT{} \arm[lll] \arf[lld] \arf[ldd] & & \arm[ll] \\
+        & \xBL{-1} \arm[l] & & & \xBL{} \arm[lll] \arf[lld] \arf[lu] & \arm[l] \\
+        & & \xBR{} \arf[lu] \arm[ll] & & & \arm[lll] \\
+        \xyTimeHoriz{rrrrr} &&&&&
+    }
+\end{equation*}
 
 % Recall that the \AxiomOfAvailability requires miners to reflect only those blocks that are available, and that the \AxiomOfAvailability must be satisfied by all reflected blocks (applied recursively).
 

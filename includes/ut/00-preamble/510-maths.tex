@@ -31,6 +31,29 @@
 % `\mathord{}' just for clarity -- `{}' would work just as well
 \renewcommand\sim{\ensuremath{\mathord{\opsim}}}
 
+% xypic diag stuff
+
+
+
+% chain-diags: boxes for blocks (xyB) and chain names (xyL)
+\newcommand{\xyB}[1]{*+[F]+{#1}}
+\providecommand\xyBDraft[1]{*+[F--]+{#1}}
+\providecommand\xyL[1]{*++[F:<2pt>]{#1}}
+
+
+% ARrow reFlection
+\newcommand\arf[1][]{\ar@{.>}[#1]}
+% \newcommand\arff[1][]{\ar@2{.>}@[Maroon][#1]}
+\newcommand\arff[1][]{\ar@{.>}[#1]}
+% ARrow Main (for primary parents)
+\newcommand\arm[1][]{\ar@{->}[#1]}
+% ARrow Secondary (for secondary parents)
+\newcommand\ars[1][]{\ar@{~>}[#1]}
+%
+\newcommand\arAncestor[1][]{\ar@{-->}[#1]}
+
+
+
 % labels for chains that work in and out of math mode
 % if \xspace is inside \ensuremath then it won't work outside math mode
 
@@ -38,6 +61,7 @@
 \newcommand\cL{\ensuremath{L}\xspace}
 \newcommand\cM{\ensuremath{M}\xspace}
 \newcommand\cR{\ensuremath{R}\xspace}
+\newcommand\cT{\ensuremath{T}\xspace}
 \newcommand\cMone{\ensuremath{M^1}\xspace}
 \newcommand\cMtwo{\ensuremath{M^2}\xspace}
 \newcommand\cRone{\ensuremath{R^1}\xspace}
@@ -48,8 +72,11 @@
 %   M^1_{i+1} (the superscript 1 and subscript i+1 will be left-aligned vertically)
 
 \ExplSyntaxOn%
-\NewDocumentCommand{\prependPlusIfNotEmpty}{m}{%
-  \tl_if_empty:nTF{#1}{}{+{#1}}%
+\NewExpandableDocumentCommand{\prependPlusIfNotEmpty}{m}{%
+  \tl_if_empty:nTF{#1}{}{\ifnum 0<#1%
+    +%
+  \fi%
+  {#1}}%
 }
 \ExplSyntaxOff%
 \NewDocumentCommand{\BCI}{m m g}{%
@@ -65,19 +92,23 @@
 \newcommand\xBB[1]{\xyB{\BB{#1}}}
 
 \NewDocumentCommand{\BBj}{g}{\BCI{\cB}{j}{#1}}
-\NewDocumentCommand{\xBBj}{g}{\xyB{\BBj{#1}}}
+\newcommand\xBBj[1]{\xyB{\BBj{#1}}}
 
 \NewDocumentCommand{\BBi}{}{\BCIStart{\cB}{i}}
-\NewDocumentCommand{\xBBi}{}{\xyB{\BBi}}
+\newcommand\xBBi{\xyB{\BBi}}
 
 \NewDocumentCommand{\BL}{g}{\BCI{\cL}{i}{#1}}
-\NewDocumentCommand{\xBL}{g}{\xyB{\BL{#1}}}
+% \newcommand\xBL[1]{\xyB{\BL{#1}}}
+\NewExpandableDocumentCommand{\xBL}{m}{\xyB{\BL{#1}}}
 
 \NewDocumentCommand{\BR}{g}{\BCI{\cR}{k}{#1}}
-\NewDocumentCommand{\xBR}{g}{\xyB{\BR{#1}}}
+\newcommand\xBR[1]{\xyB{\BR{#1}}}
 
 \NewDocumentCommand{\BM}{g}{\BCI{\cM}{j}{#1}}
-\NewDocumentCommand{\xBM}{g}{\xyB{\BM{#1}}}
+\newcommand\xBM[1]{\xyB{\BM{#1}}}
+
+\NewDocumentCommand{\BT}{g}{\BCI{\cT}{h}{#1}}
+\newcommand\xBT[1]{\xyB{\BT{#1}}}
 
 %
 % helpers for xymatrix based chain-diags
@@ -99,24 +130,6 @@
 
 % wrapper for inline refl paths
 \providecommand\xyInlineRefl[1]{\xymatrix@C=10pt@M=0pt{#1}}
-
-
-% chain-diags: boxes for blocks (xyB) and chain names (xyL)
-\providecommand\xyB[1]{*+[F]+{#1}}
-\providecommand\xyBDraft[1]{*+[F--]+{#1}}
-\providecommand\xyL[1]{*++[F:<2pt>]{#1}}
-
-
-% ARrow reFlection
-\newcommand\arf[1][]{\ar@{.>}[#1]}
-% \newcommand\arff[1][]{\ar@2{.>}@[Maroon][#1]}
-\newcommand\arff[1][]{\ar@{.>}[#1]}
-% ARrow Main (for primary parents)
-\newcommand\arm[1][]{\ar@{->}[#1]}
-% ARrow Secondary (for secondary parents)
-\newcommand\ars[1][]{\ar@{~>}[#1]}
-%
-\newcommand\arAncestor[1][]{\ar@{-->}[#1]}
 
 
 % % \def\useone#1{#1}
