@@ -432,11 +432,11 @@ This also means that PoRs are composable into recursive PoRs.
 
 Specifically, we have a situation like this:
 \begin{itemize}
-  \item \BL{2} has a PoR for \BL{0} reflected via \BM{1}
+  \item \BL{2} has a PoR for \BL{} reflected via \BM{1}
   \item \BL{4} has a PoR for \BL{2} reflected via \BM{3}
   \item \BL{4} has \BM{3}'s PoR for \BM{1} reflected via \BR{2}
 \end{itemize}
-Thus, \BL{4} implicitly has all the information to deduce the recursive PoR: that \BL{0} was imaged by \BM{1}, that \BM{1} was imaged by \BR{2}, that \BR{2} was imaged by \BM{3}, and that \BM{3} was imaged by \BL{4}.
+Thus, \BL{4} implicitly has all the information to deduce the recursive PoR: that \BL{} was imaged by \BM{1}, that \BM{1} was imaged by \BR{2}, that \BR{2} was imaged by \BM{3}, and that \BM{3} was imaged by \BL{4}.
 
 The precise nature of how recursive PoRs should be counted and attributed, as well as which matter and which don't, is explored in the ``Recursive \emph{Proof of Reflection}'' section of the whitepaper.
 

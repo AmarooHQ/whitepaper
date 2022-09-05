@@ -394,7 +394,7 @@ At a depth of $d=10$, with 64 simplex-chains per tile, this burden is 40 - 60 KB
 However, after a block period, one specific root simplex-chain should have the weight of the whole root.
 If we use this fact, then we only need to know a path from one simplex-chain block in the root back to the target chain:
 \begin{equation*}
-    \xyInlineRefl{\BL2 \;&\; \cdots \arf[l] \;&\; \BR{20} \arf[l] \;&\; \{\frac{N_1}{v+1} - 1 \text{ other root chains}\} \arf[l] \;&\; \BR{21} \arf[l] \;&\; \cdots \arf[l] \;&\; \BL3 \arf[l]}.
+    \xyInlineRefl{\BL{2} \;&\; \cdots \arf[l] \;&\; \BR{20} \arf[l] \;&\; \{\frac{N_1}{v+1} - 1 \text{ other root chains}\} \arf[l] \;&\; \BR{21} \arf[l] \;&\; \cdots \arf[l] \;&\; \BL{3} \arf[l]}.
 \end{equation*}
 This version has $\Psz N_1 (v+1)^{-1}$ extra individual proofs, and only two branches going from \cL to the root tile and back again.
 But it proves as much work as the bundle of 40 - 60 KB that we had before.
@@ -405,13 +405,13 @@ This time, though, the burden is only 2.7 - 4.0 KB per local block.
 
 % \begin{equation*}
 %     \xymatrix@C=1em@R-1.8em{
-%         \BL4 \arf[dr] & & & \\
+%         \BL{4} \arf[dr] & & & \\
 %         & \ddots \arf[dr] & & \\
-%         & & \BR3 \arf[dr] & \\
+%         & & \BR{3} \arf[dr] & \\
 %         & & & \{\frac{N_1}{v+1} \text{ other root chains}\} \arf[dl] \\
-%         & & \BR2 \arf[dl] & \\
+%         & & \BR{2} \arf[dl] & \\
 %         & \iddots \arf[dl] & & \\
-%         \BL2 & & & \\
+%         \BL{2} & & & \\
 %     }
 % \end{equation*}
 

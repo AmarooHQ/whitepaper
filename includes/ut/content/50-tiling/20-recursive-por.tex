@@ -63,17 +63,17 @@ An easy example of this is: \cL nodes should not count \cM's PoRs where an \cL b
 
 % commands used in the following xy chains diag
 
-\providecommand\BL{}
-\renewcommand\BL[1]{\BCI{\cL}{i}{#1}}
-\providecommand\xBL[1]{\xyB{\BL{#1}}}
+% \providecommand\BL{}
+% \renewcommand\BL[1]{\BCI{\cL}{i}{#1}}
+% \providecommand\xBL[1]{\xyB{\BL{#1}}}
 
-\providecommand\BR{}
-\renewcommand\BR[1]{\BCI{\cR}{k}{#1}}
-\providecommand\xBR[1]{\xyB{\BR{#1}}}
+% \providecommand\BR{}
+% \renewcommand\BR[1]{\BCI{\cR}{k}{#1}}
+% \providecommand\xBR[1]{\xyB{\BR{#1}}}
 
-\providecommand\BM{}
-\renewcommand\BM[1]{\BCI{\cM}{j}{#1}}
-\providecommand\xBM[1]{\xyB{\BM{#1}}}
+% \providecommand\BM{}
+% \renewcommand\BM[1]{\BCI{\cM}{j}{#1}}
+% \providecommand\xBM[1]{\xyB{\BM{#1}}}
 
 Chain \cL can only count work contributed by \cR \emph{after} a multi-stage PoR can be constructed.
 For example, let's consider the (rather orderly) chain-segments in \autoref{fig:simple-recursive-por-chain-diag}.
@@ -100,23 +100,23 @@ We can see that \BR{2} \ul{\emph{implicitly}} reflects \BL{1} via \BR{2}'s \ul{\
 We can use this implicit reflection because the network already depends on all the PoRs that are sufficient to prove it.
 \BL{2}'s PoR for \BL{1} will prove $\xyInlineRefl{\BL{1}\;&\;\BM{1}\arf[l]}$ (i.e., that \BL{1} was reflected by \BM{1}).
 \BM{2}'s PoR (via \cR) for \BM{1} will prove $\xyInlineRefl{\BM{1}\;&\;\BR{2}\arf[l]}$.
-We combine these two for the full path by which \BR2 implicitly reflects \BL1:
-$\xyInlineRefl{\BL1 \;&\; \BM{1}\arf[l] \;&\; \BR{2}\arf[l]}$.
+We combine these two for the full path by which \BR{2} implicitly reflects \BL{1}:
+$\xyInlineRefl{\BL{1} \;&\; \BM{1}\arf[l] \;&\; \BR{2}\arf[l]}$.
 
-Similarly, we know that \BL{3} implicitly reflects \BR{2}: $\xyInlineRefl{\BR2\;&\;\BM2\arf[l]\;&\;\BL3\arf[l]}$.
+Similarly, we know that \BL{3} implicitly reflects \BR{2}: $\xyInlineRefl{\BR{2}\;&\;\BM{2}\arf[l]\;&\;\BL{3}\arf[l]}$.
 
-Thus, for \BL3, we can construct a full recursive PoR of \BL1 via \BR2 using the proofs for each link between them:
-$\xyInlineRefl{\BL1 \;&\; \BM{1}\arf[l] \;&\; \BR2\arf[l] \;&\; \BM2\arf[l] \;&\; \BL3\arf[l]}$.
+Thus, for \BL{3}, we can construct a full recursive PoR of \BL{1} via \BR{2} using the proofs for each link between them:
+$\xyInlineRefl{\BL{1} \;&\; \BM{1}\arf[l] \;&\; \BR{2}\arf[l] \;&\; \BM{2}\arf[l] \;&\; \BL{3}\arf[l]}$.
 
 Since \cL nodes already know about all the \cM and \cR blocks (and the relevant PoRs), the full recursive PoR \emph{does not need to be explicitly recorded}.
 It is already known to all \cL nodes, since each part of the recursive PoR is available in one of the \cL, \cM, or \cR chains (it is explicitly recorded if a +PoRs UT variant is used, and recalculated by the node otherwise).
 
 In \autoref{sec:counting-work} we discussed the idea that a PoR can only contribute to local blocks that are in the reflecting block's past.
-By inspection, we can see that the most recent \cR block (the reflecting block) in \BL{3}'s past is \BR{2}, and the most recent \cL block (the local block) in \BR2's past is \BL1.
+By inspection, we can see that the most recent \cR block (the reflecting block) in \BL{3}'s past is \BR{2}, and the most recent \cL block (the local block) in \BR{2}'s past is \BL{1}.
 Thus, we can see that our method for attributing reflected work -- following the arrows -- works for recursive PoR, too.
 
 There is something important to point out here: \emph{latency}.
-Notice that these 3 blocks (in chronological order) are required for this recursive PoR to exist: \BM1, \BR2, and \BM2.
+Notice that these 3 blocks (in chronological order) are required for this recursive PoR to exist: \BM{1}, \BR{2}, and \BM{2}.
 A non-recursive PoR only needs to wait for 1 reflecting block to be produced (after which the PoR counts as \emph{draft reflected work}).
 So, in this case, the expected delay will be $3\times$ normal (assuming all chains have the same block periods).
 In general (if only one PoR path between two given blocks will exist) this delay, measured in block periods, is equal to the length of the full PoR (excluding \cL blocks), which equals $2x-1$ the depth of recursion ($x$).
@@ -132,17 +132,6 @@ This is the second problem.
 
 \subsubsubsection{Recursive PoR with Multiple Paths}
 
-\providecommand\BMone{}
-\renewcommand\BMone[1]{\BCI{\cMone}{g}{#1}}
-\newcommand\xBMone[1]{\xyB{\BMone{#1}}}
-
-\providecommand\BMtwo{}
-\renewcommand\BMtwo[1]{\BCI{\cMtwo}{h}{#1}}
-\newcommand\xBMtwo[1]{\xyB{\BMtwo{#1}}}
-
-% ARrow reFlection Bent Down
-\newcommand\arfbd[1][]{\ar@{.>}@/_9pt/[#1]}
-\newcommand\arfbu[1][]{\ar@{.>}@/^9pt/[#1]}
 
 Say that we now have four chains: \cL, \cMone, \cMtwo, and \cR doing mutual PoR like so:
 \begin{equation*}
@@ -178,22 +167,22 @@ First, let's consider when \cL can \emph{definitely} count \emph{all} the work c
     \label{fig:multi-path-recursive-por-chain-diag}
 \end{figure}
 
-As before, we'll look at valid PoRs for \BL3 that prove \BL1 was reflected in \BR2.
+As before, we'll look at valid PoRs for \BL{3} that prove \BL{1} was reflected in \BR{2}.
 The exact reflections that exist will be analogous to our prior example, too.
 See \autoref{fig:multi-path-recursive-por-chain-diag} for the chain-diagram.
 % For each $x$ in $\{1,2,3\}$, we'll assume that \BL{x} and \BR{x} occur simultaneously, and both reflect \BMone{x-1} and \BMtwo{x-1}.
 % After \BL{x}, but before \BL{x+1}, we'll assume that \BMone{x} and \BMtwo{x} are mined simultaneously and both blocks reflect \BL{x} and \BR{x}.
-Notice that there are 4 possible paths from \BL{3} to \BL1:
+Notice that there are 4 possible paths from \BL{3} to \BL{1}:
 % \\[-.66em]
 \begin{equation*}
     \xymatrix@C=1em@R=-.5em{
         & & \BMone1 \arf[ld] & & \BMone2 \arf[ld] & \\
-        \BL0 & \BL1 & & \BR2 \arf[lu] \arf[ld] & & \BL3 \arf[lu] \arf[ld] & \BL4 \\
+        \BL{} & \BL{1} & & \BR{2} \arf[lu] \arf[ld] & & \BL{3} \arf[lu] \arf[ld] & \BL{4} \\
         & & \BMtwo1 \arf[lu] & & \BMtwo2 \arf[lu] & \\
     }
 \end{equation*}
 % \\[-.66em]
-Here is what we can say about this case: if all 4 of these PoR paths exist, then \BR2 \emph{definitely} reflects \BL1, and its weight can be included in \BL3's total chain-weight.
+Here is what we can say about this case: if all 4 of these PoR paths exist, then \BR{2} \emph{definitely} reflects \BL{1}, and its weight can be included in \BL{3}'s total chain-weight.
 
 But, what if only some of those paths are available?
 Consider this alternative case:
@@ -202,17 +191,17 @@ Consider this alternative case:
     \xymatrix@C=1em@R=-.15em{
         % & \BMone1 \arff[ld] & & & \BMone2 \arf[llld] \arff[ld] & \\
         & \BMone1 \arff[ld] & & & \BMone2 \arff[ld] & \\
-        % \BL0 & \BL1 & & \BR2 \arff[llu] \arff[ld] & & \BL3 \arff[lu] \arf[llld] & \BL4 \arf[ld] \\
-        \BL0 & \BL1 & & \BR2 \arff[llu] \arff[ld] & & \BL3 \arff[lu] & \BL4 \arf[ld] \\
+        % \BL{} & \BL{1} & & \BR{2} \arff[llu] \arff[ld] & & \BL{3} \arff[lu] \arf[llld] & \BL{4} \arf[ld] \\
+        \BL{} & \BL{1} & & \BR{2} \arff[llu] \arff[ld] & & \BL{3} \arff[lu] & \BL{4} \arf[ld] \\
         & & \BMtwo1 \arff[lu] & & & \BMtwo2 \arf[llu] \\
     }
 \end{equation*}
-In this case, \cL is implicitly reflected in \BR2, and \BL3 has two possible recursive PoRs of this: \BL{1} via \BMtwo1; and \BL{0} via \BMone1.
+In this case, \cL is implicitly reflected in \BR{2}, and \BL{3} has two possible recursive PoRs of this: \BL{1} via \BMtwo1; and \BL{} via \BMone1.
 Are both valid?
 Is either preferable?
-If \BL3 includes the full weight of \BR2 in its chain-weight, then what happens when \BL4 is mined and the other two PoR paths via \BMtwo2 become available?
+If \BL{3} includes the full weight of \BR{2} in its chain-weight, then what happens when \BL{4} is mined and the other two PoR paths via \BMtwo2 become available?
 
-We \emph{can} be sure that \BR2's weight can be fully included in \cL's chain-weight \emph{after} \BL4 is mined (since all PoR paths now exist).
+We \emph{can} be sure that \BR{2}'s weight can be fully included in \cL's chain-weight \emph{after} \BL{4} is mined (since all PoR paths now exist).
 However, it's not so clear what we should do when not all PoR paths yet exist.
 % Do we even need to solve this problem, now, though?
 
@@ -228,30 +217,30 @@ Firstly, we can say that the total work contributed by all possible PoR paths is
 That is: no work is counted twice, and all blocks in a PoR path contribute work.
 
 Secondly, consider that the work contributed by an individual PoR is equal to the amount of work that an attacker would need to do to produce an equal and competing PoR.
-This means that \emph{any} PoR path proving that \BR2 reflects \BL1 is worth \emph{at least} as much as \BR2.
+This means that \emph{any} PoR path proving that \BR{2} reflects \BL{1} is worth \emph{at least} as much as \BR{2}.
 Additionally, a recursive PoR is, in isolation, worth \emph{exactly} as much as the sum of weights of each block in that PoR (excluding local blocks).
 
-Thus, we can safely add \BR2's \emph{full} weight via \BL3 (and that weight is attributed to \BL1 since it is the most recent \cL block in \BR2's history).
-An attacker would need to produce at least as much work as \BR2 to perform doublespend against \cL \emph{after} \BR2's reflection of \BL1 has been counted (assuming the doublespend competes with \BL1).
+Thus, we can safely add \BR{2}'s \emph{full} weight via \BL{3} (and that weight is attributed to \BL{1} since it is the most recent \cL block in \BR{2}'s history).
+An attacker would need to produce at least as much work as \BR{2} to perform doublespend against \cL \emph{after} \BR{2}'s reflection of \BL{1} has been counted (assuming the doublespend competes with \BL{1}).
 
-Therefore, only the \emph{first} available recursive PoR via \BR2 matters.
-The number of paths from \BR2 to past \cL blocks is not relevant: \BL0 is in the history of \BL1, and \BR2 can only count once.
-Additionally, the number of paths from \cL blocks to \BR2 is \emph{also} not relevant, since \BR2 is in the history of all such blocks.
+Therefore, only the \emph{first} available recursive PoR via \BR{2} matters.
+The number of paths from \BR{2} to past \cL blocks is not relevant: \BL{} is in the history of \BL{1}, and \BR{2} can only count once.
+Additionally, the number of paths from \cL blocks to \BR{2} is \emph{also} not relevant, since \BR{2} is in the history of all such blocks.
 Having multiple paths does provide some benefit (as there must be some new reflecting blocks, at least initially), but there will almost always be shorter PoRs that provide the same benefit.
 
 Another way to look at multiple paths is that an attacker (who is attacking \cL, \cMone, \cMtwo, and \cR) does not have to do any additional work to generate multiple redundant paths (besides the additional work that is directly involved in creating new blocks).
 
 Notice that we do \emph{not} require that a recursive PoR to use the use the same chains in each half of the PoR.
 Of the 4 possible PoRs, the preferable one is:
-$\xyInlineRefl{\BL1 \;&\; \BMtwo1 \arf[l] \;&\; \BR2 \arf[l] \;&\; \BMone2 \arf[l] \;&\; \BL3\arf[l]}$.\footnote{
-    This recursive PoR path is preferable because it is from the \emph{first possible} \cL block to enable a PoR via \BR2, and goes to the \emph{most recent} \cL block in \BR2's history.
+$\xyInlineRefl{\BL{1} \;&\; \BMtwo1 \arf[l] \;&\; \BR{2} \arf[l] \;&\; \BMone2 \arf[l] \;&\; \BL{3}\arf[l]}$.\footnote{
+    This recursive PoR path is preferable because it is from the \emph{first possible} \cL block to enable a PoR via \BR{2}, and goes to the \emph{most recent} \cL block in \BR{2}'s history.
 }
-We go from \BL3 to \BR2 via \cMone, and from \BR2 to \BL1 via \cMtwo.
+We go from \BL{3} to \BR{2} via \cMone, and from \BR{2} to \BL{1} via \cMtwo.
 
 We also can now reason about paths that are longer than the shortest possible path.
 For example, consider that \cMone and \cMtwo reflect each other (although this is not shown in our chain-segment examples).
-There could be PoR paths that include multiple blocks from \cMone and \cMtwo (e.g., $\xyInlineRefl{\BL0 \;&\; \BMone1 \arf[l] \;&\; \BMtwo1 \arf[l] \;&\; \BR2 \arf[l] \;&\; \BMone2 \arf[l] \;&\; \BL3 \arf[l]}$).
-Whilst these kind of paths are valid, they are not that useful: in the example, we expect that \BMtwo1 already reflects an \cL block, either \BL0 directly or a more recent \cL block.
+There could be PoR paths that include multiple blocks from \cMone and \cMtwo (e.g., $\xyInlineRefl{\BL{} \;&\; \BMone1 \arf[l] \;&\; \BMtwo1 \arf[l] \;&\; \BR{2} \arf[l] \;&\; \BMone2 \arf[l] \;&\; \BL{3} \arf[l]}$).
+Whilst these kind of paths are valid, they are not that useful: in the example, we expect that \BMtwo1 already reflects an \cL block, either \BL{} directly or a more recent \cL block.
 
 Finally, let's consider the issue of \emph{latency} again.
 Now that there are two possible chains to use going from \cL to \cR and vice versa, how long should we expect to wait for draft reflected work via \cR to appear?
@@ -294,8 +283,8 @@ Note that, for a standalone simplex, we can see that $2d-1 = 1$ (each PoR is of 
 %         if so, then it passes its weight to like that chain-segment (of the intermediate chain for which the middle bits of the recursive PoR are valid).
 %         \item but PoRs via different chains should still be valid b/c it shows order (thus we know that whatever's being reflected is in the history of every intermediate block)
 %         \item do we ever really need to consider this partial paths stuff?
-%         like a block (\BL3) that enables some PoR paths via a new block (\BR2) will probs also enable other missing PoR paths.
-%         Example: \BL4 enables \BR2 via \BMtwo2, but could also mb enable \BR3 via \BMtwo2, too.
+%         like a block (\BL{3}) that enables some PoR paths via a new block (\BR{2}) will probs also enable other missing PoR paths.
+%         Example: \BL{4} enables \BR{2} via \BMtwo2, but could also mb enable \BR{3} via \BMtwo2, too.
 %         We should expect all paths to be available within a few block periods (e.g., $\sim 60$ s).
 %         \item WRT paths like $\cL \to \cMtwo \to \cMone \to \cR \to \cMone \to \cMtwo \to \cL$ (i.e., it's longer than the shortest path possible) -- we shouldn't need to count these.
 %         we should always be able to go directly b/c an implicit reflection in a chain's history that can also be explicit, should be explicit.
@@ -329,9 +318,9 @@ Note that, for a standalone simplex, we can see that $2d-1 = 1$ (each PoR is of 
 
 \begin{equation*}
     \xymatrix@R=.3em@C=.75em{
-        \BL0 & \BL1 \ar[l] \\
-        & \BM0 & \BM1 \ar[l] \arf[ul] & \BM{2} \ar[l] \\
-        & & & \BR{1a} \arf[dl] & \BR2 \ar[l] \arf[ul] \arf[ull] \\
+        \BL & \BL{1} \ar[l] \\
+        & \BM & \BM{1} \ar[l] \arf[ul] & \BM{2} \ar[l] \\
+        & & & \BR{1a} \arf[dl] & \BR{2} \ar[l] \arf[ul] \arf[ull] \\
         & & \BM{1a} \ar[luu] \arf[dl] & \\
         & \BL{1a} \ar[luuuu]
     }

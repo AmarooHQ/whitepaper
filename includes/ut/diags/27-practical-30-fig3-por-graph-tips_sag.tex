@@ -9,19 +9,7 @@
 \def\input@path{{./includes/}{./includes/ut/diags/}}
 \makeatother
 
-% \immediate\write18{zsh -c './27-practical-30-fig2-gen.py no_replace_recent entropy=1662089394' 2> 27-practical-30-fig2-autogen.log}
-%includes/ut/diags/27-practical-30-fig2-gen.py
-
-\begin{comment}
-    Generate the blocks and reflections data using this python script:
-    `python3 ./27-practical-30-fig2-gen.py` which will generate ./27-practical-30-fig2-refls.tikz
-
-    good seeds:
-    - 1662088935
-    - 1662088959
-    - 1662088985
-    - 1662089394
-\end{comment}
+\immediate\write18{zsh -c './27-practical-30-fig3-gen.py no_replace_recent entropy=1662350874' 2> 27-practical-30-fig3-autogen.log}
 
 \begin{document}%
 \begin{tikzpicture}[node distance=0.1cm]%
@@ -29,7 +17,7 @@
 
     \tikzstyle{ar} = [->, -to, shorten >= 2pt, shorten <= 2pt, opacity=0.6]
 
-    \tikzstyle{arFocus} = [ar, very thick, opacity=0.7]
+    \tikzstyle{arFocus} = [ar, densely dotted, very thick, opacity=0.7]
     \tikzstyle{arFocusTip} = [arFocus, color=red]
     \tikzstyle{arFocusOut} = [arFocus, color=blue]
     \tikzstyle{arFocusPrevTip} = [arFocus, color=red]
@@ -37,7 +25,7 @@
     \tikzstyle{arFocusIn} = [arFocus, color=green]
 
     \tikzstyle{pAr} = [ar, opacity=1]
-    \tikzstyle{arNone} = [ar, opacity=.1]
+    \tikzstyle{arNone} = [ar, opacity=.15]
 
     \tikzstyle{arrowTime} = [stealth reversed-stealth, shorten >= -2pt, shorten <= -2pt]
 
@@ -48,10 +36,6 @@
     \def\timeArY{-0.5*\sy}
     \draw [arrowTime] (0, \timeArY) node () [anchor=west, yshift=-10pt] {\textit{Time}} -- (31*\sx, \timeArY);
 
-    % testing transparency fill of blocks
-    % \draw [pAr] (20*\sx, 9*\sy) -- (5*\sx, 1*\sy);
-
-    % \input{./27-practical-30-fig2-refls.tikz}
     \input{./27-practical-30-fig3-refls.tikz}
 \end{tikzpicture}%
 \end{document}

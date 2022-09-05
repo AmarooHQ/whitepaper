@@ -61,7 +61,7 @@
 \newcommand\cL{\ensuremath{L}\xspace}
 \newcommand\cM{\ensuremath{M}\xspace}
 \newcommand\cR{\ensuremath{R}\xspace}
-\newcommand\cT{\ensuremath{T}\xspace}
+\newcommand\cQ{\ensuremath{Q}\xspace}
 \newcommand\cMone{\ensuremath{M^1}\xspace}
 \newcommand\cMtwo{\ensuremath{M^2}\xspace}
 \newcommand\cRone{\ensuremath{R^1}\xspace}
@@ -98,8 +98,8 @@
 \newcommand\xBBi{\xyB{\BBi}}
 
 \NewDocumentCommand{\BL}{g}{\BCI{\cL}{i}{#1}}
-% \newcommand\xBL[1]{\xyB{\BL{#1}}}
-\NewExpandableDocumentCommand{\xBL}{m}{\xyB{\BL{#1}}}
+\newcommand\xBL[1]{\xyB{\BL{#1}}}
+% \NewExpandableDocumentCommand{\xBL}{m}{\xyB{\BL{#1}}}
 
 \NewDocumentCommand{\BR}{g}{\BCI{\cR}{k}{#1}}
 \newcommand\xBR[1]{\xyB{\BR{#1}}}
@@ -107,8 +107,25 @@
 \NewDocumentCommand{\BM}{g}{\BCI{\cM}{j}{#1}}
 \newcommand\xBM[1]{\xyB{\BM{#1}}}
 
-\NewDocumentCommand{\BT}{g}{\BCI{\cT}{h}{#1}}
-\newcommand\xBT[1]{\xyB{\BT{#1}}}
+\NewDocumentCommand{\BQ}{g}{\BCI{\cQ}{h}{#1}}
+\newcommand\xBQ[1]{\xyB{\BQ{#1}}}
+
+
+
+\providecommand\BMone{}
+\renewcommand\BMone[1]{\BCI{\cMone}{g}{#1}}
+\newcommand\xBMone[1]{\xyB{\BMone{#1}}}
+
+\providecommand\BMtwo{}
+\renewcommand\BMtwo[1]{\BCI{\cMtwo}{h}{#1}}
+\newcommand\xBMtwo[1]{\xyB{\BMtwo{#1}}}
+
+% ARrow reFlection Bent Down
+\newcommand\arfbd[1][]{\ar@{.>}@/_9pt/[#1]}
+\newcommand\arfbu[1][]{\ar@{.>}@/^9pt/[#1]}
+
+
+
 
 %
 % helpers for xymatrix based chain-diags
