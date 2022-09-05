@@ -6,7 +6,7 @@
 \def\blkGrp#1{\save [].[r]!C="g#1"*[F.]\frm{}\restore}%
 \def\blkGrpM[#1]#2{\save [].[#1]!C="g#2"*[F.]\frm{}\restore}%
 
-If a block \BB2 has two valid parents, how can we resolve this into one consistent history?
+If a block \BB{2} has two valid parents, how can we resolve this into one consistent history?
 
 Consider the following subgraph, where squiggly arrows indicate secondary parents (aka. uncles): \autoref{fig:merging-hist-sg-1}.
 
@@ -53,15 +53,15 @@ Because \BB{1b}'s parent is \BBi, but the block immediately executed prior to \B
 Thus, the algorithm doesn't work for \BB{1b}: we need to use a different prior state, and therefore the \emph{resulting} state root \emph{will not match} the state root in \BB{1b}'s header.
 
 Moreover, the algorithm doesn't exactly work for \BB{3}, either.
-In \BB3's case, its primary parent is \BB{2a}, but it's state root should be the result of applying \BB{1b}'s transactions to \BB{2a}'s output state, and then applying \BB3's transactions to that mid-state.
+In \BB{3}'s case, its primary parent is \BB{2a}, but it's state root should be the result of applying \BB{1b}'s transactions to \BB{2a}'s output state, and then applying \BB{3}'s transactions to that mid-state.
 
-It is clear that the algorithm breaks for \BB3 because it has more than one parent.
+It is clear that the algorithm breaks for \BB{3} because it has more than one parent.
 
 The reason that it breaks for \BB{1b} is more subtle: \BB{1b} is not part of the \emph{main chain}.
 
 Observe that the pattern works for on-main blocks with a single parent, but not for off-main blocks, nor for on-main blocks with multiple parents.
 
-The solution is to combine new off-main ancestors (\BB{1b}) with the relevant on-main descendant (\BB3) and process them as a single operation.
+The solution is to combine new off-main ancestors (\BB{1b}) with the relevant on-main descendant (\BB{3}) and process them as a single operation.
 In principle, we're collapsing the full block-DAG down to just the main chain, so that traditional blockchains' state-transition logic works for block-DAGs, too.
 
 This has two important and related implications.
@@ -82,20 +82,20 @@ We can now describe the execution in terms of the main chain by grouping novel o
         & \xyLabelHoriz{Execution Order}{0pt}{rrrrrr}{r30pt} &&&&&&
     }
 \end{equation*}
-The dotted boundary around (\BB{1b} $\to$ \BB3) indicates that the blocks are processed as a group.
+The dotted boundary around (\BB{1b} $\to$ \BB{3}) indicates that the blocks are processed as a group.
 The dashed boundary around \BB{1b} indicates that it is, in a sense, \emph{virtual} within the state-transition function.
-\BB{1b} is more like a part of \BB3 than a block in its own right.
+\BB{1b} is more like a part of \BB{3} than a block in its own right.
 
 See \autoref{fig:merging-hist-sg-4} for an addition example.
 
 If we want to support stateless full nodes (and fraud proofs), this grouping strategy adds a constraint to the block structure.
-Particularly, the complete witness structure of \BB3 is not simply the witnesses for \BB3's transactions combined with the witnesses for \BB{1b}'s.
+Particularly, the complete witness structure of \BB{3} is not simply the witnesses for \BB{3}'s transactions combined with the witnesses for \BB{1b}'s.
 Instead, it is a new witness structure initialized from \BB{2a}'s state, and must cover \emph{both} blocks' transactions.
 
-In regards to fraud proofs, the technique that we discussed in \autoref{sec:stateless-and-fraud-proofs} requires additional data to be included in \BB3.
+In regards to fraud proofs, the technique that we discussed in \autoref{sec:stateless-and-fraud-proofs} requires additional data to be included in \BB{3}.
 Recall that the transaction root should correspond to a merkle tree with leaves alternating between state roots and transactions, with each root being that of the state immediately prior to the transaction's execution.
-Thus, \BB3 must provide intermediate state roots that uniquely correspond to each transaction in each novel off-main ancestor.
-Furthermore, the transaction root should commit to \emph{all} of these \{mid-state root, transaction\} pairs, not only those of transactions that were included directly in \BB3.
+Thus, \BB{3} must provide intermediate state roots that uniquely correspond to each transaction in each novel off-main ancestor.
+Furthermore, the transaction root should commit to \emph{all} of these \{mid-state root, transaction\} pairs, not only those of transactions that were included directly in \BB{3}.
 
 \todo{mb add something about blocks linking back to invalid blocks?}
 

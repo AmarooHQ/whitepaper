@@ -44,12 +44,120 @@ For one, miners must be able to choose to reflect \emph{new} blocks as they appe
 Additionally, due to the \AxiomOfAvailability, miners must not reflect unavailable blocks, even if a valid PoR can be generated.
 However, because all honest miners obey the \AxiomOfAvailability, there is never a reason for an honest miner \emph{not} to reflect a block that is available -- doing so will always increase the overall chain-weight of that miner's draft block.
 
-So, if an honest miner's block, \BL{}, reflects some other block, \BR{}, then any block reflected by \BR{} must also be available (since the \AxiomOfAvailability is recursive).
+So, if an honest miner's block, \BL{}, reflects some block, \BR{}, then any block reflected by \BR{} must also be available (since the \AxiomOfAvailability is recursive).
+If a block is available then a PoR is possible.
 Therefore, an honest miner should reflect all non-local blocks that were reflected by \BR{} but have not already been reflected by an ancestor of \BL{}.
 
-Let's call this a state of \emph{maximal reflection}.
+Let's call this a state of \emph{maximal reflection}, and say that such a PoR graph is \emph{maximally reflective}.
+% note: don't think this definition is actually correct
+% \footnote{
+%     An alternate definition might be: the PoR graph segment between an earliest block, \BB{}, and all possible later blocks, \BL{}, is \emph{maximally reflective} if and only if all subgraphs between \BB{} and any block other than \BL{} is both a proper subgraph of the \BB{} to \BL{} subgraph.
+%     When \BB{} is the PoR graph's genesis block, then the entire PoR graph is maximally reflective.
+% }
 
 Specifically, we can say this about any PoR graph in a state of maximal reflection: for every block \BL{}, and for every block \BR{} reflected by \BL{}, then every block $b$ that is reflected by \BR{} satisfies one of: $b$ is reflected by \BL{}; or $b$ was reflected by an ancestor of \BL{}; or $b$ is an ancestor of \BL{}.
+
+Notice that, if \BL reflected any blocks, there will always be at least one block that \emph{was} reflected by \BL that was \emph{not} reflected by any other block that was reflected by \BL.
+Let us call these blocks the \emph{tips} of the PoR graph from \BL's perspective.
+PoR graph tips might reflect other blocks reflected by \BL, too.
+
+For example, consider this PoR graph segment between 3 chains \cL, \cQ, and \cR:
+\begin{equation*}
+    \xyMChains{
+        \xyL{\text{Chain \cQ}} & \cdots & & & \xBQ{} \arm[lll] \arf[lld] \arf[ldd] & \\
+        \xyL{\text{Chain \cL}} & \cdots & \xBL{-1} \arm[l] & & & \xBL{} \arm[lll] \arf[lld] \arf[lu] \\
+        \xyL{\text{Chain \cR}} & \cdots & & \xBR{} \arf[lu] \arm[ll] & & \\
+        \xyTimeHoriz{rrrrr} &&&&&
+    }
+\end{equation*}
+Here, \BL{} reflects both \BQ{} and \BR{}, and \BQ{} also reflects \BR{}.
+Thus, from \BL{}'s perspective, \BQ{} is a \emph{graph tip}; and, from \BQ{}'s perspective, \BR{} is a \emph{graph tip}.
+
+Starting from \BL{-1}, we could completely describe this section like so:
+\begin{itemize}[notopsep, noitemsep]
+    \item \BR{} reflects \BL{-1}; and
+    \item \BQ{} reflects \{{\BR{}, \BL{-1}}\}; and
+    \item \BL{} reflects \{{\BQ{}, \BR{}}\}.
+\end{itemize}
+
+If the PoR graph is not maximally reflective, then we must specify the complete set of reflections for each block.
+However, \emph{when maximally reflective}, about half of that information is redundant.
+
+We \emph{do} still need some information for each block, however, we can recreate the full PoR segment with less information -- some of the reflections are \emph{implied} and can be omitted:
+\begin{itemize}[notopsep, noitemsep]
+    \item the PoR graph segment is maximally reflective; and
+    \item \BR{} reflects the tip \BL{-1}; and
+    \item \BQ{} reflects the tip \BR{}; and
+    \item \BL{} reflects the tip \BQ{}.
+\end{itemize}
+
+This quality has two important properties.
+Firstly: we have \emph{drastically}\footnote{
+    The theoretical overhead is still $O(c)$ per block, but practically we expect the overhead to be a similar size to the header which is $O(1)$.
+    It's explained shortly.
+} reduced the amount of information needed to completely describe the graph segment: $O(c^2) \to \sim O(c)$ -- an example is shown in \autoref{fig:por-graph-tips}.
+Secondly: the PoR graph, according to each chain, \emph{converges} into a single, consistent PoR graph.
+In essence, any block in a maximally reflective PoR graph shares a \emph{common history} with all prior blocks in the graph.
+
+\begin{figure}
+    \centering
+    \includegraphics[]{27-practical-30-fig3-por-graph-tips_sag.pdf}
+    \caption[Maximally reflective PoR graph segments can be described using $\sim O(c)$ information.]{
+        This demonstrates how maximally reflective PoR graph segments can be described using $\sim O(c)$ information.
+        Thick dotted arrows represent reflections of PoR graph \emph{tips}, and semitransparent arrows show other reflections -- these reflections and implied via the reflection of the graph tips.
+        This also shows that the DAG of tip-reflections is the \emph{longest} path of reflections between two blocks.
+    }
+    \label{fig:por-graph-tips}
+\end{figure}
+
+Is there an intuitive explanation for the reduction in complexity of the PoR graph?
+Yes.
+To start with, let us assume that there is no \emph{propagation delay} -- i.e., all miners instantly receive, validate, and incorporate all blocks into the PoR graphs of their draft blocks.
+In this case, no blocks are every mined simultaneously, and so each block will reflect exactly one PoR graph tip.
+Since there are $O(c)$ many chains, and we need to add $O(1)$ extra information per header (the reflected tip), this is $O(c)$ extra information.
+
+In practice, blocks \emph{will} sometimes be mined simultaneously.
+So, even if \emph{most} of the time a block only reflects one tip, \emph{some} of the time that block will reflect multiple tips.
+The frequency of simultaneous blocks is dependent on the number of chains ($N_1$), the block frequency of each chain ($B_f$), and some propagation delay ($\phi$ seconds).
+Two blocks are simultaneous if they are mined within $\phi$ seconds of each other.
+Unless a block contains no reflections, it must reflect at least one graph tip (which happens with probability $1 - {N_1}^{-1}$).
+In the $\phi$ seconds before that tip was mined, we expect that $\sim N_1 B_f \phi$ other tips were mined (from any simplex-chain).
+So, we expect each block to reflect $1 + N_1 B_f \phi$ tips.
+For $N_1 = 100, B_f = \nicefrac{1}{15}, \phi = 0.3$, we expect
+each block to be simultaneous with $\sim 2$ others, and each block to reflect 3 graph tips on average.
+
+Therefore, the overhead to reconstruct the PoR graph -- and every PoR segment of every simplex-chain block -- is, on average, $g (1 + N_1 B_f \phi)$ bytes per block, where $g$ is the length of a hash.
+This overhead has complexity $O(c)$ \emph{per block-period per simplex-chain}, which means the overall load is $O(c^2)$.
+
+However, we estimated before that we should expect to require just 3 graph tips on average per block (which seems quite low).
+Practically speaking, the overhead is only significant when the header size is much smaller than the overhead: $B_h \ll g (1 + N_1 B_f \phi)$.
+If we plug in our rough numbers from before, we find $g (1 + N_1 B_f \phi) \approx 100 \approx B_h = O(1)$.
+
+There \emph{is} a practical limit (depending on $B_f \phi$) for how large $N_1$ can grow before this overhead is non-negligible.
+\emph{However}, (todo)
+(mb move this:) The theoretical lower bound on the \emph{worst case} $\phi$ is \sim 70 ms, but the average $\phi$ will be lower, say \sim 35 ms.
+If the block period is 15 seconds, then blocks will be simultaneous with $\sim 0.002 N_1$ other blocks, on average.
+So, if we want $B_h \ge g(1 + N_1 B_f \phi)$, then $N_1 \le (B_h g^{-1} - 1)(B_f \phi)^{-1} \approx 1000$.
+
+\footnote{
+    Substituting \autoref{eq:simplex-N1} yields $g(1 + (k_1 \phi)(2 B_h)^{-1})$ B/block overhead.
+    Limiting this to $B_h x$ yields:
+    \begin{align*}
+        g (1+(k_1 \phi)(2 B_h)^{-1}) &\le B_h x \\
+        % k_1 \phi (2 B_h)^{-1} &\le B_h x g^{-1} - 1 \\
+        k_1 &\le 2 B_h \phi^{-1} (B_h x g^{-1} - 1) \approx 5250 x - 1500
+    \end{align*}
+    Also note that setting $k_1 \propto 2 B_h \phi^{-1}$ results in constant overhead.
+}
+
+\aside{
+    You might be wondering whether we can use this discovery to optimize simplex-chains like we did with header omission (\autoref{sec:exploiting-segmented-state}).
+
+
+}
+\subsubsubsubsection{Only a bandwidth optimization}
+
+
 
 % $$
 % \forall\{b : \BL{} \refls \BR{} \refls b\}((\BL{} \refls b) \lor \exists l (\BL{} \descendsFrom l \refls b) \lor (\BL{} \descendsFrom b))
@@ -88,19 +196,6 @@ We can enforce this through a new protocol rule: %the \AxiomOfMaximalReflection.
         \end{itemize}
     \end{axiomreqs}
 }
-
-Notice that, if \BL reflected any blocks, there will always be at least one block, \BT, reflected by \BL that was not reflected by any other block that was reflected by \BL.
-Let us call these blocks the \emph{tips} of the PoR graph from \BL's perspective.
-Graph tips (like \BT) might reflect other blocks reflected by \BL, too.
-For example, consider this PoR graph segment:
-\begin{equation*}
-    \xyMChains{
-        & & & \xBT{} \arm[lll] \arf[lld] \arf[ldd] & & \arm[ll] \\
-        & \xBL{-1} \arm[l] & & & \xBL{} \arm[lll] \arf[lld] \arf[lu] & \arm[l] \\
-        & & \xBR{} \arf[lu] \arm[ll] & & & \arm[lll] \\
-        \xyTimeHoriz{rrrrr} &&&&&
-    }
-\end{equation*}
 
 % Recall that the \AxiomOfAvailability requires miners to reflect only those blocks that are available, and that the \AxiomOfAvailability must be satisfied by all reflected blocks (applied recursively).
 
