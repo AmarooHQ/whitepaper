@@ -57,7 +57,7 @@
 % labels for chains that work in and out of math mode
 % if \xspace is inside \ensuremath then it won't work outside math mode
 
-\newcommand\cB{\ensuremath{B}\xspace}
+\newcommand\cB{\ensuremath{J}\xspace}
 \newcommand\cL{\ensuremath{L}\xspace}
 \newcommand\cM{\ensuremath{M}\xspace}
 \newcommand\cR{\ensuremath{R}\xspace}
@@ -71,16 +71,22 @@
 % note, the first arg is not wrapped in {} so that we can do things like:
 %   M^1_{i+1} (the superscript 1 and subscript i+1 will be left-aligned vertically)
 
+% \def\isnum#1#2#3{%
+\NewExpandableDocumentCommand{\isnum}{m m m}{%
+  \if!\ifnum9<1#1!\else_\fi
+    #2\else#3\fi}
+
 \ExplSyntaxOn%
-\NewExpandableDocumentCommand{\prependPlusIfNotEmpty}{m}{%
-  \tl_if_empty:nTF{#1}{}{\ifnum 0<#1%
-    +%
-  \fi%
+\NewExpandableDocumentCommand{\prependPlusIfNeeded}{m}{%
+  \tl_if_empty:nTF{#1}{}{\IfBeginWith{#1}{-}{}{+}%
+  % {\ifnum 0<#1%
+  %   +%
+  % \fi}{}%
   {#1}}%
 }
 \ExplSyntaxOff%
 \NewDocumentCommand{\BCI}{m m g}{%
-  \ensuremath{#1_{{#2}\IfNoValueTF{#3}{}{\prependPlusIfNotEmpty{#3}}}}%
+  \ensuremath{#1_{{#2}\IfNoValueTF{#3}{}{\prependPlusIfNeeded{#3}}}}%
   \xspace%
 }
 
