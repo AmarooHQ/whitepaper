@@ -129,7 +129,8 @@ For $N_1 = 100, B_f = \nicefrac{1}{15}, \phi = 0.3$, we expect
 each block to be simultaneous with $\sim 2$ others, and each block to reflect 3 graph tips on average.
 
 Therefore, the overhead to reconstruct the PoR graph -- and every PoR segment of every simplex-chain block -- is, on average, $g (1 + N_1 B_f \phi)$ bytes per block, where $g$ is the length of a hash.
-This overhead has complexity $O(c)$ \emph{per block-period per simplex-chain}, and we're tracking $O(c)$ chains, which means the overall load is $O(c^2)$.
+As $g$, $1$, $B_f$, and $\phi$ are constants, the overhead thus has complexity $O(c)$ \emph{per block-period per simplex-chain}.
+Since we're tracking $O(c)$ chains, the overall load is $O(c^2)$.
 
 The total bandwidth required to track the PoR graph (excluding verifying the availability of blocks) is: the overhead per block, plus the block header, all multiplied by the network-wide blocks per second rate.
 Thus, the total bandwidth is $N_1 B_f (B_h + g(1 + N_1 B_f \phi))$ B/s -- which is $O(c^2)$.
@@ -139,45 +140,50 @@ Practically speaking, the overhead is only significant when the header size is m
 If we plug in our rough numbers from before, we find $g (1 + N_1 B_f \phi) \approx 100 \approx B_h = O(1)$.
 
 There \emph{is} a practical limit (depending on $B_f \phi$) for how large $N_1$ can grow before this overhead is non-negligible.
-\emph{However}, if we capped the expected overhead to say 8
+\emph{However}, if we capped the expected overhead to, say, 256 bytes -- $g(1+N_1B_f\phi) \le 256$ -- then we find $N_1 \le 7(B_f \phi)^{-1} \approx 350$.
+Capping the overhead to 128 bytes yields $N_1 \lesssim 150$.
+Note that maximal values of $N_1$ are inversely proportional to $B_f$, so modifying $B_f$ doesn't change the expected overhead.
 
-(mb move this:) The theoretical lower bound on the \emph{worst case} $\phi$ is \sim 70 ms, but the average $\phi$ will be lower, say \sim 35 ms.
-If the block period is 15 seconds, then blocks will be simultaneous with $\sim 0.002 N_1$ other blocks, on average.
-So, if we want $B_h \ge g(1 + N_1 B_f \phi)$, then $N_1 \le (B_h g^{-1} - 1)(B_f \phi)^{-1} \approx 1000$.
+% \begin{align*}
+%     g\Theta &\ge g(1+N_1B_f\phi) \\
+%     (\Theta - 1)(B_f \phi)^{-1} &\ge N_1 \\
+%     (\Theta - 1)(B_f \phi)^{-1} &\ge k(2 B_f B_h)^{-1} \\
+%     (\Theta - 1)(\phi)^{-1} &\ge k(2 B_h)^{-1} \\
+%     2 B_h (\Theta - 1) &\ge k \phi
+% \end{align*}
 
-\begin{align*}
-    \text{per s-ch block} &= B_h + g (1 + N_1 B_f \phi) \\
-    \therefore \text{total per s} &= N_1 B_f (B_h + g(1 + N_1 B_f \phi)) \\
-    \intertext{limit to $k_1$}
-    k_1 &> N_1 B_f (B_h + g(1 + N_1 B_f \phi)) \\
-    \intertext{sub in \autoref{eq:simplex-N1}}
-    k_1 &> k_1 (2 B_f B_h)^{-1} B_f (B_h + g(1 + k_1 (2 B_f B_h)^{-1} B_f \phi)) \\
-    1 &> (2)^{-1} + g(2 B_h)^{-1} + g k_1 (2 B_h)^{-2} \phi \\
-    2 B_h &> B_h + g + g k_1 (2 B_h)^{-1} \phi \\
-    \frac{2 B_h (B_h - g)}{g \phi} &> k_1
-\end{align*}
+% (mb move this:) The theoretical lower bound on the \emph{worst case} $\phi$ is \sim 70 ms, but the average $\phi$ will be lower, say \sim 35 ms.
+% If the block period is 15 seconds, then blocks will be simultaneous with $\sim 0.002 N_1$ other blocks, on average.
+% So, if we want $B_h \ge g(1 + N_1 B_f \phi)$, then $N_1 \le (B_h g^{-1} - 1)(B_f \phi)^{-1} \approx 1000$.
 
-\footnote{
-    Substituting \autoref{eq:simplex-N1} yields $g(1 + (k_1 \phi)(2 B_h)^{-1})$ B/block overhead.
-    Limiting this to $B_h x$ yields:
-    \begin{align*}
-        g (1+(k_1 \phi)(2 B_h)^{-1}) &\le B_h x \\
-        % k_1 \phi (2 B_h)^{-1} &\le B_h x g^{-1} - 1 \\
-        k_1 &\le 2 B_h \phi^{-1} (B_h x g^{-1} - 1) \approx 5250 x - 1500
-    \end{align*}
-    Also note that setting $k_1 \propto 2 B_h \phi^{-1}$ results in constant overhead.
-}
+% \begin{align*}
+%     \text{per s-ch block} &= B_h + g (1 + N_1 B_f \phi) \\
+%     \therefore \text{total per s} &= N_1 B_f (B_h + g(1 + N_1 B_f \phi)) \\
+%     \intertext{limit to $k_1$}
+%     k_1 &> N_1 B_f (B_h + g(1 + N_1 B_f \phi)) \\
+%     \intertext{sub in \autoref{eq:simplex-N1}}
+%     k_1 &> k_1 (2 B_f B_h)^{-1} B_f (B_h + g(1 + k_1 (2 B_f B_h)^{-1} B_f \phi)) \\
+%     1 &> (2)^{-1} + g(2 B_h)^{-1} + g k_1 (2 B_h)^{-2} \phi \\
+%     2 B_h &> B_h + g + g k_1 (2 B_h)^{-1} \phi \\
+%     \frac{2 B_h (B_h - g)}{g \phi} &> k_1
+% \end{align*}
 
-\aside{
-    You might be wondering whether we can use this discovery to optimize simplex-chains like we did with header omission (\autoref{sec:exploiting-segmented-state}).
+% \footnote{
+%     Substituting \autoref{eq:simplex-N1} yields $g(1 + (k_1 \phi)(2 B_h)^{-1})$ B/block overhead.
+%     Limiting this to $B_h x$ yields:
+%     \begin{align*}
+%         g (1+(k_1 \phi)(2 B_h)^{-1}) &\le B_h x \\
+%         % k_1 \phi (2 B_h)^{-1} &\le B_h x g^{-1} - 1 \\
+%         k_1 &\le 2 B_h \phi^{-1} (B_h x g^{-1} - 1) \approx 5250 x - 1500
+%     \end{align*}
+%     Also note that setting $k_1 \propto 2 B_h \phi^{-1}$ results in constant overhead.
+% }
 
+% \aside{
+%     You might be wondering whether we can use this discovery to optimize simplex-chains like we did with header omission (\autoref{sec:exploiting-segmented-state}).
+% }
 
-}
-
-
-\subsubsubsection{Only a bandwidth optimization}
-
-\subsubsubsection{A Contradiction?}
+\subsubsubsection{Optimization or Contradiction?}
 
 We calculated the overhead to be $g(1+N_1 B_f \phi) = O(c)$ -- this is because we assumed that $O(B_f \phi) = O(1)$.
 However, if this were really the case, we should be able to optimize the PoR sections of blocks (similar to \autoref{sec:exploiting-segmented-state}).
@@ -193,7 +199,7 @@ The new PoR sub-block instead takes up $B_f g(1 + N_1 B_f \phi)$ B/s of capacity
 If $k_{1,B}$ B/s of a chain's capacity is dedicated to reflections, then we have:
 \begin{align}
     k_{1,B} &= B_f g(1 + N_1 B_f \phi) \nonumber \\
-    N_1 &= \Big(\frac{k_{1,B}}{B_f g} - 1\Big)(B_f \phi) ^ {-1}
+    N_1 &= \frac{1}{B_f \phi} \Big(\frac{k_{1,B}}{B_f g} - 1\Big)
     % & \text{Note that $N_1 \propto \phi^{-1}$}
     \label{eq:bad-n1-with-phi}
 \end{align}
@@ -219,7 +225,7 @@ Moreover, even as the best-case minimum latency approaches physical limits, tech
     This is something we didn't consider when estimating $N_1$ in \autoref{eq:bad-n1-with-phi} -- that the propagation delay will increase as the excess capacity of nodes' available bandwidth decreases.
     Like all systems, response time is inversely proportional to excess capacity.
 }
-Therefore, $O(\phi)$ \emph{should not} be considered $O(1)$, but rather should be considered $O(c^{-1})$ -- as technology improves, $\phi$ decreases.
+Therefore, $O(\phi)$ \emph{should not} be considered $O(1)$, but rather should be considered $O(c^{-1})$: as technology improves, $\phi$ decreases.
 
 If $O(\phi) = O(c^{-1})$, this resolves the contradiction.
 % First, recall $N_1 \propto \phi^{-1}$ from \autoref{eq:bad-n1-with-phi}.
@@ -232,10 +238,15 @@ So we effectively changed $O(N_1)$ from $O(c) \to O(c^2)$.
 That meant that network-wide bandwidth and storage requirements went from $O(c^2) \to O(c^3)$.
 
 Curiously, we can still \emph{in principle} use this optimization idea to increase network throughput in the future, if we want to.
+In practice, the effects would be similar to increasing the PoRs sub-block size.
 However, this is best left as \emph{excess capacity} in \UT{}'s architecture -- a resource to tap into if we get desperate, but not something that we should plan to use.
 
-
 \subsubsubsection{The Longest PoR Chain}
+
+\autoref{fig:por-graph-tips} shows us an interesting feature of maximally reflective PoR graphs: between two given blocks, the union of the paths via PoR graph tips both \emph{visit every block} and are the \emph{longest} paths between any two blocks.
+This is somewhat self-evident: since the PoR graph is a DAG, there is no way to return to a block once we have visited a it.
+Thus, if a path exists that visits every block, then it must be a longest path because there are no unvisited blocks.
+A longer path would need to visit more blocks, but there are no more blocks, therefore no longer path exists.
 
 
 

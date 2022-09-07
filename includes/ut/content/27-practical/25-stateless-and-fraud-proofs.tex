@@ -9,7 +9,7 @@ The mutations to the state tree made by a block's transactions are all calculabl
 In other words: the prior state root, the witness data, and the full block are all that is required to calculate the output state root of that block.
 
 \aside{
-    We won't discuss the general idea of stateless nodes here, since there are many existing resources\footnotemark{} on the topic.
+    We won't focus too much on the specifics of stateless nodes here, since there are many existing resources\footnotemark{} on the topic.
     Note that some stateless node designs require that each individual \emph{transaction} include appropriate witnesses, rather than each block having a combined witness.
 
     Although we will design a method that supports transaction witnesses, we won't require that transactions include them.
@@ -23,7 +23,7 @@ Supporting stateless nodes introduces some constraints on the cryptographic desi
 Updates to the state tree must be computationally efficient -- something like $O(log n)$ complexity for $n$ total state elements.
 Practically, it appears that this requires using an append only structure (e.g., a \href{https://github.com/opentimestamps/opentimestamps-server/blob/master/doc/merkle-mountain-range.md}{Merkle Mountain Range}), or some kind of merklized prefix tree (e.g., a \href{https://web.archive.org/web/20160928121722/http://www.deadalnix.me/2016/09/24/introducing-merklix-tree-as-an-unordered-merkle-tree-on-steroid}{Merklix tree}).
 Additionally, headers should\footnote{
-    This isn't \emph{strictly} true -- it could be recorded elsewhere in a block, e.g., the coinbase transaction.
+    This isn't \emph{strictly} necessary -- it could be recorded elsewhere in a block, e.g., the coinbase transaction.
     However, in that case, the effective header size becomes the actual header, plus the branch to the coinbase tx, plus the coinbase tx.
     Committing elsewhere in the block doesn't have any overhead for stateless full nodes (since they have the full block data, anyway), but it does increase witness sizes for individual transactions.
 } commit to the state root, too, so that witnesses for individual transactions are minimal.
