@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from collections import defaultdict
 import os
 import os.path as path
 import random
@@ -35,12 +36,21 @@ for arg in sys.argv:
 logging.warning(f"set random.seed to {rand_seed}")
 random.seed(rand_seed)
 
-n_chains = 30
-n_ticks = 120
-phi_ticks = 3
+n_chains = 50
+n_ticks = 100
+phi_ticks = 3 * n_ticks // 15 // 10
 avg_overlap = 1
 overlap_each_tick = avg_overlap / phi_ticks
 prob_mine = overlap_each_tick / n_chains
+
+logging.warning("Parameters: %s", {
+    "n_chains": n_chains,
+    "n_ticks": n_ticks,
+    "phi_ticks": phi_ticks,
+    "avg_overlap": avg_overlap,
+    "overlap_each_tick": overlap_each_tick,
+    "prob_mine": prob_mine,
+})
 logging.warning(f"expected blocks per chain: {n_ticks * prob_mine}")
 
 def block_flags_ixs(bs: list[int]):
@@ -67,19 +77,29 @@ def seg_is_suitable(cbs: list[list[int]]):
         return False
     return len(cbs) > 1
 
-def gen_blocks(prob_mine, n_blocks):
-    return list((1 if random.random() < prob_mine else 0) for _ in range(n_blocks))
+last_block_for_chain = defaultdict(lambda: -1000)
+def check_mine_block(prob_mine, chain_id, t):
+    if last_block_for_chain[chain_id] > t - phi_ticks:
+        return 0
+    success = 1 if random.random() < prob_mine else 0
+    if success:
+        last_block_for_chain[chain_id] = t
+    return success
+
+
+def gen_blocks(chain_id, prob_mine, n_blocks):
+    return list(check_mine_block(prob_mine, chain_id, t) for t in range(n_blocks))
 
 def gen_chain_blocks():
-    return list(gen_blocks(prob_mine, n_ticks) for _ in range(n_chains))
+    return list(gen_blocks(chain_id, prob_mine, n_ticks) for chain_id in range(n_chains))
 
-chain_blocks = []
-while not seg_is_suitable(chain_blocks):
-    chain_blocks = gen_chain_blocks()
-    chain_blocks[focus_chain][-1] = 1
+chain_blocks = gen_chain_blocks()
+# while not seg_is_suitable(chain_blocks):
+#     chain_blocks = gen_chain_blocks()
+#     chain_blocks[focus_chain][-1] = 1
 
-for chain in chain_blocks:
-    logging.warning(f"{{{','.join(map(str,chain))}}},")
+# for chain in chain_blocks:
+#     logging.warning(f"{{{','.join(map(str,chain))}}},")
 
 # focus_chain_refl_stats = refl_stats(chain_blocks)
 # fcrs = focus_chain_refl_stats
@@ -203,10 +223,10 @@ def edge_refl(ct_from, ct_to):
     style = edge_style(ct_from, ct_to)
     if style != 'arNone':
         count_refls += 1
+        s = f"\\draw [{style}] ({nodename_of_block(ct_from)}) -- ({nodename_of_block(ct_to)});"
+        return s
     else:
         count_sec_refls += 1
-    s = f"\\draw [{style}] ({nodename_of_block(ct_from)}) -- ({nodename_of_block(ct_to)});"
-    return s
 
 def edge_parent(ct_from, ct_to):
     s = f"\\draw [pAr] ({nodename_of_block(ct_from)}) -- ({nodename_of_block(ct_to)});"
@@ -250,12 +270,13 @@ for c in range(n_chains):
             last_local_block = t
             break
     else:
-        raise Exception(f'no local blocks for chain {c}')
+        continue
+        # raise Exception(f'no local blocks for chain {c}')
     tikz_lines.append(node_invis(c, n_ticks))
     tikz_lines.append(edge_parent((c, n_ticks), (c, last_local_block)))
 
 with open(out_file, 'w') as f:
-    f.write("\n".join(tikz_lines))
+    f.write("\n".join(l for l in tikz_lines if l))
 
 logging.warning(f"count_blocks / n_chains: {count_blocks / n_chains}")
 logging.warning(f"count_refls: {count_refls}")
