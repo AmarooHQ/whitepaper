@@ -241,24 +241,26 @@ Curiously, we can still \emph{in principle} use this optimization idea to increa
 In practice, the effects would be similar to increasing the PoRs sub-block size.
 However, this is best left as \emph{excess capacity} in \UT{}'s architecture -- a resource to tap into if we get desperate, but not something that we should plan to use.
 
-\subsubsubsection{The Longest PoR Chain}
 
-\autoref{fig:por-graph-tips} shows us an interesting feature of maximally reflective PoR graphs: between two given blocks, the union of the paths via PoR graph tips both \emph{visit every block} and are the \emph{longest} paths between any two blocks.
-This is somewhat self-evident: since the PoR graph is a DAG, there is no way to return to a block once we have visited a it.
-Thus, if a path exists that visits every block, then it must be a longest path because there are no unvisited blocks.
-A longer path would need to visit more blocks, but there are no more blocks, therefore no longer path exists.
+\subsubsubsection{\AxiomOfRawMaximalReflection}
 
+It should be clear that there are decisive advantages for \UT{} if the PoR graph is maximally reflective.
+Thus, we will require that it is via a protocol rule: the \AxiomOfMaximalReflection.
 
-
-\todo{optimizing PoR calculations: now can operate over a list of blocks between \BL{-1} and \BL to calculate non-local weight of reflections}
-
-
-
-
-
-\subsubsubsection{PoR Graph Axiom}
-
-
+\DeclareAxiom{MaximalReflection}{%
+    A miner should reflect all possible blocks.
+}{%
+    A block, \BL{}, is invalid unless, for each reflected block \BR{}:
+    \begin{axiomreqs}
+        \item \BR{} is valid under this Axiom; and
+        \item each block that was reflected by \BR{} or is a parent of \BR{}:
+        \begin{itemize}
+            \item is reflected by \BL{}; or
+            \item is an ancestor of \BL{}; or
+            \item was reflected by an ancestor of \BL{}.
+        \end{itemize}
+    \end{axiomreqs}
+}
 
 % $$
 % \forall\{b : \BL{} \refls \BR{} \refls b\}((\BL{} \refls b) \lor \exists l (\BL{} \descendsFrom l \refls b) \lor (\BL{} \descendsFrom b))
@@ -282,34 +284,80 @@ A longer path would need to visit more blocks, but there are no more blocks, the
 % \cdots
 % \end{align*}
 
-We can enforce this through a new protocol rule: %the \AxiomOfMaximalReflection.
-\DeclareAxiom{MaximalReflection}{%
-    A miner should reflect all possible blocks.
-}{%
-    A block, \BL{}, is invalid unless, for each reflected block \BR{}:
-    \begin{axiomreqs}
-        \item \BR{} is valid under this Axiom; and
-        \item each block that was reflected by \BR{} or is a parent of \BR{}:
-        \begin{itemize}
-            \item is reflected by \BL{}; or
-            \item is an ancestor of \BL{}; or
-            \item was reflected by an ancestor of \BL{}.
-        \end{itemize}
-    \end{axiomreqs}
-}
+It is worth noting that this axiom does not impact honest miners -- it is in their interest to produce maximally reflective PoR graphs.
+However, this \emph{does} impact dishonest miners since reflecting other chains becomes all-or-nothing.
 
-% Recall that the \AxiomOfAvailability requires miners to reflect only those blocks that are available, and that the \AxiomOfAvailability must be satisfied by all reflected blocks (applied recursively).
+If a dishonest miner is determined to selectively reflect only \emph{some} simplex-chains, their valid blocks cannot reflect any other blocks that are less selective.
+Honest miners, on the other hand, \emph{can} reflect the dishonest miner's blocks.
+Thus, the \AxiomOfMaximalReflection creates an asymmetry between honest and dishonest miners.
 
-% knowing that block A reflected block B tells us nothing about the \emph{other} blocks that A reflected.
+\subsubsubsection{The Longest PoR Chain}
+
+\autoref{fig:por-graph-tips} shows us an interesting feature of maximally reflective PoR graphs: between two given blocks, the union of the paths via PoR graph tips both \emph{visit every block} and are the \emph{longest} paths between any two blocks.
+This is somewhat self-evident: since the PoR graph is a DAG, there is no way to return to a block once we have visited a it.
+Thus, if a path exists that visits every block, then it must be a longest path because there are no unvisited blocks.
+A longer path would need to visit more blocks, but there are no more blocks, therefore no longer path exists.
+
+Although it makes sense to refer to these paths as the \emph{longest} -- this isn't always strictly true.
+First, we should notice that multiple paths are possible, and are expected to occur when blocks are created near-simultaneously.
+In some cases, these paths can be different lengths.
+For example:
+\begin{equation*}
+    \xyMChains{
+        \xyL{\text{Chain \cQ}} & \cdots & & \xBQ{-1} \arm[ll] \arf[ld] & \xBQ{} \arm[l] & \\
+        \xyL{\text{Chain \cL}} & \cdots & \xBL{-1} \arm[l] & & & \xBL{} \arm[lll] \arf[lld] \arf[lu] \arf[llu] \\
+        \xyL{\text{Chain \cR}} & \cdots & & \xBR{} \arf[lu] \arm[ll] & & \\
+        \xyTimeHoriz{rrrrr} &&&&&
+    }
+\end{equation*}
+Here, we can see that \BL{} reflects the tips \{{\BQ{}, \BR{}}\}.
+There are two paths from \BL{} to \BL{-1} in this case: one via $\BQ{}\to\BQ{-1}$, and the other via \BR{}.
+Both are a longest path in the sense that they are locally maximal: no paths including \BR{} (or \BQ{}) are part of a longer path to \BL{-1}.
+
+So, really, what we have identified is the DAG of the union of the longest paths between two blocks.
+This is exactly the information that is necessary to reconstruct a maximally reflective PoR graph.
+
+Let's refer to this as the \emph{longest PoR chain}, even though it is technically a DAG.
+Of all possible PoR DAGs that both include all edges leading to a graph tip and visit every block, the \emph{longest PoR chain} has the fewest edges, and is thus the most chain-like of those DAGs.
+Additionally, in \autoref{sec:dags-and-the-por-graph} we will discuss some symmetries between blockchains and the longest PoR chain.
+
+% \todo{optimizing PoR calculations: now can operate over a list of blocks between \BL{-1} and \BL to calculate non-local weight of reflections}
+
+% One reason that the longest PoR chain is important is that it is directly related to the increase in chain-weight between two blocks.
+% Consider this longest PoR chain\footnote{
+%     As an exercise, you could try finding all implied PoRs assuming maximal reflection.
+% } between \BL{1} and \BL{-1}:
+% \begin{equation*}
+%     \xyMChains{
+%         \xyL{\text{Chain \cQ}} & \cdots & & \xBQ{-1} \arm[ll] \arft[ld] & \xBQ{} \arm[l] & & \xBQ{1} \arm[ll] \arft[ld] \arft[ldd] \\
+%         \xyL{\text{Chain \cL}} & \cdots & \xBL{-1} \arm[l] & & & \xBL{} \arm[lll] \arft[lld] \arft[lu] \arf[llu] & & \xBL{1} \arm[ll] \arft[lu] \arf[lld] \\
+%         \xyL{\text{Chain \cR}} & \cdots & & \xBR{} \arft[lu] \arm[ll] & & \xBR{1} \arm[ll] \arf[lluu] \arft[luu] & & \\
+%         \xyTimeHoriz{rrrrrrr} &&&&&&&
+%     }
+% \end{equation*}
+% \begin{equation*}
+%     \xyMChains{
+%         & \xBQ{-1} \arf[ld] & \xBQ{} \arm[l] & & \xBQ{1} \arf[ld] \arf[ldd] & \\
+%         \xBL{-1} & & & \xBL{} \arf[lu] \arf[ld] & & \xBL{1} \arf[lu] \\
+%         & & \xBR{} \arf[llu] & \xBR{1} \arm[l] \arf[luu] & &
+%     }
+% \end{equation*}
+% \begin{equation*}
+%     \xyMChains{
+%         \xBL{1} \arf[r] & \xBQ{1} \arf[rdd] \arf[r] & \xBL{} \arf[r] \arf[rd] & \xBQ{} \arm[r] & \xBQ{-1} \arf[r] & \xBL{-1} \\
+%         & & & \xBR{} \arf[r] & \xBL{-1} \\
+%         & & \xBR{1} \arf[r] \arm[rd] & \xBQ{} \arm[r] & \xBQ{-1} \arf[r] & \xBL{-1} \\
+%         & & & \xBR{} \arf[r] & \xBL{-1} \\
+%     }
+% \end{equation*}
 
 
-
-
-\FloatBarrier
 
 \subsubsubsection{NIPoPoWaPoWRs (or NIPoPoWRs for short)}
 
 \todo{inprog -- might be cut}
+
+\subsubsubsubsection{NIPoPoWs}
 
 Prior work: \citeNIPoPoWsFull{}.
 
@@ -317,14 +365,23 @@ Prior work: \citeNIPoPoWsFull{}.
     Non-Interactive Proofs of Proof-of-Work (NIPoPoWs) are short stand-alone strings that a computer program can inspect to verify that an event happened on a proof-of-work-based blockchain without connecting to the blockchain network and without downloading all block headers. For example, these proofs can illustrate that a cryptocurrency payment was made.
 }[\href{https://web.archive.org/web/20210520174729/https://nipopows.com/}{What are NIPoPoWs? (nipopows.com)}]
 
-NIPoPoWs work based on the statistical properties of proofs of work combined with a new interlink structure between blocks.
+NIPoPoWs are possible due to the statistical properties of proofs of work and require an additional interlink structure between blocks.
+The interlink structure is a kind of skip-list, where a block at height $h$ links back to $\sim \log_2 h$ other blocks.
 
+The insight that enables NIPoPoWs (and PoPoWs more generally) is that some PoWs will be \emph{much} lower than the difficulty target, and that the frequency of these special PoWs is dependent on the total number of PoWs that have been produced.
+That is: if the PoW target is $2^{184}$, then all valid PoWs will be $< 2^{184}$, 50\% will be $< 2^{183}$, 25\% will be $< 2^{182}$, and so on.
+We can generalize this via the statement: $P(\text{PoW} < 2^{184 - \mu}) = 2^{-\mu}$.
 
+When a block has $\mu > 0$, it is a $\mu$-superblock, and it is these superblocks that the interlink structure uses.
+Particularly, for each integer value of $\mu$, each block links back to the most recent $\mu$-superblock.
+The chain of $\mu$ level blocks is the $\mu$-superchain.
+Note that the 0-superchain is identical to the blockchain itself.
+This interlink structure is partially shown in \autoref{fig:nipopows}, which shows each $\mu$-superchain according to the perspective of the right-most block.
 
 \begin{figure}
 \centering
 \begin{tikzpicture}
-    \def\scale{0.65cm}
+    \def\scale{0.6cm}
     \edef\blockWH{\scale}
     \def\spacingMult{1.2}
     \edef\sx{1.2*\spacingMult*\scale}
@@ -370,12 +427,20 @@ NIPoPoWs work based on the statistical properties of proofs of work combined wit
     \draw [->] (n-15-0 |- n-14-1) -- (n-14-1);
     \draw [->] (n-15-0 |- n-12-2) -- (n-12-2);
     \draw [->] (n-15-0 |- n-8-3) -- (n-8-3);
+
+    % \node (origin) at (-1*\scale, -1*\scale) {};
+    % \draw [->] (origin.center) -- (n-15-0 |- origin) node [align=right, anchor=north east] {Height};
+    % \draw [->] (origin.center) -- (n-0-3 -| origin) node [align=right, anchor=north east] {$\mu$};
+
+    % \node (padright) at (16*\sx, -0.5) {};
 \end{tikzpicture}
 \caption[
-    The block interlink structure used by NIPoPoWs.
+    The $\mu$-superchains used by NIPoPoWs.
 ]{
-    The block interlink structure used by NIPoPoWs. \\
-    \emph{Credit:} the structure and content of this figure is credited to the authors of the NIPoPoW paper (Kiayias, Miller, Zindros) -- shown is a recreation of one of their diagrams.\footnotemark
+    The $\mu$-superchains used by NIPoPoWs.
+    Each column represents one block.
+    The $y$-axis indicates the $\mu$ level of each block.
+    \emph{Credit:} the structure and content of this figure is credited to the authors of the NIPoPoW paper (Kiayias, Miller, Zindros) -- this figure is a recreation of one of their diagrams.\footnotemark
 }
 \label{fig:nipopows}
 \end{figure}
@@ -383,5 +448,35 @@ NIPoPoWs work based on the statistical properties of proofs of work combined wit
 \footnotetext{
     Source diagram: \url{https://nipopows.com/images/hierarchical-ledger.png}
 }
+
+Intuitively, a NIPoPoW works by starting with the (very short) top-most chain of $\mu$-superblocks, and targets a block (denoted $\mathcal{C}[-k]$ in the NIPoPoW paper) a few confirmations behind the chain tip.
+This is done by progressively inspecting segments of lesser $\mu$-superchains.
+This is the main \emph{suffix proof}, as it proves the blocks at the recent end (suffix) of the blockchain.
+(Additionally, the most recent $k$ blocks ($\mathcal{C}[-k:]$) are included in the proof.)
+The work required to generate the main suffix proof is (approximately) as much work as has been contributed to the entire blockchain history.
+Thus, an adversarial NIPoPoW requires (approximately) as much work as the total chain-weight of the honest chain, so NIPoPoWs are secure.\footnote{
+    This is a simplification -- see \citeNIPoPoWs for full details.
+}
+
+Now that the chain-head and relevant $\mu$-superchains have been proven, arbitrary blocks in the chain's history can be proven.
+This is done by `following down' from a top-level $\mu$-superblock to the target block.
+starting with the best $\mu$-superblock between $\mathcal{C}[-k]$ and the target block, $\mu$ levels are progressively descended until the target block is reached.
+The blocks that were traversed form what is called an \emph{infix proof}.
+
+An example of a NIPoPoW with a suffix and infix proof is shown in \autoref{fig:nipopow-proof}.
+
+\begin{figure}
+    \centering
+    \includegraphics[]{diags/27-practical-30-nipopows-large_sag.pdf}
+    \caption[
+        The blocks of a traditional chain that comprise a NIPoPoW.
+        ]{
+        The blocks of a traditional chain that comprise a NIPoPoW.
+        Yellow blocks are part of the main NIPoPoW (suffix proof).
+        Patterned blocks comprise the proof of the target block.
+        Patterned blue blocks are unique to the infix proof.
+    }
+    \label{fig:nipopow-proof}
+\end{figure}
 
 \todo{nipopowapowrs}

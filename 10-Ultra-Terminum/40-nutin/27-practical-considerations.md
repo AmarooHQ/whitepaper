@@ -624,6 +624,12 @@ Thus, GHOST *does not mitigate* empty-block DoS attacks; *only* a full DAG-chain
 
 \input{includes/ut/content/27-practical/50-dags-50-merging-histories.tex}
 
+
+%% BLOCKDAG + POR GRAPH
+
+\input{includes/ut/content/27-practical/50-dags-75-interaction-with-por-graph.tex}
+
+
 ### Lowering Block Production Variance
 
 \label{sec:miner-resonance}

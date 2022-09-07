@@ -37,7 +37,7 @@ The after-witness should use, instead of the state root to the prior block, the 
 This way, the headers-only chain, the after-witness, and the transaction are the only data required to verify the validity of the transaction.
 
 Why does this after-witness matter so much?
-Because it is a \emph{fraud proof} for any fraudulent transaction.
+Because it \emph{is} the \emph{fraud proof} for any fraudulent transaction.
 
 We do, however, need to ensure these mid-state roots are also recorded in the block.
 Typically, a block will commit to its transactions via something like the root of a merkle tree of those transactions.

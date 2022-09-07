@@ -130,6 +130,9 @@
         "SPV",
         "SRT",
         "STARKs",
+        "superblocks",
+        "superchain",
+        "superchains",
         "Terminum",
         "textlint",
         "there'll",
@@ -202,7 +205,8 @@
         "hte", "DOS", "teh", "\\being{",
         "itertext", "the attackers", "DAA_N",
         "tress", "\\lable{", "lable",
-        "tree tiling", "tree tilings"
+        "tree tiling", "tree tilings",
+        "dependant", "independant"
     ],
     "cSpell.ignoreRegExpList": [
         "\\usepackage{([a-z,]*)}",
