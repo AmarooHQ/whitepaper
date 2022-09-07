@@ -1,0 +1,22 @@
+
+\subsubsubsection{Interaction With The PoR Graph}
+
+
+
+\subsubsubsection{\AxiomOfRawUnifiedAncestry}
+
+\DeclareAxiom{UnifiedAncestry}{
+    A miner should build on all possible blocks, and flag invalid local blocks.
+}{
+    A block, \BL{}, is invalid unless, for all reflected blocks \BR{}:
+    \begin{axiomreqs}
+        \item \BR{} is valid under this axiom; and
+        \item each \cL block reflected by \BR{}:
+        \begin{itemize}
+            \item is an ancestor of \BL{}; or
+            % \item shares no ancestors with \BL; or
+            \item is flagged as invalid by \BL{}; or
+            \item was flagged as invalid by an ancestor of \BL{}.
+        \end{itemize}
+    \end{axiomreqs}
+}
