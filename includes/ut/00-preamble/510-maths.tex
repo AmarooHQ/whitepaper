@@ -59,6 +59,7 @@
 % if \xspace is inside \ensuremath then it won't work outside math mode
 
 \newcommand\cB{\ensuremath{B}\xspace}
+\newcommand\cC{\ensuremath{C}\xspace}
 \newcommand\cL{\ensuremath{L}\xspace}
 \newcommand\cM{\ensuremath{M}\xspace}
 \newcommand\cR{\ensuremath{R}\xspace}
@@ -334,3 +335,15 @@
 
 \NewDocumentCommand{\rightdashedarrow}{}{\ensuremath{\xyInlineRefl{\;\arAncestor[r]&\;}}}
 \NewDocumentCommand{\leftdashedarrow}{}{\ensuremath{\xyInlineRefl{\;&\;\arAncestor[l]}}}
+
+
+% PoR conversion functions
+
+\NewDocumentCommand{\ConvWork}{g}{%
+  \ensuremath{\text{ConvWork}_{R\rightarrow L}}%
+  \IfNoValueTF{#1}{}{\ensuremath{(#1)}}\xspace}
+
+
+% nipopow stuff
+
+\NewDocumentCommand{\muType}{m}{\ensuremath{\mu_{#1}}\xspace}

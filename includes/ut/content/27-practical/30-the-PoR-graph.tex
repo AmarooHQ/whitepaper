@@ -353,9 +353,13 @@ Additionally, in \autoref{sec:dags-and-the-por-graph} we will discuss some symme
 
 
 
-\subsubsubsection{NIPoPoWaPoWRs (or NIPoPoWRs for short)}
+\subsubsubsection{Generalizing NIPoPoWs}
 
-\todo{inprog -- might be cut}
+\aside{
+    This section is speculative; it's about how NIPoPoWs might be possible for the longest PoR chain.
+    \UT{} won't depend on NIPoPoWs, but they are useful, so it would be good to support them if possible.
+    After an overview of what a NIPoPoW is, we'll discuss how they might be generalized.
+}
 
 \subsubsubsubsection{NIPoPoWs}
 
@@ -440,6 +444,7 @@ This interlink structure is partially shown in \autoref{fig:nipopows}, which sho
     The $\mu$-superchains used by NIPoPoWs.
     Each column represents one block.
     The $y$-axis indicates the $\mu$ level of each block.
+    A $\mu$-superblock is also a $(\mu-1)$-superblock.
     \emph{Credit:} the structure and content of this figure is credited to the authors of the NIPoPoW paper (Kiayias, Miller, Zindros) -- this figure is a recreation of one of their diagrams.\footnotemark
 }
 \label{fig:nipopows}
@@ -452,31 +457,188 @@ This interlink structure is partially shown in \autoref{fig:nipopows}, which sho
 Intuitively, a NIPoPoW works by starting with the (very short) top-most chain of $\mu$-superblocks, and targets a block (denoted $\mathcal{C}[-k]$ in the NIPoPoW paper) a few confirmations behind the chain tip.
 This is done by progressively inspecting segments of lesser $\mu$-superchains.
 This is the main \emph{suffix proof}, as it proves the blocks at the recent end (suffix) of the blockchain.
-(Additionally, the most recent $k$ blocks ($\mathcal{C}[-k:]$) are included in the proof.)
+(Additionally, the most recent $k$ blocks ($\mathcal{C}[-k:]$) are included along side the proof.)
 The work required to generate the main suffix proof is (approximately) as much work as has been contributed to the entire blockchain history.
 Thus, an adversarial NIPoPoW requires (approximately) as much work as the total chain-weight of the honest chain, so NIPoPoWs are secure.\footnote{
     This is a simplification -- see \citeNIPoPoWs for full details.
 }
 
 Now that the chain-head and relevant $\mu$-superchains have been proven, arbitrary blocks in the chain's history can be proven.
-This is done by `following down' from a top-level $\mu$-superblock to the target block.
-starting with the best $\mu$-superblock between $\mathcal{C}[-k]$ and the target block, $\mu$ levels are progressively descended until the target block is reached.
-The blocks that were traversed form what is called an \emph{infix proof}.
+This is done by `following down' from a top-level $\mu$-superblock to the target block, following the interlink structure.
+Starting with the earliest $\mu$-superblock between the target block and $\mathcal{C}[-k]$, $\mu$ levels are progressively descended until the target block is reached.
+`Following down' means: for a $\mu$-superblock, check if the previous block at level $(\mu-1)$ occurred \emph{after} the target block -- if so, that block becomes the next in the series, otherwise decrease $\mu$ by one and repeat.
+The blocks that were traversed comprise an \emph{infix proof}.
 
 An example of a NIPoPoW with a suffix and infix proof is shown in \autoref{fig:nipopow-proof}.
 
 \begin{figure}
     \centering
-    \includegraphics[]{diags/27-practical-30-nipopows-large_sag.pdf}
+    \includegraphics[max width=\linewidth]{diags/27-practical-30-nipopows-large_sag.pdf}
     \caption[
         The blocks of a traditional chain that comprise a NIPoPoW.
         ]{
         The blocks of a traditional chain that comprise a NIPoPoW.
+        For a given $\mu > 0$, each superblock at that level is \emph{the same} block as the one directly below it; only half of the blocks at level $\mu-1$ are also $\mu$-superblocks.
         Yellow blocks are part of the main NIPoPoW (suffix proof).
-        Patterned blocks comprise the proof of the target block.
+        Patterned blocks comprise the infix proof of the target block.
         Patterned blue blocks are unique to the infix proof.
+        The striped pink and gray block is there to help explain the diagram by highlighting an example a 3-superblock.
     }
     \label{fig:nipopow-proof}
 \end{figure}
 
-\todo{nipopowapowrs}
+Notice that there is no concept of ``state'' used when reasoning about NIPoPoWs -- we're only considering a chain of interlinked blocks with PoWs.
+Put another way: there is no requirement that these blocks belong to the same blockchain; only the PoW and interlink structure matters.
+
+So, at least at first glance, it appears that the longest PoR chain might work with NIPoPoWs, or some modified version.
+
+There are two important caveats that are mentioned in the NIPoPoW paper; these are problems for us and we will have to address them.
+
+First: the authors assume a single chain of blocks, not a graph.
+Thus, \emph{any} simultaneous blocks in the PoR graph are an issue.
+
+Second: the authors assume a constant difficulty.
+For a traditional blockchain, this isn't too much of a problem.
+For \UT{}, however, we ideally want uncoupled simplex-chain difficulties, even if they use the same hashing algorithm.
+Speaking of which, how does a NIPoPoW work if more than one hashing algorithm is used?
+
+\subsubsubsubsection{Non-Interactive Proofs of Proof of Work Reflection (NIPoPoWRs)}
+
+Before we discuss the problems mentioned above, it is important to note that the method we will devise cannot make use of converted work from non-PoW blocks (e.g., if some simplex-chain used PoS, or PoA, etc).
+That's because there is real sense to such a block being `lucky' in the way that superblocks are.
+We can still link back to non-PoW blocks as 0-superblocks, though (i.e., they're at the lowest $\mu$ level).
+
+\subsubsubsubsubsection{Problem: DAG Compatibility}
+
+If the longest PoR chain is a DAG, then the interlink will need to be a DAG, too.
+Sometimes, two (or more) blocks will be simultaneous, so we will have two (or more) graph tips in those cases.
+When that happens, we will always have at least two $0$-superblocks (since a 3-superblock is also a 2-superblock, etc).
+In fact, at and below the $\mu$ level of the lightest graph tip, all interlink levels will point back to all graph tips.
+
+The existing NIPoPoW \texttt{followDown} algorithm should work fine for high level $\mu$-superblocks.
+Since simultaneous blocks at such levels will be exceptionally rare, we can expect higher $\mu$-superchains to be much more chain-like than the longest PoR chain.
+
+At lower levels, it doesn't matter which path to the target block we take (if more than one is even available).
+The PoR graph has no conflicts and no concept of a ``doublespend'' -- rather, it is a massive graph of interconnected merklized tree structures.
+Put another way, there is no difference of \emph{priority} between siblings of the same $\mu$ level.
+This is not true for chains using GHOST (or block-DAGs)\footnote{
+    Note that we will discuss GHOST and block-DAGs in \autoref{sec:dos-and-dags}, and we'll discuss this issue properly, then.
+} -- in those cases it is possible for an uncle block to be of a higher $\mu$ level than its non-uncle sibling, so more work is required.
+But, in the case of the longest PoR chain, we are \emph{only} concerned about \emph{whether} a block exists -- it doesn't matter \emph{how} we get there, just that we \emph{can} get there.
+
+Curiously, this change is an alternate solution to the problem of an attacker ``[breaking] chain superquality with non-negligible probability'' addressed in the NIPoPoW paper (Section 7: An attack).
+
+The attack is one that allows an attacker to manipulate the public chain's ``superquality'' (a measure of the frequency of $\mu$-superblocks), such that fewer superblocks become canonical.
+In essence, the attacker selectively performs a selfish-mining-like attack whenever a significant $\mu$-superblock is found.
+Their goal is to mine an alternate longest chain, such that the superblock becomes stale.
+This then allows the attacker to produce, in private, a superior NIPoPoW (compared to that of the public chain) for fewer resources than should be required.
+
+The authors solve this problem via introducing a concept of ``\emph{goodness}'' -- which is basically that proofs are must be succinct and ``\emph{good at every level}'' (when this is not possible, provide the whole chain instead).
+The authors then show that, when goodness is not violated, the attack is impractical.
+
+In our modified graph-based version, though, there is no such problem: blocks cannot become stale.
+Additionally, the \AxiomOfMaximalReflection guarantees that the interlink history will fully span the entire PoR graph.
+
+\subsubsubsubsubsection{Problem: Variable Difficulty and Multiple Hashing Algorithms}
+
+There are really two problems here for us to think about.
+If we can solve the problem of blocks using different hashing algorithms, then we will need to handle variable difficulty anyway, so let's work on the critical problem first (variable difficulty).
+
+\NewDocumentCommand{\tradA}{g}{\IfNoValueTF{#1}{\ensuremath{\mathcal{A}}}{\ensuremath{\mathcal{A}_{#1}}}\xspace}
+\NewDocumentCommand{\tradB}{g}{\IfNoValueTF{#1}{\ensuremath{\mathcal{B}}}{\ensuremath{\mathcal{B}_{#1}}}\xspace}
+
+Let's consider the superchains of two very similar traditional chains, \tradA and \tradB, using the same PoW algorithm.
+Since these chains use the same hash, we can scale their respective $\mu$ values depending on their relative difficulties.
+
+If the difficulty of \tradB is half that of \tradA, then we can convert $\mu_{\tradA}$ levels into $\mu_{\tradB}$ levels by adding 1.
+In this way, all blocks in \tradA are at level $\mu_{\tradA}=0$ which is equivalent to level $\mu_{\tradB}=1$.
+
+We can observe this equivalence via the following thought experiment: what does \tradB's 1-superchain look like if \tradB's block frequency is twice that of \tradA?
+First, we should expect that, for a given period, there are twice as many \tradB blocks as there are \tradA blocks.
+Since about half of \tradB blocks will have $\mu_{\tradB} \ge 1$, there will be approximately as many \tradB blocks in the $(\mu_{\tradB}=1)$-superchain as in \tradA's $(\mu_{\tradA}=0)$-superchain.
+
+This makes sense: there are twice as many blocks at half the difficulty, so we expect the same hash rate to be mining on each chain.
+If both chains have the same hash rate, then they should produce the same number of blocks at a given $\mu_{\tradA}$ level.
+Since \tradB has the lower difficulty, this is not true for a given $\mu_{\tradB}$ level -- \tradA produces \emph{no} blocks at level $\mu_{\tradB}=0$.
+
+Now, let us modify \tradB's protocol in a strange way.
+We'll say that \tradB blocks \emph{must} explicitly include all transactions (in sequence) from all ancestor blocks between the block itself and the prior $(\mu_{\tradB}=1)$-superblock.
+We'll also assume there are suitable optimizations such that this isn't an issue for the \tradB network.
+This modification means that no \tradB NIPoPoW ever needs to descend to below $\mu_{\tradB}=1$ again.
+
+For all intents and purposes, \tradA and \tradB produce almost indistinguishable NIPoPoWs (excepting, of course, that they prove blocks in different chains).
+Without analysis of the \tradB protocol, and ignoring that all \tradB proofs end at level $\mu_{\tradB}=1$, there is no sign that the \tradB chain has twice as many blocks at half the difficulty.
+The proofs are similar sizes, descend the same number of $\mu$ levels, have similar numbers of blocks at each (adjusted) $\mu$ level, etc.
+So we might ask the question: how do we know that \tradA doesn't produce blocks at level $\mu_{\tradA}=-1$, similar to \tradB?
+
+The point of this is to demonstrate that $\mu$ levels are relative and convertible between \tradA and \tradB, and there is no appreciable difference based on any $\mu$-offset.
+% It is useful to have all $\mu \ge 0$, but this is technically an implementation concern and has no effect in principle.
+
+Therefore, we can express $\mu_{\tradA}$ and $\mu_{\tradB}$ in objective terms by measuring them relative to an arbitrarily low difficulty (e.g., 1).
+Let's call the \emph{objective $\mu$} the $\mu$ level in terms of a difficulty of 1.\footnote{
+    The difficulty is the expected number of hashes to find a solution, so a difficulty of 0 is impossible.
+}
+A consequence of this is that duplicate entries will be common when there is a large difference between difficulties (i.e., $\mu_{\tradA} \gg \mu_{\tradB}$).
+Thus, we should also modify the interlink structure to prepend the $\mu$ level to each group of previous blocks at that level.
+This allows us to omit the duplicates, assuming we use an appropriate cryptographic structure.
+
+This works because no proof for either \tradA or \tradB will ever need to descend below the minimum objective $\mu$ of that chain's difficulty, and the statistical properties of all higher $\mu$ levels are maintained.
+It is no easier for an attacker to generate a malicious NIPoPoW than it would be otherwise.
+
+Further, this is consistent with the observation that, if \tradA's hash rate doubled, then it would appear as though the minimum $\mu$ level increased by 1 (assuming that $\mu$ levels are not recalibrated according to the current difficulty).
+
+This resolves the first part of the problem: variable difficulties.
+
+With regards to multiple hashing algorithms, PoR itself has already laid the groundwork for a solution: the conversion of work.
+Recall that in \autoref{eq:por-conv-work} we derived \ConvWork: a function for converting R-hashes $\to$ L-hashes.
+
+We can use this to convert calculate a PoW's equivalent $\mu$ level in terms of another hash.
+We can think of converting a block's weight as starting with the \cR target, converting that to the difficulty ($\cR_d$ hashes/block), applying $\ConvWork{\cR_d}$, and converting this to the \cL target.
+Similarly, we can convert $\mu$ levels using the same process, except that we start with the lowest possible target that the block in question would satisfy.
+
+However, these $\mu$ levels are only comparable after linear scaling, so we need to differentiate them.
+From here out, we only need objective $\mu$ values, so let's use $\muType{\cR}$ to refer to the objective $\mu$ of the \cR chain, and $\muType{\cL}$ to refer to that of the \cL chain.
+We should note that, for a chain \cC, if we want the $\muType\cC$ level relative to the difficulty, we just need to subtract $\log_2(\cC_d)$ (which is the minimum objective $\muType\cC$ level of any chain \cC block).
+
+Conversion Example: let's start with a \cR chain PoW target of $2^{184}$ -- corresponding to a difficulty of $2^{72}$.
+Next, a block is produced with a PoW of $2^{181}$; it has an objective $\muType{\cR}$ of 75.
+The minimum target that the block would satisfy is $2^{181}$, which corresponds to a maximum difficulty of $2^{75}$ (\cR-hashes).
+Note that $\log_2(\text{max. difficulty}) = \muType{\cR}$.
+We then convert this via \ConvWork{2^{75}} to get \cL-hashes.
+All that remains is to take and take $\log_2$ to get the converted objective $\muType{\cL}$.
+
+What can we say about \muType\cR's relationship with \muType\cL?
+Consider that, in the SRT context, \autoref{eq:por-conversion-const-1} simplifies to $\cL_d \cR_r (\cR_d \cL_r)^{-1}$.
+Therefore:
+\begin{align}
+    2^{\muType\cR} \cdot \cL_d \cR_r (\cR_d \cL_r)^{-1} &= 2^{\muType\cL} \nonumber \\
+    2^{\muType\cR} \cdot \cR_r / \cR_d &= 2^{\muType\cL} \cdot \cL_r/\cL_d \nonumber \\
+    \log_2(2^{\muType\cR} \cdot \cR_r / \cR_d) &= \log_2(2^{\muType\cL} \cdot \cL_r/\cL_d) \nonumber \\
+    \muType\cR - \log_2(\cR_d) + \log_2(\cR_r) &= \muType\cL - \log_2(\cL_d) + \log_2(\cL_r)\label{eq:mu-type-conversion}
+    % \intertext{using non-objective $\mu$ values:}
+    % 2^{\muType\cR} \cR_d \cdot \cL_d / \cR_d &= 2^{\muType\cL} \cL_d \\
+    % 2^{\muType\cR} &= 2^{\muType\cL}
+\end{align}
+Note that $\muType\cR - \log_2(\cR_d)$ is the block's relative $\muType\cR$ level (and similarly for \muType\cL on the RHS).
+
+All that remains is for each block in the longest PoR chain to calculate objective $\mu$ values of the same type using \autoref{eq:mu-type-conversion}.
+Earlier, we determined that objective $\mu$ values of the same type can accommodate variable difficulties.
+
+Thus, we have resolved both parts of the problem.
+
+\subsubsubsubsubsection{NIPoPoWRs: Summary}
+
+We have sketched the construction of NIPoPoWRs -- a variant of NIPoPoWs that is compatible with the longest PoR chain.
+
+NIPoPoWs were modified in the following ways:
+\begin{enumerate}
+    \item Convert each chain's native $\mu$ values into a common type for use in the interlink structure.
+    \item Use objective $\mu$ values to accommodate variable difficulties.
+    \item Replace the tree-interlink structure with a graph-interlink structure.
+\end{enumerate}
+
+The \AxiomOfAvailability means that the PoR graph does consensus on which blocks exist.
+The \AxiomOfMaximalReflection means that the interlink structure spans the entire PoR graph.
+Thus, any path to a block is a valid path and we don't need to introduce the notion of \emph{goodness}.
+
+We should also note that this construction does not (yet) work for block-DAGs (including GHOST).
