@@ -614,14 +614,17 @@ Therefore:
     2^{\muType\cR} \cdot \cL_d \cR_r (\cR_d \cL_r)^{-1} &= 2^{\muType\cL} \nonumber \\
     2^{\muType\cR} \cdot \cR_r / \cR_d &= 2^{\muType\cL} \cdot \cL_r/\cL_d \nonumber \\
     \log_2(2^{\muType\cR} \cdot \cR_r / \cR_d) &= \log_2(2^{\muType\cL} \cdot \cL_r/\cL_d) \nonumber \\
-    \muType\cR - \log_2(\cR_d) + \log_2(\cR_r) &= \muType\cL - \log_2(\cL_d) + \log_2(\cL_r)\label{eq:mu-type-conversion}
+    \muType\cR - \log_2(\cR_d) + \log_2(\cR_r) &= \muType\cL - \log_2(\cL_d) + \log_2(\cL_r)
+    \label{eq:mu-relative-conv} \\
+    \muType\cR &= \muType\cL + \log_2(\cL_r \cR_d) - \log_2(\cL_d \cR_r)
+    \label{eq:mu-type-conv}
     % \intertext{using non-objective $\mu$ values:}
     % 2^{\muType\cR} \cR_d \cdot \cL_d / \cR_d &= 2^{\muType\cL} \cL_d \\
     % 2^{\muType\cR} &= 2^{\muType\cL}
 \end{align}
-Note that $\muType\cR - \log_2(\cR_d)$ is the block's relative $\muType\cR$ level (and similarly for \muType\cL on the RHS).
+Note that $\muType\cR - \log_2(\cR_d)$ (\autoref{eq:mu-relative-conv}) is the block's relative $\muType\cR$ level (and similarly for \muType\cL on the RHS).
 
-All that remains is for each block in the longest PoR chain to calculate objective $\mu$ values of the same type using \autoref{eq:mu-type-conversion}.
+All that remains is for each block in the longest PoR chain to calculate objective $\mu$ values of the same type using \autoref{eq:mu-type-conv}.
 Earlier, we determined that objective $\mu$ values of the same type can accommodate variable difficulties.
 
 Thus, we have resolved both parts of the problem.
