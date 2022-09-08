@@ -375,11 +375,12 @@ The interlink structure is a kind of skip-list, where a block at height $h$ link
 The insight that enables NIPoPoWs (and PoPoWs more generally) is that some PoWs will be \emph{much} lower than the difficulty target, and that the frequency of these special PoWs is dependent on the total number of PoWs that have been produced.
 That is: if the PoW target is $2^{184}$, then all valid PoWs will be $< 2^{184}$, 50\% will be $< 2^{183}$, 25\% will be $< 2^{182}$, and so on.
 We can generalize this via the statement: $P(\text{PoW} < 2^{184 - \mu}) = 2^{-\mu}$.
+In essence, $\mu$ is a measure of the \emph{excess capacity} of a block's PoW: how many orders-of-magnitude lower \emph{could} the target have been given the PoW.
 
 When a block has $\mu > 0$, it is a $\mu$-superblock, and it is these superblocks that the interlink structure uses.
 Particularly, for each integer value of $\mu$, each block links back to the most recent $\mu$-superblock.
 The chain of $\mu$ level blocks is the $\mu$-superchain.
-Note that the 0-superchain is identical to the blockchain itself.
+Note that the 0-superchain (or 0-chain) is identical to the blockchain itself.
 This interlink structure is partially shown in \autoref{fig:nipopows}, which shows each $\mu$-superchain according to the perspective of the right-most block.
 
 \begin{figure}
@@ -506,27 +507,32 @@ Speaking of which, how does a NIPoPoW work if more than one hashing algorithm is
 
 Before we discuss the problems mentioned above, it is important to note that the method we will devise cannot make use of converted work from non-PoW blocks (e.g., if some simplex-chain used PoS, or PoA, etc).
 That's because there is real sense to such a block being `lucky' in the way that superblocks are.
-We can still link back to non-PoW blocks as 0-superblocks, though (i.e., they're at the lowest $\mu$ level).
+We can still link back to non-PoW blocks as 0-blocks, though (i.e., they're at the lowest $\mu$ level).\footnote{
+    Note that, currently, this implies that non-PoW blocks are considered to contribute some work, which they do not.
+    We will resolve this conflict shortly -- at the end of the section, it will make sense to consider them 0-blocks at the lowest $\mu$ level.
+}
+
+Thus, these will not be NIPoPoRs -- this method requires PoW, so, in terms of PoRs, we are only concerned with PoW reflection, rather than all reflection.
 
 \subsubsubsubsubsection{Problem: DAG Compatibility}
 
 If the longest PoR chain is a DAG, then the interlink will need to be a DAG, too.
 Sometimes, two (or more) blocks will be simultaneous, so we will have two (or more) graph tips in those cases.
-When that happens, we will always have at least two $0$-superblocks (since a 3-superblock is also a 2-superblock, etc).
+When that happens, we will always have at least two 0-superblocks (since a 3-superblock is also a 2-superblock, etc).
 In fact, at and below the $\mu$ level of the lightest graph tip, all interlink levels will point back to all graph tips.
 
 The existing NIPoPoW \texttt{followDown} algorithm should work fine for high level $\mu$-superblocks.
 Since simultaneous blocks at such levels will be exceptionally rare, we can expect higher $\mu$-superchains to be much more chain-like than the longest PoR chain.
 
-At lower levels, it doesn't matter which path to the target block we take (if more than one is even available).
-The PoR graph has no conflicts and no concept of a ``doublespend'' -- rather, it is a massive graph of interconnected merklized tree structures.
-Put another way, there is no difference of \emph{priority} between siblings of the same $\mu$ level.
+At lower levels (or any level), it doesn't matter which path to the target block we take (if more than one is even available).
+The PoR graph has no conflicts and no concept of a ``doublespend'' -- rather, it is a massive graph of interconnected merklized tree structures where the roots of novel past vertexes comprise are the leaves of future nodes; thus, edges are merkle branches.
+Put another way, there's no sense of \emph{priority} between siblings of the same $\mu$ level.
 This is not true for chains using GHOST (or block-DAGs)\footnote{
-    Note that we will discuss GHOST and block-DAGs in \autoref{sec:dos-and-dags}, and we'll discuss this issue properly, then.
-} -- in those cases it is possible for an uncle block to be of a higher $\mu$ level than its non-uncle sibling, so more work is required.
+    GHOST and block-DAGs are the specific focus of \autoref{sec:dos-and-dags}, and we'll discuss this issue properly, then.
+} -- in those cases it is possible for an uncle block to be of a higher $\mu$ level than its non-uncle sibling, so this construction doesn't cover those cases.
 But, in the case of the longest PoR chain, we are \emph{only} concerned about \emph{whether} a block exists -- it doesn't matter \emph{how} we get there, just that we \emph{can} get there.
 
-Curiously, this change is an alternate solution to the problem of an attacker ``[breaking] chain superquality with non-negligible probability'' addressed in the NIPoPoW paper (Section 7: An attack).
+Curiously, this change is an alternate solution to the problem of an attacker ``[breaking] chain superquality with non-negligible probability'' addressed in the NIPoPoW paper (Section 7). % S7: An attack
 
 The attack is one that allows an attacker to manipulate the public chain's ``superquality'' (a measure of the frequency of $\mu$-superblocks), such that fewer superblocks become canonical.
 In essence, the attacker selectively performs a selfish-mining-like attack whenever a significant $\mu$-superblock is found.
@@ -593,8 +599,8 @@ With regards to multiple hashing algorithms, PoR itself has already laid the gro
 Recall that in \autoref{eq:por-conv-work} we derived \ConvWork: a function for converting R-hashes $\to$ L-hashes.
 
 We can use this to convert calculate a PoW's equivalent $\mu$ level in terms of another hash.
-We can think of converting a block's weight as starting with the \cR target, converting that to the difficulty ($\cR_d$ hashes/block), applying $\ConvWork{\cR_d}$, and converting this to the \cL target.
-Similarly, we can convert $\mu$ levels using the same process, except that we start with the lowest possible target that the block in question would satisfy.
+We can think of converting a block's weight as starting with the chain \cR target, converting that to the difficulty ($\cR_d$ hashes/block), applying $\ConvWork{\cR_d}$, and converting this to the \cL target.
+Similarly, we can convert $\mu$ levels using the same process, except that we replace the \emph{actual} target with the \emph{lowest possible satisfiable target} for the block in question.
 
 However, these $\mu$ levels are only comparable after linear scaling, so we need to differentiate them.
 From here out, we only need objective $\mu$ values, so let's use $\muType{\cR}$ to refer to the objective $\mu$ of the \cR chain, and $\muType{\cL}$ to refer to that of the \cL chain.
@@ -645,3 +651,5 @@ The \AxiomOfMaximalReflection means that the interlink structure spans the entir
 Thus, any path to a block is a valid path and we don't need to introduce the notion of \emph{goodness}.
 
 We should also note that this construction does not (yet) work for block-DAGs (including GHOST).
+
+We will continue this construction in \autoref{sec:blockdag-nipopowrs}
