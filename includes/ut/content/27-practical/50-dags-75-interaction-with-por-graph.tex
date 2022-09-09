@@ -57,40 +57,41 @@ There is only one way (in principle) to always arrive at an on-main block: via e
 First, starting from all chain-tips, we find the most recent common on-main ancestor.
 If this is very close to the chain-tips, we can, instead, use an on-main ancestor a few confirmations back -- so we can meet any particular security parameter we might choose.
 We can be confident that this ancestor is on-main, regardless of which chain-tip eventually ends up as the on-main block.
+We must then follow the chain of primary parents.
 
 Therefore, the interlink structure \emph{must} include enough information to traverse the $\mu$-superDAGs via on-main ancestors, only.
-Just because that we \emph{can} traverse via on-main blocks only does not mean that we will, though.
+Just because we \emph{can} traverse via on-main blocks only does not mean that we will, though.
 In fact, we will traverse via two paths: one normally, and the other via on-main blocks only.
 
 To support this, we'll modify the interlink structure such that each link has an optional second component: the most recent on-main ancestor at that \mu level.
 Most of the time, we should expect blocks to be on-main, so there will only be one interlinked entry at that \mu level.
 However, in the case that a \mu-superblock is off-main, the interlink entry is both that off-main \mu-superblock, and the most recent on-main \mu-superblock (which is necessarily older than the off-main \mu-superblock).
 
-Thus, we effectively have two \mu-superDAGs: one being the \emph{best} \mu-superDAG, and the other being the \emph{on-main only} \mu-superchain.
+Thus, we effectively have two \mu-superDAGs: one being the \emph{best-blocks} \mu-superDAG, and the other being the \emph{on-main only} \mu-superchain.
 (Each block in a block-DAG has only one primary parent, so a chain-tip's primary ancestry really is a chain, not a DAG.)
 
-We then construct the main suffix proof for two cases: the \emph{best} suffix proof (regardless of on-main status), and the \emph{on-main only} suffix proof.
-These two proofs will always be consistent, though the best proof may not include all $\mu$-superblocks that are included in the on-main proof.
-To account for this, we can require that, for each \mu level, the best \mu-superDAG suffix subgraph is a superset of the corresponding on-main \mu-superchain suffix.
+We then construct the main suffix proof for two cases: the \emph{best-blocks} suffix proof (regardless of on-main status), and the \emph{on-main only} suffix proof.
+These two proofs will always be consistent, though the best-blocks proof may not include all $\mu$-superblocks that are included in the on-main proof.
+To account for this, we can require that, for each \mu level, the best-blocks \mu-superDAG suffix subgraph is a superset of the corresponding on-main \mu-superchain suffix.
 Both together comprise the suffix proof.
 
-Regarding infix proofs, we can use the existing \texttt{followDown} algorithm for with only one modification: an additional parameter determines whether \texttt{followDown} should traverse the \emph{best} path to the block, or the \emph{on-main only} path.
+Regarding infix proofs, we can use the existing \texttt{followDown} algorithm for with only one modification: an additional parameter determines whether \texttt{followDown} should traverse the \emph{best-blocks} path to the block, or the \emph{on-main only} path.
 To generate proofs, we run \texttt{followDown} over each path.
 We similarly modify the \texttt{verify-infx} (\emph{sic}) and \texttt{ancestors} functions used to verify infix proofs.
 % This change requires a corresponding addition to the proof structure so that it accommodates the additional proofs that the on-main traversal requires.
 % The two paths must overlap at least once: at the destination on-main block.
 
 
-It is worth noting that the on-main proofs alone are not sufficient for secure NIPoPoWs: in some cases the on-main only proofs will imply substantially less total chain-weight than the best proofs.
-For example: if only 50\% of blocks were on-main, then the resources an attacker needs to generate a competing NIPoPoW (for the on-main proofs) is only 50\% of what they would need otherwise.
-Thus, we prioritize one NIPoPoW over another based on the \emph{best} proofs (rather than the \emph{on-main} proofs).
+It is worth noting that the on-main proofs alone are not sufficient for secure NIPoPoWs: in some cases the on-main only proofs will imply substantially less total chain-weight than the best-blocks proofs.
+For example: if only 50\% of blocks were on-main, then the resources an attacker needs to generate a competing NIPoPoW (for the on-main proofs) is only 50\% of what they would need compared to a best-blocks proof.
+Thus, we prioritize one NIPoPoW over another based on the \emph{best-blocks} proofs (rather than the \emph{on-main} proofs).
 We do, however, validate that the target of the NIPoPoW is on-main via the accompanying on-main proof.
-The on-main path is only inconsistent with the best path in the case that the target block is off-main.\footnote{
-    Note: when traversing the best \mu-superDAG we \emph{do not care} about the status of on-main blocks.
+The on-main path is only inconsistent with the best-blocks path in the case that the target block is off-main.\footnote{
+    Note: when traversing the best-blocks \mu-superDAG we \emph{do not care} about the status of on-main blocks.
     Thus, the on-main interlinks in off-main \mu-superblocks are not important, and we should not count any differences there as inconsistencies with the on-main \mu-superchain.
 }
 
-A major difference between the best and on-main proofs should not be an issue for \UT{}, though, as \UT{} uses modest block frequencies for each chain.
+A major difference between the best-blocks and on-main proofs should not be an issue for \UT{}, though, as \UT{} uses modest block frequencies for each chain.
 We should expect blocks to have a single parent most of the time.
 (Using the logic from \autoref{sec:por-graph-max-refl}, we'd expect simultaneous blocks \sim 2\% of the time -- give or take.)
 
@@ -111,5 +112,10 @@ so we only care about on-main status when we've exclusively traversed via on-mai
 
 NIPoPPPoWaPoWRs
 non-interactive proofs of per posterās proof of work and proof of work reflection
-non-interactive proofs of posteritorial proof of work and proof of work reflection
-e
+
+\hruleMarker{NIPoPPoWaPoWRs}
+
+non-interactive proofs of posteritorial\footnote{
+    A definition is require as this word is an almost-neologism: \\
+    \textbf{Posteritorial} \emph{adjective}: having posterity; supported by its descendants, especially regarding well-known descendancy, explanatory antecedence, root-causal nature, etc; having a prototypical and defining quality that was widely inherited.
+} proof of work and proof of work reflection
