@@ -20,10 +20,14 @@ In this case, for a single R-block, \autoref{eq:por-conv-work} collapses to
         \\[0.5em]
     \implies \text{ConvWork}_{R\rightarrow L}(R_d) \cdot \frac{L_r}{L_d} = \; & R_r
         & & \text{L-coins}
-        & & \text{Weight of an R-block in L-coins}
+        & & \genfrac{}{}{0pt}{}{\times \text{ L-coins/L-hashes}\qquad\qquad\quad\;\;}{\text{Weight of an R-block in L-coins}}
         % \label{eq:por-conv-work-to-coins-srt}
         \nonumber
 \end{align}
+
+So, the weight of an R-block measured in L-coins is exactly equal to the \cR chain's block reward.
+This, of course, makes sense.
+L-coins are fungible with R-coins in this context, so, naturally, the weight-in-coins of an \cR block is its own block reward.
 
 If we convert like this (treating 1 R-block as worth $R_r \cdot 1$ L-coins) then we'll we need to convert the result to L-hashes \emph{eventually}, but, if we have multiple reflections to process, we can calculate interim values (with units of L-coins) and sum them before that final conversion.
 % (since $\nicefrac{L_r}{L_d}$ is a constant for some given moment in time).

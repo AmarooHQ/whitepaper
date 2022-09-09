@@ -26,6 +26,7 @@ includes/handout/*.md
 *.log
 *.mw
 *.glsdefs
+*.glo
 *.ist
 .latexrun.db*
 

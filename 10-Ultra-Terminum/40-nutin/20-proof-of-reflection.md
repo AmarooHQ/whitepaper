@@ -158,7 +158,7 @@ For that, we need a merkle branch showing $L_{i+1}$ is part of $R_{j+1}$'s state
 Thirdly, we want to prove that $R_{j+1}$ is the \emph{best block} according to Chain \cL's projection of Chain \cR.
 We can do that via a merkle branch, too, but full nodes of Chain \cL already know whether $R_{j+1}$ is the best block or not, so this branch doesn't need to be explicit.
 However, \cL's nodes must be able to generate it.
-The \emph{full} collection of information required to prove reflection is called a *proof of reflection*.
+The \emph{full} collection of information required to prove reflection is called a *proof of reflection* (PoR).
 
 \begin{figure}
     \begin{subfigure}[t]{.31\textwidth}
@@ -184,7 +184,7 @@ The \emph{full} collection of information required to prove reflection is called
         \caption{Prove that \cR block is known to the current \cL block.}
         \label{fig:por_step3-part3}
     \end{subfigure}
-    \caption{Incrementally constructing a \emph{proof of reflection}.}
+    \caption{Incrementally constructing a \emph{proof of reflection} (PoR).}
     \label{fig:por-step3-parts}
 \end{figure}
 

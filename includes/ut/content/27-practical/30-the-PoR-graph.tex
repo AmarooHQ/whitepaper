@@ -382,6 +382,7 @@ Particularly, for each integer value of $\mu$, each block links back to the most
 The chain of $\mu$ level blocks is the $\mu$-superchain.
 Note that the 0-superchain (or 0-chain) is identical to the blockchain itself.
 This interlink structure is partially shown in \autoref{fig:nipopows}, which shows each $\mu$-superchain according to the perspective of the right-most block.
+The full interlink structure is shown in \autoref{fig:nipopows-interlinks}.
 
 \begin{figure}
 \centering
@@ -455,8 +456,19 @@ This interlink structure is partially shown in \autoref{fig:nipopows}, which sho
     Source diagram: \url{https://nipopows.com/images/hierarchical-ledger.png}
 }
 
-Intuitively, a NIPoPoW works by starting with the (very short) top-most chain of $\mu$-superblocks, and targets a block (denoted $\mathcal{C}[-k]$ in the NIPoPoW paper) a few confirmations behind the chain tip.
-This is done by progressively inspecting segments of lesser $\mu$-superchains.
+\begin{figure}
+    \centering
+    \includegraphics[max width=\linewidth]{diags/27-practical-30-nipopows-all-interlinks_sag.pdf}
+    \caption[
+        The full interlink structure used by NIPoPoWs for a chain segment.
+    ]{
+        The full interlink structure used by NIPoPoWs for the chain segment shown in \autoref{fig:nipopows}.
+    }
+    \label{fig:nipopows-interlinks}
+\end{figure}
+
+Intuitively, verification of a NIPoPoW works by starting with the (very short) top-most chain of $\mu$-superblocks, and hones in on a block (denoted $\mathcal{C}[-k]$ in the NIPoPoW paper) a few confirmations behind the chain tip.
+This is done by progressively inspecting the most recent segments of lesser and lesser $\mu$-superchains.
 This is the main \emph{suffix proof}, as it proves the blocks at the recent end (suffix) of the blockchain.
 (Additionally, the most recent $k$ blocks ($\mathcal{C}[-k:]$) are included along side the proof.)
 The work required to generate the main suffix proof is (approximately) as much work as has been contributed to the entire blockchain history.
@@ -466,9 +478,9 @@ Thus, an adversarial NIPoPoW requires (approximately) as much work as the total 
 
 Now that the chain-head and relevant $\mu$-superchains have been proven, arbitrary blocks in the chain's history can be proven.
 This is done by `following down' from a top-level $\mu$-superblock to the target block, following the interlink structure.
-Starting with the earliest $\mu$-superblock between the target block and $\mathcal{C}[-k]$, $\mu$ levels are progressively descended until the target block is reached.
+Starting with the \emph{earliest} $\mu$-superblock between the target block and $\mathcal{C}[-k]$, $\mu$ levels are progressively descended until the target block is reached.
 `Following down' means: for a $\mu$-superblock, check if the previous block at level $(\mu-1)$ occurred \emph{after} the target block -- if so, that block becomes the next in the series, otherwise decrease $\mu$ by one and repeat with the current block.
-The blocks that were traversed comprise an \emph{infix proof}.
+The blocks that are traversed comprise the \emph{infix proof} for that block.
 
 An example of a NIPoPoW with a suffix and infix proof is shown in \autoref{fig:nipopow-proof}.
 

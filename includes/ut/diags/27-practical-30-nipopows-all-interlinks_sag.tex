@@ -45,7 +45,17 @@
             % draw lines to lower blocks
             \ifnum 0<\m
                 \pgfmathtruncatemacro{\lastM}{\m - 1}
-                \draw [double distance=4pt] (n-\h-\m) -- (n-\h-\lastM);
+                % \draw [double distance=11pt] (n-\h-\m) -- (n-\h-\lastM);
+                %shorten >= -3pt, shorten <= -3pt, smooth
+                \draw []
+                    % ($(n-\h-\m.south west)!.5!(n-\h-\lastM.north west)$)
+                    ($(n-\h-\m.south west) + (1.1pt, 1.1pt)$)
+                    arc (45:-45:3.65pt)
+                    ($(n-\h-\m.south east) + (-1.1pt, 1.1pt)$)
+                    arc (-45:45:-3.65pt);
+                    % ($(n-\h-\m.south west) + (2pt, -0.2pt)$)
+                    % -- ($(n-\h-\m.south west)!.5!(n-\h-\lastM.north west) + (3pt, 0)$)
+                    % -- ($(n-\h-\lastM.north west) + (2pt, 1pt)$);
             \fi
 
             % no arrows for h=0
@@ -59,7 +69,8 @@
                     \foreach \pm in {\nextMu,...,\maxMu} {
                         \ifnum \nextMu<\maxMuPOne
                             \pgfmathtruncatemacro{\prevHiMuX}{\h - mod(\h, 2^\pm)}
-                            \draw [->, rounded corners] (n-\h-\m) |- (n-\prevHiMuX-\pm);
+                            \pgfmathsetmacro{\arrowXOffs}{\pm}
+                            \draw [->, rounded corners] ($(n-\h-\m.north) + (\pm mm - 2 mm, -.2pt)$) |- (n-\prevHiMuX-\pm);
                         \fi
                     }
                 \fi
