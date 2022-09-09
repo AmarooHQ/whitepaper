@@ -90,6 +90,7 @@
         "Namecoin's",
         "newcommand",
         "nicefrac",
+        "Nōs",
         "Nunc",
         "parachain",
         "parachains",
@@ -104,6 +105,7 @@
         "PoR",
         "PoRs",
         "PoS",
+        "posteritorial",
         "PoW",
         "prunable",
         "quadrifurcate",
@@ -145,6 +147,7 @@
         "txs",
         "Uhh",
         "Ultimum",
+        "Ultrā",
         "unconvertible",
         "uncountably",
         "uncriticized",
@@ -168,7 +171,8 @@
         "zk",
         "ZK",
         "ZKPs",
-        "Zohar"
+        "Zohar",
+        "Ῑmus"
     ],
     "cSpell.ignoreWords": [
         "subsectionautorefname",

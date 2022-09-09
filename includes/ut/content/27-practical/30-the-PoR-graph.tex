@@ -57,6 +57,8 @@ Let's call this a state of \emph{maximal reflection}, and say that such a PoR gr
 
 \subsubsubsection{Maximally Reflective PoR Graphs}
 
+\label{sec:por-graph-max-refl}
+
 Specifically, we can say this about any PoR graph in a state of maximal reflection: for every block \BL{}, and for every block \BR{} reflected by \BL{}, then every block $b$ that is reflected by \BR{} satisfies one of: $b$ is reflected by \BL{}; or $b$ was reflected by an ancestor of \BL{}; or $b$ is an ancestor of \BL{}.
 
 Notice that, if \BL reflected any blocks, there will always be at least one block that \emph{was} reflected by \BL that was \emph{not} reflected by any other block that was reflected by \BL.
@@ -533,6 +535,8 @@ Thus, these will not be NIPoPoRs -- this method requires PoW, so, in terms of Po
 }
 
 \subsubsubsubsubsection{Problem: DAG Compatibility}
+
+\label{sec:nipopowrs-problem-dag-compatibility}
 
 If the longest PoR chain is a DAG, then the interlink will need to be a DAG, too.
 Sometimes, two (or more) blocks will be simultaneous, so we will have two (or more) graph tips in those cases.

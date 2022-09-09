@@ -326,7 +326,7 @@ There are decisive advantages to using DAGs (instead of trees) as the fundamenta
 Namely, multiple histories (both compatible and incompatible) can be merged into a single, consistent history -- a feature which eliminates stale blocks and thwarts attacks like an empty-block DoS.
 UT's simplex-chains must be block-DAGs to remain functional and avoid such DoS attacks.
 
-\textbf{Note:} often, the motivation for using a block-DAG -- instead of a block-tree -- is to increase the block frequency.
+Often, the motivation for using a block-DAG -- instead of a block-tree -- is to increase the block frequency.
 Since block-DAGs can reference multiple parent blocks, the stale-rate can theoretically approach (or reach) 0.
 In UT, increasing the block frequency eventually becomes counter-productive, though, since UT is sensitive to the size and number of headers that are produced (see \autoref{sec:impact-of-header-size}).
 In UT, the purpose of using block-DAGs is to thwart certain attacks, not to increase the block frequency.

@@ -347,3 +347,5 @@
 % nipopow stuff
 
 \NewDocumentCommand{\muType}{m}{\ensuremath{\mu_{#1}}\xspace}
+\let\origMu\mu
+\RenewExpandableDocumentCommand{\mu}{}{\ensuremath{\origMu}\xspace}

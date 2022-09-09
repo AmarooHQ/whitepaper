@@ -170,6 +170,8 @@ wp-pandoc:
 	bash bin/msg_good.sh "[wp-pandoc]: PP_MODE=$(PP_MODE)"
 	pandoc -s --number-sections --toc -f markdown-latex_macros -t latex -o $(WPTEX) $(WPFILE)
 	sed -i 's/\\%\\%/%/g' $(WPTEX)
+#	sed -i 's/timum Imus/timum \\=Imus/g' $(WPTEX)
+# note: \=I doesn't work right via pandoc, so it needs to be replaced. The command works, but capital I-bar isn't a common character so causing issues
 
 pandoc-stdin:
 	pandoc -s --number-sections -f markdown-latex_macros -t latex
