@@ -1,0 +1,183 @@
+\documentclass[]{standalone}
+\usepackage[T1]{fontenc}
+\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usepackage{xintexpr}
+\usepackage{xparse}
+\usepackage{comment}
+\usepackage{ifthen}
+\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathreplacing, patterns.meta}
+
+\makeatletter
+\def\input@path{{./includes/}{./includes/ut/diags/}}
+\makeatother
+
+\definecolor{malachite}{rgb}{0.04, 0.85, 0.32}
+\definecolor{mikadoyellow}{rgb}{1.0, 0.77, 0.05}
+\definecolor{fluorescentpink}{rgb}{1.0, 0.08, 0.58}
+
+\NewDocumentEnvironment{clipThis}{}{
+    \begin{scope}
+        \clip (-1.2*\offs, -0.1) rectangle (\pgwidth, \cropUpperYRes);
+}{
+    \end{scope}
+}
+
+\newcommand{\drawBlockOutline}[6]{
+    \xdef\rawX{#1}
+    \xdef\m{#2}
+    \xdef\xl{#3}
+    \xdef\xr{#4}
+    \xdef\yb{#5}
+    \xdef\yt{#6}
+    \pgfmathsetmacro\rhsStartX{(\xl + \xr)/2}
+    \ifnum 0=\m
+        \pgfmathsetmacro\rhsStartX{\xl}
+    \fi
+    \pgfmathtruncatemacro{\drawTop}{mod(\rawX, 2) == 1}
+
+    \begin{clipThis}
+        \ifnum 1=\drawTop
+            \draw [blockOutline] (\xl, \yt) -- (\xr, \yt);
+        \fi
+        \draw [blockOutline] (\rhsStartX, \yb) -| (\xr, \yt);
+        \draw [blockOutline] (\xl, \yb) -| (\xl, \yt);
+    \end{clipThis}
+}
+
+\begin{document}%
+\begin{tikzpicture}[node distance=0.1cm]%
+    \tikzstyle{blockOutline} = [line cap=rect, opacity=1]
+
+
+    \def\maxMu{7}
+    \pgfmathtruncatemacro{\maxMuPOneRes}{\maxMu + 1}
+    \xdef\maxMuPOne{\maxMuPOneRes}
+    \pgfmathtruncatemacro{\hlSuperMu}{\maxMu - 2}
+    \pgfmathtruncatemacro{\nBlocks}{2^(\maxMu+1) - 31}
+    \pgfmathtruncatemacro{\proofAnchor}{\nBlocks-6}
+    \pgfmathtruncatemacro{\focusBlock}{37}
+    \xdef\demoBlock{136}
+    \xdef\pgwidth{14}  % cm
+    \pgfmathsetmacro\blockW{\pgwidth / \nBlocks}
+    \pgfmathsetmacro\offsRes{\blockW/2}
+    \xdef\offs{\offsRes}
+    \xdef\blockH{.75}
+    \pgfmathsetmacro\cropUpperYRes{\maxMuPOne*\blockH + 0.02}
+
+    % * variant: draw top
+    % args: \m x1 x2 y1 y2
+
+    \foreach \m in {0,...,\maxMu}{
+        \pgfmathtruncatemacro{\nBlocksAt}{ceil(\nBlocks / (2^\m))}
+        \pgfmathtruncatemacro{\twoTTMu}{2^\m}
+        \pgfmathsetmacro\thisBWidth{\blockW * 2^\m}
+        \pgfmathtruncatemacro\nextM{\m + 1}
+        \foreach \x in {0,...,\nBlocksAt}{
+            \pgfmathtruncatemacro\nextX{\x + \twoTTMu}
+            \pgfmathsetmacro\xStart{(\x * \thisBWidth)}
+            % \pgfmathsetmacro\xEnd{min(\x * \thisBWidth + \thisBWidth, \pgwidth - \offs)}
+            \pgfmathsetmacro\xEnd{(\x * \thisBWidth + \thisBWidth)}
+            \pgfmathtruncatemacro\isOkay{\xStart < \xEnd}
+            \ifnum 1=\isOkay
+                % block numbers to focus on
+                \pgfmathtruncatemacro\lower{(2*\x-5)*2^(\m-1)}
+                \pgfmathtruncatemacro\upper{(2*\x+5)*2^(\m-1)}
+                \pgfmathtruncatemacro\upperHead{(2*\x+8)*2^(\m-1)}
+
+                \pgfmathtruncatemacro\myHeight{\x*2^\m}
+                \pgfmathtruncatemacro\nextHeight{(\x+1)*2^\m}
+                \pgfmathtruncatemacro\prevSBH{(\x-1)*2^\m}
+                \pgfmathtruncatemacro\nextSBH{(\x+1)*2^\m}
+
+                \pgfmathtruncatemacro\isFocusBlock{(\prevSBH < \focusBlock && \myHeight >= \focusBlock)}
+                \pgfmathtruncatemacro{\isMainProof}{\proofAnchor <= \upperHead && (\myHeight <= \proofAnchor || (\myHeight > \proofAnchor && \m == 0))}
+                \def\blockStyle{}
+                % check if this block will be used as part of the NIPoPoW
+                \pgfmathtruncatemacro{\isSuper}{0 && mod(\x, 2^(\hlSuperMu-\m+1)) == 0}
+                % \pgfmathtruncatemacro{\setBlockStyle}{\isSuper || \isFocusBlock || \isMainProof}
+
+                \pgfmathtruncatemacro{\isDemonstrationBlock}{\m < 4 && \myHeight == \demoBlock}
+
+                % (\m > (\maxMu - 2) && \myHeight > (\proofAnchor-16)) &&
+                \pgfmathtruncatemacro{\shouldDrawAtAll}{(\myHeight <= \nBlocks)}
+
+
+                \ifnum 1=\shouldDrawAtAll
+                    \def\mpStyle{}
+                    \def\focusStyle{}
+
+                    \ifnum 1=\isMainProof
+                        \def\mpStyle{fill=mikadoyellow}
+                    \fi
+                    \ifnum 1=\isDemonstrationBlock
+                        \def\mpStyle{pattern color=gray, pattern={Lines[angle=45, distance=2mm, line width=1mm]}}
+                    \fi
+
+                    \ifnum 1=\isFocusBlock
+                        \def\focusStyle{pattern color=black, pattern={Hatch[angle=-45, distance=1mm, line width=.3mm]}}
+
+                        \ifnum 0=\isMainProof
+                            \path [fill=cyan] (\xStart, \m*\blockH) rectangle (\xEnd, \nextM*\blockH);
+                        \else
+                            \def\mpStyle{}
+                            \begin{clipThis}
+                                \path [fill=mikadoyellow, opacity=.4, fill opacity=.75] (\xStart, \m*\blockH) rectangle (\xEnd, \nextM*\blockH);
+                            \end{clipThis}
+                        \fi
+                    \fi
+                    \begin{clipThis}
+                        % \clip (-\offs, 0) rectangle (\pgwidth, \maxMuPOne*\blockH);
+                        \path [opacity=.4, fill opacity=.75, style/.expanded=\mpStyle, style/.expanded=\focusStyle] (\xStart, \m*\blockH) rectangle node (b-\m-\x) {} (\xEnd, \nextM*\blockH);
+                    \end{clipThis}
+                    \drawBlockOutline{\x}{\m}{\xStart}{\xEnd}{\m*\blockH}{\nextM*\blockH}
+                \fi
+            \fi
+        }
+        \pgfmathsetmacro{\muLabelH}{(\m+0.5)*\blockH}
+        \node [anchor=east] at (0.1, \muLabelH) {\small $\mu$: \m\;\;\;$\cdots$};
+    }
+
+    % label+arrow infix proof target
+    \node (tgLabel) [anchor=north east, align=center, xshift=-5mm, yshift=-3mm, font=\small] at (b-0-\focusBlock.south) { Infix Proof \\ Target Block };
+    \draw [->, rounded corners=3mm] (tgLabel.east) -| ([yshift=-3mm]b-0-\focusBlock.south);
+
+    % label+arrow suffix proof target
+    \node (paLabel) [anchor=north east, align=center, xshift=-5mm, yshift=-3mm, font=\small] at (b-0-\proofAnchor.south) { Suffix Proof \\ Target Block };
+    \draw [->, rounded corners=3mm] (paLabel.east) -| ([yshift=-3mm]b-0-\proofAnchor.south);
+
+    % l+a explainer-block
+    % , xshift=-5mm
+    \node (ebLabel) [anchor=north, align=center, yshift=-3mm, font=\small] at (b-0-\demoBlock.south) { Blocks directly above another \\ block are the same block };
+    % loop through outline of blocks
+    % track the last top left and top right points of each block as we ascend
+    % start from the midpoint of bottom block.
+    \xdef\lastTL{(\demoBlock*\blockW, 0)}
+    \xdef\lastTR{(\demoBlock*\blockW, 0)}
+    \xdef\x{\demoBlock*\blockW}
+    % \foreach \m in {0,...,3} {
+    %     \pgfmathsetmacro{\thisBWidth}{\blockW * 2^\m}
+    %     \pgfmathsetmacro{\leftX}{\x - \thisBWidth / 2}
+    %     \pgfmathsetmacro{\rightX}{\x + \thisBWidth / 2}
+    %     \pgfmathsetmacro{\nextM}{\m + 1}
+    %     % gray shading
+    %     \path [fill=fluorescentpink, fill opacity=.25] (\leftX, \nextM*\blockH) rectangle (\rightX, \m*\blockH);
+    %     % outline components
+    %     \draw [ line cap=rect] \lastTL -- (\leftX, \m*\blockH) -- (\leftX, \nextM*\blockH);
+    %     \draw [ line cap=rect] \lastTR -- (\rightX, \m*\blockH) -- (\rightX, \nextM*\blockH);
+    %     % for next iter
+    %     \xdef\lastTL{(\leftX, \nextM*\blockH)}
+    %     \xdef\lastTR{(\rightX, \nextM*\blockH)}
+    %     % draw top if we're done
+    %     \ifnum 3=\m
+    %         \draw[] \lastTL -- \lastTR;
+    %     \fi
+    % }
+    % \draw [->, rounded corners=3mm] (ebLabel.east) -| ([yshift=-3mm]b-0-\demoBlock.south);
+
+    % solid rectangle around suffix proof target
+    \node (paTR) [xshift=0.5*\blockW, yshift=0.5*\blockH] at (b-0-\proofAnchor.center) {};
+    \node (paBL) [xshift=-0.5*\blockW, yshift=-0.5*\blockH] at (b-0-\proofAnchor.center) {};
+    \draw [] (paTR.center) rectangle (paBL.center);
+\end{tikzpicture}%
+\end{document}
