@@ -24,10 +24,10 @@ The attacker's only available strategy is to produce a single chain of empty blo
         An attempted empty-block DoS attack on a block-DAG.
     ]{
         An attempted empty-block DoS attack on a block-DAG.
-        The attacker's blocks, $A_{\_}$, are mined in public and contain no transactions.
+        The attacker's blocks, $A_{i+\_}$, are mined in public and contain no transactions.
         Each block is annotated with its \emph{chain-weight} ($\Sigma_w$); a double outline indicates that a block is part of the main chain.
         Even though the attacker produces $2\times$ as many blocks as the honest network, the attack inevitably fails after a short while.
-        NB: $H_i$ is defined to have $\Sigma_w = 0$ for illustrative convenience.
+        Note: $H_i$ is defined to have $\Sigma_w = 0$ for illustrative convenience.
     }
     \label{fig:dag-dos-1}
 \end{figure}
@@ -40,16 +40,16 @@ For traditional (non-DAG) chains -- where each non-genesis block has exactly one
 }
 % <!-- (Typically, this means the attacker produces blocks more frequently.) -->
 
-However, if blocks are allowed to have *more* than one parent then there *is no point* where an attacker can *maintain* a DoS attack indefinitely. Instead, they can only *delay the execution* of some transactions for a short period of time.
+However, if blocks are allowed to have \emph{more} than one parent then there \emph{is no point} where an attacker can \emph{maintain} a DoS attack indefinitely. Instead, they can only \emph{delay the execution} of some transactions for a short period of time.
 Particularly, if an attacker can produce $A_{\text{blocks}} > 1$ for every 1 block produced by the honest network, then the attack can delay honest transactions for up to approximately $({A_{\text{blocks}}}^2 - 1) \cdot {B_f}^{-1}$ seconds, where $B_f$ is the frequency of block production (in Hz).
 After this (approximate) point, the weight of the honest chain-segment, which includes the attacker's chain-segment, is always greatest.
 
-If an attacker performs a *repeating cycle* of these attacks, then they may be able to decrease the effective capacity of the chain by a factor of $A_{\text{blocks}}^2$. %<!-- / (1 + A_{\text{blocks}}) -->
+If an attacker performs a \emph{repeating cycle} of these attacks, then they may be able to decrease the effective capacity of the chain by a factor of ${A_{\text{blocks}}}^2$. %<!-- / (1 + A_{\text{blocks}}) -->
 The opportunity cost of this attack, for the attacker, is at least as much as the lost transaction fees.
 % <!-- note: with the distance from the main/pivot chain penalty in "Inclusive Block Chain Protocols", a smaller attacker isn't penalized much, but a larger attacker is penalized a lot WRT block rewards -->
 
 All that sounds okay so far (maybe not that last bit), but this thought experiment is flawed.
-It is *smoothed out* compared to what we'd expect in reality -- the discrete and probabilistic natures of block production and reflections are ignored.
+It is \emph{smoothed out} compared to what we'd expect in reality -- the discrete and probabilistic natures of block production and reflections are ignored.
 In \autoref{fig:dag-dos-1}, those are explicitly excluded!
 What happens if we include the effect of other simplex-chains, though?
 % Well... something \emph{magical}.
@@ -93,6 +93,6 @@ If there were, it'd be possible to temporarily limit the attacker to $<50\%$ of 
 
 
 
-\todoDraftOnly{The above should work for simplex-chains *and* dapp-chains}
+\todoDraftOnly{The above should work for simplex-chains \emph{and} dapp-chains}
 
 \todoDraftOnly{Dynamic average block-size for simplex-chains based on dapp-chain headers having some PoW}

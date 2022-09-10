@@ -407,7 +407,7 @@ The chain of primary parents forms the \emph{main chain}.
     In a block-DAG, the \emph{main chain} is the continuous chain of primary parents from the best block to the genesis block. Blocks that are part of the main chain are \emph{on-main}, and blocks that are not are \emph{off-main}%
 }
 
-Let's limit DAG-chain blocks to two parents. If the best block has two parents, then each parent will have a *subgraph of blocks* between itself and the *most recent common primary ancestor* of the two parents.
+Let's limit block-DAG blocks to two parents. If the best block has two parents, then each parent will have a *subgraph of blocks* between itself and the *most recent common primary ancestor* of the two parents.
 The subgraph which takes priority is that of the *prioritized parent's ancestry*.
 If that subgraph is a chain, then the ordering and execution of blocks is trivial.
 If it is not, then there must be another subgraph within that subgraph, and this algorithm is applied recursively.
@@ -528,8 +528,8 @@ The attacker can include honest miners' chain-work in a purely *beneficial* way 
 
 Why does this symmetry exist?
 Because the *cumulative weight* of each block (including uncles) is *divorced* from *the set of transactions* that is contributed by that block.
-However, with a full DAG-chain, when an attacker links to uncles in this way *they must allow for the execution of all non-conflicting transactions* (i.e., those which would not cause a doublespend to occur).
-Thus, GHOST *does not mitigate* empty-block DoS attacks; *only* a full DAG-chain can do that.
+However, with a full block-DAG, when an attacker links to uncles in this way *they must allow for the execution of all non-conflicting transactions* (i.e., those which would not cause a doublespend to occur).
+Thus, GHOST *does not mitigate* empty-block DoS attacks; *only* a full block-DAG can do that.
 
 
 %%MERGING HISTORIES

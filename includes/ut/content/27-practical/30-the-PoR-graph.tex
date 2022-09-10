@@ -543,11 +543,13 @@ Sometimes, two (or more) blocks will be simultaneous, so we will have two (or mo
 When that happens, we will always have at least two 0-superblocks (since a 3-superblock is also a 2-superblock, etc).
 In fact, at and below the $\mu$ level of the lightest graph tip, all interlink levels will point back to all graph tips.
 
+We are therefore dealing with \mu-superDAGs, not \mu-superchains.
+
 The existing NIPoPoW \texttt{followDown} algorithm should work fine for high level $\mu$-superblocks.
-Since simultaneous blocks at such levels will be exceptionally rare, we can expect higher $\mu$-superchains to be much more chain-like than the longest PoR chain.
+Since simultaneous blocks at such levels will be exceptionally rare, we can expect higher $\mu$-superDAGs to be much more chain-like than the longest PoR chain.
 
 At lower levels (or any level), it doesn't matter which path to the target block we take (if more than one is even available).
-The PoR graph has no conflicts and no concept of a ``doublespend'' -- rather, it is a massive graph of interconnected merklized tree structures where the roots of novel past vertexes comprise are the leaves of future nodes; thus, edges are merkle branches.
+The PoR graph has no conflicts and no concept of a ``doublespend'' -- rather, it is a massive graph of interconnected merklized tree structures where vertexes are merkle roots and comprise the leaves of future vertex-roots; thus, edges are merkle branches.
 Put another way, there's no sense of \emph{priority} between siblings of the same $\mu$ level.
 This is not true for chains using GHOST (or block-DAGs)\footnote{
     GHOST and block-DAGs are the specific focus of \autoref{sec:dos-and-dags}, and we'll discuss this issue properly, then.
