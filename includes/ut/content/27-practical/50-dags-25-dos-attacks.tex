@@ -1,0 +1,98 @@
+
+\subsubsubsection{Preventing DoS Attacks}
+
+\label{sec:preventing-dos-attacks}
+
+Consider the situation where an attacker is attempting to deny service via the production of empty blocks, and that the attacker can create blocks faster than the honest network. Such a situation is illustrated in \autoref{fig:dag-dos-1}. Since the goal of the attack is to prevent transactions from occurring, the attacker must\footnote{
+    The attacker could also fill the blocks with spam transactions.
+    That's more work for the attacker, but also more work for the honest network (calculating and storing that state, maybe indefinitely).
+    It's preferable that the attacker has minimal transactions in their blocks.
+    It's tempting to think of ideas like: \emph{since the attacker's blocks are empty, we can let honest nodes make larger blocks via some kind of weighted average block size calculation plus some flexibility in the size of blocks produced}.
+    The problem with this is that it incents the attacker to fill their blocks with spam transactions, which is counterproductive.
+} produce empty\footnote{
+    Note that the attacker should still be reflecting other simplex-chains so as to maximize the total weight of the attacker's chain-segment.
+    Given this, the attacker's blocks will contain reflected simplex-chain headers but no transactions.
+} blocks.
+Furthermore, if the attacker links back to any honest blocks then the honest blocks' histories will be merged with the canonical history; thus the attack would fail.
+The attacker's only available strategy is to produce a single chain of empty blocks.
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\linewidth]{dag_dos_v2_sag}
+    \caption[
+        An attempted empty-block DoS attack on a block-DAG.
+    ]{
+        An attempted empty-block DoS attack on a block-DAG.
+        The attacker's blocks, $A_{\_}$, are mined in public and contain no transactions.
+        Each block is annotated with its \emph{chain-weight} ($\Sigma_w$); a double outline indicates that a block is part of the main chain.
+        Even though the attacker produces $2\times$ as many blocks as the honest network, the attack inevitably fails after a short while.
+        NB: $H_i$ is defined to have $\Sigma_w = 0$ for illustrative convenience.
+    }
+    \label{fig:dag-dos-1}
+\end{figure}
+
+How does such an attack fair?
+The challenge of such a DoS attack is to prevent honest miners from extending the attacker's chain-segment.
+For traditional (non-DAG) chains -- where each non-genesis block has exactly one parent -- this is accomplished as soon as the attacker is able to reliably produce a heavier chain-segment than the honest network for a given period.\footnote{
+    For a traditional blockchain, this would also imply a 51\% attack, so this isn't a situation that those chains have to deal with.
+    In a simplex, however, a miner can have $>50\%$ of a chain's local hash-rate, so we need to handle this case.
+}
+% <!-- (Typically, this means the attacker produces blocks more frequently.) -->
+
+However, if blocks are allowed to have *more* than one parent then there *is no point* where an attacker can *maintain* a DoS attack indefinitely. Instead, they can only *delay the execution* of some transactions for a short period of time.
+Particularly, if an attacker can produce $A_{\text{blocks}} > 1$ for every 1 block produced by the honest network, then the attack can delay honest transactions for up to approximately $({A_{\text{blocks}}}^2 - 1) \cdot {B_f}^{-1}$ seconds, where $B_f$ is the frequency of block production (in Hz).
+After this (approximate) point, the weight of the honest chain-segment, which includes the attacker's chain-segment, is always greatest.
+
+If an attacker performs a *repeating cycle* of these attacks, then they may be able to decrease the effective capacity of the chain by a factor of $A_{\text{blocks}}^2$. %<!-- / (1 + A_{\text{blocks}}) -->
+The opportunity cost of this attack, for the attacker, is at least as much as the lost transaction fees.
+% <!-- note: with the distance from the main/pivot chain penalty in "Inclusive Block Chain Protocols", a smaller attacker isn't penalized much, but a larger attacker is penalized a lot WRT block rewards -->
+
+All that sounds okay so far (maybe not that last bit), but this thought experiment is flawed.
+It is *smoothed out* compared to what we'd expect in reality -- the discrete and probabilistic natures of block production and reflections are ignored.
+In \autoref{fig:dag-dos-1}, those are explicitly excluded!
+What happens if we include the effect of other simplex-chains, though?
+% Well... something \emph{magical}.
+
+\todoDraftOnly{As soon as an honest block is created linking back to a most-recent attacker block, the game is over.}
+
+Consider an attacker producing 2 blocks for every 1 honest block.
+What happens most of the time?
+Well the attacker's blocks get reflected first, so those blocks have an appreciable advantage over the honest blocks.
+The honest blocks will get reflected, too, but most of the time the attacker's blocks will get the advantage from earlier reflections.
+\emph{Most} of the time.
+Occasionally, when an honest block is a bit lucky, an honest block will beat the attacker's next block -- gaining reflections earlier.
+At that point, the attacker has lost -- they need to outpace the \emph{difference} in the number of reflections between the honest block and attacking blocks.
+So, unlike a normal doublespend (where the attacker wins if they \emph{ever} get ahead), now the honest network wins (ends the DoS) if it \emph{ever} gets ahead of the attacker -- after that point, there's no viable strategy for the attacker besides to build on the honest blocks.
+\emph{The asymmetry has flipped!}
+
+\begin{comment}
+- mk
+cut from after "when an honest block is a bit lucky":
+> (which will be more often if there's \emph{miner resonance})
+it's worth noting the convergence better than we do atm (right now, that's: "If there were, it'd be possible to temporarily limit the attacker to $<50\%$ of mining power, ending the DoS quickly. (See \autoref{sec:miner-resonance}.))"
+\end{comment}
+
+\todoDraftOnly{
+    Analyze including requirement to only reflect extant data.
+    This means that the chain-tips get the weight (advantage honest b/c H builds on A blocks and H blocks).
+    Attacker blocks lose out on PoRs but honest chain includes all PoRs.
+    the attacker might lie about the requirement and be okay with reflecting non-extant data, but then other chains won't reflect it.
+}
+
+There's more that can be done here, too, like honest users creating transactions (with large fees) that depend on certain history (i.e., that some honest block is in the history of the chain).
+That will attract miners from other chains due to unrealized RoI (potentially a lot).
+The attacker could include that transaction, but then they need to voluntarily end the DoS themselves.
+If you're worried about that, because it seems like miners might empty-block DoS simplex-chains, consider: when in equilibrium, that situation is essentially the same as an efficient market (for transaction execution).
+
+\todoDraftOnly{Is it essentially the same?}
+
+Is there a reasonable strategy whereby the honest network can temporarily increase the number of miners?
+If there were, it'd be possible to temporarily limit the attacker to $<50\%$ of mining power, ending the DoS quickly.
+(See \autoref{sec:miner-resonance}.)
+
+
+
+\todoDraftOnly{The above should work for simplex-chains *and* dapp-chains}
+
+\todoDraftOnly{Dynamic average block-size for simplex-chains based on dapp-chain headers having some PoW}
