@@ -3,23 +3,27 @@
 BlockReduce is an architecture using merged mining to scale blockchains through a hierarchical relationship between chains at different levels.
 
 \bquote{
-    We argue that the blockchain trilemma is only a true limit in the context were two functions of a blockchain are conflated, specifically consensus and consistency. [\dots]
-
-    [\dots]
-
-    [\dots] how do we disentangle consistency with consensus while maintaining a secure, scalable, decentralized system.
-
-    [\dots]
-
+    We argue that the blockchain trilemma is only a true limit in the context were two functions of a blockchain are conflated, specifically consensus and consistency. {[...]}
+    \\
+    {[...]}
+    \\
+    {[...]} how do we disentangle consistency with consensus while maintaining a secure, scalable, decentralized system.
+    \\
+    {[...]}
+    \\
     Quai Network achieves a scalable PoW architecture because it makes tradeoffs in the CAP theorem trilemma which allows for greater throughput by delaying global consensus. There is an inherent trade-off that is being made. Quai Network can dramatically increase throughput although somewhere between 3–4 orders of increased TPS it will eventually be constrained by network bandwidth, latency, and delay of cross-chain state propagation.
+    \\
+    {[...]}
+    \\
+    {Quai Network is an open-source Proof of Work blockchain network utilizing the capabilities of merged mining to increase throughput and security. Users of Quai Network will enjoy fast transaction times without compromising decentralization and security. {[...]}}
+}[{
+    \href{https://blog.quai.network/breaking-the-trilemma-8afc28c96ed2}{Breaking The Blockchain Trilemma / blog.quai.network}
+    \href{https://archive.ph/nHVsR}{[m1]}
+    \href{https://perma.cc/CMG8-EPQK?view-mode=server-side}{[m2]}
+}]
 
-    [\dots]
 
-    Quai Network is an open-source Proof of Work blockchain network utilizing the capabilities of merged mining to increase throughput and security. Users of Quai Network will enjoy fast transaction times without compromising decentralization and security. [\dots]
-}{\href{https://perma.cc/CMG8-EPQK?view-mode=server-side}{\emph{Breaking The Blockchain Trilemma} / blog.quai.network} \href{https://archive.ph/nHVsR}{[m]}}
-
-
-\quote{
+\bquote{
     The chain at the top, Prime, has the largest mining reward but also the greatest difficulty and slowest blocks. The next levels, Regions, and zones have sequentially lower difficulty, and faster blocks enabling greater liveliness.
 }
 
@@ -34,3 +38,19 @@ BlockReduce is an architecture using merged mining to scale blockchains through 
     otherwise a malicious miner can mine a valid prime block that either: has an invalid zone block, or an unavailable region/zone block.
     So downloading all blocks is a minimum.
 \end{itemize}
+
+\bquote{
+    Each one of the blockchains in the hierarchy are fundamentally independent chains which do not depend on any of the other chains. They have a shared token and monetary policy, but the consensus rules are locally enforced. To mine in this context, a miner must mine at least one slice of the tree (prime, 1 region, and 1 child zone) which they can choose arbitrarily. The ability to be able to only mine a slice in the overall braid ensures that as the network throughput increases, miners can still participate without being forced to increase node requirements super-linearly with transaction throughput.
+}
+
+\bquote{
+    When blocks are proposed in a merged mined context the header must contain references to all of the blockchains which are being merged mined together.
+}
+
+\subsubsection{slow}
+
+\bquote{
+    The Prime Chain has an approximated throughput of one block every 15 minutes, making it the chain with the lowest throughput on the network.
+}[https://blog.quai.network/what-are-the-prime-region-and-zone-chains-in-quai-network-b7702d4afe50]
+
+$O(1)$ conf time -- like 90 min?!
