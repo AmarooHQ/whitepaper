@@ -53,6 +53,7 @@ Could we simply modify the interlink structure to add a flag for off-main blocks
 \hruleMarker{}
 
 There is only one way (in principle) to always arrive at an on-main block: via ever more recent on-main blocks.
+It is only because of an on-main block's \emph{posterity} that it becomes (and remains) on-main.
 
 First, starting from all chain-tips, we find the most recent common on-main ancestor.
 If this is very close to the chain-tips, we can, instead, use an on-main ancestor a few confirmations back -- so we can meet any particular security parameter we might choose.
@@ -95,6 +96,21 @@ A major difference between the best-blocks and on-main proofs should not be an i
 We should expect blocks to have a single parent most of the time.
 (Using the logic from \autoref{sec:por-graph-max-refl}, we'd expect simultaneous blocks \sim 2\% of the time -- give or take.)
 
+As a final note, what happens when there are multiple paths in a \mu-superDAG?
+Note that this situation only occurs in the best-blocks proof.
+Since the best-blocks proof is not concerned with the posterity of blocks (their on-main status), there is no issue here.
+We can choose between the paths by whichever means we like -- e.g., picking the block with the lowest PoW, or picking on-main blocks over off-main blocks when they are siblings in the same \mu-superDAG.
+
+We've just sketched the construction of a new type of NIPoPoW that can prove \emph{both} the full chain-weight and the posterity of blocks.
+The best-blocks half of the proof is almost a regular NIPoPoW on its own, but the other half of the proof (traversing on-main blocks only) does not meet the definition because it is not secure.
+However, \emph{together} they are secure.
+
+We should distinguish between this new kind of NIPoPoW and the regular kind.
+The main difference is that what we have just sketched proves \emph{work and posterity}, rather than just work.
+Thus, it is a \emph{Non-Interactive Proof of Posteritorial\footnote{
+    A definition is require as this word is an almost-neologism: \\
+    \textbf{Posteritorial} \emph{adjective}: having posterity; supported by its descendants, especially regarding well-known descendancy, explanatory antecedence, root-causal nature, etc; having a prototypical and defining quality that was widely inherited.
+} Proof of Work} (NIPoPPoW).
 
 
 todo: answer simultaneous blocks?
@@ -114,8 +130,3 @@ NIPoPPPoWaPoWRs
 non-interactive proofs of per posterās proof of work and proof of work reflection
 
 \hruleMarker{NIPoPPoWaPoWRs}
-
-non-interactive proofs of posteritorial\footnote{
-    A definition is require as this word is an almost-neologism: \\
-    \textbf{Posteritorial} \emph{adjective}: having posterity; supported by its descendants, especially regarding well-known descendancy, explanatory antecedence, root-causal nature, etc; having a prototypical and defining quality that was widely inherited.
-} proof of work and proof of work reflection
