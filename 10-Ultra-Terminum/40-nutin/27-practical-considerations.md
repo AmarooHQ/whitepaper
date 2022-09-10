@@ -537,11 +537,16 @@ Thus, GHOST *does not mitigate* empty-block DoS attacks; *only* a full block-DAG
 
 \input{includes/ut/content/27-practical/50-dags-50-merging-histories.tex}
 
+%% NIPoPPoWs
+
+\input{includes/ut/content/27-practical/50-dags-60-nipoppows.tex}
+
 
 %% BLOCKDAG + POR GRAPH
 
 \input{includes/ut/content/27-practical/50-dags-75-interaction-with-por-graph.tex}
 
+\input{includes/ut/content/27-practical/50-dags-83-nipoppowrs.tex}
 
 ### Lowering Block Production Variance
 
@@ -586,6 +591,8 @@ One reason that we can predict that transactions will build up in this fashion (
 
 The average hash-rate on each simplex-chain, as described above, is always the same regardless of which of the two miner strategies are used.
 However, the variance of block production on each of these chains won't be that of a chain with 60s block times, it'll be closer to that of a chain with 6s block times.
+
+\todo{discuss interaction with empty block dos attacks}
 
 %% END ### RELEASE
 

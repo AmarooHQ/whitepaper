@@ -95,3 +95,21 @@
     #1
     \end{easide*}
 }
+
+\NewDocumentCommand{\warning}{m}{
+\begin{tcolorbox}[
+    % colback=white,
+    bicolor,
+    sharp corners,
+    % enhanced,
+    parbox=false,
+    interior style={preaction={fill=white},
+        % pattern={Lines{angle=45, distance=5mm, line width=2.5mm}},
+        pattern=north east lines,
+        %{Lines{angle=45, distance=5mm, line width=2.5mm}},
+        pattern color=yellow!50!white}
+    ]%
+    \reversemarginpar\marginnote{\nullOnCopy{\textbf{Warning}}}%
+    \trim{#1}%
+\end{tcolorbox}
+}

@@ -28,3 +28,9 @@
 \newcommand\titlemath[2]{%
 \texorpdfstring{#1}{#2}\xspace%
 }
+
+
+\makeatletter
+
+\NewDocumentCommand{\trim}{m}{\trim@spaces@noexp{#1}}
+\makeatother

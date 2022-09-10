@@ -256,11 +256,11 @@ Thus, we will require that it is via a protocol rule: the \AxiomOfMaximalReflect
     \begin{axiomreqs}
         \item \BR{} is valid under this Axiom; and
         \item each block that was reflected by \BR{} or is a parent of \BR{}:
-        \begin{itemize}
+        \begin{enumerate}[label=\alph*.]
             \item is reflected by \BL{}; or
             \item is an ancestor of \BL{}; or
             \item was reflected by an ancestor of \BL{}.
-        \end{itemize}
+        \end{enumerate}
     \end{axiomreqs}
 }
 
@@ -292,6 +292,11 @@ However, this \emph{does} impact dishonest miners since reflecting other chains 
 If a dishonest miner is determined to selectively reflect only \emph{some} simplex-chains, their valid blocks cannot reflect any other blocks that are less selective.
 Honest miners, on the other hand, \emph{can} reflect the dishonest miner's blocks.
 Thus, the \AxiomOfMaximalReflection creates an asymmetry between honest and dishonest miners.
+
+If you are wondering \emph{What happens when \BR reflects an \cL block that is not an ancestor of \BL?} then I say \emph{`well spotted'} to you.
+On the one hand, if the \cL chain forks, and two distinct chains emerge, then they should reflect one another like any other pair of simplex-chains.
+On the other hand\dots{} well the other hand is a problem that we can't solve, yet -- we'll ignore it for now and return to it in \autoref{sec:dags-and-the-por-graph}.
+
 
 \subsubsubsection{The Longest PoR Chain}
 
@@ -353,17 +358,30 @@ Additionally, in \autoref{sec:dags-and-the-por-graph} we will discuss some symme
 %     }
 % \end{equation*}
 
+\subsubsubsubsubsection{Intermission and Note}
 
+\;% single space to trigger new paragraph
+
+\aside{
+    Let us return to the \AxiomOfMaximalReflection again for a moment.
+    I would have said something earlier but I wanted to give you a some time to chew, first.
+    If you were left wondering \emph{What happens when \BR reflects an \cL block that is not an ancestor of \BL?} then I say \emph{`well spotted'} to you --- finding criticisms on a first reading is worthy of praise. \\
+    \\
+    Now, the answer to the question:
+    on the one hand, if the \cL chain forks, and two distinct chains emerge, then they should reflect one another like any other pair of simplex-chains.
+    On the other hand\dots{} well the other hand is a problem that we can't solve, yet --- we'll ignore it for now and return to it in \autoref{sec:dags-and-the-por-graph}.
+}
 
 \subsubsubsection{Generalizing NIPoPoWs}
 
-\aside{
+\warning{
     This section is speculative; it's about how NIPoPoWs might be possible for the longest PoR chain.
-    \UT{} won't depend on NIPoPoWs, but they are useful, so it would be good to support them if possible.
-    After an overview, we'll discuss how they might be generalized.
+    Subsequent sections regarding NIPoPoWs will, likewise, be speculative.
+    That said, \UT{} won't depend on NIPoPoWs, but they are useful.
+    It would be good to support them if possible.
 }
 
-\subsubsubsubsection{NIPoPoWs}
+\subsubsubsubsection{NIPoPoWs Primer}
 
 Prior work: \citeNIPoPoWsFull{}.
 
@@ -518,6 +536,8 @@ For \UT{}, however, we ideally want uncoupled simplex-chain difficulties, even i
 Speaking of which, how does a NIPoPoW work if more than one hashing algorithm is used?
 
 \subsubsubsubsection{Non-Interactive Proofs of Proof of Work Reflection (NIPoPoWRs)}
+
+\label{sec:nipopowrs}
 
 Before we discuss the problems mentioned above, it is important to note that the method we will devise cannot make use of converted work from non-PoW blocks (e.g., if some simplex-chain used PoS, or PoA, etc).
 That's because there is no real sense to such a block being `lucky' in the way that PoW superblocks are.
