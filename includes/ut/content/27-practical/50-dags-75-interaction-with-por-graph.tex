@@ -68,7 +68,7 @@ In terms of DoS potential, this is \emph{exactly} the same as if the simplex-cha
 Now that we've added the \AxiomOfUnifiedAncestry, the alternative for the attacker is producing only invalid blocks.
 
 \aside{
-    Note that this axiom applies in the context of the PoR graph rather than local chain-state.\\
+    Note that this axiom applies and is verified in the context of the PoR graph (not chain-state).\\
     The entire PoR graph learns of and verifies the fraud proof.
 }
 
@@ -81,9 +81,12 @@ In the case of simplex-chain block-DAGs, we do not want to use the same best-blo
 Instead of a standard best-blocks NIPoPoWs, we can use NIPoPoWRs from \autoref{sec:nipopowrs}.
 Functionally, both serve the same purpose: proving that a block \emph{exists}.
 
-However, the best-blocks proof had substantial overlap with the on-main only proof -- that isn't the case for NIPoPoWRs as \emph{most} of the \mu-superblocks will be from reflecting chains.
-Rater, we expect the best posteritorial \mu-superchain to have a \mu level approximately $\log_2({N_1})$ lower than that of the best PoR \mu-superDAG.
+However, the NIPoPPoW best-blocks proof had substantial overlap with the on-main only proof -- that isn't the case for NIPoPoWRs as \emph{most} of the \mu-superblocks will be from reflecting chains.
+Rater, we expect the best posteritorial \mu-superchain to have a \mu level approximately $\log_2({N_1})$ lower than that of the best PoR \mu-superDAG (since there are $N_1\times$ as many blocks).
+In other words, only $1/N_1$ local blocks are at the same \mu level as the highest \mu-superDAG.
 
-
+% soln? unify the por interlink w/ local interlink
+% each NIPoPoWR interlink includes the prev \mu-superblock in each of the: PoRs graph \mu-suerDAG, the local \mu-superDAG, and the posteritorial \mu-superchain.
+% one structure, verified by the PoR graph w/o exceeding O(1) limits
 
 \subsubsubsubsection{Integrating Fraud Proofs}

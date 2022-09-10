@@ -3,13 +3,17 @@
 \newpage
 # Introduction
 
-*Ultra Terminum* (UT) is a cooperative cross-chain consensus strategy that addresses *Buterin's Trilemma*[^buterins-trilemma] (aka the *Scalability Trilemma*). That is: *Ultra Terminum* builds on existing consensus methods to produce a blockchain network that is highly distributed, highly secure, and highly scalable. In essence, UT is a new way to organize blockchains.
+*Ultra Terminum* (UT) is a cooperative cross-chain consensus strategy that addresses *Buterin's Trilemma*[^buterins-trilemma] (aka. the *Scalability Trilemma*).
+That is: *Ultra Terminum* builds on existing consensus methods to produce a blockchain network that is highly distributed, highly secure, and highly scalable. In essence, UT is a new way to organize blockchains.
 
 [^buterins-trilemma]: I think *Scalability Trilemma* is a bad name because *scalability* is one of the three conflicting qualities; you could just as well call it the *Decentralization Trilemma*, etc. The term *Blockchain Trilemma* has been used recently, which I think is worse. Apparently the term was coined by Vitalik Buterin, so I prefer the name *Buterin's Trilemma*.
 
-Compared with existing consensus methods, UT provides *equal or better* security properties than **all** existing consensus methods (including Bitcoin's PoW method and variants, and *all* PoS variants). This is because UT leverages existing consensus methods in combination and, by way of construction, UT can only *add* security to these methods.
+Compared with existing consensus methods, UT provides *equal or better* security properties than **all** existing consensus methods (including Bitcoin's PoW method and variants, and *all* PoS variants).
+This is because UT leverages existing consensus methods in combination and, by way of construction, UT can only *add* security to these methods.
 
-As a consensus method[^ut-consensus-method], UT differs from existing consensus methods in that it is a *novel modification* to particular components of preexisting consensus algorithms. These modifications allow those consensus algorithms to cooperate. This improves the maximal security and decentralization of the network, whilst also providing a foundation for scalability.
+As a consensus method[^ut-consensus-method], UT differs from existing consensus methods in that it is a *novel modification* to particular components of preexisting consensus algorithms.
+These modifications allow those consensus algorithms to cooperate.
+This improves the maximal security and decentralization of the network, whilst also providing a foundation for scalability.
 
 [^ut-consensus-method]: Whether *Ultra Terminum* is a consensus \emph{method} or not is somewhat unclear.
 On the one hand: a new combination of methods is still a method.

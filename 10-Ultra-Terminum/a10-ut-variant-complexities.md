@@ -24,7 +24,7 @@ N_1 & = \frac{k_1 \cdot \ln 2}{2 \cdot B_f \cdot g \cdot W_0((2^{B_h g^{-1} - 1}
 \implies k_{1,tx} & \neq k_{1,b}
 \end{split}
 \end{equation}
-Note: $W_0(z)$ is the Lambert W function, aka the product logarithm.
+Note: $W_0(z)$ is the Lambert W function, aka. the product logarithm.
 
 \autoref{eq:simplex-N1-with-PoR} gives an $N_1$ that is of the form $N_1 = O(1) \cdot \frac{k_1}{W_0(O(1) \cdot k_1)}$.
 \autoref{fig:x-over-lambert} graphs $f(x) = \frac{x}{W_0(x)}$ for values of $x$ that we care about; $f(x) = 0.0638x$ is included for comparison.

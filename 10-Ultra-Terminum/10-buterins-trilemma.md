@@ -3,7 +3,7 @@
 %% \newpage
 
 \begin{comment}
-keep toc to d=1 for this section -- reduces ToC page size. default is d=3
+keep toc to d=1 for this section --- reduces ToC page size. default is d=3
 \end{comment}
 
 \addtocontents{toc}{\protect\setcounter{tocdepth}{1}}
@@ -85,21 +85,23 @@ We have some hints to conditions that might belong to a solution:
 
 **This is the crux of the problem: how do you construct a network of blockchains (scalable) such that attacking an individual chain is about as difficult as attacking the full network (secure), whilst ensuring that the security of the network does not require validating all chains (decentralized)?**
 
-### Assumptions
+### Prior Assumptions
 
-Here are some additional underlying assumptions that are either common or which I expect to be common:
+Here are some prior underlying assumptions that are either common or which I expect to be common:
 
 * Sharing PoW security requires merged mining.
 * Sharing PoW security requires that chains use the same hashing algorithm.
-* Different (non-merged-mined) PoW chains using the same hashing algorithm is insecure.
+* Multiple (non-merged-mined) PoW chains using the same hashing algorithm means that at least some of those chains are be vulnerable to a 51\% attack.
 * Simultaneously securing a network with PoW and PoS is not possible without compromises (like that PoW miners could DoS PoS validators or vice versa).
 * It is unsafe for miners/validators to build on unvalidated histories (as is done with SPV mining, which *is* unsafe).
 
 These assumptions *are* true in lots of cases (arguably in all cases up to now).
-Do they need to be?
+Are they always?
 
-NB: I call them *assumptions*; some people will likely (and rightly) take issue with that and call them *conclusions* instead.
-For our purposes there isn't really a difference; I include them here so that I can later show you conditions under which they are all false.
+\aside{
+    I call them \emph{assumptions}; some people will likely (and rightly) take issue with that and call them \emph{conclusions} instead.
+    For our purposes there isn't really a difference; I include them here so that I can later show you conditions under which they are all false.
+}
 
 ## Conjecture: A Principle of Scaling
 
