@@ -9,7 +9,7 @@
 ## Comparison: ``The Big 4''
 
 The following comparisons (\autoref{table:compare_nets_3k}, \autoref{table:compare_nets_20k}, and \autoref{table:comparison_1m_tps}) are indented to be an *apples to apples* between UT variants and ``The Big 4'': Bitcoin, Cardano, Eth2, and Polkadot.
-Cardano, as a cutting-edge network, is an exception here: the Cardano/IOHK teams have not been pursuing \emph{Layer 1} scalability solutions -- unlike the Eth2 and Polkadot teams -- and are focusing instead on a \emph{Layer 2} solution: Hydra via EUTXOs.
+Cardano, as a cutting-edge network, is an exception here: the Cardano/IOHK teams have not been pursuing \emph{Layer 1} scalability solutions --- unlike the Eth2 and Polkadot teams --- and are focusing instead on a \emph{Layer 2} solution: Hydra via EUTXOs.
 Their work is good and promising.
 I mention this particularly because the nature of an *apples to apples* comparison casts Cardano in a light that some might consider to be misleading.
 However, these comparisons do not consider \emph{Layer 2} scalability solutions for one very simple reason: all networks can implement them in some fashion.
@@ -64,7 +64,7 @@ No real-world sharded network has come close to this level of performance, and i
     \tnote[PoS]{
         \href{\linkZackPoSCriticisms}{Unanswered criticisms of PoS} (\href{\linkZackPoSDefence}{replies})
         mean that we cannot conclude that PoS is $O(n)$ secure.
-        Saying PoS is ``Maybe'' $O(n)$ secure is being kind -- since there are unanswered criticisms, we should really conclude ``No''.
+        Saying PoS is ``Maybe'' $O(n)$ secure is being kind --- since there are unanswered criticisms, we should really conclude ``No''.
         (There are no such unanswered criticisms of PoW-based consensus.)
     }
     \tnote[ss]{

@@ -29,14 +29,11 @@ Thus, with \emph{omitted proofs}, \(O(\Delta s) = O(k_1 + N_1 \cdot \log_2 N_1) 
 
 However, with \emph{explicit PoRs} (variants including +PoRs), \(\Delta s \le k_1 + N_1 \cdot B_f \cdot B_h = O(k_1) = O(c)\).
 
-\todoDraftOnly{in effect: we get to choose the aspect that the $\log c$ influences -- this matters b/c of \emph{a principle of scaling} section.
-we get to choose based on *worst case* so basically scalability isn't affected by that term b/c we can always put it in the non-bottleneck component.}
-
 \aside{
   The term $g \cdot \ceil{\log_2 N_1}$ in these equations is the size of a merkle branch for a PoR.
   What if verkle trees are used instead?
   With a branching factor of 256, 32 byte commitments and proofs, and 1 byte location specifiers, this term should be replaced with $(1+32) \cdot \max(1, \log_{256} N_1)$.
-  The complexity of these two terms is the same -- $O(\log c)$ -- but in practice verkle PoRs are less than half the size of merkle PoRs.
+  The complexity of these two terms is the same --- $O(\log c)$ --- but in practice verkle PoRs are less than half the size of merkle PoRs.
   For this reason, the numerical calculations used in the tables throughout this paper assume that the UT implementation uses verkle trees.
 }
 
@@ -54,7 +51,7 @@ Let's call the total bandwidth requirements for the PoR graph $\Delta r$.
 \end{align}
 As discussed in \autoref{sec:por-graph-max-refl} it is unclear whether $O(c^2\phi) = O(c)$.
 However, we don't need to know $O(\Delta r)$ to estimate some real world values of $\Delta r$.
-Practically, $\Delta r$ looks to be between $k_1$ and $2 k_1$ for $k_1=3000$ -- but, this is sensitive to $\phi$.
+Practically, $\Delta r$ looks to be between $k_1$ and $2 k_1$ for $k_1=3000$ --- but, this is sensitive to $\phi$.
 
 If we try to restrict $\Delta r < k_1$, then we find that we require a large $B_h$ or small $k_1$:
 \begin{align*}

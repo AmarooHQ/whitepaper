@@ -48,7 +48,7 @@ $\blacksquare$
 
 The Confirmation Equivalence Conjecture is why PoR works.
 If it were false, then PoR could not work, and neither would simplexes.
-Additionally, this is the root of UT's $O(c)$ confirmation rate -- the conjecture implies that confirmation rate is proportional to the number of mutually reflecting chains.
+Additionally, this is the root of UT's $O(c)$ confirmation rate --- the conjecture implies that confirmation rate is proportional to the number of mutually reflecting chains.
 
 Can we test it? If so, how?
 
@@ -64,7 +64,7 @@ So \emph{security takes \ul{time}}, because confirmations take time.
 
 Now, consider a simplex: the equivalence conjecture says that it doesn't matter whether confirmations come from the \emph{local} chain, or if they come from a \emph{reflecting} chain.
 So, a simplex-chain in a 2-chain simplex (wherein each simplex-chain has $\mathbb{C}^\prime = 2 \times B_f$) \emph{should}, after $C$ \emph{local} confirmations, be as secure as a standalone blockchain with $2C$ confirmations.
-This is true for larger simplexes, too: \emph{doubling} the size of a simplex means we can \emph{halve} the number of \emph{local} confirmations that we wait for -- the chance of a doublespend succeeding should be approximately the same.
+This is true for larger simplexes, too: \emph{doubling} the size of a simplex means we can \emph{halve} the number of \emph{local} confirmations that we wait for --- the chance of a doublespend succeeding should be approximately the same.
 More generally, a simplex-chain in an $N$-chain simplex will, after $C$ \emph{local} confirmations, be as secure as a standalone blockchain after $CN$ confirmations.
 
 This is something we can test!
@@ -83,7 +83,7 @@ As blockchain architects, if the CEC is true, then UT allows us to maintain secu
 With a traditional blockchain, the network has no ``memory'' of work (mining) that has been done which did \emph{not} result in a valid block (i.e., the main chain does not record or account for that work).
 Specifically, the network gains no knowledge of how much work has been done \emph{between} blocks.
 This is almost self-evident: each block is the \emph{sole} way that work can be \emph{added} to the chain.
-Naturally, there is no smaller unit of contributed work than an individual block -- so there's no ``memory''.\footnote{
+Naturally, there is no smaller unit of contributed work than an individual block --- so there's no ``memory''.\footnote{
     We're not concerned with things like \emph{weak blocks} or super-block hybrid designs; though it's possible that doublespend methodology for those designs has some overlap with this section.
 }
 When an attacker publishes a heavier chain-segment which causes a reorganization, it is \emph{immediately} in the interests of miners to begin building on the attacker's best block.
@@ -103,7 +103,7 @@ Specifically, let's consider \emph{just before} the attacker publishes their cha
 In the memory pool\footnote{
   The \emph{memory pool} is where unconfirmed transactions (and other things) are stored before they are included in a block.
   Each node has their own memory pool.
-  %% -- this must be the case because securely synchronizing memory pools between untrusted parties is as difficult as running a whole blockchain. %% Note: I think this is wrong -- it's only as hard if you have to achieve consensus on which of two conflicting transactions are included.
+  %% --- this must be the case because securely synchronizing memory pools between untrusted parties is as difficult as running a whole blockchain. %% Note: I think this is wrong --- it's only as hard if you have to achieve consensus on which of two conflicting transactions are included.
   A miner typically decides a block's contents by choosing the combination of transactions from their memory pool that results in the largest reward (i.e., transactions with the largest fees).
 } of that miner, there will be PoRs, and those PoRs are \emph{only} valid for the \emph{honest} chain-segment (most likely they are for the best known honest block, but don't need to be).
 Each $L$ block, in and of itself, only adds $\sim w$ weight to the $L$ chain.
@@ -112,7 +112,7 @@ What happens when the attacker's chain-segment is published (along with their re
 The miner has a choice: reorganize to the attacker's chain-segment and mine on top of a chain with weight $W_A$, \emph{or} continue mining on the honest chain-segment that weighs $W_H + nw$.
 
 That extra term, $nw$, is the ``memory'' we're looking for, and it makes all the difference.
-It is only safe for the attacker to publish their chain-segment \emph{after} $W_A > W_H + nw$ -- only then is it \emph{decisively better} than the honest chain-segment.
+It is only safe for the attacker to publish their chain-segment \emph{after} $W_A > W_H + nw$ --- only then is it \emph{decisively better} than the honest chain-segment.
 If, however, the attacker publishes their chain-segment when $W_H < W_A < W_H + nw$: the best chain-segment for honest miners to mine is \emph{still} the honest chain-segment, not the attacker's!
 
 Miners don't actually have to change their behavior at all: their choice is the same, whether they are mining a simplex-chain \emph{or} a traditional chain.
@@ -121,9 +121,9 @@ If they build on the honest chain-segment, does their resulting block have more 
 
 There are some subtleties to consider if chains are DAGs or use GHOST: both chain-segments can be included as ancestors, but which should take priority?
 If the weight of PoRs is not taken into account (or applied after evaluating the order of parents), then the attacker's chain-segment takes priority when $W_A > W_H$.
-This rule conflicts with what we discussed above, so it must be that parents are ordered based on their chain-weights \emph{including} any PoRs in that block -- the honest chain-segment should take priority when $W_A < W_H + nw$.
+This rule conflicts with what we discussed above, so it must be that parents are ordered based on their chain-weights \emph{including} any PoRs in that block --- the honest chain-segment should take priority when $W_A < W_H + nw$.
 Also, note that this is why the weight of PoRs is attributed to the \emph{reflected} block (usually a parent) rather than the block that contains the PoRs.
-In essence, the inclusion of this ``memory'' requires that the fork rule take \emph{context} into account -- particularly the context of the descendant block.
+In essence, the inclusion of this ``memory'' requires that the fork rule take \emph{context} into account --- particularly the context of the descendant block.
 This is not a paradox because the fork rule is \emph{only} used to choose the priority chain in the context of some descendant block (even if that block is an invalid draft).
 
 \subsubsubsection{Testing the Confirmation Equivalence Conjecture}
@@ -165,7 +165,7 @@ One prediction of the hypothesis is that:
     \label{eq:por-sim-hypothesis}
 \end{equation}
 In fact, we can take this further.
-The relationship that exists is continuous -- it must be if confirmations are equivalent.
+The relationship that exists is continuous --- it must be if confirmations are equivalent.
 This is the \emph{extended} CEC:
 % 1 \le x \le N; x \in \{a_i, b_i\}
 % , and $1 \le a_i \le N$, and $1 \le b_i \le N$
@@ -182,7 +182,7 @@ This is the \emph{extended} CEC:
 Notice that we don't need to know a closed form of $P^\prime(q, c, N_1)$ to test the CEC: all cases \emph{that we can measure} are equivalent to some \emph{other, traditional} case, and we can convert between them.\footnote{
     This is not strictly true: Rosenfeld's solution requires an integer value for $c$.
     This is due to his solution assuming a static difficulty and the longest-chain fork rule; the \emph{construction} is consistent with Bitcoin (provided the difficulty doesn't adjust), but not with chains that recalculate difficulty every block.
-    Additionally, when using \emph{work} instead of \emph{height} as the measure of an attack's success, fractional values of $c$ have real meaning -- especially with a reactive DAA and $N_1 \gg 1$.
+    Additionally, when using \emph{work} instead of \emph{height} as the measure of an attack's success, fractional values of $c$ have real meaning --- especially with a reactive DAA and $N_1 \gg 1$.
     Both factors turn out to be unproblematic for us, though.
     Rosenfeld's solution has reach beyond those assumptions and observed results converge with it.
 }
@@ -191,22 +191,22 @@ This is the basis of the method used to test this hypothesis.
 If \autoref{eq:cec-extended-hypothesis} is correct, it indicates that there exists a \emph{generalization} of traditional blockchains (which have $N_1 = 1$);
 particularly, that there is \emph{another dimension} ($N_1$; the size of the simplex) which is geometrically related to the first dimension, $c$.
 
-Note: this experiment does \emph{not} test the conversion of chain-work -- the same hashing algorithm is used for each simplex-chain and no conversion of work takes place.
+Note: this experiment does \emph{not} test the conversion of chain-work --- the same hashing algorithm is used for each simplex-chain and no conversion of work takes place.
 
 
 % \subsubsubsubsection{Scope and Constraints}
 
-% This experiment is not intended to be comprehensive -- many significant real-world factors are basically ignored: e.g., block propagation latency, transaction processing overhead, geographic latency, bandwidth constraints, etc.
+% This experiment is not intended to be comprehensive --- many significant real-world factors are basically ignored: e.g., block propagation latency, transaction processing overhead, geographic latency, bandwidth constraints, etc.
 
-% The scope is \emph{only} intended to cover PoR as a consensus mechanism -- particularly with respect to doublespends.
+% The scope is \emph{only} intended to cover PoR as a consensus mechanism --- particularly with respect to doublespends.
 
 % Since we want to simulate \emph{specific attacks} we can guarantee that the honest nodes and attacking nodes will only behave in \emph{specific ways}.
 % This means, that blocks will always be valid: e.g., neither honest nor attacking nodes will generate blocks with invalid reflections.
 
 
-% This constraint means there are many ways to simplify implementation -- for example, reflected blocks are not checked against the history of a blockchain.
+% This constraint means there are many ways to simplify implementation --- for example, reflected blocks are not checked against the history of a blockchain.
 % These simplifications would render a \emph{production} blockchain insecure.
-% However, the simplifications are okay in this case since we \emph{expect} near-identical behavior from well functioning networks, and the simplifications are otherwise independent of what we are testing -- the consensus mechanism.
+% However, the simplifications are okay in this case since we \emph{expect} near-identical behavior from well functioning networks, and the simplifications are otherwise independent of what we are testing --- the consensus mechanism.
 % In essence, we want to simulate a \emph{specific} attack, so the implementation doesn't need to be hardened because we know that the attacker will \emph{only} attack in the specific way we care about.
 
 % So, while it is \emph{possible} that a poor implementation of a simplex could compromise its security, we'll assume these kinds of design flaws are \emph{in principle} avoidable.
@@ -232,7 +232,7 @@ Particularly:
 The source code for this model blockchain network is contained in the \href{https://github.com/AmarooHQ/whitepaper/tree/master/experiments/por-sim-rs}{\texttt{/experiments/por-sim-rs/}} folder of \href{https://github.com/AmarooHQ/whitepaper}{this paper's repository}.
 
 While the simulation supports blockchains with single-parent blocks and a ``longest chain'' fork rule, these were not used in this experiment.
-Rather, multi-parent blocks were used (which simulates both GHOST and block-DAGs), along with the weight-based fork rule -- these are required by UT.
+Rather, multi-parent blocks were used (which simulates both GHOST and block-DAGs), along with the weight-based fork rule --- these are required by UT.
 
 \begin{table}[H]
     \centering
@@ -259,7 +259,7 @@ Rather, multi-parent blocks were used (which simulates both GHOST and block-DAGs
 
 % with attack simulations wherein each chain uses PoW and has a fully functioning fork rule.
 % This design is modular, such that it supports different fork rules, different block data structures and ordering algorithms (including multiple parents), different attack strategies.
-% The program also accepts a variety of parameters -- both for the simulation itself, the individual chains, and for each attack strategy.
+% The program also accepts a variety of parameters --- both for the simulation itself, the individual chains, and for each attack strategy.
 
 % As we can optimize this model, we can simulate many attacks quickly; so we can efficiently make statistically significant measurements.
 
@@ -267,7 +267,7 @@ When choosing values for ${B_f}^{-1}$ and $H$, we want them to be low enough for
 To this end, both were chosen to be 75.
 This means that, prior to the doublespend attack beginning, the average difficulty is around 5625.
 
-We also want to consider $\text{DAA}_N$ -- but there isn't an issue of \emph{precision} in this case.
+We also want to consider $\text{DAA}_N$ --- but there isn't an issue of \emph{precision} in this case.
 The DAA used\footnote{
     The simulation uses the algorithm named \textsc{DAA-2} from \citeDaaTwoLink{}.
 } adjusts every block, so lower values of $\text{DAA}_N$ mean the DAA is more reactive to a drop in hash-rate.
@@ -277,7 +277,7 @@ The only way to overcome this, for shorter attacks or attacks against smaller si
 (The effect is less significant with long attacks or attacks against larger simplexes since $P^\prime \to 0$ anyway.)
 
 In essence, a shorter $\text{DAA}_N$ means that $P^\prime$ approaches zero faster.
-Since we want to \emph{match} analytical results, we want a \emph{larger} value of $\text{DAA}_N$ for this experiment -- this is most like an assumption of Rosenfeld's solution: \emph{constant difficulty}.
+Since we want to \emph{match} analytical results, we want a \emph{larger} value of $\text{DAA}_N$ for this experiment --- this is most like an assumption of Rosenfeld's solution: \emph{constant difficulty}.
 
 \aside{
     In practice, we should seriously consider smaller values of $\text{DAA}_N$ for the security benefit.
@@ -290,7 +290,7 @@ The most important thing is that $\text{DAA}_N \gg c$, particularly regarding tr
     In other words: if the doublespend occurs over 600 blocks, the value of $\text{DAA}_N$ doesn't matter much; but if the doublespend occurs over 20 blocks, then the value of $\text{DAA}_N$ is a significant variable.
 }
 
-With regards to the other values -- $q$, $c$, and $N_1$ -- they will be varied as part of the experiment so that we can generate each data-point.
+With regards to the other values --- $q$, $c$, and $N_1$ --- they will be varied as part of the experiment so that we can generate each data-point.
 For each data-point, we'll gather at least 9,000 samples (this is indicated by ``$n \ge 9000$'' in these figures' legends).
 
 The goal is to generate multiple data series that the CEC predicts to align.
@@ -298,11 +298,11 @@ To that end, the functions in \autoref{table:cec-functions-to-graph} are measure
 If the CEC is true then we expect: $f_1(x) \approx f_2(x) \approx f_3(x) \approx f_4(x) \approx f_5(x)$.
 % For $q \in \{0.4, 0.44\}$ and $C = 5$:
 % \begin{itemize}
-%     \item $f_1(x) = P(q; c = Cx)$ -- Rosenfeld's analytical solution
-%     \item $f_2(x) = P^\prime(q; c = Cx; N_1 = 1)$ -- Simulated doublespend against a traditional chain
-%     \item $f_3(x) = P^\prime(q; c = C; N_1 = x)$ -- Simulated doublespend against a simplex
-%     \item $f_4(x) = P^\prime(q; c = 2C; N_1 = x/2)$ -- Simulated doublespend against a simplex
-%     \item $f_5(x) = P^\prime(q; c = 4C; N_1 = x/4)$ -- Simulated doublespend against a simplex
+%     \item $f_1(x) = P(q; c = Cx)$ --- Rosenfeld's analytical solution
+%     \item $f_2(x) = P^\prime(q; c = Cx; N_1 = 1)$ --- Simulated doublespend against a traditional chain
+%     \item $f_3(x) = P^\prime(q; c = C; N_1 = x)$ --- Simulated doublespend against a simplex
+%     \item $f_4(x) = P^\prime(q; c = 2C; N_1 = x/2)$ --- Simulated doublespend against a simplex
+%     \item $f_5(x) = P^\prime(q; c = 4C; N_1 = x/4)$ --- Simulated doublespend against a simplex
 % \end{itemize}
 % If the CEC is true then we expect: $f_1(x) \approx f_2(x) \approx f_3(x) \approx f_4(x) \approx f_5(x)$.
 \begin{table}[H]
@@ -357,12 +357,12 @@ Those corrections were:
 Many possible sources of error were ruled out, too, like: choice of hashing algorithm (\texttt{xxh3}); values of ${B_f}^{-1}$, $H$, and other parameters; and implementation details like omitting certain validation steps.
 
 % \begin{itemize}
-%     \item Hashing algorithm -- \texttt{xxh3} is used and produces results consistent with \texttt{blake3}.
-%     \item Values of ${B_f}^{-1}$ and $H$ -- both have enough precision; particularly $Hq$ should result in an integer.
-%     \item Several implementation details -- e.g., how much validation is done on blocks.
+%     \item Hashing algorithm --- \texttt{xxh3} is used and produces results consistent with \texttt{blake3}.
+%     \item Values of ${B_f}^{-1}$ and $H$ --- both have enough precision; particularly $Hq$ should result in an integer.
+%     \item Several implementation details --- e.g., how much validation is done on blocks.
 % \end{itemize}
 
-Changing the simulation based on early results is dangerous though -- why should we believe these results are valid?
+Changing the simulation based on early results is dangerous though --- why should we believe these results are valid?
 The answer is simple: all error corrections were motivated by \emph{making the simulation more like a real blockchain}.
 No magic numbers were introduced, no values were scaled arbitrarily, simulations were not repeated to get better results, etc.
 Since we \emph{know} that a simulation will naturally include simplifying assumptions (and omitted implementation details), we should expect that some of these simplifications might be significant.
@@ -386,17 +386,17 @@ Rather, the fact that \emph{these} corrections were the significant ones is cons
         A comparison of the measured probability of a successful doublespend against a traditional blockchain compared with Rosenfeld's analytical solution.
     ]{
         A comparison of the measured probability of a successful doublespend against a traditional blockchain compared with Rosenfeld's analytical solution, for $q \in \{0.4, 0.44\}$.
-        That the measured results converge with the analytical solution is taken to be validation of the simulation -- i.e., it \emph{works} and is \emph{useful} in the context of this experiment.
+        That the measured results converge with the analytical solution is taken to be validation of the simulation --- i.e., it \emph{works} and is \emph{useful} in the context of this experiment.
     }
     \label{fig:simulation-trad-only}
 \end{figure}
 
-At a minimum, we should expect the simulation to faithfully replicate doublespends against \emph{traditional} chains -- i.e., $f_1(x) \approx f_2(x)$.
+At a minimum, we should expect the simulation to faithfully replicate doublespends against \emph{traditional} chains --- i.e., $f_1(x) \approx f_2(x)$.
 Results of this, for $q \in \{0.4, 0.44\}$, are shown in \autoref{fig:simulation-trad-only}.
 
 \autoref{fig:simulation-trad-only} shows that the simulation \emph{does} align with Rosenfeld's solution, especially at values of $q \lesssim 0.40$.
 It is consistent with \autoref{eq:cec-base-case}.
-As $q$ increases, statistical artifacts and other inaccuracies \emph{do} become more significant, but not enough to compromise the results -- the largest differences (for $q=0.44$ and $c=5$) are around 50 parts per thousand (\autoref{fig:simulation-r1-single-simplex}) and typically less than this.
+As $q$ increases, statistical artifacts and other inaccuracies \emph{do} become more significant, but not enough to compromise the results --- the largest differences (for $q=0.44$ and $c=5$) are around 50 parts per thousand (\autoref{fig:simulation-r1-single-simplex}) and typically less than this.
 There are more significant differences at $q=0.48$, however this is close to limiting threshold of blockchain security in general ($q<0.5$), so we should expect larger error in the simulation results.
 Such differences are taken to be \emph{non-critical}, i.e., they do not compromise the results.
 
@@ -450,7 +450,7 @@ These results are, for the purpose of this paper, taken to indicate the followin
     For example: we see that these experimental results \emph{converge} as expected.
     This fact is NOT evidence that UT is secure, or that PoR works, or that the CEC is right.
     But, it is a \emph{pre-emptive criticism} of ideas like: \emph{The simulation does not work}, or \emph{PoR is broken}, or \emph{Simplexes aren't secure}, or \emph{Sharing security between blockchains is impossible}.
-    A decisive criticism of UT/PoR/CEC must therefore explain how these results are wrong -- the explanation needs to include a \emph{refutation} of these results.
+    A decisive criticism of UT/PoR/CEC must therefore explain how these results are wrong --- the explanation needs to include a \emph{refutation} of these results.
     Such a refutation could be an explanation of how: the implementation was flawed, the methodology was flawed, or that UT cannot be effectively implemented as a production blockchain.
     No such explanations are currently known.
     In the \emph{absence} of such criticisms, it is reasonable to work under the assumption that UT is secure, since \emph{PoR works} and \emph{the CEC is true} are currently (to my knowledge) the only viable explanation for these results.
@@ -467,7 +467,7 @@ These results are, for the purpose of this paper, taken to indicate the followin
 
 % \begin{enumerate}
 %     \item An attacker whose hash-rate is \emph{uniformly} distributed over a simplex is at a disadvantage compared to an attacker whose hash-rate is \emph{randomly} distributed.
-%     \item Decreasing $\text{DAA}_N$ increases the security of both simplexes and traditional blockchains -- except for ``Longest Chain'' fork rules.
+%     \item Decreasing $\text{DAA}_N$ increases the security of both simplexes and traditional blockchains --- except for ``Longest Chain'' fork rules.
 %     \item An attacker that waits to generate a block on a target chain is at a decisive advantage compared to one that does not.
 %     \item Rosenfeld's closed form solution is consistent with empirical results.
 % \end{enumerate}
@@ -475,7 +475,7 @@ These results are, for the purpose of this paper, taken to indicate the followin
 % \subsubsubsubsection{Experimental Limitations}
 
 % \todo{
-%     seems like simplexes might have trouble getting below 1\% probability of successful attack -- like large $N_1$ has $\sim$diminishing returns.
+%     seems like simplexes might have trouble getting below 1\% probability of successful attack --- like large $N_1$ has $\sim$diminishing returns.
 %     This effect disappears after more local confirmations tho.
 % }
 
@@ -486,18 +486,18 @@ These results are, for the purpose of this paper, taken to indicate the followin
 %     \item those ignored factors could be decisive
 %     \item insufficient breadth of attack parameters
 %     \item didn't come up with a good strategy (mb there's a better one than mining in private)
-%     \item confirmation bias in implementation -- might have missed something
+%     \item confirmation bias in implementation --- might have missed something
 %     \item does it work for simplexes that have PoS/PoA chains? not tested for
 %     \item some validation type things not done
-%     \item assumed that there's at least 1 local confirmation -- no claims about 0-conf stuff
+%     \item assumed that there's at least 1 local confirmation --- no claims about 0-conf stuff
 % \end{itemize}
 
 % sources of error
 
 % \begin{itemize}
-%     \item attacker q (e.g., 0.44) divisibility into B\_PERIOD and/or HR\_PER\_CHAIN (should not be an issue w/ these tests, nor w/ random HR distribution) (exp21 -- high res: see \texttt{png/highres\_vs\_std*.png})
+%     \item attacker q (e.g., 0.44) divisibility into B\_PERIOD and/or HR\_PER\_CHAIN (should not be an issue w/ these tests, nor w/ random HR distribution) (exp21 --- high res: see \texttt{png/highres\_vs\_std*.png})
 
-%     \item small HR\_PER\_CHAIN -- only 50-100 hashes every tick (exp14 -- more is better but results at HR=50 still consistent with HR=100; answered w exp21)
+%     \item small HR\_PER\_CHAIN --- only 50-100 hashes every tick (exp14 --- more is better but results at HR=50 still consistent with HR=100; answered w exp21)
 
 %     \item small values $\to$ limits of accuracy mb? (in other ways, not just attacker q divisibility). exp 14 indicates not really; also exp21
 
@@ -505,18 +505,18 @@ These results are, for the purpose of this paper, taken to indicate the followin
 
 %     \item not giving the attacker a 'bonus block' (i.e. they only start after having mined a block in private)
 
-%     \item not waiting long enough for doublespends to resolve -- since we end before $t=\infty$ it is the case we cut off \emph{some} doublespends that might be successful -- is it significant? (answered: exp18/19/20; situation where it is significant: \texttt{png/atk\_length\_comparison\_q=0.48\_t=5.png}; not significant with $q \le 0.4$ or $C \ge 20$)
+%     \item not waiting long enough for doublespends to resolve --- since we end before $t=\infty$ it is the case we cut off \emph{some} doublespends that might be successful --- is it significant? (answered: exp18/19/20; situation where it is significant: \texttt{png/atk\_length\_comparison\_q=0.48\_t=5.png}; not significant with $q \le 0.4$ or $C \ge 20$)
 
 %     \item does weighted chain favor lower difficulty? if priv difficulty is 0.75 * pub difficulty, then is there an expectation that priv chain can find 2x PoWs a bit faster, so statistically there's usually a point where priv chain is ahead (more PoWs but worth less)?
 
 %     \item WRT some bonus block simulations having P above theoretical (e.g., q=0.4 at C=5):
-%             perhaps this is to do with number of ticks. particularly: there's mb a point where refls are arriving every few ticks -- does the attacker have an advantage when this happens? Like for N < 5 it's fine, and for N > 30 its fine
+%             perhaps this is to do with number of ticks. particularly: there's mb a point where refls are arriving every few ticks --- does the attacker have an advantage when this happens? Like for N < 5 it's fine, and for N > 30 its fine
 
-%     \item error in implementation? (note: mb should see discrepancies between diff crypto systems / attack strats if that were the case -- depends on the impl error)
+%     \item error in implementation? (note: mb should see discrepancies between diff crypto systems / attack strats if that were the case --- depends on the impl error)
 
-%     \item theory/CEC wrong? -- nonspecific crit but possible
+%     \item theory/CEC wrong? --- nonspecific crit but possible
 
-%     \item allowing invalid blocks / txs / refls -- either b/c of simplifications or b/c of misunderstanding of reality?
+%     \item allowing invalid blocks / txs / refls --- either b/c of simplifications or b/c of misunderstanding of reality?
 % \end{itemize}
 
 % \subsubsubsubsection{Remarks}

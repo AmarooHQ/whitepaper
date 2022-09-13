@@ -36,7 +36,7 @@ The attacker's only available strategy is to produce a single chain of empty blo
 
 How does such an attack fair?
 The challenge of such a DoS attack is to prevent honest miners from extending the attacker's chain-segment.
-For traditional (non-DAG) chains -- where each non-genesis block has exactly one parent -- this is accomplished as soon as the attacker is able to reliably produce a heavier chain-segment than the honest network for a given period.\footnote{
+For traditional (non-DAG) chains --- where each non-genesis block has exactly one parent --- this is accomplished as soon as the attacker is able to reliably produce a heavier chain-segment than the honest network for a given period.\footnote{
     For a traditional blockchain, this would also imply a 51\% attack, so this isn't a situation that those chains have to deal with.
     In a simplex, however, a miner can have $>50\%$ of a chain's local hash-rate, so we need to handle this case.
 }
@@ -52,7 +52,7 @@ The opportunity cost of this attack, for the attacker, is at least as much as th
 % <!-- note: with the distance from the main/pivot chain penalty in "Inclusive Block Chain Protocols", a smaller attacker isn't penalized much, but a larger attacker is penalized a lot WRT block rewards -->
 
 All that sounds okay so far (maybe not that last bit), but this thought experiment is flawed.
-It is \emph{smoothed out} compared to what we'd expect in reality -- the discrete and probabilistic natures of block production and reflections are ignored.
+It is \emph{smoothed out} compared to what we'd expect in reality --- the discrete and probabilistic natures of block production and reflections are ignored.
 In \autoref{fig:dag-dos-1}, those are explicitly excluded!
 What happens if we include the effect of other simplex-chains, though?
 % Well... something \emph{magical}.
@@ -64,9 +64,9 @@ What happens most of the time?
 Well the attacker's blocks get reflected first, so those blocks have an appreciable advantage over the honest blocks.
 The honest blocks will get reflected, too, but most of the time the attacker's blocks will get the advantage from earlier reflections.
 \emph{Most} of the time.
-Occasionally, when an honest block is a bit lucky, an honest block will beat the attacker's next block -- gaining reflections earlier.
-At that point, the attacker has lost -- they need to outpace the \emph{difference} in the number of reflections between the honest block and attacking blocks.
-So, unlike a normal doublespend (where the attacker wins if they \emph{ever} get ahead), now the honest network wins (ends the DoS) if it \emph{ever} gets ahead of the attacker -- after that point, there's no viable strategy for the attacker besides to build on the honest blocks.
+Occasionally, when an honest block is a bit lucky, an honest block will beat the attacker's next block --- gaining reflections earlier.
+At that point, the attacker has lost --- they need to outpace the \emph{difference} in the number of reflections between the honest block and attacking blocks.
+So, unlike a normal doublespend (where the attacker wins if they \emph{ever} get ahead), now the honest network wins (ends the DoS) if it \emph{ever} gets ahead of the attacker --- after that point, there's no viable strategy for the attacker besides to build on the honest blocks.
 \emph{The asymmetry has flipped!}
 
 \begin{comment}

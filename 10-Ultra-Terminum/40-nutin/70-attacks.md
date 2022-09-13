@@ -4,7 +4,7 @@
 
 ## Attacks
 
-*Ultra Terminum* -- with appropriate configuration -- is resistant to the following attacks; see the linked section for discussion:
+*Ultra Terminum* --- with appropriate configuration --- is resistant to the following attacks; see the linked section for discussion:
 
 - 51% Attack, see \autoref{sec:proof-of-reflection}, \autoref{sec:preventing-dos-attacks}, and \autoref{sec:simplex-security-cec}.
 - Selfish mining, see \autoref{sec:confirmation-times}
@@ -16,7 +16,7 @@
 
 \aside{
   This is a fictional dialog between a malicious actor (\nefName{}) and myself.
-  The factors in play -- like the number and types of simplex-chains, the PoW algorithms used, the ROO distribution, etc -- were chosen to represent a young UT network.
+  The factors in play --- like the number and types of simplex-chains, the PoW algorithms used, the ROO distribution, etc --- were chosen to represent a young UT network.
   The \emph{real} Amaroo network, when it goes live, will be different.
   The point of this dialog is to give you an \emph{intuition} for the effect of these factors; it's intended to help answer the question \emph{Why is attacking UT harder and more complex than attacking traditional consensus methods?}
 }
@@ -137,7 +137,7 @@ Bribes don't work either b/c the PoS set-up is done on a different chain and ref
 }
 
 \dMax{
-  No they won't. If you try to get headers reflected without blocks, then other miners will reject them b/c the blocks aren't available -- there's no point reflecting them b/c there's no benefit to the miners. If the blocks are invalid, then they will get reflected, but miners on that particular chain will link to them as an invalid uncle.
+  No they won't. If you try to get headers reflected without blocks, then other miners will reject them b/c the blocks aren't available --- there's no point reflecting them b/c there's no benefit to the miners. If the blocks are invalid, then they will get reflected, but miners on that particular chain will link to them as an invalid uncle.
 }
 
 \dMax{

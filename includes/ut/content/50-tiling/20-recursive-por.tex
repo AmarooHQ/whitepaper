@@ -26,7 +26,7 @@ However, that isn't the case for \cL and \cR.
 How can we make \cL and \cR as secure as \cM \emph{without} having them mutually reflect one another?
 Is this even reasonable?
 
-Let's consider chain {\cL} -- what happens if \cL's local chain-work is, say, $3\times$ that of chain \cM?
+Let's consider chain {\cL} --- what happens if \cL's local chain-work is, say, $3\times$ that of chain \cM?
 The total chain-work that \cL takes into account is $\nicefrac43$ of its local chain-work, so an attacker would need $\nicefrac23$ worth of \cL's local chain-work to control \cL's history.
 This is more than 50\% of \cL's local chain-work, but, depending on \cR, it's within reason that an attacker might achieve the required hash-rate.
 
@@ -113,7 +113,7 @@ It is already known to all \cL nodes, since each part of the recursive PoR is av
 
 In \autoref{sec:counting-work} we discussed the idea that a PoR can only contribute to local blocks that are in the reflecting block's past.
 By inspection, we can see that the most recent \cR block (the reflecting block) in \BL{3}'s past is \BR{2}, and the most recent \cL block (the local block) in \BR{2}'s past is \BL{1}.
-Thus, we can see that our method for attributing reflected work -- following the arrows -- works for recursive PoR, too.
+Thus, we can see that our method for attributing reflected work --- following the arrows --- works for recursive PoR, too.
 
 There is something important to point out here: \emph{latency}.
 Notice that these 3 blocks (in chronological order) are required for this recursive PoR to exist: \BM{1}, \BR{2}, and \BM{2}.
@@ -209,7 +209,7 @@ However, it's not so clear what we should do when not all PoR paths yet exist.
 
 Let us approach this from these principles:
 \begin{itemize}
-    \item A reflecting block can only contribute work once -- we should not count work more than once.
+    \item A reflecting block can only contribute work once --- we should not count work more than once.
     \item A PoR contributes as much work as an attacker would need to perform to create a competing PoR of the same weight.
 \end{itemize}
 
@@ -265,7 +265,7 @@ This is directly relevant to how fast work propagates within a tiling.
 Note that, for a standalone simplex, we can see that $2d-1 = 1$ (each PoR is of length 1), and $v=1$ (there is no tiling), so the expected latency of draft reflected work is ${N_1}^{-1}$ block periods, which, in seconds, is $(N_1 B_f)^{-1} = {\Cprime}^{-1}$.
 
 % \begin{itemize}
-%     \item no -- it's enough to know that, when all PoR paths exist, the full weight is okay
+%     \item no --- it's enough to know that, when all PoR paths exist, the full weight is okay
 %     \item this is b/c we'll simplify tiles: every ${B_f}^{-1}$ seconds all chains in each tile mine 1 new block and provide reflections of 1 new block in their local tile and adjacent tiles, and vice versa.
 %     Thus all PoR paths are available all at once.
 %     \item we just need to be confident that an answer \emph{does} exist
@@ -274,7 +274,7 @@ Note that, for a standalone simplex, we can see that $2d-1 = 1$ (each PoR is of 
 %     \item some ideas or questions for that future research:
 %     \begin{itemize}
 %         \item is a single PoR path enough to count the full weight of the reflecting block?
-%         \item if so -- tiling is very fast and secure. if not, tiling is pretty fast and still secure.
+%         \item if so --- tiling is very fast and secure. if not, tiling is pretty fast and still secure.
 %         \item what happens if some paths \emph{never} end up existing?
 %         \item do we divide contributed work by the number of paths?
 %         \item do paths have to go through the same chain? (i.e., $\cL \to \cMone \to \cR \to \cMone \to \cL$)
@@ -286,20 +286,20 @@ Note that, for a standalone simplex, we can see that $2d-1 = 1$ (each PoR is of 
 %         like a block (\BL{3}) that enables some PoR paths via a new block (\BR{2}) will probs also enable other missing PoR paths.
 %         Example: \BL{4} enables \BR{2} via \BMtwo2, but could also mb enable \BR{3} via \BMtwo2, too.
 %         We should expect all paths to be available within a few block periods (e.g., $\sim 60$ s).
-%         \item WRT paths like $\cL \to \cMtwo \to \cMone \to \cR \to \cMone \to \cMtwo \to \cL$ (i.e., it's longer than the shortest path possible) -- we shouldn't need to count these.
+%         \item WRT paths like $\cL \to \cMtwo \to \cMone \to \cR \to \cMone \to \cMtwo \to \cL$ (i.e., it's longer than the shortest path possible) --- we shouldn't need to count these.
 %         we should always be able to go directly b/c an implicit reflection in a chain's history that can also be explicit, should be explicit.
 %         so count these as 0 weight.
 %         \item idea: only the paths back matter. making more paths between the \cR block and most recent \cL block isn't so hard, but making the \cR block is (if the \cR block is relatively heavy, that is).
 %         So: divide \cR block weight by the number of \emph{paths back} and then only count unique shortest paths from $\BR{x} \to \BL{y}$.
 %         By that point, shouldn't \emph{all} those paths be available, anyway?
 %         \item maybe: path availability is only an issue between the reflecting \cR block and the current \cL block, but not between the \cR block and the reflected \cL block?
-%         (This sounds like it logically has to be true -- how could any new paths back be introduced!?)
+%         (This sounds like it logically has to be true --- how could any new paths back be introduced!?)
 %         \item idea: the weights of all blocks in a recursive PoR path \emph{all} have the same \cL in their history, so their weights can be safely added to \cL.
 %         \item idea: the principle \emph{don't double-count work} means that when we have multiple paths back, that block's weight is attributable to the \emph{most recent} reflected \cL block.
-%         \item idea: the principle that \emph{a PoR is worth whatever is required to attack it} means that only 1 PoR path to the \cR block is required -- once that happens all other paths are redundant (though useful for SPV).
-%         \item idea: so the total weight contributed by a set of PoRs is the sum of all unique blocks in that set of PoRs -- multiple paths doesn't help.
+%         \item idea: the principle that \emph{a PoR is worth whatever is required to attack it} means that only 1 PoR path to the \cR block is required --- once that happens all other paths are redundant (though useful for SPV).
+%         \item idea: so the total weight contributed by a set of PoRs is the sum of all unique blocks in that set of PoRs --- multiple paths doesn't help.
 %         \item so simplex-chains in a deep tile get the security benefit of root tile chains as soon as a single path is available from an L block to any R block back to any L block.
-%         \item this should happen MUCH faster than the predicted delay between singularly reflected chains -- $v\cdot{N_1}^{-1}\times$ the duration, I think.
+%         \item this should happen MUCH faster than the predicted delay between singularly reflected chains --- $v\cdot{N_1}^{-1}\times$ the duration, I think.
 %     \end{itemize}
 %     \item do miners need to be incentivized to reflect child chains?
 % \end{itemize}
@@ -331,7 +331,7 @@ Note that, for a standalone simplex, we can see that $2d-1 = 1$ (each PoR is of 
 
 \subsubsubsection{Data Availability}
 
-\mk{Essence: UT solves issues of consensus at scale -- problem replaced with new problem: data availability at scale. this is easy though b/c data can just be downloaded and doesn't require processing. so it's just a problem of bandwidth, not CPU or long-term overhead.}
+\mk{Essence: UT solves issues of consensus at scale --- problem replaced with new problem: data availability at scale. this is easy though b/c data can just be downloaded and doesn't require processing. so it's just a problem of bandwidth, not CPU or long-term overhead.}
 
 \subsubsubsection{Future Research}
 

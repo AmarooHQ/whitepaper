@@ -7,7 +7,7 @@
 What does it mean for a tiling to be secure?
 Well, we have our broad definition from the trilemma: the network is secure against an $O(n)$ attacker.
 To answer this more specifically, though, we need to first answer: \emph{What does a doublespend against a tiling look like?}
-Currently, we don't know enough to answer this -- we next need answers to questions like \emph{Which PoRs do simplex-chains in a given tile use?} and \emph{How do we govern the difficulties of simplex-chains in different tiles?}
+Currently, we don't know enough to answer this --- we next need answers to questions like \emph{Which PoRs do simplex-chains in a given tile use?} and \emph{How do we govern the difficulties of simplex-chains in different tiles?}
 
 To answer these questions, and then evaluate the security of tree-tiling, we first need to define some key concepts.
 After that we will construct a security architecture so that we can answer the above questions.
@@ -47,7 +47,7 @@ Additionally, the core is where the vast majority of chain-work is done.
 % $\xyInlineRefl{\B\cL{a} \;&\; \B\cM{b} \arf[l] \;&\; \B\cR{c} \arf[l] \;&\; \B\cM{d} \arf[l] \;&\; \B\cL{e} \arf[l] }$.\footnote{
 %     Here, the subscripts $a,b,c,d,e$ are somewhat arbitrary and are used to indicate a temporal ordering according to $a < b < c < d < e$.
 %     This is somewhat self-evident since a block can only reflect other blocks that have already been created.
-%     The main point is that we only care about the ordering of $a,b,c,d,e$ -- not their exact values.
+%     The main point is that we only care about the ordering of $a,b,c,d,e$ --- not their exact values.
 % }
 
 % It will become clear in \autoref{sec:tree-tiling-security-architecture} \emph{why} we need recursive PoR for tiling.
@@ -62,7 +62,7 @@ Additionally, the core is where the vast majority of chain-work is done.
 
 \subsubsubsubsection{Excess Capacity in Proof of Work}
 
-\todo{this should probs go in practical considerations -- that's where +T is introduced.}
+\todo{this should probs go in practical considerations --- that's where +T is introduced.}
 
 \end{draftonly}
 
@@ -142,7 +142,7 @@ The sum ($S$) of all work over the tiling is thus:
 
 \subsubsubsubsection{Doublespend Requirements}
 
-relax security of network very slightly -- still $O(n)$ though.
+relax security of network very slightly --- still $O(n)$ though.
 instead of resisting an attacker with up to 50\% of the network-wide hash-rate, we'll require that an attacker only have 49.5\%, instead.
 
 For the purpose of this paper, it is assumed that: \UTinf{} being secure against as attacker with $q \le 0.495$ counts as $O(n)$ secure. ($q \le 0.495$ is \emph{good enough}.)
@@ -155,7 +155,7 @@ How can we analyze the security of tree-tilings?
 
 We will consider multiple cases, and in each case establish a \emph{bound} on $r$ in terms of $u$, $q$, and \Mroot.
 The intersection of these bounds on $r$ from each of these cases will yield the values of $r$ for which \emph{tiling works} (i.e., it is secure).
-The value of $q$ that we choose will determine how difficult the root tile is to attack, relative to the entire network -- we will choose $q \le 0.495$ as an acceptable bound on $q$, so $q=0.495$ is our threshold.
+The value of $q$ that we choose will determine how difficult the root tile is to attack, relative to the entire network --- we will choose $q \le 0.495$ as an acceptable bound on $q$, so $q=0.495$ is our threshold.
 The cases that we analyze will cover all possible positions of a tile in the tiling.
 
 The primary case for us to analyze is that the root tile is secure against an attacker with $q$ proportion of the network-wide hash-rate.
@@ -401,7 +401,7 @@ But it proves as much work as the bundle of 40 - 60 KB that we had before.
 This time, though, the burden is only 2.7 - 4.0 KB per local block.
 (If $k=3000, B_f = \nicefrac1{15}$, then each block is $\sim 45$ KB.)
 
-\todoDraftOnly{what about withholding attacks where an attacker gets a conflicting block implicilty reflected? might be possible via tile boundaries. can an attacker get a recursive PoR path generated without publishing the block? the attacker can mine in multiple tiles, too. mb answer is in work attribution -- which }
+\todoDraftOnly{what about withholding attacks where an attacker gets a conflicting block implicilty reflected? might be possible via tile boundaries. can an attacker get a recursive PoR path generated without publishing the block? the attacker can mine in multiple tiles, too. mb answer is in work attribution --- which }
 
 % \begin{equation*}
 %     \xymatrix@C=1em@R-1.8em{

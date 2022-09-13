@@ -2,7 +2,7 @@ What happens if a chain reflects a valid block that is not available?
 Could an attacker use this to their advantage?
 
 For example, consider the following (shown in \autoref{fig:unavailable-ex1}).
-We have two chains using mutual PoR -- \cL and \cR.
+We have two chains using mutual PoR --- \cL and \cR.
 Additionally, the most recently produced block is \BL{1}, which reflected \BR{1}.
 Next, a malicious \cR miner produces a valid block (\BR{2a}) which reflects \BL{1}.
 That miner broadcasts the \emph{header} of \BR{2a} along with a PoR branch proving that \BL{1} was reflected, but does not broadcast the rest of the block.
@@ -11,7 +11,7 @@ Since other (honest) \cR miners cannot build on \BR{2a}, they must work on the d
 Note that, although \BR{2} will almost certainly reflect \BL{1}, whether it reflects \BL{2} is at the miner's discretion.
 
 \begin{figure}
-    % extra column at start as padding -- centering is a bit off b/c of the length of labels.
+    % extra column at start as padding --- centering is a bit off b/c of the length of labels.
     % without the padding, the (time >->) arrow is centered but the diagram is too far to the left.
     \begin{equation*}
         \xyMChains{
@@ -26,7 +26,7 @@ Note that, although \BR{2} will almost certainly reflect \BL{1}, whether it refl
     ]{
         Chain-segments showing an unavailable \cR block that was reflected anyway.
         The dashed frame of \BR{2} indicates that it is a draft block (i.e., not yet mined, but being actively worked on by miners).
-        Note: \BR{2} reflects \BL{2} at the miner's discretion -- it is optional.
+        Note: \BR{2} reflects \BL{2} at the miner's discretion --- it is optional.
     }
     \label{fig:unavailable-ex1}
 \end{figure}
@@ -38,7 +38,7 @@ In that case, the attacker can publish \BR{2a} \emph{after} \BR{2} is mined for 
 When does this case occur?
 
 If \BR{2} does \emph{not} reflect \BL{2}, then \BR{2} will claim the same chain-weight as \BR{2a}.
-However, the next block -- \BR{3} -- will favor \BR{2a} since the PoR via \BL{2} contributes weight to \BR{2a} (as discussed in \autoref{sec:counting-work}).
+However, the next block --- \BR{3} --- will favor \BR{2a} since the PoR via \BL{2} contributes weight to \BR{2a} (as discussed in \autoref{sec:counting-work}).
 So the attacker \emph{always} has the advantage if \BR{2} \emph{does not} reflect \BL{2}.
 
 If \BR{2} does reflect \BL{2}, then \BR{1} is the only block to which we can attribute the work contributed by \BL{2}.
@@ -56,7 +56,7 @@ Can \cR do anything to prevent \cL miner's reflecting \BR{2a} before the block b
 The \cR miners' can't prevent a withheld \cR block from being produced or reflected.
 But, \cR miners can still influence \cL miners' choice to reflect \BR{2a} (and withheld blocks in general).
 \cL miners want their blocks to be reflected by \cR miners so that future \cL blocks will build on top of their's.
-So \cR miners could refuse to reflect some \cL blocks -- particularly, \cL blocks that reflect \cR block headers without a known body (such as \BR{2a}).
+So \cR miners could refuse to reflect some \cL blocks --- particularly, \cL blocks that reflect \cR block headers without a known body (such as \BR{2a}).
 Since \cL miners face the same problem, \cR miners should refuse to reflect \cL blocks for which they do not have the block body.
 
 If both \cR and \cL miners do this, then an equilibrium is achieved and an attacker cannot gain an advantage by withholding block bodies.
@@ -105,7 +105,7 @@ Should the honest \cR miners reflect \BL{2}?
     ]{
         % asdf.
         % The dashed frame of \BR{2} indicates that it is a draft block (i.e., not yet mined, but being actively worked on by miners).
-        % Note: \BR{2} optionally reflects \BL{2} -- there's no requirement that \cR miners must do so.
+        % Note: \BR{2} optionally reflects \BL{2} --- there's no requirement that \cR miners must do so.
     }
     \label{fig:unavailable-ex2}
 \end{figure}
@@ -113,7 +113,7 @@ Should the honest \cR miners reflect \BL{2}?
 
 If yes:
 - what do to with the PoR of L2->R2a?
-  - ignore R2a -- refl weight attributed to R1 via L2->L1->R1
+  - ignore R2a --- refl weight attributed to R1 via L2->L1->R1
     - reason for ignoring: R2a not in history of R2
     - on R2a public: it has priority over R2 since L2->R2a now valid
   - count it as zero, but then why bother reflecting L2?
@@ -121,7 +121,7 @@ If yes:
     - on R2a public: it has priority over R2 since L2->R2a now valid
 
 If no:
-  - can only reflect L1 -- same chain-weight as R2a before draft refls
+  - can only reflect L1 --- same chain-weight as R2a before draft refls
     - on R2a public: it has priority over R2 since L2->R2a now valid
 
 

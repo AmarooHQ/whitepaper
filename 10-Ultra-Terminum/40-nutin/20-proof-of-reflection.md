@@ -24,11 +24,11 @@ The idea of one blockchain 'tracking' another blockchain via chain-headers and i
   The \emph{act} of one chain creating and maintaining the projection of another is called \emph{imaging}
 }
 
-The general idea of an on-chain headers-only version of another chain does not -- to my knowledge -- have a name. Herein this is called a *projection*. The generalized process via which projections are created is called *imaging*.
+The general idea of an on-chain headers-only version of another chain does not --- to my knowledge --- have a name. Herein this is called a *projection*. The generalized process via which projections are created is called *imaging*.
 
 ### A Projection of Bitcoin in Ethereum
 
-The idea that Ethereum smart contracts (SCs) can track Bitcoin chain-headers is well understood -- i.e., Ethereum *images* Bitcoin.
+The idea that Ethereum smart contracts (SCs) can track Bitcoin chain-headers is well understood --- i.e., Ethereum *images* Bitcoin.
 The result of this is that the *projection* of Bitcoin is available to Ethereum users and SCs.
 Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is viable.
 In principle, any chain that supports some headers-only mode can be imaged in this way.
@@ -81,7 +81,7 @@ Why would a chain want to include a projection of another chain? The typical ans
 \label{sec:two-blockchains}
 
 Let's build up the idea via a hypothetical situation with two distinct blockchains.
-For simplicity, you can imagine these as Bitcoin and Ethereum 1 -- at least to start with.
+For simplicity, you can imagine these as Bitcoin and Ethereum 1 --- at least to start with.
 However, keep in mind that the changes required to support *Proof of Reflection* are unlikely to ever be integrated with either Bitcoin or Ethereum (and reaching social agreement about the details would be difficult, to say the least).
 
 Our starting case is that both chains use different Proof of Work algorithms and neither includes a projection of the other.
@@ -91,7 +91,7 @@ For simplicity, the following progression will use two blockchains with identica
 
 This is conceptually similar to having a projection of Bitcoin in Ethereum, and shown in \autoref{fig:pow_refl_step1}.
 
-Similar to before, Chain \cR will include Chain \cL's headers as they are produced. Note that this can be a protocol-level implementation; it does not have to be at the smart contract level -- as it would be with Ethereum.
+Similar to before, Chain \cR will include Chain \cL's headers as they are produced. Note that this can be a protocol-level implementation; it does not have to be at the smart contract level --- as it would be with Ethereum.
 
 \begin{figure}
 \centering
@@ -154,7 +154,7 @@ Chain \cL proves that it is *reflected* in Chain \cR.
 What does this proof look like? The following progression is shown in \autoref{fig:por-step3-parts}.
 First, Chain \cL must prove that its history is reflected, so we first find the most recently reflected header, $L_{i+1}$ (ideally, this is the previous \cL block).
 Secondly, we want to prove that $L_{i+1}$ is also the \emph{best block} (for Chain \cL) according to \emph{Chain \cR's} projection of Chain \cL, using the best known \cR block, $R_{j+1}$.
-For that, we need a merkle branch showing $L_{i+1}$ is part of $R_{j+1}$'s state -- this is sometimes referred to (in this paper) as the \emph{missing} merkle branch.
+For that, we need a merkle branch showing $L_{i+1}$ is part of $R_{j+1}$'s state --- this is sometimes referred to (in this paper) as the \emph{missing} merkle branch.
 Thirdly, we want to prove that $R_{j+1}$ is the \emph{best block} according to Chain \cL's projection of Chain \cR.
 We can do that via a merkle branch, too, but full nodes of Chain \cL already know whether $R_{j+1}$ is the best block or not, so this branch doesn't need to be explicit.
 However, \cL's nodes must be able to generate it.
@@ -275,7 +275,7 @@ For the purposes of our hypothetical construction, let's say that \cL and \cR do
 }
 
 Currently, the Chain \cL network chooses the \`\`heaviest'' (most worked) chain as its common history.
-Chain \cL calculates the \`\`weight'' of blocks (i.e., how much work went in to them) via an estimation of how many hashes were required -- e.g., some number of *double SHA256 hashes*.
+Chain \cL calculates the \`\`weight'' of blocks (i.e., how much work went in to them) via an estimation of how many hashes were required --- e.g., some number of *double SHA256 hashes*.
 For the purposes of illustration, let's convert this number to be in terms of *L Blocks* instead of *double SHA256 hashes*.
 That's easy, since each block is worth 1 *L Block* by definition.
 We can also measure the work of an \cL block in terms of *R Blocks* (1 \emph{L Block} = 1 \emph{R Block} by the constant of conversion above).
@@ -313,7 +313,7 @@ Thus, *either*:
 * the private chain-segment must contribute more total work to the Chain \cL blockchain than the public chain-segment does (*including* the relevant Chain \cR chain-segment); *or*
 * the attacker must *additionally* produce a private Chain \cR chain-segment such that the *total* work of both private chain-segments is greater than the total work of both public chain-segments, and publish both chain-segments simultaneously.
 
-Note that, at this point, there is no benefit to Chain \cR's security. That's because Chain \cR isn't 'reading' the reflected work back from Chain \cL. Thus a doublespend attack against Chain \cR has the expected, non-reflected profile -- it isn't more difficult to attack Chain \cR yet. However, Chain \cR can take advantage of the reflection. The main requirements are: the inclusion of appropriate proofs of reflection that show known Chain \cR blocks according to Chain \cL, and an update to Chain \cR's block-weight calculations to account for the reflected work. *Proof of Reflection* doesn't automatically secure both chains; each chain can proactively and independently take advantage of *Proof of Reflection*.
+Note that, at this point, there is no benefit to Chain \cR's security. That's because Chain \cR isn't 'reading' the reflected work back from Chain \cL. Thus a doublespend attack against Chain \cR has the expected, non-reflected profile --- it isn't more difficult to attack Chain \cR yet. However, Chain \cR can take advantage of the reflection. The main requirements are: the inclusion of appropriate proofs of reflection that show known Chain \cR blocks according to Chain \cL, and an update to Chain \cR's block-weight calculations to account for the reflected work. *Proof of Reflection* doesn't automatically secure both chains; each chain can proactively and independently take advantage of *Proof of Reflection*.
 
 Naturally, if there were a large difference in target block frequencies (e.g., 10 minutes vs 15 seconds) then there would also be a good deal of latency between the points where the higher-frequency chain gains the security benefit from reflected work.
 For this reason, *Proof of Reflection* is most useful between high frequency chains, or chains of similar frequencies.
@@ -332,22 +332,22 @@ The takeaway is that there's a positive feedback loop. -->
 
 \aside{
   Where do Chain \cL miners get PoRs from?
-  There are multiple answers, but one is for miners of Chain \cL to request them from Chain \cR nodes -- light-client protocols often support this sort of thing.
+  There are multiple answers, but one is for miners of Chain \cL to request them from Chain \cR nodes --- light-client protocols often support this sort of thing.
   The problem is discussed in \autoref{sec:practical-considerations}.
   For now, it's okay to assume that PoRs are broadcast alongside headers.
 }
 
 There are still potential attacks on Chain \cL.
 For example: what if an attacker mines a doublespend in private and produces a longer chain-segment than the honest chain?
-That is, the attacker's segment -- *excluding reflections* -- is heavier than the honest chain-segment.
-At this point the attacker can publish their blocks even though the honest chain-segment -- *including reflections* -- is heavier.
+That is, the attacker's segment --- *excluding reflections* --- is heavier than the honest chain-segment.
+At this point the attacker can publish their blocks even though the honest chain-segment --- *including reflections* --- is heavier.
 Chain \cL nodes would *not* reorganize around this new chain-segment, so why would an attacker do this?
 If the projection of Chain \cL in Chain \cR \emph{does not account for reflections}, then the attacker's chain-segment will appear (to Chain \cR) to have more work than the honest chain-segment.
 Thus the *projection* of \cL in \cR will reorganize to favor the attacker's chain-segment.
 If the attacker has more hash power than the honest miners (i.e., $q > p$\footnote{
   In Satoshi's \citeBitcoinLink{} the parameters $p$ and $q$ represent the probability that the next block will be found by an honest node or the attacker, respectively.
   This convention has been continued in subsequent analysis, e.g., Rosenfeld's \citeAHBDS{}, and is continued here, also.
-}) then they might\footnotemark{} be able to use this reorganization as a foothold -- either to launch a traditional 51% attack against \cL, or to attack SPV verification and light clients.
+}) then they might\footnotemark{} be able to use this reorganization as a foothold --- either to launch a traditional 51% attack against \cL, or to attack SPV verification and light clients.
 
 \footnotetext{
   In a limited case like this, where there are only two chains, there are many options for preventing these sorts of attacks on full nodes.
@@ -361,12 +361,12 @@ If the attacker has more hash power than the honest miners (i.e., $q > p$\footno
   Since a correctly-evaluated projection of \cL is useful (for users of either chain), we should solve this problem if we can.
 }
 
-\todoDraftOnly{rewrite / edit this: evaluating PoR weight -- inconsistent with later I think}
+\todoDraftOnly{rewrite / edit this: evaluating PoR weight --- inconsistent with later I think}
 
 How can we prevent this kind of attack?
-The attack is only possible because Chain \cR was *not* accounting for reflected weight -- if Chain \cR's projection of Chain \cL accounts for reflections, then this attack is not possible.
+The attack is only possible because Chain \cR was *not* accounting for reflected weight --- if Chain \cR's projection of Chain \cL accounts for reflections, then this attack is not possible.
 <!-- In other words, Chain \cR and Chain \cL must always agree on which Chain \cL block is the current tip. -->
-If Chain \cR users were \emph{required} to run full nodes for both \cL and \cR, then we've essentially just combined \cL and \cR into one big, overly-complex blockchain -- this change would thwart the attack, but it isn't a solution.
+If Chain \cR users were \emph{required} to run full nodes for both \cL and \cR, then we've essentially just combined \cL and \cR into one big, overly-complex blockchain --- this change would thwart the attack, but it isn't a solution.
 Instead, we need to ensure that Chain \cR can cheaply and reliably evaluate the weight of \cL's reflections.
 
 Let's add a field to \cL's header: the total chain-weight,\footnote{
@@ -374,8 +374,8 @@ Let's add a field to \cL's header: the total chain-weight,\footnote{
 } *including reflections*, of that block.
 If this value is \emph{always} reliable, then it's trivial to correctly construct \cL's headers-only chain.
 With traditional blockchains (like Bitcoin) it's easy to verify the weight of a header, and thus a headers-only chain, because the header's difficulty is \emph{already available} as part of the PoW's payload.
-In \emph{this} case, though, \emph{additional} data is required -- specifically, the proofs of reflection.
-Full nodes of Chain \cL already verify that the claimed chain-weight is accurate -- all the required data is contained in \cL blocks -- but this doesn't help light clients.
+In \emph{this} case, though, \emph{additional} data is required --- specifically, the proofs of reflection.
+Full nodes of Chain \cL already verify that the claimed chain-weight is accurate --- all the required data is contained in \cL blocks --- but this doesn't help light clients.
 We need additional protocol changes to ensure that the \emph{claimed} chain-weight of a header is \emph{always} reliable.
 
 \aside{
@@ -433,9 +433,9 @@ A data structure and methodology for suitable fraud proofs of chain-weight (and 
 \todoDraftOnly{
   reconsider:\\
 As a final point on this attack, in limited cases like this (where only one set of reflections needs validation), \cR can forgo fancy protocols provided that \cL and \cR share a simple and standardized way to record and verify reflected blocks.
-Chain \cR nodes already know \cR's state, so they can trivially generate merkle branches proving reflection of \cL blocks in \cR -- these are \emph{the same} branches that \cL uses in its PoRs.
+Chain \cR nodes already know \cR's state, so they can trivially generate merkle branches proving reflection of \cL blocks in \cR --- these are \emph{the same} branches that \cL uses in its PoRs.
 All that remains is, for each \cL header, the merkle branch proving reflection of \cR blocks in \cL.
-\cR nodes *already* know (and record) every \cR header they can find -- including invalid ones.
+\cR nodes *already* know (and record) every \cR header they can find --- including invalid ones.
 \cR headers are also implicitly rate-limited via \cR's difficulty adjustment algorithm, so there will rarely be more than a few \cR headers reflected by a single \cL block.
 If a merkle root of \cL's reflections is accessible (e.g., as a field in \cL's header) then \cR nodes can \emph{quickly and exhaustively} check all possible combinations of reflected blocks.
 Under normal operation, \cR nodes should *always* find a matching merkle tree.
@@ -444,7 +444,7 @@ This might become an issue in the case of an active attack, but \cR nodes can fa
 
 #### Step 5. Mutual Reflection
 
-The final step in this progression is *mutual reflection* -- where both chains image one-another and include the necessary PoRs and modifications to their chain-weight algorithms.
+The final step in this progression is *mutual reflection* --- where both chains image one-another and include the necessary PoRs and modifications to their chain-weight algorithms.
 This is shown in \autoref{fig:por-step5}.
 
 \begin{figure}
@@ -456,14 +456,14 @@ This is shown in \autoref{fig:por-step5}.
 
 When two chains (Chain \cL and Chain \cR) mutually reflect each other, detecting attacks becomes easier.
 The security of both Chain \cL and \cR are partially dependent on each others' histories (along with their own, of course).
-If one chain is attacked, where some alternate chain-segment is published, then that chain's nodes will know that those blocks have not been reflected -- potentially indicating that the recently-published chain-segment was constructed in private or constructed after the fact.
+If one chain is attacked, where some alternate chain-segment is published, then that chain's nodes will know that those blocks have not been reflected --- potentially indicating that the recently-published chain-segment was constructed in private or constructed after the fact.
 
 There are several details that still require discussion, though, such as: *how exactly is weight contributed by a reflecting chain converted to weight in the local chain?* (discussed in \autoref{sec:comparing-chain-work}); and *how can proofs of reflection be calculated without the requirement that miners are full nodes of both chains?* (discussed in \autoref{sec:practical-considerations}).
 This last question is particularly important for moving beyond mutual reflection between only two chains.
 
 The *essence* of *Proof of Reflection* should now be apparent. *In principle*, we can make blockchains more difficult to attack based on the idea that *blockchains can include a projection of the history of other blockchains (and confirm a chain's history like they do transactions)*. *In principle*, it is possible to increase the security of a blockchain via *reflection* and to increase the security of multiple blockchains via *mutual reflection*.
 
-\todoDraftOnly{PoW -- 2 chains using the same algorithm isn't insecure!}
+\todoDraftOnly{PoW --- 2 chains using the same algorithm isn't insecure!}
 
 %% END ### RELEASE
 
@@ -523,9 +523,9 @@ For non-PoW chains, we'll need conversion methods that have non-arbitrary answer
 #### Theoretical Conversion
 
 Consider a traditional blockchain (like Bitcoin, or Ethereum 1).
-We know that traditional blockchains have properties specific to their blocks, like: reward per block (coins/block); a block target time (seconds/block) -- or block frequency (blocks/second); and a difficulty (hashes/block).
+We know that traditional blockchains have properties specific to their blocks, like: reward per block (coins/block); a block target time (seconds/block) --- or block frequency (blocks/second); and a difficulty (hashes/block).
 There are also \emph{network-wide} properties, too, like the \emph{inflation rate} (coins/second).
-The \emph{instantaneous} relationship between these properties is mediated by various protocols -- these protocols (e.g., difficulty adjustment algorithms) are part of the \emph{context} of those properties and relationships.
+The \emph{instantaneous} relationship between these properties is mediated by various protocols --- these protocols (e.g., difficulty adjustment algorithms) are part of the \emph{context} of those properties and relationships.
 How can we use these relationships to our advantage?
 
 \aside{
@@ -536,17 +536,17 @@ How can we use these relationships to our advantage?
 The units that we have to work with are: blocks, seconds, hashes, and coins\footnotemark{}.
 \footnotetext{
   Note that the terms \emph{coin} and \emph{root token} are synonymous.
-  The choice of \emph{coin} over \emph{root token}, for these sections, is pragmatic -- we'll see this term \emph{a lot}.
+  The choice of \emph{coin} over \emph{root token}, for these sections, is pragmatic --- we'll see this term \emph{a lot}.
 }
 There are actually multiple types of blocks (L-blocks and R-blocks), coins (L-coins and R-coins), and hashes (L-hashes and R-hashes).
 We can't combine those unless we're able to convert those values to common units.
 
-If we ignore some of the normal constraints on consensus algorithms -- like where information comes from -- what information could help us convert?
+If we ignore some of the normal constraints on consensus algorithms --- like where information comes from --- what information could help us convert?
 If we had \emph{an exchange rate} between L-coins and R-coins, then we can trivially convert between them.
-If we have that, then, for our current purpose, we can treat L-coins and R-coins as interchangeable units -- because we can \emph{always} convert between them.
+If we have that, then, for our current purpose, we can treat L-coins and R-coins as interchangeable units --- because we can \emph{always} convert between them.
 So now we have L-blocks, R-blocks, coins, and L-hashes and R-hashes.
 
-Let's consider Chain \cL, and give some of these properties variables: $L_f$ (L-blocks/s) for block frequency, $L_r$ (L-coins/L-block) for the block reward, and $L_d$ (L-hashes/L-block) -- the difficulty. We can multiply combinations of these to get new units: $L_f \cdot L_d$ gives us L-hashes/s; $L_f \cdot L_r$ gives L-coins/s, and $\nicefrac{L_d}{L_r}$ gives us \textbf{L-hashes/L-coin}.
+Let's consider Chain \cL, and give some of these properties variables: $L_f$ (L-blocks/s) for block frequency, $L_r$ (L-coins/L-block) for the block reward, and $L_d$ (L-hashes/L-block) --- the difficulty. We can multiply combinations of these to get new units: $L_f \cdot L_d$ gives us L-hashes/s; $L_f \cdot L_r$ gives L-coins/s, and $\nicefrac{L_d}{L_r}$ gives us \textbf{L-hashes/L-coin}.
 
 Now, let's add that exchange rate: $X_{R\rightarrow L}$ (L-coins/R-coin).
 And some variables for Chain \cR which correspond to Chain \cL's above: $R_f$, $R_r$, and $R_d$.
@@ -586,7 +586,7 @@ With \autoref{eq:por-conversion-const-1}, \textbf{we have just found our first c
 
 What's going on here?
 We start out by observing $\nicefrac{L_d}{L_r}$ gives us a value in units of $\frac{\text{L-hashes}}{\text{L-coin}}$.
-This is a constant of conversion from L-coins to L-hashes for a given moment -- if some miner earned $x$ L-coins today, then $x \cdot \frac{L_d}{L_r}$ would tell you roughly how many hashes were done to earn that reward.
+This is a constant of conversion from L-coins to L-hashes for a given moment --- if some miner earned $x$ L-coins today, then $x \cdot \frac{L_d}{L_r}$ would tell you roughly how many hashes were done to earn that reward.
 Next, we multiply by the exchange rate to find the constant of conversion for $\frac{\text{L-hashes}}{\text{R-coin}}$.
 Then, we divide by $\nicefrac{R_d}{R_r}$ to find the constant of conversion for $\frac{\text{L-hashes}}{\text{R-hash}}$.
 If we multiply this constant of conversion by a value of R-hashes, then we'll end up with a value of L-hashes.
@@ -609,23 +609,23 @@ Here are the key assumptions:
 * \cL and \cR have equal money supplies, and (by chance) the exchange rate has been stable at $X_{R\rightarrow L} = 3$ L-coins/R-coin.
 * \cL and \cR use different PoW algorithms, \cL uses something like Scrypt (similar to Litecoin) and \cR uses something like SHA256 (similar to Bitcoin).
 * ASIC/FPGA mining doesn't exist yet, but GPU mining does.
-* (In this thought experiment) the best GPUs for mining Scrypt and SHA256 are of the same brand and model -- i.e. the same supply is responsible for the hardware of *all* miners, regardless of which chain they mine.
-* There's no comparative advantage between GPU makes/models -- i.e., a miner can't increase their revenue by cleverly organizing which GPUs mine which networks.
+* (In this thought experiment) the best GPUs for mining Scrypt and SHA256 are of the same brand and model --- i.e. the same supply is responsible for the hardware of *all* miners, regardless of which chain they mine.
+* There's no comparative advantage between GPU makes/models --- i.e., a miner can't increase their revenue by cleverly organizing which GPUs mine which networks.
 * The cost of running both \cL and \cR nodes is negligible.
 * \cL and \cR have perfect difficulty adjustment algorithms.
-* The miner(s) used in this thought experiment are small relative to the total population of miners -- their choices don't meaningfully impact network hash-rates or difficulty adjustments.
+* The miner(s) used in this thought experiment are small relative to the total population of miners --- their choices don't meaningfully impact network hash-rates or difficulty adjustments.
 
 What should we expect regarding the conversion of work?
-To start with, let's note that GPU miners could work on either chain -- good hardware for one chain is good hardware for the other, too.
-We know that \cL and \cR's block rewards (in root tokens) and block frequencies are the same -- so the exchange rate is going to play a dominant role in RoI (since the only other difference is difficulty and hash-rate).
+To start with, let's note that GPU miners could work on either chain --- good hardware for one chain is good hardware for the other, too.
+We know that \cL and \cR's block rewards (in root tokens) and block frequencies are the same --- so the exchange rate is going to play a dominant role in RoI (since the only other difference is difficulty and hash-rate).
 If a miner could break even by making 30 L-coins, then they could also break even by making 10 R-coins.
-They'd need to make $3\times$ as many L-coins as R-coins -- that's the exchange rate.
-If \cL and \cR used the same hashing algorithm, then we could compare difficulties to see if this makes sense -- does that miner make $3\times$ as many L-blocks as they would R-blocks?
+They'd need to make $3\times$ as many L-coins as R-coins --- that's the exchange rate.
+If \cL and \cR used the same hashing algorithm, then we could compare difficulties to see if this makes sense --- does that miner make $3\times$ as many L-blocks as they would R-blocks?
 
-In this case, though, the difficulties are set for \emph{different hashing algorithms} -- so how many hashes can GPUs do for each hash?
+In this case, though, the difficulties are set for \emph{different hashing algorithms} --- so how many hashes can GPUs do for each hash?
 Say a GPU can do 7 SHA256 hashes for each 1 Scrypt hash.
 A miner that can do $h$ Scrypt hashes/day should be able to do $7h$ SHA256 hashes/day.
-That same miner should be able to make $h \cdot \nicefrac{L_r}{L_d}$ coins per day -- \cL's coins per block, divided by \cL's difficulty (hashes per block) gives us a constant of conversion with units L-coins/L-hash.
+That same miner should be able to make $h \cdot \nicefrac{L_r}{L_d}$ coins per day --- \cL's coins per block, divided by \cL's difficulty (hashes per block) gives us a constant of conversion with units L-coins/L-hash.
 Of course, the miner could, instead, mine on \cR, thus making $7h \cdot \nicefrac{R_r}{R_d}$ coins per day.
 How do we know which is better?
 We use the exchange rate, of course!
@@ -684,7 +684,7 @@ First, notice that the units did not change with that operation.
 Next, we know the exchange rate $X_{R\rightarrow L}=3$; we said so earlier.
 So it must be that $\nicefrac{R_r}{L_r}=1$.
 This simplifying step is only possible because we began \emph{calculating} numerical values.
-We said earlier that \cL and \cR have -- numerically -- identical block rewards, so it must be that $\nicefrac{R_r}{L_r}=1$ \emph{in this case.}
+We said earlier that \cL and \cR have --- numerically --- identical block rewards, so it must be that $\nicefrac{R_r}{L_r}=1$ \emph{in this case.}
 
 \begin{comment}
 <!--
@@ -715,7 +715,7 @@ Let's consider \autoref{eq:por-conv-work} in light of the above.
     \nonumber
 \end{align}
 
-We said this was true earlier -- 1 L-hash is worth 7 R-hashes. Thus far, we have not yet found an inconsistency (i.e., we don't yet have a reason to think this won't work).
+We said this was true earlier --- 1 L-hash is worth 7 R-hashes. Thus far, we have not yet found an inconsistency (i.e., we don't yet have a reason to think this won't work).
 
 There is, however, an inconsistency lurking.
 Consider:
@@ -745,7 +745,7 @@ How do we know whether a constant of conversion \emph{works} for our purposes?
 \aside{
   This section regards some subtle ideas about when conversions work (i.e., give meaningful results), and when conversions don't.
   It's worth spending some time on these ideas because \emph{when and how} you can convert is not always obvious.
-  But, we \emph{must} understand this to construct a meaningful method of converting block-weight -- which PoR \emph{requires}.
+  But, we \emph{must} understand this to construct a meaningful method of converting block-weight --- which PoR \emph{requires}.
 }
 
 Let's consider some units with \emph{real-world} interpretations.
@@ -766,7 +766,7 @@ If blocks on \cL are $5\times$ heavier than blocks on \cR,
 then we'd have a constant of conversion of $\nicefrac{1}{5}$ L-blocks/R-block;
 and a chain of 5 R-blocks would be \emph{roughly} as hard to create as a chain of 1 L-block.
 So $\nicefrac{1}{5}$ seems like a reasonable estimate for \emph{relative confirmations}, too.\footnote{
-  Due to the dynamics of confirmations, we can't directly compare chain-segments like this, \emph{generally} speaking -- this example is here to help give you an intuition.
+  Due to the dynamics of confirmations, we can't directly compare chain-segments like this, \emph{generally} speaking --- this example is here to help give you an intuition.
   The reason we can't directly compare in this way is that simply \emph{having more confirmations} is worth something in and of itself.
   The relationship is not linear.
   See \citeAHBDS{} for more.
@@ -811,17 +811,17 @@ Moreover, it's easy to see why \emph{relative confirmations} is not as simple as
 \end{comment}
 
 The reason that $\nicefrac{L_f}{R_f}$ did not make sense before is that we \emph{were not including all necessary \ul{context}!}
-There is \emph{implicit context} in some properties of blockchains -- \emph{participation}.
-Values like $\nicefrac{L_f}{R_f}$ -- when used to measure the \emph{target block frequency} -- \emph{do not factor in participation}; the target block time is usually a \emph{constant}, so it can hold no \emph{network-specific context}.
+There is \emph{implicit context} in some properties of blockchains --- \emph{participation}.
+Values like $\nicefrac{L_f}{R_f}$ --- when used to measure the \emph{target block frequency} --- \emph{do not factor in participation}; the target block time is usually a \emph{constant}, so it can hold no \emph{network-specific context}.
 
 Where does this network-specific context come from?
-How is it separated from \`\`world'' context -- like target block frequencies?
+How is it separated from \`\`world'' context --- like target block frequencies?
 How is the network-specific context maintained over time?
 The answer to all three questions is the same: the \textbf{Difficulty Adjustment Algorithm} (DAA).
 
 \defineTermTex{Difficulty Adjustment Algorithm (DAA)}{
   An algorithm which updates its chain's difficulty as valid blocks are produced.
-  The \emph{output} of a DAA is \emph{context laden} -- units take on \emph{additional context}
+  The \emph{output} of a DAA is \emph{context laden} --- units take on \emph{additional context}
 }
 
 DAA's typically work like this: calculate a \emph{ratio} by which to adjust (multiply) the prior difficulty, based on a \emph{target} block production rate and the \emph{measured} block production rate.
@@ -896,7 +896,7 @@ The general case of a DAA's relationships (flows of \emph{information} and \emph
   The difficulty adjustment algorithm governs the relationship between the inputs: the previous difficulty, the target block frequency, and network participation (chain history); and the output: the network difficulty.
   The DAA is how \emph{confirmations} and \emph{coins} become \textbf{laden} with \emph{implicit context}.
   If we don't account for this \emph{implicit context} then our conversions will be nonsensical.
-  The implicit context is \emph{network participation} -- thus, \texttt{N-} prefixes the units which are \emph{context laden}.
+  The implicit context is \emph{network participation} --- thus, \texttt{N-} prefixes the units which are \emph{context laden}.
   Thick arrows indicate \emph{network context}, and thin arrows indicate \emph{world context}.
   Solid arrows show the \emph{flow} of \emph{information}.
   Dashed arrows show the \emph{flow} of \emph{context}.
@@ -932,8 +932,8 @@ Let's consider what $\nicefrac{L_f}{R_f}$ means for the possible combinations of
 \end{align}
 
 We've seen \autoref{eq:conv-both-no-ctx} and \autoref{eq:conv-both-ctx-blocks} before.
-The first represents the ratio of block frequencies (unitless) -- that's straightforward and works.
-The second has units L-blocks/R-block, which sounds like it should be the ratio of block \emph{weights} -- but it's clear that it \emph{isn't} that.
+The first represents the ratio of block frequencies (unitless) --- that's straightforward and works.
+The second has units L-blocks/R-block, which sounds like it should be the ratio of block \emph{weights} --- but it's clear that it \emph{isn't} that.
 (So this conversion method fails.)
 
 \autoref{eq:conv-both-ctx-seconds} has weird units, though.
@@ -961,7 +961,7 @@ Since network context is respected, we can use an exchange rate to build a meani
   This figure shows the expanded \emph{convertible context} of two interacting blockchains, enabled by an exchange rate, $X_{R\rightarrow L}$.
 ]{
   How are the convertible contexts of two different networks related?
-  Without the market context, there's no conversion path that allows for the conversion of work -- the conversion path between difficulties is a \emph{consequence} of $X_{R\rightarrow L}$ (the exchange rate).
+  Without the market context, there's no conversion path that allows for the conversion of work --- the conversion path between difficulties is a \emph{consequence} of $X_{R\rightarrow L}$ (the exchange rate).
   This is the same convertible context that miners use to determine which network is most profitable for them.
   Double-lined arrows indicate \emph{market context}.
   Thin single-lined dashed arrows indicate \emph{world context}.
@@ -973,9 +973,9 @@ Since network context is respected, we can use an exchange rate to build a meani
 
 <!-- re block freq and conf rate: everything about them is the same except their nature -->
 
-<!-- can't divide conf rate (blocks/n-second) by block freq (blocks/s) to get (s/n-seconds) either -- so blocks must be diff units too. -->
+<!-- can't divide conf rate (blocks/n-second) by block freq (blocks/s) to get (s/n-seconds) either --- so blocks must be diff units too. -->
 
-<!-- ~~DAA is a constant of conversion -- in effect.~~ no -- it does more.
+<!-- ~~DAA is a constant of conversion --- in effect.~~ no --- it does more.
 information is *lost* through the DAA. -->
 
 \aside{
@@ -1066,7 +1066,7 @@ In that case, $\nicefrac{L_d}{L_r} \cdot \nicefrac{R_r}{R_d}$ gives us L-hashes/
 #### What About SPV?
 
 Both contexts (SRT and DEX) require that participating chains can do on-chain SPV against one another.
-Chains need some ability to *introspect* reflecting chains -- e.g., SRT requires that users can move root tokens between chains, and the DEX context requires two chains to agree on the exchange rate between their root tokens.
+Chains need some ability to *introspect* reflecting chains --- e.g., SRT requires that users can move root tokens between chains, and the DEX context requires two chains to agree on the exchange rate between their root tokens.
 Even without this requirement, some method of cross-chain communication is clearly desirable.
 
 Eventually, we'll need to construct a method for SPV between mutually reflecting chains that works and is safe.
@@ -1083,8 +1083,8 @@ We will proceed on the \emph{assumption} that SPV is possible and easy to do in 
 %% eq:por-conv-dex
 
 So far, we've considered PoW chains only.
-Conversion of chain-weight between PoW chains can work \emph{if and only if} we can convert between \emph{work} (i.e., hashes) done on each chain -- given an appropriate context.
-For a given PoW block, the network knows exactly how much work is implied by that block -- the expected number of hashes to produce it.
+Conversion of chain-weight between PoW chains can work \emph{if and only if} we can convert between \emph{work} (i.e., hashes) done on each chain --- given an appropriate context.
+For a given PoW block, the network knows exactly how much work is implied by that block --- the expected number of hashes to produce it.
 Thus, for PoW chains, there is an exact conversion between \emph{work and confirmations} (for some context at some point in time).
 Over short time-scales, this conversion ratio is approximately constant (in general it's a function that takes a timestamp as an input parameter).
 Thus, \emph{chain-weight} (as represented in figures via $\Sigma_w$, e.g. \autoref{fig:dag-ex1-full}) can be represented either in something like \emph{hashes} or \emph{difficulty} \textbf{or} chain-weight can simply be in terms of \emph{confirmations}.
@@ -1111,9 +1111,9 @@ Finally, it makes explicit the requirement that \emph{we can only compare to a g
 There is no way to say \emph{X work on \cL is worth Y work on \cR} without adding necessary context like \emph{when} that conversion is happening.
 Confirmations (like work) require that grounding, since they need to be scaled when converting between different chains.
 What about confirmations from the same chain?
-Unlike work (which can be summed directly), confirmations always require conversion to a \emph{known standard} -- even when they're \emph{from the same chain}.
+Unlike work (which can be summed directly), confirmations always require conversion to a \emph{known standard} --- even when they're \emph{from the same chain}.
 For example, we can say that the single confirmation provided by Bitcoin block 704610 is \emph{equivalent} to approximately 19,893,045,000,000 genesis-confirmations.\footnote{
-  A genesis-confirmation is relative to the Bitcoin genesis block -- which had a difficulty of exactly 1.
+  A genesis-confirmation is relative to the Bitcoin genesis block --- which had a difficulty of exactly 1.
 }
 The conversion-ratio is equal to the difficulty of block 704610.
 That is, it would take a chain of $\sim$ 20 trillion blocks, each with 1 genesis-confirmation worth of work, to match the weight of block 704610.
@@ -1193,7 +1193,7 @@ Let's consider this, starting with the conversion used in \autoref{eq:srt-block-
 
 What does \autoref{eq:chain-coin-weight} imply if \cL and \cR are the only two chains in a context like \autoref{sec:conversion-single-root-token}?
 Notice that, in this case, $L_t + R_t = G_t$, the network-wide currency supply.
-One implication is that weight (measured in coins) effectively counts \emph{how much of the full network} is contributing to Chain \cL's security -- represented via the coins that were minted in those contributing blocks.
+One implication is that weight (measured in coins) effectively counts \emph{how much of the full network} is contributing to Chain \cL's security --- represented via the coins that were minted in those contributing blocks.
 It's easier to see in \autoref{eq:chain-coin-weight2} as the sum collapses to $\nicefrac{I}{L_f}$.
 
 If the all chains in the network are functioning well, we should expect that summing a chain's weight in coins \emph{over the full history of the chain} should be close to the sum of all coins minted through block rewards.
@@ -1240,7 +1240,7 @@ When measuring and converting chain-work, we \emph{always} want to convert confi
   The intention of sections like this is not to endorse PoS, but rather to explore what is possible \emph{if} PoS can be done securely.
 }
 
-Perhaps one of the most interesting features of *Proof of Reflection* is that PoW chains and PoS chains can reflect one another. Up till now, we've contextualized the weight of a reflection via the *work* required to produce a block. But the concept of *work* does not neatly apply to foundational consensus mechanisms that do not require the utilization of some physical resource -- such as PoS.
+Perhaps one of the most interesting features of *Proof of Reflection* is that PoW chains and PoS chains can reflect one another. Up till now, we've contextualized the weight of a reflection via the *work* required to produce a block. But the concept of *work* does not neatly apply to foundational consensus mechanisms that do not require the utilization of some physical resource --- such as PoS.
 
 \defineTermTex{Foundational Consensus Mechanisms}{Those mechanisms, like PoW and PoS, which can work in some \emph{standalone} fashion; PoR is a cross-chain \emph{extension} to such mechanisms}
 
@@ -1250,9 +1250,9 @@ If a PoW chain is reflected in a PoS chain, then an attacker will likely need mo
 Consider a PoW chain and a PoS chain that share a root token, and each chain hosts approximately 50% of the total supply.
 If the two chains have equal block production frequencies, then (using \autoref{alg:weightof-ratio}) 50% of the network's security comes from each chain.
 
-Consider an attack on the PoW chain and presume that the difficulty on the PoW chain is constant over the attack, i.e., the PoW chain's difficulty doesn't adjust quickly enough to react to the attack. Additionally, assume the attacker has *not* been contributing to the network before the attack, i.e., their hash-rate is not accounted for in the PoW chain's difficulty. Given the two chains are mutually reflecting, half of the network's security is provided by the PoS chain (and thus immune to the attacker in this case). Therefore, a successful attacker -- *using the traditional method of mining a competing chain-segment in private* -- must generate more blocks than both chains combined. That means the attacker needs *twice* the honest hash-rate for a guaranteed successful attack.
+Consider an attack on the PoW chain and presume that the difficulty on the PoW chain is constant over the attack, i.e., the PoW chain's difficulty doesn't adjust quickly enough to react to the attack. Additionally, assume the attacker has *not* been contributing to the network before the attack, i.e., their hash-rate is not accounted for in the PoW chain's difficulty. Given the two chains are mutually reflecting, half of the network's security is provided by the PoS chain (and thus immune to the attacker in this case). Therefore, a successful attacker --- *using the traditional method of mining a competing chain-segment in private* --- must generate more blocks than both chains combined. That means the attacker needs *twice* the honest hash-rate for a guaranteed successful attack.
 
-However, consider the case that \emph{the security contribution of the PoW chain is \ul{capped} at 50\%} -- i.e., capped at the proportion of root tokens hosted on that chain.
+However, consider the case that \emph{the security contribution of the PoW chain is \ul{capped} at 50\%} --- i.e., capped at the proportion of root tokens hosted on that chain.
 For our purposes, this situation is approximately equivalent to that where the PoW chain has a *perfect* difficulty adjustment algorithm, i.e., the network instantly adapts to keep the block production frequency constant.
 For the sake of this demonstration, assume that these chains *retroactively* adjust block weightings to ensure this cap holds.
 Let $p > 0$ be the honest miners' contribution to *overall* network security, and $q > 0$ be the attacker's contribution.
@@ -1271,7 +1271,7 @@ Given the right set-up, a PoW chain gains an *incredible* security advantage fro
 \aside{
   \textbf{Note:} The attack scenario above assumes that the attacker is not attacking the PoS chain that is reflecting the PoW chain.
   That is not a safe assumption.
-  Additionally, with traditional blockchains (which are trees), an empty-block DoS is possible -- this is addressed in \autoref{sec:dos-and-dags}.
+  Additionally, with traditional blockchains (which are trees), an empty-block DoS is possible --- this is addressed in \autoref{sec:dos-and-dags}.
 }
 
 What about the PoS chain, though; what benefits does it gain from this relationship?
@@ -1304,7 +1304,7 @@ There are some other conjectured solutions to the *Nothing at Stake* problem.
 
 These two examples solve the \emph{Nothing at Stake} problem via mechanisms that are *external* to the protocol itself, i.e., hard-coded checkpoints and the requirement that nodes are online ``frequently''.
 
-The solution provided by mutual reflection with a PoW blockchain -- i.e., thermodynamic security -- is provided *by the protocol itself* and can only *increase* the security of PoS mechanisms.
+The solution provided by mutual reflection with a PoW blockchain --- i.e., thermodynamic security --- is provided *by the protocol itself* and can only *increase* the security of PoS mechanisms.
 Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
 
 <!-- \aside{
@@ -1324,14 +1324,14 @@ Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
 
 ### The Insecurity of Merged Mining in UT
 
-\todo{write -- The Insecurity of Merged Mining}
+\todo{write --- The Insecurity of Merged Mining}
 
 - Merged Mining allows attacking merged chains at 0 cost.
-- that means that if a parent chain and a merged mined child chain where to reflect one another, then the weight contributed via merged mining must be 0 -- no additional work was actually done beyond that of the parent-chain.
+- that means that if a parent chain and a merged mined child chain where to reflect one another, then the weight contributed via merged mining must be 0 --- no additional work was actually done beyond that of the parent-chain.
 - Also, if some other chain reflects both a parent chain *and* a merged mined child chain, then the net benefit is equal to *only* the work contributed by the reflecting parent chain.
 
 
-\todo{PoR in general: (nb: check if this is sufficiently answered) reflect only chains that reflect your history; if they favor a different history, then you should be building on that history instead, so don't reflect those blocks -- i.e. ppl should calculate weight to be 0.}
+\todo{PoR in general: (nb: check if this is sufficiently answered) reflect only chains that reflect your history; if they favor a different history, then you should be building on that history instead, so don't reflect those blocks --- i.e. ppl should calculate weight to be 0.}
 
 
 %% END ### DRAFT

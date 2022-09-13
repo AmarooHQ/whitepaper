@@ -34,6 +34,7 @@
 | TPS | Transactions per second. | tx/s |
 | $\Sigma\;\text{TPS}_{i}$ | Network-wide transactions per second at the $i^{\text{th}}$ level of nesting (given no additional levels). Primarily used when ``TPS'' alone would be ambiguous. | tx/s |
 | $\Delta s$ | Minimum network bandwidth for a full node to remain in sync with a single simplex-chain (whilst also validating PoRs). | bytes/second |
+| $\Delta r$ | Minimum network bandwidth for a full node to fully reconstruct the PoR graph. | bytes/second |
 | $\Delta S$ | Minimum network bandwidth for a \emph{mining} node to remain in sync with all reflecting simplex-chains. | bytes/second |
 | $\text{DAA}_N$ | The number of blocks over which the DAA operates. | blocks |
 
@@ -54,10 +55,10 @@
 Term & Definition & Reference \\
 \midrule
 {$\UT{i}$} & {The UT scaling configuration with $i$ levels of nesting.} & {\autoref{sec:constructing-ut}} \\
-{$\UT{1}$} & {UT with base-level chains only -- $O(c^2)$ scalability.} & {\autoref{sec:the-simplex}} \\
-{$\UT{2}$} & {UT with nested dapp-chains -- $O(c^3)$ scalability.} & {\autoref{sec:dapp-chains}} \\
-{$\UT{3}$} & {UT with nested dapp-dapp-chains -- $O(c^4)$ scalability.} & {\autoref{sec:dapp-chains}} \\
-{$\UTinf{i}$} & {Tiling of $\UT{i}$ -- $O(n)$ scalability.} & {\autoref{sec:tiling}} \\
+{$\UT{1}$} & {UT with base-level chains only --- $O(c^2)$ scalability.} & {\autoref{sec:the-simplex}} \\
+{$\UT{2}$} & {UT with nested dapp-chains --- $O(c^3)$ scalability.} & {\autoref{sec:dapp-chains}} \\
+{$\UT{3}$} & {UT with nested dapp-dapp-chains --- $O(c^4)$ scalability.} & {\autoref{sec:dapp-chains}} \\
+{$\UTinf{i}$} & {Tiling of $\UT{i}$ --- $O(n)$ scalability.} & {\autoref{sec:tiling}} \\
 {+PoRs} & {Protocol variant: explicit proofs.} & {\autoref{sec:proving-reflection}} \\
 {+PoRTs} & {Protocol variant: explicit proofs + T.} & {\autoref{sec:ext-ports}} \\
 {+HOPoRs} & {Protocol variant: explicit proofs + header omission.} & {\autoref{sec:exploiting-seg-state}} \\

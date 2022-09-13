@@ -18,14 +18,14 @@ Can we come up with a general to share security between chains?
   In this document, the term ``miner'' usually refers to the generic role of \emph{block producer} in an inclusive sense, rather than specifically to block producers of PoW based-chains.
 }
 
-Our starting point is the idea of one chain 'tracking' another chain via its headers -- it's the sort of thing that would enable a smart contract to do on-chain SPV proof evaluation.
+Our starting point is the idea of one chain 'tracking' another chain via its headers --- it's the sort of thing that would enable a smart contract to do on-chain SPV proof evaluation.
 This isn't a new idea: in 2013, I proposed a system which used this method to support rich cross-chain exchange.\footnote{
   see \url{https://bitcointalk.org/index.php?topic=198032.0}, and
   \url{https://bitcointalk.org/index.php?topic=598784.0}
 }
 I also wrote a simplified implementation of this method for Bitcoin SPV proofs in the very early days of Ethereum\footnote{
     \url{https://github.com/XertroV/coppr/blob/master/chainheaders.py}
-} -- a precursor to the later-successful BTC Relay\footnote{
+} --- a precursor to the later-successful BTC Relay\footnote{
     \url{https://github.com/ethereum/btcrelay}
 } (although BTC Relay seems to have been abandoned in late 2017).
 
@@ -102,7 +102,7 @@ This enables more complex SCs, e.g., a trustless $\text{BTC}\leftrightarrow\text
 
 \label{sec:two-blockchains}
 
-Let's consider two hypothetical and distinct blockchains -- chain \cL and chain \cR.
+Let's consider two hypothetical and distinct blockchains --- chain \cL and chain \cR.
 To begin with, you can imagine these as Bitcoin and Ethereum if it helps.
 However, the changes that are required by \emph{Proof of Reflection} would require major changes to either's consensus mechanism, so it's unlikely that changes like these would ever be integrated.
 
@@ -111,7 +111,7 @@ For simplicity, both chains also have identical block times and we won't conside
 
 \subsubsubsection{Step 1. Chain \cR Images Chain \cL}
 
-This is similar to Ethereum imaging Bitcoin -- see \autoref{fig:pow_refl_step1}.
+This is similar to Ethereum imaging Bitcoin --- see \autoref{fig:pow_refl_step1}.
 (We'll omit the table this time since it's basically the same as \autoref{tab:eth-images-btc}.)
 
 Like before, \cR will include \cL's headers as they are produced.

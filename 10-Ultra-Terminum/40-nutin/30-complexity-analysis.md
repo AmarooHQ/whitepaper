@@ -12,7 +12,7 @@ In the case of PoS dapp-chains, this provides \emph{additional} security compare
 Hosting dapp-chains on many simplex-chains also provides greater system-wide maximum capacity than a network built upon a single base-chain.
 
 A common method of sharding is to *nest* blockchains.
-For example, Ethereum 2 has *The Beacon Chain* -- its root-chain (the single base-chain of a network).
+For example, Ethereum 2 has *The Beacon Chain* --- its root-chain (the single base-chain of a network).
 
 ```{=latex}
 \bquote{
@@ -36,7 +36,7 @@ Consider a PoS dapp-chain on UT.
 Would that dapp-chain be *layer 1* or *layer 2*?
 It would be misleading to call it *layer 2* whilst \emph{directly comparable} chains (like Ethereum 2, Polkadot, or Cardano) are called *layer 1*.
 Such PoS UT dapp-chains have \emph{all} the security qualities of an equivalent stand-alone PoS chains, *and more*.
-If they were called *layer 1* chains, then what is the simplex -- *layer 0*?
+If they were called *layer 1* chains, then what is the simplex --- *layer 0*?
 It is clear that the common idea behind *layer 1/2* scaling does not have sufficient capacity to accurately describe UT's simplex- and dapp-chains; it is inadequate.
 
 ### Analysis Methodology
@@ -56,7 +56,7 @@ An increase to $k_i$ is effectively an increase in maximum block size.
 We will also derive relationships between the maximum number of chains at a level of nesting, $N_i$, and the maximum network throughput at that level of nesting, $T_i$.
 For most existing blockchain designs, $N_1 = 1$.
 
-With regards to simplexes, we are particularly concerned with the complexity of a \emph{maximal} simplex -- i.e., the simplex with the highest TPS possible.
+With regards to simplexes, we are particularly concerned with the complexity of a \emph{maximal} simplex --- i.e., the simplex with the highest TPS possible.
 
 \defineTermTex{Maximal Simplex}{
     A simplex with the maximum TPS under given $O(c)$ constraints
@@ -85,7 +85,7 @@ The complexity order of the network is given by $O(T_1) = O(k_1) = O(c)$ as expe
 
 Care should be taken to account for protocol extensions like *Segregated Witness* that effectively reduce the size of transactions (in SegWit's case, by $\sim \nicefrac{1}{4}$).
 
-For Bitcoin -- given $k_1 \approx 1700$ B/s, and transaction size $\text{Tx}_{\text{avg}} = 500 \cdot \nicefrac{3}{4}$ B -- the maximum TPS is given by:
+For Bitcoin --- given $k_1 \approx 1700$ B/s, and transaction size $\text{Tx}_{\text{avg}} = 500 \cdot \nicefrac{3}{4}$ B --- the maximum TPS is given by:
 \begin{equation*}
 {\text{TPS}}_{\text{Bitcoin}} \approx \frac{1700}{\text{Tx}_{\text{avg}}} \approx 4.5
 \end{equation*}
@@ -140,7 +140,7 @@ In the case of \emph{Polkadot}, it is \href{https://github.com/AmarooHQ/polkadot
   All-in-all, I guess that 819 B is a bit generous, and (ideally) all claims about existing chains in this paper err on the side of generosity.
 } that a typical minimum of 819 B is used in the \texttt{paraInclusion.candidateBacked} extrinsic (i.e., the transaction type that records parachain headers).
 So, a lower-bound on the effective header size of a parachain is 819 B (this does not include \emph{bitfields}\footnote{
-  Bitfields is a Polkadot term -- it's a list of hundreds of signatures, totalling $> 14$ KB per block on the current Kusama testnet (October $3^{\text{rd}}$ 2021).
+  Bitfields is a Polkadot term --- it's a list of hundreds of signatures, totalling $> 14$ KB per block on the current Kusama testnet (October $3^{\text{rd}}$ 2021).
 }).
 
 In those situations, with regards to these capacity derivations, one can use the \emph{effective} header size as a replacement for the \emph{raw} header size.
@@ -362,10 +362,10 @@ N_3 & = \frac{T_3}{k_3} \\
 
 #### Cross-Chain SPV Proofs
 
-Each chain -- at full capacity -- operates with order $O(c)$ by definition. Thus its state has order $O(c)$ also. The size of SPV proofs scale logarithmically with the set you're proving membership of, e.g., the number of transactions, or size of the chain's state, etc. Thus, SPV proofs scale with order $O(\log_2 c)$.
+Each chain --- at full capacity --- operates with order $O(c)$ by definition. Thus its state has order $O(c)$ also. The size of SPV proofs scale logarithmically with the set you're proving membership of, e.g., the number of transactions, or size of the chain's state, etc. Thus, SPV proofs scale with order $O(\log_2 c)$.
 
 For a given $O(c^j); j \in \{2,3,4\}$ configuration of UT (i.e., $\UT{1}$, $\UT{2}$, $\UT{3}$), a chain can process SPV proofs of state on another chain. For $j = 4$, the furthest that a transaction can occur from its host simplex-chain is in the 3rd level of nesting (i.e., a dapp-dapp-chain).
-It would require $j-1$ SPV proofs to \`\`ascend'' from the host simplex-chain to a dapp-dapp-chain. However, given that full nodes of a dapp-dapp-chain are required to be full nodes of both the host dapp-chain and the host simplex-chain, transactions in that dapp-dapp-chain do not need to provide SPV proofs of state in either of those host chains -- full nodes already have those details. That is: transactions which \`\`descend'' the levels of nesting can do so with $O(1)$ cost. SPV proofs are only required when transactions \`\`ascend'' the levels of nesting to other simplex-, dapp-, or dapp-dapp-chains.
+It would require $j-1$ SPV proofs to \`\`ascend'' from the host simplex-chain to a dapp-dapp-chain. However, given that full nodes of a dapp-dapp-chain are required to be full nodes of both the host dapp-chain and the host simplex-chain, transactions in that dapp-dapp-chain do not need to provide SPV proofs of state in either of those host chains --- full nodes already have those details. That is: transactions which \`\`descend'' the levels of nesting can do so with $O(1)$ cost. SPV proofs are only required when transactions \`\`ascend'' the levels of nesting to other simplex-, dapp-, or dapp-dapp-chains.
 
 Thus, the maximum number of SPV proofs required to prove state anywhere in a UT simplex is $j$.
 
@@ -382,7 +382,7 @@ A simplex-chain reflects $N_1 - 1 \approx N_1$ other simplex-chains. A merkle tr
 
 Note: In a production system, these proofs can be excluded from blocks by treating them as droppable witnesses; see \autoref{sec:proving-reflection}.
 
-\todoDraftOnly{Total reflections + computational burden (+PoRs vs omitted proofs) -- $O(c)$ vs $O(c^2)$}
+\todoDraftOnly{Total reflections + computational burden (+PoRs vs omitted proofs) --- $O(c)$ vs $O(c^2)$}
 
 ### TPS Complexity Comparison
 
@@ -417,7 +417,7 @@ More detailed comparison tables can be found in \autoref{sec:ut-variant-complexi
 
 %% INSERT ### TABLE: dapp-chains
 
-: Chain-capacity and bandwidth requirements for $\UT{\text{+OP}}$: $N_1, N_2, N_3, \Delta S$, and $\mathbb{C}^\prime$ for various parameters.
+: Chain-capacity and bandwidth requirements for $\UT{\text{+OP}}$: $N_1$, $N_2$, $N_3$, $\Delta S$, $\Delta r$, and $\mathbb{C}^\prime$ for various parameters.
 
 ### The Impact of Header Size
 

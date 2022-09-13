@@ -12,7 +12,7 @@ Recall that in \autoref{sec:nipopowrs-problem-dag-compatibility} we noted that b
 This is because the traversal method of NIPoPoWs does not know anything about whether a block is on-main or not.
 Additionally, the fork rule does not (and should not) prioritize blocks based on $\mu$ values.
 So we should expect that some off-main blocks have a higher $\mu$ value than their on-main sibling and/or their first on-main descendant.
-Therefore, currently, a valid NIPoPoW can lead to an off-main block -- i.e., a block that is not useful for SPV.
+Therefore, currently, a valid NIPoPoW can lead to an off-main block --- i.e., a block that is not useful for SPV.
 
 We do not have a problem traversing via off-main blocks, though.
 They share the same cryptographic properties (with regards to interlinks) as any other block.
@@ -28,7 +28,7 @@ We should expect that all far-future blocks will agree, but how long should we w
 
 Could we simply modify the interlink structure to add a flag for off-main blocks?
 
-No -- this is not sufficient.
+No --- this is not sufficient.
 There is only one way (in principle) to always arrive at an on-main block: via ever more recent on-main blocks.
 It is only because of an on-main block's \emph{posterity} that it becomes (and remains) on-main.
 Simply flagging off-main blocks does not work because, once we reach an off-main \mu-superblock, we know nothing about which prior blocks are on-main or not.
@@ -39,7 +39,7 @@ An off-main block is (on its own) never a reliable source of prior blocks' on-ma
 
 Here is how we can reliably arrive at on-main blocks:
 first, starting from all chain-tips, we find the most recent common on-main ancestor.
-If this is very close to the chain-tips, we can, instead, use an on-main ancestor a few confirmations back -- so we can meet any particular security parameter we might choose.
+If this is very close to the chain-tips, we can, instead, use an on-main ancestor a few confirmations back --- so we can meet any particular security parameter we might choose.
 We can be confident that this ancestor is on-main, regardless of which chain-tip eventually ends up as the on-main block.
 We must then follow the chain of primary parents.
 
@@ -78,12 +78,12 @@ The on-main path is only inconsistent with the best-blocks path in the case that
 
 A major difference between the best-blocks and on-main proofs should not be an issue for \UT{}, though, as \UT{} uses modest block frequencies for each chain.
 We should expect blocks to have a single parent most of the time.
-(Using the logic from \autoref{sec:por-graph-max-refl}, we'd expect simultaneous blocks \sim 2\% of the time -- give or take.)
+(Using the logic from \autoref{sec:por-graph-max-refl}, we'd expect simultaneous blocks \sim 2\% of the time --- give or take.)
 
 As a final note, what happens when there are multiple paths in a \mu-superDAG?
 Note that this situation only occurs in the best-blocks proof.
 Since the best-blocks proof is not concerned with the posterity of blocks (their on-main status), there is no issue here.
-We can choose between the paths by whichever means we like -- e.g., picking the block with the lowest PoW, or picking on-main blocks over off-main blocks when they are siblings in the same \mu-superDAG.
+We can choose between the paths by whichever means we like --- e.g., picking the block with the lowest PoW, or picking on-main blocks over off-main blocks when they are siblings in the same \mu-superDAG.
 
 We've just sketched the construction of a new type of NIPoPoW that can prove \emph{both} the full chain-weight and the posterity of blocks.
 The best-blocks half of the proof is almost a regular NIPoPoW on its own, but the other half of the proof (traversing on-main blocks only) is not independently secure.
@@ -94,8 +94,9 @@ The main difference is that what we have just sketched proves \emph{work and pos
 Thus, it is a \emph{Non-Interactive Proof of Posteritorial}\footnotemark \emph{Proof of Work} (NIPoPPoW).
 
 \footnotetext{
-    A definition is require as this word is an almost-neologism: \\
-    \textbf{Posteritorial} \emph{adjective}: having posterity; supported by convergent descendants, especially regarding well-known descendancy, epistemic antecedence, root-causal nature, etc; having a prototypical, and defining quality that was widely inherited without contradiction.
+    A definition is require as this word is an almost-neologism:
+
+    \textbf{Posteritorial} \emph{adjective}: having posterity; supported by its descendants, especially regarding well-known descendancy, epistemic antecedence, root-causal nature, etc; having a prototypical and defining quality that was widely inherited.
 
     \emph{Aside:} Perhaps curiously, a prior candidate modifier was the latin phrase \emph{per posterās} --- literally `through what came after'.
     But also faux-translated as `[as] per post eras', which is roughly equivalent to the English phrase `via posterity'.

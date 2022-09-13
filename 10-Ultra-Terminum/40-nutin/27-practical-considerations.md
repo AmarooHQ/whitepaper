@@ -17,7 +17,7 @@
 
 \todoDraftOnly{Review this section. Got some feedback that this section was unclear. Is nomenclature introduced prior to this section? check if there's something that interacts with DAGs and mention if so.}
 
-What would happen if a header -- with valid PoW but *without* a valid block -- were to be reflected? Let's consider the two chains from before (L and R) in a mutual PoR configuration.
+What would happen if a header --- with valid PoW but *without* a valid block --- were to be reflected? Let's consider the two chains from before (L and R) in a mutual PoR configuration.
 
 That would mean that chain L contains a header, $H_{R,1a}$, for chain R for which no block is available.
 
@@ -38,7 +38,7 @@ This would mean that the chain L block (which includes $H_{R,1a}$) is *invalid* 
 If such a method is feasible, then the malicious chain L miner has greater opportunity cost to produce a block reflecting $H_{R,1a}$.
 Moreover, this method prevents chain L (and its miners) from contributing to a potential attack on chain R.
 
-For this to work, though, miners must verify that blocks *exist* for all reflected headers. Is this practical if there are $10^3$ or $10^4$ reflected chains in a simplex? The miners are only required to do very small amounts of computation on these other blocks, so their computational capacity won't be a bottleneck here. Furthermore, they don't need to keep these other blocks indefinitely, just long enough to be confident that they reflect only headers with existent blocks. So they won't need much extra disk space, either -- after a few years, the history of a simplex-chain will be larger than, say, the last 12 hours of all simplex-chains' histories combined. What miners will need is *bandwidth*.
+For this to work, though, miners must verify that blocks *exist* for all reflected headers. Is this practical if there are $10^3$ or $10^4$ reflected chains in a simplex? The miners are only required to do very small amounts of computation on these other blocks, so their computational capacity won't be a bottleneck here. Furthermore, they don't need to keep these other blocks indefinitely, just long enough to be confident that they reflect only headers with existent blocks. So they won't need much extra disk space, either --- after a few years, the history of a simplex-chain will be larger than, say, the last 12 hours of all simplex-chains' histories combined. What miners will need is *bandwidth*.
 
 The complexity and impact of this strategy is discussed in \autoref{sec:bandwidth-complexity}.
 
@@ -55,7 +55,7 @@ That is: a node for chain L must be able to answer the question *For each other 
 This means that each node must have $N_1 - 1$ answers, per block, for a simplex of $N_1$ chains.
 
 There is a trivial method: with each header, include the corresponding merkle branch which proves reflection.
-Specifically: when a miner on chain L mines a block that includes a header from chain R, they should also include -- along-side the header -- a merkle branch that shows the most recent chain L ancestor that has been reflected by chain R.
+Specifically: when a miner on chain L mines a block that includes a header from chain R, they should also include --- along-side the header --- a merkle branch that shows the most recent chain L ancestor that has been reflected by chain R.
 For example, block $B_{L,i+1}$ might include a proof that $H_{L,i}$ was reflected by $B_{R,j}$.
 That branch is the only required branch (i.e., the \emph{missing} branch), as chain L nodes are \emph{already} aware whether $H_{R,j}$ was reflected by $B_{L,i+1}$.
 
@@ -71,14 +71,14 @@ Miners would need to do this for *all* simplex-chains that they reflect. Predict
 
 Do we *need* to include proofs of reflection, though? Is it possible to avoid the explicit inclusion of those proofs, potentially allowing for $O(c)$ complexity instead?
 
-If miners of any simplex-chain download the blocks of *all* simplex-chains -- as mentioned in \autoref{sec:availability-of-blocks} -- then including all necessary proofs of reflection can be made redundant. Since miners, theoretically, have all the necessary data to construct the proofs, do those miners need to actually include those proofs? Could we treat those proofs as witnesses and prune them -- similar to SegWit?
+If miners of any simplex-chain download the blocks of *all* simplex-chains --- as mentioned in \autoref{sec:availability-of-blocks} --- then including all necessary proofs of reflection can be made redundant. Since miners, theoretically, have all the necessary data to construct the proofs, do those miners need to actually include those proofs? Could we treat those proofs as witnesses and prune them --- similar to SegWit?
 
 \defineTermTex{Omitted Proofs (+OP)}{
     The UT protocol variant wherein miners/validators explicitly record \emph{only} reflected headers, such that necessary proofs of reflection are deterministically recalculable
 }
 
 There would be some downsides to omitting the proofs of reflection.
-For one, it would mean that simplex-chain nodes, during an initial sync, would not be able to verify the PoRs without auxiliary data -- potentially a lot.
+For one, it would mean that simplex-chain nodes, during an initial sync, would not be able to verify the PoRs without auxiliary data --- potentially a lot.
 Secondly, it would mean that miners *must* track the state of *all* reflections in the simplex for some period of time so that they ensure the integrity of the reflection protocol.
 Given \autoref{sec:availability-of-blocks}, this is possible without significant overhead.
 
@@ -95,7 +95,7 @@ A practical method for treating proofs of reflection as witnesses that may be ex
 \emph{Verkle trees} are a new alternative to merkle trees.
 Similar to merkle trees, they allow efficient proofs of membership against a cryptographically secure root.
 
-\todo{probs remove -- not worth explaining here.}
+\todo{probs remove --- not worth explaining here.}
 
 %% END ### DRAFT
 
@@ -198,7 +198,7 @@ It may present decisive advantages for implementations of *simplex tilings* (whi
 }
 \end{equation*}
 \caption{
-    Possible upgrade paths between UT variants, starting at $\UT{\text{+PoRs}}$ in the top left -- the most conservative variant.
+    Possible upgrade paths between UT variants, starting at $\UT{\text{+PoRs}}$ in the top left --- the most conservative variant.
     Solid arrows show paths of increasing capacity.
 }
 \end{figure}
@@ -252,12 +252,12 @@ A confirmation is a *discrete* event that occurs when a block is produced. When 
 
 In a traditional blockchain (e.g., Bitcoin, Ethereum) confirmations occur, on average, at a predictable rate (that of the target block production frequency). Thus, for any *particular* traditional blockchain, a convenient time-based \emph{rule of thumb} can be devised, e.g., a Bitcoin transaction is safe to accept after 1 hour. However, this approximation only works because blocks (and thus confirmations) are only produced locally (to that blockchain) and at a probabilistic (roughly constant) rate. Put another way, the frequency of confirmations is identical to the frequency of blocks, $B_f$ Hz. Since $O(B_f) = O(1)$, the time-complexity of confirmation in these networks is also $O(1)$.
 
-When using PoR, though, the assumptions behind that \emph{rule of thumb} do not hold -- while blocks on a single chain may be produced at a constant rate, that chain also gains a security benefit from other chains.
+When using PoR, though, the assumptions behind that \emph{rule of thumb} do not hold --- while blocks on a single chain may be produced at a constant rate, that chain also gains a security benefit from other chains.
 For the case of a 2-chain simplex (where those chains have the same block production frequency), the rate of confirmations will be twice the rate of block production.
 This is easily generalized: for an $N_1$-simplex with simplex-chains that share some block frequency $B_f$, the rate of confirmation will be $\Cprime = N_1 \cdot B_f$ Hz.
 Thus, the rate of confirmations has complexity $O(\Cprime) = O(N_1 \cdot B_f) = O(N_1) = O(c)$.
 
-Let *confirmation time* be the duration breakpoint beyond which enough confirmations have occurred to consider a transaction *safe*. This is equivalent to the *rule of thumb* mentioned earlier. For a traditional blockchain, as mentioned, this is the product of some constant and the expected duration between blocks: ${B_f}^{-1}$. For a simplex, though, the expected *duration* is ${\mathbb{C}^\prime}^{-1} = \frac{1}{N_1 \cdot B_f}$. Thus, as the simplex grows -- as $N_1$ *increases* -- the entire network's rate of confirmations also increases, and thus *confirmation time* approaches 0[^approach-zero].
+Let *confirmation time* be the duration breakpoint beyond which enough confirmations have occurred to consider a transaction *safe*. This is equivalent to the *rule of thumb* mentioned earlier. For a traditional blockchain, as mentioned, this is the product of some constant and the expected duration between blocks: ${B_f}^{-1}$. For a simplex, though, the expected *duration* is ${\mathbb{C}^\prime}^{-1} = \frac{1}{N_1 \cdot B_f}$. Thus, as the simplex grows --- as $N_1$ *increases* --- the entire network's rate of confirmations also increases, and thus *confirmation time* approaches 0[^approach-zero].
 
 [^approach-zero]: To say that confirmation time approaches 0 only tells the latter half of the process by which a transaction becomes confirmed. The first half of that process is *getting an initial confirmation*, which is effectively a small, but constant, overhead.
 
@@ -309,7 +309,7 @@ https://3.basecamp.com/4985262/buckets/20820958/messages/4184917383#__recording_
 
 goal: support this sentence (top of section):
 
-> There are decisive advantages to using DAGs (instead of trees) as the fundamental structure of a chain. Namely, multiple histories (both compatible and incompatible) can be merged into a single, consistent history -- a feature which eliminates stale blocks and thwarts attacks like an empty-block Denial of Service
+> There are decisive advantages to using DAGs (instead of trees) as the fundamental structure of a chain. Namely, multiple histories (both compatible and incompatible) can be merged into a single, consistent history --- a feature which eliminates stale blocks and thwarts attacks like an empty-block Denial of Service
 
 \end{comment}
 -->
@@ -370,7 +370,7 @@ However, the variance of block production on each of these chains won't be that 
 \todo{is a refl censorship attack possible? meaningful? explore. (NB: I don't think there's a viable strategy here, which is why I haven't prioritized writing this out.)}
 
 \todo{
-    Add a nash equilibrium diagram + explanation to show that it's always in the interest of miners to publish headers -- intuition: including headers means that the \emph{other chain's miner} has an incentive to include your header. that means that the next miner (on your chain) will be able to build on a heavier chain if they reflect that other chain's next header -- so that next miner (on the local chain) has an incentive to include that other chain's next header. If the original miner (who might chose not to publish the most recent header of that other chain) censors that reflection, then they disadvantage themselves relative to their competitors (other miners of that simplex-chain). Thus, it's never helpful to a miner to censor reflections (esp if we enforce the limit on $k_b$ and $k_{tx}$). It doesn't help honest miners, and it makes an attackers chain-segment less competitive.
+    Add a nash equilibrium diagram + explanation to show that it's always in the interest of miners to publish headers --- intuition: including headers means that the \emph{other chain's miner} has an incentive to include your header. that means that the next miner (on your chain) will be able to build on a heavier chain if they reflect that other chain's next header --- so that next miner (on the local chain) has an incentive to include that other chain's next header. If the original miner (who might chose not to publish the most recent header of that other chain) censors that reflection, then they disadvantage themselves relative to their competitors (other miners of that simplex-chain). Thus, it's never helpful to a miner to censor reflections (esp if we enforce the limit on $k_b$ and $k_{tx}$). It doesn't help honest miners, and it makes an attackers chain-segment less competitive.
 }
 
 Does a miner ever benefit from withholding reflections?

@@ -4,9 +4,9 @@
 
 \label{sec:constructing-ut}
 
-*Proof of Reflection* can be used to build $\UT{1}$ -- an $O(c^2)$ foundation for a blockchain network (called *the simplex*). This section details the construction of such a foundation, and how it can be extended up to $\UT{3}$ -- which has $O(c^4)$ complexity. The $O(n)$ scaling configuration ($\UTinf{}$) is detailed in \autoref{sec:tiling}.
+*Proof of Reflection* can be used to build $\UT{1}$ --- an $O(c^2)$ foundation for a blockchain network (called *the simplex*). This section details the construction of such a foundation, and how it can be extended up to $\UT{3}$ --- which has $O(c^4)$ complexity. The $O(n)$ scaling configuration ($\UTinf{}$) is detailed in \autoref{sec:tiling}.
 
-Such a foundation (*the simplex*) is *not* a sharded blockchain -- there's no requirement that participating chains are interchangeable or using the same primitives. This was demonstrated via the example in \autoref{sec:two-blockchains}. Rather, *the simplex* is an emergent construct that is created via the *relationships* between blockchains. Instead of one blockchain being split into many (as occurs with sharding), *the simplex* is many blockchains becoming one coherent network.
+Such a foundation (*the simplex*) is *not* a sharded blockchain --- there's no requirement that participating chains are interchangeable or using the same primitives. This was demonstrated via the example in \autoref{sec:two-blockchains}. Rather, *the simplex* is an emergent construct that is created via the *relationships* between blockchains. Instead of one blockchain being split into many (as occurs with sharding), *the simplex* is many blockchains becoming one coherent network.
 
 ### Generalizing Reflection
 
@@ -18,8 +18,8 @@ Such a foundation (*the simplex*) is *not* a sharded blockchain -- there's no re
 
 In principle, the necessary capabilities (and actions) that some chains, $C_A$ and $C_B$, must have (and do) in order for $C_A$ to be reflected by $C_B$ are:
 
-1. The headers of $C_A$ can be (and are) freely recorded -- promptly and unambiguously -- in $C_B$;
-2. The headers of $C_B$ can be (and are) freely recorded -- promptly and unambiguously -- in $C_A$; and
+1. The headers of $C_A$ can be (and are) freely recorded --- promptly and unambiguously --- in $C_B$;
+2. The headers of $C_B$ can be (and are) freely recorded --- promptly and unambiguously --- in $C_A$; and
 3. $C_A$ is able to (and does) promptly prove that its past headers have been recorded in $C_B$, and has full knowledge of which headers have been recorded.
 
 \input{includes/ut/algorithms/por-reflected-block-weight.tex}
@@ -149,15 +149,15 @@ This is not very secure in the case of a PoW dapp-chain, but it means that a PoS
 
 When a header-transaction is confirmed by the simplex, the corresponding dapp-chain can efficiently use one-way PoR to inherit the security (and security properties) of the host simplex-chain[^dc-por]. Similar to mutual PoR, this can provide a *security context* where otherwise-insecure methods of consensus can be done securely.
 
-[^dc-por]: Note: PoW dapp-chains will have a much lower difficulty than the host simplex-chain. Although a simplex-chain could do mutual PoR with dapp-chains, this is unnecessary and inefficient -- provided that this difficulty asymmetry exists. Although there is no fundamental reason that PoW dapp-chains must have a much lower difficulty, we should take care to use incentive structures that lead to this sort of outcome provided such a policy increases security of the simplex.
+[^dc-por]: Note: PoW dapp-chains will have a much lower difficulty than the host simplex-chain. Although a simplex-chain could do mutual PoR with dapp-chains, this is unnecessary and inefficient --- provided that this difficulty asymmetry exists. Although there is no fundamental reason that PoW dapp-chains must have a much lower difficulty, we should take care to use incentive structures that lead to this sort of outcome provided such a policy increases security of the simplex.
 
 With regards to doublespends, one-way PoR means that the reflected chain is *at least* as difficult to attack as the reflecting chain (as we covered in \autoref{sec:por-step4}).
 Since the parent simplex-chain is as difficult to attack as the complete simplex, each dapp-chain must therefore *also* be that difficult to attack.
 Attacking a dapp-chain is as difficult as attacking the entire network.
 
-Note that parent-chains (generally) need to record their child-chains' headers *anyway*, so this use of one-way PoR -- where a simplex-chain reflects child dapp-chains -- has near-zero overhead for both the simplex-chain and the dapp-chain.
+Note that parent-chains (generally) need to record their child-chains' headers *anyway*, so this use of one-way PoR --- where a simplex-chain reflects child dapp-chains --- has near-zero overhead for both the simplex-chain and the dapp-chain.
 
-The only major, generic concern for dapp-chains -- that I can see -- is \emph{preventing DoS attacks}.
+The only major, generic concern for dapp-chains --- that I can see --- is \emph{preventing DoS attacks}.
 This is one reason to favor PoS (or PoA) dapp-chains over PoW dapp-chains.
 Though perhaps we should wait for \autoref{sec:preventing-dos-attacks}.
 
@@ -165,7 +165,7 @@ Though perhaps we should wait for \autoref{sec:preventing-dos-attacks}.
 
 If dapp-chain headers are included along-side transactions in simplex-blocks, is it not the case that both must pay some kind of *transaction fee*?
 If not, how are simplex-chain miners to prioritize what to include in their blocks?
-Even if such a fee is *not always necessary*, the *ability* to provide a fee has decisive advantages -- like creating asymmetry between an attacker and honest miners.
+Even if such a fee is *not always necessary*, the *ability* to provide a fee has decisive advantages --- like creating asymmetry between an attacker and honest miners.
 
 If it is possible to implement dapp-chains (or any system of child-chains) such that those chains have \emph{freedom of protocol} and \emph{freedom of incentivization} whilst inheriting the parent-chain's security, then we should strive to achieve that.
 
@@ -202,7 +202,7 @@ When a dapp-chain hosts a native DEX, it can use that DEX for PoR.
 The general case (where a reflecting chain contributes far more chain-work than the reflected chain) was discussed in \autoref{sec:comparing-weight-dex}.
 
 Consider the limited context of a DEX with only one required trading pair (between the dapp-chain's root token and the ROO), combined with the security-contribution differential between a simplex-chain and a dapp-chain.
-Note that a conservative implementation of a DEX between this pair *only relies on local state* -- that of the host simplex-chain and the dapp-chain, all of which is accessible to dapp-chain full nodes.
+Note that a conservative implementation of a DEX between this pair *only relies on local state* --- that of the host simplex-chain and the dapp-chain, all of which is accessible to dapp-chain full nodes.
 The simplest method of preventing market manipulation (that might allow for some attack on the dapp-chain) is to calculate PoR weight via an *old* exchange rate (e.g., from 24 hours ago), or to use an *average* over some period of time.
 Both of these ensure that *competition between blocks* (at any given time) is not dependent on the *current* DEX execution.
 With regards to dapp-chains using Proof of Reflection, this is sufficient.
@@ -228,7 +228,7 @@ Example use-cases:
 This demonstrates both *freedom of incentivization* (as there is none) and *freedom of protocol* as no payments are made and no restriction is placed on the nature of this dapp-chain's payload.
 
 \begin{comment}
-<!-- [^election]: The major problem that frustrated systems of end-to-end arbitrarily-verifiable online elections was the difficulty of implementing secret ballot. Today, there are at least three known methods: zero-knowledge proofs, homomorphic encryption, and [a CoinShuffle-based system of my own design](https://gitlab.com/exo-one/svst-docker/blob/master/svst-docs/secure.vote.white.napkin.md). (Note that it is [impossible to prevent the voter from creating some proof-of-vote](https://github.com/zack-bitcoin/amoveo-docs/issues/2) -- in these and all other systems of secret ballot.) -->
+<!-- [^election]: The major problem that frustrated systems of end-to-end arbitrarily-verifiable online elections was the difficulty of implementing secret ballot. Today, there are at least three known methods: zero-knowledge proofs, homomorphic encryption, and [a CoinShuffle-based system of my own design](https://gitlab.com/exo-one/svst-docker/blob/master/svst-docs/secure.vote.white.napkin.md). (Note that it is [impossible to prevent the voter from creating some proof-of-vote](https://github.com/zack-bitcoin/amoveo-docs/issues/2) --- in these and all other systems of secret ballot.) -->
 \end{comment}
 
 [^anchoring]: **Anchoring**: The process by which the hash of some data (perhaps a secondary chain's blocks) is included in transactions of a primary blockchain (e.g., [Bitcoin](https://www.reddit.com/r/Bitcoin/comments/5xkvc1/psa_were_running_a_stress_test_of_our_blockchain/)).
@@ -242,7 +242,7 @@ This solves the *Nothing at Stake* problem for PoS dapp-chains, provided the nec
 
 The abstraction layer between simplex-chains and dapp-chains brings practical benefits, too.
 For example: existing (open-source) PoS blockchain schemes can be easily integrated as dapp-chains.
-Given that dapp-chains inherit security properties of their parent-chain (via one-way PoR), if such a dapp-chain's consensus method supports *other* features -- e.g., [finality guarantees](https://github.com/w3f/consensus/blob/master/pdf/grandpa.pdf) -- those features are *free*.
+Given that dapp-chains inherit security properties of their parent-chain (via one-way PoR), if such a dapp-chain's consensus method supports *other* features --- e.g., [finality guarantees](https://github.com/w3f/consensus/blob/master/pdf/grandpa.pdf) --- those features are *free*.
 (Sharding, too, for that matter\dots)
 
 The most likely method of integration has three core components: modification of the headers (and integration of PoR), modification of existing slashing protocols, and support for intra-simplex SPV proofs.

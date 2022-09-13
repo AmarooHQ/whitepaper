@@ -53,11 +53,11 @@ Fantom claim that the \emph{asynchronous} nature of Lachesis is the reason that 
     Finally, aBFT networks allow for greater scalability and decentralization since there isn't excessive communication to limit the number of participating nodes.
 }[{\citeFantomLachesis}]
 
-While this does argue that aBFT is superior to pBFT, it isn't relevant to the trilemma -- communication overhead isn't the issue.
+While this does argue that aBFT is superior to pBFT, it isn't relevant to the trilemma --- communication overhead isn't the issue.
 
 Rather, Fantom must show that Lachesis can process $> O(c)$ transactions, \emph{at a minimum}, whilst not suffering network degradation.
 However, regardless of the order of blocks processed, $\nicefrac{2}{3}$ of validating nodes must agree before a block is finalized.\footnote{
-    ``Transactions are finalized as soon as the nodes agree on the decision.'' -- \citeFantomLachesis.
+    ``Transactions are finalized as soon as the nodes agree on the decision.'' --- \citeFantomLachesis.
 }
 Since validators are $O(c)$ constrained, Lachesis is $O(c)$ scalable.
 
@@ -85,7 +85,7 @@ There are at least three qualitatively different meanings of \emph{speed} that a
     \item After a transaction is first included in a block, how long until that transaction is considered ``confirmed'' or ``finalized'' (confirmation time).
 \end{itemize}
 
-However, the trilemma is (canonically) about confirming $O(n) > O(c)$ transactions -- i.e., \emph{throughput} or \emph{capacity}.
+However, the trilemma is (canonically) about confirming $O(n) > O(c)$ transactions --- i.e., \emph{throughput} or \emph{capacity}.
 None of the meanings of speed are directly relevant to solving the trilemma.
 Being ``fast'' might make for a better user experience, but it's not relevant here.
 

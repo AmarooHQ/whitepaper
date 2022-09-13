@@ -143,7 +143,7 @@
 \date{
   Currently in draft \\
   Last Updated: 2022-05-09 \\
-  (Note: ``??'' indicates a link to something in the WP -- not included here.)
+  (Note: ``??'' indicates a link to something in the WP --- not included here.)
 }
 
 \begin{document}
@@ -179,13 +179,13 @@ The number of ``confirmations'' that a block or transaction has is 1 plus the nu
 A new block builds on top of all prior blocks that it is cryptographically dependent on.
 
 Each block has a property called ``weight'' that corresponds to the amount of ``work'' that was required to create the block.
-For blockchains using a consensus system based on \emph{Proof of Work}, ``weight'' and ``work'' are both measured in \emph{hashes} -- particularly, the average number of hashes that the network (in aggregate) needed to calculate in order to find a valid block.
-The weight of multiple blocks is simply the sum of their individual weights -- thus the weight of the full chain is the sum of all blocks between its initial block (the genesis block) and the ``best'' known block.
+For blockchains using a consensus system based on \emph{Proof of Work}, ``weight'' and ``work'' are both measured in \emph{hashes} --- particularly, the average number of hashes that the network (in aggregate) needed to calculate in order to find a valid block.
+The weight of multiple blocks is simply the sum of their individual weights --- thus the weight of the full chain is the sum of all blocks between its initial block (the genesis block) and the ``best'' known block.
 This is how a consensus algorithm \emph{chooses} the best block: it is the valid block with the greatest total weight of all blocks between it and the genesis block.
 Block producers are incentivized to build on the best block because they receive a smaller reward (often 0) if they build on other blocks.
 
 A function known as \emph{the fork rule} encapsulates the specific calculations involved in how a particular consensus algorithm chooses the best block.
-Particularly, the fork rule determines which of two possible chain histories (complete sequences of blocks) is the canonical one -- the one that block producers should build on and extend.
+Particularly, the fork rule determines which of two possible chain histories (complete sequences of blocks) is the canonical one --- the one that block producers should build on and extend.
 
 The \emph{security} of a blockchain (or a network of chains) is measured by the amount of resources that an attacker would need in order to effect a doublespend.
 
@@ -194,12 +194,12 @@ The effect of this is that the previously valid transaction is now invalid.
 A doublespend is conceptually similar to a credit card charge-back that is made after a consumer has received the goods.
 
 The \emph{speed} of a blockchain is inversely proportional to the duration that a user has to wait before a transaction is considered ``confirmed''.
-This duration is measured in ``confirmations'' -- e.g., it is common for users to consider a Bitcoin transaction confirmed after 6 confirmations (which takes approximately 60 minutes).
-After this number of confirmations has occurred, it is taken that the chances of an attack succeeding are so low that the possibility can be dismissed -- thus a transaction is considered secure after this point.
+This duration is measured in ``confirmations'' --- e.g., it is common for users to consider a Bitcoin transaction confirmed after 6 confirmations (which takes approximately 60 minutes).
+After this number of confirmations has occurred, it is taken that the chances of an attack succeeding are so low that the possibility can be dismissed --- thus a transaction is considered secure after this point.
 
 \subsection{Block Headers and State}
 
-Blockchains typically specify that blocks have a \emph{header} -- a small data structure (usually between $\sim 100$ and $\sim 1000$ bytes large) that includes crucial cryptographic metadata.
+Blockchains typically specify that blocks have a \emph{header} --- a small data structure (usually between $\sim 100$ and $\sim 1000$ bytes large) that includes crucial cryptographic metadata.
 That metadata typically includes (but is not limited to): the hash of the parent block(s), a cryptographic commitment (often a merkle root or equivalent) to both/either the transactions included in the block and/or the current \emph{state} of the blockchain, network information such as the \emph{difficulty}, the timestamp of the block's creation, a \emph{nonce}, and protocol version information.
 Certain classes of consensus protocols (e.g., those based on \emph{Proof of Stake}) may require additional data to be included in the header.
 
@@ -211,7 +211,7 @@ Thus, headers-only chains are as secure against an attacker as the full chain \e
 
 We can use headers-only chains via their commitment to both/either the transactions included in the block and/or the current state of the blockchain.
 
-The state of a blockchain is protocol dependent -- a rough general description is: all of the up-to-date data required to evaluate whether new transactions are valid and, if so, the results of those transactions.
+The state of a blockchain is protocol dependent --- a rough general description is: all of the up-to-date data required to evaluate whether new transactions are valid and, if so, the results of those transactions.
 For example: the state of the Bitcoin blockchain is all of the current \emph{unspent transaction outputs} set; and the state of the Ethereum blockchain is all current account balances, all smart contract code, and the databases of all smart contracts.
 
 It is possible to exclude an explicit commitment to the exact transactions in a block (since the resulting state root will not match if an incorrect list of transactions is evaluated), but this is costly.
@@ -266,7 +266,7 @@ We typically use \cL and \cR to denote the ``local'' and ``reflecting'' chains, 
 
 Note: the proper noun ``Proof of Reflection'' refers to the system where proofs of reflection (PoRs) are used, in combination with the conversion of work, to increase the security of a blockchain.
 
-\subsection{Method -- Using PoRs}
+\subsection{Method --- Using PoRs}
 
 One of the key ideas behind PoR is that the weights of blocks are summable.
 In isolation, this fact is already used by traditional PoW blockchains (such as Bitcoin) to calculate chain-weight.
@@ -284,8 +284,8 @@ For example: the dimension of \emph{duration} (of time) is qualitatively differe
 We know that duration and distance are different dimensions both because they measure different things, and because there is no way to generically convert between the two.
 Similarly, the weight of blocks from one blockchain may be measured in hashes of one type (e.g., SHA256) and the weight of blocks of another blockchain may be measured in hashes of a different type (e.g., ETHash).
 
-Only by introducing certain contexts can we convert between different dimensions -- including different weights of different blockchains.
-For example: in the context of some object with an unchanging \emph{velocity}, we do have a way to convert between distance and duration -- the velocity acts as a \emph{constant of conversion}.
+Only by introducing certain contexts can we convert between different dimensions --- including different weights of different blockchains.
+For example: in the context of some object with an unchanging \emph{velocity}, we do have a way to convert between distance and duration --- the velocity acts as a \emph{constant of conversion}.
 If the object has velocity $s$, and moves some distance $d$, then it must have done so in $d/s$ units of time.
 Just as the context of the above example enables conversion between distance and duration, PoR requires that we choose a suitable context to enable the conversion of work.
 
@@ -311,7 +311,7 @@ Also, there are some principles that the fork rule's implementation of PoR shoul
   %   \item when an \cR block reflects multiple \cL blocks that form a continuous chain-segment, the work contributed by that \cR block should be attributed to the most recent \cL block in that chain-segment; and
   % \end{itemize}
   \item a block, $R_j$, in a reflecting chain (\cR) that does not reflect any local blocks (\cL blocks) eventually contributes its weight to the same \cL blocks that were reflected by the most recent ancestor of $R_j$ that reflected \cL blocks; and
-  \item a chain, when considering contributed weight, should only consider reflections of blocks in its own history -- if a later block builds on two chain-tips\footnote{
+  \item a chain, when considering contributed weight, should only consider reflections of blocks in its own history --- if a later block builds on two chain-tips\footnote{
     This is possible in some DAG-based blockchain data structures, e.g., \citeInclusiveFull.
   } that were reflected by the same \cR block, then care should be taken to avoid double-counting the work contributed by that \cR block.
 \end{itemize}
@@ -350,7 +350,7 @@ The amount of time that a user of a chain must wait in order for their transacti
 Some networks take longer than others.
 This is because, for an attacker that controls $q$ proportion of the network's security,\footnote{
   By convention a PoW blockchain's security is analyzed in terms of an attacker with $0 < q < 0.5$ proportion of the network's hash rate, such that the ``honest'' block producers have $p$ proportion, and $p + q = 1$.
-} the chance that a doublespend succeeds depends on the number of confirmations that a user waits -- the more confirmations, the lower the chance of a successful doublespend; the larger $q$ is, the higher the chance of a successful doublespend.
+} the chance that a doublespend succeeds depends on the number of confirmations that a user waits --- the more confirmations, the lower the chance of a successful doublespend; the larger $q$ is, the higher the chance of a successful doublespend.
 For transactions of lower value, a user can afford to wait for fewer confirmations than a more valuable transaction.
 
 When two blockchains use mutual PoR, the confirmation rate (\Cprime) of each chain \emph{increases}: a confirmation is received for each local block and each reflecting block.
@@ -399,7 +399,7 @@ The difficulty of such a chain will decrease, which increases the reward relativ
 
 Moreover, miners that are not synchronized in this way will reduce their ROI.
 
-Thus, this phenomena is \emph{resonant} -- the synchronization between miners is \emph{stable and attracting}.
+Thus, this phenomena is \emph{resonant} --- the synchronization between miners is \emph{stable and attracting}.
 
 
 
@@ -415,7 +415,7 @@ Thus, this phenomena is \emph{resonant} -- the synchronization between miners is
 % \dots
 
 
-An essence of PoR is the idea of chain \cL learning that some \cR block was made after some prior \cL block -- that the work attributed to the reflecting \cR block \emph{includes} a reference to part of \cL's history.
+An essence of PoR is the idea of chain \cL learning that some \cR block was made after some prior \cL block --- that the work attributed to the reflecting \cR block \emph{includes} a reference to part of \cL's history.
 
 Proofs of reflection have (up till now) been direct between the local chain and the reflecting chain.
 However, we can use the same technique \emph{recursively} to handle additional contexts.
@@ -481,7 +481,7 @@ Additionally, reflected chain-work in a tiling propagates incredibly quickly.
 After a chain in a tile produces a new block (call it \BL{1}), it only takes a single reflecting block of a chain in the parent tile to expose (via recursive PoR) \BL{1} to the next tile on the way to the root tile.
 The delay between those two blocks being mined is, on average, the block period divided by the number of chains in the reflecting tile.
 So if we have 50 chains in each simplex tile,\footnote{
-  A safe minimum upper-limit of the size of a tile is at least 50 chains under $O(c)$ constraints -- see the whitepaper for the calculations.
+  A safe minimum upper-limit of the size of a tile is at least 50 chains under $O(c)$ constraints --- see the whitepaper for the calculations.
 } and all chains have a block period of $15$ s, then the per-step delay between \BL{1} being mined a recursive PoR becoming available is $15/50$ seconds.
 Additionally, since a recursive PoR is from the local tile to the reflecting tile and back again, the recursive PoR requires $2d-1$ steps, where $d$ is the distance (number of direct links) that are between the local tile and the root tile.
 Thus, in this example, reflected work (via one-way recursive PoR with the root tile) begins to become available in $(2d-1) \cdot 15/50$ seconds.
@@ -533,7 +533,7 @@ Ideally, a large asymmetry should exist between the local\footnote{
   Work contributed via PoR is never local work.
 } work securing the parent-chain and the local work (if any\footnote{
   The child-chain can use a consensus mechanism that uses features that are not readily convertible, e.g., Proof of Authority, or avoid the idea of block rewards and/or a native token all together.
-}) securing the child-chain -- the parent-chain should have far more local work than the child-chain.
+}) securing the child-chain --- the parent-chain should have far more local work than the child-chain.
 In this way, the parent-chain can secure many child-chains.
 
 One advantage of using PoR for hosting child-chains is that it is incredibly efficient as the burden of recording and validating PoRs is entirely on the child-chain.
@@ -587,7 +587,7 @@ Such external chains require suitably rich smart contract systems at a minimum.
 
 For external chains that do not have suitably rich smart contract systems, reflections must have a \emph{known location} within the block so that it is possible to prove exactly how many proxy chain blocks were reflected by any particular external block.\footnote{
   For external chains \emph{with} suitably rich smart contract systems, the reflecting smart contract must have a known location in \emph{state}.
-  Additionally, reflecting transactions submitted to the smart contract must be reliably included in blocks of the external chain -- i.e., the external network is not so congested as to effectively censor reflections.
+  Additionally, reflecting transactions submitted to the smart contract must be reliably included in blocks of the external chain --- i.e., the external network is not so congested as to effectively censor reflections.
   This may be mitigated to some degree via block rewards paid to the miner of the external chain and distributed via the proxy chain.
 }
 For example, if Bitcoin were used as an external chain, reflections could be provided in the \emph{coinbase} transaction (which is always the first transaction), since this is data with a known location in the Bitcoin block and a suitable reflection scheme will allow the exact number of reflected blocks to be proven (including zero).
@@ -649,7 +649,7 @@ Since some PoW solutions for the secondary chain are not solutions for the prima
 
 \newpage
 
-\section{Figures and Algorithms} % -- omitted atm to decrease compilation time}
+\section{Figures and Algorithms} % --- omitted atm to decrease compilation time}
 
 \mk{placeholder sections}
 
@@ -665,7 +665,7 @@ Since some PoW solutions for the secondary chain are not solutions for the prima
 
 
 \begin{section}{Figures and Algorithms}
-  \mk{Figures and algorithms from the WP -- the algorithms will probably need some updating but can do that towards the end of the drafting process.}
+  \mk{Figures and algorithms from the WP --- the algorithms will probably need some updating but can do that towards the end of the drafting process.}
     \input{figs-in-wp.tex}
     \input{figs-orig.tex}
 \end{section}

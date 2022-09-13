@@ -32,12 +32,12 @@ L-coins are fungible with R-coins in this context, so, naturally, the weight-in-
 If we convert like this (treating 1 R-block as worth $R_r \cdot 1$ L-coins) then we'll we need to convert the result to L-hashes \emph{eventually}, but, if we have multiple reflections to process, we can calculate interim values (with units of L-coins) and sum them before that final conversion.
 % (since $\nicefrac{L_r}{L_d}$ is a constant for some given moment in time).
 It's worth remembering that block-weight is measured \emph{per block}.
-Since we're only converting with respect to \emph{a single block} at any one time, the \emph{per block} part of the resulting units \emph{cancels out} -- e.g., \autoref{eq:por-conv-work-srt}.
+Since we're only converting with respect to \emph{a single block} at any one time, the \emph{per block} part of the resulting units \emph{cancels out} --- e.g., \autoref{eq:por-conv-work-srt}.
 
 Let's use this context to write our first \textsc{WeightOf} function: \autoref{alg:weightof-1} (we'll still return work in L-hashes, though, not L-coins).
 
 \aside{
-    Note: the algorithms we define here will be general -- they'll work for \emph{both} the local and any reflecting chains.
+    Note: the algorithms we define here will be general --- they'll work for \emph{both} the local and any reflecting chains.
 }
 
 \input{includes/ut/algorithms/weightof-basic.tex}
@@ -86,7 +86,7 @@ Let: $I$ (coins/s) be the network-wide inflation rate; $G_t$ (coins) be the netw
 \end{align}
 
 Hold up!
-Didn't we just go over -- in great detail -- why we can't use block frequencies ($L_f$ and $R_f$) in conversions?
+Didn't we just go over --- in great detail --- why we can't use block frequencies ($L_f$ and $R_f$) in conversions?
 Why is it okay to use them now?
 
 To answer this, let's consider \emph{how} block rewards could be set network-wide so that they're consistent across all chains.
@@ -103,7 +103,7 @@ This way, if a miner (or a chain) tries to subvert or attack the RAA, it's trivi
   Similar to a DAA, the \emph{output} of an RAA is \emph{context laden}
 }
 
-\todoDraftOnly{RAA is long term context, DAA is short term -- they don't interfere w/ eachother}
+\todoDraftOnly{RAA is long term context, DAA is short term --- they don't interfere w/ eachother}
 
 % figures here to let them be moved around however latex decides.
 
@@ -135,12 +135,12 @@ So it is by \emph{construction and definition} that the block frequency introduc
 Thus, we can \emph{now} include $L_f$ and $R_f$, though we couldn't before.
 
 Note that we also \emph{prove} \autoref{eq:lfrf-ne-rrlr} for this case.
-We know that -- when $L_f$ and $R_f$ are in the convertible context -- we can use them via a \emph{scaling factor} that typically $\ne 1$. For example: to convert $\nicefrac{L_f}{R_f}$ to units of L-blocks/R-block, it must be scaled by $\nicefrac{R_t}{L_t}$ (which is contextual and unitless).
+We know that --- when $L_f$ and $R_f$ are in the convertible context --- we can use them via a \emph{scaling factor} that typically $\ne 1$. For example: to convert $\nicefrac{L_f}{R_f}$ to units of L-blocks/R-block, it must be scaled by $\nicefrac{R_t}{L_t}$ (which is contextual and unitless).
 We can find a scaling factor \emph{here} (but not generally) because we \emph{included it in a protocol-level relationship} (\autoref{eq:srt-reward}).
 
 This new situation and context are diagrammed in \autoref{fig:daa-raa-conversion}.
 
-Let's use \autoref{eq:srt-block-ratios} to create our next \textsc{WeightOf} algorithm for this context of a \emph{single root token} (SRT) -- \autoref{alg:weightof-ratio}.
+Let's use \autoref{eq:srt-block-ratios} to create our next \textsc{WeightOf} algorithm for this context of a \emph{single root token} (SRT) --- \autoref{alg:weightof-ratio}.
 \begin{align}
     & \; \frac{R_t \cdot L_f}{L_t \cdot R_f} \cdot L_d
         & & \frac{\text{L-hashes}}{\text{R-block}}

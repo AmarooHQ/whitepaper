@@ -3,17 +3,15 @@
 \subsubsubsection{Basic Structure}\label{basic-structure}}
 
 There are decisive advantages to using DAGs (instead of trees) as the fundamental structure of a chain.
-Namely, multiple histories (both compatible and incompatible) can be merged into a single, consistent history -- a feature which eliminates stale blocks and thwarts attacks like an empty-block DoS.
+Namely, multiple histories (both compatible and incompatible) can be merged into a single, consistent history --- a feature which eliminates stale blocks and thwarts attacks like an empty-block DoS.
 UT's simplex-chains must be block-DAGs to remain functional and avoid such DoS attacks.
 
-Often, the motivation for using a block-DAG -- instead of a block-tree
--- is to increase the block frequency.
+Often, the motivation for using a block-DAG --- instead of a block-tree --- is to increase the block frequency.
 Since block-DAGs can reference multiple parent blocks, the stale-rate can theoretically approach (or reach) 0.
 In UT, increasing the block frequency eventually becomes counter-productive, though, since UT is sensitive to the size and number of headers that are produced (see \autoref{sec:impact-of-header-size}).
 In UT, the purpose of using block-DAGs is to thwart certain attacks, not to increase the block frequency.
-The intention is for UT simplex-chains to use fairly typical block frequencies (e.g., 1 block per 15 s) -- possibly decreasing those frequencies over time to increase capacity.
-Slower block frequencies also decrease the incidence of multiple parents
--- this matters because each parent typically increases the header size by 32 bytes.
+The intention is for UT simplex-chains to use fairly typical block frequencies (e.g., 1 block per 15 s) --- possibly decreasing those frequencies over time to increase capacity.
+Slower block frequencies also decrease the incidence of multiple parents --- this matters because each parent typically increases the header size by 32 bytes.
 
 Some basic block-dag segments are shown in
 \autoref{fig:dag-simple-segments}.
@@ -72,7 +70,7 @@ The subgraph which takes priority is that of the
 \emph{prioritized parent's ancestry}.
 If that subgraph is a chain, then the ordering and execution of blocks is trivial.
 If it is not, then there must be another subgraph within that subgraph, and this algorithm is applied recursively.
-After the prioritized subgraph is processed, the remaining blocks (those that are only ancestors of the remaining parent block) are ordered and applied -- invoking recursion where necessary.
+After the prioritized subgraph is processed, the remaining blocks (those that are only ancestors of the remaining parent block) are ordered and applied --- invoking recursion where necessary.
 Finally, the best block is applied.
 In this way, all blocks are executed after their ancestors, and there is a clear and total ordering that trivially converges.
 
@@ -137,7 +135,7 @@ This can be repeated to allow for arbitrarily many parents.
         \centering
         \includegraphics[width=\dagExamplesWidth\linewidth]{dag_example1_expanded_order_40_sag}
         \caption{
-            We're now \emph{ordering} the blocks -- the solid arrows represent the final ordering.
+            We're now \emph{ordering} the blocks --- the solid arrows represent the final ordering.
             In this step we order the highest priority blocks.}
         \label{fig:dag-ex1-order-40}
     \end{subfigure}
