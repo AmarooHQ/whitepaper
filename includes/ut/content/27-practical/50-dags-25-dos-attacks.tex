@@ -3,7 +3,9 @@
 
 \label{sec:preventing-dos-attacks}
 
-Consider the situation where an attacker is attempting to deny service via the production of empty blocks, and that the attacker can create blocks faster than the honest network. Such a situation is illustrated in \autoref{fig:dag-dos-1}. Since the goal of the attack is to prevent transactions from occurring, the attacker must\footnote{
+Consider the situation where an attacker is attempting to deny service via the production of empty blocks, and that the attacker can create blocks faster than the honest network.
+Such a situation is illustrated in \autoref{fig:dag-dos-1}.
+Since the goal of the attack is to prevent transactions from occurring, the attacker must\footnote{
     The attacker could also fill the blocks with spam transactions.
     That's more work for the attacker, but also more work for the honest network (calculating and storing that state, maybe indefinitely).
     It's preferable that the attacker has minimal transactions in their blocks.
@@ -40,7 +42,8 @@ For traditional (non-DAG) chains -- where each non-genesis block has exactly one
 }
 % <!-- (Typically, this means the attacker produces blocks more frequently.) -->
 
-However, if blocks are allowed to have \emph{more} than one parent then there \emph{is no point} where an attacker can \emph{maintain} a DoS attack indefinitely. Instead, they can only \emph{delay the execution} of some transactions for a short period of time.
+However, if blocks are allowed to have \emph{more} than one parent then there \emph{is no point} where an attacker can \emph{maintain} a DoS attack indefinitely.
+Instead, they can only \emph{delay the execution} of some transactions for a short period of time.
 Particularly, if an attacker can produce $A_{\text{blocks}} > 1$ for every 1 block produced by the honest network, then the attack can delay honest transactions for up to approximately $({A_{\text{blocks}}}^2 - 1) \cdot {B_f}^{-1}$ seconds, where $B_f$ is the frequency of block production (in Hz).
 After this (approximate) point, the weight of the honest chain-segment, which includes the attacker's chain-segment, is always greatest.
 

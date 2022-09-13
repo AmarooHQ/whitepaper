@@ -1,0 +1,13 @@
+
+Up to this point, simplex-chains have been treated like traditional blockchains, where each block has only one parent.
+Since the vast majority of a simplex-chain's security is provided by other simplex-chains (and only a small proportion comes from that chain's foundational consensus method), are attacks like an empty-block Denial of Service\footnote{
+    For an example of this attack, see \citeLJCoiledcoinLink.
+} (DoS) possible?
+If a simplex-chain were to use PoW, then it might be (relatively) trivial for an attacker to perform such an attack.
+This is because -- in traditional blockchains -- controlling more than 50\% of the blocks produced provides \emph{exclusive} control over \emph{which candidate child blocks win} (i.e., are accepted into the canonical chain).\footnote{
+    Exclusive control of this nature also allows for protocol changes via soft-forks.
+    Additionally, because these soft-forks can be undetectable (when done well) and don't necessarily affect the income of a miner substantially, bribery (of miners) is theoretically inexpensive.
+    WRT UT, this problem is resolved in \autoref{sec:preventing-dos-attacks}.
+}
+Is there a way that we can mitigate this risk?
+If blocks were permitted \emph{more} than a single parent, can this \emph{exclusivity} be denied?

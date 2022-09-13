@@ -1,12 +1,12 @@
 module Amaroo.WP.Tables where
 
+import Amaroo.WP.Tables.Types
 import Prel
 
 import Amaroo.WP.Calcs (Params, UtVariants, ChainStats, allUtChainCalcs, allUtChainCalcsF, applyTDiscountToBH, auxStats, mkNestedPs, mkSimplePs, pToPF, runChainCalcFor, tradChainCalc, tradChainCalcEth2, tradChainCalcPolkadot, utChainCalc)
 import Amaroo.WP.Formatter (fdPlain, fdPlainMixed, fdPlainZero, fdStd, fdStdMixed, fdStdNoSiMixed, fdStdTwo, fdStdZero, fmt1GbpsPs, fmtDyn, fmtPsKBfBh, fmtPsKBfBhDh, wrap, wrapXml, wrapXmlWAttr)
 import Amaroo.WP.Tables.Booktabs (renderBooktabs)
 import Amaroo.WP.Tables.Types (LatexTablePos(..), TPositioning(..))
-import Amaroo.WP.Tables.Types
 import Amaroo.WP.Utils (binarySearch, diagonalApply, ui)
 import Data.Array (drop, filter, intercalate, take)
 import Data.Array as A
@@ -468,26 +468,26 @@ tableTpsHOPoRs = Table
     tpsAlignments
     (genTpsRow (\cd -> cd.ut.hopors) <$> utShortComplexityData)
 
-genDappChainsRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> [(utF cd).d1.n, (utF cd).d2.n, (utF cd).d3.n, (utF cd).deltaBigS]) <> [fmtDyn fdStd (utF cd).confRate]
+genDappChainsRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> [(utF cd).d1.n, (utF cd).d2.n, (utF cd).d3.n, (utF cd).deltaBigS]) <> ((fmtDyn fdStd) <$> [(utF cd).deltaR, (utF cd).confRate])
 
 dappChains :: Table
 dappChains = Table
-    ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", confRateTh]
-    {md: mkSpacer <$> [6, 4, 5, 5, 5, 4], texTabular: "lrrrrr"}
+    ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", "$\\Delta r$ (B/s)", confRateTh]
+    {md: mkSpacer <$> [6, 4, 5, 5, 5, 5, 4], texTabular: "lrrrrrr"}
     (genDappChainsRow (\cd -> cd.ut.std) <$> utShortComplexityData)
 
 -- not in use
 dappChainsHot :: Table
 dappChainsHot = Table
-    ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", confRateTh]
-    {md: mkSpacer <$> [6, 4, 5, 5, 5, 4], texTabular: "lrrrrr"}
+    ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", "$\\Delta r$ (B/s)", confRateTh]
+    {md: mkSpacer <$> [6, 4, 5, 5, 5, 5, 4], texTabular: "lrrrrrr"}
     (genDappChainsRow (\cd -> cd.ut.hot) <$> utShortComplexityData)
 
 -- not in use
 dappChainsHOPoRs :: Table
 dappChainsHOPoRs = Table
-    ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", confRateTh]
-    {md: mkSpacer <$> [6, 4, 5, 5, 5, 4], texTabular: "lrrrrr"}
+    ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", "$\\Delta r$ (B/s)", confRateTh]
+    {md: mkSpacer <$> [6, 4, 5, 5, 5, 5, 4], texTabular: "lrrrrrr"}
     (genDappChainsRow (\cd -> cd.ut.hopors) <$> utShortComplexityData)
 
 -- TODO: replace `fmtDyn fdPlain`
@@ -695,6 +695,7 @@ optimizationProps2 =
   , {s: "$\\text{DTS}_{5yrs}$", f: \cs -> fmtDyn fdStdTwo cs.tts}
   -- , {s: "Chain-GB/yr", f: \cs -> intercalate " +" $ (fmtDyn fdStd <<< (_ * _B_PER_S_TO_GB_PER_YR)) <$> [cs.k1, cs.deltaSmallS - cs.k1]}
   , {s: "Chain-GB/yr", f: \cs -> fmtDyn fdStd <<< (_ * _B_PER_S_TO_GB_PER_YR) $ cs.deltaSmallS}
+  , {s: "$\\Delta r$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.deltaR}
   , {s: "$\\Delta S$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.deltaBigS}
   , {s: "$\\Sigma$ $\\text{DTS}_{5yrs}$", f: \cs -> fmtDyn fdStdMixed cs.sigmaTts}
   -- , {s: "$\\nicefrac{\\Sigma\\;\\text{TPS}}{\\Delta s}$ (Tx/B)", f: \cs -> fmtDyn fdStdTwo (cs.d1.tps / cs.deltaSmallS)}

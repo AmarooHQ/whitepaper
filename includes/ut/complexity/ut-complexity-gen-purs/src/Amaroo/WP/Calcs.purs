@@ -107,6 +107,7 @@ type ChainStats
     , d3 :: NestingStats
     , deltaBigS :: Number
     , deltaSmallS :: Number
+    , deltaR :: Number
     , tts :: Number
     , sigmaTts :: Number
     , confRate :: Number
@@ -182,7 +183,7 @@ eth2EffDh dh = dh + 32.0
 polkadotEffDh _ = 819.0  -- via polkadot.js block.extrinsics[1].method.args[0].backedCandidates[0].encodedLength; seems constant, but not every paraId included every block -- https://github.com/AmarooHQ/polkadot-effective-dh/blob/master/main.js
 
 tradChainCalc' :: Params -> TradVar -> ChainStats
-tradChainCalc' ps var = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts, sigmaTts, effBh, effDh, kTx: k, k1: k, kB: 0.0, porBytes: 0.0, porBytes2: 0.0}
+tradChainCalc' ps var = {d1, d2, d3, confRate, deltaBigS, deltaSmallS, tts, sigmaTts, effBh, effDh, kTx: k, k1: k, kB: 0.0, porBytes: 0.0, porBytes2: 0.0, deltaR: 0.0}
   where
     d1 = {n: 1.0, t: k, tps: k / ps.txSize, p: pToPF ps}
     k = head ps.ks
@@ -352,7 +353,7 @@ calcN1Raw _varParams@{explicitPoRs, onlyNecessaryHeaders} {k1, hf: {bf, bh}} = n
 
 utCalcMonolithic :: Params -> UtParams -> ChainStats
 utCalcMonolithic ps varParams@{explicitPoRs, headerOmission, hashTruncation, onlyNecessaryHeaders} =
-    {d1, d2, d3, confRate, tts, sigmaTts, deltaBigS, deltaSmallS, porBytes, porBytes2, effBh, effDh, kTx, kB, k1}
+    {d1, d2, d3, confRate, tts, sigmaTts, deltaBigS, deltaSmallS, deltaR, porBytes, porBytes2, effBh, effDh, kTx, kB, k1}
   where
     _assertNoHOPoRs = if not (explicitPoRs && headerOmission) then unit else unsafePerformEffect $ throwException $ error $ "this function should never recieve (explicitPoRs && headerOmission)"
     hashSize = if hashTruncation then 16.0 else 32.0
@@ -394,6 +395,7 @@ utCalcMonolithic ps varParams@{explicitPoRs, headerOmission, hashTruncation, onl
     -- deltaBigS = n1 * k1 -- wp says: "The amount of network bandwidth, $\Delta S$, required to download all blocks (as they are produced) across all simplex-chains is"
     deltaSmallS = if explicitPoRs then k1 else k1 + explicitPorsK + (if headerOmission then explicitHeadersK else 0.0)  -- TODO: write up in WP
     porGraphMinK = confRate * (htModBh origBh + hashSize * (1.0 + confRate * phiOverlapSec))
+    deltaR = porGraphMinK
     deltaBigS = porGraphMinK + n1 * kTx -- use porGraph for big S b/c it's always more efficient
     -- deltaSmallS = porGraphMinK + kTx
     tts = ((5.0 * 365.25) * deltaSmallS / 10_000_000.0)
@@ -404,7 +406,7 @@ utCalcMonolithic ps varParams@{explicitPoRs, headerOmission, hashTruncation, onl
     d3 = calcNextNestingLevel ps3 d2
 
 utCalcHOPoRs :: Params -> {hashTruncation :: Boolean} -> ChainStats
-utCalcHOPoRs ps {hashTruncation} = {d1, d2, d3, confRate, tts, sigmaTts, deltaBigS, deltaSmallS, porBytes, porBytes2, effBh, effDh, kTx, kB, k1}
+utCalcHOPoRs ps {hashTruncation} = {d1, d2, d3, confRate, tts, sigmaTts, deltaBigS, deltaSmallS, deltaR, porBytes, porBytes2, effBh, effDh, kTx, kB, k1}
   where
     hashSize = if hashTruncation then 16.0 else 32.0
     origBh = (head ps.hfs).bh
@@ -427,6 +429,7 @@ utCalcHOPoRs ps {hashTruncation} = {d1, d2, d3, confRate, tts, sigmaTts, deltaBi
 
     explicitHeadersK = confRate * htModBh origBh
     porGraphMinK = confRate * (htModBh origBh + hashSize * (1.0 + confRate * phiOverlapSec))
+    deltaR = porGraphMinK
     deltaBigS = porGraphMinK + n1 * kTx -- use por graph big S b/c it's more efficient
     -- deltaSmallS = kTx + porGraphMinK
     -- deltaBigS = n1 * k1 -- wp says: "The amount of network bandwidth, $\Delta S$, required to download all blocks (as they are produced) across all simplex-chains is"

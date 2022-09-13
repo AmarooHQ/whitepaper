@@ -1,0 +1,17 @@
+\hypertarget{a-criticism-of-ghost}{%
+\paragraph{A Criticism of GHOST}\label{a-criticism-of-ghost}}
+
+GHOST allows for blocks to link to a single canonical parent and multiple \emph{uncle} blocks.
+In the full GHOST algorithm, uncle blocks contribute \emph{weight} to the canonical chain-segment, but do not contribute \emph{transactions}.
+Thus, uncles have \emph{no ability} to substantially contribute to the canonical chain's \emph{state}.
+
+Consider an empty-block DoS against a chain using GHOST.
+If an attacker were to perform an empty-block DoS, the attacker could link back to honest miners' blocks as uncles, but never parents.
+Given this, there is no easy way for the honest miners to end or mitigate the DoS.
+The attacker can include honest miners' chain-work in a purely
+\emph{beneficial} way -- there is a symmetry, thus honest miners (and the network) are at the mercy of the attacker.
+
+Why does this symmetry exist? Because the \emph{cumulative weight} of each block (including uncles) is \emph{divorced} from \emph{the set of transactions} that is contributed by that block.
+However, with a full block-DAG, when an attacker links to uncles in this way \emph{they must allow for the execution of all non-conflicting transactions} (i.e., those which would not cause a doublespend to occur).
+Thus, GHOST
+\emph{does not mitigate} empty-block DoS attacks; \emph{only} a full block-DAG can do that.

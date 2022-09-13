@@ -83,6 +83,11 @@ Now that we've added the \AxiomOfUnifiedAncestry, the alternative for the attack
 }
 
 \subsubsubsection{NIPoPPoWs + NIPoPoWRs} % = NIPoPPoWaPoWRs
+\label{sec:nipoppows-and-nipopowrs}
+
+\warning{
+    Reminder: \autoref{sec:nipoppows-and-nipopowrs} and sections on NIPoPoWs are speculative.
+}
 
 In \autoref{sec:blockdag-nipopows} we devised NIPoPPoWs, modified NIPoPoWs that work with block-DAGs by accounting for posterity.
 That construction depended a \emph{best-blocks} proof in combination with an \emph{on-main only} proof.
@@ -121,10 +126,12 @@ If child blocks have only one parent, then the block is on-main.
 If the block has multiple parents, then one must be on-main, and we can always find the most recent common primary ancestor of those parents to find an on-main block.
 If child blocks have multiple parents and share the same primary parent, then we can swap to the on-main sibling whenever needed.
 If we get stuck, we can repeat any of these processes multiple times to increase our knowledge of that chain-segment --- this means we can always determine on-main status via the PoR \mu-superDAG.
-To prove posterity, we just need to show a large enough segment of the block-DAG so that we can, \emph{with certainty,} identify an on-main block.
-From there, determining on-main status of a recent ancestor is trivial.
+To prove posterity, we just need to show a large enough segment of the block-DAG so that we can, \emph{with certainty,} identify which blocks within it are on-main.
+From there, determining on-main status of ancestors is trivial.
 
-Given the similarity between this proof and our previous NIPoPoWR, it's probably easiest to use `NIPoPoWR' to refer to the this slightly modified construction, too.
+So we no longer need two proofs, but we do need a bit more information than a stand-alone NIPoPoWR.
+
+Since this method is almost the same as our previous NIPoPoWR method, we'll avoid creating a new acronym and just re-use the term `NIPoPoWR' to refer to this version, too.
 
 \aside{
     Note: there is plenty of excess capacity available to us if the above is insufficient or insecure.
