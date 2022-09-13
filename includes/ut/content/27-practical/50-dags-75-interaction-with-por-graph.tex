@@ -4,43 +4,47 @@
 
 \label{sec:dags-and-the-por-graph}
 
-Up to now we have mostly ignored that \UT{} block-DAG simplex-chains exist within a broader context.
+Up to now we have mostly considered block-DAG's in isolation; outside \UT{}'s broader context.
 Particularly, we should ask: \emph{do the Axioms of \AxOfAvailability and \AxOfMaximalReflection change the game?}
 
-Recall that, when defining the \AxiomOfMaximalReflection, we make sure to recursively include blocks' ancestors, not just reflections.
+Recall that, when defining the \AxiomOfMaximalReflection, we made sure to recursively include blocks' ancestors, not just reflections.
 This was for two reasons.
-First, \BL should not explicitly reflect its own ancestors -- links to parents \emph{are} reflections, but are the trivial case where the local and reflecting chains are the same, and the local and reflecting blocks are the same.
-Second, \BL should not skip accounting for \BR's implied reflection of its parent(s), so we treat parents like any other reflected block.
-We must be sure not to leave any gaps.
+First, \BL should not explicitly reflect its own ancestors --- links to parents \emph{are} reflections, but are the trivial case where the local and reflecting chains are the same, and the local and reflecting blocks are the same.
+Second, \BL should not skip accounting for \BR's implied reflection of its parent(s), so we treat parents like any other reflected block --- we must be sure not to leave any gaps.
 
 There is still one gap, though: \cL blocks that are not an ancestor of \BL.
 
 It should be clear that parent links are qualitatively different from reflections: child blocks attest to the validity of their parent blocks, and to continuity between these two blocks.
 % This was the reason for the predicate's (ii)(b) condition
-``PoR'' between these blocks is also free, unlike explicit PoRs between blocks of different chains.
+The implicit `PoR' between these blocks is also free, unlike explicit PoRs between blocks of different chains.
 
-Unlike traditional chains, \UT{} blocks are not only allowed to have multiple parents, but \emph{can always include a valid block as an ancestor}.
+Unlike traditional chains, \UT{} blocks are not only allowed to have multiple parents, but \emph{can always include a valid chain-tip as an ancestor}.
 Recall the \AxiomOfMaximalReflection's principle: \emph{\PrincipleOfMaximalReflection} % space but no full stop
-Considering the symmetry between parents and reflected blocks, we can devise a new principle: \emph{A miner should build on all possible chain-tips.}
+Considering the symmetry between parents and reflected blocks, we can draft a new network principle: \emph{A miner should build on all possible chain-tips.}
 
 In effect, we want to ensure that a dishonest miner cannot evade the contradiction in refusing to build on a valid chain-tip whilst acknowledging it as available.
 If it is unavailable then the miner should not reflect the blocks that imply it is available; and if it is available and valid then it should be a parent of their draft block.
 
-So far, this principle is fine for honest miners building on \emph{valid} blocks -- including every chain-tip as a parent is what we expect honest miners to do by default.
+So far, this principle is convergent with honest miners building on \emph{valid} blocks --- including every chain-tip as a parent is what we expect honest miners to do by default.
 However, what are honest miners to do if there is an invalid block?
+We need to consider this because a block with a valid PoRs sub-block does not necessarily have a valid transactions sub-block.
 
-We already know enough to answer this, of course: link back to, or \emph{flag}, that block as invalid with an attached fraud proof, and never use that block as a parent.
-The transactions in that block aren't important, so we don't care about keeping them --- the offending transaction is part of the fraud proof in any case.
+We have already discussed the solution in \autoref{sec:stateless-and-fraud-proofs}: link back to, or \emph{flag}, that block as invalid \emph{with an attached fraud proof}, and never use that block as a parent.
+The transactions in that block aren't important --- excepting the offending transaction, which is part of the fraud proof.
 And we can reconstruct the PoRs sub-block using $O(1)$ data thanks to \AxOfMaximalReflection.
 Thus, an invalid block is only as large as its header, list of reflected PoR graph-tips, and fraud proof.
 That's $O(\log c)$ in the worst case.
+
+This is all that we need to plug the gap: honest miners can always build on \emph{any} local chain-tip, valid or not.
+If the chain-tip is valid, the honest miner uses it as a parent.
+If it is invalid, the honest miner flags it as invalid.
 
 % It is only in the case of an invalid block that it cannot be an ancestor, and in that case the miner \emph{must} link to it with the fraud proof attached.
 % This link is sort of like a reflection, but it comes with a note saying \emph{this block will never be valid, and here's why}.
 % Since the transactions within such a block are non-canonical, we don't count it as an ancestor.
 % Thus, the entire PoR graph learns that the block is invalid.
 
-\subsubsubsection{\AxiomOfRawUnifiedAncestry}
+% \subsubsubsection{\AxiomOfRawUnifiedAncestry}
 
 \DeclareAxiom{UnifiedAncestry}{
     A miner should use all valid chain-tips as parents, and flag invalid ones.
@@ -59,6 +63,7 @@ That's $O(\log c)$ in the worst case.
 }
 
 This new axiom changes the game for block-DAGs.
+
 Previously, an attacker could delay transactions for $\sim {A_\text{blocks}}^2$ many blocks because they could evade the contradiction in the PoR graph.
 Now, they cannot.
 Thus, empty block DoS attacks against simplex-chain block-DAGs are limited to $\sim A_\text{blocks}$ in length (on average).\footnote{
@@ -67,26 +72,81 @@ Thus, empty block DoS attacks against simplex-chain block-DAGs are limited to $\
 In terms of DoS potential, this is \emph{exactly} the same as if the simplex-chain were a traditional chain and the attacker always built on the best block, but only made empty blocks.
 Now that we've added the \AxiomOfUnifiedAncestry, the alternative for the attacker is producing only invalid blocks.
 
+% Additionally, we now have real information about posterity without needing to follow the main chain from chain-tips.
+% For blocks to be included in the PoR graph, they must build on all ancestors.
+% It's not possible for two chain-tips progress independently for more than a block period.
+
 \aside{
-    Note that this axiom applies and is verified in the context of the PoR graph (not chain-state).\\
-    The entire PoR graph learns of and verifies the fraud proof.
+    Note that this axiom applies and is verified in the context of the PoR graph (not chain-state).
+    % \\
+    % The entire PoR graph learns of and verifies the fraud proof.
 }
 
-\subsubsubsection{NIPoPPoWs + NIPoPoWRs = NIPoPPoWaPoWRs}
+\subsubsubsection{NIPoPPoWs + NIPoPoWRs} % = NIPoPPoWaPoWRs
 
 In \autoref{sec:blockdag-nipopows} we devised NIPoPPoWs, modified NIPoPoWs that work with block-DAGs by accounting for posterity.
 That construction depended a \emph{best-blocks} proof in combination with an \emph{on-main only} proof.
-In the case of simplex-chain block-DAGs, we do not want to use the same best-blocks proof as it only accounts for local chain-work and does not include reflections.
+In the case of simplex-chain block-DAGs, we do not want to use the same best-blocks proof since it only accounts for \emph{local} chain-work and does not account for reflections.
 
-Instead of a standard best-blocks NIPoPoWs, we can use NIPoPoWRs from \autoref{sec:nipopowrs}.
+Instead of a standard best-blocks NIPoPoWs, can we use NIPoPoWRs from \autoref{sec:nipopowrs}?
 Functionally, both serve the same purpose: proving that a block \emph{exists}.
 
-However, the NIPoPPoW best-blocks proof had substantial overlap with the on-main only proof -- that isn't the case for NIPoPoWRs as \emph{most} of the \mu-superblocks will be from reflecting chains.
+One potential problem is that the NIPoPPoW best-blocks proof substantially overlapped with the on-main only proof --- that isn't the case for NIPoPoWRs as \emph{most} of the \mu-superblocks will be from reflecting chains.
 Rater, we expect the best posteritorial \mu-superchain to have a \mu level approximately $\log_2({N_1})$ lower than that of the best PoR \mu-superDAG (since there are $N_1\times$ as many blocks).
 In other words, only $1/N_1$ local blocks are at the same \mu level as the highest \mu-superDAG.
+
+Let us take stock for a moment.
+Each axiom adds a constraint on what the simplex does consensus on and each block's relationships to other blocks.
+What are those constraints on consensus created by our current axioms?
+\begin{itemize}
+    \item \AxOfAvailability: the availability of blocks.
+    \item \AxOfMaximalReflection: the order of blocks, and that there are no `gaps' in the PoR graph.
+    \item \AxOfUnifiedAncestry: the ancestry of blocks, and that there are no `gaps' in each simplex-chain.
+\end{itemize}
+
+These are properties that are verifiable \emph{simplex-wide} --- as part of tracking the PoR graph, each node can reconstruct each simplex-chain's \emph{local} interlink structure.\footnote{
+    It might go without saying, but an improper interlink structure is a reason for a block to be invalid, so bad interlinks will be rejected by the PoR graph.
+}
+\emph{Thus, the PoR graph knows the last on-main block for each simplex-chain.}
+
+So, can we use the same technique as we used before --- tracing two proofs?
+Well, we will need to modify the interlink structure once again, but it seems in-principle possible.
+% At a minimum, we need a PoR \mu-superDAG, and a posteritorial PoW \mu-superchain, so the interlink structure should accommodate multiple previous blocks at a given \mu level, and one previous on-main ancestor.
+
+Compared to NIPoPPoWs, we have greatly restricted the possibilities regarding to on-main blocks: \AxOfUnifiedAncestry means that \emph{both} on-main and off-main blocks contain reliable\footnote{
+    It's not 100\% reliable, but it's good enough that we can always find an on-main block without much effort.
+} information regarding posterity.
+If a block has only one parent, then that parent must be on-main; off-main blocks need to use all available chain-tips as parents.
+If child blocks have only one parent, then the block is on-main.
+If the block has multiple parents, then one must be on-main, and we can always find the most recent common primary ancestor of those parents to find an on-main block.
+If child blocks have multiple parents and share the same primary parent, then we can swap to the on-main sibling whenever needed.
+If we get stuck, we can repeat any of these processes multiple times to increase our knowledge of that chain-segment --- this means we can always determine on-main status via the PoR \mu-superDAG.
+To prove posterity, we just need to show a large enough segment of the block-DAG so that we can, \emph{with certainty,} identify an on-main block.
+From there, determining on-main status of a recent ancestor is trivial.
+
+Given the similarity between this proof and our previous NIPoPoWR, it's probably easiest to use `NIPoPoWR' to refer to the this slightly modified construction, too.
+
+\aside{
+    Note: there is plenty of excess capacity available to us if the above is insufficient or insecure.
+    We could, for example, use a NIPoPPoW to prove some on-main block, then prove \emph{each} high level \mu-superblock in the NIPoPPoW via NIPoPoWRs.
+}
+
+There is one other fact that we need to prove: that no fraud proof was ever recorded for the target block.
 
 % soln? unify the por interlink w/ local interlink
 % each NIPoPoWR interlink includes the prev \mu-superblock in each of the: PoRs graph \mu-suerDAG, the local \mu-superDAG, and the posteritorial \mu-superchain.
 % one structure, verified by the PoR graph w/o exceeding O(1) limits
 
 \subsubsubsubsection{Integrating Fraud Proofs}
+
+NIPoPoWs (in general) exist in a unique context: we expect that a lot of time has passed since the target infix block was mined.
+
+If PoR sub-blocks keep track of a set of \emph{all} fraudulent blocks (and this is enforced), then we can use a much later block (from any chain) to prove whether any fraud proof for any particular block was ever recorded.
+This can be done via a Merklix tree, or any other merklized structure that allows us to prove non-membership.
+Therefore, we can use the most recent \mu-superblock (or some block a little behind the current PoR graph-tips) to prove that no fraud proof was recorded for the target infix block.
+Since a long time has passed (at least some security parameter of our choosing), we can be confident that no fraud proof was possible, and thus the block is valid.
+
+We could also provide additional proofs (of non-membership) for e.g., all blocks used in the complete full NIPoPoWR, if we cared to.
+Blocks with invalid interlinks cannot be used as superblocks, though, so additional proofs should not be necessary.
+
+This completes the sketch-construction of NIPoPoWRs.

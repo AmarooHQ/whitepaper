@@ -31,6 +31,9 @@ Any new UT variants should be added to the `UtVariants` type, and
 
 -}
 
+phiOverlapSec :: Number
+phiOverlapSec = 0.5
+
 type ChainNestingParams
   = { bf :: Number, bh :: Number }
 
@@ -342,7 +345,7 @@ utChainCalc ps varParams@{explicitPoRs, headerOmission, hashTruncation} =
       else utCalcMonolithic ps varParams
 
 calcN1Raw :: UtParams -> _ -> Number
-calcN1Raw varParams@{explicitPoRs, onlyNecessaryHeaders} {k1, hf: {bf, bh}} = n1AllHeaders / onlyNecessaryDenom
+calcN1Raw _varParams@{explicitPoRs, onlyNecessaryHeaders} {k1, hf: {bf, bh}} = n1AllHeaders / onlyNecessaryDenom
   where
     n1AllHeaders = if explicitPoRs then 0.0 else k1 / 2.0 / bf / bh
     onlyNecessaryDenom = if onlyNecessaryHeaders then bf else 1.0
@@ -367,7 +370,7 @@ utCalcMonolithic ps varParams@{explicitPoRs, headerOmission, hashTruncation, onl
     k1 = head ps1.ks
     n1Raw = if explicitPoRs then findMaxPoRsN1 ps1 hashSize else (calcN1Raw varParams {k1, hf}) -- (k1 / 2.0 / bfbh)
     n1 = n1Raw * (fromMaybe 1.0 ps1.limitN1Ratio)
-    explicitHeadersN = if not onlyNecessaryHeaders then n1 else n1 * hf.bf
+    explicitHeadersN = n1
     confRate = hf.bf * n1
     explicitConfRate = hf.bf * explicitHeadersN  -- this is the rate of production of headers that need to be included
     porBytes = porLen hashSize n1
@@ -377,9 +380,9 @@ utCalcMonolithic ps varParams@{explicitPoRs, headerOmission, hashTruncation, onl
     explicitHeadersK = explicitConfRate * htModBh origBh
     kB = (if explicitPoRs then explicitPorsK else 0.0) + (if headerOmission then explicitConfRate * hashSize else explicitHeadersK)
     kTx = k1 - kB
-    -- kTx refactored so that everything depends on N1
-    kTxOld = if explicitPoRs then (k1 - explicitPorsK - explicitHeadersK) else (k1 - explicitConfRate * hf.bh)
-    _asdf = if abs (kTx - kTxOld) < 1.0 then unit else unsafePerformEffect $ throwException $ error $ intercalate "\n-- " ["kTx != kTxOld:", show {kTx, kTxOld, n1, n1Raw, explicitPorsK, explicitHeadersK, confRate, porBytes}, "limitN1Ratio: " <> show ps.limitN1Ratio, "Variant Ps: " <> show varParams, "Params: " <> show ps]
+    -- -- kTx refactored so that everything depends on N1
+    -- kTxOld = if explicitPoRs then (k1 - explicitPorsK - explicitHeadersK) else (k1 - explicitConfRate * hf.bh)
+    -- _asdf = if abs (kTx - kTxOld) < 1.0 then unit else unsafePerformEffect $ throwException $ error $ intercalate "\n-- " ["kTx != kTxOld:", show {kTx, kTxOld, n1, n1Raw, explicitPorsK, explicitHeadersK, confRate, porBytes}, "limitN1Ratio: " <> show ps.limitN1Ratio, "Variant Ps: " <> show varParams, "Params: " <> show ps]
     t1 = kTx * n1
     d1 = {n: n1, t: t1, tps: t1 / ps.txSize, p: pToPF ps1}
     effBh = if explicitPoRs then d1.p.hf.bh + porBytes else d1.p.hf.bh
@@ -387,8 +390,12 @@ utCalcMonolithic ps varParams@{explicitPoRs, headerOmission, hashTruncation, onl
     ps2Pre = paramsForNextNS ps -- trim param-depth lists
     ps2 = ps2Pre {hfs = (fixBH2 (head ps2Pre.hfs) `cons'` tail ps2Pre.hfs)}
     ps3 = paramsForNextNS $ ps2Pre
-    deltaBigS = n1 * k1 -- wp says: "The amount of network bandwidth, $\Delta S$, required to download all blocks (as they are produced) across all simplex-chains is"
+
+    -- deltaBigS = n1 * k1 -- wp says: "The amount of network bandwidth, $\Delta S$, required to download all blocks (as they are produced) across all simplex-chains is"
     deltaSmallS = if explicitPoRs then k1 else k1 + explicitPorsK + (if headerOmission then explicitHeadersK else 0.0)  -- TODO: write up in WP
+    porGraphMinK = confRate * (htModBh origBh + hashSize * (1.0 + confRate * phiOverlapSec))
+    deltaBigS = porGraphMinK + n1 * kTx -- use porGraph for big S b/c it's always more efficient
+    -- deltaSmallS = porGraphMinK + kTx
     tts = ((5.0 * 365.25) * deltaSmallS / 10_000_000.0)
     sigmaTts = ((5.0 * 365.25) * deltaBigS / 10_000_000.0)
     d2 = calcNextNestingLevel ps2 d1
@@ -419,13 +426,16 @@ utCalcHOPoRs ps {hashTruncation} = {d1, d2, d3, confRate, tts, sigmaTts, deltaBi
     d1 = {n: n1, t: t1, tps: t1 / ps.txSize, p: pToPF ps1}
 
     explicitHeadersK = confRate * htModBh origBh
+    porGraphMinK = confRate * (htModBh origBh + hashSize * (1.0 + confRate * phiOverlapSec))
+    deltaBigS = porGraphMinK + n1 * kTx -- use por graph big S b/c it's more efficient
+    -- deltaSmallS = kTx + porGraphMinK
+    -- deltaBigS = n1 * k1 -- wp says: "The amount of network bandwidth, $\Delta S$, required to download all blocks (as they are produced) across all simplex-chains is"
+    deltaSmallS = k1 + explicitHeadersK
 
     -- NB: we want to re-adjust *unaltered params `ps` not `ps1` which we use for d1
     ps2Pre = paramsForNextNS ps -- trim param-depth lists
     ps2 = ps2Pre {hfs = (fixBH2 (head ps2Pre.hfs) `cons'` tail ps2Pre.hfs)}
     ps3 = paramsForNextNS $ ps2Pre
-    deltaBigS = n1 * k1 -- wp says: "The amount of network bandwidth, $\Delta S$, required to download all blocks (as they are produced) across all simplex-chains is"
-    deltaSmallS = k1 + explicitHeadersK
     tts = ((5.0 * 365.25) * deltaSmallS / 10_000_000.0)
     sigmaTts = ((5.0 * 365.25) * deltaBigS / 10_000_000.0)
     d2 = calcNextNestingLevel ps2 d1

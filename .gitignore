@@ -2,7 +2,8 @@
 #whitepaper.markdown
 whitepaper.*
 *.log
-output/*
+output
+output-old
 .ipynb_checkpoints
 *.sage.py
 includes/ut/tiling/*.png

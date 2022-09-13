@@ -463,6 +463,8 @@ For $k_1 = 3000$, $B_f = \frac{1}{60}$, and $B_h = 112$: $\Delta S \approx 2.4$ 
 With those figures: $N_1 \approx 800$ simplex-chains, $N_2 \approx 645,000$ dapp-chains, and maximum tps of $\sim 7.7\times 10^{6}$.
 Decreasing block times to 15s correspondingly decrease the bandwidth requirements to 0.6 MB/s for a simplex with $\sim 200$ chains, $\sim 40,000$ dapp-chains, and $\sim 484,000$ max tps.
 
+\todo{Update above figures due to O(1) PoR graph}
+
 While $O(c^2)$ bandwidth scaling is not ideal, it's clear that -- especially in the early days of a UT simplex when there are fewer simplex-chains -- there are tolerable configurations available; i.e., there is *excess capacity*.
 
 %% INSERT ### TABLE: dapp-chains
@@ -507,10 +509,10 @@ For comparisons over a range of parameters, see \autoref{sec:ut-variant-complexi
 %% INSERT ### TABLE: compare_optimizations_b
 
 : Comparison of UT variants' network and storage requirements with parameters: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions.
-$\text{TTS}_{5yrs}$: The time to sync 5 years of a simplex-chain's history, including PoRs, with a fully utilized 10 MB/s network connection.
+$\text{DTS}_{5yrs}$: The days to sync 5 years of a simplex-chain's history, including PoRs, with a fully utilized 10 MB/s network connection.
 
 \begin{comment}
-$\Sigma$ $\text{TTS}_{5yrs}$: The time to sync 5 years for all simplex-chains.
+$\Sigma$ $\text{DTS}_{5yrs}$: The days to sync 5 years for all simplex-chains.
 \end{comment}
 
 %% INSERT ### TABLE: compare_optimizations_b_20k

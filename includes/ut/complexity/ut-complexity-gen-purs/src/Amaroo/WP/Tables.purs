@@ -692,11 +692,11 @@ optimizationProps1WithLvl3 =
 optimizationProps2 :: Array OProps
 optimizationProps2 =
   [ {s: "$\\Delta s$ (B/s)", f: \cs -> fmtDyn fdStdZero cs.deltaSmallS}
-  , {s: "$\\text{TTS}_{5yrs}$ (days)", f: \cs -> fmtDyn fdStdTwo cs.tts}
+  , {s: "$\\text{DTS}_{5yrs}$", f: \cs -> fmtDyn fdStdTwo cs.tts}
   -- , {s: "Chain-GB/yr", f: \cs -> intercalate " +" $ (fmtDyn fdStd <<< (_ * _B_PER_S_TO_GB_PER_YR)) <$> [cs.k1, cs.deltaSmallS - cs.k1]}
   , {s: "Chain-GB/yr", f: \cs -> fmtDyn fdStd <<< (_ * _B_PER_S_TO_GB_PER_YR) $ cs.deltaSmallS}
   , {s: "$\\Delta S$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.deltaBigS}
-  , {s: "$\\Sigma$ $\\text{TTS}_{5yrs}$ (days)", f: \cs -> fmtDyn fdStdMixed cs.sigmaTts}
+  , {s: "$\\Sigma$ $\\text{DTS}_{5yrs}$", f: \cs -> fmtDyn fdStdMixed cs.sigmaTts}
   -- , {s: "$\\nicefrac{\\Sigma\\;\\text{TPS}}{\\Delta s}$ (Tx/B)", f: \cs -> fmtDyn fdStdTwo (cs.d1.tps / cs.deltaSmallS)}
   -- , {s: "Scale $\\times$", f: \cs -> fmtDyn fdStd (auxStats cs).scalingFactors.nesting}
   ]
