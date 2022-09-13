@@ -10,7 +10,7 @@ Particularly, we should ask: \emph{do the Axioms of \AxOfAvailability and \AxOfM
 Recall that, when defining the \AxiomOfMaximalReflection, we made sure to recursively include blocks' ancestors, not just reflections.
 This was for two reasons.
 First, \BL should not explicitly reflect its own ancestors --- links to parents \emph{are} reflections, but are the trivial case where the local and reflecting chains are the same, and the local and reflecting blocks are the same.
-Second, \BL should not skip accounting for \BR's implied reflection of its parent(s), so we treat parents like any other reflected block --- we must be sure not to leave any gaps.
+Second, \BL should not skip accounting for \BR{}'s implied reflection of its parent(s), so we treat parents like any other reflected block --- we must be sure not to leave any gaps.
 
 There is still one gap, though: \cL blocks that are not an ancestor of \BL.
 
@@ -149,9 +149,10 @@ There is one other fact that we need to prove: that no fraud proof was ever reco
 NIPoPoWs (in general) exist in a unique context: we expect that a lot of time has passed since the target infix block was mined.
 
 If PoR sub-blocks keep track of a set of \emph{all} fraudulent blocks (and this is enforced), then we can use a much later block (from any chain) to prove whether any fraud proof for any particular block was ever recorded.
+We don't care what the fraud proof actually was, since the PoR graph already came to consensus on the fact it exists.
 This can be done via a Merklix tree, or any other merklized structure that allows us to prove non-membership.
-Therefore, we can use the most recent \mu-superblock (or some block a little behind the current PoR graph-tips) to prove that no fraud proof was recorded for the target infix block.
-Since a long time has passed (at least some security parameter of our choosing), we can be confident that no fraud proof was possible, and thus the block is valid.
+Therefore, we can use the one of the intermediate \mu-superblocks to prove that no fraud proof was recorded for the target infix block.
+Since a long time has passed (at least some security parameter of our choosing), we can be confident that no fraud proof was possible, and thus that the block is valid.
 
 We could also provide additional proofs (of non-membership) for e.g., all blocks used in the complete full NIPoPoWR, if we cared to.
 Blocks with invalid interlinks cannot be used as superblocks, though, so additional proofs should not be necessary.

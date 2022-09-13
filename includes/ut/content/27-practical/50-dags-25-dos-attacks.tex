@@ -47,7 +47,7 @@ Instead, they can only \emph{delay the execution} of some transactions for a sho
 Particularly, if an attacker can produce $A_{\text{blocks}} > 1$ for every 1 block produced by the honest network, then the attack can delay honest transactions for up to approximately $({A_{\text{blocks}}}^2 - 1) \cdot {B_f}^{-1}$ seconds, where $B_f$ is the frequency of block production (in Hz).
 After this (approximate) point, the weight of the honest chain-segment, which includes the attacker's chain-segment, is always greatest.
 
-If an attacker performs a \emph{repeating cycle} of these attacks, then they may be able to decrease the effective capacity of the chain by a factor of ${A_{\text{blocks}}}^2$. %<!-- / (1 + A_{\text{blocks}}) -->
+If an attacker performs a \emph{repeating cycle} of these attacks, then they may be able to decrease the effective capacity of the chain by a factor of $\sim {A_{\text{blocks}}}^2$. %<!-- / (1 + A_{\text{blocks}}) -->
 The opportunity cost of this attack, for the attacker, is at least as much as the lost transaction fees.
 % <!-- note: with the distance from the main/pivot chain penalty in "Inclusive Block Chain Protocols", a smaller attacker isn't penalized much, but a larger attacker is penalized a lot WRT block rewards -->
 
