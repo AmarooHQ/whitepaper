@@ -61,19 +61,6 @@ There is a trivial solution to this problem: require \cL and \cR nodes to downlo
 Nodes must track the origin of work contributed via PoR to avoid double-counting work.
 An easy example of this is: \cL nodes should not count \cM's PoRs where an \cL block is the reflecting block; that work is already directly included in \cL's local chain-work.
 
-% commands used in the following xy chains diag
-
-% \providecommand\BL{}
-% \renewcommand\BL[1]{\BCI{\cL}{i}{#1}}
-% \providecommand\xBL[1]{\xyB{\BL{#1}}}
-
-% \providecommand\BR{}
-% \renewcommand\BR[1]{\BCI{\cR}{k}{#1}}
-% \providecommand\xBR[1]{\xyB{\BR{#1}}}
-
-% \providecommand\BM{}
-% \renewcommand\BM[1]{\BCI{\cM}{j}{#1}}
-% \providecommand\xBM[1]{\xyB{\BM{#1}}}
 
 Chain \cL can only count work contributed by \cR \emph{after} a multi-stage PoR can be constructed.
 For example, let's consider the (rather orderly) chain-segments in \autoref{fig:simple-recursive-por-chain-diag}.

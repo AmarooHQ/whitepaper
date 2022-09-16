@@ -28,11 +28,11 @@ BlockReduce is an architecture using merged mining to scale blockchains through 
 }
 
 \begin{itemize}
-    \item due to HLRC, any prime block can out compete \emph{every} block of a higher level (order).
-    so a malicious miner can create a prime block that makes stale all region and zone blocks since the last prime block.
+    \item due to HLCR, any prime block can out compete \emph{every} block of a higher level (order).
+    so a malicious miner can create a prime block that makes stale all\footnote{mb just one region; but definitely all zones for that region} region and zone blocks since the last prime block.
     This is why fork rules should never include \texttt{AND} conditions which depend on future blocks --- i.e., a way for a future block to invalidate a past block.
     You might still end up with a consistent outcome, but it means that the work done on blocks of higher level (order) is practically useless.
-    \item due to HLRC, miners of prime blocks (i.e., all miners) must only build on valid histories --- \emph{at all levels}.
+    \item due to HLCR, miners of prime blocks (i.e., all miners) must only build on valid histories --- \emph{at all levels}.
     Thus, miners must validate $O(n)$ chains.
     \item even if miners didn't have to validate every block, they still need to download every block.
     otherwise a malicious miner can mine a valid prime block that either: has an invalid zone block, or an unavailable region/zone block.

@@ -245,7 +245,7 @@ However, this is best left as \emph{excess capacity} in \UT{}'s architecture ---
 \subsubsubsection{\AxiomOfRawMaximalReflection}
 
 It should be clear that there are decisive advantages for \UT{} if the PoR graph is maximally reflective.
-Thus, we will require that it is via a protocol rule: the \AxiomOfMaximalReflection.
+Thus, we will require it via a protocol rule: the \AxiomOfMaximalReflection.
 
 \DeclareAxiom{MaximalReflection}{%
     A miner should reflect all possible blocks.
@@ -291,9 +291,9 @@ If a dishonest miner is determined to selectively reflect only \emph{some} simpl
 Honest miners, on the other hand, \emph{can} reflect the dishonest miner's blocks.
 Thus, the \AxiomOfMaximalReflection creates an asymmetry between honest and dishonest miners.
 
-If you are wondering \emph{What happens when \BR reflects an \cL block that is not an ancestor of \BL?} then I say \emph{`well spotted'} to you.
-On the one hand, if the \cL chain forks, and two distinct chains emerge, then they should reflect one another like any other pair of simplex-chains.
-On the other hand\dots{} well the other hand is a problem that we can't solve, yet --- we'll ignore it for now and return to it in \autoref{sec:dags-and-the-por-graph}.
+% If you are wondering \emph{What happens when \BR reflects an \cL block that is not an ancestor of \BL?} then I say \emph{`well spotted'} to you.
+% On the one hand, if the \cL chain forks, and two distinct chains emerge, then they should reflect one another like any other pair of simplex-chains.
+% On the other hand\dots{} well the other hand is a problem that we can't solve, yet --- we'll ignore it for now and return to it in \autoref{sec:dags-and-the-por-graph}.
 
 
 \subsubsubsection{The Longest PoR Chain}
@@ -363,7 +363,7 @@ Additionally, in \autoref{sec:dags-and-the-por-graph} we will discuss some symme
 \aside{
     Let us return to the \AxiomOfMaximalReflection again for a moment.
     I would have said something earlier but I wanted to give you a some time to chew, first.
-    If you were left wondering \emph{What happens when \BR reflects an \cL block that is not an ancestor of \BL?} then I say \emph{`well spotted'} to you --- finding criticisms on a first reading is worthy of praise. \\
+    If you were left wondering \emph{What happens when \BR{} reflects an \cL block that is not an ancestor of \BL{}?} then I say \emph{`well spotted'} to you --- finding criticisms on a first reading is worthy of praise. \\
     \\
     Now, the answer to the question:
     on the one hand, if the \cL chain forks, and two distinct chains emerge, then they should reflect one another like any other pair of simplex-chains.

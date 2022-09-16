@@ -64,6 +64,8 @@ If it is invalid, the honest miner flags it as invalid.
 
 This new axiom changes the game for block-DAGs.
 
+\subsubsubsubsection{DoS Attacks}
+
 Previously, an attacker could delay transactions for $\sim {A_\text{blocks}}^2$ many blocks because they could evade the contradiction in the PoR graph.
 Now, they cannot.
 Thus, empty block DoS attacks against simplex-chain block-DAGs are limited to $\sim A_\text{blocks}$ in length (on average).\footnote{
@@ -82,11 +84,74 @@ Now that we've added the \AxiomOfUnifiedAncestry, the alternative for the attack
     % The entire PoR graph learns of and verifies the fraud proof.
 }
 
+
+
+
+
+
+% All that sounds okay so far (maybe not that last bit), but this thought experiment is flawed.
+% It is \emph{smoothed out} compared to what we'd expect in reality --- the discrete and probabilistic natures of block production and reflections are ignored.
+% In \autoref{fig:dag-dos-1}, those are explicitly excluded!
+% What happens if we include the effect of other simplex-chains, though?
+% % Well... something \emph{magical}.
+
+% \todoDraftOnly{As soon as an honest block is created linking back to a most-recent attacker block, the game is over.}
+
+% Consider an attacker producing 2 blocks for every 1 honest block.
+% What happens most of the time?
+% Well the attacker's blocks get reflected first, so those blocks have an appreciable advantage over the honest blocks.
+% The honest blocks will get reflected, too, but most of the time the attacker's blocks will get the advantage from earlier reflections.
+% \emph{Most} of the time.
+% Occasionally, when an honest block is a bit lucky, an honest block will beat the attacker's next block --- gaining reflections earlier.
+% At that point, the attacker has lost --- they need to outpace the \emph{difference} in the number of reflections between the honest block and attacking blocks.
+% So, unlike a normal doublespend (where the attacker wins if they \emph{ever} get ahead), now the honest network wins (ends the DoS) if it \emph{ever} gets ahead of the attacker --- after that point, there's no viable strategy for the attacker besides to build on the honest blocks.
+% \emph{The asymmetry has flipped!}
+
+% \begin{comment}
+% - mk
+% cut from after "when an honest block is a bit lucky":
+% > (which will be more often if there's \emph{miner resonance})
+% it's worth noting the convergence better than we do atm (right now, that's: "If there were, it'd be possible to temporarily limit the attacker to $<50\%$ of mining power, ending the DoS quickly. (See \autoref{sec:miner-resonance}.))"
+% \end{comment}
+
+% \todoDraftOnly{
+%     Analyze including requirement to only reflect extant data.
+%     This means that the chain-tips get the weight (advantage honest b/c H builds on A blocks and H blocks).
+%     Attacker blocks lose out on PoRs but honest chain includes all PoRs.
+%     the attacker might lie about the requirement and be okay with reflecting non-extant data, but then other chains won't reflect it.
+% }
+
+% There's more that can be done here, too, like honest users creating transactions (with large fees) that depend on certain history (i.e., that some honest block is in the history of the chain).
+% That will attract miners from other chains due to unrealized RoI (potentially a lot).
+% The attacker could include that transaction, but then they need to voluntarily end the DoS themselves.
+% If you're worried about that, because it seems like miners might empty-block DoS simplex-chains, consider: when in equilibrium, that situation is essentially the same as an efficient market (for transaction execution).
+
+% \todoDraftOnly{Is it essentially the same?}
+
+% Is there a reasonable strategy whereby the honest network can temporarily increase the number of miners?
+% If there were, it'd be possible to temporarily limit the attacker to $<50\%$ of mining power, ending the DoS quickly.
+% (See \autoref{sec:miner-resonance}.)
+
+
+
+% \todoDraftOnly{The above should work for simplex-chains \emph{and} dapp-chains}
+
+% \todoDraftOnly{Dynamic average block-size for simplex-chains based on dapp-chain headers having some PoW}
+
+
+
+
+
+
+
+
+
+
 \subsubsubsection{NIPoPPoWs + NIPoPoWRs} % = NIPoPPoWaPoWRs
-\label{sec:nipoppows-and-nipopowrs}
+\label{sec:blockdag-nipopowrs}
 
 \warning{
-    Reminder: \autoref{sec:nipoppows-and-nipopowrs} and sections on NIPoPoWs are speculative.
+    Reminder: \autoref{sec:blockdag-nipopowrs} and sections on NIPoPoWs are speculative.
 }
 
 In \autoref{sec:blockdag-nipopows} we devised NIPoPPoWs, modified NIPoPoWs that work with block-DAGs by accounting for posterity.

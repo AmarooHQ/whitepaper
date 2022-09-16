@@ -13,8 +13,7 @@ In UT, the purpose of using block-DAGs is to thwart certain attacks, not to incr
 The intention is for UT simplex-chains to use fairly typical block frequencies (e.g., 1 block per 15 s) --- possibly decreasing those frequencies over time to increase capacity.
 Slower block frequencies also decrease the incidence of multiple parents --- this matters because each parent typically increases the header size by 32 bytes.
 
-Some basic block-dag segments are shown in
-\autoref{fig:dag-simple-segments}.
+Some basic block-dag segments are shown in \autoref{fig:dag-simple-segments}.
 
 \begin{figure}[h]
     \begin{subfigure}[t]{.31\linewidth}
@@ -42,8 +41,7 @@ Some basic block-dag segments are shown in
     \label{fig:dag-simple-segments}
 \end{figure}
 
-The essence of DAG-based consensus (at least the kind we're concerned with) is to \emph{prioritize execution} of blocks and transactions based on the \emph{security contribution} (i.e., weight) of each parent block
-(and that parent's ancestry).
+The essence of DAG-based consensus (at least the kind we're concerned with) is to \emph{prioritize execution} of blocks and transactions based on the \emph{security contribution} (i.e., weight) of each parent block (and that parent's ancestry).
 Based on a \emph{most recent common primary\footnotemark ancestor}, we can decide which parent's \emph{history} has priority execution.
 Prioritized blocks are positioned \emph{earlier} in the final ordering.
 
@@ -66,8 +64,7 @@ The chain of primary parents forms the \emph{main chain}.
 
 Let's limit block-DAG blocks to two parents.
 If the best block has two parents, then each parent will have a \emph{subgraph of blocks} between itself and the \emph{most recent common primary ancestor} of the two parents.
-The subgraph which takes priority is that of the
-\emph{prioritized parent's ancestry}.
+The subgraph which takes priority is that of the \emph{prioritized parent's ancestry}.
 If that subgraph is a chain, then the ordering and execution of blocks is trivial.
 If it is not, then there must be another subgraph within that subgraph, and this algorithm is applied recursively.
 After the prioritized subgraph is processed, the remaining blocks (those that are only ancestors of the remaining parent block) are ordered and applied --- invoking recursion where necessary.
@@ -161,7 +158,7 @@ This can be repeated to allow for arbitrarily many parents.
         \centering
         \includegraphics[width=\dagExamplesWidth\linewidth]{dag_example1_expanded_order_70_sag}
         \caption{And finally we order the last remaining blocks.
-(We could remove virtual blocks too).}
+            (We could remove virtual blocks too).}
         \label{fig:dag-ex1-order-70}
     \end{subfigure}
     \caption[
@@ -175,7 +172,7 @@ This can be repeated to allow for arbitrarily many parents.
 
 We should expect conflicting transactions (which might otherwise be attempted doublespends) to arise during this process.
 Ancestors of one parent may not be ancestors of another parent.
-The exact protocol for handling conflicts is up to the implementation, but there is no reason that secondary parents should be treated as invalid blocks.
+The exact protocol for handling conflicts is up to the implementation, but there is no reason that secondary parents should be treated as invalid by default.
 We will discuss merging histories in \autoref{sec:merging-histories}.
 
 Further reading: \citeInclusiveFull{}.

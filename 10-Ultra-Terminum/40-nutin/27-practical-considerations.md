@@ -6,14 +6,14 @@
 
 \todoDraftOnly{compact spv proofs via reusing PoR branches}
 
-\todoDraftOnly{Add to dos/dags: linking back to invalid parents}
+\input{includes/ut/content/27-practical/05-intro.tex}
 
-\todoDraftOnly{stateless blockchains}
+\draftOnly{\input{includes/ut/content/27-practical/10-refl-availability.tex}}
+
 ### Availability of Reflected Blocks
 
 \label{sec:availability-of-blocks}
 
-\draftOnly{\input{includes/ut/content/27-practical/10-refl-availability.tex}}
 
 \todoDraftOnly{Review this section. Got some feedback that this section was unclear. Is nomenclature introduced prior to this section? check if there's something that interacts with DAGs and mention if so.}
 
