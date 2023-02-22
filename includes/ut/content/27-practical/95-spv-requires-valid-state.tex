@@ -101,7 +101,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     Why don't we try something different, see if we can brainstorm some.
 }
 
-(Note: alt section inserted here)
+% (Note: alt section inserted here)
 
 \dSe{How about we start by listing tools that Eth2 might use but which we don't?}
 \dMax{
@@ -1075,9 +1075,12 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 %     So, $2vr^{-1} < z(z+3) = zz + 3z$.
 % }
 
+\begin{draftonly}
+
 \todo{discussion and investigation of bribe attacks and various options / configs}
 
 \todo{branch: bribes when no FP recorded, bribes when an FP recorded.}
+
 
 
 todo:
@@ -1127,6 +1130,12 @@ like you JUST prove that --- not all the blocks, just the chain of inputs
 
 if > some size --- makes sense mb?
 
+
+
+\end{draftonly}
+
+
+
 % ########  ########  #### ########  ########
 % ##     ## ##     ##  ##  ##     ## ##
 % ##     ## ##     ##  ##  ##     ## ##
@@ -1147,14 +1156,9 @@ if > some size --- makes sense mb?
 
 \subsubsubsection{SPV Bribe Attacks: Derivations \& Breakpoints}
 
-\todo{derive bribe attack threshholds}
-
-
 
 Let's assume that an attacker is willing to bribe miners to exclude a fraud proof.
-The goal of the attacker is to continue this attack beyond whatever, how much will that cost them over the
-
-\todo{above}
+The goal of the attacker is to continue this attack beyond some breakpoint, so how much will that cost them over the course of the attack?
 
 First, let's establish a baseline: what does a healthy simplex look like?
 \emph{Healthy} meaning: no fraud proof is possible because all blocks and state-transitions are valid.
@@ -1295,7 +1299,7 @@ Combining \autoref{eq:spv-atk-losses-mining} with \autoref{eq:spv-atk-losses-bri
     \label{eq:spv-atk-losses-total}
 \end{equation}
 
-\todo{nomenclature clash: $h$ was previously used both for $H(Np+q)$ and in $h+d=1$. set $\eta = H(Np+q)$ as a replacement. keep $h+d=1$.}
+% \todo{nomenclature clash: $h$ was previously used both for $H(Np+q)$ and in $h+d=1$. set $\eta = H(Np+q)$ as a replacement. keep $h+d=1$.}
 
 Observe that this is a lower bound on $\BribeCost(z)$.
 Let's define \BribeCost as the absolute minimum it can be given our current understanding.
@@ -2489,6 +2493,12 @@ in response to writing a dialog and honestly and fully exploring everything.
 
 % note: start 2nd part/day here?
 
+%% END ### RELEASE
+
+\begin{draftonly}
+
+
+
 
 --------
 
@@ -2553,7 +2563,7 @@ in response to writing a dialog and honestly and fully exploring everything.
 
 
 
-\subsubsubsection{a diagram}
+\subsubsubsection{Decoupled State Progression}
 
 
 
@@ -2575,8 +2585,6 @@ in response to writing a dialog and honestly and fully exploring everything.
 
 
 \todo{cut below: old stuff}
-
-
 
 
 
@@ -2679,3 +2687,5 @@ epistemic asymmetry between praise and criticism.
 ---------
 
 limit of proofs of invalididty are always smaller/easier than contraproofs of fraud
+
+\end{draftonly}
