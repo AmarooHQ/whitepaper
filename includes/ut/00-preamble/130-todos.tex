@@ -39,8 +39,16 @@
 }{}
 
 \NewDocumentEnvironment{draftonly}{+b}{
-    \ifthenelse{\equal{\BuildMode}{draft}}{ #1 }{}
-}{}
+    \ifthenelse{\equal{\BuildMode}{draft}}{
+        \hruleMarker{Begin DRAFT}
+
+        {#1}
+    }{}
+}{
+    \ifthenelse{\equal{\BuildMode}{draft}}{
+        \hruleMarker{End DRAFT}
+    }{}
+}
 
 \NewDocumentCommand{\draftOnly}{m}{
     \begin{draftonly}

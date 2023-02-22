@@ -14,6 +14,7 @@
 
 \label{sec:availability-of-blocks}
 
+\draftNote{This section (\autoref{sec:availability-of-blocks}) requires a redraft. The Axiom of Availability is much newer, and is the most important part.}
 
 \todoDraftOnly{Review this section. Got some feedback that this section was unclear. Is nomenclature introduced prior to this section? check if there's something that interacts with DAGs and mention if so.}
 
@@ -45,6 +46,8 @@ The complexity and impact of this strategy is discussed in \autoref{sec:bandwidt
 \todo{argue that hiding blocks can cause massive reorgs and invalidate future blocks after those future blocks have been mined (note: might be covered in part by 10-refl-availability.tex)}
 
 \todo{note that it is vital that new stuff doesn't invalidate old stuff / cause a re-org; or check that it's noted (ties into SPV)}
+
+\input{includes/ut/content/27-practical/10a-axiom-of-availability.tex}
 
 ### Proving Reflection
 
@@ -359,7 +362,7 @@ One reason that we can predict that transactions will build up in this fashion (
 The average hash-rate on each simplex-chain, as described above, is always the same regardless of which of the two miner strategies are used.
 However, the variance of block production on each of these chains won't be that of a chain with 60s block times, it'll be closer to that of a chain with 6s block times.
 
-\todo{discuss interaction with empty block dos attacks}
+\todoDraftOnly{discuss interaction with empty block DoS attacks}
 
 %% END ### RELEASE
 

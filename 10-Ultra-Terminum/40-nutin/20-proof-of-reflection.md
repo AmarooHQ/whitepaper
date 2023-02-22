@@ -875,7 +875,7 @@ Either way works because the DAA acts as a boundary of the convertible context i
     \nonumber
 \end{align}
 
-\todo{rework above and if kept then note that we'll include the context explicitly.}
+\todoDraftOnly{rework above and if kept then note that we'll include the context explicitly.}
 
 <!-- \autoref{eq:bitcoin-daa} -->
 
@@ -1053,7 +1053,7 @@ In that case, $\nicefrac{L_d}{L_r} \cdot \nicefrac{R_r}{R_d}$ gives us L-hashes/
 
 \label{sec:conversion-single-root-token}
 
-\todo{add degenerate case: same block reward, same difficulty}
+\todoDraftOnly{add degenerate case: same block reward, same difficulty}
 
 \input{20-por/40-single-root-token-2.tex}
 

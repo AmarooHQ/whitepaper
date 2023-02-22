@@ -1,4 +1,4 @@
-\todo{ensure enough complexity stuff is introduced before the next section --- enough to analyze complexities here.}
+\todoDraftOnly{ensure enough complexity stuff is introduced before the next section --- enough to analyze complexities here.}
 
 
 
@@ -12,7 +12,7 @@ Our goal in this section is to find a method for SPV (Simple Payment Verificatio
     \item \emph{Reliable}: the above properties hold for all transactions in all simplex-chains.
 \end{itemize}
 
-\todo{n/c adversary --- explain it}
+\todoDraftOnly{n/c adversary --- explain it}
 
 Given everything we have discussed up to now, it's not clear how SPV is possible.
 The problem is that miners on one simplex-chain do not validate the state transitions of other simplex-chains.
@@ -63,7 +63,10 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     The following is a dramatized dialog based on my thoughts leading up to the afternoon of August 3\textsuperscript{rd}.
     In reality, the dialog represents several days of exploratory learning and iteration.
     Although these events have been compressed into a single dialog, it is faithful to the nature and order of significant moments and realizations.
-    % That said, given the characters, you'll have to take me at my word.
+}
+
+\draftNote{
+    That these dialogs predate The Axioms, and have not yet been re-drafted.
 }
 
 \begin{tcolorbox}[colback=black!70,coltext=white]
@@ -680,7 +683,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 \dSe{
     I see.
 }
-\todo{Check that we cover safe and reliable explicitly (or add)}
+\todoDraftOnly{Check that we cover safe and reliable explicitly (or add)}
 \dSe{
     Let's take stock for a moment.
     We've covered \emph{safe}, and we need the other two, first, for \emph{reliable}.
@@ -1472,6 +1475,8 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 
 \subsubsubsection{Dialog: Error Correction III}
 
+\draftNote{The draft of this section isn't finished, but the important ideas are here.}
+
 \dialogHeader{25\textsuperscript{th} August 2022}
 
 \dMax{
@@ -2239,7 +2244,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     Uhh, well all of those blocks would get reflected by the rest of the PoR graph --- sequentially.
     All partitions would have to do that, based on the rules we introduced a \hyperref[dialog1:network-rules]{few weeks ago}.
 }
-\todo{
+\todoDraftOnly{
     is it actually required to be sequential?
     need to consider from first principles.
     (actually, I don't think it's required to integrate them like that. nodes can just link the tips.)
@@ -2310,6 +2315,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     So doubling $z$ is fine.
     We can add an extra 50\% as buffer, too. (so $3\times$ again.)
 }
+\todo{Finish this dialog.}
 % \dSe{
 %     (bottleneck joining 2 partitions?)
 % }
@@ -2471,6 +2477,8 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     \item solve by segmented state? fraud proof only invalidates tx state, not PoR state. That way, the PoR graph from the fraud chain-segment is inherited and doesn't need any replication, etc.
 \end{comment}
 
+\begin{draftonly}
+
 --------
 
 ex se: if you can't answer the criticisms that your own mind comes up with, how will you be able to answer the criticisms that anyone else's mind comes up with?
@@ -2481,6 +2489,9 @@ in response to writing a dialog and honestly and fully exploring everything.
 
 \dSe{(draft) if you can't answer the criticisms that your own mind come's up with, how will you be able to answer the criticisms that anyone else's mind come's up with?}
 
+\end{draftonly}
+
+\hrule
 
 % end of day 1
 % to go at the end:
@@ -2493,7 +2504,22 @@ in response to writing a dialog and honestly and fully exploring everything.
 
 % note: start 2nd part/day here?
 
-%% END ### RELEASE
+
+\subsubsubsection{Decoupled State Progression}
+
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[max width=\linewidth]{spv/network_scale_AL_split_sag}
+    \caption[
+    ]{
+    }
+    \label{fig:spv-network-complexity-split}
+\end{figure}
+
+
+
 
 \begin{draftonly}
 
@@ -2560,21 +2586,6 @@ in response to writing a dialog and honestly and fully exploring everything.
     Okay, let's get back to brainstorming.
     How about we start by listing tools that Eth2 might use but which we don't?
 }
-
-
-
-\subsubsubsection{Decoupled State Progression}
-
-
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[max width=\linewidth]{spv/network_scale_AL_split_sag}
-    \caption[
-    ]{
-    }
-    \label{fig:spv-network-complexity-split}
-\end{figure}
 
 
 
