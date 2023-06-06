@@ -10,9 +10,9 @@
         "james-yu.latex-workshop",
         "ms-python.vscode-pylance",
         "njqdev.vscode-python-typehint",
-        "rust-lang.rust",
         "ms-vscode.wordcount",
         "ms-vsliveshare.vsliveshare-pack",
-        "ms-vsliveshare.vsliveshare"
+        "ms-vsliveshare.vsliveshare",
+        "rust-lang.rust-analyzer"
     ]
 }
