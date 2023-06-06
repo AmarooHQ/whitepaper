@@ -4,8 +4,10 @@
 
 - the Makefile presumes you're running this in a linux environment
 - you'll need: make, pandoc v2.5, latexmk, git
-- ubuntu pkgs: `texlive-science`, `texlive-extra-utils`, `texlive-latex-extra`, `gnuplot`
+- ubuntu pkgs: `sudo apt install make latexmk git gnuplot texlive-science texlive-extra-utils texlive-latex-extra gnuplot`
 - nodejs and npm (for purescript, for complexity tables generator)
+
+- (hopefully works) pandoc on ubuntu 22.04 `sudo apt install pandoc-data libffi7`; then install `archive.ubuntu.com/ubuntu/pool/universe/p/pandoc/pandoc_2.5-3build2_amd64.deb`
 
 if you run into compile errors, you could try installing `texlive-full` -- not a great workaround but does solve some issues (b/c apparently we have a missing dep) -- or just use the docker build via `make docker-build && make docker`
 
