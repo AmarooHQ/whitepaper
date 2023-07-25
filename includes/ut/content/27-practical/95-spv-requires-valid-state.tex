@@ -1178,7 +1178,7 @@ When an invalid block is mined, individual nodes of the network should rapidly b
 However, during an ongoing (successful) attack, that fraud proof is not recorded in the PoR graph.
 The fraud is `invisible' when considering just the blockchain data itself, which means that SPV proofs may be fraudulent.
 
-When fraud is detected, the PoR graph should proceed through multiple phase changes until normality is restored.
+When fraud is detected, the PoR graph should proceed through multiple phase changes until normality is restored (\autoref{fig:por-graph-phases}).
 
 \begin{figure}[h]
     \begin{center}
@@ -2489,26 +2489,22 @@ in response to writing a dialog and honestly and fully exploring everything.
 
 \dSe{(draft) if you can't answer the criticisms that your own mind come's up with, how will you be able to answer the criticisms that anyone else's mind come's up with?}
 
+% \begin{comment}
+%     % the following is just a copy -- was already included above in dialog I
+
+%     % end of day 1
+%     % to go at the end:
+
+%     \dMax{I think I just realized something about scaling.}
+%     \dMax{
+%         It's not about consensus on \emph{state-transitions}. \\
+%         It's about consensus on the \emph{error correction} of state-transitions.
+%         }
+
+%         % note: start 2nd part/day here?
+% \end{comment}
+
 \end{draftonly}
-
-\;
-
-\hrule
-
-\;
-\vspace{.8em}
-
-% end of day 1
-% to go at the end:
-
-\dMax{I think I just realized something about scaling.}
-\dMax{
-    It's not about consensus on \emph{state-transitions}. \\
-    It's about consensus on the \emph{error correction} of state-transitions.
-}
-
-% note: start 2nd part/day here?
-
 
 \subsubsubsection{Decoupled State Progression}
 
