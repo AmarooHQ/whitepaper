@@ -253,7 +253,7 @@ conf times
 
 \label{sec:confirmation-times}
 
-A confirmation is a *discrete* event that occurs when a block is produced. When an attacker is performing a hash-rate based doublespend attack they are, effectively, racing the honest network; that race is measured in confirmations, not *time*.
+A confirmation is a *discrete* event that occurs when a block is produced. When an attacker is performing a hash-rate based doublespend attack, they are, effectively, racing the honest network; that race is measured in confirmations, not *time*.
 
 ```{=latex}
 \bquote{

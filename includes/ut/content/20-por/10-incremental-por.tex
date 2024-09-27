@@ -24,7 +24,7 @@ This isn't a new idea: in 2013, I proposed a system which used this method to su
   \url{https://bitcointalk.org/index.php?topic=598784.0}
 }
 I also wrote a simplified implementation of this method for Bitcoin SPV proofs in the very early days of Ethereum\footnote{
-    \url{https://github.com/XertroV/coppr/blob/master/chainheaders.py}
+    \url{https://github.com/XertroV/coppr/blob/master/chainheaders.py} \href{https://web.archive.org/web/20240927044057/https://raw.githubusercontent.com/XertroV/coppr/refs/heads/master/chainheaders.py}{[m1]}
 } --- a precursor to the later-successful BTC Relay\footnote{
     \url{https://github.com/ethereum/btcrelay}
 } (although BTC Relay seems to have been abandoned in late 2017).
@@ -54,6 +54,18 @@ We're going to use some tables and diagrams as we go to show the sequence of eve
 \autoref{tab:eth-images-btc} shows data and events for both Bitcoin and Ethereum as Bitcoin blocks are produced and the projection of Bitcoin in Ethereum is maintained.
 \autoref{fig:pr-btc-eth-step1} illustrates this.
 Note: \autoref{fig:pr-btc-eth-step1} includes some variance in Ethereum's block production rate, similar to what might be observed in a real-world environment, but \autoref{tab:eth-images-btc} does not.
+
+After a Bitcoin block ($\text{BTC}_k$) is produced, a user (it doesn't matter who) produces a transaction informing the SC of that block's header.
+Then, an Ethereum miner includes that transaction in a block, which updates the SC.
+This process repeats when the next Bitcoin block is mined, and so on.
+
+Why would a chain want\footnote{
+    Obviously, blockchains don't have desires.
+    We'll personify them as a short-cut, which here means approximately: the users / community / developers of a blockchain have some common goal or incentive to do a particular thing.
+} to include a projection of another chain?
+The typical answer is to enables proofs of some state or that some transactions occurred on the imaged chain.
+This enables more complex SCs, e.g., a trustless $\text{BTC}\leftrightarrow\text{ETH}$ market.
+
 
 \ctable[
   pos = h,
@@ -87,16 +99,6 @@ Note: \autoref{fig:pr-btc-eth-step1} includes some variance in Ethereum's block 
 \label{fig:pr-btc-eth-step1}
 \end{figure}
 
-After a Bitcoin block ($\text{BTC}_k$) is produced, a user (it doesn't matter who) produces a transaction informing the SC of that block's header.
-Then, an Ethereum miner includes that transaction in a block, which updates the SC.
-This process repeats when the next Bitcoin block is mined, and so on.
-
-Why would a chain want\footnote{
-    Obviously, blockchains don't have desires.
-    We'll personify them as a short-cut, which here means approximately: the users / community / developers of a blockchain have some common goal or incentive to do a particular thing.
-} to include a projection of another chain?
-The typical answer is to enables proofs of some state or that some transactions occurred on the imaged chain.
-This enables more complex SCs, e.g., a trustless $\text{BTC}\leftrightarrow\text{ETH}$ market.
 
 \subsubsection{Incrementally Implementing \emph{Proof of Reflection}}
 
@@ -130,6 +132,13 @@ Similar to \cR, \cL will begin including \cR headers in each block via appropria
 Just as \cR hosts a projection of \cL, \cL now hosts a projection of \cR.
 This is shown in \autoref{fig:pow_refl_step2} and \autoref{tab:por-step-2}.
 
+\begin{figure}
+  \centering
+  \includegraphics[max width=\linewidth, max height=0.4\textheight]{pow_refl_step2_sag}
+  \caption{Step 2. Chain L and Chain R contain a projection of each other's headers-only chain.}
+  \label{fig:pow_refl_step2}
+\end{figure}
+
 \begin{table}[hb]
 \centering
 \caption{Step 2. Both Chain L and Chain R host a projection of each other.}
@@ -150,25 +159,21 @@ This is shown in \autoref{fig:pow_refl_step2} and \autoref{tab:por-step-2}.
 }
 \end{table}
 
+% \FloatBarrier
 
-\begin{figure}
-\centering
-\includegraphics[max width=\linewidth, max height=0.4\textheight]{pow_refl_step2_sag}
-\caption{Step 2. Chain L and Chain R contain a projection of each other's headers-only chain.}
-\label{fig:pow_refl_step2}
-\end{figure}
+% The following was the beginning of a redraft, and the content is still in 20-proof-of-reflection.md
 
-\subsubsubsection{Step 3. A Reflection of \cL in \cR}
+% \subsubsubsection{Step 3. A Reflection of \cL in \cR}
 
-Can we use a projection of a chain for a new purpose?
-What might be possible if \cL keeps track of \cR's projection of \cL?
-This is straightforward to do if \cL and \cR expose their projections via a commitment in the header?\footnote{
-    This is commonly done via the root of a merkle or verkle tree, where that tree contains state entries of some kind.
-}
+% Can we use a projection of a chain for a new purpose?
+% What might be possible if \cL keeps track of \cR's projection of \cL?
+% This is straightforward to do if \cL and \cR expose their projections via a commitment in the header.\footnote{
+%     This is commonly done via the root of a merkle or verkle tree, where that tree contains state entries of some kind.
+% }
 
-\begin{figure}
-  \centering
-  \includegraphics[max width=\linewidth, height=0.28\textheight]{pow_refl_step3_sag}
-  \caption{Step 3 (todo)}
-  \label{fig:pow_refl_step3}
-\end{figure}
+% \begin{figure}
+%   \centering
+%   \includegraphics[max width=\linewidth, height=0.28\textheight]{pow_refl_step3_sag}
+%   \caption{Step 3 (todo)}
+%   \label{fig:pow_refl_step3}
+% \end{figure}

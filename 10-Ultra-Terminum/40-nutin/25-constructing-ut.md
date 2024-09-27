@@ -12,7 +12,7 @@ Such a foundation (*the simplex*) is *not* a sharded blockchain --- there's no r
 
 \label{sec:generalizing-reflection}
 
-*Proof of Reflection* is, in essence, the idea that a chain can acknowledge that its history has been confirmed by a different chain[^reflection-prior]. That is a simplification, but it *is* the essence of it.
+*Proof of Reflection* is, in essence, the idea that a chain can acknowledge that its history has been confirmed by a different chain, and that this fact can be used to share security between chains[^reflection-prior]. That is a simplification, but it *is* the essence of it.
 
 [^reflection-prior]: I have not been able to find any existing discussion of this method. If you know of any existing discussion of this method, please post a link to the forum topic that is linked in the abstract.
 

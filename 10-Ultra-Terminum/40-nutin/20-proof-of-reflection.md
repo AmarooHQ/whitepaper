@@ -1,146 +1,8 @@
 %% BEGIN ### RELEASE
 
-## Proof of Reflection
+\input{20-por/10-incremental-por.tex}
 
-\label{sec:proof-of-reflection}
-
-\aside{
-  A note on the term ``miner'': Consensus protocols sometimes choose a new name for the role of \emph{block producer}.
-  For example: ``validator'', ``baker'', ``collator'', etc.
-  In this document, the term ``miner'' refers to the generic role of \emph{block producer} in an inclusive sense, not specifically to block producers of PoW chains.
-}
-
-Can blockchains work cooperatively to secure each other? It certainly seems that there is nothing *in principle* that prohibits this. Can we come up with a way to do this?
-
-The idea of one blockchain 'tracking' another blockchain via chain-headers and its state via SPV proofs is not new. In 2013[^xc1], I (loosely) proposed a system which used this method to support rich cross-chain exchange. I wrote a simplified implementation of this method in the very early days of Ethereum[^xc3], a precursor to the later-successful BTC Relay[^xc4]. The general idea of one blockchain tracking the headers of another will be our starting point.
-
-[^xc1]: <https://bitcointalk.org/index.php?topic=198032.0>, <https://bitcointalk.org/index.php?topic=598784.0>
-[^xc3]: <https://github.com/XertroV/coppr/blob/master/chainheaders.py>
-[^xc4]: <https://github.com/ethereum/btcrelay>
-
-\defineTermTex{Projection}{
-  A \emph{projection} of a chain is its \emph{headers-only} version which is recorded and evaluated \emph{by a different chain}.
-  For example, \href{https://github.com/ethereum/btcrelay}{BTC Relay} is a smart contract by which Ethereum previously hosted a \emph{projection} of Bitcoin.
-  The \emph{act} of one chain creating and maintaining the projection of another is called \emph{imaging}
-}
-
-The general idea of an on-chain headers-only version of another chain does not --- to my knowledge --- have a name. Herein this is called a *projection*. The generalized process via which projections are created is called *imaging*.
-
-### A Projection of Bitcoin in Ethereum
-
-The idea that Ethereum smart contracts (SCs) can track Bitcoin chain-headers is well understood --- i.e., Ethereum *images* Bitcoin.
-The result of this is that the *projection* of Bitcoin is available to Ethereum users and SCs.
-Bitcoin's proof of work algorithm is clean and simple, so implementing the necessary logic in an Ethereum SC is viable.
-In principle, any chain that supports some headers-only mode can be imaged in this way.
-In practice that can be difficult (e.g., Ethereum's EVM doesn't generally support memory hard hashes unless special cases are introduced).
-But we're not interested in practicality *at the moment*.
-
-
-Let's add such a contract to Ethereum and describe the relevant data and events in \autoref{tab:eth-images-btc}.
-\autoref{fig:pr-btc-eth-step1} illustrates this.
-Note: \autoref{fig:pr-btc-eth-step1} includes some variance in Ethereum's block production rate, similar to what might be observed in a real-world environment, but \autoref{tab:eth-images-btc} does not.
-
-\ctable[
-  pos = h,
-  caption = (Hypothetical) Data and events for both Bitcoin and Ethereum as a projection of Bitcoin in Ethereum is maintained via Bitcoin headers being included in an Ethereum SC.,
-  cap = (Hypothetical) Data and events as Ethereum images Bitcoin.,
-  center,
-  label = tab:eth-images-btc,
-]{lllll}{}{
-  \FL
-  \shortstack[l]{Time step (\textasciitilde{}15 s \\ increments)} & \shortstack[l]{Bitcoin \\ block mined} & \shortstack[l]{Eth \\ block mined} & \shortstack[l]{Eth block contents} & {Eth state}
-  \ML
-  $\vdots$ & & & & \NN
-  0 & $k$ & & & \NN
-  1 & & $j$ & $\text{BTC}_k$ header & Records $\text{BTC}_{0 \cdots k}$ \NN
-  $\vdots$ & & & & \NN
-  40 & $k+1$ & & & \NN
-  41 & & $j+40$ & $\text{BTC}_{k+1}$ header & Records $\text{BTC}_{0 \cdots k+1}$ \NN
-  $\vdots$ & & & &
-  \LL
-}
-
-\begin{figure}
-\centering
-\includegraphics[max width=\linewidth, height=0.35\textheight]{pow_refl_btc_eth_step1_sag}
-\caption[
-  (Hypothetical) A projection of Bitcoin in Ethereum via an SC and transactions.
-]{
-  (Hypothetical) Bitcoin headers, as they are produced, are included in Ethereum's state via a smart contract and user made transactions.
-  This is roughly how \textit{BTC Relay} worked.
-}
-\label{fig:pr-btc-eth-step1}
-\end{figure}
-
-After a Bitcoin block is produced, an Ethereum miner includes a transaction containing the Bitcoin header, which updates the SC imaging the Bitcoin chain. In reality there are practical concerns about incenting someone to produce such a transaction (among other things); we're not concerned with those here. We're just concerned with the relationships that exist and what they can do.
-
-Why would a chain want to include a projection of another chain? The typical answer is to prove transactions or state occurred on the foreign chain. On Ethereum, one could build a trustless $\text{BTC}\leftrightarrow\text{ETH}$ market, for example.
-
-### Incremental Implementation of Proof of Reflection
-
-\label{sec:two-blockchains}
-
-Let's build up the idea via a hypothetical situation with two distinct blockchains.
-For simplicity, you can imagine these as Bitcoin and Ethereum 1 --- at least to start with.
-However, keep in mind that the changes required to support *Proof of Reflection* are unlikely to ever be integrated with either Bitcoin or Ethereum (and reaching social agreement about the details would be difficult, to say the least).
-
-Our starting case is that both chains use different Proof of Work algorithms and neither includes a projection of the other.
-For simplicity, the following progression will use two blockchains with identical block times, and will not account for variance in block production.
-
-#### Step 1. Chain \cR images Chain \cL
-
-This is conceptually similar to having a projection of Bitcoin in Ethereum, and shown in \autoref{fig:pow_refl_step1}.
-
-Similar to before, Chain \cR will include Chain \cL's headers as they are produced. Note that this can be a protocol-level implementation; it does not have to be at the smart contract level --- as it would be with Ethereum.
-
-\begin{figure}
-\centering
-\includegraphics[max width=\linewidth, height=0.28\textheight]{pow_refl_step1_sag}
-\caption{Step 1: Chain \cR images Chain \cL; thus Chain \cR hosts a \emph{projection} of Chain \cL.}
-\label{fig:pow_refl_step1}
-\end{figure}
-
-#### Step 2. Chain \cL images Chain \cR
-
-Say that the protocol of Chain \cL is extended to support a projection of Chain \cR.
-That is, a bespoke protocol extension is created that allows/requires miners to publish known Chain \cR headers along with their Chain \cL block.
-Similar to the way Chain \cR images Chain \cL, now Chain \cL also images Chain \cR.
-This is shown in \autoref{fig:pow_refl_step2} and \autoref{tab:por-step-2}.
-
-\begin{table}
-\centering
-\caption{Step 2: Both Chain \cL and Chain \cR host a projection of each other.}
-\label{tab:por-step-2}
-\resizebox{\textwidth}{!} {%
-\begin{tabular}{lllllll}
-\toprule
-{Time} & \shortstack[l]{\cL block \\ made} & \shortstack[l]{\cL block \\ contents} & {\cL state} & \shortstack[l]{\cR block \\ made} & \shortstack[l]{\cR block \\ contents} & {\cR state} \\
-\midrule
-{$\vdots$} & {} & {} & {} & {} & {} & {} \\
-{0} & $k$ & {$R_{j-1}$ header} & {Records $R_{0 \cdots j-1}$} & {} & {} & {} \\
-{1} & {} & {} & {} & $j$ & {$L_{k}$ header} & {Records $L_{0 \cdots k}$} \\
-{2} & $k + 1$ & {$R_{j}$ header} & {Records $R_{0 \cdots j}$} & {} & {} & {} \\
-{3} & {} & {} & {} & $j + 1$ & {$L_{k+1}$ header} & {Records $L_{0 \cdots k+1}$} \\
-{$\vdots$} & {} & {} & {} & {} & {} & {} \\
-\bottomrule
-\end{tabular}%
-}
-\end{table}
-
-
-\begin{figure}
-\centering
-\includegraphics[max width=\linewidth, max height=0.4\textheight]{pow_refl_step2_sag}
-\caption{Step 2: Chain \cL and Chain \cR contain a projection of each other's headers-only chain.}
-\label{fig:pow_refl_step2}
-\end{figure}
-
-
-\FloatBarrier
-
-#### Step 3. Chain \cL's *reflection* in Chain \cR
-
-%%\subsubsubsection{Step 3. Chain \cL's \emph{reflection} in Chain \cR}
+#### Step 3. A Reflection of \cL in \cR
 
 Can we use a projection of a chain for a different purpose?
 What happens if Chain \cL tracks whether Chain \cL's history is confirmed within Chain \cR?
@@ -194,11 +56,11 @@ Segments of Chain \cL and \cR (events and data) are shown in \autoref{tab:por-st
 \ctable[
   pos = hp,
   caption = {
-    Step 3: Chain \cL records which of its headers are known about by Chain \cR.
+    Step 3. Chain \cL records which of its headers are known about by Chain \cR.
     That is: Chain \cL includes \emph{proofs of reflection}.
     Note: ``Headers'' is abbreviated to ``Hdrs''.
   },
-  cap = Step 3: Chain \cL records \emph{PoRs} via Chain \cR.,
+  cap = Step 3. Chain \cL records \emph{PoRs} via Chain \cR.,
   center,
   label = tab:por-step-3,
   width = \textwidth,
@@ -236,7 +98,7 @@ Segments of Chain \cL and \cR (events and data) are shown in \autoref{tab:por-st
 \centering
 \includegraphics[max width=\linewidth, max height=0.35\textheight]{pow_refl_step3_sag}
 \caption{
-  Step 3: Chain \cL includes \textit{proofs of reflection} (PoRs) along with headers.
+  Step 3. Chain \cL includes \textit{proofs of reflection} (PoRs) along with headers.
   Proofs of Reflection allow Chain \cL to know which of its own blocks are known to Chain \cR.
 }
 \label{fig:por-step3}

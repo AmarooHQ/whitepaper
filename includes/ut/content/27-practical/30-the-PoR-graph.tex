@@ -115,13 +115,13 @@ In essence, any block in a maximally reflective PoR graph shares a \emph{common 
 Is there an intuitive explanation for the reduction in complexity of the PoR graph?
 Yes.
 To start with, let us assume that there is no \emph{propagation delay} --- i.e., all miners instantly receive, validate, and incorporate all blocks into the PoR graphs of their draft blocks.
-In this case, no blocks are every mined simultaneously, and so each block will reflect exactly one PoR graph tip.
+In this case, no blocks are ever mined simultaneously, and so each block will reflect exactly one PoR graph tip.
 Since there are $O(c)$ many chains, and we need to add $O(1)$ extra information per header (the reflected tip), this is $O(c)$ extra information all up.
 
 In practice, blocks \emph{will} sometimes be mined simultaneously.
 So, even if \emph{most} of the time a block only reflects one tip, \emph{some} of the time that block will reflect multiple tips.
 The frequency of simultaneous blocks is dependent on the number of chains ($N_1$), the block frequency of each chain ($B_f$), and some propagation delay ($\phi$ seconds).
-Two blocks are simultaneous if they are mined within $\phi$ seconds of each other
+Two blocks are simultaneous if they are mined within $\phi$ seconds of each other.
 In the $\phi$ seconds before that most recent tip was mined, we expect that $\sim N_1 B_f \phi$ other tips were mined (from any simplex-chain).
 Unless a block contains no reflections, it must reflect at least one graph tip (which happens with probability $1 - {N_1}^{-1}$).
 So, we expect each block to reflect $1 + N_1 B_f \phi$ tips.
@@ -219,7 +219,7 @@ There is a good reason to think $O(\phi) = O(1)$.
 At some point, propagation delay is limited by the speed of light.
 So latency must have a definite minimum, which is a constant.
 
-However, the physical limits on latency do not dominated real-world latency yet.
+However, the physical limits on latency do not dominate real-world latency yet.
 Near-future networking technologies, like LEO satellite constellations, will reduce latencies over significant distances.
 Moreover, even as the best-case minimum latency approaches physical limits, technology will continue to improve latency in \emph{bandwidth intensive} contexts.\footnote{
     This is something we didn't consider when estimating $N_1$ in \autoref{eq:bad-n1-with-phi} --- that the propagation delay will increase as the excess capacity of nodes' available bandwidth decreases.
@@ -490,7 +490,7 @@ This is done by progressively inspecting the most recent segments of lesser and 
     The NIPoPoW algorithms don't do this exactly, but they embody similar and convergent knowledge.
 }
 This is the main \emph{suffix proof}, as it proves the blocks at the recent end (suffix) of the blockchain.
-(Additionally, the most recent $k$ blocks ($\mathcal{C}[-k:]$) are included along side the proof.)
+(Additionally, the most recent $k$ blocks ($\mathcal{C}[-k:]$) are included alongside the proof.)
 The work required to generate the main suffix proof is (approximately) as much work as has been contributed to the entire blockchain history.
 Thus, an adversarial NIPoPoW requires (approximately) as much work as the total chain-weight of the honest chain, so NIPoPoWs are secure.\footnote{
     This is a simplification --- see \citeNIPoPoWs for full details.
@@ -524,7 +524,7 @@ An example of a NIPoPoW with a suffix and infix proof is shown in \autoref{fig:n
 Notice that there is no concept of \emph{state} used when reasoning about NIPoPoWs --- we're only considering a chain of interlinked blocks with PoWs.
 Put another way: there is no requirement that these blocks belong to the same blockchain; only the PoW and interlink structure matters.
 
-So, at least at first glance, it appears that the longest PoR chain might work with NIPoPoWs, or some modified variant, at least.
+So, at first glance, it appears that the longest PoR chain might work with NIPoPoWs, or some modified variant, at least.
 
 There are two important caveats that are mentioned in the NIPoPoW paper; these are problems for us and we will have to address them.
 
@@ -584,7 +584,7 @@ In essence, the attacker selectively performs a selfish-mining-like attack whene
 Their goal is to mine an alternate longest chain, such that the superblock becomes stale.
 This then allows the attacker to produce, in private, a superior NIPoPoW (compared to that of the public chain) for fewer resources than should be required.
 
-The authors solve this problem via introducing a concept of ``\emph{goodness}'' --- which is basically that proofs are must be succinct and ``\emph{good at every level}'' (when this is not possible, provide the whole chain instead).
+The authors solve this problem via introducing a concept of ``\emph{goodness}'' --- which is basically that proofs must be succinct and ``\emph{good at every level}'' (when this is not possible, provide the whole chain instead).
 The authors then show that, when goodness is not violated, the attack is impractical.
 
 In our modified graph-based version, though, there is no such problem: blocks cannot become stale.
@@ -626,7 +626,7 @@ The point of this is to demonstrate that $\mu$ levels are relative and convertib
 % It is useful to have all $\mu \ge 0$, but this is technically an implementation concern and has no effect in principle.
 
 Therefore, we can express $\mu_{\tradA}$ and $\mu_{\tradB}$ in objective terms by measuring them relative to an arbitrarily low difficulty (e.g., 1).
-Let's call the $\mu$ in terms of a difficulty of 1 the \emph{objective $\mu$} level.\footnote{
+Let's call the $\mu$ level in terms of a difficulty of 1 the \emph{objective $\mu$} level.\footnote{
     The difficulty is the expected number of hashes to find a solution, so a difficulty of 0 (or below) is impossible.
 }
 A consequence of this is that duplicate interlink entries (over sequential levels) will be common when there is a large difference between difficulties (i.e., $\mu_{\tradA} \gg \mu_{\tradB}$).
@@ -685,7 +685,7 @@ Thus, we have resolved both parts of the problem.
 
 \subsubsubsubsubsection{NIPoPoWRs: Summary}
 
-We have sketched the explanatory framework and construction of variant of NIPoPoWs that is compatible with the longest PoR chain: NIPoPoWRs.
+We have sketched the explanatory framework and construction of a variant of NIPoPoWs that is compatible with the longest PoR chain: NIPoPoWRs.
 
 NIPoPoWs were modified in the following ways:
 \begin{enumerate}
@@ -700,3 +700,9 @@ Thus, any path to a block is a valid path and we don't need to introduce the not
 
 We should also note that this construction does not (yet) work for block-DAGs (including GHOST).
 We will continue this construction in \autoref{sec:blockdag-nipopowrs}.
+
+\aside{
+    Although we are considering a graph-interlink structure, we should note an obvious optimization.
+    First, let's notice that: when introducing multiple back-links to blocks of equal $\mu$ level, those new blocks \emph{must} be a subset of the PoR tips recorded in the header (since there might be other tips that are of a lesser $\mu$ level).
+    Thus, we don't actually need to include both/all in the interlink structure, since we always have access to both/all paths via the PoR tips in the header, which is already part of the NIPoPoWR.
+}
