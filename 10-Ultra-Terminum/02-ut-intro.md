@@ -32,7 +32,7 @@ That means that *layer 2* techniques (e.g., state/payment channels, ZK/optimisti
 
 UT's novel structure means that confirmation times within UT are of order $O(c^{-1})$ (i.e., the confirmation rate is $O(c)$).
 This means that, as computers get more powerful, confirmation times in UT will approach 0.
-This is a improvement over existing architectures, which are (ideally) of order $O(1)$.
+This is an improvement over existing architectures, which are (ideally) of order $O(1)$.
 
 
 %% END ### RELEASE

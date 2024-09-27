@@ -27,7 +27,7 @@ Why is that an important breakpoint for scaling configurations?
 In a word: sharding.
 The standard method of sharding (or hosting child-chains generally) is to replace transactions with shard-headers in the host-chain.
 Extra data might also be required.
-If the host-chain has $O(c)$ capacity, then it should be able support $O(c)$ shards (presuming a secure method of sharding is known and in use).
+If the host-chain has $O(c)$ capacity, then it should be able to support $O(c)$ shards (presuming a secure method of sharding is known and in use).
 Each shard has $O(c)$ capacity also, thus the full system has $O(c^2)$ capacity.
 
 ## Core Conflict
@@ -91,7 +91,7 @@ Here are some prior underlying assumptions that are either common or which I exp
 
 * Sharing PoW security requires merged mining.
 * Sharing PoW security requires that chains use the same hashing algorithm.
-* Multiple (non-merged-mined) PoW chains using the same hashing algorithm means that at least some of those chains are be vulnerable to a 51\% attack.
+* Multiple (non-merged-mined) PoW chains using the same hashing algorithm means that at least some of those chains are vulnerable to a 51\% attack.
 * Simultaneously securing a network with PoW and PoS is not possible without compromises (like that PoW miners could DoS PoS validators or vice versa).
 * It is unsafe for miners/validators to build on unvalidated histories (as is done with SPV mining, which *is* unsafe).
 

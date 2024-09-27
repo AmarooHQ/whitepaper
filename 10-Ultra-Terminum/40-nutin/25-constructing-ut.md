@@ -83,7 +83,7 @@ To maintain consistency with the geometric usage of the term *simplex*: a simple
 In a $k$-simplex, each simplex-chain has $k$ reflections (one reflection for each of the other simplex-chains).
 A $k$-simplex has, in total, ${k+1} \choose 2$ reflections.
 
-[^simplex-maths]: The name is taken from geometry (particularly: the higher-dimensional kind). A simplex, for a given dimensionality, is the uniquely simplest polytope; e.g., a line in 1D space, a triangle in 2D space, a tetrahedron in 3D space, etc. A $k$-dimensional simplex is known as a $k$-simplex. As shown in \autoref{fig:simplexes}, a particular 2D projection of a $k$-simplex is identical to a diagram of all possible mutual reflections between $k+1$ blockchains, where each chain is represented by a vertex and each mutual reflection is represented by an edge.
+[^simplex-maths]: The name is taken from geometry (particularly: the higher-dimensional kind). A simplex, for a given dimensionality, is the uniquely simplest polytope; e.g., a line in 1D space, a triangle in 2D space, a tetrahedron in 3D space, etc. A $k$-dimensional simplex is known as a $k$-simplex. As shown in \autoref{fig:simplexes}, a particular 2D projection of a $k$-simplex (which produces a regular $(k+1)$-gon with additional edges between all pairs of vertices), is identical to a diagram of all possible mutual reflections between $k+1$ blockchains, where each chain is represented by a vertex and each mutual reflection is represented by an edge.
 
 [^simplex-approx]: NB: I will ignore this distinction for $k \gg 1$.
 
@@ -108,7 +108,7 @@ The security of simplexes is discussed in \autoref{sec:simplex-security}.
   An \emph{application-specific} child-chain that is secured via the parent-chain. Dapp-chains may have architecturally distinct state- and transaction-schemes (distinct from those schemes used in the simplex, and other dapp-chains)
 }
 
-Dapp-chains are not restricted to any particular foundational consensus method.
+Intrinsically, dapp-chains are not restricted to any particular foundational consensus method.
 They might use PoW, or PoS, or PoA, or something else.
 However, dapp-chains also use *Proof of Reflection* with their host simplex-chain.
 With a suitable foundational consensus method, PoR enables dapp-chains to be as secure as their host simplex-chain with little overhead.
@@ -149,7 +149,7 @@ This is not very secure in the case of a PoW dapp-chain, but it means that a PoS
 
 When a header-transaction is confirmed by the simplex, the corresponding dapp-chain can efficiently use one-way PoR to inherit the security (and security properties) of the host simplex-chain[^dc-por]. Similar to mutual PoR, this can provide a *security context* where otherwise-insecure methods of consensus can be done securely.
 
-[^dc-por]: Note: PoW dapp-chains will have a much lower difficulty than the host simplex-chain. Although a simplex-chain could do mutual PoR with dapp-chains, this is unnecessary and inefficient --- provided that this difficulty asymmetry exists. Although there is no fundamental reason that PoW dapp-chains must have a much lower difficulty, we should take care to use incentive structures that lead to this sort of outcome provided such a policy increases security of the simplex.
+[^dc-por]: Note: PoW dapp-chains will have a much lower difficulty than the host simplex-chain. Although a simplex-chain could do mutual PoR with dapp-chains, this is unnecessary and inefficient --- provided that this difficulty asymmetry exists. Although there is no fundamental reason that PoW dapp-chains must have a much lower difficulty, we should take care to avoid any implementation that would compromise or reduce the security of the simplex. Practically, this probably means avoiding PoW dapp-chains (see \autoref{sec:child-chain-pow-pos-asymmetry}).
 
 With regards to doublespends, one-way PoR means that the reflected chain is *at least* as difficult to attack as the reflecting chain (as we covered in \autoref{sec:por-step4}).
 Since the parent simplex-chain is as difficult to attack as the complete simplex, each dapp-chain must therefore *also* be that difficult to attack.
@@ -157,9 +157,40 @@ Attacking a dapp-chain is as difficult as attacking the entire network.
 
 Note that parent-chains (generally) need to record their child-chains' headers *anyway*, so this use of one-way PoR --- where a simplex-chain reflects child dapp-chains --- has near-zero overhead for both the simplex-chain and the dapp-chain.
 
-The only major, generic concern for dapp-chains --- that I can see --- is \emph{preventing DoS attacks}.
+One major, generic concern for dapp-chains is \emph{preventing DoS attacks}.\footnote{
+  Unfortunately, the strategy we use in \autoref{sec:preventing-dos-attacks} to protect simplex chains does not work here.
+}
 This is one reason to favor PoS (or PoA) dapp-chains over PoW dapp-chains.
-Though perhaps we should wait for \autoref{sec:preventing-dos-attacks}.
+
+Another is the \emph{availability} of dapp-chain blocks, which is worth discussing now.
+
+##### Spam, Availability, and Dapp-chains: A PoW/PoS Asymmetry
+
+\label{sec:child-chain-pow-pos-asymmetry}
+
+Proof of Work systems operate best when all practicable hashing resources are contributing to the same system.
+That is: all economically available miners are mining on the same network.
+
+We can explore this with a thought experiment.
+Say I forked the Bitcoin codebase and created a new genesis block with today's date, which in turn creates a new blockchain network.
+Crucially, I do not change the hashing algorithm.
+
+How secure would this network be?
+Given that the actual Bitcoin network has an established hash-base, and there are many old, uneconomical mining units out there, the overwhelming majority of hash power would not be working on my new network (either it would be off, or working on Bitcoin).
+In fact, even if all the units that were powered off were used to mine my network, it would still have but a small fraction of Bitcoin's hash rate.
+The effect of this is that \emph{at any point} a small proportion of Bitcoin miners could divert their miners and perform a 51% attack against my network.
+Therefore, \emph{given Bitcoin exists,} my network cannot be considered secure in practice.
+
+If two traditional PoW chains share a hashing algorithm, then the one with more hashing power is the only secure candidate.
+
+How does this apply to PoW simplex dapp-chains?
+First, notice that if a PoW dapp-chain has a comparable difficulty to a simplex chain, then the simplex as a whole (including other dapp-chains) would benefit if that hashing power were used on the simplex instead of the dapp-chain.
+Additionally, moving hashing power the other way (from simplex to dapp-chain) would weaken the overall security of the simplex.
+From this, we can intuit that the most stable, secure system is one that heavily prioritizes mining simplex-chains instead of dapp-chains.
+This brings us to our second observation: that PoW dapp-chains will naturally have a much lower difficulty than their host simplex-chains.
+
+\todo{Availability in PoS systems can be handled before publication, by way of validators having to acquire the block to validate it. However, in PoW, availability is not established until a PoW soln is found and the block is broadcast.}
+
 
 #### Three General Incentive Models for Dapp-chain Reflection
 

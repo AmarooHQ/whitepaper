@@ -24,7 +24,7 @@ What we're observing is that the overall capacity is the \emph{product} of the s
 
 Let's call the proportion of capacity for transactions $t$, and the proportion for reflections $r$.
 We know that $t + r = 1$, since $t+r$ is 100\% of a chain's capacity.
-However, the \emph{network-wide} capacity is the \emph{product} of $t$ and $r$.
+However, the \emph{network-wide} capacity is proportional to the \emph{product} of $t$ and $r$.
 Maximizing $tr$ suggests that a chain's capacity should be split approximately 50/50 between $t$ and $r$, so $t=r=\half=O(1)$.
 Given that $t$ and $r$ are proportions of the capacity, we can say $tO(c) + rO(c) = O(c)$.
 Thus, the overall capacity is given by $tO(c) \cdot rO(c) = O(c^2)$.
