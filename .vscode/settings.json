@@ -305,5 +305,6 @@
         "latex",
         "tex"
     ],
-    "gitlens.advanced.externalDiffTool": "meld"
+    "gitlens.advanced.externalDiffTool": "meld",
+    "makefile.configureOnOpen": true
 }

@@ -43,9 +43,17 @@ For this to work, though, miners must verify that blocks *exist* for all reflect
 
 The complexity and impact of this strategy is discussed in \autoref{sec:bandwidth-complexity}.
 
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
+
 \todo{argue that hiding blocks can cause massive reorgs and invalidate future blocks after those future blocks have been mined (note: might be covered in part by 10-refl-availability.tex)}
 
 \todo{note that it is vital that new stuff doesn't invalidate old stuff / cause a re-org; or check that it's noted (ties into SPV)}
+
+%% END ### DRAFT
+
+%% BEGIN ### RELEASE
 
 \input{includes/ut/content/27-practical/10a-axiom-of-availability.tex}
 
