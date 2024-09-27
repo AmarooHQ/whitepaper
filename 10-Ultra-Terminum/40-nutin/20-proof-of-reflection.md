@@ -312,7 +312,7 @@ This is shown in \autoref{fig:por-step5}.
 \begin{figure}
 \centering
 \includegraphics[max width=\linewidth, height=0.35\textheight]{pow_refl_step5_sag}
-\caption{Step 5: \textit{Proof of Reflection} between two UT Chains, Chain \cL and Chain \cR}
+\caption{Step 5. \textit{Proof of Reflection} between two UT Chains, Chain \cL and Chain \cR}
 \label{fig:por-step5}
 \end{figure}
 

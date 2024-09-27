@@ -208,9 +208,9 @@ If it is possible to implement dapp-chains (or any system of child-chains) such 
   The property whereby child-chains have free choice of protocol (including consensus mechanism, scripting, accounting methods, block structures, etc)
 }
 
-\autoref{sec:comparing-weight-dex} details a conversion method whereby PoR is possible between chains using different root tokens via a DEX. Could dapp-chains use a \emph{protocol-level} DEX to abstract their protocol and incentive-method away from those of its parent-chain? Yes.
+\autoref{sec:comparing-weight-dex} details a conversion method whereby PoR is possible between chains using different root tokens via a DEX. Could dapp-chains use a \emph{protocol-level} DEX to abstract their protocol and incentive method away from those of its parent-chain? Yes.
 
-Is this required for this abstraction? No.
+Is this required for this kind of abstraction? No.
 
 Here are three methods of abstraction which maintain the above freedoms.
 
@@ -268,7 +268,7 @@ Though I think that the idea of time-stamping a hash (e.g., via an \textsc{OP\_R
 
 #### PoS Dapp-chains
 
-If the headers of dapp-chains are encoded as simplex-transactions, then techniques like *slashing* are first-class operations within the *hybrid PoW* context provided by the simplex.
+If the headers of dapp-chains are encoded as simplex-transactions, then techniques like *slashing* are first-class operations within the *hybrid* PoW context provided by the simplex.
 This solves the *Nothing at Stake* problem for PoS dapp-chains, provided the necessary PoS primitives can be encoded in a simplex-transaction.
 
 The abstraction layer between simplex-chains and dapp-chains brings practical benefits, too.
