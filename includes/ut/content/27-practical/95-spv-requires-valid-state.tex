@@ -917,7 +917,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     Oh --- if we create new coins, then miners could increase their RoI by \emph{deliberately creating fraudulent blocks}.
 }
 \dMax{
-    Like, a group of miners (with e.g., 40\% of the hash rate) could deliberately make a fraud proof, then pre-mine blocks with that fraud proof, and end up with more coins than they'd have being honest.
+    Like, a group of miners (with e.g., 40\% of the hash-rate) could deliberately make a fraud proof, then pre-mine blocks with that fraud proof, and end up with more coins than they'd have being honest.
 }
 \dMax{
     It should never be profitable to do fraud, so the rewards for publishing fraud should never be more than a miner would make by being honest.
@@ -933,7 +933,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 }
 \dSe{
     Probably.
-    By the way, what if the attacker had 40\% of the hash rate?
+    By the way, what if the attacker had 40\% of the hash-rate?
     You haven't considered that, yet.
 }
 \dMax{
@@ -1252,7 +1252,7 @@ Additionally, the rise in difficulty of these blocks presents a practical limit 
 When $k > q H^{-1} N_1$ the attacker is, \emph{by definition}, unable to keep up the attack.
 That is because, at that point, the attacker's losses are $C_r (1 + H (q H^{-1} N_1)) = C_r (1 + q N_1)$.
 Assuming an even hash-rate distribution, $C_r N_1 (p + q)$ represents the \emph{sum} of \emph{all} block rewards over the network.
-Therefore, the maximum output (measured in coins) of $q$ proportion of the hash rate, \emph{by definition}, is $C_r N_1 q$.
+Therefore, the maximum output (measured in coins) of $q$ proportion of the hash-rate, \emph{by definition}, is $C_r N_1 q$.
 An attacker must have additional support to maintain this portion of the attack --- when the mining losses per block (approx $C_r H k$) exceed the attacker's mining capacity ($C_r N_1 q$).
 % We have:
 \begin{align}
@@ -2196,7 +2196,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 }
 \dMax{
     If a bunch of blocks come all at once, though, then the honest miner still shouldn't process the tx, yet.
-    They should wait based on the network-wide hash rate.
+    They should wait based on the network-wide hash-rate.
 }
 \dMax{
     So, for a waiting period of $z$, we want the network to go through $z$ block periods overall, which is roughly $C_d N_1 z$ work (where $C_d$ is the average difficulty).
@@ -2214,7 +2214,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 }
 \dMax{
     The two (or more) sides could become inconsistent.
-    That said, users and miners would notice a >50\% drop in hash rate pretty quickly.
+    That said, users and miners would notice a >50\% drop in hash-rate pretty quickly.
     But eventually, any inconsistency could cause the miners on the smaller partition(s) lose out a bit.
 }
 \dMax{
@@ -2290,7 +2290,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     If it were less than that, minority partitions would take longer to integrate than they took to produce.
 }
 \dMax{
-    So we need to double $z$ to account for a hash rate increase, and then multiply by the capacity multiplier.
+    So we need to double $z$ to account for a hash-rate increase, and then multiply by the capacity multiplier.
     And that should be long enough for nodes to hear about any FPs.
 }
 \dSe{

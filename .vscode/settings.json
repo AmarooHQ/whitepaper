@@ -216,7 +216,9 @@
         "itertext", "the attackers", "DAA_N",
         "tress", "\\lable{", "lable",
         "tree tiling", "tree tilings",
-        "dependant", "independant"
+        "dependant", "independant",
+        "compromize", "compromized",
+        "simplex chain"
     ],
     "cSpell.ignoreRegExpList": [
         "\\usepackage{([a-z,]*)}",
@@ -306,5 +308,19 @@
         "tex"
     ],
     "gitlens.advanced.externalDiffTool": "meld",
-    "makefile.configureOnOpen": true
+    "makefile.configureOnOpen": true,
+    "[markdown]": {
+        "editor.unicodeHighlight.ambiguousCharacters": false,
+        "editor.unicodeHighlight.invisibleCharacters": false,
+        "diffEditor.ignoreTrimWhitespace": false,
+        "editor.wordWrap": "on",
+        "editor.quickSuggestions": {
+            "other": true,
+            "comments": true,
+            "strings": true
+        },
+        "cSpell.fixSpellingWithRenameProvider": true,
+        "cSpell.advanced.feature.useReferenceProviderWithRename": true,
+        "cSpell.advanced.feature.useReferenceProviderRemove": "/^#+\\s/",
+    }
 }

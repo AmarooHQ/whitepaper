@@ -134,8 +134,6 @@ There is not much (if any) overhead to using an input-output system like this: a
 
 [^scriptsig]: In Bitcoin, the input script to a transaction is called the `scriptSig`; see \url{https://en.bitcoin.it/wiki/Transaction}.
 
-
-
 #### Dapp-chain Security
 
 \label{sec:dapp-chain-security}
@@ -158,45 +156,20 @@ Attacking a dapp-chain is as difficult as attacking the entire network.
 Note that parent-chains (generally) need to record their child-chains' headers *anyway*, so this use of one-way PoR --- where a simplex-chain reflects child dapp-chains --- has near-zero overhead for both the simplex-chain and the dapp-chain.
 
 One major, generic concern for dapp-chains is \emph{preventing DoS attacks}.\footnote{
-  Unfortunately, the strategy we use in \autoref{sec:preventing-dos-attacks} to protect simplex chains does not work here.
+  Unfortunately, the strategy we use in \autoref{sec:preventing-dos-attacks} to protect simplex-chains does not work here.
 }
 This is one reason to favor PoS (or PoA) dapp-chains over PoW dapp-chains.
+Another concern is the \emph{availability} of dapp-chain blocks.
 
-Another is the \emph{availability} of dapp-chain blocks, which is worth discussing now.
 
-##### Spam, Availability, and Dapp-chains: A PoW/PoS Asymmetry
-
-\label{sec:child-chain-pow-pos-asymmetry}
-
-Proof of Work systems operate best when all practicable hashing resources are contributing to the same system.
-That is: all economically available miners are mining on the same network.
-
-We can explore this with a thought experiment.
-Say I forked the Bitcoin codebase and created a new genesis block with today's date, which in turn creates a new blockchain network.
-Crucially, I do not change the hashing algorithm.
-
-How secure would this network be?
-Given that the actual Bitcoin network has an established hash-base, and there are many old, uneconomical mining units out there, the overwhelming majority of hash power would not be working on my new network (either it would be off, or working on Bitcoin).
-In fact, even if all the units that were powered off were used to mine my network, it would still have but a small fraction of Bitcoin's hash rate.
-The effect of this is that \emph{at any point} a small proportion of Bitcoin miners could divert their miners and perform a 51% attack against my network.
-Therefore, \emph{given Bitcoin exists,} my network cannot be considered secure in practice.
-
-If two traditional PoW chains share a hashing algorithm, then the one with more hashing power is the only secure candidate.
-
-How does this apply to PoW simplex dapp-chains?
-First, notice that if a PoW dapp-chain has a comparable difficulty to a simplex chain, then the simplex as a whole (including other dapp-chains) would benefit if that hashing power were used on the simplex instead of the dapp-chain.
-Additionally, moving hashing power the other way (from simplex to dapp-chain) would weaken the overall security of the simplex.
-From this, we can intuit that the most stable, secure system is one that heavily prioritizes mining simplex-chains instead of dapp-chains.
-This brings us to our second observation: that PoW dapp-chains will naturally have a much lower difficulty than their host simplex-chains.
-
-\todo{Availability in PoS systems can be handled before publication, by way of validators having to acquire the block to validate it. However, in PoW, availability is not established until a PoW soln is found and the block is broadcast.}
+\input{25-constructing-ut/42-dapp-chain-pow-pos}
 
 
 #### Three General Incentive Models for Dapp-chain Reflection
 
 If dapp-chain headers are included along-side transactions in simplex-blocks, is it not the case that both must pay some kind of *transaction fee*?
 If not, how are simplex-chain miners to prioritize what to include in their blocks?
-Even if such a fee is *not always necessary*, the *ability* to provide a fee has decisive advantages --- like creating asymmetry between an attacker and honest miners.
+Even if such a fee is *not always necessary*, the *ability* to provide a fee has decisive advantages --- like creating asymmetry between an attacker and honest simplex-chain miners.
 
 If it is possible to implement dapp-chains (or any system of child-chains) such that those chains have \emph{freedom of protocol} and \emph{freedom of incentivization} whilst inheriting the parent-chain's security, then we should strive to achieve that.
 

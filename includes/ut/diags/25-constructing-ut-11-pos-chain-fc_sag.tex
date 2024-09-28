@@ -1,0 +1,50 @@
+\documentclass[]{standalone}
+\usepackage[T1]{fontenc}
+
+\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathmorphing}
+
+\makeatletter
+\def\input@path{{./includes/}{./includes/ut/diags/}}
+\makeatother
+
+\begin{document}
+\tikzstyle{node} = [rectangle, rounded corners, minimum width=2cm, minimum height=0.8cm, text centered, draw=black]
+\tikzstyle{arrow} = [-stealth, shorten >= 2pt, shorten <= 2pt]
+\tikzstyle{conflict} = [stealth-stealth, decorate, decoration={zigzag,pre=lineto,pre length=2mm,post=lineto,post length=1mm,segment length=5mm,amplitude=1mm}]
+\begin{tikzpicture}[node distance=1cm]
+    \node (start) [node] {Draft a block};
+    \node (mine) [node, below = of start, xshift=0mm] {Validate with group};
+    \draw [arrow] (start) -- node (sm-mid) [pos=0.5, right] {} (mine);
+
+    % position to right of midpoint between start and mine
+    \node (restart) [right = of sm-mid.east, xshift=8mm] {};
+    % \node (restartLabel) [right = of restart.west, xshift=-12mm] {\begin{tabular}{c} Restart or\\ Update \end{tabular}};
+    % \node (restartLabel) [node, right = of sm-mid.east, xshift=8mm] {\begin{tabular}{c} Restart or Update \end{tabular}};
+
+    \draw [arrow] (mine) -- (mine -| restart.west) -- node (restartLabel) [right, xshift=-2mm] {\begin{tabular}{c} Restart or\\ Update \end{tabular}} (restart.west |- start) -- (start);
+
+    \node (broadcast) [node, below = of mine] {Broadcast the block};
+    \draw [arrow] (mine) -- node (mb-lab) [pos=0.5, right] {Agree \& Produce PoS} (broadcast);
+
+
+    % \node (goal) [node] {\begin{tabular}{c} Safely increase capacity \\ via merged mining \end{tabular}};
+
+    % \node (m1) [right = of goal.east] {};
+    % \node (mr1) [node, above = of goal.east -| m1] {Stay decentralized};
+    % \node (mr2) [node, below = of goal.east -| m1] {Securely add more chains};
+    % \draw [arrow] (goal) -- (mr1);
+    % \draw [arrow] (goal) -- (mr2);
+
+    % \node (arp1) [node, right = of mr1.east, xshift=2mm] {\begin{tabular}{c} Users don't have to \\ validate all chains \end{tabular}};
+    % \node (arp2) [node] at (mr2 -| arp1) {\begin{tabular}{c} Miners must \\ validate all chains \end{tabular}};
+    % \draw [arrow] (mr1) -- (arp1);
+    % \draw [arrow] (mr2) -- (arp2);
+
+    % \draw [conflict] (arp1) -- node (c) [anchor=west, inner sep=5pt] {\begin{tabular}{c} \textbf{Conflict} \\ Miners are Users \end{tabular}} (arp2);
+
+
+    %\node (conflict) [node] at ([xshift=1cm]c.west) {\textbf{Conflict}};
+\end{tikzpicture}
+\end{document}

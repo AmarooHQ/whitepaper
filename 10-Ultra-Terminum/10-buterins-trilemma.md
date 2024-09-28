@@ -20,14 +20,19 @@ For some magnitude of computational resources (computation, bandwidth, storage, 
 
 The definition of scalability is perhaps problematic.
 If the network, which is $O(n)$, becomes bottlenecked by an $O(c^2)$ scaling method, is the network really scalable?
-I prefer an alternative definition of scalability: the system can process $O(n)$ transactions in $O(1)$ time, i.e., confirmations neither take longer nor become more scarce as $n$ and/or $c$ change.
+I prefer an alternative definition of scalability: the system can process $O(n)$ transactions in $O(1)$ time, i.e., getting a transaction confirmed is neither more expensive nor delayed as $n$ and/or $c$ change.\footnote{
+    This does not mean there is no fee market for transactions, nor that localized congestion will not happen.
+    Rather, we are interested in an equilibrium that provides substantial value and capacity whilst avoiding transactions being as free as sending an email.
+}
 
 Why mention $O(c^2)$ scaling particularly?
 Why is that an important breakpoint for scaling configurations?
 In a word: sharding.
 The standard method of sharding (or hosting child-chains generally) is to replace transactions with shard-headers in the host-chain.
 Extra data might also be required.
-If the host-chain has $O(c)$ capacity, then it should be able to support $O(c)$ shards (presuming a secure method of sharding is known and in use).
+If the host-chain has $O(c)$ capacity, then it should support\footnote{
+    Presuming a secure method of sharding is known and in use, and $O(1)$ load per shard-header.
+} $O(c)$ shards.
 Each shard has $O(c)$ capacity also, thus the full system has $O(c^2)$ capacity.
 
 ## Core Conflict
@@ -41,7 +46,9 @@ Each shard has $O(c)$ capacity also, thus the full system has $O(c^2)$ capacity.
 \label{fig:trilemma-core-conflict}
 \end{figure}
 
-\autoref{fig:trilemma-core-conflict} shows a cloud for the core conflict.
+\autoref{fig:trilemma-core-conflict} shows a cloud\footnote{
+    For more on clouds, see \href{https://www.google.com/search?q=ISBN+0-88427-115-3}{It's Not Luck} by Eli Goldratt (1994).
+} for the core conflict.
 It reads: *safely increasing capacity* requires that we *stay decentralized*.
 *Staying decentralized* requires that we *use many chains and small blocks*.
 *Safely increasing capacity* requires that the network *stays secure*.
@@ -87,7 +94,7 @@ We have some hints to conditions that might belong to a solution:
 
 ### Prior Assumptions
 
-Here are some prior underlying assumptions that are either common or which I expect to be common:
+Here are some prior underlying assumptions that are either common or which I expect to be:
 
 * Sharing PoW security requires merged mining.
 * Sharing PoW security requires that chains use the same hashing algorithm.
@@ -95,20 +102,23 @@ Here are some prior underlying assumptions that are either common or which I exp
 * Simultaneously securing a network with PoW and PoS is not possible without compromises (like that PoW miners could DoS PoS validators or vice versa).
 * It is unsafe for miners/validators to build on unvalidated histories (as is done with SPV mining, which *is* unsafe).
 
+\begin{comment}
 These assumptions *are* true in lots of cases (arguably in all cases up to now).
 Are they always?
+\end{comment}
 
 \aside{
     I call them \emph{assumptions}; some people will likely (and rightly) take issue with that and call them \emph{conclusions} instead.
-    For our purposes there isn't really a difference; I include them here so that I can later show you conditions under which they are all false.
+    For our purposes there isn't really a difference; I include them here so that I can later show you conditions under which they are all simultaneously false.
 }
 
 ## Conjecture: A Principle of Scaling
 
 \label{sec:a-principle-of-scaling}
 
-A scalable system *can* have components with complexities worse than $O(c)$ *if and only if* those components are not *bottlenecks*.
+A scalable system *can* have components with complexities worse than $O(c)$ *if and only if* those components are not *bottlenecks*, i.e., *constraints*.
 As long as there is *excess capacity* in those components, the system can still scale.
+(See also: \emph{Theory of Constraints}; \emph{Critical Fallibilism}.)
 
 \begin{comment}
 end of section, reset toc to default

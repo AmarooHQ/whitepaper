@@ -32,7 +32,7 @@ The reason is that each miner can choose \emph{whether} to reflect any block (as
 Regarding the \emph{position} of reflected blocks --- this is easy to solve.
 All we need to do is ensure there is only one position that a block can be in.
 For example, we could require that reflected blocks are ordered based on the ordering of their genesis blocks (which is fixed).
-If two or more blocks from a single simplex chain are reflected, we can use a sub-ordering method (of which there are many options).
+If two or more blocks from a single simplex-chain are reflected, we can use a sub-ordering method (of which there are many options).
 This gives us a total ordering, meaning that we only need to know \emph{which} blocks were reflected to reconstruct this segment of a block.
 Alternatively, we could use a merklized prefix tree which achieves the same goal.
 Either way, we have reduced the required information from a \emph{list} of block hashes to a \emph{set} of them.
@@ -193,7 +193,7 @@ This would increase the overall bandwidth required to track the PoR graph, but o
 
 Since the overhead is $O(c)$, and recording all reflections is also $O(c)$, can we swap in this new process to increase scalability?
 
-The old PoR sub-block takes up $N_1 B_f \alpha$ B/s of capacity (where $\alpha$ represents the bytes per reflected simplex chain and $\alpha \in [16, 512]$).
+The old PoR sub-block takes up $N_1 B_f \alpha$ B/s of capacity (where $\alpha$ represents the bytes per reflected simplex-chain and $\alpha \in [16, 512]$).
 
 The new PoR sub-block instead takes up $B_f g(1 + N_1 B_f \phi)$ B/s of capacity --- we exclude the block's header since that's already part of the block.
 If $k_{1,B}$ B/s of a chain's capacity is dedicated to reflections, then we have:
@@ -223,7 +223,7 @@ However, the physical limits on latency do not dominate real-world latency yet.
 Near-future networking technologies, like LEO satellite constellations, will reduce latencies over significant distances.
 Moreover, even as the best-case minimum latency approaches physical limits, technology will continue to improve latency in \emph{bandwidth intensive} contexts.\footnote{
     This is something we didn't consider when estimating $N_1$ in \autoref{eq:bad-n1-with-phi} --- that the propagation delay will increase as the excess capacity of nodes' available bandwidth decreases.
-    Like all systems, response time is inversely proportional to excess capacity.
+    Like all such systems, response time is inversely proportional to excess capacity.
 }
 Therefore, $O(\phi)$ \emph{should not} be considered $O(1)$, but rather should be considered $O(c^{-1})$: as technology improves, $\phi$ decreases.
 
@@ -608,8 +608,8 @@ We can observe this equivalence via the following thought experiment: what does 
 First, we should expect that, for a given period, there are twice as many \tradB blocks as there are \tradA blocks.
 Since about half of \tradB blocks will have $\mu_{\tradB} \ge 1$, there will be approximately as many \tradB blocks in the $(\mu_{\tradB}=1)$-superchain as in \tradA's $(\mu_{\tradA}=0)$-superchain.
 
-This makes sense: there are twice as many blocks at half the difficulty, so we expect the same hash rate to be mining on each chain.
-If both chains have the same hash rate, then they should produce the same number of blocks at a given $\mu_{\tradA}$ level.
+This makes sense: there are twice as many blocks at half the difficulty, so we expect the same hash-rate to be mining on each chain.
+If both chains have the same hash-rate, then they should produce the same number of blocks at a given $\mu_{\tradA}$ level.
 Since \tradB has the lower difficulty, this is not true for a given $\mu_{\tradB}$ level --- \tradA produces \emph{no} blocks at level $\mu_{\tradB}=0$.
 
 Now, let us modify \tradB's protocol in a strange way.
@@ -636,7 +636,7 @@ This allows us to omit the duplicates, assuming we use an appropriate cryptograp
 This works because no proof for either \tradA or \tradB will ever need to descend below the minimum objective $\mu$ of that chain's difficulty, and the statistical properties of all higher $\mu$ levels are maintained.
 It is no easier for an attacker to generate a malicious NIPoPoW than it would be otherwise.
 
-Further, this is consistent with the observation that, if \tradA's hash rate doubled, then it would appear as though the minimum $\mu$ level increased by 1 (assuming that $\mu$ levels are not recalibrated according to the current difficulty).
+Further, this is consistent with the observation that, if \tradA's hash-rate doubled, then it would appear as though the minimum $\mu$ level increased by 1 (assuming that $\mu$ levels are not recalibrated according to the current difficulty).
 
 However, this method is only partially consistent with the notion of \emph{goodness} introduced in the NIPoPoW paper --- the statistical distributions of $\mu$-superblocks will only hold until the objective $\mu$ level of a chain's difficulty.
 We will ignore this problem as the graph-interlink structure has no need of a goodness measurement.

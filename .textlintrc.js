@@ -66,7 +66,8 @@ module.exports = {
         },
         "sentence-length": {
             "max": 350,
-            "severity": "warning"
+            "severity": "warning",
+            "skip": ["enumerate", "itemize"]
         },
         "stop-words": {  // https://github.com/sapegin/textlint-rule-stop-words
             "defaultWords": false,
@@ -88,6 +89,7 @@ module.exports = {
                 ["discreet", "discrete"],
                 ["DOS", "DoS"],
                 ["straight forward", "straightforward"],
+                ["along side", "alongside"],
                 ["block produces", "block producers"],
                 ["the affect"],
                 ["N_{tiles}", "N_{\\text{tiles}}"],

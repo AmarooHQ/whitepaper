@@ -349,7 +349,7 @@ Additionally, simplex-chains can be incrementally created and added to the simpl
 The amount of time that a user of a chain must wait in order for their transaction to be ``confirmed'' is network dependent.
 Some networks take longer than others.
 This is because, for an attacker that controls $q$ proportion of the network's security,\footnote{
-  By convention a PoW blockchain's security is analyzed in terms of an attacker with $0 < q < 0.5$ proportion of the network's hash rate, such that the ``honest'' block producers have $p$ proportion, and $p + q = 1$.
+  By convention a PoW blockchain's security is analyzed in terms of an attacker with $0 < q < 0.5$ proportion of the network's hash-rate, such that the ``honest'' block producers have $p$ proportion, and $p + q = 1$.
 } the chance that a doublespend succeeds depends on the number of confirmations that a user waits --- the more confirmations, the lower the chance of a successful doublespend; the larger $q$ is, the higher the chance of a successful doublespend.
 For transactions of lower value, a user can afford to wait for fewer confirmations than a more valuable transaction.
 
@@ -388,7 +388,7 @@ The miner should roughly prioritize mining the chain that will produce a block w
 Practically speaking, this will often result in the miner choosing the chain with a large number of unconfirmed transactions, and this will often be the chain that has gone the longest without a block having been produced.
 
 Say the set of miners and mining resources (hash-rate) is split between $N$ simplex-chains.
-The miner should, on average, mine each chain for the same amount of time; their hash rate will be, on average, evenly split between all $N$ chains, even though the miner is only mining one chain at a time.
+The miner should, on average, mine each chain for the same amount of time; their hash-rate will be, on average, evenly split between all $N$ chains, even though the miner is only mining one chain at a time.
 
 This method works because \emph{all} miners are incentivized to mine the same chain at the same moment.
 Thus, all miners are \emph{synchronized} in a decentralized way.

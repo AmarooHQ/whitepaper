@@ -202,7 +202,7 @@ preprocess-build:
 mk-latex-pdf: preprocess-build
 	bash bin/msg_good.sh "[mk-latex-pdf]: PP_MODE=$(PP_MODE)"
 	bash bin/msg_good.sh "Run ./latexrun to get good error msgs"
-	$(LATEXRUN) $(WPTEX) -O $(OUTDIR)
+	$(LATEXRUN) $(WPTEX) -O $(OUTDIR) || true
 	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE)-reloadable.pdf
 
 	bash bin/msg_good.sh "Running latexmk to update gitinfo, build glossaries; PP_MODE=$(PP_MODE)"

@@ -52,6 +52,21 @@ The \emph{full} collection of information required to prove reflection is called
 
 Segments of Chain \cL and \cR (events and data) are shown in \autoref{tab:por-step-3} and \autoref{fig:por-step3}.
 
+Chain \cL now knows \emph{which \cL blocks are recorded by Chain \cR}, i.e., which local blocks are known about by some external source.
+Put another way: Chain \cL's history is confirmed \emph{not only} by new Chain \cL blocks, \emph{but also} by Chain \cR blocks.
+\begin{comment}
+There's no data-availability concern here since Chain \cL nodes *know* that they have the blocks that Chain \cR knows about.
+\end{comment}
+
+\aside{
+  \textbf{Important:} Soon, these confirmations will have real and useful meaning.
+  Under the right conditions, an appropriate configuration of \emph{Proof of Reflection} results in an increase in the \emph{rate} that confirmations are acquired.
+  This is the first hint of $O(c^{-1})$ confirmation time.
+}
+
+At this point, if an attacker was to publish an alternate, better Chain \cL history, then Chain \cL nodes would reorganize around the *new* history published by the attacker, and the attacker's block headers would end up being recorded in Chain \cR and causing a reorganization there, too. Currently, this configuration does not add any security to Chain \cL.
+
+Could we use Chain \cL's knowledge \emph{that its own history is reflected in Chain \cR} to *prevent* such an attack?
 
 \ctable[
   pos = hp,
@@ -96,29 +111,13 @@ Segments of Chain \cL and \cR (events and data) are shown in \autoref{tab:por-st
 
 \begin{figure}
 \centering
-\includegraphics[max width=\linewidth, max height=0.35\textheight]{pow_refl_step3_sag}
+\includegraphics[max width=\linewidth, max height=0.33\textheight]{pow_refl_step3_sag}
 \caption{
   Step 3. Chain \cL includes \textit{proofs of reflection} (PoRs) along with headers.
   Proofs of Reflection allow Chain \cL to know which of its own blocks are known to Chain \cR.
 }
 \label{fig:por-step3}
 \end{figure}
-
-Chain \cL now knows \emph{which \cL blocks are recorded by Chain \cR}, i.e., which local blocks are known about by some external source.
-Put another way: Chain \cL's history is confirmed \emph{not only} by new Chain \cL blocks, \emph{but also} by Chain \cR blocks.
-\begin{comment}
-There's no data-availability concern here since Chain \cL nodes *know* that they have the blocks that Chain \cR knows about.
-\end{comment}
-
-\aside{
-  \textbf{Important:} Soon, these confirmations will have real and useful meaning.
-  Under the right conditions, an appropriate configuration of \emph{Proof of Reflection} results in an increase in the \emph{rate} that confirmations are acquired.
-  This is the first hint of $O(c^{-1})$ confirmation time.
-}
-
-At this point, if an attacker was to publish an alternate, better Chain \cL history, then Chain \cL nodes would reorganize around the *new* history published by the attacker, and the attacker's block headers would end up being recorded in Chain \cR and causing a reorganization there, too. Currently, this configuration does not add any security to Chain \cL.
-
-Could we use Chain \cL's knowledge \emph{that its own history is reflected in Chain \cR} to *prevent* such an attack?
 
 #### Step 4. One Way Reflection
 

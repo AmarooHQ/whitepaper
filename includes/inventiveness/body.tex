@@ -108,7 +108,7 @@
 
      Each chain should generalize their reflection capabilities as detailed in \autoref{alg:por-reflected-block-weight}. Note that this includes a cap on each simplex-chain's contribution, which is optional but provides some benefits. Also note that there is more than one way to cap a simplex-chain's contribution, though only one is shown in \autoref{alg:por-reflected-block-weight}.
 
-     For maximum security, each simplex-chain should adjust their weighting function to cap the security contribution of other simplex chains.
+     For maximum security, each simplex-chain should adjust their weighting function to cap the security contribution of other simplex-chains.
      This ensures that real-world variance in block production frequency (of other simplex-chains) does not adversely affect the security of the simplex-chain in question.
      If this is not done, then an attack on one simplex-chain may have amplified effects on the other simplex-chains.
      Note: this change is optional, but beneficial.
@@ -121,7 +121,7 @@
  \end{subsection}
  \begin{subsection}{Method of Operation}
 
-    Miners that are producing blocks for simplex-chains behave slightly differently to normal. They are required to reflect the headers of other simplex-chains, and thus must include them in their blocks. However, for the smoothest operation of the simplex, each miner should download *all* other blocks of other simplex chains; this ensures that only existent blocks get reflected.
+    Miners that are producing blocks for simplex-chains behave slightly differently to normal. They are required to reflect the headers of other simplex-chains, and thus must include them in their blocks. However, for the smoothest operation of the simplex, each miner should download *all* other blocks of other simplex-chains; this ensures that only existent blocks get reflected.
 
     Futhermore, miners should partially validate blocks from other simplex-chains, but only those segments of the block that deal with reflections. This additional processing (which is not overly burdensome on the miner) ensures that proofs of reflection (e.g., merkle branches) do not need to be created or transmitted (this was hinted at previously). This improves overall throughput and reliability. It is technically optional, though other methods for ensuring the integrity are then required.
 
