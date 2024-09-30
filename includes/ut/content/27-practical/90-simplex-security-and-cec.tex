@@ -159,13 +159,16 @@ As a base case, it is taken that:
 Note that a simplex of 1 chain (the 0-simplex) \emph{is} a traditional blockchain.
 So we can take Bitcoin for example: the probability of an attack succeeding after 6 confirmations is given by $P(q; c = 6) \approx P^\prime(q; c = 6; N_1 = 1)$.
 
-One prediction of the hypothesis is that:
+One prediction of the hypothesis is that the probability of a successful attack against a simplex with $N$ simplex-chains after $C$ confirmations is equal to that of a successful attack on a traditional chain after $C\cdot N$ confirmations.
+That is:
 \begin{equation}
     P^\prime(q; c = CN; N_1 = 1) \approx P^\prime(q; c = C; N_1 = N)
     \label{eq:por-sim-hypothesis}
 \end{equation}
 In fact, we can take this further.
-The relationship that exists is continuous --- it must be if confirmations are equivalent.
+The relationship that exists is not only at the extremes, but between them too\footnote{
+    Since \nicefrac{CN}{a} in \autoref{eq:cec-extended-hypothesis} is not necessarily an integer, we'll assume there exists a valid generalization of Rosenfeld's solution for $c \in \mathbb{R}_{>0}$.
+} --- it must be if confirmations are equivalent.
 This is the \emph{extended} CEC:
 % 1 \le x \le N; x \in \{a_i, b_i\}
 % , and $1 \le a_i \le N$, and $1 \le b_i \le N$
@@ -184,7 +187,7 @@ Notice that we don't need to know a closed form of $P^\prime(q, c, N_1)$ to test
     This is due to his solution assuming a static difficulty and the longest-chain fork rule; the \emph{construction} is consistent with Bitcoin (provided the difficulty doesn't adjust), but not with chains that recalculate difficulty every block.
     Additionally, when using \emph{work} instead of \emph{height} as the measure of an attack's success, fractional values of $c$ have real meaning --- especially with a reactive DAA and $N_1 \gg 1$.
     Both factors turn out to be unproblematic for us, though.
-    Rosenfeld's solution has reach beyond those assumptions and observed results converge with it.
+    Rosenfeld's solution has reach beyond those assumptions and observed results converge with it for larger values of $\text{DAA}_N$.
 }
 This is the basis of the method used to test this hypothesis.
 
@@ -276,18 +279,23 @@ If the attacker's blocks (on average) weigh less, then the fork rule will favor 
 The only way to overcome this, for shorter attacks or attacks against smaller simplexes, is for the attacker to be \emph{a little bit luckier than usual}.
 (The effect is less significant with long attacks or attacks against larger simplexes since $P^\prime \to 0$ anyway.)
 
-In essence, a shorter $\text{DAA}_N$ means that $P^\prime$ approaches zero faster.
-Since we want to \emph{match} analytical results, we want a \emph{larger} value of $\text{DAA}_N$ for this experiment --- this is most like an assumption of Rosenfeld's solution: \emph{constant difficulty}.
-
 \aside{
-    In practice, we should seriously consider smaller values of $\text{DAA}_N$ for the security benefit.
+    This explanation --- that a smaller $\text{DAA}_N$ means the attacker needs to be luckier --- was not something I expected.
+    It is somewhat speculative, and is included here to explain why smaller simplexes (3 to 10 chains) appear to have better security properties than the analytical solution predicts, and why we should prefer larger values of $\text{DAA}_N$ if we want to match expected results.
 }
+
+In essence, a shorter $\text{DAA}_N$ means that $P^\prime$ approaches zero faster.
+Since we want to \emph{match} analytical results, we want a \emph{larger} value of $\text{DAA}_N$ for this experiment --- this is analogous to an assumption of Rosenfeld's solution: \emph{constant difficulty}.
 
 So that we match the analytical solution's assumptions, a value of $\text{DAA}_N = 500$ was chosen.
 The most important thing is that $\text{DAA}_N \gg c$, particularly regarding traditional chains.\footnote{
     The differential effect seems to diminish as an attack goes on, so $\text{DAA}_N$ is particularly important for \emph{lower} values of $c$.
     $\text{DAA}_N \gg c$ matters when c is small, but not so much when $c$ is large.
     In other words: if the doublespend occurs over 600 blocks, the value of $\text{DAA}_N$ doesn't matter much; but if the doublespend occurs over 20 blocks, then the value of $\text{DAA}_N$ is a significant variable.
+}
+
+\aside{
+    In practice, we should seriously consider smaller values of $\text{DAA}_N$ for the security benefit.
 }
 
 With regards to the other values --- $q$, $c$, and $N_1$ --- they will be varied as part of the experiment so that we can generate each data-point.
