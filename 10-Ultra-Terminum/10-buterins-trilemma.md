@@ -118,7 +118,7 @@ Are they always?
 
 A scalable system *can* have components with complexities worse than $O(c)$ *if and only if* those components are not *bottlenecks*, i.e., *constraints*.
 As long as there is *excess capacity* in those components, the system can still scale.
-(See also: \emph{Theory of Constraints}; \emph{Critical Fallibilism}.)
+%%\text{(See also: \emph{Theory of Constraints}; \emph{Critical Fallibilism}.)}
 
 \begin{comment}
 end of section, reset toc to default

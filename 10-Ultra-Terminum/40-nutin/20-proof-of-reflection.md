@@ -397,7 +397,7 @@ How can we use these relationships to our advantage?
 The units that we have to work with are: blocks, seconds, hashes, and coins\footnotemark{}.
 \footnotetext{
   Note that the terms \emph{coin} and \emph{root token} are synonymous.
-  The choice of \emph{coin} over \emph{root token}, for these sections, is pragmatic --- we'll see this term \emph{a lot}.
+  The choice of \emph{coin} over \emph{root token}, for these sections, is for practicality --- we'll see this term \emph{a lot}.
 }
 There are actually multiple types of blocks (L-blocks and R-blocks), coins (L-coins and R-coins), and hashes (L-hashes and R-hashes).
 We can't combine those unless we're able to convert those values to common units.
