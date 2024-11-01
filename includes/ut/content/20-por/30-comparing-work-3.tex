@@ -16,8 +16,11 @@ Consistency, here, means the conversion shouldn't change the outcome of the fork
 
 Since both weight and hashes can be \emph{summed}, an easy way for this to work is for us to use a \emph{linear} conversion method (i.e., the units are \emph{proportional}, we have some \emph{constant of conversion} for that specific situation, and all units \emph{share an origin}).
 In effect, for any two values, the \emph{ratio} between linearly converted values is \emph{constant} provided those values are in same units, but independent of \emph{which} units those values are represented in.
-This doesn't imply that all \emph{mid-states} are linearly convertible, though.
-However, if some mid-states \emph{are} linearly convertible (to and from hashes), then \emph{the fork rule should work for the absolute value of those units, too}.
+This doesn't imply that all possible \emph{mid-states} are linearly convertible, though.
+However, if some mid-states \emph{are} linearly convertible (to and from hashes), then \emph{the fork rule should work for those units, too}.
+
+% why did I put 'absolute value' above?
+% originally I had: 'the fork rule should work for the absolute value of those units, too'
 
 When it comes to comparing work, we'll need to work with particular factors (or properties) that are intrinsic to all blockchains (though the particular values vary by chain).
 These are the factors which \emph{naturally come as rates}, even though they're often measured in absolutes.

@@ -1,55 +1,55 @@
-\newpage
+% \newpage
 
-\section{\emph{Proof of Reflection} + \UT{} Lineage}
+% \section{\emph{Proof of Reflection} + \UT{} Lineage}
 
-\label{sec:appendix-por-lineage}
+% \label{sec:appendix-por-lineage}
 
-\xdef\gdir{south}
-\begin{forest}
-    for descendants={grow=\gdir, align=center},  % anchor=east,child anchor=east
-    grow=\gdir,
-    [{\emph{Ultra Terminum}}
-        [\emph{Proof of Reflection}
-            [{Blockchains \\ confirming \\ blockchains}
-                [{Factum \\ Exchange}]
-                [{``Dissolve the \\ Microchain''} % what i thought before inventing PoR
-                    % todo: pick better node name
-                    [{Microchains \& \\ Cryptonet \\ (Eudemonia Research)}
-                        [GPDHT [{Merged \\ Mining} [Bitcoin]]]
-                        [{Gav Wood \\ contrib}]
-                        % todo, figure out how to do a graph with
-                        % todo: - gpdht <- gav wood <- microchains; and
-                        % todo: - gpdht <- microchains
-                    ]
-                ]
-            ]
-            [{Block-DAG}
-                [Quanta [GHOST [Bitcoin]]]
-                [Inclusive Block \\ Chain Protocols [GHOST [Bitcoin]]]
-            ]
-            [{Conversion of work}
-                [{Epistemic Conversion \\ (Critical Fallibilism /\\ Elliot Temple)}]
-            ]
-        ]
-        [{Buterin's \\ Trilemma}]
-    ]
-\end{forest}
+% \xdef\gdir{south}
+% \begin{forest}
+%     for descendants={grow=\gdir, align=center},  % anchor=east,child anchor=east
+%     grow=\gdir,
+%     [{\emph{Ultra Terminum}}
+%         [\emph{Proof of Reflection}
+%             [{Blockchains \\ confirming \\ blockchains}
+%                 [{Factum \\ Exchange}]
+%                 [{``Dissolve the \\ Microchain''} % what i thought before inventing PoR
+%                     % todo: pick better node name
+%                     [{Microchains \& \\ Cryptonet \\ (Eudemonia Research)}
+%                         [GPDHT [{Merged \\ Mining} [Bitcoin]]]
+%                         [{Gav Wood \\ contrib}]
+%                         % todo, figure out how to do a graph with
+%                         % todo: - gpdht <- gav wood <- microchains; and
+%                         % todo: - gpdht <- microchains
+%                     ]
+%                 ]
+%             ]
+%             [{Block-DAG}
+%                 [Quanta [GHOST [Bitcoin]]]
+%                 [Inclusive Block \\ Chain Protocols [GHOST [Bitcoin]]]
+%             ]
+%             [{Conversion of work}
+%                 [{Epistemic Conversion \\ (Critical Fallibilism /\\ Elliot Temple)}]
+%             ]
+%         ]
+%         [{Buterin's \\ Trilemma}]
+%     ]
+% \end{forest}
 
-\newpage
+% \newpage
 
-%prerex:
-% \begin{chart}
-% \end{chart}
+% %prerex:
+% % \begin{chart}
+% % \end{chart}
 
 
-\tikzstyle{linnode} = [text width=5em, text badly centered, node distance=2cm]
-\begin{tikzpicture}[node distance = 2cm, auto]
+% \tikzstyle{linnode} = [text width=5em, text badly centered, node distance=2cm]
+% \begin{tikzpicture}[node distance = 2cm, auto]
 
-    \node [linnode] (ut) at (0,0) {\emph{Ultra Terminum}};
+%     \node [linnode] (ut) at (0,0) {\emph{Ultra Terminum}};
 
-    \node [left of=ut] (ut-l) {};
-    \node (ut-ll) [left of=ut-l] {};
+%     \node [left of=ut] (ut-l) {};
+%     \node (ut-ll) [left of=ut-l] {};
 
-    \node [linnode, below of=ut-l] (por) {\emph{Proof of Reflection}};
+%     \node [linnode, below of=ut-l] (por) {\emph{Proof of Reflection}};
 
-\end{tikzpicture}
+% \end{tikzpicture}

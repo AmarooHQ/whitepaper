@@ -221,7 +221,7 @@ def process_tex(input_file_path: str, mode: str, output_dir: Optional[str], md_c
 @click.option('--prepare-for')
 def copy_prepared_for(pdf_path, git: str, prepare_for: Optional[str]):
     if prepare_for:
-        for_name = prepare_for.lower().strip().replace(' ', '-').replace('(', '').replace(')', '').replace('.', '').replace('\\', '').replace(',', '')
+        for_name = prepare_for.lower().strip().replace(' ', '-').replace('(', '').replace(')', '').replace('.', '').replace('\\', '').replace(',', '').replace('&', 'and')
         if not for_name.replace('-', '').isalpha():
             print(t.bold_red(f"Tried to turn `{prepare_for}` in to a filename compatible string (`{for_name}`) but it seems to have other characters in it (not just alpha + dash). Erroring out."))
             sys.exit(71)

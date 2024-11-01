@@ -20,7 +20,7 @@ The idea of one blockchain 'tracking' another blockchain via chain-headers and i
 
 \defineTermTex{Projection}{
   A \emph{projection} of a chain is its \emph{headers-only} version which is recorded and evaluated \emph{by a different chain}.
-  For example \href{https://github.com/ethereum/btcrelay}{BTC Relay} is a smart contract by which Ethereum previously hosted a \emph{projection} of Bitcoin.
+  For example, \href{https://github.com/ethereum/btcrelay}{BTC Relay} is a smart contract by which Ethereum previously hosted a \emph{projection} of Bitcoin.
   The \emph{act} of one chain creating and maintaining the projection of another is called \emph{imaging}
 }
 
