@@ -20,19 +20,50 @@
 
 \providecommand{\Cprime}{\ensuremath{\mathbb{C}^\prime}\xspace}
 
+\providecommand{\FracUnits}[2]{\ensuremath{\frac{\text{#1}}{\text{#2}}}\xspace}
+
+\providecommand{\syr}{\ensuremath{s_{\text{yr}}}\xspace}
+
 % make \sim not include a space afterwards (like: `~x`).
 % for the normal version use \opsim (like: `a ~ b`).
 % source: https://tex.stackexchange.com/a/55723
 \let\opsim\sim
 % `\mathord{}' just for clarity -- `{}' would work just as well
-\renewcommand\sim{\mathord{\opsim}}
+\renewcommand\sim{\ensuremath{\mathord{\opsim}}}
+
+% xypic diag stuff
+
+
+
+% chain-diags: boxes for blocks (xyB) and chain names (xyL)
+\newcommand{\xyB}[1]{*+[F]+{#1}}
+\providecommand\xyBDraft[1]{*+[F--]+{#1}}
+\providecommand\xyL[1]{*++[F:<2pt>]{#1}}
+
+
+% ARrow reFlection
+\newcommand\arf[1][]{\ar@{.>}[#1]}
+\newcommand\arft[1][]{\ar@{-->}[#1]}  % for PoR tips
+% \newcommand\arff[1][]{\ar@2{.>}@[Maroon][#1]}
+\newcommand\arff[1][]{\ar@{.>}[#1]}
+% ARrow Main (for primary parents)
+\newcommand\arm[1][]{\ar@{->}[#1]}
+% ARrow Secondary (for secondary parents)
+\newcommand\ars[1][]{\ar@{~>}[#1]}
+%
+\newcommand\arAncestor[1][]{\ar@{-->}[#1]}
+
+
 
 % labels for chains that work in and out of math mode
 % if \xspace is inside \ensuremath then it won't work outside math mode
 
+\newcommand\cB{\ensuremath{B}\xspace}
+\newcommand\cC{\ensuremath{C}\xspace}
 \newcommand\cL{\ensuremath{L}\xspace}
 \newcommand\cM{\ensuremath{M}\xspace}
 \newcommand\cR{\ensuremath{R}\xspace}
+\newcommand\cQ{\ensuremath{Q}\xspace}
 \newcommand\cMone{\ensuremath{M^1}\xspace}
 \newcommand\cMtwo{\ensuremath{M^2}\xspace}
 \newcommand\cRone{\ensuremath{R^1}\xspace}
@@ -42,47 +73,88 @@
 % note, the first arg is not wrapped in {} so that we can do things like:
 %   M^1_{i+1} (the superscript 1 and subscript i+1 will be left-aligned vertically)
 
-\providecommand\BCI[3]{%
-    \ensuremath{#1_{{#2}+{#3}}}\xspace%
+% \def\isnum#1#2#3{%
+\NewExpandableDocumentCommand{\isnum}{m m m}{%
+  \if!\ifnum9<1#1!\else_\fi
+    #2\else#3\fi}
+
+\ExplSyntaxOn%
+\NewExpandableDocumentCommand{\prependPlusIfNeeded}{m}{%
+  \tl_if_empty:nTF{#1}{}{\IfBeginWith{#1}{-}{}{+}%
+  % {\ifnum 0<#1%
+  %   +%
+  % \fi}{}%
+  {#1}}%
+}
+\ExplSyntaxOff%
+\NewDocumentCommand{\BCI}{m m g}{%
+  \ensuremath{#1_{{#2}\IfNoValueTF{#3}{}{\prependPlusIfNeeded{#3}}}}%
+  \xspace%
 }
 
-\providecommand\BL{}
-\renewcommand\BL[1]{\BCI{\cL}{i}{#1}}
-\newcommand\xBL[1]{\xyB{\BL{#1}}}
+\NewDocumentCommand\BCIStart{m m}{%
+    \ensuremath{#1_{{#2}}}\xspace%
+}
 
-\providecommand\BR{}
-\renewcommand\BR[1]{\BCI{\cR}{k}{#1}}
+\NewDocumentCommand{\BB}{g}{\BCI{\cB}{i}{#1}}
+\newcommand\xBB[1]{\xyB{\BB{#1}}}
+
+\NewDocumentCommand{\BBj}{g}{\BCI{\cB}{j}{#1}}
+\newcommand\xBBj[1]{\xyB{\BBj{#1}}}
+
+\NewDocumentCommand{\BBi}{}{\BCIStart{\cB}{i}}
+\newcommand\xBBi{\xyB{\BBi}}
+
+\NewDocumentCommand{\BL}{g}{\BCI{\cL}{i}{#1}}
+\newcommand\xBL[1]{\xyB{\BL{#1}}}
+% \NewExpandableDocumentCommand{\xBL}{m}{\xyB{\BL{#1}}}
+
+\NewDocumentCommand{\BR}{g}{\BCI{\cR}{k}{#1}}
 \newcommand\xBR[1]{\xyB{\BR{#1}}}
 
-\providecommand\BM{}
-\renewcommand\BM[1]{\BCI{\cM}{j}{#1}}
+\NewDocumentCommand{\BM}{g}{\BCI{\cM}{j}{#1}}
 \newcommand\xBM[1]{\xyB{\BM{#1}}}
+
+\NewDocumentCommand{\BQ}{g}{\BCI{\cQ}{h}{#1}}
+\newcommand\xBQ[1]{\xyB{\BQ{#1}}}
+
+
+
+\providecommand\BMone{}
+\renewcommand\BMone[1]{\BCI{\cMone}{g}{#1}}
+\newcommand\xBMone[1]{\xyB{\BMone{#1}}}
+
+\providecommand\BMtwo{}
+\renewcommand\BMtwo[1]{\BCI{\cMtwo}{h}{#1}}
+\newcommand\xBMtwo[1]{\xyB{\BMtwo{#1}}}
+
+% ARrow reFlection Bent Down
+\newcommand\arfbd[1][]{\ar@{.>}@/_9pt/[#1]}
+\newcommand\arfbu[1][]{\ar@{.>}@/^9pt/[#1]}
+
+
+
 
 %
 % helpers for xymatrix based chain-diags
 %
 
 % std margin, cols, spacing for chain diag based on xymatrix
-\providecommand\xyMChains[1]{\xymatrix@M=3pt@R=4pt@C=14pt{#1}}
+\ProvideDocumentCommand{\xyMChains}{m}{\xymatrix@M=3pt@R=4pt@C=14pt{#1}}
 
 % use \xyTimeHoriz as first/last row in \xyMChains. the argument is an arrow direction and length (in cols)
 % e.g., `\xyTimeHoriz{rrrrrrr} & & & & & & & \\`
-\providecommand\xyTimeHoriz[1]{\ar@{>->}@<-6pt>[#1]_<{\qquad\text{Time}}}
+\providecommand\xyTimeHorizOld[1]{\ar@{>->}@<-6pt>[#1]_<{\qquad\text{Time}}}
+
+% \xyLabelHoriz{My Label}{arrow yshift}{rrrrr}{label position mod}
+% example:
+%     \xyLabelHoriz{Execution Order}{0pt}{rrrrrr}{r30pt}
+\providecommand\xyLabelHoriz[4]{\ar@{>->}@<#2>[#3]_<*!/#4/{\labelstyle\text{#1}}}
+
+\providecommand\xyTimeHoriz[1]{\xyLabelHoriz{Time}{0pt}{#1}{r10pt}}%
 
 % wrapper for inline refl paths
 \providecommand\xyInlineRefl[1]{\xymatrix@C=10pt@M=0pt{#1}}
-
-
-% chain-diags: boxes for blocks (xyB) and chain names (xyL)
-\providecommand\xyB[1]{*+[F]+{#1}}
-\providecommand\xyBDraft[1]{*+[F--]+{#1}}
-\providecommand\xyL[1]{*++[F:<2pt>]{#1}}
-
-
-% ARrow reFlection
-\newcommand\arf[1][]{\ar@{.>}[#1]}
-% \newcommand\arff[1][]{\ar@2{.>}@[Maroon][#1]}
-\newcommand\arff[1][]{\ar@{.>}[#1]}
 
 
 % % \def\useone#1{#1}
@@ -122,3 +194,164 @@
 
 % multiplier for root tile's tile-work
 \newcommand\Mroot{\ensuremath{\mathcal{M}}\xspace}
+
+% 2 column vector
+\NewDocumentCommand{\vecXY}{m m}{\left[
+    \begin{array}{c}
+        #1 \\ #2
+    \end{array}
+\right]}
+
+\NewDocumentCommand{\BribeCost}{}{%
+    \ensuremath{\mathbb{B}}\xspace%
+}
+
+
+%
+% test custom arrows/symbols for math operators using tikz
+%
+% like: `a + b = c` --- both + and = are math operators there
+%
+% these operators were intended to represent 'reflect', 'builds on', 'ancestor of', etc
+%
+
+\tikzset{
+    utCustArrows/.style={
+        scale=0.25,
+        baseline=(current bounding box.south),
+        {-[length=2pt]>},
+        line cap=round,
+        line join=bevel,
+        thin,
+        % semithick,
+        % <->
+    }
+}
+
+\NewDocumentCommand{\reflsPrev}{}{%
+  \ensuremath{\mathbin{\tikz[utCustArrows]{
+    \def\left{0}
+    \def\bottom{.1}
+    \def\top{.7}
+    \def\right{1.2}
+    \def\mid{0.4}
+    \def\llh{0.2}
+    \draw (\right, \bottom) -- (\left, \mid) -- (\right, \top);
+    \draw [-] (\left, \mid-\llh) -- (\left, \mid+\llh);
+  }}}\xspace%
+}
+
+\NewDocumentCommand{\notrefls}{}{%
+\mkern4mu\refls\mathrel{\mkern-20mu\not\:\mkern10mu}%
+}
+
+\NewDocumentCommand{\descendsFrom}{}{%
+  \ensuremath{%
+    %\succ%
+    \mathbin{\tikz[utCustArrows]{
+    \def\left{0}
+    \def\bottom{.1}
+    \def\top{.7}
+    \def\right{1.5}
+    \def\mid{0.4}
+    % \def\md{0.15}
+    \def\md{0.225}
+    \def\mup{0.45+\mid}
+    \def\mdown{\mid-0.45}
+    \def\llh{0.22}
+    \def\xa{0.25*\right}
+    \def\xb{0.5*\right}
+    \def\xc{0.75*\right}
+    % \draw (\right, \bottom) -- (\left, \mid) -- (\right, \top);
+    % \draw [-] (\left, \mid-\llh) -- (\left, \mid+\llh);
+    % \node [inner sep=0] at (\left, 0) {};
+    % \draw [arrows={->[length=3pt 0]}, double distance=2pt, line cap=butt, shorten >= 0pt] (\left-.2, \mid) -- (\right+.2, \mid);
+    % \draw [-] (\xa, \mid) -- (\xb, \mup) -- (\xc, \mid) -- (\xb, \mdown) -- cycle;
+    % \draw [-] (\xa, \mup) -- (\xc, \mup) -- (\xc, \mdown) -- (\xa, \mdown) -- cycle;
+    % \draw (\xc,\mid) -- (\right + .2, \mid);
+
+    % \draw [-] (\left, \mid + \md) -- (\right, \mid + \md);
+    % \draw [-] (\left, \mid - \md) -- (\right, \mid - \md);
+    % \draw [-] (\right + 1.3*\llh, \mid) arc (250:190:16pt);
+    % \draw [-] (\right + 1.3*\llh, \mid) arc (110:170:16pt);
+    % \draw [-] (\right, \mid) arc (250:190:16pt);
+    % \draw [-] (\right, \mid) arc (110:170:16pt);
+    % \draw [-] (\right - 2*\llh, \mid + \md) arc (220:190:16pt);
+    % \draw [-] (\right - 2*\llh, \mid - \md) arc (140:170:16pt);
+    % \draw [-] (\right - 4*\llh, \mid + \md) arc (220:190:16pt);
+    % \draw [-] (\right - 4*\llh, \mid - \md) arc (140:170:16pt);
+    % \draw [-] (\right - 6*\llh, \mid + \md) arc (220:190:16pt);
+    % \draw [-] (\right - 6*\llh, \mid - \md) arc (140:170:16pt);
+    % \draw [-, line cap=rect] (\right - 2*\llh, \mid + 0.95*\md) -- (\right - 2*\llh, \mid - 0.95*\md) -- (\right - 4*\llh, \mid - 0.95*\md) -- (\right - 4*\llh, \mid + 0.95*\md) -- cycle;
+    % \draw [-, fill=black] (\right - 3.7*\llh, \mid) arc (0:360:.5pt);
+    % \draw [-, fill=black] (\right - 4.7*\llh, \mid) arc (0:360:.5pt);
+    % \draw [-, fill=black] (\right - 5.7*\llh, \mid) arc (0:360:.5pt);
+    \draw [-{>[length=2.5pt]}] (\right, \mid) -- (\right + 0.1*\llh, \mid);
+    % \draw circle at (\right, \mid);
+    \draw [{>[length=2.5pt]}-] (\left-0.1, \mid) -- (\left + \llh, \mid);
+    % -- (\right, \mid);
+    % \draw [-, dotted, semithick] (\left + \llh, \mid) -- (\right, \mid);
+    \foreach \x in {1,...,3} {
+        \node [draw, circle, fill=black, inner sep=0.00pt, line width=0.01pt] at (\left + \x / 4.5 * \right + .13, \mid) {};
+    }
+  }}%
+  }%
+  \xspace%
+}
+
+\NewDocumentCommand{\childOf}{}{%
+  \ensuremath{%
+    %\succ%
+    \mathbin{\tikz[utCustArrows]{
+    \def\left{0}
+    \def\right{1.5}
+    \def\mid{0.4}
+    \def\llh{0.22}
+    \draw [{>[length=2.5pt]}-{>[length=2.5pt]}] (\left, \mid) -- (\right + 0.1*\llh, \mid);
+    % \draw [{>[length=2.5pt]}-] (\left-0.1, \mid) -- (\left + \llh, \mid);
+    % % -- (\right, \mid);
+    % % \draw [-, dotted, semithick] (\left + \llh, \mid) -- (\right, \mid);
+    % \foreach \x in {1,...,3} {
+    %     \node [draw, circle, fill=black, inner sep=0.00pt, line width=0.01pt] at (\left + \x / 4.5 * \right + .13, \mid) {};
+    % }
+  }}%
+  }%
+  \xspace%
+}
+
+\newcommand{\veryshortarrow}[1][0pt]{\mathrel{%
+   \vcenter{\hbox{\rule[-.2pt]{#1}{.4pt}}}%
+    % \hbox{\rule[\dimexpr\fontdimen22\textfont2-.2pt\relax]{#1}{.4pt}}%
+    \mkern-1mu\hbox{\usefont{U}{lasy}{m}{n}\symbol{41}}%
+    \mkern-5.75mu\hbox{\usefont{U}{lasy}{m}{n}\symbol{41}}%
+    \mkern-6mu\hbox{\usefont{U}{lasy}{m}{n}\symbol{41}}%
+    \mkern-3mu%
+    }}
+
+\NewDocumentCommand{\bdots}{}{\cdots\mathrel{\mkern-8mu\veryshortarrow}}
+\NewDocumentCommand{\notbdots}{}{\bdots\mathrel{\mkern-16.75mu\not\:\mkern14mu}}
+
+\NewDocumentCommand{\bAnd}{}{\mathrel{\&\&}}
+
+\NewDocumentCommand{\rightdottedarrow}{}{\ensuremath{\xyInlineRefl{\;\arf[r]&\;}}}
+\NewDocumentCommand{\leftdottedarrow}{}{\ensuremath{\xyInlineRefl{\;&\;\arf[l]}}}
+
+\NewDocumentCommand{\refls}{}{\rightdottedarrow}
+\NewDocumentCommand{\refldBy}{}{\leftdottedarrow}
+
+\NewDocumentCommand{\rightdashedarrow}{}{\ensuremath{\xyInlineRefl{\;\arAncestor[r]&\;}}}
+\NewDocumentCommand{\leftdashedarrow}{}{\ensuremath{\xyInlineRefl{\;&\;\arAncestor[l]}}}
+
+
+% PoR conversion functions
+
+\NewDocumentCommand{\ConvWork}{g}{%
+  \ensuremath{\text{ConvWork}_{R\rightarrow L}}%
+  \IfNoValueTF{#1}{}{\ensuremath{(#1)}}\xspace}
+
+
+% nipopow stuff
+
+\NewDocumentCommand{\muType}{m}{\ensuremath{\mu_{#1}}\xspace}
+\let\origMu\mu
+\RenewExpandableDocumentCommand{\mu}{}{\ensuremath{\origMu}\xspace}

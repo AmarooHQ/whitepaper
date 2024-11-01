@@ -1,0 +1,12 @@
+% note: pandoc injects
+%     {
+%     \setcounter{tocdepth}{3}
+%     \tableofcontents
+%     }
+% after `include-before` and before first content
+
+\NewDocumentCommand{\SetToCDepth}{m}{%
+    \addtocontents{toc}{\protect\setcounter{tocdepth}{#1}}%
+}
+
+\NewDocumentCommand{\SetToCDepthDefault}{}{\SetToCDepth{4}}

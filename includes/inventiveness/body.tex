@@ -14,9 +14,9 @@
          \def\labelenumi{\arabic{enumi}.}
          \tightlist
          \item \label{item:headers-a-in-b}
-               The headers of \(C_A\) can be (and are) recorded -- promptly and unambiguously -- in \(C_B\);
+               The headers of \(C_A\) can be (and are) recorded --- promptly and unambiguously --- in \(C_B\);
          \item \label{item:headers-b-in-a}
-               The headers of \(C_B\) can be (and are) recorded -- promptly and unambiguously -- in \(C_A\); and
+               The headers of \(C_B\) can be (and are) recorded --- promptly and unambiguously --- in \(C_A\); and
          \item \label{item:prove-headers}
                \(C_A\) nodes are able to (and do) promptly prove which of its headers have been recorded in \(C_B\), and have full knowledge of that set of headers.
      \end{enumerate}
@@ -53,7 +53,7 @@
 
      Also note that if a proof stake chain is reflected by a proof of work chain, then the PoW chain provides thermodynamic security to the PoS chain. A class of attacks (for which there were previously no known uncriticized solutions) can be made impossible via hosting the proof of stake set-up and staking procedures on the reflecting PoW chain. This is possible to do with low overhead, since the PoS chain is already tracking parts of the PoW chain's state (so tracking certain other parts is reasonably easy and efficient). By moving these procedures to the PoW chain, it means that an attack on the PoS chain \emph{must} also attack the PoW chain (since the attacks we are guarding against rely on manipulating these procedures); thus the PoS chain is at least as difficult to attack as the PoW chain.
 
-     Also note that PoR can be done \emph{in both directions} between two blockchains (i.e., \emph{mutual} reflection). This increases the security qualities of both chains. When PoR is done in one direction, i.e., Chain A is reflected by Chain B, then an attack on Chain A may require an attack on Chain B \emph{first} -- once Chain B is being successfully attacked, then an attacker can attack Chain A. In the one-way PoR configuration, an attacker can "checkpoint" their progress via sequential attacks. However, when PoR is \emph{mutual}, attacking Chain B requires first attacking Chain A, which first requires attacking Chain B, etc. Thus attacks are more difficult against chains that are mutually reflecting (than configurations where the PoR is one-way). Instead of being able to "checkpoint" their progress, an attacker must attack both chains simultaneously.
+     Also note that PoR can be done \emph{in both directions} between two blockchains (i.e., \emph{mutual} reflection). This increases the security qualities of both chains. When PoR is done in one direction, i.e., Chain A is reflected by Chain B, then an attack on Chain A may require an attack on Chain B \emph{first} --- once Chain B is being successfully attacked, then an attacker can attack Chain A. In the one-way PoR configuration, an attacker can "checkpoint" their progress via sequential attacks. However, when PoR is \emph{mutual}, attacking Chain B requires first attacking Chain A, which first requires attacking Chain B, etc. Thus attacks are more difficult against chains that are mutually reflecting (than configurations where the PoR is one-way). Instead of being able to "checkpoint" their progress, an attacker must attack both chains simultaneously.
 
  \end{subsection}
  \begin{subsection}{Method of Operation}
@@ -64,7 +64,7 @@
      Note that this does not require modification to Ethereum (as it existed in April 2021), so it is currently possible for almost any existing blockchain to implement the necessary changes that initiate and maintain the illustrated relationship.
  \end{subsection}
  \begin{subsection}{Novelty and Inventiveness}
-     The following (possibly inexhaustive) list of ideas -- that used in (or based on) PoR -- are novel:
+     The following (possibly inexhaustive) list of ideas --- that used in (or based on) PoR --- are novel:
 
      \begin{enumerate}
          \def\labelenumi{\arabic{enumi}.}
@@ -108,7 +108,7 @@
 
      Each chain should generalize their reflection capabilities as detailed in \autoref{alg:por-reflected-block-weight}. Note that this includes a cap on each simplex-chain's contribution, which is optional but provides some benefits. Also note that there is more than one way to cap a simplex-chain's contribution, though only one is shown in \autoref{alg:por-reflected-block-weight}.
 
-     For maximum security, each simplex-chain should adjust their weighting function to cap the security contribution of other simplex chains.
+     For maximum security, each simplex-chain should adjust their weighting function to cap the security contribution of other simplex-chains.
      This ensures that real-world variance in block production frequency (of other simplex-chains) does not adversely affect the security of the simplex-chain in question.
      If this is not done, then an attack on one simplex-chain may have amplified effects on the other simplex-chains.
      Note: this change is optional, but beneficial.
@@ -121,7 +121,7 @@
  \end{subsection}
  \begin{subsection}{Method of Operation}
 
-    Miners that are producing blocks for simplex-chains behave slightly differently to normal. They are required to reflect the headers of other simplex-chains, and thus must include them in their blocks. However, for the smoothest operation of the simplex, each miner should download *all* other blocks of other simplex chains; this ensures that only existent blocks get reflected.
+    Miners that are producing blocks for simplex-chains behave slightly differently to normal. They are required to reflect the headers of other simplex-chains, and thus must include them in their blocks. However, for the smoothest operation of the simplex, each miner should download *all* other blocks of other simplex-chains; this ensures that only existent blocks get reflected.
 
     Futhermore, miners should partially validate blocks from other simplex-chains, but only those segments of the block that deal with reflections. This additional processing (which is not overly burdensome on the miner) ensures that proofs of reflection (e.g., merkle branches) do not need to be created or transmitted (this was hinted at previously). This improves overall throughput and reliability. It is technically optional, though other methods for ensuring the integrity are then required.
 

@@ -15,9 +15,17 @@ ATK_END_DELAY_TICKS ?= 0
 
 # set this env var to `1` to do random hash-rate distrib
 RANDOMLY_DISTRIBUTE_HASHRATES ?=
+RAND_HR_INCLUDES_TARGET_CHAIN ?=
+# TwinUniform or EachHash
+RAND_HR_METHOD ?= TwinUniform
 _RAND_HRS_ARG =
+_R_HR_ARGS = --random_hr_distrib --rand_hr_method $(RAND_HR_METHOD)
+_R_HR_INCL_MAIN = --rand_hr_incl_main
 ifeq ($(RANDOMLY_DISTRIBUTE_HASHRATES),1)
-	_RAND_HRS_ARG = --random_hr_distrib
+	_RAND_HRS_ARG = $(_R_HR_ARGS)
+	ifeq ($(RAND_HR_INCLUDES_TARGET_CHAIN),1)
+		_RAND_HRS_ARG = $(_R_HR_ARGS) $(_R_HR_INCL_MAIN)
+	endif
 endif
 
 ATK_USE_DYN_END_TICK ?=
@@ -26,16 +34,25 @@ ifeq ($(ATK_USE_DYN_END_TICK),1)
 	_USE_DYN_END = --use_dyn_end_tick
 endif
 
+USE_FIXED_DIFFICULTY ?=
+_FIXED_DIFF_ARGS =
+ifeq ($(USE_FIXED_DIFFICULTY),1)
+	_FIXED_DIFF_ARGS = --fixed_difficulty
+endif
+
 
 CRYPTO_SYSTEM ?= WeightedDag
 # CRYPTO_SYSTEM ?= WeightedChain
 
 RUN_BIN = target/release/por-sim-rs
 
-SIMULATOR_ARGS ?= -R $(ATK_STRATEGY) -s $(ATK_START_TICK) -e $(ATK_END_TICK) -r $(ATK_RATIO) -S $(CRYPTO_SYSTEM) -b $(B_PERIOD) -P $(N_CHAINS) -H $(HR_PER_CHAIN) --ds_win_threshold $(ATK_DS_CONFS) --daa2_n_blocks $(DAA2_N_BLOCKS) --atk_end_delay_ticks $(ATK_END_DELAY_TICKS) $(_RAND_HRS_ARG) $(_USE_DYN_END)
+SIMULATOR_ARGS ?= -R $(ATK_STRATEGY) -s $(ATK_START_TICK) -e $(ATK_END_TICK) -r $(ATK_RATIO) -S $(CRYPTO_SYSTEM) -b $(B_PERIOD) -P $(N_CHAINS) -H $(HR_PER_CHAIN) --ds_win_threshold $(ATK_DS_CONFS) --daa2_n_blocks $(DAA2_N_BLOCKS) --atk_end_delay_ticks $(ATK_END_DELAY_TICKS) $(_RAND_HRS_ARG) $(_USE_DYN_END) $(_FIXED_DIFF_ARGS)
 
 test:
 	cargo test
+
+test-nc:
+	cargo test -- --nocapture
 
 lock-release:
 	chmod -w target/release/por-sim-rs
@@ -105,7 +122,13 @@ run-dag-doublespend-100:
 sudo-flamegraph:
 	bash ./bin/unsafe_flamegraph.sh
 
-print-randomized-hr-distributions:
-	cargo t -- --nocapture --test test_random_hr_distribution_properties
+print-rand-hr-distrib-twinuniform:
+	cargo t -- --nocapture --test test_random_hr_twinuniform_properties
 
-print-randhr-pmfs: print-randomized-hr-distributions
+print-rand-hr-distrib-eachhash:
+	cargo t -- --nocapture --test test_random_hr_eachhash_properties
+
+print-bounded-rand-hr-distributions:
+	cargo t -- --nocapture --test test_gen_bounded_random_hr_distribution
+
+print-randhr-pmfs: print-rand-hr-distrib-twinuniform

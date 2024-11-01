@@ -1,23 +1,28 @@
-What happens if a chain reflects a block that is not available?
+\subsubsection{The Availability of Reflected Blocks}
+
+% todo: unlabel this after draft
+% \label{sec:availability-of-blocks}
+
+What happens if a chain reflects a valid block that is not available?
 Could an attacker use this to their advantage?
 
 For example, consider the following (shown in \autoref{fig:unavailable-ex1}).
-We have two chains using mutual PoR -- \cL and \cR.
-Additionally, the most recently produced block is \BL{1}, which reflected \BR{1}.
-Next, a malicious \cR miner produces a valid block (\BR{2a}) which reflects \BL{1}.
-That miner broadcasts the \emph{header} of \BR{2a} along with a PoR branch proving that \BL{1} was reflected, but does not broadcast the rest of the block.
-The \cL miners receive the header and PoR branch, and shortly thereafter an \cL miner produces \BL{2}, which reflects \BR{2a}.
-Since other (honest) \cR miners cannot build on \BR{2a}, they must work on the draft block \BR{2} instead.
-Note that, although \BR2 will almost certainly reflect \BL1, whether it reflects \BL2 is at the miner's discretion.
+We have two chains using mutual PoR --- \cL and \cR.
+Additionally, the most recently produced block is \BL{}, which reflected \BR{}.
+Next, a malicious \cR miner produces a valid block (\BR{1a}) which reflects \BL{}.
+That miner broadcasts the \emph{header} of \BR{1a} along with a PoR branch proving that \BL{} was reflected, but does not broadcast the rest of the block.
+The \cL miners receive the header and PoR branch, and shortly thereafter an \cL miner produces \BL{1}, which reflects \BR{1a}.
+Since other (honest) \cR miners cannot build on \BR{1a}, they must work on the draft block \BR{1} instead.
+Note that, although \BR{1} will almost certainly reflect \BL{}, whether it reflects \BL{1} is at the miner's discretion.
 
 \begin{figure}
-    % extra column at start as padding -- centering is a bit off b/c of the length of labels.
+    % extra column at start as padding --- centering is a bit off b/c of the length of labels.
     % without the padding, the (time >->) arrow is centered but the diagram is too far to the left.
     \begin{equation*}
         \xyMChains{
-            & \xyL{\text{Chain \cL}} & \cdots & & \xBL1 \arf[dl] \ar[ll] & & \xBL2 \ar[ll] \arf[ldd] & & \\
-            & \xyL{\text{Chain \cR}} & \cdots & \xBR1 \ar[l] & & & & \xyBDraft{\BR{2}} \ar[llll] \arf[lllu] \arf[lu] \\
-            & \xyL{\text{Unavailable}} & & & & \xBR{2a} \ar[llu] \arf[luu] & & & \\
+            & \xyL{\text{Chain \cL}} & \cdots & & \xBL{} \arf[dl] \ar[ll] & & \xBL{1} \ar[ll] \arf[ldd] & & \\
+            & \xyL{\text{Chain \cR}} & \cdots & \xBR{} \ar[l] & & & & \xyBDraft{\BR{1}} \ar[llll] \arf[lllu] \arf[lu] \\
+            & \xyL{\text{Unavailable}} & & & & \xBR{1a} \ar[llu] \arf[luu] & & & \\
             & \xyTimeHoriz{rrrrrr} &&&&&&
         }
     \end{equation*}
@@ -25,50 +30,78 @@ Note that, although \BR2 will almost certainly reflect \BL1, whether it reflects
         Chain-segments showing an unavailable \cR block that was reflected anyway.
     ]{
         Chain-segments showing an unavailable \cR block that was reflected anyway.
-        The dashed frame of \BR{2} indicates that it is a draft block (i.e., not yet mined, but being actively worked on by miners).
-        Note: \BR{2} reflects \BL{2} at the miner's discretion -- it is optional.
+        The dashed frame of \BR{1} indicates that it is a draft block (i.e., not yet mined, but being actively worked on by miners).
+        Note: \BR{1} reflects \BL{1} at the miner's discretion --- it is optional.
     }
     \label{fig:unavailable-ex1}
 \end{figure}
 
-The attacker can use this situation to their advantage if \BR{2a} has precedence over \BR{2} (i.e., it's favored by the fork-rule).
-In that case, the attacker can publish \BR{2a} \emph{after} \BR{2} is mined for an advantage.\footnote{
-    This is similar (if not equivalent) to the \emph{selfish mining} attack published in \citeSelfishMiningFull{}.
+The attacker can use this situation to their advantage if \BR{1a} has precedence over \BR{1} (i.e., it's favored by the fork-rule).
+In that case, the attacker can publish \BR{1a} \emph{after} \BR{1} is mined for an advantage.\footnote{
+    This is similar to the \emph{selfish mining} attack published in \citeSelfishMiningFull{}.
 }
 When does this case occur?
 
-If \BR{2} does \emph{not} reflect \BL2, then \BR{2} will claim the same chain-weight as \BR{2a}.
-However, the next block -- \BR{3} -- will favor \BR{2a} since the PoR via \BL{2} contributes weight to \BR{2a} (as discussed in \autoref{sec:counting-work}).
-So the attacker \emph{always} has the advantage if \BR{2} \emph{does not} reflect \BL2.
+If \BR{1} does \emph{not} reflect \BL{1}, then \BR{1} will claim the same chain-weight as \BR{1a}.
+However, the next block --- \BR{2} --- will favor \BR{1a} since the PoR via \BL{1} contributes weight to \BR{1a} (as discussed in \autoref{sec:counting-work}).
+So the attacker \emph{always} has the advantage if \BR{1} \emph{does not} reflect \BL{1}.
 
-If \BR2 does reflect \BL2, then where should we attribute the work contributed by \BL2?
+If \BR{1} does reflect \BL{1}, then \BR{1} is the only block to which we can attribute the work contributed by \BL{1}.
+Thus \BR{1} will claim a greater chain-weight than \BR{1a}.
+However, in the context of the next \cR block (\BR{2}), \BR{1a} will still have precedence over \BR{1}.
 
-work counted as 0 -> same as before, atker advantage
+Both these situations makes sense: sometimes two \cR blocks will be created near-simultaneously, and occasionally only one of those blocks will be reflected by an \cL block.
+In those naturally arising cases, we'd \emph{expect} the \BR{1a} block to take precedence.
 
-work counted towards \BR1 -> \BR2a and \BR2 have the same claimed chain-weight.
+So, we seem to have a conflict: on the one hand, an attacker could withhold a block (but not the header or PoRs) to gain some advantage; on the other hand, prioritizing the earlier block seems to be necessary and correct behavior when this situation arises naturally.
 
+The only difference between these two situations is whether \BR{1a} is available or not; so this will be our discriminating factor.
 
+Can \cR do anything to prevent \cL miner's reflecting \BR{1a} before the block body is released?
+The \cR miners' can't prevent a withheld \cR block from being produced or reflected.
+But, \cR miners can still influence \cL miners' choice to reflect \BR{1a} (and withheld blocks in general).
+\cL miners want their blocks to be reflected by \cR miners so that future \cL blocks will build on top of their's.
+So \cR miners could refuse to reflect some \cL blocks --- particularly, \cL blocks that reflect \cR block headers without a known body (such as \BR{1a}).
+Since \cL miners face the same problem, \cR miners should refuse to reflect \cL blocks for which they do not have the block body.
 
+If both \cR and \cL miners do this, then an equilibrium is achieved and an attacker cannot gain an advantage by withholding block bodies.
 
+asdf todo
 
+\ctable[
+  pos = h,
+  caption = A matrix of miner choices showing when PoR works.,
+  % cap = ,
+  center,
+  label = tab:matrix-availability-refl-blocks,
+]{rcc}{}{
+  \FL
+  {} & \shortstack[c]{\cL miners reflect \\ withheld \cR blocks} & \shortstack[c]{\cL miners do not reflect \\ withheld \cR blocks}
+  \ML
+  \shortstack[c]{\cR miners reflect \\ withheld \cL blocks} & no & no \NN
+  \shortstack[c]{\cR miners do not reflect \\ withheld \cL blocks} & no & yes
+  \LL
+}
 
-Once an honest \cR miner successfully creates \BR{2}, can it ever have precedence over \BR{2a}?
+asdf
 
-Let's assume that the attacker publishes the \BR{2a} block in full immediately after \BR{2} is mined.
+Once an honest \cR miner successfully creates \BR{1}, can it ever have precedence over \BR{1a}?
+
+Let's assume that the attacker publishes the \BR{1a} block in full immediately after \BR{1} is mined.
 \cR miners now have a choice: which of the two available blocks should they prioritize?
 
-Should the honest \cR miners reflect \BL{2}?
+Should the honest \cR miners reflect \BL{1}?
 (It is their choice, after all.)
 
 
 \begin{figure}
     \begin{equation*}
         \xyMChains{
-            & \xyL{\text{Chain \cL}} & \cdots & & \xBL1 \arf[dl] \ar[ll] & & \xBL2 \ar[ll] \arf[ldd] & && \\
-            & \xyL{\text{Chain \cR}} & \cdots & \xBR1 \ar[l] & & &
-                & \xyB{\BR{2}} \ar[llll] \arf[lllu] \arf[lu]
-                & \xBR3 \ar[l] \ar@/_.75pc/@{.>}[llu] \ar@/^.85pc/[llld] \\
-            & \xyL{\text{Available}} & & & & \xBR{2a} \ar[llu] \arf[luu] & & && \\
+            & \xyL{\text{Chain \cL}} & \cdots & & \xBL{} \arf[dl] \ar[ll] & & \xBL{1} \ar[ll] \arf[ldd] & && \\
+            & \xyL{\text{Chain \cR}} & \cdots & \xBR{} \ar[l] & & &
+                & \xyB{\BR{1}} \ar[llll] \arf[lllu] \arf[lu]
+                & \xBR{2} \ar[l] \ar@/_.75pc/@{.>}[llu] \ar@/^.85pc/[llld] \\
+            & \xyL{\text{Available}} & & & & \xBR{1a} \ar[llu] \arf[luu] & & && \\
             & \xyTimeHoriz{rrrrrrr} &&&&&&&
         }
     \end{equation*}
@@ -76,25 +109,25 @@ Should the honest \cR miners reflect \BL{2}?
         asdf.
     ]{
         % asdf.
-        % The dashed frame of \BR{2} indicates that it is a draft block (i.e., not yet mined, but being actively worked on by miners).
-        % Note: \BR{2} optionally reflects \BL{2} -- there's no requirement that \cR miners must do so.
+        % The dashed frame of \BR{1} indicates that it is a draft block (i.e., not yet mined, but being actively worked on by miners).
+        % Note: \BR{1} optionally reflects \BL{1} --- there's no requirement that \cR miners must do so.
     }
     \label{fig:unavailable-ex2}
 \end{figure}
 
 
 If yes:
-- what do to with the PoR of L2->R2a?
-  - ignore R2a -- refl weight attributed to R1 via L2->L1->R1
-    - reason for ignoring: R2a not in history of R2
-    - on R2a public: it has priority over R2 since L2->R2a now valid
+- what do to with the PoR of L2->R1a?
+  - ignore R1a --- refl weight attributed to R1 via L2->L1->R1
+    - reason for ignoring: R1a not in history of R2
+    - on R1a public: it has priority over R2 since L2->R1a now valid
   - count it as zero, but then why bother reflecting L2?
     - so that L3 reflects R2
-    - on R2a public: it has priority over R2 since L2->R2a now valid
+    - on R1a public: it has priority over R2 since L2->R1a now valid
 
 If no:
-  - can only reflect L1 -- same chain-weight as R2a before draft refls
-    - on R2a public: it has priority over R2 since L2->R2a now valid
+  - can only reflect L1 --- same chain-weight as R1a before draft refls
+    - on R1a public: it has priority over R2 since L2->R1a now valid
 
 
 
@@ -105,4 +138,19 @@ If no:
 
 For example: a \cL miner receives a header for some block \BR{1a} along with a PoR via a \BL{1}
 
-Let's consider the example in \autoref{fig:unavailable-ex}:
+Let's consider the example in \autoref{fig:unavailable-ex1}:
+
+
+
+% \todo{Define the \AxiomOfAvailability}
+
+% \DeclareAxiom{Availability}{%
+%     All reflected blocks must be verifiably complete and readily available.
+% }{%
+%     A block, \BL{}, cannot yet be valid unless, for each reflected block \BR{}:
+%     \begin{axiomreqs}
+%         \item \BR{} has been downloaded (i.e., the block is available); and
+%         \item the cryptographic integrity of \BR{} has been verified; and
+%         \item \BR{} is valid under this axiom.
+%     \end{axiomreqs}
+% }

@@ -1,6 +1,6 @@
 {
     // "purescript.addSpagoSources": true,
-    // "purescript.addNpmPath": true,
+    "purescript.addNpmPath": true,
     //"purescript.buildCommand": "spago build --purs-args --json-errors",
     "files.watcherExclude": {
         "**/.spago/**": true
@@ -28,4 +28,5 @@
         "forall",
         "verkle"
     ],
+    "editor.rulers": [80, 120],
 }

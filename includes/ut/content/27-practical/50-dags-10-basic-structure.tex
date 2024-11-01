@@ -1,0 +1,174 @@
+
+\hypertarget{basic-structure}{%
+\subsubsubsection{Basic Structure}\label{basic-structure}}
+
+There are decisive advantages to using DAGs (instead of trees) as the fundamental structure of a chain.
+Namely, multiple histories (both compatible and incompatible) can be merged into a single, consistent history --- a feature which eliminates stale blocks and thwarts attacks like an empty-block DoS.
+UT's simplex-chains must be block-DAGs to remain functional and avoid such DoS attacks.
+
+Often, the motivation for using a block-DAG --- instead of a block-tree --- is to increase the block frequency.
+Since block-DAGs can reference multiple parent blocks, the stale-rate can theoretically approach (or reach) 0.
+In UT, increasing the block frequency eventually becomes counter-productive, though, since UT is sensitive to the size and number of headers that are produced (see \autoref{sec:impact-of-header-size}).
+In UT, the purpose of using block-DAGs is to thwart certain attacks, not to increase the block frequency.
+The intention is for UT simplex-chains to use fairly typical block frequencies (e.g., 1 block per 15 s) --- possibly decreasing those frequencies over time to increase capacity.
+Slower block frequencies also decrease the incidence of multiple parents --- this matters because each parent typically increases the header size by 32 bytes.
+
+Some basic block-dag segments are shown in \autoref{fig:dag-simple-segments}.
+
+\begin{figure}[h]
+    \begin{subfigure}[t]{.31\linewidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{dag_simple_sag}
+        \caption{A simple 2-parent example of a block-dag segment.}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.31\linewidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{dag_simple2_sag}
+        \caption{A slightly more complex example of a block-dag segment.}
+        \label{fig:dag-simple2}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.31\linewidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[height=.95\linewidth]{dag_simple3_sag}
+        \caption{A 3-parent example of a block-dag segment.}
+    \end{subfigure}%%
+    \caption{Some examples of simple block-dag segments.}
+    \label{fig:dag-simple-segments}
+\end{figure}
+
+The essence of DAG-based consensus (at least the kind we're concerned with) is to \emph{prioritize execution} of blocks and transactions based on the \emph{security contribution} (i.e., weight) of each parent block (and that parent's ancestry).
+Based on a \emph{most recent common primary\footnotemark ancestor}, we can decide which parent's \emph{history} has priority execution.
+Prioritized blocks are positioned \emph{earlier} in the final ordering.
+
+\footnotetext{
+    In DAG (or DAG-like) chains, primary ancestors form the \emph{main chain}, aka. the \emph{pivot chain}.
+    Provided that parent blocks \emph{are prioritized by cumulative work}, the chain of \emph{primary ancestors} between a given block and the genesis block must be the \emph{heaviest path} between the two.
+}
+
+When a block has more than one parent, the prioritized parent is the \emph{primary} one.
+The chain of primary parents forms the \emph{main chain}.
+
+\defineTermTex{Main Chain}{%
+    In a block-DAG, the \emph{main chain} is the continuous chain of primary parents from the best block to the genesis block.
+    Blocks that are part of the main chain are \emph{on-main}, and blocks that are not are \emph{off-main}%
+}
+
+Let's limit block-DAG blocks to two parents.
+If the best block has two parents, then each parent will have a \emph{subgraph of blocks} between itself and the \emph{most recent common primary ancestor} of the two parents.
+The subgraph which takes priority is that of the \emph{prioritized parent's ancestry}.
+If that subgraph is a chain, then the ordering and execution of blocks is trivial.
+If it is not, then there must be another subgraph within that subgraph, and this algorithm is applied recursively.
+After the prioritized subgraph is processed, the remaining blocks (those that are only ancestors of the remaining parent block) are ordered and applied --- invoking recursion where necessary.
+Finally, the best block is applied.
+In this way, all blocks are executed after their ancestors, and there is a clear and total ordering that trivially converges.
+
+There is a simple generalization of the above to allow more than two parent blocks, too.
+That is: replace \emph{all} but the last (worst) parent with a \emph{virtual parent block} that links back to all remaining \emph{actual} parent blocks (but contributes zero block-weight itself).
+Replacing the best parents (rather than the worst parents) with a virtual block means that the fork rule works when selecting which of the virtual block and the least-prioritized parent is prioritized.
+This can be repeated to allow for arbitrarily many parents.
+
+\autoref{fig:dag-ex1-full} is an example of this algorithm for a moderately complex chain-segment (\(\BB\cdots \BB{3}\) which is 7 blocks total), and each step is enumerated and explained.
+
+\def\dagExamplesWidth{.9375}
+\begin{figure}[p]
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=\dagExamplesWidth\linewidth]{dag_example1_sag}
+        \vspace{0.55em}
+        \caption{
+            How should we order this block-DAG?
+            Note: children should \emph{always} be after their parents, and \emph{prioritization} means \emph{earlier execution}.
+        }
+        \label{fig:dag-ex1}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=\dagExamplesWidth\linewidth]{dag_example1_expanded_order_00_sag}
+        \caption{The first thing we should do is create any virtual nodes that are required ($V_{i+2,1}$).}
+        \label{fig:dag-ex1-order-00}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=\dagExamplesWidth\linewidth]{dag_example1_expanded_order_10_sag}
+        \caption{Since there are two parents, we look at the \emph{prioritized subgraph} (i.e., most worked).}
+        \label{fig:dag-ex1-order-10}
+    \end{subfigure}
+
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=\dagExamplesWidth\linewidth]{dag_example1_expanded_order_20_sag}
+        \caption{Again, there are two parents, so we look at the \emph{next} prioritized subgraph.}
+        \label{fig:dag-ex1-order-20}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=\dagExamplesWidth\linewidth]{dag_example1_expanded_order_30_sag}
+        \caption{
+            We've found a chain.
+            These blocks have the highest priority, so are executed first.
+            }
+        \label{fig:dag-ex1-order-30}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=\dagExamplesWidth\linewidth]{dag_example1_expanded_order_40_sag}
+        \caption{
+            We're now \emph{ordering} the blocks --- the solid arrows represent the final ordering.
+            In this step we order the highest priority blocks.}
+        \label{fig:dag-ex1-order-40}
+    \end{subfigure}
+
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=\dagExamplesWidth\linewidth]{dag_example1_expanded_order_50_sag}
+        \caption{Now that the highest priority blocks are ordered, we can order the \emph{previous} subgraph.}
+        \label{fig:dag-ex1-order-50}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=\dagExamplesWidth\linewidth]{dag_example1_expanded_order_60_sag}
+        \caption{Once more, we order the next-in-line subgraph.}
+        \label{fig:dag-ex1-order-60}
+    \end{subfigure}%%
+    \hfill
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \includegraphics[width=\dagExamplesWidth\linewidth]{dag_example1_expanded_order_70_sag}
+        \caption{And finally we order the last remaining blocks.
+            (We could remove virtual blocks too).}
+        \label{fig:dag-ex1-order-70}
+    \end{subfigure}
+    \caption[
+        Example: sorting a moderately complex block-DAG.
+    ]{
+        Example: sorting a moderately complex block-DAG; note that the left parent is always the best parent, so will have priority.
+        Each block is annotated with its \emph{chain-weight} ($\Sigma_w$).
+    }
+    \label{fig:dag-ex1-full}
+\end{figure}
+
+We should expect conflicting transactions (which might otherwise be attempted doublespends) to arise during this process.
+Ancestors of one parent may not be ancestors of another parent.
+The exact protocol for handling conflicts is up to the implementation, but there is no reason that secondary parents should be treated as invalid by default.
+We will discuss merging histories in \autoref{sec:merging-histories}.
+
+Further reading: \citeInclusiveFull{}.

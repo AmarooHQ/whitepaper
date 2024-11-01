@@ -1,0 +1,74 @@
+\NewDocumentCommand{\AxiomOfRaw}{m}{Axiom of #1\xspace}
+\NewDocumentCommand{\AxiomOf}{o m}{\hyperref[axiom:\IfNoValueTF{#1}{#2}{#1}]{\AxiomOfRaw{#2}}\xspace}
+\NewDocumentCommand{\AxOf}{o m}{\hyperref[axiom:\IfNoValueTF{#1}{#2}{#1}]{#2}\xspace}
+
+% \ProvideDocumentCommand{\AxiomOfRawAvailability}{}{\AxiomOfRaw{Availability}}
+% \ProvideDocumentCommand{\AxiomOfRawMaximalReflection}{}{\AxiomOfRaw{Maximal Reflection}}
+% \ProvideDocumentCommand{\AxiomOfRawUnifiedAncestry}{}{\AxiomOfRaw{Unified Ancestry}}
+
+% \ProvideDocumentCommand{\AxiomOfAvailability}{}{\AxiomOf{Availability}}
+% \ProvideDocumentCommand{\AxiomOfMaximalReflection}{}{\AxiomOf[MaximalReflection]{Maximal Reflection}}
+% \ProvideDocumentCommand{\AxiomOfUnifiedAncestry}{}{\AxiomOf[UnifiedAncestry]{Unified Ancestry}}
+
+\ExplSyntaxOn
+\NewExpandableDocumentCommand{\MkAxiomCmds}{m m}{
+    \exp_args:Nc \NewDocumentCommand{AxiomOfRaw #1}{}{\AxiomOfRaw{#2}}
+    \exp_args:Nc \NewDocumentCommand{AxiomOf #1}{}{\AxiomOf[#1]{#2}}
+    \exp_args:Nc \NewDocumentCommand{AxOf #1}{}{\AxOf[#1]{#2}}
+}
+\ExplSyntaxOff
+
+\MkAxiomCmds{Integrity}{Integrity}
+\MkAxiomCmds{ContinuousValidity}{Continuous Validity}
+
+\MkAxiomCmds{Availability}{Availability}
+\MkAxiomCmds{MaximalReflection}{Maximal Reflection}
+\MkAxiomCmds{UnifiedAncestry}{Unified Ancestry}
+
+\ExplSyntaxOn
+\NewDocumentCommand{\MkPrincipleCmds}{m m}{
+    \exp_args:Nc \NewDocumentCommand{PrincipleOf #1}{}{\trim{#2}}
+}
+\ExplSyntaxOff
+
+
+\makeatletter
+\NewDocumentCommand{\DeclareAxiom}{m m +m +o}{
+    \MkPrincipleCmds{#1}{#2}
+    \begin{tcolorbox}[
+        title={\csname AxiomOfRaw#1\endcsname},
+        bicolor,
+        sharp corners,
+        % enhanced,
+        parbox=false,
+        before upper={\setlength{\parskip}{.3em}},
+        before lower app={\vspace{-1.25\parskip}\par},
+        fonttitle=\bfseries,
+        toptitle=.6em,
+        bottomtitle=.5em,
+        colbacktitle=black!80!white,
+        colbacklower=black!10!white,
+        colframe=black!80!white,
+        bottomrule=.5mm,
+        rightrule=.5mm,
+        leftrule=.5mm,
+        middle=.3em,
+        boxsep=0em,
+        ]%
+        \label{axiom:#1}%
+        \emph{Principle:} \trim@post@space{#2}%
+        \reversemarginpar\marginnote{\nullOnCopy{\textbf{Axiom}}}%
+
+        \tcblower
+        {\emph{Predicate:} \trim@post@space{#3}}%
+        \IfNoValueTF{#4}{}{%
+        % \tcblower
+        \emph{Function:} \trim@pre@space{#4}
+        }
+    \end{tcolorbox}%
+}
+\makeatother
+
+
+% next line: idea: calling declareaxiom dynamically defines axiomOfX commands. problem: the definition would need to be included whenever a reference to an axiom were included.
+% \expandafter\def\csname AxiomOf#1\endcsname{\AxiomOf{\IfNoValueTF{#2}{#1}{#2}}}

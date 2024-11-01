@@ -11,6 +11,7 @@
     }
     \makeatletter
     \begin{tcolorbox}[]
+        \reversemarginpar\marginnote{\nullOnCopy{\textbf{Term}}}
         \textbf{\Gls{#1}}: \trim@post@space{#2}.
     \end{tcolorbox}
     \makeatother
@@ -25,6 +26,7 @@
         description={#2},
     }
     \begin{tcolorbox}[]
+        \reversemarginpar\marginnote{\nullOnCopy{\textbf{Term}}}
         \textbf{\Gls{#1}}: \trim@post@space{#2}.
     \end{tcolorbox}
 }

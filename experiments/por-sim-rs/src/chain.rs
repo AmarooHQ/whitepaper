@@ -170,6 +170,8 @@ lazy_static! {
 pub trait ChainT<'a, B: BlockT, F: ForkRules<B> = LongestChain<B>>: Clone {
     fn new(genesis: B, genesis_meta: BlockMD<B>, net_args: NetworkArgs) -> Self;
 
+    fn get_net_args(&self) -> &NetworkArgs;
+
     fn get_chain_id(&self) -> HashID;
 
     // fn save_block(&mut self, b_id: HashID, b: (B, BlockMD<B>));
@@ -783,6 +785,10 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
         }
     }
 
+    fn get_net_args(&self) -> &NetworkArgs {
+        return &self.net_args;
+    }
+
     fn get_chain_id(&self) -> HashID {
         self.chain_id
     }
@@ -1129,7 +1135,9 @@ impl<'a, B: BlockT, F: ForkRules<B>> ChainT<'a, B, F> for Chain<B, F> {
     }
 
     fn next_difficulty(&self, b: &B, b_meta: &BlockMD<B>) -> Difficulty {
-        self.next_difficulty_daa2(b, b_meta)
+        self.net_args
+            .fixed_difficulty
+            .unwrap_or_else(|| self.next_difficulty_daa2(b, b_meta))
     }
 }
 
@@ -1381,50 +1389,60 @@ mod tests {
     #[test]
     fn block_md() -> Result<(), String> {
         type B = Block;
+        for do_fixed in vec![false, true] {
+            let (genesis, g_md, mut chain) = _setup_chain::<B, LongestChain<B>>(None);
+            let mut net_args = NetworkArgs::new(10);
+            if do_fixed {
+                net_args.fixed_difficulty = Some(1337);
+            }
+            let mut chain =
+                Chain::<B, LongestChain<B>>::new(genesis.clone(), g_md.clone(), net_args);
+            assert_eq!(
+                BlockMD::<B>::get_daa2_blocks(genesis.get_hash())
+                    .unwrap()
+                    .len(),
+                chain.net_args.daa2_n_blocks,
+            );
 
-        let (genesis, g_md, mut chain) = _setup_chain::<B, LongestChain<B>>(None);
-        assert_eq!(
-            BlockMD::<B>::get_daa2_blocks(genesis.get_hash())
-                .unwrap()
-                .len(),
-            chain.net_args.daa2_n_blocks,
-        );
+            let next_d = chain.next_difficulty(&genesis, &g_md);
+            if do_fixed {
+                assert_eq!(next_d, 1337);
+            } else {
+                assert_eq!(next_d, 1000);
+            }
 
-        let next_d = chain.next_difficulty(&genesis, &g_md);
-        // assert_eq!(next_d, 1000);
-        assert_eq!(next_d, 1000);
+            let b = _mk_draft_block(&mut chain, 10, false);
 
-        let b = _mk_draft_block(&mut chain, 10, false);
+            chain.validate_block(&b, false)?;
+            assert_eq!(
+                BlockMD::<B>::get_daa2_blocks(genesis.get_hash())
+                    .unwrap()
+                    .len(),
+                chain.net_args.daa2_n_blocks,
+            );
 
-        chain.validate_block(&b, false)?;
-        assert_eq!(
-            BlockMD::<B>::get_daa2_blocks(genesis.get_hash())
-                .unwrap()
-                .len(),
-            chain.net_args.daa2_n_blocks,
-        );
+            let is_priv = false;
+            let pre_bb = chain.select_best_block(is_priv);
+            assert_eq!(
+                B::get_cached_block(&chain.select_best_block(is_priv))
+                    .unwrap()
+                    .1
+                    .height,
+                0
+            );
+            assert_eq!(B::get_cached_block(&b.get_hash()).is_none(), true);
+            chain.add_block(b.clone(), is_priv)?;
+            assert_eq!(B::get_cached_block(&b.get_hash()).is_some(), true);
 
-        let is_priv = false;
-        let pre_bb = chain.select_best_block(is_priv);
-        assert_eq!(
-            B::get_cached_block(&chain.select_best_block(is_priv))
-                .unwrap()
-                .1
-                .height,
-            0
-        );
-        assert_eq!(B::get_cached_block(&b.get_hash()).is_none(), true);
-        chain.add_block(b.clone(), is_priv)?;
-        assert_eq!(B::get_cached_block(&b.get_hash()).is_some(), true);
-
-        assert_ne!(chain.select_best_block(is_priv), pre_bb);
-        assert_ne!(
-            B::get_cached_block(&chain.select_best_block(is_priv))
-                .unwrap()
-                .1
-                .height,
-            0
-        );
+            assert_ne!(chain.select_best_block(is_priv), pre_bb);
+            assert_ne!(
+                B::get_cached_block(&chain.select_best_block(is_priv))
+                    .unwrap()
+                    .1
+                    .height,
+                0
+            );
+        }
 
         Ok(())
     }

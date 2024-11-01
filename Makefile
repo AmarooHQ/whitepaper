@@ -103,6 +103,11 @@ watch:
 	bash bin/msg_good.sh "Watching. Command to re-run: $(WATCH_CMD)"
 	bin/onchange.sh ./10-Ultra-Terminum ./includes/ut/content ./includes/ut/algorithms '$(WATCH_CMD)'
 
+evince-draft-bg:
+	evince output/whitepaper-draft-reloadable.pdf 2>/dev/null &
+
+watch-evince: evince-draft-bg watch
+
 watch-release: WATCH_CMD=make release-quick
 watch-release: watch
 
@@ -165,6 +170,8 @@ wp-pandoc:
 	bash bin/msg_good.sh "[wp-pandoc]: PP_MODE=$(PP_MODE)"
 	pandoc -s --number-sections --toc -f markdown-latex_macros -t latex -o $(WPTEX) $(WPFILE)
 	sed -i 's/\\%\\%/%/g' $(WPTEX)
+#	sed -i 's/timum Imus/timum \\=Imus/g' $(WPTEX)
+# note: \=I doesn't work right via pandoc, so it needs to be replaced. The command works, but capital I-bar isn't a common character so causing issues
 
 pandoc-stdin:
 	pandoc -s --number-sections -f markdown-latex_macros -t latex
@@ -195,7 +202,7 @@ preprocess-build:
 mk-latex-pdf: preprocess-build
 	bash bin/msg_good.sh "[mk-latex-pdf]: PP_MODE=$(PP_MODE)"
 	bash bin/msg_good.sh "Run ./latexrun to get good error msgs"
-	$(LATEXRUN) $(WPTEX) -O $(OUTDIR)
+	$(LATEXRUN) $(WPTEX) -O $(OUTDIR) || true
 	cp $(WPNOEXT).pdf $(WPNOEXT)-$(PP_MODE)-reloadable.pdf
 
 	bash bin/msg_good.sh "Running latexmk to update gitinfo, build glossaries; PP_MODE=$(PP_MODE)"

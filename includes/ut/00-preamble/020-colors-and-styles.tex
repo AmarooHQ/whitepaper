@@ -1,6 +1,10 @@
 \definecolor{maxsColor}{HTML}{F01990}
 \definecolor{windowsMeBg}{HTML}{3a6ea5}
 
+\definecolor{Cerulean}{rgb}{0.0, 0.48, 0.65}
+\definecolor{BrickRed}{rgb}{0.8, 0.25, 0.33}
+\definecolor{ForestGreen}{rgb}{0.13, 0.55, 0.13}
+
 % https://alexwlchan.net/2017/10/latex-underlines/
 % better underlines. note that \setlength was needed instead of \renewcommand as is used in the above post.
 
@@ -11,20 +15,24 @@
 % \contourlength{0.8pt}
 \contourlength{1.0pt}
 
-\newcommand{\ul}[1]{%
-  % \uline{\phantom{#1}}%
-  % \llap{\contour{white}{#1}}%
-  \uline{\contour{white}{#1}}\xspace%
+% \newcommand{\ul}[1]{%
+%   % \uline{\phantom{#1}}%
+%   % \llap{\contour{white}{#1}}%
+%   \uline{\contour{white}{#1}}\xspace%
+% }
+
+\NewDocumentCommand{\ul}{o m}{%
+  \uline{\contour{\IfNoValueTF{#1}{white}{#1}}{#2}}\xspace%
 }
 
-% \usepackage{pdfrender}
+% 'invisible' text attempts
 
-% \newcommand{\ul}[1]{%
-%   \textpdfrender{
-%     TextRenderingMode=Stroke,
-%     LineWidth=1pt,
-%     StrokeColor=white,
-%     FillColor=black,
-%     % MiterLimit=1
-%   }{\uline{#1}}%
-% }
+% works okay but can be a pain at start of sentence
+% \NewDocumentCommand{\zerofontsize}{m}{{\fontsize{0.001pt}{0.001pt}\selectfont{#1}}}
+
+% \NewDocumentCommand{\zerofontsize}{m}{\texttransparent{0}{#1}}
+\NewDocumentCommand{\zerofontsize}{o m}{%
+  \leavevmode\unskip%
+  \tikz[overlay,opacity=0,font={\tiny}]{\node [anchor = south \IfNoValueTF{#1}{east}{#1}, yshift=-.25em, xshift=.5em] {#2};}%
+  \ignorespaces%
+}

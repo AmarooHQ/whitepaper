@@ -232,3 +232,463 @@ low # of confs
   export EXP_NUM=35
   ./bin/experiment-30-and-beyond.sh
 )
+
+---------
+# e36
+----------
+
+test --rand_hr_incl_main
+
+(
+  # for this exp
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=24
+  export ATK_QS_PRESET=light
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=balanced
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=36
+  ./bin/experiment-30-and-beyond.sh
+)
+
+
+results: see png/e36*
+- large c results in higher than expected P between N_1 = 2..32
+- variance for lower c seems to be larger than otherwise expected
+
+explanation candidates:
+- rand hr on target chain must be significant
+  - perhaps an issue when very imbalanced?
+  - could try bounding the HR balance
+
+
+---------
+# e37
+----------
+
+test new rand hr
+(note: alt distribution gen didn't seem to help the issue hand)
+additional change: DSW win condition fix (base it on network wide HR / tick * ticks / block * num confirmations)
+
+(
+  # for this exp
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=24
+  export ATK_QS_PRESET=light
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=small-only
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=37
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-- okay, that made it worse
+-- test: old distrib with DSW
+
+(
+  # for this exp
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=24
+  export ATK_QS_PRESET=light
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=small-only
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=38
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-- still borked
+-- test: no RAND_HR_INCLUDES_TARGET_CHAIN
+
+(
+  # for this exp
+  #export RAND_HR_INCLUDES_TARGET_CHAIN=0
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=24
+  export ATK_QS_PRESET=light
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=small-only
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=39
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-- still borked
+-- test: revert DSW calc
+
+(
+  # for this exp
+  #export RAND_HR_INCLUDES_TARGET_CHAIN=0
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=15
+  export ATK_QS_PRESET=light
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=small-only
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=40
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-- looks okay again (which it should be)
+-- test: new distrib
+
+(
+  # for this exp
+  #export RAND_HR_INCLUDES_TARGET_CHAIN=0
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=15
+  export ATK_QS_PRESET=light
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=small-only
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=41
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-- looks okay
+-- test: RAND_HR_INCLUDES_TARGET_CHAIN
+
+(
+  # for this exp
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=15
+  export ATK_QS_PRESET=light
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=small-only
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=42
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-- still too high
+-- test: fix for new DSW win condition + 0=RAND_HR_INCLUDES_TARGET_CHAIN
+
+(
+  # for this exp
+  #export RAND_HR_INCLUDES_TARGET_CHAIN=0
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=15
+  export ATK_QS_PRESET=light
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=small-only
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=43
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-- and looking good
+-- test: RAND_HR_INCLUDES_TARGET_CHAIN
+
+(
+  # for this exp
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=15
+  export ATK_QS_PRESET=light
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=small-only
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=44
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-- still got the bump at low n1 for high c
+-- test: add to e44: higher q
+
+(
+  # for this exp
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=15
+  export ATK_QS_PRESET=light
+  export DS_CONFS_PRESET=40
+  export N_CHAINS_PRESET=1-8
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=44
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-- bump is even worse at c=40. hmm
+-- is there a bias in the DAA that disadvantages honest?
+-- can we separate results into smaller than avg target chains and larger?
+-- wait, bug in MM.new: did not properly set attacker hash rate
+
+-- retest e44 as e45 (with fixed attacker hr)
+
+(
+  # for this exp
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=15
+  export ATK_QS_PRESET=light
+  export DS_CONFS_PRESET=std+40
+  export N_CHAINS_PRESET=1-8
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=45
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-- add 0.48 to e45
+
+(
+  # for this exp
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  # std
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=15
+  export ATK_QS_PRESET=0.48
+  export DS_CONFS_PRESET=std+40
+  export N_CHAINS_PRESET=balanced
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=45
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-- add 2100 more runs
+
+(
+  export REPEAT_TIMES=21
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=15
+  export ATK_QS_PRESET=std
+  export DS_CONFS_PRESET=std+40
+  export N_CHAINS_PRESET=balanced
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=45
+  ./bin/experiment-30-and-beyond.sh
+)
+
+---------
+e46
+test new DSW win condition + old HR distribution (TwinUniform)
+new HR distribution method is EachHash
+
+also note: changed std-range in exp script to be (2 5 10 20) instead of (2.5 5 10 20)
+
+additionally: a bug existed where sometimes the attack wouldn't resolve b/c one of the hashrates were 0 (on the targeted chain). Added a minimum to TwinUniform
+
+results: looks pretty std, mb a little more secure than otherwise (possibly due to added floor on TwinUniform distrib)
+---------
+
+(
+  export REPEAT_TIMES=30
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  export RANDOMLY_DISTRIBUTE_HASHRATES=1
+  export RAND_HR_METHOD=TwinUniform
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=15
+  export ATK_QS_PRESET=std
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=balanced
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=46
+  ./bin/experiment-30-and-beyond.sh
+)
+
+---------
+e47
+
+fixed difficulty
+- implemented behind `-d` flag `--fixed-difficulty`
+
+hmmm, v curious. I wouldn't have expected that necessarily (aligning with c=2) but it makes some sense -- difficulty changes the least with c=2 compared to longer DS attempts
+
+ideas:
+- rand hr method impacts anything?
+- attacker draft refl work?
+- with fixed difficulty a tie might bias one side; (but there's a 50% chance of success if the attacker just publishes mb?)
+  - i think explicitly gt/lt is right, not gte/lte
+---------
+
+(
+  export REPEAT_TIMES=30
+  export USE_FIXED_DIFFICULTY=1
+  export ATK_START_TICK=300
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  export RANDOMLY_DISTRIBUTE_HASHRATES=1
+  export RAND_HR_METHOD=TwinUniform
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=24
+  export ATK_QS_PRESET=std
+  export DS_CONFS_PRESET=2-5-10
+  export N_CHAINS_PRESET=balanced
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=47
+  ./bin/experiment-30-and-beyond.sh
+)
+
+--------
+e48
+
+as above but using EachHash rand method (see if this makes and significant difference)
+
+hmm, pretty similar
+- mb try again without fixed daa?
+-----
+
+(
+  export REPEAT_TIMES=13
+  export USE_FIXED_DIFFICULTY=1
+  export ATK_START_TICK=300
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  export RANDOMLY_DISTRIBUTE_HASHRATES=1
+  export RAND_HR_METHOD=EachHash
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=24
+  export ATK_QS_PRESET=std
+  export DS_CONFS_PRESET=std+13+16
+  export N_CHAINS_PRESET=balanced
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=48
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-----------
+e49
+
+test calculation of avg_work_per_block_period -- going with a theoretical calc'd value instead of measured
+
+results: well that made a big difference -- results much more closely align with theoretical
+post mort: prior results may have terminated attacks too early (the value was used in the dynamic cutoff calculation)
+-----------
+
+(
+  export REPEAT_TIMES=13
+  export USE_FIXED_DIFFICULTY=1
+  export ATK_START_TICK=300
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  export RANDOMLY_DISTRIBUTE_HASHRATES=1
+  export RAND_HR_METHOD=EachHash
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=24
+  export ATK_QS_PRESET=std
+  export DS_CONFS_PRESET=std+13+16
+  export N_CHAINS_PRESET=balanced
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=49
+  ./bin/experiment-30-and-beyond.sh
+)
+
+----------
+e50
+
+use DAA again, make sure results make sense still
+looks good
+---------
+
+(
+  export REPEAT_TIMES=13
+  export RAND_HR_INCLUDES_TARGET_CHAIN=1
+  export RANDOMLY_DISTRIBUTE_HASHRATES=1
+  export RAND_HR_METHOD=EachHash
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=24
+  export ATK_QS_PRESET=std
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=balanced
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=50
+  ./bin/experiment-30-and-beyond.sh
+)
+
+-----------
+e51
+
+does randomizing target chain really make a difference?
+-------
+
+(
+  export REPEAT_TIMES=13
+  export USE_FIXED_DIFFICULTY=1
+  export ATK_START_TICK=300
+  export RAND_HR_INCLUDES_TARGET_CHAIN=0
+  export RANDOMLY_DISTRIBUTE_HASHRATES=1
+  export RAND_HR_METHOD=TwinUniform
+  export B_PERIOD=75
+  export HR_PER_CHAIN=75
+  export DAA2_N_BLOCKS=500
+  export N_CPUS=24
+  export ATK_QS_PRESET=std
+  export DS_CONFS_PRESET=std-range
+  export N_CHAINS_PRESET=balanced
+  #export DRY_RUN=1
+  export SKIP_EXP_CONF_PROMPT=0
+  export EXP_NUM=51
+  ./bin/experiment-30-and-beyond.sh
+)
+
+
+
+
+
+c=2

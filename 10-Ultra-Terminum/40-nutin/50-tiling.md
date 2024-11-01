@@ -16,7 +16,7 @@
 
 %% BEGIN ### DRAFT
 
-\subsection{Tiling -- Previous (Old) Version}
+\subsection{Tiling --- Previous (Old) Version}
 
 \label{sec:tiling-old}
 
@@ -31,7 +31,7 @@ Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes
 \todoDraftOnly{terms and edit / refactor this section}
 
 A simplex tile, on its own, is very similar to a standalone simplex.
-If a standalone simplex (of a given capacity) could host $1600$ simplex-chains, then an equivalent simplex tile will host $400$ (or maybe less); only $25\%$ of the PoR capacity is reserved for *internal* reflections -- i.e., reflections within that simplex tile.
+If a standalone simplex (of a given capacity) could host $1600$ simplex-chains, then an equivalent simplex tile will host $400$ (or maybe less); only $25\%$ of the PoR capacity is reserved for *internal* reflections --- i.e., reflections within that simplex tile.
 The other $75\%$ is reserved for *external* reflections to simplex-chains in *neighboring* tiles.
 
 That is: it is a simplex that deliberately reserves only $\nicefrac{1}{4}$ of its otherwise maximum PoR capacity for internal reflections.
@@ -40,7 +40,7 @@ Why quadrifurcate capacity like this?
 In a maximal simplex, all reflections are between simplex-chains within that simplex, i.e., all reflections are internal.
 However, if a simplex reserves $\nicefrac{3}{4}$ of a its maximum capacity, that simplex (which thus becomes the root tile) can reflect every simplex-chain in 3 adjacent tiles (at least 2 of which are 'child' tiles).
 Those child tiles do not reflect their siblings, though; initially, their only external reflections are with simplex-chains in the parent tile.
-Each child tile, at this stage, has only reserved 50% of its full PoR capacity -- 25% for externally reflecting its parent's simplex-chains, and 25% for internally reflecting its own simplex-chains.
+Each child tile, at this stage, has only reserved 50% of its full PoR capacity --- 25% for externally reflecting its parent's simplex-chains, and 25% for internally reflecting its own simplex-chains.
 Thus, each tile is able to reflect all simplex-chains of the parent tile *and* two additional child tiles.
 Child tiles can be instantiated in an ad-hoc basis, i.e., as a simplex-tiling (or an individual tile) approaches maximum capacity.
 
@@ -64,7 +64,7 @@ For a tile-chain of length $n$, proving state on the far end of the chain would 
 
 However, if tiles have a valance of $3$, then each tile has up to 3 neighbors.
 For all tiles but the first, this is equivalent to being a node in a binary tree (where each non-root, non-leaf node has 1 parent and 2 children: 3 neighbors).
-In essence, this method of tiling simplexes results in 3 distinct binary trees as children of a single root tile -- this can be seen in \autoref{fig:tiled-simplex-5-d3}.
+In essence, this method of tiling simplexes results in 3 distinct binary trees as children of a single root tile --- this can be seen in \autoref{fig:tiled-simplex-5-d3}.
 
 Increasing the valence beyond 3 does not make sense, though. There are two reasons for this.
 The first reason is that, for complexity orders involving logarithms, higher valences change the *base* of the logarithms; and that has no effect on the order of complexity\footnote{
@@ -96,7 +96,7 @@ Particularly, trees of branching factor $v - 1$ (so $v=3$ corresponds to binary 
 
 #### Adding Tiles
 
-A tiling 'iteration' is the process by which new tiles are added. For the sake of simplicity and demonstration, each iteration will add *all possible new tiles* as children of all 'leaf' tiles -- though in reality there's no requirement that new tiles be added at the same time, or that tiles are added in a balanced fashion.
+A tiling 'iteration' is the process by which new tiles are added. For the sake of simplicity and demonstration, each iteration will add *all possible new tiles* as children of all 'leaf' tiles --- though in reality there's no requirement that new tiles be added at the same time, or that tiles are added in a balanced fashion.
 
 We start from the foundation that each tile has a maximum of $\frac{N_1}{4}$ simplex-chains, where $N_1$ is the maximum capacity of a maximal simplex. That is: if one computer (based on $O(c)$ reasoning) could be a full node[^simplex-full-validation] for a simplex-chain in a 4000-simplex, then each tile will have, at most, 1000 simplex-chains. Since a tile is adjacent to $\le 3$ other tiles, a tiled simplex-chain will have, at most, $N_1$ reflections (since a tile and its neighbors have, at most, $\frac{N_1}{4}$ simplex-chains, and all of those simplex-chains are reflected).
 
@@ -107,8 +107,8 @@ This is shown in \autoref{fig:tiled-simplex-5-d0}.
 
 The next iteration is to add $3$ adjacent tiles, since tiling has a valence of 3.
 Each of these new tiles has one pre-existing neighbor (the root tile), so each new tile has capacity for 2 more neighbors.
-Thus, the next iteration will add twice the number of tiles as the preceding iteration -- in this case, $6$ new tiles.
-This pattern -- adding twice the number of tiles as the previous iteration -- continues indefinitely.
+Thus, the next iteration will add twice the number of tiles as the preceding iteration --- in this case, $6$ new tiles.
+This pattern --- adding twice the number of tiles as the previous iteration --- continues indefinitely.
 It is shown in \autoref{fig:simplex-tiling}.
 
 \begin{comment}
@@ -360,7 +360,7 @@ This configuration still has $O(n)$ scalability.
 
 This method has some decisive criticisms.
 
-First, the confirmation rate is much slower -- both intra-tile and inter-tile. Inter-tile confirmations (which are important for e.g., cross-tile SPV transactions) occur with frequency $B_f \cdot N_1$, i.e., the frequency is proportional to the number of simplex-chains in each tile. This means that single-chain tilings have the theoretically *worst case* confirmation rate compared to tilings of larger simplexes.
+First, the confirmation rate is much slower --- both intra-tile and inter-tile. Inter-tile confirmations (which are important for e.g., cross-tile SPV transactions) occur with frequency $B_f \cdot N_1$, i.e., the frequency is proportional to the number of simplex-chains in each tile. This means that single-chain tilings have the theoretically *worst case* confirmation rate compared to tilings of larger simplexes.
 
 Second, because the inter-tile confirmation rate is *worst case*, the window for attack (via the private creation of chain-segments) is correspondingly longer. That is, the window for attack is also *worst case* for a chosen block frequency.
 
@@ -436,7 +436,7 @@ In a tessellating set of tiles, we can approximate the *maximum* distance betwee
 
 However, using the tree method (with $v=3$), the *maximal* distance between any 2 of $n$ tiles, is $\sim \log_2 n$. So it's (maybe counterintuitively) more efficient to use non-tessellating tiles.
 
-Additionally, a model of tilings of similar capacity -- i.e., similar $N_{\text{tiles}}$ -- shows that the *average* distance between tiles is lower for tree-based tilings. \autoref{fig:tiling-avg-dist-comparison} shows a comparison of the average distance between tiles given different tiling methods. The square tessellating method produces the tiling shown in \autoref{fig:tiling-square}.
+Additionally, a model of tilings of similar capacity --- i.e., similar $N_{\text{tiles}}$ --- shows that the *average* distance between tiles is lower for tree-based tilings. \autoref{fig:tiling-avg-dist-comparison} shows a comparison of the average distance between tiles given different tiling methods. The square tessellating method produces the tiling shown in \autoref{fig:tiling-square}.
 
 \begin{figure}
 \centering
@@ -458,7 +458,7 @@ Additionally, a model of tilings of similar capacity -- i.e., similar $N_{\text{
     \caption[
         Distances between randomly selected tiles for the tree method of tiling vs a simple square tessellating method.
     ]{
-        Shown are the distances between randomly selected tiles for two tiling methods -- the tree method (which this section primarily concerns) and a simple square tessellating method.
+        Shown are the distances between randomly selected tiles for two tiling methods --- the tree method (which this section primarily concerns) and a simple square tessellating method.
         Valence and depth parameters were chosen so that the number of tiles are comparable.
     }
     \label{fig:tiling-avg-dist-comparison}
@@ -501,7 +501,7 @@ Additionally, a model of tilings of similar capacity -- i.e., similar $N_{\text{
 
 \todo{write this section properly}
 
-What's the worst case for tiling -- as a method? Probably that PoR isn't safe to do non-recursively in a way that works for $O(n)$ tiling. The solution is to validate PoRs recursively which means that *every* miner needs *every* base-level (i.e., simplex-chain) block across all simplex tiles. That would enable edge-to-edge verification of all PoRs. In that case, an upper-bound is set based on minimum bandwidth requirements (for miners) and $\Delta S$ (see \autoref{sec:bandwidth-complexity}). For a given set of parameters, the limit is $N_{\text{tiles}} \cdot \nicefrac{\Delta S}{4} < \text{MinBandwidth}$.
+What's the worst case for tiling --- as a method? Probably that PoR isn't safe to do non-recursively in a way that works for $O(n)$ tiling. The solution is to validate PoRs recursively which means that *every* miner needs *every* base-level (i.e., simplex-chain) block across all simplex tiles. That would enable edge-to-edge verification of all PoRs. In that case, an upper-bound is set based on minimum bandwidth requirements (for miners) and $\Delta S$ (see \autoref{sec:bandwidth-complexity}). For a given set of parameters, the limit is $N_{\text{tiles}} \cdot \nicefrac{\Delta S}{4} < \text{MinBandwidth}$.
 
 possible extension: maybe PoRs can be provided to miners but excluded from blocks. Like you can be a full node or a full-full-node, and full-full-nodes validate PoRs recursively in a way that isn't required for a single simplex. Or full-full-nodes are miners in a simplex, and full-full-full-nodes are miners in a tiling of simplexes.
 
@@ -529,7 +529,7 @@ Let's *assume* there *is* significant work in a simplex-miner calculating and ve
 
 Now, let's consider two systems of equal (network wide) throughput: a tiling of depth 1 (with 4 tiles) and a single simplex. This should be an easy comparison if the tiling has a valence of 3.
 
-In the tiled system, with non-recursive validation, miners on the root tile need to do more work than miners on leaf tiles -- internal reflections for 4 tiles and 3 sets of inter-tile reflections. With recursive validation all miners (for all tiles) have this same burden.
+In the tiled system, with non-recursive validation, miners on the root tile need to do more work than miners on leaf tiles --- internal reflections for 4 tiles and 3 sets of inter-tile reflections. With recursive validation all miners (for all tiles) have this same burden.
 \begin{equation}
 \begin{split}
 & \text{Tiling Refls} = (\frac{N_1}{4})^2 \cdot (4 + 3) = \frac{7 {N_1}^2}{16} \\

@@ -1,12 +1,12 @@
 module Amaroo.WP.Tables where
 
+import Amaroo.WP.Tables.Types
 import Prel
 
 import Amaroo.WP.Calcs (Params, UtVariants, ChainStats, allUtChainCalcs, allUtChainCalcsF, applyTDiscountToBH, auxStats, mkNestedPs, mkSimplePs, pToPF, runChainCalcFor, tradChainCalc, tradChainCalcEth2, tradChainCalcPolkadot, utChainCalc)
 import Amaroo.WP.Formatter (fdPlain, fdPlainMixed, fdPlainZero, fdStd, fdStdMixed, fdStdNoSiMixed, fdStdTwo, fdStdZero, fmt1GbpsPs, fmtDyn, fmtPsKBfBh, fmtPsKBfBhDh, wrap, wrapXml, wrapXmlWAttr)
 import Amaroo.WP.Tables.Booktabs (renderBooktabs)
 import Amaroo.WP.Tables.Types (LatexTablePos(..), TPositioning(..))
-import Amaroo.WP.Tables.Types
 import Amaroo.WP.Utils (binarySearch, diagonalApply, ui)
 import Data.Array (drop, filter, intercalate, take)
 import Data.Array as A
@@ -79,7 +79,7 @@ sigmaTps Nothing = "$\\Sigma\\;\\text{TPS}$"
 
 confRateTh = wrap "$" confRateTex <> " (Hz)"
 
-data UtName = PoRs Int | PoRTs Int | HOPoRs Int | HOPoRTs Int | Std Int | T Int | HO Int | HOT Int | Aleph UtName
+data UtName = PoRs Int | PoRTs Int | HOPoRs Int | HOPoRTs Int | Std Int | T Int | HO Int | HOT Int | OhnStd Int | OhnHO Int | OhnHOT Int | Aleph UtName
 
 derive instance eqUtName :: Eq UtName
 
@@ -104,6 +104,9 @@ utNameI (Std i) = i
 utNameI (T i) = i
 utNameI (HO i) = i
 utNameI (HOT i) = i
+utNameI (OhnStd i) = i
+utNameI (OhnHO i) = i
+utNameI (OhnHOT i) = i
 utNameI (Aleph n) = utNameI n
 
 utNameE :: UtName -> String
@@ -115,6 +118,9 @@ utNameE (Std _) = "OP"
 utNameE (T _) = "OPT"
 utNameE (HO _) = "HO"
 utNameE (HOT _) = "HOT"
+utNameE (OhnStd _) = "OhnOP"
+utNameE (OhnHO _) = "OhnHO"
+utNameE (OhnHOT _) = "OhnHOT"
 utNameE (Aleph n) = utNameE n
 
 utName :: UtName -> String
@@ -259,6 +265,8 @@ utVsOther =
     , {net: UT (T 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1T_1M_K}
     , {net: UT (HO 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1HO_1M_K}
     , {net: UT (HOT 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just _UT1HOT_1M_K}
+    -- , {net: UT (OhnStd 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just 1.0}
+    -- , {net: UT (OhnHO 1), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Just 1.0}
     , {net: UT (Aleph (HOT 1)), p: \k -> mkSimplePs k _UT_HF tx, oneMTps: Nothing}
     , {net: Polkadot, p: \k -> mkSimplePs k {bf: _POLKADOT_BF, bh: _POLKADOT_BH} tx, oneMTps: Just _POLKADOT_1M_K}
     , {net: Eth2, p: \k -> mkNestedPs k {bf: _ETH2_BF, bh: _ETH2_BH} {bf: _ETH2_BF, bh: _ETH2_DH} tx, oneMTps: Just _ETH2_1M_K}
@@ -305,6 +313,9 @@ utNestingLvl (Std i) = i
 utNestingLvl (T i) = i
 utNestingLvl (HO i) = i
 utNestingLvl (HOT i) = i
+utNestingLvl (OhnStd i) = i
+utNestingLvl (OhnHO i) = i
+utNestingLvl (OhnHOT i) = i
 utNestingLvl (Aleph other) = utNestingLvl other
 
 netToChainStats :: Network -> Params -> ChainStats
@@ -316,6 +327,9 @@ netToChainStats (UT (Std _)) p = (utChainCalc p (allUtChainCalcsF id).std)
 netToChainStats (UT (T _)) p = (utChainCalc p (allUtChainCalcsF id).t)
 netToChainStats (UT (HO _)) p = (utChainCalc p (allUtChainCalcsF id).ho)
 netToChainStats (UT (HOT _)) p = (utChainCalc p (allUtChainCalcsF id).hot)
+netToChainStats (UT (OhnStd _)) p = (utChainCalc p (allUtChainCalcsF id).onh_std)
+netToChainStats (UT (OhnHO _)) p = (utChainCalc p (allUtChainCalcsF id).onh_ho)
+netToChainStats (UT (OhnHOT _)) p = (utChainCalc p (allUtChainCalcsF id).onh_hot)
 netToChainStats (UT (Aleph v)) p = netToChainStats (UT v) p
 netToChainStats Eth2 p = tradChainCalcEth2 p
 netToChainStats Polkadot p = tradChainCalcPolkadot p
@@ -330,6 +344,9 @@ netLookupChainStats (UT (Std _)) utvs = utvs.std
 netLookupChainStats (UT (T _)) utvs = utvs.t
 netLookupChainStats (UT (HO _)) utvs = utvs.ho
 netLookupChainStats (UT (HOT _)) utvs = utvs.hot
+netLookupChainStats (UT (OhnStd _)) utvs = utvs.onh_std
+netLookupChainStats (UT (OhnHO _)) utvs = utvs.onh_ho
+netLookupChainStats (UT (OhnHOT _)) utvs = utvs.onh_hot
 netLookupChainStats (UT (Aleph v)) utvs = netLookupChainStats (UT v) utvs
 netLookupChainStats net _ = unsafeThrowException $ error $ "[netLookupChainStats] non UT network provided: " <> show net
 
@@ -382,6 +399,10 @@ notPoRs (UT (PoRs _)) = false
 notPoRs (UT (PoRTs _)) = false
 notPoRs (UT (HOPoRs _)) = false
 notPoRs (UT (HOPoRTs _)) = false
+-- notPoRs (UT (OhnPoRs _)) = false
+-- notPoRs (UT (OhnPoRTs _)) = false
+-- notPoRs (UT (OhnHOPoRs _)) = false
+-- notPoRs (UT (OhnHOPoRTs _)) = false
 notPoRs _ = true
 
 isAleph :: Network -> Boolean
@@ -447,26 +468,26 @@ tableTpsHOPoRs = Table
     tpsAlignments
     (genTpsRow (\cd -> cd.ut.hopors) <$> utShortComplexityData)
 
-genDappChainsRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> [(utF cd).d1.n, (utF cd).d2.n, (utF cd).d3.n, (utF cd).deltaBigS]) <> [fmtDyn fdStd (utF cd).confRate]
+genDappChainsRow utF cd = [fmtPsKBfBh $ pToPF cd.ps] <> (fmtDyn fdStdMixed <$> [(utF cd).d1.n, (utF cd).d2.n, (utF cd).d3.n, (utF cd).deltaBigS]) <> ((fmtDyn fdStd) <$> [(utF cd).deltaR, (utF cd).confRate])
 
 dappChains :: Table
 dappChains = Table
-    ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", confRateTh]
-    {md: mkSpacer <$> [6, 4, 5, 5, 5, 4], texTabular: "lrrrrr"}
+    ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", "$\\Delta r$ (B/s)", confRateTh]
+    {md: mkSpacer <$> [6, 4, 5, 5, 5, 5, 4], texTabular: "lrrrrrr"}
     (genDappChainsRow (\cd -> cd.ut.std) <$> utShortComplexityData)
 
 -- not in use
 dappChainsHot :: Table
 dappChainsHot = Table
-    ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", confRateTh]
-    {md: mkSpacer <$> [6, 4, 5, 5, 5, 4], texTabular: "lrrrrr"}
+    ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", "$\\Delta r$ (B/s)", confRateTh]
+    {md: mkSpacer <$> [6, 4, 5, 5, 5, 5, 4], texTabular: "lrrrrrr"}
     (genDappChainsRow (\cd -> cd.ut.hot) <$> utShortComplexityData)
 
 -- not in use
 dappChainsHOPoRs :: Table
 dappChainsHOPoRs = Table
-    ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", confRateTh]
-    {md: mkSpacer <$> [6, 4, 5, 5, 5, 4], texTabular: "lrrrrr"}
+    ["$k$, $B_f$, $B_h$", "$N_1$", "$N_2$", "$N_3$", "$\\Delta S$ (B/s)", "$\\Delta r$ (B/s)", confRateTh]
+    {md: mkSpacer <$> [6, 4, 5, 5, 5, 5, 4], texTabular: "lrrrrrr"}
     (genDappChainsRow (\cd -> cd.ut.hopors) <$> utShortComplexityData)
 
 -- TODO: replace `fmtDyn fdPlain`
@@ -505,6 +526,15 @@ tpsOP = porTpsHeader Std (genPoRRow (\cd -> cd.ut.std) <$> utComplexityData)
 
 tpsOPT :: Table
 tpsOPT = porTpsHeader T (genPoRRow (\cd -> cd.ut.t) <$> utComplexityData)
+
+tpsOhnOP :: Table
+tpsOhnOP = porTpsHeader OhnStd (genPoRRow (\cd -> cd.ut.onh_std) <$> utComplexityData)
+
+tpsOhnHO :: Table
+tpsOhnHO = porTpsHeader OhnHO (genPoRRow (\cd -> cd.ut.onh_ho) <$> utComplexityData)
+
+tpsOhnHOT :: Table
+tpsOhnHOT = porTpsHeader OhnHOT (genPoRRow (\cd -> cd.ut.onh_hot) <$> utComplexityData)
 
 -- todo: fix fmtDyn fdPlain
 genCompareRow k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdPlainMixed <$> [cs.effBh, effDh]) <> ([fmtDyn fdStdZero scalingFactor, fmtDyn fdStdMixed n2]) <> (fmtDyn fdStdMixed <$> [tps])
@@ -662,11 +692,12 @@ optimizationProps1WithLvl3 =
 optimizationProps2 :: Array OProps
 optimizationProps2 =
   [ {s: "$\\Delta s$ (B/s)", f: \cs -> fmtDyn fdStdZero cs.deltaSmallS}
-  , {s: "$\\text{TTS}_{5yrs}$ (days)", f: \cs -> fmtDyn fdStdTwo cs.tts}
+  , {s: "$\\text{DTS}_{5yrs}$", f: \cs -> fmtDyn fdStdTwo cs.tts}
   -- , {s: "Chain-GB/yr", f: \cs -> intercalate " +" $ (fmtDyn fdStd <<< (_ * _B_PER_S_TO_GB_PER_YR)) <$> [cs.k1, cs.deltaSmallS - cs.k1]}
   , {s: "Chain-GB/yr", f: \cs -> fmtDyn fdStd <<< (_ * _B_PER_S_TO_GB_PER_YR) $ cs.deltaSmallS}
+  , {s: "$\\Delta r$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.deltaR}
   , {s: "$\\Delta S$ (B/s)", f: \cs -> fmtDyn fdStdMixed cs.deltaBigS}
-  , {s: "$\\Sigma$ $\\text{TTS}_{5yrs}$ (days)", f: \cs -> fmtDyn fdStdMixed cs.sigmaTts}
+  , {s: "$\\Sigma$ $\\text{DTS}_{5yrs}$", f: \cs -> fmtDyn fdStdMixed cs.sigmaTts}
   -- , {s: "$\\nicefrac{\\Sigma\\;\\text{TPS}}{\\Delta s}$ (Tx/B)", f: \cs -> fmtDyn fdStdTwo (cs.d1.tps / cs.deltaSmallS)}
   -- , {s: "Scale $\\times$", f: \cs -> fmtDyn fdStd (auxStats cs).scalingFactors.nesting}
   ]

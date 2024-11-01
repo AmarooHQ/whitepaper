@@ -51,6 +51,13 @@ arg_enum! {
         SelfishMining,
     }
 }
+arg_enum! {
+    #[derive(Debug, PartialEq, Clone)]
+    pub enum RandHrMethod {
+        TwinUniform,
+        EachHash,
+    }
+}
 
 fn num_is_between<T: PartialOrd + Display>(n: T, min: T, max: T) -> Result<(), String> {
     if min <= n && n <= max {
@@ -91,13 +98,16 @@ fn get_arg_matches<'a>() -> ArgMatches<'a> {
         (@arg use_dynamic_cutoff: --use_dyn_end_tick !takes_value "Instead of ending the simulation at a fixed tick, end the simulation when the attacker is far behind.")
         (@arg hash_rate: -H --hash_rate +takes_value default_value("1000") "Network hash-rate per tick.")
         (@arg block_target: -b --block_target_time +takes_value default_value("10") "Target time (in ticks) between blocks.")
+        (@arg fixed_difficulty: -d --fixed_difficulty !takes_value "Optional -- sets a theoretically calculated fixed difficulty if present")
         (@arg crypto_system: -S --crypto_system +takes_value default_value("WeightedDag") possible_values(&CryptoSystemArg::variants()) "Name of the cryptosystem template to use.")
         (@arg relay_strategy: -R --relay_strategy +takes_value default_value("DoubleSpend") possible_values(&RelayStrategyArg::variants()) "Name of the relay strategy to use")
         (@arg attacker_instant_propagation: --attacker_instant_prop !takes_value "Attacker's blocks instantly propagate to attackers (no wasted mining)")
         (@arg atk_end_delay_ticks: --atk_end_delay_ticks +takes_value default_value("0") "Number of ticks to delay ending the simulation if the attacker gets ahead")
         // doublspend params
         (@arg win_threshold: -C --ds_win_threshold +takes_value default_value("20") "[DoubleSpend] Minimum number of confirmations before the double-spending private chain is published.")
-        (@arg random_hr_distrib: --random_hr_distrib !takes_value "If true, distribute the attackers hash-rate randomly over all chains. (No effect with -P=1)")
+        (@arg random_hr_distrib: --random_hr_distrib !takes_value "If true, distribute the attackers hash-rate randomly over all but the targeted chain. (No effect with -P=1)")
+        (@arg rand_hr_incl_main: --rand_hr_incl_main !takes_value "If true, the targeted chain's hash-rate will be included in the random distribution. (Requires --random_hr_distrib; No effect with -P=1)")
+        (@arg rand_hr_method: --rand_hr_method +takes_value default_value("TwinUniform") possible_values(&RandHrMethod::variants()) "Method of distributing hash rate when randomized (see `MessageManager.new`)")
         // selfish mining params
         // <none>
         // PoR params
@@ -134,7 +144,15 @@ pub fn main() -> Result<(), String> {
     let daa2_n_blocks = value_t_or_exit!(args.value_of("daa2_n_blocks"), usize);
     let atk_end_delay_ticks = value_t_or_exit!(args.value_of("atk_end_delay_ticks"), Timestamp);
     let random_hr_distrib = args.is_present("random_hr_distrib");
+    let rand_hr_incl_main = args.is_present("rand_hr_incl_main");
+    let rand_hr_method = value_t!(args, "rand_hr_method", RandHrMethod).unwrap();
     let use_dynamic_cutoff = args.is_present("use_dynamic_cutoff");
+
+    let fixed_difficulty = if args.is_present("fixed_difficulty") {
+        Some(0)
+    } else {
+        None
+    };
 
     let atk_args = AttackArgs {
         q: attacker_ratio,
@@ -151,6 +169,9 @@ pub fn main() -> Result<(), String> {
         por_chains,
         daa2_n_blocks,
         random_hr_distrib,
+        rand_hr_incl_main,
+        rand_hr_method,
+        fixed_difficulty,
     };
 
     let start_atk = SystemTime::now();
@@ -227,6 +248,7 @@ fn mk_run_atk<'a, S: CSystemT<'a>>(
                         args.attack_starts_at,
                         win_thresh,
                         network_args.por_chains,
+                        args.total_hr_per_chain(),
                     );
                     MM::<'_, S, DoubleSpendWorkStrat>::new(
                         args.clone(),

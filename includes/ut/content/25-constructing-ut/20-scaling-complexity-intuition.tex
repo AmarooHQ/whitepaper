@@ -1,0 +1,41 @@
+\subsubsection{\titlemath{$\UT{1}$}{UT₁}: Scaling Complexity Intuition}
+
+\aside{
+    Although we will rigorously investigate \UT{}'s scaling complexity in \autoref{sec:ut-complexity}, it will prove useful to introduce $N_1$ here and to gain an intuition for UT's scalability before \autoref{sec:practical-considerations}.
+}
+
+How scalable is \UT1?
+
+Let us start by assuming that a single blockchain has $O(c)$ capacity (measured in transactions per second) and is thus $O(c)$ scalable.
+We'll also assume that the \emph{headers} are $O(1)$ bytes (i.e., a constant size).
+
+Note that a single blockchain is a 0-simplex.
+
+A 1-simplex has two blockchains, and each chain must record the headers of the other and the respective PoRs.
+For the sake of simplicity, let's assume that the PoRs are also $O(1)$.
+Thus, each chain loses $O(1)$ of its $O(c)$ capacity, and the network's total capacity is $2O(c)-2O(1) = O(c)$.
+
+Since each chain has finite capacity, there is an absolute maximum size to a simplex.
+We can keep adding more chains until all blocks are 100\% full of headers and PoRs.
+However, this system has 0 capacity for transactions.
+So, there must be a capacity maxima with more than 2 simplex-chains and fewer than the absolute maximum.
+
+What we're observing is that the overall capacity is the \emph{product} of the size of the simplex (in chains) and each chain's remaining capacity --- a quadratic relationship.
+
+Let's call the proportion of capacity for transactions $t$, and the proportion for reflections $r$.
+We know that $t + r = 1$, since $t+r$ is 100\% of a chain's capacity.
+However, the \emph{network-wide} capacity is proportional to the \emph{product} of $t$ and $r$.
+Maximizing $tr$ suggests that a chain's capacity should be split approximately 50/50 between $t$ and $r$, so $t=r=\half=O(1)$.
+Given that $t$ and $r$ are proportions of the capacity, we can say $tO(c) + rO(c) = O(c)$.
+Thus, the overall capacity is given by $tO(c) \cdot rO(c) = O(c^2)$.
+
+This relationship is analogous to the relationship between a rectangle's maximum area for a given perimeter length: the area scales with the square of the perimeter (and such a rectangle is a square).
+
+Let's say $N_1$ is the number of chains which maximizes a simplex's capacity (for transactions).
+To get a feel for $N_1$, let's estimate it using example chains based on modified Bitcoin parameters.
+
+First, we'll add a merkle root of headers and PoRs to the header, increasing header size from 80 to 112 bytes.
+Second, we'll reduce the block frequency down from 10 minutes to 1 minute, and scale the block limit down from 1 MB to 100 KB (this will give us more realistic numbers).
+Let's assume the merkle branch leading to a header is 256 bytes, so the total PoR overhead is 368 B / block / chain.
+We want to use 50\% of the overall capacity (100 KB / block) for PoRs, so each block should contain \sim 50 KB worth of PoRs.
+Dividing the PoR capacity by the per-chain overhead gives us $N_1 \approx 139$ chains and a network-wide capacity equivalent to \sim 70 Bitcoin networks.

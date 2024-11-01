@@ -30,7 +30,7 @@ tree_tiling =
 
 
 params_tt k = mkSimplePs k {bf: _UT_BF, bh: _UT_BH} 250.0
-ut_params = {explicitPoRs: true, headerOmission: true, hashTruncation: true}
+ut_params = {explicitPoRs: true, headerOmission: true, hashTruncation: true, onlyNecessaryHeaders: false}
 
 trim_for_lp :: Array String -> Array String
 -- trim_for_lp [e1, e2, e3, e4, e5, e6, e7, e8, e9] = [e1, e3, e4, e5, e6, e7, e9]

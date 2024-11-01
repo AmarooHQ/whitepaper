@@ -146,8 +146,9 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendStrat {
 pub struct DoubleSpendWorkParams {
     attack_starts_at: Timestamp,
     // multiplier of block confirmations
-    win_thres: f32,
+    win_thres: f32, /* e.g., win_thres = 6 corresponds to an amount of work that the whole network would produce in 6 block periods */
     n_por_chains: u16,
+    total_hr: Difficulty,
 }
 
 impl GetDS<f32> for DoubleSpendWorkParams {
@@ -160,11 +161,17 @@ impl GetDS<f32> for DoubleSpendWorkParams {
 }
 
 impl DoubleSpendWorkParams {
-    pub fn new(attack_starts_at: Height, win_thres: f32, n_por_chains: u16) -> Self {
+    pub fn new(
+        attack_starts_at: Height,
+        win_thres: f32,
+        n_por_chains: u16,
+        total_hr: Difficulty,
+    ) -> Self {
         DoubleSpendWorkParams {
             attack_starts_at,
             win_thres,
             n_por_chains,
+            total_hr,
         }
     }
 }
@@ -194,13 +201,21 @@ impl<'a, S: CSystemT<'a>> RelayStrategyT<'a, S> for DoubleSpendWorkStrat {
     type DSMultType = f32;
     type Params = DoubleSpendWorkParams;
     fn init(chain: &S::C, atk_start_h: Height, params: Self::Params) -> Self {
+        let win_work_thresh_test = params.n_por_chains as Difficulty
+            * (params.win_thres * chain.get_net_args().block_target as f32 * params.total_hr as f32)
+                .round() as Difficulty;
+        let win_work_thresh_old = params.n_por_chains as Difficulty
+            * (params.win_thres * chain.get_any_best_block(false).0.get_difficulty() as f32)
+                as Difficulty;
+        // warn!(
+        //     "Normal win_work_t: {}; new win_work_t: {}",
+        //     win_work_thresh_old, win_work_thresh_test
+        // );
         DoubleSpendWorkStrat {
             params,
             atk_start_h,
             atk_start_work: chain.get_fork_measure_pub_priv().public,
-            win_work_thresh: params.n_por_chains as Difficulty
-                * (params.win_thres * chain.get_any_best_block(false).0.get_difficulty() as f32)
-                    as Difficulty,
+            win_work_thresh: win_work_thresh_test,
         }
     }
     fn name() -> String {

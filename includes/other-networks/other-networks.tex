@@ -71,10 +71,10 @@
 \usepackage[lastpage,user]{zref}
 \usepackage{fancyhdr}
 \usepackage[dvipsnames]{xcolor}
-\usepackage{amsmath,amsfonts}
+\usepackage{amsmath,amsfonts,bm}
 \usepackage{mathtools}
 \usepackage{mdframed}
-\usepackage[skins,breakable]{tcolorbox}
+\usepackage[skins,breakable,most]{tcolorbox}
 \usepackage[yyyymmdd,hhmmss]{datetime}
 \usepackage{nicefrac}
 \usepackage{epigraph}
@@ -86,41 +86,43 @@
 \usepackage{pdfpages}
 \usepackage{algpseudocode}
 \usepackage{algorithm}
+\usepackage[automake,toc,nogroupskip]{glossaries}
 \usepackage[titles]{tocloft}
 \usepackage[fit]{truncate}
 \usepackage{wallpaper}
 \usepackage[section]{placeins}
 \usepackage[export]{adjustbox}
 \usepackage{ifthen}
+\usepackage{array}
+\usepackage{tabularx}
 \usepackage{ctable}
-\usepackage{tablefootnote}
 \usepackage{trimspaces}
 \usepackage{cancel}
-\usepackage{array}
 \usepackage[all,cmtip]{xy}
 \usepackage{morewrites}
 \usepackage{xparse}
 \usepackage{forest}
 \usepackage{mathdots}
+%% for labeling lists
+\usepackage{enumitem}
+%% use cref not autoref for items
+\usepackage[nameinlink]{cleveref}
+
+\usepackage{marginnote}
 
 
-\graphicspath{{../}{../diags/}}
+\graphicspath{{../ut/}{../ut/diags/}}
 
 
 \providecommand*\ErrorOnReleaseIfTODOs{no}
 \providecommand*\BuildMode{draft}
+\providecommand*\preparedfor{}
 
+\makeatletter
+\def\input@path{{../}{../../}{../ut/diags/}}
+\makeatother
 
-\input{../ut/00-preamble/020-colors-and-styles.tex}
-\input{../ut/00-preamble/030-hyperlinks.tex}
-\input{../ut/00-preamble/050-utils.tex}
-\input{../ut/00-preamble/060-autoref.tex}
-\input{../ut/00-preamble/110-quotes.tex}
-\input{../ut/00-preamble/120-comments.tex}
-\input{../ut/00-preamble/130-todos.tex}
-\input{../ut/00-preamble/510-maths.tex}
-\input{../ut/00-preamble/610-ut-names.tex}
-\input{../ut/00-preamble/999-citations.tex}
+\input{includes/ut/00-preamble/000-all-preambles.tex}
 
 \makeatletter
 \providecommand\defineTermTex[2]{
@@ -165,5 +167,6 @@
 }
 
 \input{40-claimed-trilemma-solns.tex}
+
 
 \end{document}

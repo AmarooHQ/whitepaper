@@ -1,0 +1,101 @@
+
+\hypertarget{bandwidth-complexity}{%
+\subsubsection{Bandwidth Complexity}\label{bandwidth-complexity}}
+
+\label{sec:bandwidth-complexity}
+
+\subsubsubsection{Full Node}
+
+What data must a full node download?
+A full node must be able to \emph{completely validate} a \emph{single chain}.
+For a simplex-chain, provided that the PoRs and corresponding headers remain available (which they always do\footnote{
+    The necessary PoRs are, at the very least, part of other simplex-chains, so ``always do'' assumes that simplex-chains themselves remain available, excluding planned shutdown.
+    Since all blockchain networks \emph{depend} on the availability of their chains, this is a safe assumption.
+}), this means it must download: all blocks for that simplex-chain, and any auxiliary data necessary to verify PoRs.
+Note that bandwidth requirements differ based on which UT protocol variant is used.
+
+For \UT{\text{+OP}}, the data a full node requires are: each block, the headers of all reflecting chains, and the missing branches for all
+PoRs.
+Network-wide, headers consume \(N_1 \cdot B_f \cdot B_h\) B/s.
+For a single chain, PoRs use \(N_1 \cdot B_f \cdot g \cdot \ceil{\log_2 N_1}\) B/s of capacity, where $g$ is the digest size of the hash used for merkle trees (usually 32 bytes).
+Let's denote the total bandwidth required for a full node \(\Delta s\).
+In the worst case (\UT{\text{+HO}} and \UT{\text{+HOT}}), where both headers and PoRs must be downloaded:
+\begin{align}
+    \Delta s & = k_1 + (N_1 \cdot B_f \cdot B_h) + (N_1 \cdot B_f \cdot g \cdot \ceil{\log_2 N_1}) \nonumber \\
+    & = k_1 + N_1 \cdot B_f \cdot ( B_h + g \cdot \ceil{\log_2 N_1}) \nonumber
+\end{align}
+
+Thus, with \emph{omitted proofs}, \(O(\Delta s) = O(k_1 + N_1 \cdot \log_2 N_1) = O(c \cdot \log_2 c)\).
+
+However, with \emph{explicit PoRs} (variants including +PoRs), \(\Delta s \le k_1 + N_1 \cdot B_f \cdot B_h = O(k_1) = O(c)\).
+
+\aside{
+  The term $g \cdot \ceil{\log_2 N_1}$ in these equations is the size of a merkle branch for a PoR.
+  What if verkle trees are used instead?
+  With a branching factor of 256, 32 byte commitments and proofs, and 1 byte location specifiers, this term should be replaced with $(1+32) \cdot \max(1, \log_{256} N_1)$.
+  The complexity of these two terms is the same --- $O(\log c)$ --- but in practice verkle PoRs are less than half the size of merkle PoRs.
+  For this reason, the numerical calculations used in the tables throughout this paper assume that the UT implementation uses verkle trees.
+}
+
+\subsubsubsection{PoR Graph}
+
+We found the bandwidth requirements for fully reconstructing the PoR graph before in \autoref{sec:por-graph-max-refl} involving the measure of propagation delay, $\phi$ seconds.
+Let's call the total bandwidth requirements for the PoR graph $\Delta r$.
+\begin{align}{}
+    \Delta r &= N_1 B_f (B_h + g(1 + N_1 B_f \phi)) \nonumber \\
+    &= \frac{k_1}{2 B_h} \Bigl(B_h + g\Bigl(1 + \frac{k_1 \phi}{2 B_h}\Bigr)\Bigr) \nonumber \\
+    % &= \frac{k_1}{2} + \frac{g k_1}{2 B_h}\Bigl(1 + \frac{k_1 \phi}{2 B_h}\Bigr) \nonumber \\
+    % &= \frac{k_1}{2} + \frac{g k_1}{2 B_h} + \frac{g {k_1}^2 \phi}{4 {B_h}^2} \nonumber \\
+    &= \frac{k_1}{2}\Bigl(1 + \frac{g}{B_h} + \frac{g {k_1} \phi}{2 {B_h}^2}\Bigr) \label{eq:por-graph-delta-r} \\
+    \implies O(\Delta r) &= O(c^2\phi) \nonumber
+\end{align}
+As discussed in \autoref{sec:por-graph-max-refl} it is unclear whether $O(c^2\phi) = O(c)$.
+However, we don't need to know $O(\Delta r)$ to estimate some real world values of $\Delta r$.
+Practically, $\Delta r$ looks to be between $k_1$ and $2 k_1$ for $k_1=3000$ --- but, this is sensitive to $\phi$.
+
+If we try to restrict $\Delta r < k_1$, then we find that we require a large $B_h$ or small $k_1$:
+\begin{align*}
+    k_1 &> \frac{k_1}{2}\Bigl(1 + \frac{g}{B_h} + \frac{g {k_1} \phi}{2 {B_h}^2}\Bigr) \\
+    2 {B_h}^2 &> 2 B_h g + g k_1 \phi \\
+    k_1 &< 2 B_h (B_h - g) (g \phi)^{-1}
+\end{align*}
+If $k_1 = 3000$, $\phi = 0.5$, we have $B_h \ge 172$ --- much larger than what we've assumed to be the minimum so far.
+Achieving $\Delta r < 3000$ requires $\phi \lesssim 0.2$ given the usual parameters.
+
+Regarding the terms from \autoref{eq:por-graph-delta-r} within the parentheses, it is clear that $1 + g/B_h$ will be a value around 1.3, give or take.
+What do we expect the value of $g k_1 \phi / (2 {B_h}^2)$ to be?
+If $B_h \in [50, 500]$, and $\phi \in [0.05, 2.0]$, then we can see that the coefficient of $k_1$ is, at most, 0.0128 (and $3.2\cdot10^{-7}$ at least).
+Thus, this last term dominates $(1+g/B_h)$ when $g k_1 \phi \gtrsim 2 {B_h}^2$.
+
+To keep $\Delta r$ practicable, we should therefore go to some effort to keep $g k_1 \phi \ll 2 {B_h}^2$.
+
+\subsubsubsection{Complete Simplex}
+
+\aside{
+    This is also the bandwidth required by all miners due to the \AxiomOfAvailability.
+    Miners do not verify the state transitions of each block, but do verify the integrity of the data structure and PoR graph (which is very cheap by comparison).
+}
+
+What about the bandwidth required to verify \emph{the entire simplex}?
+
+If miners temporarily keep the blocks of every simplex-chain (so that they can regenerate PoRs and verify that reflected headers correspond to existent blocks) then what is the complexity and burden of this?
+% Each simplex-chain has a raw throughput of \(k_1\) bytes/s.
+% From \autoref{eq:simplex-N1} we know that \(N_1 = \frac{k_1}{2 \cdot B_f \cdot B_h}\).
+
+The amount of network bandwidth, \(\Delta S\), required to download all blocks (as they are produced) across all simplex-chains is the overall transaction throughput, $(N_1 \cdot k_{1,tx})$, plus the data necessary to reconstruct the PoR graph: $\Delta r$.
+Any auxiliary data can be deterministically regenerated.
+\begin{equation}
+\begin{split}
+\Delta S &= N_1 \cdot k_{1,tx} + \Delta r
+\label{eq:bandwidth-req} \\
+% \\ & = \frac{{k_1}^2}{2 \cdot B_f \cdot B_h}
+\implies O(\Delta S) &= O(c^2) \nonumber
+\end{split}
+\end{equation}
+
+It is clear that \(\Delta S\) has order \(O(c^2)\), but how bad is this?
+For \(k_1 = 3000\), \(B_f = \frac{1}{60}\), and \(B_h = 112\): \(\Delta S \approx 1.2\) MB/s.
+With those figures: \(N_1 \approx 800\) simplex-chains, \(N_2 \approx 645,000\) dapp-chains, and maximum tps of \(\sim 7.7\times 10^{6}\) at nesting level 2.
+Decreasing block times to 15s correspondingly decrease the bandwidth requirements to 0.3 MB/s for a simplex with \(\sim 200\) chains, \(\sim 40,000\) dapp-chains, and \(\sim 484,000\) max tps.
+
+While \(O(c^2)\) bandwidth scaling is not ideal, it's clear that --- especially in the early days of a UT simplex when there are fewer simplex-chains --- there are tolerable configurations available; i.e., there is \emph{excess capacity}.

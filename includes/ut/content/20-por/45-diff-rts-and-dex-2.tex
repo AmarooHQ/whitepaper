@@ -8,7 +8,7 @@ Our starting point will be \autoref{eq:por-conv-work}:
 %     & &\text{R-hashes }\rightarrow\text{ L-hashes}
 \end{align}
 
-It's easy to see that we can work with this -- of course, the \textsc{WeightOf} function needs access to R's difficulty and block reward, and the exchange rate, too.
+It's easy to see that we can work with this --- of course, the \textsc{WeightOf} function needs access to R's difficulty and block reward, and the exchange rate, too.
 Do we \emph{need} to use $R_d$, though?
 Surely \emph{any} conversion to L-hashes will work, right?
 
@@ -41,16 +41,16 @@ Let's see:
 \end{align}
 
 Okay, so we \emph{can} convert to L's block-weight (L-hashes) \emph{without knowing R's difficulty}.
-It's good to know that we have \emph{options} there -- there's \emph{excess capacity} in the values we can convert between.
+It's good to know that we have \emph{options} there --- there's \emph{excess capacity} in the values we can convert between.
 If one value is not available, then we might not even need it.
 (This is relevant for \autoref{sec:converting-confirmations}.)
 
 \todoDraftOnly{This (above) is one of the properties that we should quickcheck}
 
-To move forward, we need to use $X_{R\rightarrow L}$ in a new \textsc{WeightOf} function -- \emph{where does that value come from?}
+To move forward, we need to use $X_{R\rightarrow L}$ in a new \textsc{WeightOf} function --- \emph{where does that value come from?}
 
-The value can't be hard-coded, or provided by a third party -- these would introduce vulnerabilities.
-We need an accurate exchange rate for the moment of conversion, too -- one that is reactive enough to remain up-to-date, and precise enough to be useful.
+The value can't be hard-coded, or provided by a third party --- these would introduce vulnerabilities.
+We need an accurate exchange rate for the moment of conversion, too --- one that is reactive enough to remain up-to-date, and precise enough to be useful.
 It also needs to be \emph{provable}; in practice, it needs to be \emph{on-chain} and available to both chains (and they should agree on the exchange rate).
 If that wasn't the case, how could one chain validate the weight of another chain's PoRs?
 Ideally, the exchange rate should \emph{already} be recorded in \emph{both} chains.

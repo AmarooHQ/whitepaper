@@ -160,7 +160,8 @@ utSpec = describe "ut" do
       it "confRate" do
         basicSample.ut.std.confRate `shouldEqual` 5.0
       it "dbs" do
-        basicSample.ut.std.deltaBigS `shouldEqual` (1000.0 * 50.0)
+        -- basicSample.ut.std.deltaBigS `shouldEqual` (1000.0 * 50.0)
+        basicSample.ut.std.deltaBigS `shouldEqual` (1000.0 * 50.0 / 2.0 + 50.0 * bf * (bh + 32.0 * (1.0 + bf * 50.0 * phiOverlapSec))) -- 1060.0)  -- 1060.0 is the PoR graph overhead
       it "k" do
         std.k1 `shouldEqual` 1000.0
 
@@ -168,13 +169,15 @@ utSpec = describe "ut" do
           k = 1000.0
           -- note, don't add bh (because we don't omit headers in std) and don't add hash(bh) b/c it's the last element in the PoR branch
           dss = k + 0.1 * n1 * (porLen 32.0 n1)  -- k + bf * N1 proofs * (proof_size)
-          dS = k * n1
+          -- dS = k * n1
+          dS = k * n1 / 2.0 + 50.0 * bf * (bh + 32.0 * (1.0 + bf * n1 * phiOverlapSec))
           tts = 5.0 * 365.25 * dss / 10_000_000.0
           stts = 5.0 * 365.25 * dS / 10_000_000.0
       it "dss" do
         basicSample.ut.std.deltaSmallS `shouldEqual` dss
       it "tts" do
         basicSample.ut.std.tts `shouldBeCloseTo` tts
+      it "sigma-tts" do
         basicSample.ut.std.sigmaTts `shouldBeCloseTo` stts
 
     sequence_ $ do
@@ -334,7 +337,7 @@ utSpec = describe "ut" do
       -- note that k=1000
       let tpss = [50, 156, 312]
           n1s = [50, 156, 312]
-          dbs = [50000, 156250, 312500]
+          dbs = [26060, 84093, 166875]
           confRates = [5.00, 15.625, 31.25]
           -- TTS isn't an exact match, but p close. Definitely *looks* mostly right WRT numbers coming out.
           -- ttss = [0.44, 0.94, 1.03]  -- from python gen
@@ -432,8 +435,8 @@ utSpec = describe "ut" do
     describe "+PoRs vs large headers checks" do
       it "large headers approx (w/in ~33%) of +PoRs" do
         let tx = 250.0
-            utL = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 115.0} tx) {explicitPoRs: false, hashTruncation: false, headerOmission: false}
-            utP = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 84.0} tx) {explicitPoRs: true, hashTruncation: false, headerOmission: false}
+            utL = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 115.0} tx) {explicitPoRs: false, hashTruncation: false, headerOmission: false, onlyNecessaryHeaders: false}
+            utP = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 84.0} tx) {explicitPoRs: true, hashTruncation: false, headerOmission: false, onlyNecessaryHeaders: false}
         -- +PoRs and std
         utP.d1.tps `shouldBeWithin 0.5` 1154.0
         utP.d1.n `shouldBeWithin 0.5` 192.0
@@ -441,8 +444,8 @@ utSpec = describe "ut" do
         utL.d1.n `shouldBeWithin 20.0` utP.d1.n  -- 82 vs 64
       it "large headers approx (w/in ~33%) of +PoRTs" do
         let tx = 250.0
-            utLT = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 99.0} tx) {explicitPoRs: false, hashTruncation: false, headerOmission: false}
-            utPT = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 84.0} tx) {explicitPoRs: true, hashTruncation: true, headerOmission: false}
+            utLT = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 99.0} tx) {explicitPoRs: false, hashTruncation: false, headerOmission: false, onlyNecessaryHeaders: false}
+            utPT = utChainCalc (mkSimplePs 3000.0 {bf: btToF 15, bh: 84.0} tx) {explicitPoRs: true, hashTruncation: true, headerOmission: false, onlyNecessaryHeaders: false}
         -- +T
         utPT.d1.tps `shouldBeWithin 0.5` 1364.0
         utPT.d1.n `shouldBeWithin 0.5` 227.0

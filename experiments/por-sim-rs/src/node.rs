@@ -50,6 +50,10 @@ impl<'a, S: CSystemT<'a>> Node<'a, S> {
         }
     }
 
+    pub fn get_hr(&self) -> Difficulty {
+        self.mining_attempts_per_tick
+    }
+
     pub fn attack_has_started(&self) -> bool {
         self.has_seen_main_atk_block
     }

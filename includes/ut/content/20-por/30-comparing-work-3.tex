@@ -16,8 +16,11 @@ Consistency, here, means the conversion shouldn't change the outcome of the fork
 
 Since both weight and hashes can be \emph{summed}, an easy way for this to work is for us to use a \emph{linear} conversion method (i.e., the units are \emph{proportional}, we have some \emph{constant of conversion} for that specific situation, and all units \emph{share an origin}).
 In effect, for any two values, the \emph{ratio} between linearly converted values is \emph{constant} provided those values are in same units, but independent of \emph{which} units those values are represented in.
-This doesn't imply that all \emph{mid-states} are linearly convertible, though.
-However, if some mid-states \emph{are} linearly convertible (to and from hashes), then \emph{the fork rule should work for the absolute value of those units, too}.
+This doesn't imply that all possible \emph{mid-states} are linearly convertible, though.
+However, if some mid-states \emph{are} linearly convertible (to and from hashes), then \emph{the fork rule should work for those units, too}.
+
+% why did I put 'absolute value' above?
+% originally I had: 'the fork rule should work for the absolute value of those units, too'
 
 When it comes to comparing work, we'll need to work with particular factors (or properties) that are intrinsic to all blockchains (though the particular values vary by chain).
 These are the factors which \emph{naturally come as rates}, even though they're often measured in absolutes.
@@ -28,18 +31,18 @@ Since a block represents a discrete amount of work, and has a known, measurable 
 Making these sorts of conversions up-front (where appropriate) will simplify the work to come, since we'll be working with ratios of units which naturally allow for useful conversion.
 
 \aside{
-    If we can measure the \emph{rate of work} in some direct way (e.g., number of hashes per block) then we can also \emph{scale block rewards according to both the network difficulty and the demonstrated rate of work}.
+    When we can measure the \emph{rate of work} in some direct way (e.g., number of hashes per block), we can also \emph{scale block rewards according to both the network difficulty and the demonstrated rate of work}.
     This enables dynamic block production (i.e., blocks with a flexible minimum difficulty).
     This would (probably) be disruptive to a traditional blockchain, due to many stale blocks.
     For UT, it becomes relevant with \autoref{sec:dos-and-dags}, and particularly with \autoref{sec:preventing-dos-attacks}.
-    There's no requirement that support for dynamic block production is used in UT, but it's useful to have as a technique in reserve.
+    UT does not require support for dynamic block production, but it's useful to have as a technique in reserve (perhaps particularly for \autoref{sec:dapp-chains}).
 }
 
 \textbf{Here's the problem:} \emph{universal and generic} conversion between qualitatively different units is impossible.\footnote{
-    Attribution: I learned this, and the importance of \emph{goals} and \emph{context} when evaluating \emph{ideas}, from the philosopher Elliot Temple -- particularly via his \href{https://curi.gumroad.com/l/mhtbA}{Critical Fallibilism Course} (which is difficult to cite directly).
+    Attribution: I learned this, and the importance of \emph{goals} and \emph{context} when evaluating \emph{ideas}, from the philosopher Elliot Temple --- particularly via his \href{https://curi.gumroad.com/l/mhtbA}{Critical Fallibilism Course} (which is difficult to cite directly).
     His article \href{https://criticalfallibilism.com/multi-factor-decision-making-math}{Multi-Factor Decision Making Math} details many related concepts and is a good starting point.
 }
-We need a specific \emph{goal} and \emph{context} to successfully convert -- in fact, the \emph{goal} is what \emph{enables} us to judge whether it's a successful method of conversion or not.
+We need a specific \emph{goal} and \emph{context} to successfully convert --- in fact, the \emph{goal} is what \emph{enables} us to judge whether it's a successful method of conversion or not.
 
 We only know one specific thing at the moment: our goal is to \emph{convert} chain-work so that \emph{PoR works}.
 The \emph{conversion} shouldn't introduce any vulnerabilities, and it should work within the constraints that we've discussed up to this point.
@@ -48,6 +51,6 @@ In order to discuss \emph{conversion methods} we need to know the \emph{context}
 We already know some background context, like that we're using blockchains, that root tokens (which are exact and fungible) are involved via block rewards, that nodes have access to certain information via some proof or because it's already in their state, etc.
 This background context isn't enough, though.
 What specific contexts can \emph{facilitate} conversion?
-This section has two examples -- \autoref{sec:conversion-single-root-token} and \autoref{sec:comparing-weight-dex}.
+This section has two examples --- \autoref{sec:conversion-single-root-token} and \autoref{sec:comparing-weight-dex}.
 
 Before we discuss the examples themselves, let's discuss some intermediate conversions that we'll use in those two examples.

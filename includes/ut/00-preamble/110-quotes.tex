@@ -30,6 +30,7 @@
         % breakable,
         \IfNoValueTF{#1}{}{#1}
         ]
+        \reversemarginpar\marginnote{\nullOnCopy{\textbf{Quote}}}
 }{
     \end{tcolorbox}
 }
@@ -52,6 +53,7 @@
 
 \NewDocumentCommand{\bquote}{ m o }{
     \begin{quote}
+    \reversemarginpar\marginnote{\nullOnCopy{\textbf{Quote}}}
     #1
     \IfNoValueTF{#2}{}{
         \par
@@ -66,15 +68,16 @@
 \newenvironment{easide}{
     \begin{tcolorbox}[
         colback=gray!15,colbacktitle=gray!15,
-        parbox=false,
         tile,
-        breakable]
+        breakable]%
+    \reversemarginpar\marginnote{\nullOnCopy{\textbf{Aside}}}%
 }{
+    % \reversemarginpar\marginnote{\nullOnCopy{\textbf{Aside}}}%
     \end{tcolorbox}
 }
 
 \newcommand{\aside}[1]{
-    \begin{easide}
+    \begin{easide}%
     #1
     \end{easide}
 }
@@ -82,7 +85,6 @@
 \newenvironment{easide*}{
     \begin{tcolorbox}[
         colback=gray!15,colbacktitle=gray!15,
-        parbox=false,
         tile]
 }{
     \end{tcolorbox}
@@ -92,4 +94,40 @@
     \begin{easide*}
     #1
     \end{easide*}
+}
+
+\NewDocumentCommand{\warning}{m}{
+\begin{tcolorbox}[
+    % colback=white,
+    bicolor,
+    sharp corners,
+    % enhanced,
+    parbox=false,
+    interior style={preaction={fill=white},
+        % pattern={Lines{angle=45, distance=5mm, line width=2.5mm}},
+        pattern=north east lines,
+        %{Lines{angle=45, distance=5mm, line width=2.5mm}},
+        pattern color=yellow!50!white}
+    ]%
+    \reversemarginpar\marginnote{\nullOnCopy{\textbf{Warning}}}%
+    \trim{#1}%
+\end{tcolorbox}
+}
+
+\NewDocumentCommand{\draftNote}{m}{
+\begin{tcolorbox}[
+    % colback=white,
+    bicolor,
+    sharp corners,
+    % enhanced,
+    parbox=false,
+    interior style={preaction={fill=Cerulean!40!white},
+        % pattern={Lines{angle=45, distance=5mm, line width=2.5mm}},
+        pattern=north east lines,
+        %{Lines{angle=45, distance=5mm, line width=2.5mm}},
+        pattern color=Cerulean!20!white}
+    ]%
+    \reversemarginpar\marginnote{\nullOnCopy{\textbf{Draft Note}}}%
+    \trim{#1}%
+\end{tcolorbox}
 }

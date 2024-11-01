@@ -24,7 +24,7 @@ N_1 & = \frac{k_1 \cdot \ln 2}{2 \cdot B_f \cdot g \cdot W_0((2^{B_h g^{-1} - 1}
 \implies k_{1,tx} & \neq k_{1,b}
 \end{split}
 \end{equation}
-Note: $W_0(z)$ is the Lambert W function, aka the product logarithm.
+Note: $W_0(z)$ is the Lambert W function, aka. the product logarithm.
 
 \autoref{eq:simplex-N1-with-PoR} gives an $N_1$ that is of the form $N_1 = O(1) \cdot \frac{k_1}{W_0(O(1) \cdot k_1)}$.
 \autoref{fig:x-over-lambert} graphs $f(x) = \frac{x}{W_0(x)}$ for values of $x$ that we care about; $f(x) = 0.0638x$ is included for comparison.
@@ -88,13 +88,13 @@ The derivations of +OP's complexity was covered in \autoref{sec:ut-complexity}.
 
 The +HO variants replace the headers of reflecting chains with the respective header's hash.
 This is reasonable since the headers of each simplex-chain (that would otherwise be recorded in simplex-chain blocks) are \emph{common} among all simplex-chains.
-If a user is running nodes for multiple simplex-chains, they should only need to download each header once -- including raw headers in each block is redundant.
+If a user is running nodes for multiple simplex-chains, they should only need to download each header once --- including raw headers in each block is redundant.
 
 Thus, +HO has $k_{1,b}$ of:
 \begin{equation}
     k_{1,b} = N_1 \cdot B_f \cdot g
 \end{equation}
-This is equivalent to +OP with very small headers -- 32 bytes instead of 80+ bytes.
+This is equivalent to +OP with very small headers --- 32 bytes instead of 80+ bytes.
 
 %% INSERT ### TABLE: tps_ho
 
@@ -106,7 +106,7 @@ This is equivalent to +OP with very small headers -- 32 bytes instead of 80+ byt
 
 ## +HOPoRs and +HOPoRTs
 
-+HOPoRs is the combination of +HO and +PoRs -- headers are omitted but PoRs are still explicitly recorded.
++HOPoRs is the combination of +HO and +PoRs --- headers are omitted but PoRs are still explicitly recorded.
 
 Thus, +HOPoRs has $k_{1,b}$ of:
 \begin{align}

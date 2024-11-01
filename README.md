@@ -3,7 +3,7 @@
 ## dependencies
 
 - the Makefile presumes you're running this in a linux environment
-- you'll need: make, pandoc v2.5, latexmk, git
+- you'll need: make, [pandoc v2.5](https://github.com/jgm/pandoc/releases/tag/2.5), latexmk, git
 - ubuntu pkgs: `sudo apt install make latexmk git gnuplot texlive-science texlive-extra-utils texlive-latex-extra gnuplot`
 - nodejs and npm (for purescript, for complexity tables generator)
 

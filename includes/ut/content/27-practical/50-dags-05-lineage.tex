@@ -1,0 +1,34 @@
+
+\hypertarget{block-dag-lineage}{%
+\paragraph{Block-DAG Lineage}\label{block-dag-lineage}}
+
+\label{sec:block-dag-lineage}
+
+The idea that blocks in a chain can have multiple parents --- i.e., the chain forms a Directed Acyclic Graph (DAG) that is not also a tree --- dates back to (at least) late 2013 with the publication of GHOST\footnote{
+    \citeGhostFull{}
+} by Sompolinsky and Zohar.
+However, GHOST disallows multiple \emph{canonical} parents, and a chain using GHOST defines its \emph{canonical history} --- the \emph{main chain} --- via the chain formed exclusively from the first parent of each block.
+A block's other, non-canonical parents are linked to \emph{only} for the purpose of contributing to the total chain-weight.
+
+In the two years after GHOST was published, a number of DAG-based blockchain designs were developed that facilitated merging histories from multiple parent blocks.
+
+In mid-2014 I created a prototype DAG-based blockchain called
+Quanta\footnote{
+    \href{https://github.com/XertroV/quanta-test/blob/ba598d5fe89d3b16db07533957a2080edb19a9cd/quanta.py\#L157}{Quanta source code},
+    \href{https://bitcointalk.org/index.php?topic=1057342}{Quanta BitcoinTalk thread}.
+} with a novel method of linearization that converged to a complete and stable ordering of blocks.
+This method was independently rediscovered\footnote{
+    As far as I can tell, the linearization methods produce identical results.
+} in mid-2015 by Lewenberg, Sompolinsky, and Zohar\footnote{\citeInclusiveFull{}} --- who also further developed and analyzed the method, which they named \emph{the inclusive protocol}.
+Additionally, in 2016 Paul Firth further developed Quanta in his \emph{Trustless Eventual Total Order} draft.\footnote{\href{https://github.com/wildbunny/docs/blob/master/T.E.T.O-draft.pdf}{T.E.T.O Draft} by Paul Firth.}
+
+In late-2015 several new, alternative methods were also published, however these are not generalizations of Nakamoto consensus.
+Namely:
+Lerner's DagCoin\footnote{
+    \href{https://cloudflare-ipfs.com/ipfs/QmbXhgQzN8FPFLiJoVApHvT1vf3xZUGefvD5GdfYPHuBpe}{DagCoin Draft} by Sergio Demian Lerner.
+}, and IOTA's Tangle\footnote{
+    \href{https://bitcointalk.org/index.php?topic=1216479.0}{IOTA BitcoinTalk thread}.
+}.
+Since then, multiple other models have been proposed, and some built.
+
+For the purposes of this paper, we are concerned with the method detailed in \emph{Inclusive Block Chain Protocols}.

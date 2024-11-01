@@ -1,0 +1,141 @@
+
+\subparagraph{Spam, Availability, and Dapp-chains: A PoW/PoS Asymmetry}
+
+\label{sec:child-chain-pow-pos-asymmetry}
+
+\subsubparagraph{PoW Dapp-chains}
+
+Proof of Work systems operate best when all practicable hashing resources are contributing to the same system.
+That is: all economically available miners are mining on the same network.
+
+We can explore this with a thought experiment.
+Say I forked the Bitcoin codebase and created a new genesis block with today's date, which in turn creates a new blockchain network.
+Crucially, I do not change the hashing algorithm.
+
+How secure would this network be?
+Given that the actual Bitcoin network has an established hash-base, and there are many old, uneconomical mining units out there, the overwhelming majority of hash power would not be working on my new network (either it would be off, or working on Bitcoin).
+In fact, even if all the units that were powered off were used to mine my network, it would still have but a small fraction of Bitcoin's hash-rate.
+The effect of this is that \emph{at any point} a small proportion of Bitcoin miners could divert their miners and perform a 51\% attack against my network.
+Therefore, \emph{given Bitcoin exists,} my network cannot be considered secure in practice.
+
+If two traditional PoW chains share a hashing algorithm, then the one with more hashing power is the only secure candidate.
+
+How does this apply to PoW simplex dapp-chains?
+First, notice that if a PoW dapp-chain has a comparable difficulty to a simplex-chain, then the simplex as a whole (including other dapp-chains) would benefit if that hashing power were used on the simplex instead of the dapp-chain.
+Additionally, moving hashing power the other way (from simplex to dapp-chain) would weaken the overall security of the simplex.
+From this, we can intuit that the most stable, secure system is one that heavily prioritizes mining PoW simplex-chains over PoW dapp-chains.
+This brings us to our second observation: that PoW dapp-chains will naturally have a much lower difficulty than their host simplex-chains.
+
+In a functioning PoW network, the work serves not only as the method of securing the chain, but also a method to prevent block spam.
+This is due to the DAA regulating block production rates.
+DAAs are unreliable, though, when there are large reserves of mining power that might come online at any moment for an unknown period of time, and then disappear.
+One typical consequence of a sharp drop in mining power is a period where the difficulty is much higher than the remaining miners are capable of meeting, resulting in reduced block production.
+In extreme cases, this may require a hard-fork to resolve.
+The usual solution to this is a rule whereby blocks at lower difficulty can be mined, provided that a suitably long duration has passed since the prior block.
+If PoW dapp-chain headers are verified by the simplex, a hard-fork to change the DAA of a PoW dapp-chain would require the host simplex-chain to be aware of this change.
+This is not the only issue with block spam, though.
+If a miner can trivially create blocks (because the difficulty is too low), then they could flood the host simplex-chain with valid (but useless) header-transactions.
+This is a problem, not just for that dapp-chain, but for all other dapp-chains hosted by that simplex-chain.
+
+\aside{
+  These are substantial problems, but might be soluble.
+  The next problem, however, is not.
+}
+
+Spam is not the nail in the coffin for PoW dapp-chains.
+Rather, that honor falls to \emph{availability}.
+
+The problem itself is simple to describe: a malicious miner creates valid blocks, and publishes the header-transactions to the host chain, but does not publish the block bodies to the dapp-chain network.
+
+A key requirement of dapp-chains is that they cannot increase the load of the miner above $O(c)$.
+This means that processing a single header-transaction cannot exceed $O(\nicefrac{c}{N_D})$, where $N_D$ is the number of dapp-chains that a simplex-chain is capable of hosting -- or, more accurately, the number of header transactions it can process per block; we'll assume these are equivalent.
+Ideally $O(N_D) = O(c)$, assuming it is not possible to do better than $O(1)$ when processing a header-transaction.
+
+If we are to have reliable inter-chain operation between simplex-chains and dapp-chains, then we must have some assurance that the recorded blocks are valid, which requires them to be available.
+Invalid blocks would allow a miner to steal funds via cross-chain transactions, which is obviously bad.
+Provided that we only allow (public\footnote{
+  If a dapp-chain is designed to be private, opaque, or non-financial, then we might not care (or even be able to care) about the validity of its state transition.
+}) dapp-chains which support fraud proofs, then we have the foundation for that assurance.
+But, fraud proofs only work if honest nodes have access to the block to calculate said fraud proof.
+It is generally not possible to create a fraud proof if the block is unavailable.
+
+Since availability is a requirement, how can we ensure that dapp-chain blocks are available and not withheld?
+
+\aside{
+  Note that \emph{Proofs of Availability} are of no use here, because verifying them requires at least as many bytes as the block itself\footnote{
+    This is somewhat intuitive since proofs of availability allow for the reconstruction of the original block.
+    % below is commented because big omega is complexity not a proper formula.
+    % Example: ``the sender must transmit $\Omega(|B|)$ bits [\dots] to enable the correct reconstruction of $b$,'' where $b$ is the block, and $|B|$ is the size of the block. -- \href{https://eprint.iacr.org/2022/455.pdf}{Proof of Availability & Retrieval in a Modular Blockchain Architecture} (Cohen, Goren, Kokoris-Kogias, Sonnino, and Spiegelman; 2022)
+  }.
+  So, at best, we might be able to do some kind of challenge-response, but, practically speaking, this isn't the solution we're looking for.
+}
+
+I suspect that, for PoW dapp-chains, it is \emph{in principle} not possible to ensure the availability of blocks.
+This is due to the principles by which PoW blockchains operate.
+Particularly, \emph{proofs of work} are created \emph{in isolation}.
+Only \emph{after} a PoW is found is a block shared with the network (see \autoref{fig:pow-pos-mining-asymmetry-pow}).
+Therefore, it is always possible to partially share a block in (pure) PoW networks.
+
+\begin{figure}
+  \begin{subfigure}[t]{.45\textwidth}
+    \vskip 0pt
+    \centering
+    \includegraphics[max width=.95\linewidth]{25-constructing-ut-10-pow-chain-fc_sag}
+    \caption{The PoW block creation process (simplified).}
+    \label{fig:pow-pos-mining-asymmetry-pow}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{.45\textwidth}
+    \vskip 0pt
+    \centering
+    \includegraphics[max width=.95\linewidth]{25-constructing-ut-11-pos-chain-fc_sag}
+    \caption{An example of the kind of PoS block creation process we're after.}
+    \label{fig:pow-pos-mining-asymmetry-pos}
+  \end{subfigure}
+  \caption{The block creation process (simplified) for PoW chains and some variants of PoS chains.}
+  \label{fig:pow-pos-mining-asymmetry}
+\end{figure}
+
+
+\subsubparagraph{PoS Dapp-chains}
+
+First, it's important to note that within the ``Proof of Stake'' family of consensus methods, there are many variants.
+For our purposes, we're interested in those where multiple validators are involved before a block is finalized / validated.
+\autoref{fig:pow-pos-mining-asymmetry-pos} demonstrates a simplification of such a block creation processes.
+
+Provided that the PoS method is well-constructed, this kind of PoS solves both the spam and availability problems.
+
+Typically, such systems prevent validators from creating competing blocks by imposing an economic penalty (\emph{slashing}) on those validators who help create two or more blocks at the same height (or slot, or whatever).
+Since slashing will destroy a validator's capital, and thus destroy their ability to be a validator, we can infer that this process will be rare.
+That's good, because we don't have to care much about the overhead of resolving these cases.
+This solves the spam problem.
+
+The availability problem is solved provided there is at least one honest validator with knowledge of the block contents (because honest validators want to broadcast the block).
+
+\aside{
+  The term ``well-constructed'' is doing most of the heavy lifting here.
+  I don't think we need to worry, though, because these sorts of problems are what PoS designers spend a lot of time on.
+  So, if any contemporary PoS chains are secure (putting aside nothing-at-stake and long-range attacks, since the PoW context of the simplex solves those), then we'll have a viable option for PoS dapp-chains.
+}
+
+\begin{comment}
+
+Even in the case where validators for a specific block collude, we can still avoid disaster with some safeguards:
+\begin{itemize}
+  \item Validators for consecutive blocks are independent\footnote{
+    The important property here is that it's hard for colluding actors to synchronize the times they are active validators.
+    On the whole, it seems like most PoS systems are designed with something like this in mind.
+  }, and
+  \item A majority of currently inactive validators can collectively report a missing block, and/or
+  \item Validators are not required\footnote{
+    In such a case the fork rule will determine which chain wins, and validators of the other chain can be penalized.
+  } to build on the prior recorded block.
+\end{itemize}
+
+How bad would the worst case be?
+First, such a case would mean that a group of malicious validators is at or above the threshold for controlling the dapp-chain's canonical chain (perhaps \nicefrac{1}{2} or maybe \nicefrac{2}{3}).
+Second, it would also require that a majority of blocks in a sequence were controlled by those validators.
+The length of the sequence would depend on the number of blocks required for the slashing / resolution algorithm to complete.
+For the malicious validators to win, they would need to be responsible for the longest chain at that point.
+
+\end{comment}

@@ -6,6 +6,7 @@ use crate::cryptosystem::CSystemT;
 use crate::msg::*;
 use crate::strategies::relay::*;
 use crate::types::*;
+use crate::RandHrMethod;
 use itertools::Itertools;
 use log::*;
 use num::ToPrimitive;
@@ -60,7 +61,7 @@ impl AttackArgs {
         }
     }
 
-    fn total_hr(&self) -> Difficulty {
+    pub fn total_hr_per_chain(&self) -> Difficulty {
         self.honest_hr + self.attacker_hr
     }
 }
@@ -71,33 +72,54 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             "Creating new simulation with {} honest HR and {} attacking HR. Attack starts at T={}. InstantProp={}",
             args.honest_hr, args.attacker_hr, args.attack_starts_at, args.attacker_instant_propagation
         );
-        let extra_chain_nodes = Self::mk_extra_chain_nodes(&args, &net_args);
+        let mut extra_chain_nodes = Self::mk_extra_chain_nodes(&args, &net_args);
+
+        // set HRs for targeted chain
+        let mut honest_hr = args.honest_hr;
+        let mut attacker_hr = args.attacker_hr;
+        // overwrite them if we are including targeted chain in rand distrib
+        if net_args.rand_hr_incl_main {
+            let main_nodes = extra_chain_nodes.pop().unwrap();
+            honest_hr = main_nodes.honest.get_hr();
+            attacker_hr = main_nodes.attacker.get_hr();
+        }
+
         let genesis = S::B::genesis(0);
         let chain = S::C::new(
             genesis.clone(),
             BlockMD::mk_genesis_md(&genesis.clone(), net_args.daa2_n_blocks.to_usize().unwrap()),
-            net_args.clone(),
+            net_args
+                .clone_and_set_fixed_d(net_args.block_target as u64 * (honest_hr + attacker_hr)),
         );
-        // this later gets updated in self.check_and_set_atk_start_h
-        let avg_work_per_block_period =
-            (net_args.por_chains as u64) * (net_args.block_target as u64) * args.total_hr();
+
+        // ~~this later gets updated in self.check_and_set_atk_start_h~~
+        // keep the theoretical calc -- results seem to be way more accurate
+        let avg_work_per_block_period = (net_args.por_chains as u64)
+            * (net_args.block_target as u64)
+            * args.total_hr_per_chain();
+
+        // nodes for targeted chain
+        let honest_node = Node::new(
+            0,
+            chain.clone(),
+            None,
+            honest_hr,
+            false,
+            net_args.por_chains,
+        );
+        let attacker_node = Node::new(
+            1,
+            chain.clone(),
+            Some(NodeAtkParams { is_r_chain: false }),
+            attacker_hr,
+            args.attacker_instant_propagation,
+            net_args.por_chains,
+        );
+
+        // finally, return message manager
         MM {
-            honest_node: Node::new(
-                0,
-                chain.clone(),
-                None,
-                args.honest_hr,
-                false,
-                net_args.por_chains,
-            ),
-            attacker_node: Node::new(
-                1,
-                chain.clone(),
-                Some(NodeAtkParams { is_r_chain: false }),
-                args.attacker_hr,
-                args.attacker_instant_propagation,
-                net_args.por_chains,
-            ),
+            honest_node,
+            attacker_node,
             strategy: None,
             args: args.clone(),
             atk_params,
@@ -114,11 +136,11 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
         args: &AttackArgs,
         net_args: &NetworkArgs,
     ) -> Vec<ExtraChainNodes<'a, S>> {
-        if net_args.por_chains <= 1 {
+        let n_chains = net_args.n_extra_chains();
+        if n_chains < 1 {
             return vec![];
         }
 
-        let n_chains = net_args.por_chains as u32 - 1;
         let avg_hr_per_chain = (args.attacker_hr + args.honest_hr) as u64;
         let total_hr: Difficulty = n_chains as u64 * avg_hr_per_chain;
         let avg_honest_hr_ratio: f32 = (args.honest_hr as f32) / (avg_hr_per_chain as f32);
@@ -136,8 +158,18 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
         let cw_hash_rates: Vec<(Difficulty, Difficulty)>;
 
         if net_args.random_hr_distrib {
-            let rd_h = gen_random_hr_distribution(n_chains, hr_p, total_hr);
-            let rd_a = gen_random_hr_distribution(n_chains, hr_q, total_hr);
+            // let rd_h = gen_random_hr_distribution_simple(n_chains, hr_p, total_hr);
+            // let rd_a = gen_random_hr_distribution_simple(n_chains, hr_q, total_hr);
+            let (rd_h, rd_a) = match (net_args.rand_hr_method) {
+                RandHrMethod::EachHash => {
+                    debug!("EachHash");
+                    gen_random_hr_distributions(n_chains, hr_q, total_hr, hr_q / 2.0)
+                }
+                RandHrMethod::TwinUniform => {
+                    debug!("TwinUniform");
+                    gen_twin_random_hr_distributions(n_chains, hr_q, total_hr)
+                }
+            };
             cw_hash_rates = rd_h.into_iter().zip(rd_a.into_iter()).collect();
         } else {
             // uniform hash rates over all chains
@@ -145,7 +177,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
                 .map(|_| avg_honest_hr_ratio)
                 .collect();
             // println!("honest node HR ratios: {:?}", honest_hr_ratios);
-            // no ratios <0.05 or >0.95
+            // no ratios <0 or >1 (since they're all the same, we are okay using whatever the parameters say to use)
             debug_assert_eq!(
                 honest_hr_ratios
                     .iter()
@@ -194,7 +226,9 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
                         &genesis.clone(),
                         net_args.daa2_n_blocks.to_usize().unwrap(),
                     ),
-                    net_args.clone(),
+                    net_args.clone_and_set_fixed_d(
+                        net_args.block_target as u64 * (honest_hr + attacker_hr),
+                    ),
                 );
                 let honest = Node::new(
                     i * 1_000,
@@ -244,12 +278,14 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
             let h = self.honest_node.chain.get_heights_pub_priv().public as Height;
             self.atk_start_h = Some(h);
             debug!("setting atk_start_h:{}", h);
-            let bb = self.honest_node.chain.get_any_best_block(false);
-            let bb_id = bb.0.get_hash();
-            let daa2_bs = BlockMD::<S::B>::get_daa2_blocks(bb_id).unwrap();
-            let _ago = daa2_bs.len() as Difficulty / 4;
-            let past_b = S::C::get_cached_block(&daa2_bs[_ago as usize]).unwrap();
-            self.avg_work_per_block_period = (bb.1.chain_weight - past_b.1.chain_weight) / _ago;
+            // let bb = self.honest_node.chain.get_any_best_block(false);
+            // let bb_id = bb.0.get_hash();
+            // let daa2_bs = BlockMD::<S::B>::get_daa2_blocks(bb_id).unwrap();
+            // let _ago = daa2_bs.len() as Difficulty / 4;
+            // let _ago = 10;
+            // let past_b = S::C::get_cached_block(&daa2_bs[_ago as usize]).unwrap();
+            // should we actually bother updating this with a measurement?
+            // self.avg_work_per_block_period = (bb.1.chain_weight - past_b.1.chain_weight) / _ago;
         }
     }
 
@@ -317,6 +353,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
         // WRT limit of ~1_000_000: with q=0.48 at ds_win=1200 -- no successes went this high, but otherwise they'd typically go >2m
         // 1200 * 11 * 75(bt) = 960k
         let ts_limit = if self.args.use_dynamic_cutoff {
+            // ticks
             ((100.0 as f32)
                 .max(self.atk_params.ds_win_as_f32().unwrap_or(20.0).powf(2.0) * 4.0)
                 .min(self.atk_params.ds_win_as_f32().unwrap_or(20.0) * 11.0)
@@ -410,7 +447,7 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
         let win = if success { 1 } else { 0 };
         // win, ticks_elapsed, atk_start_h, pub_h, priv_h, pub_cw, priv_cw, atk_q, block_target, daa2_n_blocks, n_chains, ms_elapsed, ...atk_strategy_cols
         println!(
-            "RESULT:{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}",
+            "RESULT:{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}",
             win,
             last_ts,
             self.atk_start_h.unwrap_or(0),
@@ -427,6 +464,8 @@ impl<'a, S: CSystemT<'a>, R: RelayStrategyT<'a, S>> MM<'a, S, R> {
                 .as_ref()
                 .map(|s| s.params_as_csv())
                 .unwrap_or("_,_".to_string()),
+            self.honest_node.get_hr(),
+            self.attacker_node.get_hr(),
         );
     }
 }
@@ -446,23 +485,79 @@ pub fn msgs_from_into_to<B: BlockT>(msgs_from: &Vec<Msg<B>>) -> Vec<MsgToNode<B>
     msgs_to
 }
 
+pub fn gen_random_hr_distribution_simple(
+    n_chains: u32,
+    hr: f32,
+    total_hr: Difficulty,
+) -> Vec<Difficulty> {
+    gen_random_hr_distribution(n_chains, hr, total_hr, 0.0, 1.0)
+}
+
+pub fn gen_twin_random_hr_distributions(
+    n_chains: u32,
+    q: f32,
+    total_hr: Difficulty,
+) -> (Vec<Difficulty>, Vec<Difficulty>) {
+    (
+        gen_random_hr_distribution_simple(n_chains, 1.0 - q, total_hr),
+        gen_random_hr_distribution_simple(n_chains, q, total_hr),
+    )
+}
+
 /// randomly distribute hash-rate over N_1 partitions so that the *overall* p+q=1 identity is maintained
-pub fn gen_random_hr_distribution(n_chains: u32, q: f32, total_hr: Difficulty) -> Vec<Difficulty> {
-    // let attacker_raw_agg_hr = q as f64 * total_hr as f64;
-    // let attacker_avg_hr = (attacker_raw_agg_hr / n_chains as f64).round() as u32;
+pub fn gen_random_hr_distribution(
+    n_chains: u32,
+    hr: f32,
+    total_hr: Difficulty,
+    min_hr: f32,
+    max_hr: f32,
+) -> Vec<Difficulty> {
+    debug_assert!(
+        min_hr < max_hr,
+        "min HR is >= max HR ({},{})",
+        min_hr,
+        max_hr
+    );
+    debug_assert!(
+        0.0 <= min_hr && max_hr <= 1.0,
+        "min/max HRs not in [0,1] ({},{})",
+        min_hr,
+        max_hr
+    );
+    debug_assert_eq!(min_hr, 0.0, "unsupported otherwise");
+    debug_assert_eq!(max_hr, 1.0, "unsupported otherwise");
+
+    let rand_min = 0.2;
+    let min_hr = rand_min;
+    let max_hr = 1.0;
+
+    // set up hr range stuff for scaling
+    let hr_range: f64 = (max_hr - min_hr) as f64; // / n_chains as f64;
+    let hr_base: f64 = min_hr as f64; // / n_chains as f64;
 
     // idea: create a random distrib to start with -- doesn't rly matter how it looks
+    // we'll turn that into a list of HRs
+    // we want each value to be within min_hr and max_hr, so we should scale based on these
     let mut rd = vec![];
     for _i in 0..n_chains {
-        rd.push(random::<f64>())
+        rd.push(random::<f64>() * hr_range + hr_base)
     }
-    // now we need to scale it so that it adds to `q`
+
+    // now we need to scale it so that it sums to `hr`
     let rd_sum: f64 = rd.iter().sum();
-    let scale = q as f64 / rd_sum;
+    let scale = hr as f64 / rd_sum;
     rd = rd.iter().map(|v| v * scale).collect();
-    debug_assert!((q as f64 - rd.iter().sum::<f64>()).abs() < 0.00000001);
+
+    /*
+    // (note that we convert from local chain HR proportion to global HR proportion here)
+    // rd = rd.iter().map(|v| v * hr_range + hr_base).collect();
+     */
+
+    let hr_diff = (hr as f64 - rd.iter().sum::<f64>()).abs();
+
+    debug_assert!(hr_diff < 0.00000001, "hr_diff too large! {}", hr_diff);
     // we have: list of fractions of network wide HR controlled by the attacker for each chain
-    let exp_total = (total_hr as f64 * q as f64).round();
+    let exp_total = (total_hr as f64 * hr as f64).round();
     rd = rd
         .iter()
         .map(|q_frac| (q_frac * total_hr as f64).floor())
@@ -471,13 +566,125 @@ pub fn gen_random_hr_distribution(n_chains: u32, q: f32, total_hr: Difficulty) -
     let missing = exp_total - actual_total;
     debug_assert!(missing >= 0.0);
     debug_assert_eq!(missing, missing.round(), "no fractional component");
+    let max_per_chain_hr = max_hr as f64 * (total_hr as f64 / n_chains as f64);
     for _i in 0..(missing as u32) {
-        let rand_i = random::<usize>() % (n_chains as usize);
-        rd[rand_i] += 1.0;
+        for _attempt_n in 0..1000 {
+            let rand_i = random::<usize>() % (n_chains as usize);
+            if (rd[rand_i] <= max_per_chain_hr - 1.0) {
+                rd[rand_i] += 1.0;
+                break;
+            }
+            debug_assert!(_attempt_n < 999, "impossible to allocate missing HR?");
+        }
     }
     let actual_total: f64 = rd.iter().cloned().sum();
     debug_assert_eq!(exp_total, actual_total);
     rd.into_iter().map(|v| v as Difficulty).collect()
+}
+
+pub fn gen_random_hr_distributions(
+    n_chains: u32,
+    q: f32,
+    total_hr: Difficulty,
+    min_h_chain_hr: f32,
+) -> (Vec<Difficulty>, Vec<Difficulty>) {
+    /* different plan:
+        1. generate distribution of hashes over all chains
+        1a. bias distribution so that no chain has close to 0 HR (all chains > 0.25x avg HR per chain)
+        1b. scale distribution to per-chain hashes
+        2. allocate those hashes to either honest or attacker HRs
+        2a. allocate minimum honest HR to each chain
+        2b. while attacker needs more hash rate allocation
+            - choose i in 0..(total_hr_left)
+            - find the chain that the ith hash-to-allocate belongs to
+            - sub1 from that chain's remaining HR
+            - add1 to attacker's hr for that chain
+        2c. add remaining hashes to honest
+    */
+
+    // 1. and 1a. gen distrib and bias
+    let mut rd = vec![];
+    for _i in 0..n_chains {
+        // multiply by 2 so that the average over the distrib is 1
+        // then ensure that each value is at least 0.25
+        rd.push(random::<f64>() * 2.0 * (2. - 0.25 / 2.0) + 0.25);
+    }
+
+    // we want the sum of the distribution to == n_chains
+    // so sum(v * const) = n_chains => const = n_chains / sum(v)
+    let v_scale: f64 = n_chains as f64 / rd.iter().sum::<f64>();
+    rd = rd.iter().map(|v| v * v_scale).collect();
+
+    // check the scaling works
+    let nc_diff = (n_chains as f64 - rd.iter().sum::<f64>()).abs();
+    debug_assert!(nc_diff < 0.00000001, "nc_diff too large! {}", nc_diff);
+
+    let avg_per_chain_hr = total_hr as f64 / n_chains as f64;
+    // 1b. scale to per-chain HR
+    let mut chain_hrs = rd
+        .iter()
+        .map(|v| (v * avg_per_chain_hr).round() as u64)
+        .collect_vec();
+
+    // check we have the expected number of global hashes per tick
+    let hr_sum = chain_hrs.iter().sum::<u64>();
+    // we can sometimes be off by 1, here, so if there are any missing then add them to chain0
+    if hr_sum < total_hr {
+        let missing_hrs = total_hr - hr_sum;
+        chain_hrs[0] += missing_hrs;
+        debug!("Added {} missing HRs to chain0", missing_hrs);
+    } else if total_hr < hr_sum {
+        let extra_hrs = hr_sum - total_hr;
+        chain_hrs[0] -= extra_hrs;
+        debug!("Removed {} extra HRs from chain0", extra_hrs);
+    }
+    debug_assert_eq!(total_hr, chain_hrs.iter().sum::<u64>());
+
+    let mut hrs_h = vec![0; n_chains as usize];
+    let mut hrs_a = vec![0; n_chains as usize];
+
+    // 2a allocate min honest hashes to each chain
+    for c in 0..(n_chains as usize) {
+        let min_h_hashes = (chain_hrs[c] as f32 * min_h_chain_hr).ceil() as u64;
+        chain_hrs[c] -= min_h_hashes;
+        hrs_h[c] += min_h_hashes;
+    }
+
+    let mut still_to_alloc: u64 = chain_hrs.iter().sum();
+    let mut alloc_to_attacker = (total_hr as f32 * q).round() as u64;
+
+    // 2b allocate attackers hashes
+    while alloc_to_attacker > 0 {
+        let mut ix = thread_rng().gen_range(0..still_to_alloc);
+        // find ix'th hash
+        let mut c = 0;
+        while chain_hrs[c] <= ix {
+            if c >= chain_hrs.len() {
+                panic!("should be unreachable");
+            }
+            ix -= chain_hrs[c];
+            c += 1;
+        }
+        // the ix'th hash should be in the c'th chain
+        hrs_a[c] += 1;
+        chain_hrs[c] -= 1;
+        alloc_to_attacker -= 1;
+        still_to_alloc -= 1;
+    }
+
+    assert_eq!(0, alloc_to_attacker, "alloc'd all hashes to atker");
+
+    // 2c allocate rest to honest
+    for (c, &chain_hr) in chain_hrs.clone().iter().enumerate() {
+        hrs_h[c] += chain_hr;
+        chain_hrs[c] -= chain_hr;
+        still_to_alloc -= chain_hr;
+    }
+
+    assert_eq!(0, still_to_alloc, "alloc'd all hashes");
+    assert_eq!(0, chain_hrs.iter().sum::<u64>(), "sum chain_hrs == 0");
+
+    (hrs_h, hrs_a)
 }
 
 /// Unimplemented
@@ -489,8 +696,9 @@ pub fn gen_paired_80_20_hr_distributions(
     total_hr: Difficulty,
 ) -> Vec<(Difficulty, Difficulty)> {
     let p = 1. - q;
-    let mut hr_a = gen_random_hr_distribution(n_chains, q, total_hr);
-    let mut hr_h = gen_random_hr_distribution(n_chains, p, total_hr);
+    debug_assert!(q >= 0.2, "q must be > 0.2");
+    let mut hr_a = gen_random_hr_distribution(n_chains, q, total_hr, 0.2, 0.8);
+    let mut hr_h = gen_random_hr_distribution(n_chains, p, total_hr, 0.2, 0.8);
     // now, we want to ensure that for each pair, neither makes up less than 20% of the total (0.2 <= q <= 0.8 and same for p)
     // this breaks at low q, so set lower bound to (q/2).min(p/2);
     let l_bound = (q / 2.).min(p / 2.);
@@ -526,6 +734,9 @@ mod tests {
                 daa2_n_blocks: 100,
                 por_chains: 10,
                 random_hr_distrib: false,
+                rand_hr_incl_main: false,
+                rand_hr_method: RandHrMethod::TwinUniform,
+                fixed_difficulty: None,
             },
         )
     }
@@ -877,7 +1088,7 @@ mod tests {
             for n_chains in [7] {
                 let total_hr = (chain_hr * n_chains) as Difficulty;
                 for q in [0.4, 0.41, 0.11333, 0.6] {
-                    let rd1 = gen_random_hr_distribution(n_chains, q, total_hr);
+                    let rd1 = gen_random_hr_distribution_simple(n_chains, q, total_hr);
                     let rd1_f64: Vec<f64> = rd1
                         .iter()
                         .cloned()
@@ -901,8 +1112,8 @@ mod tests {
                     );
 
                     // test honest + attacker distributions at once
-                    let rd_h = gen_random_hr_distribution(n_chains, 1.0 - q, total_hr);
-                    let rd_a = gen_random_hr_distribution(n_chains, q, total_hr);
+                    let rd_h = gen_random_hr_distribution_simple(n_chains, 1.0 - q, total_hr);
+                    let rd_a = gen_random_hr_distribution_simple(n_chains, q, total_hr);
                     let actual_total: Difficulty = rd_h.iter().cloned().sum::<Difficulty>()
                         + rd_a.iter().cloned().sum::<Difficulty>();
                     assert_eq!(total_hr, actual_total);
@@ -924,16 +1135,119 @@ mod tests {
             }
         }
     }
+    #[test]
+
+    fn test_gen_bounded_random_hr_distribution() {
+        // 7 chains, q=0.4, total_hr=66*7
+        for chain_hr in [66] {
+            for n_chains in [1, 2, 3, 7, 30, 57] {
+                let total_hr = (chain_hr * n_chains) as Difficulty;
+                for q in [0.4, 0.41, 0.21333, 0.6] {
+                    let (rd1_h, rd1) = gen_random_hr_distributions(n_chains, q, total_hr, 0.1);
+                    let rd1_f64: Vec<f64> = rd1.iter().cloned().map(|v| v as f64).collect();
+
+                    let exp_total_hr = (total_hr) as f64 * q as f64;
+                    assert_eq!(
+                        exp_total_hr.round(),
+                        rd1_f64.iter().sum(),
+                        "total hr should match expected ({:?})",
+                        rd1
+                    );
+                    let exp_avg_hr = (chain_hr as f32 * q) as f64;
+                    let act_avg_hr = rd1_f64.amean().unwrap();
+                    let avg_diff = (exp_avg_hr - act_avg_hr).abs();
+                    assert!(
+                        avg_diff < 0.5,
+                        "average HR per chain >0.5 from expected act:{}, exp:{} (hrs: {:?})",
+                        act_avg_hr,
+                        exp_avg_hr,
+                        rd1
+                    );
+
+                    // test honest + attacker distributions at once
+                    let min_h = 0.15;
+                    let (rd_h, rd_a) = gen_random_hr_distributions(n_chains, q, total_hr, min_h);
+
+                    let rd_comb: Vec<_> = rd_h
+                        .iter()
+                        .cloned()
+                        .zip(rd_a.iter().cloned())
+                        .map(|(h, a)| (h + a) as u32)
+                        .collect();
+                    println!("Q: {:?}", q);
+                    println!("Attacker: {:?}", rd_a);
+                    println!("Honest:   {:?}", rd_h);
+                    println!("Combined: {:?}", rd_comb);
+                    println!(
+                        "Average:  {:?} == {:?}",
+                        chain_hr,
+                        rd_comb.amean().unwrap() as Difficulty
+                    );
+
+                    rd_h.iter()
+                        .zip(rd_comb.clone())
+                        .map(|(&v, tot)| {
+                            assert!(
+                                (v as f32) >= min_h * tot as f32,
+                                "All honest HRs above min ({} > {})",
+                                v,
+                                min_h * tot as f32
+                            );
+                        })
+                        .collect_vec();
+
+                    rd_a.iter()
+                        .zip(rd_comb.clone())
+                        .map(|(&v, tot)| {
+                            assert!(
+                                (v as f32) <= (1.0 - min_h) * tot as f32,
+                                "All attacker HRs below max ({} < {})",
+                                v,
+                                (1.0 - min_h) * tot as f32
+                            );
+                        })
+                        .collect_vec();
+
+                    let actual_total: Difficulty = rd_h.iter().cloned().sum::<Difficulty>()
+                        + rd_a.iter().cloned().sum::<Difficulty>();
+
+                    assert_eq!(total_hr, actual_total);
+                }
+            }
+        }
+    }
 
     #[test]
-    fn test_random_hr_distribution_properties() {
-        let n_chains = 100;
-        // let hr_p = 0.65;
-        // let hr_q = 0.35;
-        // let (hr_p, hr_q) = (0.5, 0.5);
+    fn test_random_hr_twinuniform_properties() {
+        println!("HASH-RATE DISTRIBUTION PMFs FOR __TWIN UNIFORM__ DISTRIBUTIONS");
+        let n_chains = 50;
         let (hr_p, hr_q) = (0.7, 0.3);
-        let per_chain_hr = 200;
+        let per_chain_hr = 60;
         let total_hr: u64 = (n_chains as u64) * per_chain_hr;
+        random_hr_distribution_properties(n_chains, hr_p, hr_q, per_chain_hr, &|| {
+            gen_twin_random_hr_distributions(n_chains, hr_q, total_hr)
+        });
+    }
+
+    #[test]
+    fn test_random_hr_eachhash_properties() {
+        println!("HASH-RATE DISTRIBUTION PMFs FOR __EACH HASH__ DISTRIBUTIONS");
+        let n_chains = 50;
+        let (hr_p, hr_q) = (0.7, 0.3);
+        let per_chain_hr = 60;
+        let total_hr: u64 = (n_chains as u64) * per_chain_hr;
+        random_hr_distribution_properties(n_chains, hr_p, hr_q, per_chain_hr, &|| {
+            gen_random_hr_distributions(n_chains, hr_q, total_hr, 0.15)
+        });
+    }
+
+    fn random_hr_distribution_properties(
+        n_chains: u32,
+        hr_p: f32,
+        hr_q: f32,
+        per_chain_hr: u64,
+        hr_distribs: &dyn Fn() -> (Vec<u64>, Vec<u64>),
+    ) {
         // results
         let n_buckets = 21;
         let max_chain_hr = per_chain_hr * 2;
@@ -949,8 +1263,7 @@ mod tests {
         let n_trials = 1000;
         let count_incr = 1.0 / (n_trials * n_chains) as f64; // add this to the right bucket each loop
         for _i in 0..n_trials {
-            let rd_h = gen_random_hr_distribution(n_chains, hr_p, total_hr);
-            let rd_a = gen_random_hr_distribution(n_chains, hr_q, total_hr);
+            let (rd_h, rd_a) = hr_distribs();
             let cw_hash_rates: Vec<_> = rd_h.into_iter().zip(rd_a.into_iter()).collect();
             for (_p, _q) in cw_hash_rates {
                 results_honest[(_p / bucket_period) as usize] += count_incr;

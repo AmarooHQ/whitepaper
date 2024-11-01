@@ -1,0 +1,68 @@
+%---
+
+% fix for incompatibility between ctable and tikz
+% \usepackage{scrlfile}
+% \usepackage{tikz}
+% \usepackage{transparent}
+% \let\OriginalTransparent=\transparent
+%
+% \makeatletter
+% \begingroup\expandafter\expandafter\expandafter\endgroup
+% \expandafter\ifx\csname pgfutil@addpdfresource@extgs\endcsname\relax
+% \else
+%   \AtBeginDocument{%
+%     % \pgf@sys@addpdfresource@extgs@plain{%
+%     \pgfutil@addpdfresource@extgs{%
+%       \TRP@list
+%     }%
+%   }%
+%   \let\TRP@addresource\relax
+% \fi
+% \makeatother
+%
+% \AfterPackage{tikz}{\usepackage{ctable}}
+% \AtBeginDocument{%
+%   \let\transparent=\OriginalTransparent
+% }
+
+%---
+
+% accsupp provides a way to replace text when being copied
+% this might make screenreaders or the link say things other than what is read,
+% but the intention is to use to to avoid duplication for things like margin text in dialogs.
+\usepackage{accsupp}
+
+%---
+
+% misc packages
+\usepackage{ifthen}
+
+%---
+
+% add some tikz libs for inline diags (can be moved to SAG later)
+\usetikzlibrary{arrows, arrows.meta, calc, positioning, fit, decorations.pathreplacing, patterns, patterns.meta}
+
+%---
+
+% all the preamble stuff
+
+\input{includes/ut/00-preamble/010-pagestyle.tex}
+\input{includes/ut/00-preamble/020-colors-and-styles.tex}
+\input{includes/ut/00-preamble/030-hyperlinks.tex}
+\input{includes/ut/00-preamble/040-gitinfo.tex}
+\input{includes/ut/00-preamble/050-utils.tex}
+\input{includes/ut/00-preamble/060-autoref.tex}
+\input{includes/ut/00-preamble/070-toc-depth.tex}
+\input{includes/ut/00-preamble/080-custom-lists.tex}
+\input{includes/ut/00-preamble/110-quotes.tex}
+\input{includes/ut/00-preamble/120-comments.tex}
+\input{includes/ut/00-preamble/130-todos.tex}
+\input{includes/ut/00-preamble/140-chat-bubbles.tex}
+\input{includes/ut/00-preamble/150-glossary.tex}
+\input{includes/ut/00-preamble/160-axioms.tex}
+\input{includes/ut/00-preamble/210-tables.tex}
+\input{includes/ut/00-preamble/510-maths.tex}
+\input{includes/ut/00-preamble/610-ut-names.tex}
+\input{includes/ut/00-preamble/900-epigraph.tex}
+\input{includes/ut/00-preamble/970-fix-sections.tex}
+\input{includes/ut/00-preamble/999-citations.tex}

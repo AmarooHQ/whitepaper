@@ -4,22 +4,22 @@
 
 \label{sec:constructing-ut}
 
-*Proof of Reflection* can be used to build $\UT{1}$ -- an $O(c^2)$ foundation for a blockchain network (called *the simplex*). This section details the construction of such a foundation, and how it can be extended up to $\UT{3}$ -- which has $O(c^4)$ complexity. The $O(n)$ scaling configuration ($\UTinf{}$) is detailed in \autoref{sec:tiling}.
+*Proof of Reflection* can be used to build $\UT{1}$ --- an $O(c^2)$ foundation for a blockchain network (called *the simplex*). This section details the construction of such a foundation, and how it can be extended up to $\UT{3}$ --- which has $O(c^4)$ complexity. The $O(n)$ scaling configuration ($\UTinf{}$) is detailed in \autoref{sec:tiling}.
 
-Such a foundation (*the simplex*) is *not* a sharded blockchain -- there's no requirement that participating chains are interchangeable or using the same primitives. This was demonstrated via the example in \autoref{sec:two-blockchains}. Rather, *the simplex* is an emergent construct that is created via the *relationships* between blockchains. Instead of one blockchain being split into many (as occurs with sharding), *the simplex* is many blockchains becoming one coherent network.
+Such a foundation (*the simplex*) is *not* a sharded blockchain --- there's no requirement that participating chains are interchangeable or using the same primitives. This was demonstrated via the example in \autoref{sec:two-blockchains}. Rather, *the simplex* is an emergent construct that is created via the *relationships* between blockchains. Instead of one blockchain being split into many (as occurs with sharding), *the simplex* is many blockchains becoming one coherent network.
 
 ### Generalizing Reflection
 
 \label{sec:generalizing-reflection}
 
-*Proof of Reflection* is, in essence, the idea that a chain can acknowledge that its history has been confirmed by a different chain[^reflection-prior]. That is a simplification, but it *is* the essence of it.
+*Proof of Reflection* is, in essence, the idea that a chain can acknowledge that its history has been confirmed by a different chain, and that this fact can be used to share security between chains[^reflection-prior]. That is a simplification, but it *is* the essence of it.
 
 [^reflection-prior]: I have not been able to find any existing discussion of this method. If you know of any existing discussion of this method, please post a link to the forum topic that is linked in the abstract.
 
 In principle, the necessary capabilities (and actions) that some chains, $C_A$ and $C_B$, must have (and do) in order for $C_A$ to be reflected by $C_B$ are:
 
-1. The headers of $C_A$ can be (and are) freely recorded -- promptly and unambiguously -- in $C_B$;
-2. The headers of $C_B$ can be (and are) freely recorded -- promptly and unambiguously -- in $C_A$; and
+1. The headers of $C_A$ can be (and are) freely recorded --- promptly and unambiguously --- in $C_B$;
+2. The headers of $C_B$ can be (and are) freely recorded --- promptly and unambiguously --- in $C_A$; and
 3. $C_A$ is able to (and does) promptly prove that its past headers have been recorded in $C_B$, and has full knowledge of which headers have been recorded.
 
 \input{includes/ut/algorithms/por-reflected-block-weight.tex}
@@ -83,15 +83,20 @@ To maintain consistency with the geometric usage of the term *simplex*: a simple
 In a $k$-simplex, each simplex-chain has $k$ reflections (one reflection for each of the other simplex-chains).
 A $k$-simplex has, in total, ${k+1} \choose 2$ reflections.
 
-[^simplex-maths]: The name is taken from geometry (particularly: the higher-dimensional kind). A simplex, for a given dimensionality, is the uniquely simplest polytope; e.g., a line in 1D space, a triangle in 2D space, a tetrahedron in 3D space, etc. A $k$-dimensional simplex is known as a $k$-simplex. As shown in \autoref{fig:simplexes}, a particular 2D projection of a $k$-simplex is identical to a diagram of all possible mutual reflections between $k+1$ blockchains, where each chain is represented by a vertex and each mutual reflection is represented by an edge.
+[^simplex-maths]: The name is taken from geometry (particularly: the higher-dimensional kind). A simplex, for a given dimensionality, is the uniquely simplest polytope; e.g., a line in 1D space, a triangle in 2D space, a tetrahedron in 3D space, etc. A $k$-dimensional simplex is known as a $k$-simplex. As shown in \autoref{fig:simplexes}, a particular 2D projection of a $k$-simplex (which produces a regular $(k+1)$-gon with additional edges between all pairs of vertices), is identical to a diagram of all possible mutual reflections between $k+1$ blockchains, where each chain is represented by a vertex and each mutual reflection is represented by an edge.
 
-[^simplex-approx]: \textbf{NB:} I will ignore this distinction for $k \gg 1$.
+[^simplex-approx]: NB: I will ignore this distinction for $k \gg 1$.
 
 The security of simplexes is discussed in \autoref{sec:simplex-security}.
 
+
+<!-- ### Scaling Complexity Intuition -->
+
+
+\input{includes/ut/content/25-constructing-ut/20-scaling-complexity-intuition.tex}
+
+
 %% --- %%
-
-
 
 \input{includes/ut/headings/25-dapp-chains.tex}
 
@@ -103,7 +108,7 @@ The security of simplexes is discussed in \autoref{sec:simplex-security}.
   An \emph{application-specific} child-chain that is secured via the parent-chain. Dapp-chains may have architecturally distinct state- and transaction-schemes (distinct from those schemes used in the simplex, and other dapp-chains)
 }
 
-Dapp-chains are not restricted to any particular foundational consensus method.
+Intrinsically, dapp-chains are not restricted to any particular foundational consensus method.
 They might use PoW, or PoS, or PoA, or something else.
 However, dapp-chains also use *Proof of Reflection* with their host simplex-chain.
 With a suitable foundational consensus method, PoR enables dapp-chains to be as secure as their host simplex-chain with little overhead.
@@ -129,8 +134,6 @@ There is not much (if any) overhead to using an input-output system like this: a
 
 [^scriptsig]: In Bitcoin, the input script to a transaction is called the `scriptSig`; see \url{https://en.bitcoin.it/wiki/Transaction}.
 
-
-
 #### Dapp-chain Security
 
 \label{sec:dapp-chain-security}
@@ -144,23 +147,29 @@ This is not very secure in the case of a PoW dapp-chain, but it means that a PoS
 
 When a header-transaction is confirmed by the simplex, the corresponding dapp-chain can efficiently use one-way PoR to inherit the security (and security properties) of the host simplex-chain[^dc-por]. Similar to mutual PoR, this can provide a *security context* where otherwise-insecure methods of consensus can be done securely.
 
-[^dc-por]: Note: PoW dapp-chains will have a much lower difficulty than the host simplex-chain. Although a simplex-chain could do mutual PoR with dapp-chains, this is unnecessary and inefficient -- provided that this difficulty asymmetry exists. Although there is no fundamental reason that PoW dapp-chains must have a much lower difficulty, we should take care to use incentive structures that lead to this sort of outcome provided such a policy increases security of the simplex.
+[^dc-por]: Note: PoW dapp-chains will have a much lower difficulty than the host simplex-chain. Although a simplex-chain could do mutual PoR with dapp-chains, this is unnecessary and inefficient --- provided that this difficulty asymmetry exists. Although there is no fundamental reason that PoW dapp-chains must have a much lower difficulty, we should take care to avoid any implementation that would compromise or reduce the security of the simplex. Practically, this probably means avoiding PoW dapp-chains (see \autoref{sec:child-chain-pow-pos-asymmetry}).
 
 With regards to doublespends, one-way PoR means that the reflected chain is *at least* as difficult to attack as the reflecting chain (as we covered in \autoref{sec:por-step4}).
 Since the parent simplex-chain is as difficult to attack as the complete simplex, each dapp-chain must therefore *also* be that difficult to attack.
 Attacking a dapp-chain is as difficult as attacking the entire network.
 
-Note that parent-chains (generally) need to record their child-chains' headers *anyway*, so this use of one-way PoR -- where a simplex-chain reflects child dapp-chains -- has near-zero overhead for both the simplex-chain and the dapp-chain.
+Note that parent-chains (generally) need to record their child-chains' headers *anyway*, so this use of one-way PoR --- where a simplex-chain reflects child dapp-chains --- has near-zero overhead for both the simplex-chain and the dapp-chain.
 
-The only major, generic concern for dapp-chains -- that I can see -- is \emph{preventing DoS attacks}.
+One major, generic concern for dapp-chains is \emph{preventing DoS attacks}.\footnote{
+  Unfortunately, the strategy we use in \autoref{sec:preventing-dos-attacks} to protect simplex-chains does not work here.
+}
 This is one reason to favor PoS (or PoA) dapp-chains over PoW dapp-chains.
-Though perhaps we should wait for \autoref{sec:preventing-dos-attacks}.
+Another concern is the \emph{availability} of dapp-chain blocks.
+
+
+\input{25-constructing-ut/42-dapp-chain-pow-pos}
+
 
 #### Three General Incentive Models for Dapp-chain Reflection
 
 If dapp-chain headers are included along-side transactions in simplex-blocks, is it not the case that both must pay some kind of *transaction fee*?
 If not, how are simplex-chain miners to prioritize what to include in their blocks?
-Even if such a fee is *not always necessary*, the *ability* to provide a fee has decisive advantages -- like creating asymmetry between an attacker and honest miners.
+Even if such a fee is *not always necessary*, the *ability* to provide a fee has decisive advantages --- like creating asymmetry between an attacker and honest simplex-chain miners.
 
 If it is possible to implement dapp-chains (or any system of child-chains) such that those chains have \emph{freedom of protocol} and \emph{freedom of incentivization} whilst inheriting the parent-chain's security, then we should strive to achieve that.
 
@@ -172,9 +181,9 @@ If it is possible to implement dapp-chains (or any system of child-chains) such 
   The property whereby child-chains have free choice of protocol (including consensus mechanism, scripting, accounting methods, block structures, etc)
 }
 
-\autoref{sec:comparing-weight-dex} details a conversion method whereby PoR is possible between chains using different root tokens via a DEX. Could dapp-chains use a \emph{protocol-level} DEX to abstract their protocol and incentive-method away from those of its parent-chain? Yes.
+\autoref{sec:comparing-weight-dex} details a conversion method whereby PoR is possible between chains using different root tokens via a DEX. Could dapp-chains use a \emph{protocol-level} DEX to abstract their protocol and incentive method away from those of its parent-chain? Yes.
 
-Is this required for this abstraction? No.
+Is this required for this kind of abstraction? No.
 
 Here are three methods of abstraction which maintain the above freedoms.
 
@@ -197,7 +206,7 @@ When a dapp-chain hosts a native DEX, it can use that DEX for PoR.
 The general case (where a reflecting chain contributes far more chain-work than the reflected chain) was discussed in \autoref{sec:comparing-weight-dex}.
 
 Consider the limited context of a DEX with only one required trading pair (between the dapp-chain's root token and the ROO), combined with the security-contribution differential between a simplex-chain and a dapp-chain.
-Note that a conservative implementation of a DEX between this pair *only relies on local state* -- that of the host simplex-chain and the dapp-chain, all of which is accessible to dapp-chain full nodes.
+Note that a conservative implementation of a DEX between this pair *only relies on local state* --- that of the host simplex-chain and the dapp-chain, all of which is accessible to dapp-chain full nodes.
 The simplest method of preventing market manipulation (that might allow for some attack on the dapp-chain) is to calculate PoR weight via an *old* exchange rate (e.g., from 24 hours ago), or to use an *average* over some period of time.
 Both of these ensure that *competition between blocks* (at any given time) is not dependent on the *current* DEX execution.
 With regards to dapp-chains using Proof of Reflection, this is sufficient.
@@ -223,7 +232,7 @@ Example use-cases:
 This demonstrates both *freedom of incentivization* (as there is none) and *freedom of protocol* as no payments are made and no restriction is placed on the nature of this dapp-chain's payload.
 
 \begin{comment}
-<!-- [^election]: The major problem that frustrated systems of end-to-end arbitrarily-verifiable online elections was the difficulty of implementing secret ballot. Today, there are at least three known methods: zero-knowledge proofs, homomorphic encryption, and [a CoinShuffle-based system of my own design](https://gitlab.com/exo-one/svst-docker/blob/master/svst-docs/secure.vote.white.napkin.md). (Note that it is [impossible to prevent the voter from creating some proof-of-vote](https://github.com/zack-bitcoin/amoveo-docs/issues/2) -- in these and all other systems of secret ballot.) -->
+<!-- [^election]: The major problem that frustrated systems of end-to-end arbitrarily-verifiable online elections was the difficulty of implementing secret ballot. Today, there are at least three known methods: zero-knowledge proofs, homomorphic encryption, and [a CoinShuffle-based system of my own design](https://gitlab.com/exo-one/svst-docker/blob/master/svst-docs/secure.vote.white.napkin.md). (Note that it is [impossible to prevent the voter from creating some proof-of-vote](https://github.com/zack-bitcoin/amoveo-docs/issues/2) --- in these and all other systems of secret ballot.) -->
 \end{comment}
 
 [^anchoring]: **Anchoring**: The process by which the hash of some data (perhaps a secondary chain's blocks) is included in transactions of a primary blockchain (e.g., [Bitcoin](https://www.reddit.com/r/Bitcoin/comments/5xkvc1/psa_were_running_a_stress_test_of_our_blockchain/)).
@@ -232,12 +241,12 @@ Though I think that the idea of time-stamping a hash (e.g., via an \textsc{OP\_R
 
 #### PoS Dapp-chains
 
-If the headers of dapp-chains are encoded as simplex-transactions, then techniques like *slashing* are first-class operations within the *hybrid PoW* context provided by the simplex.
+If the headers of dapp-chains are encoded as simplex-transactions, then techniques like *slashing* are first-class operations within the *hybrid* PoW context provided by the simplex.
 This solves the *Nothing at Stake* problem for PoS dapp-chains, provided the necessary PoS primitives can be encoded in a simplex-transaction.
 
 The abstraction layer between simplex-chains and dapp-chains brings practical benefits, too.
 For example: existing (open-source) PoS blockchain schemes can be easily integrated as dapp-chains.
-Given that dapp-chains inherit security properties of their parent-chain (via one-way PoR), if such a dapp-chain's consensus method supports *other* features -- e.g., [finality guarantees](https://github.com/w3f/consensus/blob/master/pdf/grandpa.pdf) -- those features are *free*.
+Given that dapp-chains inherit security properties of their parent-chain (via one-way PoR), if such a dapp-chain's consensus method supports *other* features --- e.g., [finality guarantees](https://github.com/w3f/consensus/blob/master/pdf/grandpa.pdf) --- those features are *free*.
 (Sharding, too, for that matter\dots)
 
 The most likely method of integration has three core components: modification of the headers (and integration of PoR), modification of existing slashing protocols, and support for intra-simplex SPV proofs.
