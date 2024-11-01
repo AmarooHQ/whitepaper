@@ -57,6 +57,7 @@ Thus, we effectively have two \mu-superDAGs: one being the \emph{best-blocks} \m
 We then construct the main suffix proof for two cases: the \emph{best-blocks} suffix proof (regardless of on-main status), and the \emph{on-main only} suffix proof.
 These two proofs will always be consistent, though the best-blocks proof may not include all $\mu$-superblocks that are included in the on-main proof.
 To account for this, we can require that, for each \mu level, the best-blocks \mu-superDAG suffix subgraph is a superset of the corresponding on-main \mu-superchain suffix.
+(That is: we make sure the necessary on-main blocks are included in the proof if they wouldn't be otherwise.)
 Both together comprise the suffix proof.
 
 Regarding infix proofs, we can use the existing \texttt{followDown} algorithm for with only one modification: an additional parameter determines whether \texttt{followDown} should traverse the \emph{best-blocks} path to the block, or the \emph{on-main only} path.
