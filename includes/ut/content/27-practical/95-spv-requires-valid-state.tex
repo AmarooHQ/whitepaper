@@ -1411,10 +1411,10 @@ The duration of this transition depends on the proportion of honest miners: $h$.
 Let's define $h$ via $h + d = 1$, where $d$ is the proportion of dishonest miners, including the attacker.
 Since $d$ includes the attacker, we can say $d > q$, and $h < p$.
 
-Similar to \autoref{sec:dos-and-dags}, the asymmetry between honest and dishonest miners means that, even for a small $h$, the chain-weight of the honest chain-tips will eventuall dominate the chain-weight of dishonest chain-tips.
+Similar to \autoref{sec:dos-and-dags}, the asymmetry between honest and dishonest miners means that, even for a small $h$, the chain-weight of the honest chain-tips will eventually dominate the chain-weight of dishonest chain-tips.
 After that point, each simplex-chain's main chain will include the fraud proof, and the dishonest chain-tips will never be able to out-weigh the honest ones.
 
-Let us represent the weight of the honest and dishonest chain segments with a vector.
+Let us use a vector to represent the weight of the honest and dishonest chain segments (relative to their most recent common ancestor).
 This is purely for convenience so that we can analyze both at the same time.
 The top row is the weight of the honest chain segment, and the second row is the weight of the dishonest chain segment.
 At the start of the attack ($t_0$), neither chain segment has any blocks, so $t_0 = \vec{0}$.

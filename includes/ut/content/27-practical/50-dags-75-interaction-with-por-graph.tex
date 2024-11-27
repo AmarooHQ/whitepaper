@@ -12,7 +12,7 @@ This was for two reasons.
 First, \BL should not explicitly reflect its own ancestors --- links to parents \emph{are} reflections, but are the trivial case where the local and reflecting chains are the same, and the local and reflecting blocks are the same.
 Second, \BL should not skip accounting for \BR{}'s implied reflection of its parent(s), so we treat parents like any other reflected block --- we must be sure not to leave any gaps.
 
-There is still one gap, though: \cL blocks that are not an ancestor of \BL.
+\ul{There is still one gap, though}: \cL blocks that are not an ancestor of \BL.
 
 It should be clear that parent links are qualitatively different from reflections: child blocks attest to the validity of their parent blocks, and to continuity between these two blocks.
 % This was the reason for the predicate's (ii)(b) condition
@@ -29,15 +29,18 @@ So far, this principle is convergent with honest miners building on \emph{valid}
 However, what are honest miners to do if there is an invalid block?
 We need to consider this because a block with a valid PoRs sub-block does not necessarily have a valid transactions sub-block.
 
-We have already discussed the solution in \autoref{sec:stateless-and-fraud-proofs}: link back to, or \emph{flag}, that block as invalid \emph{with an attached fraud proof}, and never use that block as a parent.
+We have already discussed the solution in \autoref{sec:stateless-and-fraud-proofs}: link back to, or \emph{flag}, that block as invalid \emph{with an attached fraud proof}, and never use that block as a canonical ancestor.
 The transactions in that block aren't important --- excepting the offending transaction, which is part of the fraud proof.
 And we can reconstruct the PoRs sub-block using $O(1)$ data thanks to \AxOfMaximalReflection.
 Thus, an invalid block is only as large as its header, list of reflected PoR graph-tips, and fraud proof.
 That's $O(\log c)$ in the worst case.
 
-This is all that we need to plug the gap: honest miners can always build on \emph{any} local chain-tip, valid or not.
+\subsubsubsubsection{Axiom of Unified Ancestry}
+
+This is all that we need to plug the gap: ensure honest miners can always build on \emph{any} local chain-tip, valid or not.
 If the chain-tip is valid, the honest miner uses it as a parent.
 If it is invalid, the honest miner flags it as invalid.
+It is still an ancestor cryptographically, but not with respect to its transactions and chain-state.
 
 % It is only in the case of an invalid block that it cannot be an ancestor, and in that case the miner \emph{must} link to it with the fraud proof attached.
 % This link is sort of like a reflection, but it comes with a note saying \emph{this block will never be valid, and here's why}.

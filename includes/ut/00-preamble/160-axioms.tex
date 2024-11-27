@@ -35,6 +35,7 @@
 \makeatletter
 \NewDocumentCommand{\DeclareAxiom}{m m +m +o}{
     \MkPrincipleCmds{#1}{#2}
+    \label{axiom:#1}%
     \begin{tcolorbox}[
         title={\csname AxiomOfRaw#1\endcsname},
         bicolor,
@@ -55,7 +56,6 @@
         middle=.3em,
         boxsep=0em,
         ]%
-        \label{axiom:#1}%
         \emph{Principle:} \trim@post@space{#2}%
         \reversemarginpar\marginnote{\nullOnCopy{\textbf{Axiom}}}%
 

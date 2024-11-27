@@ -62,14 +62,14 @@ Let's limit block-DAG blocks to two parents.
 If the best block has two parents, then each parent will have a \emph{subgraph of blocks} between itself and the \emph{most recent common primary ancestor} of the two parents.
 The subgraph which takes priority is that of the \emph{prioritized parent's ancestry}.
 If that subgraph is a chain, then the ordering and execution of blocks is trivial.
-If it is not, then there must be another subgraph within that subgraph, and this algorithm is applied recursively.
-After the prioritized subgraph is processed, the remaining blocks (those that are only ancestors of the remaining parent block) are ordered and applied --- invoking recursion where necessary.
+If it is not, then there must be another subgraph within that subgraph, and this algorithm is applied recursively to the prioritized parent.
+After the prioritized subgraph is processed, the remaining blocks (those that are only ancestors of the secondary parent block, if it exists) are ordered and applied --- invoking recursion where necessary.
 Finally, the best block is applied.
 In this way, all blocks are executed after their ancestors, and there is a clear and total ordering that trivially converges.
 
 There is a simple generalization of the above to allow more than two parent blocks, too.
 That is: replace \emph{all} but the last (worst) parent with a \emph{virtual parent block} that links back to all remaining \emph{actual} parent blocks (but contributes zero block-weight itself).
-Replacing the best parents (rather than the worst parents) with a virtual block means that the fork rule works when selecting which of the virtual block and the least-prioritized parent is prioritized.
+Replacing the best parents (rather than the worst parents) with a virtual block means that the fork rule works when selecting the virtual block over the least-prioritized parent.
 This can be repeated to allow for arbitrarily many parents.
 
 \autoref{fig:dag-ex1-full} is an example of this algorithm for a moderately complex chain-segment (\(\BB\cdots \BB{3}\) which is 7 blocks total), and each step is enumerated and explained.

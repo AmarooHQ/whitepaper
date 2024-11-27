@@ -27,7 +27,7 @@ Particularly that, provided we knew \emph{which} blocks were reflected and the \
 However, this relied on either tracking \emph{the entire} PoR graph, or additionally downloading all missing merkle branches corresponding to PoRs used by the reflected block.
 
 Why is so much information required?
-The reason is that each miner can choose \emph{whether} to reflect any block (assuming that the block is available), and has the freedom to choose the \emph{position} of each reflected block in the reflections tree.
+The reason is that each miner can choose \emph{whether} to reflect any remote block (assuming that the block is available), and has freedom to choose the \emph{position} of each reflected block in the merkle tree of PoRs.
 
 Regarding the \emph{position} of reflected blocks --- this is easy to solve.
 All we need to do is ensure there is only one position that a block can be in.

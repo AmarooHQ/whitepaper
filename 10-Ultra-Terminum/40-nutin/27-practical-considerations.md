@@ -10,37 +10,6 @@
 
 \input{includes/ut/content/27-practical/10-refl-availability.tex}
 
-### Availability of Reflected Blocks (old)
-
-\draftNote{This section (\autoref{sec:availability-of-blocks}) requires a redraft. The Axiom of Availability is much newer, and is the most important part.}
-
-\todoDraftOnly{Review this section. Got some feedback that this section was unclear. Is nomenclature introduced prior to this section? check if there's something that interacts with DAGs and mention if so.}
-
-What would happen if a header --- with valid PoW but *without* a valid block --- were to be reflected? Let's consider the two chains from before (L and R) in a mutual PoR configuration.
-
-That would mean that chain L contains a header, $H_{R,1a}$, for chain R for which no block is available.
-
-This does not break chain R, but it could mean that other blocks on chain R temporarily have a harder time competing, or waste the resources of chain R nodes as they go looking for that block, $B_{R,1a}$.
-Furthermore, it risks chain R miners doing SPV mining, which is bad.
-
-\todoDraftOnly{i think the below is wrong. should probs rewrite section}
-
-After $H_{R,1a}$ is reflected, chain R miners shouldn't build on that header without validating the block (so they should not mine on top of it).
-Before long they'd produce an alternate valid block, $B_{R,1b}$.
-But $B_{R,1b}$ (and its header, $H_{R,1b}$) wouldn't be reflected yet.
-So $B_{R,1a}$ would have priority over $B_{R,1b}$ until $B_{R,2b}$ (building on $B_{R,1b}$) is created and both $H_{R,1b}$ and $H_{R,2b}$ are reflected.
-After that, a minor chain re-org would restore normality.
-
-There is at least one way to ensure that blocks of reflected headers are available.
-That is: miners on both chain L and chain R should *refuse* to build on blocks that include headers without a known block.
-This would mean that the chain L block (which includes $H_{R,1a}$) is \emph{invalid} on chain L while $B_{R,1a}$ is unavailable.
-If such a method is feasible, then the malicious chain L miner has greater opportunity cost to produce a block reflecting $H_{R,1a}$.
-Moreover, this method prevents chain L (and its miners) from contributing to a potential attack on chain R.
-
-For this to work, though, miners must verify that blocks *exist* for all reflected headers. Is this practical if there are $10^3$ or $10^4$ reflected chains in a simplex? The miners are only required to do very small amounts of computation on these other blocks, so their computational capacity won't be a bottleneck here. Furthermore, they don't need to keep these other blocks indefinitely, just long enough to be confident that they reflect only headers with existent blocks. So they won't need much extra disk space, either --- after a few years, the history of a simplex-chain will be larger than, say, the last 12 hours of all simplex-chains' histories combined. What miners will need is *bandwidth*.
-
-The complexity and impact of this strategy is discussed in \autoref{sec:bandwidth-complexity}.
-
 %% END ### RELEASE
 
 %% BEGIN ### DRAFT
