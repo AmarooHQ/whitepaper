@@ -94,6 +94,8 @@ We have some hints to conditions that might belong to a solution:
 
 ### Prior Assumptions
 
+\pz{There is no 2.1.2 so we need to remove the numbering}
+
 Here are some prior underlying assumptions that are either common or which I expect to be:
 
 * Sharing PoW security requires merged mining.
@@ -113,6 +115,8 @@ Are they always?
 }
 
 ## Conjecture: A Principle of Scaling
+
+\pz{This is too short to be a subsection, or at least emphasize on the message}
 
 \label{sec:a-principle-of-scaling}
 

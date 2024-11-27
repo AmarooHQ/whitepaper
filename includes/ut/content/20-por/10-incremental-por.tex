@@ -7,7 +7,7 @@ This is a proof that one blockchain's headers have been confirmed by a second ch
 Using these proofs, we can share security between these two chains, such that attacking either chain is as difficult as attacking both.
 
 Our starting point is the question: is there anything \emph{in principle} that prohibits blockchains sharing security?
-We already have some examples of this (e.g., merged mining), but those existing methods require each miner to opt-in and are not general.
+We already have some examples of this (e.g., merged mining), but those existing methods require each miner to opt-in and aren't general.
 Can we come up with a general way to share security between chains?
 
 \aside{
@@ -40,7 +40,7 @@ Since there is no established term, let's call it a ``projection'', and let's ca
 
 It is well understood that an Ethereum smart contract (SC) can \emph{image} Bitcoin.
 This results in a \emph{projection} of Bitcoin that is available to other Ethereum SCs (e.g., to use as the basis for SPV proofs).
-Since Bitcoin's consensus and PoW algorithm is simple and has low overhead, implementing the necessary logic as an SC is viable.
+Since Bitcoin's consensus and PoW algorithm is simple and has low overhead, implementing the necessary logic as an Ethereum SC is viable.
 In principle, any chain with a headers-only mode can be imaged in this way.\footnote{
     Practically, there can be constraints that prevent this.
     For example: Ethereum typically doesn't support memory hard hashes, so hosting projections of chains like Litecoin on Ethereum is potentially impossible.
