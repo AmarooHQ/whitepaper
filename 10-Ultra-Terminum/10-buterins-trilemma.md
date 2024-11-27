@@ -12,7 +12,7 @@ keep toc to d=1 for this section --- reduces ToC page size. default is d=3
 
 \href{\citeShardingFAQsLink}{The trilemma} is as follows:
 
-For some magnitude of computational resources (computation, bandwidth, storage, etc), *c*, and magnitude of the network (transaction throughput, state size, market cap, etc), *n*, it is claimed that blockchain systems have, at most, 2 of these 3 properties:
+For some magnitude of computational resources available to each node (computation, bandwidth, storage, etc), $c$, and abstract magnitude of the network (transaction throughput, state size, user population, market cap, etc), $n$, it is claimed that blockchain systems have, at most, two of these three properties:
 
 * Decentralization --- the system can operate with participants that have only $O(c)$ resources (e.g., a laptop, a raspberry pi, a VPS; typical internet bandwidth, storage space, etc).
 * Security --- the system is secure against attackers with up to $O(n)$ resources.
