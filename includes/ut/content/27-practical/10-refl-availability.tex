@@ -1,14 +1,12 @@
 \subsubsection{The Availability of Reflected Blocks}
 
-% todo: label this after draft
-% \label{sec:availability-of-blocks}
+\label{sec:availability-of-blocks}
 
 What happens if a chain reflects a valid block that is not available?
 Could an attacker use this to their advantage?
 
-For example, consider the following (shown in \autoref{fig:unavailable-ex1}).
-We have two chains using mutual PoR --- \cL and \cR.
-Additionally, the most recently produced block is \BL{}, which reflected \BR{}.
+For example, consider the following situation (\autoref{fig:unavailable-ex1}).
+\cL and \cR are two mutually reflecting chains, and the most recently produced block is \BL{}, which reflected \BR{}.
 Next, a malicious \cR miner produces a valid block (\BR{1a}) which reflects \BL{}.
 That miner broadcasts the \emph{header} of \BR{1a} along with a PoR branch proving that \BL{} was reflected, but does not broadcast the rest of the block.
 The \cL miners receive the header and PoR branch, and shortly thereafter an \cL miner produces \BL{1}, which reflects \BR{1a}.
@@ -63,105 +61,35 @@ The \cR miners can't prevent a withheld \cR block from being produced or reflect
 So \cR miners could refuse to reflect some \cL blocks --- particularly, \cL blocks that reflect \cR block headers without a known body (such as \BR{1a}).
 
 Since \cL miners face the same problem (withheld but reflected \cL blocks), both \cL and \cR miners are incentivized to cooperate.
-This is forms a stable equilibrium provided that the honest miners have excess bandwidth and that the attacker has less than half the overall (post-conversion) hash-rate.
+This is forms a stable equilibrium provided that the honest miners have excess bandwidth and that the attacker has less than half the combined (post-conversion) hash-rate.
 
 Another way to look at this is that PoR only works when all blocks are available.
 This isn't surprising because blockchains generally only work when all (canonical) blocks are available.
-Since honest miners only want to participate in systems that work (how else would they earn income?), they will readily adopt the practices required to make the system work.
+Since miners only want to participate in systems that work (how else would they earn income?), they will adopt the practices required to make the system work.
 
 To codify this as a foundation of \UT{}, we will introduce the first network \emph{axiom}: the \AxiomOfAvailability{}.
 
-\DeclareAxiom{Availability}{%
-    All reflected blocks must be verifiably complete and readily available.
-}{%
-    A block, \BL{}, cannot yet be valid unless, for each reflected block \BR{}:
-    \begin{axiomreqs}
-        \item \BR{} has been downloaded (i.e., the block is available); and
-        \item the cryptographic integrity of \BR{} has been verified; and
-        \item \BR{} is valid under this axiom.
-    \end{axiomreqs}
+\input{includes/ut/content/27-practical/10a-axiom-of-availability.tex}
+
+\defineTermTex{Axiom}{
+    \emph{Network axioms} are foundational rules expressed as a principle and predicate.
+    Consensus-forming nodes must adhere to them
 }
 
 \subsubsubsection{Bandwidth Requirements}
 
 In the case of just two chains, the bandwidth requirements for \cL miners are approximately doubled, but the storage and computational requirements are not.
 While there is some storage and computational overhead on the part of reflected \cR blocks, these are close-to-negligible when compared to the mined chains: miners need only to store \emph{recent} \cR blocks and verify that they are \emph{structurally} valid.
+While this is technically an $O(c)$ computational load per block (since blocks are $O(c)$ bytes large), practically this load is far smaller than the $O(c)$ load of \emph{fully processing} a block, so we can treat it as a constant overhead ($O(1)$).
+Since only recent blocks are stored, the storage requirements are also $O(1)$.
 
+If there are $O(c)$ many chains, then requirements are: $O(c^2)$ for bandwidth, $O(c)$ for storage, and $O(c)$ for computation.
+As we will see in \autoref{bandwidth-complexity}, the practical bandwidth requirements are acceptable (on the order of 1 MB/s or so\footnote{
+    A rule of thumb: 1 MB/s here corresponds to 1,000-4,000 TPS.
+    Also note that this is only a requirement for miners and full nodes \emph{after} a desired chain has been fully synchronized.
+}).
+Assuming that holds true, we can conclude that the \AxiomOfAvailability{} is not a bottleneck for scalability.
 
-\subsubsubsection{draft / old stuff below}
+See \autoref{sec:bandwidth-complexity} for a deeper discussion of bandwidth complexity.
 
-% \ctable[
-%   pos = h,
-%   caption = A matrix of miner choices showing when PoR works.,
-%   % cap = ,
-%   center,
-%   label = tab:matrix-availability-refl-blocks,
-% ]{rcc}{}{
-%   \FL
-%   {} & \shortstack[c]{\cL miners reflect \\ withheld \cR blocks} & \shortstack[c]{\cL miners do not reflect \\ withheld \cR blocks}
-%   \ML
-%   \shortstack[c]{\cR miners reflect \\ withheld \cL blocks} & no & no \NN
-%   \shortstack[c]{\cR miners do not reflect \\ withheld \cL blocks} & no & yes
-%   \LL
-% }
-
-
-
-Once an honest \cR miner successfully creates \BR{1}, can it ever have precedence over \BR{1a}?
-
-Let's assume that the attacker publishes the \BR{1a} block in full immediately after \BR{1} is mined.
-\cR miners now have a choice: which of the two available blocks should they prioritize?
-
-Should the honest \cR miners reflect \BL{1}?
-(It is their choice, after all.)
-
-
-\begin{figure}
-    \begin{equation*}
-        \xyMChains{
-            & \xyL{\text{Chain \cL}} & \cdots & & \xBL{} \arf[dl] \ar[ll] & & \xBL{1} \ar[ll] \arf[ldd] & && \\
-            & \xyL{\text{Chain \cR}} & \cdots & \xBR{} \ar[l] & & &
-                & \xyB{\BR{1}} \ar[llll] \arf[lllu] \arf[lu]
-                & \xBR{2} \ar[l] \ar@/_.75pc/@{.>}[llu] \ar@/^.85pc/[llld] \\
-            & \xyL{\text{Available}} & & & & \xBR{1a} \ar[llu] \arf[luu] & & && \\
-            & \xyTimeHoriz{rrrrrrr} &&&&&&&
-        }
-    \end{equation*}
-    \caption[
-        asdf.
-    ]{
-        % asdf.
-        % The dashed frame of \BR{1} indicates that it is a draft block (i.e., not yet mined, but being actively worked on by miners).
-        % Note: \BR{1} optionally reflects \BL{1} --- there's no requirement that \cR miners must do so.
-    }
-    \label{fig:unavailable-ex2}
-\end{figure}
-
-
-If yes:
-- what do to with the PoR of L2->R1a?
-  - ignore R1a --- refl weight attributed to R1 via L2->L1->R1
-    - reason for ignoring: R1a not in history of R2
-    - on R1a public: it has priority over R2 since L2->R1a now valid
-  - count it as zero, but then why bother reflecting L2?
-    - so that L3 reflects R2
-    - on R1a public: it has priority over R2 since L2->R1a now valid
-
-If no:
-  - can only reflect L1 --- same chain-weight as R1a before draft refls
-    - on R1a public: it has priority over R2 since L2->R1a now valid
-
-
-
-- conclusions WRT
-  - PoR working at all
-  - SPV clients
-
-
-For example: a \cL miner receives a header for some block \BR{1a} along with a PoR via a \BL{1}
-
-Let's consider the example in \autoref{fig:unavailable-ex1}:
-
-
-
-% \todo{Define the \AxiomOfAvailability}
+%

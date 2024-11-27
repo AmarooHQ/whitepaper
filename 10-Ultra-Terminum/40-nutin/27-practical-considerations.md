@@ -8,11 +8,9 @@
 
 \input{includes/ut/content/27-practical/05-intro.tex}
 
-\draftOnly{\input{includes/ut/content/27-practical/10-refl-availability.tex}}
+\input{includes/ut/content/27-practical/10-refl-availability.tex}
 
-### Availability of Reflected Blocks
-
-\label{sec:availability-of-blocks}
+### Availability of Reflected Blocks (old)
 
 \draftNote{This section (\autoref{sec:availability-of-blocks}) requires a redraft. The Axiom of Availability is much newer, and is the most important part.}
 
@@ -54,8 +52,6 @@ The complexity and impact of this strategy is discussed in \autoref{sec:bandwidt
 %% END ### DRAFT
 
 %% BEGIN ### RELEASE
-
-\input{includes/ut/content/27-practical/10a-axiom-of-availability.tex}
 
 ### Proving Reflection
 

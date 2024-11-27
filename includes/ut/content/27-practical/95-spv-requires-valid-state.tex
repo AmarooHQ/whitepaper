@@ -1992,7 +1992,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     So premise 3 is false.
 }
 \dMax{
-    And premise 2 is false, too, because basically all nodes know of the FP, which includes honest miners, so can always avoid the catch 22.
+    And premise 2 is false, too, because basically \emph{all nodes know of the FP}, which includes honest miners, so can always avoid the catch 22.
 }
 \dSe{
     So.
@@ -2067,7 +2067,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     Because it never followed the attacker's branch --- that was invalid.
 }
 \dMax{
-    So it'd be like a typical new block, except it was a long time since its parent. \\
+    So it'd be like a typical new block, except it was a long time since its parent. \\ % stylistic typo below "potentailly"
     \dots{} And it links back to like potentailly thousands of previous invalid blocks.
 }
 \dSe{
@@ -2081,7 +2081,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 }
 \dMax{
     No, not for them either.
-    The knew the block was invalid because they already had the fraud proof.
+    The knew the block was invalid because they already had the fraud proof, even if they're not a full node of that chain.
 }
 \dSe{
     So\dots{}
@@ -2159,6 +2159,14 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     However, dishonest miners will \emph{willingly} draft such blocks in exchange for bribes.
     So, we use that asymmetry to punish dishonest miners such that honest miners can always avoid becoming collateral damage.
 }
+\dMax{
+    The main weakness in this approach is that FPs take time to propagate.
+    If a miner \emph{immediately} processes SPV transactions, they'd expose themselves to potentially mining an invalid block.
+    But we can avoid that with a network-enforced security parameter / waiting period.
+}
+\dMax{
+    A second problem for discussion is \emph{How do foreign chains imaging the simplex and light clients cope with the potential for invalid blocks?}
+}
 \dSe{
     Okay.
     Good enough for now.
@@ -2188,11 +2196,12 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
     Well, if you could do SPV transactions within a block period, then there might not be enough time for an honest miner to hear about the FP.
 }
 \dMax{
-    You could \emph{make} the SPV tx at that point, but a miner shouldn't include it, yet.
+    You could \emph{make} the incoming SPV tx at that point, but a miner shouldn't include it, yet.
 }
 \dMax{
     An honest miner \emph{should} almost always hear about the FP within a block period, though.
-    Assuming blocks on the target chain are created regularly.
+    % -- hmm, not sure why I said this
+    % Assuming blocks on the target chain are created regularly.
 }
 \dMax{
     If a bunch of blocks come all at once, though, then the honest miner still shouldn't process the tx, yet.
@@ -2200,7 +2209,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 }
 \dMax{
     So, for a waiting period of $z$, we want the network to go through $z$ block periods overall, which is roughly $C_d N_1 z$ work (where $C_d$ is the average difficulty).
-    To do that we can check the difference between total chain-weight --- for each SPV transaction, each chain can check: when the header targeted by this SPV tx was reflected by us, is that chain-weight plus $C_d N_1 z$ less than the current chain-weight?
+    To do that we can check the difference between total chain-weight --- for each SPV transaction, each chain can check: \emph{when the header targeted by this SPV tx was reflected by us, is that chain-weight plus $C_d N_1 z$ less than the current chain-weight?}
 }
 \dMax{
     Maybe we could also require that both chains need $z$ local-confirmations of the relevant header --- i.e., the local chain reflected that header at least $z$ blocks ago, and there are at least $z$ R-blocks building on that header.
