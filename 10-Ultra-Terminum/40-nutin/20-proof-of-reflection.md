@@ -139,7 +139,7 @@ Currently, the Chain \cL network chooses the \`\`heaviest'' (most worked) chain 
 Chain \cL calculates the \`\`weight'' of blocks (i.e., how much work went in to them) via an estimation of how many hashes were required --- e.g., some number of *double SHA256 hashes*.
 For the purposes of illustration, let's convert this number to be in terms of *L Blocks* instead of *double SHA256 hashes*.
 That's easy, since each block is worth 1 *L Block* by definition.
-We can also measure the work of an \cL block in terms of *R Blocks* (1 \emph{L Block} = 1 \emph{R Block} by the constant of conversion above).
+We can also measure the work of an \cL block in terms of *R Blocks* (1 \emph{L-Block} = 1 \emph{R-Block} by the constant of conversion above).
 
 How can the network choose the heaviest chain? Well, a traditional blockchain might use a simple recursive function like \autoref{alg:vanilla-bw}.
 
@@ -493,7 +493,7 @@ We use the exchange rate, of course!
 
 If miners could swap from their current chain to the other chain and \emph{increase their revenue}, then we should expect some to do that.
 In turn, we expect each chain's difficulty to change, reflecting that change in participation.
-If some miners (on the whole) moved from \cL to \cR, then we'd expect \cL's difficulty to decrease and \cR's difficulty to increase, roughly proportionate to how many miners moved.
+If some miners (on the whole) moved from \cL to \cR, then we'd expect \cL's difficulty to decrease and \cR's difficulty to increase, corresponding to how many miners moved.
 Since this is an \emph{arbitrage opportunity} (for miners), we expect that any profitability gap will quickly be closed.
 Thus, we can say that a miner's revenue is \emph{equal} regardless of which chain they're mining: $\text{Revenue}_L = \text{Revenue}_R$ when measured in the same units.
 \begin{align}

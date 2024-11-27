@@ -1,6 +1,6 @@
 \subsubsection{The Availability of Reflected Blocks}
 
-% todo: unlabel this after draft
+% todo: label this after draft
 % \label{sec:availability-of-blocks}
 
 What happens if a chain reflects a valid block that is not available?
@@ -39,51 +39,73 @@ Note that, although \BR{1} will almost certainly reflect \BL{}, whether it refle
 The attacker can use this situation to their advantage if \BR{1a} has precedence over \BR{1} (i.e., it's favored by the fork-rule).
 In that case, the attacker can publish \BR{1a} \emph{after} \BR{1} is mined for an advantage.\footnote{
     This is similar to the \emph{selfish mining} attack published in \citeSelfishMiningFull{}.
+    It could also be chained to effect a doublespend.
 }
 When does this case occur?
 
 If \BR{1} does \emph{not} reflect \BL{1}, then \BR{1} will claim the same chain-weight as \BR{1a}.
-However, the next block --- \BR{2} --- will favor \BR{1a} since the PoR via \BL{1} contributes weight to \BR{1a} (as discussed in \autoref{sec:counting-work}).
+However, \BR{1a} is favored over \BR{1} since the PoR via \BL{1} contributes weight to \BR{1a} (as discussed in \autoref{sec:counting-work}).
 So the attacker \emph{always} has the advantage if \BR{1} \emph{does not} reflect \BL{1}.
 
-If \BR{1} does reflect \BL{1}, then \BR{1} is the only block to which we can attribute the work contributed by \BL{1}.
-Thus \BR{1} will claim a greater chain-weight than \BR{1a}.
-However, in the context of the next \cR block (\BR{2}), \BR{1a} will still have precedence over \BR{1}.
+If \BR{1} does reflect \BL{1}, then \BR{1a} is implied as an earlier block, so should have precedence.
 
 Both these situations makes sense: sometimes two \cR blocks will be created near-simultaneously, and occasionally only one of those blocks will be reflected by an \cL block.
-In those naturally arising cases, we'd \emph{expect} the \BR{1a} block to take precedence.
+In those naturally arising cases, we'd \emph{expect} the reflected block (\BR{1a} in this case) to take precedence.
+Either because it was reflected when \BR{1} wasn't, or because, for \BR{1} to reflect \BL{1}, \BR{1a} must have existed first.
 
-So, we seem to have a conflict: on the one hand, an attacker could withhold a block (but not the header or PoRs) to gain some advantage; on the other hand, prioritizing the earlier block seems to be necessary and correct behavior when this situation arises naturally.
+So, we seem to have a problem: on the one hand, an attacker could withhold a block (but not the header or PoRs) to gain some advantage; on the other hand, prioritizing the earlier block seems to be necessary and correct behavior when this situation arises naturally.
 
 The only difference between these two situations is whether \BR{1a} is available or not; so this will be our discriminating factor.
 
-Can \cR do anything to prevent \cL miner's reflecting \BR{1a} before the block body is released?
-The \cR miners' can't prevent a withheld \cR block from being produced or reflected.
-But, \cR miners can still influence \cL miners' choice to reflect \BR{1a} (and withheld blocks in general).
+Can \cR miners do anything to prevent \cL miners reflecting \BR{1a} before the block body is released?
+The \cR miners can't prevent a withheld \cR block from being produced or reflected, but, \cR miners can still influence \cL miners' choice to reflect \BR{1a} (and withheld blocks in general).
 \cL miners want their blocks to be reflected by \cR miners so that future \cL blocks will build on top of their's.
 So \cR miners could refuse to reflect some \cL blocks --- particularly, \cL blocks that reflect \cR block headers without a known body (such as \BR{1a}).
-Since \cL miners face the same problem, \cR miners should refuse to reflect \cL blocks for which they do not have the block body.
 
-If both \cR and \cL miners do this, then an equilibrium is achieved and an attacker cannot gain an advantage by withholding block bodies.
+Since \cL miners face the same problem (withheld but reflected \cL blocks), both \cL and \cR miners are incentivized to cooperate.
+This is forms a stable equilibrium provided that the honest miners have excess bandwidth and that the attacker has less than half the overall (post-conversion) hash-rate.
 
-asdf todo
+Another way to look at this is that PoR only works when all blocks are available.
+This isn't surprising because blockchains generally only work when all (canonical) blocks are available.
+Since honest miners only want to participate in systems that work (how else would they earn income?), they will readily adopt the practices required to make the system work.
 
-\ctable[
-  pos = h,
-  caption = A matrix of miner choices showing when PoR works.,
-  % cap = ,
-  center,
-  label = tab:matrix-availability-refl-blocks,
-]{rcc}{}{
-  \FL
-  {} & \shortstack[c]{\cL miners reflect \\ withheld \cR blocks} & \shortstack[c]{\cL miners do not reflect \\ withheld \cR blocks}
-  \ML
-  \shortstack[c]{\cR miners reflect \\ withheld \cL blocks} & no & no \NN
-  \shortstack[c]{\cR miners do not reflect \\ withheld \cL blocks} & no & yes
-  \LL
+To codify this as a foundation of \UT{}, we will introduce the first network \emph{axiom}: the \AxiomOfAvailability{}.
+
+\DeclareAxiom{Availability}{%
+    All reflected blocks must be verifiably complete and readily available.
+}{%
+    A block, \BL{}, cannot yet be valid unless, for each reflected block \BR{}:
+    \begin{axiomreqs}
+        \item \BR{} has been downloaded (i.e., the block is available); and
+        \item the cryptographic integrity of \BR{} has been verified; and
+        \item \BR{} is valid under this axiom.
+    \end{axiomreqs}
 }
 
-asdf
+\subsubsubsection{Bandwidth Requirements}
+
+In the case of just two chains, the bandwidth requirements for \cL miners are approximately doubled, but the storage and computational requirements are not.
+While there is some storage and computational overhead on the part of reflected \cR blocks, these are close-to-negligible when compared to the mined chains: miners need only to store \emph{recent} \cR blocks and verify that they are \emph{structurally} valid.
+
+
+\subsubsubsection{draft / old stuff below}
+
+% \ctable[
+%   pos = h,
+%   caption = A matrix of miner choices showing when PoR works.,
+%   % cap = ,
+%   center,
+%   label = tab:matrix-availability-refl-blocks,
+% ]{rcc}{}{
+%   \FL
+%   {} & \shortstack[c]{\cL miners reflect \\ withheld \cR blocks} & \shortstack[c]{\cL miners do not reflect \\ withheld \cR blocks}
+%   \ML
+%   \shortstack[c]{\cR miners reflect \\ withheld \cL blocks} & no & no \NN
+%   \shortstack[c]{\cR miners do not reflect \\ withheld \cL blocks} & no & yes
+%   \LL
+% }
+
+
 
 Once an honest \cR miner successfully creates \BR{1}, can it ever have precedence over \BR{1a}?
 
@@ -143,14 +165,3 @@ Let's consider the example in \autoref{fig:unavailable-ex1}:
 
 
 % \todo{Define the \AxiomOfAvailability}
-
-% \DeclareAxiom{Availability}{%
-%     All reflected blocks must be verifiably complete and readily available.
-% }{%
-%     A block, \BL{}, cannot yet be valid unless, for each reflected block \BR{}:
-%     \begin{axiomreqs}
-%         \item \BR{} has been downloaded (i.e., the block is available); and
-%         \item the cryptographic integrity of \BR{} has been verified; and
-%         \item \BR{} is valid under this axiom.
-%     \end{axiomreqs}
-% }

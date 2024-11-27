@@ -11,16 +11,16 @@ That is: *Ultra Terminum* builds on existing consensus methods to produce a bloc
 Compared with existing consensus methods, UT provides *equal or better* security properties than **all** existing consensus methods (including Bitcoin's PoW method and variants, and *all* PoS variants).
 This is because UT leverages existing consensus methods in combination and, by way of construction, UT can only *add* security to these methods.
 
-As a consensus method[^ut-consensus-method], UT differs from existing consensus methods in that it is a *novel modification* to particular components of preexisting consensus algorithms.
+As a consensus method, \UT{} differs from existing consensus methods in that it is a *novel modification* to particular components of preexisting consensus algorithms.
 These modifications allow those consensus algorithms to cooperate.
 This improves the maximal security and decentralization of the network, whilst also providing a foundation for scalability.
 
 [^ut-consensus-method]: Whether *Ultra Terminum* is a consensus \emph{method} or not is somewhat unclear.
 On the one hand: a new combination of methods is still a method.
-On the other hand: UT provides a way to modify other consensus methods via the fork rule, and UT doesn't provide a way to run a *single* blockchain.
-This is why I introduced it as a cross-chain consensus *strategy*.
+On the other hand: UT provides a way to modify other consensus methods via the fork rule, and UT doesn't provide a way to run a \emph{single} blockchain.
+This is why I introduced it as a cross-chain consensus \emph{strategy}.
 
-UT is capable of supporting millions of transactions per second with similar chain parameters (like block size) to those of traditional blockchains (like Bitcoin or Eth1).
+\UT{} is capable of supporting millions of transactions per second with similar chain parameters (like block size) to those of traditional blockchains (like Bitcoin or Eth1).
 
 At the core of *Ultra Terminum* is a new method for sharing security: *Proof of Reflection*.
 This technique (which works in conjunction with PoW, PoS, etc) allows the incremental construction of complex blockchain networks with powerful scaling properties.

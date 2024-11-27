@@ -22,6 +22,11 @@ RUN apt-get update && \
 
 RUN mkdir -p /.npm && chown -R 1000:1000 "/.npm"
 
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y inotify-tools && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /work
 
 CMD ["unbuffer", "make"]

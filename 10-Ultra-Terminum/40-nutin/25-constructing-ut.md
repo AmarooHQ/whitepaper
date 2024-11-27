@@ -196,7 +196,7 @@ Since all dapp-chain miners are required to run a full node of the parent-chain,
 [^hostminercollect]: A simplex-miner could use other methods too, like maintaining full nodes of each dapp-chain and continuously cycling through them (alternating which are running and which are not) to avoid massive computation requirements.
 Light clients seem obviously preferable where possible.
 
-A dapp-chain could, perhaps, have a rule like *X root tokens are created as part of the coinbase transaction and the miner of that block has free choice of the proportion of those which are provided as a transaction fee to the host-miner*.
+A dapp-chain could, perhaps, have a rule like *X root tokens are created as part of the coinbase transaction and the miner of that dapp-block has free choice of the proportion of those which are provided as a transaction fee to the host-miner*.
 
 Example use-case: an existing blockchain migrates to become an *Amaroo* dapp-chain.
 

@@ -35,7 +35,7 @@ After that, a minor chain re-org would restore normality.
 
 There is at least one way to ensure that blocks of reflected headers are available.
 That is: miners on both chain L and chain R should *refuse* to build on blocks that include headers without a known block.
-This would mean that the chain L block (which includes $H_{R,1a}$) is *invalid* on chain L while $B_{R,1a}$ is unavailable.
+This would mean that the chain L block (which includes $H_{R,1a}$) is \emph{invalid} on chain L while $B_{R,1a}$ is unavailable.
 If such a method is feasible, then the malicious chain L miner has greater opportunity cost to produce a block reflecting $H_{R,1a}$.
 Moreover, this method prevents chain L (and its miners) from contributing to a potential attack on chain R.
 

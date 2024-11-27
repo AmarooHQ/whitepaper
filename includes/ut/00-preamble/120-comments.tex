@@ -18,3 +18,20 @@
     \end{tcolorbox}
     \addcontentsline{com}{comment}{\protect{\thecomment. } \truncate{0.8\linewidth}{#1}}
 }
+
+% using same comment counter but w/e
+\newcounter{pzcommentcounter}
+\newcommand{\pz}[1]{
+    \refstepcounter{pzcommentcounter}%
+    \refstepcounter{comment}%
+    \begin{tcolorbox}[
+        colback=pzColor!80!white,
+        coltext=black,
+        title={Comment (Pouriya) [\thepzcommentcounter]}
+    ]
+    \label{commentref:mk\thepzcommentcounter}
+    \label{commentref:\thecomment}
+    #1
+    \end{tcolorbox}
+    \addcontentsline{com}{comment}{\protect{\thecomment. } \truncate{0.8\linewidth}{#1}}
+}
