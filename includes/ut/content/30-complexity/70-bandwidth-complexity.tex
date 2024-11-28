@@ -14,8 +14,7 @@ For a simplex-chain, provided that the PoRs and corresponding headers remain ava
 }), this means it must download: all blocks for that simplex-chain, and any auxiliary data necessary to verify PoRs.
 Note that bandwidth requirements differ based on which UT protocol variant is used.
 
-For \UT{\text{+OP}}, the data a full node requires are: each block, the headers of all reflecting chains, and the missing branches for all
-PoRs.
+For \UT{\text{+OP}}, the data a full node requires are: each block, the headers of all reflecting chains, and the missing branches for all PoRs.
 Network-wide, headers consume \(N_1 \cdot B_f \cdot B_h\) B/s.
 For a single chain, PoRs use \(N_1 \cdot B_f \cdot g \cdot \ceil{\log_2 N_1}\) B/s of capacity, where $g$ is the digest size of the hash used for merkle trees (usually 32 bytes).
 Let's denote the total bandwidth required for a full node \(\Delta s\).
@@ -40,7 +39,7 @@ However, with \emph{explicit PoRs} (variants including +PoRs), \(\Delta s \le k_
 \subsubsubsection{PoR Graph}
 
 We found the bandwidth requirements for fully reconstructing the PoR graph before in \autoref{sec:por-graph-max-refl} involving the measure of propagation delay, $\phi$ seconds.
-Let's call the total bandwidth requirements for the PoR graph $\Delta r$.
+Let's call the total bandwidth requirements for the PoR graph $\Delta r$ and substitute in \autoref{eq:simplex-N1}.
 \begin{align}{}
     \Delta r &= N_1 B_f (B_h + g(1 + N_1 B_f \phi)) \nonumber \\
     &= \frac{k_1}{2 B_h} \Bigl(B_h + g\Bigl(1 + \frac{k_1 \phi}{2 B_h}\Bigr)\Bigr) \nonumber \\
@@ -67,12 +66,27 @@ What do we expect the value of $g k_1 \phi / (2 {B_h}^2)$ to be?
 If $B_h \in [50, 500]$, and $\phi \in [0.05, 2.0]$, then we can see that the coefficient of $k_1$ is, at most, 0.0128 (and $3.2\cdot10^{-7}$ at least).
 Thus, this last term dominates $(1+g/B_h)$ when $g k_1 \phi \gtrsim 2 {B_h}^2$.
 
-To keep $\Delta r$ practicable, we should therefore go to some effort to keep $g k_1 \phi \ll 2 {B_h}^2$.
+To keep $\Delta r$ practicable, we should therefore go to some effort to keep $g k_1 \phi \lesssim 2 {B_h}^2$.
+
+\subsubsubsubsubsection{\AxiomOfUnifiedAncestry Optimization}
+
+Using the \AxiomOfUnifiedAncestry, we do not need to reference to a block's parents directly, since they are implied by the PoR graph and the absence of fraud proofs.
+This results in a small optimization where the parent hash is replaced with the best tip of the longest PoR chain.
+Regarding $\Delta r$, $g(1 + N_1 B_f \phi) \to g N_1 B_f \phi$ and thus:
+\begin{align}{}
+    \Delta r &= N_1 B_f (B_h + g N_1 B_f \phi) \nonumber \\
+    % &= \frac{k_1}{2 B_h} \Bigl(B_h + \frac{g k_1 \phi}{2 B_h}\Bigr) \nonumber \\
+    &= \frac{k_1}{2}\Bigl(1 + \frac{g {k_1} \phi}{2 {B_h}^2}\Bigr) \nonumber % \label{eq:por-graph-delta-r} \\
+\end{align}
+Restricting $\Delta r < k_1$ now implies $k_1 < 2 {B_h}^2 (g \phi)^{-1}$.
+If $k_1 = 3000$, $\phi = 0.5$, we have $B_h \ge 155$.
+So for a maximal simplex of reasonable parameters, we still have $k_1 < \Delta r < 2 k_1$.
+
 
 \subsubsubsection{Complete Simplex}
 
 \aside{
-    This is also the bandwidth required by all miners due to the \AxiomOfAvailability.
+    This is also the bandwidth required by all active miners due to the \AxiomOfAvailability.
     Miners do not verify the state transitions of each block, but do verify the integrity of the data structure and PoR graph (which is very cheap by comparison).
 }
 

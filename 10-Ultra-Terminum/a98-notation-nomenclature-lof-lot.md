@@ -19,10 +19,12 @@
 
 | Term | Definition | Unit |
 | ------ | ------------------------------------------------------------- | ------------ |
+| $c$ | Abstract representation of per-node computational resources. | - |
+| $n$ | Abstract representation of network size. | - |
 | $\mathbb{C}^\prime$ | Confirmation rate. | Hz |
 | $g$ | Hash digest size. | bytes |
 | $k_i$ | A generalization of block size: the average per-chain raw throughput at the $i^{th}$ level of nesting. | bytes/second |
-| $k$ | Average per-chain raw throughput across nesting levels. $k$ is used to simplify reasoning and equations, especially in situations where all $k_i$ are equal. | bytes/second |
+| $k$ | Average per-chain raw throughput across nesting levels. $k$ is used to simplify reasoning and equations, especially when all $k_i$ are equal. | bytes/second |
 | $T_i$ | Network throughput at the $i^{th}$ level of nesting. | bytes/second |
 | $N_i$ | Number of chains at the $i^{th}$ level of nesting. | chains |
 | $N_\text{tiles}$ | Number of tiles in a simplex-tiling. | tiles |

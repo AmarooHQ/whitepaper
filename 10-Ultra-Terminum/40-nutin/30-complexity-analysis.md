@@ -449,6 +449,7 @@ For comparisons over a range of parameters, see \autoref{sec:ut-variant-complexi
 
 : Comparison of UT variants' capacities with parameters: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions.
 ``E. $B_h$'' means the \emph{effective} header-size.
+Simplex-headers \emph{for the purposes of PoR} can shrink to less than the actual header-size due to the data that is excluded under the corresponding scaling configuration.
 
 %% INSERT ### TABLE: compare_optimizations_a_20k
 

@@ -1,6 +1,10 @@
 % intro paragraph or something?
 % todo mb (intro paragraph)
 
+% something about context with longest PoR chain and axioms?
+
+\todo{Add something about the context regarding axioms and longest PoR chain.}
+
 \subsubsubsection{Simplex Security}
 
 \label{sec:simplex-security}
@@ -98,7 +102,7 @@ As it turns out: yes.
 
 Let the total chain-weight of the attacker's best block be called $W_A$, and the total chain-weight of the honest network's best block be called $W_H$.
 
-Consider a miner of a simplex-chain (chain $L$) who is working on a \emph{draft block} during an active attack (though, of course, the miner does not know about the attack).
+Consider a miner of a non-DAG simplex-chain (chain $L$) who is working on a \emph{draft block} during an active attack (though, of course, the miner does not know about the attack).
 Specifically, let's consider \emph{just before} the attacker publishes their chain-segment.
 In the memory pool\footnote{
   The \emph{memory pool} is where unconfirmed transactions (and other things) are stored before they are included in a block.
@@ -115,7 +119,7 @@ That extra term, $nw$, is the ``memory'' we're looking for, and it makes all the
 It is only safe for the attacker to publish their chain-segment \emph{after} $W_A > W_H + nw$ --- only then is it \emph{decisively better} than the honest chain-segment.
 If, however, the attacker publishes their chain-segment when $W_H < W_A < W_H + nw$: the best chain-segment for honest miners to mine is \emph{still} the honest chain-segment, not the attacker's!
 
-Miners don't actually have to change their behavior at all: their choice is the same, whether they are mining a simplex-chain \emph{or} a traditional chain.
+For non-DAG chains, miners don't actually have to change their behavior at all: their choice is the same, whether they are mining a simplex-chain \emph{or} a traditional chain.
 That choice is: \emph{of all possible blocks to mine, which results in the greatest reward?}
 If they build on the honest chain-segment, does their resulting block have more total chain-weight than if they were to build on the attacker's chain-segment?
 
@@ -125,6 +129,12 @@ This rule conflicts with what we discussed above, so it must be that parents are
 Also, note that this is why the weight of PoRs is attributed to the \emph{reflected} block (usually a parent) rather than the block that contains the PoRs.
 In essence, the inclusion of this ``memory'' requires that the fork rule take \emph{context} into account --- particularly the context of the descendant block.
 This is not a paradox because the fork rule is \emph{only} used to choose the priority chain in the context of some descendant block (even if that block is an invalid draft).
+
+
+\aside{
+    In the context of the longest PoR chain, this property is made somewhat obvious.
+}
+
 
 \subsubsubsection{Testing the Confirmation Equivalence Conjecture}
 
