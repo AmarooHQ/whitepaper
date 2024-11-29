@@ -11,7 +11,7 @@ However, real-world blockchains do not produce blocks like this --- even if chai
 \begin{equation*}
     \xyMChains{
         \xyL{\text{Chain L}} & \cdots & \xyB{L_i} \ar[l] & & \xyB{L_{i+1}} \ar[ll] \ar@{.>}[ld] & \xyB{L_{i+2}} \ar[l] & \xyB{L_{i+3}} \ar[l] & \\
-        \xyL{\text{Chain R}} & \cdots & & \xyB{R_j} \ar[ll] \ar@{.>}[lu] & & & & \xyB{R_{j+1}} \ar[llll] \ar@{.>}[lu] \\
+        \xyL{\text{Chain R}} & \cdots & & \xyB{R_k} \ar[ll] \ar@{.>}[lu] & & & & \xyB{R_{k+1}} \ar[llll] \ar@{.>}[lu] \\
         \xyTimeHoriz{rrrrrrr} & & & & & & & \\
     }
 \end{equation*}
@@ -25,8 +25,8 @@ Why?
 
 Consider the situation from the miner's perspective (the miner of \BL{2}).
 There is no new R block for them to reflect --- if there were, they'd include it.
-The miner is effectively claiming --- via the absence of a new reflection --- that \BL{2}'s parent (\BL{1}) reflects the most recent R header ($R_j$); that \BL{1} is still \emph{up-to-date}.
-From this perspective, it's clear that \BL{2} should contribute reflected weight to the best R headers that were most recently reflected: in this case, just $R_j$.
+The miner is effectively claiming --- via the absence of a new reflection --- that \BL{2}'s parent (\BL{1}) reflects the most recent R header ($R_k$); that \BL{1} is still \emph{up-to-date}.
+From this perspective, it's clear that \BL{2} should contribute reflected weight to the best R headers that were most recently reflected: in this case, just $R_k$.
 
 We can evaluate \BL{3} the same way.
 
