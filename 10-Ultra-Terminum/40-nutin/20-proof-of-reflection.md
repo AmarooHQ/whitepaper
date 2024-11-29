@@ -1183,6 +1183,8 @@ Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
 
 %% BEGIN ### DRAFT
 
+\pz{From previous sections it seemed like merged mining was not a solution, if it is furthermore insecure why do we want to include it and mention it here?}
+
 ### The Insecurity of Merged Mining in UT
 
 \todo{write --- The Insecurity of Merged Mining}

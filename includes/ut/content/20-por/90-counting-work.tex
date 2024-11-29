@@ -4,6 +4,7 @@
 
 \providecommand\BL[1]{\BCI{L}{i}{#1}}
 \providecommand\BR[1]{\BCI{R}{j}{#1}}
+\providecommand\BRj[1]{\BCI{R}{j}{#1}}
 % note: \BR renewed below to change `j` term to `k`
 
 When chains L and R have the same block frequency and produce blocks in an orderly fashion, it's trivial to count how much work is contributed by each PoR.
@@ -11,28 +12,27 @@ However, real-world blockchains do not produce blocks like this --- even if chai
 \begin{equation*}
     \xyMChains{
         \xyL{\text{Chain L}} & \cdots & \xyB{L_i} \ar[l] & & \xyB{L_{i+1}} \ar[ll] \ar@{.>}[ld] & \xyB{L_{i+2}} \ar[l] & \xyB{L_{i+3}} \ar[l] & \\
-        \xyL{\text{Chain R}} & \cdots & & \xyB{R_k} \ar[ll] \ar@{.>}[lu] & & & & \xyB{R_{k+1}} \ar[llll] \ar@{.>}[lu] \\
+        \xyL{\text{Chain R}} & \cdots & & \xyB{R_j} \ar[ll] \ar@{.>}[lu] & & & & \xyB{R_{j+1}} \ar[llll] \ar@{.>}[lu] \\
         \xyTimeHoriz{rrrrrrr} & & & & & & & \\
     }
 \end{equation*}
-Should \BR{1} include 3 PoRs, or just 1?
-How should \BR{1} calculate the weight of those PoRs and the total weight contributed to chain R?
+Should \BRj{1} include 3 PoRs, or just 1?
+How should \BRj{1} calculate the weight of those PoRs and the total weight contributed to chain R?
 
-If \BR{1} had reflected only \BL{1}, then it's clear that we would count work from both \BL{1} and \BR{1} --- that much is easy.
-However, \BR{1} reflected \emph{three} L headers.
-Should \BR{1} count work from \emph{all three}, or something else?
+If \BRj{1} had reflected only \BL{1}, then it's clear that we would count work from both \BL{1} and \BRj{1} --- that much is easy.
+However, \BRj{1} reflected \emph{three} L headers.
+Should \BRj{1} count work from \emph{all three}, or something else?
 Why?
 
 Consider the situation from the miner's perspective (the miner of \BL{2}).
 There is no new R block for them to reflect --- if there were, they'd include it.
-The miner is effectively claiming --- via the absence of a new reflection --- that \BL{2}'s parent (\BL{1}) reflects the most recent R header ($R_k$); that \BL{1} is still \emph{up-to-date}.
-From this perspective, it's clear that \BL{2} should contribute reflected weight to the best R headers that were most recently reflected: in this case, just $R_k$.
+The miner is effectively claiming --- via the absence of a new reflection --- that \BL{2}'s parent (\BL{1}) reflects the most recent R header ($R_j$); that \BL{1} is still \emph{up-to-date}.
+From this perspective, it's clear that \BL{2} should contribute reflected weight to the best R headers that were most recently reflected: in this case, just $R_j$.
 
 We can evaluate \BL{3} the same way.
 
-So, yes \BR{1} should include and count work from all 3 PoRs in this case.
+So, yes \BRj{1} should include and count work from all 3 PoRs in this case.
 
-\providecommand\BRj[1]{\BCI{R}{j}{#1}}
 \renewcommand\BR[1]{\BCI{R}{k}{#1}}
 
 What about a more complicated example?
@@ -57,6 +57,8 @@ It must be that reflections contribute to the \emph{most recent common ancestor}
 
 This leads us to a simple and elegant way to count reflected work: follow the arrows back from the reflecting block to the most recently reflected local block.
 
+\pz{Unclear, did you mean \BL{4} instead of \BL{3}?}
+
 \BL{4}'s reflection of \BR{2} contributes chain-weight to \BL{3} because \emph{any} block that builds on \BL{3} could reflect \BR{2}.
 % (L_{i+4} \; \ar@{.>}[r] &) \;
 Following the arrows: $\xyInlineRefl{R_{k+2} \; \ar@{.>}[r] & \; L_{i+3}}$.
@@ -64,6 +66,7 @@ Following the arrows: $\xyInlineRefl{R_{k+2} \; \ar@{.>}[r] & \; L_{i+3}}$.
 
 % Following the arrows: $L_{i+4} \dashrightarrow R_{k+2} \dashrightarrow L_{i+3}$.
 
+\pz{Same, why $L_i$?}
 Similarly, \BL{4}'s reflection of \BR{1} (which could be either explicit or implicit via \BR{2}) must contribute chain-weight to $L_i$ because \emph{any} block building on $L_i$ could reflect \BR{1} and include that PoR.
 % (L_{i+4} \; \ar@{.>}[r] & \; R_{k+2} \; \ar[r] &) \;
 Following the arrows: $\xyInlineRefl{R_{k+1} \; \ar[r] & \; R_k \; \ar@{.>}[r] & \; L_{i}}$.
