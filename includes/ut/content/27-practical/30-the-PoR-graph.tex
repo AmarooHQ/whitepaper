@@ -123,11 +123,13 @@ So, even if \emph{most} of the time a block only reflects one tip, \emph{some} o
 The frequency of simultaneous blocks is dependent on the number of chains ($N_1$), the block frequency of each chain ($B_f$), and some propagation delay ($\phi$ seconds).
 Two blocks are simultaneous if they are mined within $\phi$ seconds of each other.
 In the $\phi$ seconds before that most recent tip was mined, we expect that $\sim N_1 B_f \phi$ other tips were mined (from any simplex-chain).
+\pz{Where does $1 - {N_1}^{-1}$ come from?}
 Unless a block contains no reflections, it must reflect at least one graph tip (which happens with probability $1 - {N_1}^{-1}$).
 So, we expect each block to reflect $1 + N_1 B_f \phi$ tips.
 For $N_1 = 100, B_f = \nicefrac{1}{15}, \phi = 0.3$, we expect
 each block to be simultaneous with $\sim 2$ others, and each block to reflect 3 graph tips on average.
 
+\pz{0.3 seconds propagation delay is not realistic for a network.}
 Therefore, the overhead to reconstruct the PoR graph --- and every PoR segment of every simplex-chain block --- is, on average, $g (1 + N_1 B_f \phi)$ bytes per block, where $g$ is the length of a hash.
 As $g$, $1$, $B_f$, and $\phi$ are constants, the overhead thus has complexity $O(c)$ \emph{per block-period per simplex-chain}.
 Since we're tracking $O(c)$ chains, the overall load is $O(c^2)$.
@@ -203,6 +205,7 @@ If $k_{1,B}$ B/s of a chain's capacity is dedicated to reflections, then we have
     % & \text{Note that $N_1 \propto \phi^{-1}$}
     \label{eq:bad-n1-with-phi}
 \end{align}
+\pz{Not trivial where 23 and 2.1 come from, maybe just give final approx >35k (35156).}
 Plugging in our numbers from before (excluding $N_1$), yields $N_1 \approx 23 (k_{1,B} - 2.1)$.
 If $k_{1,B}$ = 1,500 B/s, then $N_1 \approx$ 34,500.
 
@@ -219,6 +222,7 @@ There is a good reason to think $O(\phi) = O(1)$.
 At some point, propagation delay is limited by the speed of light.
 So latency must have a definite minimum, which is a constant.
 
+\pz{The graph cannot be fully connected and we use gossip so shouldn't $\phi$ have a term in $\log(n)$?}
 However, the physical limits on latency do not dominate real-world latency yet.
 Near-future networking technologies, like LEO satellite constellations, will reduce latencies over significant distances.
 Moreover, even as the best-case minimum latency approaches physical limits, technology will continue to improve latency in \emph{bandwidth intensive} contexts.\footnote{
@@ -299,7 +303,7 @@ Thus, the \AxiomOfMaximalReflection creates an asymmetry between honest and dish
 \subsubsubsection{The Longest PoR Chain}
 
 \autoref{fig:por-graph-tips} shows us an interesting feature of maximally reflective PoR graphs: between two given blocks, the union of the paths via PoR graph tips both \emph{visit every block} and are the \emph{longest} paths between any two blocks.
-This is somewhat self-evident: since the PoR graph is a DAG, there is no way to return to a block once we have visited a it.
+This is somewhat self-evident: since the PoR graph is a DAG, there is no way to return to a block once we have visited it.
 Thus, if a path exists that visits every block, then it must be a longest path because there are no unvisited blocks.
 A longer path would need to visit more blocks, but there are no more blocks, therefore no longer path exists.
 
@@ -362,7 +366,7 @@ Additionally, in \autoref{sec:dags-and-the-por-graph} we will discuss some symme
 
 \aside{
     Let us return to the \AxiomOfMaximalReflection again for a moment.
-    I would have said something earlier but I wanted to give you a some time to chew, first.
+    I would have said something earlier but I wanted to give you some time to chew, first.
     If you were left wondering \emph{What happens when \BR{} reflects an \cL block that is not an ancestor of \BL{}?} then I say \emph{`well spotted'} to you --- finding criticisms on a first reading is worthy of praise. \\
     \\
     Now, the answer to the question:
@@ -550,7 +554,7 @@ We can still link back to non-PoW blocks as 0-blocks, though (i.e., they're at t
 Thus, these will not be NIPoPoRs --- this method requires PoW, so, in terms of PoRs, we are only concerned with PoW reflection, rather than all reflection.
 
 \aside{
-    You should know, I am only confident about the \emph{princples} of NIPoPoWs, not the specifics.
+    You should know, I am only confident about the \emph{principles} of NIPoPoWs, not the specifics.
     So, I claim the following only as an \emph{in principle} argument.
     Further diligence is required.
 }
