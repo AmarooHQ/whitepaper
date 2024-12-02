@@ -155,6 +155,7 @@ This UT protocol variant is +HOPoRs, the combination of *header omission* (+HO) 
 It may present decisive advantages for implementations of *simplex tilings* (which are introduced in \autoref{sec:tiling}).
 
 \aside{
+    \pz{Should we mention +T if it is redacted?}
     There is an independent protocol variant (from those above) called +T which provides a significant reduction to header size.
     % proof size and
     This optimization is currently redacted. \\
