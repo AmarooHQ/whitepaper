@@ -15,7 +15,7 @@
         \State $w_R \gets w_R \; +$ \Call{WeightOf}{$R_i$, $state$} \Comment{Convert weight of $R_i$}
       \EndIf
     \EndFor
-    \State $\text{weightMod} \gets $ \Call{CapWorkOf}{$R$, $n$, $state$}
+    \State $\text{weightMod} \gets $ \Call{CapWorkOf}{$R$, $n_R$, $state$}
     \State $w \gets w + w_R \cdot \text{weightMod}$ % \Comment{$w_R \cdot \text{weightMod}$ always $\le$ the expected maximum}
   \EndFor
   \State \Return{$s$}

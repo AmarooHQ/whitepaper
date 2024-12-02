@@ -47,7 +47,7 @@ So the attacker \emph{always} has the advantage if \BR{1} \emph{does not} reflec
 
 If \BR{1} does reflect \BL{1}, then \BR{1a} is implied as an earlier block, so should have precedence.
 
-Both these situations makes sense: sometimes two \cR blocks will be created near-simultaneously, and occasionally only one of those blocks will be reflected by an \cL block.
+Both these situations make sense: sometimes two \cR blocks will be created near-simultaneously, and occasionally only one of those blocks will be reflected by an \cL block.
 In those naturally arising cases, we'd \emph{expect} the reflected block (\BR{1a} in this case) to take precedence.
 Either because it was reflected when \BR{1} wasn't, or because, for \BR{1} to reflect \BL{1}, \BR{1a} must have existed first.
 
@@ -57,7 +57,7 @@ The only difference between these two situations is whether \BR{1a} is available
 
 Can \cR miners do anything to prevent \cL miners reflecting \BR{1a} before the block body is released?
 The \cR miners can't prevent a withheld \cR block from being produced or reflected, but, \cR miners can still influence \cL miners' choice to reflect \BR{1a} (and withheld blocks in general).
-\cL miners want their blocks to be reflected by \cR miners so that future \cL blocks will build on top of their's.
+\cL miners want their blocks to be reflected by \cR miners so that future \cL blocks will build on top of theirs.
 So \cR miners could refuse to reflect some \cL blocks --- particularly, \cL blocks that reflect \cR block headers without a known body (such as \BR{1a}).
 
 Since \cL miners face the same problem (withheld but reflected \cL blocks), both \cL and \cR miners are incentivized to cooperate.
