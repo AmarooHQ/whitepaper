@@ -35,3 +35,19 @@
     \end{tcolorbox}
     \addcontentsline{com}{comment}{\protect{\thecomment. } \truncate{0.8\linewidth}{#1}}
 }
+
+\newcounter{cncommentcounter}
+\newcommand{\cn}[1]{
+    \refstepcounter{cncommentcounter}%
+    \refstepcounter{comment}%
+    \begin{tcolorbox}[
+        colback=cnColor!80!white,
+        coltext=black,
+        title={Comment (Chris) [\thecncommentcounter]}
+    ]
+    \label{commentref:mk\thecncommentcounter}
+    \label{commentref:\thecomment}
+    #1
+    \end{tcolorbox}
+    \addcontentsline{com}{comment}{\protect{\thecomment. } \truncate{0.8\linewidth}{#1}}
+}

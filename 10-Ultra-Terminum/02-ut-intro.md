@@ -21,7 +21,11 @@ On the one hand: a new combination of methods is still a method.
 On the other hand: UT provides a way to modify other consensus methods via the fork rule, and UT doesn't provide a way to run a \emph{single} blockchain.
 This is why I introduced it as a cross-chain consensus \emph{strategy}.
 
-\UT{} is capable of supporting millions of transactions per second with similar chain parameters (like block size) to those of traditional blockchains (like Bitcoin or Eth1).
+[^eth1-pow-eth]: The term \emph{Eth1} refers to the original Proof-of-Work release of Ethereum (pre-merge), and \emph{Eth2} refers to Ethereum's sharded Proof-of-Stake Beacon Chain.
+
+\UT{} is capable of supporting millions of transactions per second with similar chain parameters (like block size) to those of traditional blockchains (like Bitcoin or Eth1[^eth1-pow-eth]).
+
+\cn{Adding a footnote to say that \emph{Eth1} refers to the PoW ethereum chain, and \emph{Eth2} the PoS beacon chain design, since those terms are relatively phased out nowadays. Or can link to \url{https://web.archive.org/web/20241128055038/https://ethereum.org/en/roadmap/}}
 
 At the core of *Ultra Terminum* is a new method for sharing security: *Proof of Reflection*.
 This technique (which works in conjunction with PoW, PoS, etc) allows the incremental construction of complex blockchain networks with powerful scaling properties.
