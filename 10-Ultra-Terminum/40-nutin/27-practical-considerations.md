@@ -238,6 +238,7 @@ Let *confirmation time* be the duration breakpoint beyond which enough confirmat
 
 [^approach-zero]: To say that confirmation time approaches 0 only tells the latter half of the process by which a transaction becomes confirmed. The first half of that process is *getting an initial confirmation*, which is effectively a small, but constant, overhead.
 
+\pz{The following does not take into consideration the difficulty to produce each block.}
 A 200-simplex with $B_f = \nicefrac{1}{15}$ has a confirmation rate of $\mathbb{C}^\prime = \nicefrac{40}{3} \approx 13.3$ Hz. An 800-simplex with $B_f = \nicefrac{1}{60}$ has the same confirmation rate. A 1400-simplex (the optimized maximal simplex given \emph{Amaroo's} initial configuration) with $B_f = \nicefrac{1}{15}$ has $\mathbb{C}^\prime \approx 93$ Hz. This is $\sim 46.5\times$ faster than EOS/Solana, $\sim 1116\times$ faster than Eth2, $\sim 1400\times$ faster than Ethereum, and $\sim 55,800\times$ faster than Bitcoin.
 
 Note that PoR incents miners to publish blocks as soon as possible so that those blocks begin gaining reflections.

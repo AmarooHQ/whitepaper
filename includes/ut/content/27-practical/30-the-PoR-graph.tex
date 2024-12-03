@@ -650,7 +650,7 @@ This resolves the first part of the problem: variable difficulties.
 With regards to multiple hashing algorithms, PoR itself has already laid the groundwork for a solution: the conversion of work.
 Recall that in \autoref{eq:por-conv-work} we derived \ConvWork: a function for converting R-hashes $\to$ L-hashes.
 
-We can use this to convert calculate a PoW's equivalent $\mu$ level in terms of another hash.
+We can use this to calculate a PoW's equivalent $\mu$ level in terms of another hash.
 We can think of converting a block's weight as starting with the chain \cR target, converting that to the difficulty ($\cR_d$ hashes/block), applying $\ConvWork{\cR_d}$, and converting this to the \cL target.
 Similarly, we can convert $\mu$ levels using the same process, except that we replace the \emph{actual} target with the \emph{lowest possible satisfiable target} for the block in question.
 
@@ -680,7 +680,7 @@ Therefore:
     % 2^{\muType\cR} \cR_d \cdot \cL_d / \cR_d &= 2^{\muType\cL} \cL_d \\
     % 2^{\muType\cR} &= 2^{\muType\cL}
 \end{align}
-Note that $\muType\cR - \log_2(\cR_d)$ (\autoref{eq:mu-relative-conv}) is the block's relative $\muType\cR$ level (and similarly for \muType\cL on the RHS).
+Note that $\muType\cR - \log_2(\cR_d)$ (\autoref{eq:mu-relative-conv}) is the block's relative $\muType\cR$ level (and similarly for \muType\cL on the right-hand side).
 
 All that remains is for each block in the longest PoR chain to calculate objective $\mu$ values of the same type using \autoref{eq:mu-type-conv}.
 
