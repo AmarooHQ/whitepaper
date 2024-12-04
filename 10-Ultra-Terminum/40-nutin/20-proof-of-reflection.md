@@ -394,6 +394,8 @@ How can we use these relationships to our advantage?
   That means: PoR does not need to be able to convert chain-work between chains \emph{over time}, only \emph{for some given moment}.
 }
 
+\cn{Part of the aside (or in footnote?) might be a good place to point to further discussion of why starting with PoW is suitable for PoR because of instantaneous weight, and that PoS has additional aspects that need to be considered (stake ratio, attestation/vote inclusion over time, ..).}
+
 The units that we have to work with are: blocks, seconds, hashes, and coins\footnotemark{}.
 \footnotetext{
   Note that the terms \emph{coin} and \emph{root token} are synonymous.
