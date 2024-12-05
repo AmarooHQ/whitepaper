@@ -158,14 +158,14 @@ Now that we've added the \AxiomOfUnifiedAncestry, the alternative for the attack
 }
 
 In \autoref{sec:blockdag-nipopows} we devised NIPoPPoWs, modified NIPoPoWs that work with block-DAGs by accounting for posterity.
-That construction depended a \emph{best-blocks} proof in combination with an \emph{on-main only} proof.
+That construction depended on a \emph{best-blocks} proof in combination with an \emph{on-main only} proof.
 In the case of simplex-chain block-DAGs, we do not want to use the same best-blocks proof since it only accounts for \emph{local} chain-work and does not account for reflections.
 
 Instead of a standard best-blocks NIPoPoWs, can we use NIPoPoWRs from \autoref{sec:nipopowrs}?
 Functionally, both serve the same purpose: proving that a block \emph{exists}.
 
 One potential problem is that the NIPoPPoW best-blocks proof substantially overlapped with the on-main only proof --- that isn't the case for NIPoPoWRs as \emph{most} of the \mu-superblocks will be from reflecting chains.
-Rater, we expect the best posteritorial \mu-superchain to have a \mu level approximately $\log_2({N_1})$ lower than that of the best PoR \mu-superDAG (since there are $N_1\times$ as many blocks).
+Rather, we expect the best posteritorial \mu-superchain to have a \mu level approximately $\log_2({N_1})$ lower than that of the best PoR \mu-superDAG (since there are $N_1\times$ as many blocks).
 In other words, only $1/N_1$ local blocks are at the same \mu level as the highest \mu-superDAG.
 
 Let us take stock for a moment.
@@ -219,7 +219,7 @@ NIPoPoWs (in general) exist in a unique context: we expect that a lot of time ha
 If PoR sub-blocks keep track of a set of \emph{all} fraudulent blocks (and this is enforced), then we can use a much later block (from any chain) to prove whether any fraud proof for any particular block was ever recorded.
 We don't care what the fraud proof actually was, since the PoR graph already came to consensus on the fact it exists.
 This can be done via a Merklix tree, or any other merklized structure that allows us to prove non-membership.
-Therefore, we can use the one of the intermediate \mu-superblocks to prove that no fraud proof was recorded for the target infix block.
+Therefore, we can use one of the intermediate \mu-superblocks to prove that no fraud proof was recorded for the target infix block.
 Since a long time has passed (at least some security parameter of our choosing), we can be confident that no fraud proof was possible, and thus that the block is valid.
 
 We could also provide additional proofs (of non-membership) for e.g., all blocks used in the complete full NIPoPoWR, if we cared to.
