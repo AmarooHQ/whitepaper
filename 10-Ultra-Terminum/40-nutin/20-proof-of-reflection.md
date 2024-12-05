@@ -383,7 +383,7 @@ For non-PoW chains, we'll need conversion methods that have non-arbitrary answer
 
 #### Theoretical Conversion
 
-Consider a traditional blockchain (like Bitcoin, or Ethereum 1).
+Consider a traditional blockchain (like Bitcoin, or Eth1).
 We know that traditional blockchains have properties specific to their blocks, like: reward per block (coins/block); a block target time (seconds/block) --- or block frequency (blocks/second); and a difficulty (hashes/block).
 There are also \emph{network-wide} properties, too, like the \emph{inflation rate} (coins/second).
 The \emph{instantaneous} relationship between these properties is mediated by various protocols --- these protocols (e.g., difficulty adjustment algorithms) are part of the \emph{context} of those properties and relationships.
@@ -614,7 +614,7 @@ How do we know whether a constant of conversion \emph{works} for our purposes?
 Let's consider some units with \emph{real-world} interpretations.
 What can L-blocks/R-block \emph{mean?}
 
-* \emph{Relative block frequencies} or \emph{relative confirmation rates} --- This has real-world meaning: Ethereum 1 produces approximately 40 Ethereum-blocks in the same period (measured in seconds) that Bitcoin produces 1 Bitcoin-block.
+* \emph{Relative block frequencies} or \emph{relative confirmation rates} --- This has real-world meaning: Eth1 produces approximately 40 Ethereum-blocks in the same period (measured in seconds) that Bitcoin produces 1 Bitcoin-block.
 * \emph{Relative block weights} --- This has real-world meaning: how much harder is it to generate a block on one network vs another network?
 * \emph{Relative confirmations} --- This has real-world meaning: how many confirmations does one network take, compared to another, to reach equivalent security?\footnote{
   ``Equivalent security'' means that a doublespend attempt on one network is just as risky, costly, etc, as a doublespend attempt on the other network.
