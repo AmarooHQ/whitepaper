@@ -26,6 +26,7 @@ Are we stuck?
 For a blockchain network to be scalable, it must be the case that miners are \emph{not} required to validate more than one chain!
 Have we come all this way, attempting to deal with the core conflict of the trilemma, only to find that we just moved the conflict?
 
+\pz{Is our implementation going to be based on SNARKs and STARKs?}
 Let's not jump to that conclusion just yet --- there are cryptographic options like SNARKs and STARKs that might help.
 Before that, though, let's slow down and reconsider why SPV works for Bitcoin.
 Perhaps we can learn something.
@@ -37,6 +38,7 @@ Particularly, we'll assume that there are no other networks of similar size usin
 
 A concise argument for the security of Bitcoin-SPV proofs is:
 
+\pz{If $\therefore$ is meant as \emph{therefore} maybe we should use $\Rightarrow$ instead.}
 \begin{argumentslist}
     \item An SPV proof is a merkle branch proving that a transaction exists in a block.
     \item All blocks are part of the same blockchain and history.
@@ -85,15 +87,16 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     Like, each simplex-chain already knows the main chain of each other simplex-chain, but that doesn't mean much if there's one chain with an attacker making like 90\% of the blocks.
     We'd need to wait like 80 blocks for the honest branch to win out.
 }
+\pz{Replace RTs with root tokens}
 \dSe{
     Only 80 blocks?
     It's worse than that.
     If that attack can fraudulently mint new RTs and move them to another chain, then the `block rewards' for the attacker are those new RTs.
     So the attacker won't mind pumping up the difficulty to push other miners out.
 }
-\dMax{Oh\dots{} yeah i guess so.}
+\dMax{Oh\dots{} yeah I guess so.}
 \dMax{
-    Actually, i think it might even be rational for \emph{all} miners to do that.
+    Actually, I think it might even be rational for \emph{all} miners to do that.
     Not good.
 }
 \dMax{I'm still convinced that, if SPV is possible in other networks, then there must be a method that works for UT.}
@@ -165,7 +168,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     The goal of our fraud proofs is to show only the problematic parts of the block using the minimum data necessary.
 }
 \dMax{
-    Say an attacker made a block that looks valid in all ways except the state-transition --- e.g., there's a tx that mints 1 billion coins or w/e.
+    Say an attacker made a block that looks valid in all ways except the state-transition --- e.g., there's a tx that mints 1 billion coins or whatever.
     We can always prove that such a tx is fraudulent if miners have to commit to the state-root before and after each transaction (in the block itself).
     All we have to do is provide all of the state-tree witnesses that are necessary to evaluate that one tx.
     If the tx is valid, then the output state root will always match the one recorded.
@@ -831,9 +834,10 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     So each miner has a choice, \emph{for each block they mine}, of whether to accept the bribe or not.
 }
 \dMax{
-    From the miner's perspective: the attacker doens't know if they've recieved a bribe before or not; and they could always earn some reward by publishing the fraud proof.
+    From the miner's perspective: the attacker doesn't know if they've recieved a bribe before or not; and they could always earn some reward by publishing the fraud proof.
     So \emph{each} bribe has to be worth more than the alternative.
 }
+\pz{H is used earlier as the total hash-rate of the network.}
 \dMax{
     Let's assume that there's a reward ($C_r H$) for publishing the fraud proof.
     ($C_r$ is the block reward of the target chain, and $H$ is the proportion of the block reward each miner gets.)
