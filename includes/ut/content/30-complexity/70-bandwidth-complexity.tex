@@ -58,6 +58,7 @@ If we try to restrict $\Delta r < k_1$, then we find that we require a large $B_
     2 {B_h}^2 &> 2 B_h g + g k_1 \phi \\
     k_1 &< 2 B_h (B_h - g) (g \phi)^{-1}
 \end{align*}
+\pz{$\phi$ also used here}
 If $k_1 = 3000$, $\phi = 0.5$, we have $B_h \ge 172$ --- much larger than what we've assumed to be the minimum so far.
 Achieving $\Delta r < 3000$ requires $\phi \lesssim 0.2$ given the usual parameters.
 
@@ -70,7 +71,7 @@ To keep $\Delta r$ practicable, we should therefore go to some effort to keep $g
 
 \subsubsubsubsubsection{\AxiomOfUnifiedAncestry Optimization}
 
-Using the \AxiomOfUnifiedAncestry, we do not need to reference to a block's parents directly, since they are implied by the PoR graph and the absence of fraud proofs.
+Using the \AxiomOfUnifiedAncestry, we do not need to reference a block's parents directly, since they are implied by the PoR graph and the absence of fraud proofs.
 This results in a small optimization where the parent hash is replaced with the best tip of the longest PoR chain.
 Regarding $\Delta r$, $g(1 + N_1 B_f \phi) \to g N_1 B_f \phi$ and thus:
 \begin{align}{}
@@ -110,6 +111,6 @@ Any auxiliary data can be deterministically regenerated.
 It is clear that \(\Delta S\) has order \(O(c^2)\), but how bad is this?
 For \(k_1 = 3000\), \(B_f = \frac{1}{60}\), and \(B_h = 112\): \(\Delta S \approx 1.2\) MB/s.
 With those figures: \(N_1 \approx 800\) simplex-chains, \(N_2 \approx 645,000\) dapp-chains, and maximum tps of \(\sim 7.7\times 10^{6}\) at nesting level 2.
-Decreasing block times to 15s correspondingly decrease the bandwidth requirements to 0.3 MB/s for a simplex with \(\sim 200\) chains, \(\sim 40,000\) dapp-chains, and \(\sim 484,000\) max tps.
+Decreasing block times to 15s correspondingly decreases the bandwidth requirements to 0.3 MB/s for a simplex with \(\sim 200\) chains, \(\sim 40,000\) dapp-chains, and \(\sim 484,000\) max tps.
 
 While \(O(c^2)\) bandwidth scaling is not ideal, it's clear that --- especially in the early days of a UT simplex when there are fewer simplex-chains --- there are tolerable configurations available; i.e., there is \emph{excess capacity}.
