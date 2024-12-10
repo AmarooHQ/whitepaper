@@ -120,29 +120,30 @@ Since there are $O(c)$ many chains, and we need to add $O(1)$ extra information 
 
 In practice, blocks \emph{will} sometimes be mined simultaneously.
 So, even if \emph{most} of the time a block only reflects one tip, \emph{some} of the time that block will reflect multiple tips.
-The frequency of simultaneous blocks is dependent on the number of chains ($N_1$), the block frequency of each chain ($B_f$), and some propagation delay ($\phi$ seconds).
-Two blocks are simultaneous if they are mined within $\phi$ seconds of each other.
+The frequency of simultaneous blocks is dependent on the number of chains ($N_1$), the block frequency of each chain ($B_f$), and some average propagation delay ($\phi$ seconds).
+Two blocks are simultaneous if they are mined within $\sim \phi$ seconds of each other.
 In the $\phi$ seconds before that most recent tip was mined, we expect that $\sim N_1 B_f \phi$ other tips were mined (from any simplex-chain).
 Unless a block contains no reflections, it must reflect at least one graph tip (which happens with probability $1 - {N_1}^{-1}$).
 So, we expect each block to reflect $1 + N_1 B_f \phi$ tips.
-For $N_1 = 100, B_f = \nicefrac{1}{15}, \phi = 0.3$, we expect
-each block to be simultaneous with $\sim 2$ others, and each block to reflect 3 graph tips on average.
+For $N_1 = 100, B_f = \nicefrac{1}{15}, \phi = 1$, we expect
+each block to be simultaneous with $\sim 7$ others, and each block to reflect 8 graph tips on average.
 
 Therefore, the overhead to reconstruct the PoR graph --- and every PoR segment of every simplex-chain block --- is, on average, $g (1 + N_1 B_f \phi)$ bytes per block, where $g$ is the length of a hash.
-As $g$, $1$, $B_f$, and $\phi$ are constants, the overhead thus has complexity $O(c)$ \emph{per block-period per simplex-chain}.
+As $g$, $1$, and $B_f$ are constants, and if we treat $\phi$ as constant, the overhead thus has complexity $O(c)$ \emph{per simplex-chain}.
 Since we're tracking $O(c)$ chains, the overall load is $O(c^2)$.
 
 The total bandwidth required to track the PoR graph (excluding verifying the availability of blocks) is: the overhead per block, plus the block header, all multiplied by the network-wide blocks per second rate.
 Thus, the total bandwidth is $N_1 B_f (B_h + g(1 + N_1 B_f \phi))$ B/s --- which is $O(c^2)$.
 
-However, we estimated before that we should expect to require just 3 graph tips on average per block (which seems quite low).
+However, we estimated before that we should expect to require 7 graph tips on average per block (which seems much less than $O(c)$).
 Practically speaking, the overhead is only significant when the header size is much smaller than the overhead: $B_h \ll g (1 + N_1 B_f \phi)$.
-If we plug in our rough numbers from before, we find $g (1 + N_1 B_f \phi) \approx 100 \approx B_h = O(1)$.
+If we plug in our rough numbers from before, we find $g (1 + N_1 B_f \phi) \approx 250 \approx 2 B_h = O(1)$.
 
 There \emph{is} a practical limit (depending on $B_f \phi$) for how large $N_1$ can grow before this overhead is non-negligible.
-\emph{However}, if we capped the expected overhead to, say, 256 bytes --- $g(1+N_1B_f\phi) \le 256$ --- then we find $N_1 \le 7(B_f \phi)^{-1} \approx 350$.
-Capping the overhead to 128 bytes yields $N_1 \lesssim 150$.
+\emph{However}, if we capped the expected overhead to, say, 256 bytes --- $g (1 + N_1 B_f \phi) \le 256$ --- then we find $N_1 \le 7(B_f \phi)^{-1} \approx 105 \cdot \phi^{-1}$.
+Capping the overhead to 128 bytes yields $N_1 \lesssim 45 \cdot \phi^{-1}$.
 Note that maximal values of $N_1$ are inversely proportional to $B_f$, so modifying $B_f$ doesn't change the expected overhead.
+
 
 % \begin{align*}
 %     g\Theta &\ge g(1+N_1B_f\phi) \\
@@ -195,7 +196,7 @@ Since the overhead is $O(c)$, and recording all reflections is also $O(c)$, can 
 
 The old PoR sub-block takes up $N_1 B_f \alpha$ B/s of capacity (where $\alpha$ represents the bytes per reflected simplex-chain and $\alpha \in [16, 512]$).
 
-The new PoR sub-block instead takes up $B_f g(1 + N_1 B_f \phi)$ B/s of capacity --- we exclude the block's header since that's already part of the block.
+The new PoR sub-block instead takes up $B_f \cdot g(1 + N_1 B_f \phi)$ B/s of capacity --- we exclude the block's header since that's already part of the block.
 If $k_{1,B}$ B/s of a chain's capacity is dedicated to reflections, then we have:
 \begin{align}
     k_{1,B} &= B_f g(1 + N_1 B_f \phi) \nonumber \\
@@ -203,16 +204,16 @@ If $k_{1,B}$ B/s of a chain's capacity is dedicated to reflections, then we have
     % & \text{Note that $N_1 \propto \phi^{-1}$}
     \label{eq:bad-n1-with-phi}
 \end{align}
-Plugging in our numbers from before (excluding $N_1$), yields $N_1 \approx 23 (k_{1,B} - 2.1)$.
-If $k_{1,B}$ = 1,500 B/s, then $N_1 \approx$ 34,500.
+Plugging in our numbers from before (excluding $N_1$), yields $N_1 \approx 7 \cdot \phi^{-1} (k_{1,B} - 2.1)$.
+If $k_{1,B}$ = 1,500 B/s, then $N_1 \approx 10\text{,}500 \cdot \phi^{-1}$.
 
-Of course, 34 thousand chains is a lot, and tracking the PoR graph completely would require $\sim 52$ MB/s of bandwidth and require more than 1 PB per year to store this data.
-Each block would reflect, on average, 34k other blocks.
-Every block period, keeping up with the PoR graph would require calculating 34k PoRs roots --- although there are significant optimizations to avoid recalculating these from scratch.
+Of course, 10 thousand chains is a lot, and tracking the PoR graph completely would require $\sim 15$ MB/s of bandwidth and require around 500 TB per year to store this data.
+Each block would reflect, on average, 10k other blocks.
+Every block period, keeping up with the PoR graph would require calculating 10k PoRs roots --- although there are significant optimizations to avoid recalculating these from scratch.
 
 \aside{I don't know about you, but I'm getting the suspicion that this isn't really an $O(c)$ load.}
 
-One of our premises before was that $O(N_1 B_f \phi) = O(c)$, but is that really the case?
+Since this conflicts with our notion of an $O(c)$ load, let's examine one of our premises: that $O(N_1 B_f \phi) = O(c)$.
 Certainly $O(N_1) = O(c)$, and $O(B_f) = O(1)$, but does $O(\phi) = O(1)$?
 
 There is a good reason to think $O(\phi) = O(1)$.
@@ -237,14 +238,21 @@ We can also explain why we had such a large $N_1$ estimate before --- we took an
 So we effectively changed $O(N_1)$ from $O(c) \to O(c^2)$.
 That meant that network-wide bandwidth and storage requirements went from $O(c^2) \to O(c^3)$.
 
-Curiously, we can still \emph{in principle} use this optimization idea to increase network throughput in the future, if we want to.
-In practice, the effects would be similar to increasing the PoRs sub-block size.
-However, this is best left as \emph{excess capacity} in \UT{}'s architecture --- a resource to tap into if we get desperate, but not something that we should plan to use.
+There is also an argument that $\phi$ depends on the number of nodes in the P2P network --- that would take the form of a $\log_b(n)$ term in $O(\phi)$.
+While this is true for naive gossip protocols, in practice we see that miners will go to some effort to specifically reduce latency for block propagation.
+Under near-ideal conditions, miners can propagate new blocks and reflections to one another with near-zero local overhead (compared to the milliseconds of latency between them).
+Since this propagation is constrained by the latency between these special nodes, and not by the size of the network as a whole, we will ignore any $\log_b(n)$ component of $\phi$.
+
+% MK: the following is unnecessary
+% Curiously, we can still \emph{in principle} use this optimization idea to increase network throughput in the future, if we want to.
+% In practice, the effects would be similar to increasing the PoRs sub-block size.
+% However, this is best left as \emph{excess capacity} in \UT{}'s architecture --- a resource to tap into if we get desperate, but not something that we should plan to use.
 
 
 \subsubsubsection{\AxiomOfRawMaximalReflection}
 
 It should be clear that there are decisive advantages for \UT{} if the PoR graph is maximally reflective.
+Particularly, we can accurately describe the PoR graph entirely via \emph{new reflections}, greatly reducing PoR overhead.
 Thus, we will require it via a protocol rule: the \AxiomOfMaximalReflection.
 
 \DeclareAxiom{MaximalReflection}{%
