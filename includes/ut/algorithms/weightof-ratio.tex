@@ -7,8 +7,8 @@
     \State $R \gets$ \Call{ChainOf}{$R_i$, $state$}
     \State $R_f \gets$ \Call{BlockFrequencyOfChain}{$R$, $state$} \Comment{Block production Hz of $R$}
     \State $R_t \gets$ \Call{RootTokensOnChainAt}{$R$, $t$, $state$} \Comment{Number of root tokenson $R$ at $t$}
-    \State $L_d \gets$ \Call{LocalBlockDifficultyAt}{$t$, $state$}
-    \State $L_f \gets$ \Call{LocalBlockBlockFrequency}{$t$, $state$}
+    \State $L_d \gets$ \Call{LocalDifficultyAt}{$t$, $state$}
+    \State $L_f \gets$ \Call{LocalBlockFrequency}{$t$, $state$}
     \State $L_t \gets$ \Call{LocalRootTokens}{$t$, $state$}
     \State \Return{\Call{$\text{ConvSRT}_{R\rightarrow L}$}{$L_d$, $L_f$, $L_t$, $R_f$, $R_t$}}
 \EndProcedure

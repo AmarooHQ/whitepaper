@@ -51,7 +51,7 @@ Notice that in both cases, \cM is $O(n)$ secure.
 Given this, chains \cL and \cR should be able to use the same work that chain \cM does to reach the same level of security.
 
 The first problem is that \cL and \cR cannot use the same \textsc{WeightOf} algorithm as before (although, \cM can).
-Particularly, \cL and \cR's \textsc{WeightOf} must count: not only their local chain-work and that contributed reflected \cM blocks, but also some additional weight based on reflections from \emph{other} chains.
+Particularly, \cL and \cR's \textsc{WeightOf} must count: not only their local chain-work and that contributed by reflected \cM blocks, but also some additional weight based on reflections from \emph{other} chains.
 Each \cM block might record the total chain-work that it adds to \cM (including PoRs), but \cL and \cR's new \textsc{WeightOf} can't use this value directly.
 Firstly, that value includes past local chain-work that reflected \cM (which includes both \cL and \cR blocks).
 But more importantly, we don't want to force \cL and \cR to verify \emph{every} PoR that contributes to \cM, just the ones that matter.
@@ -98,7 +98,7 @@ $\xyInlineRefl{\BL{1} \;&\; \BM{1}\arf[l] \;&\; \BR{2}\arf[l] \;&\; \BM{2}\arf[l
 Since \cL nodes already know about all the \cM and \cR blocks (and the relevant PoRs), the full recursive PoR \emph{does not need to be explicitly recorded}.
 It is already known to all \cL nodes, since each part of the recursive PoR is available in one of the \cL, \cM, or \cR chains (it is explicitly recorded if a +PoRs UT variant is used, and recalculated by the node otherwise).
 
-In \autoref{sec:counting-work} we discussed the idea that a PoR can only contribute to local blocks that are in the reflecting block's past.
+In \autoref{sec:counting-work}, we discussed the idea that a PoR can only contribute to local blocks that are in the reflecting block's past.
 By inspection, we can see that the most recent \cR block (the reflecting block) in \BL{3}'s past is \BR{2}, and the most recent \cL block (the local block) in \BR{2}'s past is \BL{1}.
 Thus, we can see that our method for attributing reflected work --- following the arrows --- works for recursive PoR, too.
 
@@ -145,10 +145,7 @@ First, let's consider when \cL can \emph{definitely} count \emph{all} the work c
             \xyTimeHoriz{rrrrrr} &&&&&&
         }
     \end{equation*}
-    \caption[
-        asdf.
-    ]{
-        asdf.
+    \caption[]{
         Note that reflections between \cMone and \cMtwo are not shown.
     }
     \label{fig:multi-path-recursive-por-chain-diag}
@@ -217,7 +214,7 @@ Having multiple paths does provide some benefit (as there must be some new refle
 
 Another way to look at multiple paths is that an attacker (who is attacking \cL, \cMone, \cMtwo, and \cR) does not have to do any additional work to generate multiple redundant paths (besides the additional work that is directly involved in creating new blocks).
 
-Notice that we do \emph{not} require that a recursive PoR to use the use the same chains in each half of the PoR.
+Notice that we do \emph{not} require that a recursive PoR use the same chains in each half of the PoR.
 Of the 4 possible PoRs, the preferable one is:
 $\xyInlineRefl{\BL{1} \;&\; \BMtwo1 \arf[l] \;&\; \BR{2} \arf[l] \;&\; \BMone2 \arf[l] \;&\; \BL{3}\arf[l]}$.\footnote{
     This recursive PoR path is preferable because it is from the \emph{first possible} \cL block to enable a PoR via \BR{2}, and goes to the \emph{most recent} \cL block in \BR{2}'s history.
@@ -246,7 +243,8 @@ That configuration would look like this:
         & \cMtwo \ar@{<->}[r] \ar@{<->}[uur] & \cRtwo \ar@{<->}[uul]
     }
 \end{equation*}
-In general, for a recursive PoR of length $2d-1$, were each reflection could be provided by $N_1 v^{-1}$ possible chains, the expected latency of draft reflected work is ${N_1}^{-1} v (2d-1)$ block periods.
+\pz{$2x-1$ was used above}
+In general, for a recursive PoR of length $2d-1$, where each reflection could be provided by $N_1 v^{-1}$ possible chains, the expected latency of draft reflected work is ${N_1}^{-1} v (2d-1)$ block periods.
 This is directly relevant to how fast work propagates within a tiling.
 
 Note that, for a standalone simplex, we can see that $2d-1 = 1$ (each PoR is of length 1), and $v=1$ (there is no tiling), so the expected latency of draft reflected work is ${N_1}^{-1}$ block periods, which, in seconds, is $(N_1 B_f)^{-1} = {\Cprime}^{-1}$.
@@ -323,6 +321,7 @@ Note that, for a standalone simplex, we can see that $2d-1 = 1$ (each PoR is of 
 \subsubsubsection{Future Research}
 
 There are some future areas of research that may improve this process, too.
+\pz{Citation repeated}
 For example: along the lines of NIPoPoWs\footnote{
     Non-Interactive Proofs of Proof-of-Work (NIPoPoWs), see \citeNIPoPoWsFull.
 }, are \emph{Non-Interactive Proofs of Proof-of-Work Reflections} (NIPoPoWRs) possible?
