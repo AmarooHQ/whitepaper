@@ -81,6 +81,7 @@ The *throughput*, $T_1$, of an $O(c)$ chain is equivalent to its raw throughput:
 T_1 = k_1
 \end{equation*}
 
+\pz{Isn't "The complexity order of the network" equal to $O(n)$ by definition?}
 The complexity order of the network is given by $O(T_1) = O(k_1) = O(c)$ as expected.
 
 Care should be taken to account for protocol extensions like *Segregated Witness* that effectively reduce the size of transactions (in SegWit's case, by $\sim \nicefrac{1}{4}$).
@@ -125,6 +126,7 @@ It's typical, though, that the headers of nested chains, alone, are not sufficie
 When such data is required to be recorded on-chain (i.e., it cannot be deterministically regenerated), then the \emph{effective} header size is the size of the raw header, plus the size of any auxiliary data.
 
 For example, in an \emph{Ethereum 2} beacon block, each shard has a header size of 280 B, but there is additional overhead.
+\pz{Update footnotes as they date back}
 A reasonable lower-bound is that each header has an \emph{effective} minimum header size of 312 B.\footnote{
   As of late September 2021, the Ethereum 2 \href{https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/sharding/beacon-chain.md\#beaconblockbody}{sharding spec} has capacity for 2:1 attestations to shards per block (with 64 shards), but only 32 B of each attestation is dedicated to sharding.
   The spec also has capacity for 4:1 shard headers to shards per block.
@@ -176,6 +178,7 @@ There's enough capacity for attestations (128 each block for 64 shards) that the
 
 \subsubsection{Complexity of \titlemath{$\UT{1}$}{UT₁}}
 
+\pz{Any specific reason why are we using $B_h$ in this section and $D_h$ in the previous one.}
 There is no single root-chain for a collection of mutually reflecting blockchains (i.e., a simplex), so $N_1 \neq 1$.
 What is $N_1$ then?
 In a simplex, each chain has $k_1$ B/s capacity, but this is split between reflections and transactions.
@@ -266,7 +269,7 @@ Thus, from the definition of $k_1$ in \autoref{eq:k1-reflection-defn}:
 \begin{equation*}
 k_{1,B} = \frac{k_1}{2}
 \end{equation*}
-
+\pz{We should add a sentence saying that "For a maximal simplex, half of the throughput must be$\dots$"..}
 
 
 
@@ -354,7 +357,7 @@ N_3 & = \frac{T_3}{k_3} \\
 & = \frac{{k_1}^2 \cdot k_2}{4 \cdot B_f \cdot B_h \cdot {D_h}^2 \cdot {D_f}^2}
 \end{split}
 \end{equation*}
-
+\pz{What is the conclusion of this equation?}
 
 
 
@@ -397,6 +400,7 @@ $Tx_{avg}$: average tx size (bytes)
 
 NB: For the purposes of \autoref{table:tps} and on, the average transaction size is taken to be 250 bytes.
 
+\pz{In the table, rename columns named $O(c)$ and $O(c^2).$}
 %% INSERT ### TABLE: tps
 
 : A comparison of the maximum transaction throughput (transactions per second; TPS) given different $\UT{\text{+OP}}$ scaling configurations.
@@ -445,6 +449,7 @@ Practically, this effect means that a decrease to the size of headers has *incre
 \autoref{table:compare_optimizations_a} and \autoref{table:compare_optimizations_b} show a comparison between UT variants.
 For comparisons over a range of parameters, see \autoref{sec:ut-variant-complexities}.
 
+\pz{For the four tables below, add some short description to make interpretation of the table unambiguous. For instance, if the main focus is TPS, move the corresponding column at the end and mention or make it bold.}
 %% INSERT ### TABLE: compare_optimizations_a
 
 : Comparison of UT variants' capacities with parameters: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions.

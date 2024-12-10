@@ -66,6 +66,7 @@ After the first few confirmations, each additional confirmation reduces the risk
 }
 So \emph{security takes \ul{time}}, because confirmations take time.
 
+\pz{Recall the meaning of $\mathbb{C}^\prime$}
 Now, consider a simplex: the equivalence conjecture says that it doesn't matter whether confirmations come from the \emph{local} chain, or if they come from a \emph{reflecting} chain.
 So, a simplex-chain in a 2-chain simplex (wherein each simplex-chain has $\mathbb{C}^\prime = 2 \times B_f$) \emph{should}, after $C$ \emph{local} confirmations, be as secure as a standalone blockchain with $2C$ confirmations.
 This is true for larger simplexes, too: \emph{doubling} the size of a simplex means we can \emph{halve} the number of \emph{local} confirmations that we wait for --- the chance of a doublespend succeeding should be approximately the same.
@@ -146,9 +147,12 @@ Let's test the Confirmation Equivalence Conjecture.
 
 The hypothesis is that: doublespends against an \emph{individual simplex-chain} in an $N$-chain simplex after $C$ \emph{local} confirmations are \emph{as hard} as doublespends against a traditional blockchain after $C\cdot N$ confirmations.
 
+\pz{A bibliography would avoid repeating the same citation over and over.}
+\pz{c and m have not been defined. Also, we use the same letter for local computation power and confirmations.}
 First, define $P(q; c)$ to be the function that returns the probability of an attempted doublespend succeeding on a traditional blockchain according to Rosenfeld's analytical solution\footnote{
     \citeAHBDSFull
 }:
+\pz{Unclear if $\{1, 2, \dots\}$ is finite or infinite.}
 \begin{equation}
     \forall c \in \{1, 2, \dots\}: P(q; c) = \begin{cases}
         1 - \sum_{m=0}^c \binom{m+c-1}{m}(p^c q^m - p^m q^c), & \text{if } q < p \\
@@ -175,6 +179,7 @@ That is:
     P^\prime(q; c = CN; N_1 = 1) \approx P^\prime(q; c = C; N_1 = N)
     \label{eq:por-sim-hypothesis}
 \end{equation}
+\pz{Variable $a$ used in footnote but only defined a posteriori.}
 In fact, we can take this further.
 The relationship that exists is not only at the extremes, but between them too\footnote{
     Since \nicefrac{CN}{a} in \autoref{eq:cec-extended-hypothesis} is not necessarily an integer, we'll assume there exists a valid generalization of Rosenfeld's solution for $c \in \mathbb{R}_{>0}$.
@@ -308,6 +313,7 @@ The most important thing is that $\text{DAA}_N \gg c$, particularly regarding tr
     In practice, we should seriously consider smaller values of $\text{DAA}_N$ for the security benefit.
 }
 
+\pz{Variable n has already been defined.}
 With regards to the other values --- $q$, $c$, and $N_1$ --- they will be varied as part of the experiment so that we can generate each data-point.
 For each data-point, we'll gather at least 9,000 samples (this is indicated by ``$n \ge 9000$'' in these figures' legends).
 
@@ -351,6 +357,7 @@ If the CEC is true then we expect: $f_1(x) \approx f_2(x) \approx f_3(x) \approx
 
 \subsubsubsubsection{Error Correction Iteration}
 
+\pz{Having a probabilistic model and proving it empirically would be far more convincing than trying to make the experiments fit the hypothesis.}
 Following the initial implementation of PoR in the simulator, results were promising but did not align with the theoretical prediction (based on Rosenfeld's analytical derivation of $P(q; c)$).
 At lower values of $c$ and/or $N_1$, the results suggested that the simulation was \emph{more} secure than expected.
 At higher values of $N_1$, $P^\prime$ did not appear to approach 0, instead approaching $\sim 0.05$.
@@ -463,6 +470,7 @@ Does the extended CEC hold true, also?
 
 \subsubsubsubsection{Conclusions}
 
+\pz{The first part of the footnote could be moved as a disclaimer to the beginning of the section. The lack of refuting evidence is also due to the fact that it is not published yet.}
 These results are, for the purpose of this paper, taken to indicate the following statements are true\footnote{
     Experimental results never prove that something is correct, however, they are criticisms of \emph{competing} explanations.
     For example: we see that these experimental results \emph{converge} as expected.

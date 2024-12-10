@@ -60,7 +60,8 @@ To account for this, we can require that, for each \mu level, the best-blocks \m
 (That is: we make sure the necessary on-main blocks are included in the proof if they wouldn't be otherwise.)
 Both together comprise the suffix proof.
 
-Regarding infix proofs, we can use the existing \texttt{followDown} algorithm for with only one modification: an additional parameter determines whether \texttt{followDown} should traverse the \emph{best-blocks} path to the block, or the \emph{on-main only} path.
+\pz{Add where \texttt{followDown} and \texttt{verify-infx} are coming from.}
+Regarding infix proofs, we can use the existing \texttt{followDown} algorithm with only one modification: an additional parameter determines whether \texttt{followDown} should traverse the \emph{best-blocks} path to the block, or the \emph{on-main only} path.
 To generate proofs, we run \texttt{followDown} over each path.
 We similarly modify the \texttt{verify-infx} (\emph{sic}) and \texttt{ancestors} functions used to verify infix proofs.
 % This change requires a corresponding addition to the proof structure so that it accommodates the additional proofs that the on-main traversal requires.
@@ -95,7 +96,7 @@ The main difference is that what we have just sketched proves \emph{work and pos
 Thus, it is a \emph{Non-Interactive Proof of Posteritorial}\footnotemark \emph{Proof of Work} (NIPoPPoW).
 
 \footnotetext{
-    A definition is require as this word is an almost-neologism:
+    A definition is required as this word is an almost-neologism:
 
     \textbf{Posteritorial} \emph{adjective}: having posterity; supported by its descendants, especially regarding well-known descendancy, epistemic antecedence, root-causal nature, etc; having a prototypical and defining quality that was widely inherited.
 

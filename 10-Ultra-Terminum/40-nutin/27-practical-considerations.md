@@ -309,12 +309,12 @@ It's better to have a simple system with emergent properties than a complex syst
 Say you have a network with 10 chains: $C_0, C_1, C_2, ..., C_9$.
 If the networks are separate, then you have 10 groups of miners: $M_0, M_1, M_2, ..., M_9$.
 They have to choose one chain to mine on, so the distribution of miners is expected to be approximately the distribution of normalized block rewards plus tx fees.
-The proportions of block rewards between $C_i$ & $C_j$ don't really matter, we expect the mining groups $M_i$ & $M_j$ will just sort themselves out due to market forces.
+The proportions of block rewards between $C_i$ & $C_j$ don't really matter, we expect the mining groups $M_i$ & $M_j$ to just sort themselves out due to market forces.
 For simplicity, though, this example assumes that mining rewards and the distribution of miners is an even 10% across the board.
 
 If the network has spare capacity (i.e., transactions are mostly cleared out with each block; the mempool for each chain is ~empty) then we have a situation like this:
 
-Set $t=0$ to be immediately after a block is published on a chain.
+Set $t=0$ immediately after a block is published on a chain.
 Then, as $t$ progresses, transactions with fees should build up in the mempool, so $\text{TxFees} \propto t$.
 The reward for mining a block is $r + \text{TxFees}$ for some block reward, $r$.
 If $\text{TxFees} \propto t$ then $r + \text{TxFees} \propto K + t$ for some constant $K$.

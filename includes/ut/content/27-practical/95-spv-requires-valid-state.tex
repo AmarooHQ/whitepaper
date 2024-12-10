@@ -26,6 +26,7 @@ Are we stuck?
 For a blockchain network to be scalable, it must be the case that miners are \emph{not} required to validate more than one chain!
 Have we come all this way, attempting to deal with the core conflict of the trilemma, only to find that we just moved the conflict?
 
+\pz{Is our implementation going to be based on SNARKs and STARKs?}
 Let's not jump to that conclusion just yet --- there are cryptographic options like SNARKs and STARKs that might help.
 Before that, though, let's slow down and reconsider why SPV works for Bitcoin.
 Perhaps we can learn something.
@@ -37,6 +38,7 @@ Particularly, we'll assume that there are no other networks of similar size usin
 
 A concise argument for the security of Bitcoin-SPV proofs is:
 
+\pz{If $\therefore$ is meant as \emph{therefore} maybe we should use $\Rightarrow$ instead.}
 \begin{argumentslist}
     \item An SPV proof is a merkle branch proving that a transaction exists in a block.
     \item All blocks are part of the same blockchain and history.
@@ -85,15 +87,16 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     Like, each simplex-chain already knows the main chain of each other simplex-chain, but that doesn't mean much if there's one chain with an attacker making like 90\% of the blocks.
     We'd need to wait like 80 blocks for the honest branch to win out.
 }
+\pz{Replace RTs with root tokens}
 \dSe{
     Only 80 blocks?
     It's worse than that.
     If that attack can fraudulently mint new RTs and move them to another chain, then the `block rewards' for the attacker are those new RTs.
     So the attacker won't mind pumping up the difficulty to push other miners out.
 }
-\dMax{Oh\dots{} yeah i guess so.}
+\dMax{Oh\dots{} yeah I guess so.}
 \dMax{
-    Actually, i think it might even be rational for \emph{all} miners to do that.
+    Actually, I think it might even be rational for \emph{all} miners to do that.
     Not good.
 }
 \dMax{I'm still convinced that, if SPV is possible in other networks, then there must be a method that works for UT.}
@@ -165,7 +168,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     The goal of our fraud proofs is to show only the problematic parts of the block using the minimum data necessary.
 }
 \dMax{
-    Say an attacker made a block that looks valid in all ways except the state-transition --- e.g., there's a tx that mints 1 billion coins or w/e.
+    Say an attacker made a block that looks valid in all ways except the state-transition --- e.g., there's a tx that mints 1 billion coins or whatever.
     We can always prove that such a tx is fraudulent if miners have to commit to the state-root before and after each transaction (in the block itself).
     All we have to do is provide all of the state-tree witnesses that are necessary to evaluate that one tx.
     If the tx is valid, then the output state root will always match the one recorded.
@@ -831,9 +834,10 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     So each miner has a choice, \emph{for each block they mine}, of whether to accept the bribe or not.
 }
 \dMax{
-    From the miner's perspective: the attacker doens't know if they've recieved a bribe before or not; and they could always earn some reward by publishing the fraud proof.
+    From the miner's perspective: the attacker doesn't know if they've recieved a bribe before or not; and they could always earn some reward by publishing the fraud proof.
     So \emph{each} bribe has to be worth more than the alternative.
 }
+\pz{H is used earlier as the total hash-rate of the network.}
 \dMax{
     Let's assume that there's a reward ($C_r H$) for publishing the fraud proof.
     ($C_r$ is the block reward of the target chain, and $H$ is the proportion of the block reward each miner gets.)
@@ -1241,6 +1245,7 @@ Thus the attacker suffers losses compared to mining honestly: $C_r H k$ for the 
 That reward is lost to excessive work securing the target chain which would otherwise earn the attacker that much revenue.
 Additionally, the attacker loses the block rewards each time --- so these losses are $C_r (1 + H k)$ per block after $k$ blocks.
 Let $C_r \cdot l_m$ represent the total losses due to mining: factoring out $l_m$ in this way allows us to analyze the situation independent of the block reward.
+\pz{Define $z$}
 \begin{align}
     l_m &> \sum\limits_{k=0}^z \Bigl( 1 + H k \Bigr) \nonumber \\
     &= z + 1 + H \sum\limits_{k=0}^z k \nonumber \\
@@ -1254,6 +1259,7 @@ That is because, at that point, the attacker's losses are $C_r (1 + H (q H^{-1} 
 Assuming an even hash-rate distribution, $C_r N_1 (p + q)$ represents the \emph{sum} of \emph{all} block rewards over the network.
 Therefore, the maximum output (measured in coins) of $q$ proportion of the hash-rate, \emph{by definition}, is $C_r N_1 q$.
 An attacker must have additional support to maintain this portion of the attack --- when the mining losses per block (approx $C_r H k$) exceed the attacker's mining capacity ($C_r N_1 q$).
+\pz{In $H \ge {N_1}^{-1}$, what is the relation between the hash-rate and the number chains?}
 % We have:
 \begin{align}
     \text{\hspace{8em}}
@@ -1266,6 +1272,7 @@ At that point, at least 50\% of the network hash-rate needs to be dedicated to t
 
 \subsubsubsubsection{Phase 1 $\not\to$ Phase 2 and $\BribeCost(z)$}
 
+\pz{Define $Z_k$}
 \begin{itemize}
     \item Each miner (on each simplex-chain) needs bribing (but only if they make a block).
     \item Each round, the attacker must pay $C_r Z_k$ in bribes (where $k$ is the round, starting at 1).
@@ -1321,7 +1328,7 @@ We should also note the inverse of \BribeCost, which gives us a lower bound on t
     \label{eq:spv-bribe-cost-inverse}
 \end{align}
 
-\subsubsubsubsection{Domain and Range of $\BribeCost(z)$ in the SRT context}
+\subsubsubsubsection{Domain and Range of $\BribeCost(z)$ in the SRT Context}
 
 It is clear that $\BribeCost(0) = 1$.
 That is: the attacker has lost exactly 1 block reward (the reward for the fraudulent block).
@@ -1375,6 +1382,7 @@ If, instead, $H = 1/\sqrt{N_1}$, then $\eta = 5.05$ and
 
 \subsubsubsubsection{Fixed Points of $\BribeCost(z)$ when Batching}
 
+\pz{Unclear what this section is about.}
 Let's assume that there is a constant outbound SPV ``pressure''.
 That is, every block, $y$ multiples of the block reward are queued for the next batch.
 
@@ -1395,6 +1403,7 @@ So, if $y = 10$ and $\eta = 1$, then we can estimate that we have a fixed point 
 
 The network transitions from phase 1 to phase 2 as soon as a first miner produces a block that includes the fraud proof.
 
+\pz{Formatting is off, but the first item only says attacker}
 - attacker
 - dishonest nodes: the ones that take the bribe and help the attacker
 - honest nodes: the ones that produce blocks where the FP is included in the PoR graph
@@ -1409,8 +1418,10 @@ Thus, using those PoRs effectively turns dishonest miners into honest miners.
 
 The duration of this transition depends on the proportion of honest miners: $h$.
 Let's define $h$ via $h + d = 1$, where $d$ is the proportion of dishonest miners, including the attacker.
+\pz{Define p as it seems it's not the proportion of honest miners.}
 Since $d$ includes the attacker, we can say $d > q$, and $h < p$.
 
+\pz{Does a fraudulent block reflected by a honest miner adds weight? If yes, this is worth mentioning If yes, does it create vulnerabilities?}
 Similar to \autoref{sec:dos-and-dags}, the asymmetry between honest and dishonest miners means that, even for a small $h$, the chain-weight of the honest chain-tips will eventually dominate the chain-weight of dishonest chain-tips.
 After that point, each simplex-chain's main chain will include the fraud proof, and the dishonest chain-tips will never be able to out-weigh the honest ones.
 
@@ -1425,6 +1436,7 @@ So, after 1 block period, we expect:
     t_1 = t_0 + \vecXY{N_1 h}{N_1 d} = N_1 \vecXY{h}{d}
 \end{equation*}
 
+\pz{What if the $N_1 d$ blocks are mined privately?}
 After 2 block periods, the $h$ proportion of new blocks that are honest can use PoRs via the dishonest blocks.
 Due to the asymmetry, the dishonest blocks can not.
 \begin{equation*}
@@ -1456,6 +1468,7 @@ If $h = \nicefrac{1}{N_1}$, i.e., for each honest miner there are $(N_1 - 1)$ di
 %     k > N_1 - 1
 % \end{equation*}
 
+\pz{This is an important result, probably worth mentioning earlier. }
 If only 1\% of miners refuse the bribe ($h = 0.01$), and that the other 99\% of miners continue to mine only blocks that do not include the fraud proof, then we have: $k > 99$.
 
 If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$, then $k > 2$.
@@ -2081,7 +2094,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 }
 \dMax{
     No, not for them either.
-    The knew the block was invalid because they already had the fraud proof, even if they're not a full node of that chain.
+    They knew the block was invalid because they already had the fraud proof, even if they're not a full node of that chain.
 }
 \dSe{
     So\dots{}
@@ -2105,7 +2118,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 \dMax{
     Hmm.
     If a totally different chain outside the simplex, like Eth2, is verifying SPV proofs against the simplex, it must be aware of unpublished fraud proofs to be secure.
-    And it needs to tolerate to the sort of invalidation (via FPs) that might happen.
+    And it needs to tolerate the sort of invalidation (via FPs) that might happen.
 }
 \dSe{
     Mm\dots{} perhaps.
@@ -2517,7 +2530,7 @@ in response to writing a dialog and honestly and fully exploring everything.
 
 \subsubsubsection{Decoupled State Progression}
 
-
+\pz{Add some explanation here and define what $AL_x$s are.}
 
 \begin{figure}[h]
     \centering
@@ -2642,7 +2655,7 @@ Realistically, we should expect a single simplex-chain to record and verify many
 There are techniques to help here --- like \emph{recursive} STARKs --- but making the method more complex exacerbates other problems.
 For example: creating a STARK proof is somewhat resource intensive.
 The running-time is okay, but RAM requirements can be in the many-gigabytes.
- these proofs would need to be verified for each block in each other simplex-chain that
+These proofs would need to be verified for each block in each other simplex-chain that
 
 \begin{itemize}
     \item transparency, good
