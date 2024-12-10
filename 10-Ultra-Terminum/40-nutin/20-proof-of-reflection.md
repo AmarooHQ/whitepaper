@@ -842,7 +842,7 @@ Since network context is respected, we can use an exchange rate to build a meani
 information is *lost* through the DAA. -->
 
 \aside{
-  With regards to DAAs, it should be noted that Bitcoin's was the first and the method has some undesirable properties.
+  With regard to DAAs, it should be noted that Bitcoin's was the first, and the method has some undesirable properties.
   I quite like the algorithm named \textsc{DAA-2} (which is used by Bitcoin Cash) in \citeDaaTwoLink{}.
   Experimentally, it seems to work well with \autoref{sec:dos-and-dags}.
 }
