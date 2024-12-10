@@ -50,7 +50,7 @@ Let's call the total bandwidth requirements for the PoR graph $\Delta r$ and sub
 \end{align}
 As discussed in \autoref{sec:por-graph-max-refl} it is unclear whether $O(c^2\phi) = O(c)$.
 However, we don't need to know $O(\Delta r)$ to estimate some real world values of $\Delta r$.
-Practically, $\Delta r$ looks to be between $k_1$ and $2 k_1$ for $k_1=3000$ --- but, this is sensitive to $\phi$.
+Practically, $\Delta r$ looks to be between $k_1$ and $3 k_1$ for $k_1=3000$ --- but, this is sensitive to $\phi$.
 
 If we try to restrict $\Delta r < k_1$, then we find that we require a large $B_h$ or small $k_1$:
 \begin{align*}
@@ -58,16 +58,14 @@ If we try to restrict $\Delta r < k_1$, then we find that we require a large $B_
     2 {B_h}^2 &> 2 B_h g + g k_1 \phi \\
     k_1 &< 2 B_h (B_h - g) (g \phi)^{-1}
 \end{align*}
-\pz{$\phi$ also used here}
-If $k_1 = 3000$, $\phi = 0.5$, we have $B_h \ge 172$ --- much larger than what we've assumed to be the minimum so far.
+If $k_1 = 3000$, $\phi = 1$, we have $B_h \ge 235$ --- much larger than what we've assumed to be the minimum so far.
 Achieving $\Delta r < 3000$ requires $\phi \lesssim 0.2$ given the usual parameters.
 
 Regarding the terms from \autoref{eq:por-graph-delta-r} within the parentheses, it is clear that $1 + g/B_h$ will be a value around 1.3, give or take.
 What do we expect the value of $g k_1 \phi / (2 {B_h}^2)$ to be?
 If $B_h \in [50, 500]$, and $\phi \in [0.05, 2.0]$, then we can see that the coefficient of $k_1$ is, at most, 0.0128 (and $3.2\cdot10^{-7}$ at least).
 Thus, this last term dominates $(1+g/B_h)$ when $g k_1 \phi \gtrsim 2 {B_h}^2$.
-
-To keep $\Delta r$ practicable, we should therefore go to some effort to keep $g k_1 \phi \lesssim 2 {B_h}^2$.
+To keep $\Delta r$ practicable, we should therefore go to some effort to keep $g k_1 \phi \lesssim 2 {B_h}^2 z$ (where $z$ is a small constant we can use to add some acceptable tolerance in lieu of improving $\phi$).
 
 \subsubsubsubsubsection{\AxiomOfUnifiedAncestry Optimization}
 
@@ -79,9 +77,9 @@ Regarding $\Delta r$, $g(1 + N_1 B_f \phi) \to g N_1 B_f \phi$ and thus:
     % &= \frac{k_1}{2 B_h} \Bigl(B_h + \frac{g k_1 \phi}{2 B_h}\Bigr) \nonumber \\
     &= \frac{k_1}{2}\Bigl(1 + \frac{g {k_1} \phi}{2 {B_h}^2}\Bigr) \nonumber % \label{eq:por-graph-delta-r} \\
 \end{align}
+A maximal simplex of reasonable parameters has $\Delta r \approx 7\text{,}200$ B/s.
 Restricting $\Delta r < k_1$ now implies $k_1 < 2 {B_h}^2 (g \phi)^{-1}$.
-If $k_1 = 3000$, $\phi = 0.5$, we have $B_h \ge 155$.
-So for a maximal simplex of reasonable parameters, we still have $k_1 < \Delta r < 2 k_1$.
+If $k_1 = 3000$, $\phi = 1$, we have $B_h \ge 219$.
 
 
 \subsubsubsection{Complete Simplex}

@@ -6,7 +6,7 @@
     \State $t \gets$ \Call{BlockTimestamp}{$B_i$}
     \State $R \gets$ \Call{ChainOf}{$B_i$, $state$} \Comment{Either the local or a reflecting chain}
     \State $R_r \gets$ \Call{BlockRewardOfAt}{$R$, $t$, $state$} \Comment{L-coins/R-block --- by definition}
-    \State $L_d \gets$ \Call{LocalBlockDifficultyAt}{$t$, $state$}
+    \State $L_d \gets$ \Call{LocalDifficultyAt}{$t$, $state$}
     \State $L_r \gets$ \Call{LocalBlockRewardAt}{$t$, $state$}
     \State \Return{$R_r \cdot (L_d \div L_r)$} \Comment{See \autoref{eq:por-conv-work-srt} (Note: $R_d$ cancels out)}
 \EndProcedure
