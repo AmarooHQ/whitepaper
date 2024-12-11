@@ -8,8 +8,9 @@
 
 \label{sec:por-with-proofs}
 
-What is the throughput of simplex if simplex-chains include explicit proofs of reflection (as merkle branches) and the headers of reflecting chains?
+What is the throughput of the simplex if simplex-chains include explicit proofs of reflection (as merkle branches) and the headers of reflecting chains?
 
+\pz{A capital B was used earlier for $k_{1,b}$}
 Let $g$ be the length of the digest in bytes, i.e., the size of the hashes used in our merkle trees.
 \begin{equation}
 \begin{split}
@@ -29,6 +30,7 @@ Note: $W_0(z)$ is the Lambert W function, aka. the product logarithm.
 \autoref{eq:simplex-N1-with-PoR} gives an $N_1$ that is of the form $N_1 = O(1) \cdot \frac{k_1}{W_0(O(1) \cdot k_1)}$.
 \autoref{fig:x-over-lambert} graphs $f(x) = \frac{x}{W_0(x)}$ for values of $x$ that we care about; $f(x) = 0.0638x$ is included for comparison.
 Regarding this specific case, is it reasonable to approximate $O(\frac{k}{W_0(k)}) = O(k)$?
+\pz{Remove "If it is" if it is a reasonable approximation, otherwise it implies that maybe it is and maybe it isn't.}
 If it is, then we still have $O(N_1) = O(c)$ and $O(T_1) = O(c^2)$.
 
 \begin{figure}
@@ -71,7 +73,7 @@ Other than this change, the logic that is used in \autoref{eq:simplex-N1-with-Po
 
 The +OP variants exclude PoRs from simplex-chain blocks.
 This is reasonable if users running full nodes are willing to download and temporarily store all blocks from all simplex-chains (this allows each node to regenerate the PoRs).
-The PoRs are still processed as part of a chain's state transition (each reflecting header will must have a corresponding PoR), and are thus provable.
+The PoRs are still processed as part of a chain's state transition (each reflecting header will have a corresponding PoR), and are thus provable.
 Additionally, since full nodes will need to recalculate these, a suitable P2P protocol will allow PoRs to be requested from full nodes on an ad-hoc basis.
 
 The derivations of +OP's complexity was covered in \autoref{sec:ut-complexity}.
