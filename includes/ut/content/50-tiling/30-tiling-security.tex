@@ -102,6 +102,7 @@ The purpose of this design is to enable the following argument for $O(n)$ securi
 
 Since each tile has $v-1$ children, we will let $u = v-1$ for convenience.
 
+\pz{Should $\mathcal{M}$ and $r$ be correlated?}
 We will limit each tile's maximum tile-work production, measured against the unit tile, using the following rules:
 \begin{enumerate}
     \item The root tile produces at least \Mroot units of tile-work ($\Mroot \ge 1$; \Mroot stands for ``multiplier'').
@@ -142,6 +143,7 @@ The sum ($S$) of all work over the tiling is thus:
 
 \subsubsubsubsection{Doublespend Requirements}
 
+\pz{Add TODO for this section.}
 relax security of network very slightly --- still $O(n)$ though.
 instead of resisting an attacker with up to 50\% of the network-wide hash-rate, we'll require that an attacker only have 49.5\%, instead.
 
@@ -277,6 +279,7 @@ If $u = 2$, $\Mroot = 8$, and $q = 0.495$, then $r > 8$.
 %     ]
 % \end{forest}
 
+\pz{Add what do we mean by complexity and where does the Eq 58 come from?$}
 Complexity of the core and its children:
 
 \begin{align}

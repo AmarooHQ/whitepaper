@@ -8,7 +8,7 @@
 
 ## Comparison: ``The Big 4''
 
-The following comparisons (\autoref{table:compare_nets_3k}, \autoref{table:compare_nets_20k}, and \autoref{table:comparison_1m_tps}) are indented to be an *apples to apples* between UT variants and ``The Big 4'': Bitcoin, Cardano, Eth2, and Polkadot.
+The following comparisons (\autoref{table:compare_nets_3k}, \autoref{table:compare_nets_20k}, and \autoref{table:comparison_1m_tps}) are intended to be an *apples to apples* comparison between UT variants and ``The Big 4'': Bitcoin, Cardano, Eth2, and Polkadot.
 Cardano, as a cutting-edge network, is an exception here: the Cardano/IOHK teams have not been pursuing \emph{Layer 1} scalability solutions --- unlike the Eth2 and Polkadot teams --- and are focusing instead on a \emph{Layer 2} solution: Hydra via EUTXOs.
 Their work is good and promising.
 I mention this particularly because the nature of an *apples to apples* comparison casts Cardano in a light that some might consider to be misleading.
@@ -28,6 +28,7 @@ No real-world sharded network has come close to this level of performance, and i
     For some designs, the \emph{Scaling Factor} can change between nesting levels
 }
 
+\pz{Last row with infinity: theoretically yes, but is it practically achievable?}
 %% INSERT ### TABLE: compare_nets_3k
 
 : A comparison of quantitative scaling properties between UT and various networks given $k = 3000$ bytes/s. Transaction size is set to 250 bytes, $D_f = B_f$, and $D_h = B_h$.
@@ -36,6 +37,7 @@ No real-world sharded network has come close to this level of performance, and i
 
 : Similar to the previous table, but with $k = 20$ KB/s instead of 3 KB/s.
 
+\pz{Table 15: What does the last column represent?}
 %% INSERT ### TABLE: comparison_1m_tps
 
 : A comparison of computational requirements (approximated by $k$) for 1 million TPS between UT and various other networks. $\UT{2}$'s equivalent TPS is also provided (given the same parameters).
@@ -46,7 +48,7 @@ No real-world sharded network has come close to this level of performance, and i
 : A comparison of various networks' $k$ and TPS given a maximum network-wide throughput of 1 Gb/s ($\sim1.3\times 10^8$ B/s). Also included is the rate at which chains on that network grow in size (which is proportional to $k$).
 \end{comment}
 
-
+\pz{What is PoH?}
 \ctable[
     pos = htb,
     caption = Table evaluating various other networks against trilemma criteria.,
