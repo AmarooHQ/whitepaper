@@ -46,13 +46,13 @@ A concise argument for the security of Bitcoin-SPV proofs is:
     \item If a transaction is invalid, then the block is invalid.
     \item If a block builds on an invalid block, then it is invalid.
     \item If a miner produces an invalid block, they get no block reward.
-    \item $\therefore$ Honest miners won't produce or build on invalid blocks.
-    \item \label{prem:spv-7} $\therefore$ For an adversary to produce an apparently valid (but fraudulent) proof leading to a \emph{main chain} block, they'd need to out-compete honest miners (i.e., 51\% attack the network).
-    \item \label{prem:spv-8} $\therefore$ Only valid transactions exist in the main chain.\footnote{
+    \item $\implies$ Honest miners won't produce or build on invalid blocks.
+    \item \label{prem:spv-7} $\implies$ For an adversary to produce an apparently valid (but fraudulent) proof leading to a \emph{main chain} block, they'd need to out-compete honest miners (i.e., 51\% attack the network).
+    \item \label{prem:spv-8} $\implies$ Only valid transactions exist in the main chain.\footnote{
         This isn't the full picture for some blockchains (e.g., Ethereum) even though SPV still works for them --- a transaction that fails to execute can still be valid and produce a valid state transition.
         In these cases, an invalid state transition implies an invalid block, so it's customary to prove that some state has the right values rather than that a transaction exists.
     }
-    \item $\therefore$ It's safe to accept SPV proofs for blocks in the main chain.
+    \item $\implies$ It's safe to accept SPV proofs for blocks in the main chain.
 \end{argumentslist}
 
 It appears that \cref{prem:spv-7} is our current sticking point for Simplex-SPV proofs.

@@ -120,16 +120,16 @@ Since there are $O(c)$ many chains, and we need to add $O(1)$ extra information 
 
 In practice, blocks \emph{will} sometimes be mined simultaneously.
 So, even if \emph{most} of the time a block only reflects one tip, \emph{some} of the time that block will reflect multiple tips.
-The frequency of simultaneous blocks is dependent on the number of chains ($N_1$), the block frequency of each chain ($B_f$), and some average propagation delay ($\phi$ seconds).
+The frequency of simultaneous blocks is dependent on the number of chains ($N_1$), the block frequency of each chain ($B_f$), and some average propagation\footnote{
+    In particular, we are concerned with propagation \emph{between miners}, not the network as a whole.
+} delay ($\phi$ seconds).
 Two blocks are simultaneous if they are mined within $\sim \phi$ seconds of each other.
 In the $\phi$ seconds before that most recent tip was mined, we expect that $\sim N_1 B_f \phi$ other tips were mined (from any simplex-chain).
-\pz{Where does $1 - {N_1}^{-1}$ come from?}
 Unless a block contains no reflections (which happens with probability $1 - {N_1}^{-1}$), it must reflect at least one graph tip.
 So, we expect each block to reflect $1 + N_1 B_f \phi$ tips.
 For $N_1 = 100, B_f = \nicefrac{1}{15}, \phi = 1$, we expect
 each block to be simultaneous with $\sim 7$ others, and each block to reflect 8 graph tips on average.
 
-\pz{0.3 seconds propagation delay is not realistic for a network.}
 Therefore, the overhead to reconstruct the PoR graph --- and every PoR segment of every simplex-chain block --- is, on average, $g (1 + N_1 B_f \phi)$ bytes per block, where $g$ is the length of a hash.
 As $g$, $1$, and $B_f$ are constants, and if we treat $\phi$ as constant, the overhead thus has complexity $O(c)$ \emph{per simplex-chain}.
 Since we're tracking $O(c)$ chains, the overall load is $O(c^2)$.
@@ -206,14 +206,9 @@ If $k_{1,B}$ B/s of a chain's capacity is dedicated to reflections, then we have
     % & \text{Note that $N_1 \propto \phi^{-1}$}
     \label{eq:bad-n1-with-phi}
 \end{align}
-<<<<<<< HEAD
-\pz{Not trivial where 23 and 2.1 come from, maybe just give final approx >35k (35156).}
-Plugging in our numbers from before (excluding $N_1$), yields $N_1 \approx 23 (k_{1,B} - 2.1)$.
-If $k_{1,B}$ = 1,500 B/s, then $N_1 \approx$ 34,500.
-=======
-Plugging in our numbers from before (excluding $N_1$), yields $N_1 \approx 7 \cdot \phi^{-1} (k_{1,B} - 2.1)$.
-If $k_{1,B}$ = 1,500 B/s, then $N_1 \approx 10\text{,}500 \cdot \phi^{-1}$.
->>>>>>> origin/master
+Setting $k_{1,B}$ = 1,500 B/s and evaluating yields $N_1 \approx 10\text{,}500 \cdot \phi^{-1}$.
+% Plugging in our numbers from before (excluding $N_1$), yields $N_1 \approx 7 \cdot \phi^{-1} (k_{1,B} - 2.1)$.
+% If $k_{1,B}$ = 1,500 B/s, then $N_1 \approx 10\text{,}500 \cdot \phi^{-1}$.
 
 Of course, 10 thousand chains is a lot, and tracking the PoR graph completely would require $\sim 15$ MB/s of bandwidth and require around 500 TB per year to store this data.
 Each block would reflect, on average, 10k other blocks.
@@ -228,7 +223,6 @@ There is a good reason to think $O(\phi) = O(1)$.
 At some point, propagation delay is limited by the speed of light.
 So latency must have a definite minimum, which is a constant.
 
-\pz{The graph cannot be fully connected and we use gossip so shouldn't $\phi$ have a term in $\log(n)$?}
 However, the physical limits on latency do not dominate real-world latency yet.
 Near-future networking technologies, like LEO satellite constellations, will reduce latencies over significant distances.
 Moreover, even as the best-case minimum latency approaches physical limits, technology will continue to improve latency in \emph{bandwidth intensive} contexts.\footnote{
