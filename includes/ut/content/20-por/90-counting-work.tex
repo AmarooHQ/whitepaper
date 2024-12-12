@@ -57,8 +57,6 @@ It must be that reflections contribute to the \emph{most recent common ancestor}
 
 This leads us to a simple and elegant way to count reflected work: follow the arrows back from the reflecting block to the most recently reflected local block.
 
-\pz{Unclear, did you mean \BL{4} instead of \BL{3}?}
-
 \BL{4}'s reflection of \BR{2} contributes chain-weight to \BL{3} because \emph{any} block that builds on \BL{3} could reflect \BR{2}.
 % (L_{i+4} \; \ar@{.>}[r] &) \;
 Following the arrows: $\xyInlineRefl{R_{k+2} \; \ar@{.>}[r] & \; L_{i+3}}$.
@@ -66,7 +64,6 @@ Following the arrows: $\xyInlineRefl{R_{k+2} \; \ar@{.>}[r] & \; L_{i+3}}$.
 
 % Following the arrows: $L_{i+4} \dashrightarrow R_{k+2} \dashrightarrow L_{i+3}$.
 
-\pz{Same, why $L_i$?}
 Similarly, \BL{4}'s reflection of \BR{1} (which could be either explicit or implicit via \BR{2}) must contribute chain-weight to $L_i$ because \emph{any} block building on $L_i$ could reflect \BR{1} and include that PoR.
 % (L_{i+4} \; \ar@{.>}[r] & \; R_{k+2} \; \ar[r] &) \;
 Following the arrows: $\xyInlineRefl{R_{k+1} \; \ar[r] & \; R_k \; \ar@{.>}[r] & \; L_{i}}$.

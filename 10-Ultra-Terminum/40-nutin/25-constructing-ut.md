@@ -12,13 +12,8 @@ Such a foundation (*the simplex*) is *not* a sharded blockchain --- there's no r
 
 \label{sec:generalizing-reflection}
 
-\pz{What about Kadena?}
-
-*Proof of Reflection* is, in essence, the idea that a chain can acknowledge that its history has been confirmed by a different chain, and that this fact can be used to share security between chains[^reflection-prior]. That is a simplification, but it *is* the essence of it.
-
-\pz{Remove reference to forum}
-
-[^reflection-prior]: I have not been able to find any existing discussion of this method. If you know of any existing discussion of this method, please post a link to the forum topic that is linked in the abstract.
+*Proof of Reflection* is, in essence, the idea that a chain can acknowledge that its history has been confirmed by a different chain, and that this fact can be used to share security between chains.
+That is a simplification, but it *is* the essence of it.
 
 In principle, the necessary capabilities (and actions) that some chains, $C_A$ and $C_B$, must have (and do) in order for $C_A$ to be reflected by $C_B$ are:
 

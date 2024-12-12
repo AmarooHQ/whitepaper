@@ -1187,6 +1187,11 @@ Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
 
 \subsection{The Insecurity of Merged Mining in UT}
 
+\mk{
+  Change title to ``the/an incompatibility between merged mining and PoR''.
+  The point of the section is to explicitly mention that using MM with PoR can be   dangerous and to list/discuss the conditions on that incompatibility.
+}
+
 \todo{write --- The Insecurity of Merged Mining}
 
 - Merged Mining allows attacking merged chains at 0 cost.
