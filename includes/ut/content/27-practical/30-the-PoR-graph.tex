@@ -124,7 +124,7 @@ The frequency of simultaneous blocks is dependent on the number of chains ($N_1$
 Two blocks are simultaneous if they are mined within $\sim \phi$ seconds of each other.
 In the $\phi$ seconds before that most recent tip was mined, we expect that $\sim N_1 B_f \phi$ other tips were mined (from any simplex-chain).
 \pz{Where does $1 - {N_1}^{-1}$ come from?}
-Unless a block contains no reflections, it must reflect at least one graph tip (which happens with probability $1 - {N_1}^{-1}$).
+Unless a block contains no reflections (which happens with probability $1 - {N_1}^{-1}$), it must reflect at least one graph tip.
 So, we expect each block to reflect $1 + N_1 B_f \phi$ tips.
 For $N_1 = 100, B_f = \nicefrac{1}{15}, \phi = 1$, we expect
 each block to be simultaneous with $\sim 7$ others, and each block to reflect 8 graph tips on average.

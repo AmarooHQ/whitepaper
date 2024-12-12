@@ -10,19 +10,18 @@
 
 What is the throughput of the simplex if simplex-chains include explicit proofs of reflection (as merkle branches) and the headers of reflecting chains?
 
-\pz{A capital B was used earlier for $k_{1,b}$}
 Let $g$ be the length of the digest in bytes, i.e., the size of the hashes used in our merkle trees.
 \begin{equation}
 \begin{split}
 \label{eq:simplex-N1-with-PoR}
-k_1 & = k_{1,tx} + k_{1,b} \\
+k_1 & = k_{1,tx} + k_{1,B} \\
 & = k_{1,tx} + B_f \cdot N_1 \cdot (B_h + g \cdot \ceil{\log_2 N_1}) \\
 & \approx k_{1,tx} + B_f \cdot N_1 \cdot (B_h + g \cdot \log_2 N_1) \\
 \implies T_1 & = N_1 \cdot (k_{1} - B_f \cdot N_1 \cdot (B_h + g \cdot \log_2 N_1)) \\
 \frac{dT_1}{dN_1} & = \frac{1}{\ln 2}(k_1 \cdot \ln 2 - B_f \cdot N_1 \cdot (g + B_h \cdot \ln 4) - 2 \cdot B_f \cdot g \cdot N_1 \cdot \ln N_1) \\
 \mbox{\href{\wolframAlphaPorsRootUrl}{which has a zero at:}} \\
 N_1 & = \frac{k_1 \cdot \ln 2}{2 \cdot B_f \cdot g \cdot W_0((2^{B_h g^{-1} - 1} \cdot \sqrt e \cdot k_1 \cdot \ln 2)(B_f \cdot g)^{-1})} \\
-\implies k_{1,tx} & \neq k_{1,b}
+\implies k_{1,tx} & \neq k_{1,B}
 \end{split}
 \end{equation}
 Note: $W_0(z)$ is the Lambert W function, aka. the product logarithm.
@@ -51,9 +50,9 @@ If it is, then we still have $O(N_1) = O(c)$ and $O(T_1) = O(c^2)$.
     \label{fig:x-over-lambert}
 \end{figure}
 
-If we use verkle PoRs instead of merkle PoRs, then we'll have a different $k_{1,b}$. Assuming that vector commitments and proofs are $g$ bytes, and vector locations are 1 byte:
+If we use verkle PoRs instead of merkle PoRs, then we'll have a different $k_{1,B}$. Assuming that vector commitments and proofs are $g$ bytes, and vector locations are 1 byte:
 \begin{equation}
-    k_{1,b} = B_f \cdot N_1 \cdot (B_h + (1 + g) \cdot \log_{256} N_1)
+    k_{1,B} = B_f \cdot N_1 \cdot (B_h + (1 + g) \cdot \log_{256} N_1)
 \end{equation}
 Other than this change, the logic that is used in \autoref{eq:simplex-N1-with-PoR} still works, and the resulting complexities will be the same.
 
@@ -92,9 +91,9 @@ The +HO variants replace the headers of reflecting chains with the respective he
 This is reasonable since the headers of each simplex-chain (that would otherwise be recorded in simplex-chain blocks) are \emph{common} among all simplex-chains.
 If a user is running nodes for multiple simplex-chains, they should only need to download each header once --- including raw headers in each block is redundant.
 
-Thus, +HO has $k_{1,b}$ of:
+Thus, +HO has $k_{1,B}$ of:
 \begin{equation}
-    k_{1,b} = N_1 \cdot B_f \cdot g
+    k_{1,B} = N_1 \cdot B_f \cdot g
 \end{equation}
 This is equivalent to +OP with very small headers --- 32 bytes instead of 80+ bytes.
 
@@ -110,11 +109,11 @@ This is equivalent to +OP with very small headers --- 32 bytes instead of 80+ by
 
 +HOPoRs is the combination of +HO and +PoRs --- headers are omitted but PoRs are still explicitly recorded.
 
-Thus, +HOPoRs has $k_{1,b}$ of:
+Thus, +HOPoRs has $k_{1,B}$ of:
 \begin{align}
-    \text{Merkle PoRs:} & & k_{1,b} &= B_f \cdot N_1 \cdot g \cdot (1 + \log_2 N_1) &
+    \text{Merkle PoRs:} & & k_{1,B} &= B_f \cdot N_1 \cdot g \cdot (1 + \log_2 N_1) &
     \nonumber \\
-    \text{Verkle PoRs:} & & k_{1,b} &= B_f \cdot N_1 \cdot (g + (g + 1) \cdot \max(1, \log_{256} N_1)) &
+    \text{Verkle PoRs:} & & k_{1,B} &= B_f \cdot N_1 \cdot (g + (g + 1) \cdot \max(1, \log_{256} N_1)) &
 \end{align}
 
 %% INSERT ### TABLE: tps_hopors
