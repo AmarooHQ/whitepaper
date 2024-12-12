@@ -1,6 +1,6 @@
 %% BEGIN ### RELEASE
 
-## Practical Considerations for UT's Design
+\section{Practical Considerations for UT's Design}
 
 \label{sec:practical-considerations}
 
@@ -22,7 +22,7 @@
 
 %% BEGIN ### RELEASE
 
-### Proving Reflection
+\subsection{Proving Reflection}
 
 \label{sec:proving-reflection}
 
@@ -64,7 +64,7 @@ A practical method for treating proofs of reflection as witnesses that may be ex
 
 %% BEGIN ### DRAFT
 
-#### Verkle Trees and Shorter PoRs
+\subsubsection{Verkle Trees and Shorter PoRs}
 
 \label{sec:verkle-proofs}
 
@@ -77,7 +77,7 @@ Similar to merkle trees, they allow efficient proofs of membership against a cry
 
 %% BEGIN ### RELEASE
 
-### Segmented State
+\subsection{Segmented State}
 
 \label{sec:segmented-state}
 
@@ -118,7 +118,7 @@ In essence \autoref{eq:segregated-state} shows that $\sigma_{R,t}$ depends *only
 If simplex-chains are segmented in this manner, then miners will be able to calculate the reflection-state of other simplex-chains without calculating their complete state.
 This would allow them to deterministically calculate proofs of reflection for all other simplex-chains.
 
-### Exploiting Segmented State
+\subsection{Exploiting Segmented State}
 
 \label{sec:exploiting-seg-state}
 \label{sec:exploiting-segmented-state}
@@ -215,7 +215,7 @@ o.`Y8b   88   88  .o o.`Y8b     Yb"""88""     88""   88"""  o.`Y8b
 conf times
 -->
 
-### Confirmation Times
+\subsection{Confirmation Times}
 
 \label{sec:confirmation-times}
 
@@ -293,7 +293,7 @@ goal: support this sentence (top of section):
 -->
 
 
-### Lowering Block Production Variance
+\subsection{Lowering Block Production Variance}
 
 \label{sec:miner-resonance}
 
@@ -343,7 +343,7 @@ However, the variance of block production on each of these chains won't be that 
 
 %% BEGIN ### DRAFT
 
-### Reflection: Incentive and Censorship
+\subsection{Reflection: Incentive and Censorship}
 
 \todo{is a refl censorship attack possible? meaningful? explore. (NB: I don't think there's a viable strategy here, which is why I haven't prioritized writing this out.)}
 
@@ -357,7 +357,7 @@ Does a miner ever benefit from withholding reflections?
 
 %% BEGIN ### RELEASE
 
-### Simplex Security and the Confirmation Equivalence Conjecture
+\subsection{Simplex Security and the Confirmation Equivalence Conjecture}
 
 \label{sec:simplex-security-cec}
 
@@ -382,7 +382,7 @@ atk situations:
 
 %% BEGIN ### RELEASE
 
-### On SPV In UT
+\subsection{On SPV In UT}
 
 \label{sec:spv-in-ut}
 

@@ -1,6 +1,6 @@
 %% BEGIN ### RELEASE
 
-\subsection{\titlemath{$\text{UT}_{\aleph}$:}{UT-aleph:} Tiling Simplexes}
+\section{\titlemath{$\text{UT}_{\aleph}$:}{UT-aleph:} Tiling Simplexes}
 
 \label{sec:tiling}
 
@@ -16,7 +16,7 @@
 
 %% BEGIN ### DRAFT
 
-\subsection{Tiling --- Previous (Old) Version}
+\section{Tiling --- Previous (Old) Version}
 
 \label{sec:tiling-old}
 

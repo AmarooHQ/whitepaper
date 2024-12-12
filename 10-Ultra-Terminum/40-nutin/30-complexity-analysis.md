@@ -1,6 +1,6 @@
 %% BEGIN ### RELEASE
 
-## Scaling Complexity Analysis of *Ultra Terminum*
+\section{Scaling Complexity Analysis of *Ultra Terminum*}
 
 \label{sec:ut-complexity}
 
@@ -39,7 +39,7 @@ Such PoS UT dapp-chains have \emph{all} the security qualities of an equivalent 
 If they were called *layer 1* chains, then what is the simplex --- *layer 0*?
 It is clear that the common idea behind *layer 1/2* scaling does not have sufficient capacity to accurately describe UT's simplex- and dapp-chains; it is inadequate.
 
-### Analysis Methodology
+\subsection{Analysis Methodology}
 
 The following derivations focus on *throughput* of particular blockchain designs and scaling configurations.
 These derivations will let us evaluate the complexity of each design.
@@ -65,9 +65,7 @@ With regards to simplexes, we are particularly concerned with the complexity of 
 Additionally, $O(k_i)$ is \emph{defined} as $O(k_i) \equiv O(c)$.
 This is reasonable provided there are no $O(c)$ bottlenecks, e.g., network bandwidth, CPU throughput, memory requirements, etc (\autoref{sec:a-principle-of-scaling}).
 
-%%### Complexity of $O(c)$ Chains
-
-\subsubsection{Complexity of \titlemath{$O(c)$}{O(c)} Chains}
+\subsection{Complexity of \titlemath{$O(c)$}{O(c)} Chains}
 
 Example: Bitcoin.
 
@@ -93,9 +91,7 @@ For Bitcoin --- given $k_1 \approx 1700$ B/s, and transaction size $\text{Tx}_{\
 
 This is what we expect based on the measured real-world performance of Bitcoin.
 
-%%### Optimistic Complexity of $O(c^2)$ Chains
-
-\subsubsection{Optimistic Complexity of \titlemath{$O(c^2)$}{O(c²)} Chains}
+\subsection{Optimistic Complexity of \titlemath{$O(c^2)$}{O(c²)} Chains}
 
 Examples: Ethereum 2, Polkadot.
 
@@ -120,7 +116,7 @@ T_2 & = \frac{k_1 \cdot k_2}{D_f \cdot D_h} \\
 
 Thus $O(T_2) = O(c^2)$ as expected.
 
-#### Effective Header Size
+\subsubsection{Effective Header Size}
 
 It's typical, though, that the headers of nested chains, alone, are not sufficient: additional data is required.
 When such data is required to be recorded on-chain (i.e., it cannot be deterministically regenerated), then the \emph{effective} header size is the size of the raw header, plus the size of any auxiliary data.
@@ -174,9 +170,7 @@ There's enough capacity for attestations (128 each block for 64 shards) that the
 
 
 
-%%### Complexity of $\UT{1}$
-
-\subsubsection{Complexity of \titlemath{$\UT{1}$}{UT₁}}
+\subsection{Complexity of \titlemath{$\UT{1}$}{UT₁}}
 
 \pz{Any specific reason why are we using $B_h$ in this section and $D_h$ in the previous one.}
 There is no single root-chain for a collection of mutually reflecting blockchains (i.e., a simplex), so $N_1 \neq 1$.
@@ -277,9 +271,9 @@ k_{1,B} = \frac{k_1}{2}
 Dapp-Chains and the Complexity of $\UT{2}$ and $\UT{3}$
 \end{comment}
 
-\subsubsection{Dapp-Chains and the Complexity of \titlemath{$\UT{2}$}{UT₂} and \titlemath{$\UT{3}$}{UT₃}}
+\subsection{Dapp-Chains and the Complexity of \titlemath{$\UT{2}$}{UT₂} and \titlemath{$\UT{3}$}{UT₃}}
 
-#### Dapp-Chains
+\subsubsection{Dapp-Chains}
 
 If a system supports nested chains, then we can say that for some throughput, $T_i$, at nesting level $i$, the $(i+1)^{th}$ nesting level can support $N_{i+1}$ nested chains via:
 \begin{equation}
@@ -304,9 +298,7 @@ N_{i+1} = \frac{T_{i+1}}{k_{i+1}}
 
 
 
-%%#### UT with Dapp-Chains (\titlemath{$\UT{2}$}{UT2})
-
-\subsubsubsection{UT with Dapp-Chains (\titlemath{$\UT{2}$}{UT₂})}
+\subsubsection{UT with Dapp-Chains (\titlemath{$\UT{2}$}{UT₂})}
 
 
 Starting with \autoref{eq:simplex-T1} and building on \autoref{eq:throughput-iter}:
@@ -333,9 +325,7 @@ When $D_h = B_h$ and $D_f = B_f$, note that $N_2 = {N_1}^2$.
 
 
 
-%%#### UT with Dapp-Dapp-Chains ($\UT{3}$)
-
-\subsubsubsection{UT with Dapp-Dapp-Chains (\titlemath{$\UT{3}$}{UT₃})}
+\subsubsection{UT with Dapp-Dapp-Chains (\titlemath{$\UT{3}$}{UT₃})}
 
 If we say each dapp-chain hosts shards or more dapp-chains (e.g., as a dapp-chain version of Eth2 or Polkadot would), then via \autoref{eq:throughput-iter} and \autoref{eq:throughput-c-3},
 \begin{equation}
@@ -361,9 +351,9 @@ N_3 & = \frac{T_3}{k_3} \\
 
 
 
-### Complexity of Cross-Chain SPV Proofs & Proofs of Reflection
+\subsection{Complexity of Cross-Chain SPV Proofs & Proofs of Reflection}
 
-#### Cross-Chain SPV Proofs
+\subsubsection{Cross-Chain SPV Proofs}
 
 Each chain --- at full capacity --- operates with order $O(c)$ by definition. Thus its state has order $O(c)$ also. The size of SPV proofs scale logarithmically with the set you're proving membership of, e.g., the number of transactions, or size of the chain's state, etc. Thus, SPV proofs scale with order $O(\log_2 c)$.
 
@@ -377,7 +367,7 @@ Since $j$ is constant, cross-chain SPV proofs therefore have order:
 O(j \cdot \log_2 c) = O(\log_2 c) \label{eq:spv-complexity}
 \end{equation}
 
-#### Proofs of Reflection
+\subsubsection{Proofs of Reflection}
 
 \label{sec:complexity-reflection-proof}
 
@@ -387,7 +377,7 @@ Note: In a production system, these proofs can be excluded from blocks by treati
 
 \todoDraftOnly{Total reflections + computational burden (+PoRs vs omitted proofs) --- $O(c)$ vs $O(c^2)$}
 
-### TPS Complexity Comparison
+\subsection{TPS Complexity Comparison}
 
 $k$: raw per-chain throughput (bytes/$s$) \newline
 $B_f$: simplex block frequency ($s^{-1}$) \newline
@@ -423,7 +413,7 @@ More detailed comparison tables can be found in \autoref{sec:ut-variant-complexi
 
 : Chain-capacity and bandwidth requirements for $\UT{\text{+OP}}$: $N_1$, $N_2$, $N_3$, $\Delta S$, $\Delta r$, and $\mathbb{C}^\prime$ for various parameters.
 
-### The Impact of Header Size
+\subsection{The Impact of Header Size}
 
 \label{sec:impact-of-header-size}
 
@@ -442,7 +432,7 @@ Practically, this effect means that a decrease to the size of headers has *incre
 \todoDraftOnly{some discussion to replace +HOT stuff.}
 
 
-### Comparison of UT Variants
+\subsection{Comparison of UT Variants}
 
 \todoDraftOnly{update values to account for \AxiomOfRawMaximalReflection + longest PoR chain}
 

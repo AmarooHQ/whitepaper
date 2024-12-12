@@ -1,4 +1,4 @@
-\subsubsection{Tree-Tiling Security}
+\subsection{Tree-Tiling Security}
 
 \label{sec:tiling-security}
 
@@ -13,9 +13,9 @@ To answer these questions, and then evaluate the security of tree-tiling, we fir
 After that we will construct a security architecture so that we can answer the above questions.
 Finally, we will analyze this architecture to find out if it's secure.
 
-\subsubsubsection{Key Concepts}
+\subsubsection{Key Concepts}
 
-\subsubsubsubsection{Local Chain-work, Tile-work, and Unit Tile}
+\subsubsubsection{Local Chain-work, Tile-work, and Unit Tile}
 
 We're familiar with \emph{local chain-work} (that's work directly contributed by a single simplex-chain).
 
@@ -27,13 +27,13 @@ Instead, we'll normalize tile-work via a \emph{unit tile}.
 If some tile's tile-work is $3\times$ that of the \emph{unit tile}, then we write down that tile-work as $3$ instead of some number of hashes.
 This will simplify our analysis.
 
-\subsubsubsubsection{The Core}
+\subsubsubsection{The Core}
 
 \emph{The core} of a tree-tiling is \emph{the root tile and its children}.
 It's called \emph{the core} because all nodes in the network verify the work and PoRs of all simplex-chains that are part of the core.
 Additionally, the core is where the vast majority of chain-work is done.
 
-% \subsubsubsubsection{Recursive PoR}
+% \subsubsubsection{Recursive PoR}
 
 % Part of our security architecture will be the idea of \emph{recursive PoR}.
 
@@ -60,13 +60,13 @@ Additionally, the core is where the vast majority of chain-work is done.
 
 \begin{draftonly}
 
-\subsubsubsubsection{Excess Capacity in Proof of Work}
+\subsubsubsection{Excess Capacity in Proof of Work}
 
 \todo{this should probs go in practical considerations --- that's where +T is introduced.}
 
 \end{draftonly}
 
-\subsubsubsection{Security Architecture}
+\subsubsection{Security Architecture}
 
 \label{sec:tree-tiling-security-architecture}
 
@@ -98,7 +98,7 @@ The purpose of this design is to enable the following argument for $O(n)$ securi
 %     \item Nodes for all simplex-chains verify all PoRs between the local tile and the root tile, and all PoRs within the core.
 % \end{itemize}
 
-\subsubsubsubsection{Inter-tile Security Relationship}
+\subsubsubsection{Inter-tile Security Relationship}
 
 Since each tile has $v-1$ children, we will let $u = v-1$ for convenience.
 
@@ -114,7 +114,7 @@ The root tile has no upper limit on tile-work production.
 If a tile would have aggregate rewards greater than its upper limit, then the block rewards of constituent chains are proportionally capped and any excess is allocated to the parent tile.
 This process continues until all tiles are under their respective limits.
 
-\subsubsubsubsection{Total Work Across a Tiling}
+\subsubsubsection{Total Work Across a Tiling}
 
 % https://www.desmos.com/calculator/nku2g8qxmy
 % https://www.desmos.com/calculator/vxp5spzr4q
@@ -141,7 +141,7 @@ The sum ($S$) of all work over the tiling is thus:
     \label{eq:tree-tiling-total-work}
 \end{align}
 
-\subsubsubsubsection{Doublespend Requirements}
+\subsubsubsection{Doublespend Requirements}
 
 \pz{Add TODO for this section.}
 relax security of network very slightly --- still $O(n)$ though.
@@ -149,7 +149,7 @@ instead of resisting an attacker with up to 50\% of the network-wide hash-rate, 
 
 For the purpose of this paper, it is assumed that: \UTinf{} being secure against as attacker with $q \le 0.495$ counts as $O(n)$ secure. ($q \le 0.495$ is \emph{good enough}.)
 
-\subsubsubsection{Analysis Method}
+\subsubsection{Analysis Method}
 
 \mk{Note: this section is in draft.}
 
@@ -175,28 +175,28 @@ Analyze cases, if we can satisfy all of them then we should be good:
 \end{itemize}
 Use as recursive cases to show that every tile is $O(n)$ secure.
 
-\subsubsubsubsection{Assumptions}
+\subsubsubsection{Assumptions}
 
 \begin{itemize}
     \item security of tile works like that of a simplex
     \item able to apply logic recursively
 \end{itemize}
 
-\subsubsubsubsection{Additional Imposed Requirements}
+\subsubsubsection{Additional Imposed Requirements}
 
-\subsubsubsection{Security Criteria for Specific Cases}
+\subsubsection{Security Criteria for Specific Cases}
 
 what are the cases?
 what are their criteria?
 
-\subsubsubsection{Security Evaluation of Specific Cases}
+\subsubsection{Security Evaluation of Specific Cases}
 
 \begin{itemize}
     \item $r>u$
     \item \dots
 \end{itemize}
 
-\subsubsubsubsection{The Core is (Almost) as Secure as the Network}
+\subsubsubsection{The Core is (Almost) as Secure as the Network}
 
 Let's constrain the core to being secure against an attacker with up to $q$ proportion of the network-wide hash-rate ($0 \le q < 0.5$).
 
@@ -241,7 +241,7 @@ Thus, the core is secure when:
 This is our first bound on $r$.
 If $u = 2$, $\Mroot = 8$, and $q = 0.495$, then $r > 8$.
 
-% \subsubsubsubsection{Self Severance}
+% \subsubsubsection{Self Severance}
 
 % \emph{Self Severance} is when a tile severs itself from the tiling.
 % Even if an attacker controls 99\% of the relevant tile-work, this should not be viable (if it were, then the tiling would not be $O(n)$ secure).
@@ -260,11 +260,11 @@ If $u = 2$, $\Mroot = 8$, and $q = 0.495$, then $r > 8$.
 %     ]
 % \end{forest}
 
-\subsubsubsection{Security Propagation Speed / Finalization}
+\subsubsection{Security Propagation Speed / Finalization}
 
-\subsubsection{Scaling Complexity}
+\subsection{Scaling Complexity}
 
-\subsubsubsection{Complexity of the Core}
+\subsubsection{Complexity of the Core}
 
 % \begin{forest}
 %     % rectangle, draw=black, minimum width=6em, minimum height=1.5em,
@@ -338,7 +338,7 @@ then, we can divide this by the number of reflections that each layer adds to fi
 %     &\approx 42\times
 % \end{align*}
 
-\subsubsubsection{Security Burden Complexity}
+\subsubsection{Security Burden Complexity}
 
 each tile has a local $O(c)$ load for PoR verification
 
@@ -381,7 +381,7 @@ $(1 + (v-1)) + \max(0, d - 2) + 1$
     \therefore \text{ total load is:} & & & O(c^2 \log(n)) \\
 \end{align*}
 
-\subsubsubsubsection{Complexity of Minimum Recursive PoR Set}
+\subsubsubsection{Complexity of Minimum Recursive PoR Set}
 
 The minimum no. of recursive PoRs per local block that a simplex-chain outside the core requires is $N_1 (v+1)^{-1}$ and each has a depth of $d$ and a length of $2d-1$.
 
@@ -421,7 +421,7 @@ This time, though, the burden is only 2.7 - 4.0 KB per local block.
 
 \begin{draftonly}
 
-\subsubsubsection{Capacity Complexity}
+\subsubsection{Capacity Complexity}
 
 \begin{center}
 \begin{forest}
@@ -457,7 +457,7 @@ This time, though, the burden is only 2.7 - 4.0 KB per local block.
     \implies N_\text{tiles} &\lesssim 2^{41} \approx 2\cdot 10^{12} \\
 \end{align*}
 
-\subsubsection{Asymmetry: Capacity and Security}
+\subsection{Asymmetry: Capacity and Security}
 
 % https://www.desmos.com/calculator/7trq5aehnm
 % https://www.desmos.com/calculator/n17w3560ig
