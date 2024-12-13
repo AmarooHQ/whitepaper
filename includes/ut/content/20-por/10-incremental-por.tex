@@ -1,4 +1,4 @@
-\subsection{Proof of Reflection}
+\section{Proof of Reflection}
 
 \label{sec:proof-of-reflection}
 
@@ -36,7 +36,7 @@ Since there is no established term, let's call it a ``projection'', and let's ca
   The \emph{act} of one chain creating and maintaining the projection of another is called \emph{imaging}
 }
 
-\subsubsection{A Projection of Bitcoin in Ethereum}
+\subsection{A Projection of Bitcoin in Ethereum}
 
 It is well understood that an Ethereum smart contract (SC) can \emph{image} Bitcoin.
 This results in a \emph{projection} of Bitcoin that is available to other Ethereum SCs (e.g., to use as the basis for SPV proofs).
@@ -98,7 +98,7 @@ This enables more complex SCs, e.g., a trustless $\text{BTC}\leftrightarrow\text
 \end{figure}
 
 
-\subsubsection{Incrementally Implementing \emph{Proof of Reflection}}
+\subsection{Incrementally Implementing \emph{Proof of Reflection}}
 
 \label{sec:two-blockchains}
 
@@ -109,7 +109,7 @@ However, the changes that are required by \emph{Proof of Reflection} would requi
 Our starting case for \cL and \cR is that both use Nakamoto consensus with the same Proof of Work algorithm.
 For simplicity, both chains also have identical block times and we won't consider block production variance.
 
-\subsubsubsection{Step 1. Chain \cR Images Chain \cL}
+\subsubsection{Step 1. Chain \cR Images Chain \cL}
 
 This is similar to Ethereum imaging Bitcoin --- see \autoref{fig:pow_refl_step1}.
 (We'll omit the table this time since it's basically the same as \autoref{tab:eth-images-btc}.)
@@ -124,7 +124,7 @@ Unlike before, let's assume this is a \emph{protocol-level} implementation; so \
     \label{fig:pow_refl_step1}
 \end{figure}
 
-\subsubsubsection{Step 2. \cL Images \cR}
+\subsubsection{Step 2. \cL Images \cR}
 
 Similar to \cR, \cL will begin including \cR headers in each block via appropriate protocol-level changes.
 Just as \cR hosts a projection of \cL, \cL now hosts a projection of \cR.
@@ -161,7 +161,7 @@ This is shown in \autoref{fig:pow_refl_step2} and \autoref{tab:por-step-2}.
 
 % The following was the beginning of a redraft, and the content is still in 20-proof-of-reflection.md
 
-% \subsubsubsection{Step 3. A Reflection of \cL in \cR}
+% \subsubsection{Step 3. A Reflection of \cL in \cR}
 
 % Can we use a projection of a chain for a new purpose?
 % What might be possible if \cL keeps track of \cR's projection of \cL?

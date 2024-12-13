@@ -2,7 +2,7 @@
 
 \input{20-por/10-incremental-por.tex}
 
-#### Step 3. A Reflection of \cL in \cR
+\subsubsection{Step 3. A Reflection of \cL in \cR}
 
 Can we use a projection of a chain for a different purpose?
 What happens if Chain \cL tracks whether Chain \cL's history is confirmed within Chain \cR?
@@ -119,7 +119,7 @@ Could we use Chain \cL's knowledge \emph{that its own history is reflected in Ch
 \label{fig:por-step3}
 \end{figure}
 
-#### Step 4. One Way Reflection
+\subsubsection{Step 4. One Way Reflection}
 
 \label{sec:por-step4}
 
@@ -303,7 +303,7 @@ Under normal operation, \cR nodes should *always* find a matching merkle tree.
 This might become an issue in the case of an active attack, but \cR nodes can fall back to explicitly recording and/or verifying those PoRs for the duration of the attack.
 }
 
-#### Step 5. Mutual Reflection
+\subsubsection{Step 5. Mutual Reflection}
 
 The final step in this progression is *mutual reflection* --- where both chains image one-another and include the necessary PoRs and modifications to their chain-weight algorithms.
 This is shown in \autoref{fig:por-step5}.
@@ -332,7 +332,7 @@ The *essence* of *Proof of Reflection* should now be apparent. *In principle*, w
 
 \todoDraftOnly{redraft the following}
 
-#### Applicability of PoR
+\subsubsection{Applicability of PoR}
 
 \label{sec:applicability-of-por}
 
@@ -375,13 +375,13 @@ For non-PoW chains, we'll need conversion methods that have non-arbitrary answer
 
 %% BEGIN ### RELEASE
 
-### Comparing Incomparable Proofs of Work
+\subsection{Comparing Incomparable Proofs of Work}
 
 \label{sec:comparing-chain-work}
 
 \input{20-por/30-comparing-work-3}
 
-#### Theoretical Conversion
+\subsubsection{Theoretical Conversion}
 
 Consider a traditional blockchain (like Bitcoin, or Ethereum 1).
 We know that traditional blockchains have properties specific to their blocks, like: reward per block (coins/block); a block target time (seconds/block) --- or block frequency (blocks/second); and a difficulty (hashes/block).
@@ -415,7 +415,7 @@ There's a symmetry between chains \cL and \cR, so we already know that $\nicefra
 
 In theory, can an exchange rate help us convert between R-hashes/R-coin and L-hashes/L-coin?
 
-#### Converting Block-Weights
+\subsubsection{Converting Block-Weights}
 
 \label{sec:converting-block-weights}
 
@@ -601,7 +601,7 @@ But they have the same units!
 What's going on?
 How do we know whether a constant of conversion \emph{works} for our purposes?
 
-#### Hold Up! We Need to Talk About $\nicefrac{L_f}{R_f}$ and $\nicefrac{R_r}{L_r} \cdot X_{R\rightarrow L}$
+\subsubsection{Hold Up! We Need to Talk About $\nicefrac{L_f}{R_f}$ and $\nicefrac{R_r}{L_r} \cdot X_{R\rightarrow L}$}
 
 \aside{
   This section regards some subtle ideas about when conversions work (i.e., give meaningful results), and when conversions don't.
@@ -845,7 +845,7 @@ information is *lost* through the DAA. -->
   Experimentally, it seems to work well with \autoref{sec:dos-and-dags}.
 }
 
-#### Conversions and Sums
+\subsubsection{Conversions and Sums}
 
 We know that, after conversion, we can sum work from two different chains.
 Are there any \emph{other} values (in units other than L-hashes) that we can sum up, though?
@@ -899,7 +899,7 @@ Thus, \emph{any} common units, which are linearly convertible both from a reflec
 
 \todoDraftOnly{Add new vars to nomenclature table}
 
-### Conversion Contexts
+\subsection{Conversion Contexts}
 
 What blockchain contexts can facilitate the conversion of block-weight?
 
@@ -910,7 +910,7 @@ Can we \emph{avoid} that exchange rate, though?
 Well, there is a context where $X_{R\rightarrow L}=1$: \textbf{when L-coins $\equiv$ R-coins}, i.e., both chains use the same root token.
 In that case, $\nicefrac{L_d}{L_r} \cdot \nicefrac{R_r}{R_d}$ gives us L-hashes/R-hash directly.
 
-#### A Single Root Token Across Multiple Chains
+\subsubsection{A Single Root Token Across Multiple Chains}
 
 \label{sec:conversion-single-root-token}
 
@@ -918,13 +918,13 @@ In that case, $\nicefrac{L_d}{L_r} \cdot \nicefrac{R_r}{R_d}$ gives us L-hashes/
 
 \input{20-por/40-single-root-token-2.tex}
 
-#### Different Root Tokens with a DEX
+\subsubsection{Different Root Tokens with a DEX}
 
 \label{sec:comparing-weight-dex}
 
 \input{20-por/45-diff-rts-and-dex-2.tex}
 
-#### What About SPV?
+\subsubsection{What About SPV?}
 
 Both contexts (SRT and DEX) require that participating chains can do on-chain SPV against one another.
 Chains need some ability to *introspect* reflecting chains --- e.g., SRT requires that users can move root tokens between chains, and the DEX context requires two chains to agree on the exchange rate between their root tokens.
@@ -937,7 +937,7 @@ So, attempting to solve the SPV problem at this point is premature.
 
 We will proceed on the \emph{assumption} that SPV is possible and easy to do in a reasonable time period, and we'll investigate the problem of SPV in detail in \autoref{sec:spv-in-ut}.
 
-### Converting Confirmations
+\subsection{Converting Confirmations}
 
 \label{sec:converting-confirmations}
 
@@ -1011,7 +1011,7 @@ Nice and simple.
 
 <!-- Notice that L-coins are easily converted to blocks via the conversion constant $\nicefrac{1}{L_r}$, and hashes via the conversion constant $\nicefrac{L_d}{L_r}$. -->
 
-#### Coins per Confirmation
+\subsubsection{Coins per Confirmation}
 
 \label{sec:coins-per-confirmation}
 
@@ -1091,7 +1091,7 @@ When measuring and converting chain-work, we \emph{always} want to convert confi
   \\[0.5em] -->
 
 
-### Reflection Between PoW and PoS Chains
+\subsection{Reflection Between PoW and PoS Chains}
 
 \label{sec:reflection-pow-and-pos}
 
@@ -1172,7 +1172,7 @@ Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
   \autoref{sec:converting-block-weights} mentions a \emph{natural symmetry} --
 } -->
 
-### Counting Work
+\subsection{Counting Work}
 
 \label{sec:counting-work}
 
@@ -1185,7 +1185,7 @@ Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
 
 \pz{From previous sections it seemed like merged mining was not a solution, if it is furthermore insecure why do we want to include it and mention it here?}
 
-### The Insecurity of Merged Mining in UT
+\subsection{The Insecurity of Merged Mining in UT}
 
 \mk{
   Change title to ``the/an incompatibility between merged mining and PoR''.

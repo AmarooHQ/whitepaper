@@ -1,6 +1,6 @@
 %% BEGIN ### RELEASE
 
-\subsection{\titlemath{$\UT{i}$}{UTᵢ}: Constructing \emph{Ultra Terminum}}
+\section{\titlemath{$\UT{i}$}{UTᵢ}: Constructing \emph{Ultra Terminum}}
 
 \label{sec:constructing-ut}
 
@@ -8,7 +8,7 @@
 
 Such a foundation (*the simplex*) is *not* a sharded blockchain --- there's no requirement that participating chains are interchangeable or using the same primitives. This was demonstrated via the example in \autoref{sec:two-blockchains}. Rather, *the simplex* is an emergent construct that is created via the *relationships* between blockchains. Instead of one blockchain being split into many (as occurs with sharding), *the simplex* is many blockchains becoming one coherent network.
 
-### Generalizing Reflection
+\subsection{Generalizing Reflection}
 
 \label{sec:generalizing-reflection}
 
@@ -133,7 +133,7 @@ There is not much (if any) overhead to using an input-output system like this: a
 
 [^scriptsig]: In Bitcoin, the input script to a transaction is called the `scriptSig`; see \url{https://en.bitcoin.it/wiki/Transaction}.
 
-#### Dapp-chain Security
+\subsubsection{Dapp-chain Security}
 
 \label{sec:dapp-chain-security}
 
@@ -164,7 +164,7 @@ Another concern is the \emph{availability} of dapp-chain blocks.
 \input{25-constructing-ut/42-dapp-chain-pow-pos}
 
 
-#### Three General Incentive Models for Dapp-chain Reflection
+\subsubsection{Three General Incentive Models for Dapp-chain Reflection}
 
 If dapp-chain headers are included along-side transactions in simplex-blocks, is it not the case that both must pay some kind of *transaction fee*?
 If not, how are simplex-chain miners to prioritize what to include in their blocks?
@@ -186,7 +186,7 @@ Is this required for this kind of abstraction? No.
 
 Here are three methods of abstraction which maintain the above freedoms.
 
-##### Method 1: Pay the simplex miner on the dapp-chain
+\subsubsubsection{Method 1: Pay the simplex miner on the dapp-chain}
 
 In this method, the dapp-chain uses its root token to pay both the dapp-chain miner and the simplex-chain miner (who includes the relevant dapp-chain header in their block).
 
@@ -199,7 +199,7 @@ A dapp-chain could, perhaps, have a rule like *X root tokens are created as part
 
 Example use-case: an existing blockchain migrates to become an *Amaroo* dapp-chain.
 
-##### Method 2: Pay the simplex miner via a native DEX
+\subsubsubsection{Method 2: Pay the simplex miner via a native DEX}
 
 When a dapp-chain hosts a native DEX, it can use that DEX for PoR.
 The general case (where a reflecting chain contributes far more chain-work than the reflected chain) was discussed in \autoref{sec:comparing-weight-dex}.
@@ -216,7 +216,7 @@ Unlike the previous method, this method doesn't require the simplex-chain miner 
 
 Example use-case: a greenfield dapp-chain uses an Amaroo-compatible DEX (which requires no development effort) so that simplex-miners have lower operating costs; thus incenting simplex-miners to include their headers over those of others.
 
-##### Method 3: Pay the simplex miner directly
+\subsubsubsection{Method 3: Pay the simplex miner directly}
 
 If the dapp-chain is willing to forego more efficient SPV transactions (or otherwise doesn't require them), and it is willing to bear the full burden of PoR in this context, then simply recording the hash of a dapp-chain header might be sufficient.
 In such a case, transactions (in the style of Bitcoin's \textsc{OP\_RETURN} transaction format) provide everything required.
@@ -238,7 +238,7 @@ This demonstrates both *freedom of incentivization* (as there is none) and *free
 Anchoring *would* be a progenitor to PoR, except that I believe the idea of an [on-chain light client predates](https://github.com/XertroV/coppr/blob/master/chainheaders.py) the term *anchoring*.
 Though I think that the idea of time-stamping a hash (e.g., via an \textsc{OP\_RETURN} transaction on Bitcoin) predates the idea of an on-chain light client.
 
-#### PoS Dapp-chains
+\subsubsection{PoS Dapp-chains}
 
 If the headers of dapp-chains are encoded as simplex-transactions, then techniques like *slashing* are first-class operations within the *hybrid* PoW context provided by the simplex.
 This solves the *Nothing at Stake* problem for PoS dapp-chains, provided the necessary PoS primitives can be encoded in a simplex-transaction.
@@ -258,14 +258,14 @@ Naturally, there are some other components that are necessary (like a component 
 
 %% BEGIN ### DRAFT
 
-#### Dapp-chain simplexes
+\subsubsection{Dapp-chain simplexes}
 
 \todo{
   Dapp-chains can make simplexes between each other (in addition to one-way PoR with their host simplex-chain).
   This is mb useful?
 }
 
-#### Future Dapp-chain Stuff (todo)
+\subsubsection{Future Dapp-chain Stuff (todo)}
 
 \todo{finish below}
 

@@ -1,4 +1,4 @@
-\subsubsection{The PoR Graph}
+\subsection{The PoR Graph}
 
 As a simplex ages, a complex graph of PoRs is produced (and it is a DAG).
 Each vertex represents a block in some simplex-chain, and the outgoing edges point to reflected blocks.
@@ -53,7 +53,7 @@ Let's call this a state of \emph{maximal reflection}, and say that such a PoR gr
 %     When \BB{} is the PoR graph's genesis block, then the entire PoR graph is maximally reflective.
 % }
 
-\subsubsubsection{Maximally Reflective PoR Graphs}
+\subsubsection{Maximally Reflective PoR Graphs}
 
 \label{sec:por-graph-max-refl}
 
@@ -186,7 +186,7 @@ Note that maximal values of $N_1$ are inversely proportional to $B_f$, so modify
 %     You might be wondering whether we can use this discovery to optimize simplex-chains like we did with header omission (\autoref{sec:exploiting-segmented-state}).
 % }
 
-\subsubsubsection{Optimization or Contradiction?}
+\subsubsection{Optimization or Contradiction?}
 
 We calculated the overhead to be $g(1+N_1 B_f \phi) = O(c)$ --- this is because we assumed that $O(B_f \phi) = O(1)$.
 However, if this were really the case, we should be able to optimize the PoR sections of blocks (similar to \autoref{sec:exploiting-segmented-state}).
@@ -252,7 +252,7 @@ Since this propagation is constrained by the latency between these special nodes
 % However, this is best left as \emph{excess capacity} in \UT{}'s architecture --- a resource to tap into if we get desperate, but not something that we should plan to use.
 
 
-\subsubsubsection{\AxiomOfRawMaximalReflection}
+\subsubsection{\AxiomOfRawMaximalReflection}
 
 It should be clear that there are decisive advantages for \UT{} if the PoR graph is maximally reflective.
 Particularly, we can accurately describe the PoR graph entirely via \emph{new reflections}, greatly reducing PoR overhead.
@@ -307,7 +307,7 @@ Thus, the \AxiomOfMaximalReflection creates an asymmetry between honest and dish
 % On the other hand\dots{} well the other hand is a problem that we can't solve, yet --- we'll ignore it for now and return to it in \autoref{sec:dags-and-the-por-graph}.
 
 
-\subsubsubsection{The Longest PoR Chain}
+\subsubsection{The Longest PoR Chain}
 
 \autoref{fig:por-graph-tips} shows us an interesting feature of maximally reflective PoR graphs: between two given blocks, the union of the paths via PoR graph tips both \emph{visit every block} and are the \emph{longest} paths between any two blocks.
 This is somewhat self-evident: since the PoR graph is a DAG, there is no way to return to a block once we have visited it.
@@ -367,7 +367,7 @@ Additionally, in \autoref{sec:dags-and-the-por-graph} we will discuss some symme
 %     }
 % \end{equation*}
 
-\subsubsubsubsubsection{Intermission and Note}
+\subsubsubsubsection{Intermission and Note}
 
 \;% single space to trigger new paragraph
 
@@ -381,7 +381,7 @@ Additionally, in \autoref{sec:dags-and-the-por-graph} we will discuss some symme
     On the other hand\dots{} well the other hand is a problem that we can't solve, yet --- we'll ignore it for now and return to it in \autoref{sec:dags-and-the-por-graph}.
 }
 
-\subsubsubsection{Generalizing NIPoPoWs}
+\subsubsection{Generalizing NIPoPoWs}
 
 \warning{
     This section is speculative; it's about how NIPoPoWs might be possible for the longest PoR chain.
@@ -389,7 +389,7 @@ Additionally, in \autoref{sec:dags-and-the-por-graph} we will discuss some symme
     \UT{} won't depend on NIPoPoWs, but they are useful and it would be good to support them, if possible.
 }
 
-\subsubsubsubsection{NIPoPoWs Primer}
+\subsubsubsection{NIPoPoWs Primer}
 
 Prior work: \citeNIPoPoWsFull{}.
 
@@ -547,7 +547,7 @@ For a traditional blockchain, this isn't too much of a problem.
 For \UT{}, however, we ideally want uncoupled simplex-chain difficulties, even if they use the same hashing algorithm.
 Speaking of which, how does a NIPoPoW work if more than one hashing algorithm is used?
 
-\subsubsubsubsection{Non-Interactive Proofs of Proof of Work Reflection (NIPoPoWRs)}
+\subsubsubsection{Non-Interactive Proofs of Proof of Work Reflection (NIPoPoWRs)}
 
 \label{sec:nipopowrs}
 
@@ -566,7 +566,7 @@ Thus, these will not be NIPoPoRs --- this method requires PoW, so, in terms of P
     Further diligence is required.
 }
 
-\subsubsubsubsubsection{Problem: DAG Compatibility}
+\subsubparagraph{Problem: DAG Compatibility}
 
 \label{sec:nipopowrs-problem-dag-compatibility}
 
@@ -601,7 +601,7 @@ The authors then show that, when goodness is not violated, the attack is impract
 In our modified graph-based version, though, there is no such problem: blocks cannot become stale.
 Additionally, the \AxiomOfMaximalReflection guarantees that the interlink history will fully span the entire PoR graph.
 
-\subsubsubsubsubsection{Problem: Variable Difficulty and Multiple Hashing Algorithms}
+\subsubparagraph{Problem: Variable Difficulty and Multiple Hashing Algorithms}
 
 There are really two problems here for us to think about.
 If we can solve the problem of blocks using different hashing algorithms, then we will need to handle variable difficulty anyway, so let's work on the critical path first (variable difficulty).
@@ -694,7 +694,7 @@ All that remains is for each block in the longest PoR chain to calculate objecti
 Earlier, we determined that objective $\mu$ values of the same type can accommodate variable difficulties.
 Thus, we have resolved both parts of the problem.
 
-\subsubsubsubsubsection{NIPoPoWRs: Summary}
+\subsubparagraph{NIPoPoWRs: Summary}
 
 We have sketched the explanatory framework and construction of a variant of NIPoPoWs that is compatible with the longest PoR chain: NIPoPoWRs.
 
