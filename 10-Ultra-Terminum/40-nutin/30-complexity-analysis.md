@@ -351,7 +351,7 @@ N_3 & = \frac{T_3}{k_3} \\
 
 
 
-\subsection{Complexity of Cross-Chain SPV Proofs & Proofs of Reflection}
+\subsection{Complexity of Cross-Chain SPV Proofs \& Proofs of Reflection}
 
 \subsubsection{Cross-Chain SPV Proofs}
 
