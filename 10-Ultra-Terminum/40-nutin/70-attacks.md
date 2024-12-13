@@ -2,7 +2,7 @@
 
 \newpage
 
-## Attacks
+\section{Attacks}
 
 *Ultra Terminum* --- with appropriate configuration --- is resistant to the following attacks; see the linked section for discussion:
 
@@ -12,7 +12,7 @@
 - Empty block DoS and censorship, see \autoref{sec:dos-and-dags}
 - \emph{Nothing at Stake} and \emph{long range} attacks, see \autoref{sec:reflection-pow-and-pos} and \autoref{sec:dapp-chains}
 
-### Dialog: Attacks and Mitigation
+\subsection{Dialog: Attacks and Mitigation}
 
 \aside{
   This is a fictional dialog between a malicious actor (\nefName{}) and myself.

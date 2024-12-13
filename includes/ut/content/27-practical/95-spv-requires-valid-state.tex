@@ -2,7 +2,7 @@
 
 
 
-\subsubsubsection{Introduction}
+\subsubsection{Introduction}
 
 Our goal in this section is to find a method for SPV (Simple Payment Verification) between any two simplex-chains that is safe, fast, succinct, and reliable.
 \begin{itemize}
@@ -31,7 +31,7 @@ Let's not jump to that conclusion just yet --- there are cryptographic options l
 Before that, though, let's slow down and reconsider why SPV works for Bitcoin.
 Perhaps we can learn something.
 
-\subsubsubsection{Why does SPV work for Bitcoin?}
+\subsubsection{Why does SPV work for Bitcoin?}
 
 For the sake of simplicity, let's consider Bitcoin in isolation.
 Particularly, we'll assume that there are no other networks of similar size using the same PoW algorithm or compatible mining hardware.
@@ -46,20 +46,20 @@ A concise argument for the security of Bitcoin-SPV proofs is:
     \item If a transaction is invalid, then the block is invalid.
     \item If a block builds on an invalid block, then it is invalid.
     \item If a miner produces an invalid block, they get no block reward.
-    \item $\therefore$ Honest miners won't produce or build on invalid blocks.
-    \item \label{prem:spv-7} $\therefore$ For an adversary to produce an apparently valid (but fraudulent) proof leading to a \emph{main chain} block, they'd need to out-compete honest miners (i.e., 51\% attack the network).
-    \item \label{prem:spv-8} $\therefore$ Only valid transactions exist in the main chain.\footnote{
+    \item $\implies$ Honest miners won't produce or build on invalid blocks.
+    \item \label{prem:spv-7} $\implies$ For an adversary to produce an apparently valid (but fraudulent) proof leading to a \emph{main chain} block, they'd need to out-compete honest miners (i.e., 51\% attack the network).
+    \item \label{prem:spv-8} $\implies$ Only valid transactions exist in the main chain.\footnote{
         This isn't the full picture for some blockchains (e.g., Ethereum) even though SPV still works for them --- a transaction that fails to execute can still be valid and produce a valid state transition.
         In these cases, an invalid state transition implies an invalid block, so it's customary to prove that some state has the right values rather than that a transaction exists.
     }
-    \item $\therefore$ It's safe to accept SPV proofs for blocks in the main chain.
+    \item $\implies$ It's safe to accept SPV proofs for blocks in the main chain.
 \end{argumentslist}
 
 It appears that \cref{prem:spv-7} is our current sticking point for Simplex-SPV proofs.
 
 But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could get to \cref{prem:spv-8} by other means.
 
-\subsubsubsection{Dialog: Error Correction I}
+\subsubsection{Dialog: Error Correction I}
 
 \aside{
     The following is a dramatized dialog based on my thoughts leading up to the afternoon of August 3\textsuperscript{rd}.
@@ -468,7 +468,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 % DIALOG 2
 
 
-\subsubsubsection{Dialog: Error Correction II}
+\subsubsection{Dialog: Error Correction II}
 
 \dialogHeader{11\textsuperscript{th} August 2022}
 
@@ -1161,7 +1161,7 @@ if > some size --- makes sense mb?
 % Breakpoints
 %
 
-\subsubsubsection{SPV Bribe Attacks: Derivations \& Breakpoints}
+\subsubsection{SPV Bribe Attacks: Derivations \& Breakpoints}
 
 
 Let's assume that an attacker is willing to bribe miners to exclude a fraud proof.
@@ -1231,7 +1231,7 @@ If the network is kept in phase 1, then the PoR graph and (nearly all) chain dat
 
 
 
-\subsubsubsubsection{Phase 1 $\not\to$ Phase 2 on the Target Chain}
+\subsubsubsection{Phase 1 $\not\to$ Phase 2 on the Target Chain}
 
 The first honest block on the target chain must, by definition, link back to the fraudulent block as an invalid ancestor.
 The additional reward for this block after $k$ attacking blocks is $C_r H k$.
@@ -1270,7 +1270,7 @@ An attacker must have additional support to maintain this portion of the attack 
 If $N_1 = 100$, then no attack is viable (without help) after 5000 blocks, unless $q > 0.5$.
 At that point, at least 50\% of the network hash-rate needs to be dedicated to the target chain to make it unprofitable enough to dissuade honest miners.
 
-\subsubsubsubsection{Phase 1 $\not\to$ Phase 2 and $\BribeCost(z)$}
+\subsubsubsection{Phase 1 $\not\to$ Phase 2 and $\BribeCost(z)$}
 
 \pz{Define $Z_k$}
 \begin{itemize}
@@ -1328,7 +1328,7 @@ We should also note the inverse of \BribeCost, which gives us a lower bound on t
     \label{eq:spv-bribe-cost-inverse}
 \end{align}
 
-\subsubsubsubsection{Domain and Range of $\BribeCost(z)$ in the SRT Context}
+\subsubsubsection{Domain and Range of $\BribeCost(z)$ in the SRT Context}
 
 It is clear that $\BribeCost(0) = 1$.
 That is: the attacker has lost exactly 1 block reward (the reward for the fraudulent block).
@@ -1380,7 +1380,7 @@ If, instead, $H = 1/\sqrt{N_1}$, then $\eta = 5.05$ and
 \end{equation*}
 
 
-\subsubsubsubsection{Fixed Points of $\BribeCost(z)$ when Batching}
+\subsubsubsection{Fixed Points of $\BribeCost(z)$ when Batching}
 
 \pz{Unclear what this section is about.}
 Let's assume that there is a constant outbound SPV ``pressure''.
@@ -1399,7 +1399,7 @@ Alternatively: $z = \frac{2}{\eta}(y - 1) - 1$.
 
 So, if $y = 10$ and $\eta = 1$, then we can estimate that we have a fixed point at $z \approx 17$ blocks.
 
-\subsubsubsubsection{Phase 1 $\to$ Phase 2}
+\subsubsubsection{Phase 1 $\to$ Phase 2}
 
 The network transitions from phase 1 to phase 2 as soon as a first miner produces a block that includes the fraud proof.
 
@@ -1414,7 +1414,7 @@ Thus, using those PoRs effectively turns dishonest miners into honest miners.
 
 
 
-\subsubsubsubsection{Phase 2 $\to$ Phase 3}
+\subsubsubsection{Phase 2 $\to$ Phase 3}
 
 The duration of this transition depends on the proportion of honest miners: $h$.
 Let's define $h$ via $h + d = 1$, where $d$ is the proportion of dishonest miners, including the attacker.
@@ -1486,7 +1486,7 @@ If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$
 %
 % dialog 3
 
-\subsubsubsection{Dialog: Error Correction III}
+\subsubsection{Dialog: Error Correction III}
 
 \draftNote{The draft of this section isn't finished, but the important ideas are here.}
 
@@ -2528,7 +2528,7 @@ in response to writing a dialog and honestly and fully exploring everything.
 
 \end{draftonly}
 
-\subsubsubsection{Decoupled State Progression}
+\subsubsection{Decoupled State Progression}
 
 \pz{Add some explanation here and define what $AL_x$s are.}
 
@@ -2553,7 +2553,7 @@ in response to writing a dialog and honestly and fully exploring everything.
 
 
 
-\subsubsubsubsection{alt section in dialog}
+\subsubsubsection{alt section in dialog}
 
 \todo{
     I removed this section from the main dialog b/c it is maybe innapropriate, and a little exaggerated.
@@ -2612,7 +2612,7 @@ in response to writing a dialog and honestly and fully exploring everything.
 
 
 
-\subsubsubsection{SPV Limits}
+\subsubsection{SPV Limits}
 
 (not sure if this section is necessary anymore)
 
@@ -2623,7 +2623,7 @@ in response to writing a dialog and honestly and fully exploring everything.
 
 
 
-\subsubsubsection{What about SNARKs and STARKs?}
+\subsubsection{What about SNARKs and STARKs?}
 
 SNARKs and STARKs, and their zk- siblings, refer to cryptosystems (or their respective proofs) with some remarkable properties.
 Particularly, these systems produce proofs of \emph{correct computation} for a known algorithm, and \emph{the proof can be verified both faster and using less data than doing the computation itself}.
@@ -2640,7 +2640,7 @@ Vitalik wrote\footnote{
 
 This is good motivation to explore whether any of these cryptosystems are useful for constructing a suitable Simplex-SPV method.
 
-\subsubsubsubsection{zk-STARKs}
+\subsubsubsection{zk-STARKs}
 
 The major reason to consider S\textbf{T}ARKs first is their \textbf{t}ransparent (trustless) setup.
 
@@ -2665,7 +2665,7 @@ These proofs would need to be verified for each block in each other simplex-chai
     \item come back to it if we run out of other options
 \end{itemize}
 
-\subsubsubsubsection{zk-SNARKs}
+\subsubsubsection{zk-SNARKs}
 
 \begin{itemize}
     \item trusted set-up / toxic waste
@@ -2677,12 +2677,12 @@ These proofs would need to be verified for each block in each other simplex-chai
     \item wait, if we can provide fraud proofs (and we'd rely on that), why do we need a zk-SNARK?
 \end{itemize}
 
-\subsubsubsection{What about Fraud Proofs?}
+\subsubsection{What about Fraud Proofs?}
 
 
 
 
-\subsubsubsection{draft content below}
+\subsubsection{draft content below}
 
 
 It might be feasible for someone to create an invalid block that gets reflections.

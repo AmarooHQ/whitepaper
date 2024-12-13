@@ -1,6 +1,6 @@
 %% BEGIN ### RELEASE
 
-## Practical Considerations for UT's Design
+\section{Practical Considerations for UT's Design}
 
 \label{sec:practical-considerations}
 
@@ -22,7 +22,7 @@
 
 %% BEGIN ### RELEASE
 
-### Proving Reflection
+\subsection{Proving Reflection}
 
 \label{sec:proving-reflection}
 
@@ -67,7 +67,7 @@ A practical method for treating proofs of reflection as witnesses that may be ex
 
 %% BEGIN ### DRAFT
 
-#### Verkle Trees and Shorter PoRs
+\subsubsection{Verkle Trees and Shorter PoRs}
 
 \label{sec:verkle-proofs}
 
@@ -80,7 +80,7 @@ Similar to merkle trees, they allow efficient proofs of membership against a cry
 
 %% BEGIN ### RELEASE
 
-### Segmented State
+\subsection{Segmented State}
 
 \label{sec:segmented-state}
 
@@ -121,7 +121,7 @@ In essence \autoref{eq:segregated-state} shows that $\sigma_{R,t}$ depends *only
 If simplex-chains are segmented in this manner, then miners will be able to calculate the reflection-state of other simplex-chains without calculating their complete state.
 This would allow them to deterministically calculate proofs of reflection for all other simplex-chains.
 
-### Exploiting Segmented State
+\subsection{Exploiting Segmented State}
 
 \label{sec:exploiting-seg-state}
 \label{sec:exploiting-segmented-state}
@@ -218,7 +218,7 @@ o.`Y8b   88   88  .o o.`Y8b     Yb"""88""     88""   88"""  o.`Y8b
 conf times
 -->
 
-### Confirmation Times
+\subsection{Confirmation Times}
 
 \label{sec:confirmation-times}
 
@@ -237,12 +237,14 @@ For the case of a 2-chain simplex (where those chains have the same block produc
 This is easily generalized: for an $N_1$-simplex with simplex-chains that share some block frequency $B_f$, the rate of confirmation will be $\Cprime = N_1 \cdot B_f$ Hz.
 Thus, the rate of confirmations has complexity $O(\Cprime) = O(N_1 \cdot B_f) = O(N_1) = O(c)$.
 
-Let *confirmation time* be the duration breakpoint beyond which enough confirmations have occurred to consider a transaction *safe*. This is equivalent to the *rule of thumb* mentioned earlier. For a traditional blockchain, as mentioned, this is the product of some constant and the expected duration between blocks: ${B_f}^{-1}$. For a simplex, though, the expected *duration* is ${\mathbb{C}^\prime}^{-1} = \frac{1}{N_1 \cdot B_f}$. Thus, as the simplex grows --- as $N_1$ *increases* --- the entire network's rate of confirmations also increases, and thus *confirmation time* approaches 0[^approach-zero].
+Let *confirmation time* be the duration breakpoint beyond which enough confirmations have occurred to consider a transaction *safe*. This is equivalent to the *rule of thumb* mentioned earlier.
+For a traditional blockchain, as mentioned, this is the product of some constant and the expected duration between blocks: ${B_f}^{-1}$.
+For a simplex, though, the expected *duration* is ${\mathbb{C}^\prime}^{-1} \propto \frac{1}{N_1 \cdot B_f}$.
+Thus, as the simplex grows --- as $N_1$ *increases* --- the entire network's rate of confirmations also increases, and thus *confirmation time* approaches 0[^approach-zero].
 
 [^approach-zero]: To say that confirmation time approaches 0 only tells the latter half of the process by which a transaction becomes confirmed. The first half of that process is *getting an initial confirmation*, which is effectively a small, but constant, overhead.
 
-\pz{The following does not take into consideration the difficulty to produce each block.}
-A 200-simplex with $B_f = \nicefrac{1}{15}$ has a confirmation rate of $\mathbb{C}^\prime = \nicefrac{40}{3} \approx 13.3$ Hz. An 800-simplex with $B_f = \nicefrac{1}{60}$ has the same confirmation rate. A 1400-simplex (the optimized maximal simplex given \emph{Amaroo's} initial configuration) with $B_f = \nicefrac{1}{15}$ has $\mathbb{C}^\prime \approx 93$ Hz. This is $\sim 46.5\times$ faster than EOS/Solana, $\sim 1116\times$ faster than Eth2, $\sim 1400\times$ faster than Ethereum, and $\sim 55,800\times$ faster than Bitcoin.
+A 200-simplex with $B_f = \nicefrac{1}{15}$ has a confirmation rate of $\mathbb{C}^\prime = \nicefrac{40}{3} \approx 13.3$ Hz. An 800-simplex with $B_f = \nicefrac{1}{60}$ has the same confirmation rate. A 1400-simplex (the most optimized maximal simplex given \emph{Amaroo's} initial configuration) with $B_f = \nicefrac{1}{15}$ has $\mathbb{C}^\prime \approx 93$ Hz --- $\sim 46.5\times$ faster than EOS/Solana, $\sim 1116\times$ faster than Eth2, $\sim 1400\times$ faster than Ethereum, and $\sim 55,800\times$ faster than Bitcoin.
 
 Note that PoR incents miners to publish blocks as soon as possible so that those blocks begin gaining reflections.
 If a miner does not publish a block immediately, then the reflections in that block become out-of-date very quickly as there are new, additional headers to reflect arriving constantly.
@@ -296,7 +298,7 @@ goal: support this sentence (top of section):
 -->
 
 
-### Lowering Block Production Variance
+\subsection{Lowering Block Production Variance}
 
 \label{sec:miner-resonance}
 
@@ -346,7 +348,7 @@ However, the variance of block production on each of these chains won't be that 
 
 %% BEGIN ### DRAFT
 
-### Reflection: Incentive and Censorship
+\subsection{Reflection: Incentive and Censorship}
 
 \todo{is a refl censorship attack possible? meaningful? explore. (NB: I don't think there's a viable strategy here, which is why I haven't prioritized writing this out.)}
 
@@ -360,7 +362,7 @@ Does a miner ever benefit from withholding reflections?
 
 %% BEGIN ### RELEASE
 
-### Simplex Security and the Confirmation Equivalence Conjecture
+\subsection{Simplex Security and the Confirmation Equivalence Conjecture}
 
 \label{sec:simplex-security-cec}
 
@@ -385,7 +387,7 @@ atk situations:
 
 %% BEGIN ### RELEASE
 
-### On SPV In UT
+\subsection{On SPV In UT}
 
 \label{sec:spv-in-ut}
 

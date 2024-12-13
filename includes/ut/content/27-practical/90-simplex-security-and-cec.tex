@@ -5,7 +5,7 @@
 
 \todo{Add something about the context regarding axioms and longest PoR chain.}
 
-\subsubsubsection{Simplex Security}
+\subsubsection{Simplex Security}
 
 \label{sec:simplex-security}
 
@@ -36,7 +36,7 @@ Over some attack duration $d$, on \emph{average} we expect the attacker's chain-
 Thus, for the attacker's chain-segment to \emph{reliably} win, it must be that $qrd > prd \implies q > p$.
 $\blacksquare$
 
-\subsubsubsection{Confirmation Equivalence Conjecture}
+\subsubsection{Confirmation Equivalence Conjecture}
 
 \label{sec:cec-overview}
 
@@ -66,9 +66,8 @@ After the first few confirmations, each additional confirmation reduces the risk
 }
 So \emph{security takes \ul{time}}, because confirmations take time.
 
-\pz{Recall the meaning of $\mathbb{C}^\prime$}
 Now, consider a simplex: the equivalence conjecture says that it doesn't matter whether confirmations come from the \emph{local} chain, or if they come from a \emph{reflecting} chain.
-So, a simplex-chain in a 2-chain simplex (wherein each simplex-chain has $\mathbb{C}^\prime = 2 \times B_f$) \emph{should}, after $C$ \emph{local} confirmations, be as secure as a standalone blockchain with $2C$ confirmations.
+So, a simplex-chain in a 2-chain simplex \emph{should}, after $C$ \emph{local} confirmations, be as secure as a standalone blockchain with $2C$ confirmations.
 This is true for larger simplexes, too: \emph{doubling} the size of a simplex means we can \emph{halve} the number of \emph{local} confirmations that we wait for --- the chance of a doublespend succeeding should be approximately the same.
 More generally, a simplex-chain in an $N$-chain simplex will, after $C$ \emph{local} confirmations, be as secure as a standalone blockchain after $CN$ confirmations.
 
@@ -81,7 +80,7 @@ As blockchain architects, if the CEC is true, then UT allows us to maintain secu
     If you were looking for an essence of how UT breaks the core conflict of Buterin's Trilemma\dots
 }
 
-\subsubsubsection{Generalizing Doublespends}
+\subsubsection{Generalizing Doublespends}
 
 \label{sec:cec-draft-refl-work}
 
@@ -137,13 +136,13 @@ This is not a paradox because the fork rule is \emph{only} used to choose the pr
 }
 
 
-\subsubsubsection{Testing the Confirmation Equivalence Conjecture}
+\subsubsection{Testing the Confirmation Equivalence Conjecture}
 
 \label{sec:por-simulation-experiment}
 
 Let's test the Confirmation Equivalence Conjecture.
 
-\subsubsubsubsection{Hypothesis}
+\subsubsubsection{Hypothesis}
 
 The hypothesis is that: doublespends against an \emph{individual simplex-chain} in an $N$-chain simplex after $C$ \emph{local} confirmations are \emph{as hard} as doublespends against a traditional blockchain after $C\cdot N$ confirmations.
 
@@ -212,7 +211,7 @@ particularly, that there is \emph{another dimension} ($N_1$; the size of the sim
 Note: this experiment does \emph{not} test the conversion of chain-work --- the same hashing algorithm is used for each simplex-chain and no conversion of work takes place.
 
 
-% \subsubsubsubsection{Scope and Constraints}
+% \subsubsubsection{Scope and Constraints}
 
 % This experiment is not intended to be comprehensive --- many significant real-world factors are basically ignored: e.g., block propagation latency, transaction processing overhead, geographic latency, bandwidth constraints, etc.
 
@@ -233,7 +232,7 @@ Note: this experiment does \emph{not} test the conversion of chain-work --- the 
 
 
 
-\subsubsubsubsection{Method}
+\subsubsubsection{Method}
 
 I have implemented a simulation of a blockchain network that is suitable for this experiment.
 Particularly:
@@ -355,7 +354,7 @@ If the CEC is true then we expect: $f_1(x) \approx f_2(x) \approx f_3(x) \approx
 
 
 
-\subsubsubsubsection{Error Correction Iteration}
+\subsubsubsection{Error Correction Iteration}
 
 \pz{Having a probabilistic model and proving it empirically would be far more convincing than trying to make the experiments fit the hypothesis.}
 Following the initial implementation of PoR in the simulator, results were promising but did not align with the theoretical prediction (based on Rosenfeld's analytical derivation of $P(q; c)$).
@@ -402,7 +401,7 @@ Rather, the fact that \emph{these} corrections were the significant ones is cons
 
 \todoDraftOnly{attacker's draft refl work?}
 
-\subsubsubsubsection{Validating the Model}
+\subsubsubsection{Validating the Model}
 
 \begin{figure}
     \centering
@@ -428,7 +427,7 @@ Such differences are taken to be \emph{non-critical}, i.e., they do not compromi
 
 
 
-\subsubsubsubsection{Results}
+\subsubsubsection{Results}
 
 \label{sec:cec-experiment-results}
 
@@ -468,7 +467,7 @@ Does the extended CEC hold true, also?
 
 % \FloatBarrier
 
-\subsubsubsubsection{Conclusions}
+\subsubsubsection{Conclusions}
 
 \pz{The first part of the footnote could be moved as a disclaimer to the beginning of the section. The lack of refuting evidence is also due to the fact that it is not published yet.}
 These results are, for the purpose of this paper, taken to indicate the following statements are true\footnote{
@@ -498,7 +497,7 @@ These results are, for the purpose of this paper, taken to indicate the followin
 %     \item Rosenfeld's closed form solution is consistent with empirical results.
 % \end{enumerate}
 
-% \subsubsubsubsection{Experimental Limitations}
+% \subsubsubsection{Experimental Limitations}
 
 % \todo{
 %     seems like simplexes might have trouble getting below 1\% probability of successful attack --- like large $N_1$ has $\sim$diminishing returns.
@@ -545,7 +544,7 @@ These results are, for the purpose of this paper, taken to indicate the followin
 %     \item allowing invalid blocks / txs / refls --- either b/c of simplifications or b/c of misunderstanding of reality?
 % \end{itemize}
 
-% \subsubsubsubsection{Remarks}
+% \subsubsubsection{Remarks}
 
 % \aside{
 %     I estimate that my CPUs alone used $\sim 100$ million J to obtain the results for this experiment.

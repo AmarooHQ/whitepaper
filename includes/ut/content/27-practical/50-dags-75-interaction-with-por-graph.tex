@@ -1,6 +1,6 @@
 
 
-\subsubsubsection{Block-DAG Interaction With The PoR Graph}
+\subsubsection{Block-DAG Interaction With The PoR Graph}
 
 \label{sec:dags-and-the-por-graph}
 
@@ -35,7 +35,7 @@ And we can reconstruct the PoRs sub-block using $O(1)$ data thanks to \AxOfMaxim
 Thus, an invalid block is only as large as its header, list of reflected PoR graph-tips, and fraud proof.
 That's $O(\log c)$ in the worst case.
 
-\subsubsubsubsection{Axiom of Unified Ancestry}
+\subsubsubsection{Axiom of Unified Ancestry}
 
 This is all that we need to plug the gap: ensure honest miners can always build on \emph{any} local chain-tip, valid or not.
 If the chain-tip is valid, the honest miner uses it as a parent.
@@ -47,7 +47,7 @@ It is still an ancestor cryptographically, but not with respect to its transacti
 % Since the transactions within such a block are non-canonical, we don't count it as an ancestor.
 % Thus, the entire PoR graph learns that the block is invalid.
 
-% \subsubsubsection{\AxiomOfRawUnifiedAncestry}
+% \subsubsection{\AxiomOfRawUnifiedAncestry}
 
 \DeclareAxiom{UnifiedAncestry}{
     A miner should use all valid chain-tips as parents, and flag invalid ones.
@@ -67,7 +67,7 @@ It is still an ancestor cryptographically, but not with respect to its transacti
 
 This new axiom changes the game for block-DAGs.
 
-\subsubsubsubsection{DoS Attacks}
+\subsubsubsection{DoS Attacks}
 
 Previously, an attacker could delay transactions for $\sim {A_\text{blocks}}^2$ many blocks because they could evade the contradiction in the PoR graph.
 Now, they cannot.
@@ -150,7 +150,7 @@ Now that we've added the \AxiomOfUnifiedAncestry, the alternative for the attack
 
 
 
-\subsubsubsection{NIPoPPoWs + NIPoPoWRs} % = NIPoPPoWaPoWRs
+\subsubsection{NIPoPPoWs + NIPoPoWRs} % = NIPoPPoWaPoWRs
 \label{sec:blockdag-nipopowrs}
 
 \warning{
@@ -212,7 +212,7 @@ There is one other fact that we need to prove: that no fraud proof was ever reco
 % each NIPoPoWR interlink includes the prev \mu-superblock in each of the: PoRs graph \mu-suerDAG, the local \mu-superDAG, and the posteritorial \mu-superchain.
 % one structure, verified by the PoR graph w/o exceeding O(1) limits
 
-\subsubsubsubsection{Integrating Fraud Proofs}
+\subsubsubsection{Integrating Fraud Proofs}
 
 NIPoPoWs (in general) exist in a unique context: we expect that a lot of time has passed since the target infix block was mined.
 
