@@ -47,7 +47,10 @@ Miners would need to do this for *all* simplex-chains that they reflect. Predict
 
 Do we *need* to include proofs of reflection, though? Is it possible to avoid the explicit inclusion of those proofs, potentially allowing for $O(c)$ complexity instead?
 
-If miners of any simplex-chain download the blocks of *all* simplex-chains --- as mentioned in \autoref{sec:availability-of-blocks} --- then including all necessary proofs of reflection can be made redundant. Since miners, theoretically, have all the necessary data to construct the proofs, do those miners need to actually include those proofs? Could we treat those proofs as witnesses and prune them --- similar to SegWit?
+[^segregated-witness]: [Segregated Witness](https://web.archive.org/web/20240926154239/https://en.bitcoin.it/wiki/Segregated_Witness) was a new ``witness'' structure introduced to bitcoin blocks, separate from the transaction merkle tree. The structure contains data required to check transaction validity but not required to determine the transaction effects. Introduced with [BIP-141](https://web.archive.org/web/20240423183945/https://en.bitcoin.it/wiki/BIP_0141).
+
+
+If miners of any simplex-chain download the blocks of *all* simplex-chains --- as mentioned in \autoref{sec:availability-of-blocks} --- then including all necessary proofs of reflection can be made redundant. Since miners, theoretically, have all the necessary data to construct the proofs, do those miners need to actually include those proofs? Could we treat those proofs as witnesses and prune them --- similar to Segregated Witness (SegWit)[^segregated-witness]?
 
 \defineTermTex{Omitted Proofs (+OP)}{
     The UT protocol variant wherein miners/validators explicitly record \emph{only} reflected headers, such that necessary proofs of reflection are deterministically recalculable
@@ -126,7 +129,7 @@ This would allow them to deterministically calculate proofs of reflection for al
 Given that the reflection-segments of simplex-chains will contain mostly redundant data (i.e., headers), numerous optimizations are possible.
 
 For example, it's not necessary for a miner's node to re-download reflected headers (which are part of other chains' blocks), since it can download them in advance and as they become available.
-We can reconstruct the PoRs root provided that we know *which* headers are reflected and in what order.
+We can reconstruct the PoRs root, provided that we know *which* headers are reflected and in what order.
 Transmitting the \emph{hashes} of headers, only, reduces the effective size of simplex-blocks[^sb-size] from $b$ to $\sim b \cdot (\frac{g + B_h}{2B_h})$, where $g$ is the size of the relevant digest in bytes.
 For $g=32; B_h=112$, this reduces effective block size to $\sim 0.643 b$ --- an improvement of $\sim 35\%$.
 
