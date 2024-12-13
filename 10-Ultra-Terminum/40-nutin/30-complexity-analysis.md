@@ -1,6 +1,6 @@
 %% BEGIN ### RELEASE
 
-\section{Scaling Complexity Analysis of *Ultra Terminum*}
+\section{Scaling Complexity Analysis of \emph{Ultra Terminum}}
 
 \label{sec:ut-complexity}
 
