@@ -1,6 +1,13 @@
 \pagestyle{fancy}
+
+% Set the fancy headers to show subseciton left and section right.
+\fancyhf{}
+\fancyhead[RO]{\leftmark}
+\fancyhead[RE]{\rightmark}
 \fancyfoot[C]{\thepage\ of \zpageref{LastPage}\preparedfor}
 
+
+% First page style (title page)
 \fancypagestyle{firststyle}
 {
     \fancyhf{}
@@ -8,6 +15,7 @@
     \fancyfoot[R]{Compiled: \\ \today\ at \currenttime \\ \scriptsize{\texttt{\gitAbbrevHash{} \textbullet\;\gitAuthorDate}}}
 }
 
+% Page for no fancy headers, plain
 \newcommand\nofancyhdr{
     %% tell fancyhdr to not do a style on this page
     \fancypagestyle{plain}{
