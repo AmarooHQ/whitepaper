@@ -8,7 +8,7 @@ keep toc to d=1 for this section --- reduces ToC page size. default is d=3
 
 \addtocontents{toc}{\protect\setcounter{tocdepth}{1}}
 
-# Buterin's Trilemma
+\subsection{Buterin's Trilemma}
 
 \href{\citeShardingFAQsLink}{The trilemma} is as follows:
 
@@ -35,7 +35,7 @@ If the host-chain has $O(c)$ capacity, then it should support\footnote{
 } $O(c)$ shards.
 Each shard has $O(c)$ capacity also, thus the full system has $O(c^2)$ capacity.
 
-## Core Conflict
+\subsubsection{Core Conflict}
 
 \label{sec:core-conflict}
 
@@ -92,7 +92,7 @@ We have some hints to conditions that might belong to a solution:
 
 **This is the crux of the problem: how do you construct a network of blockchains (scalable) such that attacking an individual chain is about as difficult as attacking the full network (secure), whilst ensuring that the security of the network does not require validating all chains (decentralized)?**
 
-### Prior Assumptions
+\subsubparagraph{Prior Assumptions}
 
 Here are some prior underlying assumptions that are either common or which I expect to be:
 
@@ -112,9 +112,7 @@ Are they always?
     For our purposes there isn't really a difference; I include them here so that I can later show you conditions under which they are all simultaneously false.
 }
 
-## Conjecture: A Principle of Scaling
-
-\pz{This is too short to be a subsection, or at least emphasize on the message}
+\subsubsection{Conjecture: A Principle of Scaling}
 
 \label{sec:a-principle-of-scaling}
 
