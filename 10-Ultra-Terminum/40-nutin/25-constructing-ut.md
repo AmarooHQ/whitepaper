@@ -261,13 +261,13 @@ Naturally, there are some other components that are necessary (like a component 
 \subsubsection{Dapp-chain simplexes}
 
 \todo{
-  Dapp-chains can make simplexes between each other (in addition to one-way PoR with their host simplex-chain).
+  **** Dapp-chains can make simplexes between each other (in addition to one-way PoR with their host simplex-chain).
   This is mb useful?
 }
 
 \subsubsection{Future Dapp-chain Stuff (todo)}
 
-\todo{finish below}
+\todo{**** finish below}
 
 plan:
 
@@ -298,7 +298,7 @@ plan:
 
 \input{includes/ut/headings/25-dapp-dapp-chains.tex}
 
-\todo{write it}
+\todo{**** write it}
 
 plan:
 

@@ -222,7 +222,7 @@ If the attacker has more hash power than the honest miners (i.e., $q > p$\footno
   Since a correctly-evaluated projection of \cL is useful (for users of either chain), we should solve this problem if we can.
 }
 
-\todoDraftOnly{rewrite / edit this: evaluating PoR weight --- inconsistent with later I think}
+\todoDraftOnly{**** rewrite / edit this: evaluating PoR weight --- inconsistent with later I think}
 
 How can we prevent this kind of attack?
 The attack is only possible because Chain \cR was *not* accounting for reflected weight --- if Chain \cR's projection of Chain \cL accounts for reflections, then this attack is not possible.
@@ -269,7 +269,6 @@ Since this case only has two chains (\cL and \cR), \cL will only be reflecting \
 - combine with VLMTs.
 }
 
-\todoDraftOnly{NIPOPoWRs as proofs of validity?}
 
 <!-- Broadly, there are two categories of low-overhead, potential solutions: proofs of validity, and proofs of invalidity (i.e., fraud proofs).
 Let's consider the latter.
@@ -324,7 +323,7 @@ This last question is particularly important for moving beyond mutual reflection
 
 The *essence* of *Proof of Reflection* should now be apparent. *In principle*, we can make blockchains more difficult to attack based on the idea that *blockchains can include a projection of the history of other blockchains (and confirm a chain's history like they do transactions)*. *In principle*, it is possible to increase the security of a blockchain via *reflection* and to increase the security of multiple blockchains via *mutual reflection*.
 
-\todoDraftOnly{PoW --- 2 chains using the same algorithm isn't insecure!}
+\todoDraftOnly{**** PoW --- 2 chains using the same algorithm isn't insecure!}
 
 %% END ### RELEASE
 
@@ -899,7 +898,7 @@ Thus, \emph{any} common units, which are linearly convertible both from a reflec
   Is it possible that we can convert chain-work \emph{via summing block rewards?}
 }
 
-\todoDraftOnly{Add new vars to nomenclature table}
+\todoDraftOnly{**** Add new vars to nomenclature table}
 
 \subsection{Conversion Contexts}
 
@@ -916,7 +915,7 @@ In that case, $\nicefrac{L_d}{L_r} \cdot \nicefrac{R_r}{R_d}$ gives us L-hashes/
 
 \label{sec:conversion-single-root-token}
 
-\todoDraftOnly{add degenerate case: same block reward, same difficulty}
+\todoDraftOnly{**** add degenerate case: same block reward, same difficulty}
 
 \input{20-por/40-single-root-token-2.tex}
 
@@ -1185,16 +1184,9 @@ Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
 
 %% BEGIN ### DRAFT
 
-\pz{From previous sections it seemed like merged mining was not a solution, if it is furthermore insecure why do we want to include it and mention it here?}
+\subsection{Incompatibility between Merged Mining and PoR}
 
-\subsection{The Insecurity of Merged Mining in UT}
-
-\mk{
-  Change title to ``the/an incompatibility between merged mining and PoR''.
-  The point of the section is to explicitly mention that using MM with PoR can be   dangerous and to list/discuss the conditions on that incompatibility.
-}
-
-\todo{write --- The Insecurity of Merged Mining}
+\todo{**** write --- The Insecurity of Merged Mining}
 
 - Merged Mining allows attacking merged chains at 0 cost.
 - that means that if a parent chain and a merged mined child chain where to reflect one another, then the weight contributed via merged mining must be 0 --- no additional work was actually done beyond that of the parent-chain.

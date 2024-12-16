@@ -375,7 +375,7 @@ A simplex-chain reflects $N_1 - 1 \approx N_1$ other simplex-chains. A merkle tr
 
 Note: In a production system, these proofs can be excluded from blocks by treating them as droppable witnesses; see \autoref{sec:proving-reflection}.
 
-\todoDraftOnly{Total reflections + computational burden (+PoRs vs omitted proofs) --- $O(c)$ vs $O(c^2)$}
+\todoDraftOnly{**** Total reflections + computational burden (+PoRs vs omitted proofs) --- $O(c)$ vs $O(c^2)$}
 
 \subsection{TPS Complexity Comparison}
 
@@ -434,7 +434,7 @@ Practically, this effect means that a decrease to the size of headers has *incre
 
 \subsection{Comparison of UT Variants}
 
-\todoDraftOnly{update values to account for \AxiomOfRawMaximalReflection + longest PoR chain}
+\todoDraftOnly{**** update values to account for \AxiomOfRawMaximalReflection + longest PoR chain}
 
 \autoref{table:compare_optimizations_a} and \autoref{table:compare_optimizations_b} show a comparison between UT variants.
 For comparisons over a range of parameters, see \autoref{sec:ut-variant-complexities}.
