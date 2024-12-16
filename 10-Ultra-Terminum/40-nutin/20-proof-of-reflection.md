@@ -269,7 +269,6 @@ Since this case only has two chains (\cL and \cR), \cL will only be reflecting \
 - combine with VLMTs.
 }
 
-\todoDraftOnly{NIPOPoWRs as proofs of validity?}
 
 <!-- Broadly, there are two categories of low-overhead, potential solutions: proofs of validity, and proofs of invalidity (i.e., fraud proofs).
 Let's consider the latter.
