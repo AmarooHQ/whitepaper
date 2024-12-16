@@ -4,7 +4,7 @@
 
 \label{sec:practical-considerations}
 
-\todoDraftOnly{compact spv proofs via reusing PoR branches}
+\todoDraftOnly{**** compact spv proofs via reusing PoR branches}
 
 \input{includes/ut/content/27-practical/05-intro.tex}
 
@@ -74,7 +74,7 @@ A practical method for treating proofs of reflection as witnesses that may be ex
 \emph{Verkle trees} are a new alternative to merkle trees.
 Similar to merkle trees, they allow efficient proofs of membership against a cryptographically secure root.
 
-\todo{probs remove --- not worth explaining here.}
+\todo{**** probs remove --- not worth explaining here.}
 
 %% END ### DRAFT
 
@@ -133,7 +133,7 @@ We can reconstruct the PoRs root, provided that we know *which* headers are refl
 Transmitting the \emph{hashes} of headers, only, reduces the effective size of simplex-blocks[^sb-size] from $b$ to $\sim b \cdot (\frac{g + B_h}{2B_h})$, where $g$ is the size of the relevant digest in bytes.
 For $g=32; B_h=112$, this reduces effective block size to $\sim 0.643 b$ --- an improvement of $\sim 35\%$.
 
-\todo{ensure we've covered what a 'PoRs root' is, and that we're assuming a miner is tracking the entire PoR graph so it can be reconstructed easily}
+\todo{**** ensure we've covered what a 'PoRs root' is, and that we're assuming a miner is tracking the entire PoR graph so it can be reconstructed easily}
 
 [^sb-size]: Assuming those blocks dedicate 50% capacity to transactions, and 50% to reflected headers (without PoRs).
 

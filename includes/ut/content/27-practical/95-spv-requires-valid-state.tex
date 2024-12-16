@@ -26,7 +26,6 @@ Are we stuck?
 For a blockchain network to be scalable, it must be the case that miners are \emph{not} required to validate more than one chain!
 Have we come all this way, attempting to deal with the core conflict of the trilemma, only to find that we just moved the conflict?
 
-\pz{Is our implementation going to be based on SNARKs and STARKs?}
 Let's not jump to that conclusion just yet --- there are cryptographic options like SNARKs and STARKs that might help.
 Before that, though, let's slow down and reconsider why SPV works for Bitcoin.
 Perhaps we can learn something.
@@ -38,7 +37,6 @@ Particularly, we'll assume that there are no other networks of similar size usin
 
 A concise argument for the security of Bitcoin-SPV proofs is:
 
-\pz{If $\therefore$ is meant as \emph{therefore} maybe we should use $\Rightarrow$ instead.}
 \begin{argumentslist}
     \item An SPV proof is a merkle branch proving that a transaction exists in a block.
     \item All blocks are part of the same blockchain and history.
@@ -87,7 +85,6 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     Like, each simplex-chain already knows the main chain of each other simplex-chain, but that doesn't mean much if there's one chain with an attacker making like 90\% of the blocks.
     We'd need to wait like 80 blocks for the honest branch to win out.
 }
-\pz{Replace RTs with root tokens}
 \dSe{
     Only 80 blocks?
     It's worse than that.
@@ -1436,7 +1433,6 @@ So, after 1 block period, we expect:
     t_1 = t_0 + \vecXY{N_1 h}{N_1 d} = N_1 \vecXY{h}{d}
 \end{equation*}
 
-\pz{What if the $N_1 d$ blocks are mined privately?}
 After 2 block periods, the $h$ proportion of new blocks that are honest can use PoRs via the dishonest blocks.
 Due to the asymmetry, the dishonest blocks can not.
 \begin{equation*}
@@ -2556,7 +2552,7 @@ in response to writing a dialog and honestly and fully exploring everything.
 \subsubsubsection{alt section in dialog}
 
 \todo{
-    I removed this section from the main dialog b/c it is maybe innapropriate, and a little exaggerated.
+    **** I removed this section from the main dialog b/c it is maybe innapropriate, and a little exaggerated.
     But it ties into the theme of the dialog pretty well.
 }
 
@@ -2618,7 +2614,7 @@ in response to writing a dialog and honestly and fully exploring everything.
 
 
 
-\todo{cut below: old stuff}
+\todo{**** cut below: old stuff}
 
 
 
