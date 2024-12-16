@@ -4,8 +4,6 @@
 
 \label{sec:practical-considerations}
 
-\todoDraftOnly{**** compact spv proofs via reusing PoR branches}
-
 \input{includes/ut/content/27-practical/05-intro.tex}
 
 \input{includes/ut/content/27-practical/10-refl-availability.tex}
@@ -132,8 +130,6 @@ For example, it's not necessary for a miner's node to re-download reflected head
 We can reconstruct the PoRs root, provided that we know *which* headers are reflected and in what order.
 Transmitting the \emph{hashes} of headers, only, reduces the effective size of simplex-blocks[^sb-size] from $b$ to $\sim b \cdot (\frac{g + B_h}{2B_h})$, where $g$ is the size of the relevant digest in bytes.
 For $g=32; B_h=112$, this reduces effective block size to $\sim 0.643 b$ --- an improvement of $\sim 35\%$.
-
-\todo{**** ensure we've covered what a 'PoRs root' is, and that we're assuming a miner is tracking the entire PoR graph so it can be reconstructed easily}
 
 [^sb-size]: Assuming those blocks dedicate 50% capacity to transactions, and 50% to reflected headers (without PoRs).
 
@@ -341,8 +337,6 @@ One reason that we can predict that transactions will build up in this fashion (
 
 The average hash-rate on each simplex-chain, as described above, is always the same regardless of which of the two miner strategies are used.
 However, the variance of block production on each of these chains won't be that of a chain with 60s block times, it'll be closer to that of a chain with 6s block times.
-
-\todoDraftOnly{discuss interaction with empty block DoS attacks}
 
 %% END ### RELEASE
 
