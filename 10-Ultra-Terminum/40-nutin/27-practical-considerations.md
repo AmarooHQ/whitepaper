@@ -45,10 +45,11 @@ Miners would need to do this for *all* simplex-chains that they reflect. Predict
 
 Do we *need* to include proofs of reflection, though? Is it possible to avoid the explicit inclusion of those proofs, potentially allowing for $O(c)$ complexity instead?
 
-[^segregated-witness]: [Segregated Witness](https://web.archive.org/web/20240926154239/https://en.bitcoin.it/wiki/Segregated_Witness) was a new ``witness'' structure introduced to bitcoin blocks, separate from the transaction merkle tree. The structure contains data required to check transaction validity but not required to determine the transaction effects. Introduced with [BIP-141](https://web.archive.org/web/20240423183945/https://en.bitcoin.it/wiki/BIP_0141).
 
 
-If miners of any simplex-chain download the blocks of *all* simplex-chains --- as mentioned in \autoref{sec:availability-of-blocks} --- then including all necessary proofs of reflection can be made redundant. Since miners, theoretically, have all the necessary data to construct the proofs, do those miners need to actually include those proofs? Could we treat those proofs as witnesses and prune them --- similar to Segregated Witness (SegWit)[^segregated-witness]?
+If miners of any simplex-chain download the blocks of *all* simplex-chains --- as mentioned in \autoref{sec:availability-of-blocks} --- then including all necessary proofs of reflection can be made redundant.
+Since miners, theoretically, have all the necessary data to construct the proofs, do those miners need to actually include those proofs?
+Could we treat those proofs as witnesses and prune them --- similar to Segregated Witness (SegWit)\footnote{\href{https://web.archive.org/web/20240926154239/https://en.bitcoin.it/wiki/Segregated_Witness}{Segregated Witness} was a new ``witness'' structure introduced to bitcoin blocks, separate from the transaction merkle tree. The structure contains data required to check transaction validity but not required to determine the transaction effects. Introduced with \href{https://web.archive.org/web/20240423183945/https://en.bitcoin.it/wiki/BIP_0141}{BIP-141}.}?
 
 \defineTermTex{Omitted Proofs (+OP)}{
     The UT protocol variant wherein miners/validators explicitly record \emph{only} reflected headers, such that necessary proofs of reflection are deterministically recalculable
@@ -240,7 +241,7 @@ Thus, as the simplex grows --- as $N_1$ *increases* --- the entire network's rat
 
 [^approach-zero]: To say that confirmation time approaches 0 only tells the latter half of the process by which a transaction becomes confirmed. The first half of that process is *getting an initial confirmation*, which is effectively a small, but constant, overhead.
 
-A 200-simplex with $B_f = \nicefrac{1}{15}$ has a confirmation rate of $\mathbb{C}^\prime = \nicefrac{40}{3} \approx 13.3$ Hz. An 800-simplex with $B_f = \nicefrac{1}{60}$ has the same confirmation rate. A 1400-simplex (the most optimized maximal simplex given \emph{Amaroo's} initial configuration) with $B_f = \nicefrac{1}{15}$ has $\mathbb{C}^\prime \approx 93$ Hz --- $\sim 46.5\times$ faster than EOS/Solana, $\sim 1116\times$ faster than Eth2, $\sim 1400\times$ faster than Ethereum, and $\sim 55,800\times$ faster than Bitcoin.
+A 200-simplex with $B_f = \nicefrac{1}{15}$ has a confirmation rate of $\mathbb{C}^\prime = \nicefrac{40}{3} \approx 13.3$ Hz. An 800-simplex with $B_f = \nicefrac{1}{60}$ has the same confirmation rate. A 1400-simplex (the most optimized maximal simplex given \emph{Amaroo's} initial configuration) with $B_f = \nicefrac{1}{15}$ has $\mathbb{C}^\prime \approx 93$ Hz --- $\sim 46.5\times$ faster than EOS/Solana, $\sim 1116\times$ faster than Eth2, $\sim 1400\times$ faster than Eth1, and $\sim 55,800\times$ faster than Bitcoin.
 
 Note that PoR incents miners to publish blocks as soon as possible so that those blocks begin gaining reflections.
 If a miner does not publish a block immediately, then the reflections in that block become out-of-date very quickly as there are new, additional headers to reflect arriving constantly.
