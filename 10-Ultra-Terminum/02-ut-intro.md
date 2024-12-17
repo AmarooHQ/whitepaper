@@ -12,7 +12,7 @@ That is: *Ultra Terminum* builds on existing consensus methods to produce a bloc
 [^buterins-trilemma]: I think *Scalability Trilemma* is a bad name because *scalability* is one of the three conflicting qualities; you could just as well call it the *Decentralization Trilemma*. Arguably, as we will see, the most appropriate of the 3 would actually be the *Security Trilemma*. The term *Blockchain Trilemma* has been used recently, which I think is worse. Apparently, the term was coined by Vitalik Buterin, so I prefer the name *Buterin's Trilemma*.
 
 \mk{big claim, might have to qualify this a bit more about what 'existing consensus methods' means.}
-\pz{Add somewhere that UT is a consensus protocol that combines (1) a generalization of Proof-of-X protocols and (2) reflection to share security between heterogenous chains.}
+\pz{Add somewhere in intro that UT is a consensus protocol that combines (1) a generalization of Proof-of-X protocols and (2) reflection to share security between heterogenous chains.}
 
 Compared with existing consensus methods, UT provides *equal or better* security properties than **all** existing consensus methods (including Bitcoin's PoW method and variants, and *all* PoS variants).
 This is because UT leverages existing consensus methods in combination and, by way of construction, UT can only *add* security to these methods.
