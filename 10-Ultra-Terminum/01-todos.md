@@ -6,5 +6,6 @@
 
 \cn{Note to self/reads: check consistency: swaps between \emph{Eth1}, \emph{Ethereum 1} and \emph{Ethereum (before migrating to PoS)}, and then \emph{Ethereum 2} and \emph{Eth2}.}
 
+\pz{Table of notations should come before the appendices}
 
 %% END ### RELEASE
