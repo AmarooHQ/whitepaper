@@ -1,9 +1,19 @@
 %% custom todo
-
 \newcommand{\listtodoname}{Todos}
 \newlistof{todo}{todo}{\listtodoname}
-
 \newcounter{todocounter}
+
+%% priority-based todos
+\newlistof{htodo}{htodo}{HIGH Todos}
+\newcounter{hightodocounter}
+
+\newlistof{mtodo}{mtodo}{MED Todos}
+\newcounter{medtodocounter}
+
+\newlistof{ltodo}{ltodo}{LOW Todos}
+\newcounter{lowtodocounter}
+
+%% Direct TODO
 \newcommand{\todoDirect}[1]{
     \refstepcounter{todocounter}%
     \refstepcounter{todo}%
@@ -17,14 +27,60 @@
     \addcontentsline{todo}{todo}{\protect{\thetodo. } \truncate{0.8\linewidth}{#1}}
 }
 
+% TODO: Chris: addcontentsline, update the title background!
+\newcommand{\priorityTODO}[2][]{
+  \ifthenelse{\equal{#1}{h}}{
+    \refstepcounter{hightodocounter}%
+    \begin{tcolorbox}[
+        colback=maxsColor!20!white,
+        colframe=TODOHIGH!70!white,
+        title={TODO: [\thehightodocounter] \hfill {\sf \textbf{(HIGH)}}}
+      ]
+      \label{htodoref:\thehightodocounter}
+      #2
+    \end{tcolorbox}
+    \addcontentsline{htodo}{htodo}{\protect{\thehightodocounter. } \truncate{0.8\linewidth}{#2}}
+  }{
+    \ifthenelse{\equal{#1}{m}}{
+      \refstepcounter{medtodocounter}%
+      \begin{tcolorbox}[
+          colback=maxsColor!10!white,
+          colframe=TODOMED!90!white,
+          title={[TODO: [\themedtodocounter] \hfill {\sf \textbf{(MED)}}}
+        ]
+        \label{mtodoref:\themedtodocounter}
+        #2
+      \end{tcolorbox}
+      \addcontentsline{mtodo}{mtodo}{\protect{\themedtodocounter. } \truncate{0.8\linewidth}{#2}}
+    }{
+      \ifthenelse{\equal{#1}{l}}{
+        \refstepcounter{lowtodocounter}%
+        \begin{tcolorbox}[
+            colback=maxsColor!10!white,
+            colframe=TODOLOW!70!white,
+            title={TODO: [\thelowtodocounter] \hfill {\sf \textbf{(LOW)}}}
+          ]
+          \label{ltodoref:\thelowtodocounter}
+          #2
+        \end{tcolorbox}
+        \addcontentsline{ltodo}{ltodo}{\protect{\thelowtodocounter. } \truncate{0.8\linewidth}{#2}}
+      }{}
+    }
+  }
+}
+
 \ifthenelse{\equal{\BuildMode}{draft}}{
-    \newcommand{\todoDraftOnly}[1]{
-        \todoDirect{
-            #1
+    \newcommand{\todoDraftOnly}[2][]{
+        \ifthenelse{\equal{#1}{}}{
+          \todoDirect{
+              #2
+          }
+        }{
+          \priorityTODO[#1]{#2}
         }
     }
 }{
-    \newcommand{\todoDraftOnly}[1]{
+    \newcommand{\todoDraftOnly}[2][]{
     }
 }
 

@@ -4,6 +4,10 @@
 
 # Introduction
 
+\todoDraftOnly[h]{
+    Create an introduction and merge Intro, Buterins Trilemma and UT into one section.
+}
+
 \pz{Add quick presentation of the trilemma and "chose two out of three" limitation, and detail common approaches and their limitations.}
 
 *Ultra Terminum* (UT) is a cooperative cross-chain consensus strategy that addresses *Buterin's Trilemma*[^buterins-trilemma] (aka. the *Scalability Trilemma*).

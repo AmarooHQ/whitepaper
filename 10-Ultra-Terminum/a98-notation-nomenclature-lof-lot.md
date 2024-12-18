@@ -33,6 +33,7 @@
 | $B_h$ | Base-chain header size. | bytes |
 | $D_f$ | Dapp-chain block frequency. | Hz |
 | $D_h$ | Dapp-chain header size. | bytes |
+| $I$   | Inflation rate. | coins |
 | $X_{R\rightarrow L}$ | Exchange rate between L-coins and R-coins. | coins |
 | TPS | Transactions per second. | tx/s |
 | $\Sigma\;\text{TPS}_{i}$ | Network-wide transactions per second at the $i^{\text{th}}$ level of nesting (given no additional levels). Primarily used when ``TPS'' alone would be ambiguous. | tx/s |
