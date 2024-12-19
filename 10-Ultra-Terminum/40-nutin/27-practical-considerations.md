@@ -305,7 +305,7 @@ Is it possible to *dramatically* lower the variance of block production in PoW b
 
 Yes. The method relies on the *structure* of the network, rather than the consensus protocol itself.
 Particularly, the network must be structured such that miners' choices result in decreased block production variance --- an emergent phenomenon.
-It's important that it's emergent and not synthetic (e.g., by increasing the block reward with time-since-last-block) because we don't want people to game the system.
+It's important that it is emergent and not synthetic (e.g., by increasing the block reward with time-since-last-block) because we don't want people to game the system.
 It's better to have a simple system with emergent properties than a complex system with those properties \`\`designed in''.
 
 Say you have a network with 10 chains: $C_0, C_1, C_2, ..., C_9$.

@@ -60,7 +60,7 @@ Consider a traditional PoW blockchain (e.g., Bitcoin, Eth1, etc).
 It's well known that the risk of a doublespend against a particular block is related to the number of \emph{confirmations} that block has.\footnote{
     \citeAHBDSFull
 }
-However, this is not a linear relationship; rather, it's similar to \emph{exponential decay}.
+However, this is not a linear relationship; rather, it is similar to \emph{exponential decay}.
 After the first few confirmations, each additional confirmation reduces the risk of a doublespend by approximately the same factor.\footnote{
     The exact factor depends on the attacker's hash-rate as a proportion of the network's (i.e., $q$).
 }
@@ -93,7 +93,7 @@ Naturally, there is no smaller unit of contributed work than an individual block
 When an attacker publishes a heavier chain-segment which causes a reorganization, it is \emph{immediately} in the interests of miners to begin building on the attacker's best block.
 A heavier chain-segment is \emph{decisively better} in all cases.
 That may seem so obvious that it isn't worth mentioning, but it's actually a \emph{specific case} that only works for traditional blockchains.
-If there were some ``memory'', it might be worth miners \emph{continuing} mining their \emph{existing} block, \emph{instead} of reorganizing and building on the attacker's best block.
+If there were some ``memory'', it might be worth miners \emph{continuing} to mine their \emph{existing} block, \emph{instead} of reorganizing and building on the attacker's best block.
 
 What kind of ``memory'' could there be?
 Are \emph{Proofs of Reflection} a ``memory''?
@@ -144,15 +144,22 @@ Let's test the Confirmation Equivalence Conjecture.
 
 \subsubsubsection{Hypothesis}
 
-The hypothesis is that: doublespends against an \emph{individual simplex-chain} in an $N$-chain simplex after $C$ \emph{local} confirmations are \emph{as hard} as doublespends against a traditional blockchain after $C\cdot N$ confirmations.
+The hypothesis is that: doublespends against an \emph{individual simplex-chain} in an $N$-chain simplex after $\mathcal{C}$ \emph{local} confirmations are \emph{as hard} as doublespends against a traditional blockchain after $C\cdot N$ confirmations.
 
 \pz{c and m have not been defined. Also, we use the same letter for local computation power and confirmations.}
-First, define $P(q; c)$ to be the function that returns the probability of an attempted doublespend succeeding on a traditional blockchain according to Rosenfeld's analytical solution\footnote{
+First, define $P(q; c)$, where $c$ is the number of confirmations and $q$ is the proportion of global hash rate controlled by the attacker, to be the function that returns the probability of an attempted doublespend succeeding on a traditional blockchain according to Rosenfeld's analytical solution\footnote{
     \citeAHBDSFull
 }:
-\pz{Unclear if $\{1, 2, \dots\}$ is finite or infinite.}
+\pz{
+  Unclear if $\{1, 2, \dots\}$ is finite or infinite.\\
+  -------\\
+  Chris: A few notes on the above comments:\\
+$m$ is defined as part of the $\Sigma$, counting from $m=0$ to $c$;\\
+The $\{1,2,\dots\}$ I read as unbounded unless a specific bound is mentioned, quite typical in mathematical proofs. Since the parameter $c$ is the number of confirmations and can be as high as it wishes. We could say it as $\mathbb{N}^+$?}
+
+
 \begin{equation}
-    \forall c \in \{1, 2, \dots\}: P(q; c) = \begin{cases}
+  \forall c \in \{1, 2, \dots\}: P(q; c) = \begin{cases}
         1 - \sum_{m=0}^c \binom{m+c-1}{m}(p^c q^m - p^m q^c), & \text{if } q < p \\
         1, & \text{otherwise}
     \end{cases}
@@ -160,7 +167,7 @@ First, define $P(q; c)$ to be the function that returns the probability of an at
 \end{equation}
 
 Next, we will declare a new function, $P^\prime$, and assume that \emph{it exists and is measurable}.
-Particularly: $P^\prime(q; c = C; N_1 = N)$ is the probability of a doublespend attack succeeding against a simplex with $N$ simplex-chains after $C$ confirmations, given an attacker with $q$ proportion of the network hash-rate.
+Particularly: $P^\prime(q; c = \mathcal{C}; N_1 = N)$ is the probability of a doublespend attack succeeding against a simplex with $N$ simplex-chains after $\mathcal{C}$ confirmations, given an attacker with $q$ proportion of the network hash-rate.
 We do not know the definition of this function, but we can measure its output.
 
 As a base case, it is taken that:
@@ -171,16 +178,16 @@ As a base case, it is taken that:
 Note that a simplex of 1 chain (the 0-simplex) \emph{is} a traditional blockchain.
 So we can take Bitcoin for example: the probability of an attack succeeding after 6 confirmations is given by $P(q; c = 6) \approx P^\prime(q; c = 6; N_1 = 1)$.
 
-One prediction of the hypothesis is that the probability of a successful attack against a simplex with $N$ simplex-chains after $C$ confirmations is equal to that of a successful attack on a traditional chain after $C\cdot N$ confirmations.
+One prediction of the hypothesis is that the probability of a successful attack against a simplex with $N$ simplex-chains after $\mathcal{C}$ confirmations is equal to that of a successful attack on a traditional chain after $\mathcal{C}\cdot N$ confirmations.
 That is:
 \begin{equation}
-    P^\prime(q; c = CN; N_1 = 1) \approx P^\prime(q; c = C; N_1 = N)
+  P^\prime(q; c = \mathcal{C}N; N_1 = 1) \approx P^\prime(q; c = \mathcal{C}; N_1 = N)
     \label{eq:por-sim-hypothesis}
 \end{equation}
 \pz{Variable $a$ used in footnote but only defined a posteriori.}
 In fact, we can take this further.
 The relationship that exists is not only at the extremes, but between them too\footnote{
-    Since \nicefrac{CN}{a} in \autoref{eq:cec-extended-hypothesis} is not necessarily an integer, we'll assume there exists a valid generalization of Rosenfeld's solution for $c \in \mathbb{R}_{>0}$.
+  Since \nicefrac{$\mathcal{C}$N}{a} in \autoref{eq:cec-extended-hypothesis} is not necessarily an integer, we'll assume there exists a valid generalization of Rosenfeld's solution for $c \in \mathbb{R}_{>0}$.
 } --- it must be if confirmations are equivalent.
 This is the \emph{extended} CEC:
 % 1 \le x \le N; x \in \{a_i, b_i\}
@@ -188,9 +195,9 @@ This is the \emph{extended} CEC:
 \begin{equation}
     \begin{split}
         %P\biggl(q; N_1 = a; c = \frac{CN}{a}\biggr) \approx P\biggl(q; N_1 = b; c = \frac{CN}{b}\biggr)
-        \forall a \in \{1,\dots,N\}: P^\prime\biggl(q; c = \frac{CN}{a}; N_1 = a\biggr) &\text{ is approximately constant}
+      \forall a \in \{1,\dots,N\}: P^\prime\biggl(q; c = \frac{\mathcal{C}N}{a}; N_1 = a\biggr) &\text{ is approximately constant}
         \label{eq:cec-extended-hypothesis} \\
-        \implies P^\prime\biggl(q; c = \frac{CN}{a}; N_1 = a\biggr) &\approx P(q; c = CN)
+        \implies P^\prime\biggl(q; c = \frac{\mathcal{C}N}{a}; N_1 = a\biggr) &\approx P(q; c = \mathcal{C}N)
         % \label{eq:cec-approx-rosenfeld}
     \end{split}
 \end{equation}

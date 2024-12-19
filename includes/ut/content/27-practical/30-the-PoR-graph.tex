@@ -578,7 +578,7 @@ When that happens, we will always have at least two 0-superblocks (since a 3-sup
 In fact, at and below the $\mu$ level of the lightest graph tip, all interlink levels will point back to all graph tips.
 
 We are therefore dealing with \mu-superDAGs, not \mu-superchains.
-The existing NIPoPoW \texttt{followDown}\footnote{The \texttt{followDown} algorithm produces the necessary blocks to connect a superblock to a proceeding regular block. It is defined in Section 5.1 and Algorithm 6 of the NiPoPoW paper.} algorithm should work fine for high level $\mu$-superblocks.
+The existing NIPoPoW \texttt{followDown}\footnote{The \texttt{followDown} algorithm produces the necessary blocks to connect a superblock to a proceeding regular block. It is defined in Section 5.1 and Algorithm 6 of \citeNIPoPoWs{}} algorithm should work fine for high level $\mu$-superblocks.
 Since simultaneous blocks at such levels will be exceptionally rare, we can expect higher $\mu$-superDAGs to be much more chain-like than the longest PoR chain.
 
 At lower levels (or any level), it doesn't matter which path to the target block we take (if more than one is even available).

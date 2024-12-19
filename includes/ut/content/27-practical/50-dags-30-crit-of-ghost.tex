@@ -12,6 +12,6 @@ The attacker can include honest miners' chain-work in a purely
 \emph{beneficial} way --- there is a symmetry, thus honest miners (and the network) are at the mercy of the attacker.
 
 Why does this symmetry exist? Because the \emph{cumulative weight} of each block (including uncles) is \emph{divorced} from \emph{the set of transactions} that is contributed by that block.
-However, with a full block-DAG, when an attacker links to uncles in this way \emph{they must allow for the execution of all non-conflicting transactions} (i.e., those which would not cause a doublespend to occur).
+However, with a full block-DAG, when an attacker links to uncles in this way, \emph{they must allow for the execution of all non-conflicting transactions} (i.e., those which would not cause a doublespend to occur).
 Thus, GHOST
 \emph{does not mitigate} empty-block DoS attacks; \emph{only} a full block-DAG can do that.
