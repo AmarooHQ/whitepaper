@@ -1,9 +1,9 @@
 \pagestyle{fancy}
 
 % Set the fancy headers to show subseciton left and section right.
+\renewcommand{\subsectionmark}[1]{\markright{\thesubsection.\ #1}}
 \fancyhf{}
-\fancyhead[LO]{\leftmark}
-\fancyhead[LE]{\rightmark}
+\fancyhead[L]{\checkoddpage\ifoddpage \leftmark \else \rightmark \fi}
 \fancyfoot[C]{\thepage\ of \zpageref{LastPage}\preparedfor}
 
 

@@ -144,7 +144,7 @@ Let's test the Confirmation Equivalence Conjecture.
 
 \subsubsubsection{Hypothesis}
 
-The hypothesis is that: doublespends against an \emph{individual simplex-chain} in an $N$-chain simplex after $\mathcal{C}$ \emph{local} confirmations are \emph{as hard} as doublespends against a traditional blockchain after $C\cdot N$ confirmations.
+The hypothesis is that: doublespends against an \emph{individual simplex-chain} in an $N$-chain simplex after $\mathcal{C}$ \emph{local} confirmations are \emph{as hard} as doublespends against a traditional blockchain after $\mathcal{C}\cdot N$ confirmations.
 
 \pz{c and m have not been defined. Also, we use the same letter for local computation power and confirmations.}
 First, define $P(q; c)$, where $c$ is the number of confirmations and $q$ is the proportion of global hash rate controlled by the attacker, to be the function that returns the probability of an attempted doublespend succeeding on a traditional blockchain according to Rosenfeld's analytical solution\footnote{
@@ -189,7 +189,7 @@ In fact, we can take this further.
 The relationship that exists is not only at the extremes, but between them too\footnote{
   Since \nicefrac{$\mathcal{C}$N}{a} in \autoref{eq:cec-extended-hypothesis} is not necessarily an integer, we'll assume there exists a valid generalization of Rosenfeld's solution for $c \in \mathbb{R}_{>0}$.
 } --- it must be if confirmations are equivalent.
-This is the \emph{extended} CEC:
+This is the \emph{extended} CEC, where $a$ is the number of simplex-chains:
 % 1 \le x \le N; x \in \{a_i, b_i\}
 % , and $1 \le a_i \le N$, and $1 \le b_i \le N$
 \begin{equation}
