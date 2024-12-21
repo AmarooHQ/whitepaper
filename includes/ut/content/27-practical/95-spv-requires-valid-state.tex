@@ -1218,7 +1218,7 @@ The attacker's primary goal is to prevent the network transitioning from phase 1
 
 The dynamics of the attack change for both the attacker and each miner during each phase.
 
-For example, there is a qualitative difference between phase 1 and phase 2 and it is in the attacker's interest to prevent the network transitioning to phase 2 if possible.
+For example, there is a qualitative difference between phase 1 and phase 2, and it is in the attacker's interest to prevent the network transitioning to phase 2 if possible.
 Therefore it is most valuable for the attacker if they can prevent the FP being recorded.
 It is also more profitable for miners, since the size of bribes grow quadratically.
 
@@ -1241,7 +1241,7 @@ To mitigate this, the attacker must raise the difficulty on the target chain suc
 Thus the attacker suffers losses compared to mining honestly: $C_r H k$ for the k-th block.
 That reward is lost to excessive work securing the target chain which would otherwise earn the attacker that much revenue.
 Additionally, the attacker loses the block rewards each time --- so these losses are $C_r (1 + H k)$ per block after $k$ blocks.
-Let $C_r \cdot l_m$ represent the total losses due to mining: factoring out $l_m$ in this way allows us to analyze the situation independent of the block reward.
+Let $C_r \cdot l_m$ represent the total losses due to mining, and $z$ the number of blocks for the attack: factoring out $l_m$ in this way allows us to analyze the situation independent of the block reward.
 \pz{Define $z$}
 \begin{align}
     l_m &> \sum\limits_{k=0}^z \Bigl( 1 + H k \Bigr) \nonumber \\
@@ -1272,7 +1272,7 @@ At that point, at least 50\% of the network hash-rate needs to be dedicated to t
 \pz{Define $Z_k$}
 \begin{itemize}
     \item Each miner (on each simplex-chain) needs bribing (but only if they make a block).
-    \item Each round, the attacker must pay $C_r Z_k$ in bribes (where $k$ is the round, starting at 1).
+    \item Each round, the attacker must pay $C_r Z_k$ in bribes (where $Z$ is the bribe, and $k$ is the round, starting at 1).
     \item These bribes are given to $(N_1 - 1)$ miners (we subtract 1 to exclude the target chain from this split). One bribe per R-chain.
     \item However, an attacker with $q$ proportion of the hashrate can recover $q(N_1 - 1)$ of these bribes, at most, and thus loses at least $p(N_1 - 1)$ of them.
     \item A miner receives $C_r H k$ coins as a reward for publishing a fraud proof that invalidates $k$ blocks.
