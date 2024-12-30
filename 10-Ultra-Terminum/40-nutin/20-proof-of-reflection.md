@@ -1186,14 +1186,14 @@ Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
 
 \subsection{Incompatibility between Merged Mining and PoR}
 
-\todo[h]{write --- The Insecurity of Merged Mining}
+\todo{write --- The Insecurity of Merged Mining}
 
 - Merged Mining allows attacking merged chains at 0 cost.
 - that means that if a parent chain and a merged mined child chain where to reflect one another, then the weight contributed via merged mining must be 0 --- no additional work was actually done beyond that of the parent-chain.
 - Also, if some other chain reflects both a parent chain *and* a merged mined child chain, then the net benefit is equal to *only* the work contributed by the reflecting parent chain.
 
 
-\todo[m]{PoR in general: (nb: check if this is sufficiently answered) reflect only chains that reflect your history; if they favor a different history, then you should be building on that history instead, so don't reflect those blocks --- i.e. ppl should calculate weight to be 0.}
+\todo{PoR in general: (nb: check if this is sufficiently answered) reflect only chains that reflect your history; if they favor a different history, then you should be building on that history instead, so don't reflect those blocks --- i.e. ppl should calculate weight to be 0.}
 
 
 %% END ### DRAFT

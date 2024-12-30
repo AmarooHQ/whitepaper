@@ -96,7 +96,7 @@ No real-world sharded network has come close to this level of performance, and i
 
 ## Addressing *Buterin's Trilemma*
 
-\todoDraftOnly{**** write out some explanation of how B.T. is answered.}
+\todoDraftOnly[h]{write out some explanation of how B.T. is answered.}
 
 \begin{figure}[H]
 \centering

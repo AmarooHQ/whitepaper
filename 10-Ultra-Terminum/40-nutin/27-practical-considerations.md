@@ -73,7 +73,7 @@ A practical method for treating proofs of reflection as witnesses that may be ex
 \emph{Verkle trees} are a new alternative to merkle trees.
 Similar to merkle trees, they allow efficient proofs of membership against a cryptographically secure root.
 
-\todo[h]{probs remove --- not worth explaining here.}
+\todoDraftOnly[m]{probs remove --- not worth explaining here.}
 
 %% END ### DRAFT
 
