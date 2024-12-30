@@ -183,7 +183,7 @@ In the scheme of things, this can be somewhat significant but it is not a deal-b
 
 Exactly how one chain can properly account for reflected work requires that we cover how to compare (and convert) that work, and is the topic of \autoref{sec:comparing-chain-work}.
 
-\todoDraftOnly{move this bit to step 5?}
+\todoDraftOnly[m]{move this bit to step 5?}
 
 Note that, as the Chain \cL tip is gaining reflections from Chain \cR, miners on Chain \cL are incented to include as many novel Chain \cR headers and PoRs as possible.
 That's because each new Chain \cR header (with a PoR) will increase the weight of the *ancestors* of the Chain \cL draft block, which helps the draft block compete with other draft \cL blocks.
@@ -222,7 +222,7 @@ If the attacker has more hash power than the honest miners (i.e., $q > p$\footno
   Since a correctly-evaluated projection of \cL is useful (for users of either chain), we should solve this problem if we can.
 }
 
-\todoDraftOnly{**** rewrite / edit this: evaluating PoR weight --- inconsistent with later I think}
+\todoDraftOnly[h]{rewrite / edit this: evaluating PoR weight --- inconsistent with later I think}
 
 How can we prevent this kind of attack?
 The attack is only possible because Chain \cR was *not* accounting for reflected weight --- if Chain \cR's projection of Chain \cL accounts for reflections, then this attack is not possible.
@@ -246,20 +246,20 @@ We need additional protocol changes to ensure that the \emph{claimed} chain-weig
   It is discussed in \autoref{sec:segmented-state} and \autoref{sec:exploiting-seg-state}, and analyzed in \autoref{sec:bandwidth-complexity}.
 }
 
-\todoDraftOnly{revisit / edit this}
+\todoDraftOnly[l]{revisit / edit this}
 
 We \emph{can}, at least, guarantee that a fraud proof will \emph{always} be possible when a malicious \cL block lies about its total chain-weight.
 Additionally, other \cL miners can detect the lie and link back to the malicious block as an invalid parent alongside the fraud proof.
 These are useful features, but they're overkill at this point.
 
-\todoDraftOnly{Add to dos/dags: linking back to invalid parents}
+\todoDraftOnly[m]{Add to dos/dags: linking back to invalid parents}
 
 For now, let's assume that \cR records \cL headers \emph{and} the corresponding PoRs.
 
-\todoDraftOnly{Forward link to VLMTs, stateless chains; goal: support the claim we can always guarantee a fraud proof is possible}
+\todoDraftOnly[l]{Forward link to VLMTs, stateless chains; goal: support the claim we can always guarantee a fraud proof is possible}
 
 
-\todoDraftOnly{this should go later when talking about mutual refl:\\
+\todoDraftOnly[l]{this should go later when talking about mutual refl:\\
 In this case (with only 2 chains) it's somewhat trivial.
 It's trivial because, when \cR reflects a malicious \cL block, it will \emph{always} come with a PoR, even if that PoR proves that no \emph{new} \cR blocks were reflected by the \cL block (for reasons discussed in \autoref{sec:counting-work}).
 Since this case only has two chains (\cL and \cR), \cL will only be reflecting \cR blocks.\\
@@ -284,13 +284,13 @@ A data structure and methodology for suitable fraud proofs of chain-weight (and 
   Mitigation of DoS attacks is covered in \autoref{sec:dos-and-dags}.
 } -->
 
-\todoDraftOnly{
+\todoDraftOnly[l]{
   Since an invalid block's parent is known, such a fraud proof only needs to show that the difference (between the parent and block's chain-weight) is not possible.
   If we use a VLMT (see \autoref{sec:vlmt}) to store reflections, then the merkle branches used for PoR will contain, for each subtree, the contributed chain-weight.
   This means a complete and valid VLMT (with forged total chain-weight) is impossible, which in turn makes fraud proofs easy to generate.
 }
 
-\todoDraftOnly{
+\todoDraftOnly[l]{
   reconsider:\\
 As a final point on this attack, in limited cases like this (where only one set of reflections needs validation), \cR can forgo fancy protocols provided that \cL and \cR share a simple and standardized way to record and verify reflected blocks.
 Chain \cR nodes already know \cR's state, so they can trivially generate merkle branches proving reflection of \cL blocks in \cR --- these are \emph{the same} branches that \cL uses in its PoRs.
@@ -323,13 +323,13 @@ This last question is particularly important for moving beyond mutual reflection
 
 The *essence* of *Proof of Reflection* should now be apparent. *In principle*, we can make blockchains more difficult to attack based on the idea that *blockchains can include a projection of the history of other blockchains (and confirm a chain's history like they do transactions)*. *In principle*, it is possible to increase the security of a blockchain via *reflection* and to increase the security of multiple blockchains via *mutual reflection*.
 
-\todoDraftOnly{**** PoW --- 2 chains using the same algorithm isn't insecure!}
+\todoDraftOnly[h]{PoW --- 2 chains using the same algorithm isn't insecure!}
 
 %% END ### RELEASE
 
 %% BEGIN ### DRAFT
 
-\todoDraftOnly{redraft the following}
+\todoDraftOnly[m]{redraft the following}
 
 \subsubsection{Applicability of PoR}
 
@@ -737,7 +737,7 @@ Either way works because the DAA acts as a boundary of the convertible context i
     \nonumber
 \end{align}
 
-\todoDraftOnly{rework above and if kept then note that we'll include the context explicitly.}
+\todoDraftOnly[m]{rework above and if kept then note that we'll include the context explicitly.}
 
 <!-- \autoref{eq:bitcoin-daa} -->
 
@@ -898,7 +898,7 @@ Thus, \emph{any} common units, which are linearly convertible both from a reflec
   Is it possible that we can convert chain-work \emph{via summing block rewards?}
 }
 
-\todoDraftOnly{**** Add new vars to nomenclature table}
+\todoDraftOnly[h]{Add new vars to nomenclature table}
 
 \subsection{Conversion Contexts}
 
@@ -915,7 +915,7 @@ In that case, $\nicefrac{L_d}{L_r} \cdot \nicefrac{R_r}{R_d}$ gives us L-hashes/
 
 \label{sec:conversion-single-root-token}
 
-\todoDraftOnly{**** add degenerate case: same block reward, same difficulty}
+\todoDraftOnly[h]{add degenerate case: same block reward, same difficulty}
 
 \input{20-por/40-single-root-token-2.tex}
 
@@ -1186,14 +1186,14 @@ Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
 
 \subsection{Incompatibility between Merged Mining and PoR}
 
-\todo{**** write --- The Insecurity of Merged Mining}
+\todo[h]{write --- The Insecurity of Merged Mining}
 
 - Merged Mining allows attacking merged chains at 0 cost.
 - that means that if a parent chain and a merged mined child chain where to reflect one another, then the weight contributed via merged mining must be 0 --- no additional work was actually done beyond that of the parent-chain.
 - Also, if some other chain reflects both a parent chain *and* a merged mined child chain, then the net benefit is equal to *only* the work contributed by the reflecting parent chain.
 
 
-\todo{PoR in general: (nb: check if this is sufficiently answered) reflect only chains that reflect your history; if they favor a different history, then you should be building on that history instead, so don't reflect those blocks --- i.e. ppl should calculate weight to be 0.}
+\todo[m]{PoR in general: (nb: check if this is sufficiently answered) reflect only chains that reflect your history; if they favor a different history, then you should be building on that history instead, so don't reflect those blocks --- i.e. ppl should calculate weight to be 0.}
 
 
 %% END ### DRAFT

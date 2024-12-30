@@ -260,14 +260,14 @@ Naturally, there are some other components that are necessary (like a component 
 
 \subsubsection{Dapp-chain simplexes}
 
-\todo{
-  **** Dapp-chains can make simplexes between each other (in addition to one-way PoR with their host simplex-chain).
+\todo[h]{
+  Dapp-chains can make simplexes between each other (in addition to one-way PoR with their host simplex-chain).
   This is mb useful?
 }
 
 \subsubsection{Future Dapp-chain Stuff (todo)}
 
-\todo{**** finish below}
+\todo[h]{finish below about future dapp-chain stuff}
 
 plan:
 
@@ -288,7 +288,7 @@ plan:
   - *all* the layer-2 solns
   - todo: more tomorrow
 
-\todo{
+\todo[m]{
   dev potential;
 }
 
@@ -298,7 +298,7 @@ plan:
 
 \input{includes/ut/headings/25-dapp-dapp-chains.tex}
 
-\todo{**** write it}
+\todo[h]{write UT3 dapp-dapp chains section}
 
 plan:
 

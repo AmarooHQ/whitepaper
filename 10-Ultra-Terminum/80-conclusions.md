@@ -4,6 +4,8 @@
 
 # Conclusions
 
+\todoDraftOnly[h]{Finish conclusion}
+
 \label{sec:conclusions}
 
 ## Comparison: ``The Big 4''
@@ -70,7 +72,7 @@ No real-world sharded network has come close to this level of performance, and i
         (There are no such unanswered criticisms of PoW-based consensus.)
     }
     \tnote[ss]{
-        PoH is $O(c)$ secure by design.
+        \href{https://web.archive.org/web/20241227202028/https://solana.com/solana-whitepaper.pdf}{PoH} is $O(c)$ secure by design.
         Solana uses PoS on top of PoH, but it's unclear which has precedence (and one must).
         Additionally, since a $\le O(c)$ DoS has brought down Solana before, this is an upper limit on Solana's security.
     }

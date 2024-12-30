@@ -33,7 +33,7 @@
 | $B_h$ | Base-chain header size. | bytes |
 | $D_f$ | Dapp-chain block frequency. | Hz |
 | $D_h$ | Dapp-chain header size. | bytes |
-| $I$   | Inflation rate. | coins |
+| $I$   | Inflation rate. | coins/second |
 | $X_{R\rightarrow L}$ | Exchange rate between L-coins and R-coins. | coins |
 | TPS | Transactions per second. | tx/s |
 | $\phi$ | Propagation delay across the network | seconds |

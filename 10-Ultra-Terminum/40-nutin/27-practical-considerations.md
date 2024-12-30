@@ -73,7 +73,7 @@ A practical method for treating proofs of reflection as witnesses that may be ex
 \emph{Verkle trees} are a new alternative to merkle trees.
 Similar to merkle trees, they allow efficient proofs of membership against a cryptographically secure root.
 
-\todo{**** probs remove --- not worth explaining here.}
+\todo[h]{probs remove --- not worth explaining here.}
 
 %% END ### DRAFT
 
@@ -153,6 +153,8 @@ Additionally, these merkle branches *will be part of specific SPV proofs*, so wh
 
 This UT protocol variant is +HOPoRs, the combination of *header omission* (+HO) and *explicit proofs* (+PoRs).
 It may present decisive advantages for implementations of *simplex tilings* (which are introduced in \autoref{sec:tiling}).
+
+\todoDraftOnly[h]{Write the +T variant information}
 
 \aside{
     \pz{Should we mention +T if it is redacted?}
@@ -299,7 +301,7 @@ goal: support this sentence (top of section):
 
 \label{sec:miner-resonance}
 
-\todoDraftOnly{redraft 'lowering block prod variance'}
+\todoDraftOnly[l]{redraft 'lowering block prod variance'}
 
 Is it possible to *dramatically* lower the variance of block production in PoW blockchains without altering incentive structures, compromising security, or changing the probability of generating a valid block?
 

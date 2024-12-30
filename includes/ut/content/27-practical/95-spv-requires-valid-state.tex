@@ -11,7 +11,7 @@ Our goal in this section is to find a method for SPV (Simple Payment Verificatio
     \item \emph{Reliable}: the above properties hold for all transactions in all simplex-chains.
 \end{itemize}
 
-\todoDraftOnly{n/c adversary --- explain it}
+\todoDraftOnly[h]{n/c adversary --- explain it}
 
 Given everything we have discussed up to now, it's not clear how SPV is possible.
 The problem is that miners on one simplex-chain do not validate the state transitions of other simplex-chains.
@@ -683,7 +683,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 \dSe{
     I see.
 }
-\todoDraftOnly{Check that we cover safe and reliable explicitly (or add)}
+\todoDraftOnly[h]{Check that we cover safe and reliable explicitly (or add)}
 \dSe{
     Let's take stock for a moment.
     We've covered \emph{safe}, and we need the other two, first, for \emph{reliable}.
@@ -1270,6 +1270,7 @@ At that point, at least 50\% of the network hash-rate needs to be dedicated to t
 \subsubsubsection{Phase 1 $\not\to$ Phase 2 and $\BribeCost(z)$}
 
 \pz{Define $Z_k$}
+\cn{Is $Z_k$ related to $\mathbb{B}$ for the bribes paid by the attacker?}
 \begin{itemize}
     \item Each miner (on each simplex-chain) needs bribing (but only if they make a block).
     \item Each round, the attacker must pay $C_r Z_k$ in bribes (where $Z$ is the bribe, and $k$ is the round, starting at 1).
@@ -1380,6 +1381,9 @@ If, instead, $H = 1/\sqrt{N_1}$, then $\eta = 5.05$ and
 \subsubsubsection{Fixed Points of $\BribeCost(z)$ when Batching}
 
 \pz{Unclear what this section is about.}
+
+\cn{Re-introduce the batching from the error correction. ``Recall in our dialog we talked about waiting for SPV transactions and executing them in batches \dots''}
+
 Let's assume that there is a constant outbound SPV ``pressure''.
 That is, every block, $y$ multiples of the block reward are queued for the next batch.
 
@@ -2614,7 +2618,7 @@ in response to writing a dialog and honestly and fully exploring everything.
 
 
 
-\todo{**** cut below: old stuff}
+\todo[h]{cut below: old stuff}
 
 
 
