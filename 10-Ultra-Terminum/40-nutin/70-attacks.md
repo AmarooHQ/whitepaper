@@ -4,6 +4,8 @@
 
 \section{Attacks}
 
+\label{sec:attacks}
+
 *Ultra Terminum* --- with appropriate configuration --- is resistant to the following attacks; see the linked section for discussion:
 
 - 51% Attack, see \autoref{sec:proof-of-reflection}, \autoref{sec:preventing-dos-attacks}, and \autoref{sec:simplex-security-cec}.

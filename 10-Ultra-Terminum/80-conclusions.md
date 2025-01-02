@@ -4,9 +4,9 @@
 
 # Conclusions
 
-\todoDraftOnly[h]{Finish conclusion}
-
 \label{sec:conclusions}
+
+\todoDraftOnly[h]{Finish conclusion}
 
 ## Comparison: ``The Big 4''
 
