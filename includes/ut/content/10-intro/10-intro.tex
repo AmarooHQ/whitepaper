@@ -1,0 +1,64 @@
+% Small introduction, just to bring in the whitepaper
+
+The design of a blockchain requires careful consideration of numerous variables, each with its own unique influence on the network.
+These considerations, in turn, are ossified into design decisions that set the trajectory of how the blockchain is governed and how it will operate in the longer term.
+This already difficult task of blockchain design, which requires a great appreciation for various disciplines of technology, economics, finance, philosophy and psychology, is now being swayed by the changing environment around us, coupled with increased usage and more complex interactions.
+
+The nature of blockchain use is also growing, starting off as a niche, underground peer-to-peer digital currency, to now being embedded in global financial institutions and a becoming an increasingly strong narrative for various applications.
+This puts a degree of importance on designing blockchains, as both design and research should look beyond the current cycles with an attempt to visualise the potential that lies ahead.
+
+% Then we can lead into the what we're bringing --> UT.
+These new designs and ongoing research constantly push the boundaries of what is possible within blockchains, however, there are slight subtleties that inhibit their \emph{performance}, whether insufficient decentralization, low throughput, high transaction latency, weak protocol-level security assumptions, or, the lack of fostering native and intuitive interactions between communities.
+
+One of the major challenges that prompts these inhibitions is \emph{Buterin's Trilemma} (aka. the \emph{Scalability Trilemma})\footnote{%
+  I think \emph{Scalability Trilemma} is a bad name because \emph{scalability} is one of the three conflicting qualities; you could just as well call it the \emph{Decentralization Trilemma}.
+  Arguably, as we will see, the most appropriate of the 3 would actually be the \emph{Security Trilemma}.
+  The term \emph{Blockchain Trilemma} has been used recently, which I think is worse.
+  Apparently, the term was coined by Vitalik Buterin, so I prefer the name \emph{Buterin's Trilemma}.
+},
+which states that a blockchain can have at most two of the three following properties: (i)~security, (ii)~scalability and (iii)~decentralization (discussed below in \cref{subsec:trilemma}).
+
+These properties, and the notion of ``\emph{choose two of three}'', quickly highlight potential shortcomings in various designs.
+For example, Bitcoin and the original Proof-of-Work Ethereum (pre-merge) are chains that preference \emph{decentralization} and \emph{security} while foregoing scalability, manifesting into long transaction wait times and higher fees due to the network not having enough capacity to process all requests.
+On the other hand, blockchains that focus on \emph{security} and \emph{scalability} over decentralization often display with transaction throughput, but are vulnerable to network halts due to node failures or fall to shortcomings of centralized services, such as censorship risks -- examples include Solana, BNBChain, Ripple, or enterprise blockchains.
+Finally, chains that prefer \emph{scalability} and \emph{decentralization} over security may have high performance, but often reduce parameters in their security choices for the sake of inclusivity, for example XXX.
+
+\todoDraftOnly[h]{Examples of the blockchains for each side of the trilemma}
+
+Amaroo's underlying consensus mechanism, \emph{Ultra Terminum} (UT), is a cooperative cross-chain consensus strategy that addresses \emph{Buterin's Trilemma}, and promotes cohesiveness beteween different chains and communities.
+
+\mk{big claim, might have to qualify this a bit more about what 'existing consensus methods' means.}
+\pz{Add somewhere in intro that UT is a consensus protocol that combines (1) a generalization of Proof-of-X protocols and (2) reflection to share security between heterogenous chains.}
+
+%% TODO: rewrite this section to (1) make it pop, (2) follow Pouriya and Max's comments
+
+Compared with existing consensus methods, UT provides \emph{equal or better} security properties than \textbf{all} existing consensus methods (including Bitcoin's PoW method and variants, and \emph{all} PoS variants).
+This is because UT leverages existing consensus methods in combination and, by way of construction, UT can only \emph{add} security to these methods.
+
+\UT{} differs from existing consensus methods\footnote{
+  Whether \emph{Ultra Terminum} is a consensus \emph{method} or not is somewhat unclear.
+  On the one hand: a new combination of methods is still a method.
+  On the other hand: UT provides a way to modify other consensus methods via the fork rule, and UT doesn't provide a way to run a \emph{single} blockchain.
+  This is why I introduced it as a cross-chain consensus \emph{strategy}.
+}, in that it is a \emph{novel modification} to particular components of preexisting consensus algorithms.
+These modifications allow those consensus algorithms to cooperate.
+This improves the maximal security and decentralization of the network, whilst also providing a foundation for scalability.
+
+\UT{} is capable of supporting millions of transactions per second with similar chain parameters (like block size) to those of traditional blockchains (like Bitcoin or Eth1\footnote{
+  The term \emph{Eth1} refers to the original Proof-of-Work Ethereum (pre-merge), and \emph{Eth2} refers to the Sharded Proof-of-Stake Beacon Chain.
+  These terms were originally adopted to describe the different designs on the \href{https://web.archive.org/web/20241128055038/https://ethereum.org/en/roadmap/}{Ethereum Roadmap}.
+}).
+
+At the core of \emph{Ultra Terminum} is a new method for sharing security: \emph{Proof of Reflection}.
+This technique (which works in conjunction with PoW, PoS, etc) allows the incremental construction of complex blockchain networks with powerful scaling properties.
+The vital properties provided by \UT{} allow heterogenous chains, with differing Proof-of-*, to form a cohesive network and cooperate in securing each other.
+\emph{Proof of Reflection} is how \emph{Ultra Terminum} (excluding nested chains) scales with order $O(c^2)$, and is the basis for unbounded $O(n)$ scaling.
+UT's higher-order scaling configurations, $O(c^3)$ and $O(c^4)$, require dapp-chains: chains that are application-specific and which inherit security properties from the foundational structure.
+
+As UT is primarily a method of \emph{structuring} a blockchain network, the scalability configurations mentioned herein \emph{do not include \textbf{layer 2} methods}.
+That means that \emph{layer 2} techniques (e.g., state/payment channels, ZK/optimistic rollups) can be implemented \emph{on top} of UT.
+
+UT's novel structure means that confirmation times within UT are of order $O(c^{-1})$ (i.e., the confirmation rate is $O(c)$).
+This means that, as the network grows and $c$ increases, confirmation times in UT will approach 0.
+This is an improvement over existing architectures, which are, ideally and at best, $O(1)$.
+
