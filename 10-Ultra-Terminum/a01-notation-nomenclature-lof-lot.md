@@ -2,10 +2,6 @@
 
 \clearpage
 
-\printglossaries
-
-\newpage
-
 \section*{Notation}
 \addcontentsline{toc}{section}{Notation, Nomenclature, and Lists of Figures and Tables}
 \fancypagestyle{notation}{%
@@ -78,6 +74,10 @@ Term & Definition & Reference \\
 
 \newpage
 
+\printglossaries
+
+\newpage
+
 \listoffigures
 
 \newpage
@@ -85,5 +85,7 @@ Term & Definition & Reference \\
 \listoftables
 
 %%\listofalgorithms
+
+\clearpage
 
 %% END ### RELEASE
