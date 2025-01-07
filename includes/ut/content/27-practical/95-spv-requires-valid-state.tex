@@ -834,7 +834,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     From the miner's perspective: the attacker doesn't know if they've recieved a bribe before or not; and they could always earn some reward by publishing the fraud proof.
     So \emph{each} bribe has to be worth more than the alternative.
 }
-\pz{H is used earlier as the total hash-rate of the network.}
+\pz{H is used earlier as the total hash-rate of the network. Also $z$ should be defined.}
 \dMax{
     Let's assume that there's a reward ($C_r H$) for publishing the fraud proof.
     ($C_r$ is the block reward of the target chain, and $H$ is the proportion of the block reward each miner gets.)
@@ -1270,7 +1270,6 @@ At that point, at least 50\% of the network hash-rate needs to be dedicated to t
 \subsubsubsection{Phase 1 $\not\to$ Phase 2 and $\BribeCost(z)$}
 
 \pz{Define $Z_k$}
-\cn{Is $Z_k$ related to $\mathbb{B}$ for the bribes paid by the attacker?}
 \begin{itemize}
     \item Each miner (on each simplex-chain) needs bribing (but only if they make a block).
     \item Each round, the attacker must pay $C_r Z_k$ in bribes (where $Z$ is the bribe, and $k$ is the round, starting at 1).

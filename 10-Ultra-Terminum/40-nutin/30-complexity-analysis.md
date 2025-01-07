@@ -172,11 +172,6 @@ There's enough capacity for attestations (128 each block for 64 shards) that the
 
 \subsection{Complexity of \titlemath{$\UT{1}$}{UT₁}}
 
-\pz{Any specific reason why are we using $B_h$ in this section and $D_h$ in the previous one.
-\\
---
-\\
-From Chris: The $B_h$ is used when referencing the base simplex-chain header sizes (talking $\UT{1}$), and $D_h$ is the dapp-chain header size when (talking $\UT{2}$, $\UT{3}$)}
 There is no single root-chain for a collection of mutually reflecting blockchains (i.e., a simplex), so $N_1 \neq 1$.
 What is $N_1$ then?
 In a simplex, each chain has $k_1$ B/s capacity, but this is split between reflections and transactions.

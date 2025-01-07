@@ -153,9 +153,8 @@ First, define $P(q; c)$, where $c$ is the number of confirmations and $q$ is the
 \pz{
   Unclear if $\{1, 2, \dots\}$ is finite or infinite.\\
   -------\\
-  Chris: A few notes on the above comments:\\
-$m$ is defined as part of the $\Sigma$, counting from $m=0$ to $c$;\\
-The $\{1,2,\dots\}$ I read as unbounded unless a specific bound is mentioned, quite typical in mathematical proofs. Since the parameter $c$ is the number of confirmations and can be as high as it wishes. We could say it as $\mathbb{N}^+$?}
+  Chris: do we define $m$ if only used as part of the $\Sigma$, counting from $m=0$ to $c$;
+}
 
 
 \begin{equation}
@@ -189,7 +188,12 @@ In fact, we can take this further.
 The relationship that exists is not only at the extremes, but between them too\footnote{
   Since \nicefrac{$\mathcal{C}$N}{a} in \autoref{eq:cec-extended-hypothesis} is not necessarily an integer, we'll assume there exists a valid generalization of Rosenfeld's solution for $c \in \mathbb{R}_{>0}$.
 } --- it must be if confirmations are equivalent.
-This is the \emph{extended} CEC, where $a$ is the number of simplex-chains:
+This is the \emph{extended} CEC:
+\cn{
+  Just want to check these equations.\\
+  Is $a$ the number of simplex chains?\\
+  Would that mean that $\mathcal{C}N = \mathcal{C}N_1$?
+}
 % 1 \le x \le N; x \in \{a_i, b_i\}
 % , and $1 \le a_i \le N$, and $1 \le b_i \le N$
 \begin{equation}
@@ -363,6 +367,9 @@ If the CEC is true then we expect: $f_1(x) \approx f_2(x) \approx f_3(x) \approx
 \subsubsubsection{Error Correction Iteration}
 
 \pz{Having a probabilistic model and proving it empirically would be far more convincing than trying to make the experiments fit the hypothesis.}
+
+\todoDraftOnly[h]{Rewrite paragraph so that it isn't misleading to say that the experiment changed to fit the hypothesis.}
+
 Following the initial implementation of PoR in the simulator, results were promising but did not align with the theoretical prediction (based on Rosenfeld's analytical derivation of $P(q; c)$).
 At lower values of $c$ and/or $N_1$, the results suggested that the simulation was \emph{more} secure than expected.
 At higher values of $N_1$, $P^\prime$ did not appear to approach 0, instead approaching $\sim 0.05$.
