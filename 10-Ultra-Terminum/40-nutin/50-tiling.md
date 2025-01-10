@@ -242,10 +242,9 @@ For all practical purposes, if we can grow the tiling fast enough, $\UTinf{}$ pr
 
 %% BEGIN ### DRAFT
 
-\pz{What is the h column?}
 %% INSERT ### TABLE: tree_tiling_3k_v4_table
 
-: Tree-Tiling performance with $v=4$ and $k=3000$.
+: Tree-Tiling performance of various heights ($h$) with $v=4$ and $k=3000$.
 Values for $N_1$ and $N_2$ and a comparison between $\UTinf{\text{+OPT}}$ and $\UT{\text{+OPT}}$ with equivalent values.
 
 %% END ### DRAFT

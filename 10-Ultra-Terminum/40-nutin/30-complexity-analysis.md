@@ -121,10 +121,16 @@ Thus $O(T_2) = O(c^2)$ as expected.
 It's typical, though, that the headers of nested chains, alone, are not sufficient: additional data is required.
 When such data is required to be recorded on-chain (i.e., it cannot be deterministically regenerated), then the \emph{effective} header size is the size of the raw header, plus the size of any auxiliary data.
 
+\todoDraftOnly[h]{Discuss the changes to the Ethereum model to make current.\\
+Might mean that L1 blocks are truly just L1 beacon block header + (if we need blob size / blob data commitment which is huge)?\\
+TL;DR: new \href{https://web.archive.org/web/20250105115555/https://ethereum.org/en/roadmap/danksharding/}{danksharding roadmap} with \href{https://github.com/ethereum/consensus-specs/blob/68d32accf945a84f69d4c779cb6c71223a311eac/specs/\_features/sharding/beacon-chain.md}{spec} means that the "shards" are now blobs of data, that get sampled. We now also have temporary blobs as the blobs for the layer 2s, and the commitment data for data sampling.
+}
+
 For example, in an \emph{Ethereum 2} beacon block, each shard has a header size of 280 B, but there is additional overhead.
 \pz{Update footnotes as they date back}
 A reasonable lower-bound is that each header has an \emph{effective} minimum header size of 312 B.\footnote{
-  As of late September 2021, the Ethereum 2 \href{https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/sharding/beacon-chain.md\#beaconblockbody}{sharding spec} has capacity for 2:1 attestations to shards per block (with 64 shards), but only 32 B of each attestation is dedicated to sharding.
+  As of late September 2021, the Ethereum 2 \href{https://github.com/ethereum/consensus-specs/blob/296f9bab81566e2a11dd0ce3de806ff191e926bb/specs/sharding/beacon-chain.md\#beaconblockbody}{sharding spec}
+  has capacity for 2:1 attestations to shards per block (with 64 shards), but only 32 B of each attestation is dedicated to sharding.
   The spec also has capacity for 4:1 shard headers to shards per block.
   It seems reasonable that capacity which exists will be used within reason.
   Thus a reasonable lower-bound for the effective header-size of shards is taken via: $1\times$ headers per shard per block, $1\times$ attestations per shard per block (which do not count towards effective header-size), and $1\times$ 32 B per attestation per block.
