@@ -183,8 +183,6 @@ In the scheme of things, this can be somewhat significant but it is not a deal-b
 
 Exactly how one chain can properly account for reflected work requires that we cover how to compare (and convert) that work, and is the topic of \autoref{sec:comparing-chain-work}.
 
-\todoDraftOnly[m]{move this bit to step 5?}
-
 Note that, as the Chain \cL tip is gaining reflections from Chain \cR, miners on Chain \cL are incented to include as many novel Chain \cR headers and PoRs as possible.
 That's because each new Chain \cR header (with a PoR) will increase the weight of the *ancestors* of the Chain \cL draft block, which helps the draft block compete with other draft \cL blocks.
 This increases the overall chain-weight that the miner is building on, and thus contributes to their block becoming part of the most-worked chain.
@@ -222,7 +220,7 @@ If the attacker has more hash power than the honest miners (i.e., $q > p$\footno
   Since a correctly-evaluated projection of \cL is useful (for users of either chain), we should solve this problem if we can.
 }
 
-\todoDraftOnly[h]{rewrite / edit this: evaluating PoR weight --- inconsistent with later I think}
+<!-- \todoDraftOnly[h]{rewrite / edit this: evaluating PoR weight --- inconsistent with later I think} -->
 
 How can we prevent this kind of attack?
 The attack is only possible because Chain \cR was *not* accounting for reflected weight --- if Chain \cR's projection of Chain \cL accounts for reflections, then this attack is not possible.
@@ -240,34 +238,19 @@ Full nodes of Chain \cL already verify that the claimed chain-weight is accurate
 We need additional protocol changes to ensure that the \emph{claimed} chain-weight of a header is \emph{always} reliable.
 
 \aside{
-  One solution is to adopt a design that allows \cR nodes to independently calculate and verify \cL's reflections without evaluating \cL's state.
+  One solution is to adopt a design that allows \cR nodes to independently calculate or verify \cL's reflections without evaluating \cL's state.
   Provided that \cR nodes can calculate any missing merkle branches on demand, this will work.
   This method has substantial advantages, however, some configurations have considerable overhead.
   It is discussed in \autoref{sec:segmented-state} and \autoref{sec:exploiting-seg-state}, and analyzed in \autoref{sec:bandwidth-complexity}.
 }
 
-\todoDraftOnly[l]{revisit / edit this}
+<!-- \todoDraftOnly[l]{revisit / edit this} -->
 
 We \emph{can}, at least, guarantee that a fraud proof will \emph{always} be possible when a malicious \cL block lies about its total chain-weight.
 Additionally, other \cL miners can detect the lie and link back to the malicious block as an invalid parent alongside the fraud proof.
 These are useful features, but they're overkill at this point.
 
-\todoDraftOnly[m]{Add to dos/dags: linking back to invalid parents}
-
-For now, let's assume that \cR records \cL headers \emph{and} the corresponding PoRs.
-
-\todoDraftOnly[l]{Forward link to VLMTs, stateless chains; goal: support the claim we can always guarantee a fraud proof is possible}
-
-
-\todoDraftOnly[l]{this should go later when talking about mutual refl:\\
-In this case (with only 2 chains) it's somewhat trivial.
-It's trivial because, when \cR reflects a malicious \cL block, it will \emph{always} come with a PoR, even if that PoR proves that no \emph{new} \cR blocks were reflected by the \cL block (for reasons discussed in \autoref{sec:counting-work}).
-Since this case only has two chains (\cL and \cR), \cL will only be reflecting \cR blocks.\\
-- first branch of \cL's PoRs will be second branches of some \cR PoRs.\\
-- and those will correspond to known \cR blocks.\\
-- so it's trivial to check that all the required data exists etc.\\
-- combine with VLMTs.
-}
+For now, let's assume that \cR records \cL headers \emph{and} the corresponding PoRs, and that \cR nodes verify \cL headers' chain weights.
 
 
 <!-- Broadly, there are two categories of low-overhead, potential solutions: proofs of validity, and proofs of invalidity (i.e., fraud proofs).
@@ -284,13 +267,13 @@ A data structure and methodology for suitable fraud proofs of chain-weight (and 
   Mitigation of DoS attacks is covered in \autoref{sec:dos-and-dags}.
 } -->
 
-\todoDraftOnly[l]{
+<!-- \todoDraftOnly[l]{
   Since an invalid block's parent is known, such a fraud proof only needs to show that the difference (between the parent and block's chain-weight) is not possible.
   If we use a VLMT (see \autoref{sec:vlmt}) to store reflections, then the merkle branches used for PoR will contain, for each subtree, the contributed chain-weight.
   This means a complete and valid VLMT (with forged total chain-weight) is impossible, which in turn makes fraud proofs easy to generate.
-}
+} -->
 
-\todoDraftOnly[l]{
+<!-- \todoDraftOnly[l]{
   reconsider:\\
 As a final point on this attack, in limited cases like this (where only one set of reflections needs validation), \cR can forgo fancy protocols provided that \cL and \cR share a simple and standardized way to record and verify reflected blocks.
 Chain \cR nodes already know \cR's state, so they can trivially generate merkle branches proving reflection of \cL blocks in \cR --- these are \emph{the same} branches that \cL uses in its PoRs.
@@ -300,7 +283,7 @@ All that remains is, for each \cL header, the merkle branch proving reflection o
 If a merkle root of \cL's reflections is accessible (e.g., as a field in \cL's header) then \cR nodes can \emph{quickly and exhaustively} check all possible combinations of reflected blocks.
 Under normal operation, \cR nodes should *always* find a matching merkle tree.
 This might become an issue in the case of an active attack, but \cR nodes can fall back to explicitly recording and/or verifying those PoRs for the duration of the attack.
-}
+} -->
 
 \subsubsection{Step 5. Mutual Reflection}
 
@@ -323,52 +306,17 @@ This last question is particularly important for moving beyond mutual reflection
 
 The *essence* of *Proof of Reflection* should now be apparent. *In principle*, we can make blockchains more difficult to attack based on the idea that *blockchains can include a projection of the history of other blockchains (and confirm a chain's history like they do transactions)*. *In principle*, it is possible to increase the security of a blockchain via *reflection* and to increase the security of multiple blockchains via *mutual reflection*.
 
-\todoDraftOnly[h]{PoW --- 2 chains using the same algorithm isn't insecure!}
+\subsubsubsubsubsection{Remarks}
+
+Typically, it is insecure for a weaker PoW blockchain to use the same hashing algorithm as a more popular, more heavily mined PoW blockchain.
+In such a situation, a small proportion of miners on the more popular chain could temporarily divert efforts to perform a doublespend or empty block DoS on the other chain, and thus the weaker chain is plainly insecure.
+However, if those two chains were using \emph{mutual PoR}, then this kind of attack becomes impossible, and we've found a way for two PoW chains to coexist using the same PoW algorithm.
 
 %% END ### RELEASE
 
 %% BEGIN ### DRAFT
 
-\todoDraftOnly[m]{redraft the following}
-
-\subsubsection{Applicability of PoR}
-
-\label{sec:applicability-of-por}
-
-Does PoR work for ``blockchains'' in the broad sense, or are there constraints on a blockchain's architecture?
-
-\emph{Proof of Reflection} modifies the fork rule and accounts for block-weight in discrete amounts.
-
-Some alternative distributed ledger networks (i.e., non-blockchain DLTs) do not produce network-wide discrete updates.
-It's not clear how such DLTs would use PoR themselves or be used by a blockchain for PoR.
-Examples: Hedera uses Hashgraph; Solana uses Proof of History (PoH).\footnote{
-  It's also not clear how either Hashgraph or PoH networks could support network-level two-way cross-chain transactions in general (though specific methods, like Bitcoin's \href{https://en.bitcoin.it/wiki/Contract\#Example_5:_Trading_across_chains}{atomic cross-chain transaction script}, could still work).
-  Networks of either type could, of course, host a projection of a blockchain, but what then?
-}
-
-PoR also requires that \emph{state can be verified} in the reflecting chain.
-
-Some blockchains obscure their state (e.g. Monero).
-If we can't \emph{publicly verify} PoRs, then we can't convert chain-work, so those networks can't easily be used \emph{for} reflection (but they could perhaps do one-way PoR, though).
-In that case, appropriate protocol changes would enable \emph{mutual} PoR (e.g., \autoref{sec:segmented-state}).
-
-Some DLTs don't have meaningful network-wide state; i.e., there is no single, consistent view of that network's history.
-In this case we can neither convert work nor verify PoRs.
-Example: IOTA uses The Tangle.
-
-PoR also needs a way to normalize the idea of \`\`a confirmation'' so that confirmations can be compared. (This is trivial for PoW chains.)
-
-Consider a PoA chain with \emph{irregular} block production.
-It has discrete updates, and state can be verified against it.
-But, what does each confirmation \emph{mean?}
-Is a block that is produced soon after its parent worth as much as a block produced long after its parent?
-For non-PoW chains, we'll need conversion methods that have non-arbitrary answers for these questions.
-
-\aside{
-  In general, my intuition is that we can almost always use PoR with data structures that fit the \emph{traditional} idea of a blockchain.
-  (And when we can't, a protocol change could fix that.)
-  All bets are off for other architectures.
-}
+<!-- \input{20-por/15-cutdraft-applicability-of-por} -->
 
 %% END ### DRAFT
 

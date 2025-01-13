@@ -1,0 +1,40 @@
+% \todoDraftOnly[m]{redraft the following}
+
+\subsubsection{(CUT) Applicability of PoR}
+
+\label{sec:applicability-of-por}
+
+Does PoR work for ``blockchains'' in the broad sense, or are there constraints on a blockchain's architecture?
+
+\emph{Proof of Reflection} modifies the fork rule and accounts for block-weight in discrete amounts.
+
+Some alternative distributed ledger networks (i.e., non-blockchain DLTs) do not produce network-wide discrete updates.
+It's not clear how such DLTs would use PoR themselves or be used by a blockchain for PoR.
+Examples: Hedera uses Hashgraph; Solana uses Proof of History (PoH).\footnote{
+  It's also not clear how either Hashgraph or PoH networks could support network-level two-way cross-chain transactions in general (though specific methods, like Bitcoin's \href{https://en.bitcoin.it/wiki/Contract\#Example_5:_Trading_across_chains}{atomic cross-chain transaction script}, could still work).
+  Networks of either type could, of course, host a projection of a blockchain, but what then?
+}
+
+PoR also requires that \emph{state can be verified} in the reflecting chain.
+
+Some blockchains obscure their state (e.g. Monero).
+If we can't \emph{publicly verify} PoRs, then we can't convert chain-work, so those networks can't easily be used \emph{for} reflection (but they could perhaps do one-way PoR, though).
+In that case, appropriate protocol changes would enable \emph{mutual} PoR (e.g., \autoref{sec:segmented-state}).
+
+Some DLTs don't have meaningful network-wide state; i.e., there is no single, consistent view of that network's history.
+In this case we can neither convert work nor verify PoRs.
+Example: IOTA uses The Tangle.
+
+PoR also needs a way to normalize the idea of ``a confirmation'' so that confirmations can be compared. (This is trivial for PoW chains.)
+
+Consider a PoA chain with \emph{irregular} block production.
+It has discrete updates, and state can be verified against it.
+But, what does each confirmation \emph{mean?}
+Is a block that is produced soon after its parent worth as much as a block produced long after its parent?
+For non-PoW chains, we'll need conversion methods that have non-arbitrary answers for these questions.
+
+\aside{
+  In general, my intuition is that we can almost always use PoR with data structures that fit the \emph{traditional} idea of a blockchain.
+  (And when we can't, a protocol change could fix that.)
+  All bets are off for other architectures.
+}
