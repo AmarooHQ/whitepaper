@@ -28,9 +28,7 @@ Note: $W_0(z)$ is the Lambert W function, aka. the product logarithm.
 
 \autoref{eq:simplex-N1-with-PoR} gives an $N_1$ that is of the form $N_1 = O(1) \cdot \frac{k_1}{W_0(O(1) \cdot k_1)}$.
 \autoref{fig:x-over-lambert} graphs $f(x) = \frac{x}{W_0(x)}$ for values of $x$ that we care about; $f(x) = 0.0638x$ is included for comparison.
-Regarding this specific case, is it reasonable to approximate $O(\frac{k}{W_0(k)}) = O(k)$?
-\pz{Remove "If it is" if it is a reasonable approximation, otherwise it implies that maybe it is and maybe it isn't.}
-If it is, then we still have $O(N_1) = O(c)$ and $O(T_1) = O(c^2)$.
+Regarding this specific case, approximating $O(\frac{k}{W_0(k)}) = O(k)$ gives us $O(N_1) = O(c)$ and $O(T_1) = O(c^2)$.
 
 \begin{figure}
     \begin{subfigure}[t]{.48\linewidth}
