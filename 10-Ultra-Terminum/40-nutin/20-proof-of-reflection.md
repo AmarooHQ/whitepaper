@@ -846,8 +846,6 @@ Thus, \emph{any} common units, which are linearly convertible both from a reflec
   Is it possible that we can convert chain-work \emph{via summing block rewards?}
 }
 
-\todoDraftOnly[h]{Add new vars to nomenclature table}
-
 \subsection{Conversion Contexts}
 
 What blockchain contexts can facilitate the conversion of block-weight?

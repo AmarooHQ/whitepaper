@@ -6,7 +6,7 @@ There are, naturally, questions to answer,
 
 Let's consider the following \emph{restricted case} first: the chains (\cL and \cR) have something like a two-way peg between them, ensuring that no coins are ever incorrectly created or destroyed.
 
-In this case, for a single R-block, \autoref{eq:por-conv-work} collapses to
+In this case, for a single R-block, \autoref{eq:por-conv-work} collapses to:
 \begin{align}
     \text{ConvWork}_{R\rightarrow L}(w) = \; & \frac{L_d}{L_r} \cdot \frac{R_r}{R_d} \cdot w % \cdot \cancelto{1}{X_{R\rightarrow L}}
         & & % \text{R-hashes }\rightarrow\text{ L-hashes}
@@ -159,10 +159,16 @@ Let's use \autoref{eq:srt-block-ratios} to create our next \textsc{WeightOf} alg
     This is due to the symmetry mentioned at the start of \autoref{sec:converting-block-weights}.
 }
 
-\begin{draftonly}
-
 \subsubsubsection{Degenerate Case}
 
-\todo{degenerate case}
-
-\end{draftonly}
+There is an even simpler case when the same hashing algorithm is used and when the rewards and difficulties are equal.
+In this case, the conversion to/from remote units is trivial, since these are now, \emph{by definition,} identical to local units.
+Equivalently: all constants of conversion between corresponding values are $1$.
+Subsequently, \autoref{eq:por-conv-work-srt} collapses to:
+\begin{align}
+    \text{ConvWork}_{R\rightarrow L}(w) = \; & w
+        & & \text{L-hashes}
+        & & \text{If } R_d = L_d, R_r = L_r
+        \label{eq:por-conv-work-degenerate}
+\end{align}
+While this works fine for PoR, it offers little value for this discussion conversion theory.
