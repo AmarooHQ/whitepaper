@@ -50,7 +50,6 @@ No real-world sharded network has come close to this level of performance, and i
 : A comparison of various networks' $k$ and TPS given a maximum network-wide throughput of 1 Gb/s ($\sim1.3\times 10^8$ B/s). Also included is the rate at which chains on that network grow in size (which is proportional to $k$).
 \end{comment}
 
-\pz{What is PoH?}
 \ctable[
     pos = htb,
     caption = Table evaluating various other networks against trilemma criteria.,
