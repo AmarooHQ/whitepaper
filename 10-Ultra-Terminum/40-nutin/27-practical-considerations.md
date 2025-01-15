@@ -52,13 +52,13 @@ Since miners, theoretically, have all the necessary data to construct the proofs
 Could we treat those proofs as witnesses and prune them --- similar to Segregated Witness (SegWit)\footnote{\href{https://web.archive.org/web/20240926154239/https://en.bitcoin.it/wiki/Segregated_Witness}{Segregated Witness} was a new ``witness'' structure introduced to bitcoin blocks, separate from the transaction merkle tree. The structure contains data required to check transaction validity but not required to determine the transaction effects. Introduced with \href{https://web.archive.org/web/20240423183945/https://en.bitcoin.it/wiki/BIP_0141}{BIP-141}.}?
 
 \defineTermTex{Omitted Proofs (+OP)}{
-    The UT protocol variant wherein miners/validators explicitly record \emph{only} reflected headers, such that necessary proofs of reflection are deterministically recalculable
+    The UT protocol variant wherein miners/validators explicitly transmit \emph{only} the reflected header component of PoRs, such that necessary proofs of reflection themselves are deterministically recalculable
 }
 
 There would be some downsides to omitting the proofs of reflection.
-For one, it would mean that simplex-chain nodes, during an initial sync, would not be able to verify the PoRs without auxiliary data --- potentially a lot.
+For one, it would mean that simplex-chain nodes of a single chain, during an initial sync, would not be able to verify the PoRs without auxiliary data --- potentially a lot.
 Secondly, it would mean that miners *must* track the state of *all* reflections in the simplex for some period of time so that they ensure the integrity of the reflection protocol.
-Given \autoref{sec:availability-of-blocks}, this is possible without significant overhead.
+Although, given the \AxiomOfAvailability{}, this is possible without significant overhead.
 
 A practical method for treating proofs of reflection as witnesses that may be excluded/pruned is discussed in \autoref{sec:segmented-state}.
 
@@ -135,35 +135,76 @@ For $g=32; B_h=112$, this reduces effective block size to $\sim 0.643 b$ --- an 
 [^sb-size]: Assuming those blocks dedicate 50% capacity to transactions, and 50% to reflected headers (without PoRs).
 
 However, \emph{instead} of using that technique to \emph{minimize bandwidth} we could instead use it to \emph{maximize the number of simplex-chains}.
-If simplex-blocks dedicate $\nicefrac{1}{2}$ of their capacity to reflections, then we can reduce that burden by $1 - \nicefrac{32}{B_h} \approx 70\%$, \emph{or} we could increase the capacity for reflections by $\nicefrac{B_h}{32} \approx 300\%$!
+If simplex-blocks dedicate $\nicefrac{1}{2}$ of their capacity to reflections, and assuming +OP, then we can reduce that burden by $1 - \nicefrac{32}{B_h} \approx 70\%$, \emph{or} we could increase the capacity for reflections by $\nicefrac{B_h}{32} \approx 300\%$!
 
 \defineTermTex{Header Omission (+HO)}{
     The UT protocol variant wherein miners/validators explicitly record \emph{only} the hashes of reflected headers.
     A requirement is that block producers must eagerly download the headers of all simplex-chains and deterministically recalculate the relevant Proofs of Reflection
 }
 
-Starting with +PoRs, we have just reached the +HO variant via *omitting proofs* (+OP).
-However, it is not the *proofs* that are redundant, but the *headers*.
-Does *header omission* with *explicit proofs* provide any advantages? Yes.
+We have just reached the +HO variant via *omitting proofs* (+OP).
+This time, however, it is not the *proofs* that are redundant, but the *headers*.
 
-Particularly, if miners include only the single missing merkle branch associated with the necessary PoRs, then *no additional information* is required besides the *header* itself.
+Does *header omission* with *explicit proofs* provide any advantages? Yes, in some cases.
+
+Particularly, if miners include only the single missing merkle branch associated with each necessary PoR, then *no additional information* is required besides the *header* itself.
 Headers are trivial to acquire from the network, and each only needs to be acquired once, regardless of the number of PoRs it is a part of.
 Since the *hash of each header* is *part* of the missing PoR merkle branch, miners only need to provided *an ordered list of merkle branches* for full PoR verifiability.
-Additionally, these merkle branches *will be part of specific SPV proofs*, so when a cross-chain SPV transaction (that uses those branches) is made, it can omit those parts of the proof (replacing them with a pointer).
+Additionally, these merkle branches *will be part of specific SPV proofs*, so that when a cross-chain SPV transaction (which uses those branches) is made, it can omit those parts of the proof (replacing them with a pointer).
 
-This UT protocol variant is +HOPoRs, the combination of *header omission* (+HO) and *explicit proofs* (+PoRs).
+This UT protocol variant is +HOPoRs: the combination of *header omission* (+HO) and *explicit proofs* (+PoRs).
 It may present decisive advantages for implementations of *simplex tilings* (which are introduced in \autoref{sec:tiling}).
 
-\todoDraftOnly[h]{Write the +T variant information}
+\subsubsection {Hash Compression \& Truncation}
 
-\aside{
-    \pz{Should we mention +T if it is redacted?}
-    There is an independent protocol variant (from those above) called +T which provides a significant reduction to header size.
-    % proof size and
-    This optimization is currently redacted. \\
-    \\
-    Each protocol variant thus far has a corresponding +T variant, e.g., +PoRs and +PoRTs, +HO and +HOT, etc.
+\warning{The following applies to PoW chains with compatible header hashes.}
+
+Consider a fairly normal PoW chain, in that the PoW algorithm compares the hash of headers as a number with a target.
+That is, the output hash has a bunch of zero digits at one end (or can be losslessly converted into such a form).
+For simplicity, we'll assume that the zero digits are the most significant and are leading (and the lease significant bits are trailing).
+
+When we serialize this hash as a binary string, there is a trivial compression method.
+Since we \emph{know} that one end of the hash has multiple zero bytes, we can replace this substring with the number of zero bytes replaced.\footnote{
+    Since we're now dealing with a variable length byte-string, a typical encoding scheme would prefix this with the length of the bytes.
+    From this we can recover the number of zero bytes, so we don't need to explicitly encode it.
 }
+
+This reduces the length of the hash (in bytes) from $g$ to $g - z + 1$ ($z$ being the number of zero bytes), \emph{however}, the \emph{security} of the hash \ul{is still $8g$ bits}.
+This is a limited form of hash compression.
+In a mature network using +HO, reducing hash length by $\sim \nicefrac{1}{4}$ is possible, corresponding to an increase in maximum capacity of $\sim \nicefrac{1}{3}$ or so.
+
+This kind of compression is possible (and valuable) because the hashes are \emph{laden} with special properties by the PoW algorithm.
+There are two main properties we are concerned with.
+The first is that better header hashes, interpreted as numbers, are smaller.
+The second is subtle.
+
+Consider a mature, healthy PoW chain, like Bitcoin.
+The proofs of work produced by such a chain are, through market feedback mechanisms, the \emph{best} proofs of work that the market as a whole (i.e., the global economy) is capable of producing profitably.
+Therefore, the proofs of work are an approximate \emph{measure} of the global capacity for hashing.
+More specifically, the number of leading zero-bits loosely encodes humanity's collective ability to produce arbitrary partial collisions via brute force.
+For example, Bitcoin block 879,273 has a difficulty around $1.1 \times 10^{14}$, corresponding to at least 78 leading zero-bits.\footnote{
+    The block itself had 81 leading zero-bits.
+}
+Given Bitcoin produces around 52600 blocks per year (and all else being equal), we can expect the best block hash produced in the last year to have around $78 + \log_2(52600) \approx 94$ leading zero-bits.
+Practically speaking, all the silicon in the world working for a year, singularly, on finding a partial SHA256 collision would not do much better than 94 bits.
+
+We will make use of this second property, that the leading zero-bits are related to the global hashing capacity, to justify the safety of \emph{hash truncation} as an optimization.
+
+\defineTermTex{Hash Truncation (+T)}{
+    The UT protocol variant wherein miners/validators refer to reflected headers using \emph{only} the least significant half of the hash.
+    This effectively halves the hash size in throughput calculations for +OP and +HO variants
+}
+
+The idea behind +T is that the security of a truncated hash in bits, assuming $g \gg 2z$, is given by $8(\nicefrac{g}{2} + z)$\footnote{
+    I use $g$ here, even though it's measured in bytes, for consistency with the rest of the whitepaper.
+    A more rigorous method would measure everything in bits instead, and avoid the somewhat awkward multiplication by 8, but it's not important for this discussion.
+}, and that this \emph{always} sufficient, given that $z$ is intimately related to the largest reasonable attack that we could expect at that moment.
+
+%% exception: exploit in hash function; or z \approx / gt (g/2)
+
+\todoDraftOnly[h]{Finish +T section.}
+\todoDraftOnly[h]{Revisit +T calculations for +PoRTs variants.}
+
 
 \begin{figure}[H]
 \begin{equation*}

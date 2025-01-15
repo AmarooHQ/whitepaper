@@ -861,8 +861,6 @@ In that case, $\nicefrac{L_d}{L_r} \cdot \nicefrac{R_r}{R_d}$ gives us L-hashes/
 
 \label{sec:conversion-single-root-token}
 
-\todoDraftOnly[h]{add degenerate case: same block reward, same difficulty}
-
 \input{20-por/40-single-root-token-2.tex}
 
 \subsubsection{Different Root Tokens with a DEX}
