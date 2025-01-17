@@ -217,9 +217,6 @@ In this configuration: headers are smaller, the information required for PoR reg
 Since +T halves the effective hash length (which is all the data in the PoRs half of the block), the overall simplex capacity increases $2 \times$.
 
 
-\todoDraftOnly[h]{Revisit +T calculations for +PoRTs variants.}
-
-
 \begin{figure}[H]
 \begin{equation*}
 \xymatrix@R=14pt@!R@C=-24pt@!C@M=4pt{
