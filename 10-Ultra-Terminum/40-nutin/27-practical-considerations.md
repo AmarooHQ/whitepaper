@@ -161,7 +161,7 @@ It may present decisive advantages for implementations of *simplex tilings* (whi
 
 Consider a fairly normal PoW chain, in that the PoW algorithm compares the hash of headers as a number with a target.
 That is, the output hash has a bunch of zero digits at one end (or can be losslessly converted into such a form).
-For simplicity, we'll assume that the zero digits are the most significant and are leading (and the lease significant bits are trailing).
+For simplicity, we'll assume that the zero digits are the most significant and are leading (and the least significant bits are trailing).
 
 When we serialize this hash as a binary string, there is a trivial compression method.
 Since we \emph{know} that one end of the hash has multiple zero bytes, we can replace this substring with the number of zero bytes replaced.\footnote{
@@ -187,6 +187,9 @@ For example, Bitcoin block 879,273 has a difficulty around $1.1 \times 10^{14}$,
 }
 Given Bitcoin produces around 52600 blocks per year (and all else being equal), we can expect the best block hash produced in the last year to have around $78 + \log_2(52600) \approx 94$ leading zero-bits.
 Practically speaking, all the silicon in the world working for a year, singularly, on finding a partial SHA256 collision would not do much better than 94 bits.
+We can be confident in this \emph{particular} prediction because the market for Bitcoin ASICs is mature -- those ASICs use the latest fabrication processes, are numerous enough, and are orders of magnitude more efficient than general processors (CPUs, GPUs, etc).
+For less mature networks, or networks using algorithms that benefit less from ASICs, the difference will be greater and more dependent on external compute resources which are not reflected in the PoW difficulty.
+But, provided that $g \gg 2z$, this does not present an issue -- the low value of $z$ means we have more buffer until we pass the insecurity breakpoint, so these two forces roughly cancel out in all but extreme cases.
 
 We will make use of this second property, that the leading zero-bits are related to the global hashing capacity, to justify the safety of \emph{hash truncation} as an optimization.
 
@@ -195,14 +198,25 @@ We will make use of this second property, that the leading zero-bits are related
     This effectively halves the hash size in throughput calculations for +OP and +HO variants
 }
 
-The idea behind +T is that the security of a truncated hash in bits, assuming $g \gg 2z$, is given by $8(\nicefrac{g}{2} + z)$\footnote{
+The idea behind +T is that the security of a truncated hash in bits, assuming $g > 2z$, is given by $8(\nicefrac{g}{2} + z)$\footnote{
     I use $g$ here, even though it's measured in bytes, for consistency with the rest of the whitepaper.
     A more rigorous method would measure everything in bits instead, and avoid the somewhat awkward multiplication by 8, but it's not important for this discussion.
 }, and that this \emph{always} sufficient, given that $z$ is intimately related to the largest reasonable attack that we could expect at that moment.
+The $g > 2z$ condition is there for two reasons.
+First, if $2z \ge g$ then the security of the truncated hash is just $8g$ bits, like normal.
+Second, using significantly more than half the hash for PoW is problematic because the chance of collisions between valid headers increases dramatically.
+So, intuitively, there is some breakpoint that we cross as the bits used for PoW increases.
+Crossing that breakpoint indicates that the hash is no longer suitable for use in PoW -- we've ``maxed it out'' and need a hash with more bits, or a hash that is harder to generate (or slower, etc).
+Therefore, there is also some similar and related breakpoint where the safety of hash truncation degrades.
+Perhaps it does not degrade completely, but at least enough that partial collisions (without the required PoW) of the least significant bits become practical to generate.
+Even though this shouldn't cause an issue for full and rigorous validation, it might open up DoS vectors, or other unforeseen exploits associated with optimizations or software patterns that might otherwise be safe.
+Treating that breakpoint as $g \approx 2z$ should provide us a reasonable safety margin to avoid such issues --- if we get close to it, it's time to change the hash.
 
-%% exception: exploit in hash function; or z \approx / gt (g/2)
+Combining +HO and +T gives us +HOT, the highest capacity variant of \UT{1}.
+In this configuration: headers are smaller, the information required for PoR regeneration is minimal, and the number of chains per simplex within given constraints is maximal.
+Since +T halves the effective hash length (which is all the data in the PoRs half of the block), the overall simplex capacity increases $2 \times$.
 
-\todoDraftOnly[h]{Finish +T section.}
+
 \todoDraftOnly[h]{Revisit +T calculations for +PoRTs variants.}
 
 

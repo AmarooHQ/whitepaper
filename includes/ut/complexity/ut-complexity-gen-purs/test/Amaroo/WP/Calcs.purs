@@ -185,9 +185,11 @@ utSpec = describe "ut" do
       pure $ do
         let name = if g == 32.0 then "pors" else "ports"
             ps = mkSimplePs 1000.0 {bh, bf: 0.1} 500.0
+            gHdr = g
+            gElse = 32.0
         describe ("ut." <> name) do
-          let n1 = findMaxPoRsN1 ps g
-              porSize = porLen g n1
+          let n1 = findMaxPoRsN1 ps gHdr gElse
+              porSize = porLen gElse n1
               kTx = 1000.0 - n1 * (bh + porSize) * 0.1
               t1 = n1 * kTx
               ut = getCs utvs
@@ -361,11 +363,11 @@ utSpec = describe "ut" do
 
     describe "PoR consistency checks" do
       it "numbers from tables (or otherwise calculated)" do
-        let getN1PoRs k = flip findMaxPoRsN1 32.0 $ mkSimplePs k {bf: btToF 15, bh: 84.0} 250.0
-            getN1PoRTs k = flip findMaxPoRsN1 16.0 $ mkSimplePs k {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0
+        let getN1PoRs k = (\ps -> findMaxPoRsN1 ps 32.0 32.0) $ mkSimplePs k {bf: btToF 15, bh: 84.0} 250.0
+            getN1PoRTs k = (\ps -> findMaxPoRsN1 ps 16.0 32.0) $ mkSimplePs k {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0
         getN1PoRs 3000.0 `shouldEqual` 192.0
         getN1PoRTs 3000.0 `shouldEqual` 227.0
-        findMaxPoRsN1 (mkSimplePs 3000.0 {bf: btToF 60, bh: 112.0} 250.0) 32.0 `shouldEqual` 511.0
+        findMaxPoRsN1 (mkSimplePs 3000.0 {bf: btToF 60, bh: 112.0} 250.0) 32.0 32.0 `shouldEqual` 511.0
         let expected = [5119.0, 10239.0, 15359.0, 20223.0, 25343.0, 30463.0, 35583.0, 40447.0, 45567.0, 50687.0]
             actual = getN1PoRTs <$> [100000.0, 200000.0, 300000.0, 400000.0, 500000.0, 600000.0, 700000.0, 800000.0, 900000.0, 1000000.0]
         actual `shouldEqual` expected
@@ -379,15 +381,15 @@ utSpec = describe "ut" do
           let r = kRange {from: 100.0, to: 100_000.0, step: 100.0}
               r2 = kRange {from: 10_000.0, to: 100_000_000.0, step: 10_000.0}
           liftEffect $ writeTextFile UTF8 "test-output-ports-k-vs-n1.csv" $ intercalate "\n" $
-            r <#> (\k -> Tuple k $ flip findMaxPoRsN1 16.0 $ mkSimplePs k {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0)
+            r <#> (\k -> Tuple k $ (\ps -> findMaxPoRsN1 ps 16.0 32.0) $ mkSimplePs k {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0)
               <#> (\(Tuple k n) -> show k <> "," <> show n)
           liftEffect $ writeTextFile UTF8 "test-output-pors-k-vs-n1.csv" $ intercalate "\n" $
-            r <#> (\k -> Tuple k $ flip findMaxPoRsN1 32.0 $ mkSimplePs k {bf: btToF 15, bh: 84.0} 250.0)
+            r <#> (\k -> Tuple k $ (\ps -> findMaxPoRsN1 ps 32.0 32.0) $ mkSimplePs k {bf: btToF 15, bh: 84.0} 250.0)
               <#> (\(Tuple k n) -> show k <> "," <> show n)
           -- -- NB: This one is v slow
           liftEffect $ C.log $ "Warning, about to calculate PoRs table for k in (10_000, 100_000_000) with a step size of 10_000. This may take some time"
           liftEffect $ writeTextFile UTF8 "test-output-ports-k-vs-n1-waymore.csv" $ intercalate "\n" $
-            r2 <#> (\k -> Tuple k $ flip findMaxPoRsN1 16.0 $ mkSimplePs k {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0)
+            r2 <#> (\k -> Tuple k $ (\ps -> findMaxPoRsN1 ps 16.0 32.0) $ mkSimplePs k {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0)
               <#> (\(Tuple k n) -> show k <> "," <> show n)
       else pure unit
 
@@ -409,14 +411,14 @@ utSpec = describe "ut" do
           -- -- liftEffect $ C.log $ "testing new pors for ranges"
           -- liftEffect $ writeTextFile UTF8 "ports-k-vs-n1-to10MBs.csv" $ intercalate "\n" $
           --   findMaxPoRsN1ForRanges {g: 16.0, r} <#> (\(Tuple ps {i}) -> show (pToPF ps).k <> "," <> show i)
-          liftEffect $ writePoRTableToCsv {r: r10MPors, g: 32.0, fn: "pors-k-vs-n-to-k-eq-10M.csv"}
-          liftEffect $ writePoRTableToCsv {r: r10MPorts, g: 16.0, fn: "ports-k-vs-n-to-k-eq-10M.csv"}
-          liftEffect $ writePoRTableToCsv {r: rPors, g: 32.0, fn: "pors-k-vs-n-to-k-eq-100000.csv"}
-          liftEffect $ writePoRTableToCsv {r: rPorts, g: 16.0, fn: "ports-k-vs-n-to-k-eq-100000.csv"}
-          liftEffect $ writeHOPoRTableToCsv {r: r10MPors, g: 32.0, fn: "hopors-k-vs-n-to-k-eq-10M.csv"}
-          liftEffect $ writeHOPoRTableToCsv {r: r10MPorts, g: 16.0, fn: "hoports-k-vs-n-to-k-eq-10M.csv"}
-          liftEffect $ writeHOPoRTableToCsv {r: rPors, g: 32.0, fn: "hopors-k-vs-n-to-k-eq-100000.csv"}
-          liftEffect $ writeHOPoRTableToCsv {r: rPorts, g: 16.0, fn: "hoports-k-vs-n-to-k-eq-100000.csv"}
+          liftEffect $ writePoRTableToCsv {r: r10MPors, gHdr: 32.0, gElse: 32.0, fn: "pors-k-vs-n-to-k-eq-10M.csv"}
+          liftEffect $ writePoRTableToCsv {r: r10MPorts, gHdr: 16.0, gElse: 32.0, fn: "ports-k-vs-n-to-k-eq-10M.csv"}
+          liftEffect $ writePoRTableToCsv {r: rPors, gHdr: 32.0, gElse: 32.0, fn: "pors-k-vs-n-to-k-eq-100000.csv"}
+          liftEffect $ writePoRTableToCsv {r: rPorts, gHdr: 16.0, gElse: 32.0, fn: "ports-k-vs-n-to-k-eq-100000.csv"}
+          liftEffect $ writeHOPoRTableToCsv {r: r10MPors, gHdr: 32.0, gElse: 32.0, fn: "hopors-k-vs-n-to-k-eq-10M.csv"}
+          liftEffect $ writeHOPoRTableToCsv {r: r10MPorts, gHdr: 16.0, gElse: 32.0, fn: "hoports-k-vs-n-to-k-eq-10M.csv"}
+          liftEffect $ writeHOPoRTableToCsv {r: rPors, gHdr: 32.0, gElse: 32.0, fn: "hopors-k-vs-n-to-k-eq-100000.csv"}
+          liftEffect $ writeHOPoRTableToCsv {r: rPorts, gHdr: 16.0, gElse: 32.0, fn: "hoports-k-vs-n-to-k-eq-100000.csv"}
 
     let doComparitiveK = false
     if not doComparitiveK
@@ -460,13 +462,13 @@ utSpec = describe "ut" do
         quickCheck $ abs >>> \n ->
           porVCLen n == porVCLen2 n
 
-writePoRTableToCsv :: {fn :: String, g :: Number, r :: Array Params} -> Effect Unit
-writePoRTableToCsv {fn, g, r} = writeTextFile UTF8 fn $ intercalate "\n" $
-          findMaxPoRsN1ForRanges {g, r} <#> (\(Tuple ps {i}) -> intercalate "," $ show <$> [(pToPF ps).k, toNumber i, (utNoExplicitPoRsN1 (pToPF ps))])
+writePoRTableToCsv :: {fn :: String, gHdr :: Number, gElse :: Number, r :: Array Params} -> Effect Unit
+writePoRTableToCsv {fn, gHdr, gElse, r} = writeTextFile UTF8 fn $ intercalate "\n" $
+          findMaxPoRsN1ForRanges {gHdr, gElse, r} <#> (\(Tuple ps {i}) -> intercalate "," $ show <$> [(pToPF ps).k, toNumber i, (utNoExplicitPoRsN1 (pToPF ps))])
 
-writeHOPoRTableToCsv :: {fn :: String, g :: Number, r :: Array Params} -> Effect Unit
-writeHOPoRTableToCsv {fn, g, r} = writeTextFile UTF8 fn $ intercalate "\n" $ append ["k, N1, \"N1 w/o PoRs\", T1"] $
-          findMaxHOPoRsN1ForRanges {g, r} <#> (\(Tuple ps {i, t}) -> intercalate "," $ show <$> [(pToPF ps).k, toNumber i, (utNoExplicitPoRsN1 (pToPF ps)), t])
+writeHOPoRTableToCsv :: {fn :: String, gHdr :: Number, gElse :: Number, r :: Array Params} -> Effect Unit
+writeHOPoRTableToCsv {fn, gHdr, gElse, r} = writeTextFile UTF8 fn $ intercalate "\n" $ append ["k, N1, \"N1 w/o PoRs\", T1"] $
+          findMaxHOPoRsN1ForRanges {gHdr, gElse, r} <#> (\(Tuple ps {i, t}) -> intercalate "," $ show <$> [(pToPF ps).k, toNumber i, (utNoExplicitPoRsN1 (pToPF ps)), t])
 
 utNoExplicitPoRsN1 p =
   let bh = p.hf.bh
@@ -478,8 +480,10 @@ porsForRangesQC _k = normalAnswer == rangesAnswer <?> "Mismatching: " <> show {e
   where
     k = enlarge 3000.0 _k
     enlarge target i = if abs i < target then enlarge (abs target) (abs $ 10.0 * i) else floor i
-    normalAnswer = {k: lastRangeK, n: flip findMaxPoRsN1 16.0 $ mkSimplePs lastRangeK {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0}
-    rangesAnswer = findMaxPoRsN1ForRanges {g: 16.0, r: inputRanges}
+    normalAnswer :: {k :: Number, n :: Number}
+    normalAnswer = {k: lastRangeK, n: (\ps -> findMaxPoRsN1 ps 16.0 32.0) $ mkSimplePs lastRangeK {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0}
+    rangesAnswer :: {k :: Number, n :: Number}
+    rangesAnswer = findMaxPoRsN1ForRanges {gHdr: 16.0, gElse: 32.0, r: inputRanges}
                     |> A.last |> unsafePartial fromJust |> (\(Tuple ps {i}) -> {k:(pToPF ps).k, n: toNumber i})
     inputRanges = (\inK -> mkSimplePs inK {bf: btToF 15, bh: applyTDiscountToBH 84.0} 250.0)
                     <$> rangeKs
