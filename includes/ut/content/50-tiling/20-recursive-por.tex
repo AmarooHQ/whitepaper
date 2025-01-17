@@ -106,7 +106,7 @@ There is something important to point out here: \emph{latency}.
 Notice that these 3 blocks (in chronological order) are required for this recursive PoR to exist: \BM{1}, \BR{2}, and \BM{2}.
 A non-recursive PoR only needs to wait for 1 reflecting block to be produced (after which the PoR counts as \emph{draft reflected work}).
 So, in this case, the expected delay will be $3\times$ normal (assuming all chains have the same block periods).
-In general (if only one PoR path between two given blocks will exist) this delay, measured in block periods, is equal to the length of the full PoR (excluding \cL blocks), which equals $2x-1$ the depth of recursion ($x$).
+In general (if only one PoR path between two given blocks will exist) this delay, measured in block periods, is equal to the length of the full PoR (excluding \cL blocks), which equals $2d-1$, with $d$ being the distance (in PoRs) between the chains.
 
 Recapping the first problem: \cL and \cR nodes need an expanded \textsc{WeightOf} function with access to \emph{the origin} of implicitly reflected work, and knowledge of \emph{where} that work has already been counted.
 Nodes can do this relatively efficiently, for all relevant chains, by downloading the headers and verifying the PoRs.
@@ -243,7 +243,6 @@ That configuration would look like this:
         & \cMtwo \ar@{<->}[r] \ar@{<->}[uur] & \cRtwo \ar@{<->}[uul]
     }
 \end{equation*}
-\pz{$2x-1$ was used above}
 In general, for a recursive PoR of length $2d-1$, where each reflection could be provided by $N_1 v^{-1}$ possible chains, the expected latency of draft reflected work is ${N_1}^{-1} v (2d-1)$ block periods.
 This is directly relevant to how fast work propagates within a tiling.
 
