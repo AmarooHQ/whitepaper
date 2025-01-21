@@ -437,8 +437,13 @@ atk situations:
 %% BEGIN ### RELEASE
 
 \subsection{On SPV In UT}
-
 \label{sec:spv-in-ut}
+
+New stuff
+
+\subsection{OLD - On SPV In UT}
+
+\pz{This section is being replaces by \Cref{sec:spv-in-ut}}
 
 \input{27-practical/95-spv-requires-valid-state.tex}
 
