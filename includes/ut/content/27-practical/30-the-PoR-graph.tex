@@ -198,8 +198,6 @@ Since the overhead is $O(c)$, and recording all reflections is also $O(c)$, can 
 
 The old PoR sub-block takes up $N_1 B_f \alpha$ B/s of capacity (where $\alpha$ represents the bytes per reflected simplex-chain and $\alpha \in [16, 512]$).
 
-\cn{nit: $k$ and $B$ (for the subscript, assumed block at this point -- but don't know $k_{1, B}$) have not been defined for the next equation.}
-
 The new PoR sub-block instead takes up $B_f \cdot g(1 + N_1 B_f \phi)$ B/s of capacity --- we exclude the block's header since that's already part of the block.
 If $k_{1,B}$ B/s of a chain's capacity is dedicated to reflections, then we have:
 \begin{align}
