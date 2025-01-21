@@ -60,8 +60,7 @@ To account for this, we can require that, for each \mu level, the best-blocks \m
 (That is: we make sure the necessary on-main blocks are included in the proof if they wouldn't be otherwise.)
 Both together comprise the suffix proof.
 
-\pz{Add where \texttt{followDown} and \texttt{verify-infx} are coming from. Maybe "we can use the existing \texttt{followDown} algorithm, used to find\dots" }
-Regarding infix proofs, we can use the existing\footnote{Defined in the \citeNIPoPoWs{} paper.} \texttt{followDown} algorithm, is used to navigate between superblocks and regular blocks, with only one modification: an additional parameter determines whether \texttt{followDown} should traverse the \emph{best-blocks} path to the block, or the \emph{on-main only} path.
+Regarding infix proofs, we can use the existing\footnote{\texttt{followDown}, \texttt{verify-infx} and \texttt{ancestors} are functions defined in the \citeNIPoPoWs{} paper.} \texttt{followDown} algorithm, is used to navigate between superblocks and regular blocks, with only one modification: an additional parameter determines whether \texttt{followDown} should traverse the \emph{best-blocks} path to the block, or the \emph{on-main only} path.
 To generate proofs, we run \texttt{followDown} over each path.
 We similarly modify the \texttt{verify-infx} (\emph{sic}) and \texttt{ancestors} functions used to verify infix proofs.
 % This change requires a corresponding addition to the proof structure so that it accommodates the additional proofs that the on-main traversal requires.

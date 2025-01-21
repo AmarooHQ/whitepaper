@@ -398,8 +398,7 @@ NB: For the purposes of \autoref{table:tps} and on, the average transaction size
 \pz{In the table, rename columns named $O(c)$ and $O(c^2).$}
 %% INSERT ### TABLE: tps
 
-: A comparison of the maximum transaction throughput (transactions per second; TPS) given different $\UT{\text{+OP}}$ scaling configurations.
-Note that the \emph{Sharded $O(c^2)$} column is theoretically optimal for sharding systems where all headers are recorded in the base-chain.
+: A comparison of the maximum theoretical transaction throughput (transactions per second; TPS) with parameters $k$, $B_f$, $B_h$ for $O(c)$, Sharded $O(c^2)$ and the different $\UT{\text{+OP}}$ scaling configurations. Note that the \emph{Sharded $O(c^2)$} column is the theoretical optimal limit for sharded systems where all headers are recorded in the base-chain.
 
 More detailed comparison tables can be found in \autoref{sec:ut-variant-complexities}.
 
