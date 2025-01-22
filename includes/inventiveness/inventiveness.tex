@@ -450,11 +450,11 @@ Recursive PoR is required for \emph{Tiling}.
 
 \section{Simplex Tilings}
 
-When simplexes become part of a simplex tiling they are called \emph{tiles}, or \emph{simplex tiles}.
+When simplexes become part of a simplex tiling they are called \emph{tiles}, or \emph{simplex-tiles}.
 
-\emph{Simplex tilings} (or just \emph{tilings}) are a bidirectional graph of mutually reflecting simplex tiles.
+\emph{Simplex tilings} (or just \emph{tilings}) are a bidirectional graph of mutually reflecting simplex-tiles.
 
-Simplex tilings require that each simplex-chain in a given simplex tile does mutual PoR with each other simplex-chain in all adjacent simplex tiles (this is what is meant when we say that a simplex tile mutually reflects another simplex tile).
+Simplex tilings require that each simplex-chain in a given simplex-tile does mutual PoR with each other simplex-chain in all adjacent simplex-tiles (this is what is meant when we say that a simplex-tile mutually reflects another simplex-tile).
 
 When each tile in a tiling reflects no more than a certain number of other tiles, we call this number the \emph{valence} ($v$) of the tiling.
 We are particularly concerned with tilings of $v > 2$ because it is only these tilings that can grow in an unbounded capacity.
@@ -480,7 +480,7 @@ Thus, all tiles outside the core can be roughly as secure as the core, and attac
 Additionally, reflected chain-work in a tiling propagates incredibly quickly.
 After a chain in a tile produces a new block (call it \BL{1}), it only takes a single reflecting block of a chain in the parent tile to expose (via recursive PoR) \BL{1} to the next tile on the way to the root tile.
 The delay between those two blocks being mined is, on average, the block period divided by the number of chains in the reflecting tile.
-So if we have 50 chains in each simplex tile,\footnote{
+So if we have 50 chains in each simplex-tile,\footnote{
   A safe minimum upper-limit of the size of a tile is at least 50 chains under $O(c)$ constraints --- see the whitepaper for the calculations.
 } and all chains have a block period of $15$ s, then the per-step delay between \BL{1} being mined a recursive PoR becoming available is $15/50$ seconds.
 Additionally, since a recursive PoR is from the local tile to the reflecting tile and back again, the recursive PoR requires $2d-1$ steps, where $d$ is the distance (number of direct links) that are between the local tile and the root tile.

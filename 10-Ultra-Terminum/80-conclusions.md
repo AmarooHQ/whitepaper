@@ -6,7 +6,7 @@
 
 \label{sec:conclusions}
 
-\todoDraftOnly[h]{Finish conclusion}
+\assignedTODO{{Max}}{h}{Write conclusion}
 
 ## Comparison: ``The Big 4''
 
@@ -39,10 +39,9 @@ No real-world sharded network has come close to this level of performance, and i
 
 : Similar to the previous table, but with $k = 20$ KB/s instead of 3 KB/s.
 
-\pz{Table 15: What does the last column represent?}
 %% INSERT ### TABLE: comparison_1m_tps
 
-: A comparison of computational requirements (approximated by $k$) for 1 million TPS between UT and various other networks. $\UT{2}$'s equivalent TPS is also provided (given the same parameters).
+: A comparison of computational requirements (approximated by $k$) for 1 million TPS between UT and various other networks. $\UT{2}$'s equivalent TPS is also provided (given the same parameters of $k$, $B_f$ and $B_h$).
 
 \begin{comment}
 %% INS--ERT ### TABLE: comparison_1gbps
@@ -57,11 +56,11 @@ No real-world sharded network has come close to this level of performance, and i
     center,
     label = tab:other-nets-trilemma,
 ]{lllll}{
-    \tnote[bt]{Real-world performance of Bitcoin; $k \approx 1700$ B/s; $\text{Tx}_\text{avg} \approx 375$ B.}
-    \tnote[ct,et,pt]{Prediction based on $3000 \le k \le 20000$.}
+    \tnote[*]{Real-world performance of Bitcoin; $k \approx 1700$ B/s; $\text{Tx}_\text{avg} \approx 375$ B.}
+    \tnote[$\!$\#,$\|$,\P]{Prediction based on $3000 \le k \le 20000$.}
     %\tnote[et]{Prediction based on $3000 \le k \le 20000$.}
     %\tnote[pt]{Prediction based on $3000 \le k \le 20000$.}
-    \tnote[ot]{
+    \tnote[\S]{
         Assuming $3000 \le k \le 20000$ and that child-chains use PoW + PoR with the smallest possible headers.
     }
     \tnote[PoS]{
@@ -70,12 +69,12 @@ No real-world sharded network has come close to this level of performance, and i
         Saying PoS is ``Maybe'' $O(n)$ secure is being kind --- since there are unanswered criticisms, we should really conclude ``No''.
         (There are no such unanswered criticisms of PoW-based consensus.)
     }
-    \tnote[ss]{
+    \tnote[$\dagger$]{
         \href{https://web.archive.org/web/20241227202028/https://solana.com/solana-whitepaper.pdf}{PoH} is $O(c)$ secure by design.
         Solana uses PoS on top of PoH, but it's unclear which has precedence (and one must).
         Additionally, since a $\le O(c)$ DoS has brought down Solana before, this is an upper limit on Solana's security.
     }
-    \tnote[st]{
+    \tnote[$\ddagger$]{
         Even though Solana requires $k \approx 10^8$ ($\sim$ 12 MB/s) for 50K TPS, this is consistent with their published ``strategy'' for ``scaling''.
         50K is chosen as the limit because \href{\linkSolanaFiftyKClaim}{the official site claims \emph{at least} 50K as the upper limit} and \href{\linkSolanaFourHundKFail}{400K is known to be beyond Solana's capabilities}.
         (Note: this also earns Solana a decisive ``No'' under the ``Decentralized?'' column.)
@@ -84,18 +83,18 @@ No real-world sharded network has come close to this level of performance, and i
         \FL
         Network & Decentralized? & $O(n)$ Secure? & \multicolumn{2}{l}{$O(n)$ Scalable?}
         \ML
-        Bitcoin   & Yes           & Yes              & No    & (Max. TPS: $\sim$ 5)\tmark[bt] \NN
-        Cardano   & Yes           & Maybe\tmark[PoS] & No    & (Max. TPS: $\sim$ 10 - 80)\tmark[ct] \NN
-        Solana    & No\tmark[st]  & No ($O(c)$)\tmark[ss] & Maybe & (Max. TPS: $\sim$ 50K)\tmark[st] \NN
-        Polkadot  & Maybe         & Maybe\tmark[PoS] & Maybe & (Max. TPS: $\sim$ 200 - 12K)\tmark[pt] \NN
-        Eth2      & Maybe         & Maybe\tmark[PoS] & Maybe & (Max. TPS: $\sim$ 1K - 62K)\tmark[et] \NN
-        Opt.Shard & Yes           & Yes              & Maybe & (Max. TPS: $\sim$ 8K - 350K)\tmark[ot]
+        Bitcoin   & Yes           & Yes              & No    & (Max. TPS: $\sim$ 5)\tmark[*] \NN
+        Cardano   & Yes           & Maybe\tmark[PoS] & No    & (Max. TPS: $\sim$ 10 - 80)\tmark[$\!$\#] \NN
+        Solana    & No\tmark[$\ddagger$]  & No ($O(c)$)\tmark[$\dagger$] & Maybe & (Max. TPS: $\sim$ 50K)\tmark[$\ddagger$] \NN
+        Polkadot  & Maybe         & Maybe\tmark[PoS] & Maybe & (Max. TPS: $\sim$ 200 - 12K)\tmark[\P] \NN
+        Eth2      & Maybe         & Maybe\tmark[PoS] & Maybe & (Max. TPS: $\sim$ 1K - 62K)\tmark[$\|$] \NN
+        Opt.Shard & Yes           & Yes              & Maybe & (Max. TPS: $\sim$ 8K - 350K)\tmark[\S]
         \LL
 }
 
 ## Addressing *Buterin's Trilemma*
 
-\todoDraftOnly[h]{write out some explanation of how B.T. is answered.}
+\assignedTODO{{Max}}{h}{write out some explanation of how B.T. is answered.}
 
 \begin{figure}[H]
 \centering
