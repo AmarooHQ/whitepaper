@@ -1,17 +1,17 @@
 \subsection{Simplex Tilings}
 
-We connect simplex tiles together, via mutual reflection, to create a simplex tiling.
-For the sake of brevity, when we say that a simplex tile reflects another tile (or that a tile is \emph{connected} to another tile), we mean that all simplex-chains in the first tile mutually reflect all simplex-chains in the second tile.
+We connect simplex-tiles together, via mutual reflection, to create a simplex tiling.
+For the sake of brevity, when we say that a simplex-tile reflects another tile (or that a tile is \emph{connected} to another tile), we mean that all simplex-chains in the first tile mutually reflect all simplex-chains in the second tile.
 % There are an infinite number of simplex tilings, and an infinite number of \emph{patterns} by which we can construct simplex tilings.
 A simplex tiling is thus a \emph{graph} of interconnected tiles.
 Connected tiles are \emph{neighbors} and are \emph{adjacent} to one another in the tiling.
 
 \defineTermTex{Simplex Tiling}{
-    An interconnected graph of mutually reflecting simplex tiles
+    An interconnected graph of mutually reflecting simplex-tiles
 }
 
 Before we look at some complex (and useful) tilings, let's consider three examples that are some of the simplest tilings possible: \autoref{fig:trivial-simplex-tiling}.
-The examples contain 2, 3, and 4 simplex tiles respectively.
+The examples contain 2, 3, and 4 simplex-tiles respectively.
 
 \aside{
     Note: we are not yet concerned with the security properties of these examples --- we need to build up to that first.
@@ -22,7 +22,7 @@ The examples contain 2, 3, and 4 simplex tiles respectively.
         \vskip 0pt
         \centering
         \includegraphics[max height=\linewidth, max width=\linewidth]{tiling_alt_s5_d0_sag.pdf}
-        \caption{2 simplex tiles}
+        \caption{2 simplex-tiles}
         \label{fig:triv-tiling-2}
     \end{subfigure}%%
     \hfill
@@ -30,7 +30,7 @@ The examples contain 2, 3, and 4 simplex tiles respectively.
         \vskip 0pt
         \centering
         \includegraphics[max height=\linewidth, max width=\linewidth]{tiling_a3_v3_s5_d0_sag.pdf}
-        \caption{3 simplex tiles}
+        \caption{3 simplex-tiles}
         \label{fig:triv-tiling-3}
     \end{subfigure}%%
     \hfill
@@ -38,19 +38,19 @@ The examples contain 2, 3, and 4 simplex tiles respectively.
         \vskip 0pt
         \centering
         \includegraphics[max height=\linewidth, max width=\linewidth]{tiling_a4_v3_s5_d0_sag.pdf}
-        \caption{4 simplex tiles}
+        \caption{4 simplex-tiles}
         \label{fig:triv-tiling-4}
     \end{subfigure}
     \caption[Trivial simplex tilings]{Trivial simplex tilings --- these are all equivalent to a single simplex as each simplex-chain reflects all other simplex-chains in the network.}
     \label{fig:trivial-simplex-tiling}
 \end{figure}
 
-In those examples, notice that each simplex tile reflects each other tile.
+In those examples, notice that each simplex-tile reflects each other tile.
 This means that each simplex-chain is mutually reflecting \emph{all} other simplex-chains (in all other tiles), so each of these tilings is equivalent to a standalone simplex.
 These tilings aren't particularly useful to us in practice, though, because we don't have a way to increase network-wide capacity beyond $O(c^2)$.
 
 If we want $O(n)$ capacity, then we'll need to come up with a new pattern for how to connect tiles together and how to add new tiles.
-Specifically: the pattern must \emph{always} have room for more simplex tiles, and each tile added must, on average, add \emph{more} than 1 new spot for additional tiles.\footnote{
+Specifically: the pattern must \emph{always} have room for more simplex-tiles, and each tile added must, on average, add \emph{more} than 1 new spot for additional tiles.\footnote{
     There are tilings where a tile consumes more than one free spot.
     For those tilings, on average each tile must add more spots than it consumes.
 }
@@ -58,9 +58,9 @@ Specifically: the pattern must \emph{always} have room for more simplex tiles, a
 \subsection{Tile Valence}
 
 The \emph{valence} ($v$) of a tile is the number of other tiles that it can connect to.
-In our example earlier, we split our simplex tile's capacity for reflections into 4 equal parts --- each part was 12.5\% of each simplex-chain's \emph{total} capacity.
-Since 1 of those parts is reserved for internal reflections, and 3 parts are reserved for external reflections, that simplex tile has a valence of $v=3$.
-If, instead, we split our simplex tile's capacity for reflections into \emph{5} equal parts, then each part would be 10\% of each simplex-chain's \emph{total} capacity, and the tile would have $v=4$.
+In our example earlier, we split our simplex-tile's capacity for reflections into 4 equal parts --- each part was 12.5\% of each simplex-chain's \emph{total} capacity.
+Since 1 of those parts is reserved for internal reflections, and 3 parts are reserved for external reflections, that simplex-tile has a valence of $v=3$.
+If, instead, we split our simplex-tile's capacity for reflections into \emph{5} equal parts, then each part would be 10\% of each simplex-chain's \emph{total} capacity, and the tile would have $v=4$.
 
 We don't \emph{have} to use a valence of 3 --- we can split up a tile's capacity for reflections any way that we like.
 Each tile could even have different valences, too, but this makes designing a tiling more complex.
@@ -74,7 +74,7 @@ We end up with a tiling that's equivalent to a normal simplex, though, since all
 The complete tiling with $v=1$, which is the only possible tiling, is shown in \autoref{fig:triv-tiling-2}.
 
 If a tiling has a valence of $v=2$, then there is a countably infinite number of solutions.
-The trivial solution (which has 3 tiles) is where each simplex tile is connected to all other simplex tiles --- this is shown in \autoref{fig:triv-tiling-3}.
+The trivial solution (which has 3 tiles) is where each simplex-tile is connected to all other simplex-tiles --- this is shown in \autoref{fig:triv-tiling-3}.
 We can create a tiling of $v=2$ with 4 tiles, too: $A \lrar B \lrar C \lrar D \lrar A$.
 This is part of a class of solutions: a loop.
 With $v=2$, we can construct a loop of arbitrary length.

@@ -260,7 +260,7 @@ Naturally, there are some other components that are necessary (like a component 
 
 \subsubsection{Dapp-chain simplexes}
 
-\todoDraftOnly[h]{Write sections on Dapp-chain simplex and dapp-dapp-chains}
+\todoDraftOnly[m]{Write sections on Dapp-chain simplex and dapp-dapp-chains}
 
 \todo{
   Dapp-chains can make simplexes between each other (in addition to one-way PoR with their host simplex-chain).

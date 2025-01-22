@@ -6,6 +6,13 @@
 
 \draftOnly{\mk{This section (\autoref{sec:tiling}) is being redrafted. It replaces \autoref{sec:tiling-old}}}
 
+\assignedTODO{{Max+Pouriya+Chris}}{h}{{
+    TILING: All three to discuss what needs to be in section.\\
+    Chris and Pouriya to pull together missing parts / refine.\\
+    Max to finish off writing.\\
+    Chris and Pouriya to do review after done.
+}}
+
 \input{50-tiling/00-tiling-intro.tex}
 \input{50-tiling/10-simplex-tilings.tex}
 \input{50-tiling/20-recursive-por.tex}
@@ -24,14 +31,14 @@
 
 Tiling is a method which allows UT to scale with order $O(n)$. When UT simplexes are tiled, the result is called a *simplex tiling*.
 
-<!-- \defineTermTex{Simplex Tile}{
+<!-- \defineTermTex{Simplex-Tile}{
     Like a simplex, but $\ge 75\%$ of the PoR capacity is reserved for reflections with \emph{neighboring} tiles; typically a quadrifurcated maximal simplex
 } -->
 
 \todoDraftOnly{terms and edit / refactor this section}
 
-A simplex tile, on its own, is very similar to a standalone simplex.
-If a standalone simplex (of a given capacity) could host $1600$ simplex-chains, then an equivalent simplex tile will host $400$ (or maybe less); only $25\%$ of the PoR capacity is reserved for *internal* reflections --- i.e., reflections within that simplex tile.
+A simplex-tile, on its own, is very similar to a standalone simplex.
+If a standalone simplex (of a given capacity) could host $1600$ simplex-chains, then an equivalent simplex-tile will host $400$ (or maybe less); only $25\%$ of the PoR capacity is reserved for *internal* reflections --- i.e., reflections within that simplex-tile.
 The other $75\%$ is reserved for *external* reflections to simplex-chains in *neighboring* tiles.
 
 That is: it is a simplex that deliberately reserves only $\nicefrac{1}{4}$ of its otherwise maximum PoR capacity for internal reflections.
@@ -44,7 +51,7 @@ Each child tile, at this stage, has only reserved 50% of its full PoR capacity -
 Thus, each tile is able to reflect all simplex-chains of the parent tile *and* two additional child tiles.
 Child tiles can be instantiated in an ad-hoc basis, i.e., as a simplex-tiling (or an individual tile) approaches maximum capacity.
 
-<!-- \defineTermTex{Simplex Tiling}{An interconnected graph of mutually reflecting simplexes. This graph grows in a scalable manner when simplex tiles have a valence $\ge 3$} -->
+<!-- \defineTermTex{Simplex Tiling}{An interconnected graph of mutually reflecting simplexes. This graph grows in a scalable manner when simplex-tiles have a valence $\ge 3$} -->
 
 <!-- \todoDraftOnly{
     from forum: \\
@@ -501,7 +508,7 @@ Additionally, a model of tilings of similar capacity --- i.e., similar $N_{\text
 
 \todo{write this section properly}
 
-What's the worst case for tiling --- as a method? Probably that PoR isn't safe to do non-recursively in a way that works for $O(n)$ tiling. The solution is to validate PoRs recursively which means that *every* miner needs *every* base-level (i.e., simplex-chain) block across all simplex tiles. That would enable edge-to-edge verification of all PoRs. In that case, an upper-bound is set based on minimum bandwidth requirements (for miners) and $\Delta S$ (see \autoref{sec:bandwidth-complexity}). For a given set of parameters, the limit is $N_{\text{tiles}} \cdot \nicefrac{\Delta S}{4} < \text{MinBandwidth}$.
+What's the worst case for tiling --- as a method? Probably that PoR isn't safe to do non-recursively in a way that works for $O(n)$ tiling. The solution is to validate PoRs recursively which means that *every* miner needs *every* base-level (i.e., simplex-chain) block across all simplex-tiles. That would enable edge-to-edge verification of all PoRs. In that case, an upper-bound is set based on minimum bandwidth requirements (for miners) and $\Delta S$ (see \autoref{sec:bandwidth-complexity}). For a given set of parameters, the limit is $N_{\text{tiles}} \cdot \nicefrac{\Delta S}{4} < \text{MinBandwidth}$.
 
 possible extension: maybe PoRs can be provided to miners but excluded from blocks. Like you can be a full node or a full-full-node, and full-full-nodes validate PoRs recursively in a way that isn't required for a single simplex. Or full-full-nodes are miners in a simplex, and full-full-full-nodes are miners in a tiling of simplexes.
 
