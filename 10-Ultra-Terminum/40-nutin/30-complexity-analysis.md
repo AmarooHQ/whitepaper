@@ -121,7 +121,7 @@ Thus $O(T_2) = O(c^2)$ as expected.
 It's typical, though, that the headers of nested chains, alone, are not sufficient: additional data is required.
 When such data is required to be recorded on-chain (i.e., it cannot be deterministically regenerated), then the \emph{effective} header size is the size of the raw header, plus the size of any auxiliary data.
 
-\todoDraftOnly[h]{Discuss the changes to the Ethereum model to make current.\\
+\assignedTODO{{Chris+Max}}{h}{Discuss the changes to the Ethereum model to make current.\\
 Might mean that L1 blocks are truly just L1 beacon block header + (if we need blob size / blob data commitment which is huge)?\\
 TL;DR: new \href{https://web.archive.org/web/20250105115555/https://ethereum.org/en/roadmap/danksharding/}{danksharding roadmap} with \href{https://github.com/ethereum/consensus-specs/blob/68d32accf945a84f69d4c779cb6c71223a311eac/specs/\_features/sharding/beacon-chain.md}{spec} means that the "shards" are now blobs of data, that get sampled. We now also have temporary blobs as the blobs for the layer 2s, and the commitment data for data sampling.
 }

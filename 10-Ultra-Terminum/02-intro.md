@@ -7,8 +7,8 @@
 
 # Introduction
 
-\assignedTODO{{Pouriya}}{h}{
-    Review the introduction changes.
+\assignedTODO{{Chris+Pouriya}}{h}{
+    INTRO: Chris to rewrite intro; Pouriya to review the changes.
 }
 
 \input{includes/ut/content/10-intro/10-intro.tex}

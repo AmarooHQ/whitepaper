@@ -7,7 +7,7 @@
 \draftOnly{\mk{This section (\autoref{sec:tiling}) is being redrafted. It replaces \autoref{sec:tiling-old}}}
 
 \assignedTODO{{Max+Pouriya+Chris}}{h}{{
-    All three to discuss what needs to be in section.\\
+    TILING: All three to discuss what needs to be in section.\\
     Chris and Pouriya to pull together missing parts / refine.\\
     Max to finish off writing.\\
     Chris and Pouriya to do review after done.
