@@ -441,6 +441,9 @@ atk situations:
 
 New stuff
 
+\begin{figure}
+\centering
+
 \begin{tikzpicture}[
 roundnode/.style={circle, draw=green!60, fill=green!5, very thick, minimum size=7mm},
 squarednode/.style={rectangle, draw=black!100, fill=white!5, thin, minimum size=5mm},
@@ -498,6 +501,9 @@ squarednode/.style={rectangle, draw=black!100, fill=white!5, thin, minimum size=
     node[midway, above] {$\lambda T$ elapsed};
 
 \end{tikzpicture}
+
+\caption{Visual Representation of the Four Conditions used to Compute a Safe LCA for Chain $R$.}
+\end{figure}
 
 \subsection{OLD - On SPV In UT}
 
