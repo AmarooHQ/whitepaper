@@ -443,46 +443,50 @@ atk situations:
 
 New stuff
 
+\input{tikz-styles}
+
 \begin{figure}
 \centering
 
 \begin{tikzpicture}[
-roundnode/.style={circle, draw=green!60, fill=green!5, very thick, minimum size=7mm},
-squarednode/.style={rectangle, draw=black!100, fill=white!5, thin, minimum size=5mm},
+roundednode/.style={rectangle,rounded corners=.1cm, draw=black!100, fill=white!5, thin, minimum size=7mm},
+squarednode/.style={rectangle, draw=black!100, fill=white!5, thin, minimum size=2mm},
+dotsnode/.style={draw=black!0, fill=white!5, minimum size=2mm},
 ]
 
 %\draw[help lines] (-1,-5) grid (12,5);
 
 %Nodes
-\node[squarednode]      (local1)                              {$L_i$};
-%\node[squarednode]      (remotelca)                           {$a$};
-%\node[squarednode]      (remote4)  [right=of remotelca]       {$R_{\lambda T}$};
-\node[squarednode]      (remote4)                             {$R_{\lambda T}$};
+\node[roundednode]      (chainr)                              {Chain R};
+\node[dotsnode]      (chainrpast) [right=of chainr, xshift=-0.5cm]   {$\dots$};
+\node[squarednode]      (remote4)  [right=of chainrpast]      {$R_{\lambda T}$};
 \node[squarednode]      (remote3)  [right=of remote4]         {$R_{\lambda N}$};
 \node[squarednode]      (remote2)  [right=of remote3]         {$R_{\lambda L}$};
 \node[squarednode]      (remote1)  [right=of remote2]         {$R_{j - \lambda}$};
-\node[squarednode]      (remotex)  [right=of remote1]         {$\dots$};
+\node[dotsnode]      (remotex)  [right=of remote1]         {$\dots$};
 \node[squarednode]      (remote0)  [right=of remotex]         {$R_j$};
 
-\node[squarednode]      (local1)   [below=of remotex]         {$L_{i - \lambda}$};
-\node[squarednode]      (localx)   [right=of local1]          {$\dots$};
-\node[squarednode]      (local0)   [right=of localx]          {$L_i$};
+\node[roundednode]      (chainl)   [below=of chainr]         {Chain L};
+\node[dotsnode]      (chainlpast) [right=of chainl, xshift=-0.5cm]   {$\dots$};
+\node[squarednode]      (local1)   [right=of chainlpast, xshift=6cm]         {$L_{i - \lambda}$};
+\node[dotsnode]      (localx)   [right=of local1, xshift=1cm]          {$\dots$};
+\node[squarednode]      (local0)   [right=of localx, xshift=1cm]          {$L_i$};
 
-%Lines
-%\draw[->] (remote4.west) -- (remotelca.east);
-\draw[->] (remote0.west) -- (remotex.east);
-\draw[->] (remotex.west) -- (remote1.east);
-\draw[->] (remote1.west) -- (remote2.east);
-\draw[->] (remote2.west) -- (remote3.east);
-\draw[->] (remote3.west) -- (remote4.east);
+%Parent refs
+\draw[arrowParent] (remote0.west) -- (remotex.east);
+\draw[arrowParent] (remotex.west) -- (remote1.east);
+\draw[arrowParent] (remote1.west) -- (remote2.east);
+\draw[arrowParent] (remote2.west) -- (remote3.east);
+\draw[arrowParent] (remote3.west) -- (remote4.east);
+\draw[arrowParent] (remote4.west) -- (chainrpast.east);
 
-\draw[->] (local0.west) -- (localx.east);
-\draw[->] (localx.west) -- (local1.east);
+\draw[arrowParent] (local0.west) -- (localx.east);
+\draw[arrowParent] (localx.west) -- (local1.east);
 
-\draw[dotted, black, arrows={->}] (local0.west) -- (remote0.east);
-\draw[dotted, black, arrows={->}] (local1.west) -- ([yshift=-0.15cm]remote2.east);
+\draw[dotted, black, arrowParent] (local0.west) -- (remote0.east);
+\draw[dotted, black, arrowParent] (local1.west) -- ([yshift=-0.15cm]remote2.east);
 
-%Dotted references
+%Dashed references
 \draw[dashed] (remote4.north) -- +(0, 2.2);
 \draw[dashed] (remote3.north) -- +(0, 1.5);
 \draw[dashed] (remote1.north) -- +(0, 0.8);
@@ -490,16 +494,16 @@ squarednode/.style={rectangle, draw=black!100, fill=white!5, thin, minimum size=
 
 \draw[dashed] (local1.south) -- +(0,-0.8);
 \draw[dashed] (local0.south) -- +(0,-0.8);
-\draw[dashed] (local0.north) -- +(0,3.7);
+\draw[dashed] (local0.north) -- +(0,3.9);
 
 %Condition arrows
 \draw[black, arrows={<->}] ([yshift=-0.6cm]local0.south) -- ([yshift=-0.6cm]local1.south)
     node[midway, above] {$\lambda$ blocks};
 \draw[black, arrows={<->}] ([yshift=0.3cm]remote0.north) -- ([yshift=0.3cm]remote1.north)
     node[midway, above] {$\lambda$ blocks};
-\draw[black, arrows={<->}] ([yshift=2.55cm]local0.north) -- ([yshift=1.0cm]remote3.north)
+\draw[black, arrows={<->}] ([yshift=2.7cm]local0.north) -- ([yshift=1.0cm]remote3.north)
     node[midway, above] {$\lambda N$ volume growth};
-\draw[black, arrows={<->}] ([yshift=3.25cm]local0.north) -- ([yshift=1.7cm]remote4.north)
+\draw[black, arrows={<->}] ([yshift=3.4cm]local0.north) -- ([yshift=1.7cm]remote4.north)
     node[midway, above] {$\lambda T$ elapsed};
 
 \end{tikzpicture}
