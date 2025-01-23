@@ -94,7 +94,11 @@ No real-world sharded network has come close to this level of performance, and i
 
 ## Addressing *Buterin's Trilemma*
 
-\assignedTODO{{Max}}{h}{write out some explanation of how B.T. is answered.}
+\pz{Clarify $\lambda$ and $T$}
+
+This paper introduced a new consensus mechanism, proof of reflection, that solves the Buterin trilemma by achieving scalability without compromising on decentralization or on security.
+At the core of this approach resides the ability for blockchains to share security using reflection while keeping the state of each chain local.
+Scalability and decentralization result from the fact that each chain only needs to process an $O(c)$ load for its chain state and an $O(c)$ load for the PoR graph, and $O(n)$ security is achieved through reflection whereby each chain becomes as secure as the network.
 
 \begin{figure}[H]
 \centering
@@ -103,6 +107,14 @@ No real-world sharded network has come close to this level of performance, and i
 \label{fig:trilemma-core-conflict-solved}
 \end{figure}
 
+Each chain state is independent and has its own specifications, thus allowing for a multitude of chain implementations to meet the needs of virtually any service.
+However, chains are not siloed and we presented a secure cross-chain protocol that enables chains to communicate and transfer assets between them.
+In essence, cross-chain transactions enable chains to converge toward an Internet of blockchains.
+
+\pz{Need to mention the security of tiles similar to what was presented in Duk Inn andd Conduit}
+Finally, with tiling configurations, chains can optionally adopt a solution that pushes throughput even further while still benefiting from the security of the network.
+With UT$_\aleph$, the network can achieve unbounded throughput and open the way to a truly ubiquitous blockchain.
+In \Cref{table:ut-vs-trilemma}, we present an evaluation of the throughput of the UT variants.
 
 \begin{table}[H]
     \centering
@@ -121,6 +133,7 @@ No real-world sharded network has come close to this level of performance, and i
         $\UTinf{3}$ & Yes & Yes & Yes & (Max. TPS: $\sim$ $10^{14}$ - $10^{25}$) \\
         \bottomrule
     \end{tabular}
+\label{table:ut-vs-trilemma}
 \end{table}
 
 %% END ### RELEASE
