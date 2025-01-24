@@ -436,12 +436,12 @@ atk situations:
 
 %% BEGIN ### RELEASE
 
-\assignedTODO{{Max+Pouriya}}{h}{SPV section}
 
-\subsection{On SPV In UT}
+\subsection{Intra-Simplex Cross-Chain Transactions}
+
 \label{sec:spv-in-ut}
 
-New stuff
+\assignedTODO{{Max+Pouriya}}{h}{SPV section}
 
 \begin{figure}
 \centering
@@ -451,11 +451,10 @@ New stuff
 \caption{Visual Representation of the Four Conditions used to Compute a Safe LCA for Chain $R$.}
 \end{figure}
 
-\subsection{OLD - On SPV In UT}
-
-\pz{This section is being replaced by \Cref{sec:spv-in-ut}}
-
 \input{27-practical/95-spv-requires-valid-state.tex}
+
+<!-- max redraft start -->
+\input{27-practical/95-spv-2-mk.tex}
 
 \input{27-practical/98-ut1-protocol-summary.tex}
 
