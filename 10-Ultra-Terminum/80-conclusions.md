@@ -107,11 +107,10 @@ Scalability and decentralization result from the fact that each chain only needs
 \label{fig:trilemma-core-conflict-solved}
 \end{figure}
 
-Each chain state is independent and has its own specifications, thus allowing for a multitude of chain implementations to meet the needs of virtually any service.
+Each chain state is independent and has its own specifications, thus allowing for a multitude of chain implementations to meet the needs of virtually any application.
 However, chains are not siloed and we presented a secure cross-chain protocol that enables chains to communicate and transfer assets between them.
 In essence, cross-chain transactions enable chains to converge toward an Internet of blockchains.
 
-\pz{Need to mention the security of tiles similar to what was presented in Duk Inn andd Conduit}
 Finally, with tiling configurations, chains can optionally adopt a solution that pushes throughput even further while still benefiting from the security of the network.
 With UT$_\aleph$, the network can achieve unbounded throughput and open the way to a truly ubiquitous blockchain.
 In \Cref{table:ut-vs-trilemma}, we present an evaluation of the throughput of the UT variants.
