@@ -123,11 +123,13 @@ This outcome is self-evidently insecure.
 Therefore our question about cross-chain transaction invalidation has the same answer as questions like \emph{Under which circumstances can a simplex-chain reorganization occur?}
 We are also concerned with the parameters around such a reorganization: \emph{Is it dependent on the number of confirmations?}, \emph{If so, how many?}, \emph{What proportion of global hash-rate is required?}, etc.
 
+\mk{cohesion or coherence}
+
 Fortunately, we've done a lot of the legwork already.
 \emph{Proof of Reflection} allows us to share security between simplex-chains.
-Block-DAGs and the PoR Graph provide some censorship resistance, and more importantly, are the basis for both the \AxiomOfMaximalRefelection{} and the \AxiomOfUnifiedAncestry{}.
+Block-DAGs and the PoR Graph provide some censorship resistance, and more importantly, are the basis for both the \AxiomOfMaximalReflection{} and the \AxiomOfUnifiedAncestry{}.
 These axioms go on to, respectively, bind the histories of each simplex-chain to one another and ensure that each chain's history spans all valid blocks of that chain in the PoR graph.
-The binding of histories is the basis for the \emph{cohesion} of the simplex, and PoR Graph-spanning histories ensures that the ordering of blocks within each chain conforms to the ordering of blocks in the PoR Graph.
+The binding of histories is the basis for the \emph{cohesion} / TODO / \emph{coherence} of the simplex, and PoR Graph-spanning histories ensures that the ordering of blocks within each chain conforms to the ordering of blocks in the PoR Graph.
 Therefore: to change the order of blocks within a simplex-chain requires that an attacker change the global ordering, which in turn requires a 51\% attack.
 $\blacksquare$
 
@@ -148,6 +150,7 @@ What we need is a method of \emph{error correction} that is fast enough to ensur
 This role is filled by \emph{fraud proofs}.
 
 % FP requirements: small, fast to verify, verifiable by full nodes of other simplex-chains.
+%
 %
 
 
