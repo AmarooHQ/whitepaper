@@ -27,7 +27,53 @@
     \addcontentsline{todo}{todo}{\protect{\thetodo. } \truncate{0.8\linewidth}{#1}}
 }
 
-% TODO: Chris: addcontentsline, update the title background!
+\newcommand{\assignedTODO}[3]{ %%
+  \ifthenelse{\equal{#1}{}}{
+    %% This is a normal todo, no assignment
+    \todoDraftOnly[#2]{#3}
+  }{
+    %% The assigned todo
+    \ifthenelse{\equal{#2}{h}}{
+      \refstepcounter{hightodocounter}%
+      \begin{tcolorbox}[
+          colback=maxsColor!20!white,
+          colframe=TODOHIGH!70!white,
+          title={TODO: (#1) [\thehightodocounter] \hfill {\sf \textbf{(HIGH)}}}
+        ]
+        \label{htodoref:\thehightodocounter}
+        (#1): #3
+      \end{tcolorbox}
+      \addcontentsline{htodo}{htodo}{\protect{\thehightodocounter. } \truncate{0.8\linewidth}{(#1) #3}}
+    }{
+      \ifthenelse{\equal{#2}{m}}{
+        \refstepcounter{medtodocounter}%
+        \begin{tcolorbox}[
+            colback=maxsColor!10!white,
+            colframe=TODOMED!90!white,
+            title={[TODO: (#1) [\themedtodocounter] \hfill {\sf \textbf{(MED)}}}
+          ]
+          \label{mtodoref:\themedtodocounter}
+          (#1): #3
+        \end{tcolorbox}
+        \addcontentsline{mtodo}{mtodo}{\protect{\themedtodocounter. } \truncate{0.8\linewidth}{(#1) #3}}
+      }{
+        \ifthenelse{\equal{#2}{l}}{
+          \refstepcounter{lowtodocounter}%
+          \begin{tcolorbox}[
+              colback=maxsColor!10!white,
+              colframe=TODOLOW!70!white,
+              title={TODO: (#1) [\thelowtodocounter] \hfill {\sf \textbf{(LOW)}}}
+            ]
+            \label{ltodoref:\thelowtodocounter}
+            (#1): #3
+          \end{tcolorbox}
+          \addcontentsline{ltodo}{ltodo}{\protect{\thelowtodocounter. } \truncate{0.8\linewidth}{(#1) #3}}
+        }{}
+      }
+    }
+  }
+}
+
 \newcommand{\priorityTODO}[2][]{
   \ifthenelse{\equal{#1}{h}}{
     \refstepcounter{hightodocounter}%

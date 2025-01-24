@@ -322,9 +322,8 @@ The most important thing is that $\text{DAA}_N \gg c$, particularly regarding tr
     In practice, we should seriously consider smaller values of $\text{DAA}_N$ for the security benefit.
 }
 
-\pz{Variable n has already been defined.}
 With regards to the other values --- $q$, $c$, and $N_1$ --- they will be varied as part of the experiment so that we can generate each data-point.
-For each data-point, we'll gather at least 9,000 samples (this is indicated by ``$n \ge 9000$'' in these figures' legends).
+For each data-point, we'll gather at least 9,000 samples (this is indicated by ``$n \ge 9000$'' in these figures' legends, where $n$ in this context is the number of samples).
 
 The goal is to generate multiple data series that the CEC predicts to align.
 To that end, the functions in \autoref{table:cec-functions-to-graph} are measured and graphed on the same axes.
@@ -366,13 +365,10 @@ If the CEC is true then we expect: $f_1(x) \approx f_2(x) \approx f_3(x) \approx
 
 \subsubsubsection{Error Correction Iteration}
 
-\pz{Having a probabilistic model and proving it empirically would be far more convincing than trying to make the experiments fit the hypothesis.}
-
-\todoDraftOnly[h]{Rewrite paragraph so that it isn't misleading to say that the experiment changed to fit the hypothesis.}
-
 Following the initial implementation of PoR in the simulator, results were promising but did not align with the theoretical prediction (based on Rosenfeld's analytical derivation of $P(q; c)$).
 At lower values of $c$ and/or $N_1$, the results suggested that the simulation was \emph{more} secure than expected.
 At higher values of $N_1$, $P^\prime$ did not appear to approach 0, instead approaching $\sim 0.05$.
+This hinted at the existence of potential errors in the simulator framework.
 
 Given the nature of writing a simulation (compared to writing a production blockchain), many simplifications were made.
 Some of these simplifications shouldn't matter, but some might.

@@ -149,7 +149,7 @@ Does *header omission* with *explicit proofs* provide any advantages? Yes, in so
 
 Particularly, if miners include only the single missing merkle branch associated with each necessary PoR, then *no additional information* is required besides the *header* itself.
 Headers are trivial to acquire from the network, and each only needs to be acquired once, regardless of the number of PoRs it is a part of.
-Since the *hash of each header* is *part* of the missing PoR merkle branch, miners only need to provided *an ordered list of merkle branches* for full PoR verifiability.
+Since the *hash of each header* is *part* of the missing PoR merkle branch, miners only need to provide *an ordered list of merkle branches* for full PoR verifiability.
 Additionally, these merkle branches *will be part of specific SPV proofs*, so that when a cross-chain SPV transaction (which uses those branches) is made, it can omit those parts of the proof (replacing them with a pointer).
 
 This UT protocol variant is +HOPoRs: the combination of *header omission* (+HO) and *explicit proofs* (+PoRs).
@@ -169,7 +169,7 @@ Since we \emph{know} that one end of the hash has multiple zero bytes, we can re
     From this we can recover the number of zero bytes, so we don't need to explicitly encode it.
 }
 
-This reduces the length of the hash (in bytes) from $g$ to $g - z + 1$ ($z$ being the number of zero bytes), \emph{however}, the \emph{security} of the hash \ul{is still $8g$ bits}.
+This reduces the length of the hash (in bytes) from $g$ to $g - z + 1$ ($z$ being the number of zero bytes), \emph{however}, the \emph{security} of the hash \ul{remains the same ($8g$ bits)}.
 This is a limited form of hash compression.
 In a mature network using +HO, reducing hash length by $\sim \nicefrac{1}{4}$ is possible, corresponding to an increase in maximum capacity of $\sim \nicefrac{1}{3}$ or so.
 
@@ -188,7 +188,7 @@ For example, Bitcoin block 879,273 has a difficulty around $1.1 \times 10^{14}$,
 Given Bitcoin produces around 52600 blocks per year (and all else being equal), we can expect the best block hash produced in the last year to have around $78 + \log_2(52600) \approx 94$ leading zero-bits.
 Practically speaking, all the silicon in the world working for a year, singularly, on finding a partial SHA256 collision would not do much better than 94 bits.
 We can be confident in this \emph{particular} prediction because the market for Bitcoin ASICs is mature -- those ASICs use the latest fabrication processes, are numerous enough, and are orders of magnitude more efficient than general processors (CPUs, GPUs, etc).
-For less mature networks, or networks using algorithms that benefit less from ASICs, the difference will be greater and more dependent on external compute resources which are not reflected in the PoW difficulty.
+For less mature networks, or networks using algorithms that benefit less from ASICs, the difference will be greater and more dependent on external compute resources, which are not reflected in the PoW difficulty.
 But, provided that $g \gg 2z$, this does not present an issue -- the low value of $z$ means we have more buffer until we pass the insecurity breakpoint, so these two forces roughly cancel out in all but extreme cases.
 
 We will make use of this second property, that the leading zero-bits are related to the global hashing capacity, to justify the safety of \emph{hash truncation} as an optimization.
@@ -436,9 +436,12 @@ atk situations:
 
 %% BEGIN ### RELEASE
 
+
 \subsection{Intra-Simplex Cross-Chain Transactions}
 
 \label{sec:spv-in-ut}
+
+\assignedTODO{{Max+Pouriya}}{h}{SPV section}
 
 \input{27-practical/95-spv-requires-valid-state.tex}
 

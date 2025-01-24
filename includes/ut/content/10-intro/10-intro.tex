@@ -20,17 +20,18 @@ which states that a blockchain can have at most two of the three following prope
 These properties, and the notion of only being able to ``\emph{choose two of three}'', quickly highlight potential shortcomings in various designs.
 For example, Bitcoin and the original Proof-of-Work Ethereum (pre-merge) are chains that preference \emph{decentralization} and \emph{security} while foregoing scalability manifested into long transaction wait times, and higher fees due to the network not having enough capacity to process all requests.
 On the other hand, blockchains that focus on \emph{security} and \emph{scalability} over decentralization often display exceptional transaction throughput, but are vulnerable node failures causing network halts, or, fall to shortcomings of centralized services, such as censorship -- examples include Solana, BNBChain, Ripple, or enterprise blockchains.
-Finally, chains that prefer \emph{scalability} and \emph{decentralization} over security may exhibit high performance, but often reduce parameters in their security choices for the sake of inclusivity, for example XXX.
-
-\todoDraftOnly[h]{Examples of the blockchains for each side of the trilemma}
+Finally, chains that prefer \emph{scalability} and \emph{decentralization} over security may exhibit high performance, but may reduce parameters in their security choices for the sake of inclusivity, for example the original IOTA chain or chains that target IOT/embedded devices.
 
 Amaroo's underlying consensus mechanism, \emph{Ultra Terminum} (UT), is a cooperative cross-chain consensus strategy that addresses \emph{Buterin's Trilemma}, and promotes cohesiveness amongst chains and communities.
 
-\mk{big claim, might have to qualify this a bit more about what 'existing consensus methods' means.}
-\pz{Add somewhere in intro that UT is a consensus protocol that combines (1) a generalization of Proof-of-X protocols and (2) reflection to share security between heterogenous chains.}
+%% Commenting for brevity of TODO
+%% \mk{big claim, might have to qualify this a bit more about what 'existing consensus methods' means.}
 
-Compared with existing consensus methods, UT provides \emph{equal or better} security properties than \textbf{all} existing consensus methods (including Bitcoin's PoW method and variants, and \emph{all} PoS variants).
+Compared with existing consensus methods, UT provides \emph{equal or better} security properties
+%% than \textbf{all} existing consensus methods
+(including Bitcoin's PoW method and variants, and \emph{all} PoS variants).
 This is because UT leverages existing consensus methods in combination and, by way of construction, UT can only \emph{add} security to these methods.
+In a way, $\UT{}$ provides ways to generalize the contributions between chains, fostering collaboration to share security amongst heterogeneous chains.
 
 \UT{} is capable of supporting millions of transactions per second with similar chain parameters (like block size) to those of traditional blockchains (like Bitcoin or Eth1\footnote{
     The term \emph{Eth1} refers to the original Proof-of-Work Ethereum (pre-merge), and \emph{Eth2} refers to the Sharded Proof-of-Stake Beacon Chain.

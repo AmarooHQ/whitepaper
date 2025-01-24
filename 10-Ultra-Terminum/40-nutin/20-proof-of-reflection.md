@@ -338,10 +338,8 @@ How can we use these relationships to our advantage?
 
 \aside{
   With regards to Proof of Reflection, consider that we \emph{only} need to convert \emph{simultaneous} work.
-  That means: PoR does not need to be able to convert chain-work between chains \emph{over time}, only \emph{for some given moment}.
+  That means: PoR does not need to be able to convert chain-work between chains \emph{over time}, only \emph{for some given moment}.\footnote{At this point, we are discussing how PoR works with Proof-of-Work, discussions of where other methods, such as Proof-of-Stake, fit into the ecosystem will be discussed in \cref{sec:converting-confirmations}.}
 }
-
-\cn{Part of the aside (or in footnote?) might be a good place to point to further discussion of why starting with PoW is suitable for PoR because of instantaneous weight, and that PoS has additional aspects that need to be considered (stake ratio, attestation/vote inclusion over time, ..) or forward reference to: \cref{sec:converting-confirmations}.}
 
 The units that we have to work with are: blocks, seconds, hashes, and coins\footnotemark{}.
 \footnotetext{
@@ -1130,7 +1128,7 @@ Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
 
 \subsection{Incompatibility between Merged Mining and PoR}
 
-\todoDraftOnly[h]{write --- The Insecurity of Merged Mining}
+\assignedTODO{{Max}}{h}{write or leave for next release --- The Insecurity of Merged Mining}
 
 - Merged Mining allows attacking merged chains at 0 cost.
 - that means that if a parent chain and a merged mined child chain where to reflect one another, then the weight contributed via merged mining must be 0 --- no additional work was actually done beyond that of the parent-chain.
