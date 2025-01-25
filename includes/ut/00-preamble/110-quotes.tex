@@ -131,3 +131,21 @@
     \trim{#1}%
 \end{tcolorbox}
 }
+
+\NewDocumentCommand{\infoNote}{m}{
+\begin{tcolorbox}[
+    % colback=white,
+    bicolor,
+    sharp corners,
+    % enhanced,
+    parbox=false,
+    interior style={preaction={fill=Cerulean!40!white},
+        % pattern={Lines{angle=45, distance=5mm, line width=2.5mm}},
+        pattern=north east lines,
+        %{Lines{angle=45, distance=5mm, line width=2.5mm}},
+        pattern color=Cerulean!20!white}
+    ]%
+    \reversemarginpar\marginnote{\nullOnCopy{\textbf{Note}}}%
+    \trim{#1}%
+\end{tcolorbox}
+}

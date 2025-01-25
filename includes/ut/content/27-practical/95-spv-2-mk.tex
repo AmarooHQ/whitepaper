@@ -1,0 +1,194 @@
+\subsubsection{0 - goes immediatley after subsection title}
+
+
+
+\subsubsection{Introduction}
+
+
+
+Our goal in this section is to find a method for cross-chain transactions between any two simplex-chains that is safe, fast, succinct, and reliable.
+\begin{itemize}
+    \item \emph{Safe}: an adversary must perform a 51\% attack to execute an invalid cross-chain transaction.
+    \item \emph{Fast}: $O(t) \le O(\lambda) = O(1)$, where: $t$ is the maximum delay between a cross-chain transaction being confirmed by a simplex-chain and the point at which the destination simplex-chain allows processing that transaction; $\lambda$ is a security parameter (e.g., $\lambda = 4$ local confirmations).
+    \item \emph{Succinct}: for any cross-chain proof $\pi$, $O(\pi) < O(c)$ and $|\pi|$ is practical.
+    \item \emph{Reliable}: the above properties hold for all transactions in all simplex-chains.
+\end{itemize}
+
+Given everything we have discussed up to now, it's not clear how cross-chain transactions are possible.
+The problem is that miners on one simplex-chain do not validate the state transitions of other simplex-chains.
+Each simplex-chain, locally, has an $O(\nicefrac{n}{c})$ share of the network's security (assuming there are $O(c)$ many chains).
+An $O(\nicefrac{n}{c})$ adversary could theoretically produce \emph{all} of the blocks for a single simplex-chain (e.g., by mining at a slight loss to push other miners out).
+The adversary could then create a very long chain of blocks that have valid headers, PoRs, etc, but also contain one or more fraudulent transactions.
+Perhaps the main-chain eventually corrects to a non-fraudulent history (similar to \autoref{sec:preventing-dos-attacks}) --- but in that case we'd need to wait a \emph{very} long time to be sure that such a correction \emph{must} have happened.
+That violates the \emph{fast} goal, so this eventual-correction idea fails to meet our overall goal.
+
+Are we stuck?
+For a blockchain network to be scalable, it must be the case that miners are \emph{not} required to validate more than one chain!
+Have we come all this way, attempting to deal with the core conflict of the trilemma, only to find that we just moved the conflict?
+
+(normally mentioned snarks and stuff here, but we don't want to for new spv)
+
+\subsubsection{Why does SPV work for Bitcoin?}
+
+For the sake of simplicity, let's consider Bitcoin in isolation.
+Particularly, we'll assume that there are no other networks of similar size using the same PoW algorithm or compatible mining hardware.
+
+A concise argument for the security of Bitcoin-SPV proofs is:
+
+\begin{argumentslist}
+    \item An SPV proof is a merkle branch proving that a transaction exists in a block.
+    \item All blocks are part of the same blockchain and history.
+    \item All transactions that occur are in some block's merkle tree.
+    \item If a transaction is invalid, then the block is invalid.
+    \item If a block builds on an invalid block, then it is invalid.
+    \item If a miner produces an invalid block, they get no block reward.
+    \item $\implies$ Honest miners won't produce or build on invalid blocks.
+    \item \label{prem:spv-7} $\implies$ For an adversary to produce an apparently valid (but fraudulent) proof leading to a \emph{main chain} block, they'd need to out-compete honest miners (i.e., 51\% attack the network).
+    \item \label{prem:spv-8} $\implies$ Only valid transactions exist in the main chain.\footnote{
+        This isn't the full picture for some blockchains (e.g., Ethereum) even though SPV still works for them --- a transaction that fails to execute can still be valid and produce a valid state transition.
+        In these cases, an invalid state transition implies an invalid block, so it's customary to prove that some state has the right values rather than that a transaction exists.
+    }
+    \item $\implies$ It's safe to accept SPV proofs for blocks in the main chain.
+\end{argumentslist}
+
+It appears that \cref{prem:spv-7} is our current sticking point for Simplex-SPV proofs.
+
+But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could get to \cref{prem:spv-8} by other means.
+
+\subsubsection{Method}
+
+\infoNote{
+    The details below are an overview of Amaroo's cross-chain protocol.
+    Full details are the topic of the Amaroo team's forthcoming paper on the subject.
+}
+
+\subsubsubsection{Context}
+
+The purpose of UT's cross-chain protocol is to \emph{maintain coherence} between simplex-chains.
+This means all that all the essential properties we'd expect to hold for transactions on a single chain should hold between chains, too: coins are not created nor destroyed\footnote{
+    That isn't to say burning coins isn't possible, but it should never be an unintended byproduct of a cross-chain transaction.
+}, coins can only be spent once, \emph{the transaction executes entirely or not at all}, etc.
+There will obviously be some particular properties that are different, such as a delay between inputs being spent (on the sending chain) and outputs being created (on the receiving chain).
+
+
+
+\begin{comment}
+    - hard things
+      - guaranteed execution vs guaranteed to be redeemable
+
+    - if a tx is valid, then spending the same inputs with a cross-chain wrapper around the outputs is valid
+    - the validity of a transaction is evaluated and enforced entirely on the sending chain
+    - if a transaction is invalid, then a fraud proof is possible
+    - the \AxiomOfAvailability means miners on the receiving chain can easily find all incoming XC transactions
+    - if a fraud proof exists for a block, then the block is invalid
+    - a fraud proof can be included by any miner from any simplex chain (and goes in the PoR graph)
+    - if a block is invalid, then all blocks of that chain that build on it are invalid
+    - if a block is invalid, reflecting blocks are not immediately invalidated
+    - however, reflecting blocks outside the security parameter are invalid \emph{unless} they build on PoR graph tips that include the fraud proof
+
+
+    - normal SPV is PUSH-PULL: you PUSH on the sending chain and PULL on the receiving chain
+    - We can do PUSH-PUSH: you PUSH on the sending chain it is automatically PUSHed on the receiving chain
+    - We can also do PULL-PUSH: you PULL on the receiving chain, which automatically PUSHes on the sending chain to the receiving chain
+      - this requires an output type: SpendIfExistsElse which tests whether an output exists and then produces one of two outcomes depending on the result
+      - you send that PUSH-PUSH style from a chain, which then auto-execs the output on the receiving chain. If the exists branch is an XC output, then this is also PUSH-PUSH. So it functions as PULL-PUSH.
+    - Our cases require only 1 tx compared to the typical 2 txs.
+
+
+
+- DoS issue
+- Bribe issue
+- Decoherence (mint funds)
+
+% important: censorship resistance
+\end{comment}
+
+
+% -- context
+
+Before we address how cross-chain transactions will work, we first need to remember the context in which we're operating.
+Leading up to this point, we've constructed a network with some wildly different properties to traditional blockchains: ultra-fast confirmations, additional DoS and censorship resistance, shared security, higher order scaling, etc.
+These improvements are due to the specific combination of: \emph{Proof of Reflection}, the use of chain-like block-DAGs in the PoR Graph and each simplex-chain, fraud proofs, and the Axioms of \AxOfAvailability{}, \AxOfMaximalReflection{}, and \AxOfUnifiedAncestry{}.
+Each of these ideas will have a role to play in the cross-chain protocol described shortly.
+
+Additionally, we are concerned about some possible attacks aimed at the cross-chain protocol.
+We are not concerned about a 51\% attack in this discussion since we already know that the network cannot function in that context.
+
+The first and most important thing to consider is \emph{Under which circumstances can cross-chain transactions be invalidated?}
+If it is possible to invalidate a past SPV transaction, this could be used to perform a doublespend, or coin duplication, etc.
+Therefore, we should strive for a protocol that only permits such invalidation under a 51\% attack (or worse).
+That way we can be confident that the cross-chain protocol is not the weakest link in the chain, since local (intra-chain) transactions break down at that point, anyway.
+
+The obvious way to invalidate a cross-chain transaction is to cause a reorganization on the origin chain.
+If the pivot of the reorganization is antecedent to the cross-chain transaction, then it is up to the attacker whether the origin transaction is included in the resulting canonical history.
+This outcome is self-evidently insecure.
+Therefore our question about cross-chain transaction invalidation has the same answer as questions like \emph{Under which circumstances can a simplex-chain reorganization occur?}
+We are also concerned with the parameters around such a reorganization: \emph{Is it dependent on the number of confirmations?}, \emph{If so, how many?}, \emph{What proportion of global hash-rate is required?}, etc.
+
+Fortunately, we've done a lot of the legwork already to prove that the ordering of simplex-chain blocks is stable and works for cross-chain transactions.
+\emph{Proof of Reflection} allows us to share security between simplex-chains.
+Block-DAGs and the PoR Graph provide some censorship resistance, and more importantly, are the basis for both the \AxiomOfMaximalReflection{} and the \AxiomOfUnifiedAncestry{}.
+These axioms go on to, respectively, bind the histories of each simplex-chain to one another and ensure that each chain's history spans all valid blocks of that chain in the PoR graph.
+The binding of histories is the basis for the \emph{coherence} of the simplex, and PoR graph-spanning histories ensures that the ordering of blocks within each chain conforms to the ordering of blocks in the PoR graph.
+Therefore: to change the order of blocks within a simplex-chain requires that an attacker change the global ordering, which in turn requires a 51\% attack.
+$\blacksquare$
+
+Regarding network security, resisting this particular attack is paramount because this kind of reorganization \emph{affects honest nodes}.
+By comparison, there are other attacks that do not affect honest nodes, but do affect, say, light clients.\footnote{
+    In this context light clients are not considered honest nodes (nor attacking nodes) since they do not contribute to global consensus.
+}
+These other attacks aren't as concerning provided that they only affect non-validating network participants.
+But! What happens when an invalid block is mined?
+It \emph{will} be reflected, because miners of other simplex-chains do not validate the block.
+What we need is a method of \emph{error correction} -- one that is fast enough to ensure invalid blocks are dealt with before the cross-chain protocol allows those blocks to be processed.
+This role is filled by \emph{fraud proofs}.
+
+In \UT{}, \emph{fraud proofs} are automatically constructed by any full node during normal validation -- the state transition function will return either a new state trie \emph{or} a fraud proof.
+Once a fraud proof is constructed, it is broadcast similar to a transaction.
+Then, \emph{any miner} from \emph{any simplex-chain} can validate and include the fraud proof \emph{as part of the PoR graph}.
+Due to \AxOfUnifiedAncestry{}, every simplex-chain calculates the expected chain-tips for every simplex-chain.
+When a fraud proof invalidates a block, the calculated chain-tips for a given simplex-chain are updated to exclude any invalid blocks from that chain's history.
+Thus, as long as fraud proofs are readily generated, broadcast, and included by other miners, the PoR graph knows which blocks are on-main valid blocks, and which are not.
+
+There is, of course, some lag between an invalid block being mined, the fraud proof being generated, and the proof being included in the PoR graph.
+In a healthy network, the expected delay is $(N_1 B_f)^{-1} + o$ seconds, where $o$ is a little overhead to account for the first node of that chain to receive and process the block.
+This is much less than a block period -- even when a minority of miners are honest (particularly when $N_1 \gg p^{-1}$).
+
+\subsubsubsection{Construction}
+
+
+
+\subsubsubsection{Other draft stuff}
+
+% hidden assumption: attacker is producing valid blocks.
+% this matters particularly because \emph{the re-org affects honest nodes}.
+
+
+% -- ctx: attacker is producing valid blocks
+% problem: conflates DoS with XC attack
+\emph{The only re-orgs that matter are those among \ul{honest} nodes.}
+For example: if an attacker bribes 90\% of miners to ignore certain blocks, this \emph{does not affect \ul{\UT{1}}}.
+It \emph{does} affect traditional blockchains, though, since this \emph{effectively} controls the canonical history of the chain.
+For a single-chain network, using a block-DAG is enough to foil the attack: controlling the canonical history of the chain can only be done for very short intervals (\autoref{sec:preventing-dos-attacks}).
+In a multi-chain network like \UT{1}, we need the property to be strong enough to ensure that cross-chain transactions are \emph{never} processed when the network is in an ambiguous state.
+% \UT{1} achieves this through the \emph{convergence} required by the Axioms.
+% \UT{1} achieves this
+
+% one way to achieve this is by making certain things invalid that would be permissable (or not possible to detect) in a single-chain netowrk.
+% UT does this via Axioms
+
+
+\begin{comment}
+- any honest node can produce a fraud proof
+- any miner on any simplex-chain can include a fraud proof at the PoR level targeting any other chain
+- therefore, getting invalid blocks in the main chain requires either:
+  - 51% attack, or
+  - near-complete control over p2p connections (particularly around miners)
+\end{comment}
+
+
+% -- push-pull
+Typically, a cross-chain protocol will require two interactions: one on the sending chain and one on the receiving chain.
+That is, there is some state modification on the first chain, and then, on the second, an acknowledgment of that and some associated action (like crediting an account).
+Based on the direction of information, order of actions, and the focus on those actions, we could describe these kinds of methods as \emph{push-pull} methods.
+Information is both pushed from the sending chain, and pulled into the receiving one -- conceptually, at least.

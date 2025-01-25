@@ -438,8 +438,6 @@ Practically, this effect means that a decrease to the size of headers has *incre
 
 \subsection{Comparison of UT Variants}
 
-\todoDraftOnly[h]{update values to account for \AxiomOfRawMaximalReflection + longest PoR chain}
-
 \autoref{table:compare_optimizations_a} and \autoref{table:compare_optimizations_b} show a comparison between UT variants.
 For comparisons over a range of parameters, see \autoref{sec:ut-variant-complexities}.
 
