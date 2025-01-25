@@ -63,7 +63,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 }
 
 The purpose of UT's cross-chain protocol is to \emph{maintain coherence} between simplex-chains.
-This means all that all the essential properties we'd expect to hold for transactions on a single chain should hold between chains, too: coins are not created nor destroyed\footnote{
+This means that all the essential properties we'd expect to hold for transactions on a single chain should hold between chains, too: coins are not created nor destroyed\footnote{
     That isn't to say burning coins isn't possible, but it should never be an unintended byproduct of a cross-chain transaction.
 }, coins can only be spent once, \emph{the transaction executes entirely or not at all}, etc.
 There will obviously be some particular properties that are different, such as a delay between inputs being spent (on the sending chain) and outputs being created (on the receiving chain).
