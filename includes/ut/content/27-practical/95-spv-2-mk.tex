@@ -62,6 +62,8 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
     Full details are the topic of the Amaroo team's forthcoming paper on the subject.
 }
 
+\subsubsubsection{Context}
+
 The purpose of UT's cross-chain protocol is to \emph{maintain coherence} between simplex-chains.
 This means all that all the essential properties we'd expect to hold for transactions on a single chain should hold between chains, too: coins are not created nor destroyed\footnote{
     That isn't to say burning coins isn't possible, but it should never be an unintended byproduct of a cross-chain transaction.
@@ -123,37 +125,40 @@ This outcome is self-evidently insecure.
 Therefore our question about cross-chain transaction invalidation has the same answer as questions like \emph{Under which circumstances can a simplex-chain reorganization occur?}
 We are also concerned with the parameters around such a reorganization: \emph{Is it dependent on the number of confirmations?}, \emph{If so, how many?}, \emph{What proportion of global hash-rate is required?}, etc.
 
-\mk{cohesion or coherence}
-
-Fortunately, we've done a lot of the legwork already.
+Fortunately, we've done a lot of the legwork already to prove that the ordering of simplex-chain blocks is stable and works for cross-chain transactions.
 \emph{Proof of Reflection} allows us to share security between simplex-chains.
 Block-DAGs and the PoR Graph provide some censorship resistance, and more importantly, are the basis for both the \AxiomOfMaximalReflection{} and the \AxiomOfUnifiedAncestry{}.
 These axioms go on to, respectively, bind the histories of each simplex-chain to one another and ensure that each chain's history spans all valid blocks of that chain in the PoR graph.
-The binding of histories is the basis for the \emph{cohesion} / TODO / \emph{coherence} of the simplex, and PoR Graph-spanning histories ensures that the ordering of blocks within each chain conforms to the ordering of blocks in the PoR Graph.
+The binding of histories is the basis for the \emph{coherence} of the simplex, and PoR graph-spanning histories ensures that the ordering of blocks within each chain conforms to the ordering of blocks in the PoR graph.
 Therefore: to change the order of blocks within a simplex-chain requires that an attacker change the global ordering, which in turn requires a 51\% attack.
 $\blacksquare$
 
-\aside{
-    This argument is only half the picture because I snuck in a hidden assumption.
-    (The other half of the picture being that case where the assumption is false.)
-    What is that assumption?
-}
-
 Regarding network security, resisting this particular attack is paramount because this kind of reorganization \emph{affects honest nodes}.
-By comparison, there are other attacks that do not affect honest nodes, but do affect light clients.\footnote{
+By comparison, there are other attacks that do not affect honest nodes, but do affect, say, light clients.\footnote{
     In this context light clients are not considered honest nodes (nor attacking nodes) since they do not contribute to global consensus.
 }
-These other attacks aren't as concerning provided that we can maintain the asymmetry between honest nodes and light clients (or similar non-validating network participants).
-The way we do that goes back to the hidden assumption.
-The missing ingredient is \emph{error correction}, and the hidden assumption was \emph{that the attacker's blocks were valid.}
-What we need is a method of \emph{error correction} that is fast enough to ensure invalid blocks are dealt with before the cross-chain protocol allows those blocks to be processed.
+These other attacks aren't as concerning provided that they only affect non-validating network participants.
+But! What happens when an invalid block is mined?
+It \emph{will} be reflected, because miners of other simplex-chains do not validate the block.
+What we need is a method of \emph{error correction} -- one that is fast enough to ensure invalid blocks are dealt with before the cross-chain protocol allows those blocks to be processed.
 This role is filled by \emph{fraud proofs}.
 
-% FP requirements: small, fast to verify, verifiable by full nodes of other simplex-chains.
-%
-%
+In \UT{}, \emph{fraud proofs} are automatically constructed by any full node during normal validation -- the state transition function will return either a new state trie \emph{or} a fraud proof.
+Once a fraud proof is constructed, it is broadcast similar to a transaction.
+Then, \emph{any miner} from \emph{any simplex-chain} can validate and include the fraud proof \emph{as part of the PoR graph}.
+Due to \AxOfUnifiedAncestry{}, every simplex-chain calculates the expected chain-tips for every simplex-chain.
+When a fraud proof invalidates a block, the calculated chain-tips for a given simplex-chain are updated to exclude any invalid blocks from that chain's history.
+Thus, as long as fraud proofs are readily generated, broadcast, and included by other miners, the PoR graph knows which blocks are on-main valid blocks, and which are not.
+
+There is, of course, some lag between an invalid block being mined, the fraud proof being generated, and the proof being included in the PoR graph.
+In a healthy network, the expected delay is $(N_1 B_f)^{-1} + o$ seconds, where $o$ is a little overhead to account for the first node of that chain to receive and process the block.
+This is much less than a block period -- even when a minority of miners are honest (particularly when $N_1 \gg p^{-1}$).
+
+\subsubsubsection{Construction}
 
 
+
+\subsubsubsection{Other draft stuff}
 
 % hidden assumption: attacker is producing valid blocks.
 % this matters particularly because \emph{the re-org affects honest nodes}.
