@@ -23,16 +23,16 @@ dotsnode/.style={draw=black!0, fill=white!5, minimum size=2mm},
 %Nodes
 \node[roundednode]      (chainr)                              {Chain R};
 \node[dotsnode]      (chainrpast) [right=of chainr, xshift=-0.5cm]   {$\dots$};
-\node[squarednode]      (remote4)  [right=of chainrpast]      {$R_{\lambda T}$};
-\node[squarednode]      (remote3)  [right=of remote4]         {$R_{\lambda N}$};
-\node[squarednode]      (remote2)  [right=of remote3]         {$R_{\lambda L}$};
+\node[squarednode]      (remote4)  [right=of chainrpast]      {$R_{j-k_3}$};
+\node[squarednode]      (remote3)  [right=of remote4]         {$R_{j-k_2}$};
+\node[squarednode]      (remote2)  [right=of remote3]         {$R_{j-k_1}$};
 \node[squarednode]      (remote1)  [right=of remote2]         {$R_{j - \lambda}$};
 \node[dotsnode]      (remotex)  [right=of remote1]         {$\dots$};
 \node[squarednode]      (remote0)  [right=of remotex]         {$R_j$};
 
 \node[roundednode]      (chainl)   [below=of chainr]         {Chain L};
 \node[dotsnode]      (chainlpast) [right=of chainl, xshift=-0.5cm]   {$\dots$};
-\node[squarednode]      (local1)   [right=of chainlpast, xshift=6cm]         {$L_{i - \lambda}$};
+\node[squarednode]      (local1)   [right=of chainlpast, xshift=6.5cm]         {$L_{i - \lambda}$};
 \node[dotsnode]      (localx)   [right=of local1, xshift=1cm]          {$\dots$};
 \node[squarednode]      (local0)   [right=of localx, xshift=1cm]          {$L_i$};
 
@@ -68,7 +68,7 @@ dotsnode/.style={draw=black!0, fill=white!5, minimum size=2mm},
 \draw[black, arrows={<->}] ([yshift=2.7cm]local0.north) -- ([yshift=1.0cm]remote3.north)
     node[midway, above] {$\lambda N$ volume growth};
 \draw[black, arrows={<->}] ([yshift=3.4cm]local0.north) -- ([yshift=1.7cm]remote4.north)
-    node[midway, above] {$\lambda T$ elapsed};
+    node[midway, above] {$\frac{\lambda}{B_f}$ elapsed};
 
 \end{tikzpicture}
 
