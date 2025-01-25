@@ -149,7 +149,7 @@ Does *header omission* with *explicit proofs* provide any advantages? Yes, in so
 
 Particularly, if miners include only the single missing merkle branch associated with each necessary PoR, then *no additional information* is required besides the *header* itself.
 Headers are trivial to acquire from the network, and each only needs to be acquired once, regardless of the number of PoRs it is a part of.
-Since the *hash of each header* is *part* of the missing PoR merkle branch, miners only need to provide *an ordered list of merkle branches* for full PoR verifiability.
+Since the *hash of each header* is *part* of the missing PoR merkle branch, miners only need to provided *an ordered list of merkle branches* for full PoR verifiability.
 Additionally, these merkle branches *will be part of specific SPV proofs*, so that when a cross-chain SPV transaction (which uses those branches) is made, it can omit those parts of the proof (replacing them with a pointer).
 
 This UT protocol variant is +HOPoRs: the combination of *header omission* (+HO) and *explicit proofs* (+PoRs).
@@ -169,7 +169,7 @@ Since we \emph{know} that one end of the hash has multiple zero bytes, we can re
     From this we can recover the number of zero bytes, so we don't need to explicitly encode it.
 }
 
-This reduces the length of the hash (in bytes) from $g$ to $g - z + 1$ ($z$ being the number of zero bytes), \emph{however}, the \emph{security} of the hash \ul{remains the same ($8g$ bits)}.
+This reduces the length of the hash (in bytes) from $g$ to $g - z + 1$ ($z$ being the number of zero bytes), \emph{however}, the \emph{security} of the hash \ul{is still $8g$ bits}.
 This is a limited form of hash compression.
 In a mature network using +HO, reducing hash length by $\sim \nicefrac{1}{4}$ is possible, corresponding to an increase in maximum capacity of $\sim \nicefrac{1}{3}$ or so.
 
@@ -188,7 +188,7 @@ For example, Bitcoin block 879,273 has a difficulty around $1.1 \times 10^{14}$,
 Given Bitcoin produces around 52600 blocks per year (and all else being equal), we can expect the best block hash produced in the last year to have around $78 + \log_2(52600) \approx 94$ leading zero-bits.
 Practically speaking, all the silicon in the world working for a year, singularly, on finding a partial SHA256 collision would not do much better than 94 bits.
 We can be confident in this \emph{particular} prediction because the market for Bitcoin ASICs is mature -- those ASICs use the latest fabrication processes, are numerous enough, and are orders of magnitude more efficient than general processors (CPUs, GPUs, etc).
-For less mature networks, or networks using algorithms that benefit less from ASICs, the difference will be greater and more dependent on external compute resources, which are not reflected in the PoW difficulty.
+For less mature networks, or networks using algorithms that benefit less from ASICs, the difference will be greater and more dependent on external compute resources which are not reflected in the PoW difficulty.
 But, provided that $g \gg 2z$, this does not present an issue -- the low value of $z$ means we have more buffer until we pass the insecurity breakpoint, so these two forces roughly cancel out in all but extreme cases.
 
 We will make use of this second property, that the leading zero-bits are related to the global hashing capacity, to justify the safety of \emph{hash truncation} as an optimization.
@@ -439,8 +439,81 @@ atk situations:
 \assignedTODO{{Max+Pouriya}}{h}{SPV section}
 
 \subsection{On SPV In UT}
-
 \label{sec:spv-in-ut}
+
+New stuff
+
+\input{tikz-styles}
+
+\begin{figure}
+\centering
+
+\begin{tikzpicture}[
+roundednode/.style={rectangle,rounded corners=.1cm, draw=black!100, fill=white!5, thin, minimum size=7mm},
+squarednode/.style={rectangle, draw=black!100, fill=white!5, thin, minimum size=2mm},
+dotsnode/.style={draw=black!0, fill=white!5, minimum size=2mm},
+]
+
+%\draw[help lines] (-1,-5) grid (12,5);
+
+%Nodes
+\node[roundednode]      (chainr)                              {Chain R};
+\node[dotsnode]      (chainrpast) [right=of chainr, xshift=-0.5cm]   {$\dots$};
+\node[squarednode]      (remote4)  [right=of chainrpast]      {$R_{\lambda T}$};
+\node[squarednode]      (remote3)  [right=of remote4]         {$R_{\lambda N}$};
+\node[squarednode]      (remote2)  [right=of remote3]         {$R_{\lambda L}$};
+\node[squarednode]      (remote1)  [right=of remote2]         {$R_{j - \lambda}$};
+\node[dotsnode]      (remotex)  [right=of remote1]         {$\dots$};
+\node[squarednode]      (remote0)  [right=of remotex]         {$R_j$};
+
+\node[roundednode]      (chainl)   [below=of chainr]         {Chain L};
+\node[dotsnode]      (chainlpast) [right=of chainl, xshift=-0.5cm]   {$\dots$};
+\node[squarednode]      (local1)   [right=of chainlpast, xshift=6cm]         {$L_{i - \lambda}$};
+\node[dotsnode]      (localx)   [right=of local1, xshift=1cm]          {$\dots$};
+\node[squarednode]      (local0)   [right=of localx, xshift=1cm]          {$L_i$};
+
+%Parent refs
+\draw[arrowParent] (remote0.west) -- (remotex.east);
+\draw[arrowParent] (remotex.west) -- (remote1.east);
+\draw[arrowParent] (remote1.west) -- (remote2.east);
+\draw[arrowParent] (remote2.west) -- (remote3.east);
+\draw[arrowParent] (remote3.west) -- (remote4.east);
+\draw[arrowParent] (remote4.west) -- (chainrpast.east);
+
+\draw[arrowParent] (local0.west) -- (localx.east);
+\draw[arrowParent] (localx.west) -- (local1.east);
+
+\draw[dotted, black, arrowParent] (local0.west) -- (remote0.east);
+\draw[dotted, black, arrowParent] (local1.west) -- ([yshift=-0.15cm]remote2.east);
+
+%Dashed references
+\draw[dashed] (remote4.north) -- +(0, 2.2);
+\draw[dashed] (remote3.north) -- +(0, 1.5);
+\draw[dashed] (remote1.north) -- +(0, 0.8);
+\draw[dashed] (remote0.north) -- +(0, 0.8);
+
+\draw[dashed] (local1.south) -- +(0,-0.8);
+\draw[dashed] (local0.south) -- +(0,-0.8);
+\draw[dashed] (local0.north) -- +(0,3.9);
+
+%Condition arrows
+\draw[black, arrows={<->}] ([yshift=-0.6cm]local0.south) -- ([yshift=-0.6cm]local1.south)
+    node[midway, above] {$\lambda$ blocks};
+\draw[black, arrows={<->}] ([yshift=0.3cm]remote0.north) -- ([yshift=0.3cm]remote1.north)
+    node[midway, above] {$\lambda$ blocks};
+\draw[black, arrows={<->}] ([yshift=2.7cm]local0.north) -- ([yshift=1.0cm]remote3.north)
+    node[midway, above] {$\lambda N$ volume growth};
+\draw[black, arrows={<->}] ([yshift=3.4cm]local0.north) -- ([yshift=1.7cm]remote4.north)
+    node[midway, above] {$\lambda T$ elapsed};
+
+\end{tikzpicture}
+
+\caption{Visual Representation of the Four Conditions used to Compute a Safe LCA for Chain $R$.}
+\end{figure}
+
+\subsection{OLD - On SPV In UT}
+
+\pz{This section is being replaced by \Cref{sec:spv-in-ut}}
 
 \input{27-practical/95-spv-requires-valid-state.tex}
 
