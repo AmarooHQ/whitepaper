@@ -103,9 +103,7 @@ No real-world sharded network has come close to this level of performance, and i
 
 ## Addressing *Buterin's Trilemma*
 
-\pz{Clarify $\lambda$ and $T$}
-
-The underlying primitive, \emph{Proof of Reflection}, promotes the necessary interconnections between chains to achieve scalability without compromising on decentralization or security, thus, in conjunction with \emph{Ultra Terminum}, addressing the conflicts that lie at the heart of the trilemma, as illustrated in \cref{fig:trilemma-core-conflict-solved}.
+The underlying primitive, \emph{Proof of Reflection}, promotes the necessary interconnections between chains to achieve scalability without compromising on decentralization or security, thus, in conjunction with \emph{Ultra Terminum}, addressing the conflicts that lie at the heart of the trilemma, as illustrated in \Cref{fig:trilemma-core-conflict-solved}.
 \emph{Security} is achieved at the core of this approach, where each blockchain uses \emph{reflections} to share security, while keeping the state local, allowing each chain to become \emph{as secure as the entire network}.
 \emph{Scalability} and \emph{decentralization} result from the fact that each chain only needs to process an $O(c)$ load for its chain state and an $O(c)$ load for the PoR graph.
 
@@ -118,8 +116,8 @@ The underlying primitive, \emph{Proof of Reflection}, promotes the necessary int
 
 
 On the base layer, the Simplex, each participating simplex-chain maintains its own local, independent state with its own specification, allowing for a multitude of chain implementations to meet the need of virtually any application.
-Similarly, dapp-chains have the freedom to implement whatever sate- and transaction-protocols that fit their desired use case.
-Although heterogeneous, the chains are not siloed -- the interleaving of chains with PoR, tied with the secure cross-chain protocol presented in \cref{sec:spv-in-ut}, enables chains to seamlessly communicate and transact amongst each other.
+Similarly, dapp-chains have the freedom to implement whatever state- and transaction-protocols that fit their desired use case.
+Although heterogeneous, the chains are not siloed -- the interleaving of chains with PoR, tied with the secure cross-chain protocol presented in \Cref{sec:spv-in-ut}, enables chains to seamlessly communicate and transact amongst each other.
 In essence, cross-chain transactions enable chains to converge toward an Internet of blockchains.
 
 Finally, various tiling configurations allow the network to adopt a solution that pushes throughput beyond the limits of what was possible, without sacrificing the overall security of the network.

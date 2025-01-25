@@ -454,7 +454,7 @@ $R_j$ is an ancestor of $L_i$ on chain $R$.
 $R_{j-\lambda}$ is a safe block on $R$ viewed from $R_j$.
 $L_{i-\lambda}$ is a safe block on $L$ viewed from $L_i$.
 $R_{j-k_1}$ is an ancestor of $L_{i-\lambda}$ on chain $R$.
-$R_{j-k_2}$ is an ancestor of $L_i$ such that the PoR graph has grown at least $\lambda N$ since $R_{j-k_2}$.
+$R_{j-k_2}$ is an ancestor of $L_i$ such that the PoR volume has increased at least $\lambda N$ since $R_{j-k_2}$.
 $R_{j-k_3}$ is an ancestor of $L_i$ that is at least $\frac{\lambda}{B_f}$ older than $L_i$.
 }
 \end{figure}
