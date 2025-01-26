@@ -156,6 +156,84 @@ This is much less than a block period -- even when a minority of miners are hone
 
 \subsubsubsection{Construction}
 
+Typically, a cross-chain protocol will require two interactions: one on the sending chain and one on the receiving chain.
+That is, there is some state modification on the first chain, and then, on the second, an acknowledgment of that and some associated action (like crediting an account).
+Based on the direction of information, order of actions, and the focus on those actions, we could describe these kinds of methods as \emph{push-pull} methods.
+Information is `pushed' from the sending chain, and, at some later point, `pulled' into the receiving one -- conceptually, at least.
+In practice the `pull' requires the user publish a proof about the sending chain to the receiving chain.
+
+By contrast, a \emph{push-push} method would be one where the receiving chain automatically processes the cross-chain output at the correct time.
+This means that no second action from the user is required.
+Such a system must therefore \emph{require} miners to process cross-chain transactions -- but how do they know about transactions on other chains and whether they are valid?
+In our case, the \AxiomOfAvailability{} means that all miners on all simplex-chains have all recent blocks from all other simplex-chains.
+Our use of fraud proofs means that all honest nodes quickly learn of invalid blocks.
+Thus, provided enough time has passed, we can be confident that miners know of all  cross-chain transactions, and that they are, in fact, valid.
+
+How long should we wait, and how do we measure how long we've waited?
+We need at least some delay to avoid a particularly lucky series of blocks from triggering cross-chain processing.
+Ideally, this processing should be as predictable as possible, and well distributed.
+We also want to avoid our delay method from being manipulated to cause earlier or later execution.
+
+The delay duration itself is almost unconstrained: fraud proofs propagate well within one block period (at which point honest nodes are aware of them), and are included in the PoR graph within a block period, too.
+However, if we pick too short a period then we risk some fragility in the network.
+We can technically recover if an invalid cross-chain transaction were processed before a corresponding fraud proof was recorded, but doing so robs honest miners of their block reward.
+So, whatever we pick, it needs to be something that is conservative enough for miners to be comfortable with.
+
+Although it's somewhat arbitrary, 60 seconds (or 4 block periods at $B_f = \nicefrac{1}{15}$ Hz) seems like a reasonable choice.
+There is plenty of time for the fraud proof to propagate and be recorded, and minimal risk of a miner's block being invalidated.
+
+How do we measure this duration, then?
+We could use block timestamps, although that may open us up to some kind of time-warp attack.
+We could use the number of confirmations on the sending or receiving chain, but there's local block variance to consider.
+We could use the change in volume of the simplex (i.e., the number of confirmations over all simplex chains since some block), but we don't have any guarantees about the progression of either the sending or receiving chain.
+Each of these has disadvantages, but if we take these breakpoints together, then we have a reliable single condition.
+
+We can now summarize; when drafting a block, blocks which are valid for cross-chain processing are those which:
+\begin{enumerate}
+    \def\labelenumi{\arabic{enumi}.}
+    \tightlist
+    \item Have not been processed before; and
+    \item Have a timestamp at least $\lambda$ block periods in the past; and
+    \item Have a volume at least $N_1 \lambda$ blocks fewer than this block's volume; and.
+    \item \label{e-xc-cond3} Are in the history of this block's $\lambda$-parent\footnote{
+        Definition: the $1$-parent is the parent; the $2$-parent is the parent of the $1$-parent; the $(k+1)$-parent is the parent of the $k$-parent.
+    }; and
+    \item \label{e-xc-cond4} Are at least $\lambda$ local confirmations deep.
+\end{enumerate}
+
+The protocol for processing cross-chain transactions is now, simply: when drafting a block, miners gather all blocks which are valid for cross-chain processing, scan them for incoming cross-chain outputs, and include those cross-chain outputs in the draft block.
+
+\aside{
+    In reality, this isn't ideal because updating the reflections of a draft block may introduce new blocks which are valid for cross-chain processing.
+    To avoid this, we replace \autoref{e-xc-cond3} and \autoref{e-xc-cond4} with similar conditions based on the draft block's parent and $\lambda-1$.
+    This keeps the set of blocks stable when updating the reflections of a draft block.
+}
+
+\subsubsubsection{Evaluation}
+
+\subsubparagraph{Safe}
+
+Double-spending a cross-chain transaction requires a 51\% attack on the entire network.
+Executing an invalid cross-chain transaction is not possible when there are honest nodes of that simplex-chain and honest miners of any simplex chain.
+
+\subsubparagraph{Fast}
+
+Cross-chain transactions are processed based on conditions which are all $O(1)$ with respect to time, and therefore the expected delay in execution is $O(1)$.
+
+\subsubparagraph{Succinct}
+
+No proof is explicitly recorded.
+If one did want to craft an explicit proof $\pi$, then it would be similar in size to a normal transaction proof (assuming headers in the surrounding PoR graph are available).
+Normal transaction proofs are $O(\log c)$, therefore, $O(\pi) = O(\log c) < O(c)$.
+
+\subsubparagraph{Reliable}
+
+The consensus protocol requires that cross-chain transactions are processed if they are valid for cross-chain processing.
+Not doing so invalidates a block.
+Therefore, all cross-chain transactions on all simplex-chains will have these above properties.
+
+\subsubparagraph{Censorship Resistance}
+
 
 
 \subsubsubsection{Other draft stuff}
@@ -185,10 +263,3 @@ In a multi-chain network like \UT{1}, we need the property to be strong enough t
   - 51% attack, or
   - near-complete control over p2p connections (particularly around miners)
 \end{comment}
-
-
-% -- push-pull
-Typically, a cross-chain protocol will require two interactions: one on the sending chain and one on the receiving chain.
-That is, there is some state modification on the first chain, and then, on the second, an acknowledgment of that and some associated action (like crediting an account).
-Based on the direction of information, order of actions, and the focus on those actions, we could describe these kinds of methods as \emph{push-pull} methods.
-Information is both pushed from the sending chain, and pulled into the receiving one -- conceptually, at least.
