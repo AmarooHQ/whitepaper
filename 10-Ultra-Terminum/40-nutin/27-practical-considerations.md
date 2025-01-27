@@ -153,13 +153,13 @@ Since the *hash of each header* is *part* of the missing PoR merkle branch, mine
 Additionally, these merkle branches *will be part of specific SPV proofs*, so that when a cross-chain SPV transaction (which uses those branches) is made, it can omit those parts of the proof (replacing them with a pointer).
 
 This UT protocol variant is +HOPoRs: the combination of *header omission* (+HO) and *explicit proofs* (+PoRs).
-It may present decisive advantages for implementations of *simplex tilings* (which are introduced in \autoref{sec:tiling}).
+It may present decisive advantages for implementations of *simplex tilings* (which are introduced in \Cref{sec:tiling}).
 
 \subsubsection {Hash Compression \& Truncation}
 
 \warning{The following applies to PoW chains with compatible header hashes.}
 
-Consider a fairly normal PoW chain, in that the PoW algorithm compares the hash of headers as a number with a target.
+Consider a fairly normal PoW chain, in that the PoW algorithm compares the hashes of headers as a number with a target.
 That is, the output hash has a bunch of zero digits at one end (or can be losslessly converted into such a form).
 For simplicity, we'll assume that the zero digits are the most significant and are leading (and the least significant bits are trailing).
 
@@ -201,7 +201,7 @@ We will make use of this second property, that the leading zero-bits are related
 The idea behind +T is that the security of a truncated hash in bits, assuming $g > 2z$, is given by $8(\nicefrac{g}{2} + z)$\footnote{
     I use $g$ here, even though it's measured in bytes, for consistency with the rest of the whitepaper.
     A more rigorous method would measure everything in bits instead, and avoid the somewhat awkward multiplication by 8, but it's not important for this discussion.
-}, and that this \emph{always} sufficient, given that $z$ is intimately related to the largest reasonable attack that we could expect at that moment.
+}, and that this is \emph{always} sufficient, given that $z$ is intimately related to the largest reasonable attack that we could expect at that moment.
 The $g > 2z$ condition is there for two reasons.
 First, if $2z \ge g$ then the security of the truncated hash is just $8g$ bits, like normal.
 Second, using significantly more than half the hash for PoW is problematic because the chance of collisions between valid headers increases dramatically.
