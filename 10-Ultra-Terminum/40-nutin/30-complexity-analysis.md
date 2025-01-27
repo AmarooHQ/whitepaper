@@ -122,9 +122,9 @@ It's typical, though, that the headers of nested chains, alone, are not sufficie
 When such data is required to be recorded on-chain (i.e., it cannot be deterministically regenerated), then the \emph{effective} header size is the size of the raw header, plus the size of any auxiliary data.
 
 \aside{
-    It is important to note that from this point on we refer to Ethereum 2 as the sharded beacon chain design for the layer 1 as was written in 2021, not the rollup-centric \href{https://web.archive.org/web/20250105115555/https://ethereum.org/en/roadmap/danksharding/}{danksharding} approach where shards are primarily used for data availability as of January 2025.
-    This is primarily used to illustrate as an example of a sharded $O(c^2)$ layer 1 blockchain, and keep the calculations for block requirements and throughput to the layer 1.
-    Given the changes introduced through the \href{https://web.archive.org/web/20241001092213/https://github.com/ethereum/consensus-specs/blob/dev/specs/deneb/beacon-chain.md}{deneb}, and the separation of beacon blocks and execution payloads, we use the original sharded blockchain approach for the calculations.
+    It is important to note for the calculations in this paper, `Ethereum 2' is referencing the sharded beacon chain design for the layer 1 as was written in 2021, not the rollup-centric \href{https://web.archive.org/web/20250105115555/https://ethereum.org/en/roadmap/danksharding/}{danksharding} approach where shards are primarily used for data availability as of January 2025.
+    This is primarily used to illustrate as an example of a sharded $O(c^2)$ layer 1 blockchain, and keep the calculations for block requirements and throughput purely to the layer 1.
+    Given the changes introduced through the \href{https://web.archive.org/web/20241001092213/https://github.com/ethereum/consensus-specs/blob/dev/specs/deneb/beacon-chain.md}{deneb}, and the separation of beacon blocks and execution payloads, we use the original sharded blockchain approach for the calculations with beacon block headers and the main sharded beacon chain design.
 }
 
 For example, in an \emph{Ethereum 2} beacon block, each shard has a header size of 280 B, but there is additional overhead.
