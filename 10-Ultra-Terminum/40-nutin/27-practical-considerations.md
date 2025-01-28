@@ -153,7 +153,7 @@ Since the *hash of each header* is *part* of the missing PoR merkle branch, mine
 Additionally, these merkle branches *will be part of specific SPV proofs*, so that when a cross-chain SPV transaction (which uses those branches) is made, it can omit those parts of the proof (replacing them with a pointer).
 
 This UT protocol variant is +HOPoRs: the combination of *header omission* (+HO) and *explicit proofs* (+PoRs).
-It may present decisive advantages for implementations of *simplex tilings* (which are introduced in \Cref{sec:tiling}).
+It may present decisive advantages for implementations of *simplex tilings* (which are introduced in \autoref{sec:tiling}).
 
 \subsubsection {Hash Compression \& Truncation}
 
