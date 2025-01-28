@@ -26,7 +26,7 @@ Are we stuck?
 For a blockchain network to be scalable, it must be the case that miners are \emph{not} required to validate more than one chain!
 Have we come all this way, attempting to deal with the core conflict of the trilemma, only to find that we just moved the conflict?
 
-(normally mentioned snarks and stuff here, but we don't want to for new spv)
+\mk{(normally mentioned snarks and stuff here, but we don't want to for new spv)}
 
 \subsubsection{Why does SPV work for Bitcoin?}
 
@@ -188,13 +188,15 @@ We could use the number of confirmations on the sending or receiving chain, but 
 We could use the change in volume of the simplex (i.e., the number of confirmations over all simplex chains since some block), but we don't have any guarantees about the progression of either the sending or receiving chain.
 Each of these has disadvantages, but if we take these breakpoints together, then we have a reliable single condition.
 
+\mk{note: technically: find blocks matching condition, find LCA of those blocks; calculate the same for the parent. Then get all blocks between LCA (inclusive) and parent's LCA (exclusive).}
+
 We can now summarize; when drafting a block, blocks which are valid for cross-chain processing are those which:
 \begin{enumerate}
     \def\labelenumi{\arabic{enumi}.}
     \tightlist
     \item Have not been processed before; and
     \item Have a timestamp at least $\lambda$ block periods in the past; and
-    \item Have a volume at least $N_1 \lambda$ blocks fewer than this block's volume; and.
+    \item Have a volume at least $N_1 \lambda$ blocks fewer than this block's volume; and
     \item \label{e-xc-cond3} Are in the history of this block's $\lambda$-parent\footnote{
         Definition: the $1$-parent is the parent; the $2$-parent is the parent of the $1$-parent; the $(k+1)$-parent is the parent of the $k$-parent.
     }; and
@@ -205,9 +207,9 @@ These conditions are illustrated in \Cref{fig:xc-conditions}.
 
 \begin{figure}
     \centering
-    
+
     \includegraphics[max width=\linewidth]{spv/xc_security_conditions_sag}
-    
+
     \caption{
         Visual representation of the conditions used to compute, for a block $L_i$ on chain $L$, blocks from chain $R$ that are valid for cross-chain transactions.
         Valid blocks are those that are earlier than (or in) a common ancestor of the four blocks $\{ R_{j-\lambda}, R_{j-k_1}, R_{j-k_2}, R_{j-k_3} \}$.
@@ -220,7 +222,6 @@ These conditions are illustrated in \Cref{fig:xc-conditions}.
         }
 \label{fig:xc-conditions}
 \end{figure}
-
 
 The protocol for processing cross-chain transactions is now, simply: when drafting a block, miners gather all blocks which are valid for cross-chain processing, scan them for incoming cross-chain outputs, and include those cross-chain outputs in the draft block.
 
@@ -244,7 +245,7 @@ Cross-chain transactions are processed based on conditions which are all $O(1)$ 
 \subsubparagraph{Succinct}
 
 No proof is explicitly recorded.
-If one did want to craft an explicit proof $\pi$, then it would be similar in size to a normal transaction proof (assuming headers in the surrounding PoR graph are available).
+If one did want to craft an explicit proof $\pi$, then it would be similar in size to a normal transaction proof (assuming headers from the surrounding PoR graph are available).
 Normal transaction proofs are $O(\log c)$, therefore, $O(\pi) = O(\log c) < O(c)$.
 
 \subsubparagraph{Reliable}
@@ -258,7 +259,7 @@ Therefore, all cross-chain transactions on all simplex-chains will have these ab
 This construction has a curious property.
 Say that an attacker, in an effort to perform an empty block DoS, is mining a simplex-chain at a loss, and has pushed out other miners.
 If you wish to make a local transaction, it could take much longer than a block period.
-An alternative is to make a cross-chain transaction instead.
+An alternative is to make a cross-chain transaction to that simplex-chain from another simplex-chain instead.
 This will obviously take a minute or so to execute, but you will have a guarantee that it will be processed -- the attacker cannot continue the attack without processing that cross-chain transaction.
 You could then `rescue' your coins and send them to a more useful chain.\footnote{
     This kind of operation would require some support from the transaction layer, e.g., a way to spend inputs indirectly.
@@ -267,7 +268,6 @@ You could then `rescue' your coins and send them to a more useful chain.\footnot
 }
 While this describes an unpleasant user experience, the takeaway is that it is yet another obstacle for an attacker to overcome.
 
-\subsubsubsection{Other draft stuff}
 
 % hidden assumption: attacker is producing valid blocks.
 % this matters particularly because \emph{the re-org affects honest nodes}.
@@ -275,11 +275,14 @@ While this describes an unpleasant user experience, the takeaway is that it is y
 
 % -- ctx: attacker is producing valid blocks
 % problem: conflates DoS with XC attack
-\emph{The only re-orgs that matter are those among \ul{honest} nodes.}
-For example: if an attacker bribes 90\% of miners to ignore certain blocks, this \emph{does not affect \ul{\UT{1}}}.
-It \emph{does} affect traditional blockchains, though, since this \emph{effectively} controls the canonical history of the chain.
-For a single-chain network, using a block-DAG is enough to foil the attack: controlling the canonical history of the chain can only be done for very short intervals (\autoref{sec:preventing-dos-attacks}).
-In a multi-chain network like \UT{1}, we need the property to be strong enough to ensure that cross-chain transactions are \emph{never} processed when the network is in an ambiguous state.
+\begin{comment}
+\subsubsubsection{Other draft stuff}
+    \emph{The only re-orgs that matter are those among \ul{honest} nodes.}
+    For example: if an attacker bribes 90\% of miners to ignore certain blocks, this \emph{does not affect \ul{\UT{1}}}.
+    It \emph{does} affect traditional blockchains, though, since this \emph{effectively} controls the canonical history of the chain.
+    For a single-chain network, using a block-DAG is enough to foil the attack: controlling the canonical history of the chain can only be done for very short intervals (\autoref{sec:preventing-dos-attacks}).
+    In a multi-chain network like \UT{1}, we need the property to be strong enough to ensure that cross-chain transactions are \emph{never} processed when the network is in an ambiguous state.
+\end{comment}
 % \UT{1} achieves this through the \emph{convergence} required by the Axioms.
 % \UT{1} achieves this
 
