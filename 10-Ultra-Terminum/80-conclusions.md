@@ -8,16 +8,25 @@
 
 \assignedTODO{{Max}}{h}{Write conclusion}
 
+This paper introduced and constructed Amaroo's consensus mechanism, \emph{Ultra Terminum}, a proof-agnostic cross-chain consensus strategy that addresses the core conflict of Buterin's Trilemma.
+\emph{Ultra Terminum} provides multiple scaling configurations, $\UT{1} (O(c^2))$, $\UT{2} (O(c^3)$, $\UT{3} (O(c^4))$ and a special configuration of tiling UT$_{\aleph}$ $O(n)$.
+
+$\UT{}$ leverages existing consensus methods in combination and, by way of construction, adds security to these methods.
+The paper presented the underlying primitive, \emph{Proof of Reflection}, that provides an agnostic way for chains of various proof mechanisms to participate in a collaborative network where chains share security amongst each other.
+This critical piece of collaboration allows $\UT{}$ and Amaroo's network to scale to meet market demand without compromising decentralisation or security.
+
+
 ## Comparison: ``The Big 4''
 
 The following comparisons (\autoref{table:compare_nets_3k}, \autoref{table:compare_nets_20k}, and \autoref{table:comparison_1m_tps}) are intended to be an *apples to apples* comparison between UT variants and ``The Big 4'': Bitcoin, Cardano, Eth2, and Polkadot.
-Cardano, as a cutting-edge network, is an exception here: the Cardano/IOHK teams have not been pursuing \emph{Layer 1} scalability solutions --- unlike the Eth2 and Polkadot teams --- and are focusing instead on a \emph{Layer 2} solution: Hydra via EUTXOs.
+Cardano, as a cutting-edge network, is an exception here: the Cardano/IOHK teams have not been pursuing \emph{Layer 1} scalability solutions and are focusing instead on a \emph{Layer 2} solution: Hydra via EUTXOs.
 Their work is good and promising.
-I mention this particularly because the nature of an *apples to apples* comparison casts Cardano in a light that some might consider to be misleading.
+Similarly, these comparisons use the original \emph{Eth2} sharding roadmap to illustrate their example of a sharded Layer 1, whereas the Ethereum network is now pursuing a rollup-centric scaling strategy in their beacon chain network.
+I mention this particularly because the nature of an *apples to apples* comparison casts Cardano and Ethereum in a light that some might consider to be misleading.
 However, these comparisons do not consider \emph{Layer 2} scalability solutions for one very simple reason: all networks can implement them in some fashion.
 It is not a fair (or accurate) comparison *of blockchain architecture* if \emph{Layer 2} scaling solutions are considered for some networks and not for others.
 \begin{comment}
-Additionally, as mentioned in [Ethereum's *Sharding FAQs*](https://eth.wiki/sharding/Sharding-FAQs#how-does-plasma-state-channels-and-other-layer-2-technologies-fit-into-the-trilemma), payment- and state-channels provide a *constant factor* increase in throughput, so those techniques will not improve a network's scaling complexity as it is measured here.
+Additionally, as mentioned in [Ethereum's *Sharding FAQs*](https://web.archive.org/web/20220606205028/https://eth.wiki/sharding/Sharding-FAQs#how-does-plasma-state-channels-and-other-layer-2-technologies-fit-into-the-trilemma), payment- and state-channels provide a *constant factor* increase in throughput, so those techniques will not improve a network's scaling complexity as it is measured here.
 \end{comment}
 
 In addition to those four, a network named *Opt.Shard* (for *Optimal Sharding*) is included in these comparisons.
@@ -94,7 +103,9 @@ No real-world sharded network has come close to this level of performance, and i
 
 ## Addressing *Buterin's Trilemma*
 
-\assignedTODO{{Max}}{h}{write out some explanation of how B.T. is answered.}
+The underlying primitive, \emph{Proof of Reflection}, promotes the necessary interconnections between chains to achieve scalability without compromising on decentralization or security, thus, in conjunction with \emph{Ultra Terminum}, addressing the conflicts that lie at the heart of the trilemma, as illustrated in \Cref{fig:trilemma-core-conflict-solved}.
+\emph{Security} is achieved at the core of this approach, where each blockchain uses \emph{reflections} to share security, while keeping the state local, allowing each chain to become \emph{as secure as the entire network}.
+\emph{Scalability} and \emph{decentralization} result from the fact that each chain only needs to process an $O(c)$ load for its chain state and an $O(c)$ load for the PoR graph.
 
 \begin{figure}[H]
 \centering
@@ -103,6 +114,16 @@ No real-world sharded network has come close to this level of performance, and i
 \label{fig:trilemma-core-conflict-solved}
 \end{figure}
 
+
+On the base layer, the Simplex, each participating simplex-chain maintains its own local, independent state with its own specification, allowing for a multitude of chain implementations to meet the need of virtually any application.
+Similarly, dapp-chains have the freedom to implement whatever state- and transaction-protocols that fit their desired use case.
+Although heterogeneous, the chains are not siloed -- the interleaving of chains with PoR, tied with the secure cross-chain protocol presented in \Cref{sec:spv-in-ut}, enables chains to seamlessly communicate and transact amongst each other.
+In essence, cross-chain transactions enable chains to converge toward an Internet of blockchains.
+
+Finally, various tiling configurations allow the network to adopt a solution that pushes throughput beyond the limits of what was possible, without sacrificing the overall security of the network.
+UT$_\aleph$ achieves unbounded $O(n)$ scalability and opens the way to a truly ubiquitous blockchain.
+
+\Cref{table:ut-vs-trilemma} outlines the way in which $\UT{}$ variants evaluate against the trilemma, also presenting the possible throughput achieved.
 
 \begin{table}[H]
     \centering
@@ -121,6 +142,7 @@ No real-world sharded network has come close to this level of performance, and i
         $\UTinf{3}$ & Yes & Yes & Yes & (Max. TPS: $\sim$ $10^{14}$ - $10^{25}$) \\
         \bottomrule
     \end{tabular}
+\label{table:ut-vs-trilemma}
 \end{table}
 
 %% END ### RELEASE

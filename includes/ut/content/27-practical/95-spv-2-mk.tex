@@ -65,7 +65,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 \subsubsubsection{Context}
 
 The purpose of UT's cross-chain protocol is to \emph{maintain coherence} between simplex-chains.
-This means all that all the essential properties we'd expect to hold for transactions on a single chain should hold between chains, too: coins are not created nor destroyed\footnote{
+This means that all the essential properties we'd expect to hold for transactions on a single chain should hold between chains, too: coins are not created nor destroyed\footnote{
     That isn't to say burning coins isn't possible, but it should never be an unintended byproduct of a cross-chain transaction.
 }, coins can only be spent once, \emph{the transaction executes entirely or not at all}, etc.
 There will obviously be some particular properties that are different, such as a delay between inputs being spent (on the sending chain) and outputs being created (on the receiving chain).
@@ -160,7 +160,7 @@ Typically, a cross-chain protocol will require two interactions: one on the send
 That is, there is some state modification on the first chain, and then, on the second, an acknowledgment of that and some associated action (like crediting an account).
 Based on the direction of information, order of actions, and the focus on those actions, we could describe these kinds of methods as \emph{push-pull} methods.
 Information is `pushed' from the sending chain, and, at some later point, `pulled' into the receiving one -- conceptually, at least.
-In practice the `pull' requires the user publish a proof about the sending chain to the receiving chain.
+In practice the `pull' requires the user to publish a proof about the sending chain to the receiving chain.
 
 By contrast, a \emph{push-push} method would be one where the receiving chain automatically processes the cross-chain output at the correct time.
 This means that no second action from the user is required.
@@ -176,7 +176,7 @@ We also want to avoid our delay method from being manipulated to cause earlier o
 
 The delay duration itself is almost unconstrained: fraud proofs propagate well within one block period (at which point honest nodes are aware of them), and are included in the PoR graph within a block period, too.
 However, if we pick too short a period then we risk some fragility in the network.
-We can technically recover if an invalid cross-chain transaction were processed before a corresponding fraud proof was recorded, but doing so robs honest miners of their block reward.
+We can technically recover if an invalid cross-chain transaction was processed before a corresponding fraud proof was recorded, but doing so robs honest miners of their block reward.
 So, whatever we pick, it needs to be something that is conservative enough for miners to be comfortable with.
 
 Although it's somewhat arbitrary, 60 seconds (or 4 block periods at $B_f = \nicefrac{1}{15}$ Hz) seems like a reasonable choice.
@@ -202,6 +202,26 @@ We can now summarize; when drafting a block, blocks which are valid for cross-ch
     }; and
     \item \label{e-xc-cond4} Are at least $\lambda$ local confirmations deep.
 \end{enumerate}
+
+These conditions are illustrated in \Cref{fig:xc-conditions}.
+
+\begin{figure}
+    \centering
+
+    \includegraphics[max width=\linewidth]{spv/xc_security_conditions_sag}
+
+    \caption{
+        Visual representation of the conditions used to compute, for a block $L_i$ on chain $L$, blocks from chain $R$ that are valid for cross-chain transactions.
+        Valid blocks are those that are earlier than (or in) a common ancestor of the four blocks $\{ R_{j-\lambda}, R_{j-k_1}, R_{j-k_2}, R_{j-k_3} \}$.
+        $R_j$ is an ancestor of $L_i$ on chain $R$.
+        $R_{j-\lambda}$ is a safe block on $R$ viewed from $R_j$.
+        $L_{i-\lambda}$ is a safe block on $L$ viewed from $L_i$.
+        $R_{j-k_1}$ is an ancestor of $L_{i-\lambda}$ on chain $R$.
+        $R_{j-k_2}$ is an ancestor of $L_i$ such that the PoR volume has increased at least $N_1 \lambda$ since $R_{j-k_2}$.
+        $R_{j-k_3}$ is an ancestor of $L_i$ that is at least ${B_f}^{-1} \lambda$ older than $L_i$.
+        }
+\label{fig:xc-conditions}
+\end{figure}
 
 The protocol for processing cross-chain transactions is now, simply: when drafting a block, miners gather all blocks which are valid for cross-chain processing, scan them for incoming cross-chain outputs, and include those cross-chain outputs in the draft block.
 
@@ -238,7 +258,7 @@ Therefore, all cross-chain transactions on all simplex-chains will have these ab
 
 This construction has a curious property.
 Say that an attacker, in an effort to perform an empty block DoS, is mining a simplex-chain at a loss, and has pushed out other miners.
-If you wish to make a local transaction, it could take a much longer than a block period.
+If you wish to make a local transaction, it could take much longer than a block period.
 An alternative is to make a cross-chain transaction to that simplex-chain from another simplex-chain instead.
 This will obviously take a minute or so to execute, but you will have a guarantee that it will be processed -- the attacker cannot continue the attack without processing that cross-chain transaction.
 You could then `rescue' your coins and send them to a more useful chain.\footnote{

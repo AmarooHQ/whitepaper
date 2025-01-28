@@ -1,26 +1,31 @@
 % Small introduction, just to bring in the whitepaper
-Designing a blockchain requires the careful consideration of numerous variables, each with its own unique, but impactful, influence on the final outcome of the network.
-These considerations, in turn, are ossified into design decisions that set the trajectory of how the blockchain is governed, and how it will operate in the longer term.
-This already difficult task of blockchain design, which requires a great appreciation for various disciplines of technology, economics, finance, philosophy and psychology, is now being swayed by the changing environment around us, coupled with increased usage and more complex interactions.
+Modern blockchains are composed of a symphony of complex components, each having a distinct, yet profound influence on the operation of the entire network.
+The construction of these components necessitates careful consideration over a multitude of variables surrounding the Internet, network bandwidth, hardware, performance and behaviour.
+These careful considerations become ossified within the underlying code, effectively setting the blockchain on a trajectory of governance and long-term evolution.
 
-The nature of blockchain use is also growing, starting off as a niche, underground peer-to-peer digital currency, to now being embedded in global financial institutions and a becoming an increasingly strong narrative for various interconnected applications of varying complexity.
-This puts a degree of importance on designing blockchains, as both design and research should look beyond the current cycles with an attempt to visualise the potential that lies ahead.
+%% The process of such architectural thinking demands great appreciation for a multitude of disciplines surrounding technology, economics, finance, philosophy and psychology-- all of which now being swayed by the changing environments around us.
+The scope of blockchain use has expanded significantly, evolving from its origins as an underground mechanism for pseudonymous peer-to-peer digital currency into a foundational layer embedded within global financial institutions.
+This progression has been accompanied by several strong narratives that position blockchain frameworks as a foundation for interconnected applications of increasing complexity.
+This puts a degree of importance when designing a blockchain, requiring efforts to extend beyond the immediate trends in order to envision the latent potential that lies beyond the current cycles.
 
 % Then we can lead into the what we're bringing --> UT.
-These new designs and ongoing research constantly push the boundaries of what is possible within blockchains, however, there are slight subtleties that inhibit their \emph{performance}, whether insufficient decentralization, low throughput, high transaction latency, weak protocol-level security assumptions, or, the lack of fostering native and intuitive interactions between communities and other blockchain networks.
+These new designs and ongoing research endeavours push the boundaries of what blockchains can achieve.
+However, subtle constraints remain that hinder the \emph{optimal performance}, whether insufficient decentralization, limited throughput, high transaction latency, and weak security assumptions at the protocol level.
+Equally significant is the difficulty of cultivating seamless and intuitive interactions between communities and disparate blockchain networks.
+Such challenges emphasize the need for continued innovation and foresight to unlock what is possible tomorrow.
 
-One of the major challenges that has been identified to be a cause of such inhibitions is \emph{Buterin's Trilemma} (aka. the \emph{Scalability Trilemma})\footnote{%
+One of the major challenges that has been identified to be a cause of such inhibitions of optimality is \emph{Buterin's Trilemma} (aka. the \emph{Scalability Trilemma})\footnote{%
   I think \emph{Scalability Trilemma} is a bad name because \emph{scalability} is one of the three conflicting qualities; you could just as well call it the \emph{Decentralization Trilemma}.
   Arguably, as we will see, the most appropriate of the 3 would actually be the \emph{Security Trilemma}.
   The term \emph{Blockchain Trilemma} has been used recently, which I think is worse.
   Apparently, the term was coined by Vitalik Buterin, so I prefer the name \emph{Buterin's Trilemma}.
 },
-which states that a blockchain can have at most two of the three following properties: (i)~security, (ii)~scalability and (iii)~decentralization (discussed below in \cref{subsec:trilemma}).
+which states that a blockchain can have at most two of the three following properties: (i)~security, (ii)~scalability and (iii)~decentralization (discussed below in \Cref{subsec:trilemma}).
 
 These properties, and the notion of only being able to ``\emph{choose two of three}'', quickly highlight potential shortcomings in various designs.
 For example, Bitcoin and the original Proof-of-Work Ethereum (pre-merge) are chains that preference \emph{decentralization} and \emph{security} while foregoing scalability manifested into long transaction wait times, and higher fees due to the network not having enough capacity to process all requests.
-On the other hand, blockchains that focus on \emph{security} and \emph{scalability} over decentralization often display exceptional transaction throughput, but are vulnerable node failures causing network halts, or, fall to shortcomings of centralized services, such as censorship -- examples include Solana, BNBChain, Ripple, or enterprise blockchains.
-Finally, chains that prefer \emph{scalability} and \emph{decentralization} over security may exhibit high performance, but may reduce parameters in their security choices for the sake of inclusivity, for example the original IOTA chain or chains that target IOT/embedded devices.
+On the other hand, blockchains that focus on \emph{security} and \emph{scalability} over decentralization often display exceptional transaction throughput, but are vulnerable to node failures causing network halts, or, fall to shortcomings of centralized services, such as censorship -- examples include Solana, BNBChain, Ripple, or enterprise blockchains.
+Finally, chains that prefer \emph{scalability} and \emph{decentralization} over security may exhibit high performance, but may reduce parameters in their security choices for the sake of inclusivity, for example the original IOTA chain or chains that target IoT/embedded devices.
 
 Amaroo's underlying consensus mechanism, \emph{Ultra Terminum} (UT), is a cooperative cross-chain consensus strategy that addresses \emph{Buterin's Trilemma}, and promotes cohesiveness amongst chains and communities.
 

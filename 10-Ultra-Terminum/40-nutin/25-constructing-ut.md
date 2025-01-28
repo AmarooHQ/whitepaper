@@ -4,7 +4,7 @@
 
 \label{sec:constructing-ut}
 
-*Proof of Reflection* can be used to build $\UT{1}$ --- an $O(c^2)$ foundation for a blockchain network (called *the simplex*). This section details the construction of such a foundation, and how it can be extended up to $\UT{3}$ --- which has $O(c^4)$ complexity. The $O(n)$ scaling configuration ($\UTinf{}$) is detailed in \autoref{sec:tiling}.
+*Proof of Reflection* can be used to build $\UT{1}$ --- an $O(c^2)$ foundation for a blockchain network (called *the simplex*). This section details the construction of such a foundation, and how it can be extended up to $\UT{3}$ --- which has $O(c^4)$ complexity. The $O(n)$ scaling configuration ($\UTinf{}$) is detailed in \Cref{sec:tiling}.
 
 Such a foundation (*the simplex*) is *not* a sharded blockchain --- there's no requirement that participating chains are interchangeable or using the same primitives. This was demonstrated via the example in \autoref{sec:two-blockchains}. Rather, *the simplex* is an emergent construct that is created via the *relationships* between blockchains. Instead of one blockchain being split into many (as occurs with sharding), *the simplex* is many blockchains becoming one coherent network.
 
@@ -101,7 +101,7 @@ The security of simplexes is discussed in \autoref{sec:simplex-security}.
 
 \label{sec:dapp-chains}
 
-*Dapp-chains* are the method by which *Ultra Terminum* exceeds $O(c^2)$ scaling *without* using the method described in \autoref{sec:tiling}. To be clear: the $O(c^2)$ configuration of UT is compatible with that other method; dapp-chains are a *separate and independent* method of scaling. However, there are *decisive* reasons to introduce and use *dapp-chains*. Dapp-chains provide features that the $O(n)$ scaling configuration alone cannot \emph{easily} provide. Additionally, dapp-chains increase the simplex's scalability to $O(c^3)$ or $O(c^4)$.
+*Dapp-chains* are the method by which *Ultra Terminum* exceeds $O(c^2)$ scaling *without* using the method described in \Cref{sec:tiling}. To be clear: the $O(c^2)$ configuration of UT is compatible with that other method; dapp-chains are a *separate and independent* method of scaling. However, there are *decisive* reasons to introduce and use *dapp-chains*. Dapp-chains provide features that the $O(n)$ scaling configuration alone cannot \emph{easily} provide. Additionally, dapp-chains increase the simplex's scalability to $O(c^3)$ or $O(c^4)$.
 
 \defineTermTex{Dapp-chain}{
   An \emph{application-specific} child-chain that is secured via the parent-chain. Dapp-chains may have architecturally distinct state- and transaction-schemes (distinct from those schemes used in the simplex, and other dapp-chains)
