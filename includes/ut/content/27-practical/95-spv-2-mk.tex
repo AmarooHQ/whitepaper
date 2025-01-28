@@ -26,8 +26,6 @@ Are we stuck?
 For a blockchain network to be scalable, it must be the case that miners are \emph{not} required to validate more than one chain!
 Have we come all this way, attempting to deal with the core conflict of the trilemma, only to find that we just moved the conflict?
 
-\mk{(normally mentioned snarks and stuff here, but we don't want to for new spv)}
-
 \subsubsection{Why does SPV work for Bitcoin?}
 
 For the sake of simplicity, let's consider Bitcoin in isolation.
@@ -59,7 +57,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 
 \infoNote{
     The details below are an overview of Amaroo's cross-chain protocol.
-    Full details are the topic of the Amaroo team's forthcoming paper on the subject.
+    Full details comprise the Amaroo team's forthcoming paper on the subject.
 }
 
 \subsubsubsection{Context}
@@ -108,19 +106,19 @@ There will obviously be some particular properties that are different, such as a
 
 Before we address how cross-chain transactions will work, we first need to remember the context in which we're operating.
 Leading up to this point, we've constructed a network with some wildly different properties to traditional blockchains: ultra-fast confirmations, additional DoS and censorship resistance, shared security, higher order scaling, etc.
-These improvements are due to the specific combination of: \emph{Proof of Reflection}, the use of chain-like block-DAGs in the PoR Graph and each simplex-chain, fraud proofs, and the Axioms of \AxOfAvailability{}, \AxOfMaximalReflection{}, and \AxOfUnifiedAncestry{}.
-Each of these ideas will have a role to play in the cross-chain protocol described shortly.
+These improvements are due to the specific combination of: \emph{Proof of Reflection}, the use of chain-like block-DAGs in the PoR Graph and each simplex-chain, and the Axioms of \AxOfAvailability{}, \AxOfMaximalReflection{}, and \AxOfUnifiedAncestry{}.
+Each of these ideas, along with fraud proofs, will have a role to play in the cross-chain protocol described shortly.
 
 Additionally, we are concerned about some possible attacks aimed at the cross-chain protocol.
-We are not concerned about a 51\% attack in this discussion since we already know that the network cannot function in that context.
+We are not necessarily concerned about how the protocol resolves during a 51\% attack in this discussion since we already know that the network does not function in that context.
 
 The first and most important thing to consider is \emph{Under which circumstances can cross-chain transactions be invalidated?}
-If it is possible to invalidate a past SPV transaction, this could be used to perform a doublespend, or coin duplication, etc.
+If it is possible to invalidate a past cross-chain transaction, this could be used to perform a doublespend, or coin duplication, etc.
 Therefore, we should strive for a protocol that only permits such invalidation under a 51\% attack (or worse).
-That way we can be confident that the cross-chain protocol is not the weakest link in the chain, since local (intra-chain) transactions break down at that point, anyway.
+That way, we can be confident that the cross-chain protocol is not the weakest link in the chain, since local (intra-chain) transactions break down at that point, anyway.
 
 The obvious way to invalidate a cross-chain transaction is to cause a reorganization on the origin chain.
-If the pivot of the reorganization is antecedent to the cross-chain transaction, then it is up to the attacker whether the origin transaction is included in the resulting canonical history.
+If the pivot of the reorganization is antecedent to the cross-chain transaction, then it is up to the attacker whether that transaction is included in the resulting canonical history.
 This outcome is self-evidently insecure.
 Therefore our question about cross-chain transaction invalidation has the same answer as questions like \emph{Under which circumstances can a simplex-chain reorganization occur?}
 We are also concerned with the parameters around such a reorganization: \emph{Is it dependent on the number of confirmations?}, \emph{If so, how many?}, \emph{What proportion of global hash-rate is required?}, etc.
@@ -174,13 +172,13 @@ We need at least some delay to avoid a particularly lucky series of blocks from 
 Ideally, this processing should be as predictable as possible, and well distributed.
 We also want to avoid our delay method from being manipulated to cause earlier or later execution.
 
-The delay duration itself is almost unconstrained: fraud proofs normally propagate well within one block period (at which point honest nodes are aware of them), and are included in the PoR graph within a block period, too.
-However, if we pick too short a period then we risk some fragility in the network.
+The delay duration itself is almost unconstrained: fraud proofs both propagate through the network well within one block period (at which point honest nodes are aware of them), and are included in the PoR graph within a block period, too.
+However, if we pick too short a period, then we risk some fragility in the network.
 We can technically recover if an invalid cross-chain transaction was processed before a corresponding fraud proof was recorded, but doing so robs honest miners of their block reward.
 So, whatever we pick, it needs to be something that is conservative enough for miners to be comfortable with.
 
 Although it's somewhat arbitrary, 60 seconds (or 4 block periods at $B_f = \nicefrac{1}{15}$ Hz) seems like a reasonable choice.
-There is plenty of time for the fraud proof to propagate and be recorded, and minimal risk of a miner's block being invalidated.
+There is plenty of time for the fraud proof to propagate and be recorded, and the risk of an honest miner's block being invalidated is low.
 
 How do we measure this duration, then?
 We could use block timestamps, although that may open us up to some kind of time-warp attack.
@@ -188,16 +186,14 @@ We could use the number of confirmations on the sending or receiving chain, but 
 We could use the change in volume of the simplex (i.e., the number of confirmations over all simplex chains since some block), but we don't have any guarantees about the progression of either the sending or receiving chain.
 Each of these has disadvantages, but if we take these breakpoints together, then we have a reliable single condition.
 
-\mk{note: technically: find blocks matching condition, find LCA of those blocks; calculate the same for the parent. Then get all blocks between LCA (inclusive) and parent's LCA (exclusive).}
-
-We can now summarize; when drafting a block, blocks which are valid for cross-chain processing are those which:
+We can now summarize; when drafting an \cL block, the \cR blocks which are valid for cross-chain processing from the draft block's perspective are those which:
 \begin{enumerate}
     \def\labelenumi{\arabic{enumi}.}
     \tightlist
     \item Have not been processed before; and
     \item Have a timestamp at least $\lambda$ block periods in the past; and
     \item Have a volume at least $N_1 \lambda$ blocks fewer than this block's volume; and
-    \item \label{e-xc-cond3} Are in the history of this block's $\lambda$-parent\footnote{
+    \item \label{e-xc-cond3} Are in the PoRs history of this block's $\lambda$-parent\footnote{
         Definition: the $1$-parent is the parent; the $2$-parent is the parent of the $1$-parent; the $(k+1)$-parent is the parent of the $k$-parent.
     }; and
     \item \label{e-xc-cond4} Are at least $\lambda$ local confirmations deep.
@@ -223,10 +219,24 @@ These conditions are illustrated in \autoref{fig:xc-conditions}.
 \label{fig:xc-conditions}
 \end{figure}
 
-The protocol for processing cross-chain transactions is now, simply: when drafting a block, miners gather all blocks which are valid for cross-chain processing, scan them for incoming cross-chain outputs, and include those cross-chain outputs in the draft block.
+There is one slight oversight in this formulation that we need to fix.
+How do we know that the transactions in those blocks to be processed are all consistent?
+If we naively collect blocks according to the above conditions, then we don't -- there might be conflicting transactions in off-main blocks.
+To correct this, we first use the four conditions to find the 1-4 most recent corresponding blocks (some conditions may resolve to the same block).
+Next, for chain \cR, we find the on-main MRCA (most recent common ancestor) of those blocks -- this is the most recent block that will be processed for cross-chain transactions.
+We repeat this process for the parent of the draft block to find its corresponding MRCA by the same rules.
+Let's call these blocks $\cR_\alpha$ and $\cR_\beta$ respectively.
+The set of blocks to process is: $\cR_\alpha$ and all on-main blocks in its history \emph{minus} $\cR_\beta$ and all on-main blocks in its history.
+This is the on-main ``chain-slice'' from $\cR_\alpha$ (inclusive) to $\cR_\beta$ (exclusive).
+Since all of these blocks are on-main, any valid transactions from off-main blocks between $\cR_\alpha$ and $\cR_\beta$ will be included in one of the on-main blocks.
+By inspection, we can observe that $\cR_\beta$ for the current block was $\cR_\alpha$ for the parent block (or an earlier ancestor).
+By induction, this series of chain-slices continues all the way back to the genesis block (before which no chain-slices exist).
+Therefore, every on-main block (and thus every valid transaction on that chain) is processed for cross-chain transactions at the earliest appropriate time.
+
+The protocol for processing cross-chain transactions is now, simply: when drafting an \cL block, for each \cR chain, miners gather the chain-slice (of \cR blocks) that is valid for cross-chain processing, scan those blocks for incoming cross-chain outputs, and include those cross-chain outputs in the draft block.
 
 \aside{
-    In reality, this isn't ideal because updating the reflections of a draft block may introduce new blocks which are valid for cross-chain processing.
+    In practice, these conditions aren't ideal because updating the reflections of a draft block may introduce new blocks which are valid for cross-chain processing, in turn requiring a complete recalculation of that block's output state.
     To avoid this, we replace \autoref{e-xc-cond3} and \autoref{e-xc-cond4} with similar conditions based on the draft block's parent and $\lambda-1$.
     This keeps the set of blocks stable when updating the reflections of a draft block.
 }

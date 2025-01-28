@@ -436,14 +436,20 @@ atk situations:
 
 %% BEGIN ### RELEASE
 
-
 \subsection{Intra-Simplex Cross-Chain Transactions}
 
 \label{sec:spv-in-ut}
 
+%% END ### RELEASE
+
+%% BEGIN ### DRAFT
+
 \input{27-practical/95-spv-requires-valid-state.tex}
 
-<!-- max redraft start -->
+%% END ### DRAFT
+
+%% BEGIN ### RELEASE
+
 \input{27-practical/95-spv-2-mk.tex}
 
 \input{27-practical/98-ut1-protocol-summary.tex}
