@@ -28,15 +28,12 @@
 | $T_i$ | Network throughput at the $i^{th}$ level of nesting. | bytes/second |
 | $N_i$ | Number of chains at the $i^{th}$ level of nesting. | chains |
 | $N_\text{tiles}$ | Number of tiles in a simplex-tiling. | tiles |
-| $B_{max}$ | Maximum block size. | bytes |
 | $B_f$, $L_f$ | Base-chain block frequency. | Hz |
 | $B_h$ | Base-chain header size. | bytes |
 | $D_f$ | Dapp-chain block frequency. | Hz |
 | $D_h$ | Dapp-chain header size. | bytes |
-| $I$   | Inflation rate. | coins/second |
-| TPS | Transactions per second. | tx/s |
 | $\phi$ | Propagation delay across the network | seconds |
-| $\Sigma\;\text{TPS}_{i}$ | Network-wide transactions per second at the $i^{\text{th}}$ level of nesting (given no additional levels). Primarily used when ``TPS'' alone would be ambiguous. | tx/s |
+| $\Sigma\;\text{TPS}_{i}$ | Network-wide transactions per second at the $i^{\text{th}}$ level of nesting (given no additional levels). | tx/s |
 | $\Delta s$ | Minimum network bandwidth for a full node to remain in sync with a single simplex-chain (whilst also validating PoRs). | bytes/second |
 | $\Delta r$ | Minimum network bandwidth for a full node to fully reconstruct the PoR graph. | bytes/second |
 | $\Delta S$ | Minimum network bandwidth for a \emph{mining} node to remain in sync with all reflecting simplex-chains. | bytes/second |
