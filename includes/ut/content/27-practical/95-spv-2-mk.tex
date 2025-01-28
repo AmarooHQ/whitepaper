@@ -45,7 +45,7 @@ A concise argument for the security of Bitcoin-SPV proofs is:
     \item $\implies$ Honest miners won't produce or build on invalid blocks.
     \item \label{prem:spv-7} $\implies$ For an adversary to produce an apparently valid (but fraudulent) proof leading to a \emph{main chain} block, they'd need to out-compete honest miners (i.e., 51\% attack the network).
     \item \label{prem:spv-8} $\implies$ Only valid transactions exist in the main chain.\footnote{
-        This isn't the full picture for some blockchains (e.g., Ethereum) even though SPV still works for them --- a transaction that fails to execute can still be valid and produce a valid state transition.
+        This isn't the full picture for some blockchains (e.g., Ethereum), even though SPV still works for them --- a transaction that fails to execute can still be valid and produce a valid state transition.
         In these cases, an invalid state transition implies an invalid block, so it's customary to prove that some state has the right values rather than that a transaction exists.
     }
     \item $\implies$ It's safe to accept SPV proofs for blocks in the main chain.
@@ -174,7 +174,7 @@ We need at least some delay to avoid a particularly lucky series of blocks from 
 Ideally, this processing should be as predictable as possible, and well distributed.
 We also want to avoid our delay method from being manipulated to cause earlier or later execution.
 
-The delay duration itself is almost unconstrained: fraud proofs propagate well within one block period (at which point honest nodes are aware of them), and are included in the PoR graph within a block period, too.
+The delay duration itself is almost unconstrained: fraud proofs normally propagate well within one block period (at which point honest nodes are aware of them), and are included in the PoR graph within a block period, too.
 However, if we pick too short a period then we risk some fragility in the network.
 We can technically recover if an invalid cross-chain transaction was processed before a corresponding fraud proof was recorded, but doing so robs honest miners of their block reward.
 So, whatever we pick, it needs to be something that is conservative enough for miners to be comfortable with.

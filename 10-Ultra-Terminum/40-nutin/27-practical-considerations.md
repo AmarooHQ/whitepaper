@@ -149,7 +149,7 @@ Does *header omission* with *explicit proofs* provide any advantages? Yes, in so
 
 Particularly, if miners include only the single missing merkle branch associated with each necessary PoR, then *no additional information* is required besides the *header* itself.
 Headers are trivial to acquire from the network, and each only needs to be acquired once, regardless of the number of PoRs it is a part of.
-Since the *hash of each header* is *part* of the missing PoR merkle branch, miners only need to provided *an ordered list of merkle branches* for full PoR verifiability.
+Since the *hash of each header* is *part* of the missing PoR merkle branch, miners only need to provide *an ordered list of merkle branches* for full PoR verifiability.
 Additionally, these merkle branches *will be part of specific SPV proofs*, so that when a cross-chain SPV transaction (which uses those branches) is made, it can omit those parts of the proof (replacing them with a pointer).
 
 This UT protocol variant is +HOPoRs: the combination of *header omission* (+HO) and *explicit proofs* (+PoRs).
