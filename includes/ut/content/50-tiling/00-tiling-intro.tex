@@ -4,7 +4,7 @@ This method ($\UT{1}$) is useful, but, without dapp-chains, it is limited to $O(
 Can we do better than $O(c^2)$ scalability, though?
 Is \ul{$O(n)$} scalability possible?
 
-When analyzing simplexes in \Cref{sec:ut-complexity}, we saw that each chain in a simplex reserves \half of its capacity for reflections (with other simplex-chains) and \half of its capacity for transactions and dapp-chain headers.
+When analyzing simplexes in \autoref{sec:ut-complexity}, we saw that each chain in a simplex reserves \half of its capacity for reflections (with other simplex-chains) and \half of its capacity for transactions and dapp-chain headers.
 We could, however, use some of this \emph{capacity for reflections} for a slightly different purpose.
 If we were to divide the \emph{capacity for reflections} into multiple partitions, then we would have a \emph{smaller simplex}, but could also use this new \emph{excess capacity} for something else.
 Let's consider a simplex where $\nicefrac34$ of its capacity for reflections is reserved as \emph{excess capacity}.
