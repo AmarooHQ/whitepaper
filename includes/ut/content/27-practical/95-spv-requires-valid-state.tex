@@ -1172,8 +1172,12 @@ The defining quality of a healthy simplex is that additions to the PoR graph are
 When new blocks are mined, they reflect all possible remote blocks and link back to all possible local blocks.
 Thus, there should be no partitions or asymmetric boundaries.
 
+\mk{"The asymmetric boundary lies" -- huh? check for making sense. boundary is inside the graph }
+
 An \emph{asymmetric boundary} emerges when a group of miners contributes \emph{exclusively} to a \emph{subgraph} of the full PoR graph (e.g., a subgraph that censors the fraud proof).
 The asymmetric boundary lies between the full (honest) PoR graph and the dishonest subgraph.
+
+
 
 When an invalid block is mined, individual nodes of the network should rapidly become aware of the fraud proof --- and we expect this if the P2P layer is working correctly.
 However, during an ongoing (successful) attack, that fraud proof is not recorded in the PoR graph.
