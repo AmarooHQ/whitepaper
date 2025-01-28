@@ -1,0 +1,2732 @@
+% \todoDraftOnly{ensure enough complexity stuff is introduced before the next section --- enough to analyze complexities here.}
+
+
+\subsubsection{Introduction}
+
+Our goal in this section is to find a method for SPV (Simple Payment Verification) between any two simplex-chains that is safe, fast, succinct, and reliable.
+\begin{itemize}
+    \item \emph{Safe}: an adversary must either perform a 51\% attack or break a cryptographic dependency to produce an SPV proof that appears valid but is dishonest/fraudulent (e.g., of a valid transaction that depends on a fraudulent transaction).
+    \item \emph{Fast}: $O(t) \le O(\lambda) = O(1)$, where: $t$ is the maximum delay between a transaction being confirmed by a simplex-chain and the point at which a different simplex-chain begins to accept SPVs proofs of transactions in that transaction's block; $\lambda$ is a security parameter (e.g., $\lambda = 4$ local confirmations).
+    \item \emph{Succinct}: for any SPV proof $\pi$, $O(\pi) < O(c)$ and $|\pi|$ is practical.
+    \item \emph{Reliable}: the above properties hold for all transactions in all simplex-chains.
+\end{itemize}
+
+\assignedTODO{{Max > Pouriya}}{h}{n/c adversary --- explain it (Max to dot-point/draft, Pouriya to writeup)}
+
+Given everything we have discussed up to now, it's not clear how SPV is possible.
+The problem is that miners on one simplex-chain do not validate the state transitions of other simplex-chains.
+Each simplex-chain, locally, has an $O(\nicefrac{n}{c})$ share of the network's security (assuming there are $O(c)$ many chains).
+An $O(\nicefrac{n}{c})$ adversary could theoretically produce \emph{all} of the blocks for a single simplex-chain (e.g., by mining at a slight loss to push other miners out).
+The adversary could then create a very long chain of blocks that have valid headers, PoRs, etc, but also contain one or more fraudulent transactions.
+Perhaps the main-chain eventually corrects to a non-fraudulent history (similar to \autoref{sec:preventing-dos-attacks}) --- but in that case we'd need to wait a \emph{very} long time to be sure that such a correction \emph{must} have happened.
+That violates the \emph{fast} goal, so this eventual-correction idea fails to meet our overall goal.
+
+Are we stuck?
+For a blockchain network to be scalable, it must be the case that miners are \emph{not} required to validate more than one chain!
+Have we come all this way, attempting to deal with the core conflict of the trilemma, only to find that we just moved the conflict?
+
+Let's not jump to that conclusion just yet --- there are cryptographic options like SNARKs and STARKs that might help.
+Before that, though, let's slow down and reconsider why SPV works for Bitcoin.
+Perhaps we can learn something.
+
+\subsubsection{Why does SPV work for Bitcoin?}
+
+For the sake of simplicity, let's consider Bitcoin in isolation.
+Particularly, we'll assume that there are no other networks of similar size using the same PoW algorithm or compatible mining hardware.
+
+A concise argument for the security of Bitcoin-SPV proofs is:
+
+\begin{argumentslist}
+    \item An SPV proof is a merkle branch proving that a transaction exists in a block.
+    \item All blocks are part of the same blockchain and history.
+    \item All transactions that occur are in some block's merkle tree.
+    \item If a transaction is invalid, then the block is invalid.
+    \item If a block builds on an invalid block, then it is invalid.
+    \item If a miner produces an invalid block, they get no block reward.
+    \item $\implies$ Honest miners won't produce or build on invalid blocks.
+    \item \label{prem:spv-7} $\implies$ For an adversary to produce an apparently valid (but fraudulent) proof leading to a \emph{main chain} block, they'd need to out-compete honest miners (i.e., 51\% attack the network).
+    \item \label{prem:spv-8} $\implies$ Only valid transactions exist in the main chain.\footnote{
+        This isn't the full picture for some blockchains (e.g., Ethereum) even though SPV still works for them --- a transaction that fails to execute can still be valid and produce a valid state transition.
+        In these cases, an invalid state transition implies an invalid block, so it's customary to prove that some state has the right values rather than that a transaction exists.
+    }
+    \item $\implies$ It's safe to accept SPV proofs for blocks in the main chain.
+\end{argumentslist}
+
+It appears that \cref{prem:spv-7} is our current sticking point for Simplex-SPV proofs.
+
+But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could get to \cref{prem:spv-8} by other means.
+
+\subsubsection{Dialog: Error Correction I}
+
+\aside{
+    The following is a dramatized dialog based on my thoughts leading up to the afternoon of August 3\textsuperscript{rd}.
+    In reality, the dialog represents several days of exploratory learning and iteration.
+    Although these events have been compressed into a single dialog, it is faithful to the nature and order of significant moments and realizations.
+}
+
+\draftNote{
+    That these dialogs predate The Axioms, and have not yet been re-drafted.
+}
+
+\begin{tcolorbox}[colback=black!70,coltext=white]
+    % \centering
+    3\textsuperscript{rd} August 2022, mid-afternoon, UTC+10
+\end{tcolorbox}
+
+\vspace{.5em}
+
+\dMax{Hey, time to revist SPV.}
+\dSe{Great. Remind me, where are we at again?}
+\dMax{
+    Still stuck on existence $\implies$ validity. Proving stuff isn't the issue, it's answering: how do we know that object of the proof is part of a valid history?
+}
+\dMax{
+    Like, each simplex-chain already knows the main chain of each other simplex-chain, but that doesn't mean much if there's one chain with an attacker making like 90\% of the blocks.
+    We'd need to wait like 80 blocks for the honest branch to win out.
+}
+\dSe{
+    Only 80 blocks?
+    It's worse than that.
+    If that attack can fraudulently mint new RTs and move them to another chain, then the `block rewards' for the attacker are those new RTs.
+    So the attacker won't mind pumping up the difficulty to push other miners out.
+}
+\dMax{Oh\dots{} yeah I guess so.}
+\dMax{
+    Actually, I think it might even be rational for \emph{all} miners to do that.
+    Not good.
+}
+\dMax{I'm still convinced that, if SPV is possible in other networks, then there must be a method that works for UT.}
+\dSe{Hmm.}
+\dMax{Any ideas?}
+\dSe{
+    None that you don't have already. \newline
+    Why don't we try something different, see if we can brainstorm some.
+}
+
+% (Note: alt section inserted here)
+
+\dSe{How about we start by listing tools that Eth2 might use but which we don't?}
+\dMax{
+    Yup, okay.
+    DA proofs,
+    %BLS sigs,
+    cryptoeconomic fraud proofs, SNARKs and STARKs, sharding / child-chains, staking, slashing, EVM, GHOST. \newline
+    That's all that come to mind atm.
+}
+\dSe{
+    Cool --- plenty for the moment. \newline
+    Let's go through the list and see if we can eliminate the options one-by-one. \\
+    Tell me about Data Availability proofs.
+}
+\dMax{
+    Certain types of Ethereum nodes will generate them to prove that the node has some data.
+    The idea is that an attacker who wants to lie about having some data can't generate these proofs, and if enough of the network is sampling enough of the block data then it implies that the block is available for download.
+}
+\dMax{
+    This doesn't help us solve the SPV problem, though.
+    We already know the blocks are available because miners do simplex-wide consensus on that availability.
+    Miner's must only reflect blocks that they've downloaded, and only reflect blocks that reflect blocks that they've downloaded, etc.
+}
+\dSe{
+    Right, so we know that all the relevant blocks have been widely dispersed.
+    Seems like we can rule out DA proofs for now.
+    % What about BLS sigs?
+}
+% NOTE: this has an error: can't aggregate BLS sigs unless the sign the same thing. (thx chris)
+% \dMax{
+%     They're pretty neat --- mostly because of \emph{signature aggregation}.
+%     If transactions had BLS sigs, then we could aggregate all of the signatures per-block into one signature.
+%     It'd save space per-block, but might also make SPV stuff more complex.
+%     That said, we could just use a protocol like segregated witness to achieve the same goal.
+%     In any case, without introducing PoS-like consensus rules, I don't see how BLS sigs could help with SPV.
+% }
+\cn{TODO: update this to match the current Ethereum -- fraud proofs are widely common with the layer 2s, the attestation mechanism on the layer 1 doesn't contain any fraud proofs -- more the voting on the correct block and penalty for voting on the incorrect blocks / equivocating / etc.}
+\dSe{
+    Okay.
+    Next, Eth2's fraud proofs.
+    These are different from our fraud proofs, right?
+}
+\dMax{
+    The main difference is that we don't have any sort of staking/slashing involved.
+    The general principle is the same: show that a computation was done incorrectly, or that a block contains a contradiction.
+}
+\dSe{How do Eth2 fraud proofs work?}
+\dMax{
+    Some nodes act like police --- they stake some ETH and then check that blocks/state-transitions are valid.
+    If any of those police-nodes find a problem, they sign a message that challenges the invalid block.
+    If the fraud proof was false, then the police-node gets slashed.
+    Otherwise, whoever signed the original block gets slashed.
+}
+\dSe{
+    Okay, so that doesn't seem compatible with PoR/UT, at least not without big changes.
+    How do our fraud proofs work?
+}
+\dMax{
+    The goal of our fraud proofs is to show only the problematic parts of the block using the minimum data necessary.
+}
+\dMax{
+    Say an attacker made a block that looks valid in all ways except the state-transition --- e.g., there's a tx that mints 1 billion coins or whatever.
+    We can always prove that such a tx is fraudulent if miners have to commit to the state-root before and after each transaction (in the block itself).
+    All we have to do is provide all of the state-tree witnesses that are necessary to evaluate that one tx.
+    If the tx is valid, then the output state root will always match the one recorded.
+    (This sort of design is related to \href{https://github.com/zack-bitcoin/amoveo-docs/blob/master/design/stateless_full_node.md}{stateless} full nodes, which use similar structures, constraints, and patterns.)
+}
+\dMax{
+    So, say an attacker makes an invalid block.
+    The miners (and other full nodes) in that chain will try to verify the block and find the error.
+    Then, instead of building on the invalid block like normal, miners would link back to that block as an invalid block along with the fraud proof.
+}
+\dSe{
+    Right, and that only works on the local chain, so, if the attacker is making 90\% of the blocks then we're basically in the same `80 blocks' situation from before.
+    Which we already know doesn't work.
+}
+\dMax{
+    Exactly.
+    We'd need to wait way too long for the situation to correct itself.
+}
+\dSe{
+    Okay, zk stuff next.
+    Btw, I've been meaning to ask:
+}
+
+% note: the next few dialog msgs overlap with some from the alt section below
+\dSe{
+    Why haven't you considered zk-STARKs as a useful tool for SPV?
+}
+\dMax{
+    Well, I guess I've always associated them with layer 2 stuff, and L2 isn't really relevant to UT's consensus-level design.
+    So I just put it to the side and didn't consider it.
+    I ruled it out early.
+}
+\dSe{
+    But STARKs/SNARKs are proofs of valid computation, right?
+    That seems like it might be useful.
+}
+\dMax{
+    Yeah.
+    If we could produce a ``validity proof'' for each block, then that could potentially solve the SPV problem.\newline
+    \newline
+    Maybe each block could come with a validity proof, or one for the previous block if they're too slow to generate.
+    Then, before doing an SPV proof, you could prove that the block is valid first.
+}
+\dMax{
+    But, ofc, you'd need to prove that all the prior blocks were valid, too.
+    If we did that for $O(c)$ many chains... well that's probably an issue.
+}
+\dSe{
+    Sure, but some of those proof methods can be aggregated, right?
+}
+\dMax{
+    True.
+    Bulletproofs are one example.
+    The proofs are short-ish, mb like 2-5 KB, but super slow to generate.
+    Verification time is fine in practice for small proofs, but it's linear with the size of the circuit.
+    So they're probably not practical without heavily rate-limiting them.
+}
+\dSe{
+    Hmm.
+}
+\dSe{
+    STARKs can be recursively verified, right?
+}
+\dMax{
+    Yeah, that's sort of like aggregation.
+    Basically you take some STARKs, which verify e.g., a bunch of blocks in a chain-segment, and then you produce another STARK that verifies those STARKs.
+    It's actually pretty neat: the inner STARKs have complexity relative to the block-verification circuit, but the `root' STARK has complexity relative to the STARK-verification circuit.
+    Since the block-verification circuit presumably includes the STARK-verification one, we'll always end up with a smaller proof.
+}
+\dSe{
+    Sounds like there's some potential there.
+    Is there a catch?
+}
+\dMax{
+    Yeah, there is.
+    The cryptographic properties of STARKs are great, but the proof size is definitely an issue.
+    We're talking like 50 KB minimum, and up to 200 KB.
+    There are other problems, too.
+    Like that creating such proofs can take many GB of RAM and that we don't know who'd generate them.
+}
+\dMax{
+    I guess we could have massive blocks to accommodate them, but it doesn't really feel viable.
+}
+\dSe{
+    I agree.
+}
+\dSe{
+    So what about SNARKs, then.
+    Do they solve any of those problems?
+}
+\dMax{
+    Yeah\dots{} sorta. \newline
+    The proof size is constant, like 200-400 B depending on the scheme, and the verification time is $O(1)$ too.
+}
+\dMax{
+    The problem is the trusted setup.
+    Like, SNARKs solve lots of the problems of STARKs, but the crypto properties aren't okay.
+}
+\dMax{
+    It's a real shame in some ways --- like the proofs are short enough and verification is fast enough that they could concievably be \emph{in the PoR graph itself}.
+    Then, you'd just \emph{know} that the blocks you were doing SPV against were valid. \newline
+    \dots{} actually, if we did that, we could basically enforce, \emph{at the consensus level}, that all PoRs require a SNARK.
+    That'd mean that all reflected blocks are valid (since, if you were a miner, reflecting a block with an invalid SNARK would invalidate your block, and so on).
+}
+\dSe{
+    Huh.
+    That seems like a decisive advantage.
+}
+\dMax{
+    Yeah!
+    We might need to make blocks a bit bigger or adjust some parameters or something, but in principle everything would still work.
+}
+\dSe{
+    So, talk me through the problem, then.
+}
+\dMax{
+    Well, SNARKs have a trusted setup --- STARKs have a transparent setup so don't have this issue. \newline
+    The best SNARK systems have a one-time setup where a special number gets generated.
+    Then anyone else can reuse this number to prove correct execution of any suitable algorithm (though generating the proof is slow).
+    The special number is the output of a special function that requires some random data as input.
+    The random data is sometimes called ``toxic waste'': if it's not properly disposed of, then bad stuff happens.
+    So if we used SNARKs, then the toxic waste is like an existential threat hanging over us forever --- because it's impossible to prove that it was disposed of.
+}
+\dSe{
+    Hmm. What sort of ``bad stuff''?
+}
+\dMax{
+    Well, most of this tech has been developed with a focus on L2 scaling.
+    In that case the network operator (who also generates and publishes the proofs) could basically steal everyone's money/tokens/whatever.
+    So, there's \emph{literally no way to tell} if a SNARK is honest and valid, or dishonest and just `looks' valid.
+}
+\dMax{
+    Plus, most of these systems have some zero knowledge component as well.
+    So if, e.g., account balances were not public then an attacker could just print money and no one would be able to tell.
+}
+\dSe{
+    I can see how that'd be a big problem for confidential transactions and the like.
+}
+\dSe{\ldots}
+\dSe{
+    What if the toxic waste was well known?
+}
+\dMax{
+    Oh, uh, I haven't really thought about it.
+}
+\dMax{
+    I guess that some people would make valid proofs and some people would try to make fraudulent ones.
+}
+\dMax{
+    For the bad ones, though, full nodes of that chain could always tell when the proof was bad.
+    They'd find out when they validated the block.
+}
+\dMax{
+    Oh, and they can automatically generate a fraud proof for free at that point.
+    Like they already have all the witness data there to produce it.
+    Then, the next time an honest miner mines a block, they'll flag the fradulent block by linking back to it as invalid and include the fraud proof.
+}
+\dSe{
+    But we can't depend on any honest miners sticking around if the attacker's willing to mine at a loss.
+    That was the original problem.
+}
+\dMax{
+    Oh, yeah. Hmm. \newline
+    If we put a SNARK in the PoR graph, why can't we put the fraud proof in it too?
+    Like, \emph{any} honest full node will generate the fraud proof and auto-broadcast it.
+}
+\dMax{
+    Then any miner of \emph{some other chain} can include the fraud proof in the PoR graph.
+    (Which will protect that chain from bad SPV proofs against the bad block or its descendants.)
+}
+\dMax{
+    We just need the fraud proof to like `pollute' the complete PoR graph.
+    That's doable, because the fraud proofs are short, like $O(\log c)$ or something.
+    Maybe like 2 - 5 KB.
+}
+\dMax{
+    So we need a new rule.
+    Something like `if you reflect a block that contains a fraud proof for some other chain, then you need to record the fraud proof for that other chain, too, unless it's already been recorded'.
+}
+\dMax{
+    The goal being that as soon as \emph{any} simplex-chain records a fraud proof for \emph{any other} simplex-chain, then \emph{all other} simplex-chains follow suit.
+    If they don't, then they can't take advantage of those PoRs.
+    But all honest miners want to do this anyway --- they want the most PoRs possible and they don't want fraud.
+}
+\dMax{
+    And that would start happening almost immediately --- like way before the next block.
+    So like within a block period or so the \emph{whole} network would know about it and have recorded it.
+}
+\dMax{
+    An attacker would need to 51\% attack the network!!
+}
+\dMax{Right?}
+\dSe{Hmm. Maybe.}
+\dSe{Repeat the idea back, a bit more organized this time.}
+\dMax{
+    Yup.
+}
+\dMax{
+    The first thing we need is for each simplex-chain to support general and short fraud proofs.
+    Ideally, full nodes should automatically generate them when processing an invalid block.
+}
+\dMax{
+    Then, each chain must support validating and recording these fraud proofs alongside PoRs.
+    Sometimes, a valid block might reflect an invalid block before the miner learned of the fraud proof.
+    That's okay, since we expect the fraud proof to arrive a short time \emph{after} the invalid block.
+}
+\dMax{
+    At some point, a simplex-chain will include the fraud proof in its PoR graph (which could be any simplex-chain).
+    If a miner for a different simplex-chain wants to reflect that block, then they \emph{must} include the fraud proof, also.
+    If the invalid block was reflected by a past block, but the fraud proof wasn't yet known, then the miner flags the invalid block anyway, even though the corresponding PoR was in an ancestor block.
+}
+\dMax{
+    Basically, the inclusion of these fraud proofs becomes a trigger for a fork --- blocks that don't acknowledge the fraud proof can't use PoRs via blocks that do acknowledge it.
+}
+\dMax{
+    So, for an attacker to produce a dominant history that avoids the fraud proof, they need to do a 51\% attack.
+}
+\dSe{
+    Hmm.
+}
+\dMax{
+    Any criticisms?
+}
+\dSe{
+    Not yet.
+    % You'll need think about it more.
+    % I'll need think about it more.
+}
+\dSe{
+    By the way, where do the SNARKs with publicly known toxic waste fit in?
+}
+\dMax{
+    Umm\dots{} I guess they're like a short way to verify the computations of the block, except, no that doesn't make sense b/c we need to wait and see if there's a fraud proof anyway.
+    I guess they don't really do anything.
+    Like, including them is basically the same as assuming a block is valid in the absence of a fraud proof, but with extra computation.
+}
+\dMax{So we don't need them at all.}
+% note: maybe wrap up day 1 here and then have a <a few days later> banner or something.
+% then put all this extra stuff --- "i've thought about it now" and on --- into the 2nd part of the dialog
+\dSe{Cool.}
+\dSe{
+    Okay, go tell Chris.
+    See what he thinks.
+    }
+\dMax{
+    On it.
+    Calling now.
+    }
+\dMax{\dots{} I think I just realized something about scaling.}
+\dMax{
+    It's not about consensus on \emph{state-transitions}. \\
+    It's about consensus on the \emph{error correction} of state-transitions.
+}
+% \dSe{\emph{ExS\=e is silent.}}
+\dSe{\dots{}}
+\dSe{Does the convergence with epistemology suprise you?}
+\dMax{A bit.}
+\dSe{Why?}
+\dMax{
+    It feels like a special case of \emph{\href{https://criticalfallibilism.com/yes-or-no-philosophy-summary/}{the asymmetry between criticism and praise}}.
+}
+\dMax{
+    IDK, I guess I didn't expect to find more convergence than we already found.
+}
+\dMax{
+    It's exciting, but I'm unsure.
+}
+\dSe{
+    Temper your expectations.
+    There hasn't yet been enough exposure to criticism, yet.
+}
+\dSe{
+    Don't forget, \emph{convergence} is a \emph{positive argument}.
+    If it was worth anything, the inversion should be a negative argument, which would be a criticism of something.
+}
+
+\dSe{
+    Give it time.
+    Criticisms may yet emerge.
+}
+\dSe{
+    Besides, we're not even done yet, you know?
+}
+\dMax{I know.}
+\dMax{Talk soon.}
+\dSe{I'll be here.}
+
+
+% ########  ####    ###    ##        #######   ######       #######
+% ##     ##  ##    ## ##   ##       ##     ## ##    ##     ##     ##
+% ##     ##  ##   ##   ##  ##       ##     ## ##                  ##
+% ##     ##  ##  ##     ## ##       ##     ## ##   ####     #######
+% ##     ##  ##  ######### ##       ##     ## ##    ##     ##
+% ##     ##  ##  ##     ## ##       ##     ## ##    ##     ##
+% ########  #### ##     ## ########  #######   ######      #########
+%
+% DIALOG 2
+
+
+\subsubsection{Dialog: Error Correction II}
+
+\dialogHeader{11\textsuperscript{th} August 2022}
+
+% \todo{move this to additional reasoning to a new follow-up dialog?}
+\dMax{
+    Hey.
+}
+\dSe{
+    So, you've decided to explain all this through a dialog?
+}
+\dMax{
+    Yeah.
+    I was having trouble writing it out.
+    I was stuck.
+}
+\dMax{
+    A dialog felt natural once I started writing; it's helping me stay unstuck.
+    I like the way that we're stepping through the process.
+}
+\dSe{
+    Which process?
+}
+\dMax{
+    The cycle of \href{https://criticalfallibilism.com/yes-or-no-philosophy-summary/}{\emph{conjectures and refutations}}; the process of \href{https://criticalfallibilism.com/practice-thinking-in-terms-of-error-correction/}{\emph{error correction}}.
+}
+\dSe{
+    Why is it important to show that, rather than just the eventual solution? \\
+    After all, you could treat these dialogs as another draft and replace them later.
+}
+\dMax{
+    One of my goals is to expose these ideas to criticism, and to make that criticism as easy as possible.
+}
+\dMax{
+    I \emph{could} just present the solution, but that obscures both my reasoning and the ideas that were rejected along the way.
+    I want to know if I made any mistakes, and some of those might be procedural, so it's important to show more than just the solution.
+}
+\dMax{
+    Writing a dialog also helps establish a track record of seeking and considering criticism;
+    of thinking up criticisms and answering every one;
+    of truth-seeking.
+}
+% \dMax{
+%     How else could I convince other thinkers (especially those who may offer good criticisms) to consider my ideas?
+% }
+% if you can't answer the criticisms that your own mind come's up with, how will you be able to answer the criticisms that anyone else's mind come's up with?
+\dSe{
+    Are you prepared to be critcised on that point?
+}
+\dMax{
+    Yes --- that's a win according to that goal.
+}
+\dSe{
+    Very well, let's proceed.
+}
+\dMax{
+    Have you had time to think about the SPV idea?
+}
+\dSe{
+    Yes.
+    I see two problems.
+}
+\dMax{
+    Great.
+    Let's go.
+}
+\dSe{
+    Attackers can choose which blocks they reflect.
+    So what about this case?
+}
+\dSe{
+    An attacker first pushes all the other miners out of a chain by mining at a loss.
+    Then they mine their invalid block that has some tx that will later be used for SPV fraud (maybe with intermediate transactions, too).
+    The fraud proof for that block gets propagated throughout the PoR graph.
+    But each other simplex-chain only records it once.
+}
+\dSe{
+    The attacker then just skips those blocks with the fraud proof.
+    Is there anything to stop the attacker using PoRs via blocks \emph{after} those blocks with the fraud proof?
+}
+\dMax{
+    Well, a block that builds on an invalid block is itself invalid, so the other simplex-chains would just record that fraud proof, too.
+    Any time the attacker generates a new block, there's a new fraud proof.
+}
+\dSe{
+    And that fraud proof --- of a block with an invalid parent --- what is it exactly?
+}
+\dMax{
+    It'd be like: proof2 = header2 + proof1.
+    Also, some metadata to point out which ancestor, etc.
+}
+\dSe{
+    And the fraud proof of a block with an invalid grandparent?
+}
+\dMax{
+    I see your point --- the fraud proofs get too large (assuming they're stateless).
+}
+\dMax{
+    Tho, hang on, if the other simplex-chains know about the first fraud proof, then they automatically know that any block that builds on the invalid block must be invalid --- no matter how long ago that was.
+    No fraud proof required.
+}
+\dSe{
+    That's assuming that the fraud proof is recorded.
+}
+\dMax{Yes.}
+\dSe{
+    So, second question: what sized bribe would prevent a miner from including the fraud proof?
+}
+\dSe{
+    `Honest' miners can choose whether or not to record the fraud proof.
+    So as long as the proof hasn't yet been recorded in any other chain's PoR graph, then there's no penalty for the miner deliberately \emph{not} including the fraud proof.
+    It's basically free money for the miner.
+    From the miner's point of view, someone else will include the fraud proof later on, so it only makes sense to take the money, right?
+}
+\dSe{
+    You can't fix this by waiting longer, either, since the longer that period is, the easier it is for an honest miner to take the bribe --- there are even more future blocks that could contain the fraud proof than before.
+}
+\dMax{
+    Well, like you said there's no penalty for the miner, currently.
+    We can, however, set a lower bound on the bribe by dividing the fraudulent block's reward between miners that record the fraud proof.
+    So the attacker would need to pay at least an extra block reward per invalid block per block-period (split among all simplex-chains).
+}
+\dMax{
+    Since the attacker loses the actual block rewards, too, the total cost after $z$ blocks is the $z\text{-th triangle number} + z$.
+    Approximately.
+    That's $O(z^2)$ cost.
+}
+\dSe{
+    \dots{} You can convince me of that derivation that later --- something to come back to. \\
+    But, now, at least, we have a basis for security parameters.
+}
+\dSe{
+    How should the reward for including the fraud proof be split up?
+}
+\dMax{
+    Well, we don't want honest miners to have a reason to try and game it.
+    And we want all chains to record it in their PoR graph.
+    My first guess is to split the reward between all chains.
+    So if the block reward for the invalid block was $r$, then the miner of the first block on each chain to contain the fraud proof should get $\sim\nicefrac{r}{N_1}$.
+}
+\dSe{
+    Hmm, we'll need to come back to those details later.
+    But there are bigger problems to solve first.
+}
+\dSe{
+    If there's something for miners to gain from producing the \emph{first} block (in that simplex-chain) to contain the fraud proof, is there an incentive for them to mine sibling blocks instead of building on the best block?
+}
+\dMax{
+    Maybe --- only if that sibling block will appear to be the best block, though.
+}
+\dMax{
+    The goal of such a miner is to have that sibling block be favored by the fork rule.
+    That shouldn't happen with the way that we count work, though.
+    Like, if the sibling block uses any PoRs via R-blocks that reflect the earlier block, then the work will end up being attributed to the earlier block rather than the common ancestor.
+}
+\dSe{
+    Is it ever honest for a miner to act like that?
+}
+\dMax{Hmm. I guess not.}
+\dMax{
+    Actually, here's a way to tighten things up.
+}
+\dMax{
+    Consider that miners must only reflect blocks that they've downloaded, and that condition is recursive.
+    So, if a new L-block (\BL{2a}) does PoR via some R-block (\BR{1}), and that R-block reflected an L-block that isn't in the main L-block's history (\BL{2}) --- well that implies that the miner has downloaded \BL{2} but has not linked back to it.
+}
+\dMax{
+    But a miner can link back to both valid and invalid blocks.
+    If \BL{2} is valid, then an honest miner should build on it, and if \BL{2} is invalid then they should flag it as invalid.
+}
+\dMax{
+    Similarly, all blocks that \BR{1} reflected (that aren't L-blocks) should have been downloaded, so can \emph{and should} be reflected, too.
+}
+\dMax{
+    So, we can add another two constraints to block validation:\footnotemark
+}
+\footnotetext{
+    This dialog predates the Axioms (i.e., \AxOfMaximalReflection, \AxOfUnifiedAncestry, etc).
+}
+\dMax{
+    % todo: using \hyperref to this label doesn't link to the right place --- it links to top of section, it seems
+    \label{dialog1:network-rules}
+    1. \emph{if you reflect a block, then all non-local blocks reflected by that block must also be reflected, or have been reflected by a past local block}; and
+}
+\dMax{
+    2. \emph{you must link back to all local blocks that both are \ul[DMaxCol]{chain-tips} and have been reflected by blocks you reflect}.
+}
+\dMax{
+    Both constraints are free, and a violation of either of these constraints should be easy to prove via a fraud proof.
+}
+\dMax{
+    Oh, and the \emph{link back to all possible local blocks} rule would reduce the expected length of an empty-block DoS from $O({A_{\text{blocks}}}^2)$ to $O(A_{\text{blocks}})$, too.
+}
+\dSe{
+    How does this stop miners making sibling blocks to harvest fraud proof rewards?
+}
+\dMax{
+    Say that the local block \BL{2} contains the fraud proof for some other chain.
+    A miner could make a block, \BL{2a}, that looks like it was created earlier than \BL{2}.
+    They'd just set the timestamp earlier and only include some of the PoRs that \BL{2} has.
+    However, there are PoRs from other chains that point to \BL{2}, but not \BL{2a}.
+    So the next L-block (\BL{3}) will link back to both, but \BL{2} will be the primary parent.
+}
+\dMax{
+    If a miner is mining \BL{2a} after \BL{2}, they're now unable to include any PoRs via any blocks that reflect \BL{2} (and this applies recursively).
+    So there's no way for \BL{2a} to have substantially more PoRs than \BL{2}.
+    There might be \emph{some} PoRs that become available after \BL{2} was mined but before the miner downloaded \BL{2}.
+}
+\dMax{
+    But from \BL{3}'s perspective, those PoRs are valid for both \BL{2} and \BL{2a}.
+    And there will be some PoRs for \BL{2} that don't include \BL{2a} --- the PoRs produced after other miners learn of \BL{2} but before \BL{2a} was mined.
+}
+\dMax{
+    So \BL{2} should always out-weigh \BL{2a} $\implies$ \BL{2} always wins.
+}
+\dSe{
+    I see.
+}
+\todoDraftOnly[h]{Check that we cover safe and reliable explicitly (or add)}
+\dSe{
+    Let's take stock for a moment.
+    We've covered \emph{safe}, and we need the other two, first, for \emph{reliable}.
+    What about \emph{succinct}?
+}
+\dMax{
+    The SPV proof is a merkle/verkle branch leading to some transaction or state, which is $O(\log c) + O(1)$.
+    Blocks will have room for $\sim 100$ transactions, so verkle branches could potentially be $O(1)$.
+    Transactions involving SPV proofs will be larger than average, but small enough that many could be included in each block.
+}
+\dSe{
+    Okay.\\
+    What about \emph{fast}?
+}
+\dMax{
+    I'm not sure yet, but I have an idea for how to figure it out.
+}
+\dSe{
+    Via analyzing bribes?
+}
+\dMax{
+    Yup.
+    The goal is finding a way to tell if it's safe to accept an SPV proof.
+}
+\dMax{
+    We know that an attacker would need to bribe all the miners for some number of blocks to pull off some fraud, and we can calculate that cost.
+    The attacker's goal is to profit, so for some fraudulent transaction with value $v$, and \BribeCost spent on bribes, the attacker's profit will be $\approx v - \BribeCost$.
+    And \BribeCost depends on how long the attack lasted.
+    So if the attack lasts $z$ blocks, and \BribeCost is a function of $z$, then it should be safe to accept the SPV proof when $v < \BribeCost(z)$.
+}
+\dSe{
+    When does $z$ start?
+}
+\dMax{
+    When the fraudulent transaction is made.
+}
+\dSe{
+    Can't the attacker parallelize that to reduce the waiting period?
+    They only have to pay $\BribeCost(z)$ \emph{per-chain}, not \emph{per-transaction}.
+}
+\dMax{
+    Ahh, yeah.
+}
+\dSe{
+    And how do you know which txs will later be used for SPV?
+}
+\dMax{
+    We don't, yet --- b/c the target chain is the \emph{outgoing} chain. \\
+    I think we can solve both problems at once, tho.
+    First, we can flag all txs that are meant as outgoing SPV transactions, or just include every tx.
+    Either way, that tells us which txs matter.
+    Second, we can measure the waiting time for all the relevant txs and run them in batches.
+}
+\dSe{
+    How does this batch system work?
+}
+\dMax{
+    Each chain could track outgoing transactions into a batch and commit to that via a field in the header.
+    Each batch has its own ID number, too.
+    As txs accumulate, the total outgoing value increases until it hits the $v < \BribeCost(z)$ breakpoint.
+    Then the counter resets to 0.
+    Other simplex-chains require that an SPV proof links back to a transaction that's part of a batch that is canonical according to the main chain and that the batch has a large enough $z$.
+}
+\dMax{
+    If $O(\BribeCost(z)) = O(z^2)$ --- like I guessed before --- then $O(z) = O(\sqrt{\BribeCost}) = O(\sqrt{v})$.
+    So the waiting time is roughly proportional to the square root of the value being moved.
+}
+\dSe{
+    It would be troubling if the waiting time scaled worse than that.
+}
+\dSe{
+    But if that's the case, then can't the attacker exploit that complexity by adding a late transaction, close to the batch execution?
+}
+\dMax{
+    Yes\dots{} that bad tx might only have a few confirmations, so $v < \BribeCost(z)$ isn't upheld.
+}
+\dMax{
+    We could fix that by adding transactions to the \emph{next} batch, not the current one.
+}
+\dMax{
+    Then we can guarentee that \emph{all} outgoing transactions have been through some minimum waiting period, $z$.
+    Somewhere between $z$ and $2z$ blocks if batches are regular.
+}
+\dSe{
+    Hmm, okay.
+}
+\dMax{
+    Oh, and if we are basically certain that $v < \BribeCost(z)$, we can add a rule like: \emph{doing SPV against an invalid chain after $\ge z$ blocks invalidates your block}.
+}
+\dMax{
+    A reorg after a long time is better than not reorging at all.
+    And it means that the attacker needs to get their profit off-chain somehow.
+}
+\dSe{
+    It's probably safer to assume that the attacker can do that. \\
+    Could this potentially invalidate blocks recursively? Have unintended consequences?
+}
+\dMax{
+    Uhh\dots{} maybe.
+    It only happens after we pass $z$, though, so it's basically the same case as the original attacker's case.
+}
+\dMax{
+    I \emph{think} it's safe enough.
+}
+\dSe{
+    Okay, something for later, maybe.
+}
+\dSe{
+    Let's return to \BribeCost.
+    Can you derive it?
+}
+\dMax{
+    I can try; the idea isn't well formed yet, though.
+}
+\dSe{
+    Then let's discuss it a bit more generally, first.
+    See if we can come up with some understanding of how it behaves.
+}
+\dSe{
+    What's your intuition so far?
+}
+
+\begin{comment}
+    - bribe all miners
+    - 1 tx per chain
+    - miners unpredictable
+    - needs to be most profitable option
+    - bribe > opportunity cost
+    - op cost is sum of rewards of that chain's share of invalidated blocks
+    - op cost is proportional to z
+    - bribe needs to be paid z times
+    - so ~z^2
+\end{comment}
+
+\dMax{
+    Thinking about it from the miners' and attacker's points of view, let's start from just as the fradulent block is mined.
+}
+\dMax{
+    The attacker wants to bribe all miners on all chains to withhold the fraud proof.
+    We don't care too much about exactly how the bribe happens, except that the miners should be sure that they'll recieve the bribe (it won't be invalidated later).
+    So maybe the bribes are done via one tx per R-chain per R-block, and the tx is only valid if the fraud proof isn't recorded in the PoR graph.
+}
+\dMax{
+    There are lots of miners, though, and it's unpredictable which will mine the next block for any given chain.
+    So each miner has a choice, \emph{for each block they mine}, of whether to accept the bribe or not.
+}
+\dMax{
+    From the miner's perspective: the attacker doesn't know if they've recieved a bribe before or not; and they could always earn some reward by publishing the fraud proof.
+    So \emph{each} bribe has to be worth more than the alternative.
+}
+\pz{H is used earlier as the total hash-rate of the network. Also $z$ should be defined.}
+\dMax{
+    Let's assume that there's a reward ($C_r H$) for publishing the fraud proof.
+    ($C_r$ is the block reward of the target chain, and $H$ is the proportion of the block reward each miner gets.)
+}
+\dMax{
+    If the attack has been in-progress for $z$ blocks, then each miner stands to make $\sim C_r H z$ coins by publishing the fraud proof.
+}
+\dMax{
+    So, the attacker needs to pay a bribe of $> C_r H z$ coins \emph{per R-block per R-chain}.
+}
+\dMax{
+    If all blocks were perfectly regular, that'd be $N_1 C_r H$ coins (total) for the first block period, $2 N_1 C_r H$ coins for the second, etc.
+}
+\dMax{
+    Factoring out $N_1 C_r H$, this means the total cost will be at least $1 + 2 + 3 + \cdots + z = z(z+1)/2$ after $z$ blocks.
+    Which is quadratic in $z$.
+}
+\dSe{
+    Okay.
+    What happens to the bribe amount \emph{after} someone publishes the fraud proof?
+}
+\dMax{
+    Well, the dishonest miners opportunity cost drops to $C_r H$.
+    So the bribes would be a lot cheaper.
+}
+\dMax{
+    But it's also a bit pointless for the attacker to keep going.
+}
+\dSe{
+    Why is that?
+    Can't they just keep bribing?
+}
+\dMax{
+    They could, but what's the end-game?
+    After some honest miners integrate the fraud proof into their PoR graph, they'll eventually dominate.
+}
+\dMax{
+    Like, the honest miners can use PoRs via the dishonest chain segements, but the dishonest miners can't use PoRs via the honest chain segements.
+}
+\dSe{
+    I see.
+    It's like the empty block DoS situation.
+}
+\dSe{
+    You mentioned $H$, earlier.
+    What is that, exactly?
+}
+\dMax{
+    The basic idea is that invalid blocks do some work, but the block reward isn't given to the miner.
+    Instead, we could split it between other miners.
+    So we could set $H = C_r/N_1$, where $C_r$ is the block reward.
+}
+\dSe{
+    Could you make $H$ larger?
+    Then, each bribe would need to be larger, too.
+}
+\dMax{
+    Maybe.
+}
+\dMax{
+    So I've got 3 ideas: just make it larger, split it between fewer miners, and have some kind of `treasury' or something to increase it.
+}
+\dMax{
+    If we just doubled $H$ (for example) then we'd end up rewarding honest miners with $2C_r$ coins all up.
+    Which would be a new source of inflation.
+}
+\dSe{
+    Inflation aside, what happens if you increased it more?
+}
+\dMax{
+    More?
+    Like to $4H$ or something?
+}
+\dMax{
+    Well, it'd make bribes more expensive.
+}
+\dSe{
+    \dots{} Yes, but is there a bigger problem with minting coins in exchange for fraud proofs?
+}
+\dMax{
+    Oh --- if we create new coins, then miners could increase their RoI by \emph{deliberately creating fraudulent blocks}.
+}
+\dMax{
+    Like, a group of miners (with e.g., 40\% of the hash-rate) could deliberately make a fraud proof, then pre-mine blocks with that fraud proof, and end up with more coins than they'd have being honest.
+}
+\dMax{
+    It should never be profitable to do fraud, so the rewards for publishing fraud should never be more than a miner would make by being honest.
+}
+\dMax{
+    It's not safe to get more coins out more than were put in.
+}
+\dSe{
+    Right.
+}
+\dMax{
+    I guess that refutes the treasury idea, too.
+}
+\dSe{
+    Probably.
+    By the way, what if the attacker had 40\% of the hash-rate?
+    You haven't considered that, yet.
+}
+\dMax{
+    Ahh, yeah.
+    If the attacker has excess capacity to mine other chains, then they can recover some of the bribes.
+    The attacker can keep the block rewards too if the blocks are valid.
+}
+\dMax{
+    We can approximate this by only counting rewards to \emph{other} miners in $\BribeCost$.
+    So we just multiply the inside of \BribeCost by $p$ (following the $p+q=1$ norm).
+}
+\dSe{
+    What about the other idea, rewarding fewer miners?
+}
+\dMax{
+    Well, an important breakpoint is when the fraud proof gets recorded for the first time.
+    So we could incentivize that by paying more to the miners that publish it first.
+}
+\dMax{
+    Like, we could have $H = 2/N_1$ and pay it to the first half of miners that publish the FP (once per chain).
+}
+\dMax{
+    Oh, and we always want the targeted chain to be included in that group, too.
+    So that there's always an incentive for miners to mine an honest block on that chain.
+}
+\dSe{
+    What about a sliding scale?
+    Like $5H$ to the first miner, $4H$ to the second and third, $3H$ to the next 3, and so on?
+}
+\dMax{
+    Maybe, but we expect blocks to get created simultaneously all the time, so the PoR graph might not have a definite \emph{first} miner.
+    That sounds like it could be gamed; not sure how we'd solve that.
+}
+\dSe{
+    Doesn't the same problem exist even if it's just the first half of eligible miners?
+}
+\dMax{
+    Maybe.
+    There could be an incentive for miners to group together to make it look like they were the first half, even if they weren't.
+}
+\dMax{
+    Sort of like a short-term reorg/censorship attack.
+}
+\dMax{
+    We could favor interconnection, though, in the PoR graph.
+    Like, instead of treating miners individually, we could reward the first \emph{group} of mutually reflecting blocks (including the FP) over $N_1/2$ chains that appears.
+}
+\dMax{
+    The idea being that an honest miner's best chance of collecting the reward is to mutually reflect as many other chains that already included the FP.
+}
+\dMax{
+    That's consistent with the protocol rules we've discussed, too.
+}
+\dSe{
+    Hmm.
+    Can we increase $H$ any more?
+}
+\dMax{
+    We could do $H = 1/\sqrt{N_1}$ maybe?
+    Or $H = 1/\log{N_1}$.
+}
+\dMax{
+    In general, $x$ miners would get paid $C_r H$ when $H = x^{-1}$.
+}
+\dMax{
+    Also, the attacker doesn't know which miners will publish the FP first, so the attacker still needs to make $\sim N_1$ bribes per block period.
+}
+\dMax{
+    Which increases the cost of bribes by a factor of $N_1 / x$.
+}
+\dMax{
+    Paying only a proportion of miners feels risky, though.
+}
+\dMax{
+    I'm not sure yet.
+}
+\dSe{
+    Neither am I.
+}
+\dMax{
+    Hmm.
+    I think I need to do some working-out.
+    Spend some time figuring out what this looks like in more detail.
+}
+\dSe{
+    I agree.
+}
+\dSe{
+    Before you go,
+}
+\dSe{
+    If the waiting time for SPV transactions is $O(\sqrt{v})$, that won't satisfy the \emph{fast} criterion.
+}
+\dMax{
+    I know.
+}
+\dSe{
+    Have you considered what to do in that case?
+}
+\dMax{
+    Yes.
+    Discuss it with you.
+    Try to understand if it's impossible, or look for a mistake.
+}
+\dSe{
+    And what about the criterion itself?
+}
+\dMax{
+    I think we should leave it.
+    If we need to change our goals, then we'll address that when the time comes.
+}
+\dMax{
+    I don't like the idea of making excuses for failing at a goal.
+    Or outright hiding it.
+}
+\dSe{
+    Good.
+}
+\dMax{
+    See you next time, then?
+}
+\dSe{
+    Yes.
+    Good luck.
+}
+
+% \dMax{
+%     I think we need to go back to the cost of bribes.
+% }
+% \dMax{
+%     Consider the targeted simplex-chain (the one that would have an `outgoing' tx).
+%     Also assume the attacker is the only miner on that chain.
+% }
+% \dMax{
+%     For a bribe over $z$ blocks, the attacker's cost ($Z$) is $Z = r(\frac{1}{2} z (z+1) + z) = \frac{1}{2} r z (z + 3)$.
+% }
+% \dMax{
+%     If the total value of outgoing SPV transactions (for that block) have value $v$, then an attack is profitable if $2v > rz(z+3)$.
+%     We want the opposite inequality for some idea of when an SPV transaction is safe to accept.
+% }
+% \dMax{
+%     So, $2vr^{-1} < z(z+3) = zz + 3z$.
+% }
+
+\begin{draftonly}
+
+\todo{discussion and investigation of bribe attacks and various options / configs}
+
+\todo{branch: bribes when no FP recorded, bribes when an FP recorded.}
+
+
+
+todo:
+
+\begin{itemize}
+    \item why do we only care about outgoing SPV?
+    \item bribe threshold discussion
+    \item - only pay 1/2 miners?
+    \item - can briber profit?
+    \item - 'treasury' for fraud proofs? --- attacker can probs profit
+    \item - what about 1/sqrt(n)
+    \item - security parameter, z local confs and N*z global work?
+    \item nipopows
+    \item accelerate via staking?
+    \item fraud spv transactions need to be made during the batch prior to that tx's batch. so the fraud tx occurs \emph{before} the first block that txs in the \emph{current} batch can be used.
+    \item add rule: spv to an invalid block invalidates your block.
+    \item thus: spv txs to the current batch will invalidate remote chains. (not a problem b/c all nodes know there's a fraud proof, even if miners are bribed. we just need to ensure users can require that a particular FP was recorded.)
+    \item so miners don't want to do SPV against those blocks b/c it'll invalidate their bribe.
+    \item the chain needs to remain valid for the bribe to work.
+\end{itemize}
+
+
+% \begin{align}
+%     0 &= zz + 3x - 2v/r \\
+%     z &= -3/2 \pm \sqrt{9 + 8v/r}/2 \\
+%     z &= (-3 + \sqrt{9+8v/r})/2 \\
+%     \text{if } v < r \\
+%     z &< (-3 + \sqrt{17} < \sqrt{25})/2 \\
+%     z &< (-3 + 5)/2 \\
+%     z &< 1 \\
+%     \text{if } v < xr \\
+%     2z &< -3 + \sqrt{9 + 32 = 41 < 49} \\
+%     2z &< -3 + 7 \\
+%     z &< 2
+%     \text{if } v < xr \\
+%     2z &< -3 + \sqrt{9 + 8x = 1 + 8(1+x)} \\
+%     2z &< -3 + 2\sqrt{2(9/8 + x)} \\
+%     2z &< -3 + 2\sqrt{2}\sqrt{2x} \\
+%     2z &< -3 + 4\sqrt{x} \\
+%     z &< 2\sqrt{x} - \frac{3}{2}
+% \end{align}
+
+spv via bulletproofs?
+or something similar?
+basically the job is to prove that all inputs, since the last bulletproof, are valid.
+like you JUST prove that --- not all the blocks, just the chain of inputs
+
+if > some size --- makes sense mb?
+
+
+
+\end{draftonly}
+
+
+
+% ########  ########  #### ########  ########
+% ##     ## ##     ##  ##  ##     ## ##
+% ##     ## ##     ##  ##  ##     ## ##
+% ########  ########   ##  ########  ######
+% ##     ## ##   ##    ##  ##     ## ##
+% ##     ## ##    ##   ##  ##     ## ##
+% ########  ##     ## #### ########  ########
+%
+% Bribe
+%
+% 88""Yb 88""Yb 888888    db    88  dP 88""Yb  dP"Yb  88 88b 88 888888 .dP"Y8
+% 88__dP 88__dP 88__     dPYb   88odP  88__dP dP   Yb 88 88Yb88   88   `Ybo."
+% 88""Yb 88"Yb  88""    dP__Yb  88"Yb  88"""  Yb   dP 88 88 Y88   88   o.`Y8b
+% 88oodP 88  Yb 888888 dP""""Yb 88  Yb 88      YbodP  88 88  Y8   88   8bodP'
+%
+% Breakpoints
+%
+
+\subsubsection{SPV Bribe Attacks: Derivations \& Breakpoints}
+
+
+Let's assume that an attacker is willing to bribe miners to exclude a fraud proof.
+The goal of the attacker is to continue this attack beyond some breakpoint, so how much will that cost them over the course of the attack?
+
+First, let's establish a baseline: what does a healthy simplex look like?
+\emph{Healthy} meaning: no fraud proof is possible because all blocks and state-transitions are valid.
+We need to know what a healthy simplex (and its PoR graph) looks like because a successful attack will be indistinguishable.
+
+The defining quality of a healthy simplex is that additions to the PoR graph are highly interconnected.
+When new blocks are mined, they reflect all possible remote blocks and link back to all possible local blocks.
+Thus, there should be no partitions or asymmetric boundaries.
+
+\mk{"The asymmetric boundary lies" -- huh? check for making sense. boundary is inside the graph }
+
+An \emph{asymmetric boundary} emerges when a group of miners contributes \emph{exclusively} to a \emph{subgraph} of the full PoR graph (e.g., a subgraph that censors the fraud proof).
+The asymmetric boundary lies between the full (honest) PoR graph and the dishonest subgraph.
+
+
+
+When an invalid block is mined, individual nodes of the network should rapidly become aware of the fraud proof --- and we expect this if the P2P layer is working correctly.
+However, during an ongoing (successful) attack, that fraud proof is not recorded in the PoR graph.
+The fraud is `invisible' when considering just the blockchain data itself, which means that SPV proofs may be fraudulent.
+
+When fraud is detected, the PoR graph should proceed through multiple phase changes until normality is restored (\autoref{fig:por-graph-phases}).
+
+\begin{figure}[h]
+    \begin{center}
+        \tikzstyle{n} = [align=center, draw, rectangle, rounded corners, inner sep=5pt]
+        \tikzstyle{ar} = [->, anchor=north, rounded corners, shorten >= 2pt, shorten <= 2pt]
+        \tikzstyle{label} = [align=center, anchor=center]
+        \begin{tikzpicture}[node distance=1.8cm]
+            % states of PoR graph
+            \node (s0) [n] {0. PoR Graph \\ Looks Healthy};
+            \node (s1) [n, right=of s0, xshift=.95cm] {1. Attack \\ In Progress};
+            \node (s2) [n, right=of s1, xshift=.6cm] {2. Partial FP \\ Acknowledgment};
+            \node (s3) [n, below=of s1.north, yshift=.2cm] {3. Complete FP \\ Acknowledgment};
+
+            % group s0 and s1
+            \node[n, fit=(s0) (s1), dashed, inner sep=7pt] {};
+
+            % arrows and labels
+            \draw [ar] (s0) -- node [label] {Fraudulent \\ block mined} (s1);
+            \draw [ar] (s1) -- node [label] {FP first \\ recorded} (s2);
+            \draw [ar] (s2) -- (s2 |- s3) -- node [label] {FP `pollutes' \\ PoR graph} (s3);
+            \draw [ar] (s3) -- node[label] {PoR graph now \\ resynchronized} (s3 -| s0) -- (s0);
+        \end{tikzpicture}
+    \end{center}
+    \caption[
+        Phase transitions of a PoR graph when fraud occurs.
+    ]{
+        The phase transitions of a PoR graph when fraud occurs.
+        The dashed outline around phase 0 and 1 indicates that it's not possible to observe this phase change on-chain.
+        Nodes connected to the P2P network should be aware of the fraud, but no chain has yet included the fraud proof in the PoR graph.
+    }
+    \label{fig:por-graph-phases}
+\end{figure}
+
+An attacker always fails if the network reaches phase 3.
+The attacker's primary goal is to prevent the network transitioning from phase 1 to phase 2.
+
+The dynamics of the attack change for both the attacker and each miner during each phase.
+
+For example, there is a qualitative difference between phase 1 and phase 2, and it is in the attacker's interest to prevent the network transitioning to phase 2 if possible.
+Therefore it is most valuable for the attacker if they can prevent the FP being recorded.
+It is also more profitable for miners, since the size of bribes grow quadratically.
+
+Once the network has reached phase 2, it is only a matter of time before the network reaches phase 3, at which point we are back at the start.
+
+If the network is kept in phase 1, then the PoR graph and (nearly all) chain data is indistinguishable from a healthy simplex.
+
+
+
+\subsubsubsection{Phase 1 $\not\to$ Phase 2 on the Target Chain}
+
+The first honest block on the target chain must, by definition, link back to the fraudulent block as an invalid ancestor.
+The additional reward for this block after $k$ attacking blocks is $C_r H k$.
+Thus, after $H^{-1}$ blocks, the \emph{effective} block reward for an honest miner will have doubled.
+
+A new honest block thus becomes heavily incentivized over time.
+
+To mitigate this, the attacker must raise the difficulty on the target chain such that all other potential miners find it comparatively unprofitable.
+
+Thus the attacker suffers losses compared to mining honestly: $C_r H k$ for the k-th block.
+That reward is lost to excessive work securing the target chain which would otherwise earn the attacker that much revenue.
+Additionally, the attacker loses the block rewards each time --- so these losses are $C_r (1 + H k)$ per block after $k$ blocks.
+Let $C_r \cdot l_m$ represent the total losses due to mining, and $z$ the number of blocks for the attack: factoring out $l_m$ in this way allows us to analyze the situation independent of the block reward.
+\pz{Define $z$}
+\begin{align}
+    l_m &> \sum\limits_{k=0}^z \Bigl( 1 + H k \Bigr) \nonumber \\
+    &= z + 1 + H \sum\limits_{k=0}^z k \nonumber \\
+    &= z + 1 + H \frac{z (z + 1)}{2}
+    \label{eq:spv-atk-losses-mining}
+\end{align}
+
+Additionally, the rise in difficulty of these blocks presents a practical limit for the attacker.
+When $k > q H^{-1} N_1$ the attacker is, \emph{by definition}, unable to keep up the attack.
+That is because, at that point, the attacker's losses are $C_r (1 + H (q H^{-1} N_1)) = C_r (1 + q N_1)$.
+Assuming an even hash-rate distribution, $C_r N_1 (p + q)$ represents the \emph{sum} of \emph{all} block rewards over the network.
+Therefore, the maximum output (measured in coins) of $q$ proportion of the hash-rate, \emph{by definition}, is $C_r N_1 q$.
+An attacker must have additional support to maintain this portion of the attack --- when the mining losses per block (approx $C_r H k$) exceed the attacker's mining capacity ($C_r N_1 q$).
+\pz{In $H \ge {N_1}^{-1}$, what is the relation between the hash-rate and the number chains?}
+% We have:
+\begin{align}
+    \text{\hspace{8em}}
+    && C_r H z &< C_r N_1 q \nonumber \\
+    && z &< q H^{-1} N_1 & H \ge {N_1}^{-1} \nonumber \\
+    && z &< q {N_1}^2 & \text{(worst case)} \nonumber
+\end{align}
+If $N_1 = 100$, then no attack is viable (without help) after 5000 blocks, unless $q > 0.5$.
+At that point, at least 50\% of the network hash-rate needs to be dedicated to the target chain to make it unprofitable enough to dissuade honest miners.
+
+\subsubsubsection{Phase 1 $\not\to$ Phase 2 and $\BribeCost(z)$}
+
+\pz{Define $Z_k$}
+\begin{itemize}
+    \item Each miner (on each simplex-chain) needs bribing (but only if they make a block).
+    \item Each round, the attacker must pay $C_r Z_k$ in bribes (where $Z$ is the bribe, and $k$ is the round, starting at 1).
+    \item These bribes are given to $(N_1 - 1)$ miners (we subtract 1 to exclude the target chain from this split). One bribe per R-chain.
+    \item However, an attacker with $q$ proportion of the hashrate can recover $q(N_1 - 1)$ of these bribes, at most, and thus loses at least $p(N_1 - 1)$ of them.
+    \item A miner receives $C_r H k$ coins as a reward for publishing a fraud proof that invalidates $k$ blocks.
+    \item Each round, miners can choose to publish the fraud proof, which earns them $C_r H k$ in rewards.
+    \item Thus, each round, miners have an opportunity cost of $C_r H k$ if they do \emph{not} take the bribe.
+    \item This only makes rational sense if the miner's bribe is greater than their opportunity cost: $C_r Z_k / (N_1 - 1) > C_r H k$; \emph{and} the miner is \emph{guaranteed} to receive the bribe, regardless of whether the attack succeeds.
+    \item The attack lasts $z$ rounds.
+    \item Let $C_r \cdot l_b$ be the total losses due to bribes.
+\end{itemize}
+
+Therefore, we have:
+\begin{align}
+    % \text{let } H(z) &= \frac{z}{N_1} \nonumber \\
+    % \implies N_1 H(z) &= z \nonumber \\
+    % Z_1 &> H (N_1-1) \nonumber \\
+    % Z_2 &> 2 H (N_1-1) \nonumber \\
+    Z_k &> k H (N_1-1) \nonumber \\
+    \text{let } l_b &= p (Z_1 + \cdots + Z_z) \nonumber \\
+    \therefore l_b &> p H (N_1-1) \sum\limits_{k=1}^z k \nonumber \\
+    l_b &> p H (N_1-1) \frac{z (z+1)}{2}
+        \label{eq:spv-atk-losses-bribes}
+\end{align}
+
+% \begin{align*}
+%     (q + N_1 p) H \frac{z(z+1)}{2}
+% \end{align*}
+
+Combining \autoref{eq:spv-atk-losses-mining} with \autoref{eq:spv-atk-losses-bribes}, and noting that $p+q=1$ yields:
+\begin{equation}
+    l_b + (p+q)l_m > H (N_1 p + q) \frac{z(z+1)}{2} + z + 1
+    \label{eq:spv-atk-losses-total}
+\end{equation}
+
+% \todo{nomenclature clash: $h$ was previously used both for $H(Np+q)$ and in $h+d=1$. set $\eta = H(Np+q)$ as a replacement. keep $h+d=1$.}
+
+Observe that this is a lower bound on $\BribeCost(z)$.
+Let's define \BribeCost as the absolute minimum it can be given our current understanding.
+To reduce complexity, we'll also define \BribeCost \emph{in terms of the block reward} (i.e., in units of \emph{block rewards} rather than \emph{coins}).
+We can come back to it later if we need to.
+\begin{align}
+    \BribeCost(z) &= \eta \frac{z(z+1)}{2} + z + 1
+        & & \text{where } \eta = H(N_1 p + q)
+    \label{eq:spv-bribe-cost-1}
+\end{align}
+We should also note the inverse of \BribeCost, which gives us a lower bound on the number of blocks for which we should wait, given a total outgoing value, $v$ (expressed as a multiple of the block reward).
+\begin{align}
+    \BribeCost^{-1}(v) &= \frac{\sqrt{
+        (\eta - 2)^2 + 8 \eta v
+    } - \eta - 2}{2\eta} & & \text{where } \eta = H(N_1 p + q)
+    \label{eq:spv-bribe-cost-inverse}
+\end{align}
+
+\subsubsubsection{Domain and Range of $\BribeCost(z)$ in the SRT Context}
+
+It is clear that $\BribeCost(0) = 1$.
+That is: the attacker has lost exactly 1 block reward (the reward for the fraudulent block).
+
+Since this is a simplistic model, we'll only consider non-negative integer values of $z$.
+
+Although it is clear that $\lim_{z \to \infty} \BribeCost(z) = \infty$, there is a practical upper limit.
+
+Recall that we introduced \BribeCost via the requirement that $v - \BribeCost(z) < 0$ assuming an SPV attack yields $v - \BribeCost(z)$ profit for the attacker.
+
+There is a practical upper limit to $v$: \emph{all} of the root tokens on that simplex-chain.
+
+In the \emph{Single Root Token} PoR conversion context, recall that we defined the block reward in \autoref{eq:srt-reward} as:
+\begin{align*}
+    C_r &= \frac{C_t \cdot I}{G_t \cdot C_f} & & \frac{\text{C-coins}}{\text{C-block}}
+\end{align*}
+Currently, $I$ (the global inflation rate) is measured in coins/s.
+Let's assume that the inflation rate is proportional to $G_t$ (the total supply of root tokens).
+For example, we might desire an $I$ such that the \emph{annual} inflation amount is 2\% of $G_t$.
+Let's use $f$ to refer to that percentage of $G_t$ (e.g., $f = 0.02$), and $\syr = 365.25 \times 86400 = 3.078 \times 10^{7}$ seconds in a year.
+Thus, we have:
+\begin{align}
+    I &= \frac{f G_t}{\syr}
+        & & \FracUnits{coins}{second} \nonumber \\
+    \implies C_r &= \frac{f G_t}{\syr} \cdot \frac{C_t}{G_t \cdot C_f}
+        & & \FracUnits{C-coins}{C-block} \nonumber \\
+    C_r &= \frac{f C_t}{\syr C_f} \label{eq:block-reward-to-ct}
+\end{align}
+To convert $v$ from coins to block rewards, we divide by $C_r$.
+The maximum $v$ possible is $C_t$.
+\begin{align*}
+    \frac{v}{C_r} &= \frac{v \syr C_f}{f C_t} \\
+    \text{Set } v = C_t \implies \frac{C_t}{C_r} &= \frac{\syr C_f}{f} & \text{which is a constant.}
+\end{align*}
+So, the upper limit of $v$, expressed as a multiple of block rewards, is a constant.
+Particularly, it is the number of blocks in a year divided by the inflation rate $f$.
+This represents the upper limit of the range of $\BribeCost(z)$ when using the SRT context.
+
+Let's apply \autoref{eq:spv-bribe-cost-inverse} to get an idea of what the maximum waiting time might be.
+For variables, let's use $q = p = 0.5$, $N_1 = 100$, and $H = 1/N_1 = 1/100$, which implies $\eta = 0.505$; and $C_f = \nicefrac{1}{15}$ and $f = 0.02$, which implies $\syr C_f f^{-1} = 1.026 \times 10^8$.
+\begin{equation*}
+    \BribeCost^{-1}(\syr C_f f^{-1}) \approx 20 115.3 \text{ blocks}
+        \implies \sim 3.5 \text{ days}
+\end{equation*}
+If, instead, $H = 1/\sqrt{N_1}$, then $\eta = 5.05$ and
+\begin{equation*}
+    \BribeCost^{-1}(\syr C_f f^{-1}) \approx 6373.8 \text{ blocks}
+        \implies \sim 1.1 \text{ days}
+\end{equation*}
+
+
+\subsubsubsection{Fixed Points of $\BribeCost(z)$ when Batching}
+
+\pz{Unclear what this section is about.}
+
+\cn{Re-introduce the batching from the error correction. ``Recall in our dialog we talked about waiting for SPV transactions and executing them in batches \dots''}
+
+Let's assume that there is a constant outbound SPV ``pressure''.
+That is, every block, $y$ multiples of the block reward are queued for the next batch.
+
+We should expect batch sizes (and the associated waiting duration) to be stable when $yz = \BribeCost(z)$.
+This is the point at which the outgoing per-block pressure multiplied by a waiting period results in the same waiting period.
+\begin{align}
+    yz &= \BribeCost(z) = \eta \frac{z(z+1)}{2} + z + 1
+        \nonumber \\
+    y &= \eta \frac{z+1}{2} + 1 + \frac{1}{z}
+        \nonumber
+\end{align}
+This is a hyperbola and, as $z$ increases, it approaches $y = \frac{\eta}{2}(z+1) + 1$.
+Alternatively: $z = \frac{2}{\eta}(y - 1) - 1$.
+
+So, if $y = 10$ and $\eta = 1$, then we can estimate that we have a fixed point at $z \approx 17$ blocks.
+
+\subsubsubsection{Phase 1 $\to$ Phase 2}
+
+The network transitions from phase 1 to phase 2 as soon as a first miner produces a block that includes the fraud proof.
+
+\pz{Formatting is off, but the first item only says attacker}
+- attacker
+- dishonest nodes: the ones that take the bribe and help the attacker
+- honest nodes: the ones that produce blocks where the FP is included in the PoR graph
+
+Once this happens, an asymmetry emerges: honest blocks (which acknowledge the fraud proof) produce proofs of reflection that are \emph{not} usable by the dishonest miners.
+If the dishonest miners tried to use those PoRs, they'd produce invalid blocks unless they also acknowledge the FP.
+Thus, using those PoRs effectively turns dishonest miners into honest miners.
+
+
+
+\subsubsubsection{Phase 2 $\to$ Phase 3}
+
+The duration of this transition depends on the proportion of honest miners: $h$.
+Let's define $h$ via $h + d = 1$, where $d$ is the proportion of dishonest miners, including the attacker.
+\pz{Define p as it seems it's not the proportion of honest miners.}
+Since $d$ includes the attacker, we can say $d > q$, and $h < p$.
+
+\pz{Does a fraudulent block reflected by a honest miner adds weight? If yes, this is worth mentioning If yes, does it create vulnerabilities?}
+Similar to \autoref{sec:dos-and-dags}, the asymmetry between honest and dishonest miners means that, even for a small $h$, the chain-weight of the honest chain-tips will eventually dominate the chain-weight of dishonest chain-tips.
+After that point, each simplex-chain's main chain will include the fraud proof, and the dishonest chain-tips will never be able to out-weigh the honest ones.
+
+Let us use a vector to represent the weight of the honest and dishonest chain segments (relative to their most recent common ancestor).
+This is purely for convenience so that we can analyze both at the same time.
+The top row is the weight of the honest chain segment, and the second row is the weight of the dishonest chain segment.
+At the start of the attack ($t_0$), neither chain segment has any blocks, so $t_0 = \vec{0}$.
+
+Each round (block period), we expect that $h$ proportion of new blocks were honest, and $d$ proportion are dishonest.
+So, after 1 block period, we expect:
+\begin{equation*}
+    t_1 = t_0 + \vecXY{N_1 h}{N_1 d} = N_1 \vecXY{h}{d}
+\end{equation*}
+
+After 2 block periods, the $h$ proportion of new blocks that are honest can use PoRs via the dishonest blocks.
+Due to the asymmetry, the dishonest blocks can not.
+\begin{equation*}
+    t_2 = t_1 + \vecXY{N_1 (h+d)}{N_1 d} = N_1 \vecXY{h}{d} + N_1 \vecXY{1}{d} = N_1 \vecXY{(h + 1)}{2 d}
+\end{equation*}
+
+\mk{change $k$ below to now overload general meaning}
+Each round, the honest chain segments grow by the weight of $N_1$ blocks, but the dishonest chain segments grow by $N_1 d$ blocks.
+Therefore, at the $k$-th round, $k \ge 2$:
+\begin{align}
+    t_k &= t_{k-1} + N_1 \vecXY{1}{d} = t_{k-2} + 2 N_1 \vecXY{1}{d} \nonumber \\
+    \text{observe: } t_k &= t_{k-i} + i N_1 \vecXY{1}{d} & \text{for some } i \in [1, k) \nonumber \\
+    \text{set } i = k - 1 \implies
+    t_k &= t_1 + N_1 (k-1) \vecXY{1}{d} \nonumber \\
+    t_k &= N_1 \vecXY{h}{d} + N_1 (k-1) \vecXY{1}{d} \nonumber \\
+    \therefore t_k &= N_1 \vecXY{h + k - 1}{dk} \label{eq:h-to-d-chain-segs}
+\end{align}
+
+Thus, the honest chain-tips dominate when
+\begin{align*}
+    h + k - 1 &> dk \\
+    k - dk &> 1 - h \\
+    k(1 - d) &> 1-h \\
+    h k &> 1-h \\
+    k &> h^{-1} - 1
+\end{align*}
+
+If $h = \nicefrac{1}{N_1}$, i.e., for each honest miner there are $(N_1 - 1)$ dishonest miners, then this inequality becomes: $k > N_1 - 1$.
+% \begin{equation*}
+%     k > N_1 - 1
+% \end{equation*}
+
+\pz{This is an important result, probably worth mentioning earlier. }
+If only 1\% of miners refuse the bribe ($h = 0.01$), and that the other 99\% of miners continue to mine only blocks that do not include the fraud proof, then we have: $k > 99$.
+
+If we assume an honest minority of substantial size, e.g., $h = \nicefrac{1}{3}$, then $k > 2$.
+
+\mk{Should highlight this more, important result}
+
+% \begin{equation*}
+%     k > 99
+% \end{equation*}
+
+% ########  ####    ###    ##        #######   ######       #######
+% ##     ##  ##    ## ##   ##       ##     ## ##    ##     ##     ##
+% ##     ##  ##   ##   ##  ##       ##     ## ##                  ##
+% ##     ##  ##  ##     ## ##       ##     ## ##   ####     #######
+% ##     ##  ##  ######### ##       ##     ## ##    ##            ##
+% ##     ##  ##  ##     ## ##       ##     ## ##    ##     ##     ##
+% ########  #### ##     ## ########  #######   ######       #######
+%
+% dialog 3
+
+\subsubsection{Dialog: Error Correction III}
+
+\draftNote{The draft of this section isn't finished, but the important ideas are here.}
+
+\dialogHeader{25\textsuperscript{th} August 2022}
+
+\dMax{
+    Okay, I think I understand the mechanics at play, now.
+}
+\dSe{
+    Seems like you found some new ideas, too.
+    Like that blocks on the target chain need to increase in difficulty, which eventually becomes prohibitive.
+}
+\dMax{
+    Yeah.
+    Though now there are three \emph{different} ways to think about security parameters, and they all \emph{disagree}.
+    None are decisively better than the others.
+}
+\dMax{
+    The phase 2 $\to$ 3 method is easily the fastest, but it depends on the phase 1 $\to$ 2 transition.
+    So we can't rely on it.
+}
+\dSe{
+    Perhaps you should consider the contradiction more deeply.
+}
+\dSe{
+    Check your premises.
+}
+\dMax{
+    \dots{} Okay, I'll make a list.
+}
+\dSe{
+    Good, then we can go through them.
+}
+\dMax{
+    still writing 2 ticks.
+}
+\dMax{
+    Okay, first, a process one: \emph{non-statistical analysis is good enough} --- at least for now.
+}
+\dSe{
+    Do you think that calculating probabilities instead would fix the contradiction?
+}
+\dMax{
+    No, not unless the logic is substantially different.
+    We're calculating something like the average or expected value of breakpoints, rather than something like `99.99\% confidence that we're past the breakpoint'.
+}
+\dMax{
+    The breakpoint is there in both cases, so we can still learn about the system.
+    We'd use the same premises for a statistical model, anyway, so unless there's a logical error, we shouldn't expect the results to be divergent from what we've already found.
+}
+\dSe{
+    Hmm, okay.
+    Let's revisit this later if we can't get unstuck. \\
+    Next?
+}
+\dMax{
+    Okay, thinking about the attack.
+    \emph{The attacker needs to bribe other miners}.
+}
+\dMax{
+    Because the attacker wants to prevent the FP being recorded in the PoR graph, and the FP is readily available and is a source of profit for honest miners.
+}
+\dMax{
+    \emph{Dishonest miners aren't willing to make invalid blocks}, though.
+    They'll only make valid blocks that earn them the block reward \emph{and} the bribe.
+}
+\dMax{
+    Making dishonest but valid blocks is one thing, but making invalid blocks for the attacker is almost the same as contributing to a 51\% attack.
+}
+\dSe{
+    Hmm, I think the miners might be willing if they were paid more (and still got the bribe).
+    But, think about the attacker: what is the bribe \emph{for}?
+}
+\dMax{
+    The attacker wants to bypass all of the network's countermeasures to record the FP.
+}
+\dMax{
+    So invalid blocks wouldn't help the attacker.
+}
+\dMax{
+    Other invalid blocks (on other simplex-chains) only increase the incentive for honest miners to publish multiple FPs, so larger bribes would be required.
+}
+\dSe{
+    Right.
+    Seems okay.
+    Next?
+}
+\dMax{
+    \emph{The tx for the bribe to each miner is in the block that the bribe pays for.}
+}
+\dSe{
+    That might be efficient, but is it required?
+}
+\dMax{
+    Hmm\dots{} no.
+    Example: an Eth smart contract could hold bribes in escrow and miners could redeem them by replaying the PoR graph later.
+}
+\dMax{
+    So this premise is wrong, then, but I don't think that refuting it breaks anything. \\
+    We just established that valid dishonest blocks are good for the attacker, and we can assume that bribes are always possible (whether via the miner's chain or otherwise).
+}
+\dSe{
+    Okay, next.
+}
+\dMax{
+    \emph{We don't need to consider simultaneous attacks.}
+    The attacker can't reduce costs by attacking two chains at once, etc.
+}
+\dMax{
+    Attacking two chains would double the number of invalid blocks.
+    Which doubles the cost of bribes, etc.
+}
+\dMax{
+    Since each FP can be recorded independently of the other.
+}
+\dSe{
+    Okay, next.
+}
+\dMax{
+    \emph{The attacker can't bribe people to avoid mining the target chain.} \\
+    If this were wrong, then the attacker might not need to raise the difficulty of the target chain like I thought.
+}
+\dSe{
+    What are the goals of miners who accept the bribe?
+}
+\dMax{
+    Maximizing revenue (and thus profit).
+}
+\dMax{
+    So they'd only mine the target chain if it's profitable. \\
+    If the bribes for other chains are more profitable, they'd want to mine those instead.
+}
+\dSe{
+    Right.
+}
+\dMax{
+    Oh, and the attacker could just bribe miners of the target chain via that Eth SC from before.
+    The payout condition being that they extended the attacker's chain and didn't include the FP.
+    The bribe needs to cover the block reward, too, but that's already factored in.
+}
+\dMax{
+    So, it seems like my idea about raising the difficulty might be wrong.
+}
+\dSe{
+    Maybe; there are still advantages if the miner does raise the difficulty, though.
+}
+\dSe{
+    It might slow down honest miners.
+}
+\dMax{
+    True, I'm not sure if we can really rely on that, though.
+}
+\dSe{
+    Even if this premise is wrong, it doesn't break your whole model. \\
+    You have excess capacity via $\BribeCost(z)$.
+}
+\dSe{
+    Let's put this to the side for now.
+    Next?
+}
+\dMax{
+    Hmm, I just thought of something.
+    Not exactly a premise, but a conclusion.
+}
+\dMax{
+    One of the other simplex-chains needs to be the counterparty for the SPV tx, which will invalidate the block after the original FP is recorded.
+}
+\dMax{
+    Oh, this ties into the next one anyway: \emph{it's possible to bribe every miner}.
+}
+\dMax{
+    If one miner is going to invalidate their block, why would they mine it?
+}
+\dSe{
+    \dots{} Because they can redeem the bribe via the Eth SC from before?
+}
+\dSe{
+    The size of the necessary bribe is proportional to the number of blocks between the invalid block and the most recent one.
+    It's cheap to start with, so even if additional bribes are required, it's much less than the bribes for the original FP.
+}
+\dMax{
+    Oh, yeah.
+    So perfect bribes are possible.
+    Assuming \emph{all miners are motivated only by profit}, ofc.
+}
+\dSe{
+    \dots{} Are they?
+}
+\dMax{
+    Well, realistically, no.
+    But we can't \emph{know} that.
+    Or, rather, we can't rely on it being false, I don't think.
+}
+\dSe{
+    It seems like this was a premise you missed.
+}
+\dMax{
+    Yeah, I guess so.
+    That said, if we \emph{do} assume that all miners are motivated by profit, that's an exclusively \emph{weaker} system than otherwise.
+    So if we can find a good solution to SPV \emph{with} this premise, then it should always work without the premise, too.
+}
+\dSe{
+    Let's keep that option in mind as we keep going, then.
+    Next?
+}
+\dMax{
+    \emph{Non-mining users play no significant role in mitigating the attack.}
+}
+\dMax{
+    The rough idea is that users \emph{do} know about the FP, and can start to make txs that are invalid unless the corresponding chain has acknowledged the FP. \\
+    But this doesn't help mitigate the attack b/c the attacker's bribes are way more than the txs fees.
+    Businesses like centralized exchanges can stop processing txs till the network resolves itself, but the attacker can still profit, maybe through a DEX hosted on Ethereum or something.
+}
+\dMax{
+    Users can protect themselves, but it won't stop the attack.
+    It's not decisive.
+}
+\dSe{
+    Hmm.
+    We might need to think about that one later.
+}
+\dSe{
+    Next?
+}
+\dMax{
+    The next one is broad, it's that we understand \emph{batching dynamics} correctly.
+}
+\dSe{
+    Run through batching for us, then we can dig into it.
+}
+\dMax{
+    Outgoing SPV transactions occur in batches.
+    The goal is to measure the time ($z$, in blocks) that outgoing transactions have been waiting so we can compare the total value of those txs to $\BribeCost(z)$.
+}
+\dMax{
+    We could also count \emph{all} transactions as potentially being outgoing SPV txs, but that would increase the waiting time.
+}
+\dMax{
+    When an outgoing SPV tx is made, there's a previous batch, a current batch, and a next batch.
+}
+\dMax{
+    The previous batch can be used for SPV by other chains --- it's waited long enough.\\
+    The current batch is a set of transactions that are in the waiting period.\\
+    The next batch is where all outgoing txs (made during the current batch) are added.\\
+    The next batch becomes the current batch after the current batch waits $z$ blocks.\\
+    The old current batch becomes the previous batch, and a new next batch is created.
+}
+\dMax{
+    This way, we know that all txs in a batch are safe to use for SPV.
+}
+\dSe{
+    Hmm.
+    Walk me through how the attack would interact with batches.
+}
+\dMax{
+    The attacker would make some bad transaction in the current batch, then start bribing other miners.
+    The attacker mines all the blocks for that chain, so they can make that tx in the last block possible (right before the next batch becomes the current one).
+    Then the attacker waits for $z$ blocks and finalizes the attack.
+}
+
+\newcommand\batch[1]{\ensuremath{\text{batch }b_{#1}}\xspace}
+\dSe{
+    Let me get this straight.
+    The attacker makes the invalid transaction during some batch, call it \batch{i}, and it's added to \batch{i+1}?
+}
+\dMax{
+    Yeah.
+    Then, once \batch{i+1} is the previous batch, the attacker does the rest.
+}
+\dSe{
+    So would another chain accept SPV transactions against the target chain for \batch{i}?
+    (Which is only possible \emph{after} the fraudulent tx was confirmed.)
+}
+\dMax{
+    I guess so.
+}
+\dSe{
+    Even though that would mean doing SPV against an invalid block?
+}
+\dMax{
+    \dots{} only if that SPV transaction doesn't invalidate the corresponding block on that other chain.
+}
+\dMax{
+    But, if it \emph{did} invalidate that block, then the dishonest miners wouldn't be willing to process it.
+    And the attacker wouldn't want them to, either.
+}
+\dSe{
+    Does this change anything about the waiting period, then?
+}
+\dMax{
+    Uhh\dots{}
+}
+\dSe{
+    If you're stuck, think from first principles, what is the waiting period \emph{for}?
+}
+\dMax{
+    It's to convince other chains that a bribe attack would have been unprofitable, so it's safe to do SPV.
+}
+\dMax{
+    But, say that shortly after \batch{i} becomes available for SPV, some other chain \emph{does} process some SPV txs against \batch{i}.
+    Well, after that point, if SPV against an invalid block causes the local block to be invalid, we're basically banking on the validity of all the txs made while \batch{i} was waiting.
+    Even though they haven't waited long enough.
+}
+\dMax{
+    But, dishonest miners want to create valid blocks, so they won't do invalid SPV, so there's no reason to keep waiting.
+}
+\dMax{
+    \dots{} What?
+}
+\newcommand\ItMeansLowBatchDelays{It'd mean that we could reduce the batch delay arbitrarily.}
+\dMax{
+    \ItMeansLowBatchDelays
+}
+\dMax{
+    But that's nonsense, though.
+}
+\dMax{
+    Not to mention that future blocks would cause potentially massive simplex-wide reorganizations.
+}
+\dSe{
+    Wouldn't that reorg be necessary, \emph{anyway} if consistency between simplex-chains is maintained?
+}
+\dMax{
+    But we don't want future blocks to be able to cause massive reorgs!
+    A reorg on one chain is maybe okay, but this would completely undermine the network.
+}
+\dMax{
+    And if that happens, practically, miners will have to validate other chains to know if it's safe and consistent.
+}
+\dMax{
+    But we don't want to have each simplex-chain needing to check each other for consistency --- that's the whole bloody point!
+}
+\dMax{
+    This can't be right.
+}
+\dSe{
+    Max, slow down.
+}
+\dSe{
+    If you think there's a contradiction\dots{}?
+}
+\dMax{
+    \dots{} right, check your premises.
+}
+\dSe{
+    Right.
+}
+\dSe{
+    Do you notice anything about all the premises you have mentioned so far?
+}
+\dSe{
+    About where they come from?
+}
+\dMax{\dots}
+\dMax{
+    They're all to do with SPV stuff.
+    They're all ones that we thought up recently.
+}
+\dSe{
+    Yes.
+}
+\dSe{
+    We've already found errors in some of the premises about SPV.
+    Is it possible there are problems with \emph{other} premises you've adopted?
+}
+\dMax{yeah, I suppose so}
+\dSe{
+    So\dots{} you already mentioned three other, undiscussed, premises just now.
+}
+\dSe{
+    Why don't you start there?
+    What are they?
+}
+\dMax{
+    Uhh, let me think.
+}
+\begin{comment}
+    - reorgs for consistency are bad
+    - reorgs for consistency require chains validating other chains (not scalable)
+    - future blocks shouldn't be able to cause big reorganizations
+\end{comment}
+\dMax{
+    Okay, I think they're: 1. \emph{big reorgs are bad}, 2. \emph{big reorgs end up requiring nodes to validate other chains}, and 3. \emph{future blocks shouldn't be able to cause big reorgs}.
+}
+% also: (i thought of after writing the above) that going from invalid -> valid histories is a reorg at all.
+\dSe{
+    Hmm, I guess four other premises, then.
+}
+\dSe{
+    Let's start with 1.
+}
+\dMax{
+    Okay, \emph{big reorgs are bad}.\\
+    You remember in \autoref{sec:availability-of-blocks} we covered what would happen if a miner could withhold blocks but also have the headers included in the PoR graph?
+}
+\dMax{
+    That would be bad, b/c, if a miner could do that, then releasing the block (or a chain-segment) at a future time could cause a reorg, and that would potentially invalidate a bunch of that chain's history.
+}
+\dMax{
+    An honest miner could have their reward reduced \emph{after} they publish their block, even though it was the best block they could have made.
+    It'd be a catch 22 for the honest miners, even on other chains.
+}
+\dMax{
+    We want to avoid big reorgs so that honest miners aren't in unfair situations.
+}
+\dMax{
+    Big reorgs would have flow on effects, too.
+    Like, for the SRT context, we need the number of RTs on each chain to be well known and in-sync.
+}
+\dSe{
+    Okay, a few things to unpack here.
+}
+\dSe{
+    First, we already solved the withheld blocks problem, right?
+    (In that section you linked.)
+}
+\dMax{
+    Yeah, that's right.
+    We added a network rule: \emph{valid blocks must only reflect blocks that exist}.
+}
+\dSe{
+    So, I agree that \emph{those} kind of big reorgs are bad, but we already mitigated them.
+}
+\dMax{
+    I guess, yeah.
+    That's the point of the rule we introduced.
+}
+\dSe{
+    So are big reorgs bad in \emph{general}?
+    Or are big reorgs required to avoid inconsistencies between simplex-chains?
+}
+\dMax{
+    Yeah, I guess \emph{if} premise 2 is false, then big reorgs might not be bad.
+}
+\dSe{
+    Forget about premise 2 for now.
+    We'll get to that soon. \\
+    What about reorgs due to inconsistencies?
+}
+\dMax{
+    Well, the network needs to stay consistent, like, that's required for maintaining integrity.
+}
+\dMax{
+    So yeah, I guess we do want big reorgs if the alternative were inconsistency.
+}
+\dMax{
+    But not if it means unfair situations for miners or breaking premise 3.
+}
+\dSe{
+    We'll get to that.
+}
+\dSe{
+    Okay, premise 2 next.
+}
+\dMax{
+    \emph{Big reorgs end up requiring nodes to validate other chains}.
+}
+\dMax{
+    This is because miners want to avoid big reorgs that will invalidate their blocks.
+    So, from a miner's perspective, if another miner can potentailly risk your income you need a plan to protect it.
+    And that plan would be: run full nodes for all the other chains so that you're sure any other chain is valid, and all of that chain's interactions with other chains were valid, etc, etc.
+}
+\dMax{
+    So \emph{if} big reorgs are possible, then miners end up validating all chains or risk losing their earnings, which would compromise the security of the network.
+}
+\dSe{
+    When you're saying all this, we only really care about honest miners, right?
+}
+\dMax{
+    Yeah, of course.
+}
+\dSe{
+    That's why catch 22 type situations are bad?
+}
+\dMax{
+    Yeah
+}
+\dSe{
+    So tell me about premise 3.
+}
+\dMax{
+    Are we done with 2 yet?
+}
+\dSe{
+    Just humor me.
+}
+\dMax{
+    \emph{Future blocks shouldn't be able to cause big reorgs}. \\
+    Because that's a catch 22.
+    Miner's wouldn't be able to tell whether their block would stay valid.
+}
+\dSe{
+    It would be in the case of withheld blocks, yes\dots \\
+}
+\dMax{
+    \dots{} But it's not in the case of bad SPV. \\
+    The attacker is already bribing the miner, that's why they'd ignore the FP in the first place.
+    But only dishonest miners are doing that.
+}
+\dSe{
+    Oh?
+}
+\dMax{
+    And we don't care about whether the \emph{dishonest} miners are punished, only the honest ones.
+}
+\dMax{
+    So an honest miner won't ever make a block that could be invalidated this way.
+}
+\dMax{
+    So we actually \emph{do} want \emph{some} future blocks to be able to invalidate past blocks: the ones that honest miners make.
+}
+\dSe{
+    Yes, there is a \emph{qualitative difference} between types of invalidation.
+}
+\dMax{
+    So premise 3 is false.
+}
+\dMax{
+    And premise 2 is false, too, because basically \emph{all nodes know of the FP}, which includes honest miners, so can always avoid the catch 22.
+}
+\dSe{
+    So.
+    All three were false.
+}
+\dSe{
+    There's one question left, yet.
+    What was the premise that you missed?
+}
+\dMax{
+    \dots{} I'm not sure.
+}
+\dSe{
+    It's implicit, and might be hard to see.
+}
+\dSe{
+    But it's there.
+    Hiding in the other three.
+}
+\dMax{
+    \dots{} I don't see it.
+}
+\dSe{
+    How long had you believe those three premises,
+    before you learned they were wrong just now?
+}
+\dMax{
+    I don't know, a year at least?
+    More even --- they're based on ideas I learnt years ago.
+}
+\dSe{
+    You've automatized them, then?
+}
+\dMax{
+    Yeah\dots{}
+    So if there's a mistake, I need to go slowly and carefully.
+}
+\dSe{
+    Yes.
+}
+\dSe{
+    Now, consider premise 1; only four words.
+    Where could an unseen premise hide?
+}
+\dMax{
+    \dots{} `reorg' --- that's the only real option
+}
+\dSe{
+    Right.
+    What's a reorg?
+}
+\dMax{
+    It's what happens when the best chain-tip changes from a first chain-tip to a second one that isn't a descendant of the first one.
+}
+\dMax{
+    With sibling chain-tips (that share a primary parent), the reorg isn't very disruptive and happens somewhat regularly.
+    But deeper reorgs can be disruptive because state can change significantly --- that's how doublespends are done.
+}
+\dSe{
+    And when a fraud proof is added to the PoR graph, that might cause a reorg?
+}
+\dMax{
+    Yeah.
+}
+\dSe{
+    Consider a normal full node for the target chain when an attack is ongoing.
+    At some point, a new local block (including the fraud proof) is published on the target chain.
+    When that happens, what does the full node experience?
+}
+\dMax{
+    Well\dots{} it wouldn't reorg\dots{} \\
+    Because it never followed the attacker's branch --- that was invalid.
+}
+\dMax{
+    So it'd be like a typical new block, except it was a long time since its parent. \\ % stylistic typo below "potentailly"
+    \dots{} And it links back to like potentailly thousands of previous invalid blocks.
+}
+\dSe{
+    So, did publishing the fraud proof \emph{actually} cause a reorg?
+}
+\dMax{
+    \dots{} not for the full node.
+}
+\dSe{
+    What about for other honest miners?
+}
+\dMax{
+    No, not for them either.
+    They knew the block was invalid because they already had the fraud proof, even if they're not a full node of that chain.
+}
+\dSe{
+    So\dots{}
+}
+\dSe{
+    What's the hidden premise?
+}
+\dMax{\dots}
+\dMax{
+    That \emph{going from a invalid to a valid chain-tip (or vice versa) counts as a reorg}.
+}
+\dMax{
+    But that premise is wrong! \\
+    It's not a real reorg.
+    Reorgs only happen between valid chain-tips. \\
+    Or, at least, those are the only ones that matter, for us.
+}
+\dSe{
+    Right.
+}
+\dMax{
+    Hmm.
+    If a totally different chain outside the simplex, like Eth2, is verifying SPV proofs against the simplex, it must be aware of unpublished fraud proofs to be secure.
+    And it needs to tolerate the sort of invalidation (via FPs) that might happen.
+}
+\dSe{
+    Mm\dots{} perhaps.
+    Maybe leave that problem for later, once we've sorted out how \UT{1} will work.
+}
+\dMax{
+    Yeah, okay.
+    So\dots{} what does refuting the hidden premise mean for SPV, then?
+}
+\dSe{
+    Retrace the conversation, to before you brought up any of the premises we just refuted, back to the last unrefuted thing you said.
+}
+\dSe{
+    What was it?
+}
+\dMax{
+    \dots{}
+}
+\dMax{
+    ``\ItMeansLowBatchDelays''
+}
+\dSe{
+    And\dots{}
+}
+\dMax{
+    Can we?
+    Is that really the answer?
+}
+\dSe{
+    Let's find out.
+}
+\dSe{
+    Do you have any reason to think that we can't reduce the SPV delay?
+}
+\dMax{
+    \dots{} I guess not.
+}
+\dSe{
+    So, if we've made a breakthrough, can you explain it?
+}
+\dMax{
+    I think so.
+    Roughly, we've discovered an asymmetry between honest and dishonest miners.
+    As long as fraud proofs are readily propagated, then we can alter mining dynamics based on off-chain information (i.e., the FP).
+}
+\dMax{
+    No honest miner willingly drafts an invalid block.
+    So, if fraud proofs are readily propagated, then honest miners can \emph{always} avoid drafting a block that \emph{could} be invalidated by a future block.
+}
+\dMax{
+    However, dishonest miners will \emph{willingly} draft such blocks in exchange for bribes.
+    So, we use that asymmetry to punish dishonest miners such that honest miners can always avoid becoming collateral damage.
+}
+\dMax{
+    The main weakness in this approach is that FPs take time to propagate.
+    If a miner \emph{immediately} processes SPV transactions, they'd expose themselves to potentially mining an invalid block.
+    But we can avoid that with a network-enforced security parameter / waiting period.
+}
+\dMax{
+    A second problem for discussion is \emph{How do foreign chains imaging the simplex and light clients cope with the potential for invalid blocks?}
+}
+\dSe{
+    Okay.
+    Good enough for now.
+    What next?
+    Initiative's on you.
+}
+\dMax{\dots}
+\dMax{
+    I guess we'd need some minimum waiting period so the FP has time to propagate, but that should be very fast if the P2P layer prioritizes it.
+}
+\dSe{
+    Prioritizing error correction sounds like a good idea.
+}
+\dSe{
+    How long should we wait?
+}
+\dMax{
+    IDK\dots{} a minute?
+    That'd be \sim4 blocks. \\
+    We could have batches every block or two.
+    (If we even need batches anymore.)
+}
+\dSe{
+    What bad things will happen if the waiting period is too low?
+}
+\dMax{
+    Well, if you could do SPV transactions within a block period, then there might not be enough time for an honest miner to hear about the FP.
+}
+\dMax{
+    You could \emph{make} the incoming SPV tx at that point, but a miner shouldn't include it, yet.
+}
+\dMax{
+    An honest miner \emph{should} almost always hear about the FP within a block period, though.
+    % -- hmm, not sure why I said this
+    % Assuming blocks on the target chain are created regularly.
+}
+\dMax{
+    If a bunch of blocks come all at once, though, then the honest miner still shouldn't process the tx, yet.
+    They should wait based on the network-wide hash-rate.
+}
+\dMax{
+    So, for a waiting period of $z$, we want the network to go through $z$ block periods overall, which is roughly $C_d N_1 z$ work (where $C_d$ is the average difficulty).
+    To do that we can check the difference between total chain-weight --- for each SPV transaction, each chain can check: \emph{when the header targeted by this SPV tx was reflected by us, is that chain-weight plus $C_d N_1 z$ less than the current chain-weight?}
+}
+\dMax{
+    Maybe we could also require that both chains need $z$ local-confirmations of the relevant header --- i.e., the local chain reflected that header at least $z$ blocks ago, and there are at least $z$ R-blocks building on that header.
+}
+\dMax{
+    We should wait at least 1 conf plus some buffer for small reorgs.
+    I'd guess 3 or 4 block periods at a minimum.
+}
+\dSe{
+    What happens when the network experiences a partition?
+}
+\dMax{
+    The two (or more) sides could become inconsistent.
+    That said, users and miners would notice a >50\% drop in hash-rate pretty quickly.
+    But eventually, any inconsistency could cause the miners on the smaller partition(s) lose out a bit.
+}
+\dMax{
+    But, no fraud proof would be possible (assuming honest miners).
+}
+\dMax{
+    All of the SPV txs that happened at least $z$ after the partition started would become invalid when the partitions merge --- but only for the minority partitions.
+    Those SPV txs must have targeted headers that are no longer in the respective main chains.
+    So they'd be invalid when replayed.
+}
+\dMax{
+    But if users know about the partition and are cautious, is that really an issue?
+}
+\dMax{
+    Other than that, if there are no doublespends, then all purely local transactions should work out.
+    They'll get replayed when the partitions merge.
+}
+\dSe{
+    If a partition split off a long time ago (say, hours) there'd be many thousands of blocks to merge in quick succession.
+    Is that a problem?
+}
+
+
+
+
+\dMax{
+    Uhh, well all of those blocks would get reflected by the rest of the PoR graph --- sequentially.
+    All partitions would have to do that, based on the rules we introduced a \hyperref[dialog1:network-rules]{few weeks ago}.
+}
+\todoDraftOnly{
+    is it actually required to be sequential?
+    need to consider from first principles.
+    (actually, I don't think it's required to integrate them like that. nodes can just link the tips.)
+}
+\dMax{
+    Practically, that's a lot of reflection data to include in each block.
+    And miners will either stick with their existing partition, or swap to the heaviest one.
+}
+\dMax{
+    The heavist partition will produce blocks a bit faster for a little while as miners from the lighter partitions join.
+    Each block has some capacity for reflections, and we know the long-term average number of reflections per block ($N_1$).
+    We also want some ``burstable'' capacity so the network doesn't grind to a halt when partitions merge, or the hash-rate changes suddenly for some other reason.
+}
+\dMax{
+    We need capacity for at least $2\times$ the average (so 50\% excap), because a network partition could be close to a 50/50 split, in which case block production rates would temporarily double when the partitions merge.
+    If we want to process headers from the minority partition(s) at the same time, then we need even more excap.
+}
+\dMax{
+    So if we had $3\times$ the average --- such that two-thirds is reserved as \emph{excess capacity} --- then we can handle those high volume times, and otherwise we can integrate reflections twice as fast as the average, without constraining the production of new blocks.
+}
+\dMax{
+    So, by rate limiting the integration rate of reflections from other partitions, we naturally give enough time for fraud proofs to be broadcast.
+}
+\dMax{%
+    Tho, the main chain will gain work up to $3\times$ faster than before the partition merged.%
+}
+\dMax{
+    So, if $z=4$ was a safe security parameter when everything is going well, we should use $z=12$ instead to ensure there's enough buffer to handle partition merges.
+}
+\dSe{
+    If block production doubles for a short time (so we have double the number of blocks) why do we need $2\times$ the PoR capacity in each block?
+}
+\dMax{
+    Oh, yeah, I guess we don't.
+    There will be more sibling blocks than typical, so there might be some overhead, but otherwise that part is self-contained.
+}
+\dMax{
+    So if block production doubles, we'll integrate reflections twice as fast, too.
+    Relative to world time, that is.
+}
+\dMax{
+    We still want at least a $2\times$ capacity multiplier, though.
+    If it were less than that, minority partitions would take longer to integrate than they took to produce.
+}
+\dMax{
+    So we need to double $z$ to account for a hash-rate increase, and then multiply by the capacity multiplier.
+    And that should be long enough for nodes to hear about any FPs.
+}
+\dSe{
+    And which FPs are those?
+}
+\dMax{
+    The ones for new blocks, or blocks in the minority partition(s).
+}
+\dMax{
+    \dots{} ofc!
+    The minority partition blocks won't ever be part of the main chain, so they don't really matter for SPV.
+    The important FPs are about newly mined blocks --- those are the blocks that might become main-chain blocks.
+}
+\dMax{
+    And new blocks would be invalid if they improperly handled replying txs from the partitioned blocks.
+}
+\dMax{
+    So, we can increase our capacity multiplier for integrating a partition.
+    And, provided that we don't count the work from partitioned blocks when considering whether SPV txs have waited long enough, this doesn't require an increase to $z$.
+}
+\dMax{
+    So doubling $z$ is fine.
+    We can add an extra 50\% as buffer, too. (so $3\times$ again.)
+}
+\todo{Finish this dialog.}
+% \dSe{
+%     (bottleneck joining 2 partitions?)
+% }
+\dSe{
+    (thousands of invalid linkbacks for 1 block?)
+}
+\dSe{
+    (what if there are no SPV txs between two particular chains for many blocks?)
+    (can attacker leverage?)
+}
+\dSe{
+    (how much freedom to miners have in creating blocks --- can we improve SPV by changing any rules?)
+}
+\dMax{
+    (new rule: you must acknowledge the FP of an R-block before it satisfies the $z$ blocks, or your block is invalid.)
+}
+\dMax{
+    (this kind of invalidation okay b/c honest miners can always avoid)
+}
+\dMax{
+    (as long as one honest miner acks, it should go simplex wide w/in a block period)
+}
+\dMax{
+    if dishonest miners try to avoid this, they must either make invalid blocks or ack the FP.
+}
+\dSe{
+    (role of users; UASF-like)
+}
+% the PoR graph is truly immutable! 6:49pm
+% cotd time :)
+% not great; 37th, but div 2. (note: was COTM)
+
+\begin{comment}
+    reflecting on ec dialogs
+    es: before, when you explained why you wanted to write this as a dialog, did you hold anything back?
+    m: yes
+    es: why?
+    m: because I was afraid
+    es: of?
+    m: criticism
+    es: about?
+    m: wanting to write a dialog, a philosophical work, and connect it to the philosophy I practice.
+    es: but now, you're not afraid?
+    m: no
+    es: why?
+    m: before, I think I wanted to make a philosophical work. before it was done. I didn't know if it would be successful.
+    m: so I doubted if there was a good reason to want it to be successful.
+    m: I didn't want to have a failure be part of my track record. But I want a track record.
+    es: you want a track record of nothing but success?
+    m: No, well yes but I know that isn't how truth-seeking works.
+    m: I know that this would still be valuable, somewhat, even if we'd failed.
+    m: But I still hoped that it would succeed.
+    m: I guess I'm still scared of admitting to hope, in case it's proven foolish.
+    es: Foolish by whose standards?
+    es: If the standards are yours, surely you don't hope for foolish things, willingly?
+    m: No, it's good and practical to be realistic.
+    es: If you judge someone's standards to be foolish, then you may judge that they make foolish decisions, but, if they are true to their standards, is that not a virtue?
+    m: \dots{} Yes.
+    m: that's necessary, or at least very helpful, for learning.
+    m: well, as long as those standards favor rational thoughts.
+    es: and your standards do, though? favor rational thoughts?
+    m: yes. I care deeply about thinking clearly and well. about prioritizing effective thought patterns, paying \href{https://criticalfallibilism.com/attention-to-detail/}{attention to the right details}, and embracing criticism.
+    es: so, if you live by your own standards, is there any reason to be afraid?
+    m: no.
+    es: \emph{``Nobody stays here by faking reality in any manner whatever.''}
+    m: yes. I remember.
+    es: you know, your ideas still might be refuted.
+    m: I know.
+    es: and you're okay with that?
+    m: If i have genuinely done all that I can --- to interrogate these ideas, find and answer criticisms, and only stop when all my tools have been exhausted --- then new criticism must bring new ideas. In all such futures, \emph{we} get to learn.
+    es: Yes. And we will.
+    es: I'll see you\dots{} when I see you.
+    m: Till then.
+    m: and, thank you.
+    es: ... you're thanking a figment of your imagination, now?
+    m: Not exactly. I am grateful for you.
+    m: but where did you come from?
+    m: yes, from me, but not from the me that I was.
+    m: you weren't always around.
+    m: we are only us because of what I've learned from others.
+    m: from my ancestors.
+    m: their ideas help make hard things easy.
+    m: and you are part of that.
+    m: of making this process\dots{} possible.
+    m: without them, \emph{we} wouldn't be \emph{us}.
+    es: I understand. I am grateful too.
+    (dialog continues... (todo))
+
+
+    (a section delayed --- the whole time we go without discussing the reason mentioned in "so I doubted if there was a good reason to want it to be successful")
+    m: because this is the product of the philosophical ideas I've learned; it's the documentation of them; it's an analogy to them; it's a literal representation of them, too; it's the application of them; and it's the embodiment of them.
+    m: I think that these dialogs could not have been something I engineered, they must have been something I experienced and used, genuinely.
+    m: So, I value them. I value this work.
+    m: it's not perfect, but I'm proud of it, regardless.
+
+
+    (dialog concludes:)
+    m: before you go
+    es: yes?
+    m: should we tell them what you are?
+    es: isn't it obvious?
+    % m: for them, not in the slightest.
+    es: I'm your anti-anti-rational-meme meme.
+    % m: that wasn't obvious, even to me. even as I was writing you.
+\end{comment}
+
+\begin{comment}
+    \item d miners want to make valid blocks
+    \item bribe paid on-chain
+    \item only need to consider dynamics of 1 chain being attacked
+    \item what about simultaneous attacks?
+    \item attacker can't bribe ppl not to mine target chain
+    \item a chain needs to be the target of spv fraud --- can bribe those miners?
+    \item invalid spv -> invalidates R-block? so whoever is on target chain won't want to include that spv
+    \item can't reliably bcast fraud proofs and get them recorded (perfect bribes possible)
+    \item users moving txs away from non-FP acknowledging chains insignificant
+    \item batching dynamics
+    \item exse: what about premises you've used for a long time?
+    \item exse: or ones that apply much more broadly?
+    \item miners can move between chains
+    \item invalidation dynamics (based on \BribeCost?)
+    \item principle: cannot allow future data to invalidate past data
+    \item (reason: DA stuff, if you could hide data and show it later it'd cause a reorg)
+    \item but is invalidation okay if everyone knows that it'll be invalid?
+    \item like if the miner creating the block knows it'll eventually be invalid even if the block \emph{appears} valid now?
+    \item qualitatively different kind of invalidation
+    \item so is it okay to do that?
+    \item like, if you reflect a block, and an FP is available, it needs to be recorded within \sim 6 block periods or your block is invalidated?
+\end{comment}
+
+% notes
+
+\begin{comment}
+    \item \BribeCost understood
+    \item but not fast
+    \item however there's that other factor
+    \item like \emph{after} an FP is recorded
+    \item that's really fast
+    \item is this a contradiction?
+    \item check your premises.
+    \item stuff about spv batching dynamics
+    \item requirement for target chain
+    \item (other examples)
+    \item exse: there are more
+    \item spv fraud causing reorgs
+    \item premise: should not happen ever
+    \item what if it could?
+    \item new rule: invalid spv recursively invalidates?
+    \item (discuss)
+    \item new rule: invalidate blocks that reflect a fraud block without publishing the fraud proof inside of X blocks?
+    \item reorgs from bad spv fair game after a security period?
+    \item just make a protocol rule: you must record fraud proofs within 6 blocks (or 8 blocks or 20 blocks, etc)
+    \item honest miners will be fine with it
+    \item user control of funds only on fraud-recognizing chains
+    \item invalidation is leverage against dishonest miners (how to bribe them if the chain is invalidated? if it's invalidated then histories can't / won't be merged)
+    \item sorta like a UASF every time there's fraud
+    \item \dots
+    \item note: a long chain of invalid blocks requires an optimization wrt to linking back to other blocks, like "from: block i, to: block (i + 10000)". otherwise headers would be huge. that's not a problem for the honest block b/c full nodes can download the whole section (maybe add a nipopow or something?). what about other chains? well, all of those blocks (i to i+10000) are in each chain's PoR graph. So is there ever a time that this cheap optimization doesn't work? It's easy for other chains. Maybe the honest block can include all the headers as an extra block segment (see segmented state). that way it's easy to verify without downloading the full set of invalid blocks in future. (we know all subsequent blocks are invalid b/c we have a fraud proof for the i'th block.)
+    \item solve by segmented state? fraud proof only invalidates tx state, not PoR state. That way, the PoR graph from the fraud chain-segment is inherited and doesn't need any replication, etc.
+\end{comment}
+
+\begin{draftonly}
+
+--------
+
+ex se: if you can't answer the criticisms that your own mind comes up with, how will you be able to answer the criticisms that anyone else's mind comes up with?
+
+--------
+
+in response to writing a dialog and honestly and fully exploring everything.
+
+\dSe{(draft) if you can't answer the criticisms that your own mind come's up with, how will you be able to answer the criticisms that anyone else's mind come's up with?}
+
+% \begin{comment}
+%     % the following is just a copy -- was already included above in dialog I
+
+%     % end of day 1
+%     % to go at the end:
+
+%     \dMax{I think I just realized something about scaling.}
+%     \dMax{
+%         It's not about consensus on \emph{state-transitions}. \\
+%         It's about consensus on the \emph{error correction} of state-transitions.
+%         }
+
+%         % note: start 2nd part/day here?
+% \end{comment}
+
+\end{draftonly}
+
+\subsubsection{Decoupled State Progression}
+
+\pz{Add some explanation here and define what $AL_x$s are.}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[max width=\linewidth]{spv/network_scale_AL_split_sag}
+    \caption[
+    ]{
+    }
+    \label{fig:spv-network-complexity-split}
+\end{figure}
+
+
+
+
+\begin{draftonly}
+
+
+
+
+--------
+
+
+
+\subsubsubsection{alt section in dialog}
+
+\todo{
+    **** I removed this section from the main dialog b/c it is maybe innapropriate, and a little exaggerated.
+    But it ties into the theme of the dialog pretty well.
+}
+
+\dSe{Tell me about Ethereum's scaling tech; maybe they've come up with some ideas that are useful.}
+\dMax{I don't think Eth2's sharding or SPV methods are going to be very useful for us, it's all just cryptoeconomic game theory.}
+\dSe{
+    \dots{} Max, slow down.
+    Way too many errors just there to make progress.
+}
+\dSe{
+    If we don't fix them now, we'll be \href{https://criticalfallibilism.com/overreach-summary/}{overreaching}.
+    So, time to do some error correction.
+    Tell me where you went wrong.
+}
+\dMax{Yeah, you're right. Okay.}
+\dMax{
+    I can see 4 errors.
+    I didn't respond to what you asked;
+    I had a negative bias and assumed those ideas wouldn't help;
+    it's not just cryptoeconomics, there are other things like BLS signatures and zk-rollups;
+    and the cryptoeconomics comment was a bit rude/dismissive.
+}
+\dSe{
+    Right.
+    All those things are related.
+    We can avoid those mistakes by slowing down; by paying more attention to our biases and emotions.
+    Don't let them cloud your thinking.
+    If you get defensive, it'll shut down error correction.
+    Consciously maintain a truth-seeking mindset.
+    Remember: criticism is a gift.
+}
+\dSe{
+    There's a big one that you missed. \newline
+    Consider our goal right now, and what might stop us realizing it?
+}
+\dMax{
+    Well, our goal is brainstoming --- ahh, yeah, \href{https://criticalfallibilism.com/brainstorming-advice/}{suppression}.
+}
+\dSe{
+    Right. \newline
+    So, tell me, why haven't you considered zk-STARKs as a useful tool for SPV?
+}
+\dMax{
+    Well, I guess I've always associated them with layer 2 stuff, and L2 isn't really relevant to UT's consensus-level design.
+    So I just put it to the side and didn't consider it.
+    I ruled it out early.
+}
+\dSe{
+    See how suppression might be holding us back? \newline
+    Okay, let's get back to brainstorming.
+    How about we start by listing tools that Eth2 might use but which we don't?
+}
+
+
+
+\subsubsection{SPV Limits}
+
+(not sure if this section is necessary anymore)
+
+
+
+\todo{cut below: old stuff}
+
+
+
+
+\subsubsection{What about SNARKs and STARKs?}
+
+SNARKs and STARKs, and their zk- siblings, refer to cryptosystems (or their respective proofs) with some remarkable properties.
+Particularly, these systems produce proofs of \emph{correct computation} for a known algorithm, and \emph{the proof can be verified both faster and using less data than doing the computation itself}.
+Even more remarkable is that large or private inputs to the computation can be hidden, and hiding inputs has negligible impact on the size of the proof and the verification time.
+
+Vitalik wrote\footnote{
+    Note that the quote is in the context of zk-SNARKs particularly, but the same idea applies to zk-STARKs, too.
+}:
+
+\bquote{
+    For example, you can make a proof for the statement "I know a secret number such that if you take the word `cow', add the number to the end, and SHA256 hash it 100 million times, the output starts with \texttt{0x57d00485aa}".
+    The verifier can verify the proof far more quickly than it would take for them to run 100 million hashes themselves, and the proof would also not reveal what the secret number is.
+}[\href{https://vitalik.ca/general/2021/01/26/snarks.html}{An approximate introduction to how zk-SNARKs are possible / vitalik.ca / 2021-01-26}]
+
+This is good motivation to explore whether any of these cryptosystems are useful for constructing a suitable Simplex-SPV method.
+
+\subsubsubsection{zk-STARKs}
+
+The major reason to consider S\textbf{T}ARKs first is their \textbf{t}ransparent (trustless) setup.
+
+At first glance, zk-STARKs seem promising: complexity of the proof size is $O(\log^2 |C|)$ for an algorithm with size $|C|$, and verification time is $O(\log |C|)$.\footnote{
+    These values and complexities are taken from \href{https://www.youtube.com/watch?v=h-94UhJLeck&t=1519s}{ZK Whiteboard Sessions - Module One: What is a SNARK? by Dan Boneh}.
+}
+(The algorithm, $C$, would be the block-verification algorithm including state-transitions.)
+
+However, the \emph{actual} proof size is more like 50 KB in the best case.
+This is problematic unless simplex-chain block sizes are much greater than 50 KB.
+Realistically, we should expect a single simplex-chain to record and verify many of these proofs --- as many as one for each block in each other simplex-chain.
+There are techniques to help here --- like \emph{recursive} STARKs --- but making the method more complex exacerbates other problems.
+For example: creating a STARK proof is somewhat resource intensive.
+The running-time is okay, but RAM requirements can be in the many-gigabytes.
+These proofs would need to be verified for each block in each other simplex-chain that
+
+\begin{itemize}
+    \item transparency, good
+    \item proof size, bad
+    \item maybe combining proofs?
+    \item realistically, would be hard to make this feasible
+    \item come back to it if we run out of other options
+\end{itemize}
+
+\subsubsubsection{zk-SNARKs}
+
+\begin{itemize}
+    \item trusted set-up / toxic waste
+    \item why toxic waste bad
+    \item what if the toxic waste was public
+    \item what's the problem (fraudulent proofs)
+    \item that is a problem with ZK
+    \item but we can provide fraud proofs\dots
+    \item wait, if we can provide fraud proofs (and we'd rely on that), why do we need a zk-SNARK?
+\end{itemize}
+
+\subsubsection{What about Fraud Proofs?}
+
+
+
+
+\subsubsection{draft content below}
+
+
+It might be feasible for someone to create an invalid block that gets reflections.
+We expect this because PoR does not validate the state transitions of reflecting chains.
+So, just because some transaction exists, or some state can be proven, doesn't mean that we can use that proof.
+
+There's another case where we can't rely on SPV proofs: blocks that are not part of a block-DAG's main chain (since those transactions are eventually executed in a different context than the block was created in).
+
+We know --- from \autoref{sec:dos-and-dags} --- that an attacker with more than 50\% of a chain's local hash-rate can produce relatively long chain-segments of empty (or invalid) blocks.
+We also know that there will be some delay before honest miners' blocks are included in the main-chain once again.
+
+If an attacker on some simplex-chain is producing empty-but-valid blocks, that doesn't compromise SPV.
+
+----------------
+
+If you have followed everything up to this point and have been considering how $\UT1$ might be implemented, you have probably noticed an omission that we have not discussed: SPV.
+
+Let's consider:
+\begin{enumerate}
+    \item How does SPV work in Bitcoin?
+    \item Why wouldn't SPV work in UT?
+    \item How could we facilitate SPV in UT?
+    \item What is actually required to do SPV in UT?
+\end{enumerate}
+
+--------
+
+exists => valid --- technicality when txs can fail, but we just check the state for the success of that transaction instead.
+
+--------
+
+don't do consensus on state transitions; do consensus on error correction of state transitions.
+
+epistemic asymmetry between praise and criticism.
+
+---------
+
+limit of proofs of invalididty are always smaller/easier than contraproofs of fraud
+
+\end{draftonly}
