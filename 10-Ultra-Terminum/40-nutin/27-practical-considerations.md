@@ -442,11 +442,6 @@ atk situations:
 
 %% END ### RELEASE
 
-%% BEGIN ### DRAFT
-
-\input{27-practical/95-spv-requires-valid-state.tex}
-
-%% END ### DRAFT
 
 %% BEGIN ### RELEASE
 
