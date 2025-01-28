@@ -452,6 +452,8 @@ atk situations:
 
 \input{27-practical/95-spv-2-mk.tex}
 
+\input{27-practical/96-spv-bribe-attacks.tex}
+
 \input{27-practical/98-ut1-protocol-summary.tex}
 
 %% END ### RELEASE
