@@ -17,6 +17,8 @@
 | ------- | ------------------------------------------------------------- | ---------------- |
 | $c$ | Abstract representation of per-node computational resources. | - |
 | $n$ | Abstract representation of network size. | - |
+| $p$ | Proportion of the network's hash-rate controlled by honest nodes. | - |
+| $q$ | Proportion of the network's hash-rate controlled by the attacker. | - |
 | $L_d$, $R_d$ | The difficulty of chain \cL /\cR. | hashes/block |
 | $L_r$, $R_r$ | The block reward of chain \cL /\cR. | coins/block |
 | $w$ | Some amount of \emph{work}. | hashes |
