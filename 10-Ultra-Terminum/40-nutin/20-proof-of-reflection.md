@@ -192,7 +192,7 @@ The takeaway is that there's a positive feedback loop. -->
 \aside{
   Where do Chain \cL miners get PoRs from?
   There are multiple answers, but one is for miners of Chain \cL to request them from Chain \cR nodes --- light-client protocols often support this sort of thing.
-  The problem is discussed in \Cref{sec:practical-considerations}.
+  The problem is discussed in \autoref{sec:practical-considerations}.
   For now, it's okay to assume that PoRs are broadcast alongside headers.
 }
 
@@ -301,7 +301,7 @@ When two chains (Chain \cL and Chain \cR) mutually reflect each other, detecting
 The security of both Chain \cL and \cR are partially dependent on each others' histories (along with their own, of course).
 If one chain is attacked, where some alternate chain-segment is published, then that chain's nodes will know that those blocks have not been reflected --- potentially indicating that the recently-published chain-segment was constructed in private or constructed after the fact.
 
-There are several details that still require discussion, though, such as: *how exactly is weight contributed by a reflecting chain converted to weight in the local chain?* (discussed in \Cref{sec:comparing-chain-work}); and *how can proofs of reflection be calculated without the requirement that miners are full nodes of both chains?* (discussed in \Cref{sec:practical-considerations}).
+There are several details that still require discussion, though, such as: *how exactly is weight contributed by a reflecting chain converted to weight in the local chain?* (discussed in \autoref{sec:comparing-chain-work}); and *how can proofs of reflection be calculated without the requirement that miners are full nodes of both chains?* (discussed in \autoref{sec:practical-considerations}).
 This last question is particularly important for moving beyond mutual reflection between only two chains.
 
 The *essence* of *Proof of Reflection* should now be apparent. *In principle*, we can make blockchains more difficult to attack based on the idea that *blockchains can include a projection of the history of other blockchains (and confirm a chain's history like they do transactions)*. *In principle*, it is possible to increase the security of a blockchain via *reflection* and to increase the security of multiple blockchains via *mutual reflection*.
@@ -338,7 +338,7 @@ How can we use these relationships to our advantage?
 
 \aside{
   With regards to Proof of Reflection, consider that we \emph{only} need to convert \emph{simultaneous} work.
-  That means: PoR does not need to be able to convert chain-work between chains \emph{over time}, only \emph{for some given moment}.\footnote{At this point, we are discussing how PoR works with Proof-of-Work, discussions of where other methods, such as Proof-of-Stake, fit into the ecosystem will be discussed in \Cref{sec:converting-confirmations}.}
+  That means: PoR does not need to be able to convert chain-work between chains \emph{over time}, only \emph{for some given moment}.\footnote{At this point, we are discussing how PoR works with Proof-of-Work, discussions of where other methods, such as Proof-of-Stake, fit into the ecosystem will be discussed in \autoref{sec:converting-confirmations}.}
 }
 
 The units that we have to work with are: blocks, seconds, hashes, and coins\footnotemark{}.

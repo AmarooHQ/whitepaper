@@ -8,11 +8,11 @@
 
 *Ultra Terminum* --- with appropriate configuration --- is resistant to the following attacks; see the linked section for discussion:
 
-- 51% Attack, see \Cref{sec:proof-of-reflection}, \Cref{sec:preventing-dos-attacks}, and \Cref{sec:simplex-security-cec}.
-- Selfish mining, see \Cref{sec:confirmation-times}.
-- Reflection without publication, see \Cref{sec:availability-of-blocks}.
-- Empty block DoS and censorship, see \Cref{sec:dos-and-dags}.
-- \emph{Nothing at Stake} and \emph{long range} attacks, see \Cref{sec:reflection-pow-and-pos} and \Cref{sec:dapp-chains}.
+- 51% Attack, see \autoref{sec:proof-of-reflection}, \autoref{sec:preventing-dos-attacks}, and \autoref{sec:simplex-security-cec}.
+- Selfish mining, see \autoref{sec:confirmation-times}.
+- Reflection without publication, see \autoref{sec:availability-of-blocks}.
+- Empty block DoS and censorship, see \autoref{sec:dos-and-dags}.
+- \emph{Nothing at Stake} and \emph{long range} attacks, see \autoref{sec:reflection-pow-and-pos} and \autoref{sec:dapp-chains}.
 
 \todo{refl without pub - XC}
 \todo{add XC attack stuff? bribes?}

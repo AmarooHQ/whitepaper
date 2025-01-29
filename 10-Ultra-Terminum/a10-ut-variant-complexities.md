@@ -73,7 +73,7 @@ This is reasonable if users running full nodes are willing to download and tempo
 The PoRs are still processed as part of a chain's state transition (each reflecting header will have a corresponding PoR), and are thus provable.
 Additionally, since full nodes will need to recalculate these, a suitable P2P protocol will allow PoRs to be requested from full nodes on an ad-hoc basis.
 
-The derivations of +OP's complexity was covered in \Cref{sec:ut-complexity}.
+The derivations of +OP's complexity was covered in \autoref{sec:ut-complexity}.
 
 %% INSERT ### TABLE: tps_op
 
