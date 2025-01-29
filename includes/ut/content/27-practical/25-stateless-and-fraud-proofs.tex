@@ -2,7 +2,7 @@
 
 \label{sec:stateless-and-fraud-proofs}
 
-A stateless full node (aka. a stateless client) is a node that verifies all blocks, but does not actively track the current state of the chain.
+A stateless full node (a.k.a. a stateless client) is a node that verifies all blocks, but does not actively track the current state of the chain.
 Instead, a stateless full node will use some minimal \emph{witness data} (specific to each block) to verify that the state transition was valid.
 This is possible because \emph{most} of the state tree remains untouched and thus the state root can be recalculated easily.
 The mutations to the state tree made by a block's transactions are all calculable from the witness data and the transactions, alone.
