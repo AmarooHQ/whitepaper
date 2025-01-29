@@ -1,15 +1,16 @@
 \subsection{Paper Roadmap}
 
-The goal of this consensus whitepaper is to introduce the novel consensus strategy forming the foundation of the Amaroo network and constructing the Simplex and Simplex Tiling.
-The whitepaper is presented as follows.
+The goal of this paper is to document, explain, discuss, and evaluate \UT{} and its components.
+The paper is structured thus:
 \begin{itemize}
-  \item \autoref{sec:proof-of-reflection} introduces the primitives and builds Proof of Reflection.
-  \item \autoref{sec:constructing-ut} shows how Proof of Reflection is used to construct \UT{} and the varying levels of scaling strategies of $\UT{1}$, $\UT{2}$ and $\UT{3}$.
-  \item \autoref{sec:practical-considerations} details the practical considerations for UT design, including the availability of blocks, confirmation times and information about the blockchain state.
-  \item \autoref{sec:ut-complexity} presents the scaling complexity analysis of \UT{}.
-  \item \autoref{sec:tiling} introduces the fundamental concepts to bring \UT{} to $O(n)$ horizontal scalability.
-  \item \autoref{sec:attacks} provides information on how \UT{} is resistant to attacks.
-  \item \autoref{sec:conclusions} presents the final conclusions.
+  \item \autoref{sec:proof-of-reflection} constructs the main primitive, \emph{Proof of Reflection}, and covers related topics such as \emph{conversion of work}.
+  \item \autoref{sec:constructing-ut} uses \emph{Proof of Reflection} to construct the \emph{Simplex}, \emph{Ultra Terminum} (\UT{}), and its scaling configurations: $\UT{1}$, $\UT{2}$ and $\UT{3}$.
+  \item \autoref{sec:practical-considerations} covers the practical considerations for \UT{}: the availability of blocks, state transition, protocol variants, confirmation times, the PoR graph, block-DAGs, DoS attacks, NIPoPoWs, Simplex security, and cross-chain transactions.
+  \item \autoref{sec:ut-complexity} analyzes the scalability of \UT{}.
+  \item \autoref{sec:tiling} constructs a \emph{Tiling of Simplexes} and \UTinf{}, scaling horizontally and unlocking $O(n)$ capacity.
+  \item \autoref{sec:attacks} briefly summarizes \UT{}'s resistance to attacks.
+  \item \autoref{sec:conclusions} concludes.
 \end{itemize}
 
+\mk{edit below}
 Additional analysis and results from the simulations can be found in the appendices or accompanying documentation.

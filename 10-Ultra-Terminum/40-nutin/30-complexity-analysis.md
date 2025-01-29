@@ -266,7 +266,7 @@ k_{1,tx} & = \frac{k_1}{2}
 \end{split}
 \end{equation*}
 
-Thus, from the definition of $k_1$ in \autoref{eq:k1-reflection-defn}:
+Thus, from the definition of $k_1$ in \autoref{eq:k1-reflection-defn}, we find that maximal throughput requires half of the block to be used for reflections:
 \begin{equation*}
 k_{1,B} = \frac{k_1}{2}
 \end{equation*}
