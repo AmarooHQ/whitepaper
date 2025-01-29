@@ -14,6 +14,9 @@
 - Empty block DoS and censorship, see \Cref{sec:dos-and-dags}.
 - \emph{Nothing at Stake} and \emph{long range} attacks, see \Cref{sec:reflection-pow-and-pos} and \Cref{sec:dapp-chains}.
 
+\todo{refl without pub - XC}
+\todo{add XC attack stuff? bribes?}
+
 \subsection{Dialog: Attacks and Mitigation}
 
 \aside{
