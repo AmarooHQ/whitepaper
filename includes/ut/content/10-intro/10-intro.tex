@@ -1,7 +1,31 @@
-% Small introduction, just to bring in the whitepaper
-Modern blockchains are composed of a symphony of complex components, each having a distinct, yet profound influence on the operation of the entire network.
-The construction of these components necessitates careful consideration over a multitude of variables surrounding the Internet, network bandwidth, hardware, performance and behaviour.
-These careful considerations become ossified within the underlying code, effectively setting the blockchain on a trajectory of governance and long-term evolution.
+Blockchains are complex systems and each component affects the system in a number of different ways.
+When designing a blockchain network, we must therefore carefully consider these components and their interactions, and the context that the chain will operate in.
+These choices are encoded in the protocol and the consequences of those choices can last for the entire lifetime of the network.
+
+Naturally, when designing systems, some problems are left to be solved later -- not everything can or should be done up-front.
+The most common problem that blockchain designers have left in the `solve later' pile is the long-term \emph{scalability} of the network.
+In turn, this neglect gave rise to a generation of blockchain designs that tried (and failed) to provide a scalable solution without abandoning the other core properties of a blockchain.
+Existing chains began to adapt, too -- Bitcoin introduced SegWit, and Ethereum developed a plan to transition to a sharded design secured by Proof-of-Stake (an effort which is still on-going, 10 years later).
+Despite all of this, a solution to this problem remains elusive.
+
+Before long, this problem was codified as a trilemma by Vitalik Buterin.
+In this paper, we'll refer to it as \emph{Buterin's Trilemma} or \emph{the Trilemma}, though it is more commonly known as the \emph{Scalability Trilemma} or the \emph{Blockchain Trilemma}.\footnote{%
+  I think \emph{Scalability Trilemma} is a bad name because \emph{scalability} is one of the three conflicting qualities; you could just as well call it the \emph{Decentralization Trilemma}.
+  Arguably, as we will see, the most appropriate of the 3 would actually be the \emph{Security Trilemma}.
+  The term \emph{Blockchain Trilemma} has been used more recently, but the name implies that this is the only big problem to solve, and makes far less sense as a name after it has been solved.
+  As the term was coined by Vitalik Buterin, I prefer the name \emph{Buterin's Trilemma}.
+}
+It states that, for blockchain designs, there is a `choose two out of three'-type relationship between (i)~security, (ii)~scalability and (iii)~decentralization (discussed below in \autoref{subsec:trilemma}).
+
+The shortcomings of popular existing designs, which have prioritized security and decentralization, are readily apparent thanks to \emph{congestion}: transactions take longer to be confirmed, fees rise, business is disrupted, and costs explode.
+When security and decentralization are prioritized over scalability, there will, inevitably, be a shortage of capacity at some stage.
+
+Other combinations of trilemma properties have been tried as well.
+Secure and scalable ``blockchains'' have been attempted, but are fragile and centralized.
+Scalable and decentralized systems exist, but lack the fundamental properties of a blockchain, such as presenting a single, consistent record of events to all users.
+
+\begin{comment}
+
 
 %% The process of such architectural thinking demands great appreciation for a multitude of disciplines surrounding technology, economics, finance, philosophy and psychology-- all of which now being swayed by the changing environments around us.
 The scope of blockchain use has expanded significantly, evolving from its origins as an underground mechanism for pseudonymous peer-to-peer digital currency into a foundational layer embedded within global financial institutions.
@@ -27,6 +51,8 @@ For example, Bitcoin and the original Proof-of-Work Ethereum (pre-merge) are cha
 On the other hand, blockchains that focus on \emph{security} and \emph{scalability} over decentralization often display exceptional transaction throughput, but are vulnerable to node failures causing network halts, or, fall to shortcomings of centralized services, such as censorship -- examples include Solana, BNBChain, Ripple, or enterprise blockchains.
 Finally, chains that prefer \emph{scalability} and \emph{decentralization} over security may exhibit high performance, but may reduce parameters in their security choices for the sake of inclusivity, for example the original IOTA chain or chains that target IoT/embedded devices.
 
+\end{comment}
+
 Amaroo's underlying consensus mechanism, \emph{Ultra Terminum} (UT), is a cooperative cross-chain consensus strategy that addresses \emph{Buterin's Trilemma}, and promotes cohesiveness amongst chains and communities.
 
 %% Commenting for brevity of TODO
@@ -41,4 +67,4 @@ In a way, $\UT{}$ provides ways to generalize the contributions between chains, 
 \UT{} is capable of supporting millions of transactions per second with similar chain parameters (like block size) to those of traditional blockchains (like Bitcoin or Eth1\footnote{
     The term \emph{Eth1} refers to the original Proof-of-Work Ethereum (pre-merge), and \emph{Eth2} refers to the Sharded Proof-of-Stake Beacon Chain.
     These terms were originally adopted to describe the different designs on the \href{https://web.archive.org/web/20241128055038/https://ethereum.org/en/roadmap/}{Ethereum Roadmap}.
-    }).
+}).
