@@ -240,7 +240,7 @@ Though I think that the idea of time-stamping a hash (e.g., via an \textsc{OP\_R
 
 \subsubsection{PoS Dapp-chains}
 
-If the headers of dapp-chains are encoded as simplex-transactions, then techniques like *slashing* are first-class operations within the *hybrid* PoW context provided by the simplex.
+If the headers of dapp-chains are encoded as simplex-transactions, then techniques like *slashing* can be first-class operations within the *hybrid* PoW context provided by the simplex.
 This solves the *Nothing at Stake* problem for PoS dapp-chains, provided the necessary PoS primitives can be encoded in a simplex-transaction.
 
 The abstraction layer between simplex-chains and dapp-chains brings practical benefits, too.
@@ -249,10 +249,15 @@ Given that dapp-chains inherit security properties of their parent-chain (via on
 (Sharding, too, for that matter\dots)
 
 The most likely method of integration has three core components: modification of the headers (and integration of PoR), modification of existing slashing protocols, and support for intra-simplex SPV proofs.
-For example: [OpenEthereum](https://github.com/openethereum/openethereum) could be integrated as a dapp-chain with the creation of a new [header format](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/ethcore/types/src/header.rs), the creation or modification of a suitable [engine](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/ethcore/src/engines/basic_authority.rs), and the implementation of suitable [builtins](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/vm/builtin/src/lib.rs) that facilitate intra-simplex SPV proofs[^builtins-or-sc] and any other useful features.
+For example: [OpenEthereum](https://github.com/openethereum/openethereum)[^open-eth] could be integrated as a dapp-chain with the creation of a new [header format](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/ethcore/types/src/header.rs), the creation or modification of a suitable [engine](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/ethcore/src/engines/basic_authority.rs), and the implementation of suitable [builtins](https://github.com/openethereum/openethereum/blob/582bca385fedb1af682e989e5bcc6b3b2cf53028/crates/vm/builtin/src/lib.rs) that facilitate intra-simplex SPV proofs[^builtins-or-sc] and any other useful features.
 Naturally, there are some other components that are necessary (like a component for broadcasting header-transactions), but those components are common over many dapp-chain integrations and only need to be written once for each *kind* of dapp-chain.
 
+[^open-eth]: OpenEthereum itself has, since this section was written, been deprecated.
+This section is left unchanged since the specific client we might modify is immaterial to the main point: that relatively few modifications can be applied to existing clients to create a dapp-chain version of that kind of blockchain.
+
 [^builtins-or-sc]: Note: instead of builtins, these requirements could be met via EVM/WASM smart contracts.
+
+\input{25-constructing-ut/60-going-further-research}
 
 %% END ### RELEASE
 
