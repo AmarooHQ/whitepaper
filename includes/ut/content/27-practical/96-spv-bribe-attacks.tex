@@ -124,7 +124,7 @@ Let the total cost to the attacker, in the $k$-th round, be $C_r Z_k$ coins.
     \item Each miner (on each simplex-chain) needs bribing (but only if they make a block).
     \item Each round, the attacker must pay $C_r Z_k$ in bribes (where $Z_k$ is the bribe as a multiple of the block reward, and $k$ is the round, starting at 1).
     \item These bribes are given to $(N_1 - 1)$ miners (we subtract 1 to exclude the target chain from this split). One bribe per R-chain.
-    \item However, an attacker with $q$ proportion of the hashrate can recover $q(N_1 - 1)$ of these bribes, at most, and thus loses at least $p(N_1 - 1)$ of them.
+    \item However, an attacker with $q$ proportion of the hash-rate can recover $q(N_1 - 1)$ of these bribes, at most, and thus loses at least $p(N_1 - 1)$ of them.
     \item A miner receives $C_r H k$ coins as a reward for publishing a fraud proof that invalidates $k$ blocks.
     \item Each round, miners can choose to publish the fraud proof, which earns them $C_r H k$ in rewards.
     \item Thus, each round, miners have an opportunity cost of $C_r H k$ if they do \emph{not} take the bribe.
@@ -246,7 +246,7 @@ Thus, using those PoRs effectively turns dishonest miners into honest miners.
 
 The duration of this transition depends on the proportion of honest miners: $h$.
 Let's define $h$ via $h + d = 1$, where $d$ is the proportion of dishonest miners, including the attacker.\footnote{
-    Dishonest miners are those which will accept a bribe and participate in the fraud proof censorship attack, but are not necessarily controlled by the attacker directly. 
+    Dishonest miners are those which will accept a bribe and participate in the fraud proof censorship attack, but are not necessarily controlled by the attacker directly.
     We assume that there are some miners that would accept a bribe for \emph{this} attack, but not for \emph{any} attack.
 }
 Since $d$ includes the attacker, we can say $d > q$, and $h < p$.

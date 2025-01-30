@@ -146,16 +146,9 @@ Let's test the Confirmation Equivalence Conjecture.
 
 The hypothesis is that: doublespends against an \emph{individual simplex-chain} in an $N$-chain simplex after $\mathcal{C}$ \emph{local} confirmations are \emph{as hard} as doublespends against a traditional blockchain after $\mathcal{C}\cdot N$ confirmations.
 
-\pz{c and m have not been defined. Also, we use the same letter for local computation power and confirmations.}
-First, define $P(q; c)$, where $c$ is the number of confirmations and $q$ is the proportion of global hash rate controlled by the attacker, to be the function that returns the probability of an attempted doublespend succeeding on a traditional blockchain according to Rosenfeld's analytical solution\footnote{
+First, define $P(q; c)$, where $c$ is the number of confirmations and $q$ is the proportion of global hash-rate controlled by the attacker, to be the function that returns the probability of an attempted doublespend succeeding on a traditional blockchain according to Rosenfeld's analytical solution\footnote{
     \citeAHBDSFull
 }:
-\pz{
-  Unclear if $\{1, 2, \dots\}$ is finite or infinite.\\
-  -------\\
-  Chris: do we define $m$ if only used as part of the $\Sigma$, counting from $m=0$ to $c$;
-}
-
 
 \begin{equation}
   \forall c \in \{1, 2, \dots\}: P(q; c) = \begin{cases}
@@ -188,11 +181,7 @@ The relationship that exists is not only at the extremes, but between them too\f
   Since \nicefrac{$\mathcal{C}$N}{a} in \autoref{eq:cec-extended-hypothesis} is not necessarily an integer, we'll assume there exists a valid generalization of Rosenfeld's solution for $c \in \mathbb{R}_{>0}$.
 } --- it must be if confirmations are equivalent.
 This is the \emph{extended} CEC:
-\cn{
-  Just want to check these equations.\\
-  Is $a$ the number of simplex chains?\\
-  Would that mean that $\mathcal{C}N = \mathcal{C}N_1$?
-}
+\todoDraftOnly[h]{Define $a$, not defined prior to footnote/equation --- reading it seems to be the number of simplex chains (is this controlled by attacker, or?)}
 % 1 \le x \le N; x \in \{a_i, b_i\}
 % , and $1 \le a_i \le N$, and $1 \le b_i \le N$
 \begin{equation}
