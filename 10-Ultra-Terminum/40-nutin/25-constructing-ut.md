@@ -115,7 +115,10 @@ Note that, since dapp-chains can use whichever foundational consensus method, th
 
 It's preferable that a simplex-chain validate the headers of its dapp-chains (similar to a light client), though this is not required.
 For some consensus methods that dapp-chains might choose (such as PoS), there might be special primitives that a host simplex-chain must support.
-However, only that host simplex-chain requires those primitives; other simplex-chains do not.
+However, only that host simplex-chain requires those primitives; other simplex-chains do not.\footnote{
+  The caveat here is that other simplex-chains may need to be capable of validating fraud proofs for the simplex-chain in question.
+  So they don't need these primitives \emph{available to local transactions}, but do need to be capable of executing those primitives if a fraud proof involves one.
+}
 This means that simplex-chains can *specialize* in hosting *particular types* of dapp-chains, providing rich and efficient environments (for nodes of both simplex-chains *and* dapp-chains).
 
 Validating dapp-chain headers, on-chain, can be done via the following simple, clean, and extensible method: \emph{encode dapp-chain headers as simplex-level transactions}.
