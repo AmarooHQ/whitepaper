@@ -69,6 +69,7 @@ So \emph{security takes \ul{time}}, because confirmations take time.
 Now, consider a simplex: the equivalence conjecture says that it doesn't matter whether confirmations come from the \emph{local} chain, or if they come from a \emph{reflecting} chain.
 So, a simplex-chain in a 2-chain simplex \emph{should}, after $C$ \emph{local} confirmations, be as secure as a standalone blockchain with $2C$ confirmations.
 This is true for larger simplexes, too: \emph{doubling} the size of a simplex means we can \emph{halve} the number of \emph{local} confirmations that we wait for --- the chance of a doublespend succeeding should be approximately the same.
+\pz{Give an intuition as to why this is true.}
 More generally, a simplex-chain in an $N$-chain simplex will, after $C$ \emph{local} confirmations, be as secure as a standalone blockchain after $CN$ confirmations.
 
 This is something we can test!
