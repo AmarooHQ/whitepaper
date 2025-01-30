@@ -1,10 +1,4 @@
-\subsubsection{0 - goes immediatley after subsection title}
-
-
-
 \subsubsection{Introduction}
-
-
 
 Our goal in this section is to find a method for cross-chain transactions between any two simplex-chains that is safe, fast, succinct, and reliable.
 \begin{itemize}
@@ -154,7 +148,7 @@ This is much less than a block period -- even when a minority of miners are hone
 
 \subsubsubsection{Construction}
 
-Typically, a cross-chain protocol will require two interactions: one on the sending chain and one on the receiving chain.
+Typically, a cross-chain protocol will require two user interactions: one on the sending chain and one on the receiving chain.
 That is, there is some state modification on the first chain, and then, on the second, an acknowledgment of that and some associated action (like crediting an account).
 Based on the direction of information, order of actions, and the focus on those actions, we could describe these kinds of methods as \emph{push-pull} methods.
 Information is `pushed' from the sending chain, and, at some later point, `pulled' into the receiving one -- conceptually, at least.
@@ -200,6 +194,8 @@ We can now summarize; when drafting an \cL block, the \cR blocks which are valid
 \end{enumerate}
 
 These conditions are illustrated in \autoref{fig:xc-conditions}.
+
+\todoDraftOnly[h]{fix arrow origin/dest in figure; redraft figure caption}
 
 \begin{figure}
     \centering
