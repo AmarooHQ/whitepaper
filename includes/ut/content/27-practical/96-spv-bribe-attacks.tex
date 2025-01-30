@@ -84,10 +84,11 @@ A new honest block thus becomes heavily incentivized over time.
 
 To mitigate this, the attacker must raise the difficulty on the target chain such that all other potential miners find it comparatively unprofitable.
 
-Thus the attacker suffers losses compared to mining honestly: $C_r H k$ for the k-th block.
-That reward is lost to excessive work securing the target chain which would otherwise earn the attacker that much revenue.
+Compared to mining honestly, the attacker forgoes the reward of $C_r H k$ for the k-th block.
+That reward is lost to excessive work securing the target chain which would otherwise earn the attacker that much revenue from publishing the fraud proof.
 Additionally, the attacker loses the block rewards each time --- so these losses are $C_r (1 + H k)$ per block after $k$ blocks.
 Let $C_r \cdot l_m$ represent the total losses due to mining, and $z$ the number of blocks for the attack: factoring out $l_m$ in this way allows us to analyze the situation independent of the block reward.
+In order for the losses $l_m$ to be greater than the rewards, we must have:
 \begin{align}
     l_m &> \sum\limits_{k=0}^z \Bigl( 1 + H k \Bigr) \nonumber \\
     &= z + 1 + H \sum\limits_{k=0}^z k \nonumber \\
@@ -119,8 +120,6 @@ We can define this cost \emph{in terms of the block reward}.
 Let the total cost to the attacker, in the $k$-th round, be $C_r Z_k$ coins.
 ($Z_k$ is the cost in block rewards.)
 
-
-\pz{In item 2, why do we have "chain reward $\times$ bribe"?}
 \begin{itemize}
     \item Each miner (on each simplex-chain) needs bribing (but only if they make a block).
     \item Each round, the attacker must pay $C_r Z_k$ in bribes (where $Z_k$ is the bribe as a multiple of the block reward, and $k$ is the round, starting at 1).
@@ -134,15 +133,17 @@ Let the total cost to the attacker, in the $k$-th round, be $C_r Z_k$ coins.
     \item Let $C_r \cdot l_b$ be the total losses due to bribes.
 \end{itemize}
 
-Therefore, we have:
+Therefore, for the bribes of round $k$ to be more than the rewards on all chains, we must have:
 \begin{align}
     % \text{let } H(z) &= \frac{z}{N_1} \nonumber \\
     % \implies N_1 H(z) &= z \nonumber \\
     % Z_1 &> H (N_1-1) \nonumber \\
     % Z_2 &> 2 H (N_1-1) \nonumber \\
     Z_k &> k H (N_1-1) \nonumber \\
-    \text{let } l_b &= p (Z_1 + \cdots + Z_z) \nonumber \\
-    \therefore l_b &> p H (N_1-1) \sum\limits_{k=1}^z k \nonumber \\
+\end{align}
+Let $l_b = p (Z_1 + \cdots + Z_z)$ denote the expected cost of the attack for the $z$ rounds. Substituting in the above:
+\begin{align}
+    l_b &> p H (N_1-1) \sum\limits_{k=1}^z k \nonumber \\
     l_b &> p H (N_1-1) \frac{z (z+1)}{2}
         \label{eq:spv-atk-losses-bribes}
 \end{align}
@@ -151,16 +152,16 @@ Therefore, we have:
 %     (q + N_1 p) H \frac{z(z+1)}{2}
 % \end{align*}
 
+Let $\BribeCost(z)$ denote the minimum cost of the attack for $z$ rounds, given our current understanding.
 Combining \autoref{eq:spv-atk-losses-mining} with \autoref{eq:spv-atk-losses-bribes}, and noting that $p+q=1$ yields:
 \begin{equation}
-    l_b + (p+q)l_m > H (N_1 p + q) \frac{z(z+1)}{2} + z + 1
+    \BribeCost(z)= l_b + (p+q)l_m > H (N_1 p + q) \frac{z(z+1)}{2} + z + 1
     \label{eq:spv-atk-losses-total}
 \end{equation}
 
 % \todo{nomenclature clash: $h$ was previously used both for $H(Np+q)$ and in $h+d=1$. set $\eta = H(Np+q)$ as a replacement. keep $h+d=1$.}
 
 Observe that this is a lower bound on $\BribeCost(z)$.
-Let's define \BribeCost as the absolute minimum it can be given our current understanding.
 To reduce complexity, we'll also define \BribeCost \emph{in terms of the block reward} (i.e., in units of \emph{block rewards} rather than \emph{coins}).
 We can come back to it later if we need to.
 \begin{align}
@@ -175,6 +176,8 @@ We should also note the inverse of \BribeCost, which gives us a lower bound on t
     } - \eta - 2}{2\eta} & & \text{where } \eta = H(N_1 p + q)
     \label{eq:spv-bribe-cost-inverse}
 \end{align}
+
+\begin{comment}
 
 \subsubsubsection{Domain and Range of $\BribeCost(z)$ in the SRT Context}
 
@@ -227,12 +230,14 @@ If, instead, $H = 1/\sqrt{N_1}$, then $\eta = 5.05$ and
         \implies \sim 1.1 \text{ days}
 \end{equation*}
 
+\end{comment}
+
 \subsubsubsection{Phase 1 $\to$ Phase 2}
 
 The network transitions from phase 1 to phase 2 as soon as a first miner produces a block that includes the fraud proof.
 
 Once this happens, an asymmetry emerges: honest blocks (which acknowledge the fraud proof) produce proofs of reflection that are \emph{not} usable by the dishonest miners.
-If the dishonest miners tried to use those PoRs, they'd produce invalid blocks unless they also acknowledge the FP.
+If the dishonest miners tried to use those PoRs, they'd produce invalid blocks unless they also acknowledge the fraud proof.
 Thus, using those PoRs effectively turns dishonest miners into honest miners.
 
 
@@ -240,7 +245,10 @@ Thus, using those PoRs effectively turns dishonest miners into honest miners.
 \subsubsubsection{Phase 2 $\to$ Phase 3}
 
 The duration of this transition depends on the proportion of honest miners: $h$.
-Let's define $h$ via $h + d = 1$, where $d$ is the proportion of dishonest miners, including the attacker.
+Let's define $h$ via $h + d = 1$, where $d$ is the proportion of dishonest miners, including the attacker.\footnote{
+    Dishonest miners are those which will accept a bribe and participate in the fraud proof censorship attack, but are not necessarily controlled by the attacker directly. 
+    We assume that there are some miners that would accept a bribe for \emph{this} attack, but not for \emph{any} attack.
+}
 Since $d$ includes the attacker, we can say $d > q$, and $h < p$.
 
 Similar to \autoref{sec:dos-and-dags}, the asymmetry between honest and dishonest miners means that, even for a small $h$, the chain-weight of the honest chain-tips will eventually dominate the chain-weight of dishonest chain-tips.
@@ -251,7 +259,7 @@ This is purely for convenience so that we can analyze both at the same time.
 The top row is the weight of the honest chain segment, and the second row is the weight of the dishonest chain segment.
 At the start of the attack ($t_0$), neither chain segment has any blocks, so $t_0 = \vec{0}$.
 
-Each round (block period), we expect that $h$ proportion of new blocks were honest, and $d$ proportion are dishonest.
+Each round (block period), we expect that $h$ proportion of new blocks are honest, and $d$ proportion are dishonest.
 So, after 1 block period, we expect:
 \begin{equation*}
     t_1 = t_0 + \vecXY{N_1 h}{N_1 d} = N_1 \vecXY{h}{d}

@@ -270,8 +270,6 @@ Thus, from the definition of $k_1$ in \autoref{eq:k1-reflection-defn}, we find t
 \begin{equation*}
 k_{1,B} = \frac{k_1}{2}
 \end{equation*}
-\pz{We should add a sentence saying that "For a maximal simplex, half of the throughput must be$\dots$"..}
-
 
 
 \begin{comment}
@@ -354,7 +352,6 @@ N_3 & = \frac{T_3}{k_3} \\
 & = \frac{{k_1}^2 \cdot k_2}{4 \cdot B_f \cdot B_h \cdot {D_h}^2 \cdot {D_f}^2}
 \end{split}
 \end{equation*}
-\pz{What is the conclusion of this equation?}
 
 
 
