@@ -26,6 +26,7 @@ In the worst case (\UT{\text{+HO}} and \UT{\text{+HOT}}), where both headers and
 
 Thus, with \emph{omitted proofs}, \(O(\Delta s) = O(k_1 + N_1 \cdot \log_2 N_1) = O(c \cdot \log_2 c)\).
 
+\pz{Unclear why with explicit PoRs the complexity is $O(c)$ and not $O(c \cdot \log_2 c)$ because we just defined the sizes of PoRs as $O(N_1 \log_2 N_1)$.}
 However, with \emph{explicit PoRs} (variants including +PoRs), \(\Delta s \le k_1 + N_1 \cdot B_f \cdot B_h = O(k_1) = O(c)\).
 
 \aside{
@@ -78,6 +79,7 @@ Regarding $\Delta r$, $g(1 + N_1 B_f \phi) \to g N_1 B_f \phi$ and thus:
     &= \frac{k_1}{2}\Bigl(1 + \frac{g {k_1} \phi}{2 {B_h}^2}\Bigr) \nonumber % \label{eq:por-graph-delta-r} \\
 \end{align}
 A maximal simplex of reasonable parameters has $\Delta r \approx 7\text{,}200$ B/s.
+\pz{Unclear how restricting bandwidth requirements creates a lower bound on $B_h$, we'd rather expect an upper bound.}
 Restricting $\Delta r < k_1$ now implies $k_1 < 2 {B_h}^2 (g \phi)^{-1}$.
 If $k_1 = 3000$, $\phi = 1$, we have $B_h \ge 219$.
 
