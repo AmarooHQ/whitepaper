@@ -11,7 +11,7 @@ However, if these techniques can be done practically and securely, then they wil
 
 Say we have a simplex with a reasonable number of dapp-chains --- enough that we're interested in increasing the efficiency of communication between them.
 Currently, the worst case situation for moving something (tokens, information, permissions, whatever) from one dapp-chain (\dcA hosted on \cL) to another (\dcB on \cR) involves at least three transactions: $\dcA \to \cL \to \cR \to \dcB$.
-If we are just proving something to \dcB, we can (at least) do this in one transaction, but we still need to prove both that some block on \dcA is valid and that some state entries are some particular value.
+If we are just proving something to \dcB, we can (at least) do this in one transaction, but we still need to prove both that some block on \dcA is valid and that some state entries have some particular values.
 (The proofs for \cL and \cR blocks, and the relevant PoRs, are left as implicit since all full nodes have those already.)
 
 If a path between two dapp-chains is common enough, is there any way to make this process more efficient? Yes: dapp-chain simplexes.
@@ -19,7 +19,7 @@ If a path between two dapp-chains is common enough, is there any way to make thi
 The simpler case is when all the dapp-chains are on the same simplex-chain.
 In this case, the dapp-level simplex's PoRs can be verified by the host simplex-chain, and we should gain some of the properties that the main simplex enjoys.\footnote{
     These properties (of the main simplex) are explored in-depth in \autoref{sec:practical-considerations}.
-    Exactly which properties are gained in which contexts will be left for future research, but it seems reasonable that there will be benefits around censorship resistance, reduced proof sizes, DoS mitigation, and more.
+    Exactly which properties are gained in which contexts will be left for future research, but I'd expect there to be benefits around censorship resistance, reduced proof sizes, DoS mitigation, and more.
 }
 Participating dapp-chains would know the chain-tips for all the other participating dapp-chains, so SPV-esq proofs between those chains are roughly halved in size.
 
@@ -40,7 +40,8 @@ Given that we just discussed how existing blockchain clients can be modified to 
 If the answer is \emph{nothing}, then it's self-evident that this is a path to take \UT{} from $O(c^3)$ capacity to $O(c^4)$ capacity --- that is, \UT{2} $\to$ \UT{3}.
 There may, of course, be more adjustments that need to be made depending on the PoS protocol.
 But, if the protocol is secure in isolation, then it's hard to see how adding thermodynamic security via one-way PoR with a simplex-chain would \emph{necessarily} be somehow incompatible or problematic.
+In general, if some $O(c^x)$ scaling method works for a traditional blockchain, then combining it with \UT{} results in an $O(c^{2+x})$ scalable network.
 
 It's worth noting that this technique only works in one direction: \UT{} can accommodate other chains (as dapp-chains), but other chains cannot accommodate \UT{} in the same way.
-If a sharded chain were adapted such that each shared were part of a simplex, then either overall capacity decreases due to PoR overhead, or the chain hosting the shards is redundant and we just end up with an implementation of \UT{}.
+If a sharded chain were adapted such that each shard were part of a simplex, then either overall capacity decreases due to PoR overhead, or the chain hosting the shards is redundant and we just end up with an implementation of \UT{}.
 This is yet another asymmetry between \UT{} and traditional blockchains.
