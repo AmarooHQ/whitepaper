@@ -22,14 +22,12 @@ So, there must be a capacity maxima with more than 2 simplex-chains and fewer th
 
 What we're observing is that the overall capacity is the \emph{product} of the size of the simplex (in chains) and each chain's remaining capacity --- a quadratic relationship.
 
-\mk{Change back to $t$ and $r$ if no good reason to change them. If there is a good reason, $\Theta_t$ is kinda ugly. we can probably pick a better symbol.}
-
-Let's call the proportion of capacity for transactions $\Theta_t$, and the proportion for reflections $\Theta_r$.
-We know that $\Theta_t + \Theta_r = 1$, since $\Theta_t+\Theta_r$ is 100\% of a chain's capacity.
-However, the \emph{network-wide} capacity is proportional to the \emph{product} of $\Theta_t$ and $\Theta_r$.
-Maximizing $\Theta_t \Theta_r$ suggests that a chain's capacity should be split approximately 50/50 between $\Theta_t$ and $\Theta_r$, so $\Theta_t=\Theta_r=\half=O(1)$.
-Given that $\Theta_t$ and $\Theta_r$ are proportions of the capacity, we can say $\Theta_t O(c) + \Theta_r O(c) = O(c)$.
-Thus, the overall capacity is given by $\Theta_t O(c) \cdot \Theta_r O(c) = O(c^2)$.
+Let's call the proportion of capacity for transactions $t$, and the proportion for reflections $r$.
+We know that $t + r = 1$, since $t+r$ is 100\% of a chain's capacity.
+However, the \emph{network-wide} capacity is proportional to the \emph{product} of $t$ and $r$.
+Maximizing $t r$ suggests that a chain's capacity should be split approximately 50/50 between $t$ and $r$, so $t=r=\half=O(1)$.
+Given that $t$ and $r$ are proportions of the capacity, we can say $O(ct) + O(cr) = O(c)$.
+Thus, the overall capacity is given by $O(ct) \cdot O(cr) = O(c^2)$.
 
 This relationship is analogous to the relationship between a rectangle's maximum area for a given perimeter length: the area scales with the square of the perimeter (and such a rectangle is a square).
 

@@ -347,7 +347,7 @@ def table_row_compare_inner_all(params: CompareParams):
         'bitcoin': [fp, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps'], r['btc_confirmation_rate'], r['btc_t1'], 1, 'delta_s', 'full_node_delta_s', 'time_to_sync_5yr_chain'],
         # Cardano doesn't use sharding
         'cardano': [fp, r['btc_n_2_factor'], r['btc_tps_per_basechain'], r['btc_tps'], r['btc_confirmation_rate'], r['btc_t1'], 1, 'delta_s', 'full_node_delta_s', 'time_to_sync_5yr_chain'],
-        # Shareded cardano
+        # Sharded cardano
         # 'cardano': [fp,  r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2']],
         'polkadot': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2'], 1, 'delta_s', 'full_node_delta_s', 'time_to_sync_5yr_chain'],
         'eth2': [fp, r['eth2_n_2_factor'], r['eth2_tps'], r['eth2_tps'], r['btc_confirmation_rate'], r['eth2_t2'], 1, 'delta_s', 'full_node_delta_s', 'time_to_sync_5yr_chain'],
