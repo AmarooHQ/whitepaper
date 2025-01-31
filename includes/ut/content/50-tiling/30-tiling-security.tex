@@ -60,7 +60,7 @@ Additionally, the core is where the vast majority of chain-work is done.
 
 \label{sec:tree-tiling-security-architecture}
 
-\todoDraftOnly{answer Qs like what a doublespend looks like}
+% \todoDraftOnly{answer Qs like what a doublespend looks like}
 
 The literal keystone of our tiling is the root tile.
 Most of the network's total chain-work will be produced by chains in the root tile.
@@ -92,7 +92,8 @@ The purpose of this design is to enable the following argument for $O(n)$ securi
 
 Since each tile has $v-1$ children, we will let $u = v-1$ for convenience.
 
-\pz{Should $\mathcal{M}$ and $r$ be correlated?}
+% \pz{Should $\mathcal{M}$ and $r$ be correlated?}
+% mk: not really, but there are better and worse configurations. We can't put them in some algebraic relationship though without more context.
 We will limit each tile's maximum tile-work production, measured against the unit tile, using the following rules:
 \begin{enumerate}
     \item The root tile produces at least \Mroot units of tile-work ($\Mroot \ge 1$; \Mroot stands for ``multiplier'').
@@ -133,18 +134,21 @@ The sum ($S$) of all work over the tiling is thus:
 
 \subsubsubsection{Doublespend Requirements}
 
-\todoDraftOnly{Finalise the double spend requirements in tiling}
+A traditional PoW blockchain is secure against an attacker with less than 50\% of the network hash rate.
+In terms of $p$ and $q$, this threshold is $q < 0.5$.
 
-relax security of network very slightly --- still $O(n)$ though.
-instead of resisting an attacker with up to 50\% of the network-wide hash-rate, we'll require that an attacker only have 49.5\%, instead.
+While we maintained this threshold for simplexes, we will relax is very slightly for tiling.
+Instead of $q < 0.5$, we will pick a threshold that is very close, but slightly lower.
+This leaves some wiggle room for us to use PoW in other tiles (outside the core) without weakening the network in a significant way.
+Choosing $q < 0.495$ (half of 99\%) is somewhat arbitrary -- in that we don't have a reason to choose it over 0.496 or 0.494 -- but it meets our other goals and gives us a nice round number (99\%) for the proportion of work done in the core.
 
-For the purpose of this paper, it is assumed that: \UTinf{} being secure against as attacker with $q \le 0.495$ counts as $O(n)$ secure. ($q \le 0.495$ is \emph{good enough}.)
+For the purpose of this paper, it is assumed that: \UTinf{} being secure against as attacker with $q \le 0.495$ counts as $O(n)$ secure. (That is: $q \le 0.495$ is \emph{good enough}.)
 
 \subsubsection{Analysis Method}
 
-\mk{Note: this section is in draft.}
+% \mk{Note: this section is in draft.}
 
-\todoDraftOnly{Finalise the tiling analysis section}
+% \todoDraftOnly{Finalise the tiling analysis section}
 
 How can we analyze the security of tree-tilings?
 
@@ -233,6 +237,7 @@ Thus, the core is secure when:
 
 This is our first bound on $r$.
 If $u = 2$, $\Mroot = 8$, and $q = 0.495$, then $r > 8$.
+Therefore, the hash-rate dedicated to the root tile is $\sim 64 \times$ that of its immediate children.
 
 % \subsubsubsection{Self Severance}
 
@@ -253,7 +258,37 @@ If $u = 2$, $\Mroot = 8$, and $q = 0.495$, then $r > 8$.
 %     ]
 % \end{forest}
 
+\subsubsection{Limiting the Number of Children of the Root Tile}
+
+Earlier, we limited the number of children of the root tile (in a tree-tiling) to $v-1$.
+This means we can fit twice as many chains in the root tile, and so the hash-rate of the root tile is spread over twice as many chains, and the confirmation rate is doubled (excluding confirmations from external reflections).
+
 \subsubsection{Security Propagation Speed / Finalization}
+
+\label{sec:tiling-security-propagation}
+
+Typically, ``finalization'' refers to a breakpoint whereafter it is practically impossible to revert a transaction.
+
+As we saw in \autoref{sec:recursive-por-multi-path}, PoR paths form quickly between tiles.
+Particularly, this depends on the number of chains in each tile, $N_1 (v+1)^{-1}$, and the block period.
+
+How long does it take for a block in some tile to be secured by the root tile?
+
+When a block in a tile is produced, miners in the parent tile will reflect it after some propagation delay, $\phi$.
+The expected waiting time is the propagation delay plus the expected time between blocks (of any chain) in the parent tile.
+After any block in the parent tile has reflected the first block, this process repeats for the parent tile and its parent (i.e., the grandparent of the original tile).
+Eventually, we reach the root tile, and the reflections begin to propagate back down towards the original tile.
+(Of course, the reflections propagate in all directions, but we are only concerned with the first path to form between the original tile and the root tile.)
+We can thus express the expected waiting time until the first recursive PoR with the root tile forms as:
+\begin{align}
+    & \;\;\;\; \Big( \frac{v+1}{N_1 B_f} + \phi \Big) (2d-2) + \Big( \frac{v+1}{2 N_1 B_f} + \phi \Big) \nonumber \\
+    & = \frac{(v+1)(4d - 3)}{2 N_1 B_f} + \phi(2d - 1)
+        \label{eq:tiling-finalization-delay}
+\end{align}
+Ignoring $\phi$ makes it easy to see how fast this is: given $v = 3$, $d = 10$, $N_1 = 200$ chains, and $B_f = \nicefrac{1}{15}$ Hz, we can expect a recursive PoR to be available approximately 5.5 seconds after a block is produced.
+$d = 10$ implies that the tiling has at least 10 layers.
+How large exactly is such a tiling?
+
 
 \subsection{Scaling Complexity}
 

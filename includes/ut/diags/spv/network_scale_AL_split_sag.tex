@@ -92,7 +92,7 @@
     \node (BL1) at (BR -| hruleL) {};
 
     \draw [braceUnder] (BL1) -- node (complexity1) [lb, bigText] {$O(c)$ \\ PoR Graph} (divPointB);
-    \draw [braceUnder] (divPointB) -- node (complexity2) [lb, bigText] {$O(c^2)$ \\ Blockchain State} (BR);
+    \draw [braceUnder] (divPointB) -- node (complexity2) [lb, bigText] {$O(c^2)$ \\ Blockchain States} (BR);
     \draw [stealth-stealth] (complexity1) -- node [label] {Decoupled \\ Progression} (complexity2);
 
     % \draw [braceLeft] (a3.north west) -- node [label, anchor=south, rotate=90] {DA Consensus\\} (a4.south west);
