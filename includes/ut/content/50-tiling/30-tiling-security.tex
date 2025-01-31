@@ -56,14 +56,6 @@ Additionally, the core is where the vast majority of chain-work is done.
 %     \item Once a recursive PoR for some \cR block becomes available, \cL blocks can add that \cR block's weight to their own chain-weight.
 % \end{itemize}
 
-\begin{draftonly}
-
-\subsubsubsection{Excess Capacity in Proof of Work}
-
-\todo{this should probs go in practical considerations --- that's where +T is introduced.}
-
-\end{draftonly}
-
 \subsubsection{Security Architecture}
 
 \label{sec:tree-tiling-security-architecture}
@@ -71,7 +63,7 @@ Additionally, the core is where the vast majority of chain-work is done.
 \todoDraftOnly{answer Qs like what a doublespend looks like}
 
 The literal keystone of our tiling is the root tile.
-More than half of the network's total chain-work will be produced by chains in the root tile.
+Most of the network's total chain-work will be produced by chains in the root tile.
 We'll guarantee this for $d \ge 1$ via the RAA by enforcing an \emph{upper limit} on each tile's tile-work.\footnote{
     This also means that we're only considering the PoR context of a single root token.
 }

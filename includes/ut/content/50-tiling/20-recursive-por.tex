@@ -3,8 +3,6 @@
 
 \label{sec:recursive-por}
 
-\mk{Maybe recursive PoR stuff should be moved to the PoR section, but that doesn't feel right b/c we don't use it before now (besides dapp-chains but that's trivial).}
-
 %Part of our security architecture will be the idea of \emph{recursive PoR}.
 
 So far, we've defined the `shape' of our tiling, but we don't know much about whether it is (or even can be) secure.
@@ -15,7 +13,7 @@ Recursive PoR provides the foundation that we need to answer those questions and
 
 Let us begin with the simplest case of recursive PoR: 3 chains that do not form a simplex.
 
-\subsubsection{Simple Recursive PoR: $\cL \lrar \cM \lrar \cR$}
+\subsubsection{Simple Recursive PoR: \titlemath{$\cL \lrar \cM \lrar \cR$}{L ↔ M ↔ R}}
 
 Say we have three chains: \cL, \cM, and \cR.
 They are doing mutual reflection like this: $\xymatrix@C=.85em@M=0em{{\cL} \; \ar@{<->}[r] & \; {\cM} \; \ar@{<->}[r] & \;{\cR}}$.
@@ -43,7 +41,10 @@ Case 2: However, if \cR's local chain-work is small (say, $\nicefrac13$ that of 
 Thus, \cM is not substantially harder to attack than \cL, and an attacker could attack both \cL and \cM simultaneously (optionally, \cR too).
 But, \cR \emph{is} substantially easier to attack than either \cM or \cL.
 The total chain-work that \cR takes into account is only $\nicefrac4{13}$ that of the whole network.
-So, this case is \emph{also} not $O(n)$ secure, even though \cL \emph{is} $O(n)$ secure.
+So, this case is \emph{also} not $O(n)$ secure, even though \cL \emph{is} $O(n)$ secure.\footnote{
+    \cL is secured by $\nicefrac{12}{13}$ of the network.
+    While that is less than 100\%, it is not substantially easier to attack than \cM, so, arguably, the security of \cL and \cM is of the same order.
+}
 
 These two problem cases are what recursive PoR solves.
 
@@ -180,7 +181,7 @@ Consider this alternative case:
         & & \BMtwo1 \arff[lu] & & & \BMtwo2 \arf[llu] \\
     }
 \end{equation*}
-In this case, \cL is implicitly reflected in \BR{2}, and \BL{3} has two possible recursive PoRs of this: \BL{1} via \BMtwo1; and \BL{} via \BMone1.
+In this case, multiple \cL blocks are implicitly reflected in \BR{2}, and \BL{3} has two possible recursive PoRs of this: \BL{1} via \BMtwo1; and \BL{} via \BMone1.
 Are both valid?
 Is either preferable?
 If \BL{3} includes the full weight of \BR{2} in its chain-weight, then what happens when \BL{4} is mined and the other two PoR paths via \BMtwo2 become available?
@@ -243,10 +244,15 @@ That configuration would look like this:
         & \cMtwo \ar@{<->}[r] \ar@{<->}[uur] & \cRtwo \ar@{<->}[uul]
     }
 \end{equation*}
-In general, for a recursive PoR of length $2d-1$, where each reflection could be provided by $N_1 v^{-1}$ possible chains, the expected latency of draft reflected work is ${N_1}^{-1} v (2d-1)$ block periods.
+In general, for a recursive PoR of length $2d-1$, where each reflection could be provided by $N_1 (v+1)^{-1}$ possible chains, the expected latency of draft reflected work is ${N_1}^{-1} (v+1) (2d-1)$ block periods.
 This is directly relevant to how fast work propagates within a tiling.
 
-Note that, for a standalone simplex, we can see that $2d-1 = 1$ (each PoR is of length 1), and $v=1$ (there is no tiling), so the expected latency of draft reflected work is ${N_1}^{-1}$ block periods, which, in seconds, is $(N_1 B_f)^{-1} = {\Cprime}^{-1}$.
+Note that, for a standalone simplex, we can see that $2d-1 = 1$ (each PoR is of length 1), and $v=0$ (there is no tiling), so the expected latency of draft reflected work is ${N_1}^{-1}$ block periods, which, in seconds, is $(N_1 B_f)^{-1} = {\Cprime}^{-1}$ (as expected).
+
+For a leaf tile at $d=3$ where each tile has 5 chains and $v=3$, as in \autoref{fig:binary-tree-tiling-d3}, the expected latency is 1 block period.\footnote{
+    Note: $N_1 = 20$ in this example, and $N_1 = 200$ in the next.
+}
+If, instead, each tile had 50 chains, the expected latency is 0.1 block periods.
 
 % \begin{itemize}
 %     \item no --- it's enough to know that, when all PoR paths exist, the full weight is okay
@@ -315,14 +321,16 @@ Note that, for a standalone simplex, we can see that $2d-1 = 1$ (each PoR is of 
 
 \subsubsection{Data Availability}
 
-\mk{**** Essence: UT solves issues of consensus at scale --- problem replaced with new problem: data availability at scale. this is easy though b/c data can just be downloaded and doesn't require processing. so it's just a problem of bandwidth, not CPU or long-term overhead.}
 
-\subsubsection{Future Research}
 
-There are some future areas of research that may improve this process, too.
-For example: along the lines of NIPoPoWs\footnote{
-    Non-Interactive Proofs of Proof-of-Work (NIPoPoWs), see \citeNIPoPoWsFull.
-}, are \emph{Non-Interactive Proofs of Proof-of-Work Reflections} (NIPoPoWRs) possible?
+% \mk{**** Essence: UT solves issues of consensus at scale --- problem replaced with new problem: data availability at scale. this is easy though b/c data can just be downloaded and doesn't require processing. so it's just a problem of bandwidth, not CPU or long-term overhead.}
+
+% \subsubsection{Future Research}
+
+% There are some future areas of research that may improve this process, too.
+% For example: along the lines of NIPoPoWs\footnote{
+%     Non-Interactive Proofs of Proof-of-Work (NIPoPoWs), see \citeNIPoPoWsFull.
+% }, are \emph{Non-Interactive Proofs of Proof-of-Work Reflections} (NIPoPoWRs) possible?
 
 % \subsubsection{Principles of PoR}
 
