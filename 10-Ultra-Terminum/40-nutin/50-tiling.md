@@ -1,23 +1,6 @@
 %% BEGIN ### RELEASE
 
-\section{\titlemath{$\text{UT}_{\aleph}$:}{UT-aleph:} Tiling Simplexes}
-
-\label{sec:tiling}
-
-\draftOnly{\mk{This section (\autoref{sec:tiling}) is being redrafted. It replaces \autoref{sec:tiling-old}}}
-
-\assignedTODO{{Max+Pouriya+Chris}}{h}{{
-    TILING: All three to discuss what needs to be in section.\\
-    Chris and Pouriya to pull together missing parts / refine.\\
-    Max to finish off writing.\\
-    Chris and Pouriya to do review after done.
-}}
-
-\input{50-tiling/00-tiling-intro.tex}
-\input{50-tiling/10-simplex-tilings.tex}
-\input{50-tiling/20-recursive-por.tex}
-\input{50-tiling/30-tiling-security.tex}
-\input{50-tiling/80-future-work.tex}
+\input{50-tiling/00-tiling-all}
 
 %% END ### RELEASE
 
