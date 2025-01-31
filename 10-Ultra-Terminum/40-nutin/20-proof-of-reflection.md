@@ -356,6 +356,7 @@ So now we have L-blocks, R-blocks, coins, and L-hashes and R-hashes.
 
 Let's consider Chain \cL, and give some of these properties variables: $L_f$ (L-blocks/s) for block frequency, $L_r$ (L-coins/L-block) for the block reward, and $L_d$ (L-hashes/L-block) --- the difficulty. We can multiply combinations of these to get new units: $L_f \cdot L_d$ gives us L-hashes/s; $L_f \cdot L_r$ gives L-coins/s, and $\nicefrac{L_d}{L_r}$ gives us \textbf{L-hashes/L-coin}.
 
+\pz{Check syntax of this paragraph: comma before "And" and "to Chain L's above".}
 Now, let's add that exchange rate: $X_{R\rightarrow L}$ (L-coins/R-coin).
 And some variables for Chain \cR which correspond to Chain \cL's above: $R_f$, $R_r$, and $R_d$.
 There's a symmetry between chains \cL and \cR, so we already know that $\nicefrac{R_d}{R_r}$ gives us R-hashes/R-coin.
@@ -637,6 +638,7 @@ DAA's typically work like this: calculate a \emph{ratio} by which to adjust (mul
 Bitcoin, for example, adjusts its difficulty every 2016 blocks.\footnote{
   Note: in Bitcoin, a difficulty of 1 corresponds to $2^{32}$ hashes.
 }
+\pz{The following sentence computes a ratio equal to $D_\text{prev}\frac{\Delta t_\text{actual}}{\Delta t_\text{target}}$. This implies that if actual duration for 2016 is faster, then difficulty will decrease whereas it should increase.}
 A ratio is found by multiplying the previous difficulty ($D_\text{prev}$) by the actual duration ($\Delta t_\text{actual}$) of the last 2016 blocks and dividing by the target duration ($\Delta t_\text{target}$) for 2016 blocks.\footnote{
   Note: in practice the ratio is clamped between $\nicefrac{1}{4}$ and $4$. See Bitcoin's \href{https://github.com/bitcoin/bitcoin/blob/7fcf53f7b4524572d1d0c9a5fdc388e87eb02416/src/pow.cpp\#L49-L72}{\texttt{src/pow.cpp}} for the implementation.
 }
