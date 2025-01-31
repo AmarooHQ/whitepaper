@@ -39,6 +39,7 @@ Note that \autoref{alg:por-reflected-block-weight} integrates the cap on weight 
 %% SIMPLEX
 
 \input{includes/ut/headings/25-the-simplex.tex}
+\label{sec:the-simplex}
 
 \begin{figure}[H]
     \begin{subfigure}{.31\linewidth}
@@ -67,8 +68,6 @@ Note that \autoref{alg:por-reflected-block-weight} integrates the cap on weight 
     \caption[Simplexes of increasing capacity.]{Simplexes of increasing capacity. Vertices are simplex-chains. Edges are the reflections between simplex-chains.}
     \label{fig:simplexes}
 \end{figure}
-
-\label{sec:the-simplex}
 
 \defineTermTex{Simplex}{The single coherent structure that emerges from a collection of blockchains that mutually reflect each other}
 
