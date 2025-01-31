@@ -105,7 +105,6 @@ N_2 = \frac{k_1}{D_f \cdot D_h}
 NB: For blockchains of this design: $N_1 = 1$.
 
 If each nested chain has a throughput capacity of $k_2$ B/s, then:
-\pz{$k$ not defined and why $k_1 = k_2$?}
 \begin{equation}
 \label{eq:t2-for-c2-traditional}
 \begin{split}
