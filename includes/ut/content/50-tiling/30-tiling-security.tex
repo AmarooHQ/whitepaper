@@ -287,8 +287,11 @@ We can thus express the expected waiting time until the first recursive PoR with
 \end{align}
 Ignoring $\phi$ makes it easy to see how fast this is: given $v = 3$, $d = 10$, $N_1 = 200$ chains, and $B_f = \nicefrac{1}{15}$ Hz, we can expect a recursive PoR to be available approximately 5.5 seconds after a block is produced.
 $d = 10$ implies that the tiling has at least 10 layers.
-How large exactly is such a tiling?
-
+Such a tiling has $\ge 1024$ \emph{tiles}.\footnote{
+    The tiling needs at least 1 node at $d=10$, so we assume $d=9$ is full.
+    In a full binary tree down to a depth of 9, there are $2^{10} - 1$ nodes.
+    $2^{10} - 1 + 1 = 1024$.
+}
 
 \subsection{Scaling Complexity}
 
