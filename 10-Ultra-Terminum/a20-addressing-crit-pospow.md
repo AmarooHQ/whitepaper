@@ -80,7 +80,7 @@ The hybrid \emph{context} that UT provides[^hybrid-context] is different to the 
   This means that it is always cheaper to do a hashrate rental attack against a pow/pos hybrid than against a normal pow blockchain.
 }[Zack Hess; \href{https://github.com/zack-bitcoin/amoveo-docs/blob/9a4ffa2e800c24772fd68e1f745b6a14967e59c2/other_blockchains/pow_pos_hybrid.md}{PoW/PoS Hybrid Consensus Mechanisms}]
 
-UT has two main complicating factors: simplex-chains are DAGs instead of trees (see \autoref{sec:dos-and-dags}), and the contribution of a chain's security contribution is capped via chain-work conversion (see \autoref{sec:reflection-pow-and-pos} and \autoref{sec:generalizing-reflection}). These answers assume that the the PoS method is DAG-compatible, that PoS validators can choose when to produce a block, and that (todo)
+UT has two main complicating factors: simplex-chains are DAGs instead of trees (see \autoref{sec:dos-and-dags}), and the contribution of a chain's security contribution is capped via chain-work conversion (see \autoref{sec:reflection-pow-and-pos} and \autoref{sec:generalizing-reflection}). These answers assume that the PoS method is DAG-compatible, that PoS validators can choose when to produce a block, and that (todo)
 
 \q{
     Increasing PoS participation, or increasing hashpower, can only have a positive influence on the weight of that subchain. (We will use proof by contradiction to show that this supposition is false.)
