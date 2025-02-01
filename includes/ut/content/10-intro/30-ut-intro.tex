@@ -33,9 +33,10 @@ Practically, there is little difference between a single blockchain and the simp
 \emph{Proof of Reflection} allows each simplex-chain, and each hosted dapp-chain, to do efficient SPV proofs regarding state-entries on other simplex-chains or dapp-chains.
 This allows for the creation of rich cross-chain functionality, such as the ability to use a single network-level token across all simplex-chains and dapp-chains.
 
-Although SPV proofs can be hundreds of bytes long, UT is structured so that their length does not significantly impact scalability.\footnote{
-    Also, verkle trees can replace merkle trees --- this reduces proof costs (approximately) by $5 \text{ to } 10 \times$.
-}
+Although SPV proofs can be hundreds of bytes long, UT is structured so that their length does not significantly impact scalability.
+%\footnote{
+%    Also, verkle trees can replace merkle trees --- this reduces proof costs (approximately) by $5 \text{ to } 10 \times$.
+%}
 UT does this by prioritizing a clean and simple protocol for simplex-chains, and allowing dapp-chains the freedom to implement whatever state- and transaction-protocols are suitable for the application in question.
 This means that complex or inefficient data-structures for a dapp-chain's state do not impact the network globally, preventing bottlenecks in foundational components.
 
