@@ -107,6 +107,8 @@ This process continues until all tiles are under their respective limits.
 
 \subsubsubsection{Total Work Across a Tiling}
 
+\label{sec:total-work-over-tiling}
+
 % https://www.desmos.com/calculator/nku2g8qxmy
 % https://www.desmos.com/calculator/vxp5spzr4q
 
@@ -142,9 +144,9 @@ Instead of $q < 0.5$, we will pick a threshold that is very close, but slightly 
 This leaves some wiggle room for us to use PoW in other tiles (outside the core) without weakening the network in a significant way.
 Choosing $q < 0.495$ (half of 99\%) is somewhat arbitrary -- in that we don't have a reason to choose it over 0.496 or 0.494 -- but it meets our other goals and gives us a nice round number (99\%) for the proportion of work done in the core.
 
-For the purpose of this paper, it is assumed that: \UTinf{} being secure against as attacker with $q \le 0.495$ counts as $O(n)$ secure. (That is: $q \le 0.495$ is \emph{good enough}.)
+For the purpose of this paper, it is assumed that: \UTinf{} being secure against as attacker with $q < 0.495$ counts as $O(n)$ secure. (That is: $q < 0.495$ is \emph{good enough}.)
 
-\subsubsection{Analysis Method}
+\subsubsection{Analysis}
 
 % \mk{Note: this section is in draft.}
 
@@ -158,40 +160,39 @@ The value of $q$ that we choose will determine how difficult the root tile is to
 The cases that we analyze will cover all possible positions of a tile in the tiling.
 
 The primary case for us to analyze is that the root tile is secure against an attacker with $q$ proportion of the network-wide hash-rate.
+Additionally, we need to figure out when a tile (or branch) could be severed from the tiling.
 
+% We need to consider cases where the majority of tile-work \emph{for specific tiles} is produced by an attacker.
+% We'll call this a \emph{majority-malicious} tile.
 
+% Analyze cases, if we can satisfy all of them then we should be good:
+% \begin{itemize}
+%     \item core is almost as secure as the whole network: $(\Mroot + ur^{-1}) > 2qS$
+%     \item tile can't sever it's children
+%     \item tile can't self-sever
+% \end{itemize}
+% Use as recursive cases to show that every tile is $O(n)$ secure.
 
-We need to consider cases where the majority of tile-work \emph{for specific tiles} is produced by an attacker.
-We'll call this a \emph{majority-malicious} tile.
+% \subsubsubsection{Assumptions}
 
-Analyze cases, if we can satisfy all of them then we should be good:
-\begin{itemize}
-    \item core is almost as secure as the whole network: $(\Mroot + ur^{-1}) > 2qS$
-    \item tile can't sever it's children
-    \item tile can't self-sever
-\end{itemize}
-Use as recursive cases to show that every tile is $O(n)$ secure.
+% \begin{itemize}
+%     \item security of tile works like that of a simplex
+%     \item able to apply logic recursively
+% \end{itemize}
 
-\subsubsubsection{Assumptions}
+% \subsubsubsection{Additional Imposed Requirements}
 
-\begin{itemize}
-    \item security of tile works like that of a simplex
-    \item able to apply logic recursively
-\end{itemize}
+% \subsubsection{Security Criteria for Specific Cases}
 
-\subsubsubsection{Additional Imposed Requirements}
+% what are the cases?
+% what are their criteria?
 
-\subsubsection{Security Criteria for Specific Cases}
+% \subsubsection{Security Evaluation of Specific Cases}
 
-what are the cases?
-what are their criteria?
-
-\subsubsection{Security Evaluation of Specific Cases}
-
-\begin{itemize}
-    \item $r>u$
-    \item \dots
-\end{itemize}
+% \begin{itemize}
+%     \item $r>u$
+%     \item \dots
+% \end{itemize}
 
 \subsubsubsection{The Core is (Almost) as Secure as the Network}
 
@@ -258,15 +259,13 @@ Therefore, the hash-rate dedicated to the root tile is $\sim 64 \times$ that of 
 %     ]
 % \end{forest}
 
-\subsubsection{Limiting the Number of Children of the Root Tile}
+\subsubsubsubsection{Limiting the Number of Children of the Root Tile}
 
 Earlier, we limited the number of children of the root tile (in a tree-tiling) to $v-1$.
 This means we can fit twice as many chains in the root tile, and so the hash-rate of the root tile is spread over twice as many chains, and the confirmation rate is doubled (excluding confirmations from external reflections).
-
-\mk{should probs expand this bit}
+It also means that hash-rate is less spread out over the tiling, and that we can keep the method used above and in \autoref{sec:total-work-over-tiling} relatively simple.
 
 \subsubsection{Security Propagation Speed / Finalization}
-
 \label{sec:tiling-security-propagation}
 
 Typically, ``finalization'' refers to a breakpoint whereafter it is practically impossible to revert a transaction.
