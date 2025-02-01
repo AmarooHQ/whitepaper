@@ -79,7 +79,6 @@ The *throughput*, $T_1$, of an $O(c)$ chain is equivalent to its raw throughput:
 T_1 = k_1
 \end{equation*}
 
-\pz{Isn't "The complexity order of the network" equal to $O(n)$ by definition?}
 The complexity order of the network is given by $O(T_1) = O(k_1) = O(c)$ as expected.
 
 Care should be taken to account for protocol extensions like *Segregated Witness* that effectively reduce the size of transactions (in SegWit's case, by $\sim \nicefrac{1}{4}$).
@@ -106,6 +105,7 @@ N_2 = \frac{k_1}{D_f \cdot D_h}
 NB: For blockchains of this design: $N_1 = 1$.
 
 If each nested chain has a throughput capacity of $k_2$ B/s, then:
+\pz{$k$ not defined and why $k_1 = k_2$?}
 \begin{equation}
 \label{eq:t2-for-c2-traditional}
 \begin{split}
@@ -394,7 +394,6 @@ $Tx_{avg}$: average tx size (bytes)
 
 NB: For the purposes of \autoref{table:tps} and on, the average transaction size is taken to be 250 bytes.
 
-\pz{In the table, rename columns named $O(c)$ and $O(c^2).$}
 %% INSERT ### TABLE: tps
 
 : A comparison of the maximum theoretical transaction throughput (transactions per second; TPS) with parameters $k$, $B_f$, $B_h$ for $O(c)$, Sharded $O(c^2)$ and the different $\UT{\text{+OP}}$ scaling configurations. Note that the \emph{Sharded $O(c^2)$} column is the theoretical optimal limit for sharded systems where all headers are recorded in the base-chain.
@@ -440,7 +439,6 @@ Practically, this effect means that a decrease to the size of headers has *incre
 \autoref{table:compare_optimizations_a} and \autoref{table:compare_optimizations_b} show a comparison between UT variants.
 For comparisons over a range of parameters, see \autoref{sec:ut-variant-complexities}.
 
-\pz{For the four tables below, add some short description to make interpretation of the table unambiguous. For instance, if the main focus is TPS, move the corresponding column at the end and mention or make it bold.}
 %% INSERT ### TABLE: compare_optimizations_a
 
 : Comparison of UT variants' capacities with parameters: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$; $B_h = 84$ bytes; 250 byte transactions.

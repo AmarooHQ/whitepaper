@@ -146,16 +146,9 @@ Let's test the Confirmation Equivalence Conjecture.
 
 The hypothesis is that: doublespends against an \emph{individual simplex-chain} in an $N$-chain simplex after $\mathcal{C}$ \emph{local} confirmations are \emph{as hard} as doublespends against a traditional blockchain after $\mathcal{C}\cdot N$ confirmations.
 
-\pz{c and m have not been defined. Also, we use the same letter for local computation power and confirmations.}
-First, define $P(q; c)$, where $c$ is the number of confirmations and $q$ is the proportion of global hash rate controlled by the attacker, to be the function that returns the probability of an attempted doublespend succeeding on a traditional blockchain according to Rosenfeld's analytical solution\footnote{
+First, define $P(q; c)$, where $c$ is the number of confirmations and $q$ is the proportion of global hash-rate controlled by the attacker, to be the function that returns the probability of an attempted doublespend succeeding on a traditional blockchain according to Rosenfeld's analytical solution\footnote{
     \citeAHBDSFull
 }:
-\pz{
-  Unclear if $\{1, 2, \dots\}$ is finite or infinite.\\
-  -------\\
-  Chris: do we define $m$ if only used as part of the $\Sigma$, counting from $m=0$ to $c$;
-}
-
 
 \begin{equation}
   \forall c \in \{1, 2, \dots\}: P(q; c) = \begin{cases}
@@ -183,17 +176,11 @@ That is:
   P^\prime(q; c = \mathcal{C}N; N_1 = 1) \approx P^\prime(q; c = \mathcal{C}; N_1 = N)
     \label{eq:por-sim-hypothesis}
 \end{equation}
-\pz{Variable $a$ used in footnote but only defined a posteriori.}
 In fact, we can take this further.
 The relationship that exists is not only at the extremes, but between them too\footnote{
-  Since \nicefrac{$\mathcal{C}$N}{a} in \autoref{eq:cec-extended-hypothesis} is not necessarily an integer, we'll assume there exists a valid generalization of Rosenfeld's solution for $c \in \mathbb{R}_{>0}$.
+  Since \nicefrac{$\mathcal{C}$N}{a}, where $a$ is the number of simplex-chains, in \autoref{eq:cec-extended-hypothesis} is not necessarily an integer, we'll assume there exists a valid generalization of Rosenfeld's solution for $c \in \mathbb{R}_{>0}$.
 } --- it must be if confirmations are equivalent.
 This is the \emph{extended} CEC:
-\cn{
-  Just want to check these equations.\\
-  Is $a$ the number of simplex chains?\\
-  Would that mean that $\mathcal{C}N = \mathcal{C}N_1$?
-}
 % 1 \le x \le N; x \in \{a_i, b_i\}
 % , and $1 \le a_i \le N$, and $1 \le b_i \le N$
 \begin{equation}
@@ -478,7 +465,6 @@ Does the extended CEC hold true, also?
 
 \subsubsubsection{Conclusions}
 
-\pz{The first part of the footnote could be moved as a disclaimer to the beginning of the section. The lack of refuting evidence is also due to the fact that it is not published yet.}
 These results are, for the purpose of this paper, taken to indicate the following statements are true\footnote{
     Experimental results never prove that something is correct, however, they are criticisms of \emph{competing} explanations.
     For example: we see that these experimental results \emph{converge} as expected.
