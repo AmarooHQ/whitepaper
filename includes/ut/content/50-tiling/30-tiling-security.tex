@@ -62,9 +62,9 @@ Additionally, the core is where the vast majority of chain-work is done.
 
 % \todoDraftOnly{answer Qs like what a doublespend looks like}
 
-The literal keystone of our tiling is the root tile.
+The literal keystone of our tiling is the root tile, which is at depth $d = 0$.
 Most of the network's total chain-work will be produced by chains in the root tile.
-We'll guarantee this for $d \ge 1$ via the RAA by enforcing an \emph{upper limit} on each tile's tile-work.\footnote{
+We'll guarantee this for $d \ge 1$ (i.e., all other tiles) via the RAA by enforcing an \emph{upper limit} on each tile's tile-work.\footnote{
     This also means that we're only considering the PoR context of a single root token.
 }
 This upper limit will exponentially decrease as the depth of the tiling increases.
@@ -210,7 +210,7 @@ Thus, the core is secure when:
     (\Mroot r + u)(r-u) &> 2qr((\Mroot -1)(r-u)+r) && \times 2(r-u)
     \label{eq:tree-tiling-safe-r-nofrac}
     \\
-    r &> \frac{u}{2\Mroot}\left( \Mroot - 1 + \sqrt{(\Mroot - 1)^2 + \frac{4\Mroot}{1-2q}} \right) && \text{Solve quadratic and simplify\footnotemark}
+    r &> \frac{u}{2\Mroot}\left( \Mroot - 1 + \sqrt{(\Mroot - 1)^2 + \frac{4\Mroot}{1-2q}} \right) && \text{Solve quadratic \& simplify\footnotemark}
     \label{eq:tree-tiling-safe-r}
     % https://www.wolframalpha.com/input?i=%28My+%2B+x%29%28y-x%29+%3E+2yq%28%28M-1%29%28y-x%29%2By%29%2C+0+%3C%3D+q+%3C%3D+0.5
     % note for above: y=r; x=u
@@ -263,7 +263,40 @@ Therefore, the hash-rate dedicated to the root tile is $\sim 64 \times$ that of 
 
 Earlier, we limited the number of children of the root tile (in a tree-tiling) to $v-1$.
 This means we can fit twice as many chains in the root tile, and so the hash-rate of the root tile is spread over twice as many chains, and the confirmation rate is doubled (excluding confirmations from external reflections).
-It also means that hash-rate is less spread out over the tiling, and that we can keep the method used above and in \autoref{sec:total-work-over-tiling} relatively simple.
+It also means that hash-rate is less spread out over the tiling, and that the method used above and in \autoref{sec:total-work-over-tiling} is relatively simple.
+Finally, it means that we can grow a simplex to \nicefrac{1}{2} of its maximal capacity without committing to any particular details of the tiling scheme (besides the proportion of reflection capacity left for child tiles).
+
+\subsubsubsection{Severing Tiles}
+
+Is it possible to sever a tile from the tiling?
+Tiles outside the core have a very small proportion of the network's hash-rate.
+If all of that tile's miners deliberately censored PoRs with the parent tile, the tile would be severed from the rest of the tiling.
+If one was severed from the rest of the tiling, performing a double-spend might be trivial.
+
+Assuming $r > 2$, $r > u$, and $d \ge 2$, a tile's chain-work is less than half that of its parent.
+As we've seen, the amount of work available to the tile via recursive PoR is much greater.
+Thus, the PoR graph of that tile is easily dominated by any block that can establish recursive PoRs with the core.
+
+Since we're outside the core, the local tile will produce approximately $r^{-d}$ work (in terms of the unit tile), and its children will contribute $ur^{-(d+1)}$ work at most.
+Note that $ur^{-(d+1)} < r^{-d}$.
+By comparison, the work contributed by the parent tile is $\Mroot + r^{-1} + r^{-2} + \cdots + r^{-(d-1)}$.
+Given $\Mroot > 1$, the volume of work contributed via recursive PoRs is at least $\Mroot \nicefrac{r^d}{2} > \Mroot r^{d-1}$ times greater than the work contributed by the tile and its children.
+Therefore, one honest miner in that tiling can prevent severance by producing, at most, 1 block for every $\Mroot r^{d-1}$ blocks produced by the attacker.
+
+If the attacker wishes to avoid this incredible disadvantage, they must attack the parent tile too.
+This continues recursively until the attacker reaches the core, at which point they must attack the entire network.
+
+If an attacker is attempting to sever a child tile instead, the situation is similar, except that their disadvantage is at least a factor of $\Mroot r^{d-2}$ compared to an honest miner.
+
+Given that honest miners have an overwhelming advantage in these situations, we can skip examining both how this interacts with the DAA and RAA, and the opportunity cost to the attacker of attempting such an attack.
+Instead, we'll assume that such an attack is impractical, and leave the analysis for future research.
+
+Regarding doublespends, we can conclude that, while it might be possible to disrupt a tile for a short while, all we have to do is wait for recursive PoRs via the core to thwart the attack.
+
+\subsubsubsection{Analysis Conclusion}
+
+We have established bounds where the tiling is secure against severance attacks and doublespends: \autoref{eq:tree-tiling-safe-r}, $u \ge 2$, $r > u$, and $\Mroot > 1$.
+Practically, values of $u = 2$, $\Mroot = 8$, $r \ge 8$ meet our goals.
 
 \subsubsection{Security Propagation Speed / Finalization}
 \label{sec:tiling-security-propagation}
@@ -294,9 +327,55 @@ Such a tiling has $\ge 1024$ \emph{tiles}.\footnote{
     $2^{10} - 1 + 1 = 1024$.
 }
 
+Alternatively, if we set $\phi = 0.5$, then we'd expect the same recursive PoR to be available in $\sim 15$ seconds (which happens to be 1 block period in this case).
+
+
 \subsection{Scaling Complexity}
 
-\subsubsection{Complexity of the Core}
+
+
+The tiling is an $(v-1)$-ary tree; assuming it is balanced and has a maximum depth of $d$, the number of tiles, $N_{\text{tiles}}$, in the tiling is:
+\begin{equation}
+    N_{\text{tiles}} = \frac{(v-1)^{d+1} - 1}{v - 2}
+\end{equation}
+
+Each tile in the tiling has $N_1 (v + 1)^{-1}$ chains -- except, of course, the root tile which has twice as many.
+Thus, the total number of chains in the tiling is
+\begin{align*}
+    N_{\text{chains}} & = (N_{\text{tiles}} + 1) \frac{N_1}{v + 1} \\
+    & = \frac{N_1 (v-1)^{d+1} - 1}{(v - 2)(v + 1)} + \frac{N_1}{v + 1}
+\end{align*}
+When $v = 3$, we have:
+\begin{equation}
+    N_{\text{chains}} = 2^{d-1} N_1
+\end{equation}
+Clearly, the number of chains depends on how many layers we create, which is determined by demand and systemic constraints.
+
+Assuming the demand for capacity is $O(n)$, and each chain provides $O(c^i)$ capacity (where $i=1$ with no dapp-chains, $i=2$ with 1 level of nesting, etc), we can argue that $O(2^{d-1}) = O(n c^{-i})$.
+
+There is at least one physical constraint that will eventually limit us.
+Assuming all simplex-chains in the tiling use PoW, there will eventually come a layer where we run out of bits to use in the hash.
+If we had, say, 96 bits to work with (assuming a 256 bit hash), then we'd have $\sim (96 - \log_2(\Mroot)) (\log_2(r))^{-1}$ layers to work with.
+
+Given $N_1 = 200$, $\Mroot = 8$, $r = 8$, and $v = 3$, we could support up to $\sim 31$ layers, which is more than $10^{11}$ simplex-chains in total.
+Granted, there are other constraints that we will be limited by.
+
+
+
+
+
+\begin{comment}
+    - core
+        - nb chains: o(c)
+        - throughput: o(c2)
+        - bandwidth: o(c2)
+        - proof sizes: o(c2)?
+    - nb chains: o(n)
+    - throughput: ?
+    - bandwidth: ?
+    - proof sizes
+\end{comment}
+
 
 % \begin{forest}
 %     % rectangle, draw=black, minimum width=6em, minimum height=1.5em,
