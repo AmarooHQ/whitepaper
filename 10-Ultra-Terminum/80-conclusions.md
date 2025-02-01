@@ -9,14 +9,16 @@
 \assignedTODO{{Max}}{h}{Write conclusion}
 
 This paper introduced and constructed Amaroo's consensus mechanism, \emph{Ultra Terminum}, a proof-agnostic cross-chain consensus strategy that addresses the core conflict of Buterin's Trilemma.
-\emph{Ultra Terminum} provides multiple scaling configurations, $\UT{1} (O(c^2))$, $\UT{2} (O(c^3)$, $\UT{3} (O(c^4))$ and a special configuration of tiling UT$_{\aleph}$ $O(n)$.
+\emph{Ultra Terminum} provides multiple scaling configurations, $\UT{1} (O(c^2))$, $\UT{2} (O(c^3))$, $\UT{3} (O(c^4))$ and a special configuration of tiling UT$_{\aleph}$ $O(n)$.
 
 $\UT{}$ leverages existing consensus methods in combination and, by way of construction, adds security to these methods.
 The paper presented the underlying primitive, \emph{Proof of Reflection}, that provides an agnostic way for chains of various proof mechanisms to participate in a collaborative network where chains share security amongst each other.
-This critical piece of collaboration allows $\UT{}$ and Amaroo's network to scale to meet market demand without compromising decentralisation or security.
+This critical piece of collaboration allows $\UT{}$ and Amaroo's network to scale to meet market demand without compromising decentralization or security.
 
 
 ## Comparison: ``The Big 4''
+
+\todoDraftOnly[h]{Move comparison to appendix}
 
 The following comparisons (\autoref{table:compare_nets_3k}, \autoref{table:compare_nets_20k}, and \autoref{table:comparison_1m_tps}) are intended to be an *apples to apples* comparison between UT variants and ``The Big 4'': Bitcoin, Cardano, Eth2, and Polkadot.
 Cardano, as a cutting-edge network, is an exception here: the Cardano/IOHK teams have not been pursuing \emph{Layer 1} scalability solutions and are focusing instead on a \emph{Layer 2} solution: Hydra via EUTXOs.
