@@ -383,6 +383,21 @@ Thus the resulting complexity is
 
 \subsubsection{Bandwidth}
 
+The primary bandwidth constraint on a full node for some chain in some tile is the PoR graphs for each tile between the local tile and the root (inclusive).
+Since we've already established that following the PoR graph of a simplex is an $O(c)$ bandwidth load, the overall bandwidth load is
+\begin{equation*}
+    O(c \log n - c(i+1)\log c) = O(c \log n)
+\end{equation*}
+
+A miner, though, needs to verify the availability of all those blocks -- an $O(c^2)$ bandwidth load per tile.
+Therefore they have an associated bandwidth load of $O(c^2 \log n)$.
+Assuming that we are using network and chain parameters such that the overall bandwidth requirements of a maximal simplex are tolerable (see \autoref{sec:bandwidth-complexity}), it's not out of the question that multiplying by a factor of $O(\log n)$ is also tolerable.
+That said, this will be a constraint at some point if the network grows large enough.
+
+If \emph{every} block from \emph{every} tile is downloaded, then we naturally have an $O(n)$ load.
+However, in smaller tilings we actually \emph{save} bandwidth compared to a maximal simplex of the same capacity.
+This is due to the simplex tiles themselves being smaller and reducing PoR graph overhead.
+So, even though the complexities of a tiling are naturally larger than a maximal simplex, there are configurations that increase overall capacity within the same constraints.
 
 
 \begin{comment}
@@ -397,6 +412,7 @@ Thus the resulting complexity is
     - proof sizes
 \end{comment}
 
+\begin{comment}
 
 % \begin{forest}
 %     % rectangle, draw=black, minimum width=6em, minimum height=1.5em,
@@ -595,3 +611,6 @@ This time, though, the burden is only 2.7 - 4.0 KB per local block.
 \todoDraftOnly{why do $n$-ary tree-tilings?}
 
 \end{draftonly}
+
+
+\end{comment}
