@@ -1,5 +1,7 @@
 %% BEGIN ### RELEASE
 
+\clearpage
+
 # UT Variant Complexities
 
 \label{sec:ut-variant-complexities}

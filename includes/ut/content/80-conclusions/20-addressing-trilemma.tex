@@ -1,0 +1,65 @@
+\subsection{Addressing \emph{Buterin's Trilemma}}
+
+Our journey is coming to a close, and it's time we finally answer the question \emph{Does UT solve the Trilemma?}
+First, let us consider \UT1.
+
+The \emph{decentralization} criterion states that the system must function when each participant has only $O(c)$ resources.
+We codify this with the chain-parameter $k$, a generalization of block size, which we define to be $O(c)$.
+Typically, we've set $k = 3000$ bytes/second since this is close to the real-world value of $k$ for Bitcoin and pre-merge Ethereum, and is therefore, self-evidently, an acceptable value.
+We've also set $k = 20000$ in some tables so that we have an idea of what we could do if we pushed \UT{} further.
+The \AxiomOfAvailability means that miners must download \emph{all} blocks --- an $O(c^2)$ load.
+However, miners do not need to \emph{validate} all blocks, or store them for very long; and these blocks aren't required to synchronize with the PoR graph.
+Therefore, if we fail the decentralization criterion it will be because of bandwidth: $\Delta S$.
+But, what is $\Delta S$?
+Way back in \autoref{sec:a-principle-of-scaling}, I suggested a test for whether \UT1 passes or fails in this sort of situation: is this a bottleneck or is there excess capacity?
+In \autoref{sec:comparison-of-ut-variants} we saw that, when $k = 3000$, reasonable network parameters meant $\Delta S \in [293, 2188]$ kB/s.
+This equates to $\Delta S \in [759, 5184]$ GB/month.
+Currently, Digital Ocean offers\footnote{
+    See \href{https://web.archive.org/web/20250126134024/https://www.digitalocean.com/pricing/droplets}{https://www.digitalocean.com/pricing/droplets}.
+    Note: inbound data is free.
+} a VPS with 5 TiB/month (outbound) for $48.00$ USD.
+By inspection, this is $O(c)$, so, at $k = 3000$, the $\Delta S$ requirements on miners is not a bottleneck.
+Therefore, with appropriate parameters, \UT1 passes the decentralization criterion.
+
+The \emph{security} criterion states that the system must be secure against an attacker with $O(n)$ resources.
+The standard way to check if a PoW system passes this criterion is whether it is resistant to a 51\% attack.
+We saw in \autoref{sec:simplex-security-cec} that \UT1 is indeed secure against a 51\% attack.
+We also saw in \autoref{sec:spv-in-ut} that cross-chain transactions within the simplex were as secure as the network.
+Therefore \UT1 passes the security criterion.
+
+The \emph{scalability} criterion requires that the system can process more than $O(c)$ transactions.
+Given $k = 3000$, $\Sigma \text{TPS}_1 \in [10^3, 8.4\times10^3]$.
+By inspection, 1000 TPS is more than $O(c)$.
+Therefore \UT1 passes the scalability criterion.
+
+Thus \UT1 satisfies all 3 trilemma criteria \emph{as put by Vitalik}.
+
+\aside{
+    At $k = 20000$ B/s, $\Delta S \in [10, 93]$ MB/s, or $\Delta S \in [25, 241]$ TB/month.
+    This is definitely beyond many ordinary users, but would work for miners at some economy of scale.
+    (241 TB costs $\sim 2235$ USD/month\footnote{
+        See \href{https://web.archive.org/web/20250126231118/https://docs.digitalocean.com/platform/billing/bandwidth/}{https://docs.digitalocean.com/platform/billing/bandwidth/}
+    } from Digital Ocean.)
+    Such a simplex would have $N_1 \in [10^3, 10^4]$ chains, and $\Sigma \text{TPS}_1 \in [4\times10^4, 3.8\times10^5]$ TPS.
+}
+
+Second, let's consider \UT2 and \UT3.
+
+\emph{On the assumption} that a secure $O(c)$ PoS chain exists, then using that for dapp-chains provides an $O(c)$ bump to scalability.
+The additional computational burden to a miner or full node is negligible, so \UT2 satisfies the decentralization criterion.
+The security of the simplex isn't affected, and the dapp-chain is more secure than the PoS chain would be in isolation, so \UT2 satisfies the security criterion.
+Since the dapp-chains are PoS, their effective header size will be greater than what is used for the calculations in \autoref{sec:comparison-of-ut-variants}.
+Assuming that the effective header size of dapp-chains is $10\times$ larger (and $k = 3000$, of course), we see that $N_2 \in [5\times10^3, 4\times10^4]$ dapp-chains.
+We also see that $\Sigma \text{TPS}_2 \in [6\times10^4, 5\times10^5]$.
+By inspection, 60,000 TPS is a lot.
+Therefore, \UT2 satisfies all 3 trilemma criteria \emph{as put by Vitalik}.
+
+\emph{On the assumption} that a secure $O(c^2)$ PoS chain exists\dots you know where this is going.
+If \UT3 works, then we're talking millions of TPS at $k = 3000$ B/s.
+
+Share security, and \emph{capacity follows}.
+
+
+\subsubsection{Addressing the stronger version}
+
+In \autoref{subsec:trilemma} I took issue with the scalability criterion and suggested a stronger version: $O(n)$ transactions in $O(1)$ time.

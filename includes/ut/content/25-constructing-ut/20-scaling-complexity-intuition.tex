@@ -35,7 +35,7 @@ Let's say $N_1$ is the number of chains which maximizes a simplex's capacity (fo
 To get a feel for $N_1$, let's estimate it using example chains based on modified Bitcoin parameters.
 
 First, we'll add a merkle root of headers and PoRs to the header, increasing header size from 80 to 112 bytes.
-Second, we'll reduce the block frequency down from 10 minutes to 1 minute, and scale the block limit down from 1 MB to 100 KB (this will give us more realistic numbers).
+Second, we'll reduce the block frequency down from 10 minutes to 1 minute, and scale the block limit down from 1 MB to 100 kB (this will give us more realistic numbers).
 Let's assume the merkle branch leading to a header is 256 bytes, so the total PoR overhead is 368 B / block / chain.
-We want to use 50\% of the overall capacity (100 KB / block) for PoRs, so each block should contain \sim 50 KB worth of PoRs.
+We want to use 50\% of the overall capacity (100 kB / block) for PoRs, so each block should contain \sim 50 kB worth of PoRs.
 Dividing the PoR capacity by the per-chain overhead gives us $N_1 \approx 139$ chains and a network-wide capacity equivalent to \sim 70 Bitcoin networks.

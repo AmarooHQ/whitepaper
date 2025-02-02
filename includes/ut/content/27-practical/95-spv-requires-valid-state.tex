@@ -219,7 +219,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 \dMax{
     True.
     Bulletproofs are one example.
-    The proofs are short-ish, mb like 2-5 KB, but super slow to generate.
+    The proofs are short-ish, mb like 2-5 kB, but super slow to generate.
     Verification time is fine in practice for small proofs, but it's linear with the size of the circuit.
     So they're probably not practical without heavily rate-limiting them.
 }
@@ -242,7 +242,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 \dMax{
     Yeah, there is.
     The cryptographic properties of STARKs are great, but the proof size is definitely an issue.
-    We're talking like 50 KB minimum, and up to 200 KB.
+    We're talking like 50 kB minimum, and up to 200 kB.
     There are other problems, too.
     Like that creating such proofs can take many GB of RAM and that we don't know who'd generate them.
 }
@@ -339,7 +339,7 @@ But, we don't necessarily \emph{need} to replicate \cref{prem:spv-7} if we could
 \dMax{
     We just need the fraud proof to like `pollute' the complete PoR graph.
     That's doable, because the fraud proofs are short, like $O(\log c)$ or something.
-    Maybe like 2 - 5 KB.
+    Maybe like 2 - 5 kB.
 }
 \dMax{
     So we need a new rule.
@@ -2656,8 +2656,8 @@ At first glance, zk-STARKs seem promising: complexity of the proof size is $O(\l
 }
 (The algorithm, $C$, would be the block-verification algorithm including state-transitions.)
 
-However, the \emph{actual} proof size is more like 50 KB in the best case.
-This is problematic unless simplex-chain block sizes are much greater than 50 KB.
+However, the \emph{actual} proof size is more like 50 kB in the best case.
+This is problematic unless simplex-chain block sizes are much greater than 50 kB.
 Realistically, we should expect a single simplex-chain to record and verify many of these proofs --- as many as one for each block in each other simplex-chain.
 There are techniques to help here --- like \emph{recursive} STARKs --- but making the method more complex exacerbates other problems.
 For example: creating a STARK proof is somewhat resource intensive.

@@ -1,5 +1,6 @@
 %% BEGIN ### RELEASE
 
+\clearpage
 \section{Scaling Complexity Analysis of \emph{Ultra Terminum}}
 
 \label{sec:ut-complexity}
@@ -145,7 +146,7 @@ In the case of \emph{Polkadot}, it is \href{https://github.com/AmarooHQ/polkadot
   All-in-all, I guess that 819 B is a bit generous, and (ideally) all claims about existing chains in this paper err on the side of generosity.
 } that a typical minimum of 819 B is used in the \texttt{paraInclusion.candidateBacked} extrinsic (i.e., the transaction type that records parachain headers).
 So, a lower-bound on the effective header size of a parachain is 819 B (this does not include \emph{bitfields}\footnote{
-  Bitfields is a Polkadot term --- it's a list of hundreds of signatures, totalling $> 14$ KB per block on the current Kusama testnet (October $3^{\text{rd}}$ 2021).
+  Bitfields is a Polkadot term --- it's a list of hundreds of signatures, totalling $> 14$ kB per block on the current Kusama testnet (October $3^{\text{rd}}$ 2021).
 }).
 
 In those situations, with regards to these capacity derivations, one can use the \emph{effective} header size as a replacement for the \emph{raw} header size.
@@ -434,6 +435,7 @@ Practically, this effect means that a decrease to the size of headers has *incre
 
 
 \subsection{Comparison of UT Variants}
+\label{sec:comparison-of-ut-variants}
 
 \autoref{table:compare_optimizations_a} and \autoref{table:compare_optimizations_b} show a comparison between UT variants.
 For comparisons over a range of parameters, see \autoref{sec:ut-variant-complexities}.
