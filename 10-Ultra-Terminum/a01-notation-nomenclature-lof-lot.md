@@ -86,6 +86,10 @@ Term & Definition & Reference \\
 
 \listoftables
 
+\newpage
+
+\listofcitation
+
 %%\listofalgorithms
 
 \clearpage

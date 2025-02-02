@@ -1,3 +1,28 @@
+%% Citations list
+\newlistof{citation}{citation}{Key References}
+\newcounter{citationnum}
+
+%% Ignore all the page numbers and dots -- causing the latex
+%% compilation to error.
+\renewcommand{\cftcitationdotsep}{\cftnodots}
+\renewcommand{\cftcitationpresnum}{\relax}
+\renewcommand{\cftcitationaftersnum}{\hfill}
+
+%% Make a new command for each citation that we want
+%% e.g. \newcite{\citeGhostFull}{...content}
+%% NOTE: for future reference -- had to separate the content line
+%%      from the actual citation because expanding within the line
+%%      was causing issues with compilation.
+\newcommand{\newcite}[3]{
+  \refstepcounter{citationnum}
+  \addtocontents{citation}{\protect\contentsline{citation}{\thecitationnum. #2}{}{}}
+  %% \addtocontents{citation}{\thecitationnum. #2 \\}
+  \expandafter\def\csname#1\endcsname{%
+    #3
+  }
+}
+
+
 % todo: incomplete?
 \newcommand{\allCitations}{
     \citeBitcoinFull \\
@@ -29,21 +54,13 @@
 
 %--- GHOST
 
-\newcommand{\citeGhostLink}{%
-\href{https://web.archive.org/web/20220308084727/https://cloudflare-ipfs.com/ipfs/QmTDz4WuAXi2rV7Ei3pHHKTFCYGPeDbDoAkmypkHdJnnKe}{Secure High-Rate Transaction Processing in Bitcoin}%
-\xspace
-}
-
-\newcommand{\citeGhostAuthors}{%
-Sompolinsky, Zohar; 2013%
-\xspace
-}
-
-\newcommand{\citeGhostFull}{%
-\citeGhostLink{}
-% \href{https://web.archive.org/web/20220308084727/https://cloudflare-ipfs.com/ipfs/QmTDz4WuAXi2rV7Ei3pHHKTFCYGPeDbDoAkmypkHdJnnKe}{[m1]}
-(\citeGhostAuthors)%
-\xspace
+\newcite{citeGhostFull}{%
+  %% The link for the citations list
+  \href{https://web.archive.org/web/20220308084727/https://cloudflare-ipfs.com/ipfs/QmTDz4WuAXi2rV7Ei3pHHKTFCYGPeDbDoAkmypkHdJnnKe}{Secure High-Rate Transaction Processing in Bitcoin}%
+}{%
+  %% The actual citation to display in the content
+  \href{https://web.archive.org/web/20220308084727/https://cloudflare-ipfs.com/ipfs/QmTDz4WuAXi2rV7Ei3pHHKTFCYGPeDbDoAkmypkHdJnnKe}{Secure High-Rate Transaction Processing in Bitcoin}
+  (Sompolinsky, Zohar; 2013)%
 }
 
 %--- DAA2
@@ -53,8 +70,10 @@ Sompolinsky, Zohar; 2013%
     \xspace
 }
 
-\newcommand{\citeDaaTwoFull}{%
+\newcite{citeDaaTwoFull}{%
     \citeDaaTwoLink{}
+ }{%
+   \citeDaaTwoLink{}
     \href{https://web.archive.org/web/20211018042402/https://econ.hkbu.edu.hk/eng/Doc/20201016_NODA.pdf}{[m1]}
     % \href{https://web.archive.org/web/20211018043918/https://cloudflare-ipfs.com/ipfs/Qmd8BE6xYCH58LNipE1zZ7BCftemN8hQWnfZJSJYq5XUE8}{[m2]}
     (\citeDaaTwoAuthors)%
@@ -75,7 +94,9 @@ Sompolinsky, Zohar; 2013%
     \xspace
 }
 
-\newcommand{\citeAHBDSFull}{%
+\newcite{citeAHBDSFull}{%
+    \citeAHBDS{}
+  }{%
     \citeAHBDS{}
     \href{https://web.archive.org/web/20130426054844/https://bitcoil.co.il/Doublespend.pdf}{[m1]}
     \href{https://web.archive.org/web/20240927041834/https://gateway.pinata.cloud/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{[m2]}
@@ -100,7 +121,9 @@ Sompolinsky, Zohar; 2013%
     \xspace
 }
 
-\newcommand{\citeInclusiveFull}{%
+\newcite{citeInclusiveFull}{%
+    \citeInclusive{}
+  }{%
     \citeInclusive{}
     \href{https://web.archive.org/web/20210426004808/https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{[m1]}
     % \href{https://web.archive.org/web/20210426004857/https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy}{[m2]}
@@ -133,7 +156,9 @@ https://web.archive.org/web/20220606205028/https://eth.wiki/sharding/Sharding-FA
     \xspace
 }
 
-\newcommand{\citeBitcoinFull}{%
+\newcite{citeBitcoinFull}{%
+    \citeBitcoinLink
+  }{%
     \citeBitcoinLink
     (\citeBitcoinAuthors)%
     \xspace
@@ -174,7 +199,8 @@ Eyal, Sirer; 2013%
 \xspace
 }
 
-\newcommand{\citeSelfishMiningFull}{%
+\newcite{citeSelfishMiningFull}{%
+\citeSelfishMiningLink}{%
 \citeSelfishMiningLink
 (\citeSelfishMiningAuthors)%
 \xspace
@@ -188,7 +214,9 @@ Eyal, Sirer; 2013%
     \href{https://bitcointalk.org/index.php?topic=56675.msg678006\#msg678006}{Luke Jr's attack on Coiledcoin}%
 }
 
-\newcommand{\citeLJCoiledcoinFull}{%
+\newcite{citeLJCoiledcoinFull}{%
+    \citeLJCoiledcoinLink
+  }{%
     \citeLJCoiledcoinLink
     \href{https://web.archive.org/web/20141006215827/https://bitcointalk.org/index.php?topic=56675.msg678006}{[m1]}%
 }
@@ -237,7 +265,9 @@ Kiayias, Miller, and Zindros; 2018%
     \xspace
 }
 
-\newcommand\citeNIPoPoWsFull{%
+\newcite{citeNIPoPoWsFull}{%
+    \linkNIPoPoWs{}
+  }{%
     \linkNIPoPoWs{}
     \linkNIPoPoWsMirrors{}
     (\citeNIPoPoWsAuthors{})%
