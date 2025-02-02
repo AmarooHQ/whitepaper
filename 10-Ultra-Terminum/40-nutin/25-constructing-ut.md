@@ -247,7 +247,7 @@ This solves the *Nothing at Stake* problem for PoS dapp-chains, provided the nec
 
 The abstraction layer between simplex-chains and dapp-chains brings practical benefits, too.
 For example: existing (open-source) PoS blockchain schemes can be easily integrated as dapp-chains.
-Given that dapp-chains inherit security properties of their parent-chain (via one-way PoR), if such a dapp-chain's consensus method supports *other* features --- e.g., \suppciteref{https://github.com/w3f/consensus/blob/master/pdf/grandpa.pdf}{finality guarantees} --- those features are *free*.
+Given that dapp-chains inherit security properties of their parent-chain (via one-way PoR), if such a dapp-chain's consensus method supports *other* features --- e.g., \href{\citeGrandpaLink}{finality guarantees} --- those features are *free*.
 (Sharding, too, for that matter\dots)
 
 The most likely method of integration has three core components: modification of the headers (and integration of PoR), modification of existing slashing protocols, and support for intra-simplex SPV proofs.

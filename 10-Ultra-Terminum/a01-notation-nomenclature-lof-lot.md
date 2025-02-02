@@ -79,9 +79,9 @@ Term & Definition & Reference \\
 \printglossaries
 
 \newpage
-\addcontentsline{toc}{section}{List of Figures, Tables}
 
 \listoffigures
+\addcontentsline{toc}{section}{List of Figures, Tables}
 
 \newpage
 
@@ -89,8 +89,8 @@ Term & Definition & Reference \\
 
 \newpage
 
-\addcontentsline{toc}{section}{References}
 \listofcitation
+\addcontentsline{toc}{section}{References}
 \listofsuppcites
 
 %%\listofalgorithms
