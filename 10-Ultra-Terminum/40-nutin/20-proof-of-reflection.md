@@ -654,36 +654,36 @@ We will use the subscript $W\rightarrow B$ to denote the idea of converting betw
 \begin{align}
   \text{Note that:}
     & & \text{ConversionConst}_{W\rightarrow B}
-    & = \frac{\Delta t_\text{actual}}{\Delta t_\text{target}}
-    & & \frac{\text{B-seconds} \cdot \text{blocks}}{\text{B-block} \cdot \text{second}}
+    & = \frac{\Delta t_\text{target}}{\Delta t_\text{actual}}
+    & & \frac{\text{B-blocks} \cdot \text{seconds}}{\text{B-second} \cdot \text{block}}
     \nonumber
     \\[0.5em]
   \text{Bitcoin's DAA:}
     & & \text{NextWork}_{W\rightarrow B}(D_\text{prev})
-    & = \frac{\Delta t_\text{actual}}{\Delta t_\text{target}} \cdot D_\text{prev}
-    & & \frac{\text{B-hashes} \cdot \text{B-seconds} \cdot \text{blocks}}{\text{B-block}^2 \cdot \text{second}}
+    & = \frac{\Delta t_\text{target}}{\Delta t_\text{actual}} \cdot D_\text{prev}
+    & &
+      \frac{\text{B-hashes} \cdot \text{seconds}}{\text{B-second} \cdot \text{block}}
+      \cdot \cancelto{1}{\frac{\text{B-blocks}}{\text{B-block}}}
     \nonumber
 \end{align}
 
-When a DAA adds context, it converts blocks $\rightarrow$ B-blocks, and seconds $\rightarrow$ B-seconds.
-
-Alternatively, it could \emph{strip} context; the only thing that matters is that $\text{ConversionConst}_{W\rightarrow B}$ is unitless.
+When a DAA adds context, it converts blocks $\leftrightarrow$ B-blocks, and seconds $\leftrightarrow$ B-seconds.
+Alternatively, it could \emph{strip} context.
 Either way works because the DAA acts as a boundary of the convertible context in both cases.
+This means that \emph{when converting} we can cancel B-seconds with seconds, B-blocks with blocks, etc.
 \begin{align}
   \text{Alt. with context:}
     & & \text{NextWork}_{W\rightarrow B}(D_\text{prev})
-    & = \frac{\Delta t_\text{actual}}{\Delta t_\text{target}} \cdot D_\text{prev}
+    & = \frac{\Delta t_\text{target}}{\Delta t_\text{actual}} \cdot D_\text{prev}
     & & \frac{\text{B-hashes}}{\text{B-block}}
     \label{eq:bitcoin-daa}
     \\[0.5em]
-  \text{}
+  \text{Divide by } D_\text{prev}
     & & \implies \text{ConversionConst}_{W\rightarrow B}
-    & = \frac{\Delta t_\text{actual}}{\Delta t_\text{target}}
-    & & \text{(unitless)}
+    & = \frac{\Delta t_\text{target}}{\Delta t_\text{actual}}
+    & & \cancelto{1}{\frac{\text{B-hashes} \cdot \text{B-blocks}}{\text{B-hash} \cdot \text{B-block}}}
     \nonumber
 \end{align}
-
-\todoDraftOnly[m]{rework above and if kept then note that we'll include the context explicitly.}
 
 <!-- \autoref{eq:bitcoin-daa} -->
 

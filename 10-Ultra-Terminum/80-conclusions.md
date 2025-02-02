@@ -41,7 +41,8 @@ No real-world sharded network has come close to this level of performance, and i
     For some designs, the \emph{Scaling Factor} can change between nesting levels
 }
 
-\pz{Last row with infinity: theoretically yes, but is it practically achievable?}
+\todoDraftOnly[h]{Last row with infinity: theoretically yes, but is it practically achievable?}
+
 %% INSERT ### TABLE: compare_nets_3k
 
 : A comparison of quantitative scaling properties between UT and various networks given $k = 3000$ bytes/s. Transaction size is set to 250 bytes, $D_f = B_f$, and $D_h = B_h$.
