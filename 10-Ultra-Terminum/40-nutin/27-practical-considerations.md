@@ -1,5 +1,6 @@
 %% BEGIN ### RELEASE
 
+\clearpage
 \section{Practical Considerations for UT's Design}
 
 \label{sec:practical-considerations}

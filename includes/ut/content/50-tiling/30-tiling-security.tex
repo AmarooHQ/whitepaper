@@ -539,7 +539,7 @@ For some proof size \Psz (the number of bytes that each individual merkle / verk
     &= O(\log c \cdot \log n \cdot c)
 \end{align}
 Using verkle proofs, if each tile has fewer simplex-chains than $\nicefrac14$ of the branching factor (e.g. 64 or 256), then each proof is $\Psz = 1+g$ bytes (i.e., 33 or 49).
-At a depth of $d=10$, with 64 simplex-chains per tile, this burden is 40 - 60 KB per block (assuming no redundancy in the PoR paths).
+At a depth of $d=10$, with 64 simplex-chains per tile, this burden is 40 - 60 kB per block (assuming no redundancy in the PoR paths).
 
 However, after a block period, one specific root simplex-chain should have the weight of the whole root.
 If we use this fact, then we only need to know a path from one simplex-chain block in the root back to the target chain:
@@ -547,9 +547,9 @@ If we use this fact, then we only need to know a path from one simplex-chain blo
     \xyInlineRefl{\BL{2} \;&\; \cdots \arf[l] \;&\; \BR{20} \arf[l] \;&\; \{\frac{N_1}{v+1} - 1 \text{ other root chains}\} \arf[l] \;&\; \BR{21} \arf[l] \;&\; \cdots \arf[l] \;&\; \BL{3} \arf[l]}.
 \end{equation*}
 This version has $\Psz N_1 (v+1)^{-1}$ extra individual proofs, and only two branches going from \cL to the root tile and back again.
-But it proves as much work as the bundle of 40 - 60 KB that we had before.
-This time, though, the burden is only 2.7 - 4.0 KB per local block.
-(If $k=3000, B_f = \nicefrac1{15}$, then each block is $\sim 45$ KB.)
+But it proves as much work as the bundle of 40 - 60 kB that we had before.
+This time, though, the burden is only 2.7 - 4.0 kB per local block.
+(If $k=3000, B_f = \nicefrac1{15}$, then each block is $\sim 45$ kB.)
 
 \todoDraftOnly{what about withholding attacks where an attacker gets a conflicting block implicilty reflected? might be possible via tile boundaries. can an attacker get a recursive PoR path generated without publishing the block? the attacker can mine in multiple tiles, too. mb answer is in work attribution --- which }
 
