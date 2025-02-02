@@ -2,11 +2,23 @@
 \newlistof{citation}{citation}{Key References}
 \newcounter{citationnum}
 
+%% Supplementary Links
+\newlistof{suppcites}{suppcites}{Supplementary References}
+\newcounter{suppcitesnum}
+
 %% Ignore all the page numbers and dots -- causing the latex
 %% compilation to error.
 \renewcommand{\cftcitationdotsep}{\cftnodots}
 \renewcommand{\cftcitationpresnum}{\relax}
 \renewcommand{\cftcitationaftersnum}{\hfill}
+
+\renewcommand{\cftsuppcitesdotsep}{\cftnodots}
+\renewcommand{\cftsuppcitespresnum}{\relax}
+\renewcommand{\cftsuppcitesaftersnum}{\hfill}
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% %%%% Citations to command %%%%
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Make a new command for each citation that we want
 %% e.g. \newcite{\citeGhostFull}{...content}
@@ -16,12 +28,41 @@
 \newcommand{\newcite}[3]{
   \refstepcounter{citationnum}
   \addtocontents{citation}{\protect\contentsline{citation}{\thecitationnum. #2}{}{}}
-  %% \addtocontents{citation}{\thecitationnum. #2 \\}
   \expandafter\def\csname#1\endcsname{%
     #3
   }
 }
 
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% %%%% Supplementary        %%%%
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Add a URL directly to the list (with a name)
+%% will not return anything
+%% \suppcitedirect{URL}{name}
+\newcommand{\suppcitedirect}[2]{
+  \refstepcounter{suppcitesnum}
+  \addtocontents{suppcites}{\protect\contentsline{suppcites}{\thesuppcitesnum. {\href{#1}{#2}}}{}{}}
+}
+
+%% Reference a citation directly (will return a href)
+%% \suppciteref{URL}{name}
+\newcommand{\suppciteref}[2]{
+  \refstepcounter{suppcitesnum}
+  \addtocontents{suppcites}{\protect\contentsline{suppcites}{\thesuppcitesnum. {\href{#1}{#2}}}{}{}}
+  \href{#1}{#2}
+}
+
+%% Create a new `\cite_____Link` command
+%% \suppcitelink{commandid}{url}{table of contents name}
+%% e.g. \suppcitelink{citeGhostLink}{https...}{Secure High-Rate Transaction Processing in Bitcoin}
+\newcommand{\suppcitelink}[3]{
+  \refstepcounter{suppcitesnum}
+  \addtocontents{suppcites}{\protect\contentsline{suppcites}{\thesuppcitesnum. {\href{#2}{#3}}}{}{}}
+  \expandafter\def\csname#1\endcsname{%
+    #2
+  }
+}
 
 % todo: incomplete?
 \newcommand{\allCitations}{
@@ -49,7 +90,32 @@
 %--- Max's stuff
 
 \newcommand\urlQuantaBitcointalk{https://bitcointalk.org/index.php?topic=1057342}
-\newcommand\linkQantaBitcointalk{\href{\urlQuantaBitcointalk}{Instant transactions with a stream of work -- Quanta}\xspace}
+%%\newcommand\linkQantaBitcointalk{\href{\urlQuantaBitcointalk}{Instant transactions with a stream of work -- Quanta}\xspace}
+
+\newcite{linkQantaBitcointalk}{%
+  \href{\urlQuantaBitcointalk}{Instant transactions with a stream of work -- Quanta}
+  }{%
+  \href{\urlQuantaBitcointalk}{Instant transactions with a stream of work -- Quanta}\xspace
+}
+
+
+\suppcitedirect{%
+  https://bitcointalk.org/index.php?topic=198032.0%
+}{%
+  bitcointalk | For Public Consideration: [Marketcoin | MKC] A P2P Trustless Cryptocoin Exchange - XertroV%
+}
+
+\suppcitedirect{%
+  https://bitcointalk.org/index.php?topic=598784.0%
+}{%
+  bitcointalk | [RFC] Marketcoin - A web of distributed markets with a common unit - XertroV
+}
+
+\suppcitelink{citeCopprChainheadersLink}{%
+  https://github.com/XertroV/coppr/blob/master/chainheaders.py%
+}{%
+  Coppr: Chainheaders - XertroV%
+}
 
 
 %--- GHOST
@@ -133,8 +199,17 @@
 
 %--- sharding faqs
 
-\newcommand{\citeShardingFAQsLink}{%
-https://web.archive.org/web/20220606205028/https://eth.wiki/sharding/Sharding-FAQs %
+\suppcitelink{citeShardingFAQsLink}{%
+  https://web.archive.org/web/20220606205028/https://eth.wiki/sharding/Sharding-FAQs%
+  }{%
+    Ethereum Wiki: Sharding FAQs%
+}
+
+%--- BTCRelay
+\suppcitelink{citeBTCRelayLink}{%
+  https://github.com/ethereum/btcrelay%
+}{%
+  Ethereum - BTCRelay%
 }
 
 %--- Beacon chain
@@ -164,27 +239,38 @@ https://web.archive.org/web/20220606205028/https://eth.wiki/sharding/Sharding-FA
     \xspace
 }
 
+
+%%---- Segwit
+
+\suppcitelink{citeSegwitLink}{%
+  https://web.archive.org/web/20240926154239/https://en.bitcoin.it/wiki/Segregated_Witness%
+}{%
+  Bitcoin Wiki - Segregated Witness%
+}
+
+\suppcitelink{citeBIPSWLink}{%
+https://web.archive.org/web/20240423183945/https://en.bitcoin.it/wiki/BIP_0141%
+}{%
+  Bitcoin Wiki - BIP-141%
+}
+
 %--- Polkadot
 
-\newcommand{\citePolkadotLink}{%
-% \href{https://gateway.pinata.cloud/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Polkadot Whitepaper}%
-\href{https://web.archive.org/web/20240927041732/https://gateway.pinata.cloud/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Polkadot Whitepaper}%
-\xspace
+%% \href{https://gateway.pinata.cloud/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Polkadot Whitepaper}%
+\suppcitelink{citePolkadotLink}{%
+https://web.archive.org/web/20240927041732/https://gateway.pinata.cloud/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{%
+  Polkadot Whitepaper%
 }
 
 %--- Ouroboros
 
-\newcommand{\citeOuroborosLink}{%
-\href{https://web.archive.org/web/20240927042139/https://gateway.pinata.cloud/ipfs/QmWCAHyi35SeXH2E4e8jRVk7yNse2x6D14uPfABnhagbvN}{Ouroboros: A Provably Secure Proof-of-Stake Blockchain Protocol}%
-\xspace
-}
+\suppcitelink{citeOuroborosLink}{%
+https://web.archive.org/web/20240927042139/https://gateway.pinata.cloud/ipfs/QmWCAHyi35SeXH2E4e8jRVk7yNse2x6D14uPfABnhagbvN}{Ouroboros: A Provably Secure Proof-of-Stake Blockchain Protocol}%
 
 %--- eth yellow paper
 
-\newcommand{\citeEthYellowPaperLink}{%
-\href{https://web.archive.org/web/20240927042236/https://gateway.pinata.cloud/ipfs/QmcdwaEqKjsASs1sZqxBNPw5vmypE5YL61zSvWdGoX7wtC}{Ethereum Yellow Paper / Petersburg Version 41c1837}%
-\xspace
-}
+\suppcitelink{citeEthYellowPaperLink}{%
+https://web.archive.org/web/20240927042236/https://gateway.pinata.cloud/ipfs/QmcdwaEqKjsASs1sZqxBNPw5vmypE5YL61zSvWdGoX7wtC}{Ethereum Yellow Paper / Petersburg Version 41c1837}%
 
 %--- selfish mining
 
@@ -223,11 +309,15 @@ Eyal, Sirer; 2013%
 
 %--- zack-bitcoin docs re PoS
 
-\newcommand{\linkZackPoSDefence}{%
+\suppcitelink{linkZackPoSDefence}{%
     https://web.archive.org/web/20220309063254/https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/the_defence_of_pos.md%
+}{%
+  The Defence of PoS - Zack Hess%
 }
-\newcommand{\linkZackPoSCriticisms}{%
+\suppcitelink{linkZackPoSCriticisms}{%
     https://web.archive.org/web/20220309063128/https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/proof_of_stake.md%
+}{%
+  Proof of Stake - Zack Hess%
 }
 
 %--- solana stuff
@@ -282,16 +372,22 @@ Kiayias, Miller, and Zindros; 2018%
 %
 % stateless
 
-\newcommand\linkZackStatelessFullNodes{%
+\suppcitelink{linkZackStatelessFullNodes}{%
 https://web.archive.org/web/20210523201110/https://github.com/zack-bitcoin/amoveo-docs/blob/master/design/stateless_full_node.md%
+}{%
+  Stateless Full Node - Zak Hess%
 }
 
-\newcommand\linkButerinStatelessClients{%
+\suppcitelink{linkButerinStatelessClients}{%
 https://web.archive.org/web/20210602053116/https://ethresear.ch/t/the-stateless-client-concept/172%
+}{%
+  ethresear.ch | The Stateless Client Concept - Vitalik Buterin%
 }
 
-\newcommand\linkPToddDelayedTxoCommitments{%
-https://web.archive.org/web/20210224050038/https://petertodd.org/2016/delayed-txo-commitments%
+\suppcitelink{linkPToddDelayedTxoCommitments}{%
+  https://web.archive.org/web/20210224050038/https://petertodd.org/2016/delayed-txo-commitments%
+}{%
+  Making UTXO Set Growth Irrelevant With Low-Latency Delayed TXO Commitments - Peter Todd%
 }
 
 

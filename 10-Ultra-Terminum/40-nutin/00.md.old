@@ -5,7 +5,7 @@
 ```{=latex}
 \bquote{
     Decoupling the underlying consensus from the state-transition has been informally proposed in private for at least two years---Max Kaye was a proponent of such a strategy during the very early days of Ethereum.
-}[Dr. Gavin Wood; \citePolkadotLink, s2.2]
+}[Dr. Gavin Wood; \href{\citePolkadotLink}{Polkadot Whitepaper}, s2.2]
 ```
 
 *Ultra Terminum* is not a method to scale a single blockchain.

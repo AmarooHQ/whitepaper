@@ -91,6 +91,7 @@ Term & Definition & Reference \\
 
 \addcontentsline{toc}{section}{References}
 \listofcitation
+\listofsuppcites
 
 %%\listofalgorithms
 
