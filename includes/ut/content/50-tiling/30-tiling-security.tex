@@ -332,7 +332,7 @@ Alternatively, if we set $\phi = 0.5$, then we'd expect the same recursive PoR t
 
 \subsection{Scaling Complexity}
 
-
+\subsubsection{Capacity}
 
 The tiling is an $(v-1)$-ary tree; assuming it is balanced and has a maximum depth of $d$, the number of tiles, $N_{\text{tiles}}$, in the tiling is:
 \begin{equation}
@@ -360,7 +360,28 @@ If we had, say, 96 bits to work with (assuming a 256 bit hash), then we'd have $
 Given $N_1 = 200$, $\Mroot = 8$, $r = 8$, and $v = 3$, we could support up to $\sim 31$ layers, which is more than $10^{11}$ simplex-chains in total.
 Granted, there are other constraints that we will be limited by.
 
+\subsubsection{Recursive PoRs}
 
+Consider some block in some tile outside the core.
+Given $v=3$, there will be $\nicefrac{N_1}{2}$ blocks produced in the root tile between this block and the next block.
+We only need to include one recursive PoR with the root tile to gain the weight of all those blocks --- particularly, the recursive PoR goes via the most recent block we know of in the root tile.
+Also, the other chains in the tile will include recursive PoRs via many of those root tile blocks in the intervening period.
+In principle, then, we shouldn't need much additional data than these PoRs.
+
+\newcommand\Psz{\ensuremath{\mathbb{P}}\xspace}
+
+Each merkle (or verkle) branch in such a recursive PoR is $O(\log c)$.
+There are $O(d) = O(\log(n c^{-i-1}))$ many such branches.
+Thus the resulting complexity is
+\begin{align*}
+    O(\log(c) \log(n c^{-i-1})) & = O(\log(c)(\log(n) - (i+1)\log(c))) \\
+    & = O(\log(c) \log(n))
+\end{align*}
+
+
+
+
+\subsubsection{Bandwidth}
 
 
 
@@ -495,8 +516,6 @@ $(1 + (v-1)) + \max(0, d - 2) + 1$
 \subsubsubsection{Complexity of Minimum Recursive PoR Set}
 
 The minimum no. of recursive PoRs per local block that a simplex-chain outside the core requires is $N_1 (v+1)^{-1}$ and each has a depth of $d$ and a length of $2d-1$.
-
-\newcommand\Psz{\ensuremath{\mathbb{P}}\xspace}
 
 For some proof size \Psz (the number of bytes that each individual merkle / verkle proof takes), the size of these PoRs, per block is:
 \begin{align}

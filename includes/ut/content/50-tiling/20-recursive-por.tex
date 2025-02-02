@@ -249,6 +249,7 @@ That configuration would look like this:
     }
 \end{equation*}
 In general, for a recursive PoR of length $2d-1$, where each reflection could be provided by $N_1 (v+1)^{-1}$ possible chains, the expected latency of draft reflected work is ${N_1}^{-1} (v+1) (2d-1)$ block periods.
+We divide $N_1$ by $v+1$ because each simplex-tile's capacity for reflections is divided equally between $v$ other tiles and itself.
 This is directly relevant to how fast work propagates within a tiling.
 
 Note that this does not work for a standalone simplex ($d=0 \implies 2d-1 = -1$) because we are looking particularly at when recursive PoRs become available (i.e., a draft local block could include them for the first time).
