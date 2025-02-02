@@ -544,10 +544,12 @@ genCompareRow k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdPlainMix
     aux = auxStats cs
     -- n1 = if isAleph net then infinity else cs.d1.n
     tps = if isAleph net then infinity else netToTps net cs
+    -- tps = netToTps net cs
     effDh = netToEffDh net cs
     _tpsPerBaseChain = netToTps net cs / cs.d1.n
     scalingFactor = netToScalingFactor net aux
     n2 = if isAleph net then infinity else netToN2 net cs
+    -- n2 = netToN2 net cs
 
 compareNetsTH = Table
     ["$k$, $B_f$, $B_h$", "Network", "E. $B_h$ (B)", "E. $D_h$ (B)", "Scale $\\times$"
@@ -803,6 +805,7 @@ genLpCompareRow' lim k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (fmtDyn fdS
       OptShard -> cs.effDh
       _ -> cs.effBh
     tps = if isAleph net then infinity else netToTps net cs
+    -- tps = netToTps net cs
 
 genLpCompareRow = genLpCompareRow' Nothing
 genLpCompareLimitedRow = genLpCompareRow'
@@ -812,6 +815,7 @@ genLpCompare2Row k o@{net} = [fmtPsKBfBh $ pToPF p, show net] <> (_fmt <$> [cs.e
     p = o.p k
     cs = netToChainStats net p
     tps = if isAleph net then infinity else netToTps net cs
+    -- tps = netToTps net cs
     effDh = netToEffDh net cs
     _fmt = fmtDyn fdStdNoSiMixed
 

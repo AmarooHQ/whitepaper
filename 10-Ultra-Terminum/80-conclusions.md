@@ -41,11 +41,15 @@ No real-world sharded network has come close to this level of performance, and i
     For some designs, the \emph{Scaling Factor} can change between nesting levels
 }
 
+<!--
 \todoDraftOnly[h]{Last row with infinity: theoretically yes, but is it practically achievable?}
+mk: added explanatory comment. I checked the code and realized why I put inf there: we need to specify how big the tiling is but that's not bounded.
+-->
 
 %% INSERT ### TABLE: compare_nets_3k
 
 : A comparison of quantitative scaling properties between UT and various networks given $k = 3000$ bytes/s. Transaction size is set to 250 bytes, $D_f = B_f$, and $D_h = B_h$.
+Note: `$\infty$' here does not literally mean infinite; however, we cannot calculate concrete values without specifying parameters arbitrarily which are otherwise unbounded.
 
 %% INSERT ### TABLE: compare_nets_20k
 
@@ -78,7 +82,7 @@ No real-world sharded network has come close to this level of performance, and i
     \tnote[PoS]{
         \href{\linkZackPoSCriticisms}{Unanswered criticisms of PoS} (\href{\linkZackPoSDefence}{replies})
         mean that we cannot conclude that PoS is $O(n)$ secure.
-        Saying PoS is ``Maybe'' $O(n)$ secure is being kind --- since there are unanswered criticisms, we should really conclude ``No''.
+        Saying PoS is ``Maybe'' $O(n)$ secure (especially when used in isolation) is being ``kind'' --- since there are unanswered criticisms, we should really conclude ``No''.
         (There are no such unanswered criticisms of PoW-based consensus.)
     }
     \tnote[$\dagger$]{
@@ -97,9 +101,9 @@ No real-world sharded network has come close to this level of performance, and i
         \ML
         Bitcoin   & Yes           & Yes              & No    & (Max. TPS: $\sim$ 5)\tmark[*] \NN
         Cardano   & Yes           & Maybe\tmark[PoS] & No    & (Max. TPS: $\sim$ 10 - 80)\tmark[$\!$\#] \NN
-        Solana    & No\tmark[$\ddagger$]  & No ($O(c)$)\tmark[$\dagger$] & Maybe & (Max. TPS: $\sim$ 50K)\tmark[$\ddagger$] \NN
-        Polkadot  & Maybe         & Maybe\tmark[PoS] & Maybe & (Max. TPS: $\sim$ 200 - 12K)\tmark[\P] \NN
-        Eth2      & Maybe         & Maybe\tmark[PoS] & Maybe & (Max. TPS: $\sim$ 1K - 62K)\tmark[$\|$] \NN
+        Solana    & No\tmark[$\ddagger$]  & No ($O(c)$)\tmark[$\dagger$] & Unlikely & (Max. TPS: $\sim$ 50K)\tmark[$\ddagger$] \NN
+        Polkadot  & Maybe         & Maybe\tmark[PoS] & Unlikely & (Max. TPS: $\sim$ 200 - 12K)\tmark[\P] \NN
+        Eth2      & Maybe         & Maybe\tmark[PoS] & Unlikely & (Max. TPS: $\sim$ 1K - 62K)\tmark[$\|$] \NN
         Opt.Shard & Yes           & Yes              & Maybe & (Max. TPS: $\sim$ 8K - 350K)\tmark[\S]
         \LL
 }
@@ -140,9 +144,9 @@ UT$_\aleph$ achieves unbounded $O(n)$ scalability and opens the way to a truly u
         $\UT{1}$ & Yes & Yes & Maybe & (Max. TPS: $\sim$ 1K - 400K) \\
         $\UT{2}$ & Yes & Yes & Possibly & (Max. TPS: $\sim$ 600K - 2B) \\
         $\UT{3}$ & Yes & Yes & Probably & (Max. TPS: $\sim$ 300M - 6T) \\
-        $\UTinf{1}$ & Yes & Yes & Probably & (Max. TPS: $\sim$ 50M - $10^{18}$) \\
-        $\UTinf{2}$ & Yes & Yes & Yes & (Max. TPS: $\sim$ 300B - $10^{21}$) \\
-        $\UTinf{3}$ & Yes & Yes & Yes & (Max. TPS: $\sim$ $10^{14}$ - $10^{25}$) \\
+        $\UTinf{1}$ & Maybe & Yes & Probably & (Max. TPS: $\sim$ 50M - $10^{18}$) \\
+        $\UTinf{2}$ & Maybe & Yes & Yes & (Max. TPS: $\sim$ 300B - $10^{21}$) \\
+        $\UTinf{3}$ & Maybe & Yes & Yes & (Max. TPS: $\sim$ $10^{14}$ - $10^{25}$) \\
         \bottomrule
     \end{tabular}
 \label{table:ut-vs-trilemma}
