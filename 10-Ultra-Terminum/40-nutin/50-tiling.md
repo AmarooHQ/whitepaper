@@ -4,7 +4,7 @@
 
 \begin{comment}
 
-Need to include this table as it's expected and we get compile issue otherwise
+Need to include this table as it's expected and we get a compile issue otherwise
 
 %% INSERT ### TABLE: tree_tiling_3k_v4_table
 

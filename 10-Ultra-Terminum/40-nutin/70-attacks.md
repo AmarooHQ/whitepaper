@@ -13,9 +13,7 @@
 - Reflection without publication, see \autoref{sec:availability-of-blocks}.
 - Empty block DoS and censorship, see \autoref{sec:dos-and-dags}.
 - \emph{Nothing at Stake} and \emph{long range} attacks, see \autoref{sec:reflection-pow-and-pos} and \autoref{sec:dapp-chains}.
-
-\todo{refl without pub - XC}
-\todo{add XC attack stuff? bribes?}
+- Intra-simplex cross-chain attacks, see \autoref{sec:spv-in-ut}.
 
 \subsection{Dialog: Attacks and Mitigation}
 
@@ -79,7 +77,7 @@
 }
 
 \dMax{
-  Say that you did try to attack \emph{all} the PoW simplex-chains, what about the PoS ones? You need to pwn those first if you want to 51\% the PoW chains.
+  Say that you did try to attack \emph{all} the PoW simplex-chains, what about the PoS ones? You need to attack those first if you want to 51\% the PoW chains.
 }
 
 \dMax{
