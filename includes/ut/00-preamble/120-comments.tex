@@ -21,6 +21,7 @@
 
 % using same comment counter but w/e
 \newcounter{pzcommentcounter}
+\ifthenelse{\equal{\BuildMode}{draft}}{
 \newcommand{\pz}[1]{
     \refstepcounter{pzcommentcounter}%
     \refstepcounter{comment}%
@@ -35,8 +36,12 @@
     \end{tcolorbox}
     \addcontentsline{com}{comment}{\protect{\thecomment. } \truncate{0.8\linewidth}{#1}}
 }
+}{
+  \newcommand{\pz}[1]{}
+}
 
 \newcounter{cncommentcounter}
+\ifthenelse{\equal{\BuildMode}{draft}}{
 \newcommand{\cn}[1]{
     \refstepcounter{cncommentcounter}%
     \refstepcounter{comment}%
@@ -50,4 +55,7 @@
     #1
     \end{tcolorbox}
     \addcontentsline{com}{comment}{\protect{\thecomment. } \truncate{0.8\linewidth}{#1}}
+}
+}{
+  \newcommand{\cn}[1]{}
 }
