@@ -3,7 +3,7 @@
 \clearpage
 
 \section*{Notation}
-\addcontentsline{toc}{section}{Notation, Nomenclature, and Lists of Figures and Tables}
+\addcontentsline{toc}{section}{Notation, Nomenclature}
 \fancypagestyle{notation}{%
     \fancyhead[L]{}
     \fancyhead[R]{\emph{Notation, Nomenclature, Figures, \& Tables}}
@@ -79,6 +79,7 @@ Term & Definition & Reference \\
 \printglossaries
 
 \newpage
+\addcontentsline{toc}{section}{List of Figures, Tables}
 
 \listoffigures
 
@@ -88,6 +89,7 @@ Term & Definition & Reference \\
 
 \newpage
 
+\addcontentsline{toc}{section}{References}
 \listofcitation
 
 %%\listofalgorithms
