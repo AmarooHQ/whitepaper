@@ -1404,6 +1404,33 @@ var PS = {};
   })();                   
   var vcCommitSize = 32.0;
   var vcBranchingF = 256.0;
+  var utScaleOptionsFmt = function (v) {
+      if (!v.explicitPoRs && (!v.headerOmission && !v.hashTruncation)) {
+          return "+OP";
+      };
+      if (!v.explicitPoRs && (!v.headerOmission && v.hashTruncation)) {
+          return "+OPT";
+      };
+      if (v.explicitPoRs && (!v.headerOmission && !v.hashTruncation)) {
+          return "+PoRs";
+      };
+      if (v.explicitPoRs && (!v.headerOmission && v.hashTruncation)) {
+          return "+PoRTs";
+      };
+      if (v.explicitPoRs && (v.headerOmission && !v.hashTruncation)) {
+          return "+HOPoRs";
+      };
+      if (v.explicitPoRs && (v.headerOmission && v.hashTruncation)) {
+          return "+HOPoRTs";
+      };
+      if (!v.explicitPoRs && (v.headerOmission && !v.hashTruncation)) {
+          return "+HO";
+      };
+      if (!v.explicitPoRs && (v.headerOmission && v.hashTruncation)) {
+          return "+HOT";
+      };
+      throw new Error("Failed pattern match at Amaroo.WP.Calcs (line 101, column 1 - line 101, column 47): " + [ v.constructor.name ]);
+  };
   var porVCLen2$prime = function (doubleBranching) {
       return function (n) {
           var _vcBranchingF = vcBranchingF * (function () {
@@ -1416,12 +1443,12 @@ var PS = {};
           var l1Nodes = Data_Ord.min(Data_Ord.ordNumber)(n)(_vcBranchingF) - l2Groups;
           var l2Nodes = n - l1Nodes;
           var avgDepth = (1.0 * l1Nodes + 2.0 * l2Nodes) / n;
-          var $33 = n <= _vcBranchingF;
-          if ($33) {
+          var $67 = n <= _vcBranchingF;
+          if ($67) {
               return 1.0;
           };
-          var $34 = l2Groups > _vcBranchingF;
-          if ($34) {
+          var $68 = l2Groups > _vcBranchingF;
+          if ($68) {
               return 1.0 + porVCLen2$prime(doubleBranching)(n / _vcBranchingF);
           };
           return avgDepth;
@@ -1526,14 +1553,14 @@ var PS = {};
                               var n = Data_Int.toNumber(v.i);
                               var t1 = utPorsT1Applied(n);
                               var bestN = Data_Int.toNumber(v.bestI);
-                              var $38 = t1 < 0.0 || (t1 < v.t * 0.96 || t1 < v.t && $$Math.remainder($$Math.abs(Prel.log2(bestN)))(1.0) > 1.0e-2);
-                              if ($38) {
+                              var $72 = t1 < 0.0 || (t1 < v.t * 0.96 || t1 < v.t && $$Math.remainder($$Math.abs(Prel.log2(bestN)))(1.0) > 1.0e-2);
+                              if ($72) {
                                   $tco_done = true;
                                   return v;
                               };
                               $copy_v = (function () {
-                                  var $39 = t1 > v.t;
-                                  if ($39) {
+                                  var $73 = t1 > v.t;
+                                  if ($73) {
                                       return {
                                           i: v.i + 1 | 0,
                                           bestI: v.i,
@@ -1923,8 +1950,8 @@ var PS = {};
           })();
           var porBytes2 = porLen(32.0)(d2.n / n1);
           var _assertNoHOPoRs = (function () {
-              var $114 = !(v.explicitPoRs && v.headerOmission);
-              if ($114) {
+              var $148 = !(v.explicitPoRs && v.headerOmission);
+              if ($148) {
                   return Data_Unit.unit;
               };
               return Effect_Unsafe.unsafePerformEffect(Effect_Exception.throwException(Effect_Exception.error("this function should never recieve (explicitPoRs && headerOmission)")));
@@ -1951,8 +1978,8 @@ var PS = {};
   };
   var utChainCalc = function (ps) {
       return function (v) {
-          var $121 = v.explicitPoRs && v.headerOmission;
-          if ($121) {
+          var $155 = v.explicitPoRs && v.headerOmission;
+          if ($155) {
               return utCalcHOPoRs(ps)({
                   hashTruncation: v.hashTruncation
               });
@@ -2076,18 +2103,19 @@ var PS = {};
           tradPolkadot: tradPolkadot
       };
   };
-  exports["pToPF"] = pToPF;
-  exports["mkSimplePs"] = mkSimplePs;
+  exports["allUtChainCalcs"] = allUtChainCalcs;
+  exports["allUtChainCalcsF"] = allUtChainCalcsF;
+  exports["applyTDiscountToBH"] = applyTDiscountToBH;
+  exports["auxStats"] = auxStats;
   exports["mkNestedPs"] = mkNestedPs;
+  exports["mkSimplePs"] = mkSimplePs;
+  exports["pToPF"] = pToPF;
+  exports["runChainCalcFor"] = runChainCalcFor;
   exports["tradChainCalc"] = tradChainCalc;
   exports["tradChainCalcEth2"] = tradChainCalcEth2;
   exports["tradChainCalcPolkadot"] = tradChainCalcPolkadot;
-  exports["applyTDiscountToBH"] = applyTDiscountToBH;
   exports["utChainCalc"] = utChainCalc;
-  exports["allUtChainCalcsF"] = allUtChainCalcsF;
-  exports["allUtChainCalcs"] = allUtChainCalcs;
-  exports["runChainCalcFor"] = runChainCalcFor;
-  exports["auxStats"] = auxStats;
+  exports["utScaleOptionsFmt"] = utScaleOptionsFmt;
 })(PS);
 (function(exports) {
   /* globals exports */
@@ -5285,6 +5313,12 @@ var PS = {};
   var Data_Show = $PS["Data.Show"];
   var $$Math = $PS["Math"];
   var Partial = $PS["Partial"];                
+  var ut_params_hot = {
+      explicitPoRs: false,
+      headerOmission: true,
+      hashTruncation: true,
+      onlyNecessaryHeaders: false
+  };
   var ut_params = {
       explicitPoRs: true,
       headerOmission: true,
@@ -5339,71 +5373,79 @@ var PS = {};
   };
   var tree_tiling_table = function (v) {
       return function (v1) {
-          var row_hs = Data_Function.flip(filter_big_hs_for_v)(v)((function () {
-              if (v1.lp) {
-                  return [ 0, 1, 2, 5, 10, 15, 20, 30, 60, 90 ];
+          return function (scaling_params) {
+              var ut_var_name = Amaroo_WP_Calcs.utScaleOptionsFmt(scaling_params);
+              var row_hs = Data_Function.flip(filter_big_hs_for_v)(v)((function () {
+                  if (v1.lp) {
+                      return [ 0, 1, 2, 5, 10, 15, 20, 30, 60 ];
+                  };
+                  return Data_Semigroup.append(Data_Semigroup.semigroupArray)(Data_Array.range(0)(6))([ 10, 15, 20, 25, 30 ]);
+              })());
+              var mkRow = function (d) {
+                  var ut_cs = Amaroo_WP_Calcs.utChainCalc(params_tt(v1.k))(scaling_params);
+                  var tile_n2 = ut_cs.d2.n / Data_Int.toNumber(v + 1 | 0);
+                  var tile_n1 = ut_cs.d1.n / Data_Int.toNumber(v + 1 | 0);
+                  var sx_to_tile_ratio = 1.0 / Data_Int.toNumber(v + 1 | 0);
+                  var tile_tps1 = ut_cs.d1.tps * sx_to_tile_ratio;
+                  var tile_tps2 = ut_cs.d2.tps * sx_to_tile_ratio;
+                  var n_tiles = tree_tiling.sigma_tiles({
+                      v: v,
+                      d: d
+                  });
+                  var s_n1 = n_tiles * tile_n1;
+                  var x_ut_n1 = s_n1 / ut_cs.d1.n;
+                  var s_n2 = n_tiles * tile_n2;
+                  var s_tps1 = n_tiles * tile_tps1;
+                  var s_tps2 = n_tiles * tile_tps2;
+                  var conf_rate = ut_cs.confRate * sx_to_tile_ratio;
+                  var _x_ut_tps2 = s_tps2 / ut_cs.d2.tps;
+                  var _x_ut_tps1 = s_tps1 / ut_cs.d1.tps;
+                  var _x_ut_n2 = s_n2 / ut_cs.d2.n;
+                  var _n_tiles_h = tree_tiling.tiles_at({
+                      v: v,
+                      d: d
+                  });
+                  return (function () {
+                      if (v1.lp) {
+                          return trim_for_lp;
+                      };
+                      return Amaroo_WP_Tables.id;
+                  })()(Data_Semigroup.append(Data_Semigroup.semigroupArray)(Data_Functor.map(Data_Functor.functorArray)(Amaroo_WP_Formatter.fmtDyn(Amaroo_WP_Formatter.fdStdMixed))([ Data_Int.toNumber(d), n_tiles, s_n1, s_n2, s_tps1, s_tps2 ]))(Data_Functor.map(Data_Functor.functorArray)(Amaroo_WP_Formatter.fmtDyn(Amaroo_WP_Formatter.fdStd))([ conf_rate, x_ut_n1 ])));
               };
-              return Data_Semigroup.append(Data_Semigroup.semigroupArray)(Data_Array.range(0)(6))([ 10, 15, 20, 25, 30, 60, 90 ]);
-          })());
-          var mkRow = function (d) {
-              var ut_cs = Amaroo_WP_Calcs.utChainCalc(params_tt(v1.k))(ut_params);
-              var tile_n2 = ut_cs.d2.n / Data_Int.toNumber(v + 1 | 0);
-              var tile_n1 = ut_cs.d1.n / Data_Int.toNumber(v + 1 | 0);
-              var sx_to_tile_ratio = 1.0 / Data_Int.toNumber(v + 1 | 0);
-              var tile_tps1 = ut_cs.d1.tps * sx_to_tile_ratio;
-              var tile_tps2 = ut_cs.d2.tps * sx_to_tile_ratio;
-              var n_tiles = tree_tiling.sigma_tiles({
-                  v: v,
-                  d: d
-              });
-              var s_n1 = n_tiles * tile_n1;
-              var x_ut_n1 = s_n1 / ut_cs.d1.n;
-              var s_n2 = n_tiles * tile_n2;
-              var s_tps1 = n_tiles * tile_tps1;
-              var s_tps2 = n_tiles * tile_tps2;
-              var conf_rate = ut_cs.confRate * sx_to_tile_ratio;
-              var _x_ut_tps2 = s_tps2 / ut_cs.d2.tps;
-              var _x_ut_tps1 = s_tps1 / ut_cs.d1.tps;
-              var _x_ut_n2 = s_n2 / ut_cs.d2.n;
-              var _n_tiles_h = tree_tiling.tiles_at({
-                  v: v,
-                  d: d
-              });
-              return (function () {
+              var headings = (function () {
                   if (v1.lp) {
                       return trim_for_lp;
                   };
                   return Amaroo_WP_Tables.id;
-              })()(Data_Semigroup.append(Data_Semigroup.semigroupArray)(Data_Functor.map(Data_Functor.functorArray)(Amaroo_WP_Formatter.fmtDyn(Amaroo_WP_Formatter.fdStdMixed))([ Data_Int.toNumber(d), n_tiles, s_n1, s_n2, s_tps1, s_tps2 ]))(Data_Functor.map(Data_Functor.functorArray)(Amaroo_WP_Formatter.fmtDyn(Amaroo_WP_Formatter.fdStd))([ conf_rate, x_ut_n1 ])));
+              })()([ (function () {
+                  if (v1.lp) {
+                      return "# of Layers";
+                  };
+                  return "$d$";
+              })(), "$N_{\\text{tiles}}$", "$\\Sigma N_1$", "$\\Sigma N_2$", "$\\Sigma \\text{TPS}_1$", "$\\Sigma \\text{TPS}_2$", "$\\mathbb{C}^\\prime$", "$\\times \\UT{\\text{" + (ut_var_name + "}}$") ]);
+              var l = Data_Array.length(headings);
+              return new Amaroo_WP_Tables_Types.Table(headings, {
+                  md: Data_Functor.map(Data_Functor.functorArray)(Amaroo_WP_Tables.mkSpacer)(Data_Array.replicate(l)(3)),
+                  texTabular: "l" + Amaroo_WP_Tables.repeatSafe(l - 1 | 0)("r")
+              }, Data_Functor.map(Data_Functor.functorArray)(mkRow)(row_hs));
           };
-          var headings = (function () {
-              if (v1.lp) {
-                  return trim_for_lp;
-              };
-              return Amaroo_WP_Tables.id;
-          })()([ (function () {
-              if (v1.lp) {
-                  return "# of Layers";
-              };
-              return "$h$";
-          })(), "$N_{\\text{tiles}}$", "$\\Sigma N_1$", "$\\Sigma N_2$", "$\\Sigma \\text{TPS}_1$", "$\\Sigma \\text{TPS}_2$", "$\\mathbb{C}^\\prime$", "$\\times \\UT{\\text{+OPT}}$" ]);
-          var l = Data_Array.length(headings);
-          return new Amaroo_WP_Tables_Types.Table(headings, {
-              md: Data_Functor.map(Data_Functor.functorArray)(Amaroo_WP_Tables.mkSpacer)(Data_Array.replicate(l)(3)),
-              texTabular: "l" + Amaroo_WP_Tables.repeatSafe(l - 1 | 0)("r")
-          }, Data_Functor.map(Data_Functor.functorArray)(mkRow)(row_hs));
       };
-  }; 
+  };            
+  var tree_tiling_3k_v3_table = tree_tiling_table(3)({
+      k: 3000.0,
+      lp: false
+  })(ut_params);
+  var tree_tiling_3k_v3_table_hot = tree_tiling_table(3)({
+      k: 3000.0,
+      lp: false
+  })(ut_params_hot);
   var tree_tiling_3k_v3_table_lp = tree_tiling_table(3)({
       k: 3000.0,
       lp: true
-  });
-  var tree_tiling_3k_v4_table = tree_tiling_table(4)({
-      k: 3000.0,
-      lp: false
-  });
+  })(ut_params);
+  exports["tree_tiling_3k_v3_table"] = tree_tiling_3k_v3_table;
+  exports["tree_tiling_3k_v3_table_hot"] = tree_tiling_3k_v3_table_hot;
   exports["tree_tiling_3k_v3_table_lp"] = tree_tiling_3k_v3_table_lp;
-  exports["tree_tiling_3k_v4_table"] = tree_tiling_3k_v4_table;
 })(PS);
 (function($PS) {
   // Generated by purs version 0.14.9
@@ -6535,7 +6577,7 @@ var PS = {};
               if (format instanceof HTML) {
                   return Amaroo_WP_Tables.showHtmlTable(v.value0);
               };
-              throw new Error("Failed pattern match at Main (line 197, column 16 - line 200, column 31): " + [ format.constructor.name ]);
+              throw new Error("Failed pattern match at Main (line 198, column 16 - line 201, column 31): " + [ format.constructor.name ]);
           })();
           return function __do() {
               Effect_Console.log(wnltn(v.value0))();
@@ -6619,7 +6661,7 @@ var PS = {};
   var defaultPositioning = [ Amaroo_WP_Tables_Types.Hereish.value, Amaroo_WP_Tables_Types.Top.value, Amaroo_WP_Tables_Types.Bottom.value, Amaroo_WP_Tables_Types.Override.value ];
   var devTables = [ new Amaroo_WP_Tables_Types.TD("compareUtOptimizationsA", Amaroo_WP_Tables.compareUtOptimizationsA, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tpsOhnOP", Amaroo_WP_Tables.tpsOhnOP, hereish), new Amaroo_WP_Tables_Types.TD("tpsOhnHO", Amaroo_WP_Tables.tpsOhnHO, hereish), new Amaroo_WP_Tables_Types.TD("tpsOhnHOT", Amaroo_WP_Tables.tpsOhnHOT, hereish) ];
   var lpTables = [ new Amaroo_WP_Tables_Types.TD("lp_compare_networks", Amaroo_WP_Tables.lpCompareNetworks, defaultPositioning), new Amaroo_WP_Tables_Types.TD("comparison_1m_tps", Amaroo_WP_Tables.compareNets1mTps, tablePageOnly), new Amaroo_WP_Tables_Types.TD("comparison_1m_tps_all", Amaroo_WP_Tables.compareNets1mTpsAll, tablePageOnly), new Amaroo_WP_Tables_Types.TD("lp_compare_ut2_to_optshard_20k", Amaroo_WP_Tables.lpCompareUt2OptShard20k, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tree_tiling_3k_v3_table", Amaroo_WP_Calcs_Tiling.tree_tiling_3k_v3_table_lp, hereish), new Amaroo_WP_Tables_Types.TD("lp_compare_optimizations_1", Amaroo_WP_Tables.lpCompareUtOptimizations1, defaultPositioning), new Amaroo_WP_Tables_Types.TD("lp_compare_ut1_to_eth2", Amaroo_WP_Tables.lpCompareUt1Eth2, defaultPositioning), new Amaroo_WP_Tables_Types.TD("lp_compare_ut1_to_optshard", Amaroo_WP_Tables.lpCompareUt1OptShard, defaultPositioning), new Amaroo_WP_Tables_Types.TD("lp_compare_ut2_to_optshard", Amaroo_WP_Tables.lpCompareUt2OptShard, defaultPositioning) ];
-  var wpTables = [ new Amaroo_WP_Tables_Types.TD("tps", Amaroo_WP_Tables.tableTps, defaultPositioning), new Amaroo_WP_Tables_Types.TD("dapp-chains", Amaroo_WP_Tables.dappChains, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_por", Amaroo_WP_Tables.tpsPor, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_port", Amaroo_WP_Tables.tpsPort, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_hopors", Amaroo_WP_Tables.tpsHOPoRs, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_hoports", Amaroo_WP_Tables.tpsHOPoRTs, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_ho", Amaroo_WP_Tables.tpsHO, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_hot", Amaroo_WP_Tables.tpsHOT, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_op", Amaroo_WP_Tables.tpsOP, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_opt", Amaroo_WP_Tables.tpsOPT, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations_a", Amaroo_WP_Tables.compareUtOptimizationsA, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations_b", Amaroo_WP_Tables.compareUtOptimizationsB, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations_a_20k", Amaroo_WP_Tables.compareUtOptimizationsA20k, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations_b_20k", Amaroo_WP_Tables.compareUtOptimizationsB20k, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_nets_3k", Amaroo_WP_Tables.compareNets3k, hereish), new Amaroo_WP_Tables_Types.TD("compare_nets_20k", Amaroo_WP_Tables.compareNets20k, hereish), new Amaroo_WP_Tables_Types.TD("comparison_1m_tps", Amaroo_WP_Tables.compareNets1mTps, hereish), new Amaroo_WP_Tables_Types.TD("tree_tiling_3k_v4_table", Amaroo_WP_Calcs_Tiling.tree_tiling_3k_v4_table, hereish) ];
+  var wpTables = [ new Amaroo_WP_Tables_Types.TD("tps", Amaroo_WP_Tables.tableTps, defaultPositioning), new Amaroo_WP_Tables_Types.TD("dapp-chains", Amaroo_WP_Tables.dappChains, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_por", Amaroo_WP_Tables.tpsPor, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_port", Amaroo_WP_Tables.tpsPort, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_hopors", Amaroo_WP_Tables.tpsHOPoRs, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_hoports", Amaroo_WP_Tables.tpsHOPoRTs, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_ho", Amaroo_WP_Tables.tpsHO, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_hot", Amaroo_WP_Tables.tpsHOT, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_op", Amaroo_WP_Tables.tpsOP, defaultPositioning), new Amaroo_WP_Tables_Types.TD("tps_opt", Amaroo_WP_Tables.tpsOPT, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations_a", Amaroo_WP_Tables.compareUtOptimizationsA, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations_b", Amaroo_WP_Tables.compareUtOptimizationsB, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations_a_20k", Amaroo_WP_Tables.compareUtOptimizationsA20k, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_optimizations_b_20k", Amaroo_WP_Tables.compareUtOptimizationsB20k, defaultPositioning), new Amaroo_WP_Tables_Types.TD("compare_nets_3k", Amaroo_WP_Tables.compareNets3k, hereish), new Amaroo_WP_Tables_Types.TD("compare_nets_20k", Amaroo_WP_Tables.compareNets20k, hereish), new Amaroo_WP_Tables_Types.TD("comparison_1m_tps", Amaroo_WP_Tables.compareNets1mTps, hereish), new Amaroo_WP_Tables_Types.TD("tree_tiling_3k_v3_table", Amaroo_WP_Calcs_Tiling.tree_tiling_3k_v3_table, hereish), new Amaroo_WP_Tables_Types.TD("tree_tiling_3k_v3_table_hot", Amaroo_WP_Calcs_Tiling.tree_tiling_3k_v3_table_hot, hereish) ];
   var allTables = (function () {
       if (Data_Array.elem(Data_Eq.eqString)("--lp-tables")($foreign.argv)) {
           return lpTables;
@@ -6630,7 +6672,7 @@ var PS = {};
       if (Data_Boolean.otherwise) {
           return wpTables;
       };
-      throw new Error("Failed pattern match at Main (line 123, column 1 - line 123, column 29): " + [  ]);
+      throw new Error("Failed pattern match at Main (line 124, column 1 - line 124, column 29): " + [  ]);
   })();
   var logAllTables = function (format) {
       return function __do() {
