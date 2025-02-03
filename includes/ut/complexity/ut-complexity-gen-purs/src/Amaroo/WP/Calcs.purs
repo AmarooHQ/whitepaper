@@ -1,4 +1,14 @@
-module Amaroo.WP.Calcs where
+module Amaroo.WP.Calcs
+  ( module Amaroo.WP.Calcs )
+  -- ( NestingStats, ParamsF, Params, ParamsL, ChainNestingParams, ChainStats
+  -- , mkSimplePs, utChainCalc, UtOptimizations, utScaleOptionsFmt
+  -- , UtVariants, allUtChainCalcs, allUtChainCalcsF, applyTDiscountToBH
+  -- , auxStats, mkNestedPs, mkSimplePs, pToPF, runChainCalcFor
+  -- , tradChainCalc, tradChainCalcEth2, tradChainCalcPolkadot
+  -- , utChainCalc, findMaxHOPoRsN1ForRanges, findMaxPoRsN1, findMaxPoRsN1ForRanges
+  -- , phiOverlapSec, porLen
+  -- )
+  where
 
 import Prel
 
@@ -87,6 +97,17 @@ type UtOptimizations
     , hashTruncation :: Boolean
     , onlyNecessaryHeaders :: Boolean
     }
+
+utScaleOptionsFmt :: UtOptimizations -> String
+utScaleOptionsFmt {explicitPoRs: false, headerOmission: false, hashTruncation: false, onlyNecessaryHeaders: _} = "+OP"
+utScaleOptionsFmt {explicitPoRs: false, headerOmission: false, hashTruncation: true, onlyNecessaryHeaders: _} = "+OPT"
+utScaleOptionsFmt {explicitPoRs: true, headerOmission: false, hashTruncation: false, onlyNecessaryHeaders: _} = "+PoRs"
+utScaleOptionsFmt {explicitPoRs: true, headerOmission: false, hashTruncation: true, onlyNecessaryHeaders: _} = "+PoRTs"
+utScaleOptionsFmt {explicitPoRs: true, headerOmission: true, hashTruncation: false, onlyNecessaryHeaders: _} = "+HOPoRs"
+utScaleOptionsFmt {explicitPoRs: true, headerOmission: true, hashTruncation: true, onlyNecessaryHeaders: _} = "+HOPoRTs"
+utScaleOptionsFmt {explicitPoRs: false, headerOmission: true, hashTruncation: false, onlyNecessaryHeaders: _} = "+HO"
+utScaleOptionsFmt {explicitPoRs: false, headerOmission: true, hashTruncation: true, onlyNecessaryHeaders: _} = "+HOT"
+
 
 type NestingStats
   = { tps :: Number

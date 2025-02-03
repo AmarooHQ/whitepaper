@@ -62,4 +62,44 @@ Share security, and \emph{capacity follows}.
 
 \subsubsection{Addressing the stronger version}
 
-In \autoref{subsec:trilemma} I took issue with the scalability criterion and suggested a stronger version: $O(n)$ transactions in $O(1)$ time.
+In \autoref{subsec:trilemma}, I took issue with the scalability criterion and suggested a stronger version: $O(n)$ transactions in $O(1)$ time.
+
+How can we reasonably estimate what an $O(n)$ transaction load looks like?
+There are approximately 8 billion people on Earth.
+If everyone one of them made 1000 transactions per day, the network would require $8 \times 10^{12}$ transactions per day, which is about 93 million ($\sim 10^8$) TPS.
+Clearly, this is greater than any of the TPS values we calculated above.
+
+For \UT{1\text{+HOT}} to reach $10^8$ TPS, we'd need a large $k > 20000$ and maybe a longer block period.
+
+\UT{2\text{+HOT}}, by comparison, is already around the $\Sigma \text{TPS}_2 \approx 5 \times 10^5$ mark with our standard chain parameters.
+If $B_f = \nicefrac{1}{60}$, then $\Sigma \text{TPS}_2 \approx 10^7$; however, $\Delta S$ would be around $5\times$ larger.
+That is a substantial increase in bandwidth requirements, and pushing to $10^8$ TPS is not really practical within $O(c)$ constraints.
+
+Alternatively, we can look to tiling for extra capacity in the first level of nesting.
+The big problem for arbitrarily large tilings is block availability.
+Smaller tilings with acceptable $\Delta S$ are still useful, though.
+
+\UTinf{1\text{+HOT}} reaches $10^8$ TPS around 15 layers ($d \le 15$) and would have about $10^7$ chains.
+If block availability in tilings remains an unsolved problem, then this is clearly not practical.
+
+On the other hand, \UTinf{2\text{+HOT}}, with standard chain parameters, reaches $\Sigma \text{TPS}_2 \approx 10^8$ at around 8 layers; a $\sim 100\times$ increase in the number of total chains (and $\Delta S$).
+This is much closer to reasonable parameters.
+Is it so close that, perhaps, an otherwise unacceptable technique could be used to ensure the availability of all simplex-tile blocks?
+An example of such a technique might be some kind of division of responsibility between miners so that they only need to ensure blocks from tiles above and below the given tile are available (in addition to blocks from that tile, of course).
+For all tiles other than the root tile, this would dramatically reduce $\Delta S$ to about $2^{-d}\times$ what it would otherwise be, where $d$ is the depth of the tile.
+
+So, \emph{if} the problem of block availability in a tiling can be and is solved, we are clearly $O(n)$ scalable with any tiling.
+However, if it remains unsolved then \UTinf2 is not \emph{currently} $O(n)$ scalable, but could potentially reach that in the near future.
+
+Finally, what about \UT3 and \UTinf3?
+
+A conservative estimate of \UT{3}'s TPS with standard chain parameters is around $10^7$.
+Given the sensitivity of this number to small changes in chain parameters, we could easily tweak things a little to reach $10^8$ TPS.
+
+\UTinf3, by comparison, could reach these kinds of numbers with only a 3 layers (the tiling shown in \autoref{fig:binary-tree-tiling-d3}).
+In turn, $\Delta S$ increases by just $4\times$ what it would be for a maximal simplex with the same chain parameters.
+Arguably, this is practical.
+
+% final concluding section
+\subsection{Terminus Est}
+% Translates as "this is the end / limit / dividing line / boundary"

@@ -60,16 +60,29 @@ UT$_\aleph$ achieves unbounded $O(n)$ scalability and opens the way to a truly u
         \toprule
         UT Config. & Decentralized? & $O(n)$ Secure? & \multicolumn{2}{l}{$O(n)$ Scalable?} \\
         \midrule
-        $\UT{1}$ & Yes & Yes & Maybe & (Max. TPS: $\sim$ 1K - 400K) \\
-        $\UT{2}$ & Yes & Yes & Possibly & (Max. TPS: $\sim$ 600K - 2B) \\
-        $\UT{3}$ & Yes & Yes & Probably & (Max. TPS: $\sim$ 300M - 6T) \\
-        $\UTinf{1}$ & Maybe & Yes & Probably & (Max. TPS: $\sim$ 50M - $10^{18}$) \\
-        $\UTinf{2}$ & Maybe & Yes & Yes & (Max. TPS: $\sim$ 300B - $10^{21}$) \\
-        $\UTinf{3}$ & Maybe & Yes & Yes & (Max. TPS: $\sim$ $10^{14}$ - $10^{25}$) \\
+        $\UT{1}$ & Yes & Yes & Unlikely & (Max. TPS: $\sim$ 1K - 400K) \\
+        $\UT{2}$ & Yes & Yes & Possibly & (Max. TPS: $\sim$ 60K - 2B) \\
+        $\UT{3}$ & Yes & Yes & Probably & (Max. TPS: $\sim$ 10M - 6T) \\
+        $\UTinf{1}$ & Maybe\footnotemark{} & Yes & Probably & (Max. TPS: $\sim$ 50M - $10^{18}$) \\
+        $\UTinf{2}$ & Maybe & Yes & Yes & (Max. TPS: $\sim$ 30B - $10^{21}$) \\
+        $\UTinf{3}$ & Yes\footnotemark{} & Yes & Yes & (Max. TPS: $\sim$ $10^{12}$ - $10^{25}$) \\
         \bottomrule
     \end{tabular}
 \label{table:ut-vs-trilemma}
 \end{table}
+
+\addtocounter{footnote}{-1}
+\footnotetext{
+    If the block availability problem can be solved for tilings, then all tilings are $O(n)$ scalable since their capacity is unbounded.
+    If it cannot, tilings are still useful but do not provide $O(n)$ scaling on their own.
+}
+
+\addtocounter{footnote}{1}
+\footnotetext{
+    \UTinf{3} is decentralized if the maximum tiling depth is kept low.
+    As we found earlier, \UTinf{3} with $d \le 3$ provided a tolerable $\Delta S$, and lead to a network-wide TPS of around $10^8$, even though we assumed dapp-chain headers to be $10\times$ worse than the theoretical maximum (dapp-chain headers would be hundreds of bytes).
+    \emph{This specific case} is what ``Yes'' refers to.
+}
 
 %% END ### RELEASE
 
