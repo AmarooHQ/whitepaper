@@ -22,9 +22,9 @@ This isn't a new idea: in 2013, I proposed a system which used this method to su
   \url{https://bitcointalk.org/index.php?topic=598784.0}
 }
 I also wrote a simplified implementation of this method for Bitcoin SPV proofs in the very early days of Ethereum\footnote{
-    \url{https://github.com/XertroV/coppr/blob/master/chainheaders.py} \href{https://web.archive.org/web/20240927044057/https://raw.githubusercontent.com/XertroV/coppr/refs/heads/master/chainheaders.py}{[m1]}
+    \url{\citeCopprChainheadersLink} \href{https://web.archive.org/web/20240927044057/https://raw.githubusercontent.com/XertroV/coppr/refs/heads/master/chainheaders.py}{[m1]}
 } --- a precursor to the later-successful BTC Relay\footnote{
-    \url{https://github.com/ethereum/btcrelay}
+    \url{\citeBTCRelayLink}
 } (although BTC Relay seems to have been abandoned in late 2017).
 
 What should we call an on-chain version of a headers-only chain?
@@ -32,7 +32,7 @@ Since there is no established term, let's call it a ``projection'', and let's ca
 
 \defineTermTex{Projection}{
   A \emph{projection} of a chain is its \emph{headers-only} version that has been recorded and evaluated \emph{by a different chain}.
-  For example, \href{https://github.com/ethereum/btcrelay}{BTC Relay} is a smart contract by which Ethereum previously hosted a \emph{projection} of Bitcoin.
+  For example, \href{\citeBTCRelayLink}{BTC Relay} is a smart contract by which Ethereum previously hosted a \emph{projection} of Bitcoin.
   The \emph{act} of one chain creating and maintaining the projection of another is called \emph{imaging}
 }
 

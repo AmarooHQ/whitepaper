@@ -1,118 +1,224 @@
-% todo: incomplete?
-\newcommand{\allCitations}{
-    \citeBitcoinFull \\
-    \citeAHBDSFull \\
-    \citeGhostFull \\
-    \citeInclusiveFull \\
-    \textbf{INCOMPLETE}
+%% ! Working
+%% What we want:
+%% \newcite{url}{title}{author}{date}
+%% 1. href{url}{Title}, Author, Date
+
+%% KEY citations
+%% \keyciteCommand -> returns a new command to use in the document.
+%% \keyciteDirect -> direct citation, will not return
+
+%% Supplementary citations
+%% \suppciteUrlCommand -> returns a new command to use in the document, will return only the URL
+%% \suppciteDirect -> direct citation, will not return
+%% \suppciteHrefCommand -> returns a command that will provide a \href{X}{Y};
+
+
+
+%% New list for Key references
+\newlistof{citation}{citation}{Key References}
+\newcounter{keycitationnum}
+
+%% New list for Supplementary References
+\newlistof{suppcites}{suppcites}{Supplementary References}
+\newcounter{suppcitesnum}
+
+%% Ignore all the page numbers and dots -- causing the latex
+%% compilation to error.
+\renewcommand{\cftcitationdotsep}{\cftnodots}
+\renewcommand{\cftcitationpresnum}{\relax}
+\renewcommand{\cftcitationaftersnum}{\hfill}
+
+\renewcommand{\cftsuppcitesdotsep}{\cftnodots}
+\renewcommand{\cftsuppcitespresnum}{\relax}
+\renewcommand{\cftsuppcitesaftersnum}{\hfill}
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% %%%% Citations to command %%%%
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%% Key citation direct entry to the list
+%% will not return, is used for manual citation additions.
+%% Usage: \keyciteDirect{title}{url}{author}{date}
+\newcommand{\keyciteDirect}[4]{
+    % reference the counter to increment the number
+    \refstepcounter{keycitationnum}
+    % add the item to the contents line, we need to disable the page number / section number reference, so that it doesn't break.
+    \addtocontents{%
+        citation% what list are we adding to?
+    }{%
+        \protect\contentsline{citation}{%
+            \thekeycitationnum. {{\href{#2}{#1}}, #3, #4.}%
+        }{}{}
+    }
 }
 
-% todo: incomplete?
-\newcommand{\allReferences}{
-    \citeSelfishMiningFull \\
-    \citeBeaconChainLink \\
-    \citeLJCoiledcoinFull \\
-    \textbf{INCOMPLETE}
+
+%% Key citation create a new command
+%% Will return a new command to use, which will provide the reference within
+%% the text.
+%% Usage: \keyciteCommand{commandName}{title}{url}{author}{date}
+%% e.g. \keyciteCommand{helloworld}{MyTitle}{http://title.com}{Me}{2025}
+%%          -> \helloworld
+\newcommand{\keyciteCommand}[5]{
+    \refstepcounter{keycitationnum}
+    \addtocontents{%
+        citation% what list are we adding to?
+    }{%
+        \protect\contentsline{citation}{%
+            \thekeycitationnum. {{\href{#3}{#2}}, #4, #5.}%
+        }{}{}
+    }
+    % Provide the command
+    \expandafter\def\csname#1\endcsname{%
+        {\href{#3}{#2}, #4, #5}%
+    }
 }
 
-%--- Util
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% %%%% Supplementary Commands %%%%
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% \newcommand\cfIpfs[1]{https://gateway.pinata.cloud/ipfs/#1}
-
-
-
-%--- Max's stuff
-
-\newcommand\urlQuantaBitcointalk{https://bitcointalk.org/index.php?topic=1057342}
-\newcommand\linkQantaBitcointalk{\href{\urlQuantaBitcointalk}{Instant transactions with a stream of work -- Quanta}\xspace}
-
-
-%--- GHOST
-
-\newcommand{\citeGhostLink}{%
-\href{https://web.archive.org/web/20220308084727/https://cloudflare-ipfs.com/ipfs/QmTDz4WuAXi2rV7Ei3pHHKTFCYGPeDbDoAkmypkHdJnnKe}{Secure High-Rate Transaction Processing in Bitcoin}%
-\xspace
+%% Supplementary citation direct entry to the list
+%% will not return, is used for manual citation additions.
+%% Usage: \suppciteDirect{title}{url}{author}{date}
+\newcommand{\suppciteDirect}[4]{
+    % reference the counter to increment the number
+    \refstepcounter{suppcitesnum}
+    % add the item to the contents line, we need to disable the page number / section number reference, so that it doesn't break.
+    \addtocontents{%
+        suppcites% what list are we adding to?
+    }{%
+        \protect\contentsline{suppcites}{%
+            \thesuppcitesnum. {{\href{#2}{#1}}, #3, #4.}%
+        }{}{}
+    }
 }
 
-\newcommand{\citeGhostAuthors}{%
-Sompolinsky, Zohar; 2013%
-\xspace
+%% Supplementary citation - returns a new command that will provide ONLY
+%% the URL that is passed in when called.
+%% Usage: \suppciteUrlCommand{command}{title}{url}{author}{date}
+%%      -> \command{}
+%%              -> url
+%% e.g. \suppciteUrlCommand{hello}{myweb}{http://my.web}{me}{2025}
+%%      \hello -> http://my.web
+\newcommand{\suppciteUrlCommand}[5]{
+    \refstepcounter{suppcitesnum}
+    \addtocontents{%
+        suppcites% what list are we adding to?
+    }{%
+        \protect\contentsline{suppcites}{%
+            \thesuppcitesnum. {{\href{#3}{#2}}, #4, #5.}%
+        }{}{}
+    }
+    % Provide the command
+    \expandafter\def\csname#1\endcsname{%
+        #3% JUST the url (http://....)
+    }
 }
 
-\newcommand{\citeGhostFull}{%
-\citeGhostLink{}
-% \href{https://web.archive.org/web/20220308084727/https://cloudflare-ipfs.com/ipfs/QmTDz4WuAXi2rV7Ei3pHHKTFCYGPeDbDoAkmypkHdJnnKe}{[m1]}
-(\citeGhostAuthors)%
-\xspace
+%% Supplementary citation create a new command
+%% Will return a new command to use, which will provide the reference within
+%% the text.
+%% Usage: \keyciteCommand{commandName}{title}{url}{author}{date}
+%% e.g. \keyciteCommand{helloworld}{MyTitle}{http://title.com}{Me}{2025}
+%%          -> \helloworld -> \href{http://title.com}{MyTitle}
+\newcommand{\suppciteHrefCommand}[5]{
+    \refstepcounter{suppcitesnum}
+    \addtocontents{%
+        suppcites% what list are we adding to?
+    }{%
+        \protect\contentsline{suppcites}{%
+          \thesuppcitesnum. {{\href{#3}{#2}}, #4, #5.}%
+        }{}{}
+    }
+    % Provide the command
+    \expandafter\def\csname#1\endcsname{%
+        {\href{#3}{#2 (#4, #5)}}%
+    }
 }
+
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% %%%% Citations below      %%%%
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%--- Max's stuff
+
+%%%% - Quanta
+\keyciteCommand{linkQuantaBitcointalk}{%
+  Instant Transactions with a stream of work -- Quanta%
+  }{%
+  https://web.archive.org/web/20240927041949/https://bitcointalk.org/index.php?topic=1057342%
+  }{XertroV}{2015}
+
+%%%% - MarketCoin (Pub Consideration)
+\suppciteDirect{%
+  For Public Consideration: [Marketcoin | MKC] A P2P Trustless Cryptocoin Exchange%
+  }{%
+  https://web.archive.org/web/20231115114704/https://bitcointalk.org/index.php?topic=198032.0%
+  }{XertroV}{2013}
+
+\suppciteDirect{%
+  [RFC] Marketcoin - A web of distributed markets with a common unit%
+}{%
+  https://web.archive.org/web/20240526020706/https://bitcointalk.org/index.php?topic=598784.0
+}{XertroV}{2014}
+
+\suppciteUrlCommand{citeCopprChainheadersLink}{%
+  Coppr: Chainheaders%
+  }{%
+  https://github.com/XertroV/coppr/blob/master/chainheaders.py%
+  }{XertroV}{2014}
+
+%%--- GHOST
+
+\keyciteCommand{citeGhostFull}{%
+    Secure High-Rate Transaction Processing in Bitcoin%
+  }{%
+    https://web.archive.org/web/20220308084727/https://cloudflare-ipfs.com/ipfs/QmTDz4WuAXi2rV7Ei3pHHKTFCYGPeDbDoAkmypkHdJnnKe%
+  }{{Sompolinsky, Zohar}}{2013}
 
 %--- DAA2
 
-\newcommand{\citeDaaTwoLink}{%
-    \href{https://web.archive.org/web/20211018043918/https://cloudflare-ipfs.com/ipfs/Qmd8BE6xYCH58LNipE1zZ7BCftemN8hQWnfZJSJYq5XUE8}{An Economic Analysis of Difficulty Adjustment Algorithms in Proof-of-Work Blockchain Systems}%
-    \xspace
-}
-
-\newcommand{\citeDaaTwoFull}{%
-    \citeDaaTwoLink{}
-    \href{https://web.archive.org/web/20211018042402/https://econ.hkbu.edu.hk/eng/Doc/20201016_NODA.pdf}{[m1]}
-    % \href{https://web.archive.org/web/20211018043918/https://cloudflare-ipfs.com/ipfs/Qmd8BE6xYCH58LNipE1zZ7BCftemN8hQWnfZJSJYq5XUE8}{[m2]}
-    (\citeDaaTwoAuthors)%
-    \xspace
-}
-
-\newcommand{\citeDaaTwoAuthors}{%
-    Noda, Okumura, Hashimoto; 2020%
-    \xspace
-}
+\keyciteCommand{citeDaaTwoLink}{%
+  An Economic Analysis of Difficulty Adjustment Algorithms in Proof-of-Work Blockchain Systems%
+  }{%
+  https://web.archive.org/web/20211018043918/https://cloudflare-ipfs.com/ipfs/Qmd8BE6xYCH58LNipE1zZ7BCftemN8hQWnfZJSJYq5XUE8%
+  }{{Noda, Okumura, Hashimoto}}{2020}
 
 %--- Analysis of hashrate-based double-spending
 
-\newcommand{\citeAHBDS}{%
-    \href{https://web.archive.org/web/20220209100515/https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{Analysis of hashrate-based double-spending}%
-    % \href{https://web.archive.org/web/20130426054844/https://bitcoil.co.il/Doublespend.pdf}{[m1]}
-    % \href{https://web.archive.org/web/20220209100515/https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{[m2]}
-    \xspace
-}
-
-\newcommand{\citeAHBDSFull}{%
-    \citeAHBDS{}
-    \href{https://web.archive.org/web/20130426054844/https://bitcoil.co.il/Doublespend.pdf}{[m1]}
-    \href{https://web.archive.org/web/20240927041834/https://gateway.pinata.cloud/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv}{[m2]}
-    (\citeAHBDSAuthors)%
-    \xspace
-}
-
-\newcommand{\citeAHBDSAuthors}{%
-    Rosenfeld; 2012%
-    \xspace
-}
+\keyciteCommand{citeAHBDS}{%
+  Analysis of hashrate-based double-spending%
+  }{%
+  https://web.archive.org/web/20220209100515/https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv%
+  }{Rosenfeld}{2012}
 
 %--- Inclusive
 
-\newcommand{\citeInclusive}{%
-    \href{https://web.archive.org/web/20210426004857/https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy}{Inclusive Block Chain Protocols}% by Yoad Lewenberg, Yonatan Sompolinsky, and Aviv Zohar. \href{https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Avivz Mirror}, \href{http://web.archive.org/web/20210426004808/https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{Archive.org Mirror}
-    \xspace
-}
+\keyciteCommand{citeInclusiveFull}{%
+  Inclusive Block Chain Protocols%
+  }{%
+    https://web.archive.org/web/20210426004857/https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy%
+  }{{Lewenberg, Sompolinsky, Zohar}}{2015}
 
-\newcommand{\citeInclusiveAuthors}{%
-    Lewenberg, Sompolinsky, Zohar; 2015%
-    \xspace
-}
-
-\newcommand{\citeInclusiveFull}{%
-    \citeInclusive{}
-    \href{https://web.archive.org/web/20210426004808/https://www.avivz.net/pubs/15/inclusive_btc_full.pdf}{[m1]}
-    % \href{https://web.archive.org/web/20210426004857/https://cloudflare-ipfs.com/ipfs/QmPb3oZBwyg1EJCR2CivnjTKWkf9UxhVbU8JByv6SW1pXy}{[m2]}
-    (\citeInclusiveAuthors)%
-    \xspace
-}
 
 %--- sharding faqs
 
-\newcommand{\citeShardingFAQsLink}{%
-https://web.archive.org/web/20220606205028/https://eth.wiki/sharding/Sharding-FAQs %
-}
+\suppciteUrlCommand{citeShardingFAQsLink}{%
+    Ethereum Wiki: On sharding blockchains FAQs%
+  }{%
+    https://web.archive.org/web/20220606205028/https://eth.wiki/sharding/Sharding-FAQs%
+  }{Buterin}{2020}
+
+%--- BTCRelay
+\suppciteUrlCommand{citeBTCRelayLink}{%
+  Ethereum - BTCRelay%
+  }{%
+  https://github.com/ethereum/btcrelay%
+  }{Ethereum Contributors}{2017}
 
 %--- Beacon chain
 
@@ -128,38 +234,57 @@ https://web.archive.org/web/20220606205028/https://eth.wiki/sharding/Sharding-FA
 \xspace
 }
 
-\newcommand{\citeBitcoinAuthors}{%
-    Satoshi Nakamoto; 2008%
-    \xspace
-}
+\keyciteCommand{citeBitcoinFull}{%
+  Bitcoin: A Peer-to-Peer Electronic Cash System,
+  }{%
+  https://bitcoin.org/bitcoin.pdf
+  }{Nakamoto}{2008}
 
-\newcommand{\citeBitcoinFull}{%
-    \citeBitcoinLink
-    (\citeBitcoinAuthors)%
-    \xspace
-}
+%%---- Segwit
+
+\suppciteUrlCommand{citeSegwitLink}{%
+  Segregated Witness%
+  }{%
+  https://web.archive.org/web/20240926154239/https://en.bitcoin.it/wiki/Segregated_Witness%
+  }{Bitcoin Wiki}{{2017 (edit 2021)}}
+
+\suppciteUrlCommand{citeBIPSWLink}{%
+  BIP-141%
+  }{%
+  https://web.archive.org/web/20240423183945/https://en.bitcoin.it/wiki/BIP_0141%
+  }{{Lombrozo, Lau, Wuille}}{2015}
 
 %--- Polkadot
 
-\newcommand{\citePolkadotLink}{%
-% \href{https://gateway.pinata.cloud/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Polkadot Whitepaper}%
-\href{https://web.archive.org/web/20240927041732/https://gateway.pinata.cloud/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Polkadot Whitepaper}%
-\xspace
-}
+%% \href{https://gateway.pinata.cloud/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Polkadot Whitepaper}%
+\suppciteUrlCommand{citePolkadotLink}{
+  Polkadot Whitepaper%
+  }{%
+    https://web.archive.org/web/20240927041732/https://gateway.pinata.cloud/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Wood}{2016}
+
+
+\suppciteUrlCommand{citeGrandpaLink}{%
+  GRANDPA: a Byzantine Finality Gadget%
+  }{%
+  https://github.com/w3f/consensus/blob/master/pdf/grandpa.pdf%
+  }{{Stewart, Kokoris-Kogia}}{2020}
 
 %--- Ouroboros
 
-\newcommand{\citeOuroborosLink}{%
-\href{https://web.archive.org/web/20240927042139/https://gateway.pinata.cloud/ipfs/QmWCAHyi35SeXH2E4e8jRVk7yNse2x6D14uPfABnhagbvN}{Ouroboros: A Provably Secure Proof-of-Stake Blockchain Protocol}%
-\xspace
-}
+
+\suppciteUrlCommand{citeOuroborosLink}{%
+  Ouroboros: A Provably Secure Proof-of-Stake Blockchain Protocol%
+  }{%
+    https://web.archive.org/web/20240927042139/https://gateway.pinata.cloud/ipfs/QmWCAHyi35SeXH2E4e8jRVk7yNse2x6D14uPfABnhagbvN%
+  }{{Kiayias, Russell, David, Oliynykov}}{2019}
 
 %--- eth yellow paper
 
-\newcommand{\citeEthYellowPaperLink}{%
-\href{https://web.archive.org/web/20240927042236/https://gateway.pinata.cloud/ipfs/QmcdwaEqKjsASs1sZqxBNPw5vmypE5YL61zSvWdGoX7wtC}{Ethereum Yellow Paper / Petersburg Version 41c1837}%
-\xspace
-}
+  \suppciteUrlCommand{citeEthYellowPaperLink}{%
+  Ethereum Yellow Paper / Petersburg Version 41c1837%
+  }{%
+  https://web.archive.org/web/20240927042236/https://gateway.pinata.cloud/ipfs/QmcdwaEqKjsASs1sZqxBNPw5vmypE5YL61zSvWdGoX7wtC%
+  }{Wood}{2021}%
 
 %--- selfish mining
 
@@ -174,11 +299,11 @@ Eyal, Sirer; 2013%
 \xspace
 }
 
-\newcommand{\citeSelfishMiningFull}{%
-\citeSelfishMiningLink
-(\citeSelfishMiningAuthors)%
-\xspace
-}
+\keyciteCommand{citeSelfishMiningFull}{%
+  Majority is not Enough: Bitcoin Mining is Vulnerable
+  }{%
+  https://web.archive.org/web/20240927042356/https://gateway.pinata.cloud/ipfs/QmNukb1L8BhEsiCbrmnkEJWAvUjhBHidinKMZKfCaLG6ep%
+  }{{Eyal, Sirer}}{2013}
 
 %--- luke jr coiledcoin
 
@@ -188,19 +313,25 @@ Eyal, Sirer; 2013%
     \href{https://bitcointalk.org/index.php?topic=56675.msg678006\#msg678006}{Luke Jr's attack on Coiledcoin}%
 }
 
-\newcommand{\citeLJCoiledcoinFull}{%
-    \citeLJCoiledcoinLink
-    \href{https://web.archive.org/web/20141006215827/https://bitcointalk.org/index.php?topic=56675.msg678006}{[m1]}%
-}
+\keyciteCommand{citeLJCoiledcoinFull}{%
+  Luke Jr's attack on Coiledcoin%
+  }{%
+  https://web.archive.org/web/20141006215827/https://bitcointalk.org/index.php?topic=56675.msg678006%
+  }{Luke-Jr}{2012}
 
 %--- zack-bitcoin docs re PoS
 
-\newcommand{\linkZackPoSDefence}{%
+\suppciteUrlCommand{linkZackPoSDefence}{%
+    The Defence of PoS%
+  }{%
     https://web.archive.org/web/20220309063254/https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/the_defence_of_pos.md%
-}
-\newcommand{\linkZackPoSCriticisms}{%
+}{Hess}{2021}
+
+\suppciteUrlCommand{linkZackPoSCriticisms}{%
+    Proof of Stake%
+  }{%
     https://web.archive.org/web/20220309063128/https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/proof_of_stake.md%
-}
+}{Hess}{2021}
 
 %--- solana stuff
 
@@ -237,12 +368,11 @@ Kiayias, Miller, and Zindros; 2018%
     \xspace
 }
 
-\newcommand\citeNIPoPoWsFull{%
-    \linkNIPoPoWs{}
-    \linkNIPoPoWsMirrors{}
-    (\citeNIPoPoWsAuthors{})%
-    \xspace
-}
+\keyciteCommand{citeNIPoPoWsFull}{%
+  Non-Interactive Proofs of Proof-of-Work%
+  }{%
+  https://web.archive.org/web/20190123153947/https://eprint.iacr.org/2017/963.pdf
+  }{{Kiayias, Miller, and Zindros}}{2018}
 
 
 % .dP"Y8 888888    db    888888 888888 88     888888 .dP"Y8 .dP"Y8
@@ -252,17 +382,23 @@ Kiayias, Miller, and Zindros; 2018%
 %
 % stateless
 
-\newcommand\linkZackStatelessFullNodes{%
-https://web.archive.org/web/20210523201110/https://github.com/zack-bitcoin/amoveo-docs/blob/master/design/stateless_full_node.md%
-}
+\suppciteUrlCommand{linkZackStatelessFullNodes}{%
+  Stateless Full Node%
+  }{%
+  https://web.archive.org/web/20210523201110/https://github.com/zack-bitcoin/amoveo-docs/blob/master/design/stateless_full_node.md%
+  }{Hess}{2021}
 
-\newcommand\linkButerinStatelessClients{%
-https://web.archive.org/web/20210602053116/https://ethresear.ch/t/the-stateless-client-concept/172%
-}
+\suppciteUrlCommand{linkButerinStatelessClients}{%
+  The Stateless Client Concept%
+  }{%
+  https://web.archive.org/web/20210602053116/https://ethresear.ch/t/the-stateless-client-concept/172%
+}{Vitalik Buterin}{2017}
 
-\newcommand\linkPToddDelayedTxoCommitments{%
-https://web.archive.org/web/20210224050038/https://petertodd.org/2016/delayed-txo-commitments%
-}
+\suppciteUrlCommand{linkPToddDelayedTxoCommitments}{%
+  Making UTXO Set Growth Irrelevant With Low-Latency Delayed TXO Commitments%
+  }{%
+    https://web.archive.org/web/20210224050038/https://petertodd.org/2016/delayed-txo-commitments%
+}{Peter Todd}{2016}
 
 
 % 888888 88""Yb 88 88     8b    d8    db
@@ -316,3 +452,66 @@ https://web.archive.org/web/20210224050038/https://petertodd.org/2016/delayed-tx
     \href{https://www.reddit.com/r/solana/comments/m44and/how_does_solana_solve_the_trilemma_decentralized/gqsfs9g/?context=3}{u/aeyakovenko reply to: ``How does Solana solve the trilemma: decentralized, scalable and secure?''}%
     \xspace
 }
+
+
+%% %%%%%%%%%%%%%%%%%%%%
+%% MISC LINKS        %%
+%% %%%%%%%%%%%%%%%%%%%%
+
+\suppciteHrefCommand{citeMMRLink}{%
+  Merkle Mountain Range%
+  }{%
+  https://github.com/opentimestamps/opentimestamps-server/blob/master/doc/merkle-mountain-range.md%
+  }{Todd}{2018}
+
+\suppciteHrefCommand{citeMerklixLink}{%
+  Merklix tree%
+  }{%
+  https://web.archive.org/web/20160928121722/http://www.deadalnix.me/2016/09/24/introducing-merklix-tree-as-an-unordered-merkle-tree-on-steroid%
+  }{deadalnix}{2016}
+
+\suppciteHrefCommand{citeTetoLink}{%
+  {T.E.T.O Draft}%
+  }{%
+  https://github.com/wildbunny/docs/blob/master/T.E.T.O-draft.pdf%
+  }{Firth}{2016}
+
+
+\suppciteHrefCommand{citeDagcoinLink}{%
+  DagCoin Draft%
+  }{%
+  https://web.archive.org/web/20240825150407/https://bitslog.com/wp-content/uploads/2015/09/dagcoin-v41.pdf%
+  }{Demian Lerner}{2015}
+
+\suppciteHrefCommand{citeIotaTalkLink}{%
+  IOTA BitcoinTalk Thread%
+  }{%
+  https://web.archive.org/web/20250126094356/https://bitcointalk.org/index.php?topic=1216479.0%
+  }{{Come-From-Beyond}}{2015}
+
+
+\suppciteHrefCommand{citeNipopowWhatLink}{%
+  {What are NIPoPoWs? (nipopows.com)}
+  }{%
+  https://web.archive.org/web/20210520174729/https://nipopows.com/%
+  }{NiPoPoWs.com}{2019}
+
+
+\suppciteHrefCommand{citeCriticalFallibilismCourse}{%
+  Critical Fallibilism Course%
+  }{%
+  https://curi.gumroad.com/l/mhtbA%
+  }{Temple}{2021}
+
+\suppciteHrefCommand{citeMultiFactorDecisionLink}{%
+  Multi-Factor Decision Making Math%
+  }{%
+  https://criticalfallibilism.com/multi-factor-decision-making-math%
+  }{Temple}{2021}
+
+\suppciteHrefCommand{citeOpenEthereumLink}{%
+  OpenEthereum%
+  }{%
+  https://github.com/openethereum/openethereum%
+  }{{OpenEthereum, Parity}}{2022}
+

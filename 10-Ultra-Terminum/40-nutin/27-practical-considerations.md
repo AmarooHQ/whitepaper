@@ -50,7 +50,7 @@ Do we *need* to include proofs of reflection, though? Is it possible to avoid th
 
 If miners of any simplex-chain download the blocks of *all* simplex-chains --- as mentioned in \autoref{sec:availability-of-blocks} --- then including all necessary proofs of reflection can be made redundant.
 Since miners, theoretically, have all the necessary data to construct the proofs, do those miners need to actually include those proofs?
-Could we treat those proofs as witnesses and prune them --- similar to Segregated Witness (SegWit)\footnote{\href{https://web.archive.org/web/20240926154239/https://en.bitcoin.it/wiki/Segregated_Witness}{Segregated Witness} was a new ``witness'' structure introduced to bitcoin blocks, separate from the transaction merkle tree. The structure contains data required to check transaction validity but not required to determine the transaction effects. Introduced with \href{https://web.archive.org/web/20240423183945/https://en.bitcoin.it/wiki/BIP_0141}{BIP-141}.}?
+Could we treat those proofs as witnesses and prune them --- similar to Segregated Witness (SegWit)\footnote{\href{\citeSegwitLink}{Segregated Witness} was a new ``witness'' structure introduced to bitcoin blocks, separate from the transaction merkle tree. The structure contains data required to check transaction validity but not required to determine the transaction effects. Introduced with \href{\citeBIPSWLink}{BIP-141}.}?
 
 \defineTermTex{Omitted Proofs (+OP)}{
     The UT protocol variant wherein miners/validators explicitly transmit \emph{only} the reflected header component of PoRs, such that necessary proofs of reflection themselves are deterministically recalculable
@@ -95,7 +95,7 @@ Traditionally, blockchain protocols have some *global* state and a state-transit
         \sigma_{t+1} \equiv \Upsilon(\sigma_t, T)
     \end{equation*}
     where $\Upsilon$ is the Ethereum state transition function.
-}[Dr. Gavin Wood; \citeEthYellowPaperLink, s2]
+}[Dr. Gavin Wood; \href{\citeEthYellowPaperLink}{Ethereum Yellow Paper / Petersburn Version 41c1837}, s2]
 ```
 
 One of the reasons for this tradition is that transactions are (typically) permitted to depend on any part of the global state. For example: a Bitcoin transaction is permitted to spend any UTXO, and an Ethereum smart contract may interact with any other smart contract on the Ethereum blockchain.
@@ -279,7 +279,7 @@ A confirmation is a *discrete* event that occurs when a block is produced. When 
 ```{=latex}
 \bquote{
     The probability of success [of a double-spend attempt] depends on the number of blocks [by which the honest network has an advantage], and not on the time constant $T_0$.
-}[Meni Rosenfeld; \citeAHBDS]
+}[Meni Rosenfeld; \citeAHBDS{}]
 ```
 
 In a traditional blockchain (e.g., Bitcoin, Ethereum Classic) confirmations occur, on average, at a predictable rate (that of the target block production frequency). Thus, for any *particular* traditional blockchain, a convenient time-based \emph{rule of thumb} can be devised, e.g., a Bitcoin transaction is safe to accept after 1 hour. However, this approximation only works because blocks (and thus confirmations) are only produced locally (to that blockchain) and at a probabilistic (roughly constant) rate. Put another way, the frequency of confirmations is identical to the frequency of blocks, $B_f$ Hz. Since $O(B_f) = O(1)$, the time-complexity of confirmation in these networks is also $O(1)$.

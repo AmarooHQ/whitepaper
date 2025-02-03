@@ -1097,13 +1097,13 @@ There are some other conjectured solutions to the *Nothing at Stake* problem.
 \bquote{
   %% cspell: disable-next-line
   Long-range ``nothing-at-stake'' attacks are circumvented through a simple ``checkpoint'' latch which prevents a dangerous chain-reorganisation of more than a particular chain-depth. To ensure newly-syncing clients are not able to be fooled onto the wrong chain, regular ``hard forks'' will occur (of at most the same period of the validators' bond liquidation) that hard-code recent checkpoint block hashes into clients.
-}[Dr. Gavin Wood; \citePolkadotLink, s5.2]
+}[Dr. Gavin Wood; \href{\citePolkadotLink}{Polkadot Whitepaper}, s5.2]
 ```
 
 ```{=latex}
 \bquote{
   Provided that stakeholders are frequently online, nothing at stake is taken care of by our analysis of forkable strings (even if the adversary brute-forces all possible strategies to fork the evolving blockchain in the near future, there is none that is viable), and our chain selection rule that instructs players to ignore very deep forks that deviate from the block they received the last time they were online.
-}[\citeOuroborosLink, s10]
+}[\href{\citeOuroborosLink}{Ouroboros: A Provably Secure Proof-of-Stake Blockchain Protocol}, s10]
 ```
 
 These two examples solve the \emph{Nothing at Stake} problem via mechanisms that are *external* to the protocol itself, i.e., hard-coded checkpoints and the requirement that nodes are online ``frequently''.
