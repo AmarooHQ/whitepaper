@@ -60,7 +60,7 @@ If \UT3 works, then we're talking millions of TPS at $k = 3000$ B/s.
 Share security, and \emph{capacity follows}.
 
 
-\subsubsection{Addressing the stronger version}
+\subsection{Addressing the stronger version}
 
 In \autoref{subsec:trilemma}, I took issue with the scalability criterion and suggested a stronger version: $O(n)$ transactions in $O(1)$ time.
 
@@ -76,6 +76,7 @@ If $B_f = \nicefrac{1}{60}$, then $\Sigma \text{TPS}_2 \approx 10^7$; however, $
 That is a substantial increase in bandwidth requirements, and pushing to $10^8$ TPS is not really practical within $O(c)$ constraints.
 
 Alternatively, we can look to tiling for extra capacity in the first level of nesting.
+We found in \autoref{sec:tiling-security} that tree-tilings can be constructed to be $O(n)$ secure, so all that remains to show is that \UTinf{} is $O(n)$ scalable \emph{and} decentralized \emph{at the same time}.
 The big problem for arbitrarily large tilings is block availability.
 Smaller tilings with acceptable $\Delta S$ are still useful, though.
 
@@ -88,8 +89,8 @@ Is it so close that, perhaps, an otherwise unacceptable technique could be used 
 An example of such a technique might be some kind of division of responsibility between miners so that they only need to ensure blocks from tiles above and below the given tile are available (in addition to blocks from that tile, of course).
 For all tiles other than the root tile, this would dramatically reduce $\Delta S$ to about $2^{-d}\times$ what it would otherwise be, where $d$ is the depth of the tile.
 
-So, \emph{if} the problem of block availability in a tiling can be and is solved, we are clearly $O(n)$ scalable with any tiling.
-However, if it remains unsolved then \UTinf2 is not \emph{currently} $O(n)$ scalable, but could potentially reach that in the near future.
+So, \emph{if} the problem of block availability in a tiling can be and is solved, we are clearly $O(n)$ scalable and decentralized with any tiling.
+However, if it remains unsolved then \UTinf2 is \emph{not currently} $O(n)$ scalable \emph{and} decentralized, but could potentially reach that in the near future.
 
 Finally, what about \UT3 and \UTinf3?
 
@@ -99,7 +100,95 @@ Given the sensitivity of this number to small changes in chain parameters, we co
 \UTinf3, by comparison, could reach these kinds of numbers with only 3 layers (the tiling shown in \autoref{fig:binary-tree-tiling-d3}).
 In turn, $\Delta S$ increases by just $4\times$ what it would be for a maximal simplex with the same chain parameters.
 Arguably, this is practical.
+Therefore, with carefully chosen parameters, \UTinf3 is $O(n)$ scalable and decentralized \emph{at the same time}.
 
 % final concluding section
 \subsection{Terminus Est}
 % Translates as "this is the end / limit / dividing line / boundary"
+
+What a ride, ey?
+Let's recap.
+
+We started from a simple idea: that a blockchain confirming the history of another blockchain was worth \emph{something}.
+From there, we constructed \emph{Proof of Reflection} --- a new consensus primitive that facilitates the summation of chain-work from different chains.
+We then found ways to convert work between chains that is compatible with our goals and context, allowing otherwise incompatible consensus methods to cooperate.
+
+Mutual PoR plus the conversion of work allowed us to construct \emph{the Simplex} and \UT1 --- a highly interconnected network of blockchains with $O(c^2)$ capacity.
+By utilizing one-way PoR in combination with existing blockchain designs, we added dapp-chains to construct \UT2 and bump the overall capacity to $O(c^3)$.
+Based on the observation that some current PoS networks claim to be $O(c^2)$ scalable, we used these designs as dapp-chains instead to construct \UT3 and reach $O(c^4)$ capacity.
+
+We then explored the practical side, and found that we needed the \AxiomOfAvailability to ensure reflections between simplex-chains only included available simplex-blocks.
+As we looked into the specifics of how we would structure blocks and PoRs, we found several optimizations that significantly reduced both the computational and bandwidth requirements for network participants.
+We also discussed how to support stateless clients and fraud proofs -- tools we would need later.
+This ultimately lead us to construct the PoR graph and the \AxiomOfMaximalReflection{}.
+We adapted NIPoPoWs into NIPoPoWRs, which work for the PoR graph instead of a standalone blockchain.
+We then integrated block-DAGs to prevent minority attackers from performing effective DoS or censorship attacks, and developed NIPoPPoWs which work with block-DAGs.
+We realized that we now had the conditions to \emph{require} miners to build on the latest block(s) without any appreciable downside, and enshrined this as the \AxiomOfUnifiedAncestry{}.
+Throughout this, we found that these new constructions lacked multiple weaknesses that apply to traditional chains, even though solving those problems was not one of our goals.
+Selfish Mining and PoS long range attacks are two such examples.
+Somewhat surprisingly, we also found that the confirmation rate of a simplex is \emph{inversely proportional to $c$}!
+Not only is this faster than any existing network, but the dynamics of block production cause \emph{miner resonance}, which acts to synchronize miners and reduces the variance in block production times, even in purely PoW simplexes.
+Using our newfound knowledge, we tested the \emph{Confirmation Equivalence Conjecture} and found that all indications are that it is true.
+Taking all of this, we devised a fast, succinct, secure, and reliable method for intra-simplex cross-chain transactions.
+And with that, we completed the design for \UT1 and the Simplex.
+
+We analyzed this design more formally, and found that \UT1 was indeed and $O(c^2)$ construction.
+We also saw how every relevant aspect of \UT1 was within $O(c)$ constraints, except for $\Delta S$, which was $O(c^2)$.
+However, when we checked the \emph{actual numbers}, there were chain parameters where $\Delta S$ was perfectly acceptable, and would be easily accommodated by today's standards.
+At this point we were already out-scaling any existing blockchain design, but that didn't stop us confirming the scalability of \UT2 and \UT3, and calculating some impressive capacity estimates as a result.
+
+After all this, we reconsidered how simplex-chains might be organized and discovered \emph{Recursive PoRs} and \emph{Simplex Tilings}, with a particular focus on tree-tilings.
+We developed a security model for tree-tilings that was secure against an attacker with up to 49.5\% of the network hash rate.
+Were it not for the bandwidth requirements on miners to ensure block availability (which conflicts with the \AxiomOfAvailability{}), this would be the ultimate scaling construction as it is practically unbounded --- we could always add more tiles, growing the capacity exponentially with the diameter of the tiling.
+We don't know if that availability problem is solvable, but even if it isn't, we saw how smaller tilings are still useful.
+
+Penultimately, we evaluated \UT1 against \emph{Buterin's Trilemma} and found that it satisfied all 3 criteria as originally put.
+But that was not enough, so we examined each scaling configuration of \UT{} against a stronger trilemma.
+Most configurations, although boasting impressive capacity, fell short of what we set as the standard for $O(n)$ scalability: 100 million TPS.
+But! We did find one configuration that definitely worked: \UTinf3.
+
+With that, I think it's finally time to make \emph{the} claim.
+
+\emph{Buterin's Trilemma} is solved. $\blacksquare$
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[max width=\linewidth]{trilemma/conflict_resolution_sag}
+    \caption{A solution to the core conflict of \textit{Buterin's Trilemma}.}
+    \label{fig:trilemma-core-conflict-solved}
+\end{figure}
+
+% \addtocounter{footnote}{-1}
+\newcommand\trilTableFnA{
+    If the block availability problem can be solved for tilings, then all tilings are $O(n)$ scalable since their capacity is unbounded.
+    If it cannot, tilings are still useful but do not provide $O(n)$ scaling on their own.
+}
+
+% \addtocounter{footnote}{1}
+\newcommand\trilTableFnB{
+    \UTinf{3} is decentralized if the maximum tiling depth is kept low.
+    As we found earlier, \UTinf{3} with $d \le 3$ provided a tolerable $\Delta S$, and lead to a network-wide TPS of around $10^8$, even though we assumed dapp-chain headers to be $10\times$ worse than the theoretical maximum (dapp-chain headers would be hundreds of bytes).
+    \emph{This specific case} is what ``Yes'' refers to.
+}
+
+\begin{table}[p]
+    \centering
+    \caption{
+        Table evaluating UT against trilemma criteria. TPS ranges are the minimum and maximum values for $3000 \le k \le 20000$ B/s across all \UT{} variants.
+    }
+    \begin{tabular}{lllll}
+        \toprule
+        UT Config. & Decentralized? & $O(n)$ Secure? & \multicolumn{2}{l}{$O(n)$ Scalable?} \\
+        \midrule
+        $\UT{1}$ & Yes & Yes & Unlikely & (Max. TPS: $\sim$ 1K - 400K) \\
+        $\UT{2}$ & Yes & Yes & Possibly & (Max. TPS: $\sim$ 60K - 2B) \\
+        $\UT{3}$ & Yes & Yes & Probably & (Max. TPS: $\sim$ 10M - 6T) \\
+        $\UTinf{1}$ & Maybe\tablefootnote{\trilTableFnA} & Yes & Probably & (Max. TPS: $\sim$ 50M - $10^{18}$) \\
+        $\UTinf{2}$ & Maybe & Yes & Yes & (Max. TPS: $\sim$ 30B - $10^{21}$) \\
+        $\UTinf{3}$ & Yes\tablefootnote{\trilTableFnB} & Yes & Yes & (Max. TPS: $\sim$ $10^{12}$ - $10^{25}$) \\
+        \bottomrule
+    \end{tabular}
+\label{table:ut-vs-trilemma}
+\end{table}
+
+% \clearpage

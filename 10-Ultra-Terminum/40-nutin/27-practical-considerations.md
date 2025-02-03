@@ -279,7 +279,7 @@ A confirmation is a *discrete* event that occurs when a block is produced. When 
 ```{=latex}
 \bquote{
     The probability of success [of a double-spend attempt] depends on the number of blocks [by which the honest network has an advantage], and not on the time constant $T_0$.
-}[Meni Rosenfeld; \citeAHBDS]
+}[Meni Rosenfeld; \citeAHBDS{}]
 ```
 
 In a traditional blockchain (e.g., Bitcoin, Ethereum Classic) confirmations occur, on average, at a predictable rate (that of the target block production frequency). Thus, for any *particular* traditional blockchain, a convenient time-based \emph{rule of thumb} can be devised, e.g., a Bitcoin transaction is safe to accept after 1 hour. However, this approximation only works because blocks (and thus confirmations) are only produced locally (to that blockchain) and at a probabilistic (roughly constant) rate. Put another way, the frequency of confirmations is identical to the frequency of blocks, $B_f$ Hz. Since $O(B_f) = O(1)$, the time-complexity of confirmation in these networks is also $O(1)$.

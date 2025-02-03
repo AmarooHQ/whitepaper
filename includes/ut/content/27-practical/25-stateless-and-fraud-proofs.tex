@@ -21,7 +21,7 @@ In other words: the prior state root, the witness data, and the full block are a
 
 Supporting stateless nodes introduces some constraints on the cryptographic design of state and blocks.
 Updates to the state tree must be computationally efficient --- something like $O(\log m)$ complexity for $m$ total state elements.
-Practically, it appears that this requires using an append only structure (e.g., a \suppciteref{https://github.com/opentimestamps/opentimestamps-server/blob/master/doc/merkle-mountain-range.md}{Merkle Mountain Range}), or some kind of merklized prefix tree (e.g., a \suppciteref{https://web.archive.org/web/20160928121722/http://www.deadalnix.me/2016/09/24/introducing-merklix-tree-as-an-unordered-merkle-tree-on-steroid}{Merklix tree}).
+Practically, it appears that this requires using an append only structure (e.g., a \citeMMRLink{}), or some kind of merklized prefix tree (e.g., a \citeMerklixLink{}).
 Additionally, headers should\footnote{
     This isn't \emph{strictly} necessary --- it could be recorded elsewhere in a block, e.g., the coinbase transaction.
     However, in that case, the effective header size becomes the actual header, plus the branch to the coinbase tx, plus the coinbase tx.
