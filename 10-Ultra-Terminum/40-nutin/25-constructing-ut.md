@@ -268,13 +268,6 @@ This section is left unchanged since the specific client we might modify is imma
 
 \subsubsection{Dapp-chain simplexes}
 
-\todoDraftOnly[m]{Write sections on Dapp-chain simplex and dapp-dapp-chains}
-
-\todo{
-  Dapp-chains can make simplexes between each other (in addition to one-way PoR with their host simplex-chain).
-  This is mb useful?
-}
-
 \subsubsection{Future Dapp-chain Stuff (todo)}
 
 \todo{finish below about future dapp-chain stuff}
