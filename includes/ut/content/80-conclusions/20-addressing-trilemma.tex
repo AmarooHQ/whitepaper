@@ -102,9 +102,18 @@ In turn, $\Delta S$ increases by just $4\times$ what it would be for a maximal s
 Arguably, this is practical.
 Therefore, with carefully chosen parameters, \UTinf3 is $O(n)$ scalable and decentralized \emph{at the same time}.
 
+
+
+
+
 % final concluding section
 \subsection{Terminus Est}
 % Translates as "this is the end / limit / dividing line / boundary"
+
+
+
+
+
 
 What a ride, ey?
 Let's recap.
@@ -112,6 +121,54 @@ Let's recap.
 We started from a simple idea: that a blockchain confirming the history of another blockchain was worth \emph{something}.
 From there, we constructed \emph{Proof of Reflection} --- a new consensus primitive that facilitates the summation of chain-work from different chains.
 We then found ways to convert work between chains that is compatible with our goals and context, allowing otherwise incompatible consensus methods to cooperate.
+
+
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[max width=\linewidth]{trilemma/conflict_resolution_sag}
+    \caption{A solution to the core conflict of \textit{Buterin's Trilemma}.}
+    \label{fig:trilemma-core-conflict-solved}
+\end{figure}
+
+\newcommand\trilTableFnA{
+    If the block availability problem can be solved for tilings, then all tilings are $O(n)$ scalable since their capacity is unbounded.
+    If it cannot, tilings are still useful but do not provide $O(n)$ scaling on their own.
+}
+
+\newcommand\trilTableFnB{
+    \UTinf{3} is decentralized if the maximum tiling depth is kept low.
+    As we found earlier, \UTinf{3} with $d \le 3$ provided a tolerable $\Delta S$, and lead to a network-wide TPS of around $10^8$, even though we assumed dapp-chain headers to be $10\times$ worse than the theoretical maximum (dapp-chain headers would be hundreds of bytes).
+    \emph{This specific case} is what ``Yes'' refers to.
+}
+
+\begin{table}[p]
+    \centering
+    \caption{
+        Table evaluating UT against trilemma criteria. TPS ranges are the minimum and maximum values for $3000 \le k \le 20000$ B/s across all \UT{} variants.
+    }
+    \begin{tabular}{lllll}
+        \toprule
+        UT Config. & Decentralized? & $O(n)$ Secure? & \multicolumn{2}{l}{$O(n)$ Scalable?} \\
+        \midrule
+        $\UT{1}$ & Yes & Yes & Unlikely & (Max. TPS: $\sim$ 1K - 400K) \\
+        $\UT{2}$ & Yes & Yes & Possibly & (Max. TPS: $\sim$ 60K - 2B) \\
+        $\UT{3}$ & Yes & Yes & Probably & (Max. TPS: $\sim$ 10M - 6T) \\
+        $\UTinf{1}$ & Maybe\footnotemark{} & Yes & Probably & (Max. TPS: $\sim$ 50M - $10^{18}$) \\
+        $\UTinf{2}$ & Maybe & Yes & Yes & (Max. TPS: $\sim$ 30B - $10^{21}$) \\
+        $\UTinf{3}$ & Yes\footnotemark{} & Yes & Yes & (Max. TPS: $\sim$ $10^{12}$ - $10^{25}$) \\
+        \bottomrule
+    \end{tabular}
+\label{table:ut-vs-trilemma}
+\end{table}
+
+\clearpage
+
+\addtocounter{footnote}{-1}
+\footnotetext{\trilTableFnA}
+\addtocounter{footnote}{1}
+\footnotetext{\trilTableFnB}
+
 
 Mutual PoR plus the conversion of work allowed us to construct \emph{the Simplex} and \UT1 --- a highly interconnected network of blockchains with $O(c^2)$ capacity.
 By utilizing one-way PoR in combination with existing blockchain designs, we added dapp-chains to construct \UT2 and bump the overall capacity to $O(c^3)$.
@@ -150,45 +207,5 @@ But! We did find one configuration that definitely worked: \UTinf3.
 With that, I think it's finally time to make \emph{the} claim.
 
 \emph{Buterin's Trilemma} is solved. $\blacksquare$
-
-\begin{figure}[p]
-    \centering
-    \includegraphics[max width=\linewidth]{trilemma/conflict_resolution_sag}
-    \caption{A solution to the core conflict of \textit{Buterin's Trilemma}.}
-    \label{fig:trilemma-core-conflict-solved}
-\end{figure}
-
-% \addtocounter{footnote}{-1}
-\newcommand\trilTableFnA{
-    If the block availability problem can be solved for tilings, then all tilings are $O(n)$ scalable since their capacity is unbounded.
-    If it cannot, tilings are still useful but do not provide $O(n)$ scaling on their own.
-}
-
-% \addtocounter{footnote}{1}
-\newcommand\trilTableFnB{
-    \UTinf{3} is decentralized if the maximum tiling depth is kept low.
-    As we found earlier, \UTinf{3} with $d \le 3$ provided a tolerable $\Delta S$, and lead to a network-wide TPS of around $10^8$, even though we assumed dapp-chain headers to be $10\times$ worse than the theoretical maximum (dapp-chain headers would be hundreds of bytes).
-    \emph{This specific case} is what ``Yes'' refers to.
-}
-
-\begin{table}[p]
-    \centering
-    \caption{
-        Table evaluating UT against trilemma criteria. TPS ranges are the minimum and maximum values for $3000 \le k \le 20000$ B/s across all \UT{} variants.
-    }
-    \begin{tabular}{lllll}
-        \toprule
-        UT Config. & Decentralized? & $O(n)$ Secure? & \multicolumn{2}{l}{$O(n)$ Scalable?} \\
-        \midrule
-        $\UT{1}$ & Yes & Yes & Unlikely & (Max. TPS: $\sim$ 1K - 400K) \\
-        $\UT{2}$ & Yes & Yes & Possibly & (Max. TPS: $\sim$ 60K - 2B) \\
-        $\UT{3}$ & Yes & Yes & Probably & (Max. TPS: $\sim$ 10M - 6T) \\
-        $\UTinf{1}$ & Maybe\tablefootnote{\trilTableFnA} & Yes & Probably & (Max. TPS: $\sim$ 50M - $10^{18}$) \\
-        $\UTinf{2}$ & Maybe & Yes & Yes & (Max. TPS: $\sim$ 30B - $10^{21}$) \\
-        $\UTinf{3}$ & Yes\tablefootnote{\trilTableFnB} & Yes & Yes & (Max. TPS: $\sim$ $10^{12}$ - $10^{25}$) \\
-        \bottomrule
-    \end{tabular}
-\label{table:ut-vs-trilemma}
-\end{table}
 
 % \clearpage
