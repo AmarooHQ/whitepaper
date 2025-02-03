@@ -71,7 +71,7 @@
     }
     % Provide the command
     \expandafter\def\csname#1\endcsname{%
-        {\href{#3}{#2}, #4, #5}%
+      {\href{#3}{#2 (#4; #5)}}%
     }
 }
 
@@ -134,7 +134,7 @@
     }
     % Provide the command
     \expandafter\def\csname#1\endcsname{%
-        {\href{#3}{#2 (#4, #5)}}%
+        {\href{#3}{#2 (#4; #5)}}%
     }
 }
 
@@ -392,13 +392,13 @@ Kiayias, Miller, and Zindros; 2018%
   The Stateless Client Concept%
   }{%
   https://web.archive.org/web/20210602053116/https://ethresear.ch/t/the-stateless-client-concept/172%
-}{Vitalik Buterin}{2017}
+}{Buterin}{2017}
 
 \suppciteUrlCommand{linkPToddDelayedTxoCommitments}{%
   Making UTXO Set Growth Irrelevant With Low-Latency Delayed TXO Commitments%
   }{%
     https://web.archive.org/web/20210224050038/https://petertodd.org/2016/delayed-txo-commitments%
-}{Peter Todd}{2016}
+}{Todd}{2016}
 
 
 % 888888 88""Yb 88 88     8b    d8    db
@@ -497,13 +497,15 @@ Kiayias, Miller, and Zindros; 2018%
   }{NiPoPoWs.com}{2019}
 
 
-\suppciteHrefCommand{citeCriticalFallibilismCourse}{%
+ %%---- Elliot Temple
+
+\keyciteCommand{citeCriticalFallibilismCourse}{%
   Critical Fallibilism Course%
   }{%
   https://curi.gumroad.com/l/mhtbA%
   }{Temple}{2021}
 
-\suppciteHrefCommand{citeMultiFactorDecisionLink}{%
+\keyciteCommand{citeMultiFactorDecisionLink}{%
   Multi-Factor Decision Making Math%
   }{%
   https://criticalfallibilism.com/multi-factor-decision-making-math%
