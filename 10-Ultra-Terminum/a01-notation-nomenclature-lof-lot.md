@@ -90,7 +90,9 @@ Term & Definition & Reference \\
 \newpage
 
 \listofcitation
+
 \addcontentsline{toc}{section}{References}
+
 \listofsuppcites
 
 %%\listofalgorithms
