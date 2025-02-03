@@ -280,7 +280,7 @@ Thus, the PoR graph of that tile is easily dominated by any block that can estab
 Since we're outside the core, the local tile will produce approximately $r^{-d}$ work (in terms of the unit tile), and its children will contribute $ur^{-(d+1)}$ work at most.
 Note that $ur^{-(d+1)} < r^{-d}$.
 By comparison, the work contributed by the parent tile is $\Mroot + r^{-1} + r^{-2} + \cdots + r^{-(d-1)}$.
-Given $\Mroot > 1$, the volume of work contributed via recursive PoRs is at least $\Mroot \nicefrac{r^d}{2} > \Mroot r^{d-1}$ times greater than the work contributed by the tile and its children.
+Given $\Mroot > 1$, the volume of work contributed via recursive PoRs is at least $\nicefrac{\Mroot r^d}{2} > \Mroot r^{d-1}$ times greater than the work contributed by the tile and its children.
 Therefore, one honest miner in that tiling can prevent severance by producing, at most, 1 block for every $\Mroot r^{d-1}$ blocks produced by the attacker.
 
 If the attacker wishes to avoid this incredible disadvantage, they must attack the parent tile too.
