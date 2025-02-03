@@ -18,7 +18,7 @@ For example, Ethereum 2 has *The Beacon Chain* --- its root-chain (the single ba
 ```{=latex}
 \bquote{
     The Beacon Chain will conduct or coordinate the expanded network of shards and stakers. But it won't be like the Ethereum mainnet of today. It can't handle accounts or smart contracts.
-}[\citeBeaconChainLink{}]
+}[\citeBeaconChainLink{} (2021)]
 ```
 
 This type of configuration, where a base-chain facilitates child-chains, is referred to as *nesting* in this section and in the context of UT's architecture and complexity.
@@ -121,12 +121,11 @@ Thus $O(T_2) = O(c^2)$ as expected.
 It's typical, though, that the headers of nested chains, alone, are not sufficient: additional data is required.
 When such data is required to be recorded on-chain (i.e., it cannot be deterministically regenerated), then the \emph{effective} header size is the size of the raw header, plus the size of any auxiliary data.
 
-\todoDraftOnly[h]{check copy below}
-
 \aside{
-    It is important to note for the calculations in this paper, `Ethereum 2' is referencing the sharded beacon chain design for the layer 1 as was written in 2021, not the rollup-centric \href{https://web.archive.org/web/20250105115555/https://ethereum.org/en/roadmap/danksharding/}{danksharding} approach where shards are primarily used for data availability as of January 2025.
-    This is primarily used to illustrate as an example of a sharded $O(c^2)$ layer 1 blockchain, and keep the calculations for block requirements and throughput purely to the layer 1.
-    Given the changes introduced through the \href{https://web.archive.org/web/20241001092213/https://github.com/ethereum/consensus-specs/blob/dev/specs/deneb/beacon-chain.md}{deneb}, and the separation of beacon blocks and execution payloads, we use the original sharded blockchain approach for the calculations with beacon block headers and the main sharded beacon chain design.
+    Note that, for the calculations in this paper, `Ethereum 2' means the sharded beacon chain design as written in 2021, not the rollup-centric \href{https://web.archive.org/web/20250105115555/https://ethereum.org/en/roadmap/danksharding/}{danksharding} approach being pursued as of January 2025.
+    % where shards are primarily used for data availability (as of January 2025).
+    % Here, Eth2 is used as an example of a sharded $O(c^2)$ layer 1 blockchain, and all calculations around throughput, number of chains, etc only consider layer 1.
+    % Given the changes introduced through \href{https://web.archive.org/web/20241001092213/https://github.com/ethereum/consensus-specs/blob/dev/specs/deneb/beacon-chain.md}{deneb}, and the separation of beacon blocks and execution payloads, we use the original sharded blockchain approach for the calculations with beacon block headers and the main sharded beacon chain design.
 }
 
 For example, in an \emph{Ethereum 2} beacon block, each shard has a header size of 280 B, but there is additional overhead.
@@ -379,7 +378,7 @@ A simplex-chain reflects $N_1 - 1 \approx N_1$ other simplex-chains. A merkle tr
 
 Note: In a production system, these proofs can be excluded from blocks by treating them as droppable witnesses; see \autoref{sec:proving-reflection}.
 
-\todoDraftOnly[h]{Total reflections + computational burden (+PoRs vs omitted proofs) --- $O(c)$ vs $O(c^2)$}
+<!-- \todoDraftOnly[h]{Total reflections + computational burden (+PoRs vs omitted proofs) --- $O(c)$ vs $O(c^2)$} -->
 
 \subsection{TPS Complexity Comparison}
 

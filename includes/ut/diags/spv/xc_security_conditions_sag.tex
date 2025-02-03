@@ -23,9 +23,9 @@ dotsnode/.style={draw=black!0, fill=white!5, minimum size=2mm},
 %Nodes
 \node[roundednode]      (chainr)                              {Chain R};
 \node[dotsnode]      (chainrpast) [right=of chainr, xshift=-0.5cm]   {$\dots$};
-\node[squarednode]      (remote4)  [right=of chainrpast]      {$R_{j-k_3}$};
-\node[squarednode]      (remote3)  [right=of remote4]         {$R_{j-k_2}$};
-\node[squarednode]      (remote2)  [right=of remote3]         {$R_{j-k_1}$};
+\node[squarednode]      (remote4)  [right=of chainrpast]      {$R_{j-x_3}$};
+\node[squarednode]      (remote3)  [right=of remote4]         {$R_{j-x_2}$};
+\node[squarednode]      (remote2)  [right=of remote3]         {$R_{j-x_1}$};
 \node[squarednode]      (remote1)  [right=of remote2]         {$R_{j - \lambda}$};
 \node[dotsnode]      (remotex)  [right=of remote1]         {$\dots$};
 \node[squarednode]      (remote0)  [right=of remotex]         {$R_j$};
