@@ -75,6 +75,50 @@
     }
 }
 
+%% Supplementary citation - returns a new command that will provide ONLY
+%% the URL that is passed in when called.
+%% Usage: \suppciteUrlCommand{command}{title}{url}{author}{date}
+%%      -> \command{}
+%%              -> url
+%% e.g. \suppciteUrlCommand{hello}{myweb}{http://my.web}{me}{2025}
+%%      \hello -> http://my.web
+\newcommand{\keyciteUrlCommand}[5]{
+    \refstepcounter{keycitationnum}
+    \addtocontents{%
+        citation% what list are we adding to?
+    }{%
+        \protect\contentsline{citation}{%
+            \thekeycitationnum. {{\href{#3}{#2}}, #4, #5.}%
+        }{}{}
+    }
+    % Provide the command
+    \expandafter\def\csname#1\endcsname{%
+        #3% JUST the url (http://....)
+    }
+}
+
+%% Supplementary citation create a new command
+%% Will return a new command to use, which will provide the reference within
+%% the text.
+%% Usage: \keyciteCommand{commandName}{title}{url}{author}{date}
+%% e.g. \keyciteCommand{helloworld}{MyTitle}{http://title.com}{Me}{2025}
+%%          -> \helloworld -> \href{http://title.com}{MyTitle}
+\newcommand{\keyciteHrefCommand}[5]{
+    \refstepcounter{keycitationnum}
+    \addtocontents{%
+        citation% what list are we adding to?
+    }{%
+        \protect\contentsline{citation}{%
+          \thesuppcitesnum. {{\href{#3}{#2}}, #4, #5.}%
+        }{}{}
+    }
+    % Provide the command
+    \expandafter\def\csname#1\endcsname{%
+        {\href{#3}{#2 (#4; #5)}}%
+    }
+}
+
+
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% %%%% Supplementary Commands %%%%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -491,7 +535,7 @@ Kiayias, Miller, and Zindros; 2018%
 
 
 \suppciteHrefCommand{citeNipopowWhatLink}{%
-  {What are NIPoPoWs? (nipopows.com)}
+  {What are NIPoPoWs? (nipopows.com)}%
   }{%
   https://web.archive.org/web/20210520174729/https://nipopows.com/%
   }{NiPoPoWs.com}{2019}
