@@ -187,50 +187,18 @@
 %% %%%% Citations below      %%%%
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%--- Bitcoin
 
-%%--- Max's stuff
+\newcommand{\citeBitcoinLink}{%
+\href{https://bitcoin.org/bitcoin.pdf}{Bitcoin: A Peer-to-Peer Electronic Cash System}%
+\xspace
+}
 
-%%%% - Quanta
-\keyciteCommand{linkQuantaBitcointalk}{%
-  Instant Transactions with a stream of work -- Quanta%
+\keyciteCommand{citeBitcoinFull}{%
+  Bitcoin: A Peer-to-Peer Electronic Cash System%
   }{%
-  https://web.archive.org/web/20240927041949/https://bitcointalk.org/index.php?topic=1057342%
-  }{XertroV}{2015}
-
-%%%% - MarketCoin (Pub Consideration)
-\suppciteDirect{%
-  For Public Consideration: [Marketcoin | MKC] A P2P Trustless Cryptocoin Exchange%
-  }{%
-  https://web.archive.org/web/20231115114704/https://bitcointalk.org/index.php?topic=198032.0%
-  }{XertroV}{2013}
-
-\suppciteDirect{%
-  [RFC] Marketcoin - A web of distributed markets with a common unit%
-}{%
-  https://web.archive.org/web/20240526020706/https://bitcointalk.org/index.php?topic=598784.0
-}{XertroV}{2014}
-
-\suppciteUrlCommand{citeCopprChainheadersLink}{%
-  Coppr: Chainheaders%
-  }{%
-  https://github.com/XertroV/coppr/blob/master/chainheaders.py%
-  }{XertroV}{2014}
-
-%%--- GHOST
-
-\keyciteCommand{citeGhostFull}{%
-    Secure High-Rate Transaction Processing in Bitcoin%
-  }{%
-    https://web.archive.org/web/20220308084727/https://cloudflare-ipfs.com/ipfs/QmTDz4WuAXi2rV7Ei3pHHKTFCYGPeDbDoAkmypkHdJnnKe%
-  }{{Sompolinsky, Zohar}}{2013}
-
-%--- DAA2
-
-\keyciteCommand{citeDaaTwoLink}{%
-  An Economic Analysis of Difficulty Adjustment Algorithms in Proof-of-Work Blockchain Systems%
-  }{%
-  https://web.archive.org/web/20211018043918/https://cloudflare-ipfs.com/ipfs/Qmd8BE6xYCH58LNipE1zZ7BCftemN8hQWnfZJSJYq5XUE8%
-  }{{Noda, Okumura, Hashimoto}}{2020}
+  https://bitcoin.org/bitcoin.pdf%
+}{Satoshi Nakamoto}{2008}
 
 %--- Analysis of hashrate-based double-spending
 
@@ -238,7 +206,7 @@
   Analysis of hashrate-based double-spending%
   }{%
   https://web.archive.org/web/20220209100515/https://cloudflare-ipfs.com/ipfs/QmNUWmY94QUievK8ptoxsPyAQUsKvx1cjRyCgPcfmysAVv%
-  }{Rosenfeld}{2012}
+  }{Meni Rosenfeld}{2012}
 
 %--- Inclusive
 
@@ -251,141 +219,12 @@
 
 %--- sharding faqs
 
-\suppciteUrlCommand{citeShardingFAQsLink}{%
+\keyciteUrlCommand{citeShardingFAQsLink}{%
     Ethereum Wiki: On sharding blockchains FAQs%
   }{%
     https://web.archive.org/web/20220606205028/https://eth.wiki/sharding/Sharding-FAQs%
-  }{Buterin}{2020}
+  }{Vitalik Buterin}{2017}
 
-%--- BTCRelay
-\suppciteUrlCommand{citeBTCRelayLink}{%
-  Ethereum - BTCRelay%
-  }{%
-  https://github.com/ethereum/btcrelay%
-  }{Ethereum Contributors}{2017}
-
-%--- Beacon chain
-
-\newcommand{\citeBeaconChainLink}{%
-    \href{https://web.archive.org/web/20210225022359/https://ethereum.org/en/eth2/beacon-chain/}{The Beacon Chain | ethereum.org}%
-    \xspace
-}
-
-%--- Bitcoin
-
-\newcommand{\citeBitcoinLink}{%
-\href{https://bitcoin.org/bitcoin.pdf}{Bitcoin: A Peer-to-Peer Electronic Cash System}%
-\xspace
-}
-
-\keyciteCommand{citeBitcoinFull}{%
-  Bitcoin: A Peer-to-Peer Electronic Cash System,
-  }{%
-  https://bitcoin.org/bitcoin.pdf
-  }{Nakamoto}{2008}
-
-%%---- Segwit
-
-\suppciteUrlCommand{citeSegwitLink}{%
-  Segregated Witness%
-  }{%
-  https://web.archive.org/web/20240926154239/https://en.bitcoin.it/wiki/Segregated_Witness%
-  }{Bitcoin Wiki}{{2017 (edit 2021)}}
-
-\suppciteUrlCommand{citeBIPSWLink}{%
-  BIP-141%
-  }{%
-  https://web.archive.org/web/20240423183945/https://en.bitcoin.it/wiki/BIP_0141%
-  }{{Lombrozo, Lau, Wuille}}{2015}
-
-%--- Polkadot
-
-%% \href{https://gateway.pinata.cloud/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Polkadot Whitepaper}%
-\suppciteUrlCommand{citePolkadotLink}{
-  Polkadot Whitepaper%
-  }{%
-    https://web.archive.org/web/20240927041732/https://gateway.pinata.cloud/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Wood}{2016}
-
-
-\suppciteUrlCommand{citeGrandpaLink}{%
-  GRANDPA: a Byzantine Finality Gadget%
-  }{%
-  https://github.com/w3f/consensus/blob/master/pdf/grandpa.pdf%
-  }{{Stewart, Kokoris-Kogia}}{2020}
-
-%--- Ouroboros
-
-
-\suppciteUrlCommand{citeOuroborosLink}{%
-  Ouroboros: A Provably Secure Proof-of-Stake Blockchain Protocol%
-  }{%
-    https://web.archive.org/web/20240927042139/https://gateway.pinata.cloud/ipfs/QmWCAHyi35SeXH2E4e8jRVk7yNse2x6D14uPfABnhagbvN%
-  }{{Kiayias, Russell, David, Oliynykov}}{2019}
-
-%--- eth yellow paper
-
-  \suppciteUrlCommand{citeEthYellowPaperLink}{%
-  Ethereum Yellow Paper / Petersburg Version 41c1837%
-  }{%
-  https://web.archive.org/web/20240927042236/https://gateway.pinata.cloud/ipfs/QmcdwaEqKjsASs1sZqxBNPw5vmypE5YL61zSvWdGoX7wtC%
-  }{Wood}{2021}%
-
-%--- selfish mining
-
-\newcommand{\citeSelfishMiningLink}{%
-\href{https://web.archive.org/web/20240927042356/https://gateway.pinata.cloud/ipfs/QmNukb1L8BhEsiCbrmnkEJWAvUjhBHidinKMZKfCaLG6ep}{Majority is not Enough: Bitcoin Mining is Vulnerable}%
-\xspace
-}
-
-\newcommand{\citeSelfishMiningAuthors}{%
-% Ittay Eyal and Emin Gün Sirer
-Eyal, Sirer; 2013%
-\xspace
-}
-
-\keyciteCommand{citeSelfishMiningFull}{%
-  Majority is not Enough: Bitcoin Mining is Vulnerable
-  }{%
-  https://web.archive.org/web/20240927042356/https://gateway.pinata.cloud/ipfs/QmNukb1L8BhEsiCbrmnkEJWAvUjhBHidinKMZKfCaLG6ep%
-  }{{Eyal, Sirer}}{2013}
-
-%--- luke jr coiledcoin
-
-% note: `%23` = `#` in URLs
-
-\newcommand{\citeLJCoiledcoinLink}{%
-    \href{https://bitcointalk.org/index.php?topic=56675.msg678006\#msg678006}{Luke Jr's attack on Coiledcoin}%
-}
-
-\keyciteCommand{citeLJCoiledcoinFull}{%
-  Luke Jr's attack on Coiledcoin%
-  }{%
-  https://web.archive.org/web/20141006215827/https://bitcointalk.org/index.php?topic=56675.msg678006%
-  }{Luke-Jr}{2012}
-
-%--- zack-bitcoin docs re PoS
-
-\suppciteUrlCommand{linkZackPoSDefence}{%
-    The Defence of PoS%
-  }{%
-    https://web.archive.org/web/20220309063254/https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/the_defence_of_pos.md%
-}{Hess}{2021}
-
-\suppciteUrlCommand{linkZackPoSCriticisms}{%
-    Proof of Stake%
-  }{%
-    https://web.archive.org/web/20220309063128/https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/proof_of_stake.md%
-}{Hess}{2021}
-
-%--- solana stuff
-
-\newcommand{\linkSolanaFiftyKClaim}{%
-    https://web.archive.org/web/20210914230947/https://solana.com/news/8-innovations-that-make-solana-the-first-web-scale-blockchain%
-}
-
-\newcommand{\linkSolanaFourHundKFail}{%
-    https://web.archive.org/web/20220309064429/https://www.cryptosizzle.com/scalability-or-stability-failures-in-the-solana-network-indicate-that-work-is-still-needed/%
-}
 
 %--- NIPoPoWs
 
@@ -415,8 +254,190 @@ Kiayias, Miller, and Zindros; 2018%
 \keyciteCommand{citeNIPoPoWsFull}{%
   Non-Interactive Proofs of Proof-of-Work%
   }{%
-  https://web.archive.org/web/20190123153947/https://eprint.iacr.org/2017/963.pdf
+  https://web.archive.org/web/20190123153947/https://eprint.iacr.org/2017/963.pdf%
   }{{Kiayias, Miller, and Zindros}}{2018}
+
+
+%--- DAA2
+
+\keyciteCommand{citeDaaTwoLink}{%
+  An Economic Analysis of Difficulty Adjustment Algorithms in Proof-of-Work Blockchain Systems%
+  }{%
+  https://web.archive.org/web/20211018043918/https://cloudflare-ipfs.com/ipfs/Qmd8BE6xYCH58LNipE1zZ7BCftemN8hQWnfZJSJYq5XUE8%
+  }{{Noda, Okumura, Hashimoto}}{2020}
+
+ %%---- Elliot Temple
+
+ \keyciteCommand{citeCriticalFallibilismCourse}{%
+ Critical Fallibilism Course%
+ }{%
+ https://curi.gumroad.com/l/mhtbA%
+ }{Elliot Temple}{2020}
+
+\keyciteCommand{citeMultiFactorDecisionLink}{%
+ Multi-Factor Decision Making Math%
+ }{%
+ https://criticalfallibilism.com/multi-factor-decision-making-math%
+ }{Elliot Temple}{2021}
+
+
+
+
+
+
+%%--- Max's stuff
+
+%%%% - Quanta
+\suppciteUrlCommand{linkQuantaBitcointalk}{%
+  Instant Transactions with a stream of work -- Quanta%
+  }{%
+  https://web.archive.org/web/20240927041949/https://bitcointalk.org/index.php?topic=1057342%
+  }{XertroV}{2015}
+
+%%%% - MarketCoin (Pub Consideration)
+\suppciteDirect{%
+  For Public Consideration: [Marketcoin | MKC] A P2P Trustless Cryptocoin Exchange%
+  }{%
+  https://web.archive.org/web/20231115114704/https://bitcointalk.org/index.php?topic=198032.0%
+  }{XertroV}{2013}
+
+\suppciteDirect{%
+  [RFC] Marketcoin - A web of distributed markets with a common unit%
+}{%
+  https://web.archive.org/web/20240526020706/https://bitcointalk.org/index.php?topic=598784.0
+}{XertroV}{2014}
+
+\suppciteUrlCommand{citeCopprChainheadersLink}{%
+  Coppr: Chainheaders%
+  }{%
+  https://github.com/XertroV/coppr/blob/master/chainheaders.py%
+  }{XertroV}{2014}
+
+%%--- GHOST
+
+\suppciteUrlCommand{citeGhostFull}{%
+    Secure High-Rate Transaction Processing in Bitcoin%
+  }{%
+    https://web.archive.org/web/20220308084727/https://cloudflare-ipfs.com/ipfs/QmTDz4WuAXi2rV7Ei3pHHKTFCYGPeDbDoAkmypkHdJnnKe%
+  }{{Sompolinsky, Zohar}}{2013}
+
+
+%--- BTCRelay
+\suppciteUrlCommand{citeBTCRelayLink}{%
+  Ethereum - BTCRelay%
+  }{%
+  https://github.com/ethereum/btcrelay%
+  }{Ethereum Contributors}{2017}
+
+%--- Beacon chain
+
+\newcommand{\citeBeaconChainLink}{%
+    \href{https://web.archive.org/web/20210225022359/https://ethereum.org/en/eth2/beacon-chain/}{The Beacon Chain | ethereum.org}%
+    \xspace
+}
+
+%%---- Segwit
+
+\suppciteUrlCommand{citeSegwitLink}{%
+  Segregated Witness%
+  }{%
+  https://web.archive.org/web/20240926154239/https://en.bitcoin.it/wiki/Segregated_Witness%
+  }{Bitcoin Wiki}{{2017 (edit 2021)}}
+
+\suppciteUrlCommand{citeBIPSWLink}{%
+  BIP-141%
+  }{%
+  https://web.archive.org/web/20240423183945/https://en.bitcoin.it/wiki/BIP_0141%
+  }{{Lombrozo, Lau, Wuille}}{2015}
+
+%--- Polkadot
+
+%% \href{https://gateway.pinata.cloud/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Polkadot Whitepaper}%
+\suppciteUrlCommand{citePolkadotLink}{
+  Polkadot Whitepaper%
+  }{%
+    https://web.archive.org/web/20240927041732/https://gateway.pinata.cloud/ipfs/QmbH4TzUB7izvuwidG598DNnk3Nmd1aWEyf8KLxeAkrvkK}{Gavin Wood}{2016}
+
+
+\suppciteUrlCommand{citeGrandpaLink}{%
+  GRANDPA: a Byzantine Finality Gadget%
+  }{%
+  https://github.com/w3f/consensus/blob/master/pdf/grandpa.pdf%
+  }{{Stewart, Kokoris-Kogia}}{2020}
+
+%--- Ouroboros
+
+
+\suppciteUrlCommand{citeOuroborosLink}{%
+  Ouroboros: A Provably Secure Proof-of-Stake Blockchain Protocol%
+  }{%
+    https://web.archive.org/web/20240927042139/https://gateway.pinata.cloud/ipfs/QmWCAHyi35SeXH2E4e8jRVk7yNse2x6D14uPfABnhagbvN%
+  }{{Kiayias, Russell, David, Oliynykov}}{2019}
+
+%--- eth yellow paper
+
+  \suppciteUrlCommand{citeEthYellowPaperLink}{%
+  Ethereum Yellow Paper / Petersburg Version 41c1837%
+  }{%
+  https://web.archive.org/web/20240927042236/https://gateway.pinata.cloud/ipfs/QmcdwaEqKjsASs1sZqxBNPw5vmypE5YL61zSvWdGoX7wtC%
+  }{Gavin Wood}{2021}%
+
+%--- selfish mining
+
+\newcommand{\citeSelfishMiningLink}{%
+\href{https://web.archive.org/web/20240927042356/https://gateway.pinata.cloud/ipfs/QmNukb1L8BhEsiCbrmnkEJWAvUjhBHidinKMZKfCaLG6ep}{Majority is not Enough: Bitcoin Mining is Vulnerable}%
+\xspace
+}
+
+\newcommand{\citeSelfishMiningAuthors}{%
+% Ittay Eyal and Emin Gün Sirer
+Eyal, Sirer; 2013%
+\xspace
+}
+
+\suppciteUrlCommand{citeSelfishMiningFull}{%
+  Majority is not Enough: Bitcoin Mining is Vulnerable
+  }{%
+  https://web.archive.org/web/20240927042356/https://gateway.pinata.cloud/ipfs/QmNukb1L8BhEsiCbrmnkEJWAvUjhBHidinKMZKfCaLG6ep%
+  }{{Eyal, Sirer}}{2013}
+
+%--- luke jr coiledcoin
+
+% note: `%23` = `#` in URLs
+
+\newcommand{\citeLJCoiledcoinLink}{%
+    \href{https://bitcointalk.org/index.php?topic=56675.msg678006\#msg678006}{Luke Jr's attack on Coiledcoin}%
+}
+
+\suppciteUrlCommand{citeLJCoiledcoinFull}{%
+  Luke Jr's attack on Coiledcoin%
+  }{%
+  https://web.archive.org/web/20141006215827/https://bitcointalk.org/index.php?topic=56675.msg678006%
+  }{Luke-Jr}{2012}
+
+%--- zack-bitcoin docs re PoS
+
+\suppciteUrlCommand{linkZackPoSDefence}{%
+    The Defence of PoS%
+  }{%
+    https://web.archive.org/web/20220309063254/https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/the_defence_of_pos.md%
+}{Zack Hess}{2021}
+
+\suppciteUrlCommand{linkZackPoSCriticisms}{%
+    Proof of Stake%
+  }{%
+    https://web.archive.org/web/20220309063128/https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/proof_of_stake.md%
+}{Zack Hess}{2021}
+
+%--- solana stuff
+
+\newcommand{\linkSolanaFiftyKClaim}{%
+    https://web.archive.org/web/20210914230947/https://solana.com/news/8-innovations-that-make-solana-the-first-web-scale-blockchain%
+}
+
+\newcommand{\linkSolanaFourHundKFail}{%
+    https://web.archive.org/web/20220309064429/https://www.cryptosizzle.com/scalability-or-stability-failures-in-the-solana-network-indicate-that-work-is-still-needed/%
+}
 
 
 % .dP"Y8 888888    db    888888 888888 88     888888 .dP"Y8 .dP"Y8
@@ -430,19 +451,19 @@ Kiayias, Miller, and Zindros; 2018%
   Stateless Full Node%
   }{%
   https://web.archive.org/web/20210523201110/https://github.com/zack-bitcoin/amoveo-docs/blob/master/design/stateless_full_node.md%
-  }{Hess}{2021}
+  }{Zack Hess}{2021}
 
 \suppciteUrlCommand{linkButerinStatelessClients}{%
   The Stateless Client Concept%
   }{%
   https://web.archive.org/web/20210602053116/https://ethresear.ch/t/the-stateless-client-concept/172%
-}{Buterin}{2017}
+}{Vitalik Buterin}{2017}
 
 \suppciteUrlCommand{linkPToddDelayedTxoCommitments}{%
   Making UTXO Set Growth Irrelevant With Low-Latency Delayed TXO Commitments%
   }{%
     https://web.archive.org/web/20210224050038/https://petertodd.org/2016/delayed-txo-commitments%
-}{Todd}{2016}
+}{Peter Todd}{2016}
 
 
 % 888888 88""Yb 88 88     8b    d8    db
@@ -506,7 +527,7 @@ Kiayias, Miller, and Zindros; 2018%
   Merkle Mountain Range%
   }{%
   https://github.com/opentimestamps/opentimestamps-server/blob/master/doc/merkle-mountain-range.md%
-  }{Todd}{2018}
+  }{Peter Todd}{2018}
 
 \suppciteHrefCommand{citeMerklixLink}{%
   Merklix tree%
@@ -517,8 +538,8 @@ Kiayias, Miller, and Zindros; 2018%
 \suppciteHrefCommand{citeTetoLink}{%
   {T.E.T.O Draft}%
   }{%
-  https://github.com/wildbunny/docs/blob/master/T.E.T.O-draft.pdf%
-  }{Firth}{2016}
+  https://github.com/wildbunny/docs/blob/master/T.E.T.O-draft.pdf %
+  }{Paul Firth}{2016}
 
 
 \suppciteHrefCommand{citeDagcoinLink}{%
@@ -540,20 +561,6 @@ Kiayias, Miller, and Zindros; 2018%
   https://web.archive.org/web/20210520174729/https://nipopows.com/%
   }{NiPoPoWs.com}{2019}
 
-
- %%---- Elliot Temple
-
-\keyciteCommand{citeCriticalFallibilismCourse}{%
-  Critical Fallibilism Course%
-  }{%
-  https://curi.gumroad.com/l/mhtbA%
-  }{Temple}{2021}
-
-\keyciteCommand{citeMultiFactorDecisionLink}{%
-  Multi-Factor Decision Making Math%
-  }{%
-  https://criticalfallibilism.com/multi-factor-decision-making-math%
-  }{Temple}{2021}
 
 \suppciteHrefCommand{citeOpenEthereumLink}{%
   OpenEthereum%
