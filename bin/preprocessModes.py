@@ -67,6 +67,7 @@ def set_entropy(git: str, prepare_for: Optional[str]):
     xor_with = 0 if prepare_for is None else get_hash_lsb(prepare_for)
     with open('includes/refl_entropy', 'w') as f:
         entropy = int(git, 16) ^ xor_with
+        entropy = entropy % (2**31-1)
         f.write(f"\\providecommand\\EntropyIn{{{str(entropy)}}}")
     print(t.bold_green(f"Wrote entropy: {entropy}"))
 
