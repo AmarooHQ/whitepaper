@@ -58,7 +58,7 @@ Can we test it? If so, how?
 
 Consider a traditional PoW blockchain (e.g., Bitcoin, Eth1, etc).
 It's well known that the risk of a doublespend against a particular block is related to the number of \emph{confirmations} that block has.\footnote{
-    \citeAHBDSFull
+  \citeAHBDS{}
 }
 However, this is not a linear relationship; rather, it is similar to \emph{exponential decay}.
 After the first few confirmations, each additional confirmation reduces the risk of a doublespend by approximately the same factor.\footnote{
@@ -147,7 +147,7 @@ Let's test the Confirmation Equivalence Conjecture.
 The hypothesis is that: doublespends against an \emph{individual simplex-chain} in an $N$-chain simplex after $\mathcal{C}$ \emph{local} confirmations are \emph{as hard} as doublespends against a traditional blockchain after $\mathcal{C}\cdot N$ confirmations.
 
 First, define $P(q; c)$, where $c$ is the number of confirmations and $q$ is the proportion of global hash-rate controlled by the attacker, to be the function that returns the probability of an attempted doublespend succeeding on a traditional blockchain according to Rosenfeld's analytical solution\footnote{
-    \citeAHBDSFull
+  \citeAHBDS{}
 }:
 
 \begin{equation}
