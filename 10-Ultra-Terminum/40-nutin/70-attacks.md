@@ -1,7 +1,8 @@
 %% BEGIN ### RELEASE
 
-\newpage
+%% \newpage
 
+\clearpage
 \section{Attacks}
 
 \label{sec:attacks}

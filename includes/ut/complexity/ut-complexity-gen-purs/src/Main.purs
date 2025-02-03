@@ -78,8 +78,9 @@ wpTables =
     , TD "compare_nets_3k" compareNets3k hereish
     , TD "compare_nets_20k" compareNets20k hereish
     , TD "comparison_1m_tps" compareNets1mTps hereish
-    , TD "tree_tiling_3k_v4_table" tree_tiling_3k_v4_table hereish
-    -- , TD "tree_tiling_3k_v3_table" tree_tiling_3k_v3_table hereish
+    -- , TD "tree_tiling_3k_v4_table" tree_tiling_3k_v4_table hereish
+    , TD "tree_tiling_3k_v3_table" tree_tiling_3k_v3_table hereish
+    , TD "tree_tiling_3k_v3_table_hot" tree_tiling_3k_v3_table_hot hereish
     -- , TD "tree_tiling_3k_v5_table" tree_tiling_3k_v5_table hereish
     -- , TD "tree_tiling_20k_v4_table" tree_tiling_20k_v4_table hereish
     -- , TD "tree_tiling_20k_v3_table" tree_tiling_20k_v3_table hereish
