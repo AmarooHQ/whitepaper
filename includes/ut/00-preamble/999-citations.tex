@@ -71,7 +71,7 @@
     }
     % Provide the command
     \expandafter\def\csname#1\endcsname{%
-        {\href{#3}{#2}, #4, #5}%
+      {\href{#3}{#2 (#4; #5)}}%
     }
 }
 
@@ -134,7 +134,7 @@
     }
     % Provide the command
     \expandafter\def\csname#1\endcsname{%
-        {\href{#3}{#2 (#4, #5)}}%
+        {\href{#3}{#2 (#4; #5)}}%
     }
 }
 
@@ -497,13 +497,15 @@ Kiayias, Miller, and Zindros; 2018%
   }{NiPoPoWs.com}{2019}
 
 
-\suppciteHrefCommand{citeCriticalFallibilismCourse}{%
+ %%---- Elliot Temple
+
+\keyciteCommand{citeCriticalFallibilismCourse}{%
   Critical Fallibilism Course%
   }{%
   https://curi.gumroad.com/l/mhtbA%
   }{Temple}{2021}
 
-\suppciteHrefCommand{citeMultiFactorDecisionLink}{%
+\keyciteCommand{citeMultiFactorDecisionLink}{%
   Multi-Factor Decision Making Math%
   }{%
   https://criticalfallibilism.com/multi-factor-decision-making-math%
