@@ -120,7 +120,7 @@ Based on the observation that some current PoS networks claim to be $O(c^2)$ sca
 We then explored the practical side, and found that we needed the \AxiomOfAvailability to ensure reflections between simplex-chains only included available simplex-blocks.
 As we looked into the specifics of how we would structure blocks and PoRs, we found several optimizations that significantly reduced both the computational and bandwidth requirements for network participants.
 We also discussed how to support stateless clients and fraud proofs -- tools we would need later.
-This ultimately lead us to construct the PoR graph and the \AxiomOfMaximalReflection{}.
+This ultimately led us to construct the PoR graph and the \AxiomOfMaximalReflection{}.
 We adapted NIPoPoWs into NIPoPoWRs, which work for the PoR graph instead of a standalone blockchain.
 We then integrated block-DAGs to prevent minority attackers from performing effective DoS or censorship attacks, and developed NIPoPPoWs which work with block-DAGs.
 We realized that we now had the conditions to \emph{require} miners to build on the latest block(s) without any appreciable downside, and enshrined this as the \AxiomOfUnifiedAncestry{}.
