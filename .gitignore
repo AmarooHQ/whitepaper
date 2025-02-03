@@ -43,3 +43,4 @@ includes/ut/diags/**/*.png
 /_copy_wp.sh
 .psc-ide-port
 includes/refl_entropy
+test-pdf2text.txt

@@ -197,25 +197,35 @@ We can now summarize; when drafting an \cL block, the \cR blocks which are valid
 
 These conditions are illustrated in \autoref{fig:xc-conditions}.
 
-\todoDraftOnly[h]{caption + short caption}
-
 \begin{figure}
     \centering
-
     \includegraphics[max width=\linewidth]{spv/xc_security_conditions_sag}
+    \caption[
+        % The conditions for when a block becomes valid for cross-chain transaction processing.
+        The conditions used to find \cR blocks valid for cross-chain transaction processing.
+    ]{
+        The conditions used to find \cR blocks that are valid for cross-chain transaction processing from the perspective of $L_{i}$.
+        Particularly, we find up to 4 distinct blocks via 4 different paths.
+        Note that these blocks can appear in any chronological order, and the specific blocks shown in the diagram are just one example of many possibilities.
+        In this case,
+        $\lambda$ block periods ago resolves to $\cR_{j-x_3}$;
+        volume at least $N_1 \lambda$ blocks fewer resolves to $\cR_{j-x_2}$;
+        the $\lambda$-parent of $L_i$ resolves to $L_{i-\lambda}$; and
+        the $\lambda$-parent of $R_j$ resolves to $R_{j-\lambda}$.
+    }
+\label{fig:xc-conditions}
+\end{figure}
 
-    \caption{
-        Visual representation of the conditions used to compute, for a block $L_i$ on chain $L$, blocks from chain $R$ that are valid for cross-chain transactions.
-        Valid blocks are those that are earlier than (or in) a common ancestor of the four blocks $\{ R_{j-\lambda}, R_{j-k_1}, R_{j-k_2}, R_{j-k_3} \}$.
+\begin{comment}
+    Visual representation of the conditions used to compute, for a block $L_i$ on chain $L$, blocks from chain $R$ that are valid for cross-chain transactions.
+        Valid blocks are those that are earlier than (or in) a common ancestor of the four blocks $\{ R_{j-\lambda}, R_{j-x_1}, R_{j-x_2}, R_{j-x_3} \}$.
         $R_j$ is a PoR ancestor of $L_i$ on chain $R$.
         $R_{j-\lambda}$ is a $\lambda$-parent $R_j$.
         $L_{i-\lambda}$ is a $\lambda$-parent $L_i$.
-        $R_{j-k_1}$ is a PoR ancestor of $L_{i-\lambda}$ on chain $R$.
-        $R_{j-k_2}$ is an ancestor of $L_i$ such that the PoR volume has increased at least $N_1 \lambda$ since $R_{j-k_2}$.
-        $R_{j-k_3}$ is an ancestor of $L_i$ that is at least ${B_f}^{-1} \lambda$ older than $L_i$.
-        }
-\label{fig:xc-conditions}
-\end{figure}
+        $R_{j-x_1}$ is a PoR ancestor of $L_{i-\lambda}$ on chain $R$.
+        $R_{j-x_2}$ is an ancestor of $L_i$ such that the PoR volume has increased at least $N_1 \lambda$ since $R_{j-x_2}$.
+        $R_{j-x_3}$ is an ancestor of $L_i$ that is at least ${B_f}^{-1} \lambda$ older than $L_i$.
+\end{comment}
 
 There is one slight oversight in this formulation that we need to fix.
 How do we know that the transactions in those blocks to be processed are all consistent?
@@ -308,15 +318,25 @@ While this describes an unpleasant user experience, the takeaway is that it is y
 
 \subsubsection{Decoupled State Progression}
 
-\pz{Add some explanation here and define what $AL_x$s are.}
+The key to cross-chain transactions working is the decoupling of state progression combined with the property that cross-chain transactions can be read from \cR blocks without needing to validate the \cR chain -- if it exists, then it is valid.
+Since part of this protocol involves asynchronous communication between chains, we need a method of error correction to ensure cross-chain transactions are safe: fraud proofs.
+Crucially, we expect that honest nodes (particularly those on other chains) are never fooled by an invalid block for long --- much less than a block period.
+On this basis we can pick a safety parameter $\lambda$ which (in combination with the conditions from earlier) provides enough buffer to ensure that the PoR graph remains coherent.
 
-\todoDraftOnly[h]{decoupled progression diag}
+This decoupling is the essential component of \UT{} that makes $O(c^2)$ scaling possible, and is a direct result of how we use PoR to create the PoR graph.
+The procedural elements are shown in \autoref{fig:spv-network-complexity-split}.
 
-\begin{figure}[h]
+
+\begin{figure}[htbp]
     \centering
     \includegraphics[max width=\linewidth]{spv/network_scale_AL_split_sag}
     \caption[
+        Flow chart of how the segmentation of state works in \UT{} to achieve $O(c^2)$ capacity.
     ]{
+        Flow chart of how the segmentation of state works in \UT{} to achieve $O(c^2)$ capacity.
+        ``AL'' is short for ``Action Layer'', a term invented here so that we can point to the various stages of PoR graph extension and state progression.
+        $\text{AL}^1$ columns indicate actions that validating nodes of any simplex-chain perform on the PoR graph.
+        The $\text{AL}^2$ column indicates that only validating nodes \emph{of that chain} perform the associated action.
     }
     \label{fig:spv-network-complexity-split}
 \end{figure}
