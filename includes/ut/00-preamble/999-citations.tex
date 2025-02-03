@@ -75,7 +75,7 @@
     }
 }
 
-%% Supplementary citation - returns a new command that will provide ONLY
+%% Key citation - returns a new command that will provide ONLY
 %% the URL that is passed in when called.
 %% Usage: \suppciteUrlCommand{command}{title}{url}{author}{date}
 %%      -> \command{}
@@ -97,7 +97,7 @@
     }
 }
 
-%% Supplementary citation create a new command
+%% Key citation create a new command
 %% Will return a new command to use, which will provide the reference within
 %% the text.
 %% Usage: \keyciteCommand{commandName}{title}{url}{author}{date}
@@ -109,7 +109,7 @@
         citation% what list are we adding to?
     }{%
         \protect\contentsline{citation}{%
-          \thesuppcitesnum. {{\href{#3}{#2}}, #4, #5.}%
+          \thekeycitationnum. {{\href{#3}{#2}}, #4, #5.}%
         }{}{}
     }
     % Provide the command
