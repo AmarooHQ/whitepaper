@@ -95,7 +95,7 @@ Traditionally, blockchain protocols have some *global* state and a state-transit
         \sigma_{t+1} \equiv \Upsilon(\sigma_t, T)
     \end{equation*}
     where $\Upsilon$ is the Ethereum state transition function.
-}[Dr. Gavin Wood; \href{\citeEthYellowPaperLink}{Ethereum Yellow Paper / Petersburn Version 41c1837}, s2]
+}[Dr. Gavin Wood; \href{\citeEthYellowPaperLink}{Ethereum Yellow Paper / Petersburg Version 41c1837}, s2]
 ```
 
 One of the reasons for this tradition is that transactions are (typically) permitted to depend on any part of the global state. For example: a Bitcoin transaction is permitted to spend any UTXO, and an Ethereum smart contract may interact with any other smart contract on the Ethereum blockchain.

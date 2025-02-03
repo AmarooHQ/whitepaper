@@ -50,6 +50,8 @@ def release_label(d: Union[datetime, Callable[[], datetime]] = datetime.now):
     FRI = 5
     week += 0 if dow <= FRI else 1
     prefix = "" if dow == FRI and week % 2 == 1 else "pre-"
+    # temp patch to make a nice release labe
+    # prefix = ""
     return f"{prefix}{year}.{week // 2}"
 
 
