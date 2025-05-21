@@ -1,15 +1,21 @@
 This paper explains and constructs \emph{Amaroo's} consensus mechanism: \emph{Ultra Terminum}.
 
-\emph{Ultra Terminum} (UT) is a proof-agnostic cross-chain consensus strategy providing multiple scaling configurations: $\UT{1}\;(O(c^2))$, $\UT{2}\;(O(c^3))$, $\UT{3}\;(O(c^4))$, and $\UTinf{}\;(O(n))$.
-UT remains secure against an attacker with up to $O(n)$ resources.
-UT is built on a new consensus primitive, \emph{Proof of Reflection}, and addresses the core conflict of the \emph{Scalability Trilemma} (herein called \emph{Buterin's Trilemma}).
+\emph{Ultra Terminum} (UT) is a proof-agnostic cross-chain consensus strategy with multiple scaling configurations.
+UT provides a practicable solution to the Trilemma: the conjecture that blockchain networks that are \emph{secure} and \emph{decentralized} cannot scale beyond the limits of a single computer.
+This limit is $O(c)$, where $c$ is a representative computational load.
+
+UT's simplest configuration, $\UT{1}$, scales quadratically --- $O(c^2)$.
+Its other scaling configurations are: $\UT{2}$ $(O(c^3))$, $\UT{3}$ $(O(c^4))$, and $\UTinf{}$ (theoretically $O(n)$, where $n$ is the size of the network).
+UT is built on a new consensus primitive, \emph{Proof of Reflection}, and
+PoW UT configurations remain secure against attackers with less than half of the network hash-rate.
+%and addresses the core conflict of the \emph{Scalability Trilemma} (herein called \emph{Buterin's Trilemma}).
 % \par
 % UT is built on a new consensus primitive: \emph{Proof of Reflection} (PoR) --- a way for blockchains to mutually secure each other.
 \par
-With reasonable parameters (i.e., a per-chain load comparable to Bitcoin; and one level of nested dapp-chains), a conservative estimate of capacity --- using Amaroo's \emph{initial configuration} ($\UT{2}$) --- exceeds 350K TPS without \emph{layer 2} scaling methods.
+With reasonable parameters (i.e., a per-chain load comparable to Bitcoin, and one level of nested dapp-chains), a conservative estimate of capacity --- using Amaroo's intended launch configuration ($\UT{2}$) --- exceeds 350K TPS without \emph{layer 2} scaling methods.
 % In the $\UT{2}$ configuration, doubling the block time quadruples TPS.
 \par
-Capacity of $\UTinf{}$ is \emph{independent} of those parameters and is \emph{unbounded}.
+Capacity of $\UTinf{}$ is \emph{independent} of those parameters and is theoretically \emph{unbounded}.
 It has variants $\UTinf{1}$, $\UTinf{2}$, and $\UTinf{3}$; corresponding to $\UT{1}$, $\UT{2}$, and $\UT{3}$, respectively.
 \par
 % Confirmation times within UT are $\frac{1}{O(c)}$, i.e., confirmation rate is $O(c)$.
@@ -18,9 +24,10 @@ The initial configuration will have a \emph{maximum} confirmation frequency exce
 Typically, sharded blockchains have a confirmation frequency $< 0.2$ Hz.
 \par
 Some existing sharded (or otherwise $O(c^2)$) blockchain designs claim to be capable of 1M TPS.
-For comparison's sake, $\UT{2}$ configurations --- with \emph{equivalent} parameters --- have a maximum capacity exceeding 10B TPS.
-Such a configuration would have a system-wide maximum throughput exceeding 2000 GB/s of raw transactions, and a confirmation frequency exceeding 400 Hz.
-It is reasonable to say that UT out-scales each of the architectures of Cardano, Eth2, and Polkadot by multiple orders of magnitude.
+By comparison, $\UT{2}$ configurations --- with \emph{equivalent} parameters --- have a maximum capacity exceeding 10B TPS.
+Such a configuration would have a system-wide maximum throughput exceeding 2000 GB/s of transaction data, and a confirmation frequency exceeding 400 Hz.
+UT out-scales the architectures of Cardano, Eth2, Polkadot, and Solana by orders of magnitude.
+% \emph{Nos imus.}
 \par
 \ifthenelse{\equal{\BuildMode}{draft}}{
     \hruleAbstract

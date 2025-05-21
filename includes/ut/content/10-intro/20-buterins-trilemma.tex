@@ -9,17 +9,21 @@ keep toc to d=1 for this section --- reduces ToC page size. default is d=3
 
 \href{\citeShardingFAQsLink}{The trilemma} is as follows:
 
-For some magnitude of computational resources available to each node (computation, bandwidth, storage, etc), $c$, and abstract magnitude of the network (transaction throughput, state size, user population, market cap, etc), $n$, it is claimed that blockchain systems have, at most, two of these three properties:
+Given $c$ (computational resources per node, e.g., computation, bandwidth, storage, etc.), and $n$ (the size of the network, e.g., transaction throughput, state size, user population, market cap, etc.), blockchain systems have no more than two of these three properties:
 
 \begin{itemize}
-  \item Decentralization --- the system can operate with participants that have only $O(c)$ resources (e.g., a laptop, a raspberry pi, a VPS; typical internet bandwidth, storage space, etc).
-  \item Security --- the system is secure against attackers with up to $O(n)$ resources.
-  \item Scalability --- the system can process $O(n)$ transactions with $O(n) > O(c)$; this means that, as the network grows, the throughput of the system grows faster than the computational resources required per user.
+  \item Decentralization --- the system can operate with participants that have only $O(c)$ resources (e.g., a laptop, a raspberry pi, a VPS; typical internet bandwidth, storage space, etc.).
+  \item Security --- the system is secure against attackers with up to $O(n)$ resources.\footnotemark
+  \item Scalability --- the system can process $O(n)$ transactions, with $O(n) > O(c)$; this means that, as the network grows, the throughput of the system grows faster than the computational resources required per user.
 \end{itemize}
 
-The definition of scalability is perhaps problematic.
-If the network, which is $O(n)$, becomes bottlenecked by an $O(c^2)$ scaling method, is the network really scalable?
-I prefer an alternative definition of scalability: the system can process $O(n)$ transactions in $O(1)$ time, i.e., getting a transaction confirmed is neither more expensive nor delayed as $n$ and/or $c$ change.\footnote{
+\footnotetext{
+  Here, by convention, ``up to $O(n)$ resources'' means that the system remains secure against attackers with less than some critical proportion of the network's block production capacity --- e.g., less than $\nicefrac{1}{2}$ for typical PoW chains, and less than $\nicefrac{1}{3}$ for typical PoS chains.
+}
+
+This definition of scalability is perhaps problematic.
+If the network, which has $O(n)$ TPS demand, becomes bottlenecked by an $O(c^2)$ scaling method, is the network really scalable?
+I prefer an alternative definition of scalability: the system can process $O(n)$ transactions in $O(1)$ time, i.e., getting a transaction confirmed is neither too expensive nor delayed as $n$ and/or $c$ change.\footnote{
     This does not mean there is no fee market for transactions, nor that localized congestion will not happen.
     Rather, we are interested in an equilibrium that provides substantial value and capacity whilst avoiding transactions being as free as sending an email.
 }
@@ -35,7 +39,7 @@ If the host-chain has $O(c)$ capacity, then it should support\footnote{
 Each shard has $O(c)$ capacity also, thus the full system has $O(c^2)$ capacity.
 
 \aside{
-  Traditionally, the use of big $O$ notation when discussing the trilemma has not conformed to the strict mathematical meaning; instead it's used quite loosely as a way to analyze the scalability of a blockchain architecture.
+  Traditionally, the use of big $O$ notation when discussing the trilemma has not conformed to the strict mathematical meaning; instead, it is used quite loosely as a way to analyze the scalability of a blockchain architecture.
   Naturally, we'll continue this tradition.
 }
 
@@ -46,11 +50,10 @@ Each shard has $O(c)$ capacity also, thus the full system has $O(c^2)$ capacity.
 \begin{figure}
 \centering
 \includegraphics[max width=\linewidth]{trilemma/core_conflict_sag}
+\captionsetup{justification=centering,singlelinecheck=false}
 \caption{
-  \centering{
     A ``cloud'' diagram of the core conflict of \textit{Buterin's Trilemma}.\\
     $A \to B$ can be read ``$A$ so that $B$''; and $A \leftarrow B$: ``$A$ requires $B$''.
-  }
 }
 \label{fig:trilemma-core-conflict}
 \end{figure}
@@ -66,7 +69,7 @@ It reads: \emph{safely increasing capacity} requires that we \emph{stay decentra
 Big blocks are the opposite of small blocks, so we have a \emph{conflict}.
 Additionally: using multiple chains compromises security; and big blocks compromise decentralization.
 
-To understand the core conflict we need to look at the underlying assumptions.
+To understand the core conflict, we need to look at the underlying assumptions.
 
 Buterin writes\footnote{See \href{\citeShardingFAQsLink}{\emph{On sharding blockchains FAQs}}.} in the Ethereum sharding FAQ regarding the \emph{many chains with small blocks} strategy:
 
