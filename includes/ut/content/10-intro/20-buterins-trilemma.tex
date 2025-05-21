@@ -46,11 +46,17 @@ Each shard has $O(c)$ capacity also, thus the full system has $O(c^2)$ capacity.
 \begin{figure}
 \centering
 \includegraphics[max width=\linewidth]{trilemma/core_conflict_sag}
-\caption{A cloud of the core conflict of \textit{Buterin's Trilemma}.}
+\caption{
+  \centering{
+    A ``cloud'' diagram of the core conflict of \textit{Buterin's Trilemma}.\\
+    $A \to B$ can be read ``$A$ so that $B$''; and $A \leftarrow B$: ``$A$ requires $B$''.
+  }
+}
 \label{fig:trilemma-core-conflict}
 \end{figure}
 
 \autoref{fig:trilemma-core-conflict} shows a cloud\footnote{
+    Clouds are diagrams of explanatory implications which reveal a conflict between two (apparently) necessary things.
     For more on clouds, see \href{https://www.google.com/search?q=ISBN+0-88427-115-3}{It's Not Luck} by Eli Goldratt (1994).
 } for the core conflict.
 It reads: \emph{safely increasing capacity} requires that we \emph{stay decentralized}.
