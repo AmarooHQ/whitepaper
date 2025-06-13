@@ -1,9 +1,8 @@
 This paper explains and constructs \emph{Amaroo's} consensus mechanism: \emph{Ultra Terminum}.
 
-\emph{Ultra Terminum} (UT) is a proof-agnostic cross-chain consensus strategy with multiple scaling configurations.
-UT provides a practicable solution to the Trilemma: the conjecture that blockchain networks that are \emph{secure} and \emph{decentralized} cannot scale beyond the limits of a single computer.
-This limit is $O(c)$, where $c$ is a representative computational load.
+\emph{Ultra Terminum} (UT) is a proof-agnostic cross-chain consensus strategy with multiple scaling configurations, and provides a practicable solution to the Blockchain Trilemma (a.k.a. Scalability Trilemma).
 
+The Trilemma takes $O(c)$ as the measure of a traditional blockchain's scalability.
 UT's simplest configuration, $\UT{1}$, scales quadratically --- $O(c^2)$.
 Its other scaling configurations are: $\UT{2}$ $(O(c^3))$, $\UT{3}$ $(O(c^4))$, and $\UTinf{}$ (theoretically $O(n)$, where $n$ is the size of the network).
 UT is built on a new consensus primitive, \emph{Proof of Reflection}, and

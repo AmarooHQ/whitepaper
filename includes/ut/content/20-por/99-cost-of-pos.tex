@@ -1,0 +1,143 @@
+
+\subsection{The Cost of PoS}
+
+I would like to take a moment to consider typical PoS tokenomics and how value moves as a result.
+
+First, the basic dynamics of PoS are typically:
+\begin{itemize}
+  \renewcommand{\baselinestretch}{1.0}
+  \setlength{\itemsep}{-0.25\baselineskip}
+  \item Coins have some initial distribution.
+  \item Some users commit coins as \emph{stake}, which allows them to participate in block production.
+  \item Staked coins are effectively removed from the supply until they are unstaked.
+  \item Thus, there is upward pressure on the price of the token (supply decreases while demand remains constant).
+  \item Block rewards are distributed to the stakers, but are not sold (since running a node is relatively\footnotemark{} cheap, and the reward can be reinvested as additional stake).
+\end{itemize}
+
+\footnotetext{Compared to a PoW miner's running costs.}
+
+This is in stark contrast to PoW networks:
+\begin{itemize}
+  \renewcommand{\baselinestretch}{1.0}
+  \setlength{\itemsep}{-0.25\baselineskip}
+  \item Mining rewards independent from the distribution of coins.
+  \item Miners purchase and run hardware that turns energy into blockchain security.
+  \item Block rewards are distributed to the miners, and are sold\footnotemark{} to cover the cost of electricity.
+  \item Thus, there is downward pressure on the price of the token (since supply increased).
+\end{itemize}
+
+\footnotetext{
+  Miners might opt to retain some block rewards; however, it's still fine to treat these coins as being sold.
+  To whom are they sold in this case?
+  \emph{Well, to the miner, of course!}
+
+  It works like this.
+  Miners have real and substantial expenses.
+  If a miner isn't paying their power bill out of block rewards, and assuming that they are paying with funds of some other currency (like dollars), then the miner is making a deliberate choice to keep the block reward over the cash equivalent.
+  Excluding minor losses (e.g., to transaction fees), there is no difference between this outcome, and that of paying the bill directly out of their block reward and then buying that amount of coins.
+  Therefore, even when miners don't literally sell their block rewards, the effect is the same.
+}
+
+In the PoW case, we can clearly see that miners are not receiving free money --- rather, they are fulfilling a productive role in the cryptoeconomic system.
+In PoW systems, miners are producing something\footnote{
+  One of the great things about decentralized economic planning (i.e., normal free-market enterprise) is that there are no final arbiters of what kinds of production count as \emph{valid}, or \emph{good}, or \emph{worthwhile} --- outside of those cases where the state sees fit to become involved, of course.
+  The fact miners are \emph{producers} is notable in part because PoS lacks an analogue.
+} in a very real and physical sense.
+They are paid by the network as a whole via the supply inflation from block rewards.
+They produce thermodynamic security in the form of highly particular intertwined patterns of zeros and ones.
+
+In PoS, is there some \emph{production} in an equivalent sense?
+To be clear, we are not looking for equivalent \emph{outcomes}.
+We are looking for the \emph{inputs} so we can trace them through the process where production is meant to happen.
+The inputs aren't at the point of block production so they must be elsewhere, and the next best place to look is at the point of staking.
+We found the argument: there's capital and there's risk, and if the validator orders transactions wrong then they get slashed, therefore consensus.
+Okay, well there is \emph{something} going on there, but it's not \emph{production}; it's an economic game imitating the shape but not the substance.
+The connection to reality is entirely second-handed; ideally, all validators have to do is keep the lights on and add \texttt{apt update \&\& apt upgrade -y} to crontab.
+This is an entirely different \emph{kind} of risk, compared to risk taken in setting up a mining operation.
+It might look superficially similar --- being a deliberate imitation --- but the operations of a validator are comprised mostly of: running a full node and hoping you don't get slashed.
+Considering the inputs, even accounting for housekeeping (rent, security, internet, etc.), there isn't much actual economic activity going on here, only going \emph{through} here.
+(Oh, and, the only reason `here' is on the way is because the validator `paid' for the privilege, and even that only cost opportunity.)
+The PoW miner, on the other hand, is constantly incentivized to improve: better ASICs, better cooling, cheaper power, better networking.
+And if they change their mind, they can't just keep the lights on till their staking bond is up, then walk away with their complete principle plus profit \ldots like any other productive business.
+Innovation and efficiency are rewarded, just as with most other things our civilization produces.
+
+The problem with PoS and other kinds of hollow financial systems --- the kind with designs that look great until they don't --- is that they all inevitably share the same fate.
+Good intentions can't fix flawed designs.
+The danger, of course, is if or when we come to rely on them.
+So.
+If they're going to go off with a bang, let's hope it's sooner, rather than later.
+
+% was going to have a paragraph about the self defeating nature of picking PoS as a tool for economic freedom over PoW.
+% not sure where I'd fit it in.
+% also: why would anyone want that, unless they know it will end with slaves and masters, and they intend to be the masters. (Elsworth Toohey)
+% when dealing with completely abstract systems, how do you know if you're actually being productive, or if you're metaphorically breaking windows?
+
+In PoS, there is no \emph{production} in any remotely equivalent sense, compared to PoW mining.
+Energy is not being used to transform matter from less useful to more useful forms.\footnote{
+  Since all information is physically embedded in reality in some way, the creation of proofs of work, or of stake, or any data processing, does constitute some transformation of matter in a useful way.
+  It is, however, a different kind of transformation compared to traditional manufacturing since the result is \emph{special abstract data}.
+  Not to mention that we have a great abundance of universal data-processing devices dedicated to every step of the storage and replication process that make using the data exceptionally easy and practically free.
+}
+It's not that no energy is being used at all --- obviously the node will consume some electricity --- rather, we should note that there is virtually no cost associated in creating a proof of stake.
+If we want more proof that no real production is happening, we can note that there are no substantial \emph{inputs} to where the production would go; you cannot produce something from nothing.
+So \ldots where'd the money go?
+
+Perhaps this line of inquiry is presumptuous.
+Instead, what happens if we paid PoS validators like PoW pays miners?
+That is, in rough equilibrium to the cost of the inputs.
+Well, staking rewards would drop dramatically, and people would pull their coins out, in turn increasing the effective supply and pushing down the price.
+After that, it would be relatively cheap for an attacker to perform some kind of profitable attack by out-staking the validators who stuck around.
+How does PoS prevent this attack?
+Bigger block rewards to attract stakers.
+
+How is this different from protection money?
+How is this not \emph{non-aggression as a service}?
+Just look at what happens if we push more.
+The further we turn that dial, the more attractive the staking is, which further pushes up demand and thus the price and restricts supply, pushing up the price, and so on, and so on, and so on\ldots
+
+Is it not the case that increasing the block reward, and thus increasing the incentive to stake, the number of validators, etc., will result in a network that is conventionally considered \emph{more} secure?
+\emph{More} decentralized?
+\emph{More} valuable or reliable or consistent or whatever?
+Where does it stop?
+Besides avoiding self-destruction, what reason is there to ever reduce the block reward?
+I mean, \emph{it'd be bad for everyone!}
+\ldots In truth, it's bad for everyone \emph{either way}.
+
+When we consider the role that L1 PoS Blockchains will play in the future of our civilization, many of you reading this might be scared of a future where big L1 PoS chains have failed.
+That is nothing compared to the terrifying future we will face if they \emph{succeed}.
+Maybe not in 10 years, but what about 100?
+How long will any altruistic or benevolent culture of stewardship last?
+If we are considering whether and how the networks we design will survive, it would be prudent to plan beyond our foreseeable life spans.
+Perhaps that doesn't even matter because, at the end of the day, we all know that the real test of a system is whether it can \ul{endure without us}.
+When everyone has been replaced, do you trust \emph{the next generation} to carry on the culture?
+What about the one after that?
+
+Have you ever wondered: \emph{Why do democracies tend to avoid massive, sudden overextensions of government power?}
+Of course, it's not a universal truth that democracies avoid those kinds of things (though, it is usually more akin to the cautious creep of vermin past a sleeping cat, anyway),
+but democracies are pretty good at avoiding \emph{that} kind of catastrophe.\footnote{
+  Please enjoy the rich irony that comes with any vaguely similar statement in the wake of our collective derangement during COVID.
+  There was one upside, at least: the cat has cracked an eyelid.
+}
+Well, if you're one of the rulers of the day (comprise government, have a majority, whatever), and you enact overreaching laws, and the voters swing against you next election: you've just handed a potential weapon to your political opponents on a silver platter.
+Before you know it, they're playing \emph{`anything you can do, I can do better,'} and your life gets a lot worse.
+That's on the worst-case end of things, but it's possible.
+Luckily, fixing those laws can be a popular policy and so we are by no means stuck in that situation.
+But, I hope you can see how there is a strong incentive, even for corrupt politicians, to avoid creating very deep legislative holes that are all too difficult to climb out of.
+Put another way: when we create laws, we are not only trusting the current government, right now, but we are also trusting every future government, because \emph{we cannot control what they might do with it}.
+The main thing that we \emph{can} do is design robust systems that survive even the crazy ones.
+And \emph{that} property is a sign of good laws.
+
+The problem with Proof of Stake is not only that it \emph{can} be used to entrench a new caste of rent-extractors, but that this \emph{will likely} happen if we do nothing.
+Odds are, it will happen \emph{almost by default} at some point --- assuming big L1 PoS chains survive and thrive, that is.
+But, if those chains dominate, what happens when that new caste realizes that there is no friction left on the economic dials?
+Do you trust them?
+\ldots People who might not be born for 50 years?
+And let's not be so naive as to presume that they will agree with the ideas we hold dear today --- it's entirely unpredictable, and who is going to teach them our values, your values, my values, anyway?
+Betting a global financial system on the ideas of people not-yet-born is foolish, and I refuse to condemn my descendants to that hell.
+
+A much better use of our time is building robust systems that are too fragile to tolerate that kind of manipulation, but so resilient \emph{before that point} that no one even tries.
+The kinds of systems that value death with integrity above life without.
+Systems that will be studied by our descendants with curiosity and appreciation and awe, even after they've been replaced.\newline
+Systems that produce.\newline
+Systems like Bitcoin.\newline
+Systems like Amaroo.

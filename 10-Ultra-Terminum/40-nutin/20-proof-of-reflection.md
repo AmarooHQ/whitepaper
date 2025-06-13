@@ -338,7 +338,7 @@ How can we use these relationships to our advantage?
 
 \aside{
   With regards to Proof of Reflection, consider that we \emph{only} need to convert \emph{simultaneous} work.
-  That means: PoR does not need to be able to convert chain-work between chains \emph{over time}, only \emph{for some given moment}.\footnote{At this point, we are discussing how PoR works with Proof-of-Work, discussions of where other methods, such as Proof-of-Stake, fit into the ecosystem will be discussed in \autoref{sec:converting-confirmations}.}
+  That means: PoR does not need to be able to convert chain-work between chains \emph{over time}, only \emph{for some given moment}.\footnote{At this point, we are discussing how PoR works with Proof of Work, discussions of where other methods, such as Proof of Stake, fit into the ecosystem will be discussed in \autoref{sec:converting-confirmations}.}
 }
 
 The units that we have to work with are: blocks, seconds, hashes, and coins\footnotemark{}.
@@ -878,7 +878,7 @@ However, there are still other problems that we have not yet solved, and the sol
 The difference between these designs will likely impact whether (and how) SPV can be done safely.
 So, attempting to solve the SPV problem at this point is premature.
 
-We will proceed on the \emph{assumption} that SPV is possible and easy to do in a reasonable time period, and we'll investigate the problem of SPV in detail in \autoref{sec:spv-in-ut}.
+We will proceed on the \emph{assumption} that SPV is possible and easy to do in a reasonable time period, and we'll investigate the problem of SPV between reflecting chains in detail in \autoref{sec:spv-in-ut}.
 
 \subsection{Converting Confirmations}
 
@@ -921,6 +921,9 @@ For example, we can say that the single confirmation provided by Bitcoin block 7
 }
 The conversion-ratio is equal to the difficulty of block 704610.
 That is, it would take a chain of $\sim$ 20 trillion blocks, each with 1 genesis-confirmation worth of work, to match the weight of block 704610.
+Curiously, while this works for the \emph{fork rule} (since it compares chain weights), it does not work when waiting for transaction confirmations --- in that case, 20 trillion confirmations at 1 difficulty is \emph{much} more secure than 1 confirmation at 20 trillion difficulty.\footnote{
+  For an explanation of \emph{why}, see \citeAHBDS{} and \Cref{sec:confirmation-times}.
+}
 
 Now, \textbf{converting confirmations,} how do we actually do it?
 <!-- Consider the \emph{excess capacity} in our methods of conversion that we covered in \autoref{sec:comparing-weight-dex}. -->
@@ -1006,9 +1009,9 @@ Of course, this is only useful over \emph{multiple} chains.
   This may be a new criticism of PoS.
   In essence: a blockchain needs something like a DAA to factor-in participation.
   PoS chains use \emph{coins} instead of \emph{hashes}, but \emph{coins} will never provide a way to determine which chain has higher participation.
-  Moreover, \emph{coins} is actually a very \emph{bad} way to measure participation (for a standalone PoS chain), because the \emph{most valuable future network} is one where coins are being used for \emph{actual trade}, and this must happen at the expense of the number of coins dedicated for staking.
-  Thus, PoS chains \emph{can only ever have objectively secure fork-rules} when other factors are included in their conversion contexts (like using PoR with a PoW chain).
-  One thing PoS chains could try is: measuring weight \emph{in another chain's hashes}.
+  Moreover, \emph{coins} are actually a very \emph{bad} way to measure participation (for a standalone PoS chain), because the \emph{most valuable future network} is one where coins are being used for \emph{actual trade}, and this must happen at the expense of the number of coins used for staking.
+  Thus, PoS chains \emph{can only ever have objectively secure fork-rules} when other factors are included in their conversion contexts (like using PoR with a PoW chain, or some system of automatic checkpoints).
+  One thing PoS chains could try is: measuring weight \emph{in another chain's hashes} via PoR.
 }
 This happens because these conversion methods \emph{don't try to convert work done at different times.}
 PoR only ever converts \emph{near-simultaneous work}, i.e., if the coin-weights of reflecting blocks are summed, that is always converted to local work \emph{with respect to some specific moment in time.}
@@ -1122,9 +1125,14 @@ Thus, UT's solution to *Nothing at Stake* is qualitatively superior.
 \input{20-por/90-counting-work.tex}
 
 
+
+
+
 %% END ### RELEASE
 
 %% BEGIN ### DRAFT
+
+<!-- \input{20-por/99-cost-of-pos.tex} -->
 
 \subsection{Incompatibility between Merged Mining and PoR}
 
