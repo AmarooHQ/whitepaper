@@ -1,12 +1,17 @@
 This paper explains and constructs \emph{Amaroo's} consensus mechanism: \emph{Ultra Terminum}.
 
 \emph{Ultra Terminum} (UT) is a proof-agnostic cross-chain consensus strategy with multiple scaling configurations, and provides a practical solution to the Blockchain Trilemma (a.k.a. Scalability Trilemma).
+Although \UT{} is proof-agnostic, using \emph{Proof-of-Work} as the foundational method of proof provides decisive advantages to security, scalability, and user experience.
 
-The Trilemma takes $O(c)$ as the measure of a traditional blockchain's scalability.
+The Trilemma takes $O(c)$ as the measure of a traditional blockchain's scalability -- $c$ being a normal computer's capacity.
 UT's simplest configuration, $\UT{1}$, scales quadratically --- $O(c^2)$.
-Its other scaling configurations are: $\UT{2}$ $(O(c^3))$, $\UT{3}$ $(O(c^4))$, and $\UTinf{}$ (theoretically $O(n)$, where $n$ is the size of the network).
-UT is built on a new consensus primitive, \emph{Proof of Reflection}, and
-PoW UT configurations remain secure against attackers with less than half of the network hash-rate.
+UT's other scaling configurations are: $\UT{2}$ $(O(c^3))$, $\UT{3}$ $(O(c^4))$, and $\UTinf{}$ (theoretically $O(n)$, where $n$ $\sim$ size of the network).
+\par
+\emph{Proof of Reflection}, a new consensus primitive, is the key to UT's performance and security.
+Proof-of-Work configurations of UT meet \emph{or exceed} the security of traditional PoW blockchains.
+% are secure against 51\% attacks.
+% UT is built on a new consensus primitive, \emph{Proof of Reflection}, and
+% PoW UT configurations are secure against attackers with less than 50\% of the network hash-rate.
 %and addresses the core conflict of the \emph{Scalability Trilemma} (herein called \emph{Buterin's Trilemma}).
 % \par
 % UT is built on a new consensus primitive: \emph{Proof of Reflection} (PoR) --- a way for blockchains to mutually secure each other.
