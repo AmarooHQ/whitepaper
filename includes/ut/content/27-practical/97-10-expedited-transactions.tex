@@ -1,10 +1,220 @@
-\todo{Expedited TXs}
-
-In \Cref{sec:confirmation-times} we saw that \UT{}'s confirmation rate was $O(c)$, and thus the expected confirmation \emph{time} was $O(c^{-1})$.
-This is roughly how long a user needs to wait for a transaction to be considered \emph{confirmed}.
+In \Cref{sec:confirmation-times} we saw that \UT{}'s confirmation rate was $O(c)$, and that the expected confirmation \emph{time} was $O(c^{-1})$.
+This is how long a user waits for a transaction to go from \emph{newly} to \emph{fully} {confirmed}.
 
 In those calculations, we did \emph{not} account for the time \emph{between} the initial \emph{broadcast} of a transaction and its \emph{inclusion} in a block.
-To account for the duration of the whole the transaction's journey, we need to consider: broadcast latency, the block period of the local chain, and the confirmation rate of the simplex as a whole.
+To account for the duration of the whole the transaction's journey, we need to consider: broadcast latency ($\phi$), the block period of the local chain, and the confirmation rate of the simplex as a whole.
 $$
 \text{Time-to-}x\text{-confirmations} = \phi + \frac{1}{2 B_f} + \frac{x-1}{N_1 B_f}
 $$
+This process, end-to-end, is thus $O(\phi + 1 + c^{-1}) = O(1) > O(c^{-1})$.
+Can we do better?
+
+\emph{Ideally}, we'd want the \emph{time to first confirmation} (TTFC) to be as short as possible --- currently it is the bottleneck, after all.
+Naively, our first idea might be to use cross-chain transactions somehow: there are $\sim N_1$ chains that are potentially \emph{sending} transactions, so that could provide the necessary coefficient to bring down the TTFC.
+This intuition does have some merit: we're going to need to use the \emph{other chains} if we want a transaction to be `confirmed' \emph{during the period between blocks} of whichever chain the user is operating on.
+However, cross-chain transactions are way slower than we're seeking as they already wait for some number of confirmations.
+
+We must also consider a \emph{crucial difference} between local or cross-chain transactions and whatever solution we come up with:
+\ul{whether a transaction is spendable is only certain \emph{in the context of a block}.}
+Transactions without contexts are just some signed data.
+Even with a spendability proof, \emph{that proof is against a pre-existing block}.
+Therefore, if there \emph{were} some way to confirm a transaction after the last block and before the next, \emph{we cannot tell if the transaction is valid or not}.
+
+Thus, whatever the involvement of other simplex-chains is, those chains cannot know \emph{for sure} that a foreign transaction is \emph{guaranteed} to execute successfully.
+Requiring this would constitute \emph{foreign validation} which would mean an $O(c^2)$ validation load, so we \emph{cannot} have such a requirement.
+However, there is a corollary here: \ul{expedited transactions \emph{do not depend} on the \emph{validity} of foreign blocks.}
+
+\subsubsection{Protocol Design}
+
+This is enough to start sketching out expedited transactions.
+\begin{enumerate}
+    \item \cR blocks must be able to include (specially flagged) \cL transactions.
+    \item \cL miners must now scan all \emph{relevant} \cR blocks for expedited \cL transactions.
+    \item \cL miners must then \emph{include and execute} those expedited transactions, and record whether each was successful or not. Duplicates are dropped.
+\end{enumerate}
+
+This is a rudimentary protocol and we will need to improve it before it can be used.
+For example: what if an \cR miner includes a great many invalid \cL transactions?
+That would cause the \cL miner to waste valuable block space, reducing overall revenue.
+
+\subsubparagraph{DoS and Griefing}
+
+We will prevent any significant impact \emph{to miners} with an architecture that limits intentional DoS or griefing attacks.
+
+The architectural change is simple:
+\begin{itemize}
+    \item A block is \emph{invalid} if it includes more than one expedited transaction for any foreign chain.
+\end{itemize}
+% Mathematically: $\forall \mathcal{C} \in \mathcal{S} / \cL, \text{CountExpedited}(\mathcal{C}) \le 1$.
+
+Additionally, we can note that to support expedited transactions, a miner must scan foreign blocks.
+We already do this for cross-chain transactions, and miners already have the blocks due to the \AxiomOfAvailability.
+There is no need for miners to include the raw transaction \emph{again} if it has already been recorded.
+Therefore, an \cL miner only needs to reference this transaction by hash (similar to off-main transactions).
+This creates \emph{a new asymmetry} which protects miners from griefing attacks: the attacking miner must use more block space than the victim.
+
+\subsubparagraph{Incentives and Fees}
+
+A different kind of griefing is financial and might even happen without any malice: low-fee transactions.
+Miners normally have control over which transactions they include in their blocks and from this we get a functional fee market.
+However, if an \cR miner can include an expedited low-fee \cL transaction, and especially if this happens on many \cR chains at once, then \cL miners are at the mercy of whatever transactions are chosen \emph{for} them.
+
+To resolve this, we will \emph{require}:
+\begin{itemize}
+    \item Expedited transactions must pay an \emph{equal} fee to \emph{both} miners.
+\end{itemize}
+
+Additionally, we should note that \emph{the fee is dependent on the successful execution of the transaction}.
+The foreign miner is therefore incentivized to consider only transactions with \emph{current} spendability proofs --- the standard of proof is the most recent \cL block.
+(Since we are considering \emph{expedited} transactions particularly, we tolerate more stringent requirements than we'd require for simply relaying transactions.)
+
+\subsubparagraph{Miscellaneous}
+
+Since high-fee expedited transactions are likely, it's natural to ask whether miners of that chain can include them.
+There's no reason to forbid this, and it further increases that miner's rewards, so we will allow it:
+\begin{itemize}
+    \item Blocks can include any number of expedited transactions for the local chain.
+\end{itemize}
+
+\subsubparagraph{Synchronization Caveats}
+
+We should note that synchronization of a single chain must change a little to work with expedited transactions.
+Particularly, along with the block itself, we will need some auxiliary data (the expedited transactions that were recorded in other chains).
+
+\subsubparagraph{The \cL Miner's Perspective}
+
+A good feature increases the value of the network and it is in the rational self-interest of network participants to adopt it.
+Therefore, we can judge this feature from a miner's perspective to make sure it is preferable.
+
+Miner's are concerned about making and re-making blocks.
+They want to be able to create them regularly and keep them up to date with minimal computational effort.
+Since we require (for fraud proofs) that the \emph{output state} from each transaction is recorded in the block, any insertion of a transaction means re-executing transactions after the point of insertion to calculate new state roots.
+For simple transactions this is not too bad, but more complex transactions might have non-negligible overhead.
+
+In general, we'd like the frequency of changes to be lowest for the first transactions and increase as we go.
+Ideally the way state is calculated should account for this so that miners don't unnecessarily have to recalculate state.
+
+In terms of the transactions themselves, the cost of including an expedited transaction is two hashes: the transaction ID and the resulting state root.
+Since transactions are typically 250 bytes or more, we can estimate a 5$\times$ reduction in block size used for a similar transaction fee.
+Although new expedited transactions can arrive with any foreign block (which happens frequently), not every foreign block will have one, and they won't change order (or at least not often) when subsequent new ones arrive.
+That sounds good provided that the overhead is manageable.
+
+Additionally, having the option to include expedited transactions for foreign chains is welcome.
+They'll have a decent fee and don't require recalculating any state.
+That said, a miner might miss out on some fees if they include an expedited transaction that some other miner already included in a simultaneous block.
+Choosing semi-randomly might help avoid collisions, but in the meantime the severity of this and efficacy of mitigation remains to be seen.
+
+Overall, this is \emph{win--win} provided that expedited transactions are not too complex, the overhead of recalculating state is not too high, and an intelligent strategy can be found for which foreign expedited transactions to include.
+
+\subsubsection{Security of Confirmations}
+
+Expedited transactions now have \ul{multiple stages} of confirmation: first on the foreign chain, then on the local chain when they are actually executed.
+The first stage guarantees that the transaction will be executed, but not that it will succeed.
+Even a spendability proof against the prior block is not sufficient since expedited transactions consume inputs, and we don't know which transactions will be processed \emph{before} the expedited transaction is executed.
+
+\aside{
+    This kind of confirmation is not unprecedented; off-main transactions are in a similar limbo-like state before they are executed in an on-main block.
+}
+
+Thus, we are left with the question: \emph{Are these first-stage confirmations equivalent to second-stage confirmations?}
+One test is against double-spends: if they are easier to double-spend, then they are not equivalent.
+% Does this protocol protect against double-spends?
+
+\subsubparagraph{Double-Spend Resistance}
+If the attacker controls the inputs, then an attack depends on their ability to execute a conflicting transaction before the one in question.
+Therefore, \emph{if} expedited transactions are \emph{simultaneous or after} \emph{on-main} transactions they \ul{would be vulnerable}.
+However, if expedited transactions are \emph{before} on-main transactions, then the inputs would have to be spent another way.
+Off-main transactions are executed before on-main ones, but off-main parents are always near-simultaneous with their siblings (due to the \AxiomOfUnifiedAncestry) --- we can therefore trivially calculate any conflicts.
+Cross-chain transactions for a block are determined well in advance due to the delays built into the protocol, so any conflict here will be detectable and we can predict the outcome.
+Other expedited transactions might conflict too, but we already know which those are (or will in short order), so again we can predict the outcome.
+There is one other candidate that we haven't thought about \emph{at all} so far: some kind of automated transaction that is executed at the start of a block.
+However, since this would be entirely determined by the prior block, any outputs removed at this stage are already well known.
+These are all of the cases for transactions that may execute prior to the expedited transaction, and none allow for an advantage to the attacker provided we are watching for it.
+Therefore, expedited transactions are \ul{not vulnerable} to double-spends, \emph{provided} that they are executed \emph{before} on-main transactions.
+
+\aside{
+    As sometimes happens when design work and development are simultaneous, some of the planning document may be written with the hindsight of solutions already implemented.
+    The idea of automatic \emph{system} transactions is an example --- this has already been implemented in the Amaroo client.
+    That's why I know that they are deterministic based on the prior parent.
+    The reason that they are at the start of a block is that they might contain heavy state operations that are inconvenient to do at the end.
+    Having them at the start gives the same \emph{result} as if they were at the end of the prior block, but, this way, the associated state calculations only ever have to be done once.
+}
+
+\subsubparagraph{When Confirmations Differ}
+
+The primary difference between the first and second stage of confirmation is that the first stage is \emph{not} guaranteed to succeed.
+
+Therefore, if we are to be \emph{absolutely certain} that a transaction will succeed, then we \emph{should} discriminate.
+Particularly, we need to wait for a local confirmation to actually process the block at minimum.
+At that point, however, we can \emph{in hindsight} treat the confirmations as equivalent since they are double-spend resistant.
+
+If the transaction is less significant (e.g., paying for groceries) then we don't need to worry too much.
+Such transactions are more confirmed than zero-confirmation transactions, and less than it will be after the next block.
+
+Light-clients are a special case: if a local node is not available to validate blocks, then it is possible that we have an invalid block somewhere and we don't yet know about the fraud proof.
+In these cases, we need to wait as long as the cross-chain protocol waits to ensure that no fraud proof exists --- about 60 seconds in practice.
+After this, the confirmations of both stages can be treated as normal.
+
+\subsubsection{\texorpdfstring{$\mathbb{C}'$}{C′} and Time to First Confirmation}
+
+We can now calculate the time to first confirmation (TTFC) for expedited transactions.
+
+The TTFC is the time it takes for an expedited transaction (with an appropriate fee) to be broadcast and confirmed on any foreign chain (of which there are $N_1$).
+\begin{align*}
+    \text{TTFC} &= \phi + \frac{1}{N_1 B_f} \\
+    O(\text{TTFC}) &= O(c^{-1}) + O(c^{-1}) = O(c^{-1})
+\end{align*}
+
+For a 150-simplex with 15 second block periods, $\text{TTFC} \approx 100 \text{ ms}$.
+This is on the order of $\phi$ and about as close to `instant' as we can get.
+
+We can now see that $\mathbb{C}'$ is accurate \emph{from the \ul{moment} an expedited transaction is broadcast}.
+For normal on-main transactions, $\mathbb{C}'$ is accurate \emph{after} the first confirmation.
+
+Additionally, for expedited transactions:
+$$
+\text{Time-to-}x\text{-confirmations} = \phi + \frac{x}{N_1 B_f}
+$$
+
+
+
+\subsubsection{Effect on Chain-Capacity}
+
+There is a \emph{significant} secondary effect of expedited transactions that must be explored: the \emph{effective capacity} of a chain is increased, and the \emph{overall} network capacity is slightly decreased.
+
+Let us consider an exceptionally popular chain, \cL, with a growing demand for transactions -- up to 10$\times$ it's capacity.
+
+To start with, the chain is at 100\% utilization and fees are roughly equivalent to any other chain.
+As fee pressure increases, the first breakpoint for expedited transactions will be hit: the fee is more than 2$\times$ the average lowest fee of any other chain.
+At this point, it is profitable for that \cR miner to include the expedited transaction.
+
+
+
+as a function of fees, when the fee is > 2x most other chains, virtually all transactions are expedited.
+
+$\text{ExpansionRatio} = \frac{\text{AvgTx} + g}{2g} \gtrsim \frac{282}{64} \approx 4.4$
+
+$\text{CapacityLostRatio} = \frac{1}{\text{ExpansionRatio}} \lesssim 0.23$
+
+
+
+
+\subsubsection{Effect on Confirmation Time}
+
+asdf
+
+
+\begin{comment}
+    - incentivization: user pays special fee to miner (rule: must be ~equal to normal tx fee to avoid distorting fee market)
+    - R miner verifies spendability etc (since they want the fee)
+    - transaction *must* be processed by L but *might* fail (no fee to R or L in this case)
+    - uses fewer bytes in a block than the raw transaction would
+    - requires recording result of execution too (pass/fail)
+    - to prevent DoS, R blocks can only include one L transaction at a time (i.e., at most 1 tx per chain).
+    - order of txs in block
+      - system txs
+      - XC - full outputs b/c often not much bigger than a hash and removes foreign block data requirements; always succeed; + state out
+      - Expedited TXs - TXID ref + execution status + state out
+      - Off-main TXs - TXID ref + exec status + state out; the On-main TXs from Off-main blocks
+      - On-main TXs - Full TX + state out (always valid, the "normal" transactions assembled at miner's discretion)
+\end{comment}
