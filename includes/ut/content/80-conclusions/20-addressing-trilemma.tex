@@ -19,20 +19,23 @@ Currently, Digital Ocean offers\footnote{
     Note: inbound data is free.
 } a VPS with 5 TiB/month (outbound) for $48.00$ USD.
 By inspection, this is $O(c)$, so, at $k = 3000$, the $\Delta S$ requirements on miners is not a bottleneck.
-Therefore, with appropriate parameters, \UT1 passes the decentralization criterion.
+
+\ul{Therefore, with appropriate parameters, \UT1 passes the decentralization criterion.}
 
 The \emph{security} criterion states that the system must be secure against an attacker with $O(n)$ resources.
 The standard way to check if a PoW system passes this criterion is whether it is resistant to a 51\% attack.
 We saw in \autoref{sec:simplex-security-cec} that \UT1 is indeed secure against a 51\% attack.
 We also saw in \autoref{sec:spv-in-ut} that cross-chain transactions within the simplex were as secure as the network.
-Therefore \UT1 passes the security criterion.
+
+\ul{Therefore \UT1 passes the security criterion.}
 
 The \emph{scalability} criterion requires that the system can process more than $O(c)$ transactions.
 Given $k = 3000$, $\Sigma \text{TPS}_1 \in [10^3, 8.4\times10^3]$.
 By inspection, 1000 TPS is more than $O(c)$.
-Therefore \UT1 passes the scalability criterion.
 
-Thus \UT1 satisfies all 3 trilemma criteria \emph{as put by Vitalik}.
+\ul{Therefore \UT1 passes the scalability criterion.}
+
+\ul{Thus \UT1 satisfies all 3 trilemma criteria \emph{as put by Vitalik}.}
 
 \aside{
     At $k = 20000$ B/s, $\Delta S \in [10, 93]$ MB/s, or $\Delta S \in [25, 241]$ TB/month.
@@ -52,7 +55,7 @@ Since the dapp-chains are PoS, their effective header size will be greater than 
 Assuming that the effective header size of dapp-chains is $10\times$ larger (and $k = 3000$, of course), we see that $N_2 \in [5\times10^3, 4\times10^4]$ dapp-chains.
 We also see that $\Sigma \text{TPS}_2 \in [6\times10^4, 5\times10^5]$.
 By inspection, 60,000 TPS is a lot.
-Therefore, \UT2 satisfies all 3 trilemma criteria \emph{as put by Vitalik}.
+\ul{Therefore, \UT2 satisfies all 3 trilemma criteria \emph{as put by Vitalik}.}
 
 \emph{On the assumption} that a secure $O(c^2)$ PoS chain exists\dots you know where this is going.
 If \UT3 works, then we're talking millions of TPS at $k = 3000$ B/s.
@@ -97,10 +100,10 @@ Finally, what about \UT3 and \UTinf3?
 A conservative estimate of \UT{3}'s TPS with standard chain parameters is around $10^7$.
 Given the sensitivity of this number to small changes in chain parameters, we could easily tweak things a little to reach $10^8$ TPS.
 
-\UTinf3, by comparison, could reach these kinds of numbers with only 3 layers (the tiling shown in \autoref{fig:binary-tree-tiling-d3}).
+\UTinf3, by comparison to tweaking parameters, could increase capacity over \UT3 by $10\times$ to reach these kinds of numbers with only 3 layers (the tiling shown in \autoref{fig:binary-tree-tiling-d3}).
 In turn, $\Delta S$ increases by just $4\times$ what it would be for a maximal simplex with the same chain parameters.
-Arguably, this is practical.
-Therefore, with carefully chosen parameters, \UTinf3 is $O(n)$ scalable and decentralized \emph{at the same time}.
+Arguably, if the \UT3 chain parameters are practical, then this is practical.
+{Therefore, with carefully chosen parameters, \UTinf3 is secure, $O(n)$ scalable, and decentralized \emph{at the same time}.}
 
 
 
