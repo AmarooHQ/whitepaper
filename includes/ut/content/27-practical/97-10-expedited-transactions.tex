@@ -87,13 +87,9 @@ To mitigate these issues, we will modify the protocol:
 
 We should note that synchronization of a single chain must change a little to work with expedited transactions.
 Particularly, along with the block itself, we will need some auxiliary data (the expedited transactions that were recorded in other chains).
-
-\todo{todo}
-
-we don't break $O(c)$ constraints because we at worst have $N_1$ incoming expedited transactions and $O(N_1) = O(c)$.
-
-also, expedited transactions can be later pruned from the chain that they were included in.
-Synchronizing nodes only need to know enough to recalculate the block root correctly.
+In terms of complexity, this will not be a problematic increase: we have at most $N_1$ expedited transactions per block, and $O(N_1) = O(c)$.
+Practically, this can mean up to $\sim 5\times$ bandwidth requirements for nodes synchronizing just the \cL chain and no others (we'll derive this shortly).
+On the flip side, expedited transactions can be pruned from the \cR chain that they were included in, the verifying node only needs to know enough to recalculate the block root correctly.
 
 \subsubparagraph{The \cL Miner's Perspective}
 
@@ -127,7 +123,7 @@ The first stage guarantees that the transaction will be executed, but not that i
 Even a spendability proof against the prior block is not sufficient since expedited transactions consume inputs, and we don't know which transactions will be processed \emph{before} the expedited transaction is executed.
 
 \aside{
-    This kind of confirmation is not unprecedented; off-main transactions are in a similar limbo-like state before they are executed in an on-main block.
+    This kind of confirmation is not unprecedented; off-main transactions are in a similar superposition-like state before they are executed in an on-main block.
 }
 
 Thus, we are left with the question: \emph{Are these first-stage confirmations equivalent to second-stage confirmations?}
@@ -245,8 +241,9 @@ This will increase the block size beyond its normal limit, but not by that much.
 In this case, $\nicefrac{140}{90} \approx 1.56$, and since this is only considering the transaction-half of the block, the complete block is only $\sim 1.28\times$ larger than normal.
 
 Even in the most extreme case, this is clearly still within $O(c)$ block-size limits.
-That said, a \emph{synchronizing} node will need to download around $\sim 4\times$ more data to synchronize the chain over such periods.
+That said, a \emph{synchronizing} node will need to download around $\nicefrac{(700 + 140 + 90)}{(90 \times 2)} \approx 5\times$ more data to synchronize the chain over such periods.
 If we are in a situation more like this than the previous one, we should keep the one-per-chain requirement.
+
 
 \aside{
     In practice, these formulas are a rough estimate and should be taken as such.
