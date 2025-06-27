@@ -481,6 +481,44 @@ These results are, for the purpose of this paper, taken to indicate the followin
     % more stuff that's useful for UT's case?
 \end{enumerate}
 
+\subsubsection{Closed Form of $P^\prime$}
+
+Deriving a closed form of $P^\prime$ from first principles would be challenging.
+But perhaps we don't need to.
+First, let's consider the \emph{PoR graph} without all the additional context of PoR and different simplex-chains --- \emph{what is it?}
+It is, more-or-less, a fairly-streamlined block-DAG.
+If we assume there is no latency, and thus there are no siblings or `stale' blocks, then we expect a form similar to a traditional blockchain (with a very short block period).
+From this perspective, it is fairly obvious that \ul{we should expect} $P \approx P^\prime$ --- they're trying to describe the \emph{same thing}.
+
+The block-DAG nature of the PoR graph may seem complicate the derivation, too, until we notice that comparisons between \emph{linearized slices} of a block-DAG work exactly the same as comparisons between traditional chain-slices: \emph{which is heavier?}
+Moreover, the \emph{order} of blocks in the linearization \emph{doesn't matter} since \emph{all block-weight is counted} (and addition is commutative).
+Only the final comparison between the attacker's slice and the honest slice matters.
+
+Therefore, we can use \autoref{eq:por-sim-hypothesis} for the substitutions $c \to \mathcal{C}N$ and then $\mathcal{C} \to c; N \to N_1 \to n$ to arrive at a closed form.
+Starting from the important part of \autoref{eq:rosenfeld-analytical-p}:
+\begin{align}
+    % \forall c \in \{1, 2, \dots\}: P(q; c) &= \begin{cases}
+    %     1 - \sum_{m=0}^c \binom{m+c-1}{m}(p^c q^m - p^m q^c), & \text{if } q < p \\
+    %     1, & \text{otherwise}
+    % \end{cases}
+    % \\
+    \text{RHS}_1 &= 1 - \sum_{m=0}^c \binom{m+c-1}{m}(p^c q^m - p^m q^c)
+        \nonumber \\
+    \text{by the CEC, let:\;\;} c &= \mathcal{C} \cdot N
+        \nonumber \\
+    \implies \text{RHS}_1 &= 1 - \sum_{m=0}^{\mathcal{C}N} \binom{m+\mathcal{C}N-1}{m}(p^{\mathcal{C}N} q^m - p^m q^{\mathcal{C}N})
+        \nonumber \\
+    \text{by \cref{eq:por-sim-hypothesis}:\;\;}
+    \text{RHS}_1 &= 1 - \sum_{m=0}^{c N_1} \binom{m+c N_1-1}{m}(p^{c N_1} q^m - p^m q^{c N_1})
+        \nonumber \\
+    \therefore \forall c, n \in \{1, 2, \dots\}: P^\prime(q; c; n) &= \begin{cases}
+        1 - \sum_{m=0}^{c n} \binom{m+c n-1}{m}(p^{c n} q^m - p^m q^{c n}), & \text{if } q < p \\
+        1, & \text{otherwise}
+    \end{cases}
+    \label{eq:cec-closed-1}
+\end{align}
+
+
 % Additionally, the following observations are made:
 
 % \begin{enumerate}
