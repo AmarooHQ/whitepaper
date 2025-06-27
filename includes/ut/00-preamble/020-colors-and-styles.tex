@@ -28,8 +28,12 @@
 %   \uline{\contour{white}{#1}}\xspace%
 % }
 
+\NewDocumentCommand{\noselect}{m}{%
+  \BeginAccSupp{method=plain}#1\EndAccSupp{}%
+}
+
 \NewDocumentCommand{\ul}{o m}{%
-  \uline{\contour{\IfNoValueTF{#1}{white}{#1}}{#2}}\xspace%
+  \uline{\noselect{\contour{\IfNoValueTF{#1}{white}{#1}}{#2}}}\xspace%
 }
 
 % 'invisible' text attempts

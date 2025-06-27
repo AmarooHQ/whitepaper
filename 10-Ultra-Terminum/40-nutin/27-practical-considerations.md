@@ -460,7 +460,15 @@ atk situations:
 
 \input{27-practical/97-10-expedited-transactions.tex}
 
+\subsection{Initial Configuration}
+
+\label{sec:initial-config}
+
+\input{27-practical/99-50-initial-config.tex}
+
 %% END ### RELEASE
+
+<!-- draft below -->
 
 %% BEGIN ### DRAFT
 
