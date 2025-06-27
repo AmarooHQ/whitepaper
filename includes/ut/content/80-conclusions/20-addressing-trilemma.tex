@@ -1,4 +1,4 @@
-\subsection{Addressing \emph{Buterin's Trilemma}}
+\subsection{Addressing the \emph{Blockchain Trilemma}}
 
 Our journey is coming to a close, and it's time we finally answer the question \emph{Does UT solve the Trilemma?}
 First, let us consider \UT1.
@@ -127,7 +127,7 @@ We then found ways to convert work between chains that is compatible with our go
 \begin{figure}[p]
     \centering
     \includegraphics[max width=\linewidth]{trilemma/conflict_resolution_sag}
-    \caption{A solution to the core conflict of \textit{Buterin's Trilemma}.}
+    \caption{A solution to the core conflict of the \textit{Trilemma}.}
     \label{fig:trilemma-core-conflict-solved}
 \end{figure}
 
@@ -199,13 +199,13 @@ We developed a security model for tree-tilings that was secure against an attack
 Were it not for the bandwidth requirements on miners to ensure block availability (which conflicts with the \AxiomOfAvailability{}), this would be the ultimate scaling construction as it is practically unbounded --- we could always add more tiles, growing the capacity exponentially with the diameter of the tiling.
 We don't know if that availability problem is solvable, but even if it isn't, we saw how smaller tilings are still useful.
 
-Penultimately, we evaluated \UT1 against \emph{Buterin's Trilemma} and found that it satisfied all 3 criteria as originally put.
+Penultimately, we evaluated \UT1 against the \emph{Trilemma} and found that it satisfied all 3 criteria as originally put.
 But that was not enough, so we examined each scaling configuration of \UT{} against a stronger trilemma.
 Most configurations, although boasting impressive capacity, fell short of what we set as the standard for $O(n)$ scalability: 100 million TPS.
 But! We did find one configuration that definitely worked: \UTinf3.
 
 With that, I think it's finally time to make \emph{the} claim.
 
-\emph{Buterin's Trilemma} is solved. $\blacksquare$
+The \emph{Blockchain Trilemma} is solved. $\blacksquare$
 
 % \clearpage

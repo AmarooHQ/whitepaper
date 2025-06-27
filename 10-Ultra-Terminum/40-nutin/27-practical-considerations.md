@@ -450,6 +450,21 @@ atk situations:
 
 \input{27-practical/96-spv-bribe-attacks.tex}
 
-\input{27-practical/98-ut1-protocol-summary.tex}
+%% END ### RELEASE
+
+%% BEGIN ### RELEASE
+
+\subsection{Expedited Transactions}
+
+\label{sec:expedited-txs}
+
+\input{27-practical/97-10-expedited-transactions.tex}
 
 %% END ### RELEASE
+
+%% BEGIN ### DRAFT
+
+%% summary of practical solutions (section 4)
+\input{27-practical/98-ut1-protocol-summary.tex}
+
+%% END ### DRAFT

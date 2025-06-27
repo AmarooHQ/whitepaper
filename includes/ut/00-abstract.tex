@@ -1,6 +1,6 @@
 This paper explains and constructs \emph{Amaroo's} consensus mechanism: \emph{Ultra Terminum}.
 
-\emph{Ultra Terminum} (UT) is a proof-agnostic cross-chain consensus strategy with multiple scaling configurations, and provides a practicable solution to the Blockchain Trilemma (a.k.a. Scalability Trilemma).
+\emph{Ultra Terminum} (UT) is a proof-agnostic cross-chain consensus strategy with multiple scaling configurations, and provides a practical solution to the Blockchain Trilemma (a.k.a. Scalability Trilemma).
 
 The Trilemma takes $O(c)$ as the measure of a traditional blockchain's scalability.
 UT's simplest configuration, $\UT{1}$, scales quadratically --- $O(c^2)$.
@@ -14,8 +14,8 @@ PoW UT configurations remain secure against attackers with less than half of the
 With reasonable parameters (i.e., a per-chain load comparable to Bitcoin, and one level of nested dapp-chains), a conservative estimate of capacity --- using Amaroo's intended launch configuration ($\UT{2}$) --- exceeds 350K TPS without \emph{layer 2} scaling methods.
 % In the $\UT{2}$ configuration, doubling the block time quadruples TPS.
 \par
-Capacity of $\UTinf{}$ is \emph{independent} of those parameters and is theoretically \emph{unbounded}.
-It has variants $\UTinf{1}$, $\UTinf{2}$, and $\UTinf{3}$; corresponding to $\UT{1}$, $\UT{2}$, and $\UT{3}$, respectively.
+Capacity of $\UTinf{}$ is \emph{independent} of those parameters and is theoretically \emph{unbounded} by the architecture.
+It is combined with the previous variants to produce $\UTinf{1}$, $\UTinf{2}$, and $\UTinf{3}$.
 \par
 % Confirmation times within UT are $\frac{1}{O(c)}$, i.e., confirmation rate is $O(c)$.
 Confirmation times within UT are $O(c^{-1})$, i.e., confirmation rate is $O(c)$.

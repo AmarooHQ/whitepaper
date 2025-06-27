@@ -1,0 +1,10 @@
+\todo{Expedited TXs}
+
+In \Cref{sec:confirmation-times} we saw that \UT{}'s confirmation rate was $O(c)$, and thus the expected confirmation \emph{time} was $O(c^{-1})$.
+This is roughly how long a user needs to wait for a transaction to be considered \emph{confirmed}.
+
+In those calculations, we did \emph{not} account for the time \emph{between} the initial \emph{broadcast} of a transaction and its \emph{inclusion} in a block.
+To account for the duration of the whole the transaction's journey, we need to consider: broadcast latency, the block period of the local chain, and the confirmation rate of the simplex as a whole.
+$$
+\text{Time-to-}x\text{-confirmations} = \phi + \frac{1}{2 B_f} + \frac{x-1}{N_1 B_f}
+$$
