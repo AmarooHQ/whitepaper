@@ -71,15 +71,29 @@ The foreign miner is therefore incentivized to consider only transactions with \
 \subsubparagraph{Miscellaneous}
 
 Since high-fee expedited transactions are likely, it's natural to ask whether miners of that chain can include them.
-There's no reason to forbid this, and it further increases that miner's rewards, so we will allow it:
+There's no reason to forbid this, and it further increases that miner's rewards, so we will allow it.
+
+If a chain is \emph{really} popular, then it's conceivable that almost all of the transactions are expedited.
+If it's possible for a maximum block size to be exceeded with \emph{too many} expedited transactions then we'd have a deadlock on that chain.
+Therefore, when blocks are over the block size limit we need a special rule to allow such blocks.
+
+To mitigate these issues, we will modify the protocol:
 \begin{itemize}
     \item Blocks can include any number of expedited transactions for the local chain.
+\item Blocks are only invalidated by the block size limit if they include on-main transactions other than the coinbase.
 \end{itemize}
 
 \subsubparagraph{Synchronization Caveats}
 
 We should note that synchronization of a single chain must change a little to work with expedited transactions.
 Particularly, along with the block itself, we will need some auxiliary data (the expedited transactions that were recorded in other chains).
+
+\todo{todo}
+
+we don't break $O(c)$ constraints because we at worst have $N_1$ incoming expedited transactions and $O(N_1) = O(c)$.
+
+also, expedited transactions can be later pruned from the chain that they were included in.
+Synchronizing nodes only need to know enough to recalculate the block root correctly.
 
 \subsubparagraph{The \cL Miner's Perspective}
 
@@ -173,35 +187,80 @@ For normal on-main transactions, $\mathbb{C}'$ is accurate \emph{after} the firs
 
 Additionally, for expedited transactions:
 $$
-\text{Time-to-}x\text{-confirmations} = \phi + \frac{x}{N_1 B_f}
+\text{TimeToXConfirmations}(x) = \phi + \frac{x}{N_1 B_f}
 $$
-
 
 
 \subsubsection{Effect on Chain-Capacity}
 
-There is a \emph{significant} secondary effect of expedited transactions that must be explored: the \emph{effective capacity} of a chain is increased, and the \emph{overall} network capacity is slightly decreased.
+There is a \emph{significant} secondary effect of expedited transactions that must be explored: the \emph{effective capacity} of a chain is dynamically increased with demand, and the \emph{overall} network capacity is slightly decreased.
 
-Let us consider an exceptionally popular chain, \cL, with a growing demand for transactions -- up to 10$\times$ it's capacity.
+Let us consider an exceptionally popular chain, \cL, with a growing demand for transactions.
 
 To start with, the chain is at 100\% utilization and fees are roughly equivalent to any other chain.
-As fee pressure increases, the first breakpoint for expedited transactions will be hit: the fee is more than 2$\times$ the average lowest fee of any other chain.
-At this point, it is profitable for that \cR miner to include the expedited transaction.
+As fee pressure increases, the first breakpoint for expedited transactions will be hit: the fee is more than 2$\times$ the lowest fee of any other chain.
+At this point, it is profitable for that \cR miner to include the expedited transaction over local transactions.
+Additionally, transactions with this fee or higher should be counted as taking up about \nicefrac{1}{5} of the local block space that they normally would.
+With regards to capacity and utilization, we have traded one local transaction for five expedited transactions.
 
+The next major breakpoint to consider is when the average fee passes 2$\times$ the average lowest fee over \emph{all} other chains.
+When this happens, the miners of half of all simplex-chains can increase their total fee intake by including expedited \cL transactions.
+On the (perhaps arbitrary) assumption that 50\% of all \cL block space is used by expedited transactions,
+we have traded 50\% of our naive capacity (for normal on-main transactions) for an equivalent 250\% of our naive capacity in the form of expedited transactions.
+The effective capacity is therefore 300\% of the naive capacity.
 
+As the fee pressure increases further, other chains will become saturated with expedited transactions and there might be no space left for normal on-main transactions.
+This will barely register for other chains since only one expedited \cL transaction can be included in any \cR block.
+Let's also assume there are no duplicate expedited transactions.
+Since, under these conditions, we expect $\sim N_1$ expedited transactions per \cL block, we can use \autoref{eq:simplex-N1} to say:
+\begin{align}
+    \text{ExpTxsPerBlock}_\text{max} &= N_1 = \frac{k_1}{2 B_f B_h}
+    \label{eq:expedited-txs-per-block-max}
+    % \nonumber
+\end{align}
 
-as a function of fees, when the fee is > 2x most other chains, virtually all transactions are expedited.
+% \aside{A fun economic fact I leared recently reading \emph{Capitalism} (George Reisman) is that the \emph{market price} is set based on the \emph{least useful} profitable use.}
 
-$\text{ExpansionRatio} = \frac{\text{AvgTx} + g}{2g} \gtrsim \frac{282}{64} \approx 4.4$
+For our typical lower-end parameters ($k_1 = 3000, B_f = \nicefrac{1}{15}, B_h = 112$): $\text{ExpTxsPerBlock}_\text{max} \approx 200$.
+By comparison, a block would typically contain about $k_1 (2 B_f \cdot \text{Tx}_\text{avg})^{-1} \approx 90$ transactions.
+Under these parameters, we can't even use all of the available block space!
+The 200 expedited transactions consume the space of $\sim 40$ normal transactions, so overall we could expect around 250 transactions per block at most.
 
-$\text{CapacityLostRatio} = \frac{1}{\text{ExpansionRatio}} \lesssim 0.23$
+This is a little bit of a surprise (that the maximum increase is so low), but if we look to \autoref{eq:expedited-txs-per-block-max} we can observe a symmetry with the formula for naive capacity:
+$$
+\text{NormTxsPerBlock}_\text{max} = \frac{k_1}{2 B_f \cdot \text{Tx}_\text{avg}}
+$$
+In effect, we are capped based on the ratio of $\text{Tx}_\text{avg}$ to $B_h$.
+One consequence is that, at least in some cases, we can probably relax the one-per-chain requirement.
 
+\subsubparagraph{Alternate case: \UT{1+\text{HOT}}}
 
+What if $B_h$ were much smaller, though?
+If we \emph{effectively} have $B_h \le g$ (the size of a hash), then we have:
+$$ \text{ExpTxsPerBlock}_\text{max} \ge \frac{k_1}{2 B_f g} \approx 700 $$
+\aside{Ahh, that's more like it.}
 
+This will use the equivalent block space of approximately 140 normal transactions -- more than we could otherwise handle.
+This will increase the block size beyond its normal limit, but not by that much.
+In this case, $\nicefrac{140}{90} \approx 1.56$, and since this is only considering the transaction-half of the block, the complete block is only $\sim 1.28\times$ larger than normal.
 
-\subsubsection{Effect on Confirmation Time}
+Even in the most extreme case, this is clearly still within $O(c)$ block-size limits.
+That said, a \emph{synchronizing} node will need to download around $\sim 4\times$ more data to synchronize the chain over such periods.
+If we are in a situation more like this than the previous one, we should keep the one-per-chain requirement.
 
-asdf
+\aside{
+    In practice, these formulas are a rough estimate and should be taken as such.
+    The main use of this analysis is to set ballpark expectations and plan accordingly.
+    Real-world figures will be heavily dependent on a variety of implementation details.
+}
+
+The take-away from all this is that expedited transactions provide a \ul{\emph{capacity buffer}} for a chain when demand is high, and have the effect of \emph{\ul{distributing fee expenditure and transaction load}} over the simplex.
+
+% as a function of fees, when the fee is > 2x most other chains, virtually all transactions are expedited.
+
+% $\text{ExpansionRatio} = \frac{\text{AvgTx} + g}{2g} \gtrsim \frac{282}{64} \approx 4.4$
+
+% $\text{CapacityLostRatio} = \frac{1}{\text{ExpansionRatio}} \lesssim 0.23$
 
 
 \begin{comment}
