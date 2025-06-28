@@ -40,6 +40,14 @@
 
 
 \makeatletter
-
 \NewDocumentCommand{\trim}{m}{\trim@spaces@noexp{#1}}
 \makeatother
+
+
+\newcommand{\todaysdate}{%
+  \monthname[\the\month]~%
+  \the\day\ifnum\day=1\textsuperscript{st}%
+           \else\ifnum\day=2\textsuperscript{nd}%
+           \else\ifnum\day=3\textsuperscript{rd}%
+           \else\textsuperscript{th}%
+           \fi\fi\fi~\the\year}

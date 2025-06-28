@@ -59,3 +59,10 @@
 }{
   \newcommand{\cn}[1]{}
 }
+
+% \BeginAccSupp{method=pdfstringdef,unicode,ActualText={#1}}%
+\newcommand{\reallyhidden}[1]{%
+  \BeginAccSupp{method=pdfstringdef,ActualText={#1}}%
+  \textcolor{white}{.}% dummy, invisible
+  \EndAccSupp{}%
+}

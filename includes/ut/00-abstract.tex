@@ -1,14 +1,17 @@
+% -2em expands the margins by 2em on each side.
+\begin{adjustwidth}{-3em}{-3em}%
+%
 This paper explains and constructs \emph{Amaroo's} consensus mechanism: \emph{Ultra Terminum}.
 
 \emph{Ultra Terminum} (UT) is a proof-agnostic cross-chain consensus strategy with multiple scaling configurations, and provides a practical solution to the Blockchain Trilemma (a.k.a. Scalability Trilemma).
-Although \UT{} is proof-agnostic, using \emph{Proof-of-Work} as the foundational method of proof provides decisive advantages to security, scalability, and user experience.
+Although \UT{} is proof-agnostic, using \emph{Proof of Work} as the foundational method of proof provides decisive advantages to security, scalability, and user experience.
 
 The Trilemma takes $O(c)$ as the measure of a traditional blockchain's scalability -- $c$ being a normal computer's capacity.
 UT's simplest configuration, $\UT{1}$, scales quadratically --- $O(c^2)$.
 UT's other scaling configurations are: $\UT{2}$ $(O(c^3))$, $\UT{3}$ $(O(c^4))$, and $\UTinf{}$ (theoretically $O(n)$, where $n$ $\sim$ size of the network).
 \par
 \emph{Proof of Reflection}, a new consensus primitive, is the key to UT's performance and security.
-Proof-of-Work configurations of UT meet \emph{or exceed} the security of traditional PoW blockchains.
+Proof of Work configurations of UT meet \emph{or exceed} the security of traditional PoW blockchains.
 % are secure against 51\% attacks.
 % UT is built on a new consensus primitive, \emph{Proof of Reflection}, and
 % PoW UT configurations are secure against attackers with less than 50\% of the network hash-rate.
@@ -31,30 +34,37 @@ Some existing sharded (or otherwise $O(c^2)$) blockchain designs claim to be cap
 By comparison, $\UT{2}$ configurations --- with \emph{equivalent} parameters --- have a maximum capacity exceeding 10B TPS.
 Such a configuration would have a system-wide maximum throughput exceeding 2000 GB/s of transaction data, and a confirmation frequency exceeding 400 Hz.
 UT out-scales the architectures of Cardano, Eth2, Polkadot, and Solana by orders of magnitude.
+%
 % \emph{Nos imus.}
+%
 \par
 \ifthenelse{\equal{\BuildMode}{draft}}{
     \hruleAbstract
     % \textbf{NOTE --- PRERELEASE --- DO NOT SHARE OR DISTRIBUTE!}
     % \par
-    \wordcount words.
+    \centering{
+        This paper's source code available at \url{https://github.com/amaroohq/whitepaper}
+        \;\;\wordcount words.
+    }
     % don't print this stuff till the resources are available.
-    \par
-    This paper's source code available at \url{https://github.com/amaroohq/whitepaper}
+    % \par
     % \par
     % Please provide criticism at \url{https://forum.amaroo.com/c/wp/ut}
 }{
     \hruleAbstract
-    This paper's source code available at \url{https://github.com/amaroohq/whitepaper}
+    \centering{
+        This paper's source code available at \url{https://github.com/amaroohq/whitepaper}
+    }
     % \par
     % \textbf{Release:} \currentReleaseLabel % \; (\BuildMode)
 }
+\end{adjustwidth}
 
-\begin{center}
-    \; \\
-    % {\large Feb 3\textsuperscript{rd} 2025} \\
-    % \; \\
-    % {\normalsize Draft 2 --- Feb 22\textsuperscript{nd} 2023} \\
-    % \; \\
-    % {\normalsize Draft 1 --- May 14\textsuperscript{th} 2021}
-\end{center}
+% \begin{center}
+%     \; \\
+%     % {\large Feb 3\textsuperscript{rd} 2025} \\
+%     % \; \\
+%     % {\normalsize Draft 2 --- Feb 22\textsuperscript{nd} 2023} \\
+%     % \; \\
+%     % {\normalsize Draft 1 --- May 14\textsuperscript{th} 2021}
+% \end{center}
