@@ -19,21 +19,21 @@ Currently, Digital Ocean offers\footnote{
     Note: inbound data is free.
 } a VPS with 5 TiB/month (outbound) for $48.00$ USD.
 By inspection, this is $O(c)$, so, at $k = 3000$, the $\Delta S$ requirements on miners is not a bottleneck.
-
 \ul{Therefore, with appropriate parameters, \UT1 passes the decentralization criterion.}
+
 
 The \emph{security} criterion states that the system must be secure against an attacker with $O(n)$ resources.
 The standard way to check if a PoW system passes this criterion is whether it is resistant to a 51\% attack.
 We saw in \autoref{sec:simplex-security-cec} that \UT1 is indeed secure against a 51\% attack.
 We also saw in \autoref{sec:spv-in-ut} that cross-chain transactions within the simplex were as secure as the network.
-
 \ul{Therefore \UT1 passes the security criterion.}
+
 
 The \emph{scalability} criterion requires that the system can process more than $O(c)$ transactions.
 Given $k = 3000$, $\Sigma \text{TPS}_1 \in [10^3, 8.4\times10^3]$.
 By inspection, 1000 TPS is more than $O(c)$.
-
 \ul{Therefore \UT1 passes the scalability criterion.}
+
 
 \ul{Thus \UT1 satisfies all 3 trilemma criteria \emph{as put by Vitalik}.}
 
