@@ -163,7 +163,7 @@ One major, generic concern for dapp-chains is \emph{preventing DoS attacks}.\foo
 This is one reason to favor PoS (or PoA) dapp-chains over PoW dapp-chains.
 Another concern is the \emph{availability} of dapp-chain blocks.
 
-
+<!-- Note: contains >1 subsubsection -->
 \input{25-constructing-ut/42-dapp-chain-pow-pos}
 
 
@@ -259,6 +259,8 @@ Naturally, there are some other components that are necessary (like a component 
 This section is left unchanged since the specific client we might modify is immaterial to the main point: that relatively few modifications can be applied to existing clients to create a dapp-chain version of that kind of blockchain.
 
 [^builtins-or-sc]: Note: instead of builtins, these requirements could be met via EVM/WASM smart contracts.
+
+\input{25-constructing-ut/45-dapp-chains-extra}
 
 \input{25-constructing-ut/60-going-further-research}
 

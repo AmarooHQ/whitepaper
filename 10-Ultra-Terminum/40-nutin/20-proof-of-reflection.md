@@ -414,7 +414,7 @@ Unless otherwise specified, the chains are identical.
 Here are the key assumptions:
 
 * Both \cL and \cR started on the same day, with the same block rewards (in their respective root tokens), block frequencies, and inflation schedules.
-* \cL and \cR have equal money supplies, and (by chance) the exchange rate has been stable at $X_{R\rightarrow L} = 3$ L-coins/R-coin.
+* \cL and \cR have equal money supplies, and the exchange rate has been stable at $X_{R\rightarrow L} = 3$ L-coins/R-coin.
 * \cL and \cR use different PoW algorithms, \cL uses something like Scrypt (similar to Litecoin) and \cR uses something like SHA256 (similar to Bitcoin).
 * ASIC/FPGA mining doesn't exist yet, but GPU mining does.
 * (In this thought experiment) the best GPUs for mining Scrypt and SHA256 are of the same brand and model --- i.e. the same supply is responsible for the hardware of *all* miners, regardless of which chain they mine.

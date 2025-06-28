@@ -62,11 +62,11 @@ It is generally not possible to create a fraud proof if the block is unavailable
 Since availability is a requirement, how can we ensure that dapp-chain blocks are available and not withheld?
 
 \aside{
-  Note that \emph{Proofs of Availability} are of no use here, because verifying them requires at least as many bytes as the block itself\footnote{
+  Note that \emph{Proofs of Availability} are of no use here, because verifying them requires at least as many bytes as the block\footnote{
     This is somewhat intuitive since proofs of availability allow for the reconstruction of the original block.
     % below is commented because big omega is complexity not a proper formula.
     % Example: ``the sender must transmit $\Omega(|B|)$ bits [\dots] to enable the correct reconstruction of $b$,'' where $b$ is the block, and $|B|$ is the size of the block. -- \href{https://eprint.iacr.org/2022/455.pdf}{Proof of Availability & Retrieval in a Modular Blockchain Architecture} (Cohen, Goren, Kokoris-Kogias, Sonnino, and Spiegelman; 2022)
-  }.
+  } itself; it is just as bandwidth intensive as downloading all blocks.
   So, at best, we might be able to do some kind of challenge-response, but, practically speaking, this isn't the solution we're looking for.
 }
 
