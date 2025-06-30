@@ -128,9 +128,9 @@ This means that supporting new dapp-chain consensus methods is about as difficul
   Dapp-chain headers that are encoded as simplex-level transactions; i.e., they are processed by a simplex-chain as a transaction, but they also function as the header for a dapp-chain block
 }
 
-Practically speaking, a simple input-output transaction system with scripting capabilities (like that of Bitcoin) can be created to facilitate the necessary primitives.
+Practically speaking, a simple input-output transaction system with light scripting capabilities (like that of Bitcoin) can be created to facilitate the necessary primitives.
 Additionally, different simplex-chains can implement different scripting systems, effectively facilitating *any* practical consensus mechanism.
-There is not much (if any) overhead to using an input-output system like this: a header's parent hash is equivalent to a transaction input, the *output* can be omitted[^scriptpk], and other particulars of the header can be treated as an input script to the transaction[^scriptsig].
+There is not much (if any) overhead to using an input-output system like this: a header's parent hash is like a transaction input, the *output* can be omitted[^scriptpk], and other particulars of the header can be treated as an input script to the transaction[^scriptsig].
 
 [^scriptpk]: A header-transaction's output script can be generic (or templated) as it is the same for all header-transactions for that dapp-chain. In practice this can be as simple as a single opcode that validates that header. In Bitcoin, an output script is known as the `scriptPubKey`.
 
@@ -163,7 +163,7 @@ One major, generic concern for dapp-chains is \emph{preventing DoS attacks}.\foo
 This is one reason to favor PoS (or PoA) dapp-chains over PoW dapp-chains.
 Another concern is the \emph{availability} of dapp-chain blocks.
 
-<!-- Note: contains >1 subsubsection -->
+<!-- Note: may contain >1 subsubsection -->
 \input{25-constructing-ut/42-dapp-chain-pow-pos}
 
 
@@ -268,6 +268,8 @@ This section is left unchanged since the specific client we might modify is imma
 
 %% BEGIN ### DRAFT
 
+\begin{comment}
+
 \subsubsection{Dapp-chain simplexes}
 
 \subsubsection{Future Dapp-chain Stuff (todo)}
@@ -312,5 +314,7 @@ plan:
   - If Eth2 is $O(c^2)$ with shards, and we modify Eth2 to run as a dapp-chain, then Eth2 shards would be dapp-dapp-chains and UT's maximum complexity would be $O(c^4)$.
   - Basically we can use other $O(c^2)$ chains as needed to create lots of capacity w/ no loss of security
   - dapp-dapp-chains aren't a big deal really, just nice to have.
+
+\end{comment}
 
 %% END ### DRAFT

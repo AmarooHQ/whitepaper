@@ -20,7 +20,7 @@ For that, we need a merkle branch showing $L_{i+1}$ is part of $R_{j+1}$'s state
 Thirdly, we want to prove that $R_{j+1}$ is the \emph{best block} according to Chain \cL's projection of Chain \cR.
 We can do that via a merkle branch, too, but full nodes of Chain \cL already know whether $R_{j+1}$ is the best block or not, so this branch doesn't need to be explicit.
 However, \cL's nodes must be able to generate it.
-The \emph{full} collection of information required to prove reflection is called a *proof of reflection* (PoR).
+The \emph{full} collection of information required to prove reflection is called a *Proof of Reflection* (PoR).
 
 \begin{figure}
     \begin{subfigure}[t]{.31\textwidth}
@@ -394,7 +394,7 @@ With \autoref{eq:por-conversion-const-1}, \textbf{we have just found our first c
 
 What's going on here?
 We start out by observing $\nicefrac{L_d}{L_r}$ gives us a value in units of $\frac{\text{L-hashes}}{\text{L-coin}}$.
-This is a constant of conversion from L-coins to L-hashes for a given moment --- if some miner earned $x$ L-coins today, then $x \cdot \frac{L_d}{L_r}$ would tell you roughly how many hashes were done to earn that reward.
+This is a constant of conversion from L-coins to L-hashes for a given moment --- if some miner earned $x$ L-coins today, then $x \cdot \nicefrac{L_d}{L_r}$ would tell you roughly how many hashes were done to earn that reward.
 Next, we multiply by the exchange rate to find the constant of conversion for $\frac{\text{L-hashes}}{\text{R-coin}}$.
 Then, we divide by $\nicefrac{R_d}{R_r}$ to find the constant of conversion for $\frac{\text{L-hashes}}{\text{R-hash}}$.
 If we multiply this constant of conversion by a value of R-hashes, then we'll end up with a value of L-hashes.

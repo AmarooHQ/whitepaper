@@ -1,9 +1,31 @@
 \priorityTODO[h]{INITIAL CONFIG}
 
 \begin{itemize}
-    \item \textbf{Block Size:} $k_1 \in [3000, 6000]$ B/s. An exact value will be chosen closer to genesis.
+    \item \textbf{Block Size:} $k_1 \in [3000, 6000]$ B/s.
+    An exact value will be chosen closer to genesis.
     \item \textbf{Block Frequencies:} $B_f = \nicefrac{1}{15}$ Hz for all simplex-chains.
+    \item \textbf{Block Rewards:} $B_r = \nicefrac{\textsc{BaseReward}}{N_1}$ coins.
+    That is: according to the issuance schedule (which determines \textsc{BaseReward}), each block (from any simplex-chain) provides a proportional share of the base reward.
     \item \textbf{Convertible Context:} Single Root Token (SRT; \autoref{sec:conversion-single-root-token}).
+    \item \textbf{Difficulty Adjustment:} \textsc{DAA-2} as in \citeDaaTwoLink{}, modified to work for block-DAGs.
+    The exact window size ($\text{DAA}_N$) is TBD but $\text{DAA}_N = 100$ ($\sim 25$ minutes) satisfies our requirements.
+    \autoref{sec:por-simulation-experiment} has important contributions.
+    \item \textbf{PoW Algorithms:} TBD, but the goals are for diversity in the design of mining rig hardware, avoiding imbalance due to the current distributions of mining hardware, attracting existing under-utilized hardware (especially ASICs), and providing \emph{multiple} different paths for technology development.
+    Additionally, PoW algorithms \emph{will} be used by multiple simplex-chains (miner resonance would not happen, otherwise).
+    One of the PoW algorithms will be deliberately compatible with Bitcoin's double-SHA256 and Bitcoin ASICs.
     \item \textbf{\UT1 Consensus Primitives:} PoW + PoR; multiple hashing algorithms.
-    \item \textbf{\UT{} Variant:} Conservative version of +HOT. Capacity is somewhere between +HO and +HOT; the current truncation method is lossless.
+    \item \textbf{\UT{} Variant:} Conservative version of +HOT.
+    Capacity is somewhere between +HO and +HOT; the current truncation method is lossless.
+    \item \textbf{\UT1 Transaction Capabilities:} UTXOs by default; secondary EUTXO and EVM/WASM subsystems.
+    Special systems will allow for interoperability between subsystems.
+    \item \textbf{Simplex-Chains:} Mostly homogenous in architecture, though each simplex-chain can differ in these ways: the PoW algorithm, which external (non-Amaroo) chains are imaged, and the specific integrations with those external chains.
+    \item \textbf{Intra-Simplex Cross-Chain Security:} $\lambda = 4$, which corresponds to $\sim 60$ seconds.
+    \item \textbf{\UT2 and Dapp-Chains:} Limited support initially with a focus on PoA dapp-chains; secure and universal dapp-chains will require further development.
+    Constrained by and dependent on further developments of suitable PoS + PoR consensus methods.
+    \item \textbf{Simplex Size:} For reasons discussed in \autoref{sec:tiling}, the initial limit on the number of simplex-chains will be $50\%$ of maximal $N_1$.
+    This corresponds to $\sim 75\%$ of maximal TPS capacity.
+    The simplex will start with fewer chains at genesis, with more added later.
+    % The exact number will depend on the plan for genesis and the months following.
+    Genesis estimate: between 15 and 30 simplex-chains ($\text{TPS}_\textsc{Max} \in [150, 700]$).
+    % \item \textbf{\UTinf{} and Simplex Size:} Evolving a simplex into a tiling is easier when the simplex remains within certain constraints. In our case, the breakpoint is 50% of maximal N_1. This corresponds to 75% of maximal capacity, so there are strong diminishing returns (with regards to capacity) past this point, anyway.
 \end{itemize}

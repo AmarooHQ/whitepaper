@@ -497,29 +497,37 @@ The block-DAG nature of the PoR graph may seem complicate the derivation, too, u
 Moreover, the \emph{order} of blocks in the linearization \emph{doesn't matter} since \emph{all block-weight is counted} (and addition is commutative).
 Only the final comparison between the attacker's slice and the honest slice matters.
 
-Therefore, we can use \autoref{eq:por-sim-hypothesis} for the substitutions $c \to \mathcal{C}N$ and then $\mathcal{C} \to c; N \to N_1 \to n$ to arrive at a closed form.
-Starting from the important part of \autoref{eq:rosenfeld-analytical-p}:
+Therefore, we can use \autoref{eq:por-sim-hypothesis} for the substitutions $c \to \mathcal{C}N$, then $P \to P'$, then $\mathcal{C} \to c; N \to N_1 \to n$ to arrive at a closed form.
+These substitutions are important because they \emph{change the arguments} of $P$ and $P'$ without changing the algebraic description.
+Practically, in \autoref{eq:rosenfeld-analytical-p}, we are replacing $c$ with $cn$.
+% Starting from the important part of \autoref{eq:rosenfeld-analytical-p}:
 \begin{align}
     % \forall c \in \{1, 2, \dots\}: P(q; c) &= \begin{cases}
     %     1 - \sum_{m=0}^c \binom{m+c-1}{m}(p^c q^m - p^m q^c), & \text{if } q < p \\
     %     1, & \text{otherwise}
     % \end{cases}
     % \\
-    \text{RHS}_1 &= 1 - \sum_{m=0}^c \binom{m+c-1}{m}(p^c q^m - p^m q^c)
-        \nonumber \\
-    \text{by the CEC, let:\;\;} c &= \mathcal{C} \cdot N
-        \nonumber \\
-    \implies \text{RHS}_1 &= 1 - \sum_{m=0}^{\mathcal{C}N} \binom{m+\mathcal{C}N-1}{m}(p^{\mathcal{C}N} q^m - p^m q^{\mathcal{C}N})
-        \nonumber \\
-    \text{by \cref{eq:por-sim-hypothesis}:\;\;}
-    \text{RHS}_1 &= 1 - \sum_{m=0}^{c N_1} \binom{m+c N_1-1}{m}(p^{c N_1} q^m - p^m q^{c N_1})
-        \nonumber \\
-    \therefore \forall c, n \in \{1, 2, \dots\}: P^\prime(q; c; n) &= \begin{cases}
+    % \text{RHS}_1 &= 1 - \sum_{m=0}^c \binom{m+c-1}{m}(p^c q^m - p^m q^c)
+    %     \nonumber \\
+    % \text{by the CEC, let:\;\;} c &= \mathcal{C} \cdot N
+    %     \nonumber \\
+    % \implies \text{RHS}_1 &= 1 - \sum_{m=0}^{\mathcal{C}N} \binom{m+\mathcal{C}N-1}{m}(p^{\mathcal{C}N} q^m - p^m q^{\mathcal{C}N})
+    %     \nonumber \\
+    % \text{by \cref{eq:por-sim-hypothesis}:\;\;}
+    % \text{RHS}_1 &= 1 - \sum_{m=0}^{c N_1} \binom{m+c N_1-1}{m}(p^{c N_1} q^m - p^m q^{c N_1})
+    %     \nonumber \\
+    % \therefore
+    \forall c, n \in \{1, 2, \dots\}: P^\prime(q; c; n) &= \begin{cases}
         1 - \sum_{m=0}^{c n} \binom{m+c n-1}{m}(p^{c n} q^m - p^m q^{c n}), & \text{if } q < p \\
         1, & \text{otherwise}
     \end{cases}
     \label{eq:cec-closed-1}
 \end{align}
+
+
+\priorityTODO[h]{
+    The substitutions mean changing the arguments of $P$ and $P'$, which is not clear above.
+}
 
 
 % Additionally, the following observations are made:

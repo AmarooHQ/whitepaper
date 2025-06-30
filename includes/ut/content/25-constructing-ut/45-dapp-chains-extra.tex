@@ -1,3 +1,7 @@
+\subsubsubsection{Concerns and Constraints}
+
+\priorityTODO[h]{Dapp-chain extra (concerns and constraints, discussion about currently possible and what is required for universal dapp-chains, etc).}
+
 \begin{comment}
 
 Idea:
@@ -10,4 +14,88 @@ Idea:
     \item
 \end{itemize}
 
+# Supply of dapp-chain 'slots' or something
+
+
+
+# Inter-chain Connectivity Requirements:
+
+## Sometimes: none
+
+Some dapp-chains may not require any information to ever cryptographically leave the dapp-chain.
+We do not require \emph{assurance} that the dapp-chain's state is progressing correctly.
+The state can still be proven, but we don't need a reliable two-way information path between these dapp-chains and simplex-chains.
+For example, a dapp-chains like: voting systems, private data storage, or decentralized versions of twitter or youtube or any other document-publishing system.
+We don't need to be worried about these cases, and so there are no particular requirements we need to enforce --- if these chains fail, there won't be any kind of systemic contagion.
+
+% one use case that's hard to put right is like: consistency and integrity in otherwise tumultuous situations (e.g., a government in exile, companies operating in riskier/hostile environments, notaries, etc).
+
+Do we need to support fraud proofs for dapp-chains?
+Yes for some cases.
+For example, if we have some kind of DEX against the ROO on the dapp-chain, then there will need to be some protocol for moving information between the dapp-chain and the simplex-chain. This depends on the correct execution of the dapp-chain.
+For FPs, there needs to be adequate incentivization for 3rd parties to consider actively policing this, and the resolution method needs to be on the simplex-chain, not the dapp-chain.
+An alternative is ZKPs, but this is problematic if the frequency of ZKPs $\times$ the size is too high.
+
+Sending information from simplex-chain to dapp-chain is trivial since the dapp-chain's canonical consensus state (which blocks are part of the dapp-chain) is determined by the simplex-chain.
+
+PoA:
+
+PoA chains with fraud proofs should work fine.
+
+Block availability is less of a concern since if the PoA nodes are not sending out blocks, the blockchain is failing anyway.
+Since the value of such a chain depends on the authority, and doing this will harm the credibility, value, etc of the dapp-chain, the default incentives push PoA validators towards honest behavior.
+However, there should be some decent profit incentive for decentralized policing and FP generation.
+
+PoS:
+
+\textbf{Main Conjecture:} PoS in the context of a simplex can be secure, even if PoS alone is not secure.
+Particularly, one-way PoR against a PoW simplex can solve all major security problems facing PoS.
+
+We have these cases for how this might pan out:
+\begin{enumerate}
+    \item PoS is secure in isolation, and compatible with PoR.
+    \item PoS is insecure in isolation, but secure when combined appropriately with PoR.
+    \item PoS can be secure in isolation, but is incompatible with PoR.
+    \item PoS is insecure in isolation, and PoR cannot fix it.
+\end{enumerate}
+
+This paper is written with the opinion that PoS is not secure in isolation and the assumption that PoR can provide necessary properties to allow for secure PoS dapp-chains.
+Whether PoS is actually secure or not in isolation (and up to which breakpoints) is not directly relevant for PoS dapp-chains.
+An exception, perhaps, is that if PoS is independently secure then we expect PoR integration to be straightforward.
+
+We should note that many censorship attacks that are normally possible in PoS systems are mitigated provided that we can force a dapp-chain to process transactions.
+The discussion in \autoref{sec:expedited-txs} provides a framework (at the intra-simplex level) that may inspire a solution to this problem.
+
+\begin{itemize}
+    \item
+\end{itemize}
+
+Existence -> Validity
+
+- Dapp chains could provide a proof of processing central ROO in-out smart contract correctly along with dapp chain headers. This would also allow the simplex chain to automate these transactions (each dapp-chain would have a ROO 'account' to hold all the ROO that had been 'deposited' into the dapp-chain).
+-
+
 \end{comment}
+
+
+\begin{draftonly}
+
+\begin{table}[h]
+    \centering
+    \caption{PoS Security vs PoR Compatibility.}
+    \label{tab:pos-por-matrix}
+    \begin{tabular}{r|c|c}
+        % \toprule
+        & PoS + PoR: incompatible & PoS + PoR: compatible \\
+        \midrule
+        PoS Secure & \xmark & \cmark \\
+        % \midrule
+        PoS Insecure & \xmark & \emph{\textbf{?}}
+        % \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+We saw before that PoS seems to be broadly compatible with PoR.
+In the case of dapp-chains, they will require a DEX for conversion, since they will usually have their own root tokens.
+
+\end{draftonly}

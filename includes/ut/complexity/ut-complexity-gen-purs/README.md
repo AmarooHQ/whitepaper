@@ -23,6 +23,10 @@ TODO:
 
 `spago bundle-app && (cd ../../../../ ; make build-whitepaper ; node includes/ut/complexity/ut-complexity-gen-purs/index.js --populate-wp-md --dry-run)`
 
+## generate and print per capita numbers
+
+`spago bundle-app && node index.js --calc-tx-per-day-per-capita`
+
 ## compile new PW on change
 
 `npm run bundle-for-wp -- -w --then "cd ../../../../ && make"`

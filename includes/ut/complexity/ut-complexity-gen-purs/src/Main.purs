@@ -2,8 +2,9 @@ module Main where
 
 import Prel
 
+import Amaroo.WP.Calcs (calcTxPerDayPerCapita, utVarsForPerCapita, showPCN, PCapNumbers)
 import Amaroo.WP.Calcs.Tiling
-import Amaroo.WP.Formatter (wrap)
+import Amaroo.WP.Formatter (wrap, fmt3dps, fmt0dps, fmtCommasP)
 import Amaroo.WP.Tables
 import Amaroo.WP.Tables.Booktabs (renderBooktabs)
 import Amaroo.WP.Tables.Types (LatexTablePos(..), TPositioning(..), TableDesc(..))
@@ -204,14 +205,56 @@ logAllTables format = do
   _ <- sequence $ logTable format <$> allTables
   pure unit
 
+
+printTxPerDayPerCapitaParams :: Effect Unit
+printTxPerDayPerCapitaParams = do
+    C.log $ "UT Params for per capita calculations: "
+      <> "\n\t k = " <> show utParamsForPCapita.k
+      <> "\n\t d_h = " <> show utParamsForPCapita.d_h
+
+-- | Converts kilobytes per second (KB/s) to terabytes per month (TB/month).
+-- | Formula: KB/s * seconds per day * days per year / months per year / 1e9 (KB to TB)
+-- | 1 month = 86400 seconds/day * 365.25 days/year / 12 months/year
+kbpsToTBPerMonth :: Number -> Number
+kbpsToTBPerMonth kbps = kbps * 86400.0 * 365.25 / 12.0 / 1000.0 / 1000.0 / 1000.0
+
+pcnTableRow :: PCapNumbers -> String
+pcnTableRow {tpdpc, tps, delta_s, name} =
+    name <> " & "
+    <> fmt0dps tps <> " & "
+    <> fmt3dps tpdpc <> " & "
+    <> fmt0dps (delta_s / 1000.0) <> " KB/s & "
+    <> fmt3dps (kbpsToTBPerMonth $ delta_s / 1000.0) <> " TB/mo \\\\"
+
+utParamsForPCapita :: { k :: Number, d_h :: Number }
+utParamsForPCapita =
+  -- { k: 3000.0
+  { k: 3500.0
+  -- { k: 6000.0
+  -- , d_h: 560.0
+  , d_h: 1024.0
+  }
+
 main :: Effect Unit
 main = do
-    if shouldPopulateMd
-      then replaceAllTablesInWP dryRun
-      else logAllTables format
+    if shouldRunTxPerDayPerCapita
+      then runPrintTxPerDayPerCapita
+      else if shouldPopulateMd
+        then replaceAllTablesInWP dryRun
+        else logAllTables format
   where
+    shouldRunTxPerDayPerCapita = elem "--calc-tx-per-day-per-capita" argv
     shouldPopulateMd = elem "--populate-wp-md" argv
     dryRun = elem "--dry-run" argv
     format = if elem "--markdown" argv
       then Markdown
       else if elem "--html" argv then HTML else Latex
+    runPrintTxPerDayPerCapita = do
+      C.log "Calculating transactions per day per capita"
+      printTxPerDayPerCapitaParams
+      let results = calcTxPerDayPerCapita <$> utVarsForPerCapita utParamsForPCapita
+      -- C.log $ "Results: \n" <> showPCN results
+      C.log $ "Results: \n" <> (results <#> showPCN |> intercalate "\n")
+      printTxPerDayPerCapitaParams
+      C.log $ "Table: \n" <> (results <#> pcnTableRow |> intercalate "\n")
+      C.log "\n-- Done calculating transactions per day per capita"

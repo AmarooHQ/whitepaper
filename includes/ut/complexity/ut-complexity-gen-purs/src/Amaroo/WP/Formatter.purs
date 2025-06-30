@@ -16,7 +16,7 @@ import Data.String.Utils (fromCharArray, toCharArray)
 import Data.Tuple (Tuple(..))
 import Effect.Exception (error)
 import Effect.Exception.Unsafe (unsafeThrowException)
-import Math (abs, floor, pow)
+import Math (abs, floor, pow, round)
 
 
 wrap :: String -> String -> String
@@ -34,9 +34,11 @@ chunk n s = if length s <= 3 then [s] else [take 3 s] <> chunk n (drop 3 s)
 rev :: String -> String
 rev = fromCharArray <<< reverse <<< toCharArray
 
+-- | Formats the floor of a number with commas as thousands separators.
 fmtCommas :: Number -> String
 fmtCommas n = rev $ intercalate "," $ chunk 3 $ rev $ NF.toString $ floor n
 
+-- | Formats a number with commas as thousands separators and a given precision.
 fmtCommasP :: Int -> Number -> String
 fmtCommasP p n = fmtCommas n <> (if length lsf == 0 then "" else "." <> lsf)
   where
@@ -45,6 +47,7 @@ fmtCommasP p n = fmtCommas n <> (if length lsf == 0 then "" else "." <> lsf)
 _fmtSciNot [m, s] = m <> "\\times 10^{" <> (stripPrefix (Pattern "+") s |> fromMaybe s) <> "}"
 _fmtSciNot i = unsafeThrowException (error $ "bad input to _fmtSciNot: " <> show i)
 
+-- | Formats a number in scientific notation with a given precision.
 fmtSciNot :: Int -> Number -> String
 fmtSciNot precision = NF.toStringWith (exponential precision) >>> split (Pattern "e") >>> _fmtSciNot
 
@@ -127,3 +130,12 @@ fmt1GbpsPs :: ChainStats -> Params -> String
 fmt1GbpsPs cs ps = _fmtParams [fmtSciNot 1 cs.deltaBigS, fmtFract hf.bf, fmtPlain hf.bh, fmtPlain ps.txSize]
   where
     hf = head ps.hfs
+
+
+-- | format to 3dps always with commas
+fmt3dps :: Number -> String
+fmt3dps = fmtCommasP 3
+
+-- | format to 0dps always with commas (rounds)
+fmt0dps :: Number -> String
+fmt0dps = fmtCommasP 0 <<< round

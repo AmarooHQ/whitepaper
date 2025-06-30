@@ -1,37 +1,69 @@
+This section documents the major reasons that \UT{} might not work --- or, equivalently, the most valuable contributions.
+I have also provided some commentary on the criticisms.
 
+\ul{There are no known decisive criticisms of \UT1.}
 
-\subsection{Design Weaknesses}
+\subsection{Open Problems}
 
-If you are looking for reasons that \UT{} might not work, or for the most valuable contributions, let's cut to the chase.
+\subsubsection{Dapp-chains \& PoS}
 
-\textbf{Dapp-chains \& PoS:} \autoref{sec:dapp-chains}.
+Main content: \autoref{sec:dapp-chains}.
+
+\textbf{Criticism:}
 Dapp-chains are based on the assumption that a secure PoS method exists when adapted for one-way PoR.
 No specific PoS method is provided and it's not clear that PoS + PoR actually works without a clear design for such a system.
-The other claims about dapp-chains and \UT{2+} scaling are contingent on a suitable PoS method being found or created.
+The other claims about dapp-chains and \UT{2} scaling and above is contingent on a suitable PoS method being found or created.
 PoS is insecure when used in isolation and it isn't clear that PoS can be secure, even with the help of PoR and a purely PoW simplex.
-Even if a suitable method of PoS is found, PoS + PoR is inefficient compared to PoW + PoR and capacity estimates are overly optimistic.
+Even if a suitable method of PoS is found, PoS + PoR is inefficient compared to PoW + PoR and some capacity estimates are therefore overly optimistic.
 
-\textbf{\UTinf{1} Block Availability \& $O(c^2 \log n)$ Bandwidth:} \autoref{sec:tiling-bandwidth}.
+\textbf{Commentary:}
+This criticism is correct if PoS is never secure, although it is not the complete picture.
+There are some cases that work --- PoA dapp-chains and non-financial dapps, for example.
+However, the goal is a universal method that works for any dapp-chain and allows for secure cross-chain transactions between the simplex and dapp-chains.
+And while we don't have an otherwise-working PoS + PoR implementation, we also have no reason to believe that conversion is impossible or that PoR is incompatible with PoS.
+
+If PoS + PoR is secure in a PoW context, there is no other fundamental barrier to \UT2 or \UT3.
+Thus this criticism is \ul{possibly refuted} \emph{if and only if} PoS + PoR to PoW is secure.
+
+\subsubsection{\texorpdfstring{$\text{UT}_{\aleph 1}$ Block Availability \& $O(c^2 \log n)$ Bandwidth}{UTℵ Block Availability & O(c² log n) Bandwidth}}
+
+Main content: \autoref{sec:tiling-data-availability} and \autoref{sec:tiling-bandwidth}. % \autoref{sec:tiling-complexity}
+
+% \textbf{\UTinf{1} Block Availability \& $O(c^2 \log n)$ Bandwidth:}.
+\textbf{Criticism:}
 Without a solution to block availability, \UTinf{} doesn't work for $d \gtrsim 4$.
-It works to expand capacity by up to $\sim 10\times$ but not beyond.
+It works to expand capacity by up an order of magnitude but not beyond.
 Even that might not work because the security model is untested and there are no comparable PoW-based real-world examples to examine.
 $O(c^2 \log n)$ bandwidth for validating nodes is too high.
 $O(n c^{-i})$ bandwidth for root-tile miners is too high.
 
-\textbf{A Key Point for \UT1 Is Flawed:}
+\textbf{Commentary:}
+% \emph{Facts}.
+While \UTinf{} is useful, it is not a complete solution to $O(n)$ scaling.
+That it \emph{is} useful hints that there might be more and better PoR-based geometries to discover.
+If a satisfactory solution to block availability can be found then it will also solve the bandwidth problem and the bottleneck will be the \emph{gradient of work} required as distance from the core increases ($d_\textsc{Max} \in [10, 30]$).
+
+
+\subsection{Mitigated Risks}
+
+\subsubsection{A Key Point for \texorpdfstring{$\text{UT}_1$}{UT₁} Is Flawed}
+
+\textbf{Risk:}
 Several key components are required for \UT1 to work.
-There are \ul{no known decisive criticisms} but maybe you can find one?
-PoR and Conversion of Work (\autoref{sec:proof-of-reflection}), Simplex Security (\autoref{sec:simplex-security}), and Intra-Simplex Cross-Chain Transactions (\autoref{sec:spv-in-ut}) are three such examples.
+There are \ul{no \emph{known} decisive criticisms} but maybe you can find one?
+PoR and Conversion of Work (\autoref{sec:proof-of-reflection}), Simplex Security (\autoref{sec:simplex-security}), and Intra-Simplex Cross-Chain Transactions (\autoref{sec:spv-in-ut}) are three such components.
 
-% \subsection{} answered section?
+\subsubsection{\texorpdfstring{$\text{UT}_1$ $O(c^2)$}{UT₁ O(c²)} Bandwidth}
 
-\textbf{\UT1 $O(c^2)$ Bandwidth:} \autoref{sec:availability-of-blocks}.
-Depends on chosen $k$ (block size) and \ul{is mitigated} with a suitable $k$.
+Main content: \autoref{sec:availability-of-blocks}.
+
+% \textbf{$\UT1$ $O(c^2)$ Bandwidth:}.
+\textbf{Risk:}
+Whether $\Delta S$ is tolerable depends on $k$ (block size) and \ul{is mitigated} with a suitable $k$ (see \autoref{table:ut-vs-earth}, \autoref{table:ut-vs-earth-6000}).
 A $k$ of 3000 B/s has plenty of breathing room, and 20,000 B/s is on the high end of what could possibly work.
-For comparison, Bitcoin has $k \approx 1700$.
+For comparison, Bitcoin has $k \approx 1700$ B/s.
 
 
-\priorityTODO[h]{list weaknesses and current problems}
 
 % \subsubsection{Not Weaknesses}
 

@@ -46,6 +46,10 @@
 \begin{comment}
 \end{comment}
 
+\newpage
+
+\thispagestyle{notation}
+
 \section*{Nomenclature}
 
 %% ### TABLE: nomenclature

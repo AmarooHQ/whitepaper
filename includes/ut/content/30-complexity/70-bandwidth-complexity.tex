@@ -65,7 +65,7 @@ Regarding the terms from \autoref{eq:por-graph-delta-r} within the parentheses, 
 What do we expect the value of $g k_1 \phi / (2 {B_h}^2)$ to be?
 If $B_h \in [50, 500]$, and $\phi \in [0.05, 2.0]$, then we can see that the coefficient of $k_1$ is, at most, 0.0128 (and $3.2\cdot10^{-7}$ at least).
 Thus, this last term dominates $(1+g/B_h)$ when $g k_1 \phi \gtrsim 2 {B_h}^2$.
-To keep $\Delta r$ practicable, we should therefore go to some effort to keep $g k_1 \phi \lesssim 2 {B_h}^2 z$ (where $z$ is a small constant we can use to add some acceptable tolerance in lieu of improving $\phi$).
+To keep $\Delta r$ practicable, we should therefore go to some effort to keep $g k_1 \phi \lesssim 2 {B_h}^2 z$ (where $z$ is a constant near 1 that we can use to add some acceptable tolerance in lieu of improving $\phi$).
 
 \subsubsubsubsubsection{\AxiomOfUnifiedAncestry Optimization}
 
@@ -102,12 +102,18 @@ Any auxiliary data can be deterministically regenerated.
 \Delta S &= N_1 \cdot k_{1,tx} + \Delta r
 \label{eq:bandwidth-req} \\
 % \\ & = \frac{{k_1}^2}{2 \cdot B_f \cdot B_h}
+\implies O(\Delta S) &= O(c^2) + O(c^2 \phi) = O(c^2) \nonumber
+\end{split}
+\end{equation}
+If this were more than just downloading all the blocks, then we'd do that instead:
+\begin{equation}
+\begin{split}
+\Delta S &\le N_1 \cdot k_1 = \frac{{k_1}^2}{4 \cdot B_f \cdot B_h} \nonumber \\
 \implies O(\Delta S) &= O(c^2) \nonumber
 \end{split}
 \end{equation}
-
 It is clear that \(\Delta S\) has order \(O(c^2)\), but how bad is this?
-For \(k_1 = 3000\), \(B_f = \frac{1}{60}\), and \(B_h = 112\): \(\Delta S \approx 1.2\) MB/s.
+For \(k_1 = 3000\), \(B_f = \nicefrac{1}{60}\), and \(B_h = 112\): \(\Delta S \approx 1.2\) MB/s.
 With those figures: \(N_1 \approx 800\) simplex-chains, \(N_2 \approx 645,000\) dapp-chains, and maximum tps of \(\sim 7.7\times 10^{6}\) at nesting level 2.
 Decreasing block times to 15s correspondingly decreases the bandwidth requirements to 0.3 MB/s for a simplex with \(\sim 200\) chains, \(\sim 40,000\) dapp-chains, and \(\sim 484,000\) max tps.
 

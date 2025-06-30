@@ -51,3 +51,9 @@
            \else\ifnum\day=3\textsuperscript{rd}%
            \else\textsuperscript{th}%
            \fi\fi\fi~\the\year}
+
+% checkmark ✓ and cross
+
+\NewDocumentCommand{\cmark}{}{\ding{51}}%✓
+\NewDocumentCommand{\xmark}{}{\ding{55}}%✗
+\NewDocumentCommand{\qmark}{}{\emph{\textbf{?}}}%?

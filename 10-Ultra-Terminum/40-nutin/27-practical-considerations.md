@@ -454,10 +454,6 @@ atk situations:
 
 %% BEGIN ### RELEASE
 
-\subsection{Expedited Transactions}
-
-\label{sec:expedited-txs}
-
 \input{27-practical/97-10-expedited-transactions.tex}
 
 \subsection{Initial Configuration}

@@ -511,3 +511,61 @@ auxStats cs = {scalingFactors, tpsPerBaseChain, n1PerK, bfbh}
     n1PerK = cs.d1.n / (cs.d1.p.k)
     hf = cs.d1.p.hf
     bfbh = hf.bf * hf.bh
+
+globalPopulation :: Number
+globalPopulation = 10_000_000_000.0
+
+perSecondToPerDayPerCapita :: Number -> Number
+perSecondToPerDayPerCapita x = x * 86400.0 / globalPopulation
+
+type TxPDayPCapitaParams
+  = { params :: Params
+    , utParams :: UtParams
+    , getTps :: ChainStats -> Number
+    , coef :: Number -- | Coefficient to multiply results by, e.g. for tilings
+    , name :: String
+    }
+
+btToF :: Int -> Number
+btToF t = 1.0 / (toNumber t)
+
+type PCapNumbers
+  = { tpdpc :: Number
+    , tps :: Number
+    , delta_s :: Number
+    , name :: String
+    }
+
+-- | Show impl
+showPCN :: PCapNumbers -> String
+showPCN {tpdpc, tps, delta_s, name} = name <> ":\n\tTPS: " <> show (tps) <> "\n\tdelta S: " <> show (delta_s / 1000.0) <> " KB/s\n\tTx / day / capita: " <> show tpdpc <> "\n"
+
+-- | Calculate tx / capita / day for a given set of params
+calcTxPerDayPerCapita :: TxPDayPCapitaParams -> PCapNumbers
+calcTxPerDayPerCapita {params: ps, utParams, getTps, coef, name} = {tpdpc, tps, delta_s, name}
+  where
+    cs = utChainCalc ps utParams
+    tpdpc = perSecondToPerDayPerCapita tps -- tps has already been multiplied by coef
+    delta_s = coef * cs.deltaBigS
+    tps = coef * (getTps cs)
+
+-- | List where only getTps changes. Params are standard with heavy dapp-chain headers.
+-- | Used to calculate a list of values for each ut variant.
+-- | For tilings, tps and delta S are linear with N1, which is 4x at d=3.
+utVarsForPerCapita :: { k :: Number, d_h :: Number } -> Array TxPDayPCapitaParams
+utVarsForPerCapita {k, d_h} =
+    [ {params, utParams, getTps: \cs -> cs.d1.tps, coef: 1.0, name: "UT1       "}
+    , {params, utParams, getTps: \cs -> cs.d2.tps, coef: 1.0, name: "UT2       "}
+    , {params, utParams, getTps: \cs -> cs.d3.tps, coef: 1.0, name: "UT3       "}
+    -- Tilings; at d=3, we have 4x capacity
+    , {params, utParams, getTps: \cs -> cs.d1.tps, coef: tiling_coef, name: "UT1 Tiling"}
+    , {params, utParams, getTps: \cs -> cs.d2.tps, coef: tiling_coef, name: "UT2 Tiling"}
+    , {params, utParams, getTps: \cs -> cs.d3.tps, coef: tiling_coef, name: "UT3 Tiling"}
+    ]
+  where
+    tiling_coef = 4.0
+    -- k <- [3000, 6000]; d_h <- [560, 1024]
+    -- k = utParamsForPCapita.k
+    -- d_h = utParamsForPCapita.d_h
+    params = mkNestedPs k {bf: btToF 15, bh: 112.0} {bf: btToF 15, bh: d_h} 250.0
+    utParams = {explicitPoRs: false, headerOmission: true, hashTruncation: false, onlyNecessaryHeaders: false}
