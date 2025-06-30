@@ -552,8 +552,8 @@ calcTxPerDayPerCapita {params: ps, utParams, getTps, coef, name} = {tpdpc, tps, 
 -- | List where only getTps changes. Params are standard with heavy dapp-chain headers.
 -- | Used to calculate a list of values for each ut variant.
 -- | For tilings, tps and delta S are linear with N1, which is 4x at d=3.
-utVarsForPerCapita :: { k :: Number, d_h :: Number } -> Array TxPDayPCapitaParams
-utVarsForPerCapita {k, d_h} =
+utVarsForPerCapita :: { k :: Number, d_h :: Number, tiling_coef :: Number } -> Array TxPDayPCapitaParams
+utVarsForPerCapita { k, d_h, tiling_coef } =
     [ {params, utParams, getTps: \cs -> cs.d1.tps, coef: 1.0, name: "UT1       "}
     , {params, utParams, getTps: \cs -> cs.d2.tps, coef: 1.0, name: "UT2       "}
     , {params, utParams, getTps: \cs -> cs.d3.tps, coef: 1.0, name: "UT3       "}
@@ -563,7 +563,6 @@ utVarsForPerCapita {k, d_h} =
     , {params, utParams, getTps: \cs -> cs.d3.tps, coef: tiling_coef, name: "UT3 Tiling"}
     ]
   where
-    tiling_coef = 4.0
     -- k <- [3000, 6000]; d_h <- [560, 1024]
     -- k = utParamsForPCapita.k
     -- d_h = utParamsForPCapita.d_h

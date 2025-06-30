@@ -226,13 +226,14 @@ pcnTableRow {tpdpc, tps, delta_s, name} =
     <> fmt0dps (delta_s / 1000.0) <> " KB/s & "
     <> fmt3dps (kbpsToTBPerMonth $ delta_s / 1000.0) <> " TB/mo \\\\"
 
-utParamsForPCapita :: { k :: Number, d_h :: Number }
+utParamsForPCapita :: { k :: Number, d_h :: Number, tiling_coef :: Number }
 utParamsForPCapita =
-  -- { k: 3000.0
-  { k: 3500.0
+  { k: 3000.0
+  -- { k: 3300.0
   -- { k: 6000.0
   -- , d_h: 560.0
   , d_h: 1024.0
+  , tiling_coef: 4.0
   }
 
 main :: Effect Unit
