@@ -50,7 +50,7 @@ It is still an ancestor cryptographically, but not with respect to its transacti
 % \subsubsection{\AxiomOfRawUnifiedAncestry}
 
 \DeclareAxiom{UnifiedAncestry}{
-    A miner should use all valid chain-tips as parents, and flag invalid ones.
+    A miner must use all valid chain-tips as parents, and flag invalid ones.
 }{
     A block, \BL{}, is invalid unless, for all reflected blocks \BR{}:
     \begin{axiomreqs}

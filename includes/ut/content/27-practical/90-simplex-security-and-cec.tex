@@ -483,9 +483,6 @@ These results are, for the purpose of this paper, taken to indicate the followin
 
 \subsubsection{Closed Form of $P^\prime$}
 
-% todo: add assumptions (e.g., same difficult on chains etc)
-\assignedTODO{Max}{h}{add assumptions: same difficulty, period, etc between chains}
-
 Deriving a closed form of $P^\prime$ from first principles would be challenging.
 But perhaps we don't need to.
 First, let's consider the \emph{PoR graph} without all the additional context of PoR and different simplex-chains --- \emph{what is it?}
@@ -523,6 +520,12 @@ Practically, in \autoref{eq:rosenfeld-analytical-p}, we are replacing $c$ with $
     \end{cases}
     \label{eq:cec-closed-1}
 \end{align}
+Like Rosenfeld's derivation, this closed form comes with some assumptions.
+For example, we inherit the assumptions that the block period of all simplex-chains is identical and that the difficulty remains constant through the attack.
+Experimentally we found that randomizing the attacker's hash-rate over the simplex was required to match the results of the CEC, so this appears to be an assumption of this closed form, too.\footnote{
+    Additionally, the simulation showed that attacks were less effective when the attacker's hash-rate was \emph{uniformly} distributed over the simplex.
+    See \autoref{sec:cec-extra-randhr} for more details.
+}
 
 
 % Additionally, the following observations are made:

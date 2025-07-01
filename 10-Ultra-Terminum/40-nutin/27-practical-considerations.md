@@ -158,7 +158,7 @@ It may present decisive advantages for implementations of *simplex tilings* (whi
 
 \subsubsection {Hash Compression \& Truncation}
 
-\warning{The following applies to PoW chains with compatible header hashes.}
+\warning{The following applies to PoW chains with compatible header PoW-hashing algorithms.}
 
 Consider a fairly normal PoW chain, in that the PoW algorithm compares the hashes of headers as a number with a target.
 That is, the output hash has a bunch of zero digits at one end (or can be losslessly converted into such a form).

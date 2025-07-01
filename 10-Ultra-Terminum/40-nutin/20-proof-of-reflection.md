@@ -715,6 +715,24 @@ The general case of a DAA's relationships (flows of \emph{information} and \emph
 \label{fig:daa-conversion}
 \end{figure}
 
+<!-- Second figure, move it here for better placement of the page for figures -->
+\begin{figure}[p]
+\centering
+\includegraphics[max width=\linewidth]{diff_adjustment_alg_times_2_sag}
+\caption[
+  How are the convertible contexts of two different networks related?
+  This figure shows the expanded \emph{convertible context} of two interacting blockchains, enabled by an exchange rate, $X_{R\rightarrow L}$.
+]{
+  How are the convertible contexts of two different networks related?
+  Without the market context, there's no conversion path that allows for the conversion of work --- the conversion path between difficulties is a \emph{consequence} of $X_{R\rightarrow L}$ (the exchange rate).
+  This is the same convertible context that miners use to determine which network is most profitable for them.
+  Double-lined arrows indicate \emph{market context}.
+  Thin single-lined dashed arrows indicate \emph{world context}.
+  Notice that the convertible properties which we are interested in (such as $L_d$ and $R_d$) use \emph{thick, double-lined, and dashed} two-way arrows, indicating that we are using network context \emph{and} market context to convert block-weight.
+}
+\label{fig:daa-conversion-2}
+\end{figure}
+
 How do we know that \emph{both} blocks and seconds become context laden via a DAA, though?
 Let's consider what $\nicefrac{L_f}{R_f}$ means for the possible combinations of context laden values and note whether the meaning works for conversion or not (i.e., whether using it \emph{appropriately} as a constant of conversion, or scaling factor, will produce sensible results).
 \begin{align}
@@ -761,22 +779,6 @@ In essence, an exchange rate provides meaningful conversion between L-coins and 
 Converting in this way \emph{does not drop context}.
 Since network context is respected, we can use an exchange rate to build a meaningful constant of conversion \emph{across networks}.
 
-\begin{figure}[p]
-\centering
-\includegraphics[max width=\linewidth]{diff_adjustment_alg_times_2_sag}
-\caption[
-  How are the convertible contexts of two different networks related?
-  This figure shows the expanded \emph{convertible context} of two interacting blockchains, enabled by an exchange rate, $X_{R\rightarrow L}$.
-]{
-  How are the convertible contexts of two different networks related?
-  Without the market context, there's no conversion path that allows for the conversion of work --- the conversion path between difficulties is a \emph{consequence} of $X_{R\rightarrow L}$ (the exchange rate).
-  This is the same convertible context that miners use to determine which network is most profitable for them.
-  Double-lined arrows indicate \emph{market context}.
-  Thin single-lined dashed arrows indicate \emph{world context}.
-  Notice that the convertible properties which we are interested in (such as $L_d$ and $R_d$) use \emph{thick, double-lined, and dashed} two-way arrows, indicating that we are using network context \emph{and} market context to convert block-weight.
-}
-\label{fig:daa-conversion-2}
-\end{figure}
 
 
 <!-- re block freq and conf rate: everything about them is the same except their nature -->
