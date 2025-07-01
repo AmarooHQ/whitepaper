@@ -374,7 +374,6 @@ If the network has spare capacity (i.e., transactions are mostly cleared out wit
 Set $t=0$ immediately after a block is published on a chain.
 Then, as $t$ progresses, transactions with fees should build up in the mempool, so $\text{TxFees} \propto t$.
 The reward for mining a block is $r + \text{TxFees}$ for some block reward, $r$.
-If $\text{TxFees} \propto t$ then $r + \text{TxFees} \propto K + t$ for some constant $K$.
 
 The potential reward-over-time for a miner ($t$ vs $r + \text{TxFees}$) looks like a sawtooth function with a y-axis offset.
 It builds as more transactions pile up, and drops back to the baseline reward after a block.
@@ -389,7 +388,7 @@ We should thus expect that this configuration of chains actually *synchronizes* 
     The effect whereby block production \emph{variance} is reduced when miners can (and do) collectively change which chain they are currently mining faster than blocks are produced for those chains, due to changes in network-wide incentivization
 }
 
-One reason that we can predict that transactions will build up in this fashion (with those fees and in a predictable way) is that most of the transactions that are included in simplex blocks will be dapp-chain header-transactions.
+<!-- One reason that we can predict that transactions will build up in this fashion (with those fees and in a predictable way) is that most of the transactions that are included in simplex blocks will be dapp-chain header-transactions. -->
 
 The average hash-rate on each simplex-chain, as described above, is always the same regardless of which of the two miner strategies are used.
 However, the variance of block production on each of these chains won't be that of a chain with 60s block times, it'll be closer to that of a chain with 6s block times.
@@ -455,6 +454,8 @@ atk situations:
 %% BEGIN ### RELEASE
 
 \input{27-practical/97-10-expedited-transactions.tex}
+
+\clearpage
 
 \subsection{Initial Configuration}
 

@@ -1,4 +1,4 @@
-\priorityTODO[h]{INITIAL CONFIG}
+The current plan for the initial configuration of \UT and the Amaroo network:
 
 \begin{itemize}
     \item \textbf{Block Size:} $k_1 \in [3000, 6000]$ B/s.
@@ -10,7 +10,7 @@
     \item \textbf{Difficulty Adjustment:} \textsc{DAA-2} as in \citeDaaTwoLink{}, modified to work for block-DAGs.
     The exact window size ($\text{DAA}_N$) is TBD but $\text{DAA}_N = 100$ ($\sim 25$ minutes) satisfies our requirements.
     \autoref{sec:por-simulation-experiment} has important contributions.
-    \item \textbf{PoW Algorithms:} TBD, but the goals are for diversity in the design of mining rig hardware, avoiding imbalance due to the current distributions of mining hardware, attracting existing under-utilized hardware (especially ASICs), and providing \emph{multiple} different paths for technology development.
+    \item \textbf{PoW Algorithms:} TBD, but the goals are for diversity in the design of mining rig hardware, avoiding imbalance due to the current distributions of mining hardware, attracting existing under-utilized hardware, and providing \emph{multiple} different paths for technology development.
     Additionally, PoW algorithms \emph{will} be used by multiple simplex-chains (miner resonance would not happen, otherwise).
     One of the PoW algorithms will be deliberately compatible with Bitcoin's double-SHA256 and Bitcoin ASICs.
     \item \textbf{\UT1 Consensus Primitives:} PoW + PoR; multiple hashing algorithms.

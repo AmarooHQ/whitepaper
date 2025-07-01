@@ -6,7 +6,7 @@
 \addcontentsline{toc}{section}{Notation, Nomenclature}
 \fancypagestyle{notation}{%
     \fancyhead[L]{}
-    \fancyhead[R]{\emph{Notation, Nomenclature, Figures, \& Tables}}
+    \fancyhead[R]{\emph{Notation \& Nomenclature}} % Notation, Nomenclature, Figures, \& Tables
 }
 
 \thispagestyle{notation}
