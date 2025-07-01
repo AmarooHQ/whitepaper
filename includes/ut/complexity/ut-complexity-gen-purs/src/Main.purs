@@ -4,7 +4,7 @@ import Prel
 
 import Amaroo.WP.Calcs (calcTxPerDayPerCapita, utVarsForPerCapita, showPCN, PCapNumbers)
 import Amaroo.WP.Calcs.Tiling
-import Amaroo.WP.Formatter (wrap, fmt3dps, fmt0dps, fmtCommasP)
+import Amaroo.WP.Formatter (wrap, fmt3dps, fmt1dps, fmt0dps, fmtCommasP)
 import Amaroo.WP.Tables
 import Amaroo.WP.Tables.Booktabs (renderBooktabs)
 import Amaroo.WP.Tables.Types (LatexTablePos(..), TPositioning(..), TableDesc(..))
@@ -16,7 +16,7 @@ import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Data.String (Pattern(..), contains)
 import Data.String as S
 import Data.String.Utils (lines)
-import Data.Traversable (sequence)
+import Data.Traversable (sequence, sequence_)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Console as C
@@ -212,6 +212,12 @@ printTxPerDayPerCapitaParams = do
       <> "\n\t k = " <> show utParamsForPCapita.k
       <> "\n\t d_h = " <> show utParamsForPCapita.d_h
 
+printTxPerDayPerCapitaParams_ :: { k :: Number, d_h :: Number, tiling_coef :: Number } -> Effect Unit
+printTxPerDayPerCapitaParams_ p = do
+    C.log $ "UT Params for per capita calculations: "
+      <> "\n\t k = " <> show p.k
+      <> "\n\t d_h = " <> show p.d_h
+
 -- | Converts kilobytes per second (KB/s) to terabytes per month (TB/month).
 -- | Formula: KB/s * seconds per day * days per year / months per year / 1e9 (KB to TB)
 -- | 1 month = 86400 seconds/day * 365.25 days/year / 12 months/year
@@ -219,12 +225,14 @@ kbpsToTBPerMonth :: Number -> Number
 kbpsToTBPerMonth kbps = kbps * 86400.0 * 365.25 / 12.0 / 1000.0 / 1000.0 / 1000.0
 
 pcnTableRow :: PCapNumbers -> String
-pcnTableRow {tpdpc, tps, delta_s, name} =
+pcnTableRow {tpdpc, tps, delta_big_s, delta_small_s, name} =
     name <> " & "
     <> fmt0dps tps <> " & "
     <> fmt3dps tpdpc <> " & "
-    <> fmt0dps (delta_s / 1000.0) <> " KB/s & "
-    <> fmt3dps (kbpsToTBPerMonth $ delta_s / 1000.0) <> " TB/mo \\\\"
+    <> fmt1dps (delta_small_s / 1000.0) <> " & "
+    <> fmt3dps (kbpsToTBPerMonth $ delta_small_s / 1000.0) <> " & "
+    <> fmt0dps (delta_big_s / 1000.0) <> " & " -- KB/s
+    <> fmt3dps (kbpsToTBPerMonth $ delta_big_s / 1000.0) <> " \\\\" -- TB/mo
 
 utParamsForPCapita :: { k :: Number, d_h :: Number, tiling_coef :: Number }
 utParamsForPCapita =
@@ -235,6 +243,17 @@ utParamsForPCapita =
   , d_h: 1024.0
   , tiling_coef: 4.0
   }
+
+utParamsForPCapitaAll :: Array { k :: Number, d_h :: Number, tiling_coef :: Number }
+utParamsForPCapitaAll =
+  [ { k: 3000.0, d_h: 560.0, tiling_coef: 4.0 }
+  -- , { k: 3300.0, d_h: 560.0, tiling_coef: 4.0 }
+  , { k: 6000.0, d_h: 560.0, tiling_coef: 4.0 }
+  , { k: 3000.0, d_h: 1024.0, tiling_coef: 4.0 }
+  -- , { k: 3300.0, d_h: 1024.0, tiling_coef: 4.0 }
+  , { k: 6000.0, d_h: 1024.0, tiling_coef: 4.0 }
+  ]
+
 
 main :: Effect Unit
 main = do
@@ -252,10 +271,11 @@ main = do
       else if elem "--html" argv then HTML else Latex
     runPrintTxPerDayPerCapita = do
       C.log "Calculating transactions per day per capita"
-      printTxPerDayPerCapitaParams
-      let results = calcTxPerDayPerCapita <$> utVarsForPerCapita utParamsForPCapita
-      -- C.log $ "Results: \n" <> showPCN results
-      C.log $ "Results: \n" <> (results <#> showPCN |> intercalate "\n")
-      printTxPerDayPerCapitaParams
-      C.log $ "Table: \n" <> (results <#> pcnTableRow |> intercalate "\n")
-      C.log "\n-- Done calculating transactions per day per capita"
+      let results = (\ppc -> Tuple ppc (calcTxPerDayPerCapita <$> utVarsForPerCapita ppc)) <$> utParamsForPCapitaAll
+      sequence_ do
+        Tuple ppc pcns <- results
+        pure $ do
+          printTxPerDayPerCapitaParams_ ppc
+          -- C.log $ "Results: \n" <> (pcns <#> showPCN |> intercalate "\n")
+          C.log $ "Table: \n" <> (pcns <#> pcnTableRow |> intercalate "\n")
+          C.log "\n-- Done calculating transactions per day per capita"

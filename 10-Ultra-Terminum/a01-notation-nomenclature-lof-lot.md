@@ -38,7 +38,7 @@
 | $\Sigma\;\text{TPS}_{i}$ | Network-wide transactions per second at the $i^{\text{th}}$ level of nesting (given no additional levels). | tx/s |
 | $\Delta s$ | Minimum network bandwidth for a full node to remain in sync with a single simplex-chain (whilst also validating PoRs). | bytes/second |
 | $\Delta r$ | Minimum network bandwidth for a full node to fully reconstruct the PoR graph. | bytes/second |
-| $\Delta S$ | Minimum network bandwidth for a \emph{mining} node to remain in sync with all reflecting simplex-chains. | bytes/second |
+| $\Delta S$ | Minimum network bandwidth for a \emph{mining} (or fully validating) node to ensure block availability over all reflected simplex-chains. | bytes/second |
 | $\text{DAA}_N$ | The number of blocks over which the DAA operates. | blocks |
 
 : Notation defined in this document. \label{table:notation}

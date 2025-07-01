@@ -139,3 +139,6 @@ fmt3dps = fmtCommasP 3
 -- | format to 0dps always with commas (rounds)
 fmt0dps :: Number -> String
 fmt0dps = fmtCommasP 0 <<< round
+
+fmt1dps :: Number -> String
+fmt1dps = fmtCommasP 1

@@ -532,21 +532,26 @@ btToF t = 1.0 / (toNumber t)
 type PCapNumbers
   = { tpdpc :: Number
     , tps :: Number
-    , delta_s :: Number
+    , delta_big_s :: Number
+    , delta_small_s :: Number
     , name :: String
     }
 
 -- | Show impl
 showPCN :: PCapNumbers -> String
-showPCN {tpdpc, tps, delta_s, name} = name <> ":\n\tTPS: " <> show (tps) <> "\n\tdelta S: " <> show (delta_s / 1000.0) <> " KB/s\n\tTx / day / capita: " <> show tpdpc <> "\n"
+showPCN {tpdpc, tps, delta_big_s, delta_small_s, name} = name <> ":\n\tTPS: " <> show (tps)
+  <> "\n\tdelta S: " <> show (delta_big_s / 1000.0)
+  <> "\n\tdelta s: " <> show (delta_small_s / 1000.0)
+  <> " KB/s\n\tTx / day / capita: " <> show tpdpc <> "\n"
 
 -- | Calculate tx / capita / day for a given set of params
 calcTxPerDayPerCapita :: TxPDayPCapitaParams -> PCapNumbers
-calcTxPerDayPerCapita {params: ps, utParams, getTps, coef, name} = {tpdpc, tps, delta_s, name}
+calcTxPerDayPerCapita {params: ps, utParams, getTps, coef, name} = {tpdpc, tps, delta_big_s, delta_small_s, name}
   where
     cs = utChainCalc ps utParams
     tpdpc = perSecondToPerDayPerCapita tps -- tps has already been multiplied by coef
-    delta_s = coef * cs.deltaBigS
+    delta_big_s = coef * cs.deltaBigS
+    delta_small_s = coef * cs.deltaSmallS
     tps = coef * (getTps cs)
 
 -- | List where only getTps changes. Params are standard with heavy dapp-chain headers.

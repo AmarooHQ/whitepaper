@@ -211,24 +211,25 @@ The \emph{Blockchain Trilemma} is solved. $\blacksquare$
     \vspace{0.5em}
     \centering
     % \captionsetup{justification=centering,singlelinecheck=false}
-    \caption{
+    \caption[UT capacity vs. Earth with standard chain parameters and heavy dapp-chains headers.]{
         UT capacity vs. Earth with standard chain parameters and heavy dapp-chains headers. %\\
         Parameters: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$ Hz; $B_h = 112$ B; $D_f = \nicefrac{1}{15}$ Hz; $D_h = 560$ B. %\\
         % Alternate per capita to use: 8.64 billion. Seconds/day = 86400, so we get nice division and the conversion constant is 1/100,000.
         \emph{Per capita} here assumes a population of 10 billion people. %\\
         In all cases, the UT variant is +HO.
-        Tilings have $d = 3$. %\\
+        Tilings have $d = 3$. \\
+        $\Delta S$: BW req. for miners; $\Delta s$: sync BW req. for full nodes (PoR graph + 1 simplex-chain).
     }
-    \begin{tabular}{lrrrr}
+    \begin{tabular}{lrrrrrr}
         \toprule
-        UT Scaling Config. & $\text{TPS}_\textsc{Max}$ & \hspace{0.5em} Tx/day/capita & \hspace{2em} $\Delta S$ (KB/s) & $\Delta S$ (TB/month) \\
+        UT Config. & $\text{TPS}_\textsc{Max}$ & Tx/day/capita & $\Delta s$ (KB/s) & \hspace{-0.75em}(TB/mo) & $\Delta S$ (KB/s) & \hspace{-0.75em}(TB/mo) \\
         \midrule
-        $\UT{1}$ & 4,218 & 0.036 & 1,097 KB/s & 2.9 TB/mo \\
-        $\UT{2}$ & 339,007 & 2.929 & 1,097 KB/s & 2.9 TB/mo \\
-        $\UT{3}$ & 27,241,610 & 235.368 & 1,097 KB/s & 2.9 TB/mo \\
-        $\UTinf{1}$ ($d=3$) & 16,875 & 0.146  & 4,386 KB/s & 11.5 TB/mo \\
-        $\UTinf{2}$ ($d=3$) & 1,356,027 & 11.716  & 4,386 KB/s & 11.5 TB/mo \\
-        $\UTinf{3}$ ($d=3$) & 108,966,438 & 941.470  & 4,386 KB/s & 11.5 TB/mo \\
+        $\UT{1}$            & 4,219 & 0.036 & 10.8 & 0.028 & 1,097 & 2.884 \\
+        $\UT{2}$            & 339,007 & 2.929 & 10.8 & 0.028 & 1,097 & 2.884 \\
+        $\UT{3}$            & 27,241,610 & 235.368 & 10.8 & 0.028 & 1,097 & 2.884 \\
+        $\UTinf{1}$ ($d=3$) & 16,875 & 0.146 & 43.1 & 0.113 & 4,386 & 11.535 \\
+        $\UTinf{2}$ ($d=3$) & 1,356,027 & 11.716 & 43.1 & 0.113 & 4,386 & 11.535 \\
+        $\UTinf{3}$ ($d=3$) & 108,966,438 & 941.470 & 43.1 & 0.113 & 4,386 & 11.535 \\
         \bottomrule
     \end{tabular}
     \label{table:ut-vs-earth}
@@ -238,16 +239,16 @@ The \emph{Blockchain Trilemma} is solved. $\blacksquare$
     \vspace{0.5em}
     \centering
     \caption{UT capacity vs. Earth, as in \autoref{table:ut-vs-earth} with $k = 6000$ B/s ($3.5\times$ Bitcoin's); $D_h = 1024$ B.}
-    \begin{tabular}{lrrrr}
+    \begin{tabular}{lrrrrrr}
         \toprule
-        UT Scaling Config. & $\text{TPS}_\textsc{Max}$ & \hspace{0.5em} Tx/day/capita & \hspace{2em} $\Delta S$ (KB/s) & $\Delta S$ (TB/month) \\
+        UT Config. & $\text{TPS}_\textsc{Max}$ & Tx/day/capita & $\Delta s$ (KB/s) & \hspace{-0.75em}(TB/mo) & $\Delta S$ (KB/s) & \hspace{-0.75em}(TB/mo) \\
         \midrule
-        $\UT{1}$ & 16,875 & 0.146 & 4,373 KB/s & 11.5 TB/mo \\
-        $\UT{2}$ & 1,483,154 & 12.814 & 4,373 KB/s & 11.5 TB/mo \\
-        $\UT{3}$ & 130,355,358 & 1,126.270 & 4,373 KB/s & 11.5 TB/mo \\
-        $\UTinf{1}$ ($d=3$) & 67,500 & 0.583 & 17,492 KB/s & 46.0 TB/mo \\
-        $\UTinf{2}$ ($d=3$) & 5,932,617 & 51.258 & 17,492 KB/s & 46.0 TB/mo \\
-        $\UTinf{3}$ ($d=3$) & 521,421,432 & 4,505.081 & 17,492 KB/s & 46.0 TB/mo \\
+        $\UT{1}$            & 16,875 & 0.146 & 22.1 & 0.058 & 4,373 & 11.500 \\
+        $\UT{2}$            & 1,483,154 & 12.814 & 22.1 & 0.058 & 4,373 & 11.500 \\
+        $\UT{3}$            & 130,355,358 & 1,126.270 & 22.1 & 0.058 & 4,373 & 11.500 \\
+        $\UTinf{1}$ ($d=3$) & 67,500 & 0.583 & 88.5 & 0.233 & 17,492 & 45.999 \\
+        $\UTinf{2}$ ($d=3$) & 5,932,617 & 51.258 & 88.5 & 0.233 & 17,492 & 45.999 \\
+        $\UTinf{3}$ ($d=3$) & 521,421,432 & 4,505.081 & 88.5 & 0.233 & 17,492 & 45.999 \\
         \bottomrule
     \end{tabular}
     \label{table:ut-vs-earth-6000}
@@ -275,9 +276,9 @@ The \emph{Blockchain Trilemma} is solved. $\blacksquare$
 \begin{comment}
     For D_h = 1024:
 
-        $\UT{1}$ & 4,218 & 1,097 KB/s & 0.036 \\
-        $\UT{2}$ & 185,394 & 1,097 KB/s & 1.602 \\
-        $\UT{3}$ & 8,147,209 & 1,097 KB/s & 70.392 \\
+        $\UT{1}$    & 4,218 & 1,097 KB/s & 0.036 \\
+        $\UT{2}$    & 185,394 & 1,097 KB/s & 1.602 \\
+        $\UT{3}$    & 8,147,209 & 1,097 KB/s & 70.392 \\
         $\UTinf{1}$ & 16,875 & 4,386 KB/s & 0.146 \\
         $\UTinf{2}$ & 741,577 & 4,386 KB/s & 6.407 \\
         $\UTinf{3}$ & 32,588,839 & 4,386 KB/s & 281.568 \\
@@ -338,5 +339,59 @@ UT3        & 8,147,210 & 70.392 & 1,097 KB/s \\
 UT1 Tiling & 16,875 & 0.146 & 4,386 KB/s \\
 UT2 Tiling & 741,577 & 6.407 & 4,386 KB/s \\
 UT3 Tiling & 32,588,840 & 281.568 & 4,386 KB/s \\
+
+
+------- new tables with name, tps, tx/day/capita, delta s, delta s, delta S, delta S
+
+Calculating transactions per day per capita
+UT Params for per capita calculations:
+         k = 3000.0
+         d_h = 560.0
+Table:
+UT1        & 4,219 & 0.036 & 10.8 & 0.028 & 1,097 & 2.884 \\
+UT2        & 339,007 & 2.929 & 10.8 & 0.028 & 1,097 & 2.884 \\
+UT3        & 27,241,610 & 235.368 & 10.8 & 0.028 & 1,097 & 2.884 \\
+UT1 Tiling & 16,875 & 0.146 & 43.1 & 0.113 & 4,386 & 11.535 \\
+UT2 Tiling & 1,356,027 & 11.716 & 43.1 & 0.113 & 4,386 & 11.535 \\
+UT3 Tiling & 108,966,438 & 941.470 & 43.1 & 0.113 & 4,386 & 11.535 \\
+
+-- Done calculating transactions per day per capita
+UT Params for per capita calculations:
+         k = 6000.0
+         d_h = 560.0
+Table:
+UT1        & 16,875 & 0.146 & 22.1 & 0.058 & 4,373 & 11.500 \\
+UT2        & 2,712,054 & 23.432 & 22.1 & 0.058 & 4,373 & 11.500 \\
+UT3        & 435,865,753 & 3,765.880 & 22.1 & 0.058 & 4,373 & 11.500 \\
+UT1 Tiling & 67,500 & 0.583 & 88.5 & 0.233 & 17,492 & 45.999 \\
+UT2 Tiling & 10,848,214 & 93.729 & 88.5 & 0.233 & 17,492 & 45.999 \\
+UT3 Tiling & 1,743,463,010 & 15,063.520 & 88.5 & 0.233 & 17,492 & 45.999 \\
+
+-- Done calculating transactions per day per capita
+UT Params for per capita calculations:
+         k = 3000.0
+         d_h = 1024.0
+Table:
+UT1        & 4,219 & 0.036 & 10.8 & 0.028 & 1,097 & 2.884 \\
+UT2        & 185,394 & 1.602 & 10.8 & 0.028 & 1,097 & 2.884 \\
+UT3        & 8,147,210 & 70.392 & 10.8 & 0.028 & 1,097 & 2.884 \\
+UT1 Tiling & 16,875 & 0.146 & 43.1 & 0.113 & 4,386 & 11.535 \\
+UT2 Tiling & 741,577 & 6.407 & 43.1 & 0.113 & 4,386 & 11.535 \\
+UT3 Tiling & 32,588,840 & 281.568 & 43.1 & 0.113 & 4,386 & 11.535 \\
+
+-- Done calculating transactions per day per capita
+UT Params for per capita calculations:
+         k = 6000.0
+         d_h = 1024.0
+Table:
+UT1        & 16,875 & 0.146 & 22.1 & 0.058 & 4,373 & 11.500 \\
+UT2        & 1,483,154 & 12.814 & 22.1 & 0.058 & 4,373 & 11.500 \\
+UT3        & 130,355,358 & 1,126.270 & 22.1 & 0.058 & 4,373 & 11.500 \\
+UT1 Tiling & 67,500 & 0.583 & 88.5 & 0.233 & 17,492 & 45.999 \\
+UT2 Tiling & 5,932,617 & 51.258 & 88.5 & 0.233 & 17,492 & 45.999 \\
+UT3 Tiling & 521,421,432 & 4,505.081 & 88.5 & 0.233 & 17,492 & 45.999 \\
+
+-- Done calculating transactions per day per capita
+
 
 \end{comment}
