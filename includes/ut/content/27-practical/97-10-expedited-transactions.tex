@@ -45,7 +45,7 @@ We will prevent any significant impact \emph{to miners} with an architecture tha
 
 The architectural change is simple:
 \begin{itemize}
-    \item A block is \emph{invalid} if it includes more than one expedited transaction for any foreign chain.
+    \item A block is \emph{invalid} if it includes more than one\footnote{We could set this limit higher, but let's stick with one for now.} expedited transaction for any foreign chain.
 \end{itemize}
 % Mathematically: $\forall \mathcal{C} \in \mathcal{S} / \cL, \text{CountExpedited}(\mathcal{C}) \le 1$.
 
@@ -81,8 +81,8 @@ Therefore, when blocks are over the block size limit we need a special rule to a
 
 To mitigate these issues, we will modify the protocol:
 \begin{itemize}
-    \item Blocks can include any number of expedited transactions for the local chain.
-\item Blocks are only invalidated by the block size limit if they include on-main transactions other than the coinbase.
+    \item Blocks can include any number of expedited transactions as on-main for the local chain.
+    \item Blocks are only invalidated by the block size limit if they include on-main transactions other than the coinbase.
 \end{itemize}
 
 \subsubparagraph{Synchronization Caveats}
@@ -90,8 +90,8 @@ To mitigate these issues, we will modify the protocol:
 We should note that synchronization of a single chain must change a little to work with expedited transactions.
 Particularly, along with the block itself, we will need some auxiliary data (the expedited transactions that were recorded in other chains).
 In terms of complexity, this will not be a problematic increase: we have at most $N_1$ expedited transactions per block, and $O(N_1) = O(c)$.
-Practically, this can mean up to $\sim 5\times$ bandwidth requirements for nodes synchronizing just the \cL chain and no others (we'll derive this shortly).
-On the flip side, expedited transactions can be pruned from the \cR chain that they were included in, the verifying node only needs to know enough to recalculate the block root correctly.
+Practically, this can mean synchronizing \cL chain nodes must download up to $\sim 5\times$ as much for periods of high transaction volume (we'll derive this shortly).
+On the flip side, expedited transactions can be pruned from the \cR chain that they were included in, the verifying \cR node only needs to know enough to recalculate the block root correctly.
 
 \subsubparagraph{The \cL Miner's Perspective}
 
@@ -122,7 +122,7 @@ Overall, this is \emph{win--win} provided that expedited transactions are not to
 
 Expedited transactions now have \ul{multiple stages} of confirmation: first on the foreign chain, then on the local chain when they are actually executed.
 The first stage guarantees that the transaction will be executed, but not that it will succeed.
-Even a spendability proof against the prior block is not sufficient since expedited transactions consume inputs, and we don't know which transactions will be processed \emph{before} the expedited transaction is executed.
+Even a spendability proof against the prior \cL block is not sufficient since expedited transactions consume inputs, and we don't know which transactions will be processed \emph{before} the expedited transaction is executed.
 
 \aside{
     This kind of confirmation is not unprecedented; off-main transactions are in a similar superposition-like state before they are executed in an on-main block.
@@ -136,8 +136,17 @@ One test is against double-spends: if they are easier to double-spend, then they
 If the attacker controls the inputs, then an attack depends on their ability to execute a conflicting transaction before the one in question.
 Therefore, \emph{if} expedited transactions are \emph{simultaneous or after} \emph{on-main} transactions they \ul{would be vulnerable}.
 However, if expedited transactions are \emph{before} on-main transactions, then the inputs would have to be spent another way.
-Off-main transactions are executed before on-main ones, but off-main parents are always near-simultaneous with their siblings (due to the \AxiomOfUnifiedAncestry) --- we can therefore trivially calculate any conflicts.
-Cross-chain transactions for a block are determined well in advance due to the delays built into the protocol, so any conflict here will be detectable and we can predict the outcome.
+Off-main transactions are executed before on-main ones, but off-main parents are always near-simultaneous with their siblings (due to the \AxiomOfUnifiedAncestry) --- we can therefore trivially calculate any conflicts.\footnote{
+    An attacker might create a conflicting off-main block after the expedited transaction is first confirmed.
+    This could spend the expedited transaction's inputs; to mitigate this vector, we require that expedited transactions are executed \emph{before} any off-main transactions.
+}
+Cross-chain transactions for a block are determined well in advance due to the delays built into the protocol, so any conflict here will be detectable and we can predict the outcome.\footnote{
+    Cross-chain transactions are technically outputs rather than transactions, so they never fail or conflict.
+    However, it would be useful to send cross-chain transactions that can \emph{try} to spend some inputs to new outputs.
+    To ensure that such an output always executes successfully, such an output must include another output that is used if any of the inputs are not present or are invalid.
+    The behavior of this output type, in english, is: try to spend the given inputs using these signatures; if this succeeds, insert the first set of outputs; otherwise, insert the second set of outputs.
+    Care should be taken to ensure conservation of tokens depending on the branch taken.
+}
 Other expedited transactions might conflict too, but we already know which those are (or will in short order), so again we can predict the outcome.
 There is one other candidate that we haven't thought about \emph{at all} so far: some kind of automated transaction that is executed at the start of a block.
 However, since this would be entirely determined by the prior block, any outputs removed at this stage are already well known.
@@ -176,7 +185,6 @@ The TTFC is the time it takes for an expedited transaction (with an appropriate 
     \text{TTFC} &= \phi + \frac{1}{N_1 B_f} \\
     O(\text{TTFC}) &= O(c^{-1}) + O(c^{-1}) = O(c^{-1})
 \end{align*}
-
 For a 150-simplex with 15 second block periods, $\text{TTFC} \approx 100 \text{ ms}$.
 This is on the order of $\phi$ and about as close to `instant' as we can get.
 

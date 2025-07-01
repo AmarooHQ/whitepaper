@@ -41,7 +41,7 @@ By inspection, 1000 TPS is more than $O(c)$.
     At $k = 20000$ B/s, $\Delta S \in [10, 93]$ MB/s, or $\Delta S \in [25, 241]$ TB/month.
     This is definitely beyond many ordinary users, but would work for miners at some economy of scale.
     (241 TB costs $\sim 2235$ USD/month\footnote{
-        See \href{https://web.archive.org/web/20250126231118/https://docs.digitalocean.com/platform/billing/bandwidth/}{https://docs.digitalocean.com/platform/billing/bandwidth/}
+        Jan 2025; see \href{https://web.archive.org/web/20250126231118/https://docs.digitalocean.com/platform/billing/bandwidth/}{https://docs.digitalocean.com/platform/billing/bandwidth/}
     } from Digital Ocean.)
     Such a simplex would have $N_1 \in [10^3, 10^4]$ chains, and $\Sigma \text{TPS}_1 \in [4\times10^4, 3.8\times10^5]$ TPS.
 }
@@ -180,7 +180,7 @@ The \emph{Blockchain Trilemma} is solved. $\blacksquare$
 
 \newcommand\trilTableFnB{
     \UTinf{3} is decentralized if the maximum tiling depth is kept low.
-    As we found earlier, \UTinf{3} with $d \le 3$ provided a tolerable $\Delta S$, and lead to a network-wide TPS of around $10^8$, even though we assumed dapp-chain headers to be $10\times$ worse than the theoretical maximum (dapp-chain headers would be hundreds of bytes).
+    As we found earlier, \UTinf{3} with $d \le 3$ provided a tolerable $\Delta S$, and lead to a network-wide TPS of around $10^8$, even though we assumed dapp-chain headers to be $10\times$ worse than the theoretical maximum (dapp-chain headers would be $\sim1000$ bytes).
     \emph{This specific case} is what ``Yes'' refers to.
 }
 
@@ -214,6 +214,7 @@ The \emph{Blockchain Trilemma} is solved. $\blacksquare$
     \caption{
         UT capacity vs. Earth with standard chain parameters and heavy dapp-chains headers. %\\
         Parameters: $k = 3000$ B/s; $B_f = \nicefrac{1}{15}$ Hz; $B_h = 112$ B; $D_f = \nicefrac{1}{15}$ Hz; $D_h = 560$ B. %\\
+        % Alternate per capita to use: 8.64 billion. Seconds/day = 86400, so we get nice division and the conversion constant is 1/100,000.
         \emph{Per capita} here assumes a population of 10 billion people. %\\
         In all cases, the UT variant is +HO.
         Tilings have $d = 3$. %\\
