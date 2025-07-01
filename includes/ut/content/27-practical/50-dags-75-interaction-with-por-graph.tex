@@ -89,6 +89,27 @@ Now that we've added the \AxiomOfUnifiedAncestry, the alternative for the attack
 
 
 
+\begin{draftonly}
+
+    \subsubsubsection{Limits on DAG Links}
+
+\begin{itemize}
+    \item inclusive protocol says we need to limit graph width and how far back things are linked.
+    \item this matters for block rewards (distant off-main blocks should have the rewards reduced -- makes coinbase UTXO a bit more complex).
+    \item can't have a situation where someone makes old blocks for high rewards or something.
+    \item however, at the simplex-chain level, WRT the max number of parents: this is determined by \AxiomOfUnifiedAncestry.
+    \item but the PoR graph is also a block-DAG; we could get a fork of the network for say 1hr, and then connectivity is resumed.
+    \item we need to handle this case:
+    \begin{itemize}
+        \item problem: too many blocks at once will cause lag/congestion and slow processing of the block that first reflects the fork (which might be bad for the miner).
+        \item solution: limit the maximum number of newly reflected blocks that are not recent.
+        e.g., added chain-slices must have maximum path length from tip to PoR graph of 10 blocks or fewer, and maximum of 20 new blocks overall.
+        this means we'll progressively add chunks of the forked branch, limiting the impact.
+    \end{itemize}
+\end{itemize}
+
+\end{draftonly}
+
 
 
 

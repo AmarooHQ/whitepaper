@@ -415,7 +415,9 @@ Results of this, for $q \in \{0.4, 0.44\}$, are shown in \autoref{fig:simulation
 \autoref{fig:simulation-trad-only} shows that the simulation \emph{does} align with Rosenfeld's solution, especially at values of $q \lesssim 0.40$.
 It is consistent with \autoref{eq:cec-base-case}.
 As $q$ increases, statistical artifacts and other inaccuracies \emph{do} become more significant, but not enough to compromise the results --- the largest differences (for $q=0.44$ and $c=5$) are around 50 parts per thousand (\autoref{fig:simulation-r1-single-simplex}) and typically less than this.
-There are more significant differences at $q=0.48$, however this is close to limiting threshold of blockchain security in general ($q<0.5$), so we should expect larger error in the simulation results.
+There are more significant differences at $q=0.48$,\footnote{
+    See \autoref{sec:appendix-cec-extra}.
+} however this is close to limiting threshold of blockchain security in general ($q<0.5$), so we should expect larger error in the simulation results.
 Such differences are taken to be \emph{non-critical}, i.e., they do not compromise the results.
 
 

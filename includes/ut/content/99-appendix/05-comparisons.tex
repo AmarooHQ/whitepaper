@@ -1,13 +1,12 @@
 %% BEGIN ### RELEASE
 
-%% ⚠️ NOTE: THIS FILE NOT USED
+%% ⚠️ Although this is a .tex file, it's symlinked from a05-comparisons.md
 
 \clearpage
 \section{Comparison: ``The Big 4''}
 
 The following comparisons (\autoref{table:compare_nets_3k}, \autoref{table:compare_nets_20k}, and \autoref{table:comparison_1m_tps}) are intended to be an \emph{apples to apples} comparison between UT variants and ``The Big 4'': Bitcoin, Cardano, Eth2, and Polkadot.
 Cardano, as a cutting-edge network, is an exception here: the Cardano/IOHK teams have not been pursuing \emph{Layer 1} scalability solutions and are focusing instead on a \emph{Layer 2} solution: Hydra via EUTXOs.
-Their work is good and promising.
 Ethereum is also an exception of sorts: these comparisons use the original \emph{Eth2} sharding roadmap as an example of a sharded Layer 1, whereas the Ethereum network itself is now pursuing a rollup-centric scaling strategy via their beacon chain.
 I mention this particularly because the nature of an \emph{apples to apples} comparison casts Cardano and Ethereum in a light that some might consider to be misleading.
 However, these comparisons deliberately do not consider \emph{Layer 2} scalability solutions for one very simple reason: all networks can implement them in some fashion.
@@ -82,7 +81,7 @@ Note: `$\infty$' here does not literally mean infinite; however, we cannot calcu
     }
 }{
         \FL
-        Network & Decentralized? & $O(n)$ Secure? & \multicolumn{2}{l}{$O(n)$ Scalable?}
+        Network\hspace{2em} & Decentralized?\hspace{1em} & $O(n)$ Secure?\hspace{1em} & \multicolumn{2}{l}{$O(n)$ Scalable?}
         \ML
         Bitcoin   & Yes           & Yes              & No    & (Max. TPS: $\sim$ 5)\tmark[*] \NN
         Cardano   & Yes           & Maybe\tmark[PoS] & No    & (Max. TPS: $\sim$ 10 - 80)\tmark[$\!$\#] \NN

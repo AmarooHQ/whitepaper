@@ -67,13 +67,6 @@ After the prioritized subgraph is processed, the remaining blocks (those that ar
 Finally, the best block is applied.
 In this way, all blocks are executed after their ancestors, and there is a clear and total ordering that trivially converges.
 
-There is a simple generalization of the above to allow more than two parent blocks, too.
-That is: replace \emph{all} but the last (worst) parent with a \emph{virtual parent block} that links back to all remaining \emph{actual} parent blocks (but contributes zero block-weight itself).
-Replacing the best parents (rather than the worst parents) with a virtual block means that the fork rule works when selecting the virtual block over the least-prioritized parent.
-This can be repeated to allow for arbitrarily many parents.
-
-\autoref{fig:dag-ex1-full} is an example of this algorithm for a moderately complex chain-segment (\(\BB\cdots \BB{3}\) which is 7 blocks total), and each step is enumerated and explained.
-
 \def\dagExamplesWidth{.9375}
 \begin{figure}[p]
     \begin{subfigure}[t]{.32\textwidth}
@@ -165,6 +158,13 @@ This can be repeated to allow for arbitrarily many parents.
     }
     \label{fig:dag-ex1-full}
 \end{figure}
+
+There is a simple generalization of the above to allow more than two parent blocks, too.
+That is: replace \emph{all} but the last (worst) parent with a \emph{virtual parent block} that links back to all remaining \emph{actual} parent blocks (but contributes zero block-weight itself).
+Replacing the best parents (rather than the worst parents) with a virtual block means that the fork rule works when selecting the virtual block over the least-prioritized parent.
+This can be repeated to allow for arbitrarily many parents.
+
+\autoref{fig:dag-ex1-full} is an example of this algorithm for a moderately complex chain-segment (\(\BB\cdots \BB{3}\) which is 7 blocks total), and each step is enumerated and explained.
 
 We should expect conflicting transactions (which might otherwise be attempted doublespends) to arise during this process.
 Ancestors of one parent may not be ancestors of another parent.

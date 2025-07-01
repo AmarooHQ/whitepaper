@@ -34,7 +34,7 @@ However, the witness associated with a transaction \emph{before} it is confirmed
 The before-witness will prove some state against the prior block's state root.
 However, the state is almost always mutated before a transaction is executed --- the state root is different.
 The after-witness should use, instead of the state root of the prior block, the root of the \emph{intermediate} state immediately prior to the execution of that transaction.
-This way, the headers-only chain, the after-witness, and the transaction are the only data required to verify the validity of the transaction.
+This way, the headers-only chain, the after-witness, and the transaction are the only data required to verify the validity of the transaction (assuming that the merkle proof of the transaction in the block also includes the intermediate state roots directly before and after the a transaction).
 
 Why does this after-witness matter so much?
 Because it \emph{is} the \emph{fraud proof} for any fraudulent transaction.
