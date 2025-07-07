@@ -5,22 +5,21 @@
 \newcommand{\thePpeProblem}{the \ppe problem\xspace}
 \newcommand{\ThePpeProblem}{The \ppe problem\xspace}
 
-
 It sounds like PoS dapp-chains should be great --- if they \emph{can} work, that is.
 
 We are presented with an uncertain road ahead.
-The security of PoS networks is almost universally analyzed in the context of \emph{standalone} blockchains.
-Consequently, some parts of PoS systems have been deliberately introduced to solve problems \emph{for this context}.
-We find ourselves with a rather different context, though: PoW secured PoS.
-This context, combined with moving the \emph{staking} parts to the simplex, was enough for us to solve both the \emph{Nothing at Stake} and long-range attacks earlier.
+The foundational security of PoS consensus methods is most commonly analyzed in the context of L1 \emph{standalone} blockchains.
+Consequently, some parts of PoS systems have been deliberately introduced to solve problems \emph{for that context}.
+We find ourselves with a rather different context, though: PoS running on a PoW chain.
+This context, combined with moving the \emph{staking} parts to the simplex, was enough for us to solve both the \emph{Nothing at Stake} and long-range problems earlier.
 Thus, we have an opportunity to potentially simplify existing PoS methods, and we have the challenge of analyzing the security of PoS systems basically \emph{from scratch}.
 
 Beyond the \emph{security} of Proof of Stake, the \emph{method itself} remains contentious for multiple other reasons.
 These include: network dynamics like \emph{centralization} risks, and arguments from \emph{political philosophies}, \emph{economics}, and common moralistic ideas.
-Right now, our primary concern is to focus on the security dynamics.
-Later, we might discuss some of the other concerns, provided they are directly relevant.
+Right now, our concern is to focus on the security dynamics.
+% Later, we might discuss some of the other concerns, provided they are directly relevant.
 
-Our primary goal is to find a method of PoS that meets the necessary criteria as determined by our context.
+Our primary goal in this section is to figure out if \emph{some} method of PoS can meet the necessary criteria as determined by our context.
 The most important of these criteria are that dapp-chains operate correctly as a blockchain and that they are practical in the context of the simplex.
 Technically speaking, the sticking point for PoS chains is the security elements --- many of the other technical concerns are not unique to PoS.
 Thus, we will focus on security matters first.
@@ -31,7 +30,7 @@ We should also consider speaker-listener faults, since they are often prevented 
 \emph{Weak subjectivity} also deserves a brief review.
 
 We do not yet have all the tools to consider attacks and criticisms in full, so for now let's just make sure that we can't find any major hurdles.
-We will consider these problems again in \autoref{sec:pos-dapp-chain-design}.
+We will revisit some of these problems again in \autoref{sec:pos-dapp-chain-design}.
 
 \subsubsubsubsection{Speaker-Listener Faults}
 
@@ -77,22 +76,22 @@ We are going to \emph{need} some kind of \emph{universal representation for all 
 Otherwise, we have potentially hundreds of different (or slightly different) protocols to consider.
 
 In other attacks (deliberately ignoring $\nicefrac{1}{3}$ of the validators, for example) there will not be evidence of misbehavior because the attackers never signed any incriminating messages.
-These cases are harder to solve, so we will return to them later (in \autoref{sec:pos-dapp-chain-design:speaker-listener}).
-For now, let's note that standalone PoS chains seem to avoid any catastrophic issues, so maybe there's something we can do.
+These cases are harder to solve, so we will need to return to them later when we can evaluate them in the context of a concrete PoS protocol. % (in \autoref{sec:pos-dapp-chain-design:speaker-listener}).
+For now, let's note that \emph{standalone} PoS chains seem to avoid any catastrophic issues, so we probably can, too.
 
 \subsubsubsubsection{Bribery Attacks}
 
 % this paragraph is a bit awkward, maybe reword
 There are two bribery cases to consider: censoring certain transactions, and subverting the consensus system entirely.
-The second case is more serious, and known as \thePpeProblem.
-The first case is cheaper and easier to reason about, and we'll discuss this one first.
+The second case is more serious, and is deeply related to \thePpeProblem.
+The first case is cheaper for an attacker and easier to reason about, and we'll discuss it first.
 
 Say that you are a validator for a PoS chain (dapp-chain or otherwise).
 An attacker might offer you a bribe to to deliberately ignore (censor) particular transactions.
 For this to be profitable, they only need to pay you more than the transaction fee.
 
 Is this illegitimate?
-Well, if the chain supports smart contracts, I could encode this voluntary arrangement as an SC.
+Well, if the chain supports smart contracts, we could encode this voluntary arrangement as an SC.
 So preventing this attack outright isn't possible if all validators are purely driven by profit (which they are not).
 Where \emph{protocol-level} solutions come in is in preventing these attacks from lasting.
 We'll lay some groundwork in \autoref{sec:dos-and-dags} that will let us evaluate this situation fully.
@@ -103,11 +102,13 @@ Until then, we can simply note that even if we could not do anything to prevent 
 \ThePpeProblem is more serious, and not specific to any one attack.
 
 We will analyze some dynamics similar to this in \autoref{sec:fps-and-bribes}, so let's avoid the weeds of \ppe for the moment.
-Instead, with my secret power of hindsight, I suggest we simply inspect, briefly, how an attack utilizing \ppe would work and evaluate it the hybrid context of a PoW simplex.
+Instead, with my secret power of hindsight, I suggest we simply inspect, briefly, how an attack\footnote{
+    Particularly, Zack Hess's attack from \href{\linkZackPoSCriticisms}{Proof of Stake}.
+} against PoS utilizing \ppe would work and evaluate it the hybrid context of a PoW simplex.
 
 The attack starts by bribing at least $\nicefrac{2}{3}$ of validators to participate in a profitable scheme.
-Once this breakpoint is passed, the dishonest validators begin ignoring the $\nicefrac{1}{3}$ of honest, non-participating validators.
-This causes their bonds to be slashed and they are excluded from the consensus protocol.
+Once this breakpoint is passed, the dishonest validators begin ignoring the non-participating $\nicefrac{1}{3}$ of validators.
+This causes the honest validators' bonds to be slashed and those validators are excluded from the consensus protocol.
 
 \bquote{
     Now that the attackers have 100\% control, \emph{we can block anyone new from bonding, and we can start unbonding while maintaining 100\% control.}
@@ -118,7 +119,7 @@ This causes their bonds to be slashed and they are excluded from the consensus p
     \newline
     Once we have 100\% control, and the attackers have removed the vast majority of their stake from the system, \emph{we can execute any kind of attack}, and \emph{we have almost no value in the system that could be burned to punish us}.
     [...]
-}[Zack Hess; \href{\linkZackPoSCriticisms}{Proof of Stake} (2021) \emph{Emphasis mine}]
+}[Zack Hess; \href{\linkZackPoSCriticisms}{Proof of Stake} (2021); \emph{Emphasis mine}]
 
 In this quote, \emph{every one} of the italicized statements is \ul{false} for \emph{our} PoS context.
 This is due to running the PoS algorithm \emph{in a new context} and staking \emph{different tokens} (ROO, specifically).
@@ -152,7 +153,7 @@ We'd expect such an attacker to create a ``heavier'' fork compared to the \emph{
 Given our discussion of converting PoS confirmations and \autoref{fn:pos-coins-crit}, this isn't surprising.
 
 Needless to say, UT's hybrid PoW context obviates the need for any such limit.
-Proof of Reflection, insofar as weak subjectivity is concerned, upgrades PoS from weakly subjective to (potentially) objective.
+Proof of Reflection, insofar as weak subjectivity is concerned, potentially upgrades PoS from weakly subjective to objective.
 
 \subsubsubsubsection{PoS \ul{is} (obscured) PoW}
 
@@ -209,18 +210,33 @@ The choice to use PoW for the simplex and PoS for dapp-chains has not been made 
 Rather, each \emph{serves a specific purpose} that only it could.
 In Amaroo, the \emph{demand for dapp-chains} and the associated utility is the \emph{origin} of the desire to validate --- \emph{not} the other way around.
 
-In traditional PoS networks, though, it is not the system requirements that have driven the choice to adopt PoS.
+In traditional PoS consensus methods, though, it is not the system requirements that have driven the choice to adopt PoS.
 Rather, what drove the choice to use PoS and, subsequently, the choice to adopt it as \emph{primary}, were \emph{external requirements}.
 This is the source of the inversion.
 
 
 \subsubsubsubsection{Initial Conclusions}
 
-- went smoother than expected
-- critical differences identified
-- some problems to solve when we have the tools
-- doesn't mean we're out of the woods yet, tho. even if we answer all criticisms of traditional PoS, that does not mean we haven't opened the door for new criticisms. must remain vigilant later when continuing analysis and design.
-- cautiously optimistic
+So far, this analysis has gone fairly smoothly and the common problems with PoS chains appear to be addressed (or, at least, addressable).
+We have found some critical differences between PoS as used for standalone chains compared to dapp-chains.
+There were some problems that we cannot yet reason about fully, either because we do not yet have the tools, or because we require a concrete PoS protocol to analyze.
+While this is promising, we should remember that even if all prior PoS criticisms can be answered, whatever protocol we come up with could have new criticisms --- we'll need to stay vigilant when designing a PoS protocol for dapp-chains.
+The biggest constraint on dapp-chains that we identified is the need for some kind of universal fraud proof format.
+At this stage, I think it's fair to be \emph{cautiously optimistic}.
+
+\aside{
+    To avoid awkward disappointment later on, you should know that we will not design a complete PoS protocol \emph{in this paper}.
+    Rather than add another 50 pages, it's more practical to leave it for a separate, focused paper later on.
+}
+
+
+
+
+
+
+
+\begin{comment}
+
 
 \autoref{sec:pos-dapp-chain-design} todos:
 
@@ -367,7 +383,7 @@ PoS security should come from the \emph{utility} that the dapp-chain provides.
 
 \priorityTODO[h]{Dapp-chain extra (concerns and constraints, discussion about currently possible and what is required for universal dapp-chains, etc).}
 
-% \begin{comment}
+% \begin{commentx}
 
 Idea:
 \begin{itemize}
@@ -439,7 +455,7 @@ Existence -> Validity
 
 - Dapp chains could provide a proof of processing central ROO in-out smart contract correctly along with dapp chain headers. This would also allow the simplex chain to automate these transactions (each dapp-chain would have a ROO 'account' to hold all the ROO that had been 'deposited' into the dapp-chain).
 
-% \end{comment}
+% \end{commentx}
 
 
 % \begin{draftonly}
@@ -496,6 +512,4 @@ In the case of dapp-chains, they will require a DEX for conversion, since they w
     Speculation as to the nature of this mystery and the motivation behind it is left as an exercise for the reader.
 }
 
-
-\priorityTODO[h]{Practically out of scope}
-\priorityTODO[h]{Block tx order}
+\end{comment}

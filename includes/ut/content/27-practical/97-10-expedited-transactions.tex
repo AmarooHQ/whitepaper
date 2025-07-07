@@ -176,6 +176,17 @@ Light-clients are a special case: if a local node is not available to validate b
 In these cases, we need to wait as long as the cross-chain protocol waits to ensure that no fraud proof exists --- about 60 seconds in practice.
 After this, the confirmations of both stages can be treated as normal.
 
+\subsubsubsection{Transaction Execution Order}
+
+For clarity, here is the execution order of transactions in a block:
+\begin{enumerate}
+    \item Automated System Transactions (deterministic with on-main parent)
+    \item Cross-chain Transactions
+    \item Expedited Transactions
+    \item Off-main Transactions
+    \item On-main Transactions
+\end{enumerate}
+
 \subsubsection{\texorpdfstring{$\mathbb{C}'$}{C′} and Time to First Confirmation}
 
 We can now calculate the time to first confirmation (TTFC) for expedited transactions.

@@ -118,7 +118,7 @@ The availability problem is solved provided there is at least one honest validat
   So, if any contemporary PoS chains are
   % secure (putting aside nothing-at-stake and long-range attacks, since the PoW context of the simplex solves those),
   secure,
-  then we'll have a viable option for PoS dapp-chains.
+  then we \emph{should} have a viable option for PoS dapp-chains.
 }
 
 \begin{comment}
@@ -142,3 +142,18 @@ The length of the sequence would depend on the number of blocks required for the
 For the malicious validators to win, they would need to be responsible for the longest chain at that point.
 
 \end{comment}
+
+\subsubparagraph{PoA Dapp-chains \& Others}
+
+Regarding spam and availability --- what about PoA?
+Fortunately this case is trivial: we offload the responsibility \emph{completely} to the PoA operators.
+The reason is simple: if PoA operators are withholding blocks or committing fraud, then that dapp-chain is already compromised.
+
+And to cover all our bases: if interoperability with the simplex is not required, then we don't care what consensus method is used; the simplex-chain is just time-stamping data.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[max width=.95\linewidth]{25-constructing-ut-20-dappchain-proof-choice_sag}
+  \caption{A flow chart to decide which proof system to use for a dapp-chain.}
+  \label{fig:dappchain-proof-choice}
+\end{figure}

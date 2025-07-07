@@ -282,7 +282,7 @@ This will obviously take a minute or so to execute, but you will have a guarante
 You could then `rescue' your coins and send them to a more useful chain.\footnote{
     This kind of operation would require some support from the transaction layer, e.g., a way to spend inputs indirectly.
     Such an output type would also need to contain instructions in case of a failure, since the sending chain cannot verify that the inputs to be spent (on the receiving chain) will be spendable when the cross-chain transaction is processed.
-    Since we must scan blocks as part of the cross-chain processing, the branch taken should also be recorded in the block, along-side the corresponding output or transaction.
+    Since we must scan blocks as part of the cross-chain processing, the branch taken should also be recorded in the block, alongside the corresponding output or transaction.
 }
 While this describes an unpleasant user experience, the takeaway is that it is yet another obstacle for an attacker to overcome.
 

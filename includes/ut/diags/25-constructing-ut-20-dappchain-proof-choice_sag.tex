@@ -10,24 +10,46 @@
 \def\input@path{{./includes/}{./includes/ut/diags/}}
 \makeatother
 
+% start -> interop? -> PoA works? -> PoS needed
+
+% multiline helper
+\NewDocumentCommand{\mline}{m}{%
+\begin{tabular}{c}#1\end{tabular}%
+}
+
 \begin{document}
 \tikzstyle{node} = [rectangle, rounded corners, minimum width=2cm, minimum height=0.8cm, text centered, draw=black]
 \tikzstyle{arrow} = [-stealth, shorten >= 2pt, shorten <= 2pt]
 \tikzstyle{conflict} = [stealth-stealth, decorate, decoration={zigzag,pre=lineto,pre length=2mm,post=lineto,post length=1mm,segment length=5mm,amplitude=1mm}]
-\begin{tikzpicture}[node distance=1cm]
-    \node (start) [node] {Draft a block};
-    \node (mine) [node, below = of start, xshift=0mm] {Mine the block};
-    \draw [arrow] (start) -- node (sm-mid) [pos=0.5, right] {} (mine);
+\begin{tikzpicture}[node distance=1.25cm]
+    \node (start) [node] {\mline{Need a\\Dapp-chain?}};
+    \node (interop) [node, right = of start, xshift=0mm] {\mline{Requires\\interop. with\\Simplex?}};
+    \node (poa) [node, right = of interop, xshift=0mm] {\mline{Does PoA\\work for\\use case?}};
+    % \node (pos) [right = of poa, xshift=0mm] {}; % {\mline{Requires\\PoS}};
+
+    \node (usePoa) [node, below = of poa] {\mline{Use PoA}};
+    \node (noInterop) [node] at (interop |- usePoa) {\mline{Whatever}};
+    \node (usePos) [node, right = of usePoa] {\mline{Use PoS}};
+    \node (trCorner) [] at (poa -| usePos) {};
+
+    \draw [arrow] (start) -- (interop);
+    \draw [arrow] (interop) -- node (yes1) [above] {Yes} (poa);
+    \draw [arrow] (poa) -- node (no2) [above] {No} (poa -| usePos) -- (usePos);
+    \draw [arrow] (interop) -- node (no1) [right] {No} (noInterop);
+    \draw [arrow] (poa) -- node (yes2) [right] {Yes} (usePoa);
+    \draw [arrow] (start) -- node (yes0) [above] {Yes} (interop);
+    \draw [arrow] (start) -- node (no0) [right] {No} (start |- noInterop) -- (noInterop);
+
 
     % position to right of midpoint between start and mine
-    \node (restart) [right = of sm-mid.east, xshift=8mm] {};
+    % \node (restart) [right = of sm-mid.east, xshift=8mm] {};
     % \node (restartLabel) [right = of restart.west, xshift=-12mm] {\begin{tabular}{c} Restart or\\ Update \end{tabular}};
     % \node (restartLabel) [node, right = of sm-mid.east, xshift=8mm] {\begin{tabular}{c} Restart or Update \end{tabular}};
 
-    \draw [arrow] (mine) -- (mine -| restart.west) -- node (restartLabel) [right, xshift=-2mm] {\begin{tabular}{c} Restart or\\ Update \end{tabular}} (restart.west |- start) -- (start);
+    % \draw [arrow] (mine) -- (mine -| restart.west) -- node (restartLabel) [right, xshift=-2mm] {\begin{tabular}{c} Restart or\\ Update \end{tabular}} (restart.west |- start) -- (start);
 
-    \node (broadcast) [node, below = of mine] {Broadcast the block};
-    \draw [arrow] (mine) -- node (mb-lab) [pos=0.5, right] {Find PoW} (broadcast);
+    % \node (broadcast) [node, below = of mine] {Broadcast the block};
+    % \draw [arrow] (mine) -- node (mb-lab) [pos=0.5, right] {Find PoW} (broadcast);
 
 
     % \node (goal) [node] {\begin{tabular}{c} Safely increase capacity \\ via merged mining \end{tabular}};

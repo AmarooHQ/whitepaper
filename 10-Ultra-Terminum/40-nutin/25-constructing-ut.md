@@ -114,7 +114,7 @@ With a suitable foundational consensus method, PoR enables dapp-chains to be as 
 Note that, since dapp-chains can use whichever foundational consensus method, they can optionally have \emph{their own} root token (and use that for mining rewards, transaction fees, etc).
 
 It's preferable that a simplex-chain validate the headers of its dapp-chains (similar to a light client), though this is not required.
-For some consensus methods that dapp-chains might choose (such as PoS), there might be special primitives that a host simplex-chain must support.
+For some dapp-chain consensus methods (such as PoS), there might be special primitives that a host simplex-chain must support.
 However, only that host simplex-chain requires those primitives; other simplex-chains do not.\footnote{
   The caveat here is that other simplex-chains may need to be capable of validating fraud proofs for the simplex-chain in question.
   So they don't need these primitives \emph{available to local transactions}, but do need to be capable of executing those primitives if a fraud proof involves one.
@@ -144,7 +144,7 @@ If the headers of dapp-chains are simplex-level transactions, what can we say ab
 
 First, notice that there is no substantive difference between standalone headers and header-transactions.
 That means that *zero-confirmation* header-transactions are *exactly* as secure as a standalone counterparts (and at least as secure as zero-confirmation transactions).
-This is not very secure in the case of a PoW dapp-chain, but it means that a PoS dapp-chain's zero-confirmation header-transactions are just as secure as blocks from an equivalent standalone PoS blockchain.
+This is not very secure in the case of a PoW dapp-chain, but it means that a PoS dapp-chain's zero-confirmation header-transactions could be just as secure as blocks from an equivalent standalone PoS blockchain.
 (It also means that the PoS dapp-chain is much more secure after header-transactions are confirmed, compared to the standalone equivalent.)
 
 When a header-transaction is confirmed by the simplex, the corresponding dapp-chain can efficiently use one-way PoR to inherit the security (and security properties) of the host simplex-chain[^dc-por]. Similar to mutual PoR, this can provide a *security context* where otherwise-insecure methods of consensus can be done securely.
@@ -169,7 +169,7 @@ Another concern is the \emph{availability} of dapp-chain blocks.
 
 \subsubsection{Three General Incentive Models for Dapp-chain Reflection}
 
-If dapp-chain headers are included along-side transactions in simplex-blocks, is it not the case that both must pay some kind of *transaction fee*?
+If dapp-chain headers are included alongside transactions in simplex-blocks, is it not the case that both must pay some kind of *transaction fee*?
 If not, how are simplex-chain miners to prioritize what to include in their blocks?
 Even if such a fee is *not always necessary*, the *ability* to provide a fee has decisive advantages --- like creating asymmetry between an attacker and honest simplex-chain miners.
 
@@ -260,15 +260,7 @@ This section is left unchanged since the specific client we might modify is imma
 
 [^builtins-or-sc]: Note: instead of builtins, these requirements could be met via EVM/WASM smart contracts.
 
-%% END ### RELEASE
-
-%% BEGIN ### DRAFT
-
 \input{25-constructing-ut/45-dapp-chains-extra}
-
-%% END ### DRAFT
-
-%% BEGIN ### RELEASE
 
 \input{25-constructing-ut/60-going-further-research}
 

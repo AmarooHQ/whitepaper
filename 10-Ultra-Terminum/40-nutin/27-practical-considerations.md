@@ -30,7 +30,7 @@ That is: a node for chain L must be able to answer the question *For each other 
 This means that each node must have $N_1 - 1$ answers, per block, for a simplex of $N_1$ chains.
 
 There is a trivial method: with each header, include the corresponding merkle branch which proves reflection.
-Specifically: when a miner on chain L mines a block that includes a header from chain R, they should also include --- along-side the header --- a merkle branch that shows the most recent chain L ancestor that has been reflected by chain R.
+Specifically: when a miner on chain L mines a block that includes a header from chain R, they should also include --- alongside the header --- a merkle branch that shows the most recent chain L ancestor that has been reflected by chain R.
 For example, block $B_{L,i+1}$ might include a proof that $H_{L,i}$ was reflected by $B_{R,j}$.
 That branch is the only required branch (i.e., the \emph{missing} branch), as chain L nodes are \emph{already} aware whether $H_{R,j}$ was reflected by $B_{L,i+1}$.
 
@@ -454,6 +454,8 @@ atk situations:
 %% BEGIN ### RELEASE
 
 \input{27-practical/97-10-expedited-transactions.tex}
+
+\input{27-practical/97-20-pos-dapp-chains-revisited.tex}
 
 \clearpage
 

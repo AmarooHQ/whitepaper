@@ -240,7 +240,7 @@
         "tree tiling", "tree tilings",
         "dependant", "independant",
         "compromize", "compromized",
-        "simplex chain"
+        "simplex chain", "along-side"
     ],
     "cSpell.ignoreRegExpList": [
         "\\usepackage{([a-z,]*)}",
