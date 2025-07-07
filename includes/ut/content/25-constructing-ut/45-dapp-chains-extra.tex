@@ -1,4 +1,369 @@
+% first sub-section of PoS Dapp-chains section
 \subsubsubsection{Concerns and Constraints}
+
+\newcommand{\ppe}{\ensuremath{P + \varepsilon}\xspace}
+\newcommand{\thePpeProblem}{the \ppe problem\xspace}
+\newcommand{\ThePpeProblem}{The \ppe problem\xspace}
+
+
+It sounds like PoS dapp-chains should be great --- if they \emph{can} work, that is.
+
+We are presented with an uncertain road ahead.
+The security of PoS networks is almost universally analyzed in the context of \emph{standalone} blockchains.
+Consequently, some parts of PoS systems have been deliberately introduced to solve problems \emph{for this context}.
+We find ourselves with a rather different context, though: PoW secured PoS.
+This context, combined with moving the \emph{staking} parts to the simplex, was enough for us to solve both the \emph{Nothing at Stake} and long-range attacks earlier.
+Thus, we have an opportunity to potentially simplify existing PoS methods, and we have the challenge of analyzing the security of PoS systems basically \emph{from scratch}.
+
+Beyond the \emph{security} of Proof of Stake, the \emph{method itself} remains contentious for multiple other reasons.
+These include: network dynamics like \emph{centralization} risks, and arguments from \emph{political philosophies}, \emph{economics}, and common moralistic ideas.
+Right now, our primary concern is to focus on the security dynamics.
+Later, we might discuss some of the other concerns, provided they are directly relevant.
+
+Our primary goal is to find a method of PoS that meets the necessary criteria as determined by our context.
+The most important of these criteria are that dapp-chains operate correctly as a blockchain and that they are practical in the context of the simplex.
+Technically speaking, the sticking point for PoS chains is the security elements --- many of the other technical concerns are not unique to PoS.
+Thus, we will focus on security matters first.
+
+Any working PoS chain must solve the well-known criticisms of PoS.
+The common ones we have not discussed so far are: bribery attacks and \thePpeProblem, though there are others.
+We should also consider speaker-listener faults, since they are often prevented in the same way as \emph{Nothing at Stake}.
+\emph{Weak subjectivity} also deserves a brief review.
+
+We do not yet have all the tools to consider attacks and criticisms in full, so for now let's just make sure that we can't find any major hurdles.
+We will consider these problems again in \autoref{sec:pos-dapp-chain-design}.
+
+\subsubsubsubsection{Speaker-Listener Faults}
+
+In many PoS systems, validators discuss and organize the block prior to final signatures.
+Failures in this protocol can cause block generation to fail or could possibly be leveraged by an attacker.
+Therefore, we must discourage deliberate violation of that protocol.
+Typically, PoS chains achieve this via \emph{slashing} --- a sizeable financial penalty, far in excess of the validators share of the block reward.
+Slashing is also used to mitigate the \emph{Nothing at Stake} problem, though we don't need it for that.
+
+These kinds of failures are \emph{speaker-listener faults}.
+They're hard to prevent completely for a simple reason: speaker/listener fault \emph{equivalence}.
+Say you and I are having dinner with Bob, and I mention the letter I sent you.
+You, surprised, ask \emph{What letter?}
+Assuming neither of us are contradicted by evidence, Bob cannot determine what went wrong.
+Perhaps I \emph{never sent} a letter, or perhaps you \emph{did} receive it, or maybe it got \emph{lost} in the mail.
+Whatever the case is, since we don't agree on what happened (a speaker-listener fault occurred), Bob (the blockchain) cannot determine which of us is correct.
+
+\bquote{
+    % Suppose that person B says that they did not receive a message from person A. There are two possible explanations: (i) person A did not send the message, (ii) person B pretended not to hear the message. Given just the evidence of B's claim, \emph{there is no way to tell which of the two explanations is correct}.
+    The relation to blockchain protocol incentivization is this: if you see a protocol execution where 70\% of validators' messages are included in the chain and 30\% are not, and see nothing else (and this is what the blockchain sees), then there is no way to tell whether the problem is that 30\% are offline or 70\% are censoring. If we want to make both kinds of attacks expensive, there is only one thing that we can do: \textbf{penalize both sides}.
+}[Vitalik Buterin; \href{\linkButerinTriangleOfHarm}{The Triangle of Harm} (2016)]
+
+So, what if there is an attacker or colluding group of validators?
+An attacker might deliberately send out conflicting messages to different validating peers, or pretend not to receive their message, or not send out messages at all.
+If an attacker does this, how can we be sure that the dapp-chain will recover?
+We will need some kind of error correction.
+
+The active set of validating nodes will learn about the failure soon enough, how should the protocol direct them to act?
+
+In at least some attacks, they will know that there is a contradiction:
+the attacker, at some point, has sent two messages that are incompatible.
+The validating nodes can prove this to any node capable of verifying the protocol.
+(For the sake of simplicity, let's assume that such a proof\footnote{
+    As justification: in \autoref{sec:practical-considerations} we will discuss some relevant topics: transaction witnesses, generic fraud proofs, and block-DAGs.
+    Since the validators' protocol is a sequence of events and messages in a DAG that eventually results in a single consistent outcome (the block), we can represent it as transactions on a blockchain.
+    Each ``transaction'' (i.e., message) can be proven to be ``spendable'' (i.e., allowed) under the protocol, and invalid state transitions (e.g., speaker-listener faults) are detectable and can be proven with relatively short proofs.
+    Where parallelization occurs, block-DAGs allow us to merge these histories into a single chain and evaluate the outcome.
+} is easy to generate and relatively small.)
+Provided that we can verify the proof that a validator acted incoherently, we can slash the validator's stake.
+
+Here we reach our first sticking point: how are the simplex-nodes able to verify a proof from this peer-to-peer dapp-chain protocol?
+We are going to \emph{need} some kind of \emph{universal representation for all of the cryptographic operations and relationships} in these protocols.
+Otherwise, we have potentially hundreds of different (or slightly different) protocols to consider.
+
+In other attacks (deliberately ignoring $\nicefrac{1}{3}$ of the validators, for example) there will not be evidence of misbehavior because the attackers never signed any incriminating messages.
+These cases are harder to solve, so we will return to them later (in \autoref{sec:pos-dapp-chain-design:speaker-listener}).
+For now, let's note that standalone PoS chains seem to avoid any catastrophic issues, so maybe there's something we can do.
+
+\subsubsubsubsection{Bribery Attacks}
+
+% this paragraph is a bit awkward, maybe reword
+There are two bribery cases to consider: censoring certain transactions, and subverting the consensus system entirely.
+The second case is more serious, and known as \thePpeProblem.
+The first case is cheaper and easier to reason about, and we'll discuss this one first.
+
+Say that you are a validator for a PoS chain (dapp-chain or otherwise).
+An attacker might offer you a bribe to to deliberately ignore (censor) particular transactions.
+For this to be profitable, they only need to pay you more than the transaction fee.
+
+Is this illegitimate?
+Well, if the chain supports smart contracts, I could encode this voluntary arrangement as an SC.
+So preventing this attack outright isn't possible if all validators are purely driven by profit (which they are not).
+Where \emph{protocol-level} solutions come in is in preventing these attacks from lasting.
+We'll lay some groundwork in \autoref{sec:dos-and-dags} that will let us evaluate this situation fully.
+Until then, we can simply note that even if we could not do anything to prevent this, it alone would not be a decisive criticism of PoS dapp-chains \emph{in general} --- though it might severely limit their utility.
+
+\subsubsubsubsection{\texorpdfstring{\ThePpeProblem}{The P + ε Problem}}
+
+\ThePpeProblem is more serious, and not specific to any one attack.
+
+We will analyze some dynamics similar to this in \autoref{sec:fps-and-bribes}, so let's avoid the weeds of \ppe for the moment.
+Instead, with my secret power of hindsight, I suggest we simply inspect, briefly, how an attack utilizing \ppe would work and evaluate it the hybrid context of a PoW simplex.
+
+The attack starts by bribing at least $\nicefrac{2}{3}$ of validators to participate in a profitable scheme.
+Once this breakpoint is passed, the dishonest validators begin ignoring the $\nicefrac{1}{3}$ of honest, non-participating validators.
+This causes their bonds to be slashed and they are excluded from the consensus protocol.
+
+\bquote{
+    Now that the attackers have 100\% control, \emph{we can block anyone new from bonding, and we can start unbonding while maintaining 100\% control.}
+    This allows everyone participating in the attack to cash out of the network before we execute the destructive attack.
+    As they are cashing out of the PoS network, \emph{we can also decrease the size of the attacker bond}, which decreases the cost of doing this attack.
+    So the bonded validators who do participate in the attack, \emph{they can remove >99\% of their bond from the network before the attack occurs}.
+    Meaning at worst \emph{only <1\% of their security bond gets burned} as a punishment for participating in the attack.
+    \newline
+    Once we have 100\% control, and the attackers have removed the vast majority of their stake from the system, \emph{we can execute any kind of attack}, and \emph{we have almost no value in the system that could be burned to punish us}.
+    [...]
+}[Zack Hess; \href{\linkZackPoSCriticisms}{Proof of Stake} (2021) \emph{Emphasis mine}]
+
+In this quote, \emph{every one} of the italicized statements is \ul{false} for \emph{our} PoS context.
+This is due to running the PoS algorithm \emph{in a new context} and staking \emph{different tokens} (ROO, specifically).
+In our case: bonding, unbonding, the size of the bond, and penalties like slashing are all executed in the hybrid PoW context.
+
+But, just because we have thwarted \emph{that} attack \ul{does not} mean that \ppe is not a problem.
+All we've done so far is show that \emph{this specific attack} does not work for PoS dapp-chains.
+However, regarding our \emph{current} goals, this is sufficient to move on and come back later.
+Indeed, Zack goes on to mathematically derive breakpoints around the attack, and we'll need to consider those.
+When we have better tools, we might also be able to \emph{invent} a new attack aimed at Amaroo's use of PoS specifically.
+(In fact, it would be more worrying if we could not think up new attacks on PoS dapp-chains that do not apply to standalone PoS chains.)
+
+\subsubsubsubsection{Weak Subjectivity}
+
+Weak Subjectivity is an idea introduced by Vitalik\footnote{
+    Vitalik Buterin; \href{\linkButerinWeakSubjectivity}{Proof of Stake: How I Learned to Love Weak Subjectivity} (2014).
+} that describes a category of consensus algorithms --- one which most PoS protocols fall into.
+PoW chains, by contrast, are \emph{objective}, and those based on social arrangements (e.g., Ripple) are \emph{subjective}.
+
+The core of Vitalik's discriminating factor is the epistemic context in which a node (with no `outside' knowledge) finds itself when joining the network.
+For objective networks, like Bitcoin, nodes can always independently find the canonical chain out of any alternatives.
+For weakly subjective networks, nodes with \emph{a recent}\,\footnote{
+    Exactly what counts as ``recent'' is determined by the protocol in question.
+    See the quotes in \autoref{sec:reflection-pow-and-pos} for examples of this limit.
+}\emph{and known-valid state} can independently find the canonical chain.
+For subjective networks, nodes require external information about the social consensus.
+
+PoS chains are weakly subjective since their chain weight is measured in \emph{coins} (or \emph{coin-somethings}).
+If a node has been offline for too long, an attacker may have performed a long-range attack that is able to fool the node (even if it didn't fool the rest of the network).
+We'd expect such an attacker to create a ``heavier'' fork compared to the \emph{actual} main chain.
+Given our discussion of converting PoS confirmations and \autoref{fn:pos-coins-crit}, this isn't surprising.
+
+Needless to say, UT's hybrid PoW context obviates the need for any such limit.
+Proof of Reflection, insofar as weak subjectivity is concerned, upgrades PoS from weakly subjective to (potentially) objective.
+
+\subsubsubsubsection{PoS \ul{is} (obscured) PoW}
+
+This insightful criticism from Paul Sztorc\footnote{
+    Paul Sztorc; \href{\linkSztorcNothingCheaperThanPoW}{Nothing is Cheaper than Proof of Work} (2015) \href{\linkSztorcNothingCheaperMirror}{[wayback]}.
+    Paul's article also has some criticisms of Vitalik's \emph{weak subjectivity} post; it's worth a read.
+} says that any gap between validators' cost and reward is an obscured and inefficient form of PoW.
+More specifically, while marginal costs are below marginal revenue, market forces push validators to take any actions they can to increase revenue.
+This is \emph{always} the case --- even for PoW; though PoW is designed so that there is no more profitable an option than being a better miner.
+
+\bquote{
+    If any cryptosystem is to periodically release coins, \emph{without} immediately creating an incentive to ``waste'' an amount equal to the value of those coins, the cryptosystem is going to have to release the coins in a manner which is \emph{totally independent of all possible human activities}.
+}[Paul Sztorc; \href{\linkSztorcNothingCheaperThanPoW}{Nothing is Cheaper than Proof of Work} (2015)]
+% \bquote{
+%     ``Proof-of-Work'' exists because money is being created.
+%     It is, then, impossible to ``create a new form of money'' without invoking Proof-of-Work.
+%     \\
+%     Satoshi's design insight was to \emph{channel} that \emph{inevitable work} into a \emph{cumulative} process, to optimally stablize a peer-to-peer clock in a cartel-resistant way.
+% }[Paul Sztorc; \href{\linkSztorcNothingCheaperThanPoW}{Nothing is Cheaper than Proof of Work} (2015)]
+
+In \autoref{sec:child-chain-pow-pos-asymmetry} we discussed how PoW dapp-chains would be to the detriment of the network's security --- mining resources would be directed to them at the expense of the simplex.
+If we could use PoW (ignoring the availability issue), we would want the blocks to be near-trivial to mine.
+But doing that means we lose the anti-spam property that we need for dapp-chains to be manageable.
+
+Compared to typical PoS chains, this is a radically different motivation for using PoS and it operates in a similarly distinct context.
+For one, as blockchain architects, we \emph{do not} want consensus for dapp-chains to be expensive.
+This is true regardless of whether we use PoW or PoS: either work or capital is diverted to counter-productive ends.
+So, for us, it \ul{does not matter that PoS is obscured PoW}.
+Whatever kind of PoW it is, that kind evidently isn't similar to the hash-based methods we use for simplex security --- \emph{could it be that the two kinds are useful for different things?}
+
+If block rewards are how a consensus method \emph{pays} for security, that's great for us.
+We don't need \emph{that kind} of security; it's already provided by the simplex.
+Rather, our demand is for \emph{rate-limiting} and \emph{reasonable assurance} that the dapp-chain is operating correctly and blocks are not withheld.
+
+Exactly \emph{how} we should use PoS remains to be seen, but Paul's idea offers insight into \emph{why} we \emph{should} use PoS for \emph{this} purpose.
+This conclusion is yet \emph{another} example of an \emph{asymmetry} created by PoR and the simplex.
+This time, however, it is between PoS inside and PoS outside the sheltering, governed, orderly context of the simplex.
+
+% (DRAFT NOTE: this is where "Economic remarks" used to go)
+
+\subsubsubsubsection{Why might PoS work \emph{here} but not \emph{there}}
+
+So far, \emph{our} investigation of PoS dapp-chain has diverged significantly from that for the typical PoS chain.
+Granted, we have not yet \emph{built} a PoS system suitable for dapp-chains, but all of the \emph{security}-based criticisms we've seen so far have been addressed without significant issue.
+In fact, we can avoid many of the complex additions to PoS methods that are required for standalone PoS chains to operate.
+
+How is it that we have had such an easy time where PoS designers have struggled?
+
+If I had to guess: it is because \emph{traditional} PoS is \emph{inverted}.
+
+In UT, PoS is a tool we will use to \emph{enable} dapp-chains that would not otherwise be possible.
+We have been driven by the \emph{requirements of the system}.
+The choice to use PoW for the simplex and PoS for dapp-chains has not been made arbitrarily.
+Rather, each \emph{serves a specific purpose} that only it could.
+In Amaroo, the \emph{demand for dapp-chains} and the associated utility is the \emph{origin} of the desire to validate --- \emph{not} the other way around.
+
+In traditional PoS networks, though, it is not the system requirements that have driven the choice to adopt PoS.
+Rather, what drove the choice to use PoS and, subsequently, the choice to adopt it as \emph{primary}, were \emph{external requirements}.
+This is the source of the inversion.
+
+
+\subsubsubsubsection{Initial Conclusions}
+
+- went smoother than expected
+- critical differences identified
+- some problems to solve when we have the tools
+- doesn't mean we're out of the woods yet, tho. even if we answer all criticisms of traditional PoS, that does not mean we haven't opened the door for new criticisms. must remain vigilant later when continuing analysis and design.
+- cautiously optimistic
+
+\autoref{sec:pos-dapp-chain-design} todos:
+
+\begin{itemize}
+    \item dapp-chain PoS: bonding, validation, slashing, etc
+    \item dapp-chain hard forks
+    \item dapp-chain light clients
+    \item cross-chain: simplex-chain $\leftrightarrow$ dapp-chain
+\end{itemize}
+
+
+
+\subsubsubsubsection{PoS design sketch}
+
+
+\begin{itemize}
+    \item Goal: \emph{dispersion} of blocks.
+    \item Goal: rate-limited.
+    \item Goal: quick validation / low overhead.
+    \item Goal: attack resistant.
+    \item Goal: any fraudulent activity (state progression) has a corresponding fraud proof.
+    \item Goal: enforced proofs of simplex <-> dapp chain transactions (spendability/state proof of cross-chain queue against dapp-chain header).
+    \item
+    \item Say there's a set of users who have signed up as validators. (Should these spots be auctioned?)
+    \item each block, a random set (e.g, 10\%) from the pool of validators is chosen.
+    \item \begin{itemize}
+        \item This can be done deterministically based on the block's hash.
+        Given the hierarchy of PoW over PoS in the simplex, and considering the rate of block production, a simplex-chain miner is not going to find grinding out better validator pools worth it (especially since this can only happen \emph{after} a valid block has been created).
+        Thus, we don't need anything fancy here --- a CSPRNG is sufficient.
+        \item This exact set of validators have ~15 seconds to produce a block.
+    \end{itemize}
+    \item The validation protocol is structured as a very small temporary blockchain.
+    \item Each 'round', validators either should act or are waiting (or both).
+    \item They publish updates to the protocol as transactions on the tiny-chain.
+    \item The end result of this (if successful) is a dapp-chain block and signed header.
+        (Signed with BLS / Shnorr)
+    \item The dapp-chain block is then broadcast to simplex-chain miners.
+    \item The simplex-chain miners then process the header-transaction which verifies the signatures.
+    \item Dapp-chain bonding doesn't require long durations --- the main reason for long periods is to solve problems that don't affect us.
+    \item
+    \item
+    \item use unify ancestry with
+    \item
+    \item use BLS signatures with sets of v in [64, 128] validators (if v=100; 1 leader, 99 witnesses)
+    \item compute agg key efficiently (~3-4ms), verify sig (1-3ms)
+    \item batch verifying helps
+    \item if we have ~100 tx per block, and 50 dapp-chains, that means (4ms + 1ms) * 50 = 250ms per block. acceptable but not great. FPGAs can reduce this to 5-25ms.
+    \item
+    \item idea: source validators RANDOMLY over any dapp-chain. The leader sends a block with a full witness for stateless validation.
+    \item
+    \item idea: run 2x rounds of PoS at once, record both blocks and merge histories. Should solve most liveness issues. dual blocks.
+    \item
+    \item remember what the method should do and what it should not
+    \item
+    \item let free market decide dapp-chain params and stuff. how much stake is require, frequencies, slashing conditions, etc.
+    \item
+    \item
+    \item option: schnorr signatures cleaner than BLS? Eth2 has a good BLS optimization, but might still be slower.
+    \item option: some kind of oblivious shuffle to anonymize participants.
+    \item
+    \item spendability proof of dappchain state (cross chain queue)
+\end{itemize}
+
+
+
+
+
+\subsubsubsubsection{NOTES BELOW}
+
+
+deriving value from a dapp-chain incentivizes participation as a validator.
+(This is one case where the might not take a bribe since profit isn't the motive)
+
+
+
+
+
+These criteria are:
+\begin{itemize}
+    \item \textbf{Secure:} Immutability is maintained.
+    \item \textbf{Reliable:} It operates smoothly as a blockchain, blocks execute correctly, etc.
+    \item \textbf{Interoperability:} Must support stable two-way protocols between dapp-chains and their host simplex-chain.
+    \item \textbf{Censorship Resistant:} User transactions are not arbitrarily censorable indefinitely by an attacker.
+    \item \textbf{Incentivized:} There is a profit incentive for validators to behave correctly.
+    \item \textbf{Decentralized:} The system is not vulnerable to a small number of validators colluding to attack the network.
+    \item \textbf{Practical:} The system is practical to implement and use.
+    \item \textbf{Universal:} The system can be used to create any kind of dapp-chain, not just a specific type.
+    \item \textbf{Efficient:} The system is efficient in terms of resource usage, such as bandwidth, storage, and computational power.
+    \item \textbf{Scalable:} The system can handle a large number of transactions and users without significant performance degradation.
+    \item \textbf{Transparent:} The system is transparent and auditable, allowing users to verify the correctness of the dapp-chain's state and operations.
+    \item \textbf{Flexible:} The system can adapt to changes in the dapp-chain's requirements or the underlying simplex-chain's consensus method.
+    \item \textbf{Provable:} The system can provide cryptographic proofs of the dapp-chain's state and operations, allowing users to verify the correctness of the dapp-chain's state.
+\end{itemize}
+
+
+The \ppe problem is dismissed by current PoS advocates.
+
+
+\bquote{
+    vitalik quote
+}[v]
+
+% \quote{
+%     gav wood quote
+% }
+
+% \quote{
+%     x
+% }
+
+% \quote{
+%     Hoskinson
+% }
+
+
+
+PoS validators are not random economic actors.
+They are already motivated to
+
+
+
+\subsubsubsubsection{Conclusion Points}
+
+
+
+PoS security should come from the \emph{utility} that the dapp-chain provides.
+
+
+\emph{Validators are not neutral!}
+
+
+
+
+
+
+\begin{itemize}
+    \item Universal proofs for when validators act incoherently, dapp chains don't execute correctly, etc.
+    \item Need a way of recording these algorithms, too, and of people writing their own.
+    \item And the validation routines stored somewhere.
+\end{itemize}
+
+
+
 
 \priorityTODO[h]{Dapp-chain extra (concerns and constraints, discussion about currently possible and what is required for universal dapp-chains, etc).}
 
@@ -89,7 +454,7 @@ Existence -> Validity
         \midrule
         PoS Secure & \xmark & \cmark \\
         % \midrule
-        PoS Insecure & \xmark & \emph{\textbf{?}}
+        PoS Insecure & \xmark & \qmark \emph{\textbf{?}}
         % \\ \bottomrule
     \end{tabular}
 \end{table}
@@ -98,3 +463,39 @@ We saw before that PoS seems to be broadly compatible with PoR.
 In the case of dapp-chains, they will require a DEX for conversion, since they will usually have their own root tokens.
 
 % \end{draftonly}
+
+
+\hruleMarker{The economic remarks }
+
+
+\aside{
+    \textbf{Economic Remarks:} Improvements to human lives are due to \emph{wealth creation}, which is in turn a direct product of \emph{human labor}.
+    Since humans have an unbounded desire for wealth, it will always be scarce in some sense.
+    This reveals that there must be a constraint \emph{upstream}, and what lies upstream?
+    \emph{Human labor}.\footnotemark{}
+    If we are interested in living \emph{wealthier} lives, then we are motivated towards designs which \emph{free up} human labor, rather than \emph{constrain it further}.
+    \par
+    This is not the only scarce resource that standalone PoS treats as preferentially disposable (compared to resources consumed through PoW); it also exacerbates the \emph{scarcity of capital}.
+    Paul's article demonstrates this in the section \emph{Nonproductive Investments Are ``Wasteful''} --- more \emph{capital} (but not wealth or value) is required by PoS to achieve a similar outcome.
+    However, in the PoS case, the capital is \emph{prevented} from any other productive use throughout the staking duration.
+    PoW ``wastes'' some capital on chips and electricity.
+    But PoS ``wastes'' the time-value of much more capital, which could otherwise buy productive human labor, \emph{and} it ``wastes'' the human labor spent pursuing the obscured PoW.
+    \par
+    So, PoS is an \emph{inefficient} use of capital and human labor as compared to PoW.
+    When people make claims that PoS is \emph{more} efficient than PoW, what exactly are they valuing as \emph{more important} than the \emph{primary tools of wealth creation?}\,\footnotemark{}
+    % When capital is `staked', it is not used in the traditional sense.
+    % Normally, \emph{using} capital implies that it is \emph{spent} or \emph{lent} --- and lending is indirect spending.
+    % When spent, it either bought consumption goods (to improve someone's life) or production goods (to make things that other people value for improving their life).
+    % When coins are `staked', what value is being spent and spent on what?
+}
+\addtocounter{footnote}{-1}
+\footnotetext{
+    George Reisman; \href{\linkReismanCapitalism}{Capitalism: A Treatise on Economics} (1996); p59, The Scarcity of Labor and Its Ineradicability.
+}
+\footnotetext{
+    Speculation as to the nature of this mystery and the motivation behind it is left as an exercise for the reader.
+}
+
+
+\priorityTODO[h]{Practically out of scope}
+\priorityTODO[h]{Block tx order}

@@ -1008,6 +1008,7 @@ It's easier to see in \autoref{eq:chain-coin-weight2} as the sum collapses to $\
 If the all chains in the network are functioning well, we should expect that summing a chain's weight in coins \emph{over the full history of the chain} should be close to the sum of all coins minted through block rewards.
 Of course, this is only useful over \emph{multiple} chains.
 \textbf{If a single, traditional blockchain tried to do this, then all chain-weights would be basically identical!}\footnote{
+  \label{fn:pos-coins-crit}
   This may be a new criticism of PoS.
   In essence: a blockchain needs something like a DAA to factor-in participation.
   PoS chains use \emph{coins} instead of \emph{hashes}, but \emph{coins} will never provide a way to determine which chain has higher participation.

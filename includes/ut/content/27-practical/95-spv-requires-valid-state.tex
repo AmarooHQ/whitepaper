@@ -21,7 +21,7 @@ The problem is that miners on one simplex-chain do not validate the state transi
 Each simplex-chain, locally, has an $O(\nicefrac{n}{c})$ share of the network's security (assuming there are $O(c)$ many chains).
 An $O(\nicefrac{n}{c})$ adversary could theoretically produce \emph{all} of the blocks for a single simplex-chain (e.g., by mining at a slight loss to push other miners out).
 The adversary could then create a very long chain of blocks that have valid headers, PoRs, etc, but also contain one or more fraudulent transactions.
-Perhaps the main-chain eventually corrects to a non-fraudulent history (similar to \autoref{sec:preventing-dos-attacks}) --- but in that case we'd need to wait a \emph{very} long time to be sure that such a correction \emph{must} have happened.
+Perhaps the main chain eventually corrects to a non-fraudulent history (similar to \autoref{sec:preventing-dos-attacks}) --- but in that case we'd need to wait a \emph{very} long time to be sure that such a correction \emph{must} have happened.
 That violates the \emph{fast} goal, so this eventual-correction idea fails to meet our overall goal.
 
 Are we stuck?

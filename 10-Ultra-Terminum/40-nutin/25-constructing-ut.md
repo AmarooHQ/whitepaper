@@ -222,7 +222,7 @@ Example use-case: a greenfield dapp-chain uses an Amaroo-compatible DEX (which r
 \subsubsubsection{Method 3: Pay the simplex miner directly}
 
 If the dapp-chain is willing to forego more efficient SPV transactions (or otherwise doesn't require them), and it is willing to bear the full burden of PoR in this context, then simply recording the hash of a dapp-chain header might be sufficient.
-In such a case, transactions (in the style of Bitcoin's \textsc{OP\_RETURN} transaction format) provide everything required.
+In such a case, transactions (in the style of Bitcoin's \textsc{op\_return} transaction format) provide everything required.
 This makes sense if the dapp-chain has exceptionally large headers, or if the dapp-chain does not wish to *disclose* the headers themselves (perhaps it is a private/permissioned network).
 In any case, since it is impossible to stop users including hashes in transactions, this is always a method by which dapp-chains can enable PoR with the host simplex-chain.
 
@@ -239,16 +239,16 @@ This demonstrates both *freedom of incentivization* (as there is none) and *free
 
 [^anchoring]: **Anchoring**: The process by which the hash of some data (perhaps a secondary chain's blocks) is included in transactions of a primary blockchain (e.g., [Bitcoin](https://www.reddit.com/r/Bitcoin/comments/5xkvc1/psa_were_running_a_stress_test_of_our_blockchain/)).
 Anchoring *would* be a progenitor to PoR, except that I believe the idea of an [on-chain light client predates](https://github.com/XertroV/coppr/blob/master/chainheaders.py) the term *anchoring*.
-Though I think that the idea of time-stamping a hash (e.g., via an \textsc{OP\_RETURN} transaction on Bitcoin) predates the idea of an on-chain light client.
+Though I think that the idea of time-stamping a hash (e.g., via an \textsc{op\_return} transaction on Bitcoin) predates the idea of an on-chain light client.
 
 \subsubsection{PoS Dapp-chains}
 
 If the headers of dapp-chains are encoded as simplex-transactions, then techniques like *slashing* can be first-class operations within the *hybrid* PoW context provided by the simplex.
-This solves the *Nothing at Stake* problem for PoS dapp-chains, provided the necessary PoS primitives can be encoded in a simplex-transaction.
+This solves the *Nothing at Stake* and *long-range* problems for PoS dapp-chains, so long as the necessary PoS primitives can be encoded in a simplex-transaction.
 
 The abstraction layer between simplex-chains and dapp-chains brings practical benefits, too.
 For example: existing (open-source) PoS blockchain schemes can be easily integrated as dapp-chains.
-Given that dapp-chains inherit security properties of their parent-chain (via one-way PoR), if such a dapp-chain's consensus method supports *other* features --- e.g., \href{\citeGrandpaLink}{finality guarantees} --- those features are *free*.
+Given that dapp-chains inherit security properties of their parent-chain (via one-way PoR), if such a dapp-chain's consensus method supports *other* features --- e.g., \href{\citeGrandpaLink}{finality guarantees} --- we should get those features for *free*.
 (Sharding, too, for that matter\dots)
 
 The most likely method of integration has three core components: modification of the headers (and integration of PoR), modification of existing slashing protocols, and support for intra-simplex SPV proofs.
