@@ -243,6 +243,8 @@ Though I think that the idea of time-stamping a hash (e.g., via an \textsc{op\_r
 
 \subsubsection{PoS Dapp-chains}
 
+\label{sec:pos-dapp-chains}
+
 If the headers of dapp-chains are encoded as simplex-transactions, then techniques like *slashing* can be first-class operations within the *hybrid* PoW context provided by the simplex.
 This solves the *Nothing at Stake* and *long-range* problems for PoS dapp-chains, so long as the necessary PoS primitives can be encoded in a simplex-transaction.
 

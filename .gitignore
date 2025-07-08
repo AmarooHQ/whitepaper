@@ -44,3 +44,4 @@ includes/ut/diags/**/*.png
 .psc-ide-port
 includes/refl_entropy
 test-pdf2text.txt
+tmp*.md
