@@ -4,11 +4,13 @@
 
 \infoNote{
     As a reminder, we will not derive a full PoS method for dapp-chains in this paper.
-    In this section, we will cover off the additional points that we could not earlier.
+    In this section, we will sketch a simple method and cover off the additional points that we could not earlier.
 }
 
 We now have several tools to analyze dapp-chain PoS that we didn't in \autoref{sec:pos-dapp-chains}: fraud proofs, block-DAGs, and bribery mechanics.
-Let's now revisit some of the topics from earlier to fill out details we couldn't before.
+
+First, we'll sketch a simple PoS mechanism that meets our criteria.
+Second, we'll revisit some of the topics from earlier to fill out details we couldn't before.
 
 \begin{comment}
     - hold to same standard as PoW.
@@ -23,14 +25,194 @@ Let's now revisit some of the topics from earlier to fill out details we couldn'
 
 \subsubsection{Dapp-Chain PoS Sketch}
 
+The main goal of this section is to create a simple and minimal PoS design.
 
+The PoS and dapp-chain designs will need a number of properties that we have loosely discussed before:
+\begin{itemize}
+    \item Blocks are rate-limited (anti-spam).
+    \item Blocks should be available \emph{by design}.
+    \item Validators (or anyone) must not be capable of stealing user funds.
+    \item Reliable cross-chain communication between the dapp-chain and its host simplex-chain.
+\end{itemize}
+
+% There are a number of other dynamics we should keep in mind too:
+% - censorship vs validator/miner autonomy
+
+Before we can discuss how blocks are created, we must briefly discuss how the ``stake'' part will work.
+Let's say that users can voluntarily have coins locked up (bonded / staked) in exchange for some block-production capacity on a specific dapp-chain; such users are \emph{validators}.
+This takes place on the simplex via a special smart contract designed for this purpose.
+It takes care of the bonding, unbonding, and slashing mechanics, and it verifies the proofs that result in slashing.
+
+To ensure rate-limiting, we shall allow one dapp-chain block per simplex-chain block, and designate a validator (the leader) to create it.
+Since the PoR graph updates \emph{very} quickly, we can use the hash of the simplex-chain block's PoR-parent\footnote{
+    PoR-parent: the most recently reflected block; the primary parent within the PoR graph (not the local chain).
+} as a source of sufficient randomness to avoid grinding attacks.
+
+To ensure availability-by-design, we will require some number of other deterministically selected validators (e.g., 63--127) to attest to the availability (and validity) of the block.
+Since these attesting validators play a crucial role, it seems ideal to draw them from as large a pool as possible.
+If we require that PoS dapp-chains support \textbf{stateless validation}, then we can draw these attesting validators from the pool of validators over \emph{all} dapp-chains (on this simplex-chain), not just the dapp-chain in question.
+This will introduce some constraints on dapp-chain architecture since validators from other dapp-chains will need to be capable of executing the block according to the stateless witness.
+But, it also means that an attacker must coordinate a much larger set of validators.
+
+\begin{figure}%[htb]
+\centering
+\includegraphics{27-practical-97-20-pos-sketch_sag}
+\caption{
+    How block creation in the dapp-chain PoS consensus sketch succeeds or fails.
+}
+\label{fig:pos-flowchart}
+\end{figure}
+
+For signature aggregation, BLS signatures have decisive advantages: they are small (48 B) and can be aggregated to any threshold without \emph{a priori} knowledge of the set of signers.
+The overhead of this for dapp-chain headers is thus 48 bytes plus a bit field indicating which validators have attested to the header: 56--64 bytes total.
+
+When a dapp-chain header is included in a simplex-chain block, the aggregated BLS signature is validated by simplex-chain nodes like any other transaction.
+This --- potentially --- gives our dapp-chain headers a rather unique property among PoS chains: cheap headers-only validation.
+This is possible because the headers inherit the existence-implies-validity property (within safety constraints) from the base simplex-chain; just like it is for normal transactions.
+To follow through with this property, there must be a censorship-resistant mechanism to record dapp-chain fraud proofs on the simplex-chain.
+Both expedited transactions and cross-chain transactions easily satisfy this requirement.
+
+If dapp-chain validators are not constrained in their choice of parent block, a malicious actor might try and ignore the latest block and build on an earlier one instead.
+It would be convenient to introduce a rule similar to the \AxiomOfUnifiedAncestry{}, but this is not directly possible.\footnote{
+    For the \AxiomOfUnifiedAncestry{} to work, simplex-chains would need to verify the availability of all dapp-chain blocks, and to prevent collusion with simplex-chain miners, all other simplex-chains would need to verify the availability, too.
+}
+We can, however, require that dapp-chain blocks flag unavailable ancestors, \emph{and} that this is verified by the attesting validators.
+We can take action if a supermajority of validators attest that the block is available to them and the validator does not correct for this.
+Although we expect the parent block to be readily available (provided that the prior round went well), some leniency might be preferable --- to allow for potential network issues or delays in validation by the leading validator.
+
+\subsubsubsection{\texorpdfstring{Simplex-Chain $\longleftrightarrow$ Dapp-Chain Communication}{Simplex-Chain ←→ Dapp-Chain Communication}}
+
+The most important thing for cross-chain communication between simplex- and dapp-chains is the reliability of SPV proofs \emph{against the dapp-chain}.
+The proof itself is not a bottleneck since dapp-chains support stateless validation.
+Rather, the constraint is: \emph{how do we know the state transitions were valid?}
+
+% Hmm, don't need to mention ZKPs I think. Maybe if people ask but it's kinda obvious they have big downsides.
+% Zero-knowledge proofs (ZKPs) are one way to know the state transitions, but their size and verification overhead make them impractical.
+
+
+We can \emph{infer} validity based on the lack of fraud proofs.
+This will require some protocol-level constraints or expectations around how quickly fraud proofs appear.
+As is the case for simplex-chains, validating nodes will automatically generate fraud proofs during normal operation.
+\emph{Any} honest node has an incentive to broadcast the fraud proof, and so we expect, at the network level, that fraud proofs are available rather quickly.
+At the simplex-chain level, \emph{in the absence of collusion}, we expect a fraud proof to be recorded in the next block or two.\footnote{
+    This assumes someone is willing and able to create a transaction (with a fee) that contains the fraud proof.
+    Since this will result in a slashing penalty, we can use those funds to incentivize the creation of such transactions.
+    In practice, since fraud proofs are cryptographically independent of their creators, simplex-chain miners will front-run this, so merely broadcasting the fraud proof is sufficient.
+}
+To counter collusion, expedited and cross-chain transactions provide a way to force miner capitulation.
+
+Given that the insertion of a dapp-chain header \emph{requires} that the block has been broadcast and attested to, we expect that no fraud proof is possible.
+If a fraud proof is generated, it would imply that the attesting validators were colluding.
+To prevent the fraud proof being recorded, collusion would be required \emph{not only} with miners on that simplex-chain, but also with miners on \emph{all} simplex-chains (due to expedited and cross-chain transactions).
+Unless, of course, there are no honest dapp-chain nodes to generate fraud proofs --- in which case: \emph{why do we care?}
+
+Thus, we have established that, of those dapp-chain headers recorded, there is a reasonable breakpoint after which we can confidently infer that the state transitions were valid.
+
+In terms of actually \emph{processing} simplex $\longleftrightarrow$ dapp-chain transactions, we now have the to foundations sketch a protocol.
+First, since dapp-chain blocks depend on a simplex-chain block, we require them to process any \emph{incoming} transactions immediately.
+The other direction is more complex, but can be solved similarly to cross-chain transactions.
+Along with dapp-chain headers, we will require a proof of the queued dapp $\to$ simplex instructions from that dapp-chain block.\footnote{
+    We could batch these for the sake of efficiency if the amount of data would otherwise be problematic.
+}
+These instructions will need to be constrained somewhat to ensure there is no DoS vector or the like.
+While the instructions could take the form of arbitrary outputs, we need to ensure that simplex-chain miners aren't losing out on transaction fees due to this \emph{additional and required} processing.
+One simple solution is limiting these instructions to simple pay-to-script-hash-esq outputs with a mandatory fee (perhaps based on a recent moving average).
+
+In order to manage `deposits' and `withdrawals' of ROO on the dapp-chain side, a special smart contract will handle all incoming and outgoing transactions, including the creation and destruction of ROO to ensure the conservation of coins.
+On the simplex-chain side, each dapp-chain will have a special (mutable) balance of ROO that fully backs the dapp-chain's ROO supply.
+When `withdrawals' are processed, the corresponding amount is debited from this dapp-chain balance.
+Thus, even if a dapp-chain is completely compromised by some bug, the integrity of the ROO supply is maintained.
+
+\subsubsubsection{Preliminary Evaluation}
+
+Okay, we have sketched a method.
+By design, we can see that it meets the requirements: blocks are rate-limited and available, the imaged dapp-chain should be valid (at least after the security breakpoint), and we can build a reliable two-way communication channel.
+
+This is not the \emph{only} design that could work, but it suits our current purpose.
+
+In a production setting, there are some additional dynamics that we should consider at this stage --- like censorship resistance and \emph{regular} dapp-chain block production.
+While there are objective improvements to be made in such areas, they are not critical for establishing the \emph{integrity} of the dapp-chain PoS method.
+Thus, we will leave such topics for future work.
+
+Now, back to the criticisms from \autoref{sec:pos-dapp-chains}.
 
 \subsubsection{Bribes \& Censorship}
 
+An attacker wishes to pay leading validators to censor certain transactions.
+Based on our sketched design, there is a weak and a strong way to approach this.
 
+The weak way is simply what the attacker was doing before: providing a small reward to each validator that censored the transaction.
+If it did not result in a loss of profit to the validator, it would would mean refusing to build on blocks that included censored transactions.
+However, our design is capable of slashing in such cases since attesting validators can respond with the more recent (and correct) parent block.
+Either way, such an attack cannot last very long.
+
+The stronger attack involves bribing both the leading validator and a supermajority of attesting validators.
+Not only is this more expensive and less practical, it is also thwarted by a simplex to dapp-chain transaction.
+After such a transaction, the attacker would need to bribe simplex-chain miners, too.
+If the transaction is expedited or cross-chain, then the attacker now needs to bribe the entire simplex.
+As we've seen in \autoref{sec:dos-and-dags} and \autoref{sec:fps-and-bribes}, this is not a practical long-term attack.
 
 \subsubsection{\texorpdfstring{\ThePpeProblem}{The P + ε Problem}}
+
+We already know that Zack's attack from \autoref{sec:ppe-problem-1} is not directly possible in our design.
+However, our previous answer to the attack was: the attacker couldn't do anything useful \emph{after they gained control}.
+This is a somewhat naive answer because it ignores the fact that the attacker \emph{has control}.
+A better answer would be one showing that the attacker cannot gain meaningful control in the first place.
+
+Let's consider our design in the context of a \ppe attack.
+
+First, note that if the attack depends on the attacker \emph{gaining control}, it necessitates some slashing action against \emph{honest} validators.
+Where in our design are \emph{honest} validators slashed?
+Right now, they are not --- all \emph{required} slashing is in response to a \emph{positive} fraud proof.
+For \emph{honest} validators to be slashed, we would need to slash based on a \emph{negative} proof --- that is, based on an \emph{absence} that \emph{implies} wrongdoing.
+The consequence of this design is that during an attack, honest blocks will not reach an attestation supermajority and thus won't be recorded in the simplex-chain.
+Similarly, some attacker blocks might also fail to reach this threshold, but we expect others to reach it.
+So, critically, only validators in collusion with the attacker are able to produce blocks.
+
+Perhaps the attacker does not need to remove the other validators, though.
+They might, for example, want to manipulate something on the dapp-chain like an auction.
+This would involve creating valid blocks and heavily censoring the dapp-chain.
+A smart contract running on the dapp-chain can proactively defend against these kind of situations by monitoring the dapp-chain block production rate.
+This raises the bar for an attack but does not completely prevent it.
+Also, while this attack is cheaper for the attacker (since they only need to bribe validators for this dapp-chain), doing that leaves the attacker defenseless against the remaining honest validators --- eventually one of them will be selected to produce the next block.
+
+Practically, if the attacker has control of near-100\% of that dapp-chain's validators and is heavily censoring transactions, it's not possible to tell it apart from a `healthy' dapp-chain based on the objective observations recorded in the simplex-chain.
+However, \emph{the users} of the dapp-chain will notice the difference (since their transactions are stalling).
+Assuming that the attack is profitable, there must be some victims of the attack --- those are exactly the users with a strong incentive to prevent the attack, which they can always do by becoming a validator.
+Provided that the PoS design does not punish honest behavior, becoming a validator is risk-free.
+
+So it seems like an attacker will need to bribe all validators of any dapp-chain on that simplex-chain if they are to gain meaningful control.
+Their ultimate goal would be something like publishing unavailable (but attested) blocks and arranging a fraudulent state that allowed them to withdraw all the ROO or make other arbitrary changes.
+
+How much would this cost and how would such an attack play out?
+
+- attacker becomes a way to extract profit
+
+
+PoS cheap $\rightarrow$ attack causes profit seeking validators to move to something more profitable instead.
+Is this a possible asymmetry?
+
+\bquote{
+    Because of speaker-listener fault equivalence, there is no way to later prove that the 1/3rd were participating correctly and should not have lost their bonds
+}
+
+\subsubsection{Attacker-Validators}
+
+What if the attacker just stakes enough (presumably via multiple accounts) to become a supermajority of validators?
+
 
 \subsubsection{Dapp-Chain Fraud Proofs}
 
 \subsubsection{Speaker-Listener Faults 2}
+
+\subsubsection{Future Work}
+
+\begin{itemize}
+    \item Censorship resistance.
+    \item Dapp-chain hard forks.
+    \item Dapp-chain fraud proofs.
+    \item Dapp-chain light clients.
+    \item Exact cross-chain protocol.
+    \item Regular dapp-chain block production.
+    \item Exact bonding, unbonding, and slashing mechanics.
+\end{itemize}

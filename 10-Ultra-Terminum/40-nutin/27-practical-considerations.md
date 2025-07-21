@@ -455,7 +455,9 @@ atk situations:
 
 \input{27-practical/97-10-expedited-transactions.tex}
 
-\input{27-practical/97-20-pos-dapp-chains-revisited.tex}
+\draftOnly{
+    %% \input{27-practical/97-20-pos-dapp-chains-revisited.tex}
+}
 
 \clearpage
 

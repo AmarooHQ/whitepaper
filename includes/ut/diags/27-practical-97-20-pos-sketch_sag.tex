@@ -1,0 +1,136 @@
+
+\documentclass[]{standalone}
+\usepackage[T1]{fontenc}
+
+\usepackage{tikz}
+\usepackage{amsmath, amsfonts}
+\usepackage{nicefrac}
+\usepackage{pifont}
+\usetikzlibrary{arrows, shapes.geometric, calc, positioning, decorations.pathmorphing}
+
+\makeatletter
+\def\input@path{{./includes/}{./includes/ut/diags/}}
+\makeatother
+
+% start -> interop? -> PoA works? -> PoS needed
+
+% multiline helper
+\NewDocumentCommand{\mline}{m}{%
+\begin{tabular}{c}#1\end{tabular}%
+}
+
+\begin{document}
+\tikzstyle{nodeBase} = [rectangle, minimum width=2cm, minimum height=0.8cm, text centered, draw=black]
+\tikzstyle{node} = [nodeBase, rounded corners]
+\tikzstyle{nodeMal} = [nodeBase, dashed]
+\tikzstyle{nodeAct} = [nodeBase]
+
+\tikzstyle{arrow} = [-stealth, shorten >= 2pt, shorten <= 2pt]
+\tikzstyle{conflict} = [stealth-stealth, decorate, decoration={zigzag,pre=lineto,pre length=2mm,post=lineto,post length=1mm,segment length=5mm,amplitude=1mm}]
+\begin{tikzpicture}[node distance=1.25cm]
+    % cols
+    \node (col1) [] {};
+    \node (col2) [right = of col1, xshift=40mm] {};
+    \node (col3) [right = of col2, xshift=40mm] {};
+    % rows
+    \node (row1) [] at (col1) {};
+    \node (row0) [above = of row1, yshift=-5mm] {};
+    \node (row2) [below = of row1, yshift=0mm] {};
+    \node (row3) [below = of row2, yshift=0mm] {};
+    \node (row4) [below = of row3, yshift=0mm] {};
+    \node (row5) [below = of row4, yshift=0mm] {};
+    % \node (row6) [below = of row5, yshift=0mm] {};
+    % \node (row7) [below = of row6, yshift=0mm] {};
+
+
+    % debug
+    \node (c1dbg) [yshift=0cm] at (col1 |- row0) {Nominal Events};
+    \node (c2dbg) [yshift=0cm] at (col2 |- row0) {Malicious Action};
+    \node (c2dbg) [yshift=0cm] at (col3 |- row0) {Consequence};
+
+    % main nodes
+    \node (start) [node] at (col1) {\mline{Validator Selected \\ \& Drafts Block}};
+    \node (startMal) [nodeMal] at (start -| col2) {\mline{Offline / Refuse}};
+    \node (startMal2) [] at (start -| col3) {};
+
+    \node (signSend) [node] at (col1 |- row2) {\mline{Sign \& Broadcast}};
+    \node (withhold) [nodeMal] at (signSend -| col2) {\mline{Withhold}};
+    \node (withhold2) [] at (withhold -| col3) {};
+
+    % midpoint of startMal2 and withhold2
+    \node (sm-mid) [nodeAct] at ($(startMal2)!0.5!(withhold2)$) {\mline{Possible Slashing\\No Block Recorded}};
+
+
+    \node (validation) [node] at (col1 |- row3) {\mline{Mass Stateless\\Validation}};
+    \node (badWitness) [nodeMal] at (validation -| col2) {\mline{Wrong Parent,\\Bad Witness, or\\Invalid Execution}};
+    \node (badWitness2) [nodeAct] at (badWitness -| col3) {\mline{FP \& Slashing}};
+
+    \node (massAttest) [node] at (col1 |- row4) {\mline{Mass Attestation}};
+    \node (badAttest) [nodeMal] at (massAttest -| col2) {\mline{$\nicefrac{1}{3}+$ Failure}};
+    \node (badAttest2) [nodeAct] at (badAttest -| col3) {\mline{Possible FP\\ \& Slashing}};
+
+    \node (blockDone) [node] at (col1 |- row5) {\mline{Block Finalized \checkmark}};
+    % \node (blockFail) [nodeMal] at (blockDone -| col2) {\mline{Block Failed}};
+    \node(bottom) [yshift=-3.5mm] at (blockDone) {};
+
+    \draw [arrow] (start) -- (startMal);
+    \draw [arrow] (startMal) -- (sm-mid);
+    \draw [arrow] (start) -- (signSend);
+    \draw [arrow] (signSend) -- (withhold);
+    \draw [arrow] (withhold) -- (sm-mid);
+    \draw [arrow] (signSend) -- (validation);
+    \draw [arrow] (validation) -- (badWitness);
+    \draw [arrow] (badWitness) -- (badWitness2);
+    \draw [arrow] (validation) -- (massAttest);
+    \draw [arrow] (massAttest) -- (badAttest);
+    \draw [arrow] (badAttest) -- (badAttest2);
+    \draw [arrow] (massAttest) -- (blockDone);
+
+    % \node (interop) [node, right = of start, xshift=0mm] {\mline{Requires\\interop. with\\Simplex?}};
+    % \node (poa) [node, right = of interop, xshift=0mm] {\mline{Does PoA\\work for\\use case?}};
+    % % \node (pos) [right = of poa, xshift=0mm] {}; % {\mline{Requires\\PoS}};
+
+    % \node (usePoa) [node, below = of poa] {\mline{Use PoA}};
+    % \node (noInterop) [node] at (interop |- usePoa) {\mline{Whatever}};
+    % \node (usePos) [node, right = of usePoa] {\mline{Use PoS}};
+    % \node (trCorner) [] at (poa -| usePos) {};
+
+    % \draw [arrow] (start) -- (interop);
+    % \draw [arrow] (interop) -- node (yes1) [above] {Yes} (poa);
+    % \draw [arrow] (poa) -- node (no2) [above] {No} (poa -| usePos) -- (usePos);
+    % \draw [arrow] (interop) -- node (no1) [right] {No} (noInterop);
+    % \draw [arrow] (poa) -- node (yes2) [right] {Yes} (usePoa);
+    % \draw [arrow] (start) -- node (yes0) [above] {Yes} (interop);
+    % \draw [arrow] (start) -- node (no0) [right] {No} (start |- noInterop) -- (noInterop);
+
+
+    % position to right of midpoint between start and mine
+    % \node (restart) [right = of sm-mid.east, xshift=8mm] {};
+    % \node (restartLabel) [right = of restart.west, xshift=-12mm] {\begin{tabular}{c} Restart or\\ Update \end{tabular}};
+    % \node (restartLabel) [node, right = of sm-mid.east, xshift=8mm] {\begin{tabular}{c} Restart or Update \end{tabular}};
+
+    % \draw [arrow] (mine) -- (mine -| restart.west) -- node (restartLabel) [right, xshift=-2mm] {\begin{tabular}{c} Restart or\\ Update \end{tabular}} (restart.west |- start) -- (start);
+
+    % \node (broadcast) [node, below = of mine] {Broadcast the block};
+    % \draw [arrow] (mine) -- node (mb-lab) [pos=0.5, right] {Find PoW} (broadcast);
+
+
+    % \node (goal) [node] {\begin{tabular}{c} Safely increase capacity \\ via merged mining \end{tabular}};
+
+    % \node (m1) [right = of goal.east] {};
+    % \node (mr1) [node, above = of goal.east -| m1] {Stay decentralized};
+    % \node (mr2) [node, below = of goal.east -| m1] {Securely add more chains};
+    % \draw [arrow] (goal) -- (mr1);
+    % \draw [arrow] (goal) -- (mr2);
+
+    % \node (arp1) [node, right = of mr1.east, xshift=2mm] {\begin{tabular}{c} Users don't have to \\ validate all chains \end{tabular}};
+    % \node (arp2) [node] at (mr2 -| arp1) {\begin{tabular}{c} Miners must \\ validate all chains \end{tabular}};
+    % \draw [arrow] (mr1) -- (arp1);
+    % \draw [arrow] (mr2) -- (arp2);
+
+    % \draw [conflict] (arp1) -- node (c) [anchor=west, inner sep=5pt] {\begin{tabular}{c} \textbf{Conflict} \\ Miners are Users \end{tabular}} (arp2);
+
+
+    %\node (conflict) [node] at ([xshift=1cm]c.west) {\textbf{Conflict}};
+\end{tikzpicture}
+\end{document}

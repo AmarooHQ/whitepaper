@@ -262,7 +262,7 @@ This section is left unchanged since the specific client we might modify is imma
 
 [^builtins-or-sc]: Note: instead of builtins, these requirements could be met via EVM/WASM smart contracts.
 
-\input{25-constructing-ut/45-dapp-chains-extra}
+\input{25-constructing-ut/45-dapp-chains-extra-short}
 
 \input{25-constructing-ut/60-going-further-research}
 

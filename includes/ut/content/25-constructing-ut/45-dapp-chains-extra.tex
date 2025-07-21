@@ -99,11 +99,14 @@ Until then, we can simply note that even if we could not do anything to prevent 
 
 \subsubsubsubsection{\texorpdfstring{\ThePpeProblem}{The P + ε Problem}}
 
+\label{sec:ppe-problem-1}
+
 \ThePpeProblem is more serious, and not specific to any one attack.
 
 We will analyze some dynamics similar to this in \autoref{sec:fps-and-bribes}, so let's avoid the weeds of \ppe for the moment.
-Instead, with my secret power of hindsight, I suggest we simply inspect, briefly, how an attack\footnote{
-    Particularly, Zack Hess's attack from \href{\linkZackPoSCriticisms}{Proof of Stake}.
+Instead, with my secret power of hindsight, I suggest we simply inspect, briefly, how an attack put forward by Zack Hess\footnote{
+    Zack Hess; \href{\linkZackPoSCriticisms}{Proof of Stake} (2021).
+    There is also an older version \href{https://github.com/zack-bitcoin/amoveo/blob/master/docs/other_blockchains/proof_of_stake.md}{here} (2019--2020).
 } against PoS utilizing \ppe would work and evaluate it the hybrid context of a PoW simplex.
 
 The attack starts by bribing at least $\nicefrac{2}{3}$ of validators to participate in a profitable scheme.
@@ -160,7 +163,7 @@ Proof of Reflection, insofar as weak subjectivity is concerned, potentially upgr
 This insightful criticism from Paul Sztorc\footnote{
     Paul Sztorc; \href{\linkSztorcNothingCheaperThanPoW}{Nothing is Cheaper than Proof of Work} (2015) \href{\linkSztorcNothingCheaperMirror}{[wayback]}.
     Paul's article also has some criticisms of Vitalik's \emph{weak subjectivity} post; it's worth a read.
-} says that any gap between validators' cost and reward is an obscured and inefficient form of PoW.
+}, and linked in Zack's article, says that any gap between validators' cost and reward is an obscured and inefficient form of PoW.
 More specifically, while marginal costs are below marginal revenue, market forces push validators to take any actions they can to increase revenue.
 This is \emph{always} the case --- even for PoW; though PoW is designed so that there is no more profitable an option than being a better miner.
 
@@ -283,7 +286,7 @@ At this stage, I think it's fair to be \emph{cautiously optimistic}.
     \item use BLS signatures with sets of v in [64, 128] validators (if v=100; 1 leader, 99 witnesses)
     \item compute agg key efficiently (~3-4ms), verify sig (1-3ms)
     \item batch verifying helps
-    \item if we have ~100 tx per block, and 50 dapp-chains, that means (4ms + 1ms) * 50 = 250ms per block. acceptable but not great. FPGAs can reduce this to 5-25ms.
+    \item if we have ~100 tx per block, and 50 dapp-chains, that means (4ms + 1ms) * 50 = 250ms per block. acceptable but not great. FPGAs can reduce this to 5--25ms.
     \item
     \item idea: source validators RANDOMLY over any dapp-chain. The leader sends a block with a full witness for stateless validation.
     \item

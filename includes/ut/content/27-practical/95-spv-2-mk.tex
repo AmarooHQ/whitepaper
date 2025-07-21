@@ -230,7 +230,7 @@ These conditions are illustrated in \autoref{fig:xc-conditions}.
 There is one slight oversight in this formulation that we need to fix.
 How do we know that the transactions in those blocks to be processed are all consistent?
 If we naively collect blocks according to the above conditions, then we don't -- there might be conflicting transactions in off-main blocks.
-To correct this, we first use the four conditions to find the 1-4 most recent corresponding blocks (some conditions may resolve to the same block).
+To correct this, we first use the four conditions to find the 1--4 most recent corresponding blocks (some conditions may resolve to the same block).
 Next, for chain \cR, we find the on-main MRCA (most recent common ancestor) of those blocks -- this is the most recent block that will be processed for cross-chain transactions.
 We repeat this process for the parent of the draft block to find its corresponding MRCA by the same rules.
 Let's call these blocks $\cR_\alpha$ and $\cR_\beta$ respectively.

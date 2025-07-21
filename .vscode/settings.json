@@ -157,6 +157,7 @@
         "superchains",
         "superDAG",
         "superDAGs",
+        "supermajority",
         "superquality",
         "Terminum",
         "textlint",
@@ -240,7 +241,7 @@
         "tree tiling", "tree tilings",
         "dependant", "independant",
         "compromize", "compromized",
-        "simplex chain", "along-side"
+        "simplex chain", "along-side", "super-majority",
     ],
     "cSpell.ignoreRegExpList": [
         "\\usepackage{([a-z,]*)}",
