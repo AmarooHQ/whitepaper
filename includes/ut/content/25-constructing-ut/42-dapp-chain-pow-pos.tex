@@ -100,7 +100,7 @@ Therefore, it is always possible to partially share a block in (pure) PoW networ
 \subsubparagraph{PoS Dapp-chains}
 
 First, it's important to note that there are many variants within the ``Proof of Stake'' family of consensus methods.
-For our purposes, we're interested in those where multiple validators are involved before a block is finalized / validated.
+For our purposes right now, we're interested in those where multiple validators are involved before a block is finalized / validated.
 \autoref{fig:pow-pos-mining-asymmetry-pos} demonstrates a simplification of such a block creation processes.
 
 Provided that the PoS method is well-constructed, this kind of PoS solves both the spam and availability problems.
@@ -154,6 +154,17 @@ And to cover all our bases: if interoperability with the simplex is not required
 \begin{figure}[h]
   \centering
   \includegraphics[max width=.95\linewidth]{25-constructing-ut-20-dappchain-proof-choice_sag}
-  \caption{A flow chart to decide which proof system to use for a dapp-chain.}
+  \caption{A flow chart to decide which proof system to use for a dapp-chain, assuming a secure PoS method is available.}
   \label{fig:dappchain-proof-choice}
 \end{figure}
+
+It is worth noting that there are other directions that dapp-chains could take, too.
+Notably: we could use some kind of rollup; we could use some kind of zero-knowledge proof (ZKP) system; or we could go in a more traditional layer-2 direction, such as state channels.
+
+\subsubparagraph{Design Position}
+
+With regards to how we should actually design simplex-chains to best support dapp-chains, there are a few important takeaways from the above.
+First, different dapp-chain use-cases have different technical requirements; we don't need a one-size-fits-all design.
+Second, no PoS system is adapted for dapp-chain use, and if PoS is generally insecure then we cannot assume secure PoS dapp-chains are possible.
+Third, scaling research (in a broad sense) is often focused on methods that should be compatible with our dapp-chain design, so new methods may become available at any point.
+Therefore, we should aim to support many different methods of running dapp-chains and providing the necessary primitives for users to do so.

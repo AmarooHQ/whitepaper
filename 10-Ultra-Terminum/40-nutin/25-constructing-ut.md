@@ -101,7 +101,7 @@ The security of simplexes is discussed in \autoref{sec:simplex-security}.
 
 \label{sec:dapp-chains}
 
-*Dapp-chains* are the method by which *Ultra Terminum* exceeds $O(c^2)$ scaling *without* using the method described in \autoref{sec:tiling}. To be clear: the $O(c^2)$ configuration of UT is compatible with that other method; dapp-chains are a *separate and independent* method of scaling. However, there are *decisive* reasons to introduce and use *dapp-chains*. Dapp-chains provide features that the $O(n)$ scaling configuration alone cannot \emph{easily} provide. Additionally, dapp-chains increase the simplex's scalability to $O(c^3)$ or $O(c^4)$.
+*Dapp-chains* are a method by which *Ultra Terminum* exceeds $O(c^2)$ scaling *without* using the method described in \autoref{sec:tiling}. To be clear: the $O(c^2)$ configuration of UT is compatible with that other method; dapp-chains are a *separate and independent* method of scaling. However, there are *decisive* reasons to introduce and use *dapp-chains*. Dapp-chains provide features that the $O(n)$ scaling configuration alone cannot \emph{easily} provide. Additionally, dapp-chains increase the simplex's scalability to $O(c^3)$ or $O(c^4)$.
 
 \defineTermTex{Dapp-chain}{
   An \emph{application-specific} child-chain that is secured via the parent-chain. Dapp-chains may have architecturally distinct state- and transaction-schemes (distinct from those schemes used in the simplex, and other dapp-chains)
@@ -129,8 +129,8 @@ This means that supporting new dapp-chain consensus methods is about as difficul
 }
 
 Practically speaking, a simple input-output transaction system with light scripting capabilities (like that of Bitcoin) can be created to facilitate the necessary primitives.
-Additionally, different simplex-chains can implement different scripting systems, effectively facilitating *any* practical consensus mechanism.
-There is not much (if any) overhead to using an input-output system like this: a header's parent hash is like a transaction input, the *output* can be omitted[^scriptpk], and other particulars of the header can be treated as an input script to the transaction[^scriptsig].
+Additionally, different simplex-chains can implement different scripting systems, effectively facilitating *any* compatible consensus mechanism.
+There is not much (if any) overhead to using an input-output system like this: a header's parent hash is like a transaction input, the *output* is the header or its hash[^scriptpk], and any other particulars of the header can be treated as an input script to the transaction[^scriptsig].
 
 [^scriptpk]: A header-transaction's output script can be generic (or templated) as it is the same for all header-transactions for that dapp-chain. In practice this can be as simple as a single opcode that validates that header. In Bitcoin, an output script is known as the `scriptPubKey`.
 
@@ -145,15 +145,17 @@ If the headers of dapp-chains are simplex-level transactions, what can we say ab
 First, notice that there is no substantive difference between standalone headers and header-transactions.
 That means that *zero-confirmation* header-transactions are *exactly* as secure as a standalone counterparts (and at least as secure as zero-confirmation transactions).
 This is not very secure in the case of a PoW dapp-chain, but it means that a PoS dapp-chain's zero-confirmation header-transactions could be just as secure as blocks from an equivalent standalone PoS blockchain.
-(It also means that the PoS dapp-chain is much more secure after header-transactions are confirmed, compared to the standalone equivalent.)
+(It also means that the PoS dapp-chain is more secure after header-transactions are confirmed, compared to the standalone equivalent.)
 
-When a header-transaction is confirmed by the simplex, the corresponding dapp-chain can efficiently use one-way PoR to inherit the security (and security properties) of the host simplex-chain[^dc-por]. Similar to mutual PoR, this can provide a *security context* where otherwise-insecure methods of consensus can be done securely.
+When a header-transaction is confirmed by the simplex, the corresponding dapp-chain can efficiently use one-way PoR to partially[^partial-sec-por] inherit the security (and security properties) of the host simplex-chain.[^dc-por] Similar to mutual PoR, this can provide a *security context* where otherwise-insecure methods of consensus can be done securely.
+
+[^partial-sec-por]: Some security properties of the host simplex-chain are not inherited. For example: the simplex ensures data availability of simplex-chain blocks, but not dapp-chain blocks. Other security properties, like thermodynamic security, are inherited.
 
 [^dc-por]: Note: PoW dapp-chains will have a much lower difficulty than the host simplex-chain. Although a simplex-chain could do mutual PoR with dapp-chains, this is unnecessary and inefficient --- provided that this difficulty asymmetry exists. Although there is no fundamental reason that PoW dapp-chains must have a much lower difficulty, we should take care to avoid any implementation that would compromise or reduce the security of the simplex. Practically, this probably means avoiding PoW dapp-chains (see \autoref{sec:child-chain-pow-pos-asymmetry}).
 
 With regards to doublespends, one-way PoR means that the reflected chain is *at least* as difficult to attack as the reflecting chain (as we covered in \autoref{sec:por-step4}).
 Since the parent simplex-chain is as difficult to attack as the complete simplex, each dapp-chain must therefore *also* be that difficult to attack.
-Attacking a dapp-chain is as difficult as attacking the entire network.
+Provided that a dapp-chain's blocks are available, attacking a dapp-chain is as difficult as attacking the entire network.
 
 Note that parent-chains (generally) need to record their child-chains' headers *anyway*, so this use of one-way PoR --- where a simplex-chain reflects child dapp-chains --- has near-zero overhead for both the simplex-chain and the dapp-chain.
 
