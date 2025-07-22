@@ -542,7 +542,7 @@ showPCN :: PCapNumbers -> String
 showPCN {tpdpc, tps, delta_big_s, delta_small_s, name} = name <> ":\n\tTPS: " <> show (tps)
   <> "\n\tdelta S: " <> show (delta_big_s / 1000.0)
   <> "\n\tdelta s: " <> show (delta_small_s / 1000.0)
-  <> " KB/s\n\tTx / day / capita: " <> show tpdpc <> "\n"
+  <> " kB/s\n\tTx / day / capita: " <> show tpdpc <> "\n"
 
 -- | Calculate tx / capita / day for a given set of params
 calcTxPerDayPerCapita :: TxPDayPCapitaParams -> PCapNumbers

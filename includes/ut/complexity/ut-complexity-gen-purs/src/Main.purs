@@ -218,8 +218,8 @@ printTxPerDayPerCapitaParams_ p = do
       <> "\n\t k = " <> show p.k
       <> "\n\t d_h = " <> show p.d_h
 
--- | Converts kilobytes per second (KB/s) to terabytes per month (TB/month).
--- | Formula: KB/s * seconds per day * days per year / months per year / 1e9 (KB to TB)
+-- | Converts kilobytes per second (kB/s) to terabytes per month (TB/month).
+-- | Formula: kB/s * seconds per day * days per year / months per year / 1e9 (KB to TB)
 -- | 1 month = 86400 seconds/day * 365.25 days/year / 12 months/year
 kbpsToTBPerMonth :: Number -> Number
 kbpsToTBPerMonth kbps = kbps * 86400.0 * 365.25 / 12.0 / 1000.0 / 1000.0 / 1000.0
@@ -231,7 +231,7 @@ pcnTableRow {tpdpc, tps, delta_big_s, delta_small_s, name} =
     <> fmt3dps tpdpc <> " & "
     <> fmt1dps (delta_small_s / 1000.0) <> " & "
     <> fmt3dps (kbpsToTBPerMonth $ delta_small_s / 1000.0) <> " & "
-    <> fmt0dps (delta_big_s / 1000.0) <> " & " -- KB/s
+    <> fmt0dps (delta_big_s / 1000.0) <> " & " -- kB/s
     <> fmt3dps (kbpsToTBPerMonth $ delta_big_s / 1000.0) <> " \\\\" -- TB/mo
 
 utParamsForPCapita :: { k :: Number, d_h :: Number, tiling_coef :: Number }
