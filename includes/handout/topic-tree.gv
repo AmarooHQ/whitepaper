@@ -20,7 +20,7 @@ digraph TopicTree {
         wpDraft1 -> dagDetails,amarooVision,validation,networkTopol,tokenomics;
     } */
 
-    nosimus [label = "Nos Ultra\nTerminum\nUltimum\nImus, Nunc", ordering=out];
+    nosimus [label = "Amaroo / Whitepaper\n(Incomplete Topic Tree)", ordering=out];
 
     subgraph cluster_Legend {
         label = "Legend";
@@ -29,41 +29,100 @@ digraph TopicTree {
         original [label = "Original"];
     }
 
+    background [label = "Background"];
+
     consensus [label = "Consensus", ordering=out, shape=octagon];
     pow [label = "Proof of Work (PoW)", shape=rectangle];
     essenceOfPoWDataInclusion [label = "PoW - What does it prove?", shape=rectangle];
     nakamotoConsensus [label = "Nakamoto Consensus", shape=rectangle];
     nakConsensusSafeUnsafe [label = "Extensions\n(safe and unsafe)", shape=octagon];
     PoSConsensusGeneral [label = "Proof of Stake\n(Overview)", shape=rectangle];
-    blockDag [label = "Block-DAGs\n(instead of blockchains)", shape=rectangle];
+    blockDag [label = "Block-DAGs\n(instead of blockchains)", shape=octagon];
     dosAttacks [label = "DoS Attacks", shape=octagon];
+      dagNotFast [label = "Not for Speed"];
+
     dataStructsGeneral [label = "Blockchain\nData Structs", shape=rectangle];
     merkleTrees [label = "Merkle Trees", shape=rectangle];
     spvProofs [label = "SPV Proofs", shape=rectangle];
     spvProofsViaSC [label = "SPV Proofs via\nSmart Contracts", shape=rectangle];
+    spvReqs [label = "SPV Requirements", shape=rectangle];
     scaling [label = "Scaling", shape=octagon];
-    scalingTrilemma [label = "Buterin's Trilemma", shape=rectangle];
-    scalingOCSquared [label = "Scaling O(c^2)\n and maybe O(c^3)", shape=rectangle];
-    scalingOCCubed [label = "Scaling O(c^3)\nAnd Beyond", shape=octagon];
-    scalingON [label = "Scaling O(n)"];
+    scalingTrilemma [label = "The Trilemma", shape=rectangle];
+    scalingOCSquared [label = "Scaling O(c²)\n and maybe O(c³)", shape=rectangle];
+      scalingMistakes [label = "Scaling Mistakes", shape=octagon];
+      scalingMistakePoS [label = "PoS", shape=octagon];
+      scalingMistakeAcademic [label = "Academia", shape=octagon];
+      scalingMistakePhil [label = "Thinking Methods / Science", shape=octagon];
+    scalingOCCubed [label = "Scaling O(c³)\nAnd Beyond", shape=octagon];
+    // scalingON [label = "Scaling O(n)"];
     UT [label = "Ultra Terminum"];
     powReflection [label = "Proof of Reflection"];
     powRefTwoChains [label = "Proof of Reflection\nw/ 2 Chains"];
+      powRefConstruction [label = "Construction"];
+      powRefConversion [label = "Conversion of Work"];
+      powRefMutual [label = "Mutual PoR"];
+      // powRefMutReqs [label = "Requirements"];
     //UTCore [label = "Core of Ultra Terminum"];
+    porChain [label = "PoR Chain"];
+      sAxioms [label = "Axioms"];
+      axAvailability [label = "of Availability"];
+      axMaxRefl [label = "of Maximal Reflection"];
+      axAncestry [label = "of Unified Ancestry"];
+    simplexProps [label = "Properties /\nDynamics"];
     powRefSimplex [label = "The Simplex\n(N Chains)"];
-    simplexScale [label = "Simplex\nScalability"];
+    simplexScale [label = "UT₂ Scalability"];
+      sScaleCRAA [label = "Capacity-Reward\nAdjustment Alg."]
     // simplexDappChains [label = "Simplex\nDapp-chains"];
-    powRefConfirmationTimes [label = "Simplex\nConfirmation Times"];
-    powRefAttacks [label = "Simplex Attacks"];
+      sPropsBlocks [label = "Blocks"];
+      sPropFPs [label = "Fraud Proofs"];
+      sPropSPV [label = "Intra-Simplex Cross-Chain TXs"];
+      sPropExpedited [label = "Expedited TXs"];
+    powRefConfirmationTimes [label = "O(1/c) Conf Times"]; // c⁻¹
+      sPropCEC [label = "Confirmation Equiv. Conjecture"];
+    sPropsResonance [label = "Miner Resonance"];
     simplexPoSVsPurePoS [label = "Simplex + PoS\nvs\nPure PoS"];
+    powRefAttacks [label = "Attacks"];
+      simplexAtkMining [label = "PoW Mining", shape=octagon];
+        sAtkPow51 [label = "51%", shape=rectangle];
+        sAtkPowSelfish [label = "Selfish Mining", shape=rectangle];
+      simplexAtkPos [label = "PoS", shape=rectangle];
+      sAtkPosLong [label = "Long Range /\nNothing at Stake", shape=rectangle];
+      // sAtkPosSupply [label = "Supply", shape=rectangle];
+      sAtkPosBribe [label = "Bribes", shape=rectangle];
+      posInsecurity [label = "PoS always Insecure?", shape=rectangle];
     dappChains [label = "Dapp-chains", shape=octagon];
+      dappCIntegration [label = "Integration Method"];
+      dappsSpecific [label = "Dapp Specific"];
+      dappsStable [label = "Stablecoins", shape=octagon];
     devPotential [label = "Leveraging\nExisting Projects"];
+      dappsConsensus [label = "Consensus Asymmetry & PoA"];
     // devPotentialUniversality [label = "Universality", shape=octagon];
     // devPotentialReach [label = "Reach", shape=octagon];
-    tiling [label = "Tiling"];
-    tilingSec [label = "Security"];
+    // tiling [label = "Tiling"];
+    // tilingSec [label = "Security"];
 
-    nosimus -> consensus;
+    TrilemmaSoln [label = "Trilemma Solution?"];
+
+    utCrits [label = "Criticisms"];
+      critConstruction [label = "PoR or Conversion of Work"];
+      critBandwidth [label = "O(c²) Bandwidth"];
+      critDapps [label = "Dapp-chains (PoS / PoW)"];
+      critDappProb [label = "Core Problem: Availability"];
+      critTiling [label = "Tiling BW / Availability"];
+
+    dex [label = "DEX", shape=octagon];
+    pairing [label = "Pairing\n(Imaging Foreign Chains)", shape=octagon];
+    dexDesign [label = "DEX Design", shape=octagon];
+    dexFNonCustododial [label = "Non-Custodial & Risk", shape=octagon];
+      dexFCPartyRisk [label = "Security Reqs"];
+    dexBridge [label = "DEX w/ Foreign", shape=octagon];
+    dexFCollat [label = "Collateralization", shape=octagon];
+    dexDapp [label = "DEX for Dapp-chains", shape=octagon];
+    dexDappReqs [label = "Requirements (State / FPs / Avail)"];
+    dexMEV [label = "MEV", shape=octagon];
+
+
+    nosimus -> background -> consensus;
     consensus -> pow;
     pow -> nakamotoConsensus;
     pow -> essenceOfPoWDataInclusion;
@@ -72,22 +131,70 @@ digraph TopicTree {
     consensus -> PoSConsensusGeneral;
     nakamotoConsensus -> blockDag;
     blockDag -> dosAttacks;
+    blockDag -> dagNotFast;
     //nakamotoConsensus -> essenceOfPoWDataInclusion;
-    nosimus -> dataStructsGeneral -> merkleTrees -> spvProofs -> spvProofsViaSC;
-    nosimus -> scaling -> scalingTrilemma;
-    scaling -> scalingOCSquared;
+    background -> dataStructsGeneral -> merkleTrees -> spvProofs -> spvProofsViaSC;
+      spvProofs -> spvReqs;
+
+    background -> scaling -> scalingTrilemma;
+    scaling -> scalingOCSquared -> scalingMistakes;
+      scalingMistakes -> scalingMistakePoS;
+      scalingMistakes -> scalingMistakeAcademic;
+      scalingMistakes -> scalingMistakePhil;
     //scaling -> scalingON;
     nosimus -> UT -> powReflection -> powRefTwoChains;
-    powReflection -> powRefSimplex -> simplexScale;
-    powRefSimplex -> dappChains -> scalingOCCubed;
-    powRefSimplex -> powRefConfirmationTimes;
-    powRefSimplex -> powRefAttacks;
+     powRefTwoChains -> powRefConstruction; // -> powRefMutReqs;
+     powRefTwoChains -> powRefMutual -> powRefConversion;
+
+    // powReflection ->
+    UT -> powRefSimplex;
+    powRefSimplex -> porChain -> sAxioms;
+      sAxioms -> axAvailability;
+      sAxioms -> axMaxRefl;
+      sAxioms -> axAncestry;
+    powRefSimplex -> simplexProps -> simplexScale -> sScaleCRAA;
+      simplexProps -> sPropsBlocks;
+        sPropsBlocks -> powRefConfirmationTimes -> sPropCEC;
+        sPropsBlocks -> sPropsResonance;
+      simplexProps -> sPropFPs;
+      simplexProps -> sPropSPV;
+      simplexProps -> sPropExpedited;
+
+    powRefSimplex -> dappChains;
+    powRefSimplex -> powRefAttacks -> simplexAtkMining;
+      simplexAtkMining -> sAtkPow51;
+      simplexAtkMining -> sAtkPowSelfish;
+      powRefAttacks -> simplexAtkPos;
+      simplexAtkPos -> sAtkPosLong;
+      // simplexAtkPos -> sAtkPosNAS;
+      simplexAtkPos -> sAtkPosBribe -> posInsecurity;
     powRefSimplex -> simplexPoSVsPurePoS;
 
-    dappChains -> devPotential;
+    dappChains -> dappCIntegration;
+    dappChains -> dappsConsensus -> scalingOCCubed;
+    dappChains -> dappsSpecific;
+    dappsSpecific -> dappsStable;
+    dappsSpecific -> devPotential;
 
-    powRefSimplex -> tiling;
+    // powRefSimplex -> tiling;
+    // tiling -> scalingON;
+    // tiling -> tilingSec;
 
-    tiling -> scalingON;
-    tiling -> tilingSec;
+
+    UT -> TrilemmaSoln;
+    UT -> utCrits;
+      utCrits -> critConstruction;
+      utCrits -> critBandwidth;
+      utCrits -> critDapps -> critDappProb;
+      utCrits -> critTiling;
+
+    nosimus -> Demo;
+
+    nosimus -> dex;
+    dex -> pairing;
+    dex -> dexDesign;
+    dexDesign -> dexBridge -> dexFNonCustododial -> dexFCPartyRisk;
+      dexBridge -> dexFCollat;
+    dexDesign -> dexDapp -> dexDappReqs;
+    dexDesign -> dexMEV;
 }
