@@ -1,0 +1,85 @@
+flowchart LR
+  %% Approximations:
+  %% - Node shapes mapped via styles (octagon/rectangle approximated)
+  %% - Multiline labels kept with <br/> where helpful
+  %% - Compound edges and ordering are not supported in Mermaid
+
+  %% Legend (cluster)
+  subgraph Legend
+    direction TB
+    prior["Prior Work"]:::rect
+    partOriginal["Original in part"]:::oct
+    original["Original"]
+  end
+
+  %% Nodes with styles
+  consensus["Consensus"]:::oct
+  pow["Proof of Work (PoW)"]:::rect
+  essenceOfPoWDataInclusion["PoW - What does it prove?"]:::rect
+  nakamotoConsensus["Nakamoto Consensus"]:::rect
+  nakConsensusSafeUnsafe["Extensions<br/>(safe and unsafe)"]:::oct
+  PoSConsensusGeneral["Proof of Stake<br/>(Overview)"]:::rect
+  blockDag["Block-DAGs<br/>(instead of blockchains)"]:::rect
+  dosAttacks["DoS Attacks"]:::oct
+  notSpeed["Not for Speed"]:::oct
+  dataStructsGeneral["Blockchain<br/>Data Structs"]:::rect
+  merkleTrees["Merkle Trees"]:::rect
+  spvProofs["SPV Proofs"]:::rect
+  spvProofsViaSC["SPV Proofs via<br/>Smart Contracts"]:::rect
+  scaling["Scaling"]:::oct
+  scalingTrilemma["The Trilemma"]:::rect
+  scalingOCSquared["Scaling O(c^2)<br/>and maybe O(c^3)"]:::rect
+  scalingOCCubed["Scaling O(c^3)<br/>And Beyond"]:::oct
+  scalingON["Scaling O(n)"]
+  UT["Ultra Terminum"]
+  powReflection["Proof of Reflection"]
+  powRefTwoChains["Proof of Reflection<br/>w/ 2 Chains"]
+    powReflSetup["Setup"]
+    powReflMutual["Mutual Reflection"]
+    powReflReqs["Requirements"]
+  powRefSimplex["The Simplex<br/>(N Chains)"]
+  simplexScale["Simplex<br/>Scalability"]
+  powRefConfirmationTimes["Simplex<br/>Confirmation Times"]
+  powRefAttacks["Simplex Attacks"]
+  simplexPoSVsPurePoS["Simplex + PoS<br/>vs<br/>Pure PoS"]
+  dappChains["Dapp-chains"]:::oct
+  devPotential["Leveraging<br/>Existing Projects"]
+  tiling["Tiling"]
+  tilingSec["Security"]
+
+  nosimus["Whitepaper"]
+
+  %% Edges
+  nosimus --> consensus
+  consensus --> pow
+  pow --> nakamotoConsensus
+  pow --> essenceOfPoWDataInclusion
+  nakamotoConsensus --> nakConsensusSafeUnsafe
+  consensus --> PoSConsensusGeneral
+  nakamotoConsensus --> blockDag
+  blockDag --> dosAttacks
+  blockDag --> notSpeed
+
+  nosimus --> dataStructsGeneral --> merkleTrees --> spvProofs --> spvProofsViaSC
+
+  nosimus --> scaling --> scalingTrilemma
+  scaling --> scalingOCSquared
+
+  nosimus --> UT --> powReflection --> powRefTwoChains
+  powRefTwoChains --> powReflSetup
+  powRefTwoChains --> powReflMutual --> powReflReqs
+  powReflection --> powRefSimplex --> simplexScale
+  powRefSimplex --> dappChains --> scalingOCCubed
+  powRefSimplex --> powRefConfirmationTimes
+  powRefSimplex --> powRefAttacks
+  powRefSimplex --> simplexPoSVsPurePoS
+
+  dappChains --> devPotential
+
+  powRefSimplex --> tiling
+  tiling --> scalingON
+  tiling --> tilingSec
+
+  %% Styles
+  classDef rect fill:#e8f0fe,stroke:#4a67d6,stroke-width:1px
+  classDef oct fill:#fff4e5,stroke:#d67a00,stroke-width:1px

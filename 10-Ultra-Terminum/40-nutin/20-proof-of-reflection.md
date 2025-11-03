@@ -1046,7 +1046,9 @@ When measuring and converting chain-work, we \emph{always} want to convert confi
 
 \aside{
   Whether PoS systems \emph{can} be secure is not a focus of this paper.
-  There are still \href{https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/proof_of_stake.md}{criticisms of PoS} without \href{https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/the_defence_of_pos.md}{adequate answers}.
+  There are still \href{https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/proof_of_stake.md}{criticisms of PoS} without \href{https://github.com/zack-bitcoin/amoveo-docs/blob/master/other_blockchains/the_defence_of_pos.md}{adequate answers}.\footnote{
+    Links are to \href{\linkZackPoSCriticisms}{Proof of Stake} (criticisms) by Zack Hess and \href{\linkZackPoSDefence}{The Defense of PoS} (replies).
+  }
   The intention of sections like this is not to endorse PoS, but rather to explore what is possible \emph{if} PoS can be done securely.
 }
 
