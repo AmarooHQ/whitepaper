@@ -16,6 +16,7 @@
 - \emph{Nothing at Stake} and \emph{long range} attacks, see \autoref{sec:reflection-pow-and-pos} and \autoref{sec:dapp-chains}.
 - Intra-simplex cross-chain attacks, see \autoref{sec:spv-in-ut}.
 
+\IfPackageLoadedTF{lwarp}{}{
 \subsection{Dialog: Attacks and Mitigation}
 
 \aside{
@@ -155,5 +156,6 @@ Bribes don't work either b/c the PoS set-up is done on a different chain and ref
 \begin{tcolorbox}[title={\pill{\scriptsize{\checkmark \; BOT}} Clyde:}]
 Your message could not be delivered. This is usually because you don't share a server with the recipient or the recipient is only accepting direct messages from friends.
 \end{tcolorbox}
+}
 
 %% END ### RELEASE

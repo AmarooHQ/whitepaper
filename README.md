@@ -124,3 +124,22 @@ To put raw latex in .md docs so that pandoc doesn't mangle stuff, wrap latex in:
 
     ```{=latex}
     ```
+
+## html and lwarp
+
+- build WP normally
+- manually modify `output/whitepaper.tex`
+  - move `morewrites` and `\usepackage[mathjax]{lwarp}` just below `\documentclass` (lwarp package commented by default)
+  - replace `\urlstyle{same}` line with:
+  ```
+  \makeatletter
+  \@ifpackageloaded{lwarp}{}{
+      \urlstyle{same}  % don't use monospace font for urls
+  }
+  \makeatother
+  ```
+- `cp output/whitepaper{,_html}.sum`
+- run `make mk-latex-pdf-inner` -- this should build correctly.
+
+- `cd output && TEXINPUTS=../texmf/tex/latex//: lwarpmk html`
+- when you hit an error, type `R` to just run and don't stop on errors. there are a lot.

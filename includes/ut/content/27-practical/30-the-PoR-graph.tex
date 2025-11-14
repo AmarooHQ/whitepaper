@@ -249,12 +249,12 @@ Since this propagation is constrained by the latency between these special nodes
 % MK: the following is unnecessary
 % Curiously, we can still \emph{in principle} use this optimization idea to increase network throughput in the future, if we want to.
 % In practice, the effects would be similar to increasing the PoRs sub-block size.
-% However, this is best left as \emph{excess capacity} in \UT{}'s architecture --- a resource to tap into if we get desperate, but not something that we should plan to use.
+% However, this is best left as \emph{excess capacity} in UT's architecture --- a resource to tap into if we get desperate, but not something that we should plan to use.
 
 
 \subsubsection{\AxiomOfRawMaximalReflection}
 
-It should be clear that there are decisive advantages for \UT{} if the PoR graph is maximally reflective.
+It should be clear that there are decisive advantages for UT if the PoR graph is maximally reflective.
 Particularly, we can accurately describe the PoR graph entirely via \emph{new reflections}, greatly reducing PoR overhead.
 Thus, we will require it via a protocol rule: the \AxiomOfMaximalReflection.
 
@@ -386,7 +386,7 @@ Additionally, in \autoref{sec:dags-and-the-por-graph} we will discuss some symme
 \warning{
     This section is speculative; it's about how NIPoPoWs might be possible for the longest PoR chain.
     Subsequent sections regarding NIPoPoWs will, likewise, be speculative.
-    \UT{} won't depend on NIPoPoWs, but they are useful and it would be good to support them, if possible.
+    UT won't depend on NIPoPoWs, but they are useful and it would be good to support them, if possible.
 }
 
 \subsubsubsection{NIPoPoWs Primer}
@@ -544,7 +544,7 @@ Thus, \emph{any} simultaneous blocks in the PoR graph are an issue.
 
 Second: the authors assume a constant difficulty.
 For a traditional blockchain, this isn't too much of a problem.
-For \UT{}, however, we ideally want uncoupled simplex-chain difficulties, even if they use the same hashing algorithm.
+For UT, however, we ideally want uncoupled simplex-chain difficulties, even if they use the same hashing algorithm.
 Speaking of which, how does a NIPoPoW work if more than one hashing algorithm is used?
 
 \subsubsubsection{Non-Interactive Proofs of Proof of Work Reflection (NIPoPoWRs)}

@@ -34,6 +34,9 @@ This works fine for some blocks that have only one parent (e.g., \BB{1a}, \BB{2a
     \caption{A basic state transition verification function}
     \label{alg:state-trans-simple}
 
+\IfPackageLoadedTF{lwarp}{
+    Omitted due to stack size.
+}{
     \begin{algorithmic}
         \Procedure{VerifyStateTransition}{parentStateRoot, TXs, stateRoot}
             \State midState $\gets$ \Call{LoadStateFromRoot}{parentStateRoot}
@@ -43,6 +46,7 @@ This works fine for some blocks that have only one parent (e.g., \BB{1a}, \BB{2a
             \State \Return{stateRoot $==$ \Call{GetRoot}{midState}}
         \EndProcedure
     \end{algorithmic}
+}
 \end{algorithm}
 
 We \emph{can} use this algorithm \emph{from \BB{1b}'s perspective} to ensure \BB{1b} is internally consistent;

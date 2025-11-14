@@ -6,7 +6,7 @@ First, let us consider \UT1.
 The \emph{decentralization} criterion states that the system must function when each participant has only $O(c)$ resources.
 We codify this with the chain-parameter $k$, a generalization of block size, which we define to be $O(c)$.
 Typically, we've set $k = 3000$ bytes/second since this is close to the real-world value of $k$ for Bitcoin and pre-merge Ethereum, and is therefore, self-evidently, an acceptable value.
-We've also set $k = 20000$ in some tables so that we have an idea of what we could do if we pushed \UT{} further.
+We've also set $k = 20000$ in some tables so that we have an idea of what we could do if we pushed UT further.
 The \AxiomOfAvailability means that miners must download \emph{all} blocks --- an $O(c^2)$ load.
 However, miners do not need to \emph{validate} all blocks, or store them for very long; and these blocks aren't required to synchronize with the PoR graph.
 Therefore, if we fail the decentralization criterion it will be because of bandwidth: $\Delta S$.
@@ -161,7 +161,7 @@ Were it not for the bandwidth requirements on miners imposed by the \AxiomOfAvai
 We don't know if that availability problem is solvable, but even if it isn't, we saw how smaller tilings are still useful.
 
 Penultimately, we evaluated \UT1 against the \emph{Trilemma} and found that it satisfied all three criteria as originally put.
-But that was not enough, so we examined each scaling configuration of \UT{} against a stronger trilemma.
+But that was not enough, so we examined each scaling configuration of UT against a stronger trilemma.
 Although boasting impressive capacity (see \autoref{table:ut-vs-earth}, \autoref{table:ut-vs-earth-6000}), most configurations fell short of what we set as the standard for $O(n)$ scalability: 100 million TPS.
 But! We did find one configuration that definitely worked: \UTinf3.
 
@@ -189,7 +189,7 @@ The \emph{Blockchain Trilemma} is solved. $\blacksquare$
     \centering
     \caption{
         Table evaluating UT against trilemma criteria.
-        TPS ranges are the minimum and maximum values for $3000 \le k \le 20000$ B/s across all \UT{} variants.
+        TPS ranges are the minimum and maximum values for $3000 \le k \le 20000$ B/s across all UT variants.
         Tilings are not limited in $d$.
     }
     \begin{tabular}{lllll}

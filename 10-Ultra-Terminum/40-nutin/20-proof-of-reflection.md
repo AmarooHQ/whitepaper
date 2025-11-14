@@ -153,7 +153,9 @@ Yes, and we must modify the block-weight calculation so that it accounts for wor
 Essentially, additional weight is added to a block when it is *the best block* known to Chain \cR, i.e., when, according to Chain \cR, it is at the tip of Chain \cL.
 Note that this weight is still added if Chain \cR knows of multiple competing chain-tips.
 
+\IfPackageLoadedTF{lwarp}{}{
 \input{includes/ut/algorithms/por-chainweight-1.tex}
+}
 
 What is the meaning and impact of this change?
 

@@ -1,3 +1,11 @@
-\usepackage[mark]{gitinfo2}
-\renewcommand{\gitMark}{
-    \gitAbbrevHash{} \textbullet \; \gitAuthorDate}
+\makeatletter
+\@ifpackageloaded{lwarp}{%
+    % true:
+    \newcommand{\gitAbbrevHash}{xxxxxxx}
+    \newcommand{\gitAuthorDate}{YYYY-MM-DD}
+}{%
+    % false:
+    \usepackage[mark]{gitinfo2}
+    \renewcommand{\gitMark}{\gitAbbrevHash{} \textbullet \; \gitAuthorDate}
+}
+\makeatother

@@ -68,7 +68,9 @@ Provided that the source of the exchange rate is a \emph{well-built}, protocol-l
 Let's consider this limited case first: one-way PoR where the \emph{reflected} chain hosts a DEX between its root token, and the RT of the \emph{reflecting} chain.
 Using \autoref{eq:por-conv-dex}, we can write \autoref{alg:weightof-dex-one-way}.
 
+\IfPackageLoadedTF{lwarp}{}{
 \input{includes/ut/algorithms/weightof-dex.tex}
+}
 
 % \begin{algorithm}
 % \caption{A \textsc{WeightOf} function for one-way PoR between chains with different root tokens}

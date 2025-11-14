@@ -137,7 +137,7 @@ It \emph{will} be reflected, because miners of other simplex-chains do not valid
 What we need is a method of \emph{error correction} -- one that is fast enough to ensure invalid blocks are dealt with before the cross-chain protocol allows those blocks to be processed.
 This role is filled by \emph{fraud proofs}.
 
-In \UT{}, \emph{fraud proofs} are automatically constructed by any full node during normal validation -- the state transition function will return either a new state trie \emph{or} a fraud proof.
+In UT, \emph{fraud proofs} are automatically constructed by any full node during normal validation -- the state transition function will return either a new state trie \emph{or} a fraud proof.
 Once a fraud proof is constructed, it is broadcast similar to a transaction.
 Then, \emph{any miner} from \emph{any simplex-chain} can validate and include the fraud proof \emph{as part of the PoR graph}.
 Due to \AxOfUnifiedAncestry{}, every simplex-chain calculates the expected chain-tips for every simplex-chain.
@@ -323,7 +323,7 @@ Since part of this protocol involves asynchronous communication between chains, 
 Crucially, we expect that honest nodes (particularly those on other chains) are never fooled by an invalid block for long --- much less than a block period.
 On this basis we can pick a safety parameter $\lambda$ which (in combination with the conditions from earlier) provides enough buffer to ensure that the PoR graph remains coherent.
 
-This decoupling is the essential component of \UT{} that makes $O(c^2)$ scaling possible, and is a direct result of how we use PoR to create the PoR graph.
+This decoupling is the essential component of UT that makes $O(c^2)$ scaling possible, and is a direct result of how we use PoR to create the PoR graph.
 The procedural elements are shown in \autoref{fig:spv-network-complexity-split}.
 
 
@@ -331,9 +331,9 @@ The procedural elements are shown in \autoref{fig:spv-network-complexity-split}.
     \centering
     \includegraphics[max width=\linewidth]{spv/network_scale_AL_split_sag}
     \caption[
-        Flow chart of how the segmentation of state works in \UT{} to achieve $O(c^2)$ capacity.
+        Flow chart of how the segmentation of state works in UT to achieve $O(c^2)$ capacity.
     ]{
-        Flow chart of how the segmentation of state works in \UT{} to achieve $O(c^2)$ capacity.
+        Flow chart of how the segmentation of state works in UT to achieve $O(c^2)$ capacity.
         ``AL'' is short for ``Action Layer'', a term invented here so that we can point to the various stages of PoR graph extension and state progression.
         $\text{AL}^1$ columns indicate actions that validating nodes of any simplex-chain perform on the PoR graph.
         The $\text{AL}^2$ column indicates that only validating nodes \emph{of that chain} perform the associated action.

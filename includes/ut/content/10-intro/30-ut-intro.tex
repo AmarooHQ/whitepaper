@@ -6,7 +6,7 @@
 
 In essence, \emph{Ultra Terminum} (UT) is not a method to scale a single blockchain, rather a method to scale a \emph{network} of blockchains.
 
-\UT{} differs from existing consensus methods\footnote{
+UT differs from existing consensus methods\footnote{
   Whether \emph{Ultra Terminum} is a consensus \emph{method} or not is not immediately clear.
     On the one hand: a new combination of methods is still a method.
     On the other hand: UT provides a way to modify other consensus methods via the fork rule, and UT doesn't provide a way to run a \emph{single} blockchain.
@@ -19,7 +19,7 @@ At the core of \emph{Ultra Terminum} is a new method for sharing security: \emph
 This technique (which works \emph{in conjunction} with PoW, PoS, etc) allows the incremental construction of complex blockchain networks with powerful scaling properties.
 Those blockchains use the technique \emph{Proof of Reflection} to \emph{mutually secure each other}, forming something called \emph{the simplex} (\autoref{sec:the-simplex}).
 Blockchains at this level are called \emph{simplex-chains} and are able to host \emph{dapp-chains} --- chains that are dedicated to a dapp, and they can be application specific (e.g., a DEX) or general (e.g., a chain hosting an instance of the EVM).
-The vital properties provided by \UT{} allow heterogenous chains to form a cohesive network and cooperate in securing each other.
+The vital properties provided by UT allow heterogenous chains to form a cohesive network and cooperate in securing each other.
 \emph{Proof of Reflection} is how \emph{Ultra Terminum} (excluding nested chains) scales with order $O(c^2)$, and is the basis for unbounded $O(n)$ scaling.
 UT's higher-order scaling configurations, $O(c^3)$ and $O(c^4)$, require dapp-chains: chains that are application-specific and which inherit security properties from the foundational structure.
 As UT is primarily a method of \emph{structuring} a blockchain network, the scalability configurations mentioned herein \emph{do not include \textbf{layer 2} methods}.

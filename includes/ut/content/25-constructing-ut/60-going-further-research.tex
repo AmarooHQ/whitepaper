@@ -37,11 +37,11 @@ Let's assume for a moment that there exists a feature-complete, production-ready
 It's out there, in the wild, chugging away processing $O(c^2)$ many transactions.
 
 Given that we just discussed how existing blockchain clients can be modified to run as dapp-chains on the simplex, what, \emph{in principle}, is stopping us from using the same techniques with this sharded PoS chain?
-If the answer is \emph{nothing}, then it's self-evident that this is a path to take \UT{} from $O(c^3)$ capacity to $O(c^4)$ capacity --- that is, \UT{2} $\to$ \UT{3}.
+If the answer is \emph{nothing}, then it's self-evident that this is a path to take UT from $O(c^3)$ capacity to $O(c^4)$ capacity --- that is, \UT{2} $\to$ \UT{3}.
 There may, of course, be more adjustments that need to be made depending on the PoS protocol.
 But, if the protocol is secure in isolation, then it's hard to see how adding thermodynamic security via one-way PoR with a simplex-chain would \emph{necessarily} be somehow incompatible or problematic.
-In general, if some $O(c^x)$ scaling method works for a traditional blockchain, then combining it with \UT{} results in an $O(c^{2+x})$ scalable network.
+In general, if some $O(c^x)$ scaling method works for a traditional blockchain, then combining it with UT results in an $O(c^{2+x})$ scalable network.
 
-It's worth noting that this technique only works in one direction: \UT{} can accommodate other chains (as dapp-chains), but other chains cannot accommodate \UT{} in the same way.
-If a sharded chain were adapted such that each shard were part of a simplex, then either overall capacity decreases due to PoR overhead, or the chain hosting the shards is redundant and we just end up with an implementation of \UT{}.
-This is yet another asymmetry between \UT{} and traditional blockchains.
+It's worth noting that this technique only works in one direction: UT can accommodate other chains (as dapp-chains), but other chains cannot accommodate UT in the same way.
+If a sharded chain were adapted such that each shard were part of a simplex, then either overall capacity decreases due to PoR overhead, or the chain hosting the shards is redundant and we just end up with an implementation of UT.
+This is yet another asymmetry between UT and traditional blockchains.

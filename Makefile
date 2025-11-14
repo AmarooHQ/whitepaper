@@ -5,6 +5,9 @@ WPFILE=$(WPNOEXT).markdown
 WPHTML=$(WPNOEXT).html
 WPTEX=$(WPNOEXT).tex
 
+# Local texmf directory for custom packages (like ifptex)
+export TEXINPUTS := ./texmf/tex/latex//:$(TEXINPUTS)
+
 LP_DIR=includes/ut/lp
 LP_TABLES=$(LP_DIR)/tables.tex
 LP_TABLES_OUT=$(OUTDIR)/tables.tex
@@ -132,9 +135,14 @@ wp-graphics-png: $(PNGGraphics)
 	cd `dirname $<` && \
 	convert -density 400 `basename $<` `basename $@`
 
-whitepaper: $(PDFGraphics) $(InputTeXFiles) build-whitepaper set-wp-properties wp-pandoc mk-latex-pdf wc finished-msg
+# all the prerequisite things to generate whitepaper.tex
+whitepaper-prereqs: $(PDFGraphics) $(InputTeXFiles) build-whitepaper set-wp-properties wp-pandoc
+# full build of whitepaper pdf
+whitepaper: whitepaper-prereqs mk-latex-pdf wc finished-msg
+# rebuild tex/graphics but skip md and pandoc step (it assumes whitepaper.tex is already built and doesn't need updating)
 whitepaper-skip-pandoc: $(PDFGraphics) $(InputTeXFiles) mk-latex-pdf wc
 
+# parallel build of all graphics
 par-gfx:
 	$(MAKE) -j $(NCPUS) $(PDFGraphics)
 
@@ -199,7 +207,8 @@ preprocess-build:
 
 # latexrun first for error msgs, then run run latexmk once for gitinfo2/glossary, then use latexrun
 # note: the *-reloadable.pdf files are copies of interim outputs (and then the final output) so that you can f5 them in a browser without getting partially written documents.
-mk-latex-pdf: preprocess-build
+mk-latex-pdf: preprocess-build mk-latex-pdf-inner
+mk-latex-pdf-inner:
 	bash bin/msg_good.sh "[mk-latex-pdf]: PP_MODE=$(PP_MODE)"
 	bash bin/msg_good.sh "Run ./latexrun to get good error msgs"
 	$(LATEXRUN) $(WPTEX) -O $(OUTDIR) || true

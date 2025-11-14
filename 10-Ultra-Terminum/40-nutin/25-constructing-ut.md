@@ -22,7 +22,9 @@ In principle, the necessary capabilities (and actions) that some chains, $C_A$ a
 2. The headers of $C_B$ can be (and are) freely recorded --- promptly and unambiguously --- in $C_A$; and
 3. $C_A$ is able to (and does) promptly prove that its past headers have been recorded in $C_B$, and has full knowledge of which headers have been recorded.
 
+\IfPackageLoadedTF{lwarp}{}{
 \input{includes/ut/algorithms/por-reflected-block-weight.tex}
+}
 
 The benefits from *Proof of Reflection* begin as soon as $C_A$ integrates this knowledge into its chain-weighting algorithm, by a method suitably similar to \autoref{alg:refl-1-bw} and \autoref{alg:weightof-1}.
 

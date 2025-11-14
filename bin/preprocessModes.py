@@ -210,6 +210,7 @@ def process_tex(input_file_path: str, mode: str, output_dir: Optional[str], md_c
     )
 
     final_output = '\n'.join([processed_file_start2, output_contents])
+    # final_output = '\n'.join([processed_file_start2, PREPROCESS_START_FLAG, output_contents])
 
     if print_output:
         print(final_output)
