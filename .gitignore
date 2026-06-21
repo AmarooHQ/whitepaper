@@ -45,3 +45,4 @@ includes/ut/diags/**/*.png
 includes/refl_entropy
 test-pdf2text.txt
 tmp*.md
+.worktrees/
