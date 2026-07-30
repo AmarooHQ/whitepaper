@@ -1,3 +1,25 @@
 \usepackage[mark]{gitinfo2}
-\renewcommand{\gitMark}{
-    \gitAbbrevHash{} \textbullet \; \gitAuthorDate}
+
+% Footer watermark: "hash • date" normally; append " • <tag>" only when
+% HEAD is exactly tagged and the working tree is clean.
+%
+% Dirty trees encode dirtiness in \gitAbbrevHash via gitinfo2.pm
+% ("… +N (dirty)"). \gitTags is "(None)" when HEAD has no tags; otherwise
+% it is parsed from refnames and may retain a trailing ")" from git's
+% decorate format, which we strip.
+\newcommand{\gitMarkTagSuffix}{%
+    \IfSubStr{\gitAbbrevHash}{dirty}{}{%
+        \IfEq{\gitTags}{(None)}{}{%
+            \IfEq{\gitTags}{}{}{%
+                \StrDel{\gitTags}{)}[\gitMarkTagClean]%
+                \IfEq{\gitMarkTagClean}{}{}{%
+                    \ \textbullet\; \gitMarkTagClean
+                }%
+            }%
+        }%
+    }%
+}
+
+\renewcommand{\gitMark}{%
+    \gitAbbrevHash{} \textbullet \; \gitAuthorDate\gitMarkTagSuffix
+}
